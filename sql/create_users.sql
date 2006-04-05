@@ -1,0 +1,135 @@
+/* screensaver/sql/create_users.sql
+** by john sullivan, 2006.04
+**
+** creates the following tables:
+**   screensaver_user
+**   screensaver_user_role
+**   screensaver_user_role_link
+**   screening_room_user
+**   checklist_item_type
+**   checklist_item
+*/
+
+
+/* table screensaver_user */
+
+CREATE TABLE screensaver_user (
+  username   TEXT PRIMARY KEY,
+  password   TEXT NOT NULL
+);
+
+COPY screensaver_user (username, password) FROM STDIN;
+atolopko	atolopko
+jsullivan	jsullivan
+\.
+
+
+/* table screensaver_user_role */
+
+CREATE TABLE screensaver_user_role (
+  role_name  TEXT PRIMARY KEY
+);
+
+ALTER TABLE screensaver_user_role ADD
+  CHECK (role_name IN (
+    'Medicinal Chemist',
+    'Screensaver Administrator',
+    'Screening Room User'
+  ));
+
+COPY screensaver_user_role (role_name) FROM STDIN;
+Medicinal Chemist
+Screensaver Administrator
+Screening Room User
+\.
+
+
+/* table screensaver_user_role_link */
+
+CREATE TABLE screensaver_user_role_link (
+  username   TEXT NOT NULL REFERENCES screensaver_user,
+  role_name  TEXT NOT NULL REFERENCES screensaver_user_role
+);
+
+COPY screensaver_user_role_link (username, role_name) FROM STDIN;
+jsullivan	Screensaver Administrator
+atolopko	Screensaver Administrator
+\.
+
+
+/* table screening_room_user */
+
+CREATE TABLE screening_room_user (
+  screening_room_user_id   SERIAL PRIMARY KEY,
+  screensaver_username     TEXT REFERENCES screensaver_user,
+  date_created             DATE NOT NULL,
+  first_name               TEXT NOT NULL,
+  last_name                TEXT NOT NULL,
+  harvard_id               TEXT,
+  phone                    TEXT,
+  email                    TEXT,
+  lab_head                 INT REFERENCES screening_room_user,
+  user_classification      TEXT,
+  lab_affiliation_name     TEXT,
+  lab_affiliation_category TEXT,
+  is_non_screening_user    BOOLEAN NOT NULL,
+  is_rnai_user             BOOLEAN NOT NULL,
+  mailing_address          TEXT,
+  comments                 TEXT
+);
+
+ALTER TABLE screening_room_user ADD
+  CHECK (user_classification IN (
+    'Principal Investigator',
+    'Graduate Student',
+    'ICCB Fellow',
+    'Research Assistant',
+    'Postdoc',
+    'Other'
+  ));
+
+ALTER TABLE screening_room_user ADD
+  CHECK (lab_affiliation_category IN (
+    'HMS',
+    'HMS Affiliated Hospital',
+    'HSPH',
+    'Broad/ICG',
+    'Harvard FAS',
+    'Non-Harvard',
+    'Other'
+  ));
+
+
+/* table checklist_item_type */
+
+CREATE TABLE checklist_item_type (
+  name             TEXT PRIMARY KEY,
+  has_deactivation BOOLEAN NOT NULL
+);
+
+COPY checklist_item_type (name, has_deactivation) FROM STDIN;
+'Non HMS Biosafety Training Form on File'	1
+'ICCB server account set up'	1
+'ID submitted for access to screening room'	1
+'Added to ICCB screening users list'	1
+'Added to PI email list'	1
+'Added to autoscope users list'	1
+'Historical ICCB server account requested'	1
+'Data sharing agreement signed'	0
+'ID submitted for C-607 access'	0
+'CellWoRx training'	0
+'Autoscope training'	0
+'Image Analysis I training'	0
+\.
+
+
+/* table checklist_item */
+
+CREATE TABLE checklist_item (
+  screening_room_user_id   INT NOT NULL REFERENCES screening_room_user,
+  checklist_item_type_name TEXT NOT NULL REFERENCES checklist_item_type,
+  activation_date          DATE,
+  activation_initials      TEXT,
+  deactivation_date        DATE,
+  deactivation_initials    TEXT,
+);
