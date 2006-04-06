@@ -104,22 +104,23 @@ ALTER TABLE screening_room_user ADD
 
 CREATE TABLE checklist_item_type (
   name             TEXT PRIMARY KEY,
+  order_statistic  INT NOT NULL UNIQUE,
   has_deactivation BOOLEAN NOT NULL
 );
 
-COPY checklist_item_type (name, has_deactivation) FROM STDIN;
-'Non HMS Biosafety Training Form on File'	1
-'ICCB server account set up'	1
-'ID submitted for access to screening room'	1
-'Added to ICCB screening users list'	1
-'Added to PI email list'	1
-'Added to autoscope users list'	1
-'Historical ICCB server account requested'	1
-'Data sharing agreement signed'	0
-'ID submitted for C-607 access'	0
-'CellWoRx training'	0
-'Autoscope training'	0
-'Image Analysis I training'	0
+COPY checklist_item_type (name, order_statistic, has_deactivation) FROM STDIN;
+'Non HMS Biosafety Training Form on File'	1	1
+'ICCB server account set up'	2	1
+'ID submitted for access to screening room'	3	1
+'Added to ICCB screening users list'	4	1
+'Added to PI email list'	5	1
+'Added to autoscope users list'	6	1
+'Historical ICCB server account requested'	7	1
+'Data sharing agreement signed'	8	0
+'ID submitted for C-607 access'	9	0
+'CellWoRx training'	10	0
+'Autoscope training'	11	0
+'Image Analysis I training'	12	0
 \.
 
 
@@ -131,5 +132,5 @@ CREATE TABLE checklist_item (
   activation_date          DATE,
   activation_initials      TEXT,
   deactivation_date        DATE,
-  deactivation_initials    TEXT,
+  deactivation_initials    TEXT
 );
