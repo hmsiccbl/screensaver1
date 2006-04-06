@@ -5,6 +5,8 @@
 **   screensaver_user
 **   screensaver_user_role
 **   screensaver_user_role_link
+**   user_classification_taxonomy
+**   lab_affiliation_category_taxonomy
 **   screening_room_user
 **   checklist_item_type
 **   checklist_item
@@ -57,6 +59,39 @@ atolopko	Screensaver Administrator
 \.
 
 
+/* table user_classification_taxonomy */
+
+CREATE TABLE user_classification_taxonomy (
+  user_classification TEXT PRIMARY KEY
+);
+
+COPY user_classification_taxonomy (user_classification) FROM STDIN;
+Principal Investigator
+Graduate Student
+ICCB Fellow
+Research Assistant
+Postdoc
+Other
+\.
+
+
+/* table lab_affiliation_category_taxonomy */
+
+CREATE TABLE lab_affiliation_category_taxonomy (
+  lab_affiliation_category TEXT PRIMARY KEY
+);
+
+COPY lab_affiliation_category_taxonomy (lab_affiliation_category) FROM STDIN;
+HMS
+HMS Affiliated Hospital
+HSPH
+Broad/ICG
+Harvard FAS
+Non-Harvard
+Other
+\.
+
+
 /* table screening_room_user */
 
 CREATE TABLE screening_room_user (
@@ -67,37 +102,17 @@ CREATE TABLE screening_room_user (
   last_name                TEXT NOT NULL,
   harvard_id               TEXT,
   phone                    TEXT,
-  email                    TEXT,
+  email                    TEXT NOT NULL,
   lab_head                 INT REFERENCES screening_room_user,
-  user_classification      TEXT,
+  user_classification      TEXT NOT NULL
+                           REFERENCES user_classification_taxonomy,
   lab_affiliation_name     TEXT,
-  lab_affiliation_category TEXT,
+  lab_affiliation_category TEXT REFERENCES lab_affiliation_category_taxonomy,
   is_non_screening_user    BOOLEAN NOT NULL,
   is_rnai_user             BOOLEAN NOT NULL,
   mailing_address          TEXT,
   comments                 TEXT
 );
-
-ALTER TABLE screening_room_user ADD
-  CHECK (user_classification IN (
-    'Principal Investigator',
-    'Graduate Student',
-    'ICCB Fellow',
-    'Research Assistant',
-    'Postdoc',
-    'Other'
-  ));
-
-ALTER TABLE screening_room_user ADD
-  CHECK (lab_affiliation_category IN (
-    'HMS',
-    'HMS Affiliated Hospital',
-    'HSPH',
-    'Broad/ICG',
-    'Harvard FAS',
-    'Non-Harvard',
-    'Other'
-  ));
 
 
 /* table checklist_item_type */
