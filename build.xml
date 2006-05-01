@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="Screensaver" default="deploy" basedir=".">
+  <description>
+    A build.xml for Screensaver 1.xx
+  </description>
+
+  <!-- this beautiful path element doesnt seem to provide any function -->
+  <path id="hibernatetool.classpath">
+    <pathelement path="lib/hibernate-3.1.3/hibernate3.jar"/>
+    <pathelement path="lib/hibernate-tools-3.1.0.beta4/hibernate-tools.jar"/>
+    <pathelement path="lib/hibernate-tools-3.1.0.beta4/jtidy-r8-21122004.jar"/>
+    <pathelement path="lib/hibernate-tools-3.1.0.beta4/velocity-1.4.jar"/>
+    <pathelement path="lib/hibernate-tools-3.1.0.beta4/velocity-tools-generic-1.1.jar"/>
+    <pathelement path="lib/postgresql-8.1-405.jdbc3.jar"/>
+    <pathelement path="web-root/WEB-INF/classes"/>
+  </path>
+
+  <taskdef
+    name="hibernatetool" 
+	  classname="org.hibernate.tool.ant.HibernateToolTask" 
+    classpathref="hibernatetool.classpath"
+  />
+
+  <target name="ddl">
+    <description>
+      Generate the DDL from the beans classes and associated hbm.xml files
+    </description>
+
+    <hibernatetool
+      destdir="sql"
+    >
+      <configuration
+    	    configurationfile="src/hibernate.cfg.xml"
+        namingstrategy="org.hibernate.cfg.ImprovedNamingStrategy"
+      />
+      <hbm2ddl
+        export="false"
+        format="true"
+        outputfilename="create_schema.sql"
+      />
+      <hbm2ddl
+        create="false"
+        drop="true"
+        export="false"
+        format="true"
+        outputfilename="drop_schema.sql"
+      />
+    </hibernatetool>
+  </target>
+	
+	<target name="deploy">
+	  <description>
+	  	  Deploy Screensaver to the application server.
+		  Currently unimplemented.
+	  </description>
+	</target>
+	
+</project>
