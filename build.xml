@@ -5,6 +5,20 @@
     A build.xml for Screensaver 1.xx
   </description>
 
+
+	<!-- classpaths -->
+	<!-- TODO: get classpaths working properly -->
+    
+  <path id="hibernatedoclet.classpath">
+    <pathelement path="lib/hibernate-3.1.3/hibernate3.jar"/>
+    <pathelement path="lib/hibernate-tools-3.1.0.beta4/hibernate-tools.jar"/>
+    <pathelement path="lib/hibernate-tools-3.1.0.beta4/jtidy-r8-21122004.jar"/>
+    <pathelement path="lib/hibernate-tools-3.1.0.beta4/velocity-1.4.jar"/>
+    <pathelement path="lib/hibernate-tools-3.1.0.beta4/velocity-tools-generic-1.1.jar"/>
+    <pathelement path="lib/postgresql-8.1-405.jdbc3.jar"/>
+    <pathelement path="web-root/WEB-INF/classes"/>
+  </path>
+
   <!-- this beautiful path element doesnt seem to provide any function -->
   <path id="hibernatetool.classpath">
     <pathelement path="lib/hibernate-3.1.3/hibernate3.jar"/>
@@ -16,22 +30,61 @@
     <pathelement path="web-root/WEB-INF/classes"/>
   </path>
 
-  <taskdef
-    name="hibernatetool" 
-	  classname="org.hibernate.tool.ant.HibernateToolTask" 
-    classpathref="hibernatetool.classpath"
-  />
 
-  <target name="ddl">
+	<!-- build and deploy -->
+
+	<target name="hbm_xml">
+		<description>
+			Generate .hbm.xml files from Hibernate .java POJOs
+		</description>
+	  <taskdef
+	    name="hibernatedoclet"
+	    classname="xdoclet.modules.hibernate.HibernateDocletTask"
+	    classpathref="hibernatedoclet.classpath"
+	  />
+    <hibernatedoclet
+      destdir="src"
+      force="true"
+      excludedtags="@version,@author,@todo"
+    >
+      <fileset
+        dir="src"
+        casesensitive="yes"
+      >
+        <include name="edu/harvard/med/screensaver/beans/**/*.java"/>
+      </fileset>      
+      <hibernate
+        version="3.0"
+        destinationFile="{0}.hbm.xml"
+      >
+      </hibernate>
+    </hibernatedoclet>
+	</target>
+  
+	<target name="deploy">
+	  <description>
+	  	Deploy Screensaver to the application server.
+		  Currently unimplemented.
+	  </description>
+	</target>
+	
+	
+	<!-- generate ddl -->
+	
+  <target name="ddl" depends="hbm_xml">
     <description>
       Generate the DDL from the beans classes and associated hbm.xml files
     </description>
-
+    <taskdef
+      name="hibernatetool" 
+      classname="org.hibernate.tool.ant.HibernateToolTask" 
+      classpathref="hibernatetool.classpath"
+    />
     <hibernatetool
       destdir="sql"
     >
       <configuration
-    	    configurationfile="src/hibernate.cfg.xml"
+   	    configurationfile="src/hibernate.cfg.xml"
         namingstrategy="org.hibernate.cfg.ImprovedNamingStrategy"
       />
       <hbm2ddl
@@ -48,12 +101,5 @@
       />
     </hibernatetool>
   </target>
-	
-	<target name="deploy">
-	  <description>
-	  	  Deploy Screensaver to the application server.
-		  Currently unimplemented.
-	  </description>
-	</target>
-	
+
 </project>
