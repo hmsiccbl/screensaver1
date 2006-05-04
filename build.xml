@@ -71,7 +71,7 @@
 	
 	<!-- generate ddl -->
 	
-  <target name="ddl" depends="hbm_xml">
+  <target name="ddl">
     <description>
       Generate the DDL from the beans classes and associated hbm.xml files
     </description>
