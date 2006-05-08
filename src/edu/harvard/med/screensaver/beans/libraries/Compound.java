@@ -51,6 +51,7 @@ public class Compound {
    * 
    * @hibernate.property
    *   type="text"
+   *   not-null="true"
    */
   public String getName() {
     return _name;
@@ -85,6 +86,7 @@ public class Compound {
    * 
    * @hibernate.property
    *   column="is_salt"
+   *   not-null="true"
    */
   public boolean isSalt() {
     return _isSalt;
@@ -175,7 +177,6 @@ public class Compound {
   /**
    * @return Returns the pubchemCid.
    * @hibernate.property
-   *   column="pubchem_id"
    *   type="text"
    */
   public String getPubchemCid() {
@@ -192,7 +193,6 @@ public class Compound {
   /**
    * @return Returns the chembankId.
    * @hibernate.property
-   *   column="chembank_id"
    *   type="text"
    */
   public String getChembankId() {
