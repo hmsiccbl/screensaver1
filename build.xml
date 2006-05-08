@@ -6,33 +6,62 @@
   </description>
 
 
-	<!-- classpaths -->
-	<!-- TODO: get classpaths working properly -->
+	<!-- classpath -->
+	<!-- TODO: get classpath working properly in hibernate and doclet rules -->
     
-  <path id="hibernatedoclet.classpath">
+  <path id="project.classpath">
     <pathelement path="lib/hibernate-3.1.3/hibernate3.jar"/>
     <pathelement path="lib/hibernate-tools-3.1.0.beta4/hibernate-tools.jar"/>
     <pathelement path="lib/hibernate-tools-3.1.0.beta4/jtidy-r8-21122004.jar"/>
     <pathelement path="lib/hibernate-tools-3.1.0.beta4/velocity-1.4.jar"/>
     <pathelement path="lib/hibernate-tools-3.1.0.beta4/velocity-tools-generic-1.1.jar"/>
     <pathelement path="lib/postgresql-8.1-405.jdbc3.jar"/>
-    <pathelement path="web-root/WEB-INF/classes"/>
-  </path>
-
-  <!-- this beautiful path element doesnt seem to provide any function -->
-  <path id="hibernatetool.classpath">
-    <pathelement path="lib/hibernate-3.1.3/hibernate3.jar"/>
-    <pathelement path="lib/hibernate-tools-3.1.0.beta4/hibernate-tools.jar"/>
-    <pathelement path="lib/hibernate-tools-3.1.0.beta4/jtidy-r8-21122004.jar"/>
-    <pathelement path="lib/hibernate-tools-3.1.0.beta4/velocity-1.4.jar"/>
-    <pathelement path="lib/hibernate-tools-3.1.0.beta4/velocity-tools-generic-1.1.jar"/>
-    <pathelement path="lib/postgresql-8.1-405.jdbc3.jar"/>
-    <pathelement path="web-root/WEB-INF/classes"/>
+    <pathelement path="build"/>
   </path>
 
 
 	<!-- build and deploy -->
-
+  
+  <target name="deploy" depends="war">
+    <description>
+      Deploy Screensaver to the application server.
+      Currently unimplemented.
+    </description>
+  </target>
+  
+  <target name="war">
+    <description>
+      Build Screensaver into a Web ARchive.
+      Currently unimplemented.
+    </description>
+  </target>
+  
+  <target name="jar">
+    <description>
+      Compile the .class files and resources in the build directory into a
+      Java ARchive.
+    </description>
+    <jar destfile="screensaver.jar" basedir="build"/>
+  </target>
+  
+  <target name="build" depends="resources">
+    <description>
+      Compile the .java files in the src directory into .class files in the
+      build directory. Copy the contents of the resources directory into the
+      build directory.
+    </description>
+    <javac srcdir="src" destdir="build" classpathref="project.classpath"/>
+    <copy todir="build">
+      <fileset dir="resources"/>
+    </copy>
+  </target>
+  
+  <target
+    name="resources"
+    depends="hbm_xml"
+    description="Prepare the contents of the resources directory."
+  />
+  
 	<target name="hbm_xml">
 		<description>
 			Generate .hbm.xml files from Hibernate .java POJOs
@@ -40,51 +69,35 @@
 	  <taskdef
 	    name="hibernatedoclet"
 	    classname="xdoclet.modules.hibernate.HibernateDocletTask"
-	    classpathref="hibernatedoclet.classpath"
+	    classpathref="project.classpath"
 	  />
     <hibernatedoclet
-      destdir="src"
+      destdir="resources"
       force="true"
       excludedtags="@version,@author,@todo"
     >
-      <fileset
-        dir="src"
-        casesensitive="yes"
-      >
+      <fileset dir="src" casesensitive="yes">
         <include name="edu/harvard/med/screensaver/beans/**/*.java"/>
       </fileset>      
-      <hibernate
-        version="3.0"
-        destinationFile="{0}.hbm.xml"
-      >
-      </hibernate>
+      <hibernate version="3.0" destinationFile="{0}.hbm.xml"/>
     </hibernatedoclet>
-	</target>
-  
-	<target name="deploy">
-	  <description>
-	  	Deploy Screensaver to the application server.
-		  Currently unimplemented.
-	  </description>
 	</target>
 	
 	
 	<!-- generate ddl -->
 	
-  <target name="ddl">
+  <target name="ddl" depends="build">
     <description>
       Generate the DDL from the beans classes and associated hbm.xml files
     </description>
     <taskdef
       name="hibernatetool" 
       classname="org.hibernate.tool.ant.HibernateToolTask" 
-      classpathref="hibernatetool.classpath"
+      classpathref="project.classpath"
     />
-    <hibernatetool
-      destdir="sql"
-    >
+    <hibernatetool destdir="sql">
       <configuration
-   	    configurationfile="src/hibernate.cfg.xml"
+   	    configurationfile="resources/hibernate.cfg.xml"
         namingstrategy="org.hibernate.cfg.ImprovedNamingStrategy"
       />
       <hbm2ddl
@@ -102,4 +115,16 @@
     </hibernatetool>
   </target>
 
+  
+  <!-- cleanup routines -->
+  
+  <target name="clean" description="Clean out generated files.">
+    <delete includeemptydirs="true">
+      <fileset dir="build"     includes="**/*"/>
+      <fileset dir="resources" includes="edu/**"/>
+      <fileset dir="sql"       includes="create_schema.sql"/>
+      <fileset dir="sql"       includes="drop_schema.sql"/>
+    </delete>
+  </target>
+  
 </project>
