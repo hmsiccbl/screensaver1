@@ -19,7 +19,7 @@ public class Well {
   
   private Integer       _wellId;
   private Set<Compound> _compounds;
-  private String        _plateName;
+  private Integer       _plateNumber;
   private String        _wellName;
   private String        _iccbNumber;
   private String        _vendorIdentifier;
@@ -61,21 +61,20 @@ public class Well {
   }
 
   /**
-   * @return Returns the plateName.
+   * @return Returns the plateNumber.
    *
    * @hibernate.property
-   *   type="text"
    *   not-null="true"
    */
-  public String getPlateName() {
-    return _plateName;
+  public Integer getPlateNumber() {
+    return _plateNumber;
   }
 
   /**
-   * @param plateName The plateName to set.
+   * @param plateNumber The plateNumber to set.
    */
-  public void setPlateName(String plateName) {
-    _plateName = plateName;
+  public void setPlateNumber(Integer plateNumber) {
+    _plateNumber = plateNumber;
   }
 
   /**
