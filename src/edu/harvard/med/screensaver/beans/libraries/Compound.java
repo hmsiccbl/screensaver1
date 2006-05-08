@@ -1,8 +1,8 @@
 // Compound.java
 // by john sullivan, 2006.05
- 
-// TODO: get build.xml classpath working properly for ddl and hbm_xml rules
 
+// TODO: create Library and figure out how to do taxonomies
+// TODO: sample applications to load/store compounds/wells/libraries
 
 package edu.harvard.med.screensaver.beans.libraries;
 
