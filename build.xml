@@ -124,6 +124,7 @@
       <fileset dir="resources" includes="edu/**"/>
       <fileset dir="sql"       includes="create_schema.sql"/>
       <fileset dir="sql"       includes="drop_schema.sql"/>
+      <fileset dir="."         includes="screensaver.jar"/>
     </delete>
   </target>
   
