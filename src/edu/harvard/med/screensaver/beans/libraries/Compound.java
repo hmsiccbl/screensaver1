@@ -1,8 +1,6 @@
 // Compound.java
 // by john sullivan, 2006.05
-
-// TODO: implement well
-
+ 
 // TODO: autogen hibernate.cfg.xml
 // TODO: get build.xml classpath working properly for ddl and hbm_xml rules
 
@@ -23,6 +21,7 @@ public class Compound {
   // instance fields
   
 	private Integer     _compoundId;
+  private Set<Well>   _wells;
 	private String      _name;
 	private String      _smiles;
   private boolean     _isSalt;
@@ -46,6 +45,29 @@ public class Compound {
 		return _compoundId;
 	}
   
+  /**
+   * @return Returns the wells.
+   *
+   * @hibernate.set
+   *   inverse="true"
+   *   table="well_compound_link"
+   * @hibernate.collection-key
+   *   column="compound_id"
+   * @hibernate.collection-many-to-many
+   *   column="well_id"
+   *   class="edu.harvard.med.screensaver.beans.libraries.Well"
+   */
+  public Set<Well> getWells() {
+    return _wells;
+  }
+
+  /**
+   * @param wells The wells to set.
+   */
+  public void setWells(Set<Well> wells) {
+    _wells = wells;
+  }
+
   /**
    * @return Returns the name.
    * 

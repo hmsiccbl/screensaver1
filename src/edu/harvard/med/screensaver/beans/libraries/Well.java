@@ -3,6 +3,8 @@
 
 package edu.harvard.med.screensaver.beans.libraries;
 
+import java.util.Set;
+
 
 /**
  * A Hibernate entity bean representing a well.
@@ -15,11 +17,12 @@ public class Well {
   
   // instance fields
   
-  private Integer _wellId;
-  private String  _plateName;
-  private String  _wellName;
-  private String  _iccbNumber;
-  private String  _vendorIdentifier;
+  private Integer       _wellId;
+  private Set<Compound> _compounds;
+  private String        _plateName;
+  private String        _wellName;
+  private String        _iccbNumber;
+  private String        _vendorIdentifier;
   
   
   // getters and setters
@@ -33,6 +36,28 @@ public class Well {
    */
   public Integer getWellId() {
     return _wellId;
+  }
+
+  /**
+   * @return Returns the compounds.
+   *
+   * @hibernate.set
+   *   table="well_compound_link"
+   * @hibernate.collection-key
+   *   column="well_id"
+   * @hibernate.collection-many-to-many
+   *   column="compound_id"
+   *   class="edu.harvard.med.screensaver.beans.libraries.Compound"
+   */
+  public Set<Compound> getCompounds() {
+    return _compounds;
+  }
+
+  /**
+   * @param compounds The compounds to set.
+   */
+  public void setCompounds(Set<Compound> compounds) {
+    _compounds = compounds;
   }
 
   /**
