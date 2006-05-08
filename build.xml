@@ -36,31 +36,24 @@
     </description>
   </target>
   
-  <target name="jar">
-    <description>
-      Compile the .class files and resources in the build directory into a
-      Java ARchive.
-    </description>
-    <jar destfile="screensaver.jar" basedir="build"/>
-  </target>
-  
-  <target name="build" depends="resources">
-    <description>
-      Compile the .java files in the src directory into .class files in the
-      build directory. Copy the contents of the resources directory into the
-      build directory.
-    </description>
-    <javac srcdir="src" destdir="build" classpathref="project.classpath"/>
-    <copy todir="build">
-      <fileset dir="resources"/>
-    </copy>
-  </target>
-  
   <target
-    name="resources"
+    name="jar"
     depends="hbm_xml"
-    description="Prepare the contents of the resources directory."
-  />
+    description="Build a Java archive of the class and resource files."
+  >
+    <javac
+      srcdir="src"
+      destdir="build/jar"
+      classpathref="project.classpath"
+    />
+    <copy todir="build/jar">
+      <fileset dir="resources"/>
+    </copy>    
+    <jar
+      destfile="build/screensaver.jar"
+      basedir="build/jar"
+    />
+  </target>
   
 	<target name="hbm_xml">
 		<description>
@@ -129,11 +122,11 @@
   
   <target name="clean" description="Clean out generated files.">
     <delete includeemptydirs="true">
-      <fileset dir="build"     includes="**/*"/>
+      <fileset dir="build/jar" includes="**/*"/>
       <fileset dir="resources" includes="edu/**"/>
       <fileset dir="sql"       includes="create_schema.sql"/>
       <fileset dir="sql"       includes="drop_schema.sql"/>
-      <fileset dir="."         includes="screensaver.jar"/>
+      <fileset dir="build"     includes="screensaver.jar"/>
     </delete>
   </target>
   
