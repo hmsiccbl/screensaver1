@@ -13,6 +13,5 @@
     <property name="connection.password">screensaver</property>
     <property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property>
     <mapping resource="edu/harvard/med/screensaver/beans/libraries/Compound.hbm.xml" />
-    <mapping resource="edu/harvard/med/screensaver/beans/libraries/CompoundSynonym.hbm.xml" />
   </session-factory>
 </hibernate-configuration>

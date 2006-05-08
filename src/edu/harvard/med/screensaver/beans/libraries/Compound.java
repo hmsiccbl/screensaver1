@@ -1,11 +1,10 @@
 // Compound.java
 // by john sullivan, 2006.05
 
-// TODO: implement synonyms
 // TODO: implement well
 
 // TODO: autogen hibernate.cfg.xml
-// TODO: get build.xml classpath working porperly for ddl and hbm_xml rules
+// TODO: get build.xml classpath working properly for ddl and hbm_xml rules
 
 
 package edu.harvard.med.screensaver.beans.libraries;
@@ -23,19 +22,22 @@ public class Compound {
   
   // instance fields
   
-	private Integer              _compoundId;
-	private String               _name;
-	private String               _smiles;
-  private boolean              _isSalt;
-  private Set<CompoundSynonym> _synonyms;
-  private String               _pubchemCid;
-  private String               _chembankId;
+	private Integer     _compoundId;
+	private String      _name;
+	private String      _smiles;
+  private boolean     _isSalt;
+  private Set<String> _synonyms;
+  private Set<String> _casNumbers;
+  private Set<String> _nscNumbers;
+  private String      _pubchemCid;
+  private String      _chembankId;
 	
   
   // getters and setters
   
 	/**
 	 * @return Returns the id.
+   * 
 	 * @hibernate.id
 	 *   generator-class="native"
    *   column="compound_id"
@@ -46,6 +48,7 @@ public class Compound {
   
   /**
    * @return Returns the name.
+   * 
    * @hibernate.property
    *   type="text"
    */
@@ -62,6 +65,7 @@ public class Compound {
 
   /**
    * @return Returns the smiles.
+   * 
    * @hibernate.property
    *   type="text"
    */
@@ -78,6 +82,7 @@ public class Compound {
 
   /**
    * @return Returns the isSalt.
+   * 
    * @hibernate.property
    *   column="is_salt"
    */
@@ -94,23 +99,77 @@ public class Compound {
 
   /**
    * @return Returns the synonyms.
-   * 
-   * commenting out these XDoclet attributes for now so the build works:
-   * (at)hibernate.set
-   *   inverse="false"
+   *
+   * @hibernate.set
    *   order-by="synonym"
-   * (at)hibernate.collection-key
+   *   table="compound_synonym"
+   *   cascade="delete"
+   * @hibernate.collection-key
    *   column="compound_id"
+   * @hibernate.collection-element
+   *   type="text"
+   *   column="synonym"
+   *   not-null="true"
    */
-  public Set<CompoundSynonym> getSynonyms() {
+  public Set<String> getSynonyms() {
     return _synonyms;
   }
 
   /**
    * @param synonyms The synonyms to set.
    */
-  public void setSynonyms(Set<CompoundSynonym> synonyms) {
+  public void setSynonyms(Set<String> synonyms) {
     _synonyms = synonyms;
+  }
+
+  /**
+   * @return Returns the casNumber.
+   * 
+   * @hibernate.set
+   *   order-by="csa_number"
+   *   table="compound_cas_number"
+   *   cascade="delete"
+   * @hibernate.collection-key
+   *   column="compound_id"
+   * @hibernate.collection-element
+   *   type="text"
+   *   column="cas_number"
+   *   not-null="true"
+   */
+  public Set<String> getCasNumbers() {
+    return _casNumbers;
+  }
+
+  /**
+   * @param casNumber The casNumber to set.
+   */
+  public void setCasNumbers(Set<String> casNumber) {
+    _casNumbers = casNumber;
+  }
+
+  /**
+   * @return Returns the nscNumber.
+   * 
+   * @hibernate.set
+   *   order-by="nsc_number"
+   *   table="compound_nsc_number"
+   *   cascade="delete"
+   * @hibernate.collection-key
+   *   column="compound_id"
+   * @hibernate.collection-element
+   *   type="text"
+   *   column="nsc_number"
+   *   not-null="true"
+   */
+  public Set<String> getNscNumbers() {
+    return _nscNumbers;
+  }
+
+  /**
+   * @param nscNumber The nscNumber to set.
+   */
+  public void setNscNumbers(Set<String> nscNumber) {
+    _nscNumbers = nscNumber;
   }
 
   /**
