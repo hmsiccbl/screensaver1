@@ -79,6 +79,15 @@
       <fileset dir="src" casesensitive="yes">
         <include name="edu/harvard/med/screensaver/beans/**/*.java"/>
       </fileset>      
+      <hibernatecfg
+        version="3.0" 
+        showsql="true"
+        driver="org.postgresql.Driver"
+        jdbcurl="jdbc:postgresql://localhost/screensaver"
+        username="screensaver"
+        password="screensaver"
+        dialect="org.hibernate.dialect.PostgreSQLDialect"
+      />
       <hibernate version="3.0" destinationFile="{0}.hbm.xml"/>
     </hibernatedoclet>
 	</target>

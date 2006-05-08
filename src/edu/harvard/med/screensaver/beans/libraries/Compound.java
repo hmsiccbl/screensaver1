@@ -1,7 +1,6 @@
 // Compound.java
 // by john sullivan, 2006.05
  
-// TODO: autogen hibernate.cfg.xml
 // TODO: get build.xml classpath working properly for ddl and hbm_xml rules
 
 
