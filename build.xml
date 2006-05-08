@@ -6,17 +6,17 @@
   </description>
 
 
-	<!-- classpath -->
-	<!-- TODO: get classpath working properly in hibernate and doclet rules -->
+	<!-- classpaths -->
     
   <path id="project.classpath">
-    <pathelement path="lib/hibernate-3.1.3/hibernate3.jar"/>
-    <pathelement path="lib/hibernate-tools-3.1.0.beta4/hibernate-tools.jar"/>
-    <pathelement path="lib/hibernate-tools-3.1.0.beta4/jtidy-r8-21122004.jar"/>
-    <pathelement path="lib/hibernate-tools-3.1.0.beta4/velocity-1.4.jar"/>
-    <pathelement path="lib/hibernate-tools-3.1.0.beta4/velocity-tools-generic-1.1.jar"/>
-    <pathelement path="lib/postgresql-8.1-405.jdbc3.jar"/>
-    <pathelement path="build"/>
+    <fileset dir="lib">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="ddl.classpath">
+    <path refid="project.classpath"/>
+    <pathelement path="resources"/>
   </path>
 
 
@@ -55,10 +55,10 @@
     />
   </target>
   
-	<target name="hbm_xml">
-		<description>
-			Generate .hbm.xml files from Hibernate .java POJOs
-		</description>
+  <target
+    name="hbm_xml"
+    description="Generate hibernate.cfg.xml and .hbm.xml files"
+  >
 	  <taskdef
 	    name="hibernatedoclet"
 	    classname="xdoclet.modules.hibernate.HibernateDocletTask"
@@ -95,7 +95,7 @@
     <taskdef
       name="hibernatetool" 
       classname="org.hibernate.tool.ant.HibernateToolTask" 
-      classpathref="project.classpath"
+      classpathref="ddl.classpath"
     />
     <hibernatetool destdir="sql">
       <configuration
