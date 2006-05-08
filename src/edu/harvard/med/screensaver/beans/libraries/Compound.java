@@ -1,16 +1,12 @@
 // Compound.java
 // by john sullivan, 2006.05
 
-// TODO: create resources & build directories
-//   - xdoclet genereates into resources
-//   - src compiles into build
-//   - resources copied into build
-
 // TODO: implement synonyms
 // TODO: implement well
 
 // TODO: autogen hibernate.cfg.xml
-// TODO: figure out where to put hibernate xml files
+// TODO: get build.xml classpath working porperly for ddl and hbm_xml rules
+
 
 package edu.harvard.med.screensaver.beans.libraries;
 
