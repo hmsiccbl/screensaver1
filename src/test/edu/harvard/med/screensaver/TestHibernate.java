@@ -12,6 +12,7 @@ import org.hibernate.Session;
 
 import edu.harvard.med.screensaver.beans.HibernateSessionFactory;
 import edu.harvard.med.screensaver.beans.libraries.Compound;
+import edu.harvard.med.screensaver.beans.libraries.Library;
 import edu.harvard.med.screensaver.beans.libraries.Well;
 
 /**
@@ -28,11 +29,13 @@ public class TestHibernate {
   public static void main(String[] args) {
     Compound compound;
     Well well;
+    Library library;
     Iterator<Compound> compounds;
     Iterator<Well> wells;
     
     Session session = HibernateSessionFactory.currentSession();
 
+    /*
     //// create a new compound
     session.beginTransaction();
     compound = new Compound();
@@ -40,6 +43,7 @@ public class TestHibernate {
     compound.setSmiles("P");
     session.save(compound);
     session.getTransaction().commit();
+    */
 
     //// look up a compound and modify it
     session.beginTransaction();
@@ -52,14 +56,23 @@ public class TestHibernate {
 
     //// create a new well, add compound p to it
     session.beginTransaction();
+    library = new Library();
+    library.setLibraryName("library Q");
+    library.setShortName("Q");
+    library.setLibraryType("DOS");
+    library.setStartPlate(1);
+    library.setEndPlate(2);
     well = new Well();
     well.setPlateNumber(27);
     well.setWellName("A01");
+    well.setLibrary(library);
     Set<Well> wellSet = new HashSet<Well>();
     wellSet.add(well);
     compound.setWells(wellSet);
+    session.save(library);
+    session.save(well);
     session.save(compound);
-    session.getTransaction().commit();    
+    session.getTransaction().commit();
     
     //// iterate over compounds
     session.beginTransaction();
