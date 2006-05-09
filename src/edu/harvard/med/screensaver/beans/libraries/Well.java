@@ -190,4 +190,29 @@ public class Well {
   public void setVendorIdentifier(String vendorIdentifier) {
     _vendorIdentifier = vendorIdentifier;
   }
+
+  
+  // identity methods
+  
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object object) {
+    if (! (object instanceof Well)) {
+      return false;
+    }
+    Well that = (Well) object;
+    return
+      this.getPlateNumber().equals(that.getPlateNumber()) &&
+      this.getWellName().equals(that.getWellName());
+  }
+
+  /**
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    return getPlateNumber().hashCode() + getWellName().hashCode();
+  }  
 }

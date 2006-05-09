@@ -315,4 +315,28 @@ public class Compound {
   public void setChembankId(String chembankId) {
     _chembankId = chembankId;
   }
+
+  
+  // identity methods
+  
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object object) {
+    if (! (object instanceof Compound)) {
+      return false;
+    }
+    Compound that = (Compound) object;
+    return
+      this.getCompoundName().equals(that.getCompoundName());
+  }
+
+  /**
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    return getCompoundName().hashCode();
+  }
 }
