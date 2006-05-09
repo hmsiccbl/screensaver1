@@ -209,7 +209,7 @@ public class Compound {
    * @param synonym The synonym to remove.
    * @return true if the synonym existed.
    */
-  public boolean remove(String synonym) {
+  public boolean removeSynonym(String synonym) {
     return _synonyms.remove(synonym);
   }
 
