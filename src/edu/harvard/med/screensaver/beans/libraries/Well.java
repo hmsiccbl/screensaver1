@@ -81,6 +81,8 @@ public class Well {
    * @param library The library to set.
    */
   public void setLibrary(Library library) {
+    library.getMutableWells().add(this);
+    library.getMutableWells().remove(this);
     _library = library;
   }
 
@@ -97,13 +99,20 @@ public class Well {
    *   class="edu.harvard.med.screensaver.beans.libraries.Compound"
    */
   public Set<Compound> getCompounds() {
-    return _compounds;
+    return new HashSet<Compound>(_compounds);
   }
 
   /**
+   * @return The actual set of compounds.
+   */
+  protected Set<Compound> getMutableCompounds() {
+    return _compounds;
+  }
+  
+  /**
    * @param compounds The compounds to set.
    */
-  public void setCompounds(Set<Compound> compounds) {
+  protected void setCompounds(Set<Compound> compounds) {
     _compounds = compounds;
   }
 
@@ -112,6 +121,7 @@ public class Well {
    * @return true iff the compound was added.
    */
   public boolean addCompound(Compound compound) {
+    compound.getMutableWells().add(this);
     return _compounds.add(compound);
   }
   
@@ -120,6 +130,7 @@ public class Well {
    * @return true iff the compound was removed.
    */
   public boolean removeCompound(Compound compound) {
+    compound.getMutableWells().remove(this);
     return _compounds.remove(compound);
   }
   

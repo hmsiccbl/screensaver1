@@ -81,13 +81,20 @@ public class Compound {
    *   class="edu.harvard.med.screensaver.beans.libraries.Well"
    */
   public Set<Well> getWells() {
-    return _wells;
+    return  new HashSet<Well>(_wells);
   }
 
   /**
+   * @return The actual set of wells.
+   */
+  protected Set<Well> getMutableWells() {
+    return _wells;
+  }
+  
+  /**
    * @param wells The wells to set.
    */
-  public void setWells(Set<Well> wells) {
+  protected void setWells(Set<Well> wells) {
     _wells = wells;
   }
 
@@ -96,6 +103,7 @@ public class Compound {
    * @return true if wells did not already contain the specified well.
    */
   public boolean addWell(Well well) {
+    well.getMutableCompounds().add(this);
     return _wells.add(well);
   }
   
@@ -104,6 +112,7 @@ public class Compound {
    * @return true if wells contained the specified well.
    */
   public boolean removeWell(Well well) {
+    well.getMutableCompounds().remove(this);
     return _wells.remove(well);
   }
   
@@ -178,13 +187,13 @@ public class Compound {
    *   not-null="true"
    */
   public Set<String> getSynonyms() {
-    return _synonyms;
+    return  new HashSet<String>(_synonyms);
   }
 
   /**
    * @param synonyms The synonyms to set.
    */
-  public void setSynonyms(Set<String> synonyms) {
+  protected void setSynonyms(Set<String> synonyms) {
     _synonyms = synonyms;
   }
 
@@ -220,13 +229,13 @@ public class Compound {
    *   not-null="true"
    */
   public Set<String> getCasNumbers() {
-    return _casNumbers;
+    return  new HashSet<String>(_casNumbers);
   }
 
   /**
    * @param casNumber The casNumber to set.
    */
-  public void setCasNumbers(Set<String> casNumber) {
+  protected void setCasNumbers(Set<String> casNumber) {
     _casNumbers = casNumber;
   }
 
@@ -262,13 +271,13 @@ public class Compound {
    *   not-null="true"
    */
   public Set<String> getNscNumbers() {
-    return _nscNumbers;
+    return new HashSet<String>(_nscNumbers);
   }
 
   /**
    * @param nscNumber The nscNumber to set.
    */
-  public void setNscNumbers(Set<String> nscNumber) {
+  protected void setNscNumbers(Set<String> nscNumber) {
     _nscNumbers = nscNumber;
   }
 

@@ -66,9 +66,7 @@ public class TestHibernate {
     well.setPlateNumber(27);
     well.setWellName("A01");
     well.setLibrary(library);
-    Set<Well> wellSet = new HashSet<Well>();
-    wellSet.add(well);
-    compound.setWells(wellSet);
+    compound.addWell(well);
     session.save(library);
     session.save(well);
     session.save(compound);

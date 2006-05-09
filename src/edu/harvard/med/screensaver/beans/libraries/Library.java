@@ -78,32 +78,23 @@ public class Library {
    *   class="edu.harvard.med.screensaver.beans.libraries.Well"
    */
   public Set<Well> getWells() {
-    return _wells;
+    return new HashSet<Well>(_wells);
   }
 
+  /**
+   * @return the actual wells.
+   */
+  protected Set<Well> getMutableWells() {
+    return _wells;
+  }
+  
   /**
    * @param wells The wells to set.
    */
-  public void setWells(Set<Well> wells) {
+  protected void setWells(Set<Well> wells) {
     _wells = wells;
   }
 
-  /**
-   * @param well The well to add.
-   * @return true iff the well was added.
-   */
-  public boolean addWell(Well well) {
-    return _wells.add(well);
-  }
-
-  /**
-   * @param well The well to remove.
-   * @return true iff the well was removed.
-   */
-  public boolean removeWell(Well well) {
-    return _wells.remove(well);
-  }
-  
   /**
    * @return Returns the libraryName.
    *
