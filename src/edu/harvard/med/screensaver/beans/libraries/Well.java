@@ -3,6 +3,7 @@
 
 package edu.harvard.med.screensaver.beans.libraries;
 
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -20,7 +21,7 @@ public class Well {
   private Integer       _wellId;
   private Integer       _version;
   private Library       _library;
-  private Set<Compound> _compounds;
+  private Set<Compound> _compounds = new HashSet<Compound>();
   private Integer       _plateNumber;
   private String        _wellName;
   private String        _iccbNumber;
@@ -105,6 +106,22 @@ public class Well {
     _compounds = compounds;
   }
 
+  /**
+   * @param compound The compound to add.
+   * @return true iff the compound was added.
+   */
+  public boolean addCompound(Compound compound) {
+    return _compounds.add(compound);
+  }
+  
+  /**
+   * @param compound The compound to remove.
+   * @return true iff the compound was removed.
+   */
+  public boolean removeCompound(Compound compound) {
+    return _compounds.remove(compound);
+  }
+  
   /**
    * @return Returns the plateNumber.
    *

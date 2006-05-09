@@ -3,6 +3,7 @@
 
 package edu.harvard.med.screensaver.beans.libraries;
 
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -19,7 +20,7 @@ public class Library {
   
   private Integer   _libraryId;
   private Integer   _version;
-  private Set<Well> _wells;
+  private Set<Well> _wells = new HashSet<Well>();
   private String    _libraryName;
   private String    _shortName;
   private String    _description;
@@ -85,6 +86,22 @@ public class Library {
     _wells = wells;
   }
 
+  /**
+   * @param well The well to add.
+   * @return true iff the well was added.
+   */
+  public boolean addWell(Well well) {
+    return _wells.add(well);
+  }
+
+  /**
+   * @param well The well to remove.
+   * @return true iff the well was removed.
+   */
+  public boolean removeWell(Well well) {
+    return _wells.remove(well);
+  }
+  
   /**
    * @return Returns the libraryName.
    *

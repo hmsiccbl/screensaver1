@@ -4,6 +4,7 @@
 
 package edu.harvard.med.screensaver.beans.libraries;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -19,13 +20,13 @@ public class Compound {
   
 	private Integer     _compoundId;
   private Integer     _version;
-  private Set<Well>   _wells;
+  private Set<Well>   _wells         = new HashSet<Well>();
 	private String      _compoundName;
 	private String      _smiles;
   private boolean     _isSalt;
-  private Set<String> _synonyms;
-  private Set<String> _casNumbers;
-  private Set<String> _nscNumbers;
+  private Set<String> _synonyms      = new HashSet<String>();
+  private Set<String> _casNumbers    = new HashSet<String>();
+  private Set<String> _nscNumbers    = new HashSet<String>();
   private String      _pubchemCid;
   private String      _chembankId;
 	
@@ -89,6 +90,22 @@ public class Compound {
     _wells = wells;
   }
 
+  /**
+   * @param well The well to add.
+   * @return true if wells did not already contain the specified well.
+   */
+  public boolean addWell(Well well) {
+    return _wells.add(well);
+  }
+  
+  /**
+   * @param well The well to remove.
+   * @return true if wells contained the specified well.
+   */
+  public boolean removeWell(Well well) {
+    return _wells.remove(well);
+  }
+  
   /**
    * @return Returns the compoundName.
    * 
@@ -170,6 +187,22 @@ public class Compound {
   }
 
   /**
+   * @param synonym The synonym to add.
+   * @return true if the synonym did not already exist.
+   */
+  public boolean addSynonym(String synonym) {
+    return _synonyms.add(synonym);
+  }
+
+  /**
+   * @param synonym The synonym to remove.
+   * @return true if the synonym existed.
+   */
+  public boolean remove(String synonym) {
+    return _synonyms.remove(synonym);
+  }
+
+  /**
    * @return Returns the casNumber.
    * 
    * @hibernate.set
@@ -195,6 +228,22 @@ public class Compound {
   }
 
   /**
+   * @param casNumber The casNumber to add.
+   * @return true iff the casNumber was added.
+   */
+  public boolean addCasNumber(String casNumber) {
+    return _casNumbers.add(casNumber);
+  }
+
+  /**
+   * @param casNumber The casNumber to remove.
+   * @return true iff the casNumber was removed.
+   */
+  public boolean removeCasNumber(Object casNumber) {
+    return _casNumbers.remove(casNumber);
+  }
+
+  /**
    * @return Returns the nscNumber.
    * 
    * @hibernate.set
@@ -217,6 +266,22 @@ public class Compound {
    */
   public void setNscNumbers(Set<String> nscNumber) {
     _nscNumbers = nscNumber;
+  }
+
+  /**
+   * @param nscNumber The nscNumber to add.
+   * @return true iff the nscNumebr was added.
+   */
+  public boolean addNscNumber(String nscNumber) {
+    return _nscNumbers.add(nscNumber);
+  }
+  
+  /**
+   * @param nscNumber The nscNumber to remove.
+   * @return true iff the nscNumber was removed.
+   */
+  public boolean removeNscNumber(String nscNumber) {
+    return _nscNumbers.remove(nscNumber);
   }
 
   /**
