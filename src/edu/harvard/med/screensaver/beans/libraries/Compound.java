@@ -173,7 +173,7 @@ public class Compound {
    * @return Returns the casNumber.
    * 
    * @hibernate.set
-   *   order-by="csa_number"
+   *   order-by="cas_number"
    *   table="compound_cas_number"
    *   cascade="delete"
    * @hibernate.collection-key
