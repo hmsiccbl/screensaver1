@@ -89,6 +89,7 @@ public class Well {
    *
    * @hibernate.set
    *   table="well_compound_link"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="well_id"
    * @hibernate.collection-many-to-many

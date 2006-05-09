@@ -70,6 +70,8 @@ public class Library {
    * @return Returns the wells.
    *
    * @hibernate.set
+   *   lazy="true"
+   *   order-by="plate_number,well_name"
    * @hibernate.collection-key
    *   column="library_id"
    * @hibernate.collection-one-to-many

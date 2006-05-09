@@ -73,6 +73,7 @@ public class Compound {
    * @hibernate.set
    *   inverse="true"
    *   table="well_compound_link"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="compound_id"
    * @hibernate.collection-many-to-many
@@ -168,6 +169,7 @@ public class Compound {
    *   order-by="synonym"
    *   table="compound_synonym"
    *   cascade="delete"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="compound_id"
    * @hibernate.collection-element
@@ -209,6 +211,7 @@ public class Compound {
    *   order-by="cas_number"
    *   table="compound_cas_number"
    *   cascade="delete"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="compound_id"
    * @hibernate.collection-element
@@ -250,6 +253,7 @@ public class Compound {
    *   order-by="nsc_number"
    *   table="compound_nsc_number"
    *   cascade="delete"
+   *   laxy="true"
    * @hibernate.collection-key
    *   column="compound_id"
    * @hibernate.collection-element
