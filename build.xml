@@ -105,14 +105,14 @@
       <hbm2ddl
         export="false"
         format="true"
-        outputfilename="create_schema.sql"
+        outputfilename="create_database.sql"
       />
       <hbm2ddl
         create="false"
         drop="true"
         export="false"
         format="true"
-        outputfilename="drop_schema.sql"
+        outputfilename="drop_database.sql"
       />
     </hibernatetool>
   </target>
@@ -124,8 +124,8 @@
     <delete includeemptydirs="true">
       <fileset dir="build/jar" includes="**/*"/>
       <fileset dir="resources" includes="edu/**"/>
-      <fileset dir="sql"       includes="create_schema.sql"/>
-      <fileset dir="sql"       includes="drop_schema.sql"/>
+      <fileset dir="sql"       includes="create_database.sql"/>
+      <fileset dir="sql"       includes="drop_database.sql"/>
       <fileset dir="build"     includes="screensaver.jar"/>
     </delete>
   </target>
