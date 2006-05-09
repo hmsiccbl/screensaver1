@@ -1,7 +1,6 @@
 // Compound.java
 // by john sullivan, 2006.05
 
-// TODO: sample applications to load/store compounds/wells/libraries
 
 package edu.harvard.med.screensaver.beans.libraries;
 
@@ -37,7 +36,7 @@ public class Compound {
 	 * @return Returns the id.
    * 
 	 * @hibernate.id
-	 *   generator-class="native"
+	 *   generator-class="sequence"
    *   column="compound_id"
    */
 	public Integer getCompoundId() {

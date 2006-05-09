@@ -33,7 +33,7 @@ public class Well {
    * @return Returns the wellId.
    *
    * @hibernate.id
-   *   generator-class="native"
+   *   generator-class="sequence"
    *   column="well_id"
    */
   public Integer getWellId() {

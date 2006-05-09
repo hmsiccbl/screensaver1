@@ -5,8 +5,6 @@ package edu.harvard.med.screensaver.beans.libraries;
 
 import java.util.Set;
 
-// TODO: relationship with Well
-// TODO: taxonomy
 
 /**
  * A Hibernate entity bean representing a screening library.
@@ -37,7 +35,7 @@ public class Library {
    * @return Returns the libraryId.
    *
    * @hibernate.id
-   *   generator-class="native"
+   *   generator-class="sequence"
    *   column="library_id"
    */
   public Integer getLibraryId() {
