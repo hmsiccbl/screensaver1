@@ -1,7 +1,6 @@
 // Compound.java
 // by john sullivan, 2006.05
 
-// TODO: create Library and figure out how to do taxonomies
 // TODO: sample applications to load/store compounds/wells/libraries
 
 package edu.harvard.med.screensaver.beans.libraries;
@@ -20,8 +19,9 @@ public class Compound {
   // instance fields
   
 	private Integer     _compoundId;
+  private Integer     _version;
   private Set<Well>   _wells;
-	private String      _name;
+	private String      _compoundName;
 	private String      _smiles;
   private boolean     _isSalt;
   private Set<String> _synonyms;
@@ -44,6 +44,15 @@ public class Compound {
 		return _compoundId;
 	}
   
+  /**
+   * @return Returns the version.
+   *
+   * @hibernate.version
+   */
+  public Integer getVersion() {
+    return _version;
+  }
+
   /**
    * @return Returns the wells.
    *
@@ -68,21 +77,22 @@ public class Compound {
   }
 
   /**
-   * @return Returns the name.
+   * @return Returns the compoundName.
    * 
    * @hibernate.property
    *   type="text"
    *   not-null="true"
+   *   unique="true"
    */
-  public String getName() {
-    return _name;
+  public String getCompoundName() {
+    return _compoundName;
   }
 
   /**
-   * @param name The name to set.
+   * @param name The compoundName to set.
    */
-  public void setName(String name) {
-    _name = name;
+  public void setCompoundName(String name) {
+    _compoundName = name;
   }
 
   /**
@@ -90,6 +100,7 @@ public class Compound {
    * 
    * @hibernate.property
    *   type="text"
+   *   unique="true"
    */
   public String getSmiles() {
     return _smiles;

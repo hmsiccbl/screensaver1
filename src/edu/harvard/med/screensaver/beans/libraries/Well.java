@@ -18,6 +18,8 @@ public class Well {
   // instance fields
   
   private Integer       _wellId;
+  private Integer       _version;
+  private Library       _library;
   private Set<Compound> _compounds;
   private Integer       _plateNumber;
   private String        _wellName;
@@ -36,6 +38,35 @@ public class Well {
    */
   public Integer getWellId() {
     return _wellId;
+  }
+
+  /**
+   * @return Returns the version.
+   *
+   * @hibernate.version
+   */
+  public Integer getVersion() {
+    return _version;
+  }
+
+  /**
+   * @return Returns the library.
+   *
+   * @hibernate.many-to-one
+   *   column="library_id"
+   *   class="edu.harvard.med.screensaver.beans.libraries.Library"
+   *   cascade="delete"
+   *   not-null="true"
+   */
+  public Library getLibrary() {
+    return _library;
+  }
+
+  /**
+   * @param library The library to set.
+   */
+  public void setLibrary(Library library) {
+    _library = library;
   }
 
   /**
