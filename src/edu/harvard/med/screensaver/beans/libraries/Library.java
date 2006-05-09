@@ -43,12 +43,26 @@ public class Library {
   }
 
   /**
+   * @param libraryId The libraryId to set.
+   */
+  public void setLibraryId(Integer libraryId) {
+    _libraryId = libraryId;
+  }
+
+  /**
    * @return Returns the version.
    *
    * @hibernate.version
    */
   public Integer getVersion() {
     return _version;
+  }
+
+  /**
+   * @param version The version to set.
+   */
+  public void setVersion(Integer version) {
+    _version = version;
   }
 
   /**

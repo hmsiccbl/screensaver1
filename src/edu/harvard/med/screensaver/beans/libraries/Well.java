@@ -41,12 +41,26 @@ public class Well {
   }
 
   /**
+   * @param wellId The wellId to set.
+   */
+  public void setWellId(Integer wellId) {
+    _wellId = wellId;
+  }
+
+  /**
    * @return Returns the version.
    *
    * @hibernate.version
    */
   public Integer getVersion() {
     return _version;
+  }
+
+  /**
+   * @param version The version to set.
+   */
+  public void setVersion(Integer version) {
+    _version = version;
   }
 
   /**
