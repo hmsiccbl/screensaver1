@@ -66,7 +66,6 @@
 	  />
     <hibernatedoclet
       destdir="resources"
-      force="true"
       excludedtags="@version,@author,@todo"
     >
       <fileset dir="src" casesensitive="yes">
@@ -83,10 +82,10 @@
       />
       <hibernate version="3.0" destinationFile="{0}.hbm.xml"/>
     </hibernatedoclet>
-	</target>
-	
-	
-	<!-- generate ddl -->
+  </target>
+
+
+  <!-- generate ddl -->
 	
   <target name="ddl" depends="hbm_xml">
     <description>
@@ -105,14 +104,14 @@
       <hbm2ddl
         export="false"
         format="true"
-        outputfilename="create_database.sql"
+        outputfilename="create_schema.sql"
       />
       <hbm2ddl
         create="false"
         drop="true"
         export="false"
         format="true"
-        outputfilename="drop_database.sql"
+        outputfilename="drop_schema.sql"
       />
     </hibernatetool>
   </target>
