@@ -38,6 +38,9 @@ public class Library {
    * @hibernate.id
    *   generator-class="sequence"
    *   column="library_id"
+   * @hibernate.generator-param
+   *   name="sequence"
+   *   value="library_id_seq"
    */
   public Integer getLibraryId() {
     return _libraryId;

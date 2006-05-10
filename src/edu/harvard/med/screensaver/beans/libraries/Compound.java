@@ -37,8 +37,11 @@ public class Compound {
 	 * @return Returns the id.
    * 
 	 * @hibernate.id
-	 *   generator-class="sequence"
    *   column="compound_id"
+   *   generator-class="sequence"
+   * @hibernate.generator-param
+   *   name="sequence"
+   *   value="compound_id_seq"
    */
 	public Integer getCompoundId() {
 		return _compoundId;

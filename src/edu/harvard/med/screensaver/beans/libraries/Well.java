@@ -36,6 +36,9 @@ public class Well {
    * @hibernate.id
    *   generator-class="sequence"
    *   column="well_id"
+   * @hibernate.generator-param
+   *   name="sequence"
+   *   value="well_id_seq"
    */
   public Integer getWellId() {
     return _wellId;
