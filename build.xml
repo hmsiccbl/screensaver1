@@ -11,6 +11,7 @@
   <path id="project.classpath">
     <fileset dir="lib">
       <include name="**/*.jar"/>
+      <exclude name="**/unused/**"/>
     </fileset>
   </path>
 
