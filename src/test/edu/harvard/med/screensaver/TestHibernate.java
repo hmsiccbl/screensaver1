@@ -3,10 +3,7 @@
 
 package edu.harvard.med.screensaver;
 
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 import org.hibernate.Session;
 
@@ -35,7 +32,6 @@ public class TestHibernate {
     
     Session session = HibernateSessionFactory.currentSession();
 
-    /*
     //// create a new compound
     session.beginTransaction();
     compound = new Compound();
@@ -43,7 +39,6 @@ public class TestHibernate {
     compound.setSmiles("P");
     session.save(compound);
     session.getTransaction().commit();
-    */
 
     //// look up a compound and modify it
     session.beginTransaction();
