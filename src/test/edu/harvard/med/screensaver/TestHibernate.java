@@ -62,8 +62,6 @@ public class TestHibernate {
     well.setWellName("A01");
     well.setLibrary(library);
     compound.addWell(well);
-    session.save(library);
-    session.save(well);
     session.save(compound);
     session.getTransaction().commit();
     

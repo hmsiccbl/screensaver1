@@ -75,6 +75,7 @@ public class Library {
    * @hibernate.set
    *   lazy="true"
    *   order-by="plate_number,well_name"
+   *   cascade="save-update"
    * @hibernate.collection-key
    *   column="library_id"
    * @hibernate.collection-one-to-many

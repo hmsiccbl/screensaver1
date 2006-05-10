@@ -1,4 +1,4 @@
-// Compound.java
+// src/edu/harvard/med/screensaver/beans/libraries/Compound.java
 // by john sullivan, 2006.05
 
 
@@ -20,13 +20,13 @@ public class Compound {
   
 	private Integer     _compoundId;
   private Integer     _version;
-  private Set<Well>   _wells         = new HashSet<Well>();
+  private Set<Well>   _wells = new HashSet<Well>();
 	private String      _compoundName;
 	private String      _smiles;
   private boolean     _isSalt;
-  private Set<String> _synonyms      = new HashSet<String>();
-  private Set<String> _casNumbers    = new HashSet<String>();
-  private Set<String> _nscNumbers    = new HashSet<String>();
+  private Set<String> _synonyms = new HashSet<String>();
+  private Set<String> _casNumbers = new HashSet<String>();
+  private Set<String> _nscNumbers = new HashSet<String>();
   private String      _pubchemCid;
   private String      _chembankId;
 	
@@ -77,6 +77,7 @@ public class Compound {
    *   inverse="true"
    *   table="well_compound_link"
    *   lazy="true"
+   *   cascade="save-update"
    * @hibernate.collection-key
    *   column="compound_id"
    * @hibernate.collection-many-to-many
@@ -84,7 +85,7 @@ public class Compound {
    *   class="edu.harvard.med.screensaver.beans.libraries.Well"
    */
   public Set<Well> getWells() {
-    return  new HashSet<Well>(_wells);
+    return new HashSet<Well>(_wells);
   }
 
   /**
@@ -120,7 +121,8 @@ public class Compound {
   }
   
   /**
-   * @return Returns the compoundName.
+   * Get the compound name.
+   * @return the compound name
    * 
    * @hibernate.property
    *   type="text"
@@ -132,10 +134,11 @@ public class Compound {
   }
 
   /**
-   * @param name The compoundName to set.
+   * Set the compound name.
+   * @param compoundName the new name of the compound
    */
-  public void setCompoundName(String name) {
-    _compoundName = name;
+  public void setCompoundName(String compoundName) {
+    _compoundName = compoundName;
   }
 
   /**
@@ -190,7 +193,7 @@ public class Compound {
    *   not-null="true"
    */
   public Set<String> getSynonyms() {
-    return  new HashSet<String>(_synonyms);
+    return new HashSet<String>(_synonyms);
   }
 
   /**

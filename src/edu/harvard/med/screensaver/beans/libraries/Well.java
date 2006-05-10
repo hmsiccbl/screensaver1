@@ -73,7 +73,7 @@ public class Well {
    * @hibernate.many-to-one
    *   column="library_id"
    *   class="edu.harvard.med.screensaver.beans.libraries.Library"
-   *   cascade="delete"
+   *   cascade="save-update"
    *   not-null="true"
    */
   public Library getLibrary() {
@@ -95,6 +95,7 @@ public class Well {
    * @hibernate.set
    *   table="well_compound_link"
    *   lazy="true"
+   *   cascade="save-update"
    * @hibernate.collection-key
    *   column="well_id"
    * @hibernate.collection-many-to-many
@@ -127,7 +128,7 @@ public class Well {
     compound.getMutableWells().add(this);
     return _compounds.add(compound);
   }
-  
+
   /**
    * @param compound The compound to remove.
    * @return true iff the compound was removed.
