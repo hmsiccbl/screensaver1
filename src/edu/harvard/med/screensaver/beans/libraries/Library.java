@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.beans.libraries;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,10 +37,11 @@ public class Library {
   private Integer   _endPlate;
   
   
-  // getters and setters
+  // public getters and setters
   
   /**
-   * @return Returns the libraryId.
+   * Get the library id for the library.
+   * @return the library id for the library
    *
    * @hibernate.id
    *   generator-class="sequence"
@@ -53,30 +55,8 @@ public class Library {
   }
 
   /**
-   * @param libraryId The libraryId to set.
-   */
-  public void setLibraryId(Integer libraryId) {
-    _libraryId = libraryId;
-  }
-
-  /**
-   * @return Returns the version.
-   *
-   * @hibernate.version
-   */
-  public Integer getVersion() {
-    return _version;
-  }
-
-  /**
-   * @param version The version to set.
-   */
-  public void setVersion(Integer version) {
-    _version = version;
-  }
-
-  /**
-   * @return Returns the wells.
+   * Get the set of wells for the library.
+   * @return the set of wells for the library
    *
    * @hibernate.set
    *   lazy="true"
@@ -88,25 +68,12 @@ public class Library {
    *   class="edu.harvard.med.screensaver.beans.libraries.Well"
    */
   public Set<Well> getWells() {
-    return new HashSet<Well>(_wells);
+    return Collections.unmodifiableSet(_wells);
   }
 
   /**
-   * @return the actual wells.
-   */
-  protected Set<Well> getMutableWells() {
-    return _wells;
-  }
-  
-  /**
-   * @param wells The wells to set.
-   */
-  protected void setWells(Set<Well> wells) {
-    _wells = wells;
-  }
-
-  /**
-   * @return Returns the libraryName.
+   * Get the name of the library.
+   * @return the name of the library
    *
    * @hibernate.property
    *   type="text"
@@ -117,14 +84,16 @@ public class Library {
   }
 
   /**
-   * @param name The libraryName to set.
+   * Set the name of the library.
+   * @param name the new name for the library
    */
   public void setLibraryName(String name) {
     _libraryName = name;
   }
 
   /**
-   * @return Returns the shortName.
+   * Get the short name of the library.
+   * @return the short name of the library
    *
    * @hibernate.property
    *   type="text"
@@ -135,14 +104,16 @@ public class Library {
   }
 
   /**
-   * @param shortName The shortName to set.
+   * Set the short name of the library.
+   * @param shortName the new short name of the library
    */
   public void setShortName(String shortName) {
     _shortName = shortName;
   }
 
   /**
-   * @return Returns the description.
+   * Get the library description.
+   * @return the library description
    *
    * @hibernate.property
    *   type="text"
@@ -152,14 +123,16 @@ public class Library {
   }
   
   /**
-   * @param description The description to set.
+   * Set the library description.
+   * @param description the new library description
    */
   public void setDescription(String description) {
     _description = description;
   }
   
   /**
-   * @return Returns the vendor.
+   * Get the library vendor.
+   * @return the library vendor
    *
    * @hibernate.property
    *   type="text"
@@ -169,14 +142,16 @@ public class Library {
   }
 
   /**
-   * @param vendor The vendor to set.
+   * Set the library vendor.
+   * @param vendor the new library vendor
    */
   public void setVendor(String vendor) {
     _vendor = vendor;
   }
 
   /**
-   * @return Returns the libraryType.
+   * Get the library type.
+   * @return the library type
    *
    * @hibernate.property
    *   type="text"
@@ -187,14 +162,16 @@ public class Library {
   }
 
   /**
-   * @param library_type The libraryType to set.
+   * Set the library type.
+   * @param library_type the new library type
    */
   public void setLibraryType(String library_type) {
     _libraryType = library_type;
   }
 
   /**
-   * @return Returns the startPlate.
+   * Get the library start plate.
+   * @return the library start plate
    *
    * @hibernate.property
    *   not-null="true"
@@ -204,14 +181,16 @@ public class Library {
   }
 
   /**
-   * @param startPlate The startPlate to set.
+   * Set the library start plate.
+   * @param startPlate the new library start plate
    */
   public void setStartPlate(Integer startPlate) {
     _startPlate = startPlate;
   }
 
   /**
-   * @return Returns the endPlate.
+   * Get the library end plate.
+   * @return Returns the library end plate
    *
    * @hibernate.property
    *   not-null="true"
@@ -221,9 +200,69 @@ public class Library {
   }
   
   /**
-   * @param endPlate The endPlate to set.
+   * Set the library end plate.
+   * @param endPlate the new library end plate
    */
   public void setEndPlate(Integer endPlate) {
     _endPlate = endPlate;
+  }
+
+  
+  // protected getters and setters
+  
+  /**
+   * Get the modifiable set of wells.
+   * @return     the modifiable set of wells
+   * @motivation allow efficient maintenance of the bi-directional relationship
+   *             between {@link Library} and {@link Well}.
+   */
+  protected Set<Well> getModifiableWellSet() {
+    return _wells;
+  }
+
+  // private getters and setters
+  
+  /**
+   * Set the library id for the library.
+   * @param libraryId the new library id for the library
+   * @motivation      for hibernate
+   */
+  private void setLibraryId(Integer libraryId) {
+    _libraryId = libraryId;
+  }
+
+  /**
+   * Get the version of the library.
+   * @return     the version of the library
+   * @motivation for hibernate
+   *
+   * @hibernate.version
+   */
+  private Integer getVersion() {
+    return _version;
+  }
+
+  /**
+   * Set the version of the library
+   * @param version the new version of the library
+   * @motivation    for hibernate
+   */
+  private void setVersion(Integer version) {
+    _version = version;
+  }
+
+  /**
+   * Set the set of wells for the library.
+   * @param wells the new set of wells for the library
+   * @motivation  for hibernate
+   * @motivation  hibernate actually calls this method with the result of
+   *              {@link #getWells}, which, for purposes of a coherent public
+   *              API for the bean, returns an unmodifiable set. we must in
+   *              turn recast the set into a modifiable set, so that further
+   *              calls to {@link #addWell} and {@link #removeWell} function
+   *              properly.
+   */
+  private void setWells(Set<Well> wells) {
+    _wells = new HashSet<Well>(wells);
   }
 }

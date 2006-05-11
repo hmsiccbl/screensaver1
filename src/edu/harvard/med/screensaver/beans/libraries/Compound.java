@@ -7,9 +7,9 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-
 package edu.harvard.med.screensaver.beans.libraries;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,8 +20,8 @@ import java.util.Set;
  * @author john sullivan
  * @hibernate.class
  */
-public class Compound {
-
+public class Compound
+{
   
   // instance fields
   
@@ -38,10 +38,11 @@ public class Compound {
   private String      _chembankId;
 	
   
-  // getters and setters
+  // public getters and setters
   
 	/**
-	 * @return Returns the id.
+   * Get the compound id for the compound.
+	 * @return the compound id for the compound
    * 
 	 * @hibernate.id
    *   column="compound_id"
@@ -55,30 +56,8 @@ public class Compound {
 	}
   
   /**
-   * @param compoundId The compoundId to set.
-   */
-  public void setCompoundId(Integer compoundId) {
-    _compoundId = compoundId;
-  }
-
-  /**
-   * @return Returns the version.
-   *
-   * @hibernate.version
-   */
-  public Integer getVersion() {
-    return _version;
-  }
-
-  /**
-   * @param version The version to set.
-   */
-  public void setVersion(Integer version) {
-    _version = version;
-  }
-
-  /**
-   * @return Returns the wells.
+   * Get the set of wells that contain this compound.
+   * @return the set of wells that contain this compound
    *
    * @hibernate.set
    *   inverse="true"
@@ -92,49 +71,38 @@ public class Compound {
    *   class="edu.harvard.med.screensaver.beans.libraries.Well"
    */
   public Set<Well> getWells() {
-    return new HashSet<Well>(_wells);
+    return Collections.unmodifiableSet(_wells);
   }
 
   /**
-   * @return The actual set of wells.
-   */
-  protected Set<Well> getMutableWells() {
-    return _wells;
-  }
-  
-  /**
-   * @param wells The wells to set.
-   */
-  protected void setWells(Set<Well> wells) {
-    _wells = wells;
-  }
-
-  /**
-   * @param well The well to add.
-   * @return true if wells did not already contain the specified well.
+   * Add this compound to a well.
+   * @param well the well to add this compound to
+   * @return     true iff the compound was not already contained in the well
    */
   public boolean addWell(Well well) {
-    well.getMutableCompounds().add(this);
+    well.getModifiableCompoundSet().add(this);
     return _wells.add(well);
   }
   
   /**
-   * @param well The well to remove.
-   * @return true if wells contained the specified well.
+   * Remove this compound from a well.
+   * @param well the well to remove this compound from
+   * @return     true iff the compound was previously contained in the well
    */
   public boolean removeWell(Well well) {
-    well.getMutableCompounds().remove(this);
+    well.getModifiableCompoundSet().remove(this);
     return _wells.remove(well);
   }
   
   /**
-   * Get the compound name.
+   * Get the compound name
    * @return the compound name
    * 
    * @hibernate.property
    *   type="text"
    *   not-null="true"
    *   unique="true"
+   *   column="compound_name"
    */
   public String getCompoundName() {
     return _compoundName;
@@ -142,14 +110,15 @@ public class Compound {
 
   /**
    * Set the compound name.
-   * @param compoundName the new name of the compound
+   * @param compoundName the new name for the compound
    */
   public void setCompoundName(String compoundName) {
     _compoundName = compoundName;
   }
 
   /**
-   * @return Returns the smiles.
+   * Get the SMILES string for the compound.
+   * @return the SMILES string for the compound
    * 
    * @hibernate.property
    *   type="text"
@@ -160,14 +129,16 @@ public class Compound {
   }
 
   /**
-   * @param smiles The smiles to set.
+   * Set the SMILES string for the compound.
+   * @param smiles the new SMILES string for the compound
    */
   public void setSmiles(String smiles) {
     _smiles = smiles;
   }
 
   /**
-   * @return Returns the isSalt.
+   * Get the saltiness of the compound.
+   * @return true iff the compound is a salt
    * 
    * @hibernate.property
    *   column="is_salt"
@@ -178,14 +149,16 @@ public class Compound {
   }
 
   /**
-   * @param isSalt The isSalt to set.
+   * Set the saltiness of the compound.
+   * @param isSalt the new saltiness for the compound
    */
   public void setSalt(boolean isSalt) {
     _isSalt = isSalt;
   }
 
   /**
-   * @return Returns the synonyms.
+   * Get the set of synonyms for the compound.
+   * @return the set of synonyms for the compound
    *
    * @hibernate.set
    *   order-by="synonym"
@@ -200,34 +173,30 @@ public class Compound {
    *   not-null="true"
    */
   public Set<String> getSynonyms() {
-    return new HashSet<String>(_synonyms);
+    return Collections.unmodifiableSet(_synonyms);
   }
 
   /**
-   * @param synonyms The synonyms to set.
-   */
-  protected void setSynonyms(Set<String> synonyms) {
-    _synonyms = synonyms;
-  }
-
-  /**
-   * @param synonym The synonym to add.
-   * @return true if the synonym did not already exist.
+   * Add a synonym for the compound.
+   * @param synonym the synonym to add to the compound
+   * @return        true iff the compound did not already have the synonym
    */
   public boolean addSynonym(String synonym) {
     return _synonyms.add(synonym);
   }
 
   /**
-   * @param synonym The synonym to remove.
-   * @return true if the synonym existed.
+   * Remove a synonym from the compound.
+   * @param synonym the synonym to remove from the compound
+   * @return        true iff the compound previously had the synonym
    */
   public boolean removeSynonym(String synonym) {
     return _synonyms.remove(synonym);
   }
 
   /**
-   * @return Returns the casNumber.
+   * Get the set of CAS numbers for the compound.
+   * @return the set of CAS numbers for the compound
    * 
    * @hibernate.set
    *   order-by="cas_number"
@@ -242,34 +211,30 @@ public class Compound {
    *   not-null="true"
    */
   public Set<String> getCasNumbers() {
-    return  new HashSet<String>(_casNumbers);
+    return Collections.unmodifiableSet(_casNumbers);
   }
 
   /**
-   * @param casNumber The casNumber to set.
-   */
-  protected void setCasNumbers(Set<String> casNumber) {
-    _casNumbers = casNumber;
-  }
-
-  /**
-   * @param casNumber The casNumber to add.
-   * @return true iff the casNumber was added.
+   * Add a CAS number to the compound.
+   * @param casNumber the CAS number to add to the compound
+   * @return          true iff the compound did not already have the CAS number
    */
   public boolean addCasNumber(String casNumber) {
     return _casNumbers.add(casNumber);
   }
 
   /**
-   * @param casNumber The casNumber to remove.
-   * @return true iff the casNumber was removed.
+   * Remove a CAS number from the compound.
+   * @param casNumber the CAS number to remove from the compound
+   * @return          true iff the compound previously had the CAS number
    */
-  public boolean removeCasNumber(Object casNumber) {
+  public boolean removeCasNumber(String casNumber) {
     return _casNumbers.remove(casNumber);
   }
 
   /**
-   * @return Returns the nscNumber.
+   * Get the set of NSC numbers for the compound.
+   * @return the set of NSC numbers for the compound
    * 
    * @hibernate.set
    *   order-by="nsc_number"
@@ -284,59 +249,62 @@ public class Compound {
    *   not-null="true"
    */
   public Set<String> getNscNumbers() {
-    return new HashSet<String>(_nscNumbers);
+    return Collections.unmodifiableSet(_nscNumbers);
   }
 
   /**
-   * @param nscNumber The nscNumber to set.
-   */
-  protected void setNscNumbers(Set<String> nscNumber) {
-    _nscNumbers = nscNumber;
-  }
-
-  /**
-   * @param nscNumber The nscNumber to add.
-   * @return true iff the nscNumebr was added.
+   * Add an NSC number to the compound.
+   * @param nscNumber the NSC number to add to the compound
+   * @return          true iff the compound did not already have the NSC number
    */
   public boolean addNscNumber(String nscNumber) {
     return _nscNumbers.add(nscNumber);
   }
   
   /**
-   * @param nscNumber The nscNumber to remove.
-   * @return true iff the nscNumber was removed.
+   * Remove an NSC number from the compound.
+   * @param nscNumber the NSC number to remove from the compound
+   * @return          true iff the compound previously had the NSC number
    */
   public boolean removeNscNumber(String nscNumber) {
     return _nscNumbers.remove(nscNumber);
   }
 
   /**
-   * @return Returns the pubchemCid.
+   * Get the PubChem CID for the compound.
+   * @return the PubChem CID for the compound
+   *  
    * @hibernate.property
    *   type="text"
+   *   column="pubchem_cid"
    */
   public String getPubchemCid() {
     return _pubchemCid;
   }
 
   /**
-   * @param pubchemCid The pubchemCid to set.
+   * Set the PubChem CID for the compound.
+   * @param pubchemCid the new PubChem CID for the compound
    */
   public void setPubchemCid(String pubchemCid) {
     _pubchemCid = pubchemCid;
   }
 
   /**
-   * @return Returns the chembankId.
+   * Get the ChemBank ID for the compound.
+   * @return the ChemBank ID for the compound
+   * 
    * @hibernate.property
    *   type="text"
+   *   column="chembank_id"
    */
   public String getChembankId() {
     return _chembankId;
   }
   
   /**
-   * @param chembankId The chembankId to set.
+   * Set the ChemBank ID for the compound.
+   * @param chembankId the new ChemBank ID for the compound
    */
   public void setChembankId(String chembankId) {
     _chembankId = chembankId;
@@ -364,5 +332,110 @@ public class Compound {
   @Override
   public int hashCode() {
     return getCompoundName().hashCode();
+  }
+
+  
+  // protected getters and setters
+
+  /**
+   * Get the modifiable set of wells.
+   * @return     the modifiable set of wells
+   * @motivation allow efficient maintenance of the bi-directional relationship
+   *             between {@link Compound} and {@link Well}.
+   */
+  protected Set<Well> getModifiableWellSet() {
+    return _wells;
+  }
+
+  
+  // private getters and setters
+
+  /**
+   * Set the compound id for the compound.
+   * @param compoundId the new compound id for the compound
+   * @motivation       for hibernate
+   */
+  private void setCompoundId(Integer compoundId) {
+    _compoundId = compoundId;
+  }
+
+  /**
+   * Get the version number of the compound.
+   * @return     the version number of the compound
+   * @motivation for hibernate
+   *
+   * @hibernate.version
+   */
+  private Integer getVersion() {
+    return _version;
+  }
+
+  /**
+   * Set the version number of the compound.
+   * @param version the new version number for the compound
+   * @motivation    for hibernate
+   */
+  private void setVersion(Integer version) {
+    _version = version;
+  }
+
+  /**
+   * Set the set of wells that contain this compound.
+   * @param wells the new set of wells that contain this compound
+   * @motivation  for hibernate
+   * @motivation  hibernate actually calls this method with the result of
+   *              {@link #getWells}, which, for purposes of a coherent public
+   *              API for the bean, returns an unmodifiable set. we must in
+   *              turn recast the set into a modifiable set, so that further
+   *              calls to {@link #addWell} and {@link #removeWell} function
+   *              properly.
+   */
+  private void setWells(Set<Well> wells) {
+    _wells = new HashSet<Well>(wells);
+  }
+
+  /**
+   * Set the set of synonyms for the compound.
+   * @param synonyms the new set of synonyms for the compound
+   * @motivation     for hibernate
+   * @motivation     hibernate actually calls this method with the result of
+   *                 {@link #getSynonyms}, which, for purposes of a coherent
+   *                 public API for the bean, returns an unmodifiable set. we
+   *                 must in turn recast the set into a modifiable set, so that
+   *                 further calls to {@link #addSynonym} and
+   *                 {@link #removeSynonym} function properly.
+   */
+  private void setSynonyms(Set<String> synonyms) {
+    _synonyms = new HashSet<String>(synonyms);
+  }
+
+  /**
+   * Set the set of CAS numbers for the compound.
+   * @param casNumber the new set of CAS numbers for the compound
+   * @motivation      for hibernate
+   * @motivation      hibernate actually calls this method with the result of
+   *                  {@link #getCasNumbers}, which, for purposes of a coherent
+   *                  public API for the bean, returns an unmodifiable set. we
+   *                  must in turn recast the set into a modifiable set, so that
+   *                  further calls to {@link #addCasNumber} and
+   *                  {@link #removeCasNumber} function properly.
+   */
+  private void setCasNumbers(Set<String> casNumber) {
+    _casNumbers = new HashSet<String>(casNumber);
+  }
+
+  /**
+   * Set the set of NSC numbers for the compound.
+   * @param nscNumber the new set of NSC numbers for the compound
+   * @motivation      for hibernate
+   * @motivation      hibernate actually calls this method with the result of
+   *                  {@link #getNscNumbers}, which, for purposes of a coherent
+   *                  public API for the bean, returns an unmodifiable set. we
+   *                  must in turn recast the set into a modifiable set, so that
+   *                  further calls to {@link #addNscNumber} and
+   *                  {@link #removeNscNumber} function properly.
+   */
+  private void setNscNumbers(Set<String> nscNumber) {
+    _nscNumbers = new HashSet<String>(nscNumber);
   }
 }

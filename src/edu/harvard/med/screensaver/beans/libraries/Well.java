@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.beans.libraries;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,10 +35,11 @@ public class Well {
   private String        _vendorIdentifier;
   
   
-  // getters and setters
+  // public getters and setters
   
   /**
-   * @return Returns the wellId.
+   * Get the well id for the well.
+   * @return the well id for the well
    *
    * @hibernate.id
    *   generator-class="sequence"
@@ -51,30 +53,8 @@ public class Well {
   }
 
   /**
-   * @param wellId The wellId to set.
-   */
-  public void setWellId(Integer wellId) {
-    _wellId = wellId;
-  }
-
-  /**
-   * @return Returns the version.
-   *
-   * @hibernate.version
-   */
-  public Integer getVersion() {
-    return _version;
-  }
-
-  /**
-   * @param version The version to set.
-   */
-  public void setVersion(Integer version) {
-    _version = version;
-  }
-
-  /**
-   * @return Returns the library.
+   * Get the library the well is in.
+   * @return the library the well is in
    *
    * @hibernate.many-to-one
    *   column="library_id"
@@ -87,16 +67,20 @@ public class Well {
   }
 
   /**
-   * @param library The library to set.
+   * Set the library the well is in.
+   * @param library the new library for the well
    */
   public void setLibrary(Library library) {
-    library.getMutableWells().add(this);
-    library.getMutableWells().remove(this);
+    library.getModifiableWellSet().add(this);
+    if (_library != null) {
+      _library.getModifiableWellSet().remove(this);
+    }
     _library = library;
   }
 
   /**
-   * @return Returns the compounds.
+   * Get the set of compounds contained in the well.
+   * @return the set of compounds contained in the well
    *
    * @hibernate.set
    *   table="well_compound_link"
@@ -109,43 +93,32 @@ public class Well {
    *   class="edu.harvard.med.screensaver.beans.libraries.Compound"
    */
   public Set<Compound> getCompounds() {
-    return new HashSet<Compound>(_compounds);
+    return Collections.unmodifiableSet(_compounds);
   }
 
   /**
-   * @return The actual set of compounds.
-   */
-  protected Set<Compound> getMutableCompounds() {
-    return _compounds;
-  }
-  
-  /**
-   * @param compounds The compounds to set.
-   */
-  protected void setCompounds(Set<Compound> compounds) {
-    _compounds = compounds;
-  }
-
-  /**
-   * @param compound The compound to add.
-   * @return true iff the compound was added.
+   * Add the compound to the well.
+   * @param compound the compound to add to the well
+   * @return         true iff the compound was not already in the well
    */
   public boolean addCompound(Compound compound) {
-    compound.getMutableWells().add(this);
+    compound.getModifiableWellSet().add(this);
     return _compounds.add(compound);
   }
 
   /**
-   * @param compound The compound to remove.
-   * @return true iff the compound was removed.
+   * Remove the compound from the well.
+   * @param compound the compound to remove from the well
+   * @return         true iff the compound was previously in the well
    */
   public boolean removeCompound(Compound compound) {
-    compound.getMutableWells().remove(this);
+    compound.getModifiableWellSet().remove(this);
     return _compounds.remove(compound);
   }
   
   /**
-   * @return Returns the plateNumber.
+   * Get the plate number for the well.
+   * @return the plate number for the well
    *
    * @hibernate.property
    *   not-null="true"
@@ -155,14 +128,16 @@ public class Well {
   }
 
   /**
-   * @param plateNumber The plateNumber to set.
+   * Set the plate number for the well.
+   * @param plateNumber the new plate number for the well
    */
   public void setPlateNumber(Integer plateNumber) {
     _plateNumber = plateNumber;
   }
 
   /**
-   * @return Returns the wellName.
+   * Get the well name for the well.
+   * @return the well name for the well
    *
    * @hibernate.property
    *   type="text"
@@ -173,14 +148,16 @@ public class Well {
   }
 
   /**
-   * @param wellName The wellName to set.
+   * Set the well name for the well.
+   * @param wellName the new well name for the well
    */
   public void setWellName(String wellName) {
     _wellName = wellName;
   }
 
   /**
-   * @return Returns the iccbNumber.
+   * Get the ICCB number for the well.
+   * @return the ICCB number for the well
    *
    * @hibernate.property
    *   type="text"
@@ -190,14 +167,16 @@ public class Well {
   }
   
   /**
-   * @param iccbNumber The iccbNumber to set.
+   * Set the ICCB number for the well.
+   * @param iccbNumber The new ICCB number for the well
    */
   public void setIccbNumber(String iccbNumber) {
     _iccbNumber = iccbNumber;
   }
   
   /**
-   * @return Returns the vendorIdentifier.
+   * Get the vendor identifier for the well.
+   * @return the vendor identifier for the well
    *
    * @hibernate.property
    *   type="text"
@@ -207,7 +186,8 @@ public class Well {
   }
   
   /**
-   * @param vendorIdentifier The vendorIdentifier to set.
+   * Set the vendor identifier for the well.
+   * @param vendorIdentifier the new vendor identifier for the well
    */
   public void setVendorIdentifier(String vendorIdentifier) {
     _vendorIdentifier = vendorIdentifier;
@@ -236,5 +216,65 @@ public class Well {
   @Override
   public int hashCode() {
     return getPlateNumber().hashCode() + getWellName().hashCode();
+  }
+
+  
+  // protected getters and setters
+  
+  /**
+   * Get the modifiable set of compounds.
+   * @return the modifiable set of compounds
+   * @motivation allow efficient maintenance of the bi-directional relationship
+   *             between {@link Compound} and {@link Well}.
+   */
+  protected Set<Compound> getModifiableCompoundSet() {
+    return _compounds;
+  }
+
+  
+  // private getters and setters
+  
+  /**
+   * Set the well id for the well.
+   * @param wellId the new well id for the well
+   * @motivation   for hibernate
+   */
+  private void setWellId(Integer wellId) {
+    _wellId = wellId;
+  }
+
+  /**
+   * Get the version of the well.
+   * @return     the version of the well
+   * @motivation for hibernate
+   *
+   * @hibernate.version
+   */
+  private Integer getVersion() {
+    return _version;
+  }
+
+  /**
+   * Set the version of the well.
+   * @param version the new version of the well
+   * @motivation    for hibernate
+   */
+  private void setVersion(Integer version) {
+    _version = version;
+  }
+
+  /**
+   * Set the set of compounds contained in the well.
+   * @param compounds the new set of compounds contained in the well
+   * @motivation      for hibernate
+   * @motivation      hibernate actually calls this method with the result of
+   *                  {@link #getCompounds}, which, for purposes of a coherent
+   *                  public API for the bean, returns an unmodifiable set. we
+   *                  must in turn recast the set into a modifiable set, so that
+   *                  further calls to {@link #addCompound} and
+   *                  {@link #removeCompound} function properly.
+   */
+  private void setCompounds(Set<Compound> compounds) {
+    _compounds = compounds;
   }  
 }
