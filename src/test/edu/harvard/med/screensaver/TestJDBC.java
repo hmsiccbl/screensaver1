@@ -15,7 +15,7 @@ import java.util.Properties;
 
 /**
  * A basic standalone test for postgres connectivity.
- * @author s
+ * @author john sullivan
  */
 public class TestJDBC {
 
