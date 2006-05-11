@@ -69,6 +69,7 @@ public class Compound
    * @hibernate.collection-many-to-many
    *   column="well_id"
    *   class="edu.harvard.med.screensaver.beans.libraries.Well"
+   *   foreign-key="fk_well_compound_link_to_compound"
    */
   public Set<Well> getWells() {
     return Collections.unmodifiableSet(_wells);
@@ -167,6 +168,7 @@ public class Compound
    *   lazy="true"
    * @hibernate.collection-key
    *   column="compound_id"
+   *   foreign-key="fk_compound_synonym_to_compound"
    * @hibernate.collection-element
    *   type="text"
    *   column="synonym"
@@ -205,6 +207,7 @@ public class Compound
    *   lazy="true"
    * @hibernate.collection-key
    *   column="compound_id"
+   *   foreign-key="fk_compound_cas_number_to_compound"
    * @hibernate.collection-element
    *   type="text"
    *   column="cas_number"
@@ -243,6 +246,7 @@ public class Compound
    *   laxy="true"
    * @hibernate.collection-key
    *   column="compound_id"
+   *   foreign-key="fk_compound_nsc_number_to_compound"
    * @hibernate.collection-element
    *   type="text"
    *   column="nsc_number"

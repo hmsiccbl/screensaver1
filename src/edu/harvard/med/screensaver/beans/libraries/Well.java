@@ -61,6 +61,7 @@ public class Well {
    *   class="edu.harvard.med.screensaver.beans.libraries.Library"
    *   cascade="save-update"
    *   not-null="true"
+   *   foreign-key="fk_well_to_library"
    */
   public Library getLibrary() {
     return _library;
@@ -91,6 +92,7 @@ public class Well {
    * @hibernate.collection-many-to-many
    *   column="compound_id"
    *   class="edu.harvard.med.screensaver.beans.libraries.Compound"
+   *   foreign-key="fk_well_compound_link_to_well"
    */
   public Set<Compound> getCompounds() {
     return Collections.unmodifiableSet(_compounds);
