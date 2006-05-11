@@ -78,7 +78,6 @@ public class TestHibernate {
     while (compounds.hasNext()) {
       compound = compounds.next();
       System.out.println("compoundId:   " + compound.getCompoundId());
-      System.out.println("version:      " + compound.getVersion());
       System.out.println("compoundName: " + compound.getCompoundName());
       System.out.println("smiles:       " + compound.getSmiles());
       wells = compound.getWells().iterator();
