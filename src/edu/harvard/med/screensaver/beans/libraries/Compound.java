@@ -1,5 +1,5 @@
-// src/edu/harvard/med/screensaver/beans/libraries/Compound.java
-// by john sullivan, 2006.05
+// $HeadUrl$
+// $Id$
 
 
 package edu.harvard.med.screensaver.beans.libraries;
