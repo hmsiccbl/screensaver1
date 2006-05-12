@@ -1,7 +1,7 @@
 // $HeadURL$
 // $Id$
 //
-// Copyright © 2006 by the President and Fellows of Harvard College.
+// Copyright 2006 by the President and Fellows of Harvard College.
 // 
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
@@ -76,6 +76,7 @@ public class Library {
    * @return the name of the library
    *
    * @hibernate.property
+   *   column="library_name"
    *   type="text"
    *   not-null="true"
    */
@@ -96,6 +97,7 @@ public class Library {
    * @return the short name of the library
    *
    * @hibernate.property
+   *   column="short_name"
    *   type="text"
    *   not-null="true"
    */
@@ -154,6 +156,7 @@ public class Library {
    * @return the library type
    *
    * @hibernate.property
+   *   column="library_type"
    *   type="text"
    *   not-null="true"
    */
@@ -174,6 +177,7 @@ public class Library {
    * @return the library start plate
    *
    * @hibernate.property
+   *   column="start_plate"
    *   not-null="true"
    */
   public Integer getStartPlate() {
@@ -193,6 +197,7 @@ public class Library {
    * @return Returns the library end plate
    *
    * @hibernate.property
+   *   column="end_plate"
    *   not-null="true"
    */
   public Integer getEndPlate() {
