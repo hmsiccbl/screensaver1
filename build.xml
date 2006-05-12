@@ -18,29 +18,29 @@
   <description>
     A build.xml for Screensaver 1.xx
   </description>
-	
-	<!-- properties -->
-	
-	<property name="war" value="build/screensaver.war"/>
-	<property name="deploy.dir" value="/usr/local/jakarta-tomcat/webapps/"/>
-	<property name="war.build.dir" location="build/war/"/>
-	
+  
+  <!-- properties -->
+  
+  <property name="war" value="build/screensaver.war"/>
+  <property name="deploy.dir" value="/usr/local/jakarta-tomcat/webapps/"/>
+  <property name="war.build.dir" location="build/war/"/>
+  
 
-	<!-- patterns sets -->
-	
+  <!-- patterns sets -->
+  
   <fileset
-  	dir="lib" 
-  	id="lib.used"
+    dir="lib" 
+    id="lib.used"
   >
     <include name="**/*.jar"/>
     <exclude name="**/unused/**"/>
   </fileset>
 
 
-	<!-- classpaths -->
+  <!-- classpaths -->
     
   <path id="project.classpath">
-  	<fileset refid="lib.used"/>
+    <fileset refid="lib.used"/>
   </path>
 
   <path id="ddl.classpath">
@@ -49,65 +49,65 @@
   </path>
 
 
-	<!-- build and deploy -->
+  <!-- build and deploy -->
   
   <target
-  	name="deploy"
-  	depends="compile"
+    name="deploy"
+    depends="compile"
   >
     <description>
       Deploy Screensaver to the application server.
       Currently unimplemented.
     </description>
-		<antcall target="exploded.war">
-  		<param name="exploded.war.dir" location="${deploy.dir}"/>
-		</antcall>
- 	</target>
+    <antcall target="exploded.war">
+      <param name="exploded.war.dir" location="${deploy.dir}"/>
+    </antcall>
+  </target>
 
   <target
-  	name="war"
-  	depends="compile"
+    name="war"
+    depends="compile"
   >
     <description>
       Build Screensaver into a Web ARchive file.
     </description>
-		<antcall target="exploded.war">
-  		<param name="exploded.war.dir" location="${war.build.dir}"/>
-		</antcall>
+    <antcall target="exploded.war">
+      <param name="exploded.war.dir" location="${war.build.dir}"/>
+    </antcall>
     <jar
-	    destfile="${war}"
-    	basedir="${war.build.dir}"
-  	/>
+      destfile="${war}"
+      basedir="${war.build.dir}"
+    />
   </target>
   
- 	<target name="exploded.war">
+  <target name="exploded.war">
     <description>
       Generate exploded Web ARchive directory structure for the Screensaver web application.
-    	Used to 1) create a WAR file, and 2) deploy exploded WAR file to application server.
+      Used to 1) create a WAR file, and 2) deploy exploded WAR file to application server.
     </description>
-  	<mkdir dir="${exploded.war.dir}/WEB-INF"/>
-  	<mkdir dir="${exploded.war.dir}/META-INF"/>
-  	<copy file="web/web.xml" todir="${exploded.war.dir}/WEB-INF"/>
-  	<!-- TODO: upper case "manifest.mf" file name -->
-  	<copy file="web/manifest.mf" todir="${exploded.war.dir}/META-INF"/>
-  	<copy todir="${exploded.war.dir}/WEB-INF/jsp">
-  		<fileset dir="jsp"/>
-		</copy>	
-  	<copy todir="${exploded.war.dir}/WEB-INF/classes">
-  		<fileset dir="classes"/>
-  		<fileset dir="resources"/>
-		</copy>	
-  	<copy
-  		todir="${exploded.war.dir}/WEB-INF/lib"
-  		flatten="true">
-  		<fileset refid="lib.used"/>
-		</copy>	
-  	<copy todir="${exploded.war.dir}/WEB-INF/taglib">
-  		<fileset dir="web/taglib"/>
-		</copy>	
+    <mkdir dir="${exploded.war.dir}/WEB-INF"/>
+    <mkdir dir="${exploded.war.dir}/META-INF"/>
+    <copy file="web/web.xml" todir="${exploded.war.dir}/WEB-INF"/>
+    <!-- TODO: upper case "manifest.mf" file name -->
+    <copy file="web/manifest.mf" todir="${exploded.war.dir}/META-INF"/>
+    <copy todir="${exploded.war.dir}/WEB-INF/jsp">
+      <fileset dir="jsp"/>
+    </copy> 
+    <copy todir="${exploded.war.dir}/WEB-INF/classes">
+      <fileset dir="classes"/>
+      <fileset dir="resources"/>
+    </copy> 
+    <copy
+      todir="${exploded.war.dir}/WEB-INF/lib"
+      flatten="true">
+      <fileset refid="lib.used"/>
+    </copy> 
+    <copy todir="${exploded.war.dir}/WEB-INF/taglib">
+      <fileset dir="web/taglib"/>
+    </copy> 
   </target>
 
- 	<target
+  <target
     name="compile"
     depends="hbm_xml"
     description="Compiles Java source code"
@@ -127,11 +127,11 @@
     name="hbm_xml"
     description="Generate hibernate.cfg.xml and .hbm.xml files"
   >
-	  <taskdef
-	    name="hibernatedoclet"
-	    classname="xdoclet.modules.hibernate.HibernateDocletTask"
-	    classpathref="project.classpath"
-	  />
+    <taskdef
+      name="hibernatedoclet"
+      classname="xdoclet.modules.hibernate.HibernateDocletTask"
+      classpathref="project.classpath"
+    />
     <hibernatedoclet
       destdir="resources"
       excludedtags="@version,@author,@todo"
@@ -154,7 +154,7 @@
 
 
   <!-- generate ddl -->
-	
+  
   <target name="ddl" depends="hbm_xml">
     <description>
       Generate the DDL from the beans classes and associated hbm.xml files
@@ -166,7 +166,7 @@
     />
     <hibernatetool destdir="sql">
       <configuration
-   	    configurationfile="resources/hibernate.cfg.xml"
+        configurationfile="resources/hibernate.cfg.xml"
         namingstrategy="org.hibernate.cfg.ImprovedNamingStrategy"
       />
       <hbm2ddl
