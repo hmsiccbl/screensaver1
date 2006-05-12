@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.beans;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.cfg.ImprovedNamingStrategy;
 
 
 /**
@@ -32,7 +33,7 @@ public class HibernateSessionFactory
     new ThreadLocal<Session>();
 
   /** The single instance of hibernate configuration */
-  private static final Configuration configuration = new Configuration();
+  private static final Configuration configuration = buildConfiguration();
 
   /** The single instance of hibernate SessionFactory */
   private static org.hibernate.SessionFactory sessionFactory;
@@ -78,6 +79,12 @@ public class HibernateSessionFactory
     }
   }
 
+  private static Configuration buildConfiguration() {
+    Configuration configuration = new Configuration();
+    configuration.setNamingStrategy(ImprovedNamingStrategy.INSTANCE);
+    return configuration;
+  }
+  
   
   // private constructor
   
