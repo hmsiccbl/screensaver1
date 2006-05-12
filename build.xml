@@ -10,19 +10,37 @@
   the GNU General Public License.
 -->
 
-<project name="Screensaver" default="deploy" basedir=".">
+<project
+  name="Screensaver"
+  default="deploy"
+  basedir="."
+>
   <description>
     A build.xml for Screensaver 1.xx
   </description>
+	
+	<!-- properties -->
+	
+	<property name="war" value="build/screensaver.war"/>
+	<property name="deploy.dir" value="/usr/local/jakarta-tomcat/webapps/"/>
+	<property name="war.build.dir" location="build/war/"/>
+	
+
+	<!-- patterns sets -->
+	
+  <fileset
+  	dir="lib" 
+  	id="lib.used"
+  >
+    <include name="**/*.jar"/>
+    <exclude name="**/unused/**"/>
+  </fileset>
 
 
 	<!-- classpaths -->
     
   <path id="project.classpath">
-    <fileset dir="lib">
-      <include name="**/*.jar"/>
-      <exclude name="**/unused/**"/>
-    </fileset>
+  	<fileset refid="lib.used"/>
   </path>
 
   <path id="ddl.classpath">
@@ -33,37 +51,76 @@
 
 	<!-- build and deploy -->
   
-  <target name="deploy" depends="war">
+  <target
+  	name="deploy"
+  	depends="compile"
+  >
     <description>
       Deploy Screensaver to the application server.
       Currently unimplemented.
     </description>
-  </target>
-  
-  <target name="war">
-    <description>
-      Build Screensaver into a Web ARchive.
-      Currently unimplemented.
-    </description>
-  </target>
-  
+		<antcall target="exploded.war">
+  		<param name="exploded.war.dir" location="${deploy.dir}"/>
+		</antcall>
+ 	</target>
+
   <target
-    name="jar"
+  	name="war"
+  	depends="compile"
+  >
+    <description>
+      Build Screensaver into a Web ARchive file.
+    </description>
+		<antcall target="exploded.war">
+  		<param name="exploded.war.dir" location="${war.build.dir}"/>
+		</antcall>
+    <jar
+	    destfile="${war}"
+    	basedir="${war.build.dir}"
+  	/>
+  </target>
+  
+ 	<target name="exploded.war">
+    <description>
+      Generate exploded Web ARchive directory structure for the Screensaver web application.
+    	Used to 1) create a WAR file, and 2) deploy exploded WAR file to application server.
+    </description>
+  	<mkdir dir="${exploded.war.dir}/WEB-INF"/>
+  	<mkdir dir="${exploded.war.dir}/META-INF"/>
+  	<copy file="web/web.xml" todir="${exploded.war.dir}/WEB-INF"/>
+  	<!-- TODO: upper case "manifest.mf" file name -->
+  	<copy file="web/manifest.mf" todir="${exploded.war.dir}/META-INF"/>
+  	<copy todir="${exploded.war.dir}/WEB-INF/jsp">
+  		<fileset dir="jsp"/>
+		</copy>	
+  	<copy todir="${exploded.war.dir}/WEB-INF/classes">
+  		<fileset dir="classes"/>
+  		<fileset dir="resources"/>
+		</copy>	
+  	<copy
+  		todir="${exploded.war.dir}/WEB-INF/lib"
+  		flatten="true">
+  		<fileset refid="lib.used"/>
+		</copy>	
+  	<copy todir="${exploded.war.dir}/WEB-INF/taglib">
+  		<fileset dir="web/taglib"/>
+		</copy>	
+  </target>
+
+ 	<target
+    name="compile"
     depends="hbm_xml"
-    description="Build a Java archive of the class and resource files."
+    description="Compiles Java source code"
   >
     <javac
       srcdir="src"
       destdir="build/jar"
       classpathref="project.classpath"
     />
-    <copy todir="build/jar">
-      <fileset dir="resources"/>
-    </copy>    
-    <jar
+    <!--jar
       destfile="build/screensaver.jar"
       basedir="build/jar"
-    />
+    /-->
   </target>
   
   <target
@@ -136,7 +193,7 @@
       <fileset dir="resources" includes="edu/**"/>
       <fileset dir="sql"       includes="create_database.sql"/>
       <fileset dir="sql"       includes="drop_database.sql"/>
-      <fileset dir="build"     includes="screensaver.jar"/>
+      <fileset dir="build"     includes="**/*"/>
     </delete>
   </target>
   

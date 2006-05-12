@@ -1,0 +1,1 @@
+Files from spring-framework-1.2.8-with-dependencies.zip:/dist
