@@ -51,25 +51,18 @@
 
   <!-- build and deploy -->
   
-  <target
-    name="deploy"
-    depends="compile"
-  >
+  <target name="deploy">
     <description>
-      Deploy Screensaver to the application server.
-      Currently unimplemented.
+      Deploy Screensaver to the application server
     </description>
     <antcall target="exploded.war">
       <param name="exploded.war.dir" location="${deploy.dir}"/>
     </antcall>
   </target>
 
-  <target
-    name="war"
-    depends="compile"
-  >
+  <target name="war">
     <description>
-      Build Screensaver into a Web ARchive file.
+      Build Screensaver into a Web ARchive file
     </description>
     <antcall target="exploded.war">
       <param name="exploded.war.dir" location="${war.build.dir}"/>
@@ -80,53 +73,52 @@
     />
   </target>
   
-  <target name="exploded.war">
+  <target
+    name="exploded.war"
+    depends="hbm_xml"
+  > 
     <description>
       Generate exploded Web ARchive directory structure for the Screensaver web application.
       Used to 1) create a WAR file, and 2) deploy exploded WAR file to application server.
     </description>
-    <mkdir dir="${exploded.war.dir}/WEB-INF"/>
-    <mkdir dir="${exploded.war.dir}/META-INF"/>
+    <property name="webinf.dir"  value="${exploded.war.dir}/WEB-INF"/>
+    <property name="classes.dir" value="${webinf.dir}/classes"/>
+    <property name="metainf.dir" value="${exploded.war.dir}/META-INF"/>
+   
+    <mkdir dir="${classes.dir}"/>
+    <mkdir dir="${metainf.dir}"/>
+
     <copy file="web/web.xml" todir="${exploded.war.dir}/WEB-INF"/>
-    <!-- TODO: upper case "manifest.mf" file name -->
-    <copy file="web/manifest.mf" todir="${exploded.war.dir}/META-INF"/>
-    <copy todir="${exploded.war.dir}/WEB-INF/jsp">
+    <copy
+      file="web/manifest.mf"
+      tofile="${metainf.dir}/MANIFEST.MF"
+    />
+    <copy todir="${webinf.dir}/jsp">
       <fileset dir="jsp"/>
-    </copy> 
-    <copy todir="${exploded.war.dir}/WEB-INF/classes">
-      <fileset dir="classes"/>
+    </copy>
+    <javac
+      srcdir="src"
+      destdir="${classes.dir}"
+      classpathref="project.classpath"
+    />
+    <copy todir="${classes.dir}">
       <fileset dir="resources"/>
     </copy> 
     <copy
-      todir="${exploded.war.dir}/WEB-INF/lib"
-      flatten="true">
+      todir="${webinf.dir}/lib"
+      flatten="true"
+    >
       <fileset refid="lib.used"/>
     </copy> 
-    <copy todir="${exploded.war.dir}/WEB-INF/taglib">
+    <copy todir="${webinf.dir}/taglib">
       <fileset dir="web/taglib"/>
     </copy> 
   </target>
 
-  <target
-    name="compile"
-    depends="hbm_xml"
-    description="Compiles Java source code"
-  >
-    <javac
-      srcdir="src"
-      destdir="build/jar"
-      classpathref="project.classpath"
-    />
-    <!--jar
-      destfile="build/screensaver.jar"
-      basedir="build/jar"
-    /-->
-  </target>
-  
-  <target
-    name="hbm_xml"
-    description="Generate hibernate.cfg.xml and .hbm.xml files"
-  >
+  <target name="hbm_xml">
+    <description>
+      Generate hibernate.cfg.xml and .hbm.xml files
+    </description> 
     <taskdef
       name="hibernatedoclet"
       classname="xdoclet.modules.hibernate.HibernateDocletTask"
@@ -138,7 +130,7 @@
     >
       <fileset dir="src" casesensitive="yes">
         <include name="edu/harvard/med/screensaver/beans/**/*.java"/>
-      </fileset>      
+      </fileset>
       <hibernatecfg
         version="3.0" 
         showsql="true"
@@ -189,11 +181,11 @@
   
   <target name="clean" description="Clean out generated files.">
     <delete includeemptydirs="true">
-      <fileset dir="build/jar" includes="**/*"/>
-      <fileset dir="resources" includes="edu/**"/>
-      <fileset dir="sql"       includes="create_database.sql"/>
-      <fileset dir="sql"       includes="drop_database.sql"/>
       <fileset dir="build"     includes="**/*"/>
+      <fileset dir="resources" includes="edu/**"/>
+      <fileset dir="resources" includes="hibernate.cfg.xml"/>
+      <fileset dir="sql"       includes="create_schema.sql"/>
+      <fileset dir="sql"       includes="drop_schema.sql"/>
     </delete>
   </target>
   

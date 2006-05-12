@@ -19,31 +19,44 @@ which is contained herein.
 Directory Contents
 ------------------
 
-.eclipse.prefs/ Contains exported preference files from the Eclipse IDE, which
-                are intended to be shared among the project's developers.
+.eclipse.classes/ The place for Eclipse to build its own versions of the .class
+                  files.
+                  
+.eclipse.prefs/   Contains exported preference files from the Eclipse IDE, which
+                  are intended to be shared among the project's developers.
 
-build/			    Destination for exploded WAR, JAR, and EAR files (the project 
-                only builds a WAR file currently).
+.myeclipse/       The MyEclipse project settings directory.
 
-lib/				    Java JAR (library) files.  Subdirectories reflect origins of
-                related JAR files.  JAR files at the top level of this directory 
-                are shared, and potentially satisfy dependencies of the project's
-                source code and of the third-party libraries used by the project 
-                (e.g. of Hibernate, XDoclet, etc.).  Subdirectories named
-                'unused' contain JARs that are not depended upon by the 
-                project's source code or third-party libraries.
+.settings/        The Eclipse .settings directory.
 
-resources/	    Java resource files; i.e., files that can found within the 
-                project's Java classpath via Java's resource loading mechanism.
+build/			      Destination for exploded WAR, JAR, and EAR files (the project 
+                  only builds a WAR file currently).
 
-sql/				    SQL schema.
+lib/  				    Java JAR (library) files.  Subdirectories reflect origins of
+                  related JAR files.  JAR files at the top level of this directory 
+                  are shared, and potentially satisfy dependencies of the project's
+                  source code and of the third-party libraries used by the project 
+                  (e.g. of Hibernate, XDoclet, etc.).  Subdirectories named
+                  'unused' contain JARs that are not depended upon by the 
+                  project's source code or third-party libraries.
 
-src/			 	    Java source code (only).
+resources/  	    Java resource files; i.e., files that can found within the 
+                  project's Java classpath via Java's resource loading mechanism.
 
-web/				    Web application-specific files, used to generate a WAR file.
+sql/				      SQL schema.
 
-build.xml       Ant build file.
+src/			 	      Java source code (only).
 
-LICENSE         GNU General Public License.
+web/				      Web application-specific files, used to generate a WAR file.
 
-README.txt			This magnificent file.
+.classpath        The Eclipse .classpath file.
+
+.project          The Eclipse .project file.
+
+.springBeans      The MyEclipse .springBeans file.
+
+build.xml         Ant build file.
+
+LICENSE           GNU General Public License.
+
+README.txt			  This magnificent file.
