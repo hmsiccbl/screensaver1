@@ -45,7 +45,6 @@ public class Compound
 	 * @return the compound id for the compound
    * 
 	 * @hibernate.id
-   *   column="compound_id"
    *   generator-class="sequence"
    * @hibernate.generator-param
    *   name="sequence"
@@ -103,7 +102,6 @@ public class Compound
    *   type="text"
    *   not-null="true"
    *   unique="true"
-   *   column="compound_name"
    */
   public String getCompoundName() {
     return _compoundName;
@@ -280,7 +278,6 @@ public class Compound
    *  
    * @hibernate.property
    *   type="text"
-   *   column="pubchem_cid"
    */
   public String getPubchemCid() {
     return _pubchemCid;
@@ -300,7 +297,6 @@ public class Compound
    * 
    * @hibernate.property
    *   type="text"
-   *   column="chembank_id"
    */
   public String getChembankId() {
     return _chembankId;

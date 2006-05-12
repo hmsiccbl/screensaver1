@@ -43,7 +43,6 @@ public class Well {
    *
    * @hibernate.id
    *   generator-class="sequence"
-   *   column="well_id"
    * @hibernate.generator-param
    *   name="sequence"
    *   value="well_id_seq"
@@ -123,7 +122,6 @@ public class Well {
    * @return the plate number for the well
    *
    * @hibernate.property
-   *   column="plate_number"
    *   not-null="true"
    */
   public Integer getPlateNumber() {
@@ -143,7 +141,6 @@ public class Well {
    * @return the well name for the well
    *
    * @hibernate.property
-   *   column="well_name"
    *   type="text"
    *   not-null="true"
    */
@@ -164,7 +161,6 @@ public class Well {
    * @return the ICCB number for the well
    *
    * @hibernate.property
-   *   column="iccb_number"
    *   type="text"
    */
   public String getIccbNumber() {
@@ -184,7 +180,6 @@ public class Well {
    * @return the vendor identifier for the well
    *
    * @hibernate.property
-   *   column="vendor_identifier"
    *   type="text"
    */
   public String getVendorIdentifier() {
