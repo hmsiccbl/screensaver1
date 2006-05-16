@@ -5,4 +5,18 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
 	http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
+  <!-- Log4j setup -->
+  
+  <!-- This context-param provides explicit path to log4j properties file, but
+    its very declaration also enables periodic refresh -->
+  <context-param>
+    <param-name>log4jConfigLocation</param-name>
+    <param-value>classpath:log4j.properties</param-value>
+  </context-param>
+
+  <listener>
+    <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+  </listener>
+
+
 </web-app>
