@@ -11,12 +11,12 @@ package edu.harvard.med.screensaver;
 
 import java.util.Iterator;
 
-import org.hibernate.Session;
-
-import edu.harvard.med.screensaver.beans.HibernateSessionFactory;
 import edu.harvard.med.screensaver.beans.libraries.Compound;
 import edu.harvard.med.screensaver.beans.libraries.Library;
 import edu.harvard.med.screensaver.beans.libraries.Well;
+import edu.harvard.med.screensaver.db.HibernateSessionFactory;
+
+import org.hibernate.Session;
 
 /**
  * 
@@ -29,6 +29,7 @@ public class TestHibernate {
   /**
    * @param args Not used.
    */
+  @SuppressWarnings("unchecked")
   public static void main(String[] args) {
     Compound compound;
     Well well;

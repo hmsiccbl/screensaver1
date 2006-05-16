@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.beans.libraries;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -94,7 +93,9 @@ public class Well {
    *   foreign-key="fk_well_compound_link_to_well"
    */
   public Set<Compound> getCompounds() {
-    return Collections.unmodifiableSet(_compounds);
+    // TODO: reinstate next line
+    //return Collections.unmodifiableSet(_compounds);
+    return _compounds;
   }
 
   /**
@@ -276,6 +277,7 @@ public class Well {
    *                  {@link #removeCompound} function properly.
    */
   private void setCompounds(Set<Compound> compounds) {
+    System.out.println("Well.setCompounds() called, size=" + compounds.size());
     _compounds = compounds;
   }  
 }

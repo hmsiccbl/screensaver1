@@ -58,9 +58,9 @@ public class Library {
    * @return the set of wells for the library
    *
    * @hibernate.set
-   *   lazy="true"
    *   order-by="plate_number,well_name"
    *   cascade="save-update"
+   *   inverse="true"
    * @hibernate.collection-key
    *   column="library_id"
    * @hibernate.collection-one-to-many
@@ -262,6 +262,7 @@ public class Library {
    *              properly.
    */
   private void setWells(Set<Well> wells) {
+//    System.out.println( "Library.setWells() called, size=" + wells.size());
     _wells = new HashSet<Well>(wells);
   }
 }

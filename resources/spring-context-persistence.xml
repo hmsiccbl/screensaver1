@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+  <!-- Data sources -->
+
+  <bean
+    id="screensaverDevDataSource"
+    class="org.apache.commons.dbcp.BasicDataSource">
+    <property name="driverClassName">
+      <value>org.postgresql.Driver</value>
+    </property>
+    <property name="url">
+      <value>jdbc:postgresql://localhost/screensaverdev</value>
+    </property>
+    <property name="username">
+      <value>screensaverdev</value>
+    </property>
+    <property name="password">
+      <value>screensaverdev</value>
+    </property>
+  </bean>
+
+  <!-- Hibernate configuration -->
+
+  <bean
+    id="hibernateSessionFactory"
+    class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+    <!-- Have Spring gather settings from the hibernate.cfg.xml file, which we are auto-generating -->
+    <property
+      name="configLocation"
+      value="classpath:hibernate.cfg.xml" />
+    <!-- Override datasource found in hbernate.cfg.xml (just for fun) -->
+    <property
+      name="dataSource"
+      ref="screensaverDevDataSource" />
+    <!-- Use a naming strategy that uses underscores in schema's field names -->
+    <property name="namingStrategy">
+      <bean
+        id="org.hibernate.cfg.ImprovedNamingStrategy.INSTANCE"
+        class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean" />
+    </property>
+  </bean>
+
+  <!-- Transactional support -->
+
+  <bean
+    id="txnManager"
+    class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+    <property
+      name="sessionFactory"
+      ref="hibernateSessionFactory" />
+  </bean>
+
+  <!-- For declarative transactions in Spring (uses AOP) -->
+  <!-- Common practice is to specify a parent TransactionProxyFactoryBean, with default config, and set child beans' "parent" attribute to this parent bean. -->
+  <!-- (Can also use the more AOP-generic and more flexible, but more verbose, approach of specifying ProxyFactoryBean and a TransactionInterceptor beans -->
+  <bean
+    id="labDAO"
+    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+    <property
+      name="transactionManager"
+      ref="txnManager" />
+    <!-- The class/interface to be imbued with transactional qualities -->
+    <property
+      name="target"
+      ref="labDAOImpl" />
+    <!-- Use JDK5 annotation-based transaction declarations -->
+    <property name="transactionAttributeSource">
+      <bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource" />
+    </property>
+    <!-- Can also specify declarative transactions here, rather than using JDK5 annotations (but why!?) -->
+    <!--
+      <property name="transactionAttributes">
+      <props>
+      <!- - rollback rules have '-' prefix, commit rules have '+' prefix - ->
+      <prop key="createWells">PROPAGATION_REQUIRED</prop>
+      <prop key="create*">PROPAGATION_REQUIRED,-Exception</prop>
+      <prop key="update*">PROPAGATION_REQUIRED,-Exception</prop>
+      <prop key="associate*">PROPAGATION_REQUIRED,-Exception</prop>
+      <prop key="*">PROPAGATION_REQUIRED,readOnly</prop>
+      </props>
+      </property>
+    -->
+    <!-- Note: can also specify preInterceptors and postInterceptors properties for
+      specifying other AOP advice -->
+  </bean>
+  <!-- The bean through which our application will access Hibernate, and thus our persistent data.
+    Inject this bean into our application's persistence-aware classes.  -->
+
+  <bean
+    id="hibernateTemplate"
+    class="org.springframework.orm.hibernate3.HibernateTemplate">
+    <property
+      name="sessionFactory"
+      ref="hibernateSessionFactory" />
+    <!-- property name="flushModeName" value="FLUSH_COMMIT" /-->
+  </bean>
+  <!-- An implementation of our LabDAO interface.  If you want transaction behavior, you must use the "labDAO" bean, not this one! -->
+  
+  <bean
+    id="schemaUtil"
+    class="edu.harvard.med.screensaver.db.SchemaUtil">
+    <property name="sessionFactoryBeanId">
+      <idref bean="hibernateSessionFactory"/>
+    </property>
+  </bean>
+
+  <bean
+    id="labDAOImpl"
+    class="edu.harvard.med.screensaver.db.LabDAOImpl">
+    <property
+      name="hibernateTemplate"
+      ref="hibernateTemplate" />
+  </bean>
+
+  <!-- For invoking tests in our SpringHibernateTest object, outside of JUnit (TODO: remove, TEMPORARY) 
+    <bean
+    id="labDAOTest"
+    class="edu.harvard.med.screensaver.SpringHibernateTest">
+    <property name="labDAO" ref="labDAO"/>
+    <property name="transactionManager" ref="txnManager"/>
+    </bean>
+  -->
+</beans>

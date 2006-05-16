@@ -79,6 +79,7 @@ public class Compound
    * @param well the well to add this compound to
    * @return     true iff the compound was not already contained in the well
    */
+  // TODO: rename to addToWell() ?
   public boolean addWell(Well well) {
     well.getModifiableCompoundSet().add(this);
     return _wells.add(well);
@@ -89,6 +90,7 @@ public class Compound
    * @param well the well to remove this compound from
    * @return     true iff the compound was previously contained in the well
    */
+  // TODO: rename to removeFromWell() ?
   public boolean removeWell(Well well) {
     well.getModifiableCompoundSet().remove(this);
     return _wells.remove(well);

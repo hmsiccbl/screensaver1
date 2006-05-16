@@ -18,14 +18,14 @@
   <description>
     A build.xml for Screensaver 1.xx
   </description>
-  
+ 
   <!-- properties -->
-  
+
   <property name="war" value="build/screensaver.war"/>
   <property name="deploy.dir" value="/usr/local/jakarta-tomcat/webapps/"/>
   <property name="war.build.dir" location="build/war/"/>
-  
 
+  
   <!-- patterns sets -->
   
   <fileset
