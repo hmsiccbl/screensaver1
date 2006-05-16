@@ -241,7 +241,7 @@ public class Compound
    *   order-by="nsc_number"
    *   table="compound_nsc_number"
    *   cascade="delete"
-   *   laxy="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="compound_id"
    *   foreign-key="fk_compound_nsc_number_to_compound"
