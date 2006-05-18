@@ -33,7 +33,29 @@ public class Well {
   private String        _iccbNumber;
   private String        _vendorIdentifier;
   
+
+  // constructors
   
+  /**
+   * Constructs an uninitialized <code>Well</code> object.
+   * @motivation for Hibernate loading
+   */
+  protected Well() {}
+  
+  /**
+   * Constructs an initialized Well object.
+   */
+  public Well(String wellName,
+              Library parentLibrary,
+              int plateNumber) {
+    _wellName = wellName;
+    _plateNumber = new Integer(plateNumber);
+    // this call must occur after assignments of wellName and plateNumber (to
+    // ensure hashCode() works)
+    addToLibrary(parentLibrary);
+  }
+  
+
   // public getters and setters
   
   /**
@@ -53,11 +75,9 @@ public class Well {
   /**
    * Get the library the well is in.
    * @return the library the well is in
-   *
    * @hibernate.many-to-one
-   *   column="library_id"
    *   class="edu.harvard.med.screensaver.beans.libraries.Library"
-   *   cascade="save-update"
+   *   column="library_id"
    *   not-null="true"
    *   foreign-key="fk_well_to_library"
    */
@@ -69,11 +89,21 @@ public class Well {
    * Set the library the well is in.
    * @param library the new library for the well
    */
-  public void setLibrary(Library library) {
+  public void addToLibrary(Library library) {
+    assert _wellName != null && _plateNumber != null : "properties forming business key have not been defined";
     library.getModifiableWellSet().add(this);
-    if (_library != null) {
-      _library.getModifiableWellSet().remove(this);
+    if (getLibrary() != null) {
+      getLibrary().getModifiableWellSet().remove(this);
     }
+    setLibrary(library);
+  }
+  
+  /**
+   * Set the library the well is in.
+   * @param library the new library for the well
+   * @motivation for Hibernate (exclusively)
+   */
+  protected void setLibrary(Library library) {
     _library = library;
   }
 
@@ -83,8 +113,7 @@ public class Well {
    *
    * @hibernate.set
    *   table="well_compound_link"
-   *   lazy="true"
-   *   cascade="save-update"
+   *   cascade="all"
    * @hibernate.collection-key
    *   column="well_id"
    * @hibernate.collection-many-to-many
@@ -93,9 +122,8 @@ public class Well {
    *   foreign-key="fk_well_compound_link_to_well"
    */
   public Set<Compound> getCompounds() {
-    // TODO: reinstate next line
-    //return Collections.unmodifiableSet(_compounds);
-    return _compounds;
+    // TODO: unmodifiableSet causing problems w/Hibernate, figure out whether to reinstate
+    return /*Collections.unmodifiableSet*/(_compounds);
   }
 
   /**
@@ -104,8 +132,12 @@ public class Well {
    * @return         true iff the compound was not already in the well
    */
   public boolean addCompound(Compound compound) {
-    compound.getModifiableWellSet().add(this);
-    return _compounds.add(compound);
+    assert !(getCompounds().contains(compound) ^ compound.getWells().contains(this)) :
+      "asymmetric compound/well association encountered";
+    if (getModifiableCompoundSet().add(compound)) {
+      return compound.getModifiableWellSet().add(this);
+    }
+    return false;
   }
 
   /**
@@ -114,8 +146,12 @@ public class Well {
    * @return         true iff the compound was previously in the well
    */
   public boolean removeCompound(Compound compound) {
-    compound.getModifiableWellSet().remove(this);
-    return _compounds.remove(compound);
+    assert !(getCompounds().contains(compound) ^ compound.getWells().contains(this)) :
+      "asymmetric compound/well association encountered";
+    if (getModifiableCompoundSet().remove(compound)) {
+      return compound.getModifiableWellSet().remove(this);
+    }
+    return false;
   }
   
   /**
@@ -269,15 +305,8 @@ public class Well {
    * Set the set of compounds contained in the well.
    * @param compounds the new set of compounds contained in the well
    * @motivation      for hibernate
-   * @motivation      hibernate actually calls this method with the result of
-   *                  {@link #getCompounds}, which, for purposes of a coherent
-   *                  public API for the bean, returns an unmodifiable set. we
-   *                  must in turn recast the set into a modifiable set, so that
-   *                  further calls to {@link #addCompound} and
-   *                  {@link #removeCompound} function properly.
    */
   private void setCompounds(Set<Compound> compounds) {
-    System.out.println("Well.setCompounds() called, size=" + compounds.size());
     _compounds = compounds;
   }  
 }

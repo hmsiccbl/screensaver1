@@ -17,12 +17,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.beans.Child;
+import edu.harvard.med.screensaver.beans.Parent;
 import edu.harvard.med.screensaver.beans.libraries.Compound;
 import edu.harvard.med.screensaver.beans.libraries.Library;
 import edu.harvard.med.screensaver.beans.libraries.Well;
 import edu.harvard.med.screensaver.db.LabDAO;
+import edu.harvard.med.screensaver.db.LabDAOImpl;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 
+import org.hibernate.Session;
+import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.orm.hibernate3.HibernateTransactionManager;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -61,6 +66,8 @@ public class SpringHibernateTest
    * For schema-related test setup tasks.
    */
   protected SchemaUtil schemaUtil;
+  
+  protected HibernateTemplate hibernateTemplate;
   
 //  /**
 //   * For schema-related test setup tasks. Not provided via Dependency Injection,
@@ -109,13 +116,36 @@ public class SpringHibernateTest
   @Override
   protected void onSetUp() throws Exception
   {
-//    _hibernateSessionFactory = (LocalSessionFactoryBean) applicationContext.getBean("&hibernateSessionFactory");
-//    _hibernateSessionFactory.dropDatabaseSchema();
-//    _hibernateSessionFactory.createDatabaseSchema();
     schemaUtil.recreateSchema();
   }
 
   // JUnit test methods 
+  
+  public void testParentChildRelationship() {
+    Parent parent = new Parent();
+    parent.addChild(new Child("a"));
+    parent.addChild(new Child("b"));
+    hibernateTemplate.save(parent);
+    
+    Session session = hibernateTemplate.getSessionFactory().openSession();
+    Parent loadedParent = (Parent) session.load(Parent.class, parent.getId());
+    assertNotSame("distinct parent objects for save and load operations", parent, loadedParent);
+    Set<Child> loadedChildren = loadedParent.getChildren();
+    assertNotSame("distinct children set objects for save and load operations", parent.getChildren(), loadedChildren);
+    assertEquals(parent, loadedParent);
+    assertEquals(parent.getChildren(), loadedChildren);
+    
+    // now test whether we can add another child to our Parent that was loaded from the database
+    Child childC = new Child("c");
+    loadedParent.addChild(childC);
+    assertTrue("child added to loaded parent", loadedParent.getChildren().contains(childC));
+    session.flush();
+    session.close();
+    Session session2 = hibernateTemplate.getSessionFactory().openSession();
+    Parent loadedParent2 = (Parent) session2.load(Parent.class, parent.getId());
+    assertTrue("child added to re-loaded parent", loadedParent2.getChildren().contains(childC));
+    session2.close();
+  }
   
   public void testCreateAndModifyCompound()
   {
@@ -144,7 +174,6 @@ public class SpringHibernateTest
         assertEquals("compound modified", "P'", compound.getSmiles());
       }
     });
-        
   }
   
   public void testCreateLibraryWellCompound()
@@ -174,14 +203,56 @@ public class SpringHibernateTest
       }
     });
 
-   // TODO: throwing exceptions!?
-  //  // // iterate over compounds
-  //  Iterator<Compound> compoundsItr = labDAO.findAllCompounds().iterator();
-  //  System.out.println("compounds:");
-  //  while (compoundsItr.hasNext()) {
-  //    displayCompound(compoundsItr.next());
-  //    System.out.println();
-  //  }
+    new TransactionTemplate(txnManager).execute(new
+                                                TransactionCallbackWithoutResult() {
+      protected void doInTransactionWithoutResult(org.springframework.transaction.TransactionStatus status)
+      {
+        // // iterate over compounds
+        Iterator<Compound> compoundsItr = labDAO.findAllCompounds().iterator();
+        System.out.println("compounds:");
+        while (compoundsItr.hasNext()) {
+          displayCompound(compoundsItr.next());
+          System.out.println();
+        }
+      }
+    });
+  }
+  
+  
+  /**
+   * Tests whether a Well's comopunds can be modified after it has been loaded
+   * from the database. (This is more a test of Hibernate than of our
+   * application.)
+   */
+  public void testCreateWellModifyLater() {
+    new TransactionTemplate(txnManager).execute(new
+                                                TransactionCallbackWithoutResult() {
+      protected void doInTransactionWithoutResult(org.springframework.transaction.TransactionStatus status)
+      {
+        Library library = labDAO.defineLibrary("library Q", "Q", "DOS", 1, 2);
+        labDAO.defineLibraryWell(library, 27, "A01");
+      }
+     });
+    
+    new TransactionTemplate(txnManager).execute(new
+                                                TransactionCallbackWithoutResult() {
+      protected void doInTransactionWithoutResult(org.springframework.transaction.TransactionStatus status)
+      {
+        Well well = labDAO.findAllLibraryWells("library Q").iterator().next();
+        well.addCompound(labDAO.defineCompound("compound P", "P"));
+      }
+    });
+    
+    new TransactionTemplate(txnManager).execute(new
+                                                TransactionCallbackWithoutResult() {
+      protected void doInTransactionWithoutResult(org.springframework.transaction.TransactionStatus status)
+      {
+        Well well = labDAO.findAllLibraryWells("library Q").iterator().next();
+        well.getCompounds().contains(new Compound("compound P"));
+      }
+    });
+    
+    
   }
 
   public void testSpringHibernateTransactionRollback()

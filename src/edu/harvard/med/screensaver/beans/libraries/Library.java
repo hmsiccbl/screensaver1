@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL: svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/beans/libraries/Library.java $
+// $Id: Library.java 100 2006-05-16 22:17:41Z ant4 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.beans.libraries;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -59,7 +58,7 @@ public class Library {
    *
    * @hibernate.set
    *   order-by="plate_number,well_name"
-   *   cascade="save-update"
+   *   cascade="all-delete-orphan"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="library_id"
@@ -67,7 +66,8 @@ public class Library {
    *   class="edu.harvard.med.screensaver.beans.libraries.Well"
    */
   public Set<Well> getWells() {
-    return Collections.unmodifiableSet(_wells);
+    // TODO: unmodifiableSet causing problems w/Hibernate, figure out whether to reinstate
+    return /*Collections.unmodifiableSet*/(_wells);
   }
 
   /**
@@ -254,15 +254,8 @@ public class Library {
    * Set the set of wells for the library.
    * @param wells the new set of wells for the library
    * @motivation  for hibernate
-   * @motivation  hibernate actually calls this method with the result of
-   *              {@link #getWells}, which, for purposes of a coherent public
-   *              API for the bean, returns an unmodifiable set. we must in
-   *              turn recast the set into a modifiable set, so that further
-   *              calls to {@link #addWell} and {@link #removeWell} function
-   *              properly.
    */
   private void setWells(Set<Well> wells) {
-//    System.out.println( "Library.setWells() called, size=" + wells.size());
-    _wells = new HashSet<Well>(wells);
+    _wells = wells;
   }
 }

@@ -131,6 +131,10 @@
       <fileset dir="src" casesensitive="yes">
         <include name="edu/harvard/med/screensaver/beans/**/*.java"/>
       </fileset>
+     <!-- this fileset is for testing; TODO: is should be conditionally defined if a command line testing flag is specified --> 
+      <fileset dir="src/test" casesensitive="yes">
+        <include name="edu/harvard/med/screensaver/beans/*.java"/>
+      </fileset>
       <hibernatecfg
         version="3.0" 
         showsql="true"

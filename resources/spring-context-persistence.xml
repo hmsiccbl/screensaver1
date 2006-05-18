@@ -69,19 +69,6 @@
     <property name="transactionAttributeSource">
       <bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource" />
     </property>
-    <!-- Can also specify declarative transactions here, rather than using JDK5 annotations (but why!?) -->
-    <!--
-      <property name="transactionAttributes">
-      <props>
-      <!- - rollback rules have '-' prefix, commit rules have '+' prefix - ->
-      <prop key="createWells">PROPAGATION_REQUIRED</prop>
-      <prop key="create*">PROPAGATION_REQUIRED,-Exception</prop>
-      <prop key="update*">PROPAGATION_REQUIRED,-Exception</prop>
-      <prop key="associate*">PROPAGATION_REQUIRED,-Exception</prop>
-      <prop key="*">PROPAGATION_REQUIRED,readOnly</prop>
-      </props>
-      </property>
-    -->
     <!-- Note: can also specify preInterceptors and postInterceptors properties for
       specifying other AOP advice -->
   </bean>

@@ -41,8 +41,7 @@ public class TestHibernate {
     
     //// create a new compound
     session.beginTransaction();
-    compound = new Compound();
-    compound.setCompoundName("compound p");
+    compound = new Compound("compound p");
     compound.setSmiles("P");
     session.save(compound);
     session.getTransaction().commit();
@@ -64,11 +63,8 @@ public class TestHibernate {
     library.setLibraryType("DOS");
     library.setStartPlate(1);
     library.setEndPlate(2);
-    well = new Well();
-    well.setPlateNumber(27);
-    well.setWellName("A01");
-    well.setLibrary(library);
-    compound.addWell(well);
+    well = new Well("A01",library,27);
+    compound.addToWell(well);
     session.save(compound);
     session.getTransaction().commit();
     

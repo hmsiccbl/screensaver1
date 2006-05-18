@@ -36,8 +36,23 @@ public class Compound
   private Set<String> _nscNumbers = new HashSet<String>();
   private String      _pubchemCid;
   private String      _chembankId;
-	
   
+  // constructors
+  
+  /**
+   * Constructs an uninitialized <code>Compound</code> object.
+   * @motivation for Hibernate loading
+   */
+  protected Compound() {}
+  
+  /**
+   * Constructs an initialized Well object.
+   */
+  public Compound(String compoundName) {
+    _compoundName = compoundName;
+  }
+  
+
   // public getters and setters
   
 	/**
@@ -61,8 +76,7 @@ public class Compound
    * @hibernate.set
    *   inverse="true"
    *   table="well_compound_link"
-   *   lazy="true"
-   *   cascade="save-update"
+   *   cascade="all"
    * @hibernate.collection-key
    *   column="compound_id"
    * @hibernate.collection-many-to-many
@@ -71,7 +85,8 @@ public class Compound
    *   foreign-key="fk_well_compound_link_to_compound"
    */
   public Set<Well> getWells() {
-    return Collections.unmodifiableSet(_wells);
+    // TODO: unmodifiableSet causing problems w/Hibernate, figure out whether to reinstate
+    return /*Collections.unmodifiableSet*/(_wells);
   }
 
   /**
@@ -79,10 +94,13 @@ public class Compound
    * @param well the well to add this compound to
    * @return     true iff the compound was not already contained in the well
    */
-  // TODO: rename to addToWell() ?
-  public boolean addWell(Well well) {
-    well.getModifiableCompoundSet().add(this);
-    return _wells.add(well);
+  public boolean addToWell(Well well) {
+    assert !(well.getCompounds().contains(this) ^ getWells().contains(this)) :
+      "asymmetric compound/well association encountered";
+    if (getModifiableWellSet().add(well)) {
+      return well.getModifiableCompoundSet().add(this);
+    }
+    return false;
   }
   
   /**
@@ -90,10 +108,13 @@ public class Compound
    * @param well the well to remove this compound from
    * @return     true iff the compound was previously contained in the well
    */
-  // TODO: rename to removeFromWell() ?
-  public boolean removeWell(Well well) {
-    well.getModifiableCompoundSet().remove(this);
-    return _wells.remove(well);
+  public boolean removeFromWell(Well well) {
+    assert !(well.getCompounds().contains(this) ^ getWells().contains(this)) :
+      "asymmetric compound/well association encountered";
+    if (getWells().remove(well)) {
+      return well.getCompounds().remove(this);
+    }
+    return false;
   }
   
   /**
@@ -385,59 +406,36 @@ public class Compound
    * Set the set of wells that contain this compound.
    * @param wells the new set of wells that contain this compound
    * @motivation  for hibernate
-   * @motivation  hibernate actually calls this method with the result of
-   *              {@link #getWells}, which, for purposes of a coherent public
-   *              API for the bean, returns an unmodifiable set. we must in
-   *              turn recast the set into a modifiable set, so that further
-   *              calls to {@link #addWell} and {@link #removeWell} function
-   *              properly.
    */
   private void setWells(Set<Well> wells) {
-    _wells = new HashSet<Well>(wells);
+    _wells = wells;
   }
 
   /**
    * Set the set of synonyms for the compound.
    * @param synonyms the new set of synonyms for the compound
    * @motivation     for hibernate
-   * @motivation     hibernate actually calls this method with the result of
-   *                 {@link #getSynonyms}, which, for purposes of a coherent
-   *                 public API for the bean, returns an unmodifiable set. we
-   *                 must in turn recast the set into a modifiable set, so that
-   *                 further calls to {@link #addSynonym} and
-   *                 {@link #removeSynonym} function properly.
    */
   private void setSynonyms(Set<String> synonyms) {
-    _synonyms = new HashSet<String>(synonyms);
+    _synonyms = synonyms;
   }
 
   /**
    * Set the set of CAS numbers for the compound.
    * @param casNumber the new set of CAS numbers for the compound
    * @motivation      for hibernate
-   * @motivation      hibernate actually calls this method with the result of
-   *                  {@link #getCasNumbers}, which, for purposes of a coherent
-   *                  public API for the bean, returns an unmodifiable set. we
-   *                  must in turn recast the set into a modifiable set, so that
-   *                  further calls to {@link #addCasNumber} and
-   *                  {@link #removeCasNumber} function properly.
    */
   private void setCasNumbers(Set<String> casNumber) {
-    _casNumbers = new HashSet<String>(casNumber);
+    _casNumbers = casNumber;
   }
 
   /**
    * Set the set of NSC numbers for the compound.
    * @param nscNumber the new set of NSC numbers for the compound
    * @motivation      for hibernate
-   * @motivation      hibernate actually calls this method with the result of
-   *                  {@link #getNscNumbers}, which, for purposes of a coherent
-   *                  public API for the bean, returns an unmodifiable set. we
-   *                  must in turn recast the set into a modifiable set, so that
-   *                  further calls to {@link #addNscNumber} and
-   *                  {@link #removeNscNumber} function properly.
    */
   private void setNscNumbers(Set<String> nscNumber) {
-    _nscNumbers = new HashSet<String>(nscNumber);
+    _nscNumbers = nscNumber;
   }
+
 }

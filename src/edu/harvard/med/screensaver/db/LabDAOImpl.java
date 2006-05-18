@@ -46,17 +46,13 @@ public class LabDAOImpl extends HibernateDaoSupport implements LabDAO
                                 int plateNumber,
                                 String wellName)
   {
-    Well well = new Well();
-    well.setPlateNumber(plateNumber);
-    well.setWellName(wellName);
-    well.setLibrary(library);
+    Well well = new Well(wellName, library, plateNumber);
     getHibernateTemplate().save(well);
     return well;
   }
   
   public Compound defineCompound(String name, String smiles) {
-    Compound compound = new Compound();
-    compound.setCompoundName(name);
+    Compound compound = new Compound(name);
     compound.setSmiles(smiles);
     getHibernateTemplate().save(compound);
     return compound;
@@ -83,7 +79,7 @@ public class LabDAOImpl extends HibernateDaoSupport implements LabDAO
 
   public Library findLibraryByName(String libraryName) {
     return (Library) getHibernateTemplate().find("from Library l where l.libraryName = ?",
-                                                 libraryName);
+                                                 libraryName).iterator().next();
   }
 
   @SuppressWarnings("unchecked")
