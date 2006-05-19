@@ -1,5 +1,6 @@
-$Id:$
+$HeadURL$
+$Id$
 
 This file is being used to test svn hooks (e.g., post-commit email notifications)
 
-Version: 3
+Version: 4
