@@ -1,7 +1,7 @@
 // $HeadURL:
 // svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/test/edu/harvard/med/screensaver/TestHibernate.java
 // $
-// $Id: TestHibernate.java 83 2006-05-11 20:52:49Z js163 $
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
