@@ -97,7 +97,7 @@ public class Compound
   public boolean addToWell(Well well) {
     assert !(well.getCompounds().contains(this) ^ getWells().contains(this)) :
       "asymmetric compound/well association encountered";
-    if (getModifiableWellSet().add(well)) {
+    if (_wells.add(well)) {
       return well.getModifiableCompoundSet().add(this);
     }
     return false;
@@ -111,7 +111,7 @@ public class Compound
   public boolean removeFromWell(Well well) {
     assert !(well.getCompounds().contains(this) ^ getWells().contains(this)) :
       "asymmetric compound/well association encountered";
-    if (getWells().remove(well)) {
+    if (_wells.remove(well)) {
       return well.getCompounds().remove(this);
     }
     return false;

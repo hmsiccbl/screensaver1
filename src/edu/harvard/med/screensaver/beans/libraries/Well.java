@@ -92,10 +92,10 @@ public class Well {
   public void addToLibrary(Library library) {
     assert _wellName != null && _plateNumber != null : "properties forming business key have not been defined";
     library.getModifiableWellSet().add(this);
-    if (getLibrary() != null) {
-      getLibrary().getModifiableWellSet().remove(this);
+    if (_library != null) {
+      _library.getModifiableWellSet().remove(this);
     }
-    setLibrary(library);
+    _library = library;
   }
   
   /**
@@ -113,7 +113,7 @@ public class Well {
    *
    * @hibernate.set
    *   table="well_compound_link"
-   *   cascade="all"
+   *   cascade="save-update"
    * @hibernate.collection-key
    *   column="well_id"
    * @hibernate.collection-many-to-many
@@ -132,9 +132,9 @@ public class Well {
    * @return         true iff the compound was not already in the well
    */
   public boolean addCompound(Compound compound) {
-    assert !(getCompounds().contains(compound) ^ compound.getWells().contains(this)) :
+    assert !(_compounds.contains(compound) ^ compound.getWells().contains(this)) :
       "asymmetric compound/well association encountered";
-    if (getModifiableCompoundSet().add(compound)) {
+    if (_compounds.add(compound)) {
       return compound.getModifiableWellSet().add(this);
     }
     return false;
@@ -146,9 +146,9 @@ public class Well {
    * @return         true iff the compound was previously in the well
    */
   public boolean removeCompound(Compound compound) {
-    assert !(getCompounds().contains(compound) ^ compound.getWells().contains(this)) :
+    assert !(_compounds.contains(compound) ^ compound.getWells().contains(this)) :
       "asymmetric compound/well association encountered";
-    if (getModifiableCompoundSet().remove(compound)) {
+    if (_compounds.remove(compound)) {
       return compound.getModifiableWellSet().remove(this);
     }
     return false;
