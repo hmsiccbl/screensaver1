@@ -21,6 +21,7 @@
     </property>
   </bean>
 
+
   <!-- Hibernate configuration -->
 
   <bean
@@ -41,6 +42,7 @@
         class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean" />
     </property>
   </bean>
+
 
   <!-- Transactional support -->
 
@@ -101,13 +103,4 @@
       ref="hibernateTemplate" />
   </bean>
 
-  <!-- For invoking tests in our SpringHibernateTest object, outside of JUnit (TODO: remove, TEMPORARY) 
-    <bean
-    id="labDAOTest"
-    class="edu.harvard.med.screensaver.SpringHibernateTest">
-    <property name="labDAO" ref="labDAO"/>
-    <property name="transactionManager" ref="txnManager"/>
-    </bean>
-  -->
-  
 </beans>
