@@ -83,7 +83,6 @@
       ref="hibernateSessionFactory" />
     <!-- property name="flushModeName" value="FLUSH_COMMIT" /-->
   </bean>
-  <!-- An implementation of our LabDAO interface.  If you want transaction behavior, you must use the "labDAO" bean, not this one! -->
   
   <bean
     id="schemaUtil"
@@ -93,6 +92,7 @@
     </property>
   </bean>
 
+  <!-- An implementation of our LabDAO interface.  If you want transaction behavior, you must use the "labDAO" bean, not this one! -->
   <bean
     id="labDAOImpl"
     class="edu.harvard.med.screensaver.db.LabDAOImpl">
