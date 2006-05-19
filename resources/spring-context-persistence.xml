@@ -30,7 +30,7 @@
     <property
       name="configLocation"
       value="classpath:hibernate.cfg.xml" />
-    <!-- Override datasource found in hbernate.cfg.xml (just for fun) -->
+    <!-- Add to (override?) datasources found in hbernate.cfg.xml, to support local dev/testing. -->
     <property
       name="dataSource"
       ref="screensaverDevDataSource" />
