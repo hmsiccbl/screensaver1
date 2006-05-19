@@ -47,6 +47,8 @@ sql/				      SQL schema.
 
 src/			 	      Java source code (only).
 
+src/test/				  Testing-related Java source code.
+
 web/				      Web application-specific files, used to generate a WAR file.
 
 .classpath        The Eclipse .classpath file.
