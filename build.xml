@@ -15,127 +15,127 @@
   default="deploy"
   basedir="."
 >
-  <description>
+	<description>
     A build.xml for Screensaver 1.xx
   </description>
- 
-  <!-- properties -->
 
-  <property name="war" value="build/screensaver.war"/>
-  <property name="deploy.dir" value="/usr/local/jakarta-tomcat/webapps/"/>
-  <property name="war.build.dir" location="build/war/"/>
+	<!-- properties -->
 
-  
-  <!-- patterns sets -->
-  
-  <fileset
+	<property name="war" value="build/screensaver.war"/>
+	<property name="deploy.dir" value="/usr/local/jakarta-tomcat/webapps/"/>
+	<property name="war.build.dir" location="build/war/"/>
+
+
+	<!-- patterns sets -->
+
+	<fileset
     dir="lib" 
     id="lib.used"
   >
-    <include name="**/*.jar"/>
-    <exclude name="**/unused/**"/>
-  </fileset>
+		<include name="**/*.jar"/>
+		<exclude name="**/unused/**"/>
+	</fileset>
 
 
-  <!-- classpaths -->
-    
-  <path id="project.classpath">
-    <fileset refid="lib.used"/>
-  </path>
+	<!-- classpaths -->
 
-  <path id="ddl.classpath">
-    <path refid="project.classpath"/>
-    <pathelement path="resources"/>
-  </path>
+	<path id="project.classpath">
+		<fileset refid="lib.used"/>
+	</path>
+
+	<path id="ddl.classpath">
+		<path refid="project.classpath"/>
+		<pathelement path="resources"/>
+	</path>
 
 
-  <!-- build and deploy -->
-  
-  <target name="deploy">
-    <description>
+	<!-- build and deploy -->
+
+	<target name="deploy">
+		<description>
       Deploy Screensaver to the application server
     </description>
-    <antcall target="exploded.war">
-      <param name="exploded.war.dir" location="${deploy.dir}"/>
-    </antcall>
-  </target>
+		<antcall target="exploded.war">
+			<param name="exploded.war.dir" location="${deploy.dir}"/>
+		</antcall>
+	</target>
 
-  <target name="war">
-    <description>
+	<target name="war">
+		<description>
       Build Screensaver into a Web ARchive file
     </description>
-    <antcall target="exploded.war">
-      <param name="exploded.war.dir" location="${war.build.dir}"/>
-    </antcall>
-    <jar
+		<antcall target="exploded.war">
+			<param name="exploded.war.dir" location="${war.build.dir}"/>
+		</antcall>
+		<jar
       destfile="${war}"
       basedir="${war.build.dir}"
     />
-  </target>
-  
-  <target
+	</target>
+
+	<target
     name="exploded.war"
     depends="hbm_xml"
-  > 
-    <description>
+  >
+		<description>
       Generate exploded Web ARchive directory structure for the Screensaver web application.
       Used to 1) create a WAR file, and 2) deploy exploded WAR file to application server.
     </description>
-    <property name="webinf.dir"  value="${exploded.war.dir}/WEB-INF"/>
-    <property name="classes.dir" value="${webinf.dir}/classes"/>
-    <property name="metainf.dir" value="${exploded.war.dir}/META-INF"/>
-   
-    <mkdir dir="${classes.dir}"/>
-    <mkdir dir="${metainf.dir}"/>
+		<property name="webinf.dir"  value="${exploded.war.dir}/WEB-INF"/>
+		<property name="classes.dir" value="${webinf.dir}/classes"/>
+		<property name="metainf.dir" value="${exploded.war.dir}/META-INF"/>
 
-    <copy file="web/web.xml" todir="${exploded.war.dir}/WEB-INF"/>
-    <copy
+		<mkdir dir="${classes.dir}"/>
+		<mkdir dir="${metainf.dir}"/>
+
+		<copy file="web/web.xml" todir="${exploded.war.dir}/WEB-INF"/>
+		<copy
       file="web/manifest.mf"
       tofile="${metainf.dir}/MANIFEST.MF"
     />
-    <copy todir="${webinf.dir}/jsp">
-      <fileset dir="jsp"/>
-    </copy>
-    <javac
+		<copy todir="${webinf.dir}/jsp">
+			<fileset dir="jsp"/>
+		</copy>
+		<javac
       srcdir="src"
       destdir="${classes.dir}"
       classpathref="project.classpath"
     />
-    <copy todir="${classes.dir}">
-      <fileset dir="resources"/>
-    </copy> 
-    <copy
+		<copy todir="${classes.dir}">
+			<fileset dir="resources"/>
+		</copy>
+		<copy
       todir="${webinf.dir}/lib"
       flatten="true"
     >
-      <fileset refid="lib.used"/>
-    </copy> 
-    <copy todir="${webinf.dir}/taglib">
-      <fileset dir="web/taglib"/>
-    </copy> 
-  </target>
+			<fileset refid="lib.used"/>
+		</copy>
+		<copy todir="${webinf.dir}/taglib">
+			<fileset dir="web/taglib"/>
+		</copy>
+	</target>
 
-  <target name="hbm_xml">
-    <description>
+	<target name="hbm_xml">
+		<description>
       Generate hibernate.cfg.xml and .hbm.xml files
-    </description> 
-    <taskdef
+    </description>
+		<taskdef
       name="hibernatedoclet"
       classname="xdoclet.modules.hibernate.HibernateDocletTask"
       classpathref="project.classpath"
     />
-    <hibernatedoclet
+		<hibernatedoclet
       destdir="resources"
       excludedtags="@version,@author,@todo"
     >
-      <fileset dir="src" casesensitive="yes">
-        <include name="edu/harvard/med/screensaver/beans/**/*.java"/>
-      </fileset>
-     <!-- this fileset is for testing; TODO: is should be conditionally defined if a command line testing flag is specified --> 
-      <fileset dir="src/test" casesensitive="yes">
-        <include name="edu/harvard/med/screensaver/beans/*.java"/>
-      </fileset>
-      <hibernatecfg
+			<fileset dir="src" casesensitive="yes">
+				<include name="edu/harvard/med/screensaver/beans/**/*.java"/>
+			</fileset>
+			<!-- this fileset is for testing; TODO: is should be conditionally defined if a command line testing flag is specified -->
+			<fileset dir="src/test" casesensitive="yes">
+				<include name="edu/harvard/med/screensaver/beans/*.java"/>
+			</fileset>
+			<hibernatecfg
         version="3.0" 
         showsql="true"
         driver="org.postgresql.Driver"
@@ -144,53 +144,66 @@
         password="screensaver"
         dialect="org.hibernate.dialect.PostgreSQLDialect"
       />
-      <hibernate version="3.0" destinationFile="{0}.hbm.xml"/>
-    </hibernatedoclet>
-  </target>
+			<hibernate version="3.0" destinationFile="{0}.hbm.xml"/>
+		</hibernatedoclet>
+	</target>
 
 
-  <!-- generate ddl -->
-  
-  <target name="ddl" depends="hbm_xml">
-    <description>
+	<!-- generate ddl -->
+
+	<target name="ddl" depends="clean-persistence,hbm_xml">
+		<description>
       Generate the DDL from the beans classes and associated hbm.xml files
     </description>
-    <taskdef
+		<taskdef
       name="hibernatetool" 
       classname="org.hibernate.tool.ant.HibernateToolTask" 
       classpathref="ddl.classpath"
     />
-    <hibernatetool destdir="sql">
-      <configuration
+		<hibernatetool destdir="sql">
+			<configuration
         configurationfile="resources/hibernate.cfg.xml"
         namingstrategy="org.hibernate.cfg.ImprovedNamingStrategy"
       />
-      <hbm2ddl
+			<hbm2ddl
         export="false"
         format="true"
         outputfilename="create_schema.sql"
       />
-      <hbm2ddl
+			<hbm2ddl
         create="false"
         drop="true"
         export="false"
         format="true"
         outputfilename="drop_schema.sql"
       />
-    </hibernatetool>
-  </target>
+		</hibernatetool>
+	</target>
 
-  
-  <!-- cleanup routines -->
-  
-  <target name="clean" description="Clean out generated files.">
-    <delete includeemptydirs="true">
-      <fileset dir="build"     includes="**/*"/>
-      <fileset dir="resources" includes="edu/**"/>
-      <fileset dir="resources" includes="hibernate.cfg.xml"/>
-      <fileset dir="sql"       includes="create_schema.sql"/>
-      <fileset dir="sql"       includes="drop_schema.sql"/>
-    </delete>
-  </target>
-  
+
+	<!-- cleanup routines -->
+
+	<target
+    name="clean-persistence" 
+    description="Clean out generated files related to persistence (Hibernate files, sql schema)."
+  >
+		<delete includeemptydirs="true">
+			<fileset dir="resources" includes="hibernate.cfg.xml" />
+			<fileset dir="resources" includes="**/*.hbm.xml" />
+			<fileset dir="sql" includes="create_schema.sql" />
+			<fileset dir="sql" includes="drop_schema.sql" />
+		</delete>
+	</target>
+
+	<target 
+    name="clean" 
+    description="Clean out generated files." 
+    depends="clean-persistence"
+  >
+		<delete includeemptydirs="true">
+			<fileset dir="build" includes="**/*" />
+			<fileset dir="resources" includes="edu/**" />
+		</delete>
+	</target>
+
 </project>

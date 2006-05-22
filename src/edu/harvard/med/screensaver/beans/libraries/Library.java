@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.beans.libraries;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -53,21 +54,31 @@ public class Library {
   }
 
   /**
-   * Get the set of wells for the library.
+   * Get the modifiable set of wells for the library. If the caller modifies the
+   * returned collection, it must ensure that the bi-directional relationship is
+   * maintained by updating the related {@Well} bean(s).
+   * 
    * @return the set of wells for the library
-   *
-   * @hibernate.set
-   *   order-by="plate_number,well_name"
-   *   cascade="all-delete-orphan"
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="library_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.beans.libraries.Well"
+   * @motivation for Hibernate and for associated {@link Well} bean (so that it
+   *             can maintain the bi-directional association between
+   *             {@link Well} and {@link Library}).
+   * @hibernate.set order-by="plate_number,well_name"
+   *                cascade="all-delete-orphan" 
+   *                inverse="true"
+   * @hibernate.collection-key column="library_id"
+   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.beans.libraries.Well"
+   */
+  public Set<Well> getModifiableWells() {
+    return _wells;
+  }
+
+  /**
+   * Get the immutable set of wells contained in the library.
+   * 
+   * @return the immutable set of wells contained in the library
    */
   public Set<Well> getWells() {
-    // TODO: unmodifiableSet causing problems w/Hibernate, figure out whether to reinstate
-    return /*Collections.unmodifiableSet*/(_wells);
+    return Collections.unmodifiableSet(_wells);
   }
 
   /**
@@ -207,18 +218,9 @@ public class Library {
   }
 
   
-  // protected getters and setters
+  // package getters and setters
   
-  /**
-   * Get the modifiable set of wells.
-   * @return     the modifiable set of wells
-   * @motivation allow efficient maintenance of the bi-directional relationship
-   *             between {@link Library} and {@link Well}.
-   */
-  protected Set<Well> getModifiableWellSet() {
-    return _wells;
-  }
-
+  
   // private getters and setters
   
   /**
@@ -255,7 +257,7 @@ public class Library {
    * @param wells the new set of wells for the library
    * @motivation  for hibernate
    */
-  private void setWells(Set<Well> wells) {
+  private void setModifiableWells(Set<Well> wells) {
     _wells = wells;
   }
 }

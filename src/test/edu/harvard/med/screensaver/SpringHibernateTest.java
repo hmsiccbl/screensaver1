@@ -23,7 +23,6 @@ import edu.harvard.med.screensaver.beans.libraries.Compound;
 import edu.harvard.med.screensaver.beans.libraries.Library;
 import edu.harvard.med.screensaver.beans.libraries.Well;
 import edu.harvard.med.screensaver.db.LabDAO;
-import edu.harvard.med.screensaver.db.LabDAOImpl;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 
 import org.hibernate.Session;
@@ -197,9 +196,12 @@ public class SpringHibernateTest
         Library library = labDAO.findLibraryByName("library Q");
         assertEquals("Library's Well count", 1, library.getWells().size());
         Well well = library.getWells().iterator().next();
+        Compound compound = labDAO.findCompoundByName("compound P");
         assertEquals("library has well", "A01", well.getWellName());
         assertEquals("Well's Compound count", 1, well.getCompounds().size());
+        assertEquals("Compound's Well count", 1, compound.getWells().size());
         assertEquals("Well-Compound association", "compound P", well.getCompounds().iterator().next().getCompoundName());
+        assertEquals("Compound-Well association", "A01", compound.getWells().iterator().next().getWellName());
       }
     });
 

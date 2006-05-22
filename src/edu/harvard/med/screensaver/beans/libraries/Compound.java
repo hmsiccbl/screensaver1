@@ -70,23 +70,31 @@ public class Compound
 	}
   
   /**
-   * Get the set of wells that contain this compound.
+   * Get the set of wells that contain this compound. If the caller modifies the
+   * returned collection, it must ensure that the bi-directional relationship is
+   * maintained by updating the related {@link Well} bean(s).
+   * 
+   * @motivation for Hibernate and for associated {@link Well} bean (so that it
+   *             can maintain the bi-directional association between
+   *             {@link Well} and {@link Compound}).
    * @return the set of wells that contain this compound
-   *
-   * @hibernate.set
-   *   inverse="true"
-   *   table="well_compound_link"
-   *   cascade="all"
-   * @hibernate.collection-key
-   *   column="compound_id"
-   * @hibernate.collection-many-to-many
-   *   column="well_id"
-   *   class="edu.harvard.med.screensaver.beans.libraries.Well"
-   *   foreign-key="fk_well_compound_link_to_compound"
+   * @hibernate.set inverse="true" table="well_compound_link" cascade="all"
+   * @hibernate.collection-key column="compound_id"
+   * @hibernate.collection-many-to-many column="well_id"
+   *                                    class="edu.harvard.med.screensaver.beans.libraries.Well"
+   *                                    foreign-key="fk_well_compound_link_to_compound"
    */
+  public Set<Well> getModifiableWells() {
+    return _wells;
+  }
+
+  /**
+  * Get the immutable set of wells that contain this compound.
+  * 
+  * @return the immutable set of wells that contain this compound
+  */
   public Set<Well> getWells() {
-    // TODO: unmodifiableSet causing problems w/Hibernate, figure out whether to reinstate
-    return /*Collections.unmodifiableSet*/(_wells);
+    return Collections.unmodifiableSet(_wells);
   }
 
   /**
@@ -98,7 +106,7 @@ public class Compound
     assert !(well.getCompounds().contains(this) ^ getWells().contains(this)) :
       "asymmetric compound/well association encountered";
     if (_wells.add(well)) {
-      return well.getModifiableCompoundSet().add(this);
+      return well.getModifiableCompounds().add(this);
     }
     return false;
   }
@@ -360,17 +368,7 @@ public class Compound
   
   // protected getters and setters
 
-  /**
-   * Get the modifiable set of wells.
-   * @return     the modifiable set of wells
-   * @motivation allow efficient maintenance of the bi-directional relationship
-   *             between {@link Compound} and {@link Well}.
-   */
-  protected Set<Well> getModifiableWellSet() {
-    return _wells;
-  }
-
-  
+ 
   // private getters and setters
 
   /**
@@ -407,7 +405,7 @@ public class Compound
    * @param wells the new set of wells that contain this compound
    * @motivation  for hibernate
    */
-  private void setWells(Set<Well> wells) {
+  private void setModifiableWells(Set<Well> wells) {
     _wells = wells;
   }
 

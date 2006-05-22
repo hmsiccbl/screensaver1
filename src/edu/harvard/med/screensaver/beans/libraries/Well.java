@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.beans.libraries;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -89,41 +90,46 @@ public class Well {
    * Set the library the well is in.
    * @param library the new library for the well
    */
+  // TODO: Is it appropriate to have this method at all since there should never
+  // be a time when a Well is not associated with a Library? (the library_id
+  // foreign key is non-null). The constructor should be used to specify the
+  // parent Library at instantiation time.
   public void addToLibrary(Library library) {
     assert _wellName != null && _plateNumber != null : "properties forming business key have not been defined";
-    library.getModifiableWellSet().add(this);
+    library.getModifiableWells().add(this);
     if (_library != null) {
-      _library.getModifiableWellSet().remove(this);
+      _library.getModifiableWells().remove(this);
     }
     _library = library;
   }
   
   /**
-   * Set the library the well is in.
-   * @param library the new library for the well
-   * @motivation for Hibernate (exclusively)
+   * Get the modifiable set of compounds contained in the well. If the caller
+   * modifies the returned collection, it must ensure that the bi-directional
+   * relationship is maintained by updating the related {@link Compound}
+   * bean(s).
+   * 
+   * @return the set of compounds contained in the well
+   * @motivation for Hibernate and for associated {@link Compound} bean (so that
+   *             it can maintain the bi-directional association between
+   *             {@link Compound} and {@link Well}).
+   * @hibernate.set table="well_compound_link" cascade="save-update"
+   * @hibernate.collection-key column="well_id"
+   * @hibernate.collection-many-to-many column="compound_id"
+   *                                    class="edu.harvard.med.screensaver.beans.libraries.Compound"
+   *                                    foreign-key="fk_well_compound_link_to_well"
    */
-  protected void setLibrary(Library library) {
-    _library = library;
+  public Set<Compound> getModifiableCompounds() {
+    return _compounds;
   }
 
   /**
-   * Get the set of compounds contained in the well.
-   * @return the set of compounds contained in the well
-   *
-   * @hibernate.set
-   *   table="well_compound_link"
-   *   cascade="save-update"
-   * @hibernate.collection-key
-   *   column="well_id"
-   * @hibernate.collection-many-to-many
-   *   column="compound_id"
-   *   class="edu.harvard.med.screensaver.beans.libraries.Compound"
-   *   foreign-key="fk_well_compound_link_to_well"
+   * Get the immutable set of compounds contained in the well.
+   * 
+   * @return the immutable set of compounds contained in the well
    */
   public Set<Compound> getCompounds() {
-    // TODO: unmodifiableSet causing problems w/Hibernate, figure out whether to reinstate
-    return /*Collections.unmodifiableSet*/(_compounds);
+    return Collections.unmodifiableSet(_compounds);
   }
 
   /**
@@ -135,7 +141,7 @@ public class Well {
     assert !(_compounds.contains(compound) ^ compound.getWells().contains(this)) :
       "asymmetric compound/well association encountered";
     if (_compounds.add(compound)) {
-      return compound.getModifiableWellSet().add(this);
+      return compound.getModifiableWells().add(this);
     }
     return false;
   }
@@ -149,7 +155,7 @@ public class Well {
     assert !(_compounds.contains(compound) ^ compound.getWells().contains(this)) :
       "asymmetric compound/well association encountered";
     if (_compounds.remove(compound)) {
-      return compound.getModifiableWellSet().remove(this);
+      return compound.getModifiableWells().remove(this);
     }
     return false;
   }
@@ -259,17 +265,7 @@ public class Well {
   
   // protected getters and setters
   
-  /**
-   * Get the modifiable set of compounds.
-   * @return the modifiable set of compounds
-   * @motivation allow efficient maintenance of the bi-directional relationship
-   *             between {@link Compound} and {@link Well}.
-   */
-  protected Set<Compound> getModifiableCompoundSet() {
-    return _compounds;
-  }
 
-  
   // private getters and setters
   
   /**
@@ -279,6 +275,15 @@ public class Well {
    */
   private void setWellId(Integer wellId) {
     _wellId = wellId;
+  }
+
+  /**
+   * Set the library the well is in.
+   * @param library the new library for the well
+   * @motivation for Hibernate (exclusively)
+   */
+  private void setLibrary(Library library) {
+    _library = library;
   }
 
   /**
@@ -306,7 +311,7 @@ public class Well {
    * @param compounds the new set of compounds contained in the well
    * @motivation      for hibernate
    */
-  private void setCompounds(Set<Compound> compounds) {
+  private void setModifiableCompounds(Set<Compound> compounds) {
     _compounds = compounds;
   }  
 }

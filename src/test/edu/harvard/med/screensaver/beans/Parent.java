@@ -1,4 +1,4 @@
-// $HeadURL$
+  // $HeadURL$
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.beans;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,14 +50,22 @@ public class Parent
    * @hibernate.collection-one-to-many
    *   class="edu.harvard.med.screensaver.beans.Child"
    */  
-  public Set<Child> getChildren() {
+  private Set<Child> getChildrenHibernate() {
     return _children;
   }
 
-  protected void setChildren(Set<Child> children) {
+  private void setChildrenHibernate(Set<Child> children) {
     _children = children;
   }
   
+  public Set<Child> getChildren() {
+    return Collections.unmodifiableSet(_children);
+  }
+
+//  protected void setChildren(Set<Child> children) {
+//    _children = children;
+//  }
+
   @Override
   public boolean equals(Object other)
   {
