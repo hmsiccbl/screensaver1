@@ -19,7 +19,9 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 /**
  * A Hibernate entity bean representing a molecular compound.
  * 
- * @author john sullivan
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * 
  * @hibernate.class
  */
 public class Compound extends AbstractEntity
