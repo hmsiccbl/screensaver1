@@ -11,9 +11,9 @@ package edu.harvard.med.screensaver;
 
 import java.util.Iterator;
 
-import edu.harvard.med.screensaver.beans.libraries.Compound;
-import edu.harvard.med.screensaver.beans.libraries.Library;
-import edu.harvard.med.screensaver.beans.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.db.HibernateSessionFactory;
 
 import org.hibernate.Session;

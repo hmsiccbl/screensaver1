@@ -17,13 +17,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.beans.Child;
-import edu.harvard.med.screensaver.beans.Parent;
-import edu.harvard.med.screensaver.beans.libraries.Compound;
-import edu.harvard.med.screensaver.beans.libraries.Library;
-import edu.harvard.med.screensaver.beans.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.db.LabDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
+import edu.harvard.med.screensaver.model.Child;
+import edu.harvard.med.screensaver.model.Parent;
 
 import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateTemplate;
