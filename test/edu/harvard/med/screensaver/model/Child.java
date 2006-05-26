@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL:svn+ssh://orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/test/edu/harvard/med/screensaver/model/Child.java $
+// $Id:Child.java 127 2006-05-26 20:43:13Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -9,14 +9,26 @@
 
 package edu.harvard.med.screensaver.model;
 
+
 /**
  * @hibernate.class
  */
-public class Child
+public class Child extends AbstractEntity
 {
+  
+  // static fields
+
+  private static final long serialVersionUID = 5164626311748684959L;
+
+  
+  // instance fields
+  
   private Parent _parent;
   private Integer _id;
   private String _name;
+  
+  
+  // constructor and instance methods
   
   public Child() {
   }
@@ -62,7 +74,7 @@ public class Child
   
   /**
    * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.Parent"
+   *   class="edu.harvard.med.screensaver.beans.Parent"
    *   column="parent_id"
    *   not-null="true"
    */

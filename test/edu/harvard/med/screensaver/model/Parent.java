@@ -1,5 +1,5 @@
-  // $HeadURL$
-// $Id$
+// $HeadURL:svn+ssh://orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/test/edu/harvard/med/screensaver/model/Parent.java $
+// $Id:Parent.java 127 2006-05-26 20:43:13Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -16,10 +16,21 @@ import java.util.Set;
 /**
  * @hibernate.class
  */
-public class Parent
+public class Parent extends AbstractEntity
 {
+
+  // static fields
+  
+  private static final long serialVersionUID = -7056017538369965851L;
+  
+  
+  // instance fields
+  
   private Set<Child> _children = new HashSet<Child>();
   private Integer _id;
+  
+  
+  // constructor and instance methods
   
   public void setId(Integer id) {
     _id = id;
@@ -48,7 +59,7 @@ public class Parent
    * @hibernate.collection-key
    *   column="parent_id"
    * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.Child"
+   *   class="edu.harvard.med.screensaver.beans.Child"
    */  
   private Set<Child> getChildrenHibernate() {
     return _children;

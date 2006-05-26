@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.AbstractEntity;
+
 
 /**
  * A Hibernate entity bean representing a molecular compound.
@@ -20,8 +22,13 @@ import java.util.Set;
  * @author john sullivan
  * @hibernate.class
  */
-public class Compound
+public class Compound extends AbstractEntity
 {
+  
+  // static fields
+
+  private static final long serialVersionUID = 8777411947575574126L;
+
   
   // instance fields
   

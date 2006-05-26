@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.AbstractEntity;
+
 
 /**
  * A Hibernate entity bean representing a screening library.
@@ -20,7 +22,12 @@ import java.util.Set;
  * @author john sullivan
  * @hibernate.class
  */
-public class Library {
+public class Library extends AbstractEntity
+{
+  
+  // static fields
+  
+  private static final long serialVersionUID = -4412305128582638331L;
 
   
   // instance fields
