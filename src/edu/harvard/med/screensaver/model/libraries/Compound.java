@@ -81,7 +81,7 @@ public class Compound
    * @hibernate.set inverse="true" table="well_compound_link" cascade="all"
    * @hibernate.collection-key column="compound_id"
    * @hibernate.collection-many-to-many column="well_id"
-   *                                    class="edu.harvard.med.screensaver.beans.libraries.Well"
+   *                                    class="edu.harvard.med.screensaver.model.libraries.Well"
    *                                    foreign-key="fk_well_compound_link_to_compound"
    */
   public Set<Well> getModifiableWells() {

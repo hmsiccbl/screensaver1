@@ -66,7 +66,7 @@ public class Library {
    *                cascade="all-delete-orphan" 
    *                inverse="true"
    * @hibernate.collection-key column="library_id"
-   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.beans.libraries.Well"
+   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.libraries.Well"
    */
   public Set<Well> getModifiableWells() {
     return _wells;

@@ -77,7 +77,7 @@ public class Well {
    * Get the library the well is in.
    * @return the library the well is in
    * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.beans.libraries.Library"
+   *   class="edu.harvard.med.screensaver.model.libraries.Library"
    *   column="library_id"
    *   not-null="true"
    *   foreign-key="fk_well_to_library"
@@ -116,7 +116,7 @@ public class Well {
    * @hibernate.set table="well_compound_link" cascade="save-update"
    * @hibernate.collection-key column="well_id"
    * @hibernate.collection-many-to-many column="compound_id"
-   *                                    class="edu.harvard.med.screensaver.beans.libraries.Compound"
+   *                                    class="edu.harvard.med.screensaver.model.libraries.Compound"
    *                                    foreign-key="fk_well_compound_link_to_well"
    */
   public Set<Compound> getModifiableCompounds() {
