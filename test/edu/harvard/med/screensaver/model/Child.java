@@ -74,7 +74,7 @@ public class Child extends AbstractEntity
   
   /**
    * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.beans.Parent"
+   *   class="edu.harvard.med.screensaver.model.Parent"
    *   column="parent_id"
    *   not-null="true"
    */

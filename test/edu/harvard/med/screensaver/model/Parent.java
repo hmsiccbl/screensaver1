@@ -59,7 +59,7 @@ public class Parent extends AbstractEntity
    * @hibernate.collection-key
    *   column="parent_id"
    * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.beans.Child"
+   *   class="edu.harvard.med.screensaver.model.Child"
    */  
   private Set<Child> getChildrenHibernate() {
     return _children;
