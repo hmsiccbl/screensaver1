@@ -12,15 +12,14 @@ package edu.harvard.med.screensaver.ui;
 import java.util.List;
 
 import javax.faces.application.FacesMessage;
-import javax.faces.context.FacesContext;
 
-import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.db.LabDAO;
+import edu.harvard.med.screensaver.model.libraries.Library;
 
 import org.apache.log4j.Logger;
 
 
-public class MainController
+public class MainController extends AbstractController
 {
   private static Logger log = Logger.getLogger(MainController.class);
   
@@ -29,10 +28,7 @@ public class MainController
   private LibraryController _libraryController;
   
   private String _libraryNamePattern;
-
-
-  /* Property getter/setter methods */
-
+  
   public void setLabDAO(LabDAO dao) {
     _labDAO = dao;
   }
@@ -49,9 +45,6 @@ public class MainController
     _libraryNamePattern = libraryName;
   }
   
-  
-  /* JSF Application Methods */
-  
   public String createLibrary() {
     _libraryController.setLibrary(new Library());
     _libraryController.setUsageMode("create");
@@ -63,9 +56,11 @@ public class MainController
     // note: we're doing the search now, rather than when the next view is invoked (is this "wrong"?)
     List<Library> librariesFound = _labDAO.findLibrariesWithMatchingName(_libraryNamePattern);
     if (librariesFound.size() == 0) {
-      // TODO: set the library query field's message, if no result found (requires component instance binding?)
-      log.debug("no library found matching '" + _libraryNamePattern + "'");
-      FacesContext.getCurrentInstance().addMessage("queryForm", new FacesMessage("Found no libraries.  Please modify search pattern."));
+      FacesMessage msg =
+        getMessages().setFacesMessageForComponent("libraryPatternNotFound",
+                                                  new Object[] {_libraryNamePattern},
+                                                  "queryForm");
+      log.debug(msg.getDetail());
       return null; // return to same view
     }
     else if (librariesFound.size() == 1) {
@@ -75,7 +70,11 @@ public class MainController
       return "found";
     }
     else {
-      FacesContext.getCurrentInstance().addMessage("queryForm", new FacesMessage("Found multiple libraries.  Please refine search pattern."));
+      FacesMessage msg =
+        getMessages().setFacesMessageForComponent("multipleLibrariesFoundForPattern",
+                                                  new Object[] {_libraryNamePattern},
+                                                  "queryForm");
+      log.debug(msg.getDetail());
       // TODO: show all libraries in a table
       // _libraryListController.setLibraries(librariesFound);
       // return "found many";

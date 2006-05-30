@@ -76,7 +76,7 @@ public class SpringHibernateTest
 
   static {
     try {
-      Log4jConfigurer.initLogging("classpath:log4j-testing.properties");
+      Log4jConfigurer.initLogging("classpath:log4j.properties");
     }
     catch (FileNotFoundException e) {
       e.printStackTrace();

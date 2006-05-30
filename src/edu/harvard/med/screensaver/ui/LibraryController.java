@@ -18,7 +18,7 @@ import edu.harvard.med.screensaver.db.LabDAO;
 
 import org.apache.log4j.Logger;
 
-public class LibraryController
+public class LibraryController extends AbstractController
 {
   private static Logger log = Logger.getLogger(LibraryController.class);
   

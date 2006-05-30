@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+  <bean 
+    id="messageSource"
+    class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+    <!-- specify the properties (or xml) resource containing the localized messages, without a locale extension and without a file extension -->
+    <property name="basename" value="classpath:messages"/>
+  </bean>
+
+  <bean
+    id="messages"
+    class="edu.harvard.med.screensaver.ui.util.Messages">
+    <property name="messageSource" ref="messageSource"/>
+    <!--  TODO property name="locale" value=""/-->
+    
+  </bean>
+
+</beans>

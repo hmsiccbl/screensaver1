@@ -2,23 +2,30 @@
 <!DOCTYPE faces-config PUBLIC "-//Sun Microsystems, Inc.//DTD JavaServer Faces Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
 <faces-config>
 
-  <!--  Spring/JSF integration uses DelegatingVariableResolver to allow JSF to access Spring beans as if they were JSF managed beans -->
   <application>
+
+    <!-- Spring/JSF integration uses DelegatingVariableResolver to allow JSF to access Spring beans as if they were JSF managed beans -->
     <variable-resolver>org.springframework.web.jsf.DelegatingVariableResolver</variable-resolver>
-    <!-- locale-config>
+
+    <locale-config>
       <default-locale>en</default-locale>
       <supported-locale>en</supported-locale>
-    </locale-config-->
-    <!-- message-bundle>messages</message-bundle-->
+    </locale-config>
+    
+    <!-- user interface text messages -->
+    <message-bundle>org.springframework.context.support.ReloadableResourcebundleMessagesource</message-bundle>
   </application>
+  
 
   <!-- Managed beans -->
   
+  <!-- TODO: Is it possible to configured managed-bean superclass so that common properties are not repeated in each bean definition?  Or must we use Spring to manage our JSF managed-beans in order have such a feature? -->
+
   <managed-bean>
     <description>Main</description>
     <managed-bean-name>Main</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.MainController</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
+    <managed-bean-scope>request</managed-bean-scope>
     <managed-property>
       <property-name>labDAO</property-name>
       <value>#{labDAO}</value>
@@ -26,6 +33,10 @@
     <managed-property>
       <property-name>libraryController</property-name>
       <value>#{Library}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
     </managed-property>
    </managed-bean>
 
@@ -37,6 +48,10 @@
     <managed-property>
       <property-name>labDAO</property-name>
       <value>#{labDAO}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
     </managed-property>
   </managed-bean>
   
