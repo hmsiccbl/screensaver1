@@ -4,6 +4,92 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
 	http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+      
+  <display-name>Screensaver 1.x</display-name>
+
+  <description>
+    ICCB Screensaver 1.x
+  </description>
+  
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
+
+  <!-- Spring initialization -->
+  
+  <!-- Specify Spring context configuration files, possibly one per application tier. -->
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>/WEB-INF/classes/spring-context-persistence.xml</param-value>
+  </context-param>
+  
+  <!-- Use a servlet listener to allow us to load the above Spring application context XML files -->
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+
+
+  <!--  JSF/MyFaces configuration (by MyEclipse) -->
+  
+  <context-param>
+    <param-name>javax.faces.CONFIG_FILES</param-name>
+    <!-- comma-separated list of faces config files, which contain declarations of the application's JSF UI components -->
+    <param-value>/WEB-INF/faces-config.xml</param-value>
+  </context-param>
+
+  <listener>
+    <listener-class>org.apache.myfaces.webapp.StartupServletContextListener</listener-class>
+  </listener>
+
+  <servlet>
+    <servlet-name>Faces Servlet</servlet-name>
+    <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>Faces Servlet</servlet-name>
+    <!-- TODO: a url-pattern of "/*" does not work (JSF generates a stack fault) -->
+    <url-pattern>/jsf/*</url-pattern>
+  </servlet-mapping>
+
+  <!--  Not sure what extension filters are yet... -->
+  <!-- "If you use some of the MyFaces' extended components like t:inputFileUpload, t:inputHtml, t:inputCalendar, ... then you most likely need to have this filter configured in your webapp." -http://myfaces.apache.org/tomahawk/extensionsFilter.html  -->
+  <!-- 
+  <filter>
+    <filter-name>MyFacesExtensionsFilter</filter-name>
+    <filter-class>org.apache.myfaces.component.html.util.ExtensionsFilter</filter-class>
+    <init-param>
+      <param-name>maxFileSize</param-name>
+      <param-value>20m</param-value>
+    </init-param>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>MyFacesExtensionsFilter</filter-name>
+    <url-pattern>*.faces</url-pattern>
+  </filter-mapping>  
+  -->
+
+  
+  <!-- JSP Configuration -->
+  
+  <jsp-config>
+    <jsp-property-group>
+      <display-name>screensaver</display-name>
+      <url-pattern>*.jsp</url-pattern>
+      <el-ignored>false</el-ignored>
+      <scripting-invalid>false</scripting-invalid>
+      <is-xml>false</is-xml>
+      <!-- Can't use these w/MyEclipse JSP editor.
+           See http://www.myeclipseide.com/PNphpBB2+file-viewtopic-t-9223.html 
+      <include-prelude>/fragments/header.jspf</include-prelude>
+      <include-coda>/fragments/footer.jspf</include-coda>
+      -->
+    </jsp-property-group>
+  </jsp-config>
+
 
   <!-- Log4j setup -->
   

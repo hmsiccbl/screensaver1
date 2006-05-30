@@ -31,10 +31,11 @@
     <property
       name="configLocation"
       value="classpath:hibernate.cfg.xml" />
-    <!-- Add to (override?) datasources found in hbernate.cfg.xml, to support local dev/testing. -->
+    <!-- Add to (override?) datasources found in hbernate.cfg.xml, to support local dev/testing. 
     <property
       name="dataSource"
       ref="screensaverDevDataSource" />
+    -->      
     <!-- Use a naming strategy that uses underscores in schema's field names -->
     <property name="namingStrategy">
       <bean

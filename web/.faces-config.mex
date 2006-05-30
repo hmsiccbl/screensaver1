@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JSFFlowViewLayout version="1.0">
+  <Drawing gridVisible="true" snapOn="true" />
+  <JSFFlowResource path="/main.jsp" location="30,130" dimension="106,36" />
+  <JSFFlowResource path="/library.jsp" location="30,30" dimension="111,36" />
+  <JSFFlowResource path="/libraries.jsp" location="330,30" dimension="136,36" />
+  <JSFFlowNavigationCase id="/main.jsp,/library.jsp,success,#{Main.createLibrary}" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="70,130" />
+      <AbsolutePoint location="70,66" />
+    </AutomaticBendpoints>
+  </JSFFlowNavigationCase>
+  <JSFFlowNavigationCase id="/main.jsp,/library.jsp,found,#{Main.findLibrary}" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="115,130" />
+      <AbsolutePoint location="115,66" />
+    </AutomaticBendpoints>
+  </JSFFlowNavigationCase>
+  <JSFFlowNavigationCase id="/main.jsp,/libraries.jsp,found many,#{Main.findLibrary}" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="136,148" />
+      <AbsolutePoint location="398,148" />
+      <AbsolutePoint location="398,66" />
+    </AutomaticBendpoints>
+  </JSFFlowNavigationCase>
+  <JSFFlowNavigationCase id="/library.jsp,/main.jsp,cancel,null" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="85,66" />
+      <AbsolutePoint location="85,130" />
+    </AutomaticBendpoints>
+  </JSFFlowNavigationCase>
+  <JSFFlowNavigationCase id="/library.jsp,/main.jsp,done,null" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="100,66" />
+      <AbsolutePoint location="100,130" />
+    </AutomaticBendpoints>
+  </JSFFlowNavigationCase>
+  <JSFFlowNavigationCase id="/library.jsp,/library.jsp,revert,null" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="85,30" />
+      <AbsolutePoint location="85,-7" />
+      <AbsolutePoint location="238,-7" />
+      <AbsolutePoint location="238,48" />
+      <AbsolutePoint location="141,48" />
+    </AutomaticBendpoints>
+  </JSFFlowNavigationCase>
+</JSFFlowViewLayout>
+

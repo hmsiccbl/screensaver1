@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE faces-config PUBLIC "-//Sun Microsystems, Inc.//DTD JavaServer Faces Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
+<faces-config>
+
+  <!--  Spring/JSF integration uses DelegatingVariableResolver to allow JSF to access Spring beans as if they were JSF managed beans -->
+  <application>
+    <variable-resolver>org.springframework.web.jsf.DelegatingVariableResolver</variable-resolver>
+    <!-- locale-config>
+      <default-locale>en</default-locale>
+      <supported-locale>en</supported-locale>
+    </locale-config-->
+    <!-- message-bundle>messages</message-bundle-->
+  </application>
+
+  <!-- Managed beans -->
+  
+  <managed-bean>
+    <description>Main</description>
+    <managed-bean-name>Main</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.MainController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>labDAO</property-name>
+      <value>#{labDAO}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>libraryController</property-name>
+      <value>#{Library}</value>
+    </managed-property>
+   </managed-bean>
+
+  <managed-bean>
+    <description>Edit Library form backing bean</description>
+    <managed-bean-name>Library</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.LibraryController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>labDAO</property-name>
+      <value>#{labDAO}</value>
+    </managed-property>
+  </managed-bean>
+  
+  
+  <!-- Navigation rules -->
+  
+  <navigation-rule>
+    <from-view-id>/main.jsp</from-view-id>
+    <navigation-case>
+      <from-action>#{Main.createLibrary}</from-action>
+      <from-outcome>success</from-outcome>
+      <to-view-id>/library.jsp</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-action>#{Main.findLibrary}</from-action>
+      <from-outcome>found</from-outcome>
+      <to-view-id>/library.jsp</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-action>#{Main.findLibrary}</from-action>
+      <from-outcome>found many</from-outcome>
+      <!--  TODO to-view-id>/libraries.jsp</to-view-id-->
+      <to-view-id>/main.jsp</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <from-view-id>/library.jsp</from-view-id>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/main.jsp</to-view-id>
+      <redirect /> 
+    </navigation-case>
+    <navigation-case>
+      <!--from-action>...</from-action-->            
+      <from-outcome>done</from-outcome>
+      <to-view-id>/main.jsp</to-view-id>
+      <redirect /> 
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>revert</from-outcome>
+      <to-view-id>/library.jsp</to-view-id>
+    </navigation-case>
+  </navigation-rule>
+
+  
+
+</faces-config>

@@ -12,12 +12,14 @@ package edu.harvard.med.screensaver.db;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
 
+import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 /**
@@ -41,6 +43,11 @@ public class LabDAOImpl extends HibernateDaoSupport implements LabDAO
     getHibernateTemplate().save(library);
     return library;
   }
+  
+  public void updateLibrary(Library library) {
+    getHibernateTemplate().saveOrUpdate(library);
+  }
+  
   
   public Well defineLibraryWell(Library library,
                                 int plateNumber,
@@ -77,10 +84,37 @@ public class LabDAOImpl extends HibernateDaoSupport implements LabDAO
     return (List<Compound>) getHibernateTemplate().loadAll(Compound.class);
   }
 
-  public Library findLibraryByName(String libraryName) {
-    return (Library) getHibernateTemplate().find("from Library l where l.libraryName = ?",
-                                                 libraryName).iterator().next();
+  public Library findLibraryById(final Integer libraryId) {
+    return (Library)
+    getHibernateTemplate().execute(new HibernateCallback() {
+      public Object doInHibernate(org.hibernate.Session session) throws org.hibernate.HibernateException ,java.sql.SQLException {
+        return session.load(Library.class, libraryId);
+      } 
+    });
   }
+
+  public Library findLibraryByName(String libraryName) {
+    try {
+      return (Library) getHibernateTemplate().find("from Library l where l.libraryName = ?",
+                                                   libraryName).iterator().next();
+    }
+    catch (NoSuchElementException e) {
+      return null;
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<Library> findLibrariesWithMatchingName(String libraryNamePattern) {
+    try {
+      libraryNamePattern.replaceAll( "\\*", "%" );
+      return (List<Library>) getHibernateTemplate().find("from Library l where l.libraryName like ?",
+                                                         libraryNamePattern);
+    }
+    catch (NoSuchElementException e) {
+      return null;
+    }
+  }
+
 
   @SuppressWarnings("unchecked")
   public Set<Well> findAllLibraryWells(String libraryName) {
@@ -109,5 +143,6 @@ public class LabDAOImpl extends HibernateDaoSupport implements LabDAO
     }
     return result;
   }
+
 
 }

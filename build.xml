@@ -21,26 +21,75 @@
 
 	<!-- properties -->
 
+  <property 
+   name="debug"
+   description="controls whether tasks should be 'debug-aware'; provides a short-hand command-line option for setting all *.debug options appropriately"
+   value="false"/>
+  <property
+    name="javac.debug"
+    description="controls whether Java compilation generates debug information in class files"
+    value="${debug}"/>
+  <property
+    name="javac.optimize"
+    value="true" 
+    description="controls whether Java compilation generates debug information in class files"/>
+  <condition 
+    property="javac.optimize" 
+    value="true"
+    else="false" >
+    <isfalse value="${debug}"/> 
+  </condition> 
+  <property name="verbose" value="false" description="controls verbosity of various Ant tasks"/> 
 	<property name="war" value="build/screensaver.war"/>
-	<property name="deploy.dir" value="/usr/local/jakarta-tomcat/webapps/"/>
-	<property name="war.build.dir" location="build/war/"/>
-
-
-	<!-- patterns sets -->
+	<property name="deploy.dir" value="/usr/local/jakarta-tomcat/webapps/screensaver"/>
+	<property name="war.build.dir" location="build/war"/>
+  <property name="src.dir" location="src"/>
+  <property name="test.src.dir" location="test"/>
+  <property name="hibernate.cfg.xml" location="resources/hibernate.cfg.xml"/>
+ 
+	<!-- file sets -->
 
 	<fileset
+    id="lib.used.fileset"
     dir="lib" 
-    id="lib.used"
   >
 		<include name="**/*.jar"/>
 		<exclude name="**/unused/**"/>
 	</fileset>
 
+  <fileset
+    id="model.src.fileset"
+    description="defines the Java source files comprising the application's domain model" 
+    dir="${src.dir}"
+    casesensitive="yes"
+  >
+    <include name="edu/harvard/med/screensaver/model/**/*.java"/>
+  </fileset>
+  
+  <fileset 
+    id="test.model.src.fileset"
+    description="defines the Java source files comprising a domain model for testing purposes; 'test' property must be set"
+    dir="${test.src.dir}"
+    casesensitive="yes"
+  >
+    <include
+      if="test"
+      name="edu/harvard/med/screensaver/model/**/*.java"/>
+  </fileset>
+ 
+ 
+  <!-- uptodate properties (depends on "file sets" section -->
+ 
+  <uptodate property="hbm_xml.uptodate" targetfile="${hibernate.cfg.xml}">
+    <srcfiles refid="model.src.fileset"/>
+    <srcfiles refid="test.model.src.fileset"/>
+  </uptodate> 
 
-	<!-- classpaths -->
+  
+	<!-- classpaths --> 
 
 	<path id="project.classpath">
-		<fileset refid="lib.used"/>
+		<fileset refid="lib.used.fileset"/>
 	</path>
 
 	<path id="ddl.classpath">
@@ -55,6 +104,7 @@
 		<description>
       Deploy Screensaver to the application server
     </description>
+    <delete dir="${deploy.dir}"/>
 		<antcall target="exploded.war">
 			<param name="exploded.war.dir" location="${deploy.dir}"/>
 		</antcall>
@@ -81,41 +131,81 @@
       Generate exploded Web ARchive directory structure for the Screensaver web application.
       Used to 1) create a WAR file, and 2) deploy exploded WAR file to application server.
     </description>
-		<property name="webinf.dir"  value="${exploded.war.dir}/WEB-INF"/>
+		<property name="webinf.dir" value="${exploded.war.dir}/WEB-INF"/>
+    <property name="metainf.dir" value="${exploded.war.dir}/META-INF"/>
 		<property name="classes.dir" value="${webinf.dir}/classes"/>
-		<property name="metainf.dir" value="${exploded.war.dir}/META-INF"/>
 
 		<mkdir dir="${classes.dir}"/>
-		<mkdir dir="${metainf.dir}"/>
-
-		<copy file="web/web.xml" todir="${exploded.war.dir}/WEB-INF"/>
-		<copy
-      file="web/manifest.mf"
-      tofile="${metainf.dir}/MANIFEST.MF"
-    />
-		<copy todir="${webinf.dir}/jsp">
-			<fileset dir="jsp"/>
-		</copy>
-		<javac
-      srcdir="src"
+  
+    <!-- note: javac task clears out ${classes.dir}, so any files we copy there should be done afterwards -->
+    <javac 
+      srcdir="${src.dir}"
       destdir="${classes.dir}"
       classpathref="project.classpath"
+      debug="${javac.debug}" 
+      optimize="${javac.optimize} "
+      listfiles="${verbose}" 
     />
-		<copy todir="${classes.dir}">
-			<fileset dir="resources"/>
+  
+		<copy 
+      file="web/manifest.mf" 
+      tofile="${metainf.dir}/MANIFEST.MF" 
+      verbose="${verbose}"/>
+
+    <!-- if we were to copy jsp files below WEB-INF we have to map each of them in our web.xml file, 
+    to allow them to be accessed -->
+    <copy 
+      todir="${exploded.war.dir}" 
+      verbose="${verbose}"
+    >
+      <fileset dir="jsp" includes="**/*"/>
+    </copy>
+  
+    <copy 
+      todir="${webinf.dir}" 
+      verbose="${verbose}"
+    >
+      <!-- we have to copy taglibs directly into the WEB-INF directory, if we want to avoid having
+      to provide an explicit mapping for each .tld file in our web.xml <jsp-config> element -->  
+      <fileset dir="web/taglib"/>
+      <fileset dir="web">
+        <include name="web.xml" />
+        <include name="faces-config.xml"/> 
+       </fileset> 
+    </copy>
+  
+    <!-- deploy log4j.debug.properties as log4j.properties; will be overwritten by normal log4.properties unless 'debug' property is set -->
+    <copy
+      file="resources/log4j.debug.properties"
+      tofile="${classes.dir}/log4j.properties"
+      verbose="${verbose}"/>
+      
+    <copy 
+      todir="${classes.dir}" 
+      verbose="${verbose}"
+    >
+			<fileset dir="resources">
+        <include name="**/*"/>
+        
+        <exclude name="log4j.debug.properties"/>
+        <excludesfile name="log4j.properties" if="${debug}"/>
+      </fileset>    
 		</copy>
-		<copy
+  
+    <copy
       todir="${webinf.dir}/lib"
       flatten="true"
+      verbose="${verbose}"      
     >
-			<fileset refid="lib.used"/>
+			<fileset refid="lib.used.fileset"/>
 		</copy>
-		<copy todir="${webinf.dir}/taglib">
-			<fileset dir="web/taglib"/>
-		</copy>
+  
 	</target>
 
-	<target name="hbm_xml">
+	<target 
+    name="hbm_xml"
+    unless="hbm_xml.uptodate"
+  >
 		<description>
       Generate hibernate.cfg.xml and .hbm.xml files
     </description>
@@ -128,13 +218,8 @@
       destdir="resources"
       excludedtags="@version,@author,@todo"
     >
-			<fileset dir="src" casesensitive="yes">
-				<include name="edu/harvard/med/screensaver/model/**/*.java"/>
-			</fileset>
-			<!-- this fileset is for testing; TODO: is should be conditionally defined if a command line testing flag is specified -->
-			<fileset dir="test" casesensitive="yes">
-				<include name="edu/harvard/med/screensaver/model/*.java"/>
-			</fileset>
+      <fileset refid="model.src.fileset"/>
+      <fileset refid="test.model.src.fileset"/>
 			<hibernatecfg
         version="3.0" 
         showsql="true"
@@ -144,6 +229,7 @@
         password="screensaver"
         dialect="org.hibernate.dialect.PostgreSQLDialect"
       />
+      <!-- TODO: make 'hibernate.cfg.xml' property match this destinationFile attribute value -->   
 			<hibernate version="3.0" destinationFile="{0}.hbm.xml"/>
 		</hibernatedoclet>
 	</target>
@@ -188,20 +274,32 @@
     description="Clean out generated files related to persistence (Hibernate files, sql schema)."
   >
 		<delete includeemptydirs="true">
-			<fileset dir="resources" includes="hibernate.cfg.xml" />
+			<fileset file="${hibernate.cfg.xml}"/>
 			<fileset dir="resources" includes="**/*.hbm.xml" />
 			<fileset dir="sql" includes="create_schema.sql" />
 			<fileset dir="sql" includes="drop_schema.sql" />
 		</delete>
 	</target>
 
+  <target
+    name="clean-war"
+    description="Clean .war file, and directory structure used to build the .war file"
+  >
+    <delete
+     includeemptydirs="true"
+     failonerror="false"
+    >
+      <fileset dir="build/war"/>
+      <fileset file="${war}"/>
+    </delete>
+  </target>
+
 	<target 
     name="clean" 
     description="Clean out generated files." 
-    depends="clean-persistence"
+    depends="clean-persistence,clean-war"
   >
 		<delete includeemptydirs="true">
-			<fileset dir="build" includes="**/*" />
 			<fileset dir="resources" includes="edu/**" />
 		</delete>
 	</target>

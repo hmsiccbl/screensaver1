@@ -45,6 +45,16 @@ public interface LabDAO
                                String libraryType,
                                int startPlate,
                                int endPlate);
+  
+  /**
+   * Updates the database with the values for the given Library.
+   * 
+   * @motivation Used to save changes to a Library when it has been loaded by a
+   *             different thread than it was modified in (the Hibernate session
+   *             is no longer managing the object and it must be "reattached")
+   * @param library the Library whose changes must be persisted back to the database
+   */
+  public void updateLibrary(Library library);
 
   /**
    * Defines a new well for a extant library.
@@ -80,11 +90,26 @@ public interface LabDAO
 
   @Transactional(readOnly=true)
   public List<Compound> findAllCompounds();
+  
+  @Transactional(readOnly=true)
+  public Library findLibraryById(Integer libraryId);
 
+  /**
+   * Finds a specific library by its full name.
+   * @return the Library with specified name; null if no library exists with the specified name
+   */
   @Transactional(readOnly=true)
   public Library findLibraryByName(String libraryName);
 
+  /**
+   * Finds libraries with names matching a specified pattern.
+   * @param libraryNamePattern a pattern for library names, using '*' as a wildcard
+   * @return a List of Library objects matching the name pattern
+   */
   @Transactional(readOnly=true)
+  public List<Library> findLibrariesWithMatchingName(String libraryNamePattern);
+
+    @Transactional(readOnly=true)
   public Set<Well> findAllLibraryWells(String libraryName);
 
 }
