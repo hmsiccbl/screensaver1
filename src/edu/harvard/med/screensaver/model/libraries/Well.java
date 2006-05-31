@@ -48,12 +48,11 @@ public class Well extends AbstractEntity
   
   /**
    * Constructs an uninitialized <code>Well</code> object.
-   * @motivation for Hibernate loading
    */
-  protected Well() {}
+  public Well() {}
   
   /**
-   * Constructs an initialized Well object.
+   * Constructs an initialized <code>Well</code> object.
    */
   public Well(String wellName,
               Library parentLibrary,
@@ -62,7 +61,7 @@ public class Well extends AbstractEntity
     _plateNumber = new Integer(plateNumber);
     // this call must occur after assignments of wellName and plateNumber (to
     // ensure hashCode() works)
-    addToLibrary(parentLibrary);
+    setLibrary(parentLibrary);
   }
   
 
@@ -84,58 +83,30 @@ public class Well extends AbstractEntity
 
   /**
    * Get the library the well is in.
-   * @return the library the well is in
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.libraries.Library"
-   *   column="library_id"
-   *   not-null="true"
-   *   foreign-key="fk_well_to_library"
+   * @return the library the well is in.
    */
   public Library getLibrary() {
-    return _library;
+    return getHbnLibrary();
   }
 
   /**
    * Set the library the well is in.
    * @param library the new library for the well
    */
-  // TODO: Is it appropriate to have this method at all since there should never
-  // be a time when a Well is not associated with a Library? (the library_id
-  // foreign key is non-null). The constructor should be used to specify the
-  // parent Library at instantiation time.
-  public void addToLibrary(Library library) {
-    assert _wellName != null && _plateNumber != null : "properties forming business key have not been defined";
-    library.getModifiableWells().add(this);
+  public void setLibrary(Library library) {
+    assert _wellName != null && _plateNumber != null :
+      "properties forming business key have not been defined";
+    library.getHbnWells().add(this);
     if (_library != null) {
-      _library.getModifiableWells().remove(this);
+      _library.getHbnWells().remove(this);
     }
     _library = library;
   }
   
   /**
-   * Get the modifiable set of compounds contained in the well. If the caller
-   * modifies the returned collection, it must ensure that the bi-directional
-   * relationship is maintained by updating the related {@link Compound}
-   * bean(s).
+   * Get an unmodifiable copy of the set of compounds contained in the well.
    * 
-   * @return the set of compounds contained in the well
-   * @motivation for Hibernate and for associated {@link Compound} bean (so that
-   *             it can maintain the bi-directional association between
-   *             {@link Compound} and {@link Well}).
-   * @hibernate.set table="well_compound_link" cascade="save-update"
-   * @hibernate.collection-key column="well_id"
-   * @hibernate.collection-many-to-many column="compound_id"
-   *                                    class="edu.harvard.med.screensaver.model.libraries.Compound"
-   *                                    foreign-key="fk_well_compound_link_to_well"
-   */
-  public Set<Compound> getModifiableCompounds() {
-    return _compounds;
-  }
-
-  /**
-   * Get the immutable set of compounds contained in the well.
-   * 
-   * @return the immutable set of compounds contained in the well
+   * @return an unmodifiable copy of the set of compounds contained in the well
    */
   public Set<Compound> getCompounds() {
     return Collections.unmodifiableSet(_compounds);
@@ -143,14 +114,15 @@ public class Well extends AbstractEntity
 
   /**
    * Add the compound to the well.
+   * 
    * @param compound the compound to add to the well
-   * @return         true iff the compound was not already in the well
+   * @return true iff the compound was not already in the well
    */
   public boolean addCompound(Compound compound) {
     assert !(_compounds.contains(compound) ^ compound.getWells().contains(this)) :
       "asymmetric compound/well association encountered";
     if (_compounds.add(compound)) {
-      return compound.getModifiableWells().add(this);
+      return compound.getHbnWells().add(this);
     }
     return false;
   }
@@ -164,7 +136,7 @@ public class Well extends AbstractEntity
     assert !(_compounds.contains(compound) ^ compound.getWells().contains(this)) :
       "asymmetric compound/well association encountered";
     if (_compounds.remove(compound)) {
-      return compound.getModifiableWells().remove(this);
+      return compound.getHbnWells().remove(this);
     }
     return false;
   }
@@ -190,11 +162,9 @@ public class Well extends AbstractEntity
 
   /**
    * Get the well name for the well.
+   * 
    * @return the well name for the well
-   *
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
+   * @hibernate.property type="text" not-null="true"
    */
   public String getWellName() {
     return _wellName;
@@ -272,8 +242,28 @@ public class Well extends AbstractEntity
   }
 
   
-  // protected getters and setters
+  // package getters and setters
   
+  /**
+   * Get the modifiable set of compounds contained in the well. If the caller
+   * modifies the returned collection, it must ensure that the bi-directional
+   * relationship is maintained by updating the related {@link Compound}
+   * bean(s).
+   * 
+   * @return the set of compounds contained in the well
+   * @motivation for Hibernate and for associated {@link Compound} bean (so that
+   *             it can maintain the bi-directional association between
+   *             {@link Compound} and {@link Well}).
+   * @hibernate.set table="well_compound_link" cascade="save-update"
+   * @hibernate.collection-key column="well_id"
+   * @hibernate.collection-many-to-many column="compound_id"
+   *                                    class="edu.harvard.med.screensaver.model.libraries.Compound"
+   *                                    foreign-key="fk_well_compound_link_to_well"
+   */
+  Set<Compound> getHbnCompounds() {
+    return _compounds;
+  }
+
 
   // private getters and setters
   
@@ -284,15 +274,6 @@ public class Well extends AbstractEntity
    */
   private void setWellId(Integer wellId) {
     _wellId = wellId;
-  }
-
-  /**
-   * Set the library the well is in.
-   * @param library the new library for the well
-   * @motivation for Hibernate (exclusively)
-   */
-  private void setLibrary(Library library) {
-    _library = library;
   }
 
   /**
@@ -316,11 +297,33 @@ public class Well extends AbstractEntity
   }
 
   /**
+   * Get the library the well is in.
+   * @return the library the well is in
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.libraries.Library"
+   *   column="library_id"
+   *   not-null="true"
+   *   foreign-key="fk_well_to_library"
+   */
+  private Library getHbnLibrary() {
+    return _library;
+  }
+
+  /**
+   * Set the library the well is in.
+   * @param library the new library for the well
+   * @motivation for Hibernate (exclusively)
+   */
+  private void setHbnLibrary(Library library) {
+    _library = library;
+  }
+
+  /**
    * Set the set of compounds contained in the well.
    * @param compounds the new set of compounds contained in the well
    * @motivation      for hibernate
    */
-  private void setModifiableCompounds(Set<Compound> compounds) {
+  private void setHbnCompounds(Set<Compound> compounds) {
     _compounds = compounds;
   }  
 }

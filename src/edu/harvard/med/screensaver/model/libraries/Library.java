@@ -19,8 +19,8 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 /**
  * A Hibernate entity bean representing a screening library.
  *
- * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * 
  * @hibernate.class
  */
@@ -63,33 +63,46 @@ public class Library extends AbstractEntity
   }
 
   /**
-   * Get the modifiable set of wells for the library. If the caller modifies the
-   * returned collection, it must ensure that the bi-directional relationship is
-   * maintained by updating the related {@Well} bean(s).
+   * Get an unmodifiable copy of the set of the wells contained in the library.
    * 
-   * @return the set of wells for the library
-   * @motivation for Hibernate and for associated {@link Well} bean (so that it
-   *             can maintain the bi-directional association between
-   *             {@link Well} and {@link Library}).
-   * @hibernate.set order-by="plate_number,well_name"
-   *                cascade="all-delete-orphan" 
-   *                inverse="true"
-   * @hibernate.collection-key column="library_id"
-   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.libraries.Well"
-   */
-  public Set<Well> getModifiableWells() {
-    return _wells;
-  }
-
-  /**
-   * Get the immutable set of wells contained in the library.
-   * 
-   * @return the immutable set of wells contained in the library
+   * @return an unmodifiable copy of the set of the wells contained in the library
    */
   public Set<Well> getWells() {
     return Collections.unmodifiableSet(_wells);
   }
+  
+  /**
+   * Add the well to the library.
+   * 
+   * @param well the well to add to the library
+   * @return true iff the well was not already in the library
+   */
+  public boolean addWell(Well well) {
+    assert !(_wells.contains(well) ^ well.getLibrary().equals(this)) :
+      "asymmetric library/well association encountered";
+    if (_wells.add(well)) {
+      well.setLibrary(this);
+      return true;
+    }
+    return false;
+  }
 
+  /**
+   * Remove the well from the library.
+   * 
+   * @param well the well to remove from the library
+   * @return true iff the well was previously in the library
+   */
+  public boolean removeWell(Well well) {
+    assert !(_wells.contains(well) ^ well.getLibrary().equals(this)) :
+      "asymmetric library/well association encountered";
+    if (_wells.remove(well)) {
+      well.setLibrary(this);
+      return true;
+    }
+    return false;
+  }
+  
   /**
    * Get the name of the library.
    * @return the name of the library
@@ -229,13 +242,33 @@ public class Library extends AbstractEntity
   
   // package getters and setters
   
+  /**
+   * Get the modifiable set of wells for the library. If the caller modifies the
+   * returned collection, it must ensure that the bi-directional relationship is
+   * maintained by updating the related {@Well} bean(s).
+   * 
+   * @return the set of wells for the library
+   * @motivation for Hibernate and for associated {@link Well} bean (so that it
+   *             can maintain the bi-directional association between
+   *             {@link Well} and {@link Library}).
+   * @hibernate.set order-by="plate_number,well_name"
+   *                cascade="all-delete-orphan" 
+   *                inverse="true"
+   * @hibernate.collection-key column="library_id"
+   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.libraries.Well"
+   */
+  Set<Well> getHbnWells() {
+    return _wells;
+  }
+
   
   // private getters and setters
   
   /**
    * Set the library id for the library.
+   * 
    * @param libraryId the new library id for the library
-   * @motivation      for hibernate
+   * @motivation for hibernate
    */
   private void setLibraryId(Integer libraryId) {
     _libraryId = libraryId;
@@ -243,9 +276,9 @@ public class Library extends AbstractEntity
 
   /**
    * Get the version of the library.
-   * @return     the version of the library
+   * 
+   * @return the version of the library
    * @motivation for hibernate
-   *
    * @hibernate.version
    */
   private Integer getVersion() {
@@ -266,7 +299,7 @@ public class Library extends AbstractEntity
    * @param wells the new set of wells for the library
    * @motivation  for hibernate
    */
-  private void setModifiableWells(Set<Well> wells) {
+  private void setHbnWells(Set<Well> wells) {
     _wells = wells;
   }
 }

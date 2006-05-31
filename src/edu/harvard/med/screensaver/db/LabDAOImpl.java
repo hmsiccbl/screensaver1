@@ -118,7 +118,7 @@ public class LabDAOImpl extends HibernateDaoSupport implements LabDAO
 
   @SuppressWarnings("unchecked")
   public Set<Well> findAllLibraryWells(String libraryName) {
-    return new HashSet<Well>(getHibernateTemplate().find("from Well as w where w.library.libraryName = ?",
+    return new HashSet<Well>(getHibernateTemplate().find("from Well as w where w.hbnLibrary.libraryName = ?",
                                                          libraryName));
   }
   

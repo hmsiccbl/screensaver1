@@ -46,16 +46,16 @@ public class Compound extends AbstractEntity
   private String      _pubchemCid;
   private String      _chembankId;
   
+  
   // constructors
   
   /**
    * Constructs an uninitialized <code>Compound</code> object.
-   * @motivation for Hibernate loading
    */
-  protected Compound() {}
+  public Compound() {}
   
   /**
-   * Constructs an initialized Well object.
+   * Constructs an initialized <code>Compound</code> object.
    */
   public Compound(String compoundName) {
     _compoundName = compoundName;
@@ -79,28 +79,9 @@ public class Compound extends AbstractEntity
 	}
   
   /**
-   * Get the set of wells that contain this compound. If the caller modifies the
-   * returned collection, it must ensure that the bi-directional relationship is
-   * maintained by updating the related {@link Well} bean(s).
-   * 
-   * @motivation for Hibernate and for associated {@link Well} bean (so that it
-   *             can maintain the bi-directional association between
-   *             {@link Well} and {@link Compound}).
-   * @return the set of wells that contain this compound
-   * @hibernate.set inverse="true" table="well_compound_link" cascade="all"
-   * @hibernate.collection-key column="compound_id"
-   * @hibernate.collection-many-to-many column="well_id"
-   *                                    class="edu.harvard.med.screensaver.model.libraries.Well"
-   *                                    foreign-key="fk_well_compound_link_to_compound"
-   */
-  public Set<Well> getModifiableWells() {
-    return _wells;
-  }
-
-  /**
-  * Get the immutable set of wells that contain this compound.
+  * Get an unmodifiable copy of the set of wells that contain this compound.
   * 
-  * @return the immutable set of wells that contain this compound
+  * @return an unmodifiable copy of the set of wells that contain this compound
   */
   public Set<Well> getWells() {
     return Collections.unmodifiableSet(_wells);
@@ -111,11 +92,11 @@ public class Compound extends AbstractEntity
    * @param well the well to add this compound to
    * @return     true iff the compound was not already contained in the well
    */
-  public boolean addToWell(Well well) {
+  public boolean addWell(Well well) {
     assert !(well.getCompounds().contains(this) ^ getWells().contains(this)) :
       "asymmetric compound/well association encountered";
     if (_wells.add(well)) {
-      return well.getModifiableCompounds().add(this);
+      return well.getHbnCompounds().add(this);
     }
     return false;
   }
@@ -125,11 +106,11 @@ public class Compound extends AbstractEntity
    * @param well the well to remove this compound from
    * @return     true iff the compound was previously contained in the well
    */
-  public boolean removeFromWell(Well well) {
+  public boolean removeWell(Well well) {
     assert !(well.getCompounds().contains(this) ^ getWells().contains(this)) :
       "asymmetric compound/well association encountered";
     if (_wells.remove(well)) {
-      return well.getCompounds().remove(this);
+      return well.getHbnCompounds().remove(this);
     }
     return false;
   }
@@ -375,9 +356,28 @@ public class Compound extends AbstractEntity
   }
 
   
-  // protected getters and setters
+  // package getters and setters
 
- 
+  /**
+   * Get the set of wells that contain this compound. If the caller modifies the
+   * returned collection, it must ensure that the bi-directional relationship is
+   * maintained by updating the related {@link Well} bean(s).
+   * 
+   * @motivation for Hibernate and for associated {@link Well} bean (so that it
+   *             can maintain the bi-directional association between
+   *             {@link Well} and {@link Compound}).
+   * @return the set of wells that contain this compound
+   * @hibernate.set inverse="true" table="well_compound_link" cascade="all"
+   * @hibernate.collection-key column="compound_id"
+   * @hibernate.collection-many-to-many column="well_id"
+   *                                    class="edu.harvard.med.screensaver.model.libraries.Well"
+   *                                    foreign-key="fk_well_compound_link_to_compound"
+   */
+  Set<Well> getHbnWells() {
+    return _wells;
+  }
+  
+  
   // private getters and setters
 
   /**
@@ -414,7 +414,7 @@ public class Compound extends AbstractEntity
    * @param wells the new set of wells that contain this compound
    * @motivation  for hibernate
    */
-  private void setModifiableWells(Set<Well> wells) {
+  private void setHbnWells(Set<Well> wells) {
     _wells = wells;
   }
 
@@ -444,5 +444,4 @@ public class Compound extends AbstractEntity
   private void setNscNumbers(Set<String> nscNumber) {
     _nscNumbers = nscNumber;
   }
-
 }
