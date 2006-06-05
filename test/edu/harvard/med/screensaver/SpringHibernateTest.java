@@ -19,6 +19,7 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.db.LabDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
@@ -182,7 +183,7 @@ public class SpringHibernateTest
                                                 TransactionCallbackWithoutResult() {
       protected void doInTransactionWithoutResult(org.springframework.transaction.TransactionStatus status)
       {
-        Library library = labDAO.defineLibrary("library Q", "Q", "DOS", 1, 2);
+        Library library = labDAO.defineLibrary("library Q", "Q", LibraryType.KNOWN_BIOACTIVES, 1, 2);
         Compound compound = labDAO.defineCompound("compound P", "P");
         Well well = labDAO.defineLibraryWell(library, 27, "A01");
         labDAO.associateCompoundWithWell(well, compound);
@@ -195,6 +196,7 @@ public class SpringHibernateTest
       {
         Library library = labDAO.findLibraryByName("library Q");
         assertEquals("Library's Well count", 1, library.getWells().size());
+        assertEquals("library has type", LibraryType.KNOWN_BIOACTIVES, library.getLibraryType());
         Well well = library.getWells().iterator().next();
         Compound compound = labDAO.findCompoundByName("compound P");
         assertEquals("library has well", "A01", well.getWellName());
@@ -231,7 +233,7 @@ public class SpringHibernateTest
                                                 TransactionCallbackWithoutResult() {
       protected void doInTransactionWithoutResult(org.springframework.transaction.TransactionStatus status)
       {
-        Library library = labDAO.defineLibrary("library Q", "Q", "DOS", 1, 2);
+        Library library = labDAO.defineLibrary("library Q", "Q", LibraryType.KNOWN_BIOACTIVES, 1, 2);
         labDAO.defineLibraryWell(library, 27, "A01");
       }
      });
@@ -265,7 +267,7 @@ public class SpringHibernateTest
       wellNames.add("B02");
       wellNames.add("B03");
       wellNames.add("C01"); // triggers exception and causes rollback
-      Library library = labDAO.defineLibrary("library R", "R", "DOS", 1, 4);
+      Library library = labDAO.defineLibrary("library R", "R", LibraryType.KNOWN_BIOACTIVES, 1, 4);
       Compound compound = labDAO.defineCompound("compound Q", "Q");
       labDAO.defineLibraryPlateWells(28, wellNames, library, compound);
     } 
@@ -285,7 +287,7 @@ public class SpringHibernateTest
         wellNames.add("B01");
         wellNames.add("B02");
         wellNames.add("B03");
-        Library library = labDAO.defineLibrary("library R", "R", "DOS", 1, 4);
+        Library library = labDAO.defineLibrary("library R", "R", LibraryType.KNOWN_BIOACTIVES, 1, 4);
         Compound compound = labDAO.defineCompound("compound Q", "Q");
         labDAO.defineLibraryPlateWells(28, wellNames, library, compound);
       }

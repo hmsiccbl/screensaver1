@@ -17,6 +17,7 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 
 import org.springframework.orm.hibernate3.HibernateCallback;
@@ -30,7 +31,7 @@ public class LabDAOImpl extends HibernateDaoSupport implements LabDAO
 {
   public Library defineLibrary(String name,
                                String shortName,
-                               String libraryType,
+                               LibraryType libraryType,
                                int startPlate,
                                int endPlate)
   {

@@ -34,16 +34,16 @@ public class Library extends AbstractEntity
   
   // instance fields
   
-  private Integer   _libraryId;
-  private Integer   _version;
-  private Set<Well> _wells = new HashSet<Well>();
-  private String    _libraryName;
-  private String    _shortName;
-  private String    _description;
-  private String    _vendor;
-  private String    _libraryType;
-  private Integer   _startPlate;
-  private Integer   _endPlate;
+  private Integer     _libraryId;
+  private Integer     _version;
+  private Set<Well>   _wells = new HashSet<Well>();
+  private String      _libraryName;
+  private String      _shortName;
+  private String      _description;
+  private String      _vendor;
+  private LibraryType _libraryType;
+  private Integer     _startPlate;
+  private Integer     _endPlate;
   
   
   // public getters and setters
@@ -186,19 +186,19 @@ public class Library extends AbstractEntity
    * @return the library type
    *
    * @hibernate.property
-   *   type="text"
+   *   type="edu.harvard.med.screensaver.model.libraries.LibraryType$UserType"
    *   not-null="true"
    */
-  public String getLibraryType() {
+  public LibraryType getLibraryType() {
     return _libraryType;
   }
 
   /**
    * Set the library type.
-   * @param library_type the new library type
+   * @param libraryType the new library type
    */
-  public void setLibraryType(String library_type) {
-    _libraryType = library_type;
+  public void setLibraryType(LibraryType libraryType) {
+    _libraryType = libraryType;
   }
 
   /**
