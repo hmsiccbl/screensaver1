@@ -13,9 +13,11 @@ package edu.harvard.med.screensaver;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -25,6 +27,9 @@ import edu.harvard.med.screensaver.db.LabDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.Child;
 import edu.harvard.med.screensaver.model.Parent;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateTemplate;
@@ -297,6 +302,78 @@ public class SpringHibernateTest
     assertEquals("commit of all Wells", 3, wells.size());
 
   }    
+  
+  
+  public void testScreenResults() {
+    
+    final int replicates = 2;
+    
+    new TransactionTemplate(txnManager).execute(new
+                                                TransactionCallbackWithoutResult() {
+      protected void doInTransactionWithoutResult(org.springframework.transaction.TransactionStatus status)
+      {
+        ScreenResult screenResult = new ScreenResult();
+        screenResult.setShareable(false);
+        screenResult.setDateCreated(Calendar.getInstance().getTime());
+        screenResult.setReplicateCount(replicates);
+        
+        ResultValueType[] rvt = new ResultValueType[replicates];
+        for (int i = 0; i < replicates; i++) {
+          rvt[i] = new ResultValueType();
+          rvt[i].addToScreenResult(screenResult);
+        }
+        
+        Library library = labDAO.defineLibrary("library with results", 
+                                               "lwr", 
+                                               LibraryType.COMMERCIAL,
+                                               1, 
+                                               1);
+        Well[] wells = new Well[3];
+        for (int iWell = 0; iWell < wells.length; ++iWell) {
+          wells[iWell] = labDAO.defineLibraryWell(library,
+                                                  1,
+                                                  "well" + iWell);
+          for (int iResultValue = 0; iResultValue < rvt.length; ++iResultValue) {
+            ResultValue rv = new ResultValue();
+            rv.setValue("value " + iWell + "," + iResultValue);
+            rv.setWell(wells[iWell]);
+            rv.addToResultValueType(rvt[iResultValue]);
+          }
+        }
+        labDAO.persistEntity(screenResult);
+      }
+    });
+       
+    new TransactionTemplate(txnManager).execute(new
+                                                TransactionCallbackWithoutResult() {
+      protected void doInTransactionWithoutResult(org.springframework.transaction.TransactionStatus status)
+      {
+        Set<Well> wells = labDAO.findAllLibraryWells("library with results");
+        ScreenResult screenResult = labDAO.loadAllScreenResults().iterator().next();
+        int iResultValue = 0;
+        SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
+        assertEquals(2, replicates);
+        for (ResultValueType rvt : resultValueTypes) {
+          assertEquals(screenResult,
+                       rvt.getScreenResult());
+          int iWell = 0;
+          for (ResultValue rv : rvt.getResultValues()) {
+            assertEquals(rvt,
+                         rv.getResultValueType());
+            assertTrue(wells.contains(rv.getWell()));
+            // note that our naming scheme is testing the ordering of the
+            // ResultValueType and ResultValue entities (within their parent
+            // sets)
+            assertEquals("value " + iWell + "," + iResultValue,
+                         rv.getValue());
+            iWell++;
+          }
+          iResultValue++;
+        }
+      }
+    });
+
+  }
 
   private void displayCompound(Compound compound) {
     Well well;
@@ -317,24 +394,5 @@ public class SpringHibernateTest
     System.out.println("well well:    " + well.getWellName());
   }
 
-//  /**
-//   * Non-JUnit means for executing this test class within Spring.
-//   * 
-//   * @motivation When running as JUnit test, the labDAO property does not appear
-//   *             to be injected with an transaction-capapble AOP proxy for
-//   *             labDAO. Hoping that by removing JUnit (and
-//   *             AbstractDependencyInjectionSpringContextTests) from this mix,
-//   *             we'll be testing the configuration in a more kosher fashion.
-//   */
-//  public static void main(String[] args) {
-//    ApplicationContext appCtx = new ClassPathXmlApplicationContext("spring-context-persistence.xml");
-//
-//    LocalSessionFactoryBean hibernateSessionFactory = (LocalSessionFactoryBean) appCtx.getBean("&hibernateSessionFactory");
-//    hibernateSessionFactory.dropDatabaseSchema();
-//    hibernateSessionFactory.createDatabaseSchema();
-//    
-//    SpringHibernateTest tester = (SpringHibernateTest) appCtx.getBean("labDAOTest");
-//    tester.testDatabaseAccess();
-//  }
 
 }

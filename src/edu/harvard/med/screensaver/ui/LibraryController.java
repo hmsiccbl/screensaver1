@@ -70,13 +70,12 @@ public class LibraryController extends AbstractController
    * A command to saved the user's edits.
    */
   public String save() {
-    _labDAO.updateLibrary(_library);
+    _labDAO.persistEntity(_library);
     return "done";
   }
   
   public String create() {
-    // TODO: should call a method named saveLibrary() instead
-    _labDAO.updateLibrary(_library);
+    _labDAO.persistEntity(_library);
     return "done";
   }
   

@@ -41,7 +41,7 @@
   </condition> 
   <property name="verbose" value="false" description="controls verbosity of various Ant tasks"/> 
 	<property name="war" value="build/screensaver.war"/>
-	<property name="deploy.dir" value="/usr/local/jakarta-tomcat/webapps/screensaver"/>
+	<property name="deploy.dir" value="/usr/local/jakarta-tomcatT/webapps/screensaver"/>
 	<property name="war.build.dir" location="build/war"/>
   <property name="src.dir" location="src"/>
   <property name="test.src.dir" location="test"/>
@@ -80,7 +80,7 @@
  
   <!-- uptodate properties (depends on "file sets" section -->
  
-  <uptodate property="hbm_xml.uptodate" targetfile="${hibernate.cfg.xml}">
+  <uptodate property="hbm_xml.uptodate" targetfile="${hibernate.cfg.xml}" >
     <srcfiles refid="model.src.fileset"/>
     <srcfiles refid="test.model.src.fileset"/>
   </uptodate> 
@@ -144,9 +144,20 @@
       destdir="${classes.dir}"
       classpathref="project.classpath"
       debug="${javac.debug}" 
-      optimize="${javac.optimize} "
+      optimize="${javac.optimize}"
       listfiles="${verbose}" 
     />
+  
+    <!-- TODO: run this conditionally on the test var
+    <javac 
+      srcdir="${test.src.dir}"
+      destdir="${classes.dir}"
+      classpathref="project.classpath"
+      debug="${javac.debug}" 
+      optimize="${javac.optimize}"
+      listfiles="${verbose}" 
+    />
+    -->
   
 		<copy 
       file="web/manifest.mf" 
@@ -218,6 +229,7 @@
 		<hibernatedoclet
       destdir="resources"
       excludedtags="@version,@author,@todo"
+      verbose="${verbose}"
     >
       <fileset refid="model.src.fileset"/>
       <fileset refid="test.model.src.fileset"/>

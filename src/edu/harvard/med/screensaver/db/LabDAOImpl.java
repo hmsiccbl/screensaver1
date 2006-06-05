@@ -15,10 +15,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
@@ -45,9 +47,10 @@ public class LabDAOImpl extends HibernateDaoSupport implements LabDAO
     return library;
   }
   
-  public void updateLibrary(Library library) {
-    getHibernateTemplate().saveOrUpdate(library);
+  public void persistEntity(AbstractEntity entity) {
+    getHibernateTemplate().saveOrUpdate(entity);
   }
+  
   
   
   public Well defineLibraryWell(Library library,
@@ -143,6 +146,11 @@ public class LabDAOImpl extends HibernateDaoSupport implements LabDAO
       result.add(well);
     }
     return result;
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<ScreenResult> loadAllScreenResults() {
+    return new ArrayList<ScreenResult>(getHibernateTemplate().loadAll(ScreenResult.class));
   }
 
 

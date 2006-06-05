@@ -12,10 +12,12 @@ package edu.harvard.med.screensaver.db;
 import java.util.List;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,9 +55,9 @@ public interface LabDAO
    * @motivation Used to save changes to a Library when it has been loaded by a
    *             different thread than it was modified in (the Hibernate session
    *             is no longer managing the object and it must be "reattached")
-   * @param library the Library whose changes must be persisted back to the database
+   * @param entity the AbstractEntity whose changes must be persisted back to the database
    */
-  public void updateLibrary(Library library);
+  public void persistEntity(AbstractEntity entity);
 
   /**
    * Defines a new well for a extant library.
@@ -112,5 +114,7 @@ public interface LabDAO
 
     @Transactional(readOnly=true)
   public Set<Well> findAllLibraryWells(String libraryName);
+
+  public List<ScreenResult> loadAllScreenResults();
 
 }
