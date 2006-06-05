@@ -352,6 +352,7 @@ public class Compound extends AbstractEntity
    */
   @Override
   public int hashCode() {
+    assert _compoundName != null : "business key field has not been defined";
     return getCompoundName().hashCode();
   }
 

@@ -238,6 +238,7 @@ public class Well extends AbstractEntity
    */
   @Override
   public int hashCode() {
+    assert _plateNumber != null && _wellName != null : "business key fields have not been defined";
     return getPlateNumber().hashCode() + getWellName().hashCode();
   }
 
