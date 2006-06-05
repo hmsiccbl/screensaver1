@@ -94,7 +94,8 @@
 
 	<path id="ddl.classpath">
 		<path refid="project.classpath"/>
-		<pathelement path="resources"/>
+    <pathelement path="resources"/>
+    <pathelement path="build/war/WEB-INF/classes"/>
 	</path>
 
 
@@ -237,7 +238,7 @@
 
 	<!-- generate ddl -->
 
-	<target name="ddl" depends="clean-persistence,hbm_xml">
+	<target name="ddl" depends="hbm_xml">
 		<description>
       Generate the DDL from the beans classes and associated hbm.xml files
     </description>
