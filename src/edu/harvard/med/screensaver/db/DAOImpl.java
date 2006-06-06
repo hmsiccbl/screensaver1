@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.db;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
@@ -48,9 +49,27 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     return entity;
   }
 
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.db.DAO#persistEntity(edu.harvard.med.screensaver.model.AbstractEntity)
+   */
+  public void persistEntity(AbstractEntity entity)
+  {
+    getHibernateTemplate().saveOrUpdate(entity);
+  }
+
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.db.DAO#findAllEntitiesWithType(java.lang.Class)
+   */
+  @SuppressWarnings("unchecked")
+  public <E extends AbstractEntity> List<E> findAllEntitiesWithType(
+    Class<E> entityClass)
+  {
+    return (List<E>) getHibernateTemplate().loadAll(entityClass);
+  }
+
   
   // private instance methods
-  
+
   /**
    * Get the constructor for the given Entity class and arguments.
    * @param <E> the entity type
@@ -82,7 +101,8 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
    * @param arguments the arguments to get the types for
    * @return an array of types that correspond to the array of arguments
    */
-  private Class[] getArgumentTypes(Object [] arguments) {
+  private Class[] getArgumentTypes(Object [] arguments)
+  {
     _logger.info("hi from here");
     Class [] argumentTypes = new Class [arguments.length];
     for (int i = 0; i < arguments.length; i++) {

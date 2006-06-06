@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.util.List;
+
 import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.orm.hibernate3.HibernateTransactionManager;
 
@@ -65,7 +67,8 @@ public class DAOTest extends AbstractSpringTest
   
   // public instance methods
   
-  public void testCreateEntity() {
+  public void testCreateEntity()
+  {
     Compound compound = dao.defineEntity(Compound.class, "compoundName");
     assertEquals("compound name", compound.getCompoundName(), "compoundName");
     
@@ -78,5 +81,28 @@ public class DAOTest extends AbstractSpringTest
     catch (Exception e) {
       fail("bad error on create entity with bad args");
     }
+  }
+  
+  public void testPersistEntity()
+  {
+    Compound compound = new Compound();
+    compound.setCompoundName("cname");
+    compound.setSalt(true);
+    dao.persistEntity(compound);
+    List<Compound> compounds = dao.findAllEntitiesWithType(Compound.class);
+    assertEquals("one compound in the machine", compounds.size(), 1);
+    assertEquals("names match", compounds.get(0).getCompoundName(), "cname");
+    assertEquals("salty match", compounds.get(0).isSalt(), true);
+  }
+  
+  public void testFindAllEntitiesWithType()
+  {
+    List<Compound> compounds = dao.findAllEntitiesWithType(Compound.class);
+    assertEquals("no compounds in an empty database", compounds.size(), 0);
+    
+    dao.defineEntity(Compound.class, "compoundName");
+    compounds = dao.findAllEntitiesWithType(Compound.class);
+    assertEquals("one compound in the machine", compounds.size(), 1);
+    assertEquals("names match", compounds.get(0).getCompoundName(), "compoundName");
   }
 }

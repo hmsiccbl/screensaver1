@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.util.List;
+
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -38,4 +40,28 @@ public interface DAO
    */
   public <E extends AbstractEntity> E defineEntity(Class<E> entityClass,
     Object... constructorArguments);
+  
+  /**
+   * Update the database with the values for the given Entity. If the Entity
+   * was not previously in the database, then create it.
+   * 
+   * @motivation Used to save changes to a Entity when it has been loaded by a
+   *             different thread than it was modified in (the Hibernate session
+   *             is no longer managing the object and it must be "reattached").
+   *             Or when the Entity was originally created in some other
+   *             context.
+   * @param entity the Entity to persist
+   */
+  public void persistEntity(AbstractEntity entity);
+  
+  /**
+   * Retrieve and return a list of Entities of the specified type.
+   * 
+   * @param<E> The type of the entity to retrieve
+   * @param entityClass the class of the entity to retrieve 
+   * @return a list of the entities of the specified type
+   */
+  @Transactional(readOnly=true)
+  public <E extends AbstractEntity> List<E> findAllEntitiesWithType(
+    Class<E> entityClass);
 }
