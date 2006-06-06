@@ -38,7 +38,6 @@ import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.orm.hibernate3.HibernateTransactionManager;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Log4jConfigurer;
@@ -54,15 +53,8 @@ import org.springframework.util.Log4jConfigurer;
  * 
  * @author andrew tolopko
  */
-public class SpringHibernateTest
-  extends AbstractDependencyInjectionSpringContextTests
+public class SpringHibernateTest extends AbstractSpringTest
 {
-
-  /**
-   * Spring configuration will be loaded from the configuration file(s)
-   * specified in this constant.
-   */
-   private static final String[] SPRING_CONFIG_FILES = new String[] {"spring-context-persistence.xml"};
 
   /**
    * Bean property, for database access via Spring and Hibernate.
@@ -80,28 +72,7 @@ public class SpringHibernateTest
   protected SchemaUtil schemaUtil;
   
   protected HibernateTemplate hibernateTemplate;
-  
-//  /**
-//   * For schema-related test setup tasks. Not provided via Dependency Injection,
-//   * due to AOP proxy-related class mismatch problems.
-//   */
-//  private LocalSessionFactoryBean _hibernateSessionFactory;
 
-  static {
-    try {
-      Log4jConfigurer.initLogging("classpath:log4j.properties");
-    }
-    catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public SpringHibernateTest() {
-    // have AbstractDependencyInjectionSpringContextTests inject the properties
-    // we need into protected data members that share the same name as beans in
-    // our Spring configuration files.
-    setPopulateProtectedVariables(true);
-  }
   
   // bean property setter/getter methods
 
@@ -113,16 +84,7 @@ public class SpringHibernateTest
     this.txnManager = txnManager;
   }
   
-  @Override
-  /**
-   * Provides the Spring framework with the configuration files we need loaded
-   * in order to execute our tests.
-   */
-  protected String[] getConfigLocations()
-  {
-    return SPRING_CONFIG_FILES;
-  }
-  
+
   // AbstractDependencyInjectionSpringContextTests methods
 
   @Override

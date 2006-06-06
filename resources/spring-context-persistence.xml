@@ -75,6 +75,24 @@
     <!-- Note: can also specify preInterceptors and postInterceptors properties for
       specifying other AOP advice -->
   </bean>
+    <bean
+    id="dao"
+    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+    <property
+      name="transactionManager"
+      ref="txnManager" />
+    <!-- The class/interface to be imbued with transactional qualities -->
+    <property
+      name="target"
+      ref="daoImpl" />
+    <!-- Use JDK5 annotation-based transaction declarations -->
+    <property name="transactionAttributeSource">
+      <bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource" />
+    </property>
+    <!-- Note: can also specify preInterceptors and postInterceptors properties for
+      specifying other AOP advice -->
+  </bean>
+  
   <!-- The bean through which our application will access Hibernate, and thus our persistent data.
     Inject this bean into our application's persistence-aware classes.  -->
 
@@ -102,6 +120,15 @@
     <property
       name="hibernateTemplate"
       ref="hibernateTemplate" />
+  </bean>
+  <bean
+    id="daoImpl"
+    class="edu.harvard.med.screensaver.db.DAOImpl"
+  >
+    <property
+      name="hibernateTemplate"
+      ref="hibernateTemplate"
+    />
   </bean>
   
 </beans>
