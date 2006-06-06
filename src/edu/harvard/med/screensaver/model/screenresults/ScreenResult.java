@@ -25,11 +25,11 @@ import edu.harvard.med.screensaver.model.libraries.Well;
  * plates ("replicates"). Each replicate assay plate can have one or more
  * readouts performed on it, possibly over time intervals and/or with different
  * assay readout technologies. Every distinct readout type is identified by a
- * {@link ResultType}. A <code>ScreenResult</code> becomes the parent of
+ * {@link ResultValueType}. A <code>ScreenResult</code> becomes the parent of
  * {@link ResultValue}s. For visualization purposes, one can imagine a
  * <code>ScreenResult</code> as representing a spreadsheet, where the column
  * headings are represented by {@link ResultValueType}s and the rows are
- * identified by stock plate {@link Well}, and each row contains a
+ * identified by stock plate {@link Well}s, and each row contains a
  * {@link ResultValue} for each {@link ResultValueType} "column".
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -134,34 +134,6 @@ public class ScreenResult extends AbstractEntity
   }
 
   /**
-   * Get a {@link java.util.SortedSet} of all {@link ResultValueType}s for this
-   * <code>ScreenResult</code>.
-   * 
-   * @motivation for Hibernate
-   * @return an {@link java.util.SortedSet} of all {@link ResultValueType}s for
-   *         this <code>ScreenResult</code>
-   * @hibernate.set cascade="all-delete-orphan" inverse="true" sort="natural"
-   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
-   * @hibernate.collection-key column="screen_result_id"
-   */
-  public SortedSet<ResultValueType> getHbnResultValueTypes() {
-    return _resultValueTypes;
-  }
-
-  /**
-   * Set the ordered set of {@link ResultValueType}s that comprise this
-   * <code>ScreenResult</code>.
-   * 
-   * @param resultValueTypes the {@link java.util.SortedSet} of
-   *          {@link ResultValueType}s that comprise this
-   *          <code>ScreenResult</code>.
-   * @motivation for hibernate
-   */
-  public void setHbnResultValueTypes(SortedSet<ResultValueType> resultValueTypes) {
-    _resultValueTypes = resultValueTypes;
-  }
-
-  /**
    * Get a ordered set of all {@link ResultValueType}s for this
    * <code>ScreenResult</code>.
    * 
@@ -195,7 +167,22 @@ public class ScreenResult extends AbstractEntity
     _replicateCount = replicateCount;
   }
   
-  
+  /**
+   * Get a sorted set of all {@link ResultValueType}s for this
+   * <code>ScreenResult</code>.
+   * 
+   * @motivation for Hibernate
+   * @return an {@link java.util.SortedSet} of all {@link ResultValueType}s for
+   *         this <code>ScreenResult</code>
+   * @hibernate.set cascade="all-delete-orphan" inverse="true" sort="natural"
+   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
+   * @hibernate.collection-key column="screen_result_id"
+   */
+  public SortedSet<ResultValueType> getHbnResultValueTypes() {
+    return _resultValueTypes;
+  }
+
+
   // protected getters and setters
   
   /**
@@ -218,5 +205,20 @@ public class ScreenResult extends AbstractEntity
   protected void setVersion(Integer version) {
     _version = version;
   }
+  
+  /**
+   * Set the sorted set of {@link ResultValueType}s that comprise this
+   * <code>ScreenResult</code>.
+   * 
+   * @param resultValueTypes the {@link java.util.SortedSet} of
+   *          {@link ResultValueType}s that comprise this
+   *          <code>ScreenResult</code>.
+   * @motivation for hibernate
+   */
+  protected void setHbnResultValueTypes(SortedSet<ResultValueType> resultValueTypes) {
+    _resultValueTypes = resultValueTypes;
+  }
+
+  
 
 }

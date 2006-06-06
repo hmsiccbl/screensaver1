@@ -245,7 +245,7 @@ public class Library extends AbstractEntity
   /**
    * Get the modifiable set of wells for the library. If the caller modifies the
    * returned collection, it must ensure that the bi-directional relationship is
-   * maintained by updating the related {@Well} bean(s).
+   * maintained by updating the related {@link Well} bean(s).
    * 
    * @return the set of wells for the library
    * @motivation for Hibernate and for associated {@link Well} bean (so that it

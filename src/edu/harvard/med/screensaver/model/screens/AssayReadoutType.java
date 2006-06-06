@@ -13,7 +13,7 @@ import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
- * The Activity Indicator type vocabulary.
+ * The Assay Readout Type vocabulary.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -23,9 +23,13 @@ public enum AssayReadoutType implements VocabularyTerm
   
   // the vocabulary
   
-  FLOURESCENCE("Flourescence"),
-  PHOSPHORESCENCE("Phosphorescnce")
-  // TODO: complete this list
+  PHOTOMETRY("Photometry"),
+  LUMINESCENCE("Luminescence"),
+  FLOURESCENCE_INTENSITY("Flourescence Intensity"),
+  FP("FP"),
+  FRET("FRET"),
+  IMAGING("Imaging"),
+  UNSPECIFIED("Unspecified")
   ;
   
 

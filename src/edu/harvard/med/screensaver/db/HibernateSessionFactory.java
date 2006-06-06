@@ -18,7 +18,7 @@ import org.hibernate.cfg.ImprovedNamingStrategy;
 /**
  * Configures and provides access to Hibernate sessions, tied to the
  * current thread of execution.  Follows the Thread Local Session
- * pattern, see {@link http://hibernate.org/42.html}.
+ * pattern, see <a href="http://hibernate.org/42.html"/>.
  */
 public class HibernateSessionFactory
 {

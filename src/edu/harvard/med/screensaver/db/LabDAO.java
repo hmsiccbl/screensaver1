@@ -78,7 +78,6 @@ public interface LabDAO
    *             JDK5 annotations
    * @param plateNumber
    * @param wellNames
-   * @param compounds
    * @param library
    * @param compound
    * @return

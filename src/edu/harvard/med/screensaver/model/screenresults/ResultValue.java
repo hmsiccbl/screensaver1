@@ -16,7 +16,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
  * A <code>ResultValue</code> holds the actual value of a screen result data
  * point (in a text field) for a given {@link ScreenResult},
  * {@link ResultValueType}, and
- * {@link edu.harvard.med.screensaver.db.model.libraries.Well}.
+ * {@link edu.harvard.med.screensaver.model.libraries.Well}.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -88,7 +88,7 @@ public class ResultValue extends AbstractEntity implements Comparable
    * {@link ResultValueType}, removing from the existing
    * {@link ResultValueType} parent, if necessary.
    * 
-   * @param resultValueType the new parent {@link ResultValueType}
+   * @param newResultValueType the new parent {@link ResultValueType}
    */
   public void setResultValueType(ResultValueType newResultValueType) {
     if (_resultValueType != null && newResultValueType != _resultValueType) {
@@ -99,11 +99,11 @@ public class ResultValue extends AbstractEntity implements Comparable
   }
 
   /**
-   * Get the {@link edu.harvard.med.screensaved.model.libraries.Well} (of the
+   * Get the {@link edu.harvard.med.screensaver.model.libraries.Well} (of the
    * library stock plate) that was replicated and used to generate this
    * <code>ResultValue</code>.
    * 
-   * @return the {@link edu.harvard.med.screensaved.model.libraries.Well} (of
+   * @return the {@link edu.harvard.med.screensaver.model.libraries.Well} (of
    *         the library stock plate) that was replicated and used to generate
    *         this <code>ResultValue</code>
    * @hibernate.many-to-one column="well_id" not-null="true"
@@ -113,11 +113,11 @@ public class ResultValue extends AbstractEntity implements Comparable
   }
 
   /**
-   * Set the {@link edu.harvard.med.screensaved.model.libraries.Well} (of the
+   * Set the {@link edu.harvard.med.screensaver.model.libraries.Well} (of the
    * library stock plate) that was replicated and used to generate this
    * <code>ResultValue</code>.
    * 
-   * @param well the {@link edu.harvard.med.screensaved.model.libraries.Well}
+   * @param well the {@link edu.harvard.med.screensaver.model.libraries.Well}
    *          (of the library stock plate) that was replicated and used to
    *          generate this <code>ResultValue</code>
    */
@@ -140,7 +140,7 @@ public class ResultValue extends AbstractEntity implements Comparable
   }
 
   /**
-   * Get the actual value of this <code>ResultValue</code>.
+   * Set the actual value of this <code>ResultValue</code>.
    * 
    * @param value the value to set
    */

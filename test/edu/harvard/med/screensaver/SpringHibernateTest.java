@@ -14,21 +14,20 @@ package edu.harvard.med.screensaver;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import edu.harvard.med.screensaver.model.libraries.Compound;
-import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.db.LabDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.Child;
 import edu.harvard.med.screensaver.model.Parent;
+import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -328,7 +327,8 @@ public class SpringHibernateTest
         ResultValueType[] rvt = new ResultValueType[replicates];
         for (int i = 0; i < replicates; i++) {
           rvt[i] = new ResultValueType();
-          rvt[i].setAssayReadoutType(i % 2 == 0 ? AssayReadoutType.PHOSPHORESCENCE : AssayReadoutType.FLOURESCENCE);
+          rvt[i].setName("rvt" + i);
+          rvt[i].setAssayReadoutType(i % 2 == 0 ? AssayReadoutType.PHOTOMETRY: AssayReadoutType.FLOURESCENCE_INTENSITY);
           rvt[i].setActivityIndicatorType(i % 2 == 0 ? ActivityIndicatorType.BOOLEAN: ActivityIndicatorType.SCALED);
           rvt[i].setIndicatorDirection(i % 2 == 0 ? IndicatorDirection.LOW_VALUES_INDICATE : IndicatorDirection.HIGH_VALUES_INDICATE);
           rvt[i].setAssayPhenotype("human");
@@ -368,7 +368,7 @@ public class SpringHibernateTest
         for (ResultValueType rvt : resultValueTypes) {
           assertEquals(screenResult,
                        rvt.getScreenResult());
-          assertEquals(iResultValue % 2 == 0 ? AssayReadoutType.PHOSPHORESCENCE : AssayReadoutType.FLOURESCENCE,
+          assertEquals(iResultValue % 2 == 0 ? AssayReadoutType.PHOTOMETRY : AssayReadoutType.FLOURESCENCE_INTENSITY,
                        rvt.getAssayReadoutType());
           assertEquals(iResultValue % 2 == 0 ? ActivityIndicatorType.BOOLEAN: ActivityIndicatorType.SCALED,
                        rvt.getActivityIndicatorType());
@@ -412,6 +412,7 @@ public class SpringHibernateTest
         
         for (int i = 0; i < replicates; i++) {
           ResultValueType rvt = new ResultValueType();
+          rvt.setName("rvt" + i);
           rvt.setAssayPhenotype("human");
           rvt.setScreenResult(screenResult);
           derivedRvtSet1.add(rvt);
@@ -420,11 +421,13 @@ public class SpringHibernateTest
           }
         }
         ResultValueType derivedRvt1 = new ResultValueType();
+        derivedRvt1.setName("derivedRvt1");
         derivedRvt1.setAssayPhenotype("human");
         derivedRvt1.setScreenResult(screenResult);
         derivedRvt1.setDerivedFrom(derivedRvtSet1);
 
         ResultValueType derivedRvt2 = new ResultValueType();
+        derivedRvt2.setName("derivedRvt2");
         derivedRvt2.setAssayPhenotype("human");
         derivedRvt2.setScreenResult(screenResult);
         derivedRvt2.setDerivedFrom(derivedRvtSet2);

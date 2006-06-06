@@ -26,7 +26,7 @@ import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 /**
- * A Hibernate-specific implementation of the {@link #LabDAO} interface.
+ * A Hibernate-specific implementation of the {@link LabDAO} interface.
  * @author ant
  */
 public class LabDAOImpl extends HibernateDaoSupport implements LabDAO

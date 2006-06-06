@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.model.screenresults;
 
 import java.util.Collections;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -20,7 +19,7 @@ import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 
 /**
  * Provides the metadata for a subset of a
- * {@link edu.harvard.med.screensaver.model.libraries.Screen}'s
+ * {@link edu.harvard.med.screensaver.model.screens.Screen Screen}'s
  * {@link ResultValue}s, all of which will have been produced with the "same
  * way". A <code>ResultValueType</code> can describe either how a subset of
  * raw data values were generated via automated machine reading of assay plates,
@@ -91,7 +90,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   }
 
   /**
-   * Set the unique identifier for the <code>ResultValueType</code>.
+   * Set a unique identifier for the <code>ResultValueType</code>.
    * 
    * @param resultValueTypeId a unique identifier for the
    *          <code>ResultValueType</code>
@@ -164,10 +163,11 @@ public class ResultValueType extends AbstractEntity implements Comparable
   /**
    * Set the ordinal position of this <code>ResultValueType</code> within its
    * parent {@link ScreenResult}. To be called by Hibernate only, as this
-   * property is set automatically when {@link #addToScreenResult(ScreenResult)}
+   * property is set automatically when {@link #setScreenResult(ScreenResult)}
    * is called.
    * 
-   * @return an <code>Integer</code>
+   * @param ordinal the ordinal position of this <code>ResultValueType</code>
+   *          within its parent {@link ScreenResult}
    * @motivation for Hibernate
    */
   protected void setOrdinal(Integer ordinal) {
@@ -290,7 +290,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * the calculated values of our {@link ResultValues} depend upon the the
    * {@link ResultValue}s of other {@link ResultValueType}s (of the same stock
    * plate well). The details of the derivation should be specified via
-   * {@ #setHowDerived}.
+   * {@link #setHowDerived}.
    * 
    * @return the set of {@link ResultValueType}s that this
    *         <code>ResultValueType</code> was derived from
@@ -367,7 +367,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * 
    * @param howDerived a description of how this <code>ResultValueType</code>
    *          was derived from other <code>ResultValueType</code>s
-   * @hibernate.property type="text"
    */
   public void setHowDerived(String howDerived) {
     _howDerived = howDerived;
@@ -383,67 +382,137 @@ public class ResultValueType extends AbstractEntity implements Comparable
     _indicatorCutoff = indicatorCutoff;
   }
 
-
   /**
-   * Get the Indicator Direction.
+   * Get the indicator direction, which indicates whether a "hit" exists based
+   * upon whether a numeric result value is above or below the indicator cutoff.
+   * 
    * @return an {@link IndicatorDirection} enum
-   * @hibernate.property
-   *   type="edu.harvard.med.screensaver.model.screenresults.IndicatorDirection$UserType"
+   * @hibernate.property type="edu.harvard.med.screensaver.model.screenresults.IndicatorDirection$UserType"
    */
   public IndicatorDirection getIndicatorDirection() {
     return _indicatorDirection;
   }
 
-
+  /**
+   * Set the indicator direction, which indicates whether a "hit" exists based
+   * upon whether a numeric result value is above or below the indicator cutoff.
+   * 
+   * @param indicatorDirection the indicator direction
+   */
   public void setIndicatorDirection(IndicatorDirection indicatorDirection) {
     _indicatorDirection = indicatorDirection;
   }
 
-
+  /**
+   * Get whether this <code>ResultValueType</code> is an activity indicator.
+   * TODO: explain what this is, exactly.
+   * 
+   * @return <code>true</code> iff this <code>ResultValueType</code> is an
+   *         activity indicator
+   * @hibernate.property type="boolean" not-null="true"
+   */
   public boolean isActivityIndicator() {
     return _isActivityIndicator;
   }
 
-
+  /**
+   * Set whether this <code>ResultValueType</code> is an activity indicator.
+   * 
+   * @param isActivityIndicator set to <code>true</code> iff this
+   *          <code>ResultValueType</code> is an activity indicator
+   */
   public void setActivityIndicator(boolean isActivityIndicator) {
     _isActivityIndicator = isActivityIndicator;
   }
 
-
+  /**
+   * Get whether the {@link ResultValue}s of this <code>ResultValueType</code>
+   * constitute the criteria for making cherry picks.
+   * 
+   * @return <code>true</code> iff the {@link ResultValue}s of this
+   *         <code>ResultValueType</code> constitute the criteria for making
+   *         cherry picks.
+   * @hibernate.property type="boolean" not-null="true"
+   */
   public boolean isCherryPick() {
     return _isCherryPick;
   }
 
-
+  /**
+   * Set whether the {@link ResultValue}s of this <code>ResultValueType</code>
+   * constitute the criteria for making cherry picks.
+   * 
+   * @param isCherryPick set to <code>true</code> iff the {@link ResultValue}s
+   *          of this <code>ResultValueType</code> constitute the criteria for
+   *          making cherry picks.
+   */
   public void setCherryPick(boolean isCherryPick) {
     _isCherryPick = isCherryPick;
-  }
+   }
 
+  /**
+   * Get whether this <code>ResultValueType</code> contains follow up data
+   * [TODO: presumably generated during a subsequent visit?]
+   * 
+   * @return <code>true</code> iff this <code>ResultValueType</code>
+   *         contains follow up data
+   * @hibernate.property type="boolean" not-null="true"
+   */
   public boolean isFollowUpData() {
     return _isFollowUpData;
   }
 
-
+  /**
+   * Set whether this <code>ResultValueType</code> contains follow up data
+   * [TODO: presumably generated during a subsequent visit?]
+   * 
+   * @param isFollowUpData set to <code>true</code> iff this
+   *          <code>ResultValueType</code> contains follow up data
+   */
   public void setFollowUpData(boolean isFollowUpData) {
     _isFollowUpData = isFollowUpData;
   }
 
-
+  /**
+   * Get the name of this <code>ResultValueType</code>.
+   * 
+   * @return a <code>String</code> name
+   * @hibernate.property type="string" not-null="true"
+   */
   public String getName() {
     return _name;
   }
 
-
+  /**
+   * Set the name of this <code>ResultValueType</code>.
+   * @param name the name of this <code>ResultValueType</code>
+   */
   public void setName(String name) {
     _name = name;
   }
 
-
+  /**
+   * Get the time point, indicating the time interval, relative to the time the
+   * assay plate was first read [TODO: prepared?], at which the
+   * {@link ResultValue}s for this <code>ResultValueType</code> were read.
+   * The format and units for the time point is arbitrary.
+   * 
+   * @return a <code>String</code> representing the time point
+   * @hibernate.property type="text"
+   */
   public String getTimePoint() {
     return _timePoint;
   }
 
 
+  /**
+   * Get the time point, indicating the time interval, relative to the time the
+   * assay plate was first read [TODO: prepared?], at which the
+   * {@link ResultValue}s for this <code>ResultValueType</code> were read.
+   * The format and units for the time point is arbitrary.
+   * 
+   * @param timePoint the time point
+   */
   public void setTimePoint(String timePoint) {
     _timePoint = timePoint;
   }
@@ -537,13 +606,12 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * 
    * @return <code>true</code> iff this <code>ResultValueType</code> is
    *         derived from other <code>ResultValueType</code>s.
-   * @see #setDerivedFrom(Set)
+   * @see #setDerivedFrom(SortedSet)
    * @hibernate.property type="boolean" not-null="true"
    */
   protected boolean isDerived() {
     return _isDerived;
   }
-
 
   /**
    * Set whether this <code>ResultValueType</code> is derived from other
@@ -551,7 +619,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * 
    * @param isDerived <code>true</code> iff this <code>ResultValueType</code>
    *          is derived from other <code>ResultValueType</code>s.
-   * @see #setDerivedFrom(Set)
+   * @see #setDerivedFrom(SortedSet)
    */
   protected void setDerived(boolean isDerived) {
     _isDerived = isDerived;
@@ -573,5 +641,4 @@ public class ResultValueType extends AbstractEntity implements Comparable
     return getScreenResult().getDateCreated() + ":" + getOrdinal();
   }
 
-  
 }
