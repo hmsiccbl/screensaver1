@@ -78,13 +78,11 @@ public class ResultValue extends AbstractEntity implements Comparable
    * Get the parent {@link ResultValueType}.
    * 
    * @return the parent {@link ResultValueType}
-   * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
-   *                        column="result_value_type_id" not-null="true"
    */
   public ResultValueType getResultValueType() {
     return _resultValueType;
   }
-
+  
   /**
    * Add this <code>ResultValue</code> to the specified
    * {@link ResultValueType}, removing from the existing
@@ -92,14 +90,12 @@ public class ResultValue extends AbstractEntity implements Comparable
    * 
    * @param resultValueType the new parent {@link ResultValueType}
    */
-  public void addToResultValueType(ResultValueType resultValueType) {
-    if (_resultValueType != null && resultValueType != _resultValueType) {
-      _resultValueType.getHbnResultValues()
-                      .remove(this);
+  public void setResultValueType(ResultValueType newResultValueType) {
+    if (_resultValueType != null && newResultValueType != _resultValueType) {
+      _resultValueType.getHbnResultValues().remove(this);
     }
-    _resultValueType = resultValueType;
-    _resultValueType.getHbnResultValues()
-                    .add(this);
+    setHbnResultValueType(newResultValueType);
+    _resultValueType.getHbnResultValues().add(this);
   }
 
   /**
@@ -218,15 +214,26 @@ public class ResultValue extends AbstractEntity implements Comparable
   protected void setVersion(Integer version) {
     _version = version;
   }
-  
+
   /**
-   * Set the parent {@link ResultValueType}, removing from the existing
-   * {@link ScreenResult} parent, if necessary.
+   * Get the parent {@link ResultValueType}.
    * 
-   * @param resultValueType the new parent {@link ResultValueType}
+   * @return the parent {@link ResultValueType}
+   * @motivation for Hibernate
+   * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
+   *                        column="result_value_type_id" not-null="true"
+   */
+  protected ResultValueType getHbnResultValueType() {
+    return _resultValueType;
+  }
+
+  /**
+   * Set the parent {@link ResultValueType}.
+   * 
+   * @param resultValueType the parent {@link ResultValueType}
    * @motivation for Hibernate
    */
-  protected void setResultValueType(ResultValueType resultValueType) {
+  protected void setHbnResultValueType(ResultValueType resultValueType) {
     _resultValueType = resultValueType;
   }
 

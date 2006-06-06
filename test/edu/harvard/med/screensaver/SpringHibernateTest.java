@@ -14,10 +14,12 @@ package edu.harvard.med.screensaver;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -27,9 +29,12 @@ import edu.harvard.med.screensaver.db.LabDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.Child;
 import edu.harvard.med.screensaver.model.Parent;
+import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 
 import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateTemplate;
@@ -38,6 +43,9 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Log4jConfigurer;
+
+// TODO: break this test class apart into 2 classes one for Spring+Hibernate
+// tests and one for entity model tests
 
 /**
  * Tests Spring/Hibernate integration. This is one of the rare cases where
@@ -320,7 +328,11 @@ public class SpringHibernateTest
         ResultValueType[] rvt = new ResultValueType[replicates];
         for (int i = 0; i < replicates; i++) {
           rvt[i] = new ResultValueType();
-          rvt[i].addToScreenResult(screenResult);
+          rvt[i].setAssayReadoutType(i % 2 == 0 ? AssayReadoutType.PHOSPHORESCENCE : AssayReadoutType.FLOURESCENCE);
+          rvt[i].setActivityIndicatorType(i % 2 == 0 ? ActivityIndicatorType.BOOLEAN: ActivityIndicatorType.SCALED);
+          rvt[i].setIndicatorDirection(i % 2 == 0 ? IndicatorDirection.LOW_VALUES_INDICATE : IndicatorDirection.HIGH_VALUES_INDICATE);
+          rvt[i].setAssayPhenotype("human");
+          rvt[i].setScreenResult(screenResult);
         }
         
         Library library = labDAO.defineLibrary("library with results", 
@@ -337,7 +349,7 @@ public class SpringHibernateTest
             ResultValue rv = new ResultValue();
             rv.setValue("value " + iWell + "," + iResultValue);
             rv.setWell(wells[iWell]);
-            rv.addToResultValueType(rvt[iResultValue]);
+            rv.setResultValueType(rvt[iResultValue]);
           }
         }
         labDAO.persistEntity(screenResult);
@@ -356,7 +368,16 @@ public class SpringHibernateTest
         for (ResultValueType rvt : resultValueTypes) {
           assertEquals(screenResult,
                        rvt.getScreenResult());
-          int iWell = 0;
+          assertEquals(iResultValue % 2 == 0 ? AssayReadoutType.PHOSPHORESCENCE : AssayReadoutType.FLOURESCENCE,
+                       rvt.getAssayReadoutType());
+          assertEquals(iResultValue % 2 == 0 ? ActivityIndicatorType.BOOLEAN: ActivityIndicatorType.SCALED,
+                       rvt.getActivityIndicatorType());
+          assertEquals(iResultValue % 2 == 0 ? IndicatorDirection.LOW_VALUES_INDICATE : IndicatorDirection.HIGH_VALUES_INDICATE,
+                       rvt.getIndicatorDirection());
+          assertEquals("human",
+                       rvt.getAssayPhenotype());
+          
+            int iWell = 0;
           for (ResultValue rv : rvt.getResultValues()) {
             assertEquals(rvt,
                          rv.getResultValueType());
@@ -372,9 +393,67 @@ public class SpringHibernateTest
         }
       }
     });
+    
 
   }
+  
+  public void testDerivedScreenResults() {
+    final int replicates = 3;
+    final SortedSet<ResultValueType> derivedRvtSet1 = new TreeSet<ResultValueType>();
+    final SortedSet<ResultValueType> derivedRvtSet2 = new TreeSet<ResultValueType>();
+    new TransactionTemplate(txnManager).execute(new
+                                                TransactionCallbackWithoutResult() {
+      protected void doInTransactionWithoutResult(org.springframework.transaction.TransactionStatus status)
+      {
+        ScreenResult screenResult = new ScreenResult();
+        screenResult.setShareable(false);
+        screenResult.setDateCreated(Calendar.getInstance().getTime());
+        screenResult.setReplicateCount(replicates);
+        
+        for (int i = 0; i < replicates; i++) {
+          ResultValueType rvt = new ResultValueType();
+          rvt.setAssayPhenotype("human");
+          rvt.setScreenResult(screenResult);
+          derivedRvtSet1.add(rvt);
+          if (i % 2 == 0) {
+            derivedRvtSet2.add(rvt);
+          }
+        }
+        ResultValueType derivedRvt1 = new ResultValueType();
+        derivedRvt1.setAssayPhenotype("human");
+        derivedRvt1.setScreenResult(screenResult);
+        derivedRvt1.setDerivedFrom(derivedRvtSet1);
 
+        ResultValueType derivedRvt2 = new ResultValueType();
+        derivedRvt2.setAssayPhenotype("human");
+        derivedRvt2.setScreenResult(screenResult);
+        derivedRvt2.setDerivedFrom(derivedRvtSet2);
+        
+        labDAO.persistEntity(screenResult);
+      }
+    });
+    
+    new TransactionTemplate(txnManager).execute(new
+                                                TransactionCallbackWithoutResult() {
+      protected void doInTransactionWithoutResult(org.springframework.transaction.TransactionStatus status)
+      {
+        ScreenResult screenResult = labDAO.loadAllScreenResults().iterator().next();
+        @SuppressWarnings("unchecked")
+        SortedSet<ResultValueType> resultValueTypes = new TreeSet(screenResult.getResultValueTypes());
+
+        ResultValueType derivedRvt = resultValueTypes.last();
+        Set<ResultValueType> derivedFromSet = derivedRvt.getDerivedFrom();
+        assertEquals(derivedRvtSet2, derivedFromSet);
+        
+        resultValueTypes.remove(derivedRvt);
+        derivedRvt = resultValueTypes.last();
+        derivedFromSet = derivedRvt.getDerivedFrom();
+        assertEquals(derivedRvtSet1, derivedFromSet);
+      }
+    });
+    
+  }
+        
   private void displayCompound(Compound compound) {
     Well well;
     Iterator<Well> wells;

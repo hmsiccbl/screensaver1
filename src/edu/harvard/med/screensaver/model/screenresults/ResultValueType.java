@@ -15,6 +15,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 
 
 /**
@@ -51,14 +52,14 @@ public class ResultValueType extends AbstractEntity implements Comparable
   private String                 _description;
   private Integer                _ordinal;
   private int                    _replicateOrdinal;
-  private String                 _assayReadoutTechnology;
+  private AssayReadoutType       _assayReadoutType;
   private String                 _timePoint;
   private boolean                _isDerived;
   private String                 _howDerived;
-  private Set<ResultValueType>   _derivedFrom;
+  private SortedSet<ResultValueType> _derivedFrom;
   private boolean                _isActivityIndicator;
-  private enum                   _activityIndicatorType {NUMERICAL, BOOLEAN, SCALED};
-  private enum                   _indicatorDirection {HIGH_VALUES_INDICATE, LOW_VALUES_INDICATE};
+  private ActivityIndicatorType  _activityIndicatorType;
+  private IndicatorDirection     _indicatorDirection;
   private double                 _indicatorCutoff;
   private boolean                _isFollowUpData;
   private String                 _assayPhenotype;
@@ -80,8 +81,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   /**
    * Get a unique identifier for the <code>ResultValueType</code>.
    * 
-   * @return an Integer representing a unique i
-   * dentifier for the
+   * @return an Integer representing a unique identifier for the
    *         <code>ResultValueType</code>
    * @hibernate.id generator-class="sequence"
    * @hibernate.generator-param name="sequence" value="result_value_type_id_seq"
@@ -102,32 +102,23 @@ public class ResultValueType extends AbstractEntity implements Comparable
   
   /**
    * Get the parent {@link ScreenResult}.
-   * 
-   * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screenresults.ScreenResult"
-   *                        column="screen_result_id" not-null="true"
+   * @return the parent {@link ScreenResult}
    */
   public ScreenResult getScreenResult() {
     return _screenResult;
   }
   
   /**
-   * Set the parent {@link ScreenResult}.
-   * @motivation for Hibernate
-   */
-  protected void setScreenResult(ScreenResult screenResult) {
-    _screenResult = screenResult;
-  }
-
-  /**
    * Add this <code>ResultValueType</code> to the specified
    * {@link ScreenResult}, removing from the existing {@link ScreenResult}
    * parent, if necessary.
+   * @param newScreenResult the new parent {@link ScreenResult}
    */
-  public void addToScreenResult(ScreenResult screenResult) {
-    if (_screenResult != null && screenResult != _screenResult) {
+  public void setScreenResult(ScreenResult newScreenResult) {
+    if (_screenResult != null && newScreenResult != _screenResult) {
       _screenResult.getHbnResultValueTypes().remove(this);
     }
-    _screenResult = screenResult;
+    _screenResult = newScreenResult;
     setOrdinal(_screenResult.getHbnResultValueTypes().size());
     _screenResult.getHbnResultValueTypes().add(this);
   }
@@ -136,7 +127,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * Get the set of {@link ResultValue}s that were generated for this
    * <code>ResultValueType</code>.
    * 
-   * @motivation for Hibernate
+   * @motivation for Hibernate and bi-directional association management
    * @return the {@link java.util.SortedSet} of {@link ResultValue}s generated
    *         for this <code>ResultValueType</code>
    * @hibernate.set cascade="all-delete-orphan" inverse="true" sort="natural"
@@ -145,18 +136,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
    */
   public SortedSet<ResultValue> getHbnResultValues() {
     return _resultValues;
-  }
-
-  /**
-   * Set the set of {@link ResultValue}s that comprise this
-   * <code>ResultValueType</code>.
-   * 
-   * @param resultValue the {@link java.util.SortedSet} of {@link ResultValue}s
-   *          generated for this <code>ResultValueType</code>.
-   * @motivation for Hibernate
-   */
-  public void setHbnResultValues(SortedSet<ResultValue> resultValues) {
-    _resultValues = resultValues;
   }
 
   /**
@@ -195,15 +174,281 @@ public class ResultValueType extends AbstractEntity implements Comparable
     _ordinal = ordinal;
   }
 
+  /**
+   * Get the replicate ordinal, a zero-based index indicating the order of this
+   * <code>ResultValueType</code> within its parent {@link ScreenResult}.
+   * This ordering is really only significant from the standpoint of presenting
+   * a {@link ScreenResult} to the user (historically speaking, it reflects the
+   * ordering found during spreadhseet file import).
+   * 
+   * @return the replicate ordinal, as an <code>int</code>
+   * @hibernate.property
+   *   type="integer"
+   *   not-null="true"
+   */
   public int getReplicateOrdinal() {
     return _replicateOrdinal;
   }
   
-  protected void setReplicateOrdinal(int replicateOrdinal) {
+  /**
+   * Set the replicate ordinal, a 1-based index indicating the order of this
+   * <code>ResultValueType</code> within its parent {@link ScreenResult}.  
+   * 
+   * @param replicateOrdinal the replicate ordinal
+   */
+  public void setReplicateOrdinal(int replicateOrdinal) {
     _replicateOrdinal = replicateOrdinal;
   }
   
-  
+  /**
+   * Get the Activity Indicator Type.
+   * @return an {@link ActivityIndicatorType} enum
+   * @hibernate.property
+   *   type="edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType$UserType"
+   */
+  public ActivityIndicatorType getActivityIndicatorType() {
+    return _activityIndicatorType;
+  }
+
+  /**
+   * Set the Activity Indicator Type.
+   * @param activityIndicatorType the Activity Indicator Type to set
+   */
+  public void setActivityIndicatorType(ActivityIndicatorType activityIndicatorType)
+  {
+    _activityIndicatorType = activityIndicatorType;
+  }
+
+
+  /**
+   * Get the Assay Phenotype.
+   * @return a <code>String</code> representing the Assay Phenotype
+   * @hibernate.property
+   *   type="text"
+   *   not-null="true"
+   */
+  public String getAssayPhenotype() {
+    return _assayPhenotype;
+  }
+
+
+  /**
+   * Set the Assay Phenotype.
+   * @param assayPhenotype the Assay Phenotype to set
+   */
+  public void setAssayPhenotype(String assayPhenotype) {
+    _assayPhenotype = assayPhenotype;
+  }
+
+
+  /**
+   * Get the Assay Readout Type.
+   * @return an {@link AssayReadoutType} enum
+   * @hibernate.property
+   *   type="edu.harvard.med.screensaver.model.screens.AssayReadoutType$UserType"
+   */
+  public AssayReadoutType getAssayReadoutType() {
+    return _assayReadoutType;
+  }
+
+  /**
+   * Set the Assay Readout Type.
+   * @param assayReadoutType the Assay Readout Type to set
+   */
+  public void setAssayReadoutType(AssayReadoutType assayReadoutType) {
+    // TODO: verify that assayReadoutType is in Screen's assayReadoutTypes set.
+    _assayReadoutType = assayReadoutType;
+  }
+
+
+  /**
+   * Get the comments. Comments should describe real-world issues relating to
+   * how the data was generated, how it may be problematic, etc. Contrast with
+   * {@link #getDescription()}.
+   * 
+   * @return a <code>String</code> containing the comments
+   * @see #getDescription()
+   * @hibernate.property type="text"
+   */
+  public String getComments() {
+    return _comments;
+  }
+
+
+  /**
+   * Set the comments.
+   * @param comments The comments to set.
+   */
+  public void setComments(String comments) {
+    _comments = comments;
+  }
+
+
+  /**
+   * Get the set of {@link ResultValueType}s that this
+   * <code>ResultValueType</code> was derived from. By "derived", we mean that
+   * the calculated values of our {@link ResultValues} depend upon the the
+   * {@link ResultValue}s of other {@link ResultValueType}s (of the same stock
+   * plate well). The details of the derivation should be specified via
+   * {@ #setHowDerived}.
+   * 
+   * @return the set of {@link ResultValueType}s that this
+   *         <code>ResultValueType</code> was derived from
+   * @hibernate.set table="result_value_type_derived_from_link" sort="natural"
+   * @hibernate.collection-key column="derived_result_value_type_id"
+   * @hibernate.collection-many-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
+   *                                    column="derived_from_result_value_type_id"
+   */
+  public SortedSet<ResultValueType> getDerivedFrom() {
+    // note: it is okay to return modifiable collection to application code,
+    // since this is a unidirectional association and any changes made directly
+    // to the collection will be properly persisted
+    return _derivedFrom;
+  }
+
+
+  /**
+   * Set the set of {@link ResultValueType}s that this
+   * <code>ResultValueType</code> was derived from. By "derived", we mean that
+   * the calculated values of our {@link ResultValues} depend upon the the
+   * {@link ResultValue}s of other {@link ResultValueType}s (of the same stock
+   * plate well). The details of the derivation should be specified via
+   * {@ #setHowDerived}.
+   * 
+   * @param derivedFrom the set of {@link ResultValueType}s that this
+   *          <code>ResultValueType</code> was derived from
+   */
+  public void setDerivedFrom(SortedSet<ResultValueType> derivedFrom) {
+    // TODO: assert no cycles exist in derivedFrom graph
+    if (derivedFrom != null && derivedFrom.size() > 0) {
+      setDerived(true);
+    }
+    _derivedFrom = derivedFrom;
+  }
+                          
+
+  /**
+   * Get a description of this <code>ResultValueType</code>.
+   * 
+   * @return a <code>String</code> description of this
+   *         <code>ResultValueType</code>
+   * @hibernate.property type="text"
+   */
+  public String getDescription() {
+    return _description;
+  }
+
+  /**
+   * Set a description of this <code>ResultValueType</code>.
+   * 
+   * @param description a description of this <code>ResultValueType</code>
+   */
+  public void setDescription(String description) {
+    _description = description;
+  }
+
+
+  /**
+   * Get then description of how this <code>ResultValueType</code> was derived
+   * from other <code>ResultValueType</code>s.
+   * 
+   * @return a <code>String</code> description of how this
+   *         <code>ResultValueType</code> was derived from other
+   *         <code>ResultValueType</code>s
+   * @hibernate.property type="text"
+   */
+  public String getHowDerived() {
+    return _howDerived;
+  }
+
+  /**
+   * Set the description of how this <code>ResultValueType</code> was derived
+   * from other <code>ResultValueType</code>s.
+   * 
+   * @param howDerived a description of how this <code>ResultValueType</code>
+   *          was derived from other <code>ResultValueType</code>s
+   * @hibernate.property type="text"
+   */
+  public void setHowDerived(String howDerived) {
+    _howDerived = howDerived;
+  }
+
+
+  public double getIndicatorCutoff() {
+    return _indicatorCutoff;
+  }
+
+
+  public void setIndicatorCutoff(double indicatorCutoff) {
+    _indicatorCutoff = indicatorCutoff;
+  }
+
+
+  /**
+   * Get the Indicator Direction.
+   * @return an {@link IndicatorDirection} enum
+   * @hibernate.property
+   *   type="edu.harvard.med.screensaver.model.screenresults.IndicatorDirection$UserType"
+   */
+  public IndicatorDirection getIndicatorDirection() {
+    return _indicatorDirection;
+  }
+
+
+  public void setIndicatorDirection(IndicatorDirection indicatorDirection) {
+    _indicatorDirection = indicatorDirection;
+  }
+
+
+  public boolean isActivityIndicator() {
+    return _isActivityIndicator;
+  }
+
+
+  public void setActivityIndicator(boolean isActivityIndicator) {
+    _isActivityIndicator = isActivityIndicator;
+  }
+
+
+  public boolean isCherryPick() {
+    return _isCherryPick;
+  }
+
+
+  public void setCherryPick(boolean isCherryPick) {
+    _isCherryPick = isCherryPick;
+  }
+
+  public boolean isFollowUpData() {
+    return _isFollowUpData;
+  }
+
+
+  public void setFollowUpData(boolean isFollowUpData) {
+    _isFollowUpData = isFollowUpData;
+  }
+
+
+  public String getName() {
+    return _name;
+  }
+
+
+  public void setName(String name) {
+    _name = name;
+  }
+
+
+  public String getTimePoint() {
+    return _timePoint;
+  }
+
+
+  public void setTimePoint(String timePoint) {
+    _timePoint = timePoint;
+  }
+
+
   // public Object methods
   
   @Override
@@ -221,8 +466,14 @@ public class ResultValueType extends AbstractEntity implements Comparable
   
   // Comparable interface methods
 
+  /**
+   * Defines natural ordering of <code>ResultValueType</code> objects, based
+   * upon their ordinal field value. Note that natural ordering is only defined
+   * between <code>ResultValueType</code> objects that share the same parent
+   * {@link ScreenResult}.
+   */
   public int compareTo(Object that) {
-    return getBusinessKey().compareTo(((ResultValueType) that).getBusinessKey());
+    return getOrdinal().compareTo(((ResultValueType) that).getOrdinal());
   }
 
 
@@ -247,6 +498,63 @@ public class ResultValueType extends AbstractEntity implements Comparable
    */
   protected void setVersion(Integer version) {
     _version = version;
+  }
+
+  /**
+   * Get the parent {@link ScreenResult}.
+   * 
+   * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screenresults.ScreenResult"
+   *                        column="screen_result_id" not-null="true"
+   */
+  protected ScreenResult getHbnScreenResult() {
+    return _screenResult;
+  }
+  
+  /**
+   * Set the parent {@link ScreenResult}.
+   * @param newScreenResult the parent {@link ScreenResult}
+   * @motivation for Hibernate
+   */
+  protected void setHbnScreenResult(ScreenResult screenResult) {
+    _screenResult = screenResult;
+  }
+
+  /**
+   * Set the set of {@link ResultValue}s that comprise this
+   * <code>ResultValueType</code>.
+   * 
+   * @param resultValue the {@link java.util.SortedSet} of {@link ResultValue}s
+   *          generated for this <code>ResultValueType</code>.
+   * @motivation for Hibernate
+   */
+  protected void setHbnResultValues(SortedSet<ResultValue> resultValues) {
+    _resultValues = resultValues;
+  }
+
+  /**
+   * Get whether this <code>ResultValueType</code> is derived from other
+   * <code>ResultValueType</code>s.
+   * 
+   * @return <code>true</code> iff this <code>ResultValueType</code> is
+   *         derived from other <code>ResultValueType</code>s.
+   * @see #setDerivedFrom(Set)
+   * @hibernate.property type="boolean" not-null="true"
+   */
+  protected boolean isDerived() {
+    return _isDerived;
+  }
+
+
+  /**
+   * Set whether this <code>ResultValueType</code> is derived from other
+   * <code>ResultValueType</code>s.
+   * 
+   * @param isDerived <code>true</code> iff this <code>ResultValueType</code>
+   *          is derived from other <code>ResultValueType</code>s.
+   * @see #setDerivedFrom(Set)
+   */
+  protected void setDerived(boolean isDerived) {
+    _isDerived = isDerived;
   }
 
   /**

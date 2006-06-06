@@ -29,7 +29,7 @@ import org.hibernate.usertype.UserType;
  * 
  * <p>
  *
- * Let's sat the name of the <code>VocabularyTerm</code> subclass is
+ * Let's say the name of the <code>VocabularyTerm</code> subclass is
  * <code>term.VTS</code>. In order to make <code>term.VTS</code> function
  * properly, two things need to be done. First, declare a static nested class
  * like so:
@@ -43,10 +43,12 @@ import org.hibernate.usertype.UserType;
  * </pre>
  *
  * Second, every entity property that has type <code>term.VTS</code> must be
- * annotated with the <code>UserType</code>. For example:
+ * Xdoclet-annotated with the <code>UserType</code>. For example:
  * 
  * <pre>
- *   type="term.VTS$UserType"
+ *   @hibernate.property
+ *     type="term.VTS$UserType"
+ *     ...
  * </pre>
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
