@@ -152,14 +152,12 @@ public class ResultValue extends AbstractEntity implements Comparable
   // public Object methods
 
   @Override
-  public int hashCode()
-  {
+  public int hashCode() {
     return getBusinessKey().hashCode();
   }
   
   @Override
-  public boolean equals(Object other)
-  {
+  public boolean equals(Object other) {
     return getBusinessKey().equals(((ResultValue) other).getBusinessKey());
   }
 
