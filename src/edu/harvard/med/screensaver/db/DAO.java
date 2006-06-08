@@ -14,6 +14,7 @@ import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.libraries.Library;
 
 /**
  * A Data Access Object for the beans in the
@@ -64,4 +65,19 @@ public interface DAO
   @Transactional(readOnly=true)
   public <E extends AbstractEntity> List<E> findAllEntitiesWithType(
     Class<E> entityClass);
+  
+  /**
+   * Retrieve and return an entity by its id (primary key).
+   * 
+   * @param <E> the type of the entity to retrieve
+   * @param id the id of the entity to retrieve
+   * @return the entity of the specified type, with the specified id. Return
+   * null if there is no such entity. 
+   */
+  @Transactional(readOnly=true)
+  public <E extends AbstractEntity> E findEntityById(
+    Class<E> entityClass,
+    Integer id);
+
+  // TODO: findEntityByColumns, with and without patterns
 }

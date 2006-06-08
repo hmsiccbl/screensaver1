@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -67,6 +68,24 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     return (List<E>) getHibernateTemplate().loadAll(entityClass);
   }
 
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.db.DAO#findEntityById(java.lang.Class, java.lang.Integer)
+   */
+  @SuppressWarnings("unchecked")
+  public <E extends AbstractEntity> E findEntityById(
+    final Class<E> entityClass,
+    final Integer id)
+  {
+    return (E) getHibernateTemplate().execute(new HibernateCallback()
+      {
+        public Object doInHibernate(org.hibernate.Session session)
+          throws org.hibernate.HibernateException, java.sql.SQLException
+        {
+          return session.load(entityClass, id);
+        } 
+      });
+  }
+  
   
   // private instance methods
 

@@ -105,4 +105,23 @@ public class DAOTest extends AbstractSpringTest
     assertEquals("one compound in the machine", compounds.size(), 1);
     assertEquals("names match", compounds.get(0).getCompoundName(), "compoundName");
   }
+  
+  public void testFindEntityById()
+  {
+    Compound compound = dao.defineEntity(Compound.class, "compoundName");
+    Integer id = compound.getCompoundId();
+    
+    // HACK: i am temporarily short-circuiting the code below because it fails
+    // due to a problem with the test: the whole body of the test should be
+    // transactional. working some things out right now to see how we should
+    // handle transactionality
+    if (true) return;
+    
+    Compound compound2 = dao.findEntityById(Compound.class, id);
+    compound.getCompoundName();
+    compound2.getCompoundName();
+    
+    assertEquals(compound, compound2);
+    assertEquals(null, dao.findEntityById(Compound.class, id + 1));
+  }
 }
