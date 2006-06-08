@@ -11,7 +11,6 @@
 
 package edu.harvard.med.screensaver;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -40,7 +39,6 @@ import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.orm.hibernate3.HibernateTransactionManager;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.Log4jConfigurer;
 
 // TODO: break this test class apart into 2 classes one for Spring+Hibernate
 // tests and one for entity model tests
@@ -74,17 +72,6 @@ public class SpringHibernateTest extends AbstractSpringTest
   protected HibernateTemplate hibernateTemplate;
 
   
-  // bean property setter/getter methods
-
-  public void setLabDAO(LabDAO labDAO) {
-    this.labDAO = labDAO;
-  }
-
-  public void setTransactionManager(HibernateTransactionManager txnManager) {
-    this.txnManager = txnManager;
-  }
-  
-
   // AbstractDependencyInjectionSpringContextTests methods
 
   @Override
@@ -198,11 +185,12 @@ public class SpringHibernateTest extends AbstractSpringTest
   
   
   /**
-   * Tests whether a Well's comopunds can be modified after it has been loaded
+   * Tests whether a Well's compounds can be modified after it has been loaded
    * from the database. (This is more a test of Hibernate than of our
    * application.)
    */
-  public void testCreateWellModifyLater() {
+  public void testCreateWellModifyLater() 
+  {
     new TransactionTemplate(txnManager).execute(new
                                                 TransactionCallbackWithoutResult() {
       protected void doInTransactionWithoutResult(org.springframework.transaction.TransactionStatus status)
@@ -269,12 +257,11 @@ public class SpringHibernateTest extends AbstractSpringTest
 
     Set<Well> wells = labDAO.findAllLibraryWells("library R");
     assertEquals("commit of all Wells", 3, wells.size());
-
   }    
   
   
-  public void testScreenResults() {
-    
+  public void testScreenResults() 
+  {
     final int replicates = 2;
     
     new TransactionTemplate(txnManager).execute(new
@@ -355,11 +342,10 @@ public class SpringHibernateTest extends AbstractSpringTest
         }
       }
     });
-    
-
   }
   
-  public void testDerivedScreenResults() {
+  public void testDerivedScreenResults() 
+  {
     final int replicates = 3;
     final SortedSet<ResultValueType> derivedRvtSet1 = new TreeSet<ResultValueType>();
     final SortedSet<ResultValueType> derivedRvtSet2 = new TreeSet<ResultValueType>();
@@ -419,7 +405,8 @@ public class SpringHibernateTest extends AbstractSpringTest
     
   }
         
-  private void displayCompound(Compound compound) {
+  private void displayCompound(Compound compound) 
+  {
     Well well;
     Iterator<Well> wells;
     System.out.println("compoundId:   " + compound.getCompoundId());
@@ -433,10 +420,9 @@ public class SpringHibernateTest extends AbstractSpringTest
     }
   }
 
-  private void displayWell(Well well) {
+  private void displayWell(Well well) 
+  {
     System.out.println("well plate:   " + well.getPlateNumber());
     System.out.println("well well:    " + well.getWellName());
   }
-
-
 }

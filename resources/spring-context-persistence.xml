@@ -44,8 +44,24 @@
     </property>
   </bean>
 
+  <!-- The bean through which our application will access Hibernate, and thus our persistent data.
+    Inject this bean into our application's persistence-aware classes.  -->
+  <bean
+    id="hibernateTemplate"
+    class="org.springframework.orm.hibernate3.HibernateTemplate">
+    <property
+      name="sessionFactory"
+      ref="hibernateSessionFactory" />
+    <!-- property name="flushModeName" value="FLUSH_COMMIT" /-->
+  </bean>
+  
 
   <!-- Transactional support -->
+
+  <!-- Configuration for explicity, declarative transactions in Spring (uses AOP), 
+  where every bean needing transactional capabilities explicitly has a proxy defined for it -->
+  <!-- Common practice is to specify a parent TransactionProxyFactoryBean, with default config, and set child beans' "parent" attribute to this parent bean. -->
+  <!-- (Can also use the more AOP-generic and more flexible, but more verbose, approach of specifying ProxyFactoryBean and a TransactionInterceptor beans -->
 
   <bean
     id="txnManager"
@@ -55,9 +71,8 @@
       ref="hibernateSessionFactory" />
   </bean>
 
-  <!-- For declarative transactions in Spring (uses AOP) -->
-  <!-- Common practice is to specify a parent TransactionProxyFactoryBean, with default config, and set child beans' "parent" attribute to this parent bean. -->
-  <!-- (Can also use the more AOP-generic and more flexible, but more verbose, approach of specifying ProxyFactoryBean and a TransactionInterceptor beans -->
+  <!-- The beans that are to be wrapped by transactional proxies -->
+  
   <bean
     id="labDAO"
     class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
@@ -75,7 +90,8 @@
     <!-- Note: can also specify preInterceptors and postInterceptors properties for
       specifying other AOP advice -->
   </bean>
-    <bean
+
+  <bean
     id="dao"
     class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
     <property
@@ -93,17 +109,36 @@
       specifying other AOP advice -->
   </bean>
   
-  <!-- The bean through which our application will access Hibernate, and thus our persistent data.
-    Inject this bean into our application's persistence-aware classes.  -->
+  <!-- The following (alternate) configuration allows for auto-proxying beans whose source code contains 
+  JDK 1.5 @Transactional annotation. It enables automatic detection of Spring's @Transactional 
+  annotation, leading to implicit proxies for beans containing that annotation. 
+  [See Spring 1.2.x reference docs, section 6.10.2., "Using metadata-driven auto-proxying"] 
 
-  <bean
-    id="hibernateTemplate"
-    class="org.springframework.orm.hibernate3.HibernateTemplate">
+  <!- - Creates AOP proxies based on all candidate Advisors in the current Spring context.   
+  Allows us to apply the same advice consistently to many business objects. - ->
+  <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
+
+  <bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor">
     <property
-      name="sessionFactory"
-      ref="hibernateSessionFactory" />
-    <!-- property name="flushModeName" value="FLUSH_COMMIT" /-->
+      name="transactionInterceptor"
+      ref="transactionInterceptor" />
   </bean>
+  
+  <bean
+    id="transactionInterceptor"
+    class="org.springframework.transaction.interceptor.TransactionInterceptor">
+    <property
+      name="transactionManager"
+      ref="txnManager" />
+    <property name="transactionAttributeSource">
+      <bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource" />
+    </property>
+  </bean>
+  
+  -->
+  
+  <!-- end of transactional support configuration -->
+  
   
   <bean
     id="schemaUtil"
@@ -113,14 +148,18 @@
     </property>
   </bean>
 
-  <!-- An implementation of our LabDAO interface.  If you want transaction behavior, you must use the "labDAO" bean, not this one! -->
+
+  <!-- Data Access Object (DAO) beans -->
+
   <bean
     id="labDAOImpl"
     class="edu.harvard.med.screensaver.db.LabDAOImpl">
     <property
       name="hibernateTemplate"
-      ref="hibernateTemplate" />
+      ref="hibernateTemplate" 
+    />
   </bean>
+
   <bean
     id="daoImpl"
     class="edu.harvard.med.screensaver.db.DAOImpl"
