@@ -9,9 +9,9 @@
 
 package edu.harvard.med.screensaver.model;
 
-
 /**
  * @hibernate.class
+ *   lazy="false"
  */
 public class Child extends AbstractEntity
 {

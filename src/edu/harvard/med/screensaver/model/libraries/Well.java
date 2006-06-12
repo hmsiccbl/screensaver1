@@ -23,6 +23,7 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * 
  * @hibernate.class
+ *   lazy="false"
  */
 public class Well extends AbstractEntity
 {

@@ -15,6 +15,7 @@ import java.util.Set;
 
 /**
  * @hibernate.class
+ *   lazy="false"
  */
 public class Parent extends AbstractEntity
 {
