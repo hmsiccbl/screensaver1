@@ -47,6 +47,31 @@ public class Library extends AbstractEntity
   private Integer     _endPlate;
   
   
+  // public constructors
+  
+  /**
+   * Construct an uninitialized <code>Library </code> object.
+   */
+  public Library() {}
+  
+  /**
+   * Construct an initialized <code>Library </code> object.
+   */
+  public Library(
+    String libraryName,
+    String shortName,
+    LibraryType libraryType,
+    Integer startPlate,
+    Integer endPlate)
+  {
+    setLibraryName(libraryName);
+    setShortName(shortName);
+    setLibraryType(libraryType);
+    setStartPlate(startPlate);
+    setEndPlate(endPlate);
+  }
+  
+
   // public getters and setters
   
   /**
@@ -111,6 +136,7 @@ public class Library extends AbstractEntity
    * @hibernate.property
    *   type="text"
    *   not-null="true"
+   *   unique="true"
    */
   public String getLibraryName() {
     return _libraryName;
@@ -131,6 +157,7 @@ public class Library extends AbstractEntity
    * @hibernate.property
    *   type="text"
    *   not-null="true"
+   *   unique="true"
    */
   public String getShortName() {
     return _shortName;
@@ -208,6 +235,7 @@ public class Library extends AbstractEntity
    *
    * @hibernate.property
    *   not-null="true"
+   *   unique="true"
    */
   public Integer getStartPlate() {
     return _startPlate;
@@ -227,6 +255,7 @@ public class Library extends AbstractEntity
    *
    * @hibernate.property
    *   not-null="true"
+   *   unique="true"
    */
   public Integer getEndPlate() {
     return _endPlate;
