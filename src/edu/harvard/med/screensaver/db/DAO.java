@@ -100,6 +100,18 @@ public interface DAO
                                                                    String propertyName,
                                                                    Object propertyValue);
   
-  // TODO: findEntitiesByPropertyPattern
-  
+  /**
+   * Retrieve and return a list of entities that match a pattern for the specified text property.
+   * Patterns are specified by using the '*' character as a wildcard.
+   * 
+   * @param <E> the type of the entity to retrieve
+   * @param entityClass the class of the entity to retrieve
+   * @param propertyName the name of the text property to query against
+   * @param propertyPattern the pattern to match
+   * @return a list of entities that have the specified value for the specified property
+   */
+  @Transactional(readOnly = true)
+  public <E extends AbstractEntity> List<E> findEntitiesByPropertyPattern(Class<E> entityClass,
+                                                                          String propertyName,
+                                                                          String propertyPattern);
 }

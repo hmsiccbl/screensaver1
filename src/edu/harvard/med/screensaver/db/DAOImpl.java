@@ -113,6 +113,21 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     return (List<E>) getHibernateTemplate().find(hql, propertyValue);
   }
   
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.db.DAO#findEntitiesByPropertyPattern(java.lang.Class, java.lang.String, java.lang.String)
+   */
+  @SuppressWarnings("unchecked")
+  public <E extends AbstractEntity> List<E> findEntitiesByPropertyPattern(
+    Class<E> entityClass,
+    String propertyName,
+    String propertyPattern)
+  {
+    String entityName = entityClass.getSimpleName();
+    String hql = "from " + entityName + " x where x." + propertyName + " like ?";
+    propertyPattern = propertyPattern.replaceAll( "\\*", "%" );
+    return (List<E>) getHibernateTemplate().find(hql, propertyPattern);
+  }
+  
   
   // private instance methods
 

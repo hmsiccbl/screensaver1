@@ -144,4 +144,18 @@ public class DAOTest extends AbstractSpringTest
     assertEquals(2, dao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.DISCRETE).size());
     assertEquals(0, dao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.COMMERCIAL).size());
   }
+
+  public void testFindEntitiesByPropertyPattern()
+  {
+    dao.defineEntity(Library.class, "npln1", "sn1", LibraryType.NATURAL_PRODUCTS, 1, 50);
+    dao.defineEntity(Library.class, "npln2", "sn2", LibraryType.NATURAL_PRODUCTS, 51, 100);
+    dao.defineEntity(Library.class, "ln3", "sn3", LibraryType.DISCRETE, 101, 150);
+    dao.defineEntity(Library.class, "npln4", "sn4", LibraryType.NATURAL_PRODUCTS, 151, 200);
+    dao.defineEntity(Library.class, "ln5", "sn5", LibraryType.DISCRETE, 201, 250);
+    
+    assertEquals(3, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "npln*").size());
+    assertEquals(2, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "ln*").size());
+    assertEquals(5, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "*ln*").size());
+    assertEquals(0, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "ZZZZZZZZZ*").size());
+  }
 }
