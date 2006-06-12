@@ -16,6 +16,8 @@ import org.springframework.orm.hibernate3.HibernateTransactionManager;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
 
 /**
  * Tests the {@link DAOImpl}.
@@ -116,5 +118,30 @@ public class DAOTest extends AbstractSpringTest
     assertEquals(compound, compound2);
     compound2 = dao.findEntityById(Compound.class, id + 1);
     assertEquals(null, compound2);
+  }
+
+  public void testFindEntitiesbyProperty1()
+  {
+    Compound compound = dao.defineEntity(Compound.class, "spaz");
+    
+    List<Compound> compounds = dao.findEntitiesByProperty(Compound.class, "compoundName", "spaz");
+    assertEquals(1, compounds.size());
+    assertEquals(compound, compounds.get(0));
+
+    compounds = dao.findEntitiesByProperty(Compound.class, "compoundName", "something other than spaz");
+    assertEquals(0, compounds.size());
+  }
+  
+  public void testFindEntitiesByProperty2()
+  {
+    dao.defineEntity(Library.class, "ln1", "sn1", LibraryType.NATURAL_PRODUCTS, 1, 50);
+    dao.defineEntity(Library.class, "ln2", "sn2", LibraryType.NATURAL_PRODUCTS, 51, 100);
+    dao.defineEntity(Library.class, "ln3", "sn3", LibraryType.DISCRETE, 101, 150);
+    dao.defineEntity(Library.class, "ln4", "sn4", LibraryType.NATURAL_PRODUCTS, 151, 200);
+    dao.defineEntity(Library.class, "ln5", "sn5", LibraryType.DISCRETE, 201, 250);
+    
+    assertEquals(3, dao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.NATURAL_PRODUCTS).size());
+    assertEquals(2, dao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.DISCRETE).size());
+    assertEquals(0, dao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.COMMERCIAL).size());
   }
 }

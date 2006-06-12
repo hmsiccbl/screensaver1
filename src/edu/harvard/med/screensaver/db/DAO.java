@@ -78,6 +78,7 @@ public interface DAO
    * 
    * @param <E> the type of the entity to retrieve
    * @param id the id of the entity to retrieve
+   * @param entityClass the class of the entity to retrieve
    * @return the entity of the specified type, with the specified id. Return
    *         null if there is no such entity.
    */
@@ -85,5 +86,20 @@ public interface DAO
   public <E extends AbstractEntity> E findEntityById(Class<E> entityClass,
                                                      Integer id);
 
-  // TODO: findEntityByColumns, with and without patterns
+  /**
+   * Retrieve and return a list of entities that have a specific value for the specified property.
+   * 
+   * @param <E> the type of the entity to retrieve
+   * @param entityClass the class of the entity to retrieve
+   * @param propertyName the name of the property to query against
+   * @param propertyValue the value of the property to query for 
+   * @return a list of entities that have the specified value for the specified property
+   */
+  @Transactional(readOnly = true)
+  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass,
+                                                                   String propertyName,
+                                                                   Object propertyValue);
+  
+  // TODO: findEntitiesByPropertyPattern
+  
 }
