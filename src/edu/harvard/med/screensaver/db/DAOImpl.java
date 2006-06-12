@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.hibernate.ObjectNotFoundException;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
@@ -37,6 +38,13 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   
   // public instance methods
 
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.db.DAO#doInTransaction(edu.harvard.med.screensaver.db.DAOTransaction)
+   */
+  public void doInTransaction(DAOTransaction daoTransaction) {
+    daoTransaction.runTransaction();
+  }
+  
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.db.DAO#defineEntity(java.lang.Class, java.lang.Object[])
    */
@@ -81,7 +89,12 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
         public Object doInHibernate(org.hibernate.Session session)
           throws org.hibernate.HibernateException, java.sql.SQLException
         {
-          return session.load(entityClass, id);
+          try {
+            return session.load(entityClass, id);
+          }
+          catch (ObjectNotFoundException e) {
+            return null;
+          }
         } 
       });
   }
@@ -122,11 +135,9 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
    */
   private Class[] getArgumentTypes(Object [] arguments)
   {
-    _logger.info("hi from here");
     Class [] argumentTypes = new Class [arguments.length];
     for (int i = 0; i < arguments.length; i++) {
       argumentTypes[i] = arguments[i].getClass();
-      _logger.info("arg type " + argumentTypes[i]);
     }
     return argumentTypes;
   }

@@ -14,7 +14,7 @@ import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.libraries.Library;
+
 
 /**
  * A Data Access Object for the beans in the
@@ -26,6 +26,14 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 @Transactional
 public interface DAO
 {
+
+  /**
+   * Execute a segment of code within a transaction.
+   * 
+   * @param daoTransaction the object encapsulating the transactional code to
+   *          execute.
+   */
+  public void doInTransaction(DAOTransaction daoTransaction);
 
   /**
    * Create, register, and return a new {@link AbstractEntity Entity} of the
@@ -40,11 +48,11 @@ public interface DAO
    *              constructor
    */
   public <E extends AbstractEntity> E defineEntity(Class<E> entityClass,
-    Object... constructorArguments);
-  
+                                                   Object... constructorArguments);
+
   /**
-   * Update the database with the values for the given Entity. If the Entity
-   * was not previously in the database, then create it.
+   * Update the database with the values for the given Entity. If the Entity was
+   * not previously in the database, then create it.
    * 
    * @motivation Used to save changes to a Entity when it has been loaded by a
    *             different thread than it was modified in (the Hibernate session
@@ -54,30 +62,28 @@ public interface DAO
    * @param entity the Entity to persist
    */
   public void persistEntity(AbstractEntity entity);
-  
+
   /**
    * Retrieve and return a list of Entities of the specified type.
    * 
    * @param<E> The type of the entity to retrieve
-   * @param entityClass the class of the entity to retrieve 
+   * @param entityClass the class of the entity to retrieve
    * @return a list of the entities of the specified type
    */
-  @Transactional(readOnly=true)
-  public <E extends AbstractEntity> List<E> findAllEntitiesWithType(
-    Class<E> entityClass);
-  
+  @Transactional(readOnly = true)
+  public <E extends AbstractEntity> List<E> findAllEntitiesWithType(Class<E> entityClass);
+
   /**
    * Retrieve and return an entity by its id (primary key).
    * 
    * @param <E> the type of the entity to retrieve
    * @param id the id of the entity to retrieve
    * @return the entity of the specified type, with the specified id. Return
-   * null if there is no such entity. 
+   *         null if there is no such entity.
    */
-  @Transactional(readOnly=true)
-  public <E extends AbstractEntity> E findEntityById(
-    Class<E> entityClass,
-    Integer id);
+  @Transactional(readOnly = true)
+  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass,
+                                                     Integer id);
 
   // TODO: findEntityByColumns, with and without patterns
 }
