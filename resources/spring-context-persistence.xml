@@ -72,24 +72,6 @@
   </bean>
 
   <!-- The beans that are to be wrapped by transactional proxies -->
-  
-  <bean
-    id="labDAO"
-    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-    <property
-      name="transactionManager"
-      ref="txnManager" />
-    <!-- The class/interface to be imbued with transactional qualities -->
-    <property
-      name="target"
-      ref="labDAOImpl" />
-    <!-- Use JDK5 annotation-based transaction declarations -->
-    <property name="transactionAttributeSource">
-      <bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource" />
-    </property>
-    <!-- Note: can also specify preInterceptors and postInterceptors properties for
-      specifying other AOP advice -->
-  </bean>
 
   <bean
     id="dao"
@@ -150,15 +132,6 @@
 
 
   <!-- Data Access Object (DAO) beans -->
-
-  <bean
-    id="labDAOImpl"
-    class="edu.harvard.med.screensaver.db.LabDAOImpl">
-    <property
-      name="hibernateTemplate"
-      ref="hibernateTemplate" 
-    />
-  </bean>
 
   <bean
     id="daoImpl"
