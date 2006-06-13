@@ -14,7 +14,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.db.LabDAO;
+import edu.harvard.med.screensaver.db.DAO;
 
 import org.apache.log4j.Logger;
 
@@ -22,15 +22,15 @@ public class LibraryController extends AbstractController
 {
   private static Logger log = Logger.getLogger(LibraryController.class);
   
-  private LabDAO _labDAO;
+  private DAO _dao;
   private Library _library;
   private String _usageMode; // "create" or "edit"
   private boolean _advancedMode;
   
   /* Property getter/setter methods */
   
-  public void setLabDAO(LabDAO dao) {
-    _labDAO = dao;
+  public void setDAO(DAO dao) {
+    _dao = dao;
   }
   
   public void setLibrary(Library library) {
@@ -70,12 +70,12 @@ public class LibraryController extends AbstractController
    * A command to saved the user's edits.
    */
   public String save() {
-    _labDAO.persistEntity(_library);
+    _dao.persistEntity(_library);
     return "done";
   }
   
   public String create() {
-    _labDAO.persistEntity(_library);
+    _dao.persistEntity(_library);
     return "done";
   }
   

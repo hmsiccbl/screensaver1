@@ -13,7 +13,7 @@ import java.util.List;
 
 import javax.faces.application.FacesMessage;
 
-import edu.harvard.med.screensaver.db.LabDAO;
+import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Library;
 
 import org.apache.log4j.Logger;
@@ -23,14 +23,14 @@ public class MainController extends AbstractController
 {
   private static Logger log = Logger.getLogger(MainController.class);
   
-  private LabDAO _labDAO;
+  private DAO _dao;
   
   private LibraryController _libraryController;
   
   private String _libraryNamePattern;
   
-  public void setLabDAO(LabDAO dao) {
-    _labDAO = dao;
+  public void setDAO(DAO dao) {
+    _dao = dao;
   }
 
   public void setLibraryController(LibraryController libraryController) {
@@ -52,9 +52,12 @@ public class MainController extends AbstractController
   }
   
   public String findLibrary() {
-    assert _labDAO != null : "labDAO property was not initialized";
+    assert _dao != null : "dao property was not initialized";
     // note: we're doing the search now, rather than when the next view is invoked (is this "wrong"?)
-    List<Library> librariesFound = _labDAO.findLibrariesWithMatchingName(_libraryNamePattern);
+    List<Library> librariesFound = _dao.findEntitiesByPropertyPattern(
+        Library.class,
+        "libraryName",
+        _libraryNamePattern);
     if (librariesFound.size() == 0) {
       FacesMessage msg =
         getMessages().setFacesMessageForComponent("libraryPatternNotFound",
