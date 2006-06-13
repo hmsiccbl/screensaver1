@@ -18,19 +18,19 @@ import edu.harvard.med.screensaver.model.libraries.LibraryType;
 
 
 /**
- * Tests the {@link DAOImpl}.
+ * Tests the {@link DAOImpl} in some simple, straightfoward ways.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class DAOTest extends AbstractSpringTest
+public class SimpleDAOTest extends AbstractSpringTest
 {
   
   // public static methods
   
   public static void main(String[] args)
   {
-    junit.textui.TestRunner.run(DAOTest.class);
+    junit.textui.TestRunner.run(SimpleDAOTest.class);
   }
 
   
@@ -134,6 +134,17 @@ public class DAOTest extends AbstractSpringTest
     assertEquals(0, dao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.COMMERCIAL).size());
   }
 
+  public void testFindEntitybyProperty()
+  {
+    Compound compound = dao.defineEntity(Compound.class, "spaz");
+    
+    Compound compound2 = dao.findEntityByProperty(Compound.class, "compoundName", "spaz");
+    assertEquals(compound, compound2);
+
+    compound2 = dao.findEntityByProperty(Compound.class, "compoundName", "something other than spaz");
+    assertNull(compound2);
+  }
+  
   public void testFindEntitiesByPropertyPattern()
   {
     dao.defineEntity(Library.class, "npln1", "sn1", LibraryType.NATURAL_PRODUCTS, 1, 50);
