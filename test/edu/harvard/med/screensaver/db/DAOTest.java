@@ -11,13 +11,11 @@ package edu.harvard.med.screensaver.db;
 
 import java.util.List;
 
-import org.springframework.orm.hibernate3.HibernateTemplate;
-import org.springframework.orm.hibernate3.HibernateTransactionManager;
-
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+
 
 /**
  * Tests the {@link DAOImpl}.
@@ -30,7 +28,8 @@ public class DAOTest extends AbstractSpringTest
   
   // public static methods
   
-  public static void main(String[] args) {
+  public static void main(String[] args)
+  {
     junit.textui.TestRunner.run(DAOTest.class);
   }
 
@@ -43,19 +42,9 @@ public class DAOTest extends AbstractSpringTest
   protected DAO dao;
 
   /**
-   * Bean property, for executing programmatic transactions.
-   */
-  protected HibernateTransactionManager txnManager;
-  
-  /**
    * For schema-related test setup tasks.
    */
   protected SchemaUtil schemaUtil;
-  
-  /**
-   * The hibernate template, and how about that? 
-   */
-  protected HibernateTemplate hibernateTemplate;
 
   
   // protected instance methods
