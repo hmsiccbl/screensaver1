@@ -47,8 +47,9 @@ public interface DAO
    *              do not match the parameter list of the required-fields
    *              constructor
    */
-  public <E extends AbstractEntity> E defineEntity(Class<E> entityClass,
-                                                   Object... constructorArguments);
+  public <E extends AbstractEntity> E defineEntity(
+    Class<E> entityClass,
+    Object... constructorArguments);
 
   /**
    * Update the database with the values for the given Entity. If the Entity was
@@ -83,11 +84,13 @@ public interface DAO
    *         null if there is no such entity.
    */
   @Transactional(readOnly = true)
-  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass,
-                                                     Integer id);
+  public <E extends AbstractEntity> E findEntityById(
+    Class<E> entityClass,
+    Integer id);
 
   /**
-   * Retrieve and return a list of entities that have a specific value for the specified property.
+   * Retrieve and return a list of entities that have a specific value for the
+   * specified property.
    * 
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
@@ -96,10 +99,31 @@ public interface DAO
    * @return a list of entities that have the specified value for the specified property
    */
   @Transactional(readOnly = true)
-  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass,
-                                                                   String propertyName,
-                                                                   Object propertyValue);
+  public <E extends AbstractEntity> List<E> findEntitiesByProperty(
+    Class<E> entityClass,
+    String propertyName,
+    Object propertyValue);
   
+  /**
+   * Retrieve and return the entity that has a specific value for the specified
+   * property. Return <code>null</code> if no entity has that value for that
+   * property. Throw an <code>InvalidArgumentException</code> if there is more
+   * than one entity with the specified value.
+   * 
+   * @param <E> the type of the entity to retrieve
+   * @param entityClass the class of the entity to retrieve
+   * @param propertyName the name of the property to query against
+   * @param propertyValue the value of the property to query for 
+   * @return a list of entities that have the specified value for the specified property
+   * @exception InvalidArgumentException when there is more
+   *    than one entity with the specified value for the property
+   */
+  @Transactional(readOnly = true)
+  public <E extends AbstractEntity> E findEntityByProperty(
+    Class<E> entityClass,
+    String propertyName,
+    Object propertyValue);
+
   /**
    * Retrieve and return a list of entities that match a pattern for the specified text property.
    * Patterns are specified by using the '*' character as a wildcard.
@@ -111,7 +135,8 @@ public interface DAO
    * @return a list of entities that have the specified value for the specified property
    */
   @Transactional(readOnly = true)
-  public <E extends AbstractEntity> List<E> findEntitiesByPropertyPattern(Class<E> entityClass,
-                                                                          String propertyName,
-                                                                          String propertyPattern);
+  public <E extends AbstractEntity> List<E> findEntitiesByPropertyPattern(
+    Class<E> entityClass,
+    String propertyName,
+    String propertyPattern);
 }

@@ -114,6 +114,28 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   }
   
   /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.db.DAO#findEntityByProperty(java.lang.Class, java.lang.String, java.lang.Object)
+   */
+  public <E extends AbstractEntity> E findEntityByProperty(
+    Class<E> entityClass,
+    String propertyName,
+    Object propertyValue)
+  {
+    List<E> entities = findEntitiesByProperty(
+      entityClass,
+      propertyName,
+      propertyValue);
+    if (entities.size() == 0) {
+      return null;
+    }
+    if (entities.size() > 1) {
+      throw new IllegalArgumentException(
+        "more than one result for DAO.findEntityByProperty");
+    }
+    return entities.get(0);
+  }
+  
+  /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.db.DAO#findEntitiesByPropertyPattern(java.lang.Class, java.lang.String, java.lang.String)
    */
   @SuppressWarnings("unchecked")
@@ -166,6 +188,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   {
     Class [] argumentTypes = new Class [arguments.length];
     for (int i = 0; i < arguments.length; i++) {
+      _logger.info("arg type = " + arguments[i].getClass());
       argumentTypes[i] = arguments[i].getClass();
     }
     return argumentTypes;
