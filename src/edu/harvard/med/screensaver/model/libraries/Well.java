@@ -55,11 +55,10 @@ public class Well extends AbstractEntity
   /**
    * Constructs an initialized <code>Well</code> object.
    */
-  public Well(String wellName,
-              Library parentLibrary,
-              int plateNumber) {
+  public Well(Library parentLibrary, Integer plateNumber, String wellName)
+  {
+    _plateNumber = plateNumber;
     _wellName = wellName;
-    _plateNumber = new Integer(plateNumber);
     // this call must occur after assignments of wellName and plateNumber (to
     // ensure hashCode() works)
     setLibrary(parentLibrary);
