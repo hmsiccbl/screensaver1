@@ -23,6 +23,9 @@ public class Child extends AbstractEntity
   
   // instance fields
   
+  private Integer _version;
+
+
   private Parent _parent;
   private Integer _id;
   private String _name;
@@ -30,14 +33,17 @@ public class Child extends AbstractEntity
   
   // constructor and instance methods
   
-  public Child() {
+  public Child()
+  {
   }
 
-  public Child(String name) {
+  public Child(String name)
+  {
     _name = name;
   }
 
-  public void setId(Integer id) {
+  public void setId(Integer id)
+  {
     _id = id;
   }
 
@@ -48,16 +54,19 @@ public class Child extends AbstractEntity
    *   name="sequence"
    *   value="parent_id_seq"
    */  
-  public Integer getId() {
+  public Integer getId()
+  {
     return _id;
   }
   
-  public void addToParent(Parent parent) {
+  public void addToParent(Parent parent)
+  {
     setParent(parent);
     parent.getChildren().add(this);
   }
   
-  public void setParent(Parent parent) {
+  public void setParent(Parent parent)
+  {
     _parent = parent;
 
     // NOTE: Cannot make the following call, as it causes
@@ -70,7 +79,6 @@ public class Child extends AbstractEntity
 
     // parent.getChildren().add(this)
   }
-
   
   /**
    * @hibernate.many-to-one
@@ -78,7 +86,8 @@ public class Child extends AbstractEntity
    *   column="parent_id"
    *   not-null="true"
    */
-  public Parent getParent() {
+  public Parent getParent()
+  {
     return _parent;
   }
 
@@ -88,23 +97,44 @@ public class Child extends AbstractEntity
    *   not-null="true"
    * @return
    */
-  public String getName() {
+  public String getName()
+  {
     return _name;
   }
 
-  public void setName(String name) {
+  public void setName(String name)
+  {
     _name = name;
   }
   
-  @Override
-  public int hashCode()
-  {
-    return getName().hashCode();
-  }
   
-  @Override
-  public boolean equals(Object other)
+  // protected getters and setters
+  
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.model.AbstractEntity#getBusinessKey()
+   */
+  protected Object getBusinessKey()
   {
-    return getName().equals(((Child) other).getName());
+    return getName();
+  }
+
+  /**
+   * Get the version number of the compound.
+   * @return     the version number of the compound
+   * @motivation for hibernate
+   *
+   * @hibernate.version
+   */
+  private Integer getVersion() {
+    return _version;
+  }
+
+  /**
+   * Set the version number of the compound.
+   * @param version the new version number for the compound
+   * @motivation    for hibernate
+   */
+  private void setVersion(Integer version) {
+    _version = version;
   }
 }

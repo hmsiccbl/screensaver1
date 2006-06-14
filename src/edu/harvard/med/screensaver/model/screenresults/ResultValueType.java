@@ -521,16 +521,30 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
   // public Object methods
   
-  @Override
-  public int hashCode()
-  {
-    return getBusinessKey().hashCode();
+  /**
+   * Get whether this <code>ResultValueType</code> is derived from other
+   * <code>ResultValueType</code>s.
+   * 
+   * @return <code>true</code> iff this <code>ResultValueType</code> is
+   *         derived from other <code>ResultValueType</code>s.
+   * @see #setDerivedFrom(SortedSet)
+   * @hibernate.property type="boolean" not-null="true"
+   */
+  public boolean isDerived() {
+    return _isDerived;
   }
 
-  @Override
-  public boolean equals(Object other)
-  {
-    return getBusinessKey().equals(((ResultValueType) other).getBusinessKey());
+
+  /**
+   * Set whether this <code>ResultValueType</code> is derived from other
+   * <code>ResultValueType</code>s.
+   * 
+   * @param isDerived <code>true</code> iff this <code>ResultValueType</code>
+   *          is derived from other <code>ResultValueType</code>s.
+   * @see #setDerivedFrom(SortedSet)
+   */
+  public void setDerived(boolean isDerived) {
+    _isDerived = isDerived;
   }
 
   
@@ -550,83 +564,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
   // protected getters and setters
   
   /**
-   * Get the version number of the compound.
-   * 
-   * @return the version number of the <code>ResultValueType</code>
-   * @motivation for hibernate
-   * @hibernate.version
-   */
-  protected Integer getVersion() {
-    return _version;
-  }
-
-  /**
-   * Set the version number of the <code>ResultValueType</code>
-   * 
-   * @param version the new version number for the <code>ResultValueType</code>
-   * @motivation for hibernate
-   */
-  protected void setVersion(Integer version) {
-    _version = version;
-  }
-
-  /**
-   * Get the parent {@link ScreenResult}.
-   * 
-   * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screenresults.ScreenResult"
-   *                        column="screen_result_id" not-null="true"
-   */
-  protected ScreenResult getHbnScreenResult() {
-    return _screenResult;
-  }
-  
-  /**
-   * Set the parent {@link ScreenResult}.
-   * @param newScreenResult the parent {@link ScreenResult}
-   * @motivation for Hibernate
-   */
-  protected void setHbnScreenResult(ScreenResult screenResult) {
-    _screenResult = screenResult;
-  }
-
-  /**
-   * Set the set of {@link ResultValue}s that comprise this
-   * <code>ResultValueType</code>.
-   * 
-   * @param resultValue the {@link java.util.SortedSet} of {@link ResultValue}s
-   *          generated for this <code>ResultValueType</code>.
-   * @motivation for Hibernate
-   */
-  protected void setHbnResultValues(SortedSet<ResultValue> resultValues) {
-    _resultValues = resultValues;
-  }
-
-  /**
-   * Get whether this <code>ResultValueType</code> is derived from other
-   * <code>ResultValueType</code>s.
-   * 
-   * @return <code>true</code> iff this <code>ResultValueType</code> is
-   *         derived from other <code>ResultValueType</code>s.
-   * @see #setDerivedFrom(SortedSet)
-   * @hibernate.property type="boolean" not-null="true"
-   */
-  protected boolean isDerived() {
-    return _isDerived;
-  }
-
-  /**
-   * Set whether this <code>ResultValueType</code> is derived from other
-   * <code>ResultValueType</code>s.
-   * 
-   * @param isDerived <code>true</code> iff this <code>ResultValueType</code>
-   *          is derived from other <code>ResultValueType</code>s.
-   * @see #setDerivedFrom(SortedSet)
-   */
-  protected void setDerived(boolean isDerived) {
-    _isDerived = isDerived;
-  }
-
-  /**
    * Get a business key that uniquely represents this object and that is based
    * upon some subset of its domain-model data fields.
    * 
@@ -642,4 +579,58 @@ public class ResultValueType extends AbstractEntity implements Comparable
     return getScreenResult().getDateCreated() + ":" + getOrdinal();
   }
 
+
+  // private getters and setters
+  
+  /**
+   * Get the version number of the compound.
+   * 
+   * @return the version number of the <code>ResultValueType</code>
+   * @motivation for hibernate
+   * @hibernate.version
+   */
+  private Integer getVersion() {
+    return _version;
+  }
+
+  /**
+   * Set the version number of the <code>ResultValueType</code>
+   * 
+   * @param version the new version number for the <code>ResultValueType</code>
+   * @motivation for hibernate
+   */
+  private void setVersion(Integer version) {
+    _version = version;
+  }
+
+  /**
+   * Get the parent {@link ScreenResult}.
+   * 
+   * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screenresults.ScreenResult"
+   *                        column="screen_result_id" not-null="true"
+   */
+  private ScreenResult getHbnScreenResult() {
+    return _screenResult;
+  }
+  
+  /**
+   * Set the parent {@link ScreenResult}.
+   * @param newScreenResult the parent {@link ScreenResult}
+   * @motivation for Hibernate
+   */
+  private void setHbnScreenResult(ScreenResult screenResult) {
+    _screenResult = screenResult;
+  }
+
+  /**
+   * Set the set of {@link ResultValue}s that comprise this
+   * <code>ResultValueType</code>.
+   * 
+   * @param resultValue the {@link java.util.SortedSet} of {@link ResultValue}s
+   *          generated for this <code>ResultValueType</code>.
+   * @motivation for Hibernate
+   */
+  private void setHbnResultValues(SortedSet<ResultValue> resultValues) {
+    _resultValues = resultValues;
+  }
 }

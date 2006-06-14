@@ -168,6 +168,24 @@ public class ScreenResult extends AbstractEntity
     _replicateCount = replicateCount;
   }
   
+  
+  // protected getters and setters
+  
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.model.AbstractEntity#getBusinessKey()
+   */
+  protected Object getBusinessKey()
+  {
+    // HACK: this biz key won't actually work! gotta replace it!
+    // TODO: replace with
+    // return getScreen()
+    // when it is implemented
+    return this;
+  }
+  
+  
+  // package instance methods
+  
   /**
    * Get a sorted set of all {@link ResultValueType}s for this
    * <code>ScreenResult</code>.
@@ -179,12 +197,12 @@ public class ScreenResult extends AbstractEntity
    * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
    * @hibernate.collection-key column="screen_result_id"
    */
-  public SortedSet<ResultValueType> getHbnResultValueTypes() {
+  SortedSet<ResultValueType> getHbnResultValueTypes() {
     return _resultValueTypes;
   }
 
 
-  // protected getters and setters
+  // private getters and setters
   
   /**
    * Get the version number of the compound.
@@ -193,7 +211,7 @@ public class ScreenResult extends AbstractEntity
    * @motivation for hibernate
    * @hibernate.version
    */
-  protected Integer getVersion() {
+  private Integer getVersion() {
     return _version;
   }
 
@@ -203,7 +221,7 @@ public class ScreenResult extends AbstractEntity
    * @param version the new version number for the <code>ScreenResult</code>
    * @motivation for hibernate
    */
-  protected void setVersion(Integer version) {
+  private void setVersion(Integer version) {
     _version = version;
   }
   
@@ -216,10 +234,7 @@ public class ScreenResult extends AbstractEntity
    *          <code>ScreenResult</code>.
    * @motivation for hibernate
    */
-  protected void setHbnResultValueTypes(SortedSet<ResultValueType> resultValueTypes) {
+  private void setHbnResultValueTypes(SortedSet<ResultValueType> resultValueTypes) {
     _resultValueTypes = resultValueTypes;
   }
-
-  
-
 }

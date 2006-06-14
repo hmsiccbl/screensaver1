@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.model;
 
 import java.io.Serializable;
 
+
 /**
  * An abstract superclass for the entity beans in the data model.
  *
@@ -20,4 +21,41 @@ import java.io.Serializable;
 public abstract class AbstractEntity implements Serializable
 {
 
+  /**
+   * Return the business key for the entity.
+   * @return the business key
+   */
+  abstract protected Object getBusinessKey();
+  
+  
+  // method overrides from Object
+  
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object object) {
+    if (! getClass().equals(object.getClass())) {
+      return false;
+    }
+    AbstractEntity that = (AbstractEntity) object;
+    return getBusinessKey().equals(that.getBusinessKey());
+  }
+
+  /**
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    return getBusinessKey().hashCode();
+  }
+
+  /**
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "(" + getBusinessKey().toString() + ")";
+  }
 }

@@ -333,28 +333,14 @@ public class Compound extends AbstractEntity
   }
 
   
-  // identity methods
+  // protected getters and setters
   
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.model.AbstractEntity#getBusinessKey()
    */
-  @Override
-  public boolean equals(Object object) {
-    if (! (object instanceof Compound)) {
-      return false;
-    }
-    Compound that = (Compound) object;
-    return
-      this.getCompoundName().equals(that.getCompoundName());
-  }
-
-  /**
-   * @see java.lang.Object#hashCode()
-   */
-  @Override
-  public int hashCode() {
-    assert _compoundName != null : "business key field has not been defined";
-    return getCompoundName().hashCode();
+  protected Object getBusinessKey()
+  {
+    return getCompoundName();
   }
 
   

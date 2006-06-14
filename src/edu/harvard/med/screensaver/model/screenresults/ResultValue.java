@@ -148,19 +148,6 @@ public class ResultValue extends AbstractEntity implements Comparable
   public void setValue(String value) {
     _value = value;
   }
-  
-
-  // public Object methods
-
-  @Override
-  public int hashCode() {
-    return getBusinessKey().hashCode();
-  }
-  
-  @Override
-  public boolean equals(Object other) {
-    return getBusinessKey().equals(((ResultValue) other).getBusinessKey());
-  }
 
   
   // Comparable interface methods
@@ -192,50 +179,7 @@ public class ResultValue extends AbstractEntity implements Comparable
 
   
   // protected getters and setters
-
-  /**
-   * Get the version number of the <code>ResultValue</code>.
-   * 
-   * @return the version number of the <code>ResultValue</code>
-   * @motivation for hibernate
-   * @hibernate.version
-   */
-  protected Integer getVersion() {
-    return _version;
-  }
-
-  /**
-   * Set the version number of the <code>ResultValue</code>
-   * 
-   * @param version the new version number for the <code>ResultValue</code>
-   * @motivation for hibernate
-   */
-  protected void setVersion(Integer version) {
-    _version = version;
-  }
-
-  /**
-   * Get the parent {@link ResultValueType}.
-   * 
-   * @return the parent {@link ResultValueType}
-   * @motivation for Hibernate
-   * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
-   *                        column="result_value_type_id" not-null="true"
-   */
-  protected ResultValueType getHbnResultValueType() {
-    return _resultValueType;
-  }
-
-  /**
-   * Set the parent {@link ResultValueType}.
-   * 
-   * @param resultValueType the parent {@link ResultValueType}
-   * @motivation for Hibernate
-   */
-  protected void setHbnResultValueType(ResultValueType resultValueType) {
-    _resultValueType = resultValueType;
-  }
-
+  
   /**
    * Get a business key that uniquely represents this object and that is based
    * upon some subset of its domain-model data fields.
@@ -250,5 +194,49 @@ public class ResultValue extends AbstractEntity implements Comparable
       "business key fields have not been defined";
     return _well.getPlateNumber() + _well.getWellName() + _resultValueType.getOrdinal();
   }
-  
+
+  // private getters and setters
+
+  /**
+   * Get the version number of the <code>ResultValue</code>.
+   * 
+   * @return the version number of the <code>ResultValue</code>
+   * @motivation for hibernate
+   * @hibernate.version
+   */
+  private Integer getVersion() {
+    return _version;
+  }
+
+  /**
+   * Set the version number of the <code>ResultValue</code>
+   * 
+   * @param version the new version number for the <code>ResultValue</code>
+   * @motivation for hibernate
+   */
+  private void setVersion(Integer version) {
+    _version = version;
+  }
+
+  /**
+   * Get the parent {@link ResultValueType}.
+   * 
+   * @return the parent {@link ResultValueType}
+   * @motivation for Hibernate
+   * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
+   *                        column="result_value_type_id" not-null="true"
+   */
+  private ResultValueType getHbnResultValueType() {
+    return _resultValueType;
+  }
+
+  /**
+   * Set the parent {@link ResultValueType}.
+   * 
+   * @param resultValueType the parent {@link ResultValueType}
+   * @motivation for Hibernate
+   */
+  private void setHbnResultValueType(ResultValueType resultValueType) {
+    _resultValueType = resultValueType;
+  }
 }

@@ -27,6 +27,9 @@ public class Parent extends AbstractEntity
   
   // instance fields
   
+  private Integer _version;
+
+
   private Set<Child> _children = new HashSet<Child>();
   private Integer _id;
   
@@ -54,6 +57,26 @@ public class Parent extends AbstractEntity
   }
   
   /**
+   * Get the version number of the compound.
+   * @return     the version number of the compound
+   * @motivation for hibernate
+   *
+   * @hibernate.version
+   */
+  private Integer getVersion() {
+    return _version;
+  }
+
+  /**
+   * Set the version number of the compound.
+   * @param version the new version number for the compound
+   * @motivation    for hibernate
+   */
+  private void setVersion(Integer version) {
+    _version = version;
+  }
+
+  /**
    * @hibernate.set
    *   cascade="all-delete-orphan"
    *   inverse="true"
@@ -77,10 +100,15 @@ public class Parent extends AbstractEntity
 //  protected void setChildren(Set<Child> children) {
 //    _children = children;
 //  }
-
-  @Override
-  public boolean equals(Object other)
+  
+  
+  // protected getters and setters
+  
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.model.AbstractEntity#getBusinessKey()
+   */
+  protected Object getBusinessKey()
   {
-    return _id.equals(((Parent) other).getId());
+    return this;
   }
 }

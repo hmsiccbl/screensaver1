@@ -270,6 +270,17 @@ public class Library extends AbstractEntity
   }
 
   
+  // protected getters and setters
+  
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.model.AbstractEntity#getBusinessKey()
+   */
+  protected Object getBusinessKey()
+  {
+    return getLibraryName();
+  }
+  
+  
   // package getters and setters
   
   /**
