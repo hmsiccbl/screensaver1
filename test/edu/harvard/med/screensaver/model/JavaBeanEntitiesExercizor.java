@@ -34,6 +34,9 @@ abstract class JavaBeanEntitiesExercizor extends EntityClassesExercisor
         public void exercizeJavaBeanEntity(AbstractEntity bean, BeanInfo beanInfo)
         {
           for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
+            if (propertyDescriptor.getReadMethod().getName().equals("getClass")) {
+              continue;
+            }
             exercizor.exercizePropertyDescriptor(bean, beanInfo, propertyDescriptor);
           }
         }
