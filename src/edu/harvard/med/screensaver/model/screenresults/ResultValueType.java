@@ -51,7 +51,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   private String                 _name;
   private String                 _description;
   private Integer                _ordinal;
-  private int                    _replicateOrdinal;
+  private Integer                _replicateOrdinal;
   private AssayReadoutType       _assayReadoutType;
   private String                 _timePoint;
   private boolean                _isDerived;
@@ -60,7 +60,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   private boolean                _isActivityIndicator;
   private ActivityIndicatorType  _activityIndicatorType;
   private IndicatorDirection     _indicatorDirection;
-  private double                 _indicatorCutoff;
+  private Double                 _indicatorCutoff;
   private boolean                _isFollowUpData;
   private String                 _assayPhenotype;
   private boolean                _isCherryPick;
@@ -171,7 +171,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    *          within its parent {@link ScreenResult}
    * @motivation for Hibernate
    */
-  protected void setOrdinal(Integer ordinal) {
+  public void setOrdinal(Integer ordinal) {
     _ordinal = ordinal;
   }
 
@@ -182,12 +182,12 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * a {@link ScreenResult} to the user (historically speaking, it reflects the
    * ordering found during spreadhseet file import).
    * 
-   * @return the replicate ordinal, as an <code>int</code>
+   * @return the replicate ordinal
    * @hibernate.property
    *   type="integer"
    *   not-null="true"
    */
-  public int getReplicateOrdinal() {
+  public Integer getReplicateOrdinal() {
     return _replicateOrdinal;
   }
   
@@ -197,7 +197,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * 
    * @param replicateOrdinal the replicate ordinal
    */
-  public void setReplicateOrdinal(int replicateOrdinal) {
+  public void setReplicateOrdinal(Integer replicateOrdinal) {
     _replicateOrdinal = replicateOrdinal;
   }
   
@@ -374,12 +374,12 @@ public class ResultValueType extends AbstractEntity implements Comparable
   }
 
 
-  public double getIndicatorCutoff() {
+  public Double getIndicatorCutoff() {
     return _indicatorCutoff;
   }
 
 
-  public void setIndicatorCutoff(double indicatorCutoff) {
+  public void setIndicatorCutoff(Double indicatorCutoff) {
     _indicatorCutoff = indicatorCutoff;
   }
 

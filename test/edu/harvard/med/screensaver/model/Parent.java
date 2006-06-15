@@ -36,10 +36,6 @@ public class Parent extends AbstractEntity
   
   // constructor and instance methods
   
-  public void setId(Integer id) {
-    _id = id;
-  }
-  
   /**
    * @hibernate.id
    *   generator-class="sequence"
@@ -50,12 +46,28 @@ public class Parent extends AbstractEntity
   public Integer getId() {
     return _id;
   }
+
+  public void setId(Integer id) {
+    _id = id;
+  }
   
+  public Set<Child> getChildren() {
+    return Collections.unmodifiableSet(_children);
+  }
+
   public void addChild(Child c) {
     _children.add(c);
     c.setParent(this);
   }
   
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.model.AbstractEntity#getBusinessKey()
+   */
+  protected Object getBusinessKey()
+  {
+    return this;
+  }
+
   /**
    * Get the version number of the compound.
    * @return     the version number of the compound
@@ -91,24 +103,5 @@ public class Parent extends AbstractEntity
 
   private void setChildrenHibernate(Set<Child> children) {
     _children = children;
-  }
-  
-  public Set<Child> getChildren() {
-    return Collections.unmodifiableSet(_children);
-  }
-
-//  protected void setChildren(Set<Child> children) {
-//    _children = children;
-//  }
-  
-  
-  // protected getters and setters
-  
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.model.AbstractEntity#getBusinessKey()
-   */
-  protected Object getBusinessKey()
-  {
-    return this;
   }
 }

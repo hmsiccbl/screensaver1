@@ -49,7 +49,7 @@ public class ScreenResult extends AbstractEntity
   private Integer                    _version;
   private Date                       _dateCreated;
   private boolean                    _isShareable;
-  private int                        _replicateCount;
+  private Integer                    _replicateCount;
   private SortedSet<ResultValueType> _resultValueTypes = new TreeSet<ResultValueType>();
 
   
@@ -153,7 +153,7 @@ public class ScreenResult extends AbstractEntity
    *         <code>ScreenResult</code>
    * @hibernate.property type="integer" not-null="true"
    */
-  public int getReplicateCount() {
+  public Integer getReplicateCount() {
     return _replicateCount;
   }
   
@@ -164,7 +164,7 @@ public class ScreenResult extends AbstractEntity
    * @param replicateCount the number of replicates (assay plates) associated
    *          with this <code>ScreenResult</code>
    */
-  public void setReplicateCount(int replicateCount) {
+  public void setReplicateCount(Integer replicateCount) {
     _replicateCount = replicateCount;
   }
   
