@@ -11,6 +11,8 @@ package edu.harvard.med.screensaver.model;
 
 import java.beans.BeanInfo;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
+import java.util.Collection;
 
 /**
  * Test the entities as JavaBeans.
@@ -31,7 +33,11 @@ public class JavaBeanEntitiesTest extends JavaBeanEntitiesExercizor
       });
   }
   
-  public void testUninitializedPropertiesReturnNull()
+  /**
+   * Test that all properties have a getter, and all properties aside from
+   * set-based properties and hibernate ids have a setter
+   */
+  public void testPropertiesHaveGetterAndSetter()
   {
     exercizePropertyDescriptors(new PropertyDescriptorExercizor()
       {
@@ -40,9 +46,67 @@ public class JavaBeanEntitiesTest extends JavaBeanEntitiesExercizor
           BeanInfo beanInfo,
           PropertyDescriptor propertyDescriptor)
         {
-          System.out.println("bean = " + bean.getClass());
-          System.out.println("info = " + beanInfo);
-          System.out.println("prop = " + propertyDescriptor.getReadMethod().getName());
+          assertNotNull(
+            "property has getter: " +
+            bean.getClass() + "." + propertyDescriptor.getDisplayName(),
+            propertyDescriptor.getReadMethod());
+          
+          // HACK: kludging endsWith("Id") <=> is hibernate id. should really
+          // make sure this is the hibernate id
+          if (! propertyDescriptor.getName().endsWith("Id")) {
+            if (! Collection.class.isAssignableFrom(propertyDescriptor.getPropertyType())) {
+              assertNotNull(
+                "property has setter: " +
+                bean.getClass() + "." + propertyDescriptor.getDisplayName(),
+                propertyDescriptor.getWriteMethod());
+            }
+          }
+        }
+      });
+  }
+  
+  /**
+   * Test that all properties start out uninitialized when a bean is first
+   * created.
+   */
+  public void testUninitializedProperties()
+  {
+    exercizePropertyDescriptors(new PropertyDescriptorExercizor()
+      {
+        public void exercizePropertyDescriptor(
+          AbstractEntity bean,
+          BeanInfo beanInfo,
+          PropertyDescriptor propertyDescriptor)
+        {
+          Method getter = propertyDescriptor.getReadMethod();
+          Object result = null;
+          try {
+            // note that result will be Boolean when the getter returns boolean
+            result = getter.invoke(bean);
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            fail("getter for uninitialized property threw exception" + e);
+          }
+          if (result instanceof Collection) {
+            assertEquals(
+              "getter for uninitialized property returns empty collection: " +
+              bean.getClass() + "." + getter.getName(),
+              0,
+              ((Collection) result).size());
+          }
+          else if (result != null && result instanceof Boolean) {
+            assertFalse(
+              "getter for uninitialized property returns false: " +
+              bean.getClass() + "." + getter.getName(),
+              (Boolean) result);
+          }
+          else {
+            assertNull(
+              "getter for uninitialized property returns null: " +
+              bean.getClass() + "." + getter.getName(),
+              result);
+          }
         }
       });
   }
