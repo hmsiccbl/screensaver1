@@ -180,7 +180,7 @@ public class ScreenResult extends AbstractEntity
     // TODO: replace with
     // return getScreen()
     // when it is implemented
-    return hashCode();
+    return super.hashCode();
   }
   
   
