@@ -51,7 +51,57 @@ import java.io.Serializable;
  *     </ul>
  *   </li>
  *   <li>
- *     lots more that just hasn't been recorded yet...
+ *     the getter for the Hibernate id is public; the setter for the Hibernate
+ *     id is private.
+ *   </li>
+ *   <li>
+ *     the Hibernate version is an Integer name <code>_version</code>. the
+ *     Hibernate accessors to the version are private, and are named
+ *     <code>getVersion</code> and <code>setVersion</code>
+ *   </li>
+ *   <li>
+ *     in general, any method that is exclusively for Hibernate use is private
+ *   </li>
+ *   <li>
+ *     collection properties (properties whose getter method returns a Collection)
+ *     have a public getter for the whole collection, e.g., <code>getBars</code>;
+ *     have public methods <code>addBar</code> and <code>removeBar</code> that
+ *     each take a <code>Bar</code> object, and behave in a similar fashion to
+ *     <code>Collection.add</code> and <code>Collection.remove</code>. In
+ *     particular, if the collection is a <code>Set</code>, then the add and
+ *     remove operators return the boolean value <code>true</code> whenever
+ *     the operation actually added or removed the <code>Bar</code> (whether it
+ *     was not previously in the set, and whether it was previously in the set,
+ *     respectively).
+ *     <p>
+ *     A setter method for the Collection property only exists when needed
+ *     by Hibernate, and is private. (Only needed when the property does not
+ *     represent a relationship.)
+ *   </li>
+ *   <li>
+ *     relationship properties always maintain bidirectionality of the
+ *     relationship. Because this usage conflicts with Hibernate usage,
+ *     relationship properties always come in pairs: a "JavaBean" version of
+ *     the property, which is named traditionally, e.g., <code>getFoo</code>
+ *     and <code>setFoo</code>; and a Hibernate version of the property, which
+ *     is named by prefixing the JavaBean property with "hbn", e.g.,
+ *     <code>getHbnFoo</code> and <code>setHbnFoo</code>
+ *   </li>
+ *   <li>
+ *     note that the combination of the previous two bullet items will dictate
+ *     the following set of methods for a collection property <code>foos</code>
+ *     that is also a relationship:
+ *     <p>
+ *     <pre>
+ *       public Set<Foo> getFoos();
+ *       public boolean addFoo(Foo foo);
+ *       public boolean removeFoo(Foo foo);
+ *       private Set<Foo> getHbnFoo();
+ *       private void setHbnFoo(Set<Foo>);
+ *     </pre>
+ *   </li>
+ *   <li>
+ *     TODO: more stuff that just hasn't been recorded yet...
  *   </li>
  * </ul>
  *
