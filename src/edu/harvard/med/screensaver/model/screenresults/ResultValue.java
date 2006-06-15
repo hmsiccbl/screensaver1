@@ -45,16 +45,20 @@ public class ResultValue extends AbstractEntity implements Comparable
   private boolean _exclude;
   
 
-  // constructors
+  // public constructors and instance methods
   
   /**
-   * Constructs an uninitialized <code>ResultValue</code> object.
-   * @motivation for Hibernate loading
+   * Constructs an initialized <code>ResultValue</code> object.
+   * @param resultValueType
+   * @param well
+   * @param value
    */
-  public ResultValue() {}
-  
-
-  // public getters and setters
+  public ResultValue(ResultValueType resultValueType, Well well, String value)
+  {
+    setResultValueType(resultValueType);
+    setWell(well);
+    setValue(value);
+  }
 
   /**
    * Get a unique identifier for the <code>ResultValue</code>.
@@ -195,8 +199,15 @@ public class ResultValue extends AbstractEntity implements Comparable
     return _well.getPlateNumber() + _well.getWellName() + _resultValueType.getOrdinal();
   }
 
-  // private getters and setters
+  
+  // private constructors and instance methods
 
+  /**
+   * Constructs an uninitialized ResultValue object.
+   * @motivation for hibernate
+   */
+  private ResultValue() {}
+  
   /**
    * Get the version number of the <code>ResultValue</code>.
    * 

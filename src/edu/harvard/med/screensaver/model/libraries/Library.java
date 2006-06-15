@@ -47,15 +47,15 @@ public class Library extends AbstractEntity
   private Integer     _endPlate;
   
   
-  // public constructors
-  
-  /**
-   * Construct an uninitialized <code>Library </code> object.
-   */
-  public Library() {}
+  // public constructors and instance methods
   
   /**
    * Construct an initialized <code>Library </code> object.
+   * @param libraryName
+   * @param shortName
+   * @param libraryType
+   * @param startPlate
+   * @param endPlate
    */
   public Library(
     String libraryName,
@@ -70,9 +70,6 @@ public class Library extends AbstractEntity
     setStartPlate(startPlate);
     setEndPlate(endPlate);
   }
-  
-
-  // public getters and setters
   
   /**
    * Get the library id for the library.
@@ -303,7 +300,13 @@ public class Library extends AbstractEntity
   }
 
   
-  // private getters and setters
+  // private constructors and instance methods
+  
+  /**
+   * Constructs an uninitialized Library object.
+   * @motivation for hibernate
+   */
+  private Library() {}
   
   /**
    * Set the library id for the library.

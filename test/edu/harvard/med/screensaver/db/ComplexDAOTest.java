@@ -12,6 +12,7 @@
 package edu.harvard.med.screensaver.db;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -298,20 +299,25 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         public void runTransaction()
         {
-          ScreenResult screenResult = new ScreenResult();
-          screenResult.setShareable(false);
-          screenResult.setDateCreated(Calendar.getInstance().getTime());
-          screenResult.setReplicateCount(replicates);
+          ScreenResult screenResult = new ScreenResult(
+            new Date(),
+            false,
+            replicates);
           
           ResultValueType[] rvt = new ResultValueType[replicates];
           for (int i = 0; i < replicates; i++) {
-            rvt[i] = new ResultValueType();
-            rvt[i].setName("rvt" + i);
+            rvt[i] = new ResultValueType(
+              screenResult,
+              "rvt" + i,
+              1,
+              false,
+              false,
+              false,
+              "human",
+              false);
             rvt[i].setAssayReadoutType(i % 2 == 0 ? AssayReadoutType.PHOTOMETRY: AssayReadoutType.FLOURESCENCE_INTENSITY);
             rvt[i].setActivityIndicatorType(i % 2 == 0 ? ActivityIndicatorType.BOOLEAN: ActivityIndicatorType.SCALED);
             rvt[i].setIndicatorDirection(i % 2 == 0 ? IndicatorDirection.LOW_VALUES_INDICATE : IndicatorDirection.HIGH_VALUES_INDICATE);
-            rvt[i].setAssayPhenotype("human");
-            rvt[i].setScreenResult(screenResult);
           }
           
           Library library = dao.defineEntity(
@@ -329,10 +335,10 @@ public class ComplexDAOTest extends AbstractSpringTest
               1,
               "well" + iWell);
             for (int iResultValue = 0; iResultValue < rvt.length; ++iResultValue) {
-              ResultValue rv = new ResultValue();
-              rv.setValue("value " + iWell + "," + iResultValue);
-              rv.setWell(wells[iWell]);
-              rv.setResultValueType(rvt[iResultValue]);
+              new ResultValue(
+                rvt[iResultValue],
+                wells[iWell],
+                "value " + iWell + "," + iResultValue);
             }
           }
           dao.persistEntity(screenResult);
@@ -397,31 +403,46 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         public void runTransaction()
         {
-          ScreenResult screenResult = new ScreenResult();
-          screenResult.setShareable(false);
-          screenResult.setDateCreated(Calendar.getInstance().getTime());
-          screenResult.setReplicateCount(replicates);
+          ScreenResult screenResult = new ScreenResult(
+            new Date(),
+            false,
+            replicates);
           
           for (int i = 0; i < replicates; i++) {
-            ResultValueType rvt = new ResultValueType();
-            rvt.setName("rvt" + i);
-            rvt.setAssayPhenotype("human");
-            rvt.setScreenResult(screenResult);
+            ResultValueType rvt = new ResultValueType(
+              screenResult,
+              "rvt" + i,
+              1,
+              false,
+              false,
+              false,
+              "human",
+              false);
             derivedRvtSet1.add(rvt);
             if (i % 2 == 0) {
               derivedRvtSet2.add(rvt);
             }
           }
-          ResultValueType derivedRvt1 = new ResultValueType();
-          derivedRvt1.setName("derivedRvt1");
-          derivedRvt1.setAssayPhenotype("human");
-          derivedRvt1.setScreenResult(screenResult);
+          ResultValueType derivedRvt1 = new ResultValueType(
+            screenResult,
+            "derivedRvt1",
+            1,
+            false,
+            false,
+            false,
+            "human",
+            false);
           derivedRvt1.setDerivedFrom(derivedRvtSet1);
           
-          ResultValueType derivedRvt2 = new ResultValueType();
-          derivedRvt2.setName("derivedRvt2");
-          derivedRvt2.setAssayPhenotype("human");
-          derivedRvt2.setScreenResult(screenResult);
+          ResultValueType derivedRvt2 = new ResultValueType(
+            screenResult,
+            "derivedRvt2",
+            1,
+            false,
+            false,
+            false,
+            "human",
+            false);
           derivedRvt2.setDerivedFrom(derivedRvtSet2);
           
           dao.persistEntity(screenResult);

@@ -53,17 +53,24 @@ public class ScreenResult extends AbstractEntity
   private SortedSet<ResultValueType> _resultValueTypes = new TreeSet<ResultValueType>();
 
   
-  // constructors
+  // public constructors and instance methods
   
   /**
-   * Constructs an uninitialized <code>ScreenResult</code> object.
-   * @motivation for Hibernate loading
+   * Constructs an initialized ScreenResult object.
+   * @param dateCreated
+   * @param isShareable
+   * @param replicateCount
    */
-  public ScreenResult() {}
+  public ScreenResult(
+    Date dateCreated,
+    boolean isShareable, 
+    Integer replicateCount)
+  {
+    setDateCreated(dateCreated);
+    setShareable(isShareable);
+    setReplicateCount(replicateCount);
+  }
   
-  
-  // public getters and setters
-
   /**
    * Get a unique identifier for the <code>ScreenResult</code>.
    * 
@@ -204,6 +211,12 @@ public class ScreenResult extends AbstractEntity
 
   // private getters and setters
   
+  /**
+   * Constructs an uninitialized <code>ScreenResult</code> object.
+   * @motivation for Hibernate loading
+   */
+  private ScreenResult() {}
+
   /**
    * Get the version number of the compound.
    * 

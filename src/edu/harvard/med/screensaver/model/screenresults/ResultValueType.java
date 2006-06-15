@@ -66,18 +66,41 @@ public class ResultValueType extends AbstractEntity implements Comparable
   private boolean                _isCherryPick;
   private String                 _comments;
 
-
-  // constructors
   
+  // public constructors and instance methods
+
   /**
-   * Constructs an uninitialized <code>ResultValueType</code> object.
-   * @motivation for Hibernate loading
+   * Constructs an initialized ResultValueType object.
+   * @param screenResult
+   * @param name
+   * @param replicateOrdinal
+   * @param isDerived
+   * @param isActivityIndicator
+   * @param isFollowupData
+   * @param assayPhenotype
+   * @param isCherryPick
    */
-  public ResultValueType() {}
+  public ResultValueType(
+    ScreenResult screenResult,
+    String name,
+    Integer replicateOrdinal,
+    boolean isDerived,
+    boolean isActivityIndicator,
+    boolean isFollowupData,
+    String assayPhenotype,
+    boolean isCherryPick
+    )
+  {
+    setScreenResult(screenResult);
+    setName(name);
+    setReplicateOrdinal(replicateOrdinal);
+    setDerived(isDerived);
+    setActivityIndicator(isActivityIndicator);
+    setFollowUpData(isFollowupData);
+    setAssayPhenotype(assayPhenotype);
+    setCherryPick(isCherryPick);
+  }
   
-  
-  // public getters and setters
-
   /**
    * Get a unique identifier for the <code>ResultValueType</code>.
    * 
@@ -580,7 +603,13 @@ public class ResultValueType extends AbstractEntity implements Comparable
   }
 
 
-  // private getters and setters
+  // private constructors and instance methods
+
+  /**
+   * Constructs an uninitialized <code>ResultValueType</code> object.
+   * @motivation for Hibernate loading
+   */
+  private ResultValueType() {}
   
   /**
    * Get the version number of the compound.

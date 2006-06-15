@@ -15,6 +15,7 @@ import javax.faces.application.FacesMessage;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
 
 import org.apache.log4j.Logger;
 
@@ -46,7 +47,12 @@ public class MainController extends AbstractController
   }
   
   public String createLibrary() {
-    _libraryController.setLibrary(new Library());
+    _libraryController.setLibrary(new Library(
+      "libraryName",
+      "shortName",
+      LibraryType.DOS,
+      1,
+      2));
     _libraryController.setUsageMode("create");
     return "success";
   }

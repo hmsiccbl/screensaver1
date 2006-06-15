@@ -48,22 +48,15 @@ public class Compound extends AbstractEntity
   private String      _chembankId;
   
   
-  // constructors
-  
-  /**
-   * Constructs an uninitialized <code>Compound</code> object.
-   */
-  public Compound() {}
+  // public constructors and methods
   
   /**
    * Constructs an initialized <code>Compound</code> object.
+   * @param compoundName
    */
   public Compound(String compoundName) {
     _compoundName = compoundName;
   }
-  
-
-  // public getters and setters
   
 	/**
    * Get the compound id for the compound.
@@ -366,8 +359,14 @@ public class Compound extends AbstractEntity
   }
   
   
-  // private getters and setters
+  // private constructors and instance methods
 
+  /**
+   * Constructs an uninitialized Compound object.
+   * @motivation for hibernate
+   */
+  private Compound() {}
+  
   /**
    * Set the compound id for the compound.
    * @param compoundId the new compound id for the compound

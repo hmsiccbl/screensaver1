@@ -45,15 +45,13 @@ public class Well extends AbstractEntity
   private String        _vendorIdentifier;
   
 
-  // constructors
-  
-  /**
-   * Constructs an uninitialized <code>Well</code> object.
-   */
-  public Well() {}
+  // public constructors and instance methods
   
   /**
    * Constructs an initialized <code>Well</code> object.
+   * @param parentLibrary
+   * @param plateNumber
+   * @param wellName
    */
   public Well(Library parentLibrary, Integer plateNumber, String wellName)
   {
@@ -63,9 +61,6 @@ public class Well extends AbstractEntity
     // ensure hashCode() works)
     setLibrary(parentLibrary);
   }
-  
-
-  // public getters and setters
   
   /**
    * Get the well id for the well.
@@ -284,7 +279,13 @@ public class Well extends AbstractEntity
   }
 
 
-  // private getters and setters
+  // private constructors and instance methods
+  
+  /**
+   * Constructs an uninitialized Well object.
+   * @motivation for hibernate
+   */
+  private Well() {}
   
   /**
    * Set the well id for the well.

@@ -24,19 +24,17 @@ public class Child extends AbstractEntity
   // instance fields
   
   private Integer _version;
-
-
   private Parent _parent;
   private Integer _id;
   private String _name;
   
   
-  // constructor and instance methods
+  // public constructor and instance methods
   
-  public Child()
-  {
-  }
-
+  /**
+   * Constructs an initialized Child object.
+   * @param name
+   */
   public Child(String name)
   {
     _name = name;
@@ -117,6 +115,14 @@ public class Child extends AbstractEntity
   {
     return getName();
   }
+
+  // constructor and instance methods
+  
+  /**
+   * Constructs an uninitialized Child object.
+   * @motivation for hibernate
+   */
+  private Child() {}
 
   /**
    * Get the version number of the compound.

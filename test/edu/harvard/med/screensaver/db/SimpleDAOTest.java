@@ -76,8 +76,7 @@ public class SimpleDAOTest extends AbstractSpringTest
   
   public void testPersistEntity()
   {
-    Compound compound = new Compound();
-    compound.setCompoundName("cname");
+    Compound compound = new Compound("cname");
     compound.setSalt(true);
     dao.persistEntity(compound);
     List<Compound> compounds = dao.findAllEntitiesWithType(Compound.class);
