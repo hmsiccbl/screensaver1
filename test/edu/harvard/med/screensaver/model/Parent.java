@@ -65,7 +65,7 @@ public class Parent extends AbstractEntity
    */
   protected Object getBusinessKey()
   {
-    return this;
+    return hashCode();
   }
 
   /**
