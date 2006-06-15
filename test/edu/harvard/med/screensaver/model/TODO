@@ -1,0 +1,19 @@
+JavaBean tests:
+
+- test getter returns what setter set
+- test bidirectionaliy of relationships
+
+Hibernate bean tests:
+
+- test n-arg constructor arg list matches not-null properties
+- test not-null properties start out initialized
+- test not-not-null properties start out uninitialized
+- test set; persist; get
+- test { set; persist; get; } for relationships
+- test bidirectionality of relationships over persist
+- test setting a not-null property to null throws exception
+- test relationship methods have correct names and sigs
+- test getId() is public and setId() is private
+- test isVersioned
+- test set-properties have add/remove methods, public setter & private getter
+  - (how does this relate to set-relationships?)
