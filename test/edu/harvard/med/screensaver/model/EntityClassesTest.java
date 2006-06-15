@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -22,13 +23,19 @@ public class EntityClassesTest extends EntityClassesExercisor
     junit.textui.TestRunner.run(EntityClassesTest.class);
   }
   
-  public void testEntityClassesHavePublicNoArgConstructor()
+  public void testEntityClassesHaveExactlyOnePublicConstructor()
   {
     exercizeEntityClasses(new EntityClassExercizor()
       {
         public void exercizeEntityClass(Class<AbstractEntity> entityClass)
         {
-          newInstance(entityClass);          
+          int publicConstructorCount = 0;
+          for (Constructor constructor : entityClass.getConstructors()) {
+            if (Modifier.isPublic(constructor.getModifiers())) {
+              publicConstructorCount ++;
+            }
+          }
+          assertEquals("exactly one public constructor", 1, publicConstructorCount);
         }
       });
   }

@@ -19,6 +19,7 @@ import java.beans.PropertyDescriptor;
  */
 abstract class JavaBeanEntitiesExercizor extends EntityClassesExercisor
 {
+  
   protected static interface PropertyDescriptorExercizor
   {
     public void exercizePropertyDescriptor(
