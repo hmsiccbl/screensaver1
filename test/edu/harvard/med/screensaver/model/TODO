@@ -1,6 +1,5 @@
 JavaBean tests:
 
-- test getter returns what setter set
 - test bidirectionaliy of relationships
 
 Hibernate bean tests:
