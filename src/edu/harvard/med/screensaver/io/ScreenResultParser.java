@@ -11,13 +11,13 @@ package edu.harvard.med.screensaver.io;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import edu.harvard.med.screensaver.io.CellParser.Factory;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -45,11 +45,11 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
  * import attempts. Validation checks performed include:
  * <ul>
  * <li> Data header count in data file matches data header definitions in
- * metadata file.
+ * metadata file. (TODO)
  * <li> File name listed in cell "Sheet1:A2" of metadata file must match data
- * file name.
+ * file name. (TODO)
  * <li> Data Header names, as defined in the metadata, match the actual Data
- * Header names in the data file.
+ * Header names in the data file. (TODO)
  * </ul>
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -61,14 +61,12 @@ public class ScreenResultParser
   // static data members
   
   private static final String FIRST_DATE_SCREENED = "First Date Screened";
-  private static final String META_SHEET_NAME = "meta";
-
-  private static final String NO_META_SHEET_ERROR = "\"meta\" worksheet not found";
+  private static final String METADATA_META_SHEET_NAME = "meta";
+  private static final String NO_METADATA_META_SHEET_ERROR = "\"meta\" worksheet not found";
   private static final String NO_CREATED_DATE_FOUND_ERROR = "\"First Date Screened\" value not found";
   private static final String UNEXPECTED_DATA_HEADER_TYPE_ERROR = "unexpected data header type";
   private static final String REFERENCED_UNDEFINED_DATA_HEADER_ERROR = "referenced undefined data header";
   private static final String UNRECOGNIZED_INDICATOR_DIRECTION_ERROR = "unrecognized \"indicator direction\" value";
-  private static final String INVALID_CELL_TYPE_ERROR = "invalid cell type";
   private static final String UNKNOWN_ERROR = "unknown error";
 
   private static final int FIRST_DATA_ROW_INDEX = 1;
@@ -140,13 +138,11 @@ public class ScreenResultParser
   
   private InputStream _dataExcelFileInStream;
   private InputStream _metadataExcelFileInStream;
-  private List<String> _errors = new ArrayList<String>();
   /**
    * The ScreenResult object to be populated with data parsed from the spreadsheet.
    */
   private ScreenResult _screenResult;
   private HSSFWorkbook _wb;
-  private HSSFSheet _metadataSheet;
   private Map<String,ResultValueType> _columnsDerivedFromMap = new HashMap<String,ResultValueType>();
   private CellValueParser<ResultValueType> _columnsDerivedFromParser = 
     new CellValueParser<ResultValueType>(_columnsDerivedFromMap);
@@ -160,6 +156,8 @@ public class ScreenResultParser
     new CellValueParser<Boolean>(primaryOrFollowUpMap);
   private CellValueParser<Boolean> booleanParser = 
     new CellValueParser<Boolean>(booleanMap);
+  private ParseErrorManager _errors = new ParseErrorManager();
+  private Factory _metadataSheetCellParserFactory;
   
   
   // constructors
@@ -197,7 +195,7 @@ public class ScreenResultParser
     catch (Exception e) {
       // TODO: log this
       e.printStackTrace();
-      addError(UNKNOWN_ERROR + ": " + e.getMessage());
+      _errors.addError(UNKNOWN_ERROR + ": " + e.getMessage());
     }
     return _screenResult;
   }
@@ -214,235 +212,69 @@ public class ScreenResultParser
    */
   public List<String> getErrors()
   {
-    return _errors;
+    return _errors.getErrors();
   }
   
 
   // private methods
-  
-  /**
-   * Returns the cell on the metadata worksheet at the specified {@link Row} and
-   * column, where the row and column are relative to left-upper-most <i>data</i>
-   * value (i.e., we exclude the bordering row and column "label" cells)
-   * 
-   * @param dataRow the {@link Row} containing the desired cell
-   * @param dataHeaderColumn the zero-based index of the "data header" column
-   *          containing the desired cell, which are those columns with their
-   *          "Column Type" row equal to "Data"
-   * @return an <code>HSSFCell</code>
-   * @throws CellUndefinedException if the specified cell has not been
-   *           initialized with a value in the worksheet
-   */
-  private HSSFCell getMetadataCell(Row dataRow, int dataHeaderColumn) throws CellUndefinedException
-  {
-    short physicalRow = (short) (FIRST_DATA_ROW_INDEX + dataRow.ordinal());
-    short physicalCol = (short) (FIRST_DATA_HEADER__COLUMN_INDEX + dataHeaderColumn);
-    if (_metadataSheet.getLastRowNum() < physicalRow) {
-      throw new CellUndefinedException(CellUndefinedException.UndefinedInAxis.ROW,
-                                       physicalCol,
-                                       physicalRow);
-    }
-    HSSFRow row = _metadataSheet.getRow(physicalRow);
-    if (row.getLastCellNum() < physicalCol) {
-      throw new CellUndefinedException(CellUndefinedException.UndefinedInAxis.COLUMN,
-                                       physicalCol,
-                                       physicalRow);
-    }
-    HSSFCell cell = row.getCell(physicalCol);
-    if (cell == null) {
-      throw new CellUndefinedException(CellUndefinedException.UndefinedInAxis.ROW_AND_COLUMN,
-                                       physicalCol,
-                                       physicalRow);
-    }
-    return cell;
-  }
-  
-  /**
-   * Convenience method to get the a <code>Double</code> value for a given
-   * worksheet cell.
-   * 
-   * @motivation consistent means of handling uninitialized cells or erroneous
-   *             values
-   * @param dataRow the {@link Row} containing the value
-   * @param dataHeader the zero-based index of the "data header" column containing the value
-   * @return a <code>Double</code> value or
-   *         <code>0.0</false> if cell does not contain a valid (or any) double value
-   */
-  private Double getDouble(Row dataRow, int dataHeader) {
-    try {
-      HSSFCell cell = getMetadataCell(dataRow, dataHeader);
-      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
-        return 0.0;
-      }
-      if (cell.getCellType() != HSSFCell.CELL_TYPE_NUMERIC) {
-        addError(INVALID_CELL_TYPE_ERROR, dataHeader, dataRow);
-        return 0.0;
-      }
-      return new Double(cell.getNumericCellValue());
-    } 
-    catch (CellUndefinedException e) {
-      return new Double(0.0);
-    }
-  }
-  
-  /**
-   * Convenience method to get the a <code>Integer</code> value for a given
-   * worksheet cell.
-   * 
-   * @motivation consistent means of handling uninitialized cells or erroneous
-   *             values
-   * @param dataRow the {@link Row} containing the value
-   * @param dataHeader the zero-based index of the "data header" column
-   *          containing the value
-   * @return an <code>Integer</code> value or
-   *         <code>0</false> if cell does not contain a valid (or any) boolean value
-   */
-  private Integer getInteger(Row dataRow, int dataHeader) {
-    try {
-      HSSFCell cell = getMetadataCell(dataRow, dataHeader);
-      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
-        return 0;
-      }
-      if (cell.getCellType() != HSSFCell.CELL_TYPE_NUMERIC) {
-        addError(INVALID_CELL_TYPE_ERROR, dataHeader, dataRow);
-        return 0;
-      }
-      return new Integer((int) cell.getNumericCellValue());
-    } 
-    catch (CellUndefinedException e) {
-      return 0;
-    }
-  }
-  
-  /**
-   * Convenience method to get the a <code>Boolean</code> value for a given
-   * worksheet cell.
-   * 
-   * @motivation consistent means of handling uninitialized cells or erroneous
-   *             values
-   * @param dataRow the {@link Row} containing the value
-   * @param dataHeader the zero-based index of the "data header" column
-   *          containing the value
-   * @return a <code>Boolean</code> value, or
-   *         <code>false</false> if cell does not contain a valid (or any) boolean value
-   */
-  private Boolean getBoolean(Row dataRow, int dataHeader) {
-    try {
-      HSSFCell cell = getMetadataCell(dataRow, dataHeader);
-      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
-        return false;
-      }
-      if (cell.getCellType() != HSSFCell.CELL_TYPE_BOOLEAN) {
-        addError(INVALID_CELL_TYPE_ERROR, dataHeader, dataRow);
-        return false;
-      }
-      return cell.getBooleanCellValue();
-    } 
-    catch (CellUndefinedException e) {
-      return false;
-    }
-  }
-  
-  /**
-   * Convenience method to get the a <code>Date</code> value for a given
-   * worksheet cell.
-   * 
-   * @motivation consistent means of handling uninitialized cells or erroneous
-   *             values
-   * @param dataRow the {@link Row} containing the value
-   * @param dataHeader the zero-based index of the "data header" column
-   *          containing the value
-   * @return a <code>Date</code> value, or null if cell does not contain a
-   *         valid (or any) date
-   */
-  private Date getDate(Row dataRow, int dataHeader) {
-    try {
-      HSSFCell cell = getMetadataCell(dataRow, dataHeader);
-      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
-        return null;
-      }
-      return cell.getDateCellValue();
-    } 
-    catch (CellUndefinedException e) {
-      return null;
-    }
-    catch (NumberFormatException e) {
-      addError(INVALID_CELL_TYPE_ERROR, dataHeader, dataRow);
-      return null;
-    }
-  }
-  
-  /**
-   * Convenience method to get the a <code>String</code> value for a given
-   * worksheet cell.
-   * 
-   * @motivation consistent means of handling uninitialized cells or erroneous
-   *             values
-   * @param dataRow the {@link Row} containing the value
-   * @param dataHeader the zero-based index of the "data header" column
-   *          containing the value
-   * @return a <code>String</code> value, or the empty string if cell does not
-   *         contain a value
-   */
-  private String getString(Row dataRow, int dataHeader) {
-    try {
-      HSSFCell cell = getMetadataCell(dataRow, dataHeader);
-      return cell.getStringCellValue();
-    } 
-    catch (CellUndefinedException e) {
-      return "";
-    }
-  }
+
 
   /**
    * Find the metadata worksheet.
    */
-  private void initializeMetadataSheet()
+  private void initializeMetadataSheet() {
+    // TODO: find the sheet in a more reliable, flexible fashion
+    HSSFSheet metadataSheet = _wb.getSheetAt(0);
+
+    // TODO: take action if verification fails
+    verifyStandardFormat(metadataSheet);
+
+    _metadataSheetCellParserFactory = new CellParser.Factory(_wb.getSheetName(0),
+                                                             metadataSheet,
+                                                             _errors);  
+  }
+  
+  private CellParser cell(Row row, int dataHeader) 
   {
-    if (_metadataSheet == null) {
-      // TODO: find the sheet in a more reliable, flexible fashion
-      _metadataSheet = _wb.getSheetAt(0);
-      
-      // TODO: take action if verification fails
-      verifyStandardFormat(_metadataSheet);
-    }
+    return _metadataSheetCellParserFactory.newCellParser((short) (FIRST_DATA_HEADER__COLUMN_INDEX + dataHeader),
+                                                   (short) (FIRST_DATA_ROW_INDEX + row.ordinal()));
   }
   
   /**
    * Parse the metaata worksheet. This is where the real work of this class gets
-   * done.  Once upon a time, it was really long, ugly method.  But look at it now!
+   * done. Once upon a time, it was really long, ugly method. But look at it
+   * now!
    */
   private void parseMetadata() {
     initializeMetadataSheet();
-    for (int iDataHeader = 0; 
-          getString(Row.COLUMN_TYPE, iDataHeader).equalsIgnoreCase("data"); 
-          ++iDataHeader) {
+    for (int iDataHeader = 0; cell(Row.COLUMN_TYPE,
+                                   iDataHeader).
+                                   getString().equalsIgnoreCase("data"); ++iDataHeader) {
       ResultValueType rvt = 
-        new ResultValueType(
-          _screenResult,
-          getString(Row.NAME, iDataHeader),
-          getInteger(Row.REPLICATE, iDataHeader),
-          rawOrDerivedParser.parse(Row.RAW_OR_DERIVED, iDataHeader),
-          booleanParser.parse(Row.IS_ASSAY_ACTIVITY_INDICATOR, iDataHeader),
-          primaryOrFollowUpParser.parse(Row.PRIMARY_OR_FOLLOWUP, iDataHeader),
-          getString(Row.ASSAY_PHENOTYPE, iDataHeader),
-          booleanParser.parse(Row.IS_CHERRY_PICK, iDataHeader));
-      _columnsDerivedFromMap.put(getString(Row.COLUMN_IN_TEMPLATE, iDataHeader), rvt);
-      rvt.setDescription(getString(Row.DESCRIPTION, iDataHeader));
-      rvt.setTimePoint(getString(Row.TIME_POINT, iDataHeader));
+        new ResultValueType(_screenResult,
+                            cell(Row.NAME, iDataHeader).getString(),
+                            cell(Row.REPLICATE, iDataHeader).getInteger(),
+                            rawOrDerivedParser.parse(cell(Row.RAW_OR_DERIVED, iDataHeader)),
+                            booleanParser.parse(cell(Row.IS_ASSAY_ACTIVITY_INDICATOR, iDataHeader)),
+                            primaryOrFollowUpParser.parse(cell(Row.PRIMARY_OR_FOLLOWUP, iDataHeader)),
+                            cell(Row.ASSAY_PHENOTYPE,iDataHeader).getString(),
+                            booleanParser.parse(cell(Row.IS_CHERRY_PICK, iDataHeader)));
+      _columnsDerivedFromMap.put(cell(Row.COLUMN_IN_TEMPLATE, iDataHeader).getString(), rvt);
+      rvt.setDescription(cell(Row.DESCRIPTION, iDataHeader).getString());
+      rvt.setTimePoint(cell(Row.TIME_POINT, iDataHeader).getString());
       if (rvt.isDerived()) {
-        rvt.setDerivedFrom(new TreeSet<ResultValueType>(_columnsDerivedFromParser.parseList(Row.COLUMNS_DERIVED_FROM, iDataHeader)));
-        rvt.setHowDerived(getString(Row.HOW_DERIVED, iDataHeader));
+        rvt.setDerivedFrom(new TreeSet<ResultValueType>(_columnsDerivedFromParser.parseList(cell(Row.COLUMNS_DERIVED_FROM, iDataHeader))));
+        rvt.setHowDerived(cell(Row.HOW_DERIVED, iDataHeader).getString());
         // TODO: should warn if these values are defined and !isDerivedFrom()
       }
       if (rvt.isActivityIndicator()) {
-        rvt.setActivityIndicatorType(activityIndicatorTypeParser.parse(Row.ACTIVITY_INDICATOR_TYPE, iDataHeader));
-        rvt.setIndicatorDirection(indicatorDirectionParser.parse(Row.INDICATOR_DIRECTION, iDataHeader));
-        rvt.setIndicatorCutoff(getDouble(Row.INDICATOR_CUTOFF, iDataHeader));
+        rvt.setActivityIndicatorType(activityIndicatorTypeParser.parse(cell(Row.ACTIVITY_INDICATOR_TYPE, iDataHeader)));
+        rvt.setIndicatorDirection(indicatorDirectionParser.parse(cell(Row.INDICATOR_DIRECTION, iDataHeader)));
+        rvt.setIndicatorCutoff(cell(Row.INDICATOR_CUTOFF, iDataHeader).getDouble());
         // TODO: should warn if these values are defined and
         // !isActivityIndicator()
       }
-      rvt.setComments(getString(Row.COMMENTS, iDataHeader));
+      rvt.setComments(cell(Row.COMMENTS, iDataHeader).getString());
     }
   }
 
@@ -465,12 +297,12 @@ public class ScreenResultParser
    * thus the double-meta prefix.  Life is complex.
    */
   private void parseMetaMetadata() {
-    HSSFSheet metaSheet = _wb.getSheet(META_SHEET_NAME);
-    if (metaSheet == null) {
-      addError(NO_META_SHEET_ERROR);
+    HSSFSheet metametaSheet = _wb.getSheet(METADATA_META_SHEET_NAME);
+    if (metametaSheet == null) {
+      _errors.addError(NO_METADATA_META_SHEET_ERROR);
       return;
     }
-    Iterator iterator = metaSheet.rowIterator();
+    Iterator iterator = metametaSheet.rowIterator();
     while (iterator.hasNext()) {
       HSSFRow row = (HSSFRow) iterator.next();
       HSSFCell nameCell = row.getCell(row.getFirstCellNum());
@@ -480,38 +312,9 @@ public class ScreenResultParser
         return;
       }
     }
-    addError(NO_CREATED_DATE_FOUND_ERROR);
+    _errors.addError(NO_CREATED_DATE_FOUND_ERROR);
   }
 
-  /**
-   * Add an error, noting the particular cell the error is related to.
-   * 
-   * @param error the error
-   * @param dataHeader the data header of the cell containing the error
-   * @param row the {@link Row} of the cell containing the error
-   */
-  private void addError(String error,
-                        int dataHeader,
-                        Row row)
-  {
-    _errors.add(error + 
-                " @ (" + 
-                // TODO: only handles A-Z, not AA...
-                Character.toString((char) ('A' + dataHeader + FIRST_DATA_HEADER__COLUMN_INDEX)) + "," + 
-                (row.ordinal() + FIRST_DATA_ROW_INDEX + 1) +
-                ")" );
-  }
-  
-  /**
-   * Add a simple error.
-   * 
-   * @param error the error
-   */
-  private void addError(String error)
-  {
-    _errors.add(error);
-  }
-  
   /**
    * Parses the value of a cell, mapping a text value to an internal, system
    * object representation. Handles single-valued cells as well as cells that
@@ -564,40 +367,39 @@ public class ScreenResultParser
     
     
     // public methods
-    
-    public T parse(Row row, int dataHeader)
+
+    public T parse(CellParser cell) 
     {
-      String cellValue = getString(row, dataHeader).toLowerCase().trim();
-      return doParse(cellValue, row, dataHeader);
+      String cellValue = cell.getString().toLowerCase().trim();
+      return doParse(cellValue, cell);
     }
 
-    public List<T> parseList(Row row, int dataHeader)
-    {
+    public List<T> parseList(CellParser cell) {
       List<T> result = new ArrayList<T>();
-      String textMultiValue = getString(row, dataHeader).toLowerCase().trim();
+      String textMultiValue = cell.getString().toLowerCase().trim();
       String[] textValues = textMultiValue.split(_delimiterRegex);
       for (int i = 0; i < textValues.length; i++) {
         String text = textValues[i];
-        result.add(doParse(text, row, dataHeader));
+        result.add(doParse(text, cell));
       }
       return result;
     }
     
 
     // private methods
-    
-    private T doParse(String text, Row row, int dataHeader) {
+
+    private T doParse(String text, CellParser cell) {
       text = text.trim();
-      for (Iterator iter = _parsedValue2SystemValue.keySet().iterator(); iter.hasNext();) {
+      for (Iterator iter = _parsedValue2SystemValue.keySet()
+                                                   .iterator(); iter.hasNext();) {
         String pattern = (String) iter.next();
         if (pattern.equalsIgnoreCase(text)) {
           return _parsedValue2SystemValue.get(pattern);
         }
       }
-      ScreenResultParser.this.addError(_errorMessage, dataHeader, row);
+      _errors.addError(_errorMessage, cell);
       return null;
     }
 
   }
-  
 }

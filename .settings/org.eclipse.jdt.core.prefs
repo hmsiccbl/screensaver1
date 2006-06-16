@@ -1,4 +1,4 @@
-#Fri Jun 16 08:54:56 EST 2006
+#Fri Jun 16 13:37:59 EST 2006
 eclipse.preferences.version=1
 org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode=enabled
 org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.5
@@ -93,7 +93,7 @@ org.eclipse.jdt.core.formatter.brace_position_for_block_in_case=end_of_line
 org.eclipse.jdt.core.formatter.brace_position_for_constructor_declaration=next_line_on_wrap
 org.eclipse.jdt.core.formatter.brace_position_for_enum_constant=end_of_line
 org.eclipse.jdt.core.formatter.brace_position_for_enum_declaration=end_of_line
-org.eclipse.jdt.core.formatter.brace_position_for_method_declaration=next_line_on_wrap
+org.eclipse.jdt.core.formatter.brace_position_for_method_declaration=next_line
 org.eclipse.jdt.core.formatter.brace_position_for_switch=end_of_line
 org.eclipse.jdt.core.formatter.brace_position_for_type_declaration=next_line
 org.eclipse.jdt.core.formatter.comment.clear_blank_lines=true

@@ -9,17 +9,29 @@
 
 package edu.harvard.med.screensaver.io;
 
+/**
+ * Exception for reporting problems reading cells from an <code>HSSFSheet</code>
+ * worksheet.
+ * 
+ * @author ant
+ */
 public class CellUndefinedException extends Exception
 {
   private static final long serialVersionUID = -6769776818247218394L;
 
   public static enum UndefinedInAxis { ROW, COLUMN, ROW_AND_COLUMN };
   
+  /**
+   * Constructs a CellUndefinedException exception object.
+   * 
+   * @param undefinedInAxis whether the row, or column, or both, were undefined
+   *          in the worksheet
+   * @param cell the cell that was undefined
+   */
   public CellUndefinedException(UndefinedInAxis undefinedInAxis,
-                                short row,
-                                short column)
+                                CellParser cell)
   {
-    super("cell (" + Character.toString((char) (column + 'A')) + ", " + (row + 1) + ") undefined at " + 
+    super("cell " + cell + " undefined at " + 
           undefinedInAxis.toString());
   }
 }
