@@ -330,10 +330,10 @@ public class ComplexDAOTest extends AbstractSpringTest
               1,
               "well" + iWell);
             for (int iResultValue = 0; iResultValue < rvt.length; ++iResultValue) {
-              new ResultValue(
-                rvt[iResultValue],
-                wells[iWell],
-                "value " + iWell + "," + iResultValue);
+              ResultValue rv = new ResultValue(rvt[iResultValue],
+                                               wells[iWell],
+                                               "value " + iWell + "," + iResultValue);
+              rv.setExclude(iWell % 2 == 1);
             }
           }
 
@@ -387,6 +387,8 @@ public class ComplexDAOTest extends AbstractSpringTest
               assertEquals(
                 "value " + iWell + "," + iResultValue,
                 rv.getValue());
+              assertEquals(iWell % 2 == 1,
+                           rv.isExclude());
               iWell++;
             }
             iResultValue++;

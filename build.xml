@@ -73,9 +73,12 @@
     dir="${test.src.dir}"
     casesensitive="yes"
   >
-    <include
+    <include 
       if="test"
-      name="edu/harvard/med/screensaver/model/**/*.java"/>
+      name="edu/harvard/med/screensaver/model/Child.java"/>
+      <include 
+        if="test"
+        name="edu /harvard/med/screensaver/model/Parent.java"/>
   </fileset>
  
   <fileset

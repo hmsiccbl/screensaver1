@@ -55,8 +55,21 @@ public class ResultValue extends AbstractEntity implements Comparable
    */
   public ResultValue(ResultValueType resultValueType, Well well, String value)
   {
+    this(resultValueType, well, value, false);
+  }
+
+  /**
+   * Constructs an initialized <code>ResultValue</code> object.
+   * @param resultValueType
+   * @param well
+   * @param value
+   * @param exclude
+   */
+  public ResultValue(ResultValueType resultValueType, Well well, String value, boolean exclude)
+  {
     setWell(well);
     setValue(value);
+    setExclude(exclude);
     setResultValueType(resultValueType);
   }
 
@@ -128,8 +141,8 @@ public class ResultValue extends AbstractEntity implements Comparable
    */
   public void setWell(Well well) {
     // note: this is a unidirectional many-to-one relationship, so no need to
-    // update Well's ResultValue members (it doesn't track its ResultValue
-    // members)
+    // update any list ResultValue in affected Well (it doesn't track
+    // ResultValue members at all)
     _well = well;
   }
 
@@ -179,6 +192,31 @@ public class ResultValue extends AbstractEntity implements Comparable
       }
     }
     return result;
+  }
+  
+  /**
+   * Get whether this <code>ResultValue</code> is to be excluded in any
+   * subsequent analyses.
+   * 
+   * @return <code>true</code> iff this <code>ResultValue</code> is to be
+   *         excluded in any subsequent analysis
+   * @hibernate.property type="boolean" not-null="true"
+   */
+  public boolean isExclude()
+  {
+    return _exclude;
+  }
+
+  /**
+   * Set whether this <code>ResultValue</code> is to be excluded in any
+   * subsequent analyses.
+   * 
+   * @param exclude set to <code>true</code> iff this <code>ResultValue</code>
+   *          is to be excluded in any subsequent analysis
+   */
+  public void setExclude(boolean exclude)
+  {
+    _exclude = exclude;
   }
 
   
@@ -250,4 +288,5 @@ public class ResultValue extends AbstractEntity implements Comparable
   private void setHbnResultValueType(ResultValueType resultValueType) {
     _resultValueType = resultValueType;
   }
+
 }
