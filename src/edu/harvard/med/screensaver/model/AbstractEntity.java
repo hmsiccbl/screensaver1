@@ -9,7 +9,14 @@
 
 package edu.harvard.med.screensaver.model;
 
+import java.beans.PropertyDescriptor;
 import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Map;
+
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.log4j.Logger;
 
 
 /**
@@ -110,7 +117,54 @@ import java.io.Serializable;
  */
 public abstract class AbstractEntity implements Serializable
 {
+  private static Logger log = Logger.getLogger(AbstractEntity.class);
+  
+  /**
+   * Performs a shallow compare of this <code>AbstractEntity</code> with
+   * another and returns <code>true</code> iff they are the exact same class
+   * and have matching values for each property, excluding properties that
+   * return <code>Collection</code>, <code>Map</code>, and
+   * <code>AbstractEntity</code>, which, presumably, return entity
+   * relationships.
+   * 
+   * @motivation for comparing entities in test code
+   * @param that the other AbstractEntity to compare equivalency with
+   * @return true iff the two AbstractEntities are equivalent
+   */
+  public boolean isEquivalent(AbstractEntity that)
+  {
+    if (!this.getClass().equals(that.getClass())) {
+      return false;
+    }
+    PropertyDescriptor[] beanProperties = PropertyUtils.getPropertyDescriptors(this.getClass());
 
+    for (int i = 0; i < beanProperties.length; i++) {
+      PropertyDescriptor beanProperty = beanProperties[i];
+      if (isEquivalenceProperty(beanProperty)) {
+        String propertyName = beanProperty.getName();
+        try {
+          Object thisValue = beanProperty.getReadMethod().invoke(this);
+          Object thatValue = beanProperty.getReadMethod().invoke(that);
+          // TODO: following getProperty() complains that it can't find the getter method!
+//          Object thisValue = PropertyUtils.getProperty(this,
+//                                                       propertyName);
+//          Object thatValue = PropertyUtils.getProperty(that,
+//                                                       propertyName);
+          if (thisValue == null ^ thatValue == null ||
+            thisValue != null && !thisValue.equals(thatValue)) {
+            log.debug("property " + propertyName + " differs");
+            return false;
+          }
+        }
+        catch (Exception e) {
+          log.error("error comparing bean properties: " + e.getMessage());
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  
   /**
    * Return the business key for the entity.
    * @return the business key
@@ -148,4 +202,30 @@ public abstract class AbstractEntity implements Serializable
   {
     return getClass().getSimpleName() + "(" + getBusinessKey().toString() + ")";
   }
+
+  
+  // private methods
+  
+  /**
+   * Determine if a given property should be used in determining equivalence.
+   * @return boolean (see code, since this is private method)
+   * @see #isEquivalent(AbstractEntity)
+   */
+  private boolean isEquivalenceProperty(PropertyDescriptor property) {
+    Method method = property.getReadMethod();
+    // only test methods that are declared by subclasses of AbstractEntity 
+    if (method.getDeclaringClass().equals(AbstractEntity.class) ||
+      !AbstractEntity.class.isAssignableFrom(method.getDeclaringClass())) {
+      return false;
+    }
+    if (method.getName().startsWith("getHbn")) {
+      return false;
+    }
+
+    return 
+      !(Collection.class.isAssignableFrom(property.getPropertyType()) ||
+        Map.class.isAssignableFrom(property.getPropertyType()) ||
+        AbstractEntity.class.isAssignableFrom(property.getPropertyType()));
+  }
+  
 }
