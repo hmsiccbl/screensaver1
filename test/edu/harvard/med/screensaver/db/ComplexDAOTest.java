@@ -304,7 +304,7 @@ public class ComplexDAOTest extends AbstractSpringTest
             rvt[i] = new ResultValueType(
               screenResult,
               "rvt" + i,
-              1,
+              i + 1,
               false,
               false,
               false,

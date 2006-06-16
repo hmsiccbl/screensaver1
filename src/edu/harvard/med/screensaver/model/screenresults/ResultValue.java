@@ -55,9 +55,9 @@ public class ResultValue extends AbstractEntity implements Comparable
    */
   public ResultValue(ResultValueType resultValueType, Well well, String value)
   {
-    setResultValueType(resultValueType);
     setWell(well);
     setValue(value);
+    setResultValueType(resultValueType);
   }
 
   /**
