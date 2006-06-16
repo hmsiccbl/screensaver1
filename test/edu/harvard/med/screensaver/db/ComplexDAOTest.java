@@ -75,7 +75,7 @@ public class ComplexDAOTest extends AbstractSpringTest
   
   public void testParentChildRelationship()
   {
-    Parent parent = new Parent();
+    Parent parent = new Parent("parent1");
     parent.addChild(new Child("a"));
     parent.addChild(new Child("b"));
     dao.persistEntity(parent);

@@ -86,6 +86,7 @@
   >
     <include name="edu/harvard/med/screensaver/**/*Test.java"/>
     <exclude name="edu/harvard/med/screensaver/**/Abstract*.java"/>
+    <exclude name="edu/harvard/med/screensaver/**/*Suite.java"/>
   </fileset>
  
   <!-- uptodate properties (depends on "file sets" section) -->
@@ -322,10 +323,9 @@
   <target 
     name="test"
     description="Runs all JUnit tests, after performing a clean build" 
-  >
-  <!--    depends="clean"-->
-    <!--property name="test" value="true"/>
-    <antcall target="war"/-->
+    depends="clean">
+    <property name="test" value="true"/>
+    <antcall target="war"/>
     <taskdef
       name="junit"
       classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask"
@@ -337,12 +337,11 @@
       showoutput="true" 
       description="Run all project's tests"
     >
-      <classpath refid="project.classpath"/>
+      <test name="edu.harvard.med.screensaver.PackageTestSuite" outfile="test-result"></test> 
+      <!--classpath refid="project.classpath"/-->
       <!--batchtest todir="${basedir}/.test.reports">
         <fileset refid="junit.tests.fileset"/>
       </batchtest-->
-      <!--test name="edu.harvard.med.screensaver.ProjectTestSuite" outfile="test-result"></test--> 
-      <test name="edu.harvard.med.screensaver.SimpleTest" outfile="test-result.txt" todir="${basedir}"></test> 
     </junit> 
   </target> 
  

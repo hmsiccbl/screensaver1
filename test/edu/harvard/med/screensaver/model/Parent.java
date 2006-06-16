@@ -31,10 +31,20 @@ public class Parent extends AbstractEntity
 
 
   private Set<Child> _children = new HashSet<Child>();
+  private String _name;
   private Integer _id;
   
   
   // constructor and instance methods
+  
+  /**
+   * Construct a Parent.
+   * @param name unique n ame
+   */
+  public Parent(String name)
+  {
+    _name = name;
+  }
   
   /**
    * @hibernate.id
@@ -51,6 +61,23 @@ public class Parent extends AbstractEntity
     _id = id;
   }
   
+  /**
+   * Get the name.
+   * 
+   * @hibernate.property type="text" not-null="true"
+   */  
+  public String getName() {
+    return _name;
+  }
+
+  /**
+   * Set the name.
+   * @param name
+   */
+  public void setName(String name) {
+    _name = name;
+  }
+
   public Set<Child> getChildren() {
     return Collections.unmodifiableSet(_children);
   }
@@ -60,13 +87,20 @@ public class Parent extends AbstractEntity
     c.setParent(this);
   }
   
+  // protected and private methods and constructors
+
+  /**
+   * Default constructor.
+   * @motivation for Hibernate
+   */
+  protected Parent() {}
+  
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.model.AbstractEntity#getBusinessKey()
    */
   protected Object getBusinessKey()
   {
-    // HACK
-    return super.hashCode();
+    return getName();
   }
 
   /**
@@ -105,4 +139,5 @@ public class Parent extends AbstractEntity
   private void setChildrenHibernate(Set<Child> children) {
     _children = children;
   }
+
 }
