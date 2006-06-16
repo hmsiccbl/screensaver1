@@ -17,7 +17,7 @@
           <h:message for="shortName"/>
 
           <h:outputLabel value="Library type" for="libraryType"/>
-          <h:inputText id="libraryType" value="#{Library.library.libraryType}" required="true"/>
+          <h:inputText id="libraryType" value="#{Library.library.libraryType}" required="true" converter="LibraryTypeConverter"/>
           <h:message for="libraryType"/>
 
           <h:outputLabel value="Start plate" for="startPlate"/>

@@ -41,7 +41,7 @@
   </condition> 
   <property name="verbose" value="false" description="controls verbosity of various Ant tasks"/> 
   <property name="war" value="build/screensaver.war"/>
-  <property name="deploy.dir" value="/usr/local/jakarta-tomcatT/webapps/screensaver"/>
+  <property name="deploy.dir" value="/usr/local/jakarta-tomcat/webapps/screensaver"/>
   <property name="war.build.dir" location="build/war"/>
   <property name="src.dir" location="src"/>
   <property name="test.src.dir" location="test"/>
@@ -78,8 +78,17 @@
       name="edu/harvard/med/screensaver/model/**/*.java"/>
   </fileset>
  
+  <fileset
+    id="junit.tests.fileset"
+    description="defines the Java source files that are JUnit tests" 
+    dir="${test.src.dir}"
+    casesensitive="yes"
+  >
+    <include name="edu/harvard/med/screensaver/**/*Test.java"/>
+    <exclude name="edu/harvard/med/screensaver/**/Abstract*.java"/>
+  </fileset>
  
-  <!-- uptodate properties (depends on "file sets" section -->
+  <!-- uptodate properties (depends on "file sets" section) -->
  
   <uptodate property="hbm_xml.uptodate" targetfile="${hibernate.cfg.xml}" >
     <srcfiles refid="model.src.fileset"/>
@@ -91,13 +100,14 @@
 
   <path id="project.sourcepath" path="${src.dir}"/>
 
-  <path id="project.classpath">
-    <!--path refid="source.classpath"/-->
+  <path id="project.test.sourcepath" path="${test.src.dir}"/>
+
+  <path id="project.library.path">
     <fileset refid="lib.used.fileset"/>
   </path>
 
-  <path id="ddl.classpath">
-    <path refid="project.classpath"/>
+  <path id="project.classpath">
+    <path refid="project.library.path"/>
     <pathelement path="resources"/>
     <pathelement path="build/war/WEB-INF/classes"/>
   </path>
@@ -146,7 +156,7 @@
     <javac 
       srcdir="${src.dir}"
       destdir="${classes.dir}"
-      classpathref="project.classpath"
+      classpathref="project.library.path"
       debug="${javac.debug}" 
       optimize="${javac.optimize}"
       listfiles="${verbose}" 
@@ -228,7 +238,7 @@
     <taskdef
       name="hibernatedoclet"
       classname="xdoclet.modules.hibernate.HibernateDocletTask"
-      classpathref="project.classpath"
+      classpathref="project.library.path"
     />
     <hibernatedoclet
       destdir="resources"
@@ -261,7 +271,7 @@
     <taskdef
       name="hibernatetool" 
       classname="org.hibernate.tool.ant.HibernateToolTask" 
-      classpathref="ddl.classpath"
+      classpathref="project.classpath"
     />
     <hibernatetool destdir="sql">
       <configuration
@@ -289,7 +299,7 @@
     <javadoc 
      doctitle="Screensaver 1.00" 
      sourcepathref="project.sourcepath"
-     classpathref="project.classpath"
+     classpathref="project.library.path"
      packagenames="edu.harvard.med.screensaver.*" 
      destdir="${javadoc.dir}" 
      access="package" 
@@ -305,6 +315,36 @@
      verbose="${verbose}" 
     />
   </target>
+ 
+ 
+  <!-- run tests -->
+ 
+  <target 
+    name="test"
+    description="Runs all JUnit tests, after performing a clean build" 
+  >
+  <!--    depends="clean"-->
+    <!--property name="test" value="true"/>
+    <antcall target="war"/-->
+    <taskdef
+      name="junit"
+      classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask"
+      classpathref="project.library.path"
+    />
+
+    <junit
+      printsummary="true"
+      showoutput="true" 
+      description="Run all project's tests"
+    >
+      <classpath refid="project.classpath"/>
+      <!--batchtest todir="${basedir}/.test.reports">
+        <fileset refid="junit.tests.fileset"/>
+      </batchtest-->
+      <!--test name="edu.harvard.med.screensaver.ProjectTestSuite" outfile="test-result"></test--> 
+      <test name="edu.harvard.med.screensaver.SimpleTest" outfile="test-result.txt" todir="${basedir}"></test> 
+    </junit> 
+  </target> 
  
  
   <!-- cleanup routines -->

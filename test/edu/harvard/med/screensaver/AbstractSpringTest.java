@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver;
 
 import java.io.FileNotFoundException;
 
+import org.apache.log4j.Level;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 import org.springframework.util.Log4jConfigurer;
 
@@ -30,6 +31,7 @@ public abstract class AbstractSpringTest
   static {
     try {
       Log4jConfigurer.initLogging("classpath:log4j.properties");
+      org.apache.log4j.Logger.getRootLogger().setLevel(Level.DEBUG);
     }
     catch (FileNotFoundException e) {
       e.printStackTrace();

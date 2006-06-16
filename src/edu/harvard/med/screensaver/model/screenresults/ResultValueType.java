@@ -44,27 +44,27 @@ public class ResultValueType extends AbstractEntity implements Comparable
   
   // instance data
 
-  private Integer                _resultValueTypeId;
-  private Integer                _version;
-  private ScreenResult           _screenResult;
-  private SortedSet<ResultValue> _resultValues = new TreeSet<ResultValue>();
-  private String                 _name;
-  private String                 _description;
-  private Integer                _ordinal;
-  private Integer                _replicateOrdinal;
-  private AssayReadoutType       _assayReadoutType;
-  private String                 _timePoint;
-  private boolean                _isDerived;
-  private String                 _howDerived;
+  private Integer                    _resultValueTypeId;
+  private Integer                    _version;
+  private ScreenResult               _screenResult;
+  private SortedSet<ResultValue>     _resultValues = new TreeSet<ResultValue>();
+  private String                     _name;
+  private String                     _description;
+  private Integer                    _ordinal;
+  private Integer                    _replicateOrdinal;
+  private AssayReadoutType           _assayReadoutType;
+  private String                     _timePoint;
+  private boolean                    _isDerived;
+  private String                     _howDerived;
   private SortedSet<ResultValueType> _derivedFrom;
-  private boolean                _isActivityIndicator;
-  private ActivityIndicatorType  _activityIndicatorType;
-  private IndicatorDirection     _indicatorDirection;
-  private Double                 _indicatorCutoff;
-  private boolean                _isFollowUpData;
-  private String                 _assayPhenotype;
-  private boolean                _isCherryPick;
-  private String                 _comments;
+  private boolean                    _isActivityIndicator;
+  private ActivityIndicatorType      _activityIndicatorType;
+  private IndicatorDirection         _indicatorDirection;
+  private Double                     _indicatorCutoff;
+  private boolean                    _isFollowUpData;
+  private String                     _assayPhenotype;
+  private boolean                    _isCherryPick;
+  private String                     _comments;
 
   
   // public constructors and instance methods
@@ -101,6 +101,20 @@ public class ResultValueType extends AbstractEntity implements Comparable
     setCherryPick(isCherryPick);
   }
   
+  // TODO: jps: I suggest this as a valid minimal constructor; we should discuss... --ant
+  /**
+   * Constructs an initialized ResultValueType object.
+   * @param screenResult
+   * @param name
+   */
+  public ResultValueType(
+    ScreenResult screenResult,
+    String name)
+  {
+    setScreenResult(screenResult);
+    setName(name);
+  }
+
   /**
    * Get a unique identifier for the <code>ResultValueType</code>.
    * 
@@ -203,12 +217,11 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * <code>ResultValueType</code> within its parent {@link ScreenResult}.
    * This ordering is really only significant from the standpoint of presenting
    * a {@link ScreenResult} to the user (historically speaking, it reflects the
-   * ordering found during spreadhseet file import).
+   * ordering found during spreadsheet file import).
    * 
    * @return the replicate ordinal
    * @hibernate.property
    *   type="integer"
-   *   not-null="true"
    */
   public Integer getReplicateOrdinal() {
     return _replicateOrdinal;
@@ -221,6 +234,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @param replicateOrdinal the replicate ordinal
    */
   public void setReplicateOrdinal(Integer replicateOrdinal) {
+    assert replicateOrdinal > 0 : "replicate ordinal values must be positive (non-zero)";
     _replicateOrdinal = replicateOrdinal;
   }
   
@@ -283,7 +297,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
     // TODO: verify that assayReadoutType is in Screen's assayReadoutTypes set.
     _assayReadoutType = assayReadoutType;
   }
-
 
   /**
    * Get the comments. Comments should describe real-world issues relating to
@@ -557,7 +570,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
     return _isDerived;
   }
 
-
   /**
    * Set whether this <code>ResultValueType</code> is derived from other
    * <code>ResultValueType</code>s.
@@ -598,8 +610,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   protected String getBusinessKey() {
     assert _screenResult != null && _ordinal != null :
       "business key fields have not been defined";
-    // TODO: should call getScreenResult().getBusinessKey(), but method doesn't yet exist
-    return getScreenResult().getDateCreated() + ":" + getOrdinal();
+    return getScreenResult().getBusinessKey().toString() + ":" + getOrdinal();
   }
 
 

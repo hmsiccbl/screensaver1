@@ -19,7 +19,7 @@
 
   <!-- Managed beans -->
   
-  <!-- TODO: Is it possible to configured managed-bean superclass so that common properties are not repeated in each bean definition?  Or must we use Spring to manage our JSF managed-beans in order have such a feature? -->
+  <!-- TODO: Is it possible to configure managed-bean superclass so that common properties are not repeated in each bean definition?  Or must we use Spring to manage our JSF managed-beans in order have such a feature? -->
 
   <managed-bean>
     <description>Main</description>
@@ -99,7 +99,13 @@
       <to-view-id>/library.jsp</to-view-id>
     </navigation-case>
   </navigation-rule>
-
   
+  <!-- Converters -->
 
+  <!-- converter>
+    <description>Converter for LibraryType enum to/from string representation</description>
+    <converter-id>LibraryTypeConverter</converter-id>
+    <converter-class>edu.harvard.med.screensaver.model.libraries.LibraryType</converter-class>
+  </converter-->
+  
 </faces-config>

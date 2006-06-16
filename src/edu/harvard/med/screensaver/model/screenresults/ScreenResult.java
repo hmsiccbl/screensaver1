@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.model.screenresults;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -34,8 +35,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- * @hibernate.class
- *   lazy="false"
+ * @hibernate.class lazy="false"
  */
 public class ScreenResult extends AbstractEntity
 {
@@ -63,14 +63,25 @@ public class ScreenResult extends AbstractEntity
    */
   public ScreenResult(
     Date dateCreated,
-    boolean isShareable, 
+    boolean isShareable,
     Integer replicateCount)
   {
     setDateCreated(dateCreated);
     setShareable(isShareable);
     setReplicateCount(replicateCount);
   }
+
   
+  // TODO: jps: I suggest this as the minimal constructor.
+  /**
+   * Constructs an initialized ScreenResult object.
+   * @param dateCreated
+   */
+  public ScreenResult(Date dateCreated)
+  {
+    setDateCreated(dateCreated);
+  }
+
   /**
    * Get a unique identifier for the <code>ScreenResult</code>.
    * 
@@ -161,6 +172,23 @@ public class ScreenResult extends AbstractEntity
    * @hibernate.property type="integer" not-null="true"
    */
   public Integer getReplicateCount() {
+    if (_replicateCount == null) {
+      if (getResultValueTypes().size() == 0) {
+        _replicateCount = 0;
+      } 
+      else {
+        ResultValueType maxOrdinalRvt = 
+          Collections.max(getResultValueTypes(),
+            new Comparator<ResultValueType>()
+            {
+              public int compare(ResultValueType rvt1, ResultValueType rvt2)
+              {
+                return rvt1.getReplicateOrdinal().compareTo(rvt2.getReplicateOrdinal());
+              }
+            } );
+        _replicateCount = maxOrdinalRvt.getReplicateOrdinal();
+      }
+    }
     return _replicateCount;
   }
   
@@ -183,11 +211,10 @@ public class ScreenResult extends AbstractEntity
    */
   protected Object getBusinessKey()
   {
-    // HACK: this biz key won't actually work! gotta replace it!
     // TODO: replace with
     // return getScreen()
     // when it is implemented
-    return super.hashCode();
+    return getDateCreated();
   }
   
   

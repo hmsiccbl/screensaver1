@@ -11,14 +11,12 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.Child;
 import edu.harvard.med.screensaver.model.Parent;
 import edu.harvard.med.screensaver.model.libraries.Compound;
@@ -299,10 +297,7 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         public void runTransaction()
         {
-          ScreenResult screenResult = new ScreenResult(
-            new Date(),
-            false,
-            replicates);
+          ScreenResult screenResult = new ScreenResult(new Date());
           
           ResultValueType[] rvt = new ResultValueType[replicates];
           for (int i = 0; i < replicates; i++) {
@@ -341,6 +336,11 @@ public class ComplexDAOTest extends AbstractSpringTest
                 "value " + iWell + "," + iResultValue);
             }
           }
+
+          // test the calculation of replicateCount from child ResultValueTypes,
+          // before setReplicate() is called by anyone
+          assertEquals(replicates,screenResult.getReplicateCount().intValue());
+          
           dao.persistEntity(screenResult);
         }
       });
@@ -356,6 +356,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           Set<Well> wells = library.getWells();
           ScreenResult screenResult =
             dao.findAllEntitiesWithType(ScreenResult.class).get(0);
+          assertEquals(replicates,screenResult.getReplicateCount().intValue());
           int iResultValue = 0;
           SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
           assertEquals(2, replicates);
@@ -403,10 +404,7 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         public void runTransaction()
         {
-          ScreenResult screenResult = new ScreenResult(
-            new Date(),
-            false,
-            replicates);
+          ScreenResult screenResult = new ScreenResult(new Date());
           
           for (int i = 0; i < replicates; i++) {
             ResultValueType rvt = new ResultValueType(
