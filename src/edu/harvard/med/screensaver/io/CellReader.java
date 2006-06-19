@@ -31,6 +31,9 @@ public class CellReader
   // static data members
   
   public static final String INVALID_CELL_TYPE_ERROR = "invalid cell type";
+
+
+  private static final String CELL_VALUE_REQUIRED_ERROR = "value required";
   
   
   // instance data members
@@ -40,6 +43,7 @@ public class CellReader
   private HSSFSheet _sheet;
   private short _column;
   private short _row;
+  private boolean _required;
   
   // inner class definitions
   
@@ -83,19 +87,28 @@ public class CellReader
      *         associated with
      */
     public CellReader newCellReader(short column,
-                                    short row)
+                                    short row,
+                                    boolean required)
     {
       if (_recycledCellReader == null ) {
         _recycledCellReader = new CellReader(_sheetName,
                                              _sheet,
                                              _errors,
                                              column,
-                                             row);
+                                             row,
+                                             required);
       } else {
         _recycledCellReader._column = column;
         _recycledCellReader._row = row;
+        _recycledCellReader._required = required;
       }
       return _recycledCellReader;
+    }
+    
+    public CellReader newCellReader(short column,
+      short row)
+    {
+      return newCellReader(column, row, /*required=*/false);
     }
   }
   
@@ -146,6 +159,9 @@ public class CellReader
     try {
       HSSFCell cell = getCell();
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
+        if (_required) {
+          _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        }
         return 0.0;
       }
       if (cell.getCellType() != HSSFCell.CELL_TYPE_NUMERIC) {
@@ -154,7 +170,10 @@ public class CellReader
       }
       return new Double(cell.getNumericCellValue());
     } 
-    catch (CellUndefinedException e) {
+    catch (CellOutOfRangeException e) {
+      if (_required) {
+        _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+      }
       return new Double(0.0);
     }
   }
@@ -170,6 +189,9 @@ public class CellReader
     try {
       HSSFCell cell = getCell();
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
+        if (_required) {
+          _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        }
         return 0;
       }
       if (cell.getCellType() != HSSFCell.CELL_TYPE_NUMERIC) {
@@ -178,7 +200,10 @@ public class CellReader
       }
       return new Integer((int) cell.getNumericCellValue());
     } 
-    catch (CellUndefinedException e) {
+    catch (CellOutOfRangeException e) {
+      if (_required) {
+        _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+      }
       return 0;
     }
   }
@@ -194,6 +219,9 @@ public class CellReader
     try {
       HSSFCell cell = getCell();
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
+        if (_required) {
+          _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        }
         return false;
       }
       if (cell.getCellType() != HSSFCell.CELL_TYPE_BOOLEAN) {
@@ -202,7 +230,10 @@ public class CellReader
       }
       return cell.getBooleanCellValue();
     } 
-    catch (CellUndefinedException e) {
+    catch (CellOutOfRangeException e) {
+      if (_required) {
+        _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+      }
       return false;
     }
   }
@@ -218,11 +249,17 @@ public class CellReader
     try {
       HSSFCell cell = getCell();
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
+        if (_required) {
+          _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        }
         return null;
       }
       return cell.getDateCellValue();
     } 
-    catch (CellUndefinedException e) {
+    catch (CellOutOfRangeException e) {
+      if (_required) {
+        _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+      }
       return null;
     }
     catch (NumberFormatException e) {
@@ -242,11 +279,17 @@ public class CellReader
     try {
       HSSFCell cell = getCell();
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
+        if (_required) {
+          _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        }
         return "";
       }
       return cell.getStringCellValue();
     } 
-    catch (CellUndefinedException e) {
+    catch (CellOutOfRangeException e) {
+      if (_required) {
+        _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+      }
       return "";
     }
     catch (NumberFormatException e) {
@@ -261,37 +304,39 @@ public class CellReader
                        HSSFSheet sheet,
                        ParseErrorManager errors,
                        short column,
-                       short row)
+                       short row,
+                       boolean required)
   {
     _sheet = sheet;
     _sheetName = sheetName;
     _errors = errors;
     _column = column;
     _row = row;
+    _required = required;
   }
   
   /**
    * Returns the HSSFCell on the worksheet at the specified location.
    * 
    * @return an <code>HSSFCell</code>
-   * @throws CellUndefinedException if the specified cell has not been
+   * @throws CellOutOfRangeException if the specified cell has not been
    *           initialized with a value in the worksheet
    */
   private HSSFCell getCell()
-    throws CellUndefinedException
+    throws CellOutOfRangeException
   {
     if (_sheet.getLastRowNum() < getRow()) {
-      throw new CellUndefinedException(CellUndefinedException.UndefinedInAxis.ROW,
+      throw new CellOutOfRangeException(CellOutOfRangeException.UndefinedInAxis.ROW,
                                        this);
     }
     HSSFRow row = _sheet.getRow(getRow());
     if (row.getLastCellNum() < getColumn()) {
-      throw new CellUndefinedException(CellUndefinedException.UndefinedInAxis.COLUMN,
+      throw new CellOutOfRangeException(CellOutOfRangeException.UndefinedInAxis.COLUMN,
                                        this);
     }
     HSSFCell cell = row.getCell(getColumn());
     if (cell == null) {
-      throw new CellUndefinedException(CellUndefinedException.UndefinedInAxis.ROW_AND_COLUMN,
+      throw new CellOutOfRangeException(CellOutOfRangeException.UndefinedInAxis.ROW_AND_COLUMN,
                                        this);
     }
     return cell;

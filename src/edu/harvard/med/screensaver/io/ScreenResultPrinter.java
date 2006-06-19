@@ -61,7 +61,8 @@ public class ScreenResultPrinter
       printer.println("\tResult Values: (" + rvt.getResultValues().size() + ")");
       int n = 0;
       for (ResultValue rv : rvt.getResultValues()) {
-        printer.println("\t\t" + rv.getValue());
+        printer.println("\t\t" + rv.getWell().getPlateNumber() + ":" + rv.getWell().getWellName() + 
+                        "\t" + rv.getValue());
         if (maxResultValuesToPrint != null && ++n >= maxResultValuesToPrint) {
           printer.println("\t\t...");
           break;

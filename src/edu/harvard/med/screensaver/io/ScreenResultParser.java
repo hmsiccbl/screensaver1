@@ -153,10 +153,10 @@ public class ScreenResultParser
     booleanMap.put("no", false);
     booleanMap.put("n", false);
     booleanMap.put("0", false);
-    booleanMap.put("true", false);
-    booleanMap.put("yes", false);
-    booleanMap.put("y", false);
-    booleanMap.put("1", false);
+    booleanMap.put("true", true);
+    booleanMap.put("yes", true);
+    booleanMap.put("y", true);
+    booleanMap.put("1", true);
   }
   
 
@@ -185,6 +185,12 @@ public class ScreenResultParser
       ScreenResultParser screenResultParser = (ScreenResultParser) appCtx.getBean("screenResultParser");
       ScreenResult screenResult = screenResultParser.parse(metadataFileInStream,
                                                            dataFileInStream);
+      if (screenResultParser.getErrors().size() > 0) {
+        System.err.println("Errors encountered during parse:");
+        for (String error : screenResultParser.getErrors()) {
+          System.err.println(error);
+        }
+      }
       if (cmdLine.hasOption("wellstoprint")) {
         new ScreenResultPrinter(screenResult).print(new Integer(cmdLine.getOptionValue("wellstoprint")));
       }
@@ -323,10 +329,16 @@ public class ScreenResultParser
   }
 
 
-  private CellReader metadataCell(MetadataRow row, int dataHeader) 
+  private CellReader metadataCell(MetadataRow row, int dataHeader, boolean isRequired) 
   {
     return _metadataCellParserFactory.newCellReader((short) (METADATA_FIRST_DATA_HEADER__COLUMN_INDEX + dataHeader),
-                                                    (short) (METADATA_FIRST_DATA_ROW_INDEX + row.ordinal()));
+                                                    (short) (METADATA_FIRST_DATA_ROW_INDEX + row.ordinal()),
+                                                    isRequired);
+  }
+  
+  private CellReader metadataCell(MetadataRow row, int dataHeader)
+  {
+    return metadataCell(row, dataHeader, /*required=*/false);
   }
   
   private CellReader dataCell(int row, DataColumn column)
@@ -349,29 +361,31 @@ public class ScreenResultParser
     initializeMetadataSheet();
     parseMetaMetadata();
     for (int iDataHeader = 0; metadataCell(MetadataRow.COLUMN_TYPE,
-                                   iDataHeader).
-                                   getString().equalsIgnoreCase("data"); ++iDataHeader) {
+                                           iDataHeader).
+                                           getString().equalsIgnoreCase("data"); ++iDataHeader) {
       ResultValueType rvt = 
         new ResultValueType(_screenResult,
-                            metadataCell(MetadataRow.NAME, iDataHeader).getString(),
+                            metadataCell(MetadataRow.NAME, iDataHeader, true).getString(),
                             metadataCell(MetadataRow.REPLICATE, iDataHeader).getInteger(),
                             _rawOrDerivedParser.parse(metadataCell(MetadataRow.RAW_OR_DERIVED, iDataHeader)),
                             _booleanParser.parse(metadataCell(MetadataRow.IS_ASSAY_ACTIVITY_INDICATOR, iDataHeader)),
                             _primaryOrFollowUpParser.parse(metadataCell(MetadataRow.PRIMARY_OR_FOLLOWUP, iDataHeader)),
-                            metadataCell(MetadataRow.ASSAY_PHENOTYPE,iDataHeader).getString(),
+                            metadataCell(MetadataRow.ASSAY_PHENOTYPE, iDataHeader).getString(),
                             _booleanParser.parse(metadataCell(MetadataRow.IS_CHERRY_PICK, iDataHeader)));
-      _columnsDerivedFromMap.put(metadataCell(MetadataRow.COLUMN_IN_TEMPLATE, iDataHeader).getString(), rvt);
+      _columnsDerivedFromMap.put(metadataCell(MetadataRow.COLUMN_IN_TEMPLATE, iDataHeader, true).getString(), rvt);
       rvt.setDescription(metadataCell(MetadataRow.DESCRIPTION, iDataHeader).getString());
       rvt.setTimePoint(metadataCell(MetadataRow.TIME_POINT, iDataHeader).getString());
       if (rvt.isDerived()) {
-        rvt.setDerivedFrom(new TreeSet<ResultValueType>(_columnsDerivedFromParser.parseList(metadataCell(MetadataRow.COLUMNS_DERIVED_FROM, iDataHeader))));
-        rvt.setHowDerived(metadataCell(MetadataRow.HOW_DERIVED, iDataHeader).getString());
+        rvt.setDerivedFrom(new TreeSet<ResultValueType>(_columnsDerivedFromParser.parseList(metadataCell(MetadataRow.COLUMNS_DERIVED_FROM, iDataHeader, true))));
+        rvt.setHowDerived(metadataCell(MetadataRow.HOW_DERIVED, iDataHeader, true).getString());
         // TODO: should warn if these values *are* defined and !isDerivedFrom()
       }
       if (rvt.isActivityIndicator()) {
-        rvt.setActivityIndicatorType(_activityIndicatorTypeParser.parse(metadataCell(MetadataRow.ACTIVITY_INDICATOR_TYPE, iDataHeader)));
-        rvt.setIndicatorDirection(indicatorDirectionParser.parse(metadataCell(MetadataRow.INDICATOR_DIRECTION, iDataHeader)));
-        rvt.setIndicatorCutoff(metadataCell(MetadataRow.INDICATOR_CUTOFF, iDataHeader).getDouble());
+        rvt.setActivityIndicatorType(_activityIndicatorTypeParser.parse(metadataCell(MetadataRow.ACTIVITY_INDICATOR_TYPE, iDataHeader, true)));
+        if (rvt.getActivityIndicatorType().equals(ActivityIndicatorType.NUMERICAL)) {
+          rvt.setIndicatorDirection(indicatorDirectionParser.parse(metadataCell(MetadataRow.INDICATOR_DIRECTION, iDataHeader, true)));
+          rvt.setIndicatorCutoff(metadataCell(MetadataRow.INDICATOR_CUTOFF, iDataHeader, true).getDouble());
+        }
         // TODO: should warn if these values *are* defined and !isActivityIndicator()
       }
       rvt.setComments(metadataCell(MetadataRow.COMMENTS, iDataHeader).getString());
@@ -395,9 +409,10 @@ public class ScreenResultParser
           CellReader cell = dataCell(iRow, iDataHeader);
           String value =
             !rvt.isActivityIndicator() ? cell.getDouble().toString() :
-              rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN ? cell.getBoolean().toString() :
+              rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN ? _booleanParser.parse(cell).toString() :
                 rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL ? cell.getDouble().toString() :
-                  cell.getString();
+                  rvt.getActivityIndicatorType() == ActivityIndicatorType.SCALED ? cell.getString() :
+                    cell.getString();
           new ResultValue(rvt,
                           well,
                           value,
@@ -471,7 +486,7 @@ public class ScreenResultParser
    * 
    * @author ant
    */
-  private interface CellValueParser<T>
+  public interface CellValueParser<T>
   {
     /**
      * Parse the value in a cell, returning <T>
@@ -489,7 +504,7 @@ public class ScreenResultParser
    * contain lists of values. Note that this class is a non-static inner class
    * and references instance methods of {@link ScreenResultParser}.
    */
-  private class CellVocabularyParser<T> implements CellValueParser<T>
+  public class CellVocabularyParser<T> implements CellValueParser<T>
   {
     // TODO: class methods needs javadocs
     
@@ -539,12 +554,12 @@ public class ScreenResultParser
     public CellVocabularyParser(Map<String,T> parsedValue2SystemValue,
                                 T valueToReturnIfUnparseable,
                                 String errorMessage,
-                                String delimeterRegex)
+                                String delimiterRegex)
     {
       _parsedValue2SystemValue = parsedValue2SystemValue;
       _valueToReturnIfUnparseable = valueToReturnIfUnparseable;
       _errorMessage = errorMessage;
-      _delimiterRegex = delimeterRegex;
+      _delimiterRegex = delimiterRegex;
     }
     
     
@@ -580,7 +595,7 @@ public class ScreenResultParser
           return _parsedValue2SystemValue.get(pattern);
         }
       }
-      _errors.addError(_errorMessage, cell);
+      _errors.addError(_errorMessage + " (expected one of " + _parsedValue2SystemValue.keySet() + ")", cell);
       return _valueToReturnIfUnparseable;
     }
 

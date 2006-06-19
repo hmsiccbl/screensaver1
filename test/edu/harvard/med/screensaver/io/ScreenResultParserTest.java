@@ -54,7 +54,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
    * we're using actually works. Somewhat useful to keep around in case we
    * upgrade jar version, etc.
    */
-  public void testReadExcelSpreadsheet() throws Exception {
+  public void testReadExcelSpreadsheet() throws Exception 
+  {
     // TODO: for sheet names (at least) underscores appear to converted to dashes by HSSF
     String[] expectedSheetNames = new String[] { "PL-0500", "PL-0501", "PL-0502", "PL-0503" };
     String[] expectedHeaderRowValues = new String[] { "Stock ID", "Row", "Type", "Exclude", "Intensity_A", "Intensity_B", "Positive" };
@@ -75,7 +76,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
       }
     }
   }
-
+  
   // TODO: how do we instantiate a non-static inner class via reflection?
   // public void testCellParser() throws Exception {
   // ScreenResultParser screenResultParser = new ScreenResultParser(null, null);
@@ -85,7 +86,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
   // String.class);
   // }
 
-  public void testParseScreenResult() throws Exception {
+  public void testParseScreenResult() throws Exception
+  {
     InputStream metadataIn = ScreenResultParserTest.class.getResourceAsStream("/edu/harvard/med/screensaver/io/115MetaData.xls");
     InputStream dataIn = ScreenResultParserTest.class.getResourceAsStream("/edu/harvard/med/screensaver/io/115_CBDivE_1to51.xls");
     assertNotNull(metadataIn);

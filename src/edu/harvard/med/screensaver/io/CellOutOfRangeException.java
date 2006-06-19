@@ -10,28 +10,27 @@
 package edu.harvard.med.screensaver.io;
 
 /**
- * Exception for reporting problems reading cells from an <code>HSSFSheet</code>
- * worksheet.
+ * Exception for reporting attempt to read a cell that is outside of the range
+ * of valid cells in an <code>HSSFSheet</code> worksheet.
  * 
  * @author ant
  */
-public class CellUndefinedException extends Exception
+public class CellOutOfRangeException extends Exception
 {
   private static final long serialVersionUID = -6769776818247218394L;
 
   public static enum UndefinedInAxis { ROW, COLUMN, ROW_AND_COLUMN };
   
   /**
-   * Constructs a CellUndefinedException exception object.
+   * Constructs a CellOutOfRangeException exception object.
    * 
    * @param undefinedInAxis whether the row, or column, or both, were undefined
    *          in the worksheet
    * @param cell the cell that was undefined
    */
-  public CellUndefinedException(UndefinedInAxis undefinedInAxis,
-                                CellReader cell)
+  public CellOutOfRangeException(UndefinedInAxis undefinedInAxis,
+                                 CellReader cell)
   {
-    super("cell " + cell + " undefined at " + 
-          undefinedInAxis.toString());
+    super("cell " + cell + " undefined at " + undefinedInAxis.toString());
   }
 }
