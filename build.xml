@@ -76,9 +76,9 @@
     <include 
       if="test"
       name="edu/harvard/med/screensaver/model/Child.java"/>
-      <include 
-        if="test"
-        name="edu /harvard/med/screensaver/model/Parent.java"/>
+    <include
+      if="test"
+      name="edu/harvard/med/screensaver/model/Parent.java"/>
   </fileset>
  
   <fileset
