@@ -29,7 +29,7 @@ public class CellUndefinedException extends Exception
    * @param cell the cell that was undefined
    */
   public CellUndefinedException(UndefinedInAxis undefinedInAxis,
-                                CellParser cell)
+                                CellReader cell)
   {
     super("cell " + cell + " undefined at " + 
           undefinedInAxis.toString());

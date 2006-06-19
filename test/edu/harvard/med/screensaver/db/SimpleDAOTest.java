@@ -9,12 +9,15 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.Well;
 
 
 /**
@@ -107,8 +110,30 @@ public class SimpleDAOTest extends AbstractSpringTest
     compound2 = dao.findEntityById(Compound.class, id + 1);
     assertEquals(null, compound2);
   }
+  
+  public void testFindEntitiesByProperties()
+  {
+    fail("test not implemented yet");
+  }
+  
+  public void testFindEntityByProperties()
+  {
+    
+    Map<String,Object> name2Value = new HashMap<String,Object>();
+    name2Value.put("plateNumber", new Integer(1));
+    name2Value.put("wellName", "A01");
+    
+    Library library = dao.defineEntity(Library.class, "ln1", "sn1", LibraryType.NATURAL_PRODUCTS, 1, 50);
+    Well expectedWell = dao.defineEntity(Well.class,
+                                         library,
+                                         name2Value.get("plateNumber"),
+                                         name2Value.get("wellName"));
+    Well actualWell = dao.findEntityByProperties(Well.class,
+                                                 name2Value);
+    assertTrue(actualWell.isEquivalent(expectedWell));
+  }
 
-  public void testFindEntitiesbyProperty1()
+  public void testFindEntitiesByProperty1()
   {
     Compound compound = dao.defineEntity(Compound.class, "spaz");
     

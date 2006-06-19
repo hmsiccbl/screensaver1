@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.db;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.hibernate.ObjectNotFoundException;
@@ -99,6 +100,60 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
       });
   }
   
+  /*
+   * (non-Javadoc)
+   * 
+   * @see edu.harvard.med.screensaver.db.DAO#findEntitiesByProperty(java.lang.Class,
+   *      java.lang.String, java.lang.String)
+   */
+  @SuppressWarnings("unchecked")
+  public <E extends AbstractEntity> List<E> findEntitiesByProperties(
+    Class<E> entityClass,
+    Map<String,Object> name2Value)
+  {
+    String entityName = entityClass.getSimpleName();
+    StringBuffer hql = new StringBuffer();
+    boolean first = true;
+    for (String propertyName : name2Value.keySet()) {
+      if (first) {
+        hql.append("from " + entityName + " x where ");
+        first = false;
+      }
+      else {
+        hql.append(" and ");
+      }
+      hql.append("x.")
+         .append(propertyName)
+         .append(" = ?");
+    }
+    return (List<E>) getHibernateTemplate().find(hql.toString(),
+                                                 name2Value.values()
+                                                           .toArray());
+  }
+  
+  /*
+   * (non-Javadoc)
+   * 
+   * @see edu.harvard.med.screensaver.db.DAO#findEntityByProperty(java.lang.Class,
+   *      java.lang.String, java.lang.Object)
+   */
+  public <E extends AbstractEntity> E findEntityByProperties(
+    Class<E> entityClass,
+    Map<String,Object> name2Value)
+  {
+    List<E> entities = findEntitiesByProperties(
+      entityClass,
+      name2Value);
+    if (entities.size() == 0) {
+      return null;
+    }
+    if (entities.size() > 1) {
+      throw new IllegalArgumentException(
+        "more than one result for DAO.findEntityByProperties");
+    }
+    return entities.get(0);
+  }
+  
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.db.DAO#findEntitiesByProperty(java.lang.Class, java.lang.String, java.lang.String)
    */
@@ -108,6 +163,9 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     String propertyName,
     Object propertyValue)
   {
+    // note: could delegate this method body to findEntitiesByProperties, but
+    // this would require wrapping up property{Name,Value} into a Map object,
+    // for no good reason other than (minimal) code sharing
     String entityName = entityClass.getSimpleName();
     String hql = "from " + entityName + " x where x." + propertyName + " = ?";
     return (List<E>) getHibernateTemplate().find(hql, propertyValue);

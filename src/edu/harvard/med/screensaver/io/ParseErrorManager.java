@@ -38,7 +38,7 @@ public class ParseErrorManager
    * @param row the {@link Row} of the cell containing the error
    */
   public void addError(String error,
-                       CellParser cell)
+                       CellReader cell)
   {
     _errors.add(error + " @ " + cell);
   }

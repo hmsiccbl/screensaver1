@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.db;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,7 +51,7 @@ public interface DAO
   public <E extends AbstractEntity> E defineEntity(
     Class<E> entityClass,
     Object... constructorArguments);
-
+  
   /**
    * Update the database with the values for the given Entity. If the Entity was
    * not previously in the database, then create it.
@@ -89,14 +90,50 @@ public interface DAO
     Integer id);
 
   /**
+   * Retrieve and return the entity that has a specific value for the
+   * specified properties.
+   * 
+   * @param <E> the type of the entity to retrieve
+   * @param entityClass the class of the entity to retrieve
+   * @param name2Value a <code>Map</code> containing entries for each
+   *          property/value pair to query against
+   * @return a list of entities that have the specified values for the specified
+   *         set of properties
+   */
+  public <E extends AbstractEntity> List<E> findEntitiesByProperties(
+    Class<E> entityClass,
+    Map<String,Object> name2Value);
+  
+  /**
+   * Retrieve and return the entity that has a specific values for the specified
+   * properties. Return <code>null</code> if no entity has that value for that
+   * set of properties. Throw an <code>InvalidArgumentException</code> if
+   * there is more than one entity with the specified values.
+   * 
+   * @param <E> the type of the entity to retrieve
+   * @param entityClass the class of the entity to retrieve
+   * @param name2Value a <code>Map</code> containing entries for each
+   *          property/value pair to query against
+   * @return the entity that has the specified values for the specified
+   *         set of properties
+   * @exception InvalidArgumentException when there is more than one entity with
+   *              the specified values for the set of properties
+   */
+  @Transactional(readOnly = true)
+  public <E extends AbstractEntity> E findEntityByProperties(
+    Class<E> entityClass,
+    Map<String,Object> name2Value);
+
+  /**
    * Retrieve and return a list of entities that have a specific value for the
    * specified property.
    * 
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
    * @param propertyName the name of the property to query against
-   * @param propertyValue the value of the property to query for 
-   * @return a list of entities that have the specified value for the specified property
+   * @param propertyValue the value of the property to query for
+   * @return a list of entities that have the specified value for the specified
+   *         property
    */
   @Transactional(readOnly = true)
   public <E extends AbstractEntity> List<E> findEntitiesByProperty(
@@ -114,7 +151,7 @@ public interface DAO
    * @param entityClass the class of the entity to retrieve
    * @param propertyName the name of the property to query against
    * @param propertyValue the value of the property to query for 
-   * @return a list of entities that have the specified value for the specified property
+   * @return the entity that has the specified value for the specified property
    * @exception InvalidArgumentException when there is more
    *    than one entity with the specified value for the property
    */

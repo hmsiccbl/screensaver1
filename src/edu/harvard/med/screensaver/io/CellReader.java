@@ -17,7 +17,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 
 /**
  * Encapsulates the parsing operations for a cell in a worksheet. Instantiate
- * new CellParsers via a CellParser.Factory, which you must first instantiate
+ * new CellParsers via a CellReader.Factory, which you must first instantiate
  * with a set of arguments that will be common to a "class" of CellParsers.
  * 
  * @motivation convenience class for reading HSSFSheet cells
@@ -25,7 +25,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
  *             get it from an HSSFSheet!
  * @author ant
  */
-public class CellParser
+public class CellReader
 {
   
   // static data members
@@ -44,7 +44,7 @@ public class CellParser
   // inner class definitions
   
   /**
-   * Instantiates CellParser objects with shared arguments. For lisp-o-philes,
+   * Instantiates CellReader objects with shared arguments. For lisp-o-philes,
    * this is akin to "currying" a function.
    * 
    * @author ant
@@ -54,9 +54,11 @@ public class CellParser
     private ParseErrorManager _errors;
     private String _sheetName;
     private HSSFSheet _sheet;
+    private CellReader _recycledCellReader;
+    
 
     /**
-     * Constructs a Factory object that can be used instantiate CellParser
+     * Constructs a Factory object that can be used instantiate CellReader
      * objects with a shared set of arguments
      * 
      * @param sheetName the name of the worksheet
@@ -73,21 +75,27 @@ public class CellParser
     }
     
     /**
-     * Instantiate a new CellParser, using this factory's shared arguments.
+     * Instantiate a new CellReader, using this factory's shared arguments.
      * 
      * @param column the physical zero-based column in the worksheet
      * @param row the physical zero-based row in the worksheet
-     * @return a brand new CellParser, ready to parse the value in the cell it's
+     * @return a brand new CellReader, ready to parse the value in the cell it's
      *         associated with
      */
-    public CellParser newCellParser(short column,
+    public CellReader newCellReader(short column,
                                     short row)
     {
-      return new CellParser(_sheetName,
-                            _sheet,
-                            _errors,
-                            column,
-                            row);
+      if (_recycledCellReader == null ) {
+        _recycledCellReader = new CellReader(_sheetName,
+                                             _sheet,
+                                             _errors,
+                                             column,
+                                             row);
+      } else {
+        _recycledCellReader._column = column;
+        _recycledCellReader._row = row;
+      }
+      return _recycledCellReader;
     }
   }
   
@@ -136,7 +144,7 @@ public class CellParser
   public Double getDouble() 
   {
     try {
-      HSSFCell cell = getMetadataCell();
+      HSSFCell cell = getCell();
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
         return 0.0;
       }
@@ -160,7 +168,7 @@ public class CellParser
   public Integer getInteger()
   {
     try {
-      HSSFCell cell = getMetadataCell();
+      HSSFCell cell = getCell();
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
         return 0;
       }
@@ -184,7 +192,7 @@ public class CellParser
   public Boolean getBoolean()
   {
     try {
-      HSSFCell cell = getMetadataCell();
+      HSSFCell cell = getCell();
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
         return false;
       }
@@ -208,7 +216,7 @@ public class CellParser
   public Date getDate()
   {
     try {
-      HSSFCell cell = getMetadataCell();
+      HSSFCell cell = getCell();
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
         return null;
       }
@@ -232,17 +240,24 @@ public class CellParser
   public String getString()
   {
     try {
-      HSSFCell cell = getMetadataCell();
+      HSSFCell cell = getCell();
+      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
+        return "";
+      }
       return cell.getStringCellValue();
     } 
     catch (CellUndefinedException e) {
       return "";
     }
+    catch (NumberFormatException e) {
+      _errors.addError(INVALID_CELL_TYPE_ERROR, this);
+      return null;
+    }
   }  
   
   // protected and private methods and constructors
   
-  protected CellParser(String sheetName,
+  protected CellReader(String sheetName,
                        HSSFSheet sheet,
                        ParseErrorManager errors,
                        short column,
@@ -262,7 +277,7 @@ public class CellParser
    * @throws CellUndefinedException if the specified cell has not been
    *           initialized with a value in the worksheet
    */
-  private HSSFCell getMetadataCell()
+  private HSSFCell getCell()
     throws CellUndefinedException
   {
     if (_sheet.getLastRowNum() < getRow()) {
