@@ -116,5 +116,6 @@
 	<classpathentry kind="lib" path="build/war/WEB-INF/lib/xdoclet-hibernate-module-1.2.3.jar"/>
 	<classpathentry kind="lib" path="build/war/WEB-INF/lib/xdoclet-xdoclet-module-1.2.3.jar"/>
 	<classpathentry kind="lib" path="build/war/WEB-INF/lib/xjavadoc-1.5-snapshot050611.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-commons/commons-cli-1.0.jar"/>
 	<classpathentry kind="output" path="build/war/WEB-INF/classes"/>
 </classpath>

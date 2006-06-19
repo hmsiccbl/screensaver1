@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.io;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,11 +30,17 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Parses data from Excel spreadsheet files necessary for instantiating a
@@ -149,6 +157,47 @@ public class ScreenResultParser
     booleanMap.put("yes", false);
     booleanMap.put("y", false);
     booleanMap.put("1", false);
+  }
+  
+
+  // static methods
+
+  public static void main(String[] args)
+  {
+    Options options = new Options();
+    options.addOption(new Option("datafile",
+                                 true,
+                                 "the file location of the Excel spreadsheet holding the Screen Result raw data"));
+    options.addOption(new Option("metadatafile",
+                                 true,
+                                 "the file location of the Excel spreadsheet holding the Screen Result metadata"));
+    Option wellsToPrintOption = new Option("wellstoprint",
+                                           true,
+                                           "the number of wells to print out");
+    wellsToPrintOption.setOptionalArg(true);
+    options.addOption(wellsToPrintOption);
+    try {
+      CommandLine cmdLine = new GnuParser().parse(options, args);
+      InputStream dataFileInStream = new FileInputStream(cmdLine.getOptionValue("datafile"));
+      InputStream metadataFileInStream = new FileInputStream(cmdLine.getOptionValue("metadatafile"));
+
+      ClassPathXmlApplicationContext appCtx = new ClassPathXmlApplicationContext(new String[] { "spring-context-services.xml", "spring-context-screenresultparser-test.xml" });
+      ScreenResultParser screenResultParser = (ScreenResultParser) appCtx.getBean("screenResultParser");
+      ScreenResult screenResult = screenResultParser.parse(metadataFileInStream,
+                                                           dataFileInStream);
+      if (cmdLine.hasOption("wellstoprint")) {
+        new ScreenResultPrinter(screenResult).print(new Integer(cmdLine.getOptionValue("wellstoprint")));
+      }
+      else {
+        new ScreenResultPrinter(screenResult).print();
+      }
+    }
+    catch (ParseException e) {
+      System.err.println("error parsing command line options: " + e.getMessage());
+    }
+    catch (FileNotFoundException e) {
+      System.err.println("could not read input file: " + e.getMessage());
+    }
   }
 
   
