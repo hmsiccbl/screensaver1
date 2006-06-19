@@ -28,16 +28,10 @@ import org.apache.log4j.Logger;
  * 
  * <ul>
  *   <li>
- *     exactly one public constructor with parameters for all not-null
- *     properties.
+ *     all public constructors must initialize the business key.
  *   </li>
  *   <li>
- *     public constructors have javadoc annotations for all the parameters,
- *     in the correct order, for ease of use of constructor in Eclipse
- *   </li>
- *   <li>
- *     if the public constructor does not have zero parameters, then there
- *     must be a zero parameter constructor for Hibernate.
+ *     Hibernate requires a zero-parameter constructor.
  *   </li>
  *   <li>
  *     we try to put the properties in the same order in these differing
