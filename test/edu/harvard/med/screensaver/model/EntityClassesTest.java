@@ -23,23 +23,42 @@ public class EntityClassesTest extends EntityClassesExercisor
     junit.textui.TestRunner.run(EntityClassesTest.class);
   }
   
-  public void testEntityClassesHaveExactlyOnePublicConstructor()
+  public void testEntityClassesHaveAtLeastOnePublicConstructor()
   {
     exercizeEntityClasses(new EntityClassExercizor()
       {
         public void exercizeEntityClass(Class<AbstractEntity> entityClass)
         {
-          int publicConstructorCount = 0;
+          boolean hasPublicConstructor = false;
           for (Constructor constructor : entityClass.getConstructors()) {
             if (Modifier.isPublic(constructor.getModifiers())) {
-              publicConstructorCount ++;
+              hasPublicConstructor = true;
+              break;
             }
           }
-          assertEquals("exactly one public constructor", 1, publicConstructorCount);
+          assertTrue(
+            "at least one public constructor in " + entityClass.getName(),
+            hasPublicConstructor);
         }
       });
   }
 
+  public void testPublicConstructorsHaveAtLeastOneParameter()
+  {
+    exercizeEntityClasses(new EntityClassExercizor()
+      {
+        public void exercizeEntityClass(Class<AbstractEntity> entityClass)
+        {
+          for (Constructor constructor : entityClass.getConstructors()) {
+            if (Modifier.isPublic(constructor.getModifiers())) {
+              assertTrue(
+                "public constructors have at least one param in " + entityClass.getName(),
+                constructor.getParameterTypes().length > 0);
+            }
+          }
+        }
+      });
+  }
   /**
    * Test version accessors modifiers, arguments, and return types.
    * This test might be a little excessive, but I had to put <i>something</i>
