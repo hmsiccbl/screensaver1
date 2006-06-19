@@ -111,6 +111,13 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
         if (! file.endsWith(".class")) {
           continue;
         }
+        
+        // skip inner classes of AbstractEntityTest
+        if (entityPackage.equals("edu.harvard.med.screensaver.model") &&
+            file.startsWith("AbstractEntityTest")) {
+          continue;
+        }
+        
         String classname = file.substring(0, file.length() - 6); // remove the .class extension
         Class entityClass;
         try {
