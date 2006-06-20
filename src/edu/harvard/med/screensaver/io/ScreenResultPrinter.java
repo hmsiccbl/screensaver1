@@ -58,15 +58,22 @@ public class ScreenResultPrinter
       
       printer.println("\tcomments="+rvt.getComments());
 
-      printer.println("\tResult Values: (" + rvt.getResultValues().size() + ")");
+      int nResultValues = rvt.getResultValues().size();
+      printer.println("\tResult Values: (" + nResultValues + ")");
       int n = 0;
+      boolean ellipsesOnce = false;
       for (ResultValue rv : rvt.getResultValues()) {
-        printer.println("\t\t" + rv.getWell().getPlateNumber() + ":" + rv.getWell().getWellName() + 
-                        "\t" + rv.getValue());
-        if (maxResultValuesToPrint != null && ++n >= maxResultValuesToPrint) {
-          printer.println("\t\t...");
-          break;
+        if (maxResultValuesToPrint != null) {
+          if (n < maxResultValuesToPrint / 2 || n >= nResultValues - maxResultValuesToPrint / 2) {
+            printer.println("\t\t" + rv.getWell().getPlateNumber() + ":" + rv.getWell().getWellName() + 
+                            "\t" + rv.getValue());
+          } 
+          else if (!ellipsesOnce) {
+            printer.println("\t\t...");
+            ellipsesOnce = true;
+          }
         }
+        ++n;
       }
     }
     printer.close();

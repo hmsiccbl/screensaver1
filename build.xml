@@ -348,7 +348,36 @@
     </junit> 
   </target> 
  
+  
+   <!-- run arbitrary Screensaver class  -->
+
+  <target
+   name="run"
+   description="Run the main method of a class in the Screensaver project."
+  >
+    <java
+      classname="${run.class.name}" 
+      fork="true"
+      classpathref="project.classpath"
+    >
+    <arg line="${run.class.args}"/>
+   </java> 
+  </target>
  
+   <target
+     name="screenresultparser"
+     description="Run the ScreenResult parser"
+    >
+      <java
+        classname="edu.harvard.med.screensaver.io.ScreenResultParser" 
+        fork="true"
+        classpathref="project.classpath"
+     >
+        <arg line="-metadatafile ${metadata.file} -wellstoprint ${wells.to.print}"/>
+     </java> 
+    </target>
+   
+   
   <!-- cleanup routines -->
 
   <target
@@ -386,5 +415,6 @@
       <fileset dir="resources" includes="edu/**" />
     </delete>
   </target>
+  
 
 </project>

@@ -329,7 +329,6 @@ public class ScreenResultParser
 
   // private methods
 
-
   /**
    * Initialize the metadata worksheet and related data members.
    * 
