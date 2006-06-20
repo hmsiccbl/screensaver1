@@ -28,4 +28,9 @@ public class UnrecoverableScreenResultParseException extends Exception
     super(message);
   }
 
+  public UnrecoverableScreenResultParseException(String message, CellReader cell)
+  {
+    super(message + " @ " + cell);
+  }
+
 }

@@ -9,14 +9,18 @@
 
 package edu.harvard.med.screensaver.io;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -90,12 +94,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
   public void testParseScreenResult() throws Exception
   {
-    InputStream metadataIn = ScreenResultParserTest.class.getResourceAsStream("/edu/harvard/med/screensaver/io/258MetaData.xls");
-    InputStream dataIn = ScreenResultParserTest.class.getResourceAsStream("/edu/harvard/med/screensaver/io/258_CBMicro1.xls");
-    assertNotNull(metadataIn);
-    assertNotNull(dataIn);
-
-    ScreenResult screenResult = screenResultParser.parse(metadataIn, dataIn);
+    ScreenResult screenResult = screenResultParser.parse(new File("test/edu/harvard/med/screensaver/io/258MetaData.xls"));
     assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
 
     Calendar expectedDate = Calendar.getInstance();
@@ -257,19 +256,25 @@ public class ScreenResultParserTest extends AbstractSpringTest
       }
       ++iRvt;
     }
-
-    // 115
-    // multiple replicates
-    // multiple plates in single tab
-    // 142
-    // one tab per stock plate
-    // has both raw and followup spreadsheets, both defined in metadata file
-    // "meta" tab is 3rd
-
-    // 126
-    // seems like standard case
-    // 180
-    // multiple tabs in metadata file, 1 per raw data file
+  }
+  
+  /**
+   * Test that ScreenResultParser can handle raw data from multiple workbooks,
+   * where each workbook also uses multiple worksheets.
+   */
+  public void testReadMultiWorkbookMultiWorksheet()
+  {
+    ScreenResult screenResult = screenResultParser.parse(new File("test/edu/harvard/med/screensaver/io/464MetaData.xls"));
+    assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
+    Integer[] expectedPlateNumbers = { 1409, 1410, 1369, 1370, 1371, 1453, 1454 };
+    Set<Integer> expectedPlateNumbersSet = new HashSet<Integer>(Arrays.asList(expectedPlateNumbers));
+    Set<Integer> actualPlateNumbersSet = new HashSet<Integer>();
+    SortedSet<ResultValue> resultValues = screenResult.getResultValueTypes().first().getResultValues();
+    for (ResultValue value : resultValues) {
+      actualPlateNumbersSet.add(value.getWell().getPlateNumber());
+    }
+    assertEquals(expectedPlateNumbersSet,
+                 actualPlateNumbersSet);
   }
 
   private void setDefaultValues(ResultValueType rvt) {
