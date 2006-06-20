@@ -146,7 +146,7 @@ public abstract class AbstractEntity implements Serializable
 //                                                       propertyName);
           if (thisValue == null ^ thatValue == null ||
             thisValue != null && !thisValue.equals(thatValue)) {
-            log.debug("property " + propertyName + " differs");
+            log.debug("property '" + propertyName + "' differs: this='" + thisValue + "', that='" + thatValue + "'");
             return false;
           }
         }
