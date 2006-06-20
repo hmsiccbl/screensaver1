@@ -21,6 +21,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -88,120 +90,100 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
   public void testParseScreenResult() throws Exception
   {
-    InputStream metadataIn = ScreenResultParserTest.class.getResourceAsStream("/edu/harvard/med/screensaver/io/115MetaData.xls");
-    InputStream dataIn = ScreenResultParserTest.class.getResourceAsStream("/edu/harvard/med/screensaver/io/115_CBDivE_1to51.xls");
+    InputStream metadataIn = ScreenResultParserTest.class.getResourceAsStream("/edu/harvard/med/screensaver/io/258MetaData.xls");
+    InputStream dataIn = ScreenResultParserTest.class.getResourceAsStream("/edu/harvard/med/screensaver/io/258_CBMicro1.xls");
     assertNotNull(metadataIn);
     assertNotNull(dataIn);
-    
-    ScreenResult screenResult = screenResultParser.parse(metadataIn,
-                                                         dataIn);
+
+    ScreenResult screenResult = screenResultParser.parse(metadataIn, dataIn);
     assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
-    
+
     Calendar expectedDate = Calendar.getInstance();
-    expectedDate.set(2000, 7 - 1, 7, 0, 0, 0);
+    expectedDate.set(2003, 3 - 1, 5, 0, 0, 0);
     expectedDate.set(Calendar.MILLISECOND, 0);
     ScreenResult expectedScreenResult = new ScreenResult(expectedDate.getTime());
-    assertEquals("date", expectedScreenResult.getDateCreated(), screenResult.getDateCreated());
-    assertEquals("replicate count", 4, screenResult.getReplicateCount().intValue());
+    assertEquals("date",
+                 expectedScreenResult.getDateCreated(),
+                 screenResult.getDateCreated());
+    assertEquals("replicate count", 2, screenResult.getReplicateCount()
+                                                   .intValue());
 
     Map<Integer,ResultValueType> expectedResultValueTypes = new HashMap<Integer,ResultValueType>();
 
-    ResultValueType rvt0 = new ResultValueType(
-      expectedScreenResult,
-      "Luminescence");
-    rvt0.setDescription("Luminescence");
-    rvt0.setReplicateOrdinal(1);
+    ResultValueType rvt0 = new ResultValueType(expectedScreenResult,
+                                               "Cherry Pick");
+    rvt0.setDescription("Cherry Pick");
+    rvt0.setCherryPick(true);
+    rvt0.setActivityIndicator(true);
+    rvt0.setActivityIndicatorType(ActivityIndicatorType.BOOLEAN);
+    rvt0.setComments("Use this to determine cherry picks");
 
-    ResultValueType rvt1 = new ResultValueType(
-      expectedScreenResult,
-      "Luminescence");
-    rvt1.setDescription("Luminescence");
-    rvt1.setReplicateOrdinal(2);
+    ResultValueType rvt1 = new ResultValueType(expectedScreenResult,
+                                               "Absorbance");
+    rvt1.setDescription("Absorbance");
+    rvt1.setReplicateOrdinal(1);
+    rvt1.setTimePoint("0:10");
+    rvt1.setAssayPhenotype("Human");
 
-    @SuppressWarnings("unused") ResultValueType rvt2 = new ResultValueType(
-      expectedScreenResult,
-      "filler");
+    ResultValueType rvt2 = new ResultValueType(expectedScreenResult, "FI");
+    rvt2.setDescription("Fold Induction");
+    rvt2.setReplicateOrdinal(1);
+    rvt2.setDerived(true);
+    rvt2.setHowDerived("Divide compound well by plate median");
+    SortedSet<ResultValueType> rvt2DerivedFrom = new TreeSet<ResultValueType>();
+    rvt2DerivedFrom.add(rvt1);
+    rvt2.setDerivedFrom(rvt2DerivedFrom);
+    rvt2.setActivityIndicator(true);
+    rvt2.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
+    rvt2.setIndicatorDirection(IndicatorDirection.LOW_VALUES_INDICATE);
+    rvt2.setIndicatorCutoff(1.5);
 
-    @SuppressWarnings("unused") ResultValueType rvt3 = new ResultValueType(
-      expectedScreenResult,
-      "filler");
+    ResultValueType rvt3 = new ResultValueType(expectedScreenResult,
+                                               "Absorbance");
+    rvt3.setDescription("Absorbance");
+    rvt3.setReplicateOrdinal(2);
+    rvt3.setTimePoint("0:15");
+    rvt3.setFollowUpData(true);
+    rvt3.setAssayPhenotype("Mouse");
+    rvt3.setComments("Generated during return visit");
 
-    ResultValueType rvt4 = new ResultValueType(
-      expectedScreenResult,
-      "FI");
+    ResultValueType rvt4 = new ResultValueType(expectedScreenResult, "FI");
     rvt4.setDescription("Fold Induction");
-    rvt4.setReplicateOrdinal(1);
+    rvt4.setReplicateOrdinal(2);
+    rvt4.setDerived(true);
     rvt4.setHowDerived("Divide compound well by plate median");
     SortedSet<ResultValueType> rvt4DerivedFrom = new TreeSet<ResultValueType>();
-    rvt4DerivedFrom.add(rvt0);
+    rvt4DerivedFrom.add(rvt1);
+    rvt4DerivedFrom.add(rvt3);
     rvt4.setDerivedFrom(rvt4DerivedFrom);
-
-    ResultValueType rvt5 = new ResultValueType(
-      expectedScreenResult,
-      "FI");
-    rvt5.setDescription("Fold Induction");
-    rvt5.setReplicateOrdinal(2);
-    rvt5.setHowDerived("Divide compound well by plate median");
-    SortedSet<ResultValueType> rvt5DerivedFrom = new TreeSet<ResultValueType>();
-    rvt5DerivedFrom.add(rvt1);
-    rvt5.setDerivedFrom(rvt5DerivedFrom);
+    rvt4.setActivityIndicator(true);
+    rvt4.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
+    rvt4.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);
+    rvt4.setIndicatorCutoff(1.4);
 
     expectedResultValueTypes.put(0, rvt0);
     expectedResultValueTypes.put(1, rvt1);
+    expectedResultValueTypes.put(2, rvt2);
+    expectedResultValueTypes.put(3, rvt3);
     expectedResultValueTypes.put(4, rvt4);
-    expectedResultValueTypes.put(5, rvt5);
-    
-    Integer[] expectedInitialPlateNumbers = {
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1};
 
-    String[] expectedInitialWellNames = {
-      "A01",
-      "A02",
-      "A03",
-      "A04",
-      "A05",
-      "A06",
-      "A07",
-      "A08",
-      "A09",
-      "A10"};
-    
-    double[][] expectedInitialResultValues = {
-      {1071894, 1196906, 1033498, 1433458, 0.98, 1.11, 1.33, 2.28},
-      {1174576, 1469296, 1076012, 1154580, 1.07, 1.36, 1.39, 1.83},
-      {1294182, 1280934,  728706,  688634, 1.18, 1.19, 0.94, 1.09},
-      {1158888, 1458878, 1086796,  726618, 1.06, 1.35, 1.4,  1.15},
-      {1385142, 1383446, 1266540, 1002392, 1.26, 1.28, 1.63, 1.59},
-      {1139144, 1481892,  959056,  775942, 1.04, 1.37, 1.24, 1.23},
-      {1666646, 1154436, 1152980, 1098754, 1.52, 1.07, 1.49, 1.74},
-      {1371892, 1521110, 1177946,  928598, 1.25, 1.41, 1.52, 1.47},
-      {1285342, 1337506, 1080422,  947894, 1.17, 1.24, 1.39, 1.5},
-      {1389320, 1354286, 1051664,  796924, 1.27, 1.25, 1.35, 1.27}};
-    
-    Integer[] expectedFinalPlateNumbers = {
-      51,
-      51,
-      51};
+    Integer[] expectedInitialPlateNumbers = { 686, 686, 686 };
 
-    String[] expectedFinalWellNames = {
-      "P18",
-      "P19",
-      "P20"};
-    
-    double [][] expectedFinalResultValues = {
-      {1141108, 1271406, 0.0, 921460, 0.94, 1.08, 1.11},
-      {1133060, 1159632, 0.0, 833304, 0.94, 0.98, 1.01},
-      {1200236, 1169434, 0.0, 846736, 0.99, 0.99, 1.02}};
-      
+    String[] expectedInitialWellNames = { "A03", "A04", "A05" };
+
+    Object[][] expectedInitialResultValues = {
+      {false, 1.05300000,  2.27922078, 0.88100000,  2.12801932},
+      {true, 0.53100000,  1.14935065,  0.49600000,  1.19806763},
+      {false, 0.56800000,  1.22943723,  0.45000000,  1.08695652}};
+
+    Integer[] expectedFinalPlateNumbers = { 842, 842, 842 };
+
+    String[] expectedFinalWellNames = { "P20", "P21", "P22" };
+
+    Object[][] expectedFinalResultValues = {
+      {false, 0.29600000,  1.07832423,  0.28600000,  1.00000000},
+      {true, 0.30100000,  1.09653916,  0.29200000,  1.02097902},
+      {false, 0.28000000,  1.02003643,  0.29900000,  1.04545455}};
 
     SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
     int iRvt = 0;
@@ -211,40 +193,62 @@ public class ScreenResultParserTest extends AbstractSpringTest
         setDefaultValues(expectedRvt);
         setDefaultValues(rvt);
         assertTrue("ResultValueType " + iRvt, expectedRvt.isEquivalent(rvt));
-        
+
         // compare result values
-        assertEquals(16320, rvt.getResultValues().size());
+        assertEquals(50240, rvt.getResultValues().size());
         int iWell = 0;
-        for (ResultValue rv : rvt.getResultValues() ) {
+        for (ResultValue rv : rvt.getResultValues()) {
           assertEquals("rvt " + iRvt + " well #" + iWell + " plate name",
                        expectedInitialPlateNumbers[iWell],
-                       rv.getWell().getPlateNumber());
+                       rv.getWell()
+                         .getPlateNumber());
           assertEquals("rvt " + iRvt + " well #" + iWell + " well name",
                        expectedInitialWellNames[iWell],
-                       rv.getWell().getWellName());
-          assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
-                       expectedInitialResultValues[iWell][iRvt],
-                       Double.parseDouble(rv.getValue()));
+                       rv.getWell()
+                         .getWellName());
+          if (iRvt == 0) {
+            assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
+                         expectedInitialResultValues[iWell][iRvt].toString(),
+                         rv.getValue().toString());
+          }
+          else {
+            assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
+                         ((Double) expectedInitialResultValues[iWell][iRvt]).doubleValue(),
+                         Double.parseDouble(rv.getValue()),
+                         0.0001);
+          }
           ++iWell;
           if (iWell == expectedInitialResultValues.length) {
-            // done testing the initial rows of data, now jump to testing the final rows of data
+            // done testing the initial rows of data, now jump to testing the
+            // final rows of data
             break;
           }
         }
         List<ResultValue> listOfResultValues = new ArrayList<ResultValue>(rvt.getResultValues());
-        int startIndex = rvt.getResultValues().size() - 3;
+        int startIndex = rvt.getResultValues()
+                            .size() - 3;
         iWell = 0;
         for (Iterator<ResultValue> iter = listOfResultValues.listIterator(startIndex); iter.hasNext();) {
           ResultValue rv = iter.next();
           assertEquals("rvt " + iRvt + " well #" + (iWell + startIndex) + " plate name",
                        expectedFinalPlateNumbers[iWell],
-                       rv.getWell().getPlateNumber());
+                       rv.getWell()
+                         .getPlateNumber());
           assertEquals("rvt " + iRvt + " well #" + (iWell + startIndex) + " well name",
                        expectedFinalWellNames[iWell],
-                       rv.getWell().getWellName());
-          assertEquals("rvt " + iRvt + " well #" + (iWell + startIndex) + " result value",
-                       expectedFinalResultValues[iWell][iRvt],
-                       Double.parseDouble(rv.getValue()));
+                       rv.getWell()
+                         .getWellName());
+          if (iRvt == 0) {
+            assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
+                         expectedFinalResultValues[iWell][iRvt].toString(),
+                         rv.getValue().toString());
+          } 
+          else {
+            assertEquals("rvt " + iRvt + " well #" + (iWell + startIndex) + " result value",
+                         ((Double) expectedFinalResultValues[iWell][iRvt]).doubleValue(),
+                         Double.parseDouble(rv.getValue()),
+                         0.0001);
+          }
           ++iWell;
           if (iWell == expectedFinalResultValues.length) {
             break;
@@ -253,7 +257,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
       }
       ++iRvt;
     }
-    
+
     // 115
     // multiple replicates
     // multiple plates in single tab

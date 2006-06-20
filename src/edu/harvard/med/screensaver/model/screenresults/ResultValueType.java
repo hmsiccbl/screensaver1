@@ -234,7 +234,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @param replicateOrdinal the replicate ordinal
    */
   public void setReplicateOrdinal(Integer replicateOrdinal) {
-    assert replicateOrdinal > 0 : "replicate ordinal values must be positive (non-zero)";
+    assert replicateOrdinal == null || replicateOrdinal > 0 : "replicate ordinal values must be positive (non-zero), unless null";
     _replicateOrdinal = replicateOrdinal;
   }
   

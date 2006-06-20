@@ -42,7 +42,7 @@ public class CellReader
   private String _sheetName;
   private HSSFSheet _sheet;
   private short _column;
-  private short _row;
+  private int _row;
   private boolean _required;
   
   // inner class definitions
@@ -87,7 +87,7 @@ public class CellReader
      *         associated with
      */
     public CellReader newCellReader(short column,
-                                    short row,
+                                    int row,
                                     boolean required)
     {
       if (_recycledCellReader == null ) {
@@ -105,10 +105,9 @@ public class CellReader
       return _recycledCellReader;
     }
     
-    public CellReader newCellReader(short column,
-      short row)
+    public CellReader newCellReader(short column, int row)
     {
-      return newCellReader(column, row, /*required=*/false);
+      return newCellReader(column, row, /* required= */false);
     }
   }
   
@@ -137,7 +136,7 @@ public class CellReader
    * Get the row containing the cell to be parsed.
    * @return the row
    */
-  public short getRow() { return _row; }
+  public int getRow() { return _row; }
   
   /**
    * A human-readable representation of the cell's location in the workbook.
@@ -151,98 +150,107 @@ public class CellReader
   /**
    * Get a <code>Double</code> value from the cell.
    * 
-   * @return a <code>Double</code> value or
-   *         <code>0.0</false> if cell does not contain a valid (or any) double value
+   * @return a <code>Double</code> value if cell contains a valid double
+   *         value; if cell does not contain a double or an error occurs
+   *         <code>null</code> is returned, unless cell is required, in which
+   *         case <code>0.0</code> is returned (to allow parsing
+   *         code to proceed w/a default value) contain a value
    */
   public Double getDouble() 
   {
     try {
       HSSFCell cell = getCell();
-      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
+      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK ||
+          cell.getCellType() != HSSFCell.CELL_TYPE_NUMERIC) {
         if (_required) {
           _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+          return 0.0;
         }
-        return 0.0;
-      }
-      if (cell.getCellType() != HSSFCell.CELL_TYPE_NUMERIC) {
-        _errors.addError(INVALID_CELL_TYPE_ERROR, this);
-        return 0.0;
+        return null;
       }
       return new Double(cell.getNumericCellValue());
     } 
     catch (CellOutOfRangeException e) {
       if (_required) {
         _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        return 0.0;
       }
-      return new Double(0.0);
+      return null;
     }
   }
   
   /**
    * Get an <code>Integer</code> value for the cell.
    * 
-   * @return an <code>Integer</code> value or
-   *         <code>0</false> if cell does not contain a valid (or any) boolean value
+   * @return an <code>Integer</code> value if cell contains a valid integer
+   *         value; if cell does not contain an integer or an error occurs
+   *         <code>null</code> is returned, unless cell is required, in which
+   *         case <code>0</code> is returned (to allow parsing
+   *         code to proceed w/a default value) contain a value
    */
   public Integer getInteger()
   {
     try {
       HSSFCell cell = getCell();
-      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
+      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK ||
+          cell.getCellType() != HSSFCell.CELL_TYPE_NUMERIC) {
         if (_required) {
           _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+          return 0;
         }
-        return 0;
-      }
-      if (cell.getCellType() != HSSFCell.CELL_TYPE_NUMERIC) {
-        _errors.addError(INVALID_CELL_TYPE_ERROR, this);
-        return 0;
+        return null;
       }
       return new Integer((int) cell.getNumericCellValue());
     } 
     catch (CellOutOfRangeException e) {
       if (_required) {
         _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        return 0;
       }
-      return 0;
+      return null;
     }
   }
   
   /**
    * Get an <code>Boolean</code> value for the cell.
-   *
-   * @return a <code>Boolean</code> value, or
-   *         <code>false</false> if cell does not contain a valid (or any) boolean value
+   * 
+   * @return a <code>Boolean</code> value if cell contains a valid boolean
+   *         value; if cell does not contain a boolean or an error occurs
+   *         <code>null</code> is returned, unless cell is required, in which
+   *         case <code>Boolean.FALSE</code> is returned (to allow parsing
+   *         code to proceed w/a default value) contain a value
    */
   public Boolean getBoolean()
   {
     try {
       HSSFCell cell = getCell();
-      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
+      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK ||
+          cell.getCellType() != HSSFCell.CELL_TYPE_BOOLEAN) {
         if (_required) {
           _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+          return false;
         }
-        return false;
-      }
-      if (cell.getCellType() != HSSFCell.CELL_TYPE_BOOLEAN) {
-        _errors.addError(INVALID_CELL_TYPE_ERROR, this);
-        return false;
+        return null;
       }
       return cell.getBooleanCellValue();
     } 
     catch (CellOutOfRangeException e) {
       if (_required) {
         _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        return false;
       }
-      return false;
+      return null;
     }
   }
   
   /**
    * Get an <code>Date</code> value for the cell.
    * 
-   * @return a <code>Date</code> value, or null if cell does not contain a
-   *         valid (or any) date
+   * @return a <code>Date</code> value if cell contains a valid date; if cell
+   *         does not contain a date or an error occurs <code>null</code> is
+   *         returned, unless cell is required, in which case the current date
+   *         is returned (to allow parsing code to proceed w/a default value)
+   *         contain a value
    */
   public Date getDate()
   {
@@ -251,6 +259,7 @@ public class CellReader
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
         if (_required) {
           _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+          return new Date();
         }
         return null;
       }
@@ -259,11 +268,15 @@ public class CellReader
     catch (CellOutOfRangeException e) {
       if (_required) {
         _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        return new Date();
       }
       return null;
     }
     catch (NumberFormatException e) {
-      _errors.addError(INVALID_CELL_TYPE_ERROR, this);
+      if (_required) {
+        _errors.addError(INVALID_CELL_TYPE_ERROR, this);
+        return new Date();
+      }
       return null;
     }
   }
@@ -271,7 +284,10 @@ public class CellReader
   /**
    * Get an <code>String</code> value for the cell.
    * 
-   * @return a <code>String</code> value, or the empty string if cell does not
+   * @return a <code>String</code> value if cell contains a string; if cell
+   *         does not contain a string or an error occurs <code>null</code> is
+   *         returned, unless cell is required, in which case the empty string
+   *         is returned (to allow parsing code to proceed w/a default value)
    *         contain a value
    */
   public String getString()
@@ -281,19 +297,24 @@ public class CellReader
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
         if (_required) {
           _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+          return "";
         }
-        return "";
+        return null;
       }
       return cell.getStringCellValue();
     } 
     catch (CellOutOfRangeException e) {
       if (_required) {
         _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        return "";
       }
-      return "";
+      return null;
     }
     catch (NumberFormatException e) {
-      _errors.addError(INVALID_CELL_TYPE_ERROR, this);
+      if (_required) {
+        _errors.addError(INVALID_CELL_TYPE_ERROR, this);
+        return "";
+      }
       return null;
     }
   }  
@@ -304,7 +325,7 @@ public class CellReader
                        HSSFSheet sheet,
                        ParseErrorManager errors,
                        short column,
-                       short row,
+                       int row,
                        boolean required)
   {
     _sheet = sheet;

@@ -183,6 +183,15 @@ public class ScreenResult extends AbstractEntity
             {
               public int compare(ResultValueType rvt1, ResultValueType rvt2)
               {
+                if (rvt1.getReplicateOrdinal() == null && rvt2.getReplicateOrdinal() == null) {
+                  return 0;
+                }
+                if (rvt1.getReplicateOrdinal() == null && rvt2.getReplicateOrdinal() != null) {
+                  return -1;
+                }
+                if (rvt1.getReplicateOrdinal() != null && rvt2.getReplicateOrdinal() == null) {
+                  return 1;
+                }
                 return rvt1.getReplicateOrdinal().compareTo(rvt2.getReplicateOrdinal());
               }
             } );

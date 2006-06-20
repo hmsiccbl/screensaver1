@@ -80,10 +80,11 @@ public class ScreenResultParser
   private static final String UNEXPECTED_DATA_HEADER_TYPE_ERROR = "unexpected data header type";
   private static final String REFERENCED_UNDEFINED_DATA_HEADER_ERROR = "referenced undefined data header";
   private static final String UNRECOGNIZED_INDICATOR_DIRECTION_ERROR = "unrecognized \"indicator direction\" value";
+  private static final String METADATA_DATA_HEADER_COLUMNS_NOT_FOUND_ERROR = "data header columns not found in metadata workbook";
+  private static final String METADATA_UNEXPECTED_COLUMN_TYPE_ERROR = "expected column type of \"data\"";
   private static final String UNKNOWN_ERROR = "unknown error";
 
   private static final int METADATA_FIRST_DATA_ROW_INDEX = 1;
-  private static final int METADATA_FIRST_DATA_HEADER__COLUMN_INDEX = 5;
   private static final int RAWDATA_FIRST_DATA_ROW_INDEX = 1;
   /**
    * The data rows of the metadata worksheet. Order of enum values is
@@ -237,7 +238,9 @@ public class ScreenResultParser
   private ParseErrorManager _errors = new ParseErrorManager();
   private Factory _metadataCellParserFactory;
   private Factory _dataCellParserFactory;
-  
+  private Short _metadataFirstDataHeaderColumnIndex;
+  private int _nDataHeaders;
+  private Map<Integer,Short> _dataHeaderIndex2DataHeaderColumn = new HashMap<Integer,Short>();
   
   // public methods and constructors
 
@@ -272,6 +275,9 @@ public class ScreenResultParser
       _dataWorkbook = new HSSFWorkbook(dataFs);
       parseData();
     }
+    catch (UnrecoverableScreenResultParseException e) {
+      _errors.addError("serious parse error encountered (could not continue further parsing): " + e.getMessage());
+    }
     catch (Exception e) {
       // TODO: log this
       e.printStackTrace();
@@ -300,9 +306,13 @@ public class ScreenResultParser
 
 
   /**
-   * Find the metadata worksheet.
+   * Initialize the metadata worksheet and related data members.
+   * 
+   * @throws UnrecoverableScreenResultParseException if metadata worksheet could not be
+   *           initialized or does not appear to be a valid metadata definition
    */
-  private void initializeMetadataSheet() {
+  private void initializeMetadataSheet() throws UnrecoverableScreenResultParseException
+  {
     // TODO: find the sheet in a more reliable, flexible fashion
     HSSFSheet metadataSheet = _metadataWorkbook.getSheetAt(0);
 
@@ -310,8 +320,44 @@ public class ScreenResultParser
     verifyStandardMetadataFormat(metadataSheet);
 
     _metadataCellParserFactory = new CellReader.Factory(_metadataWorkbook.getSheetName(0),
-                                               metadataSheet,
-                                               _errors);  
+                                                        metadataSheet,
+                                                        _errors);
+
+    initializeFirstDataHeaderColumnIndex(metadataSheet);
+  }
+
+  private void initializeFirstDataHeaderColumnIndex(HSSFSheet metadataSheet) throws UnrecoverableScreenResultParseException
+  {
+    int row = MetadataRow.COLUMN_TYPE.ordinal() + METADATA_FIRST_DATA_ROW_INDEX;
+    int metadataLastDataHeaderColumnIndex = metadataSheet.getRow(row).getLastCellNum();
+    for (short iCol = 0; iCol < metadataLastDataHeaderColumnIndex; ++iCol) {
+      CellReader cell = _metadataCellParserFactory.newCellReader(iCol, row);
+      String dataType = cell.getString();
+      if (dataType != null && dataType.equalsIgnoreCase("data")) {
+        _metadataFirstDataHeaderColumnIndex = new Short(iCol);
+        break;
+      }
+    }
+    if (_metadataFirstDataHeaderColumnIndex == null) {
+      throw new UnrecoverableScreenResultParseException(METADATA_DATA_HEADER_COLUMNS_NOT_FOUND_ERROR);
+    }
+
+    for (short iCol = _metadataFirstDataHeaderColumnIndex; iCol <= metadataLastDataHeaderColumnIndex; ++iCol) {
+      CellReader cell = _metadataCellParserFactory.newCellReader(iCol, row);
+      String dataType = cell.getString();
+      if (dataType != null && !dataType.equalsIgnoreCase("data")) {
+        _errors.addError(METADATA_UNEXPECTED_COLUMN_TYPE_ERROR, cell);
+        metadataLastDataHeaderColumnIndex = (short) (iCol - 1);
+        break;
+      }
+      if (dataType == null || dataType.trim().equals("")) {
+        // okay if column is blank
+        // TODO: verify *entire* column in blank, otherwise report error
+        metadataLastDataHeaderColumnIndex = (short) (iCol - 1);
+        break;
+      }
+    }
+    _nDataHeaders = (metadataLastDataHeaderColumnIndex - _metadataFirstDataHeaderColumnIndex) + 1;
   }
   
   private HSSFSheet initializeDataSheet(int index)
@@ -331,8 +377,8 @@ public class ScreenResultParser
 
   private CellReader metadataCell(MetadataRow row, int dataHeader, boolean isRequired) 
   {
-    return _metadataCellParserFactory.newCellReader((short) (METADATA_FIRST_DATA_HEADER__COLUMN_INDEX + dataHeader),
-                                                    (short) (METADATA_FIRST_DATA_ROW_INDEX + row.ordinal()),
+    return _metadataCellParserFactory.newCellReader((short) (_metadataFirstDataHeaderColumnIndex + dataHeader),
+                                                    (METADATA_FIRST_DATA_ROW_INDEX + row.ordinal()),
                                                     isRequired);
   }
   
@@ -343,26 +389,26 @@ public class ScreenResultParser
   
   private CellReader dataCell(int row, DataColumn column)
   {
-    return _dataCellParserFactory.newCellReader((short) column.ordinal(),
-                                                (short) row);
+    return _dataCellParserFactory.newCellReader((short) column.ordinal(), row);
   }
 
   private CellReader dataCell(int row, int iDataHeader)
   {
-    return _dataCellParserFactory.newCellReader((short) (DataColumn.FIRST_DATA_HEADER.ordinal() + iDataHeader),
-                                                (short) row);
+    return _dataCellParserFactory.newCellReader((short) (_dataHeaderIndex2DataHeaderColumn.get(iDataHeader)),
+                                                row);
   }
                                         
   
   /**
    * Parse the workbook containing the ScreenResult metadata
+   * @throws UnrecoverableScreenResultParseException 
    */
-  private void parseMetadata() {
+  private void parseMetadata() throws UnrecoverableScreenResultParseException 
+  {
     initializeMetadataSheet();
     parseMetaMetadata();
-    for (int iDataHeader = 0; metadataCell(MetadataRow.COLUMN_TYPE,
-                                           iDataHeader).
-                                           getString().equalsIgnoreCase("data"); ++iDataHeader) {
+    for (int iDataHeader = 0; iDataHeader < _nDataHeaders; ++iDataHeader) {
+      recordDataHeaderColumn(iDataHeader);
       ResultValueType rvt = 
         new ResultValueType(_screenResult,
                             metadataCell(MetadataRow.NAME, iDataHeader, true).getString(),
@@ -392,9 +438,20 @@ public class ScreenResultParser
     }
   }
 
+  private void recordDataHeaderColumn(int iDataHeader)
+  {
+    String forColumnInRawDataWorksheet = metadataCell(MetadataRow.COLUMN_IN_TEMPLATE, iDataHeader, true).getString();
+    if (forColumnInRawDataWorksheet != null) {
+      _dataHeaderIndex2DataHeaderColumn.put(iDataHeader,
+                                            new Short((short) (forColumnInRawDataWorksheet.charAt(0) - 'A')));
+    }
+  }
+
   /**
    * Parse the workbook containing the ScreenResult data.
-   * @throws ExtantLibraryException if an existing Well entity cannot be found in the database
+   * 
+   * @throws ExtantLibraryException if an existing Well entity cannot be found
+   *           in the database
    */
   private void parseData() throws ExtantLibraryException
   {
@@ -403,27 +460,31 @@ public class ScreenResultParser
       for (int iRow = RAWDATA_FIRST_DATA_ROW_INDEX; iRow <= sheet.getLastRowNum(); ++iRow) {
         Well well = findWell(iRow);
         dataCell(iRow, DataColumn.TYPE).getString(); // TODO: use this value?
-        boolean excludeWell = _booleanParser.parse(dataCell(iRow, DataColumn.EXCLUDE));
+        boolean excludeWell = _booleanParser.parse(dataCell(iRow,
+                                                            DataColumn.EXCLUDE));
         int iDataHeader = 0;
         for (ResultValueType rvt : _screenResult.getResultValueTypes()) {
           CellReader cell = dataCell(iRow, iDataHeader);
-          String value =
-            !rvt.isActivityIndicator() ? cell.getDouble().toString() :
-              rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN ? _booleanParser.parse(cell).toString() :
-                rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL ? cell.getDouble().toString() :
-                  rvt.getActivityIndicatorType() == ActivityIndicatorType.SCALED ? cell.getString() :
-                    cell.getString();
-          new ResultValue(rvt,
-                          well,
-                          value,
-                          excludeWell);
+          Object value = !rvt.isActivityIndicator()
+              ? cell.getDouble()
+              : rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN
+                ? _booleanParser.parse(cell)
+                : rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL
+                  ? cell.getDouble()
+                  : rvt.getActivityIndicatorType() == ActivityIndicatorType.SCALED
+                    ? cell.getString() : cell.getString();
+          if (value == null) {
+            value = "";
+          }
+          new ResultValue(rvt, well, value.toString(), excludeWell);
           ++iDataHeader;
         }
       }
     }
   }
 
-  // TODO: this needs to be moved to our DAO; probably as a findEntityByBusinessKey()
+  // TODO: this needs to be moved to our DAO; probably as a
+  // findEntityByBusinessKey()
   private Well findWell(int iRow) throws ExtantLibraryException
   {
     Map<String,Object> businessKey = new HashMap<String,Object>();
@@ -567,13 +628,15 @@ public class ScreenResultParser
 
     public T parse(CellReader cell) 
     {
-      String cellValue = cell.getString().toLowerCase().trim();
-      return doParse(cellValue, cell);
+      return doParse(cell.getString(), cell);
     }
 
     public List<T> parseList(CellReader cell) {
       List<T> result = new ArrayList<T>();
-      String textMultiValue = cell.getString().toLowerCase().trim();
+      String textMultiValue = cell.getString();
+      if (textMultiValue == null) {
+        return result;
+      }
       String[] textValues = textMultiValue.split(_delimiterRegex);
       for (int i = 0; i < textValues.length; i++) {
         String text = textValues[i];
@@ -587,7 +650,10 @@ public class ScreenResultParser
 
     private T doParse(String text, CellReader cell)
     {
-      text = text.trim();
+      if (text == null) {
+        return _valueToReturnIfUnparseable;
+      }
+      text = text.toLowerCase().trim();
       for (Iterator iter = _parsedValue2SystemValue.keySet()
                                                    .iterator(); iter.hasNext();) {
         String pattern = (String) iter.next();
