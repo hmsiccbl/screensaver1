@@ -264,9 +264,13 @@ public class ScreenResultParserTest extends AbstractSpringTest
     Integer[] expectedPlateNumbers = { 1409, 1410, 1369, 1370, 1371, 1453, 1454 };
     Set<Integer> expectedPlateNumbersSet = new HashSet<Integer>(Arrays.asList(expectedPlateNumbers));
     Set<Integer> actualPlateNumbersSet = new HashSet<Integer>();
-    SortedSet<ResultValue> resultValues = screenResult.getResultValueTypes().first().getResultValues();
-    for (ResultValue value : resultValues) {
-      actualPlateNumbersSet.add(value.getWell().getPlateNumber());
+    // note: must generate actualPlateNumbersSet from *all* ResultValueTypes,
+    // in case some have ResultValues that represent only a subset of all the
+    // plate/wells.
+    for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+      for (ResultValue value : rvt.getResultValues()) {
+        actualPlateNumbersSet.add(value.getWell().getPlateNumber());
+      }
     }
     assertEquals(expectedPlateNumbersSet,
                  actualPlateNumbersSet);
@@ -291,7 +295,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
     if (rvt.getTimePoint() == null) {
       rvt.setTimePoint("");
     }
-    
   }
   
   // TODO: test errors
