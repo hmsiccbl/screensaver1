@@ -283,7 +283,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @return a <code>String</code> representing the Assay Phenotype
    * @hibernate.property
    *   type="text"
-   *   not-null="true"
    */
   public String getAssayPhenotype() {
     return _assayPhenotype;
