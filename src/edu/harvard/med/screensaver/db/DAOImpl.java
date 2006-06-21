@@ -246,8 +246,11 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   {
     Class [] argumentTypes = new Class [arguments.length];
     for (int i = 0; i < arguments.length; i++) {
-      _logger.info("arg type = " + arguments[i].getClass());
-      argumentTypes[i] = arguments[i].getClass();
+      Class argumentType = arguments[i].getClass();
+      if (argumentType.equals(Boolean.class)) {
+        argumentType = Boolean.TYPE;
+      }
+      argumentTypes[i] = argumentType;
     }
     return argumentTypes;
   }
