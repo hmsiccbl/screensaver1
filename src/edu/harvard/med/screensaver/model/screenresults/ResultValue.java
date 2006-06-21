@@ -28,13 +28,15 @@ public class ResultValue extends AbstractEntity implements Comparable
 
   private static final long serialVersionUID = -4066041317098744417L;
 
-  // instance data
+  
+  // properties instance data
   
   private Integer         _resultValueId;
   private Integer         _version;
   private ResultValueType _resultValueType;
   private Well            _well;
   private String          _value;
+  
   /**
    * Note that we maintain an "exclude" flag on a per-ResultValue basis. It is
    * up to the application code and/or user interface to manage excluding the
@@ -43,6 +45,13 @@ public class ResultValue extends AbstractEntity implements Comparable
    * ResultValues to be excluded.
    */
   private boolean _exclude;
+  
+  
+  // non-properties instance data - used to define the business key
+
+  private Integer _plateNumber;
+  private String  _wellName;
+  private Integer _resultValueTypeOrdinal;
   
 
   // public constructors and instance methods
@@ -67,10 +76,13 @@ public class ResultValue extends AbstractEntity implements Comparable
    */
   public ResultValue(ResultValueType resultValueType, Well well, String value, boolean exclude)
   {
+    _plateNumber = well.getPlateNumber();
+    _wellName = well.getWellName();
+    _resultValueTypeOrdinal = resultValueType.getOrdinal();
+    setResultValueType(resultValueType);
     setWell(well);
     setValue(value);
     setExclude(exclude);
-    setResultValueType(resultValueType);
   }
 
   /**
@@ -106,13 +118,23 @@ public class ResultValue extends AbstractEntity implements Comparable
    * {@link ResultValueType}, removing from the existing
    * {@link ResultValueType} parent, if necessary.
    * 
-   * @param newResultValueType the new parent {@link ResultValueType}
+   * @param resultValueType the new parent {@link ResultValueType}
    */
-  public void setResultValueType(ResultValueType newResultValueType) {
-    if (_resultValueType != null && newResultValueType != _resultValueType) {
+  public void setResultValueType(ResultValueType resultValueType) {
+    if (_resultValueType == resultValueType) {
+      return;
+    }
+    if (_resultValueType != null) {
       _resultValueType.getHbnResultValues().remove(this);
     }
-    setHbnResultValueType(newResultValueType);
+    if (_well != null) {
+      _well.getHbnResultValues().remove(this);
+    }
+    _resultValueTypeOrdinal = resultValueType.getOrdinal();
+    if (_well != null) {
+      _well.getHbnResultValues().add(this);
+    }
+    _resultValueType = resultValueType;
     _resultValueType.getHbnResultValues().add(this);
   }
 
@@ -124,10 +146,9 @@ public class ResultValue extends AbstractEntity implements Comparable
    * @return the {@link edu.harvard.med.screensaver.model.libraries.Well} (of
    *         the library stock plate) that was replicated and used to generate
    *         this <code>ResultValue</code>
-   * @hibernate.many-to-one column="well_id" not-null="true"
    */
   public Well getWell() {
-    return _well;
+    return getHbnWell();
   }
 
   /**
@@ -140,10 +161,19 @@ public class ResultValue extends AbstractEntity implements Comparable
    *          generate this <code>ResultValue</code>
    */
   public void setWell(Well well) {
-    // note: this is a unidirectional many-to-one relationship, so no need to
-    // update any list ResultValue in affected Well (it doesn't track
-    // ResultValue members at all)
+    if (_resultValueType != null) {
+      _resultValueType.getHbnResultValues().remove(this);
+    }
+    if (_well != null) {
+      _well.getHbnResultValues().remove(this);
+    }
+    _plateNumber = well.getPlateNumber();
+    _wellName = well.getWellName();
+    if (_resultValueType != null) {
+      _resultValueType.getHbnResultValues().add(this);
+    }
     _well = well;
+    well.getHbnResultValues().add(this);
   }
 
   /**
@@ -166,34 +196,6 @@ public class ResultValue extends AbstractEntity implements Comparable
     _value = value;
   }
 
-  
-  // Comparable interface methods
-
-  /**
-   * Defines a natural ordering of <code>ResultValue</code> objects, assuming
-   * they are from the same {@link ScreenResult} parent; otherwise natural
-   * ordering is undefined. Ordering is by plate name, then well name, then
-   * result value type (i.e., row major ordering, if you think of a
-   * ScreenResult's data as a matrix of plate/well rows and result value type
-   * columns).
-   * 
-   * @motivation allows objects of this class to be sorted in Hibernate result
-   *             sets
-   */
-  public int compareTo(Object o) {
-    assert _resultValueType != null && _well != null :
-      "business key fields have not been defined";
-    ResultValue that = (ResultValue) o;
-    int result = this.getWell().getPlateNumber().compareTo(that.getWell().getPlateNumber());
-    if (result == 0) {
-      result = this.getWell().getWellName().compareTo(that.getWell().getWellName());
-      if (result == 0) {
-        result = this.getResultValueType().getOrdinal().compareTo(that.getResultValueType().getOrdinal());
-      }
-    }
-    return result;
-  }
-  
   /**
    * Get whether this <code>ResultValue</code> is to be excluded in any
    * subsequent analyses.
@@ -219,6 +221,55 @@ public class ResultValue extends AbstractEntity implements Comparable
     _exclude = exclude;
   }
 
+  // Comparable interface methods
+  
+  /**
+   * Defines a natural ordering of <code>ResultValue</code> objects, assuming
+   * they are from the same {@link ScreenResult} parent; otherwise natural
+   * ordering is undefined. Ordering is by plate name, then well name, then
+   * result value type (i.e., row major ordering, if you think of a
+   * ScreenResult's data as a matrix of plate/well rows and result value type
+   * columns).
+   * 
+   * @motivation allows objects of this class to be sorted in Hibernate result
+   *             sets
+   */
+  public int compareTo(Object o) {
+    assert 
+    _plateNumber != null &&
+    _wellName != null &&
+    _resultValueTypeOrdinal != null :
+    "business key fields have not been defined";
+    ResultValue that = (ResultValue) o;
+    int result = _plateNumber.compareTo(that._plateNumber);
+    if (result == 0) {
+      result = this._wellName.compareTo(that._wellName);
+      if (result == 0) {
+        result = this._resultValueTypeOrdinal.compareTo(that._resultValueTypeOrdinal);
+      }
+    }
+    return result;
+  }
+
+  
+  // public hibernate getters for cross-package relationships
+  
+  /**
+   * Set the {@link edu.harvard.med.screensaver.model.libraries.Well} (of the
+   * library stock plate) that was replicated and used to generate this
+   * <code>ResultValue</code>.
+   * 
+   * @param well the {@link edu.harvard.med.screensaver.model.libraries.Well}
+   *          (of the library stock plate) that was replicated and used to
+   *          generate this <code>ResultValue</code>
+   * @motivation for hibernate
+   */
+  public void setHbnWell(Well well) {
+    _well = well;
+    _plateNumber = (well == null) ? null : well.getPlateNumber();
+    _wellName = (well == null) ? null : well.getWellName();
+  }
+
   
   // protected getters and setters
   
@@ -230,6 +281,7 @@ public class ResultValue extends AbstractEntity implements Comparable
    */
   void setHbnResultValueType(ResultValueType resultValueType) {
     _resultValueType = resultValueType;
+    _resultValueTypeOrdinal = (resultValueType == null) ? null : resultValueType.getOrdinal();
   }
 
   /**
@@ -242,9 +294,12 @@ public class ResultValue extends AbstractEntity implements Comparable
    * @return a <code>String</code> representing the business key
    */
   protected String getBusinessKey() {
-    assert _resultValueType != null && _well != null :
+    assert 
+      _plateNumber != null &&
+      _wellName != null &&
+      _resultValueTypeOrdinal != null :
       "business key fields have not been defined";
-    return _well.getPlateNumber() + _well.getWellName() + _resultValueType.getOrdinal();
+    return _plateNumber + _wellName + _resultValueTypeOrdinal;
   }
 
   
@@ -284,8 +339,24 @@ public class ResultValue extends AbstractEntity implements Comparable
    * @motivation for Hibernate
    * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
    *                        column="result_value_type_id" not-null="true"
+   *                        foreign-key="fk_result_value_to_result_value_type"
    */
   private ResultValueType getHbnResultValueType() {
     return _resultValueType;
+  }
+  
+  /**
+   * Get the {@link edu.harvard.med.screensaver.model.libraries.Well} (of the
+   * library stock plate) that was replicated and used to generate this
+   * <code>ResultValue</code>.
+   * 
+   * @return the {@link edu.harvard.med.screensaver.model.libraries.Well} (of
+   *         the library stock plate) that was replicated and used to generate
+   *         this <code>ResultValue</code>
+   * @hibernate.many-to-one column="well_id" not-null="true"
+   *   foreign-key="fk_result_value_to_well"
+   */
+  Well getHbnWell() {
+    return _well;
   }
 }

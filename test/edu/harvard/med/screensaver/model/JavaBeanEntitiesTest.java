@@ -10,6 +10,8 @@
 package edu.harvard.med.screensaver.model;
 
 import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -195,6 +197,12 @@ public class JavaBeanEntitiesTest extends JavaBeanEntitiesExercizor
     oddPluralToSingularPropertiesMap.put("children", "child");
     oddPluralToSingularPropertiesMap.put("typesDerivedFrom", "typeDerivedFrom");
   }
+  private static Map<String, String> oddSingularToPluralPropertiesMap =
+    new HashMap<String, String>();
+  static {
+    oddSingularToPluralPropertiesMap.put("child", "children");
+    oddSingularToPluralPropertiesMap.put("typeDerivedFrom", "typesDerivedFrom");
+  }
   
   /**
    * Test collection property:
@@ -319,5 +327,267 @@ public class JavaBeanEntitiesTest extends JavaBeanEntitiesExercizor
       foundMethod.getReturnType(),
       Boolean.TYPE);
     return foundMethod;
+  }
+  
+  public void testRelationshipBidirectionality()
+  {
+    exercizePropertyDescriptors(new PropertyDescriptorExercizor()
+      {
+        public void exercizePropertyDescriptor(
+          AbstractEntity bean,
+          BeanInfo beanInfo,
+          PropertyDescriptor propertyDescriptor)
+        {
+          Method getter = propertyDescriptor.getReadMethod();
+          if (AbstractEntity.class.isAssignableFrom(getter.getReturnType())) {
+            testBidirectionalityOfOneSideOfRelationship(
+              bean,
+              beanInfo,
+              propertyDescriptor,
+              getter);
+          }
+          else if (Collection.class.isAssignableFrom(getter.getReturnType())) {
+            testBidirectionalityOfManySideOfRelationship(
+              bean,
+              beanInfo,
+              propertyDescriptor,
+              getter);
+          }
+        }
+      });
+  }
+  
+  private void testBidirectionalityOfOneSideOfRelationship(
+    AbstractEntity bean,
+    BeanInfo beanInfo,
+    PropertyDescriptor propertyDescriptor,
+    Method getter)
+  {
+    String propFullName = bean.getClass() + "." + propertyDescriptor.getName();
+    
+    // get basic objects for the other side of the reln
+    Object relatedBean = getTestValueForType(getter.getReturnType());
+    Class relatedBeanClass = relatedBean.getClass();
+    String relatedBeanClassName = relatedBeanClass.getSimpleName();
+    BeanInfo relatedBeanInfo = null;
+    try {
+      relatedBeanInfo = Introspector.getBeanInfo(relatedBeanClass);
+    }
+    catch (IntrospectionException e) {
+      e.printStackTrace();
+      fail("failed to introspect entity class: " + relatedBeanClass);
+    }
+    
+    // get the property name for the other side of the reln
+    String relatedPropertyName = bean.getClass().getSimpleName();
+    relatedPropertyName =
+      relatedPropertyName.substring(0, 1).toLowerCase() +
+      relatedPropertyName.substring(1);
+    String relatedPluralPropertyName =
+        oddSingularToPluralPropertiesMap.containsKey(relatedPropertyName) ?
+        oddSingularToPluralPropertiesMap.get(relatedPropertyName) :
+        relatedPropertyName + "s";
+        
+    // get the prop descr for the other side, and determine whether the
+    // other side is one or many
+    PropertyDescriptor relatedPropertyDescriptor = null;
+    boolean otherSideIsMany = false;
+    for (PropertyDescriptor descriptor : relatedBeanInfo.getPropertyDescriptors()) {
+      if (descriptor.getName().equals(relatedPropertyName)) {
+        relatedPropertyDescriptor = descriptor;
+        break;
+      }
+      if (descriptor.getName().equals(relatedPluralPropertyName)) {
+        relatedPropertyDescriptor = descriptor;
+        otherSideIsMany = true;
+        break;
+      }
+    }
+    assertNotNull(
+      "related bean " + relatedBeanClassName + " has property with name " +
+      relatedPropertyName + " or " + relatedPluralPropertyName,
+      relatedPropertyDescriptor);
+    
+    // invoke the setter on this side
+    Method setter = propertyDescriptor.getWriteMethod();
+    try {
+      setter.invoke(bean, relatedBean);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      fail("setter threw exception: " + propFullName);
+    }
+    
+    Method relatedGetter = relatedPropertyDescriptor.getReadMethod();
+    
+    if (otherSideIsMany) {
+      try {
+        Collection result = (Collection) relatedGetter.invoke(relatedBean);
+        assertEquals(
+          "related.getter() returns set of size 1 for " + propFullName,
+          1,
+          result.size());
+        assertSame(
+          "related.getter() returns this after this.setter(related) for " +
+          propFullName,
+          bean,
+          result.iterator().next());
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+        fail("related getter threw exception: " + propFullName);
+      }
+    }
+    else {
+      try {
+        assertSame(
+          "related.getter() returns this after this.setter(related) for " +
+          propFullName,
+          bean,
+          relatedGetter.invoke(relatedBean));
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+        fail("related getter threw exception: " + propFullName);
+      }
+    }
+  }
+
+  private static Map<String, String> oddPropertyToRelatedPropertyMap =
+    new HashMap<String, String>();
+  private static Map<String, String> oddPluralPropertyToRelatedPropertyMap =
+    new HashMap<String, String>();
+  static {
+    oddPluralPropertyToRelatedPropertyMap.put("derivedTypes", "typesDerivedFrom");
+    oddPluralPropertyToRelatedPropertyMap.put("typesDerivedFrom", "derivedTypes");
+  }
+  
+  private void testBidirectionalityOfManySideOfRelationship(
+    AbstractEntity bean,
+    BeanInfo beanInfo,
+    PropertyDescriptor propertyDescriptor,
+    Method getter)
+  {
+    // get basic objects related to the bean
+    Class<? extends AbstractEntity> beanClass = bean.getClass();
+    String propertyName = propertyDescriptor.getName();
+    String propFullName = beanClass.getSimpleName() + "." + propertyName;
+    
+    // get the add method for the property
+    String singularPropName =
+      oddPluralToSingularPropertiesMap.containsKey(propertyName) ?
+      oddPluralToSingularPropertiesMap.get(propertyName) :
+      propertyName.substring(0, propertyName.length() - 1);
+    String capitalizedSingularPropName =
+      singularPropName.substring(0, 1).toUpperCase() +
+      singularPropName.substring(1);
+    String addMethodName = "add" + capitalizedSingularPropName;
+    Method addMethod = findAndCheckMethod(beanClass, addMethodName);    
+    
+    // make sure this is actually a relationship!
+    Class relatedBeanClass = addMethod.getParameterTypes()[0];
+    if (! AbstractEntity.class.isAssignableFrom(relatedBeanClass)) {
+      return;
+    }
+    
+    // get basic objects for the other side of the reln
+    Object relatedBean = getTestValueForType(relatedBeanClass);
+    String relatedBeanClassName = relatedBeanClass.getSimpleName();
+    BeanInfo relatedBeanInfo = null;
+    try {
+      relatedBeanInfo = Introspector.getBeanInfo(relatedBeanClass);
+    }
+    catch (IntrospectionException e) {
+      e.printStackTrace();
+      fail("failed to introspect entity class: " + relatedBeanClass);
+    }
+    
+    // get the property name for the other side of the reln
+    String relatedPropertyName;
+    if (oddPropertyToRelatedPropertyMap.containsKey(propertyName)) {
+      relatedPropertyName =
+        oddPropertyToRelatedPropertyMap.get(propertyName);
+    }
+    else {
+      relatedPropertyName = beanClass.getSimpleName();
+      relatedPropertyName =
+        relatedPropertyName.substring(0, 1).toLowerCase() +
+        relatedPropertyName.substring(1);
+    }
+    String relatedPluralPropertyName;
+    if (oddPluralPropertyToRelatedPropertyMap.containsKey(propertyName)) {
+      relatedPluralPropertyName =
+        oddPluralPropertyToRelatedPropertyMap.get(propertyName);
+    }
+    else {
+      relatedPluralPropertyName =
+        oddSingularToPluralPropertiesMap.containsKey(relatedPropertyName) ?
+          oddSingularToPluralPropertiesMap.get(relatedPropertyName) :
+            relatedPropertyName + "s";
+    }
+    
+    // get the prop descr for the other side, and determine whether the
+    // other side is one or many
+    PropertyDescriptor relatedPropertyDescriptor = null;
+    boolean otherSideIsMany = false;
+    for (PropertyDescriptor descriptor : relatedBeanInfo.getPropertyDescriptors()) {
+      if (descriptor.getName().equals(relatedPropertyName)) {
+        relatedPropertyDescriptor = descriptor;
+        break;
+      }
+      if (descriptor.getName().equals(relatedPluralPropertyName)) {
+        relatedPropertyDescriptor = descriptor;
+        otherSideIsMany = true;
+        break;
+      }
+    }
+    assertNotNull(
+      "related bean " + relatedBeanClassName + " has property with name " +
+      relatedPropertyName + " or " + relatedPluralPropertyName + " for " +
+      propFullName,
+      relatedPropertyDescriptor);
+    
+    // invoke the adder on this side
+    try {
+      addMethod.invoke(bean, relatedBean);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      fail("adder threw exception: " + propFullName);
+    }
+    
+    Method relatedGetter = relatedPropertyDescriptor.getReadMethod();
+    
+    if (otherSideIsMany) {
+      try {
+        Collection result = (Collection) relatedGetter.invoke(relatedBean);
+        assertEquals(
+          "related.getter() returns set of size 1 for " + propFullName,
+          1,
+          result.size());
+        assertSame(
+          "related.getter() returns this after this.setter(related) for " +
+          propFullName,
+          bean,
+          result.iterator().next());
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+        fail("related getter threw exception: " + propFullName);
+      }
+    }
+    else {
+      try {
+        assertSame(
+          "related.getter() returns this after this.setter(related) for " +
+          propFullName,
+          bean,
+          relatedGetter.invoke(relatedBean));
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+        fail("related getter threw exception: " + propFullName);
+      }
+    }
   }
 }

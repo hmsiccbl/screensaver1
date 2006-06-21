@@ -325,7 +325,8 @@ public class Library extends AbstractEntity
    * @motivation for hibernate
    * @hibernate.version
    */
-  private Integer getVersion() {
+  private Integer getVersion()
+  {
     return _version;
   }
 
@@ -334,7 +335,8 @@ public class Library extends AbstractEntity
    * @param version the new version of the library
    * @motivation    for hibernate
    */
-  private void setVersion(Integer version) {
+  private void setVersion(Integer version)
+  {
     _version = version;
   }
 
@@ -343,7 +345,8 @@ public class Library extends AbstractEntity
    * @param wells the new set of wells for the library
    * @motivation  for hibernate
    */
-  private void setHbnWells(Set<Well> wells) {
+  private void setHbnWells(Set<Well> wells)
+  {
     _wells = wells;
   }
 }

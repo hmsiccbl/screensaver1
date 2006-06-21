@@ -1,7 +1,3 @@
-JavaBean tests:
-
-- test bidirectionaliy of relationships
-
 Hibernate bean tests:
 
 - test set; persist; get
@@ -13,3 +9,6 @@ Hibernate bean tests:
 - test isVersioned
 - test set-properties have add/remove methods, public setter & private getter
   - (how does this relate to set-relationships?)
+
+
+- make biz key-affecting setters protected

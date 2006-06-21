@@ -743,6 +743,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * 
    * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screenresults.ScreenResult"
    *                        column="screen_result_id" not-null="true"
+   *                        foreign-key="fk_result_value_type_to_screen_result"
    */
   private ScreenResult getHbnScreenResult() {
     return _screenResult;
@@ -775,7 +776,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @hibernate.collection-many-to-many
    *   class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
    *   column="derived_from_result_value_type_id"
-   *   foreign-key="fk_result_value_type_derived_result_value_type"
+   *   foreign-key="fk_derived_from_result_value_type"
    */
   private SortedSet<ResultValueType> getHbnTypesDerivedFrom() {
     return _typesDerivedFrom;
@@ -813,7 +814,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @hibernate.collection-many-to-many
    *   class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
    *   column="derived_result_value_type_id"
-   *   foreign-key="fk_result_value_type_derived_result_value_type"
+   *   foreign-key="fk_derived_result_value_type"
    */
   private SortedSet<ResultValueType> getHbnDerivedTypes() {
     return _derivedTypes;

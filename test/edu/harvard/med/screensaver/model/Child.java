@@ -133,6 +133,7 @@ public class Child extends AbstractEntity
    *   class="edu.harvard.med.screensaver.model.Parent"
    *   column="parent_id"
    *   not-null="true"
+   *   foreign-key="fk_child_to_parent"
    */
   private Parent getHbnParent()
   {
