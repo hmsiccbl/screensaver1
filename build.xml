@@ -372,6 +372,8 @@
         classname="edu.harvard.med.screensaver.io.ScreenResultParser" 
         fork="true"
         classpathref="project.classpath"
+        output="${metadata.file}.out"
+        maxmemory="512m"
      >
         <arg line="-metadatafile ${metadata.file} -wellstoprint ${wells.to.print}"/>
      </java> 
