@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.screenresults;
 
+import java.text.DateFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -261,10 +262,8 @@ public class ScreenResult extends AbstractEntity
    */
   protected Object getBusinessKey()
   {
-    // TODO: replace with
-    // return getScreen()
-    // when it is implemented
-    return getDateCreated();
+    // TODO: replace with "return getScreen();" when it is implemented
+    return DateFormat.getDateInstance().format(getDateCreated());
   }
   
   

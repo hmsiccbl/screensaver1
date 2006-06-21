@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,8 @@ import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 
 /**
@@ -113,12 +116,47 @@ public class SimpleDAOTest extends AbstractSpringTest
   
   public void testFindEntitiesByProperties()
   {
-    fail("test not implemented yet");
+    final ResultValueType[] rvts = new ResultValueType[4];
+    dao.doInTransaction(new DAOTransaction()
+                        {
+      public void runTransaction()
+      {
+        ScreenResult screenResult = dao.defineEntity(ScreenResult.class,
+                                                     new Date());
+        rvts[0] = dao.defineEntity(ResultValueType.class, screenResult, "rvt0");
+        rvts[0].setDerived(true);
+        rvts[0].setAssayPhenotype("Mouse");
+        rvts[1] = dao.defineEntity(ResultValueType.class, screenResult, "rvt1");
+        rvts[1].setDerived(false);
+        rvts[1].setAssayPhenotype("Mouse");
+        rvts[2] = dao.defineEntity(ResultValueType.class, screenResult, "rvt2");
+        rvts[2].setDerived(true);
+        rvts[2].setAssayPhenotype("Mouse");
+        rvts[3] = dao.defineEntity(ResultValueType.class, screenResult, "rvt3");
+        rvts[3].setDerived(true);
+        rvts[3].setAssayPhenotype("Human");
+      }
+                        });
+    
+    dao.doInTransaction(new DAOTransaction()
+                        {
+      public void runTransaction()
+      {
+        Map<String,Object> queryProperties = new HashMap<String,Object>();
+        queryProperties.put("derived", true);
+        queryProperties.put("assayPhenotype", "Mouse");
+        List<ResultValueType> entities = dao.findEntitiesByProperties(ResultValueType.class,
+                                                                      queryProperties);
+        assertTrue(entities.contains(rvts[0]));
+        assertTrue(entities.contains(rvts[2]));
+        assertFalse(entities.contains(rvts[1]));
+        assertFalse(entities.contains(rvts[3]));
+      }
+                        });
   }
   
   public void testFindEntityByProperties()
   {
-    
     Map<String,Object> name2Value = new HashMap<String,Object>();
     name2Value.put("plateNumber", new Integer(1));
     name2Value.put("wellName", "A01");
