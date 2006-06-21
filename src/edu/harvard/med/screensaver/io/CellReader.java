@@ -39,8 +39,8 @@ public class CellReader
   // instance data members
   
   private ParseErrorManager _errors;
-  private String _sheetName;
-  private HSSFSheet _sheet;
+  private Workbook _workbook;
+  private int _sheetIndex;
   private short _column;
   private int _row;
   private boolean _required;
@@ -56,6 +56,8 @@ public class CellReader
   public static class Factory
   {
     private ParseErrorManager _errors;
+    private Workbook _workbook;
+    private int _sheetIndex;
     private String _sheetName;
     private HSSFSheet _sheet;
     private CellReader _recycledCellReader;
@@ -69,12 +71,12 @@ public class CellReader
      * @param sheet the worksheet itself
      * @param errors the error manager that will be notified of parse errors
      */
-    public Factory(String sheetName,
-                   HSSFSheet sheet,
+    public Factory(Workbook workbook,
+                   int sheetIndex,
                    ParseErrorManager errors)
     {
-      _sheet = sheet;
-      _sheetName = sheetName;
+      _workbook = workbook;
+      _sheetIndex = sheetIndex;
       _errors = errors;
     }
     
@@ -91,8 +93,8 @@ public class CellReader
                                     boolean required)
     {
       if (_recycledCellReader == null ) {
-        _recycledCellReader = new CellReader(_sheetName,
-                                             _sheet,
+        _recycledCellReader = new CellReader(_workbook,
+                                             _sheetIndex,
                                              _errors,
                                              column,
                                              row,
@@ -118,16 +120,16 @@ public class CellReader
    * Get the sheet name.
    * @return the sheet name
    */
-  public String getSheetName() { return _sheetName; }
+  public String getSheetName() { return _workbook.getWorkbook().getSheetName(_sheetIndex); }
   
   /**
    * Get the sheet containing the cell to be parsed.
    * @return the sheet
    */
-  public HSSFSheet getSheet() { return _sheet; }
+  public HSSFSheet getSheet() { return _workbook.getWorkbook().getSheetAt(_sheetIndex); }
   
   /**
-   * Get the column containing the cell to be parsed.
+   * Get the column containing the cell to be parsed.n
    * @return the column
    */
   public short getColumn() { return _column; }
@@ -144,7 +146,8 @@ public class CellReader
    */
   public String toString() {
     // TODO: only handles A-Z, not AA...
-    return _sheetName + ":(" + Character.toString((char) (_column + 'A')) + ", " + (_row + 1) + ")";
+    return _workbook.getWorkbookFile().getName() + getSheetName() + 
+      ":(" + Character.toString((char) (_column + 'A')) + ", " + (_row + 1) + ")";
   }
   
   /**
@@ -320,16 +323,16 @@ public class CellReader
   }  
   
   // protected and private methods and constructors
-  
-  protected CellReader(String sheetName,
-                       HSSFSheet sheet,
+
+  protected CellReader(Workbook workbook,
+                       int sheetIndex,
                        ParseErrorManager errors,
                        short column,
                        int row,
                        boolean required)
   {
-    _sheet = sheet;
-    _sheetName = sheetName;
+    _workbook = workbook;
+    _sheetIndex = sheetIndex;
     _errors = errors;
     _column = column;
     _row = row;
@@ -346,11 +349,12 @@ public class CellReader
   private HSSFCell getCell()
     throws CellOutOfRangeException
   {
-    if (_sheet.getLastRowNum() < getRow()) {
+    HSSFSheet sheet = _workbook.getWorkbook().getSheetAt(_sheetIndex);
+    if (sheet.getLastRowNum() < getRow()) {
       throw new CellOutOfRangeException(CellOutOfRangeException.UndefinedInAxis.ROW,
                                        this);
     }
-    HSSFRow row = _sheet.getRow(getRow());
+    HSSFRow row = sheet.getRow(getRow());
     if (row.getLastCellNum() < getColumn()) {
       throw new CellOutOfRangeException(CellOutOfRangeException.UndefinedInAxis.COLUMN,
                                        this);

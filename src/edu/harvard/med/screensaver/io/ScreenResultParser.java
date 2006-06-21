@@ -9,11 +9,8 @@
 
 package edu.harvard.med.screensaver.io;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,13 +34,10 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -218,7 +212,7 @@ public class ScreenResultParser
    * The ScreenResult object to be populated with data parsed from the spreadsheet.
    */
   private ScreenResult _screenResult;
-  private HSSFWorkbook _metadataWorkbook;
+  private Workbook _metadataWorkbook;
   
   private Map<String,ResultValueType> _columnsDerivedFromMap = new HashMap<String,ResultValueType>();
   private CellVocabularyParser<ResultValueType> _columnsDerivedFromParser = 
@@ -265,33 +259,19 @@ public class ScreenResultParser
    */
   public ScreenResult parse(File metadataExcelFile)
   {
-    InputStream metadataInputStream = null;
     try {
-      metadataInputStream = new FileInputStream(metadataExcelFile);
-      if (metadataInputStream == null) {
-        throw new UnrecoverableScreenResultParseException("metadata workbook file " + 
-                                                          metadataExcelFile + " cannot be read");
-      }
-      POIFSFileSystem metadataFs = new POIFSFileSystem(new BufferedInputStream(metadataInputStream));
-      _metadataWorkbook = new HSSFWorkbook(metadataFs);
+      _metadataWorkbook = new Workbook(metadataExcelFile);
+      log.info("parsing " + metadataExcelFile.getAbsolutePath());
       parseMetadata();
       for (String filename : _rawDataWorkbookFiles) {
-        InputStream inputStream = null;
         try {
           File rawDataFile = new File(metadataExcelFile.getParent(),
                                       filename);
           log.info("parsing " + rawDataFile.getAbsolutePath());
-          inputStream = new FileInputStream(rawDataFile);
-          if (inputStream == null) {
-            _errors.addError("raw data workbook file " + filename + " cannot be read and will be ignored");
-          }
-          else {
-            POIFSFileSystem dataFs = new POIFSFileSystem(new BufferedInputStream(inputStream));
-            parseData(new HSSFWorkbook(dataFs));
-          }
+          parseData(new Workbook(rawDataFile));
         }
         catch (IOException e) {
-          IOUtils.closeQuietly(metadataInputStream);
+          _errors.addError("raw data workbook file " + filename + " cannot be read and will be ignored");
           throw e;
         }
       }
@@ -305,7 +285,7 @@ public class ScreenResultParser
       _errors.addError(UNKNOWN_ERROR + ": " + e.getMessage());
     }
     finally {
-      IOUtils.closeQuietly(metadataInputStream);
+      // TODO: close workbooks' inputstreams?
     }
     return _screenResult;
   }
@@ -322,7 +302,7 @@ public class ScreenResultParser
    */
   public List<String> getErrors()
   {
-    return _errors.getErrors();
+    return _errors.getErrorMessages();
   }
   
 
@@ -337,13 +317,13 @@ public class ScreenResultParser
   private void initializeMetadataSheet() throws UnrecoverableScreenResultParseException
   {
     // TODO: find the sheet in a more reliable, flexible fashion
-    HSSFSheet metadataSheet = _metadataWorkbook.getSheetAt(0);
+    HSSFSheet metadataSheet = _metadataWorkbook.getWorkbook().getSheetAt(0);
 
     // TODO: take action if verification fails
     verifyStandardMetadataFormat(metadataSheet);
 
-    _metadataCellParserFactory = new CellReader.Factory(_metadataWorkbook.getSheetName(0),
-                                                        metadataSheet,
+    _metadataCellParserFactory = new CellReader.Factory(_metadataWorkbook,
+                                                        0,
                                                         _errors);
 
     initializeFirstDataHeaderColumnIndex(metadataSheet);
@@ -383,16 +363,16 @@ public class ScreenResultParser
     _nDataHeaders = (metadataLastDataHeaderColumnIndex - _metadataFirstDataHeaderColumnIndex) + 1;
   }
   
-  private HSSFSheet initializeDataSheet(HSSFWorkbook workbook, int index)
+  private HSSFSheet initializeDataSheet(Workbook workbook, int sheetIndex)
   {
     // TODO: find the sheet in a more reliable, flexible fashion
-    HSSFSheet dataSheet = workbook.getSheetAt(index);
+    HSSFSheet dataSheet = workbook.getWorkbook().getSheetAt(sheetIndex);
 
     // TODO: take action if verification fails
     //verifyStandardDataFormat(metadataSheet);
 
-    _dataCellParserFactory = new CellReader.Factory(workbook.getSheetName(0),
-                                                    dataSheet,
+    _dataCellParserFactory = new CellReader.Factory(workbook,
+                                                    sheetIndex,
                                                     _errors);  
     return dataSheet;
   }
@@ -496,10 +476,11 @@ public class ScreenResultParser
    * @throws ExtantLibraryException if an existing Well entity cannot be found
    *           in the database
    */
-  private void parseData(HSSFWorkbook workbook) throws ExtantLibraryException
+  private void parseData(Workbook workbook) throws ExtantLibraryException
   {
-    for (int iSheet = 0; iSheet < workbook.getNumberOfSheets(); ++iSheet) {
+    for (int iSheet = 0; iSheet < workbook.getWorkbook().getNumberOfSheets(); ++iSheet) {
       HSSFSheet sheet = initializeDataSheet(workbook, iSheet);
+      log.info("parsing sheet " + workbook.getWorkbook().getSheetName(iSheet));
       for (int iRow = RAWDATA_FIRST_DATA_ROW_INDEX; iRow <= sheet.getLastRowNum(); ++iRow) {
         Well well = findWell(iRow);
         dataCell(iRow, DataColumn.TYPE).getString(); // TODO: use this value?
@@ -569,10 +550,10 @@ public class ScreenResultParser
    */
   private HSSFSheet findSheet(String targetName)
   {
-    for (int i = 0; i < _metadataWorkbook.getNumberOfSheets(); ++i) {
-      String name = _metadataWorkbook.getSheetName(i);
+    for (int i = 0; i < _metadataWorkbook.getWorkbook().getNumberOfSheets(); ++i) {
+      String name = _metadataWorkbook.getWorkbook().getSheetName(i);
       if (targetName.equalsIgnoreCase(name)) {
-        return _metadataWorkbook.getSheetAt(i);
+        return _metadataWorkbook.getWorkbook().getSheetAt(i);
       }
     }
     _errors.addError(NO_METADATA_META_SHEET_ERROR + " \"" + targetName + "\"");
