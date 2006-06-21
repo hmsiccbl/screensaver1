@@ -56,7 +56,8 @@ public class ResultValueType extends AbstractEntity implements Comparable
   private String                     _timePoint;
   private boolean                    _isDerived;
   private String                     _howDerived;
-  private SortedSet<ResultValueType> _derivedFrom;
+  private SortedSet<ResultValueType> _typesDerivedFrom = new TreeSet<ResultValueType>();
+  private SortedSet<ResultValueType> _derivedTypes = new TreeSet<ResultValueType>();
   private boolean                    _isActivityIndicator;
   private ActivityIndicatorType      _activityIndicatorType;
   private IndicatorDirection         _indicatorDirection;
@@ -161,21 +162,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
   }
 
   /**
-   * Get the set of {@link ResultValue}s that were generated for this
-   * <code>ResultValueType</code>.
-   * 
-   * @motivation for Hibernate and bi-directional association management
-   * @return the {@link java.util.SortedSet} of {@link ResultValue}s generated
-   *         for this <code>ResultValueType</code>
-   * @hibernate.set cascade="all-delete-orphan" inverse="true" sort="natural"
-   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValue"
-   * @hibernate.collection-key column="result_value_type_id"
-   */
-  public SortedSet<ResultValue> getHbnResultValues() {
-    return _resultValues;
-  }
-
-  /**
    * Get a set of all {@link ResultValue}s for this
    * <code>ResultValueType</code>.
    * 
@@ -186,7 +172,41 @@ public class ResultValueType extends AbstractEntity implements Comparable
   public SortedSet<ResultValue> getResultValues() {
     return Collections.unmodifiableSortedSet(_resultValues);
   }
+  
+  /**
+   * Add the result value to the result value type.
+   * 
+   * @param resultValue the result value to add to the result value type
+   * @return true iff the result value was not already in the result value type
+   */
+  public boolean addResultValue(ResultValue resultValue) {
+    assert !(_resultValues.contains(resultValue) ^
+      resultValue.getResultValueType().equals(this)) :
+      "asymmetric result value type / result value association encountered";
+    if (_resultValues.add(resultValue)) {
+      resultValue.setHbnResultValueType(this);
+      return true;
+    }
+    return false;
+  }
 
+  /**
+   * Remove the result value from the result value type.
+   * 
+   * @param resultValue the result value to remove from the result value type
+   * @return true iff the result value was previously in the result value type
+   */
+  public boolean removeResultValue(ResultValue resultValue) {
+    assert !(_resultValues.contains(resultValue) ^
+      resultValue.getResultValueType().equals(this)) :
+      "asymmetric result value type / result value association encountered";
+    if (_resultValues.remove(resultValue)) {
+      resultValue.setHbnResultValueType(null);
+      return true;
+    }
+    return false;
+  }
+  
   /**
    * Get the ordinal position of this <code>ResultValueType</code> within its
    * parent {@link ScreenResult}.
@@ -320,7 +340,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
     _comments = comments;
   }
 
-
   /**
    * Get the set of {@link ResultValueType}s that this
    * <code>ResultValueType</code> was derived from. By "derived", we mean that
@@ -331,38 +350,91 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * 
    * @return the set of {@link ResultValueType}s that this
    *         <code>ResultValueType</code> was derived from
-   * @hibernate.set table="result_value_type_derived_from_link" sort="natural"
-   * @hibernate.collection-key column="derived_result_value_type_id"
-   * @hibernate.collection-many-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
-   *                                    column="derived_from_result_value_type_id"
    */
-  public SortedSet<ResultValueType> getDerivedFrom() {
-    // note: it is okay to return modifiable collection to application code,
-    // since this is a unidirectional association and any changes made directly
-    // to the collection will be properly persisted
-    return _derivedFrom;
+  public SortedSet<ResultValueType> getTypesDerivedFrom() {
+    return Collections.unmodifiableSortedSet(getHbnTypesDerivedFrom());
   }
-
 
   /**
-   * Set the set of {@link ResultValueType}s that this
-   * <code>ResultValueType</code> was derived from. By "derived", we mean that
-   * the calculated values of our {@link ResultValues} depend upon the the
-   * {@link ResultValue}s of other {@link ResultValueType}s (of the same stock
-   * plate well). The details of the derivation should be specified via
-   * {@ #setHowDerived}.
-   * 
-   * @param derivedFrom the set of {@link ResultValueType}s that this
-   *          <code>ResultValueType</code> was derived from
+   * Add the result value type to the types derived from.
+   * @param typeDerivedFrom the result value type to add 
+   * @return true iff the result value type was not already contained in the
+   * set of types derived from this type
    */
-  public void setDerivedFrom(SortedSet<ResultValueType> derivedFrom) {
-    // TODO: assert no cycles exist in derivedFrom graph
-    if (derivedFrom != null && derivedFrom.size() > 0) {
+  public boolean addTypeDerivedFrom(ResultValueType typeDerivedFrom) {
+    assert !(typeDerivedFrom.getHbnDerivedTypes().contains(this) ^
+      getHbnTypesDerivedFrom().contains(typeDerivedFrom)) : 
+      "asymmetric types derived from / derived types association encountered";
+    if (getHbnTypesDerivedFrom().add(typeDerivedFrom)) {
       setDerived(true);
+      return typeDerivedFrom.getHbnDerivedTypes().add(this);
     }
-    _derivedFrom = derivedFrom;
+    return false;
   }
-                          
+  
+  /**
+   * Remove the result value type from the types derived from.
+   * @param typeDerivedFrom the result value type to remove
+   * @return true iff the result value type was previously contained in
+   * the set of types derived from this type
+   */
+  public boolean removeTypeDerivedFrom(ResultValueType typeDerivedFrom) {
+    assert !(typeDerivedFrom.getHbnDerivedTypes().contains(this) ^
+      getHbnTypesDerivedFrom().contains(typeDerivedFrom)) : 
+      "asymmetric types derived from / derived types association encountered";
+    if (getHbnTypesDerivedFrom().remove(typeDerivedFrom)) {
+      setDerived(! getHbnTypesDerivedFrom().isEmpty());
+      return typeDerivedFrom.getHbnDerivedTypes().remove(this);
+    }
+    return false;
+  }
+  
+  /**
+   * Get the set of {@link ResultValueType}s that derive from this
+   * <code>ResultValueType</code>.
+   * 
+   * @return the set of {@link ResultValueType}s that derive from this
+   *         <code>ResultValueType</code>
+   */
+  public SortedSet<ResultValueType> getDerivedTypes() {
+    return Collections.unmodifiableSortedSet(getHbnDerivedTypes());
+  }
+
+  /**
+   * Add the result value type to the derived types.
+   * @param derivedType the result value type to add 
+   * @return true iff the result value type was not already contained in the
+   * set of derived types
+   */
+  public boolean addDerivedType(ResultValueType derivedType) {
+    assert !(derivedType.getHbnTypesDerivedFrom().contains(this) ^
+      getHbnDerivedTypes().contains(derivedType)) : 
+      "asymmetric derived types / types derived from association encountered";
+    if (getHbnDerivedTypes().add(derivedType)) {
+      derivedType.getHbnTypesDerivedFrom().add(this);
+      derivedType.setDerived(true);
+      return true;
+    }
+    return false;
+  }
+  
+  /**
+   * Remove the result value type from the derived types.
+   * @param derivedType the result value type to remove
+   * @return true iff the result value type was previously contained in
+   * the set of derived types
+   */
+  public boolean removeDerivedType(ResultValueType derivedType) {
+    assert !(derivedType.getHbnTypesDerivedFrom().contains(this) ^
+      getHbnDerivedTypes().contains(derivedType)) : 
+      "asymmetric derived types / types derived from association encountered";
+    if (getHbnDerivedTypes().remove(derivedType)) {
+      derivedType.getHbnTypesDerivedFrom().remove(this);
+      derivedType.setDerived(! derivedType.getHbnTypesDerivedFrom().isEmpty());
+      return true;
+    }
+    return false;
+  }                       
 
   /**
    * Get a description of this <code>ResultValueType</code>.
@@ -563,7 +635,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * 
    * @return <code>true</code> iff this <code>ResultValueType</code> is
    *         derived from other <code>ResultValueType</code>s.
-   * @see #setDerivedFrom(SortedSet)
+   * @see #setTypesDerivedFrom(SortedSet)
    * @hibernate.property type="boolean" not-null="true"
    */
   public boolean isDerived() {
@@ -576,7 +648,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * 
    * @param isDerived <code>true</code> iff this <code>ResultValueType</code>
    *          is derived from other <code>ResultValueType</code>s.
-   * @see #setDerivedFrom(SortedSet)
+   * @see #setTypesDerivedFrom(SortedSet)
    */
   public void setDerived(boolean isDerived) {
     _isDerived = isDerived;
@@ -598,6 +670,30 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
   // protected getters and setters
   
+  /**
+   * Set the parent {@link ScreenResult}.
+   * @param newScreenResult the parent {@link ScreenResult}
+   * @motivation for Hibernate
+   */
+  void setHbnScreenResult(ScreenResult screenResult) {
+    _screenResult = screenResult;
+  }
+
+  /**
+   * Get the set of {@link ResultValue}s that were generated for this
+   * <code>ResultValueType</code>.
+   * 
+   * @motivation for Hibernate and bi-directional association management
+   * @return the {@link java.util.SortedSet} of {@link ResultValue}s generated
+   *         for this <code>ResultValueType</code>
+   * @hibernate.set cascade="all-delete-orphan" inverse="true" sort="natural"
+   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValue"
+   * @hibernate.collection-key column="result_value_type_id"
+   */
+  SortedSet<ResultValue> getHbnResultValues() {
+    return _resultValues;
+  }
+
   /**
    * Get a business key that uniquely represents this object and that is based
    * upon some subset of its domain-model data fields.
@@ -654,15 +750,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
   }
   
   /**
-   * Set the parent {@link ScreenResult}.
-   * @param newScreenResult the parent {@link ScreenResult}
-   * @motivation for Hibernate
-   */
-  private void setHbnScreenResult(ScreenResult screenResult) {
-    _screenResult = screenResult;
-  }
-
-  /**
    * Set the set of {@link ResultValue}s that comprise this
    * <code>ResultValueType</code>.
    * 
@@ -672,5 +759,77 @@ public class ResultValueType extends AbstractEntity implements Comparable
    */
   private void setHbnResultValues(SortedSet<ResultValue> resultValues) {
     _resultValues = resultValues;
+  }
+
+  /**
+   * Get the set of {@link ResultValueType}s that this
+   * <code>ResultValueType</code> was derived from.
+   * The caller of this method must ensure bi-directionality is perserved.
+   * 
+   * @return the set of {@link ResultValueType}s that this
+   *         <code>ResultValueType</code> was derived from
+   * @hibernate.set
+   *   table="result_value_type_derived_from_link"
+   *   sort="natural"
+   * @hibernate.collection-key
+   *   column="derived_result_value_type_id"
+   * @hibernate.collection-many-to-many
+   *   class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
+   *   column="derived_from_result_value_type_id"
+   *   foreign-key="fk_result_value_type_derived_result_value_type"
+   */
+  private SortedSet<ResultValueType> getHbnTypesDerivedFrom() {
+    return _typesDerivedFrom;
+  }
+
+  /**
+   * Set the set of {@link ResultValueType}s that this
+   * <code>ResultValueType</code> was derived from. The caller of this method
+   * must ensure bi-directionality is perserved.
+   * 
+   * @param derivedFrom the set of {@link ResultValueType}s that this
+   *          <code>ResultValueType</code> was derived from
+   * @motivation for hibernate
+   */
+  private void setHbnTypesDerivedFrom(SortedSet<ResultValueType> derivedFrom) {
+    if (derivedFrom != null && derivedFrom.size() > 0) {
+      setDerived(true);
+    }
+    _typesDerivedFrom = derivedFrom;
+  }
+  
+  /**
+   * Get the set of {@link ResultValueType}s that derive from this
+   * <code>ResultValueType</code>.
+   * The caller of this method must ensure bi-directionality is perserved.
+   * 
+   * @return the set of {@link ResultValueType}s that derive from this
+   *         <code>ResultValueType</code>
+   * @hibernate.set
+   *   table="result_value_type_derived_from_link"
+   *   sort="natural"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="derived_from_result_value_type_id"
+   * @hibernate.collection-many-to-many
+   *   class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
+   *   column="derived_result_value_type_id"
+   *   foreign-key="fk_result_value_type_derived_result_value_type"
+   */
+  private SortedSet<ResultValueType> getHbnDerivedTypes() {
+    return _derivedTypes;
+  }
+
+  /**
+   * Set the set of {@link ResultValueType}s that derive from this
+   * <code>ResultValueType</code>. The caller of this method
+   * must ensure bi-directionality is perserved.
+   * 
+   * @param derivedTypes the set of {@link ResultValueType}s that derive from
+   * this <code>ResultValueType</code>
+   * @motivation for hibernate
+   */
+  private void setHbnDerivedTypes(SortedSet<ResultValueType> derivedTypes) {
+    _derivedTypes = derivedTypes;
   }
 }

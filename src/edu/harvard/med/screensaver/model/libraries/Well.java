@@ -104,7 +104,7 @@ public class Well extends AbstractEntity
    * @return an unmodifiable copy of the set of compounds contained in the well
    */
   public Set<Compound> getCompounds() {
-    return Collections.unmodifiableSet(_compounds);
+    return Collections.unmodifiableSet(getHbnCompounds());
   }
 
   /**
@@ -114,9 +114,10 @@ public class Well extends AbstractEntity
    * @return true iff the compound was not already in the well
    */
   public boolean addCompound(Compound compound) {
-    assert !(_compounds.contains(compound) ^ compound.getWells().contains(this)) :
+    assert !(getHbnCompounds().contains(compound) ^
+      compound.getHbnWells().contains(this)) :
       "asymmetric compound/well association encountered";
-    if (_compounds.add(compound)) {
+    if (getHbnCompounds().add(compound)) {
       return compound.getHbnWells().add(this);
     }
     return false;
@@ -128,9 +129,10 @@ public class Well extends AbstractEntity
    * @return         true iff the compound was previously in the well
    */
   public boolean removeCompound(Compound compound) {
-    assert !(_compounds.contains(compound) ^ compound.getWells().contains(this)) :
+    assert !(getHbnCompounds().contains(compound) ^
+      compound.getHbnWells().contains(this)) :
       "asymmetric compound/well association encountered";
-    if (_compounds.remove(compound)) {
+    if (getHbnCompounds().remove(compound)) {
       return compound.getHbnWells().remove(this);
     }
     return false;
@@ -259,6 +261,19 @@ public class Well extends AbstractEntity
   // package getters and setters
   
   /**
+   * Get the library the well is in.
+   * @return the library the well is in
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.libraries.Library"
+   *   column="library_id"
+   *   not-null="true"
+   *   foreign-key="fk_well_to_library"
+   */
+  Library getHbnLibrary() {
+    return _library;
+  }
+
+  /**
    * Get the modifiable set of compounds contained in the well. If the caller
    * modifies the returned collection, it must ensure that the bi-directional
    * relationship is maintained by updating the related {@link Compound}
@@ -317,24 +332,11 @@ public class Well extends AbstractEntity
   }
 
   /**
-   * Get the library the well is in.
-   * @return the library the well is in
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.libraries.Library"
-   *   column="library_id"
-   *   not-null="true"
-   *   foreign-key="fk_well_to_library"
-   */
-  private Library getHbnLibrary() {
-    return _library;
-  }
-
-  /**
    * Set the library the well is in.
    * @param library the new library for the well
    * @motivation for Hibernate (exclusively)
    */
-  private void setHbnLibrary(Library library) {
+  void setHbnLibrary(Library library) {
     _library = library;
   }
 

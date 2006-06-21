@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
@@ -129,9 +128,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt2.setReplicateOrdinal(1);
     rvt2.setDerived(true);
     rvt2.setHowDerived("Divide compound well by plate median");
-    SortedSet<ResultValueType> rvt2DerivedFrom = new TreeSet<ResultValueType>();
-    rvt2DerivedFrom.add(rvt1);
-    rvt2.setDerivedFrom(rvt2DerivedFrom);
+    rvt2.addTypeDerivedFrom(rvt1);
     rvt2.setActivityIndicator(true);
     rvt2.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
     rvt2.setIndicatorDirection(IndicatorDirection.LOW_VALUES_INDICATE);
@@ -151,10 +148,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt4.setReplicateOrdinal(2);
     rvt4.setDerived(true);
     rvt4.setHowDerived("Divide compound well by plate median");
-    SortedSet<ResultValueType> rvt4DerivedFrom = new TreeSet<ResultValueType>();
-    rvt4DerivedFrom.add(rvt1);
-    rvt4DerivedFrom.add(rvt3);
-    rvt4.setDerivedFrom(rvt4DerivedFrom);
+    rvt4.addTypeDerivedFrom(rvt1);
+    rvt4.addTypeDerivedFrom(rvt3);
     rvt4.setActivityIndicator(true);
     rvt4.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
     rvt4.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);

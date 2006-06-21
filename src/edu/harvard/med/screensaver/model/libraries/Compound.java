@@ -87,9 +87,10 @@ public class Compound extends AbstractEntity
    * @return     true iff the compound was not already contained in the well
    */
   public boolean addWell(Well well) {
-    assert !(well.getCompounds().contains(this) ^ getWells().contains(this)) :
+    assert !(well.getHbnCompounds().contains(this) ^
+      getHbnWells().contains(this)) :
       "asymmetric compound/well association encountered";
-    if (_wells.add(well)) {
+    if (getHbnWells().add(well)) {
       return well.getHbnCompounds().add(this);
     }
     return false;
@@ -101,9 +102,10 @@ public class Compound extends AbstractEntity
    * @return     true iff the compound was previously contained in the well
    */
   public boolean removeWell(Well well) {
-    assert !(well.getCompounds().contains(this) ^ getWells().contains(this)) :
+    assert !(well.getHbnCompounds().contains(this) ^
+      getHbnWells().contains(this)) :
       "asymmetric compound/well association encountered";
-    if (_wells.remove(well)) {
+    if (getHbnWells().remove(well)) {
       return well.getHbnCompounds().remove(this);
     }
     return false;

@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -447,7 +446,9 @@ public class ScreenResultParser
       rvt.setDescription(metadataCell(MetadataRow.DESCRIPTION, iDataHeader).getString());
       rvt.setTimePoint(metadataCell(MetadataRow.TIME_POINT, iDataHeader).getString());
       if (rvt.isDerived()) {
-        rvt.setDerivedFrom(new TreeSet<ResultValueType>(_columnsDerivedFromParser.parseList(metadataCell(MetadataRow.COLUMNS_DERIVED_FROM, iDataHeader, true))));
+        for (ResultValueType resultValueType : _columnsDerivedFromParser.parseList(metadataCell(MetadataRow.COLUMNS_DERIVED_FROM, iDataHeader, true))) {
+          rvt.addTypeDerivedFrom(resultValueType);
+        }
         rvt.setHowDerived(metadataCell(MetadataRow.HOW_DERIVED, iDataHeader, true).getString());
         // TODO: should warn if these values *are* defined and !isDerivedFrom()
       }

@@ -223,6 +223,16 @@ public class ResultValue extends AbstractEntity implements Comparable
   // protected getters and setters
   
   /**
+   * Set the parent {@link ResultValueType}.
+   * 
+   * @param resultValueType the parent {@link ResultValueType}
+   * @motivation for Hibernate
+   */
+  void setHbnResultValueType(ResultValueType resultValueType) {
+    _resultValueType = resultValueType;
+  }
+
+  /**
    * Get a business key that uniquely represents this object and that is based
    * upon some subset of its domain-model data fields.
    * 
@@ -278,15 +288,4 @@ public class ResultValue extends AbstractEntity implements Comparable
   private ResultValueType getHbnResultValueType() {
     return _resultValueType;
   }
-
-  /**
-   * Set the parent {@link ResultValueType}.
-   * 
-   * @param resultValueType the parent {@link ResultValueType}
-   * @motivation for Hibernate
-   */
-  private void setHbnResultValueType(ResultValueType resultValueType) {
-    _resultValueType = resultValueType;
-  }
-
 }

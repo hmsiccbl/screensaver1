@@ -80,7 +80,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     parent.addChild(new Child("b"));
     dao.persistEntity(parent);
     
-    Parent loadedParent = dao.findEntityById(Parent.class, parent.getId());
+    Parent loadedParent = dao.findEntityById(Parent.class, parent.getParentId());
     assertNotSame("distinct parent objects for save and load operations", parent, loadedParent);
     Set<Child> loadedChildren = loadedParent.getChildren();
     assertNotSame("distinct children set objects for save and load operations", parent.getChildren(), loadedChildren);
@@ -93,7 +93,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     assertTrue("child added to loaded parent", loadedParent.getChildren().contains(childC));
     dao.persistEntity(loadedParent);
     
-    Parent loadedParent2 = dao.findEntityById(Parent.class, parent.getId());
+    Parent loadedParent2 = dao.findEntityById(Parent.class, parent.getParentId());
     assertTrue("child added to re-loaded parent", loadedParent2.getChildren().contains(childC));
   }
   
@@ -432,7 +432,9 @@ public class ComplexDAOTest extends AbstractSpringTest
             false,
             "human",
             false);
-          derivedRvt1.setDerivedFrom(derivedRvtSet1);
+          for (ResultValueType resultValueType : derivedRvtSet1) {
+            derivedRvt1.addTypeDerivedFrom(resultValueType);
+          }
           
           ResultValueType derivedRvt2 = new ResultValueType(
             screenResult,
@@ -443,7 +445,9 @@ public class ComplexDAOTest extends AbstractSpringTest
             false,
             "human",
             false);
-          derivedRvt2.setDerivedFrom(derivedRvtSet2);
+          for (ResultValueType resultValueType : derivedRvtSet2) {
+            derivedRvt2.addTypeDerivedFrom(resultValueType);
+          }
           
           dao.persistEntity(screenResult);
       }
@@ -458,12 +462,12 @@ public class ComplexDAOTest extends AbstractSpringTest
           SortedSet<ResultValueType> resultValueTypes = new TreeSet(screenResult.getResultValueTypes());
           
           ResultValueType derivedRvt = resultValueTypes.last();
-          Set<ResultValueType> derivedFromSet = derivedRvt.getDerivedFrom();
+          Set<ResultValueType> derivedFromSet = derivedRvt.getTypesDerivedFrom();
           assertEquals(derivedRvtSet2, derivedFromSet);
           
           resultValueTypes.remove(derivedRvt);
           derivedRvt = resultValueTypes.last();
-          derivedFromSet = derivedRvt.getDerivedFrom();
+          derivedFromSet = derivedRvt.getTypesDerivedFrom();
           assertEquals(derivedRvtSet1, derivedFromSet);
         }
       });

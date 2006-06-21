@@ -47,7 +47,7 @@ public class ScreenResultPrinter
       printer.println("\tassayPhenotype=" + rvt.getAssayPhenotype());
       printer.println("\tassayReadoutType=" + rvt.getAssayReadoutType());
       printer.println("\tisDerived=" + rvt.isDerived());
-      printer.println("\tderivedFrom="+rvt.getDerivedFrom()); // TODO
+      printer.println("\tderivedFrom="+rvt.getTypesDerivedFrom()); // TODO
       printer.println("\thowDerived=" + rvt.getHowDerived());
       printer.println("\tisActivityIndicator=" + rvt.isActivityIndicator());
       printer.println("\tactivityIndicatorType=" + rvt.getActivityIndicatorType());

@@ -104,7 +104,7 @@ public class Library extends AbstractEntity
     assert !(_wells.contains(well) ^ well.getLibrary().equals(this)) :
       "asymmetric library/well association encountered";
     if (_wells.add(well)) {
-      well.setLibrary(this);
+      well.setHbnLibrary(this);
       return true;
     }
     return false;
@@ -120,7 +120,7 @@ public class Library extends AbstractEntity
     assert !(_wells.contains(well) ^ well.getLibrary().equals(this)) :
       "asymmetric library/well association encountered";
     if (_wells.remove(well)) {
-      well.setLibrary(this);
+      well.setHbnLibrary(null);
       return true;
     }
     return false;

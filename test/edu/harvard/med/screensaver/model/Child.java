@@ -25,7 +25,7 @@ public class Child extends AbstractEntity
   
   private Integer _version;
   private Parent _parent;
-  private Integer _id;
+  private Integer _childId;
   private String _name;
   
   
@@ -40,11 +40,6 @@ public class Child extends AbstractEntity
     _name = name;
   }
 
-  public void setId(Integer id)
-  {
-    _id = id;
-  }
-
   /**
    * @hibernate.id
    *   generator-class="sequence"
@@ -52,43 +47,22 @@ public class Child extends AbstractEntity
    *   name="sequence"
    *   value="parent_id_seq"
    */  
-  public Integer getId()
+  public Integer getChildId()
   {
-    return _id;
+    return _childId;
   }
   
-  public void addToParent(Parent parent)
+  public Parent getParent()
   {
-    setParent(parent);
-    parent.getChildren().add(this);
+    return getHbnParent();
   }
   
   public void setParent(Parent parent)
   {
-    _parent = parent;
-
-    // NOTE: Cannot make the following call, as it causes
-    // a Hibernate LazyInitializationException, as we're trying
-    // to update the PersisentSet (of children) in our Parent class.
-    // For some reason, this is not possible WHILE HIBERNATE IS LOADING
-    // THIS OBJECTED (i.e., calling its setter methods).
-    // Calling addToParent() after the loaded object is returned our
-    // application code is OKAY.
-
-    // parent.getChildren().add(this)
+    setHbnParent(parent);
+    parent.getHbnChildren().add(this);
   }
   
-  /**
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.Parent"
-   *   column="parent_id"
-   *   not-null="true"
-   */
-  public Parent getParent()
-  {
-    return _parent;
-  }
-
   /**
    * @hibernate.property
    *   type="java.lang.String"
@@ -108,6 +82,11 @@ public class Child extends AbstractEntity
   
   // protected getters and setters
   
+  void setHbnParent(Parent parent)
+  {
+    _parent = parent;
+  }
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.model.AbstractEntity#getBusinessKey()
    */
@@ -123,6 +102,11 @@ public class Child extends AbstractEntity
    * @motivation for hibernate
    */
   private Child() {}
+
+  private void setChildId(Integer id)
+  {
+    _childId = id;
+  }
 
   /**
    * Get the version number of the compound.
@@ -142,5 +126,16 @@ public class Child extends AbstractEntity
    */
   private void setVersion(Integer version) {
     _version = version;
+  }
+
+  /**
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.Parent"
+   *   column="parent_id"
+   *   not-null="true"
+   */
+  private Parent getHbnParent()
+  {
+    return _parent;
   }
 }

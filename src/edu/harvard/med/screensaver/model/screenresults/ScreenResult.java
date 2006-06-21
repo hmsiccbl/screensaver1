@@ -90,7 +90,8 @@ public class ScreenResult extends AbstractEntity
    * @hibernate.id generator-class="sequence"
    * @hibernate.generator-param name="sequence" value="screen_result_id_seq"
    */
-  public Integer getScreenResultId() {
+  public Integer getScreenResultId()
+  {
     return _screenResultId;
   }
 
@@ -99,7 +100,8 @@ public class ScreenResult extends AbstractEntity
    * 
    * @param screenResultId a unique identifier for the <code>ScreenResult</code>
    */
-  public void setScreenResultId(Integer screenResultId) {
+  public void setScreenResultId(Integer screenResultId)
+  {
     _screenResultId = screenResultId;
   }
 
@@ -110,7 +112,8 @@ public class ScreenResult extends AbstractEntity
    *         <code>ScreenResult</code> was created
    * @hibernate.property type="date" not-null="true"
    */
-  public Date getDateCreated() {
+  public Date getDateCreated()
+  {
     return _dateCreated;
   }
   
@@ -120,7 +123,8 @@ public class ScreenResult extends AbstractEntity
    * @param dateCreated the date this <code>ScreenResult</code> was generated
    *          in the lab
    */
-  public void setDateCreated(Date dateCreated) {
+  public void setDateCreated(Date dateCreated)
+  {
     _dateCreated = dateCreated;
   }
 
@@ -135,7 +139,8 @@ public class ScreenResult extends AbstractEntity
    *         shareable among all users
    * @hibernate.property column="is_shareable" not-null="true"
    */
-  public boolean isShareable() {
+  public boolean isShareable()
+  {
     return _isShareable;
   }
 
@@ -148,7 +153,8 @@ public class ScreenResult extends AbstractEntity
    *          other than those associated with the
    *          {@link edu.harvard.med.screensaver.screens.Screen}
    */
-  public void setShareable(boolean isShareable) {
+  public void setShareable(boolean isShareable)
+  {
     _isShareable = isShareable;
   }
 
@@ -159,10 +165,43 @@ public class ScreenResult extends AbstractEntity
    * @return an unmodifiable {@link java.util.SortedSet} of all
    *         {@link ResultValueType}s for this <code>ScreenResult</code>.
    */
-  public SortedSet<ResultValueType> getResultValueTypes() {
+  public SortedSet<ResultValueType> getResultValueTypes()
+  {
     return Collections.unmodifiableSortedSet(_resultValueTypes);
   }
+  
+  /**
+   * Add the result value type to the screen result.
+   * @param resultValueType The result value type to add
+   * @return true iff the result value type was not already in the screen result
+   */
+  public boolean addResultValueType(ResultValueType resultValueType)
+  {
+    assert !(_resultValueTypes.contains(resultValueType) ^ resultValueType.getScreenResult().equals(this)) :
+      "assymetic screen result/result value type encountered";
+    if (_resultValueTypes.add(resultValueType)) {
+      resultValueType.setHbnScreenResult(this);
+      return true;
+    }
+    return false;
+  }
 
+  /**
+   * Remove the result value type to the screen result.
+   * @param resultValueType The result value type to remove
+   * @return true iff the result value type was previously in the screen result
+   */
+  public boolean removeResultValueType(ResultValueType resultValueType)
+  {
+    assert !(_resultValueTypes.contains(resultValueType) ^ resultValueType.getScreenResult().equals(this)) :
+      "assymetic screen result/result value type encountered";
+    if (_resultValueTypes.remove(resultValueType)) {
+      resultValueType.setHbnScreenResult(null);
+      return true;
+    }
+    return false;
+  }
+  
   /**
    * Get the number of replicates (assay plates) associated with this
    * <code>ScreenResult</code>.
@@ -171,7 +210,8 @@ public class ScreenResult extends AbstractEntity
    *         <code>ScreenResult</code>
    * @hibernate.property type="integer" not-null="true"
    */
-  public Integer getReplicateCount() {
+  public Integer getReplicateCount()
+  {
     if (_replicateCount == null) {
       if (getResultValueTypes().size() == 0) {
         _replicateCount = 0;
@@ -208,7 +248,8 @@ public class ScreenResult extends AbstractEntity
    * @param replicateCount the number of replicates (assay plates) associated
    *          with this <code>ScreenResult</code>
    */
-  public void setReplicateCount(Integer replicateCount) {
+  public void setReplicateCount(Integer replicateCount)
+  {
     _replicateCount = replicateCount;
   }
   

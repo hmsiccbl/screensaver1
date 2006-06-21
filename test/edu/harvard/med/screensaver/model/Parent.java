@@ -32,7 +32,7 @@ public class Parent extends AbstractEntity
 
   private Set<Child> _children = new HashSet<Child>();
   private String _name;
-  private Integer _id;
+  private Integer _parentId;
   
   
   // constructor and instance methods
@@ -53,14 +53,10 @@ public class Parent extends AbstractEntity
    *   name="sequence"
    *   value="parent_id_seq"
    */  
-  public Integer getId() {
-    return _id;
+  public Integer getParentId() {
+    return _parentId;
   }
 
-  public void setId(Integer id) {
-    _id = id;
-  }
-  
   /**
    * Get the name.
    * 
@@ -82,25 +78,50 @@ public class Parent extends AbstractEntity
     return Collections.unmodifiableSet(_children);
   }
 
-  public void addChild(Child c) {
-    _children.add(c);
-    c.setParent(this);
+  public boolean addChild(Child c) {
+    boolean result = _children.add(c);
+    c.setHbnParent(this);
+    return result;
   }
+  
+  public boolean removeChild(Child c) {
+    boolean result = _children.remove(c);
+    c.setHbnParent(null);
+    return result;
+  }
+  
   
   // protected and private methods and constructors
 
   /**
-   * Default constructor.
-   * @motivation for Hibernate
-   */
-  protected Parent() {}
-  
+   * @hibernate.set
+   *   cascade="all-delete-orphan"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="parent_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.Child"
+   */  
+  Set<Child> getHbnChildren() {
+    return _children;
+  }
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.model.AbstractEntity#getBusinessKey()
    */
   protected Object getBusinessKey()
   {
     return getName();
+  }
+
+  /**
+   * Default constructor.
+   * @motivation for Hibernate
+   */
+  private Parent() {}
+
+  private void setParentId(Integer id) {
+    _parentId = id;
   }
 
   /**
@@ -123,20 +144,7 @@ public class Parent extends AbstractEntity
     _version = version;
   }
 
-  /**
-   * @hibernate.set
-   *   cascade="all-delete-orphan"
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="parent_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.Child"
-   */  
-  private Set<Child> getChildrenHibernate() {
-    return _children;
-  }
-
-  private void setChildrenHibernate(Set<Child> children) {
+  private void setHbnChildren(Set<Child> children) {
     _children = children;
   }
 
