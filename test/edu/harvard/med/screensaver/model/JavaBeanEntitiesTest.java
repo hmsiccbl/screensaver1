@@ -11,14 +11,23 @@ package edu.harvard.med.screensaver.model;
 
 import java.beans.BeanInfo;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
 
 /**
  * Test the entities as JavaBeans.
+ * <p>
+ * Note from s: my test code is a bit sloppy! Ha, you can still read it.
+ * Them methods are way too long! Well, "it's just test code"...
  */
 public class JavaBeanEntitiesTest extends JavaBeanEntitiesExercizor
 {
+  private static Logger log = Logger.getLogger(JavaBeanEntitiesTest.class);
   
   public void testJavaBeanEntitiesTemplate()
   {
@@ -128,7 +137,6 @@ public class JavaBeanEntitiesTest extends JavaBeanEntitiesExercizor
           }
           Method setter = propertyDescriptor.getWriteMethod();
           Object testValue = getTestValueForType(getter.getReturnType());
-          System.out.println("test " + bean.getClass() + "." + propertyDescriptor.getName());
           try {
             setter.invoke(bean, testValue);
             if (AbstractEntity.class.isAssignableFrom(getter.getReturnType())) {
@@ -154,5 +162,163 @@ public class JavaBeanEntitiesTest extends JavaBeanEntitiesExercizor
           }
         }
       });
+  }
+  
+  /**
+   * Test collection properties:
+   * <ul>
+   * <li>have a pluralized name
+   * <li>do not have a (public) setter
+   * <li>have boolean add/remove methods with param of right type
+   * <li>add;get returns set of one
+   * <li>add;remove;get returns empty set
+   */
+  public void testCollectionProperties()
+  {
+    exercizePropertyDescriptors(new PropertyDescriptorExercizor()
+      {
+        public void exercizePropertyDescriptor(
+          AbstractEntity bean,
+          BeanInfo beanInfo,
+          PropertyDescriptor propertyDescriptor)
+        {
+          Method getter = propertyDescriptor.getReadMethod();
+          if (Collection.class.isAssignableFrom(getter.getReturnType())) {
+            testCollectionProperty(bean, getter, propertyDescriptor);
+          }
+        }
+      });
+  }
+
+  private static Map<String, String> oddPluralToSingularPropertiesMap =
+    new HashMap<String, String>();
+  static {
+    oddPluralToSingularPropertiesMap.put("children", "child");
+    oddPluralToSingularPropertiesMap.put("typesDerivedFrom", "typeDerivedFrom");
+  }
+  
+  /**
+   * Test collection property:
+   * <ul>
+   * <li>has a pluralized name
+   * <li>does not have a (public) setter
+   * <li>has boolean add/remove methods with param of right type
+   * <li>add;get returns set of one
+   * <li>add;remove;get returns empty set
+   */
+  @SuppressWarnings("unchecked")
+  private void testCollectionProperty(
+    AbstractEntity bean,
+    Method getter,
+    PropertyDescriptor propertyDescriptor)
+  {
+    Class<? extends AbstractEntity> beanClass = bean.getClass();
+    String beanClassName = beanClass.getSimpleName();
+    String propertyName = propertyDescriptor.getName();
+    String fullPropName = beanClassName + "." + propertyName;
+    
+    // collection property has pluralized name
+    assertTrue(
+      "collection property getter has plural name: " + fullPropName,
+      oddPluralToSingularPropertiesMap.containsKey(propertyName) ||
+      propertyName.endsWith("s"));
+
+    String singularPropName =
+      oddPluralToSingularPropertiesMap.containsKey(propertyName) ?
+      oddPluralToSingularPropertiesMap.get(propertyName) :
+      propertyName.substring(0, propertyName.length() - 1);
+    String capitalizedSingularPropName =
+      singularPropName.substring(0, 1).toUpperCase() +
+      singularPropName.substring(1);
+    
+    // collection property has no getter
+    assertNull(
+      "collection property has no setter: " + fullPropName,
+      propertyDescriptor.getWriteMethod());
+
+    // has boolean add methods with param of right type
+    String addMethodName = "add" + capitalizedSingularPropName;
+    Method addMethod = findAndCheckMethod(beanClass, addMethodName);
+      
+    // has boolean remove methods with param of right type
+    String removeMethodName = "remove" + capitalizedSingularPropName;
+    Method removeMethod = findAndCheckMethod(beanClass, removeMethodName);
+    
+    Method getterMethod = propertyDescriptor.getReadMethod();
+    
+    Class propertyType = addMethod.getParameterTypes()[0];
+    Object testValue = getTestValueForType(propertyType);
+    
+    // add;get returns set of one
+    try {
+      Boolean result = (Boolean)
+        addMethod.invoke(bean, testValue);
+      assertTrue(
+        "adding to empty collection prop returns true: " + fullPropName,
+        result.booleanValue());
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      fail("add method for prop threw exception: " + fullPropName);
+    }
+    
+    try {
+      Collection result = (Collection) getterMethod.invoke(bean);
+      assertEquals(
+        "collection prop with one element added has size one: " + fullPropName,
+        result.size(),
+        1);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      fail("getter method for prop threw exception: " + fullPropName);
+    }
+    
+    // add;remove;get returns empty set
+    try {
+      Boolean result = (Boolean)
+        removeMethod.invoke(bean, testValue);
+      assertTrue(
+        "removing to empty collection prop returns true: " + fullPropName,
+        result.booleanValue());
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      fail("remove method for prop threw exception: " + fullPropName);
+    }
+    
+    try {
+      Collection result = (Collection) getterMethod.invoke(bean);
+      assertEquals(
+        "collection prop with one element added has size one: " + fullPropName,
+        result.size(),
+        0);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      fail("getter method for prop threw exception: " + fullPropName);
+    }
+  }
+
+  private Method findAndCheckMethod(
+    Class<? extends AbstractEntity> beanClass,
+    String methodName)
+  {
+    String fullMethodName = beanClass.getName() + "." + methodName;
+    Method foundMethod = null;
+    for (Method method : beanClass.getDeclaredMethods()) {
+      if (method.getName().equals(methodName)) {
+        foundMethod = method;
+        break;
+      }
+    }
+    assertNotNull(
+      "collection property missing method: " + fullMethodName,
+      foundMethod);
+    assertEquals(
+      "collection property method returns boolean: " + fullMethodName,
+      foundMethod.getReturnType(),
+      Boolean.TYPE);
+    return foundMethod;
   }
 }

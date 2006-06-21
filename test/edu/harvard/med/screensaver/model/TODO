@@ -4,9 +4,6 @@ JavaBean tests:
 
 Hibernate bean tests:
 
-- test n-arg constructor arg list matches not-null properties
-- test not-null properties start out initialized
-- test not-not-null properties start out uninitialized
 - test set; persist; get
 - test { set; persist; get; } for relationships
 - test bidirectionality of relationships over persist
