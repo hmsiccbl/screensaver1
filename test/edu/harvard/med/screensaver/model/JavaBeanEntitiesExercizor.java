@@ -14,11 +14,15 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 
+import org.apache.log4j.Logger;
+
 /**
  * Exercise the entities as JavaBeans.
  */
 abstract class JavaBeanEntitiesExercizor extends EntityClassesExercisor
 {
+  
+  private static Logger log = Logger.getLogger(JavaBeanEntitiesExercizor.class);
   
   protected static interface PropertyDescriptorExercizor
   {
@@ -35,7 +39,10 @@ abstract class JavaBeanEntitiesExercizor extends EntityClassesExercisor
         public void exercizeJavaBeanEntity(AbstractEntity bean, BeanInfo beanInfo)
         {
           for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
-            if (propertyDescriptor.getReadMethod().getName().equals("getClass")) {
+            String propertyName = propertyDescriptor.getName();
+            if (
+              propertyName.equals("class") ||
+              propertyName.startsWith("hbn")) {
               continue;
             }
             exercizor.exercizePropertyDescriptor(bean, beanInfo, propertyDescriptor);
