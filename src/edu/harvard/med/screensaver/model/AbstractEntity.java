@@ -64,6 +64,10 @@ import org.apache.log4j.Logger;
  *     in general, any method that is exclusively for Hibernate use is private
  *   </li>
  *   <li>
+ *     boolean properties are always not-null and primitive boolean type
+ *     (Boolean.TYPE and not Boolean.class).
+ *   </li>
+ *   <li>
  *     collection properties (properties whose getter method returns a Collection)
  *     have a public getter for the whole collection, e.g., <code>getBars</code>;
  *     have public methods <code>addBar</code> and <code>removeBar</code> that
