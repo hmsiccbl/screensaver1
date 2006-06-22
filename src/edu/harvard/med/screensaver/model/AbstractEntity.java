@@ -12,10 +12,13 @@ package edu.harvard.med.screensaver.model;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 
 
@@ -168,15 +171,6 @@ public abstract class AbstractEntity implements Serializable
   }
   
   /**
-   * Return the business key for the entity.
-   * @return the business key
-   */
-  abstract protected Object getBusinessKey();
-  
-  
-  // method overrides from Object
-  
-  /**
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
@@ -209,6 +203,22 @@ public abstract class AbstractEntity implements Serializable
   // private methods
   
   /**
+   * Return the business key for the entity.
+   * @return the business key
+   */
+  abstract protected Object getBusinessKey();
+
+  /**
+   * Remove the time portion of the date and return the result.
+   * @param originalDate the date to truncate
+   * @return the truncated date
+   */
+  protected Date truncateDate(Date originalDate)
+  {
+    return DateUtils.round(originalDate, Calendar.DATE);
+  }
+  
+  /**
    * Determine if a given property should be used in determining equivalence.
    * @return boolean (see code, since this is private method)
    * @see #isEquivalent(AbstractEntity)
@@ -229,5 +239,4 @@ public abstract class AbstractEntity implements Serializable
         Map.class.isAssignableFrom(property.getPropertyType()) ||
         AbstractEntity.class.isAssignableFrom(property.getPropertyType()));
   }
-  
 }
