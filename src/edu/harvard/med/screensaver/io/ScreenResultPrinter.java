@@ -32,6 +32,10 @@ public class ScreenResultPrinter
   public void print(Integer maxResultValuesToPrint)
   {
     PrintWriter printer = new PrintWriter(System.out);
+    if (_screenResult == null) {
+      printer.println("ScreenResult was not parsed (probably due to an invalid input file)");
+      return;
+    }
     
     printer.println("dateCreated=" + _screenResult.getDateCreated());
     printer.println("replicateCount=" + _screenResult.getReplicateCount());

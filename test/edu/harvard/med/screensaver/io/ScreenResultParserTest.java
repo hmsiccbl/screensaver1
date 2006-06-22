@@ -301,9 +301,9 @@ public class ScreenResultParserTest extends AbstractSpringTest
       HSSFSheet sheet3 = workbook.getWorkbook().getSheetAt(3);
       assertEquals("ERROR: value required",
                    HSSFCellUtil.getCell(sheet0.getRow(8),'F' - 'A').getStringCellValue());
-      assertEquals("ERROR: unparseable value \"\" (expected one of [E])",
+      assertEquals("ERROR: value required; unparseable value \"\" (expected one of [E])",
                    HSSFCellUtil.getCell(sheet0.getRow(9),'F' - 'A').getStringCellValue());
-      assertEquals("ERROR: unparseable value \"maybe\" (expected one of [no, true, y, 0, yes, n, 1, false, ])",
+      assertEquals("ERROR: unparseable value \"maybe\" (expected one of [, 0, 1, false, n, no, true, y, yes])",
                    HSSFCellUtil.getCell(sheet0.getRow(16),'F' - 'A').getStringCellValue());
       assertEquals("ERROR: invalid cell type (expected a date)",
                    HSSFCellUtil.getCell(sheet1.getRow(7),'B' - 'A').getStringCellValue());
@@ -322,8 +322,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
       HSSFSheet sheet0 = workbook.getWorkbook().getSheetAt(0);
       assertEquals("ERROR: unparseable plate number 'PLL-0001'",
                    HSSFCellUtil.getCell(sheet0.getRow(3),'A' - 'A').getStringCellValue());
-      assertEquals("ERROR: invalid cell type (expected a double)",
-                   HSSFCellUtil.getCell(sheet0.getRow(2),'E' - 'A').getStringCellValue());
     }
     
     

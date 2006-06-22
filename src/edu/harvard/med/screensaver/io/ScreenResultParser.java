@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.io;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,6 +18,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -78,7 +81,7 @@ public class ScreenResultParser
   private static final String UNEXPECTED_DATA_HEADER_TYPE_ERROR = "unexpected data header type";
   private static final String REFERENCED_UNDEFINED_DATA_HEADER_ERROR = "referenced undefined data header";
   private static final String UNRECOGNIZED_INDICATOR_DIRECTION_ERROR = "unrecognized \"indicator direction\" value";
-  private static final String METADATA_DATA_HEADER_COLUMNS_NOT_FOUND_ERROR = "data header columns not found in metadata workbook";
+  private static final String METADATA_DATA_HEADER_COLUMNS_NOT_FOUND_ERROR = "data header columns not found";
   private static final String METADATA_UNEXPECTED_COLUMN_TYPE_ERROR = "expected column type of \"data\"";
   private static final String METADATA_NO_RAWDATA_FILES_SPECIFIED_ERROR = "raw data workbook files not specified";
   private static final String UNKNOWN_ERROR = "unknown error";
@@ -127,11 +130,11 @@ public class ScreenResultParser
     FIRST_DATA_HEADER
   };
 
-  private static Map<String,IndicatorDirection> indicatorDirectionMap = new HashMap<String,IndicatorDirection>();
-  private static Map<String,ActivityIndicatorType> activityIndicatorTypeMap = new HashMap<String,ActivityIndicatorType>();
-  private static Map<String,Boolean> rawOrDerivedMap = new HashMap<String,Boolean>();
-  private static Map<String,Boolean> primaryOrFollowUpMap = new HashMap<String,Boolean>();
-  private static Map<String,Boolean> booleanMap = new HashMap<String,Boolean>();
+  private static SortedMap<String,IndicatorDirection> indicatorDirectionMap = new TreeMap<String,IndicatorDirection>();
+  private static SortedMap<String,ActivityIndicatorType> activityIndicatorTypeMap = new TreeMap<String,ActivityIndicatorType>();
+  private static SortedMap<String,Boolean> rawOrDerivedMap = new TreeMap<String,Boolean>();
+  private static SortedMap<String,Boolean> primaryOrFollowUpMap = new TreeMap<String,Boolean>();
+  private static SortedMap<String,Boolean> booleanMap = new TreeMap<String,Boolean>();
   static {
     indicatorDirectionMap.put("<",IndicatorDirection.LOW_VALUES_INDICATE);
     indicatorDirectionMap.put(">",IndicatorDirection.HIGH_VALUES_INDICATE);
@@ -183,26 +186,26 @@ public class ScreenResultParser
 
       ClassPathXmlApplicationContext appCtx = new ClassPathXmlApplicationContext(new String[] { "spring-context-services.xml", "spring-context-screenresultparser-test.xml" });
       ScreenResultParser screenResultParser = (ScreenResultParser) appCtx.getBean("screenResultParser");
-      ScreenResult screenResult = screenResultParser.parse(new File(cmdLine.getOptionValue("metadatafile")));
       try {
+        ScreenResult screenResult = screenResultParser.parse(new File(cmdLine.getOptionValue("metadatafile")));
         screenResultParser.annotateErrors("errors.xls");
+        if (cmdLine.hasOption("wellstoprint")) {
+          new ScreenResultPrinter(screenResult).print(new Integer(cmdLine.getOptionValue("wellstoprint")));
+        }
+        else {
+          new ScreenResultPrinter(screenResult).print();
+        }
       }
       catch (IOException e) {
-        String errorMsg = "could not save workbook error annotations: " + e.getMessage();
+        String errorMsg = "I/O error: " + e.getMessage();
         log.error(errorMsg);
         System.err.println(errorMsg);
       }
       if (screenResultParser.getErrors().size() > 0) {
         System.err.println("Errors encountered during parse:");
-        for (String error : screenResultParser.getErrors()) {
-          System.err.println(error);
+        for (ParseError error : screenResultParser.getErrors()) {
+          System.err.println(error.getMessage());
         }
-      }
-      if (cmdLine.hasOption("wellstoprint")) {
-        new ScreenResultPrinter(screenResult).print(new Integer(cmdLine.getOptionValue("wellstoprint")));
-      }
-      else {
-        new ScreenResultPrinter(screenResult).print();
       }
     }
     catch (ParseException e) {
@@ -220,7 +223,7 @@ public class ScreenResultParser
   private ScreenResult _screenResult;
   private Workbook _metadataWorkbook;
   
-  private Map<String,ResultValueType> _columnsDerivedFromMap = new HashMap<String,ResultValueType>();
+  private SortedMap<String,ResultValueType> _columnsDerivedFromMap = new TreeMap<String,ResultValueType>();
   private CellVocabularyParser<ResultValueType> _columnsDerivedFromParser = 
     new CellVocabularyParser<ResultValueType>(_columnsDerivedFromMap);
   private CellVocabularyParser<IndicatorDirection> indicatorDirectionParser = 
@@ -265,6 +268,9 @@ public class ScreenResultParser
   public ScreenResult parse(File metadataExcelFile)
   {
     try {
+      if (!metadataExcelFile.canRead()) {
+        throw new FileNotFoundException("metadata file '" + metadataExcelFile + "' cannot be read");
+      }
       _metadataWorkbook = new Workbook(metadataExcelFile, _errors);
       log.info("parsing " + metadataExcelFile.getAbsolutePath());
       parseMetadata();
@@ -283,9 +289,9 @@ public class ScreenResultParser
       _errors.addError("serious parse error encountered (could not continue further parsing): " + e.getMessage());
     }
     catch (Exception e) {
-      // TODO: log this
       e.printStackTrace();
-      _errors.addError(UNKNOWN_ERROR + " of type : " + e.getClass() + ": " + e.getMessage());
+      String errorMsg = UNKNOWN_ERROR + " of type : " + e.getClass() + ": " + e.getMessage();
+      _errors.addError(errorMsg);
     }
     finally {
       // TODO: close workbooks' inputstreams?
@@ -303,9 +309,9 @@ public class ScreenResultParser
    * @return a
    *         <code>List&lt;String&gt;</code of all errors generated during parsing
    */
-  public List<String> getErrors()
+  public List<ParseError> getErrors()
   {
-    return _errors.getErrorMessages();
+    return _errors.getErrors();
   }
   
 
@@ -507,7 +513,7 @@ public class ScreenResultParser
         for (ResultValueType rvt : _screenResult.getResultValueTypes()) {
           Cell cell = dataCell(iRow, iDataHeader);
           Object value = !rvt.isActivityIndicator()
-              ? cell.getDouble()
+              ? cell.getAsString()
               : rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN
                 ? _booleanParser.parse(cell)
                 : rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL
@@ -625,7 +631,7 @@ public class ScreenResultParser
     
     // instance data members
     
-    private Map<String,T> _parsedValue2SystemValue;
+    private SortedMap<String,T> _parsedValue2SystemValue;
     private T _valueToReturnIfUnparseable = null;
     private String _delimiterRegex = ",";
     private String _errorMessage;
@@ -633,7 +639,7 @@ public class ScreenResultParser
     
     // constructors
 
-    public CellVocabularyParser(Map<String,T> parsedValue2SystemValue) 
+    public CellVocabularyParser(SortedMap<String,T> parsedValue2SystemValue) 
     {
       this(parsedValue2SystemValue,
            null,
@@ -641,7 +647,7 @@ public class ScreenResultParser
            DEFAULT_DELIMITER_REGEX);
     }
                            
-    public CellVocabularyParser(Map<String,T> parsedValue2SystemValue,
+    public CellVocabularyParser(SortedMap<String,T> parsedValue2SystemValue,
                                 T valueToReturnIfUnparseable)
     {
       this(parsedValue2SystemValue,
@@ -650,7 +656,7 @@ public class ScreenResultParser
            DEFAULT_DELIMITER_REGEX);
     }
     
-    public CellVocabularyParser(Map<String,T> parsedValue2SystemValue,
+    public CellVocabularyParser(SortedMap<String,T> parsedValue2SystemValue,
                                 T valueToReturnIfUnparseable,
                                 String errorMessage)
     {
@@ -660,7 +666,7 @@ public class ScreenResultParser
            DEFAULT_DELIMITER_REGEX);
     }
     
-    public CellVocabularyParser(Map<String,T> parsedValue2SystemValue,
+    public CellVocabularyParser(SortedMap<String,T> parsedValue2SystemValue,
                                 T valueToReturnIfUnparseable,
                                 String errorMessage,
                                 String delimiterRegex)
@@ -727,9 +733,11 @@ public class ScreenResultParser
   public List<File> annotateErrors(String savedFileExtension) throws IOException
   {
     List<File> errorWorkbookFiles = new ArrayList<File>();
-    errorWorkbookFiles.add(_metadataWorkbook.save(savedFileExtension));
-    for (Workbook workbook : _rawDataWorkbooks) {
-      errorWorkbookFiles.add(workbook.save(savedFileExtension));
+    if (_metadataWorkbook != null) {
+      errorWorkbookFiles.add(_metadataWorkbook.save(savedFileExtension));
+      for (Workbook workbook : _rawDataWorkbooks) {
+        errorWorkbookFiles.add(workbook.save(savedFileExtension));
+      }
     }
     return errorWorkbookFiles;
   }

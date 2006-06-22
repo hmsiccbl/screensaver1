@@ -160,6 +160,8 @@ public class Cell
    */
   public int getRow() { return _row; }
   
+  public boolean isRequired() { return _required; }
+  
   /**
    * A human-readable representation of the cell's location in the workbook.
    * @return a <code>String</code>
@@ -348,18 +350,18 @@ public class Cell
         }
         return null;
       }
-      if (cell.getCellType() != HSSFCell.CELL_TYPE_STRING) {
-        _errors.addError(INVALID_CELL_TYPE_ERROR + " (expected string)", this);
-        if (_required) {
-          return "";
-        }
-        return null;
-      }
       return cell.getStringCellValue();
     } 
     catch (CellOutOfRangeException e) {
       if (_required) {
         _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        return "";
+      }
+      return null;
+    }
+    catch (NumberFormatException e) {
+      if (_required) {
+        _errors.addError(INVALID_CELL_TYPE_ERROR + " (expected a string)", this);
         return "";
       }
       return null;
@@ -378,7 +380,16 @@ public class Cell
 //    HSSFCellStyle cellStyle = workbook.getCellStyleAt((short) (workbook.getNumCellStyles() - 1));
 //    log.debug("cellStyle == errorStyle: " + (cellStyle == errorStyle));
 //    cell.setCellStyle(errorStyle);
-    cell.setCellValue("ERROR: " + error.getMessage());
+    String annotatedCellValue = cell.getStringCellValue();
+    if (annotatedCellValue != null && annotatedCellValue.startsWith("ERROR: ")) {
+      annotatedCellValue += "; ";
+    }
+    else {
+      annotatedCellValue = "ERROR: ";
+    }
+    annotatedCellValue += error.getMessage();
+    cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+    cell.setCellValue(annotatedCellValue);
   }
   
   // protected and private methods and constructors
@@ -424,6 +435,33 @@ public class Cell
   private HSSFCell getOrCreateCell()
   {
     return HSSFCellUtil.getCell(HSSFCellUtil.getRow(getRow(), getSheet()), getColumn());
+  }
+
+  /**
+   * Returns the value of the cell as a String, regardless of the cell's type.
+   * @return a String
+   */
+  public String getAsString()
+  {
+    try {
+      int cellType = getCell().getCellType();
+      switch (cellType) {
+      case HSSFCell.CELL_TYPE_BLANK:
+        return "";
+      case HSSFCell.CELL_TYPE_BOOLEAN:
+        return getBoolean().toString();
+      case HSSFCell.CELL_TYPE_NUMERIC: 
+        return getDouble().toString();
+      case HSSFCell.CELL_TYPE_ERROR:
+      case HSSFCell.CELL_TYPE_FORMULA: // will get the formula *result* as a string
+      case HSSFCell.CELL_TYPE_STRING:
+      default:
+        return getString();
+      }
+    } 
+    catch (CellOutOfRangeException e) {
+      return "";
+    }
   }
 
 }

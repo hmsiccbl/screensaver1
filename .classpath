@@ -123,5 +123,6 @@
 	<classpathentry kind="lib" path="lib/poi-2.5.1/poi-contrib-2.5.1-final-20040804.jar"/>
 	<classpathentry kind="lib" path="build/war/WEB-INF/lib/poi-contrib-2.5.1-final-20040804.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-lang-2.1.jar"/>
+	<classpathentry kind="lib" path="build/war/WEB-INF/lib/commons-lang-2.1.jar"/>
 	<classpathentry kind="output" path="build/war/WEB-INF/classes"/>
 </classpath>

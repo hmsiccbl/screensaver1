@@ -12,8 +12,6 @@ package edu.harvard.med.screensaver.io;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -30,14 +28,6 @@ public class ParseErrorManager
 {
   private static Logger log = Logger.getLogger(ParseErrorManager.class);
   
-  private static Transformer errorToMessageTransformer = new Transformer() 
-  { 
-    public Object transform(Object parseError) 
-    { 
-      return ((ParseError) parseError).getMessage();
-    };
-  };
-
   private List<ParseError> _errors = new ArrayList<ParseError>();
   /**
    * The workbook that will be annotated with errors that are not specific to a cell.
@@ -58,7 +48,7 @@ public class ParseErrorManager
   {
     ParseError error = new ParseError(errorMessage);
     _errors.add(error);
-    log.info("parse error: " + error);
+    //log.info("parse error: " + error);
 
     // annotate workbook with non-cell-specific error by appending to a specially created "errors" sheet
     if (_errorsWorkbook != null) {
@@ -85,19 +75,7 @@ public class ParseErrorManager
     ParseError error = new ParseError(errorMessage, cell);
     _errors.add(error);
     cell.annotateWithError(error);
-    log.info("parse error: " + error);
-  }
-  
-  /**
-   * Get the list of error messages (as <code>String</code>s)
-   * 
-   * @return a list of <code>String</code> error messages
-   */
-  @SuppressWarnings("unchecked")
-  public List<String> getErrorMessages()
-  {
-    return new ArrayList<String>(CollectionUtils.transformedCollection(_errors,
-                                                                       errorToMessageTransformer));
+//    log.info("parse error: " + error);
   }
   
   /**
