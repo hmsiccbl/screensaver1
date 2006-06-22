@@ -31,6 +31,10 @@ import org.apache.log4j.Logger;
  *     all public constructors must initialize the business key.
  *   </li>
  *   <li>
+ *     the public constructor(s) with the maximum number of arguments
+ *     must initialize all not-null properties.
+ *   </li>
+ *   <li>
  *     Hibernate requires a zero-parameter constructor.
  *   </li>
  *   <li>
