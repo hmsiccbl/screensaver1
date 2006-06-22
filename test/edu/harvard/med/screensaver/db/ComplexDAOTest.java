@@ -76,8 +76,8 @@ public class ComplexDAOTest extends AbstractSpringTest
   public void testParentChildRelationship()
   {
     Parent parent = new Parent("parent1");
-    parent.addChild(new Child("a"));
-    parent.addChild(new Child("b"));
+    new Child("a", parent);
+    new Child("b", parent);
     dao.persistEntity(parent);
     
     Parent loadedParent = dao.findEntityById(Parent.class, parent.getParentId());
@@ -88,8 +88,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     assertEquals(parent.getChildren(), loadedChildren);
     
     // now test whether we can add another child to our Parent that was loaded from the database
-    Child childC = new Child("c");
-    loadedParent.addChild(childC);
+    Child childC = new Child("c", loadedParent);
     assertTrue("child added to loaded parent", loadedParent.getChildren().contains(childC));
     dao.persistEntity(loadedParent);
     

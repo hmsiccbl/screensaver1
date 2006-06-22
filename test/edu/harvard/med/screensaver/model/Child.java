@@ -34,10 +34,12 @@ public class Child extends AbstractEntity
   /**
    * Constructs an initialized Child object.
    * @param name
+   * @param parent
    */
-  public Child(String name)
+  public Child(String name, Parent parent)
   {
     _name = name;
+    setParent(parent);
   }
 
   /**
@@ -134,6 +136,7 @@ public class Child extends AbstractEntity
    *   column="parent_id"
    *   not-null="true"
    *   foreign-key="fk_child_to_parent"
+   *   cascade="save-update"
    */
   private Parent getHbnParent()
   {
