@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/test/edu/harvard/med/screensaver/model/EntityBeansTest.java $
+// $Id: EntityBeansTest.java 223 2006-06-21 21:56:57Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -26,22 +26,9 @@ import org.apache.log4j.Logger;
  * Note from s: my test code is a bit sloppy! Ha, you can still read it.
  * Them methods are way too long! Well, "it's just test code"...
  */
-public class JavaBeanEntitiesTest extends JavaBeanEntitiesExercizor
+public class EntityBeansTest extends EntityBeansExercizor
 {
-  private static Logger log = Logger.getLogger(JavaBeanEntitiesTest.class);
-  
-  public void testJavaBeanEntitiesTemplate()
-  {
-    exercizeJavaBeanEntities(new JavaBeanEntityExercizor()
-      {
-        public void exercizeJavaBeanEntity(
-          AbstractEntity bean,
-          BeanInfo beanInfo)
-        {
-          // copy this method and put your code here
-        }
-      });
-  }
+  private static Logger log = Logger.getLogger(EntityBeansTest.class);
   
   /**
    * Test that all properties have a getter, and all properties aside from
@@ -89,6 +76,8 @@ public class JavaBeanEntitiesTest extends JavaBeanEntitiesExercizor
           PropertyDescriptor propertyDescriptor)
         {
           Method getter = propertyDescriptor.getReadMethod();
+          // TODO: check if the getter returns a collection before
+          // invoking it
           Object result = null;
           try {
             // note that result will be Boolean when the getter returns boolean
@@ -173,6 +162,7 @@ public class JavaBeanEntitiesTest extends JavaBeanEntitiesExercizor
    * <li>have boolean add/remove methods with param of right type
    * <li>add;get returns set of one
    * <li>add;remove;get returns empty set
+   * </ul>
    */
   public void testCollectionProperties()
   {
@@ -258,8 +248,7 @@ public class JavaBeanEntitiesTest extends JavaBeanEntitiesExercizor
     
     // add;get returns set of one
     try {
-      Boolean result = (Boolean)
-        addMethod.invoke(bean, testValue);
+      Boolean result = (Boolean) addMethod.invoke(bean, testValue);
       assertTrue(
         "adding to empty collection prop returns true: " + fullPropName,
         result.booleanValue());
@@ -297,7 +286,7 @@ public class JavaBeanEntitiesTest extends JavaBeanEntitiesExercizor
     try {
       Collection result = (Collection) getterMethod.invoke(bean);
       assertEquals(
-        "collection prop with one element added has size one: " + fullPropName,
+        "collection prop with element removed has size zero: " + fullPropName,
         result.size(),
         0);
     }
@@ -366,8 +355,8 @@ public class JavaBeanEntitiesTest extends JavaBeanEntitiesExercizor
     String propFullName = bean.getClass() + "." + propertyDescriptor.getName();
     
     // get basic objects for the other side of the reln
-    Object relatedBean = getTestValueForType(getter.getReturnType());
-    Class relatedBeanClass = relatedBean.getClass();
+    Class relatedBeanClass = getter.getReturnType();
+    Object relatedBean = getTestValueForType(relatedBeanClass);
     String relatedBeanClassName = relatedBeanClass.getSimpleName();
     BeanInfo relatedBeanInfo = null;
     try {

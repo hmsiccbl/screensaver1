@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/test/edu/harvard/med/screensaver/model/EntityBeansExercizor.java $
+// $Id: EntityBeansExercizor.java 222 2006-06-21 21:55:28Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -19,10 +19,10 @@ import org.apache.log4j.Logger;
 /**
  * Exercise the entities as JavaBeans.
  */
-abstract class JavaBeanEntitiesExercizor extends EntityClassesExercisor
+abstract class EntityBeansExercizor extends EntityClassesExercisor
 {
   
-  private static Logger log = Logger.getLogger(JavaBeanEntitiesExercizor.class);
+  private static Logger log = Logger.getLogger(EntityBeansExercizor.class);
   
   protected static interface PropertyDescriptorExercizor
   {
