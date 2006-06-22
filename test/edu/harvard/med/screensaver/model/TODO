@@ -1,14 +1,11 @@
-Hibernate bean tests:
+EntityPersistenceTest:
 
 - test set; persist; get
 - test { set; persist; get; } for relationships
 - test bidirectionality of relationships over persist
-- test setting a not-null property to null throws exception
-- test relationship methods have correct names and sigs
+
+HibernateBeansTest:
+
 - test getId() is public and setId() is private
 - test isVersioned
-- test set-properties have add/remove methods, public setter & private getter
-  - (how does this relate to set-relationships?)
-
-
-- make biz key-affecting setters protected
+- test hbn properties have non-hbn equivalent public getters
