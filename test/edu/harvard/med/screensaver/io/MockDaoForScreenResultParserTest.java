@@ -100,4 +100,8 @@ public class MockDaoForScreenResultParserTest implements DAO
     return null;
   }
 
+  public <E extends AbstractEntity> Integer getEntityId(E entity)
+  {
+    return null;
+  }
 }

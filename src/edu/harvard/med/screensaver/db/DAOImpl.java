@@ -15,7 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.hibernate.EntityMode;
 import org.hibernate.ObjectNotFoundException;
+import org.hibernate.metadata.ClassMetadata;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
@@ -283,5 +285,19 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     catch (InvocationTargetException e) {
       throw new IllegalArgumentException(e);
     }
+  }
+  
+  
+  /**
+   * Get the persistence identifier for the specified entity.
+   * @param <E> the type of the entity to get the persistence identifier for
+   * @param entity the entity to get the persistence identifier for
+   * @return the persistence identifier for the entity
+   */
+  public <E extends AbstractEntity> Integer getEntityId(E entity)
+  {
+    Class<? extends E> entityClass = entity.getClass();
+    ClassMetadata metadata = getSessionFactory().getClassMetadata(entityClass);
+    return (Integer) metadata.getIdentifier(entity, EntityMode.POJO);
   }
 }
