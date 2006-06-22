@@ -10,7 +10,10 @@
 package edu.harvard.med.screensaver.io;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -33,6 +36,8 @@ public class ParseErrorManager
    * The workbook that will be annotated with errors that are not specific to a cell.
    */
   private Workbook _errorsWorkbook;
+
+  private Set<Workbook> _workbooksWithErrors = new HashSet<Workbook>();
   
   public void setErrorsWorbook(Workbook errorsWorkbook)
   {
@@ -60,6 +65,7 @@ public class ParseErrorManager
       HSSFRow row = parseErrorsSheet.createRow(parseErrorsSheet.getLastRowNum());
       HSSFCell cell = row.createCell((short) 0);
       cell.setCellValue(errorMessage);
+      _workbooksWithErrors.add(_errorsWorkbook);
     }
   }
   
@@ -75,6 +81,7 @@ public class ParseErrorManager
     ParseError error = new ParseError(errorMessage, cell);
     _errors.add(error);
     cell.annotateWithError(error);
+    _workbooksWithErrors.add(cell.getWorkbook());
 //    log.info("parse error: " + error);
   }
   
@@ -86,6 +93,11 @@ public class ParseErrorManager
   public List<ParseError> getErrors()
   {
     return _errors;
+  }
+
+  public Set<Workbook> getWorkbooksWithErrors()
+  {
+    return Collections.unmodifiableSet(_workbooksWithErrors);
   }
 
 }

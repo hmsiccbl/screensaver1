@@ -47,7 +47,9 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
   protected void onSetUp() throws Exception {}
 
-  protected void onTearDown() throws Exception {}
+  protected void onTearDown() throws Exception {
+    // TODO: delete *.error.xls files
+  }
   
   @Override
   protected String[] getConfigLocations()
@@ -288,44 +290,44 @@ public class ScreenResultParserTest extends AbstractSpringTest
     File workbookFile = new File("test/edu/harvard/med/screensaver/io/metadata_with_errors.xls");
     screenResultParser.parse(workbookFile);
     String extension = "errors.xls";
-    List<File> errorAnnotatedWorkbookFiles = screenResultParser.annotateErrors(extension);
+    Set<Workbook> errorAnnotatedWorkbookFiles = screenResultParser.outputErrorsInAnnotatedWorkbooks(extension);
 
-    // test metadata workbook
-    {
-      Workbook workbook = new Workbook(errorAnnotatedWorkbookFiles.get(0),
-                                       new ParseErrorManager());
-      assertEquals(4,
-                   workbook.getWorkbook().getNumberOfSheets());
-      HSSFSheet sheet0 = workbook.getWorkbook().getSheetAt(0);
-      HSSFSheet sheet1 = workbook.getWorkbook().getSheetAt(1);
-      HSSFSheet sheet3 = workbook.getWorkbook().getSheetAt(3);
-      assertEquals("ERROR: value required",
-                   HSSFCellUtil.getCell(sheet0.getRow(8),'F' - 'A').getStringCellValue());
-      assertEquals("ERROR: value required; unparseable value \"\" (expected one of [E])",
-                   HSSFCellUtil.getCell(sheet0.getRow(9),'F' - 'A').getStringCellValue());
-      assertEquals("ERROR: unparseable value \"maybe\" (expected one of [, 0, 1, false, n, no, true, y, yes])",
-                   HSSFCellUtil.getCell(sheet0.getRow(16),'F' - 'A').getStringCellValue());
-      assertEquals("ERROR: invalid cell type (expected a date)",
-                   HSSFCellUtil.getCell(sheet1.getRow(7),'B' - 'A').getStringCellValue());
-      assertEquals("Parse Errors",
-                   workbook.getWorkbook().getSheetName(3));
-      assertEquals("could not read workbook: test/edu/harvard/med/screensaver/io/nonextant.xls (No such file or directory)",
-                   HSSFCellUtil.getCell(sheet3.getRow(0),'A' - 'A').getStringCellValue());
+    for (Workbook workbook : errorAnnotatedWorkbookFiles) {
+      if (workbook.getWorkbookFile().equals(workbookFile))
+      {
+        // test metadata workbook
+        assertEquals(4,
+                     workbook.getWorkbook().getNumberOfSheets());
+        HSSFSheet sheet0 = workbook.getWorkbook().getSheetAt(0);
+        HSSFSheet sheet1 = workbook.getWorkbook().getSheetAt(1);
+        HSSFSheet sheet3 = workbook.getWorkbook().getSheetAt(3);
+        assertEquals("ERROR: value required",
+                     HSSFCellUtil.getCell(sheet0.getRow(8),'F' - 'A').getStringCellValue());
+        assertEquals("ERROR: value required; unparseable value \"\" (expected one of [E])",
+                     HSSFCellUtil.getCell(sheet0.getRow(9),'F' - 'A').getStringCellValue());
+        assertEquals("ERROR: unparseable value \"maybe\" (expected one of [, 0, 1, false, n, no, true, y, yes])",
+                     HSSFCellUtil.getCell(sheet0.getRow(16),'F' - 'A').getStringCellValue());
+        assertEquals("ERROR: invalid cell type (expected a date)",
+                     HSSFCellUtil.getCell(sheet1.getRow(7),'B' - 'A').getStringCellValue());
+        assertEquals("Parse Errors",
+                     workbook.getWorkbook().getSheetName(3));
+        assertEquals("could not read workbook: test/edu/harvard/med/screensaver/io/nonextant.xls (No such file or directory)",
+                     HSSFCellUtil.getCell(sheet3.getRow(0),'A' - 'A').getStringCellValue());
+      }
+      else if (workbook.getWorkbookFile().getName().equals("rawdata_with_errors.xls")) {
+        // test raw data workbook
+        assertEquals(1,
+                     workbook.getWorkbook().getNumberOfSheets());
+        HSSFSheet sheet0 = workbook.getWorkbook().getSheetAt(0);
+        assertEquals("ERROR: unparseable plate number 'PLL-0001'",
+                     HSSFCellUtil.getCell(sheet0.getRow(3),'A' - 'A').getStringCellValue());
+      } 
+      else {
+        fail("workbook " + workbook.getWorkbookFile() + " contained errors, but should not have");
+      }
     }
-    
-    // test raw data workbook
-    {
-      Workbook workbook = new Workbook(errorAnnotatedWorkbookFiles.get(1),
-                                       new ParseErrorManager());
-      assertEquals(1,
-                   workbook.getWorkbook().getNumberOfSheets());
-      HSSFSheet sheet0 = workbook.getWorkbook().getSheetAt(0);
-      assertEquals("ERROR: unparseable plate number 'PLL-0001'",
-                   HSSFCellUtil.getCell(sheet0.getRow(3),'A' - 'A').getStringCellValue());
-    }
-    
-    
   }
+  
 
   private void setDefaultValues(ResultValueType rvt) {
     if (rvt.getAssayPhenotype() == null) {

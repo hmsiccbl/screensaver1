@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -188,7 +189,7 @@ public class ScreenResultParser
       ScreenResultParser screenResultParser = (ScreenResultParser) appCtx.getBean("screenResultParser");
       try {
         ScreenResult screenResult = screenResultParser.parse(new File(cmdLine.getOptionValue("metadatafile")));
-        screenResultParser.annotateErrors("errors.xls");
+        screenResultParser.outputErrorsInAnnotatedWorkbooks("errors.xls");
         if (cmdLine.hasOption("wellstoprint")) {
           new ScreenResultPrinter(screenResult).print(new Integer(cmdLine.getOptionValue("wellstoprint")));
         }
@@ -722,24 +723,20 @@ public class ScreenResultParser
   }
   
   /**
-   * Annotate all parsed workbooks with errors, modifying workbook file. In fact
-   * we just need to save the workbook, since cells have already been modified
-   * in the in-memory representation.
+   * Annotate copies of parsed workbooks with parse errors. Only workbooks
+   * containing errors are written. In fact, we simply save the workbooks, since
+   * cells have already been modified in the in-memory representation.
    * 
-   * @return a list of the error-annotated workbook Files that were written
-   * 
+   * @return a set of the error-annotated <@link Workbook>s that were written
+   *         out
    * @throws IOException
    */
-  public List<File> annotateErrors(String savedFileExtension) throws IOException
+  public Set<Workbook> outputErrorsInAnnotatedWorkbooks(String savedFileExtension) throws IOException
   {
-    List<File> errorWorkbookFiles = new ArrayList<File>();
-    if (_metadataWorkbook != null) {
-      errorWorkbookFiles.add(_metadataWorkbook.save(savedFileExtension));
-      for (Workbook workbook : _rawDataWorkbooks) {
-        errorWorkbookFiles.add(workbook.save(savedFileExtension));
-      }
+    for (Workbook workbook : _errors.getWorkbooksWithErrors()) {
+      workbook.save(savedFileExtension);
     }
-    return errorWorkbookFiles;
+    return _errors.getWorkbooksWithErrors();
   }
   
   /**
