@@ -1,7 +1,5 @@
 EntityPersistenceTest:
 
-- test set; persist; get
-- test { set; persist; get; } for relationships
 - test bidirectionality of relationships over persist
 
 HibernateBeansTest:

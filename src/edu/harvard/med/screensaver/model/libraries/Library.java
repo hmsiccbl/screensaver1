@@ -290,7 +290,7 @@ public class Library extends AbstractEntity
    *             can maintain the bi-directional association between
    *             {@link Well} and {@link Library}).
    * @hibernate.set order-by="plate_number,well_name"
-   *                cascade="all-delete-orphan" 
+   *                cascade="save-update" 
    *                inverse="true"
    * @hibernate.collection-key column="library_id"
    * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.libraries.Well"

@@ -31,6 +31,6 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(ClassMetadatasTest.class);
     addTestSuite(EntityClassesTest.class);
     addTestSuite(EntityBeansTest.class);
+    addTestSuite(EntityBeansPersistenceTest.class);
   }
-
 }

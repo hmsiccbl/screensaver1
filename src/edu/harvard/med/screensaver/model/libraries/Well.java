@@ -284,42 +284,67 @@ public class Well extends AbstractEntity
 
   // protected getters and setters
 
-  protected Object getBusinessKey() {
-    return new Object() {
-      /**
-       * @see java.lang.Object#equals(java.lang.Object)
-       */
-      @Override
-      public boolean equals(Object object)
-      {
-        if (!(object instanceof Well)) {
-          return false;
-        }
-        Well that = (Well) object;
-        return getPlateNumber().equals(that.getPlateNumber()) && getWellName().equals(
-          that.getWellName());
+  /**
+   * A business key class for the well.
+   */
+  private class BusinessKey
+  {
+    /**
+     * Get the plate number for the well.
+     * @return the plate number for the well
+     */
+    private Integer getPlateNumber()
+    {
+      return _plateNumber;
+    }
+    
+    /**
+     * Get the well name.
+     * @return the well name
+     */
+    private String getWellName()
+    {
+      return _wellName;
+    }
+    
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object object)
+    {
+      if (!(object instanceof BusinessKey)) {
+        return false;
       }
+      BusinessKey that = (BusinessKey) object;
+      return getPlateNumber().equals(that.getPlateNumber()) && getWellName().equals(
+        that.getWellName());
+    }
 
-      /**
-       * @see java.lang.Object#hashCode()
-       */
-      @Override
-      public int hashCode()
-      {
-        assert _plateNumber != null && _wellName != null : "business key fields have not been defined";
-        return getPlateNumber().hashCode() + getWellName().hashCode();
-      }
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode()
+    {
+      assert _plateNumber != null && _wellName != null : "business key fields have not been defined";
+      return getPlateNumber().hashCode() + getWellName().hashCode();
+    }
 
-      /**
-       * @see java.lang.Object#toString()
-       */
-      @Override
-      public String toString()
-      {
-        assert _plateNumber != null && _wellName != null : "business key fields have not been defined";
-        return getPlateNumber() + getWellName();
-      }
-    };
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+      assert _plateNumber != null && _wellName != null : "business key fields have not been defined";
+      return getPlateNumber() + getWellName();
+    }
+  }
+
+  protected Object getBusinessKey()
+  {
+    return new BusinessKey();
   }
 
 

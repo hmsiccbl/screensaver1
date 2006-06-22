@@ -480,12 +480,19 @@ public class ResultValueType extends AbstractEntity implements Comparable
     _howDerived = howDerived;
   }
 
-
+  /**
+   * Get the indicator cutoff
+   * @return the indicator cutoff
+   * @hibernate.property type="double"
+   */
   public Double getIndicatorCutoff() {
     return _indicatorCutoff;
   }
 
-
+  /**
+   * Set the indicator cutoff
+   * @param indicatorCutoff the indicator cutoff
+   */
   public void setIndicatorCutoff(Double indicatorCutoff) {
     _indicatorCutoff = indicatorCutoff;
   }
@@ -685,7 +692,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @motivation for Hibernate and bi-directional association management
    * @return the {@link java.util.SortedSet} of {@link ResultValue}s generated
    *         for this <code>ResultValueType</code>
-   * @hibernate.set cascade="all-delete-orphan" inverse="true" sort="natural"
+   * @hibernate.set cascade="save-update" inverse="true" sort="natural"
    * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValue"
    * @hibernate.collection-key column="result_value_type_id"
    */
@@ -778,6 +785,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    *   class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
    *   column="derived_from_result_value_type_id"
    *   foreign-key="fk_derived_from_result_value_type"
+   *   cascade="save-update"
    */
   private SortedSet<ResultValueType> getHbnTypesDerivedFrom() {
     return _typesDerivedFrom;
@@ -816,6 +824,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    *   class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
    *   column="derived_result_value_type_id"
    *   foreign-key="fk_derived_result_value_type"
+   *   cascade="save-update"
    */
   private SortedSet<ResultValueType> getHbnDerivedTypes() {
     return _derivedTypes;

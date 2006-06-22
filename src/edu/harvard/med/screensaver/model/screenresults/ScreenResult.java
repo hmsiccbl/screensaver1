@@ -126,7 +126,7 @@ public class ScreenResult extends AbstractEntity
    */
   public void setDateCreated(Date dateCreated)
   {
-    _dateCreated = dateCreated;
+    _dateCreated = truncateDate(dateCreated);
   }
 
   /**
@@ -276,7 +276,7 @@ public class ScreenResult extends AbstractEntity
    * @motivation for Hibernate
    * @return an {@link java.util.SortedSet} of all {@link ResultValueType}s for
    *         this <code>ScreenResult</code>
-   * @hibernate.set cascade="all-delete-orphan" inverse="true" sort="natural"
+   * @hibernate.set cascade="save-update" inverse="true" sort="natural"
    * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
    * @hibernate.collection-key column="screen_result_id"
    */
