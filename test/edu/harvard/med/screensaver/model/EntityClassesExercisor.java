@@ -16,8 +16,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.lang.time.DateUtils;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 
@@ -37,9 +40,10 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
   };
   
   private Integer _integerTestValue = 77;
-  private Double  _doubleTestValue = 77.1;
+  private double  _doubleTestValue = 77.1;
   private boolean _booleanTestValue = true;
   private String  _stringTestValue = "test";
+  private long    _dateMilliseconds = 0;
   private int     _vocabularyTermCounter = 0;
   
   @SuppressWarnings("unchecked")
@@ -51,7 +55,7 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
     }
     if (type.equals(Double.class)) {
       _doubleTestValue *= 1.32;
-      return _doubleTestValue;
+      return new Double(new Double(_doubleTestValue * 1000).intValue() / 1000);
     }
     if (type.equals(Boolean.TYPE)) {
       _booleanTestValue = ! _booleanTestValue;
@@ -62,7 +66,8 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
       return _stringTestValue;
     }
     if (type.equals(Date.class)) {
-      return new Date();
+      _dateMilliseconds += 1000 * 60 * 60 * 24 * 1.32;
+      return DateUtils.round(new Date(_dateMilliseconds), Calendar.DATE);
     }
     if (AbstractEntity.class.isAssignableFrom(type)) {
       return newInstance((Class<AbstractEntity>) type);
