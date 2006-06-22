@@ -138,7 +138,7 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
   }
 
   protected AbstractEntity newInstance(Class<AbstractEntity> entityClass) {
-    Constructor constructor = getPublicConstructor(entityClass);
+    Constructor constructor = getMaxArgConstructor(entityClass);
     Class [] parameterTypes = constructor.getParameterTypes();
     Object[] arguments = getArgumentsForParameterTypes(parameterTypes);
     try {
@@ -159,13 +159,19 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
     return arguments;
   }
 
-  private Constructor getPublicConstructor(Class<AbstractEntity> entityClass)
+  private Constructor getMaxArgConstructor(Class<AbstractEntity> entityClass)
   {
+    int maxArgs = 0;
+    Constructor maxArgConstructor = null;
     for (Constructor constructor : entityClass.getConstructors()) {
       if (Modifier.isPublic(constructor.getModifiers())) {
-        return constructor;
+        int numArgs = constructor.getParameterTypes().length;
+        if (numArgs > maxArgs) {
+          maxArgs = numArgs;
+          maxArgConstructor = constructor;
+        }
       }
     }
-    return null;
+    return maxArgConstructor;
   }
 }
