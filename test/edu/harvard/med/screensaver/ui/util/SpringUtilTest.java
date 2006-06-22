@@ -11,11 +11,10 @@ package edu.harvard.med.screensaver.ui.util;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.faces.application.FacesMessage;
 
@@ -95,12 +94,12 @@ public class SpringUtilTest
     InputStream messagesStream = getClass().getClassLoader().getResourceAsStream("messages.properties");
     Properties messagesProperties = new Properties();
     messagesProperties.load(messagesStream);
-    HashSet<Map.Entry<String,String>> msgSet = new HashSet<Map.Entry<String,String>>();
-    msgSet.addAll( (Collection<? extends Entry<String,String>>) messagesProperties.entrySet());
+    HashSet<Map.Entry<Object,Object>> msgSet = new HashSet<Map.Entry<Object,Object>>();
+    msgSet.addAll((Set<Map.Entry<Object,Object>>) messagesProperties.entrySet());
     Object[] args = new Object[] {"arg1", "arg2", "arg3"};
-    for (Map.Entry<String,String> msgEntry : msgSet) {
-      FacesMessage facesMessage = messages.getFacesMessage(msgEntry.getKey(), args);
-      String expectedMessageText = msgEntry.getValue();
+    for (Map.Entry<Object,Object> msgEntry : msgSet) {
+      FacesMessage facesMessage = messages.getFacesMessage((String) msgEntry.getKey(), args);
+      String expectedMessageText = (String) msgEntry.getValue();
 
       // do our own param substitution for our "expected" value
       for (int i = 0; i < args.length; ++i) {
