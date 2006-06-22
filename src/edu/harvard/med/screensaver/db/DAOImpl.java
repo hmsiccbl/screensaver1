@@ -296,7 +296,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
    */
   public <E extends AbstractEntity> Integer getEntityId(E entity)
   {
-    Class<? extends E> entityClass = entity.getClass();
+    Class<? extends AbstractEntity> entityClass = entity.getClass();
     ClassMetadata metadata = getSessionFactory().getClassMetadata(entityClass);
     return (Integer) metadata.getIdentifier(entity, EntityMode.POJO);
   }
