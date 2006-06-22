@@ -332,6 +332,7 @@ public class Well extends AbstractEntity
    * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.libraries.Library"
    *                        column="library_id" not-null="true"
    *                        foreign-key="fk_well_to_library"
+   *                        cascade="save-update"
    */
   Library getHbnLibrary() {
     return _library;
@@ -362,6 +363,7 @@ public class Well extends AbstractEntity
    * @hibernate.collection-many-to-many column="compound_id"
    *                                    class="edu.harvard.med.screensaver.model.libraries.Compound"
    *                                    foreign-key="fk_well_compound_link_to_well"
+   *                                    cascade="save-update"
    */
   Set<Compound> getHbnCompounds() {
     return _compounds;

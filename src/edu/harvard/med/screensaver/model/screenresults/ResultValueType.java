@@ -744,6 +744,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screenresults.ScreenResult"
    *                        column="screen_result_id" not-null="true"
    *                        foreign-key="fk_result_value_type_to_screen_result"
+   *                        cascade="save-update"
    */
   private ScreenResult getHbnScreenResult() {
     return _screenResult;

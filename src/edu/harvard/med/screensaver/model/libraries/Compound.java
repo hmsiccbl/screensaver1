@@ -55,7 +55,17 @@ public class Compound extends AbstractEntity
    * @param compoundName
    */
   public Compound(String compoundName) {
+    this(compoundName, false);
+  }
+  
+  /**
+   * Constructs an initialized <code>Compound</code> object.
+   * @param compoundName
+   * @param isSalt
+   */
+  public Compound(String compoundName, boolean isSalt) {
     _compoundName = compoundName;
+    _isSalt = isSalt;
   }
   
 	/**
@@ -355,6 +365,7 @@ public class Compound extends AbstractEntity
    * @hibernate.collection-many-to-many column="well_id"
    *                                    class="edu.harvard.med.screensaver.model.libraries.Well"
    *                                    foreign-key="fk_well_compound_link_to_compound"
+   *                                    cascade="save-update"
    */
   Set<Well> getHbnWells() {
     return _wells;

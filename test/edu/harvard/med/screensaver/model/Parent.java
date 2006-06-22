@@ -39,7 +39,7 @@ public class Parent extends AbstractEntity
   
   /**
    * Construct a Parent.
-   * @param name unique n ame
+   * @param name unique name
    */
   public Parent(String name)
   {

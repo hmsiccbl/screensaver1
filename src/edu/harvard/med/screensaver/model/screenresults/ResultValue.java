@@ -340,6 +340,7 @@ public class ResultValue extends AbstractEntity implements Comparable
    * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
    *                        column="result_value_type_id" not-null="true"
    *                        foreign-key="fk_result_value_to_result_value_type"
+   *                        cascade="save-update"
    */
   private ResultValueType getHbnResultValueType() {
     return _resultValueType;
@@ -355,6 +356,7 @@ public class ResultValue extends AbstractEntity implements Comparable
    *         this <code>ResultValue</code>
    * @hibernate.many-to-one column="well_id" not-null="true"
    *   foreign-key="fk_result_value_to_well"
+   *   cascade="save-update"
    */
   Well getHbnWell() {
     return _well;
