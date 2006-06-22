@@ -19,7 +19,7 @@ public class CellOutOfRangeException extends Exception
 {
   private static final long serialVersionUID = -6769776818247218394L;
 
-  public static enum UndefinedInAxis { ROW, COLUMN, ROW_AND_COLUMN };
+  public static enum UndefinedInAxis {ROW, COLUMN};
   
   /**
    * Constructs a CellOutOfRangeException exception object.
@@ -29,7 +29,7 @@ public class CellOutOfRangeException extends Exception
    * @param cell the cell that was undefined
    */
   public CellOutOfRangeException(UndefinedInAxis undefinedInAxis,
-                                 CellReader cell)
+                                 Cell cell)
   {
     super("cell " + cell + " undefined at " + undefinedInAxis.toString());
   }

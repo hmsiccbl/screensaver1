@@ -11,28 +11,31 @@ package edu.harvard.med.screensaver.io;
 
 import java.util.Date;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.contrib.HSSFCellUtil;
 
 /**
- * Encapsulates the parsing operations for a cell in a worksheet. Instantiate
- * new CellParsers via a CellReader.Factory, which you must first instantiate
- * with a set of arguments that will be common to a "class" of CellParsers.
+ * Encapsulates the parsing and error annotation operations for a cell in a
+ * worksheet. Instantiate new Cells via a Cell.Factory, which you must first
+ * instantiate with a set of arguments that will be common to a set of related
+ * <code>Cell</code>s.
  * 
- * @motivation convenience class for reading HSSFSheet cells
  * @motivation explicitly associates sheet name with a cell, since you cannot
  *             get it from an HSSFSheet!
+ * @motivation handle the fact that HSSFSheet cells can be undefined 
  * @author ant
  */
-public class CellReader
+public class Cell
 {
   
   // static data members
   
-  public static final String INVALID_CELL_TYPE_ERROR = "invalid cell type";
+  private static final Logger log = Logger.getLogger(Cell.class);
 
-
+  private static final String INVALID_CELL_TYPE_ERROR = "invalid cell type";
   private static final String CELL_VALUE_REQUIRED_ERROR = "value required";
   
   
@@ -48,7 +51,7 @@ public class CellReader
   // inner class definitions
   
   /**
-   * Instantiates CellReader objects with shared arguments. For lisp-o-philes,
+   * Instantiates Cell objects with shared arguments. For lisp-o-philes,
    * this is akin to "currying" a function.
    * 
    * @author ant
@@ -60,11 +63,15 @@ public class CellReader
     private int _sheetIndex;
     private String _sheetName;
     private HSSFSheet _sheet;
-    private CellReader _recycledCellReader;
+    /**
+     * @motivation we don't want to instantiate a new Cell object for every cell
+     *             we must read, since we do this a whole lot
+     */
+    private Cell _recycledCell;
     
 
     /**
-     * Constructs a Factory object that can be used instantiate CellReader
+     * Constructs a Factory object that can be used instantiate Cell
      * objects with a shared set of arguments
      * 
      * @param sheetName the name of the worksheet
@@ -81,35 +88,39 @@ public class CellReader
     }
     
     /**
-     * Instantiate a new CellReader, using this factory's shared arguments.
+     * Get a (recycled) Cell object, initialized with this factory's shared
+     * arguments. Subsequent calls return the same object with a modified
+     * configuration!
      * 
      * @param column the physical zero-based column in the worksheet
      * @param row the physical zero-based row in the worksheet
-     * @return a brand new CellReader, ready to parse the value in the cell it's
+     * @return a (recycled) Cell, ready to parse the value in the cell it's
      *         associated with
      */
-    public CellReader newCellReader(short column,
-                                    int row,
-                                    boolean required)
+    public Cell getCell(short column, int row, boolean required)
     {
-      if (_recycledCellReader == null ) {
-        _recycledCellReader = new CellReader(_workbook,
-                                             _sheetIndex,
-                                             _errors,
-                                             column,
-                                             row,
-                                             required);
-      } else {
-        _recycledCellReader._column = column;
-        _recycledCellReader._row = row;
-        _recycledCellReader._required = required;
+      if (_recycledCell == null) {
+        _recycledCell = new Cell(_workbook,
+                                       _sheetIndex,
+                                       _errors,
+                                       column,
+                                       row,
+                                       required);
       }
-      return _recycledCellReader;
+      else {
+        _recycledCell._column = column;
+        _recycledCell._row = row;
+        _recycledCell._required = required;
+      }
+      return _recycledCell;
     }
     
-    public CellReader newCellReader(short column, int row)
+    /**
+     * @see #getCell(short, int, boolean)
+     */
+    public Cell getCell(short column, int row)
     {
-      return newCellReader(column, row, /* required= */false);
+      return getCell(column, row, /* required= */false);
     }
   }
   
@@ -117,25 +128,34 @@ public class CellReader
   // public methods
   
   /**
+   * Get the workbook containing the cell.
+   * @return the sheet name
+   */
+  public Workbook getWorkbook()
+  {
+    return _workbook;
+  }
+
+  /**
    * Get the sheet name.
    * @return the sheet name
    */
   public String getSheetName() { return _workbook.getWorkbook().getSheetName(_sheetIndex); }
   
   /**
-   * Get the sheet containing the cell to be parsed.
+   * Get the sheet containing the cell.
    * @return the sheet
    */
   public HSSFSheet getSheet() { return _workbook.getWorkbook().getSheetAt(_sheetIndex); }
   
   /**
-   * Get the column containing the cell to be parsed.n
+   * Get the column containing the cell.
    * @return the column
    */
   public short getColumn() { return _column; }
   
   /**
-   * Get the row containing the cell to be parsed.
+   * Get the row containing the cell.
    * @return the row
    */
   public int getRow() { return _row; }
@@ -146,7 +166,7 @@ public class CellReader
    */
   public String toString() {
     // TODO: only handles A-Z, not AA...
-    return _workbook.getWorkbookFile().getName() + getSheetName() + 
+    return _workbook.getWorkbookFile().getName() + ":" + getSheetName() + 
       ":(" + Character.toString((char) (_column + 'A')) + ", " + (_row + 1) + ")";
   }
   
@@ -163,8 +183,7 @@ public class CellReader
   {
     try {
       HSSFCell cell = getCell();
-      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK ||
-          cell.getCellType() != HSSFCell.CELL_TYPE_NUMERIC) {
+      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
         if (_required) {
           _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
           return 0.0;
@@ -176,6 +195,16 @@ public class CellReader
     catch (CellOutOfRangeException e) {
       if (_required) {
         _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        return 0.0;
+      }
+      return null;
+    }
+    catch (NumberFormatException e) {
+      // note: we catch this exception, rather than checking if cell type is
+      // "Numeric", because it cell type can also be "Formula", and
+      // getNumericCellValue() will still work
+      _errors.addError(INVALID_CELL_TYPE_ERROR + " (expected a double)", this);
+      if (_required) {
         return 0.0;
       }
       return null;
@@ -195,8 +224,7 @@ public class CellReader
   {
     try {
       HSSFCell cell = getCell();
-      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK ||
-          cell.getCellType() != HSSFCell.CELL_TYPE_NUMERIC) {
+      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
         if (_required) {
           _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
           return 0;
@@ -208,6 +236,16 @@ public class CellReader
     catch (CellOutOfRangeException e) {
       if (_required) {
         _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        return 0;
+      }
+      return null;
+    }
+    catch (NumberFormatException e) {
+      // note: we catch this exception, rather than checking if cell type is
+      // "Numeric", because it cell type can also be "Formula", and
+      // getNumericCellValue() will still work
+      _errors.addError(INVALID_CELL_TYPE_ERROR + " (expected an integer)", this);
+      if (_required) {
         return 0;
       }
       return null;
@@ -227,10 +265,16 @@ public class CellReader
   {
     try {
       HSSFCell cell = getCell();
-      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK ||
-          cell.getCellType() != HSSFCell.CELL_TYPE_BOOLEAN) {
+      if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
         if (_required) {
           _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+          return false;
+        }
+        return null;
+      }
+      if (cell.getCellType() != HSSFCell.CELL_TYPE_BOOLEAN) {
+        _errors.addError(INVALID_CELL_TYPE_ERROR + " (expected boolean)", this);
+        if (_required) {
           return false;
         }
         return null;
@@ -277,7 +321,7 @@ public class CellReader
     }
     catch (NumberFormatException e) {
       if (_required) {
-        _errors.addError(INVALID_CELL_TYPE_ERROR, this);
+        _errors.addError(INVALID_CELL_TYPE_ERROR + " (expected a date)", this);
         return new Date();
       }
       return null;
@@ -304,6 +348,13 @@ public class CellReader
         }
         return null;
       }
+      if (cell.getCellType() != HSSFCell.CELL_TYPE_STRING) {
+        _errors.addError(INVALID_CELL_TYPE_ERROR + " (expected string)", this);
+        if (_required) {
+          return "";
+        }
+        return null;
+      }
       return cell.getStringCellValue();
     } 
     catch (CellOutOfRangeException e) {
@@ -313,18 +364,26 @@ public class CellReader
       }
       return null;
     }
-    catch (NumberFormatException e) {
-      if (_required) {
-        _errors.addError(INVALID_CELL_TYPE_ERROR, this);
-        return "";
-      }
-      return null;
-    }
   }  
+  
+  public void annotateWithError(ParseError error)
+  {
+    HSSFCell cell = getOrCreateCell();
+    
+//    HSSFWorkbook workbook = _workbook.getWorkbook();
+//    log.debug("style count before style create: " + workbook.getNumCellStyles());
+//    HSSFCellStyle errorStyle = workbook.createCellStyle();
+//    errorStyle.setFillBackgroundColor(HSSFColor.RED.index);
+//    log.debug("style count after style create: " + workbook.getNumCellStyles());
+//    HSSFCellStyle cellStyle = workbook.getCellStyleAt((short) (workbook.getNumCellStyles() - 1));
+//    log.debug("cellStyle == errorStyle: " + (cellStyle == errorStyle));
+//    cell.setCellStyle(errorStyle);
+    cell.setCellValue("ERROR: " + error.getMessage());
+  }
   
   // protected and private methods and constructors
 
-  protected CellReader(Workbook workbook,
+  protected Cell(Workbook workbook,
                        int sheetIndex,
                        ParseErrorManager errors,
                        short column,
@@ -349,22 +408,22 @@ public class CellReader
   private HSSFCell getCell()
     throws CellOutOfRangeException
   {
-    HSSFSheet sheet = _workbook.getWorkbook().getSheetAt(_sheetIndex);
-    if (sheet.getLastRowNum() < getRow()) {
+    HSSFRow row = getSheet().getRow(getRow());
+    if (row == null) {
       throw new CellOutOfRangeException(CellOutOfRangeException.UndefinedInAxis.ROW,
-                                       this);
-    }
-    HSSFRow row = sheet.getRow(getRow());
-    if (row.getLastCellNum() < getColumn()) {
-      throw new CellOutOfRangeException(CellOutOfRangeException.UndefinedInAxis.COLUMN,
-                                       this);
+                                        this);
     }
     HSSFCell cell = row.getCell(getColumn());
     if (cell == null) {
-      throw new CellOutOfRangeException(CellOutOfRangeException.UndefinedInAxis.ROW_AND_COLUMN,
-                                       this);
+      throw new CellOutOfRangeException(CellOutOfRangeException.UndefinedInAxis.COLUMN,
+                                        this);
     }
     return cell;
   }
   
+  private HSSFCell getOrCreateCell()
+  {
+    return HSSFCellUtil.getCell(HSSFCellUtil.getRow(getRow(), getSheet()), getColumn());
+  }
+
 }

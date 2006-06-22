@@ -15,6 +15,12 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+
+import com.sun.rowset.internal.Row;
 
 /**
  * Maintains a list of error messages.
@@ -31,7 +37,17 @@ public class ParseErrorManager
       return ((ParseError) parseError).getMessage();
     };
   };
+
   private List<ParseError> _errors = new ArrayList<ParseError>();
+  /**
+   * The workbook that will be annotated with errors that are not specific to a cell.
+   */
+  private Workbook _errorsWorkbook;
+  
+  public void setErrorsWorbook(Workbook errorsWorkbook)
+  {
+    _errorsWorkbook = errorsWorkbook;
+  }
   
   /**
    * Add a simple error.
@@ -43,6 +59,18 @@ public class ParseErrorManager
     ParseError error = new ParseError(errorMessage);
     _errors.add(error);
     log.info("parse error: " + error);
+
+    // annotate workbook with non-cell-specific error by appending to a specially created "errors" sheet
+    if (_errorsWorkbook != null) {
+      HSSFWorkbook hssfWorkbook = _errorsWorkbook.getWorkbook();
+      HSSFSheet parseErrorsSheet = hssfWorkbook.getSheet("Parse Errors");
+      if (parseErrorsSheet == null) {
+        parseErrorsSheet = hssfWorkbook.createSheet("Parse Errors");
+      }
+      HSSFRow row = parseErrorsSheet.createRow(parseErrorsSheet.getLastRowNum());
+      HSSFCell cell = row.createCell((short) 0);
+      cell.setCellValue(errorMessage);
+    }
   }
   
   /**
@@ -52,10 +80,11 @@ public class ParseErrorManager
    * @param dataHeader the data header of the cell containing the error
    * @param row the {@link Row} of the cell containing the error
    */
-  public void addError(String errorMessage, CellReader cell)
+  public void addError(String errorMessage, Cell cell)
   {
     ParseError error = new ParseError(errorMessage, cell);
     _errors.add(error);
+    cell.annotateWithError(error);
     log.info("parse error: " + error);
   }
   

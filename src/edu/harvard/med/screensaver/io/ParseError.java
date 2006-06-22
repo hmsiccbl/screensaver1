@@ -18,7 +18,7 @@ package edu.harvard.med.screensaver.io;
 public class ParseError
 {
   private String _message;
-  private CellReader _atCell;
+  private Cell _atCell;
   
   /**
    * Constructs a ParseError object, associated with a particular cell location.
@@ -26,7 +26,7 @@ public class ParseError
    * @param errorMessage the error message
    * @param atCell the cell associated with the error message
    */
-  public ParseError(String message, CellReader atCell)
+  public ParseError(String message, Cell atCell)
   {
    _message = message;
    _atCell = atCell;
@@ -53,7 +53,7 @@ public class ParseError
     return _message;
   }
   
-  public CellReader getCell()
+  public Cell getCell()
   {
     return _atCell;
   }
