@@ -44,6 +44,7 @@ import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.CollectionFactory;
+import org.springframework.util.Log4jConfigurer;
 
 /**
  * Parses data from Excel spreadsheet files necessary for instantiating a
@@ -174,7 +175,7 @@ public class ScreenResultParser
 
   // static methods
 
-  public static void main(String[] args)
+  public static void main(String[] args) throws FileNotFoundException
   {
     Options options = new Options();
     options.addOption(new Option("metadatafile",
@@ -190,11 +191,10 @@ public class ScreenResultParser
 
       ClassPathXmlApplicationContext appCtx = 
         new ClassPathXmlApplicationContext(new String[] { 
+          "spring-context-logging.xml",
           "spring-context-services.xml", 
-          "spring-context-screenresultparser-test.xml", 
-          "spring-context-logging.xml"
+          "spring-context-screenresultparser-test.xml"
         });
-      Logger.getLogger(CollectionFactory.class).setLevel(Level.WARN);
       ScreenResultParser screenResultParser = (ScreenResultParser) appCtx.getBean("screenResultParser");
       try {
         ScreenResult screenResult = screenResultParser.parse(new File(cmdLine.getOptionValue("metadatafile")));

@@ -112,7 +112,6 @@
 
   <path id="project.classpath">
     <path refid="project.library.path"/>
-    <pathelement path="resources"/>
     <pathelement path="build/war/WEB-INF/classes"/>
   </path>
 
@@ -364,20 +363,20 @@
    </java> 
   </target>
  
-   <target
+  <target
      name="screenresultparser"
      description="Run the ScreenResult parser"
     >
-      <java
-        classname="edu.harvard.med.screensaver.io.ScreenResultParser" 
-        fork="true"
-        classpathref="project.classpath"
-        output="${metadata.file}.out"
-        maxmemory="512m"
-     >
-        <arg line="-metadatafile ${metadata.file} -wellstoprint ${wells.to.print}"/>
-     </java> 
-    </target>
+    <java
+      classname="edu.harvard.med.screensaver.io.ScreenResultParser" 
+      fork="true"
+      classpathref="project.classpath"
+      output="${metadata.file}.out"
+      maxmemory="512m"
+    >
+      <arg line="-metadatafile ${metadata.file} -wellstoprint ${wells.to.print}"/>
+    </java> 
+  </target>
    
    
   <!-- cleanup routines -->

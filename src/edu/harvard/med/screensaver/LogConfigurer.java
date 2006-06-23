@@ -16,9 +16,9 @@ import org.apache.log4j.Logger;
 import org.springframework.util.Log4jConfigurer;
 
 /**
- * A Spring bean that can configure Spring's Log4J logger. There must be a more
- * standard way of configuring the Log4J logger directly via Spring XML context
- * files, but this class allows us to do what we need, so here it is.
+ * A Spring bean that can configure Spring's Log4J logger. According to Spring's
+ * Javadocs, a log4j.properties in the root of the classpath will be
+ * automatically loaded, although empirically this does not seem to be the case.
  * <p>
  * Note that this bean is currently configured in the spring-context-logging.xml
  * file, so by telling Spring to use this file as one of its context files,
@@ -30,18 +30,39 @@ import org.springframework.util.Log4jConfigurer;
 public class LogConfigurer
 {
 
-  private String _logPropertiesFilename;
+  private String _logPropertiesResource;
   private long _refreshInterval;
   private Level _rootLoggerLevel;
-
-  public String getLogPropertiesFilename()
+  
+  public LogConfigurer() {}
+  
+  /**
+   * @motivation avoid duplicate this class form outputting duplicate log
+   *             messages explaining that log system has been configured
+   */
+  public LogConfigurer(
+    String logPropertiesResource,
+    long refreshInterval,
+    Level rootLoggerLevel)
   {
-    return _logPropertiesFilename;
+    _logPropertiesResource = logPropertiesResource;
+    _refreshInterval = refreshInterval;
+    _rootLoggerLevel = rootLoggerLevel;
+    update();
   }
 
-  public void setLogPropertiesFilename(String logPropertiesFilename)
+  public String getLogPropertiesResource()
   {
-    _logPropertiesFilename = logPropertiesFilename;
+    return _logPropertiesResource;
+  }
+
+  /**
+   * @see Log4jConfigurer#initLogging(java.lang.String)
+   * @param logPropertiesResource
+   */
+  public void setLogPropertiesResource(String logPropertiesResource)
+  {
+    _logPropertiesResource = logPropertiesResource;
     update();
   }
   
@@ -68,14 +89,14 @@ public class LogConfigurer
   
   private void update()
   {
-    if (_logPropertiesFilename != null) {
+    if (_logPropertiesResource != null) {
       try {
-        Log4jConfigurer.initLogging(_logPropertiesFilename,
+        Log4jConfigurer.initLogging(_logPropertiesResource,
                                     _refreshInterval);
         if (_rootLoggerLevel != null) {
           Logger.getRootLogger().setLevel(_rootLoggerLevel);
         }
-        Logger.getLogger(LogConfigurer.class).debug("Configured logger with properties file '" + _logPropertiesFilename);
+        Logger.getLogger(LogConfigurer.class).info("Configured logger with properties file '" + _logPropertiesResource);
       }
       catch (FileNotFoundException e) {
         e.printStackTrace();
