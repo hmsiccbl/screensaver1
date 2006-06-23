@@ -13,9 +13,12 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.usermodel.contrib.HSSFCellUtil;
+import org.apache.poi.hssf.util.HSSFColor;
 
 /**
  * Encapsulates the parsing and error annotation operations for a cell in a
@@ -372,14 +375,11 @@ public class Cell
   {
     HSSFCell cell = getOrCreateCell();
     
-//    HSSFWorkbook workbook = _workbook.getWorkbook();
-//    log.debug("style count before style create: " + workbook.getNumCellStyles());
-//    HSSFCellStyle errorStyle = workbook.createCellStyle();
-//    errorStyle.setFillBackgroundColor(HSSFColor.RED.index);
-//    log.debug("style count after style create: " + workbook.getNumCellStyles());
-//    HSSFCellStyle cellStyle = workbook.getCellStyleAt((short) (workbook.getNumCellStyles() - 1));
-//    log.debug("cellStyle == errorStyle: " + (cellStyle == errorStyle));
-//    cell.setCellStyle(errorStyle);
+    HSSFWorkbook workbook = _workbook.getWorkbook();
+    HSSFCellStyle errorStyle = workbook.createCellStyle();
+    errorStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+    errorStyle.setFillForegroundColor(HSSFColor.RED.index);
+    cell.setCellStyle(errorStyle);
     String annotatedCellValue = cell.getStringCellValue();
     if (annotatedCellValue != null && annotatedCellValue.startsWith("ERROR: ")) {
       annotatedCellValue += "; ";
