@@ -380,7 +380,7 @@ public class Cell
     errorStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
     errorStyle.setFillForegroundColor(HSSFColor.RED.index);
     cell.setCellStyle(errorStyle);
-    String annotatedCellValue = cell.getStringCellValue();
+    String annotatedCellValue = getAsString();
     if (annotatedCellValue != null && annotatedCellValue.startsWith("ERROR: ")) {
       annotatedCellValue += "; ";
     }
@@ -388,8 +388,8 @@ public class Cell
       annotatedCellValue = "ERROR: ";
     }
     annotatedCellValue += error.getMessage();
-    cell.setCellType(HSSFCell.CELL_TYPE_STRING);
     cell.setCellValue(annotatedCellValue);
+    cell.setCellType(HSSFCell.CELL_TYPE_STRING);
   }
   
   // protected and private methods and constructors
@@ -439,9 +439,14 @@ public class Cell
 
   /**
    * Returns the value of the cell as a String, regardless of the cell's type.
-   * @return a String
+   * 
+   * @param withValidation if <code>true</code>, performs "is required"
+   *          validation and annotates cell with error as necessary
+   * @return a String representation of the cell's contents, regardless of the
+   *         cell's actual type; if cell type is "error" then the String "<error
+   *         cell>" is returned; if cell is undefined, empty string is returned
    */
-  public String getAsString()
+  public String getAsString(boolean withValidation)
   {
     try {
       int cellType = getCell().getCellType();
@@ -449,19 +454,43 @@ public class Cell
       case HSSFCell.CELL_TYPE_BLANK:
         return "";
       case HSSFCell.CELL_TYPE_BOOLEAN:
-        return getBoolean().toString();
+        if (withValidation) {
+          return getBoolean().toString();
+        } 
+        else {
+          return Boolean.toString(getCell().getBooleanCellValue());
+        }
       case HSSFCell.CELL_TYPE_NUMERIC: 
-        return getDouble().toString();
+        if (withValidation) {
+          return getDouble().toString();
+        } 
+        else {
+          return Double.toString(getCell().getNumericCellValue());
+        }
       case HSSFCell.CELL_TYPE_ERROR:
+        return "<error cell>";
       case HSSFCell.CELL_TYPE_FORMULA: // will get the formula *result* as a string
       case HSSFCell.CELL_TYPE_STRING:
       default:
-        return getString();
+        if (withValidation) {
+          return getString();
+        } 
+        else {
+          return getCell().getStringCellValue();
+        }
       }
     } 
     catch (CellOutOfRangeException e) {
       return "";
     }
+  }
+  
+  /**
+   * @see #getAsString(boolean)
+   */
+  public String getAsString()
+  {
+    return getAsString(false);
   }
 
 }

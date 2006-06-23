@@ -372,7 +372,7 @@
       fork="true"
       classpathref="project.classpath"
       output="${metadata.file}.out"
-      maxmemory="512m"
+      maxmemory="1024m"
     >
       <arg line="-metadatafile ${metadata.file} -wellstoprint ${wells.to.print}"/>
     </java> 

@@ -24,7 +24,6 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.harvard.med.screensaver.LogConfigurer;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -39,12 +38,10 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.log4j.Level;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.CollectionFactory;
-import org.springframework.util.Log4jConfigurer;
 
 /**
  * Parses data from Excel spreadsheet files necessary for instantiating a
@@ -77,6 +74,8 @@ public class ScreenResultParser
   
   // static data members
   
+  private static final String ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION = "errors.xls";
+
   private static final Logger log = Logger.getLogger(ScreenResultParser.class);
   
   private static final String FIRST_DATE_SCREENED = "First Date Screened";
@@ -197,8 +196,10 @@ public class ScreenResultParser
         });
       ScreenResultParser screenResultParser = (ScreenResultParser) appCtx.getBean("screenResultParser");
       try {
-        ScreenResult screenResult = screenResultParser.parse(new File(cmdLine.getOptionValue("metadatafile")));
-        screenResultParser.outputErrorsInAnnotatedWorkbooks("errors.xls");
+        File metadataFileToParse = new File(cmdLine.getOptionValue("metadatafile"));
+        cleanOutputDirectory(metadataFileToParse.getParentFile());
+        ScreenResult screenResult = screenResultParser.parse(metadataFileToParse);
+        screenResultParser.outputErrorsInAnnotatedWorkbooks(ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
         if (cmdLine.hasOption("wellstoprint")) {
           new ScreenResultPrinter(screenResult).print(new Integer(cmdLine.getOptionValue("wellstoprint")));
         }
@@ -214,7 +215,7 @@ public class ScreenResultParser
       if (screenResultParser.getErrors().size() > 0) {
         System.err.println("Errors encountered during parse:");
         for (ParseError error : screenResultParser.getErrors()) {
-          System.err.println(error.getMessage());
+          System.err.println(error.toString());
         }
       }
     }
@@ -223,9 +224,22 @@ public class ScreenResultParser
     }
   }
 
+  private static void cleanOutputDirectory(File parentFile)
+  {
+    Iterator iterator = FileUtils.iterateFiles(parentFile,
+                                               new String[] { ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION, ".out" },
+                                               false);
+    while (iterator.hasNext()) {
+      File fileToDelete = (File) iterator.next();
+      log.info("deleting previously generated outputfile '" + fileToDelete + "'");
+      fileToDelete.delete();
+    }
+  }
   
   // instance data members
   
+
+
   private DAO _dao;
   /**
    * The ScreenResult object to be populated with data parsed from the spreadsheet.
@@ -416,7 +430,12 @@ public class ScreenResultParser
   
   private Cell dataCell(int row, DataColumn column)
   {
-    return _dataCellParserFactory.getCell((short) column.ordinal(), row);
+    return dataCell(row, column, false);
+  }
+
+  private Cell dataCell(int row, DataColumn column, boolean isRequired)
+  {
+    return _dataCellParserFactory.getCell((short) column.ordinal(), row, isRequired);
   }
 
   private Cell dataCell(int row, int iDataHeader)
@@ -513,7 +532,7 @@ public class ScreenResultParser
   {
     for (int iSheet = 0; iSheet < workbook.getWorkbook().getNumberOfSheets(); ++iSheet) {
       HSSFSheet sheet = initializeDataSheet(workbook, iSheet);
-      log.info("parsing sheet " + workbook.getWorkbook().getSheetName(iSheet));
+      log.info("parsing sheet " + workbook.getWorkbookFile().getName() + ":" + workbook.getWorkbook().getSheetName(iSheet));
       for (int iRow = RAWDATA_FIRST_DATA_ROW_INDEX; iRow <= sheet.getLastRowNum(); ++iRow) {
         Well well = findWell(iRow);
         dataCell(iRow, DataColumn.TYPE).getString(); // TODO: use this value?
@@ -547,14 +566,15 @@ public class ScreenResultParser
     Map<String,Object> businessKey = new HashMap<String,Object>();
     businessKey.put("plateNumber",
                     _plateNumberParser.parse(dataCell(iRow,
-                                                      DataColumn.STOCK_PLATE_ID)));
+                                                      DataColumn.STOCK_PLATE_ID,
+                                                      true)));
     businessKey.put("wellName",
-                    _wellNameParser.parse(dataCell(iRow, DataColumn.WELL_NAME)));
+                    _wellNameParser.parse(dataCell(iRow,
+                                                   DataColumn.WELL_NAME,
+                                                   true)));
     Well well = _dao.findEntityByProperties(Well.class, businessKey);
     if (well == null) {
-      throw new ExtantLibraryException("well entity has not been loaded for plate " + 
-                                       businessKey.get("plateNumber") + " and well " + 
-                                       businessKey.get("wellName"));
+      throw new ExtantLibraryException("well entity has not been loaded for plate " + businessKey.get("plateNumber") + " and well " + businessKey.get("wellName"));
     }
     return well;
   }
@@ -759,7 +779,7 @@ public class ScreenResultParser
     
     // instance data members
     
-    private Pattern plateNumberPattern = Pattern.compile("PL-(\\d+)");
+    private Pattern plateNumberPattern = Pattern.compile("(PL[-_])?(\\d+)");
 
     
     // public methods
@@ -772,7 +792,7 @@ public class ScreenResultParser
                          cell);
         return -1;
       }
-      return new Integer(matcher.group(1));
+      return new Integer(matcher.group(2));
     }
 
     public List<Integer> parseList(Cell cell)
