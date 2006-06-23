@@ -47,6 +47,8 @@
   <property name="test.src.dir" location="test"/>
   <property name="hibernate.cfg.xml" location="resources/hibernate.cfg.xml"/>
   <property name="javadoc.dir" location="build/api"/>
+  <property name="distro.build.dir" location="build/distro/screensaver"/>
+  <property name="distro.file" location="build/screensaver.tgz"/> 
  
   <!-- file sets -->
 
@@ -363,6 +365,9 @@
    </java> 
   </target>
  
+ 
+   <!-- run the ScreenResultParser --> 
+ 
   <target
      name="screenresultparser"
      description="Run the ScreenResult parser"
@@ -377,7 +382,49 @@
       <arg line="-metadatafile ${metadata.file} -wellstoprint ${wells.to.print}"/>
     </java> 
   </target>
-   
+ 
+   <!-- build a ScreenResultParser deployment -->
+ 
+  <target
+    name="distro"
+    description="Build a single-file distribution of the project, so that classes containing Main methods can be executed from the command line"
+  >
+    <!-- TODO: much of this is duplicating what exploded.war target does, so we should generalize operations -->
+    <mkdir dir="${distro.build.dir}/classes"/>
+    <javac 
+      srcdir="${src.dir}"
+      destdir="${distro.build.dir}/classes"
+      classpathref="project.library.path"
+      debug="${javac.debug}" 
+      optimize="${javac.optimize}"
+      listfiles="${verbose}" 
+    />
+    <copy
+      todir="${distro.build.dir}/lib"
+      flatten="true"
+      verbose="${verbose}" 
+    >
+      <fileset refid="lib.used.fileset"/>
+   </copy> 
+      <copy 
+      todir="${distro.build.dir}/classes" 
+      verbose="${verbose}"
+    >
+      <fileset dir="resources">
+        <include name="**/*"/>
+        <exclude name="log4j.debug.properties"/>
+        <excludesfile name="log4j.properties" if="${debug}"/>
+      </fileset>    
+    </copy>
+    
+    <tar
+      destfile="${distro.file}" 
+      basedir="${distro.build.dir}/.."
+      compression="gzip"
+    >
+     </tar> 
+  </target> 
+    
    
   <!-- cleanup routines -->
 
@@ -407,10 +454,24 @@
     </delete>
   </target>
 
+    <target
+      name="clean-distro"
+      description="Clean distro file, and directory structure used to build the distro file"
+    >
+      <delete
+       includeemptydirs="true"
+       failonerror="false"
+      >
+        <fileset dir="build/distro/screensaver/classes"/>
+        <fileset dir="build/distro/screensaver/lib"/>
+        <fileset file="${distro.file}"/>
+      </delete>
+    </target>
+ 
   <target 
     name="clean" 
     description="Clean out generated files." 
-    depends="clean-persistence,clean-war"
+    depends="clean-persistence,clean-war,clean-distro"
   >
     <delete includeemptydirs="true">
       <fileset dir="resources" includes="edu/**" />
