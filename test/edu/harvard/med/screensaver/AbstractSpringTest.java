@@ -9,11 +9,7 @@
 
 package edu.harvard.med.screensaver;
 
-import java.io.FileNotFoundException;
-
-import org.apache.log4j.Level;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
-import org.springframework.util.Log4jConfigurer;
 
 /**
  * A simple wrapper for the
@@ -28,22 +24,12 @@ public abstract class AbstractSpringTest
   extends AbstractDependencyInjectionSpringContextTests
 {
   
-  static {
-    try {
-      Log4jConfigurer.initLogging("classpath:log4j.properties");
-      org.apache.log4j.Logger.getRootLogger().setLevel(Level.DEBUG);
-    }
-    catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-  }
-  
   /**
    * Spring configuration will be loaded from the configuration file(s)
    * specified in this constant.
    */
    private static final String[] SPRING_CONFIG_FILES = new String[] {
-     "spring-context-persistence.xml"
+     "spring-context-persistence.xml", "spring-context-logging.xml"
    };
    
    

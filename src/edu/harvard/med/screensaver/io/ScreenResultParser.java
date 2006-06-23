@@ -24,6 +24,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.harvard.med.screensaver.LogConfigurer;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -38,9 +39,11 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.CollectionFactory;
 
 /**
  * Parses data from Excel spreadsheet files necessary for instantiating a
@@ -185,7 +188,13 @@ public class ScreenResultParser
     try {
       CommandLine cmdLine = new GnuParser().parse(options, args);
 
-      ClassPathXmlApplicationContext appCtx = new ClassPathXmlApplicationContext(new String[] { "spring-context-services.xml", "spring-context-screenresultparser-test.xml" });
+      ClassPathXmlApplicationContext appCtx = 
+        new ClassPathXmlApplicationContext(new String[] { 
+          "spring-context-services.xml", 
+          "spring-context-screenresultparser-test.xml", 
+          "spring-context-logging.xml"
+        });
+      Logger.getLogger(CollectionFactory.class).setLevel(Level.WARN);
       ScreenResultParser screenResultParser = (ScreenResultParser) appCtx.getBean("screenResultParser");
       try {
         ScreenResult screenResult = screenResultParser.parse(new File(cmdLine.getOptionValue("metadatafile")));

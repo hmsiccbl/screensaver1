@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+  <bean
+    name="logConfigurer"
+    class="edu.harvard.med.screensaver.LogConfigurer">
+    <property
+      name="logPropertiesFilename"
+      value="classpath:log4j.properties" />
+    <!-- property
+      name="rootLoggerLevel"
+      value="" /-->
+    <property
+      name="refreshInterval"
+      value="60000" />
+  </bean>
+  
+</beans>

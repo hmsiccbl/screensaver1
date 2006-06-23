@@ -7,7 +7,7 @@
   j2ee-spec="1.4"
   archive="screensaver.war">
   <attributes>
-    <attribute name="webrootdir" value="build/war" />
+    <attribute name="webrootdir" value="/build/war" />
   </attributes>
 </project-module>
 

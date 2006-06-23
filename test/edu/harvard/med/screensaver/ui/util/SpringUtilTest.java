@@ -1,15 +1,16 @@
-// $HeadURL$
-// $Id$
+// $HeadURL:
+// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/test/edu/harvard/med/screensaver/ui/util/SpringUtilTest.java
+// $
+//$Id$
 //
-// Copyright 2006 by the President and Fellows of Harvard College.
-// 
-// Screensaver is an open-source project developed by the ICCB-L and NSRB labs
-// at Harvard Medical School. This software is distributed under the terms of
-// the GNU General Public License.
+//Copyright 2006 by the President and Fellows of Harvard College.
+//
+//Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+//at Harvard Medical School. This software is distributed under the terms of
+//the GNU General Public License.
 
 package edu.harvard.med.screensaver.ui.util;
 
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Map;
@@ -18,42 +19,33 @@ import java.util.Set;
 
 import javax.faces.application.FacesMessage;
 
-import edu.harvard.med.screensaver.ui.util.Messages;
-
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
-import org.springframework.util.Log4jConfigurer;
 
 /**
  * Tests Spring/Hibernate integration. This is one of the rare cases where
  * testing must be Spring-aware, as we're testing our application's Spring
  * configuration. Thus we use
  * <code>AbstractDependencyInjectionSpringContextTests</code> to have Spring
- * inject our persistence-related objects into our test class.
+ * inject our Spring-managed objects into our test class.
  * 
  * @author andrew tolopko
  */
 public class SpringUtilTest
-  extends AbstractDependencyInjectionSpringContextTests
+extends AbstractDependencyInjectionSpringContextTests
 {
-
+  
   /**
    * Spring configuration will be loaded from the configuration file(s)
    * specified in this constant.
    */
-   private static final String[] SPRING_CONFIG_FILES = new String[] {"spring-context-ui.xml"};
-
-   protected Messages messages;
+  private static final String[] SPRING_CONFIG_FILES = new String[] {
+    "spring-context-ui.xml", 
+    "spring-context-logging.xml"
+  };
   
-
-  static {
-    try {
-      Log4jConfigurer.initLogging("classpath:log4j.debug.properties");
-    }
-    catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-  }
-
+  protected Messages messages;
+  
+  
   public SpringUtilTest() {
     // have AbstractDependencyInjectionSpringContextTests inject the properties
     // we need into protected data members that share the same name as beans in
@@ -62,11 +54,11 @@ public class SpringUtilTest
   }
   
   // bean property setter/getter methods
-
+  
   public void setSpringUiUtil(Messages messages) {
     this.messages = messages;
   }
-
+  
   
   @Override
   /**
@@ -78,15 +70,15 @@ public class SpringUtilTest
     return SPRING_CONFIG_FILES;
   }
   
-
+  
   /* AbstractDependencyInjectionSpringContextTests methods */
-
+  
   @Override
   protected void onSetUp() throws Exception
   {
   }
-
-
+  
+  
   /* JUnit test methods */
   
   @SuppressWarnings("unchecked")
@@ -100,7 +92,7 @@ public class SpringUtilTest
     for (Map.Entry<Object,Object> msgEntry : msgSet) {
       FacesMessage facesMessage = messages.getFacesMessage((String) msgEntry.getKey(), args);
       String expectedMessageText = (String) msgEntry.getValue();
-
+      
       // do our own param substitution for our "expected" value
       for (int i = 0; i < args.length; ++i) {
         expectedMessageText = expectedMessageText.replaceAll("\\Q{" + i + "}\\E",
