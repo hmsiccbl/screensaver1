@@ -86,6 +86,11 @@ import org.apache.log4j.Logger;
  *     was not previously in the set, and whether it was previously in the set,
  *     respectively).
  *     <p>
+ *     The add method is required. The remove method is not. Remove methods are
+ *     absent when the other side of the relationship is not-null. In this case,
+ *     to remove the related entity, you must call the setter on the inverse
+ *     property of the related entity.
+ *     <p>
  *     A setter method for the Collection property only exists when needed
  *     by Hibernate, and is private. (Only needed when the property does not
  *     represent a relationship.)
