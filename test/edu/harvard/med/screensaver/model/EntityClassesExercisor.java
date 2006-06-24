@@ -42,7 +42,7 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
   private Integer _integerTestValue = 77;
   private double  _doubleTestValue = 77.1;
   private boolean _booleanTestValue = true;
-  private String  _stringTestValue = "test";
+  private String  _stringTestValue = "test:a";
   private long    _dateMilliseconds = 0;
   private int     _vocabularyTermCounter = 0;
   
@@ -62,7 +62,14 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
       return _booleanTestValue;
     }
     if (type.equals(String.class)) {
-      _stringTestValue += "x";
+      char lastChar = _stringTestValue.charAt(_stringTestValue.length() - 1);
+      if (lastChar == 'z') {
+        lastChar = 'a';
+      }
+      else {
+        lastChar++;
+      }
+      _stringTestValue += lastChar;
       return _stringTestValue;
     }
     if (type.equals(Date.class)) {
