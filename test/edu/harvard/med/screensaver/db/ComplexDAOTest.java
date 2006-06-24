@@ -12,6 +12,7 @@
 package edu.harvard.med.screensaver.db;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -456,9 +457,10 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         public void runTransaction()
         {
-          ScreenResult screenResult = dao.findAllEntitiesWithType(ScreenResult.class).get(0);
-          @SuppressWarnings("unchecked")
-          SortedSet<ResultValueType> resultValueTypes = new TreeSet(screenResult.getResultValueTypes());
+          List<ScreenResult> screenResults = dao.findAllEntitiesWithType(ScreenResult.class); 
+          ScreenResult screenResult = screenResults.get(0);
+          SortedSet<ResultValueType> resultValueTypes =
+            new TreeSet<ResultValueType>(screenResult.getResultValueTypes());
           
           ResultValueType derivedRvt = resultValueTypes.last();
           Set<ResultValueType> derivedFromSet = derivedRvt.getTypesDerivedFrom();
