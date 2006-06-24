@@ -181,19 +181,6 @@ public class EntityBeansTest extends EntityBeansExercizor
       });
   }
 
-  private static Map<String, String> oddPluralToSingularPropertiesMap =
-    new HashMap<String, String>();
-  static {
-    oddPluralToSingularPropertiesMap.put("children", "child");
-    oddPluralToSingularPropertiesMap.put("typesDerivedFrom", "typeDerivedFrom");
-  }
-  private static Map<String, String> oddSingularToPluralPropertiesMap =
-    new HashMap<String, String>();
-  static {
-    oddSingularToPluralPropertiesMap.put("child", "children");
-    oddSingularToPluralPropertiesMap.put("typeDerivedFrom", "typesDerivedFrom");
-  }
-  
   /**
    * Test collection property:
    * <ul>
@@ -217,12 +204,12 @@ public class EntityBeansTest extends EntityBeansExercizor
     // collection property has pluralized name
     assertTrue(
       "collection property getter has plural name: " + fullPropName,
-      oddPluralToSingularPropertiesMap.containsKey(propertyName) ||
+      EntityBeansTest.oddPluralToSingularPropertiesMap.containsKey(propertyName) ||
       propertyName.endsWith("s"));
 
     String singularPropName =
-      oddPluralToSingularPropertiesMap.containsKey(propertyName) ?
-      oddPluralToSingularPropertiesMap.get(propertyName) :
+      EntityBeansTest.oddPluralToSingularPropertiesMap.containsKey(propertyName) ?
+      EntityBeansTest.oddPluralToSingularPropertiesMap.get(propertyName) :
       propertyName.substring(0, propertyName.length() - 1);
     String capitalizedSingularPropName =
       singularPropName.substring(0, 1).toUpperCase() +
@@ -235,18 +222,18 @@ public class EntityBeansTest extends EntityBeansExercizor
 
     // has boolean add methods with param of right type
     String addMethodName = "add" + capitalizedSingularPropName;
-    Method addMethod = findAndCheckMethod(beanClass, addMethodName);
+    Method addMethod = findAndCheckMethod(beanClass, addMethodName, true);
       
     // has boolean remove methods with param of right type
     String removeMethodName = "remove" + capitalizedSingularPropName;
-    Method removeMethod = findAndCheckMethod(beanClass, removeMethodName);
+    Method removeMethod = findAndCheckMethod(beanClass, removeMethodName, false);
     
     Method getterMethod = propertyDescriptor.getReadMethod();
     
     Class propertyType = addMethod.getParameterTypes()[0];
     Object testValue = getTestValueForType(propertyType);
     
-    // add;get returns set of one
+    // add the test value
     try {
       Boolean result = (Boolean) addMethod.invoke(bean, testValue);
       assertTrue(
@@ -258,22 +245,30 @@ public class EntityBeansTest extends EntityBeansExercizor
       fail("add method for prop threw exception: " + fullPropName);
     }
     
+    // call the checker to test it was added
     try {
       Collection result = (Collection) getterMethod.invoke(bean);
       assertEquals(
         "collection prop with one element added has size one: " + fullPropName,
         result.size(),
         1);
+      assertEquals(
+        "collection prop with one element added has that element: " + fullPropName,
+        testValue,
+        result.iterator().next());
     }
     catch (Exception e) {
       e.printStackTrace();
       fail("getter method for prop threw exception: " + fullPropName);
     }
     
-    // add;remove;get returns empty set
+    if (removeMethod == null) {
+      return;
+    }
+    
+    // remove the test value from the collection
     try {
-      Boolean result = (Boolean)
-        removeMethod.invoke(bean, testValue);
+      Boolean result = (Boolean) removeMethod.invoke(bean, testValue);
       assertTrue(
         "removing to empty collection prop returns true: " + fullPropName,
         result.booleanValue());
@@ -283,6 +278,7 @@ public class EntityBeansTest extends EntityBeansExercizor
       fail("remove method for prop threw exception: " + fullPropName);
     }
     
+    // call the checker to test it was removed
     try {
       Collection result = (Collection) getterMethod.invoke(bean);
       assertEquals(
@@ -296,28 +292,6 @@ public class EntityBeansTest extends EntityBeansExercizor
     }
   }
 
-  private Method findAndCheckMethod(
-    Class<? extends AbstractEntity> beanClass,
-    String methodName)
-  {
-    String fullMethodName = beanClass.getName() + "." + methodName;
-    Method foundMethod = null;
-    for (Method method : beanClass.getDeclaredMethods()) {
-      if (method.getName().equals(methodName)) {
-        foundMethod = method;
-        break;
-      }
-    }
-    assertNotNull(
-      "collection property missing method: " + fullMethodName,
-      foundMethod);
-    assertEquals(
-      "collection property method returns boolean: " + fullMethodName,
-      foundMethod.getReturnType(),
-      Boolean.TYPE);
-    return foundMethod;
-  }
-  
   public void testRelationshipBidirectionality()
   {
     exercizePropertyDescriptors(new PropertyDescriptorExercizor()
@@ -442,15 +416,6 @@ public class EntityBeansTest extends EntityBeansExercizor
     }
   }
 
-  private static Map<String, String> oddPropertyToRelatedPropertyMap =
-    new HashMap<String, String>();
-  private static Map<String, String> oddPluralPropertyToRelatedPropertyMap =
-    new HashMap<String, String>();
-  static {
-    oddPluralPropertyToRelatedPropertyMap.put("derivedTypes", "typesDerivedFrom");
-    oddPluralPropertyToRelatedPropertyMap.put("typesDerivedFrom", "derivedTypes");
-  }
-  
   private void testBidirectionalityOfManySideOfRelationship(
     AbstractEntity bean,
     BeanInfo beanInfo,
@@ -471,7 +436,7 @@ public class EntityBeansTest extends EntityBeansExercizor
       singularPropName.substring(0, 1).toUpperCase() +
       singularPropName.substring(1);
     String addMethodName = "add" + capitalizedSingularPropName;
-    Method addMethod = findAndCheckMethod(beanClass, addMethodName);    
+    Method addMethod = findAndCheckMethod(beanClass, addMethodName, true);    
     
     // make sure this is actually a relationship!
     Class relatedBeanClass = addMethod.getParameterTypes()[0];

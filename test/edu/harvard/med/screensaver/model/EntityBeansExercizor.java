@@ -13,6 +13,9 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -69,5 +72,65 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
         fail(e.getMessage());
       }
     }    
+  }
+
+  protected static Map<String, String> oddPluralToSingularPropertiesMap =
+    new HashMap<String, String>();
+  static {
+    oddPluralToSingularPropertiesMap.put("children", "child");
+    oddPluralToSingularPropertiesMap.put("typesDerivedFrom", "typeDerivedFrom");
+  }
+  protected static Map<String, String> oddSingularToPluralPropertiesMap =
+    new HashMap<String, String>();
+  static {
+    oddSingularToPluralPropertiesMap.put("child", "children");
+    oddSingularToPluralPropertiesMap.put("typeDerivedFrom", "typesDerivedFrom");
+  }
+  
+  protected static Map<String, String> oddPropertyToRelatedPropertyMap =
+    new HashMap<String, String>();
+  protected static Map<String, String> oddPluralPropertyToRelatedPropertyMap =
+    new HashMap<String, String>();
+  static {
+    oddPluralPropertyToRelatedPropertyMap.put("derivedTypes", "typesDerivedFrom");
+    oddPluralPropertyToRelatedPropertyMap.put("typesDerivedFrom", "derivedTypes");
+  }
+  
+
+  /**
+   * Find the method with the given name, and unspecified arguments. If no such
+   * method exists, and the isRequiredMethod parameter is true, then fail. If no
+   * such method exists, and isRequiredMethod is false, then return null. Fail if
+   * the method does not return a boolen. Return the method.
+   * @param beanClass the class to find the method in
+   * @param methodName the name of the method to find
+   * @param isRequiredMethod true iff the method is required to exist
+   * @return the method. Return null if isRequiredMethod is false and no such
+   * method exists.
+   */
+  protected Method findAndCheckMethod(
+    Class<? extends AbstractEntity> beanClass,
+    String methodName,
+    boolean isRequiredMethod)
+  {
+    String fullMethodName = beanClass.getName() + "." + methodName;
+    Method foundMethod = null;
+    for (Method method : beanClass.getDeclaredMethods()) {
+      if (method.getName().equals(methodName)) {
+        foundMethod = method;
+        break;
+      }
+    }
+    if (! isRequiredMethod && foundMethod == null) {
+      return null;
+    }
+    assertNotNull(
+      "collection property missing method: " + fullMethodName,
+      foundMethod);
+    assertEquals(
+      "collection property method returns boolean: " + fullMethodName,
+      foundMethod.getReturnType(),
+      Boolean.TYPE);
+    return foundMethod;
   }
 }
