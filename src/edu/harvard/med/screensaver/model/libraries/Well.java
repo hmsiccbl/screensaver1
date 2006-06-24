@@ -85,16 +85,18 @@ public class Well extends AbstractEntity
   }
 
   /**
-   * Set the library the well is in.
+   * Set the library the well is in. Throw a NullPointerException if the library
+   * is null.
    * 
    * @param library the new library for the well
+   * @throws NullPointerException when the library is null
    */
   public void setLibrary(Library library) {
     assert _wellName != null && _plateNumber != null : "properties forming business key have not been defined";
     if (_library != null) {
       _library.getHbnWells().remove(this);
     }
-    _library = library;
+    setHbnLibrary(library);
     library.getHbnWells().add(this);
   }
 
@@ -192,7 +194,8 @@ public class Well extends AbstractEntity
    * 
    * @param iccbNumber The new ICCB number for the well
    */
-  public void setIccbNumber(String iccbNumber) {
+  public void setIccbNumber(String iccbNumber)
+  {
     _iccbNumber = iccbNumber;
   }
 
@@ -202,7 +205,8 @@ public class Well extends AbstractEntity
    * @return the vendor identifier for the well
    * @hibernate.property type="text"
    */
-  public String getVendorIdentifier() {
+  public String getVendorIdentifier()
+  {
     return _vendorIdentifier;
   }
 
@@ -211,7 +215,8 @@ public class Well extends AbstractEntity
    * 
    * @param vendorIdentifier the new vendor identifier for the well
    */
-  public void setVendorIdentifier(String vendorIdentifier) {
+  public void setVendorIdentifier(String vendorIdentifier)
+  {
     _vendorIdentifier = vendorIdentifier;
   }
   
@@ -220,7 +225,8 @@ public class Well extends AbstractEntity
    * 
    * @return an unmodifiable copy of the set of the result values for the well
    */
-  public Set<ResultValue> getResultValues() {
+  public Set<ResultValue> getResultValues()
+  {
     return Collections.unmodifiableSet(_resultValues);
   }
   
@@ -230,7 +236,8 @@ public class Well extends AbstractEntity
    * @param resultValue the result value to add to the well
    * @return true iff the result value was not already in the well
    */
-  public boolean addResultValue(ResultValue resultValue) {
+  public boolean addResultValue(ResultValue resultValue)
+  {
     assert !(getHbnResultValues().contains(resultValue) ^
       resultValue.getWell().equals(this)) :
       "asymmetric well / result value association encountered";
@@ -240,23 +247,6 @@ public class Well extends AbstractEntity
     resultValue.setHbnWell(this);
     getHbnResultValues().add(resultValue);
     return true;
-  }
-
-  /**
-   * Remove the result value from the well.
-   * 
-   * @param resultValue the result value to remove from the well
-   * @return true iff the result value was previously in the well
-   */
-  public boolean removeResultValue(ResultValue resultValue) {
-    assert !(getHbnResultValues().contains(resultValue) ^
-      resultValue.getWell().equals(this)) :
-      "asymmetric well / result value association encountered";
-    if (getHbnResultValues().remove(resultValue)) {
-      resultValue.setHbnWell(null);
-      return true;
-    }
-    return false;
   }
 
   
@@ -274,10 +264,12 @@ public class Well extends AbstractEntity
    *             {@link ResultValue} and {@link Well}).
    * @hibernate.set
    *    inverse="true"
+   *    cascade="save-update"
    * @hibernate.collection-key column="well_id"
    * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValue"
    */
-  public Set<ResultValue> getHbnResultValues() {
+  public Set<ResultValue> getHbnResultValues()
+  {
     return _resultValues;
   }
   
@@ -364,12 +356,18 @@ public class Well extends AbstractEntity
   }
 
   /**
-   * Set the library the well is in.
+   * Set the library the well is in. Throw a NullPointerException when the library
+   * is null.
    * 
    * @param library the new library for the well
+   * @throws NullPointerException when the library is null
    * @motivation for Hibernate (exclusively)
    */
-  void setHbnLibrary(Library library) {
+  void setHbnLibrary(Library library)
+  {
+    if (library == null) {
+      throw new NullPointerException();
+    }
     _library = library;
   }
 
@@ -383,14 +381,14 @@ public class Well extends AbstractEntity
    * @motivation for Hibernate and for associated {@link Compound} bean (so that
    *             it can maintain the bi-directional association between
    *             {@link Compound} and {@link Well}).
-   * @hibernate.set table="well_compound_link" cascade="save-update"
+   * @hibernate.set table="well_compound_link" cascade="all"
    * @hibernate.collection-key column="well_id"
    * @hibernate.collection-many-to-many column="compound_id"
    *                                    class="edu.harvard.med.screensaver.model.libraries.Compound"
    *                                    foreign-key="fk_well_compound_link_to_well"
-   *                                    cascade="save-update"
    */
-  Set<Compound> getHbnCompounds() {
+  Set<Compound> getHbnCompounds()
+  {
     return _compounds;
   }
 
@@ -407,7 +405,8 @@ public class Well extends AbstractEntity
    * @param wellId the new well id for the well
    * @motivation for hibernate
    */
-  private void setWellId(Integer wellId) {
+  private void setWellId(Integer wellId)
+  {
     _wellId = wellId;
   }
 

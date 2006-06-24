@@ -186,22 +186,6 @@ public class ScreenResult extends AbstractEntity
     }
     return false;
   }
-
-  /**
-   * Remove the result value type to the screen result.
-   * @param resultValueType The result value type to remove
-   * @return true iff the result value type was previously in the screen result
-   */
-  public boolean removeResultValueType(ResultValueType resultValueType)
-  {
-    assert !(_resultValueTypes.contains(resultValueType) ^ resultValueType.getScreenResult().equals(this)) :
-      "assymetic screen result/result value type encountered";
-    if (_resultValueTypes.remove(resultValueType)) {
-      resultValueType.setHbnScreenResult(null);
-      return true;
-    }
-    return false;
-  }
   
   /**
    * Get the number of replicates (assay plates) associated with this

@@ -54,7 +54,8 @@ public class Compound extends AbstractEntity
    * Constructs an initialized <code>Compound</code> object.
    * @param compoundName
    */
-  public Compound(String compoundName) {
+  public Compound(String compoundName)
+  {
     this(compoundName, false);
   }
   
@@ -63,7 +64,8 @@ public class Compound extends AbstractEntity
    * @param compoundName
    * @param isSalt
    */
-  public Compound(String compoundName, boolean isSalt) {
+  public Compound(String compoundName, boolean isSalt)
+  {
     _compoundName = compoundName;
     _isSalt = isSalt;
   }
@@ -78,7 +80,8 @@ public class Compound extends AbstractEntity
    *   name="sequence"
    *   value="compound_id_seq"
    */
-	public Integer getCompoundId() {
+	public Integer getCompoundId()
+  {
 		return _compoundId;
 	}
   
@@ -87,7 +90,8 @@ public class Compound extends AbstractEntity
   * 
   * @return an unmodifiable copy of the set of wells that contain this compound
   */
-  public Set<Well> getWells() {
+  public Set<Well> getWells()
+  {
     return Collections.unmodifiableSet(_wells);
   }
 
@@ -96,7 +100,8 @@ public class Compound extends AbstractEntity
    * @param well the well to add this compound to
    * @return     true iff the compound was not already contained in the well
    */
-  public boolean addWell(Well well) {
+  public boolean addWell(Well well)
+  {
     assert !(well.getHbnCompounds().contains(this) ^
       getHbnWells().contains(this)) :
       "asymmetric compound/well association encountered";
@@ -111,7 +116,8 @@ public class Compound extends AbstractEntity
    * @param well the well to remove this compound from
    * @return     true iff the compound was previously contained in the well
    */
-  public boolean removeWell(Well well) {
+  public boolean removeWell(Well well)
+  {
     assert !(well.getHbnCompounds().contains(this) ^
       getHbnWells().contains(this)) :
       "asymmetric compound/well association encountered";
@@ -130,15 +136,19 @@ public class Compound extends AbstractEntity
    *   not-null="true"
    *   unique="true"
    */
-  public String getCompoundName() {
+  public String getCompoundName()
+  {
     return _compoundName;
   }
 
   /**
    * Set the compound name.
+   * TODO: since this changes the business key, we need to update all the
+   * corresponding Well.getHbnCompounds(). ugh.
    * @param compoundName the new name for the compound
    */
-  public void setCompoundName(String compoundName) {
+  public void setCompoundName(String compoundName)
+  {
     _compoundName = compoundName;
   }
 
@@ -150,7 +160,8 @@ public class Compound extends AbstractEntity
    *   type="text"
    *   unique="true"
    */
-  public String getSmiles() {
+  public String getSmiles()
+  {
     return _smiles;
   }
 
@@ -158,7 +169,8 @@ public class Compound extends AbstractEntity
    * Set the SMILES string for the compound.
    * @param smiles the new SMILES string for the compound
    */
-  public void setSmiles(String smiles) {
+  public void setSmiles(String smiles)
+  {
     _smiles = smiles;
   }
 
@@ -178,7 +190,8 @@ public class Compound extends AbstractEntity
    * Set the saltiness of the compound.
    * @param isSalt the new saltiness for the compound
    */
-  public void setSalt(boolean isSalt) {
+  public void setSalt(boolean isSalt)
+  {
     _isSalt = isSalt;
   }
 
@@ -199,8 +212,9 @@ public class Compound extends AbstractEntity
    *   column="synonym"
    *   not-null="true"
    */
-  public Set<String> getSynonyms() {
-    return Collections.unmodifiableSet(_synonyms);
+  public Set<String> getSynonyms()
+  {
+    return _synonyms;
   }
 
   /**
@@ -208,7 +222,8 @@ public class Compound extends AbstractEntity
    * @param synonym the synonym to add to the compound
    * @return        true iff the compound did not already have the synonym
    */
-  public boolean addSynonym(String synonym) {
+  public boolean addSynonym(String synonym)
+  {
     return _synonyms.add(synonym);
   }
 
@@ -217,7 +232,8 @@ public class Compound extends AbstractEntity
    * @param synonym the synonym to remove from the compound
    * @return        true iff the compound previously had the synonym
    */
-  public boolean removeSynonym(String synonym) {
+  public boolean removeSynonym(String synonym)
+  {
     return _synonyms.remove(synonym);
   }
 
@@ -238,8 +254,9 @@ public class Compound extends AbstractEntity
    *   column="cas_number"
    *   not-null="true"
    */
-  public Set<String> getCasNumbers() {
-    return Collections.unmodifiableSet(_casNumbers);
+  public Set<String> getCasNumbers()
+  {
+    return _casNumbers;
   }
 
   /**
@@ -247,7 +264,8 @@ public class Compound extends AbstractEntity
    * @param casNumber the CAS number to add to the compound
    * @return          true iff the compound did not already have the CAS number
    */
-  public boolean addCasNumber(String casNumber) {
+  public boolean addCasNumber(String casNumber)
+  {
     return _casNumbers.add(casNumber);
   }
 
@@ -256,7 +274,8 @@ public class Compound extends AbstractEntity
    * @param casNumber the CAS number to remove from the compound
    * @return          true iff the compound previously had the CAS number
    */
-  public boolean removeCasNumber(String casNumber) {
+  public boolean removeCasNumber(String casNumber)
+  {
     return _casNumbers.remove(casNumber);
   }
 
@@ -277,8 +296,9 @@ public class Compound extends AbstractEntity
    *   column="nsc_number"
    *   not-null="true"
    */
-  public Set<String> getNscNumbers() {
-    return Collections.unmodifiableSet(_nscNumbers);
+  public Set<String> getNscNumbers()
+  {
+    return _nscNumbers;
   }
 
   /**
@@ -286,7 +306,8 @@ public class Compound extends AbstractEntity
    * @param nscNumber the NSC number to add to the compound
    * @return          true iff the compound did not already have the NSC number
    */
-  public boolean addNscNumber(String nscNumber) {
+  public boolean addNscNumber(String nscNumber)
+  {
     return _nscNumbers.add(nscNumber);
   }
   
@@ -295,7 +316,8 @@ public class Compound extends AbstractEntity
    * @param nscNumber the NSC number to remove from the compound
    * @return          true iff the compound previously had the NSC number
    */
-  public boolean removeNscNumber(String nscNumber) {
+  public boolean removeNscNumber(String nscNumber)
+  {
     return _nscNumbers.remove(nscNumber);
   }
 
@@ -306,7 +328,8 @@ public class Compound extends AbstractEntity
    * @hibernate.property
    *   type="text"
    */
-  public String getPubchemCid() {
+  public String getPubchemCid()
+  {
     return _pubchemCid;
   }
 
@@ -314,7 +337,8 @@ public class Compound extends AbstractEntity
    * Set the PubChem CID for the compound.
    * @param pubchemCid the new PubChem CID for the compound
    */
-  public void setPubchemCid(String pubchemCid) {
+  public void setPubchemCid(String pubchemCid)
+  {
     _pubchemCid = pubchemCid;
   }
 
@@ -325,7 +349,8 @@ public class Compound extends AbstractEntity
    * @hibernate.property
    *   type="text"
    */
-  public String getChembankId() {
+  public String getChembankId()
+  {
     return _chembankId;
   }
   
@@ -333,7 +358,8 @@ public class Compound extends AbstractEntity
    * Set the ChemBank ID for the compound.
    * @param chembankId the new ChemBank ID for the compound
    */
-  public void setChembankId(String chembankId) {
+  public void setChembankId(String chembankId)
+  {
     _chembankId = chembankId;
   }
 
@@ -365,9 +391,9 @@ public class Compound extends AbstractEntity
    * @hibernate.collection-many-to-many column="well_id"
    *                                    class="edu.harvard.med.screensaver.model.libraries.Well"
    *                                    foreign-key="fk_well_compound_link_to_compound"
-   *                                    cascade="save-update"
    */
-  Set<Well> getHbnWells() {
+  Set<Well> getHbnWells()
+  {
     return _wells;
   }
   
@@ -385,7 +411,8 @@ public class Compound extends AbstractEntity
    * @param compoundId the new compound id for the compound
    * @motivation       for hibernate
    */
-  private void setCompoundId(Integer compoundId) {
+  private void setCompoundId(Integer compoundId)
+  {
     _compoundId = compoundId;
   }
 
@@ -396,7 +423,8 @@ public class Compound extends AbstractEntity
    *
    * @hibernate.version
    */
-  private Integer getVersion() {
+  private Integer getVersion()
+  {
     return _version;
   }
 
@@ -405,7 +433,8 @@ public class Compound extends AbstractEntity
    * @param version the new version number for the compound
    * @motivation    for hibernate
    */
-  private void setVersion(Integer version) {
+  private void setVersion(Integer version)
+  {
     _version = version;
   }
 
@@ -414,7 +443,8 @@ public class Compound extends AbstractEntity
    * @param wells the new set of wells that contain this compound
    * @motivation  for hibernate
    */
-  private void setHbnWells(Set<Well> wells) {
+  private void setHbnWells(Set<Well> wells)
+  {
     _wells = wells;
   }
 
@@ -423,7 +453,8 @@ public class Compound extends AbstractEntity
    * @param synonyms the new set of synonyms for the compound
    * @motivation     for hibernate
    */
-  private void setSynonyms(Set<String> synonyms) {
+  private void setSynonyms(Set<String> synonyms)
+  {
     _synonyms = synonyms;
   }
 
@@ -432,7 +463,8 @@ public class Compound extends AbstractEntity
    * @param casNumber the new set of CAS numbers for the compound
    * @motivation      for hibernate
    */
-  private void setCasNumbers(Set<String> casNumber) {
+  private void setCasNumbers(Set<String> casNumber)
+  {
     _casNumbers = casNumber;
   }
 
@@ -441,7 +473,8 @@ public class Compound extends AbstractEntity
    * @param nscNumber the new set of NSC numbers for the compound
    * @motivation      for hibernate
    */
-  private void setNscNumbers(Set<String> nscNumber) {
+  private void setNscNumbers(Set<String> nscNumber)
+  {
     _nscNumbers = nscNumber;
   }
 }

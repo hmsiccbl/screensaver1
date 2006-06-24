@@ -109,22 +109,6 @@ public class Library extends AbstractEntity
     }
     return false;
   }
-
-  /**
-   * Remove the well from the library.
-   * 
-   * @param well the well to remove from the library
-   * @return true iff the well was previously in the library
-   */
-  public boolean removeWell(Well well) {
-    assert !(_wells.contains(well) ^ well.getLibrary().equals(this)) :
-      "asymmetric library/well association encountered";
-    if (_wells.remove(well)) {
-      well.setHbnLibrary(null);
-      return true;
-    }
-    return false;
-  }
   
   /**
    * Get the name of the library.

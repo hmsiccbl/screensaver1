@@ -189,23 +189,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
     }
     return false;
   }
-
-  /**
-   * Remove the result value from the result value type.
-   * 
-   * @param resultValue the result value to remove from the result value type
-   * @return true iff the result value was previously in the result value type
-   */
-  public boolean removeResultValue(ResultValue resultValue) {
-    assert !(_resultValues.contains(resultValue) ^
-      resultValue.getResultValueType().equals(this)) :
-      "asymmetric result value type / result value association encountered";
-    if (_resultValues.remove(resultValue)) {
-      resultValue.setHbnResultValueType(null);
-      return true;
-    }
-    return false;
-  }
   
   /**
    * Get the ordinal position of this <code>ResultValueType</code> within its
@@ -779,6 +762,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @hibernate.set
    *   table="result_value_type_derived_from_link"
    *   sort="natural"
+   *   cascade="save-update"
    * @hibernate.collection-key
    *   column="derived_result_value_type_id"
    * @hibernate.collection-many-to-many
@@ -801,9 +785,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @motivation for hibernate
    */
   private void setHbnTypesDerivedFrom(SortedSet<ResultValueType> derivedFrom) {
-    if (derivedFrom != null && derivedFrom.size() > 0) {
-      setDerived(true);
-    }
+    // NOTE: cannot setDerived(true) here, Hibernate chokes
     _typesDerivedFrom = derivedFrom;
   }
   
@@ -818,6 +800,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    *   table="result_value_type_derived_from_link"
    *   sort="natural"
    *   inverse="true"
+   *   cascade="save-update"
    * @hibernate.collection-key
    *   column="derived_from_result_value_type_id"
    * @hibernate.collection-many-to-many

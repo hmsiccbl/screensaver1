@@ -14,13 +14,11 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.SchemaUtil;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-
-import org.apache.log4j.Logger;
 
 /**
  * Tests for persisting the entities.
@@ -144,18 +142,16 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
           final Method setter = propertyDescriptor.getWriteMethod();
           final Object testValue = getTestValueForType(getter.getReturnType());
 
-          if (bean.getClass().equals(Well.class)) {
-            log.info("PROPS = Well." + propertyDescriptor.getName());
-          }
-          
           // transaction to call the setter
           dao.doInTransaction(new DAOTransaction()
             {
               public void runTransaction()
               {
                 AbstractEntity localBean = bean;
+
+                // if the bean has already been persisted, then get the persisted copy, as the current
+                // copy is stale. if it has not, persist it now so we can get the entityId
                 if (dao.getEntityId(localBean) != null) {
-                  log.info("findE = " + localBean.getClass() + ":" + getBeanId());
                   localBean = dao.findEntityById(
                     localBean.getClass(),
                     getBeanId());
@@ -163,8 +159,8 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
                 else {
                   dao.persistEntity(localBean);
                   setBeanId(dao.getEntityId(localBean));
-                  log.info("setBeanId = " + localBean.getClass() + ":" + getBeanId());
                 }
+                
                 try {
                   setter.invoke(localBean, testValue);
                 }
@@ -182,15 +178,11 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
             {
               public void runTransaction()
               {
-                log.info("findE = " + bean.getClass() + ":" + getBeanId());
                 AbstractEntity localBean = dao.findEntityById(
                   bean.getClass(),
                   getBeanId());
-                log.info("LOCAL = " + localBean);
+
                 try {
-                  if (bean.getClass().equals(ResultValue.class)) {
-                    log.info("result value");
-                  }
                   Object getterResult = getter.invoke(localBean); 
                   assertEquals(
                     "getter returns what setter set for " +
@@ -211,170 +203,199 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
       });
   }
   
-//  /**
-//   * Test collection properties:
-//   * <ul>
-//   * <li>have a pluralized name
-//   * <li>do not have a (public) setter
-//   * <li>have boolean add/remove methods with param of right type
-//   * <li>add;get returns set of one
-//   * <li>add;remove;get returns empty set
-//   * </ul>
-//   */
-//  public void testCollectionProperties()
-//  {
-//    exercizePropertyDescriptors(new PropertyDescriptorExercizor()
-//      {
-//        public void exercizePropertyDescriptor(
-//          AbstractEntity bean,
-//          BeanInfo beanInfo,
-//          PropertyDescriptor propertyDescriptor)
-//        {
-//          Method getter = propertyDescriptor.getReadMethod();
-//          if (Collection.class.isAssignableFrom(getter.getReturnType())) {
-//            testCollectionProperty(bean, getter, propertyDescriptor);
-//          }
-//        }
-//      });
-//  }
-//
-//  private static Map<String, String> oddPluralToSingularPropertiesMap =
-//    new HashMap<String, String>();
-//  static {
-//    oddPluralToSingularPropertiesMap.put("children", "child");
-//    oddPluralToSingularPropertiesMap.put("typesDerivedFrom", "typeDerivedFrom");
-//  }
-//  private static Map<String, String> oddSingularToPluralPropertiesMap =
-//    new HashMap<String, String>();
-//  static {
-//    oddSingularToPluralPropertiesMap.put("child", "children");
-//    oddSingularToPluralPropertiesMap.put("typeDerivedFrom", "typesDerivedFrom");
-//  }
-//  
-//  /**
-//   * Test collection property:
-//   * <ul>
-//   * <li>has a pluralized name
-//   * <li>does not have a (public) setter
-//   * <li>has boolean add/remove methods with param of right type
-//   * <li>add;get returns set of one
-//   * <li>add;remove;get returns empty set
-//   */
-//  @SuppressWarnings("unchecked")
-//  private void testCollectionProperty(
-//    AbstractEntity bean,
-//    Method getter,
-//    PropertyDescriptor propertyDescriptor)
-//  {
-//    Class<? extends AbstractEntity> beanClass = bean.getClass();
-//    String beanClassName = beanClass.getSimpleName();
-//    String propertyName = propertyDescriptor.getName();
-//    String fullPropName = beanClassName + "." + propertyName;
-//    
-//    // collection property has pluralized name
-//    assertTrue(
-//      "collection property getter has plural name: " + fullPropName,
-//      oddPluralToSingularPropertiesMap.containsKey(propertyName) ||
-//      propertyName.endsWith("s"));
-//
-//    String singularPropName =
-//      oddPluralToSingularPropertiesMap.containsKey(propertyName) ?
-//      oddPluralToSingularPropertiesMap.get(propertyName) :
-//      propertyName.substring(0, propertyName.length() - 1);
-//    String capitalizedSingularPropName =
-//      singularPropName.substring(0, 1).toUpperCase() +
-//      singularPropName.substring(1);
-//    
-//    // collection property has no getter
-//    assertNull(
-//      "collection property has no setter: " + fullPropName,
-//      propertyDescriptor.getWriteMethod());
-//
-//    // has boolean add methods with param of right type
-//    String addMethodName = "add" + capitalizedSingularPropName;
-//    Method addMethod = findAndCheckMethod(beanClass, addMethodName);
-//      
-//    // has boolean remove methods with param of right type
-//    String removeMethodName = "remove" + capitalizedSingularPropName;
-//    Method removeMethod = findAndCheckMethod(beanClass, removeMethodName);
-//    
-//    Method getterMethod = propertyDescriptor.getReadMethod();
-//    
-//    Class propertyType = addMethod.getParameterTypes()[0];
-//    Object testValue = getTestValueForType(propertyType);
-//    
-//    // add;get returns set of one
-//    try {
-//      Boolean result = (Boolean) addMethod.invoke(bean, testValue);
-//      assertTrue(
-//        "adding to empty collection prop returns true: " + fullPropName,
-//        result.booleanValue());
-//    }
-//    catch (Exception e) {
-//      e.printStackTrace();
-//      fail("add method for prop threw exception: " + fullPropName);
-//    }
-//    
-//    try {
-//      Collection result = (Collection) getterMethod.invoke(bean);
-//      assertEquals(
-//        "collection prop with one element added has size one: " + fullPropName,
-//        result.size(),
-//        1);
-//    }
-//    catch (Exception e) {
-//      e.printStackTrace();
-//      fail("getter method for prop threw exception: " + fullPropName);
-//    }
-//    
-//    // add;remove;get returns empty set
-//    try {
-//      Boolean result = (Boolean)
-//        removeMethod.invoke(bean, testValue);
-//      assertTrue(
-//        "removing to empty collection prop returns true: " + fullPropName,
-//        result.booleanValue());
-//    }
-//    catch (Exception e) {
-//      e.printStackTrace();
-//      fail("remove method for prop threw exception: " + fullPropName);
-//    }
-//    
-//    try {
-//      Collection result = (Collection) getterMethod.invoke(bean);
-//      assertEquals(
-//        "collection prop with element removed has size zero: " + fullPropName,
-//        result.size(),
-//        0);
-//    }
-//    catch (Exception e) {
-//      e.printStackTrace();
-//      fail("getter method for prop threw exception: " + fullPropName);
-//    }
-//  }
-//
-//  private Method findAndCheckMethod(
-//    Class<? extends AbstractEntity> beanClass,
-//    String methodName)
-//  {
-//    String fullMethodName = beanClass.getName() + "." + methodName;
-//    Method foundMethod = null;
-//    for (Method method : beanClass.getDeclaredMethods()) {
-//      if (method.getName().equals(methodName)) {
-//        foundMethod = method;
-//        break;
-//      }
-//    }
-//    assertNotNull(
-//      "collection property missing method: " + fullMethodName,
-//      foundMethod);
-//    assertEquals(
-//      "collection property method returns boolean: " + fullMethodName,
-//      foundMethod.getReturnType(),
-//      Boolean.TYPE);
-//    return foundMethod;
-//  }
-//  
+  /**
+   * Test collection properties:
+   * <ul>
+   * <li>have a pluralized name
+   * <li>do not have a (public) setter
+   * <li>have boolean add/remove methods with param of right type
+   * <li>add;get returns set of one
+   * <li>add;remove;get returns empty set
+   * </ul>
+   */
+  public void testCollectionProperties()
+  {
+    exercizePropertyDescriptors(new PropertyDescriptorExercizor()
+      {
+        public void exercizePropertyDescriptor(
+          AbstractEntity bean,
+          BeanInfo beanInfo,
+          PropertyDescriptor propertyDescriptor)
+        {
+          Method getter = propertyDescriptor.getReadMethod();
+          if (Collection.class.isAssignableFrom(getter.getReturnType())) {
+            testCollectionProperty(bean, getter, propertyDescriptor);
+          }
+        }
+      });
+  }
+  
+  /**
+   * Test collection property:
+   * <ul>
+   * <li>has a pluralized name
+   * <li>does not have a (public) setter
+   * <li>has boolean add/remove methods with param of right type
+   * <li>add;get returns set of one
+   * <li>add;remove;get returns empty set
+   */
+  @SuppressWarnings("unchecked")
+  private void testCollectionProperty(
+    final AbstractEntity bean,
+    Method getter,
+    PropertyDescriptor propertyDescriptor)
+  {
+    final Class<? extends AbstractEntity> beanClass = bean.getClass();
+    String beanClassName = beanClass.getSimpleName();
+    String propertyName = propertyDescriptor.getName();
+    final String fullPropName = beanClassName + "." + propertyName;
+    
+    // collection property has pluralized name
+    assertTrue(
+      "collection property getter has plural name: " + fullPropName,
+      EntityBeansTest.oddPluralToSingularPropertiesMap.containsKey(propertyName) ||
+      propertyName.endsWith("s"));
+
+    String singularPropName =
+      EntityBeansTest.oddPluralToSingularPropertiesMap.containsKey(propertyName) ?
+      EntityBeansTest.oddPluralToSingularPropertiesMap.get(propertyName) :
+      propertyName.substring(0, propertyName.length() - 1);
+    String capitalizedSingularPropName =
+      singularPropName.substring(0, 1).toUpperCase() +
+      singularPropName.substring(1);
+    
+    // collection property has no getter
+    assertNull(
+      "collection property has no setter: " + fullPropName,
+      propertyDescriptor.getWriteMethod());
+
+    // has boolean add methods with param of right type
+    String addMethodName = "add" + capitalizedSingularPropName;
+    final Method addMethod = findAndCheckMethod(beanClass, addMethodName, true);
+      
+    // has boolean remove methods with param of right type
+    String removeMethodName = "remove" + capitalizedSingularPropName;
+    final Method removeMethod = findAndCheckMethod(beanClass, removeMethodName, false);
+    
+    final Method getterMethod = propertyDescriptor.getReadMethod();
+    
+    Class propertyType = addMethod.getParameterTypes()[0];
+    final Object testValue = getTestValueForType(propertyType);
+    
+    // add the testValue in a transaction
+    dao.doInTransaction(
+      new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          AbstractEntity localBean = bean;
+          
+          // if the bean has already been persisted, then get the persisted copy, as
+          // the current copy is stale. if it has not, persist it now so we can get
+          // the entityId
+          if (dao.getEntityId(localBean) != null) {
+            localBean = dao.findEntityById(beanClass, getBeanId());
+          }
+          else {
+            dao.persistEntity(localBean);
+            setBeanId(dao.getEntityId(localBean));
+          }
+          
+          try {
+            Boolean result = (Boolean) addMethod.invoke(localBean, testValue);
+            assertTrue(
+              "adding to empty collection prop returns true: " + fullPropName,
+              result.booleanValue());
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            fail("add method for prop threw exception: " + fullPropName);
+          }
+        }
+      });
+    
+    // transaction to call the getter
+    dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          AbstractEntity localBean = dao.findEntityById(beanClass, getBeanId());
+          
+          try {
+            Collection result = (Collection) getterMethod.invoke(localBean);
+            assertEquals(
+              "collection prop with one element added has size one: " + fullPropName,
+              1,
+              result.size());
+            assertEquals(
+              "collection prop with one element added has that element: " + fullPropName,
+              testValue,
+              result.iterator().next());
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            fail("getter method for prop threw exception: " + fullPropName);
+          }
+        }
+      });
+    
+    if (removeMethod == null) {
+      return;
+    }
+    
+    // transaction to remove the testValue
+    dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          Object localTestValue = testValue;
+          try {
+            // GOOD IDEA: don't try to use the same entity across transactions!
+            localTestValue = dao.findEntityById(
+              (Class<? extends AbstractEntity>) testValue.getClass(),
+              dao.getEntityId((AbstractEntity) testValue));
+          }
+          catch (ClassCastException e) {
+            // don't worry - it's just that the test value isn't an entity
+          }
+          
+          AbstractEntity localBean = dao.findEntityById(beanClass, getBeanId());
+          
+          try {
+            Boolean result = (Boolean) removeMethod.invoke(localBean, localTestValue);
+            assertTrue(
+              "removing to empty collection prop returns true: " + fullPropName,
+              result.booleanValue());
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            fail("remove method for prop threw exception: " + fullPropName);
+          }
+        }
+      });
+    
+    // transaction to invoke the getter
+    dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          AbstractEntity localBean = dao.findEntityById(beanClass, getBeanId());
+          
+          try {
+            Collection result = (Collection) getterMethod.invoke(localBean);
+            assertEquals(
+              "collection prop with element removed has size zero: " + fullPropName,
+              0,
+              result.size());
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            fail("getter method for prop threw exception: " + fullPropName);
+          }
+        }
+      });
+  }
+  
 //  public void testRelationshipBidirectionality()
 //  {
 //    exercizePropertyDescriptors(new PropertyDescriptorExercizor()
