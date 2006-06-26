@@ -7,30 +7,31 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model.libraries;
+package edu.harvard.med.screensaver.model.screens;
 
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
- * The library type vocabulary.
+ * The funding support vocabulary.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public enum LibraryType implements VocabularyTerm
+public enum FundingSupport implements VocabularyTerm
 {
 
   // the vocabulary
   
-  COMMERCIAL("Commercial"),
-  DOS("DOS"),
-  ANNOTATION("Annotation"),
-  DISCRETE("Discrete"),
-  KNOWN_BIOACTIVES("Known Bioactives"),
-  NCI("NCI"),
-  NATURAL_PRODUCTS("Natural Products"),
-  RNAI("RNAi"),
+  CLARDY_GRANTS("Clardy Grants"),
+  D_ANDREA_CMCR("D'Andrea CMCR"),
+  ICCBL_HMS_INTERNAL("ICCB-L HMS Internal"),
+  ICCBL_EXTERNAL("ICCB-L External"),
+  MITCHISON_P01("Mitchison P01"),
+  ICG("ICG"),
+  NERCE_NSRB("NERCE/NSRB"),
+  SANOFI_AVENTIS("Sanofi-Aventis"),
+  YUAN_NIH_06_07("Yuan NIH 06-07"),
   OTHER("Other")
   ;
 
@@ -38,13 +39,13 @@ public enum LibraryType implements VocabularyTerm
   // static inner class
 
   /**
-   * A Hibernate <code>UserType</code> to map the {@link LibraryType} vocabulary.
+   * A Hibernate <code>UserType</code> to map the {@link FundingSupport} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<LibraryType>
+  public static class UserType extends VocabularyUserType<FundingSupport>
   {
     public UserType()
     {
-      super(LibraryType.values());
+      super(FundingSupport.values());
     }
   }
 
@@ -54,10 +55,10 @@ public enum LibraryType implements VocabularyTerm
   private String _value;
 
   /**
-   * Constructs a <code>LibraryType</code> vocabulary term.
+   * Constructs a <code>FundingSupport</code> vocabulary term.
    * @param value The value of the term.
    */
-  private LibraryType(String value)
+  private FundingSupport(String value)
   {
     _value = value;
   }

@@ -13,38 +13,33 @@ import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
- * The library type vocabulary.
+ * The silencing reagent type vocabulary.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public enum LibraryType implements VocabularyTerm
+public enum SilencingReagentType implements VocabularyTerm
 {
 
   // the vocabulary
   
-  COMMERCIAL("Commercial"),
-  DOS("DOS"),
-  ANNOTATION("Annotation"),
-  DISCRETE("Discrete"),
-  KNOWN_BIOACTIVES("Known Bioactives"),
-  NCI("NCI"),
-  NATURAL_PRODUCTS("Natural Products"),
-  RNAI("RNAi"),
-  OTHER("Other")
+  SIRNA("siRNA"),
+  SHRNA("shRNA"),
+  DSRNA("dsRNA"),
+  ESIRNA("esiRNA")
   ;
 
  
   // static inner class
 
   /**
-   * A Hibernate <code>UserType</code> to map the {@link LibraryType} vocabulary.
+   * A Hibernate <code>UserType</code> to map the {@link SilencingReagentType} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<LibraryType>
+  public static class UserType extends VocabularyUserType<SilencingReagentType>
   {
     public UserType()
     {
-      super(LibraryType.values());
+      super(SilencingReagentType.values());
     }
   }
 
@@ -54,10 +49,10 @@ public enum LibraryType implements VocabularyTerm
   private String _value;
 
   /**
-   * Constructs a <code>LibraryType</code> vocabulary term.
+   * Constructs a <code>SilencingReagentType</code> vocabulary term.
    * @param value The value of the term.
    */
-  private LibraryType(String value)
+  private SilencingReagentType(String value)
   {
     _value = value;
   }

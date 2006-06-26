@@ -7,30 +7,28 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model.libraries;
+package edu.harvard.med.screensaver.model.screens;
 
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
- * The library type vocabulary.
+ * The method of quantification vocabulary.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public enum LibraryType implements VocabularyTerm
+public enum MethodOfQuantification implements VocabularyTerm
 {
 
   // the vocabulary
   
-  COMMERCIAL("Commercial"),
-  DOS("DOS"),
-  ANNOTATION("Annotation"),
-  DISCRETE("Discrete"),
-  KNOWN_BIOACTIVES("Known Bioactives"),
-  NCI("NCI"),
-  NATURAL_PRODUCTS("Natural Products"),
-  RNAI("RNAi"),
+  RTPCR("RTPCR"),
+  BRANCHED_DNA("Branched DNA"),
+  WESTERN("Western"),
+  NORTHERN("Northern"),
+  IP_WESTERN("IP Western"),
+  IMMUNOFLOURESCENCE("Immunoflourescence"),
   OTHER("Other")
   ;
 
@@ -38,13 +36,13 @@ public enum LibraryType implements VocabularyTerm
   // static inner class
 
   /**
-   * A Hibernate <code>UserType</code> to map the {@link LibraryType} vocabulary.
+   * A Hibernate <code>UserType</code> to map the {@link MethodOfQuantification} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<LibraryType>
+  public static class UserType extends VocabularyUserType<MethodOfQuantification>
   {
     public UserType()
     {
-      super(LibraryType.values());
+      super(MethodOfQuantification.values());
     }
   }
 
@@ -54,10 +52,10 @@ public enum LibraryType implements VocabularyTerm
   private String _value;
 
   /**
-   * Constructs a <code>LibraryType</code> vocabulary term.
+   * Constructs a <code>MethodOfQuantification</code> vocabulary term.
    * @param value The value of the term.
    */
-  private LibraryType(String value)
+  private MethodOfQuantification(String value)
   {
     _value = value;
   }

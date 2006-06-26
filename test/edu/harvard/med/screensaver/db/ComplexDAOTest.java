@@ -310,8 +310,8 @@ public class ComplexDAOTest extends AbstractSpringTest
               false,
               "human",
               false);
-            rvt[i].setAssayReadoutType(i % 2 == 0 ? AssayReadoutType.PHOTOMETRY: AssayReadoutType.FLOURESCENCE_INTENSITY);
-            rvt[i].setActivityIndicatorType(i % 2 == 0 ? ActivityIndicatorType.BOOLEAN: ActivityIndicatorType.SCALED);
+            rvt[i].setAssayReadoutType(i % 2 == 0 ? AssayReadoutType.PHOTOMETRY: AssayReadoutType.FLUORESCENCE_INTENSITY);
+            rvt[i].setActivityIndicatorType(i % 2 == 0 ? ActivityIndicatorType.BOOLEAN: ActivityIndicatorType.PARTITION);
             rvt[i].setIndicatorDirection(i % 2 == 0 ? IndicatorDirection.LOW_VALUES_INDICATE : IndicatorDirection.HIGH_VALUES_INDICATE);
           }
           
@@ -365,10 +365,10 @@ public class ComplexDAOTest extends AbstractSpringTest
               screenResult,
               rvt.getScreenResult());
             assertEquals(
-              iResultValue % 2 == 0 ? AssayReadoutType.PHOTOMETRY : AssayReadoutType.FLOURESCENCE_INTENSITY,
+              iResultValue % 2 == 0 ? AssayReadoutType.PHOTOMETRY : AssayReadoutType.FLUORESCENCE_INTENSITY,
               rvt.getAssayReadoutType());
             assertEquals(
-              iResultValue % 2 == 0 ? ActivityIndicatorType.BOOLEAN: ActivityIndicatorType.SCALED,
+              iResultValue % 2 == 0 ? ActivityIndicatorType.BOOLEAN: ActivityIndicatorType.PARTITION,
               rvt.getActivityIndicatorType());
             assertEquals(
               iResultValue % 2 == 0 ? IndicatorDirection.LOW_VALUES_INDICATE : IndicatorDirection.HIGH_VALUES_INDICATE,

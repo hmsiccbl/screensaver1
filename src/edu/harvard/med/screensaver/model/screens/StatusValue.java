@@ -7,44 +7,44 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model.libraries;
+package edu.harvard.med.screensaver.model.screens;
 
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
- * The library type vocabulary.
+ * The status_value vocabulary.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public enum LibraryType implements VocabularyTerm
+public enum StatusValue implements VocabularyTerm
 {
 
   // the vocabulary
   
-  COMMERCIAL("Commercial"),
-  DOS("DOS"),
-  ANNOTATION("Annotation"),
-  DISCRETE("Discrete"),
-  KNOWN_BIOACTIVES("Known Bioactives"),
-  NCI("NCI"),
-  NATURAL_PRODUCTS("Natural Products"),
-  RNAI("RNAi"),
-  OTHER("Other")
+  ACCEPTED("Accepted"),
+  COMPLETED("Completed"),
+  COMPLETED___DUPLICATE_WITH_ONGOING("Completed - Duplicate with Ongoing"),
+  DROPPED___TECHNICAL("Dropped - Technical"),
+  DROPPED___RESOURCES("Dropped - Resources"),
+  NEVER_INITIATED("Never Initiated"),
+  ONGOING("Ongoing"),
+  PENDING("Pending"),
+  TRANSFERRED_TO_BROAD_INSTITUTE("Transferred to Broad Institute")
   ;
 
  
   // static inner class
 
   /**
-   * A Hibernate <code>UserType</code> to map the {@link LibraryType} vocabulary.
+   * A Hibernate <code>UserType</code> to map the {@link StatusValue} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<LibraryType>
+  public static class UserType extends VocabularyUserType<StatusValue>
   {
     public UserType()
     {
-      super(LibraryType.values());
+      super(StatusValue.values());
     }
   }
 
@@ -54,10 +54,10 @@ public enum LibraryType implements VocabularyTerm
   private String _value;
 
   /**
-   * Constructs a <code>LibraryType</code> vocabulary term.
+   * Constructs a <code>StatusValue</code> vocabulary term.
    * @param value The value of the term.
    */
-  private LibraryType(String value)
+  private StatusValue(String value)
   {
     _value = value;
   }

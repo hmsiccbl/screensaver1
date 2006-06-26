@@ -149,8 +149,8 @@ public class ScreenResultParser
     activityIndicatorTypeMap.put("B",ActivityIndicatorType.NUMERICAL);
     activityIndicatorTypeMap.put("Boolean",ActivityIndicatorType.BOOLEAN);
     activityIndicatorTypeMap.put("C",ActivityIndicatorType.BOOLEAN);
-    activityIndicatorTypeMap.put("Scaled",ActivityIndicatorType.SCALED);
-    activityIndicatorTypeMap.put("D",ActivityIndicatorType.SCALED);
+    activityIndicatorTypeMap.put("Scaled",ActivityIndicatorType.PARTITION);
+    activityIndicatorTypeMap.put("D",ActivityIndicatorType.PARTITION);
     
     rawOrDerivedMap.put("", false);
     rawOrDerivedMap.put("raw", false);
@@ -552,7 +552,7 @@ public class ScreenResultParser
                 ? _booleanParser.parse(cell)
                 : rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL
                   ? cell.getDouble()
-                  : rvt.getActivityIndicatorType() == ActivityIndicatorType.SCALED
+                  : rvt.getActivityIndicatorType() == ActivityIndicatorType.PARTITION
                     ? cell.getString() : cell.getString();
           if (value == null) {
             value = "";

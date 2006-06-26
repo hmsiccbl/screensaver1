@@ -13,58 +13,62 @@ import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
- * The Assay Readout Type vocabulary.
+ * The assay readout type vocabulary.
  * 
- * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 public enum AssayReadoutType implements VocabularyTerm
 {
-  
+
   // the vocabulary
   
   PHOTOMETRY("Photometry"),
   LUMINESCENCE("Luminescence"),
-  FLOURESCENCE_INTENSITY("Flourescence Intensity"),
+  FLUORESCENCE_INTENSITY("Fluorescence Intensity"),
   FP("FP"),
   FRET("FRET"),
   IMAGING("Imaging"),
   UNSPECIFIED("Unspecified")
   ;
-  
 
+ 
   // static inner class
 
   /**
    * A Hibernate <code>UserType</code> to map the {@link AssayReadoutType} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<AssayReadoutType> {
-    public UserType() {
+  public static class UserType extends VocabularyUserType<AssayReadoutType>
+  {
+    public UserType()
+    {
       super(AssayReadoutType.values());
     }
   }
 
 
   // private instance field and constructor
-  
+
   private String _value;
 
   /**
    * Constructs a <code>AssayReadoutType</code> vocabulary term.
    * @param value The value of the term.
    */
-  private AssayReadoutType(String value) {
+  private AssayReadoutType(String value)
+  {
     _value = value;
   }
-  
-  
+
+
   // public instance methods
 
   /**
    * Get the value of the vocabulary term.
    * @return the value of the vocabulary term
    */
-  public String getValue() {
+  public String getValue()
+  {
     return _value;
   }
 
@@ -72,7 +76,8 @@ public enum AssayReadoutType implements VocabularyTerm
    * @see java.lang.Object#toString()
    */
   @Override
-  public String toString() {
+  public String toString()
+  {
     return getValue();
   }
 }

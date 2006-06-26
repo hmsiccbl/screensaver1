@@ -13,52 +13,57 @@ import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
- * The Indicator Direction type vocabulary.
+ * The indicator direction vocabulary.
  * 
- * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 public enum IndicatorDirection implements VocabularyTerm
 {
-  
+
   // the vocabulary
   
-  HIGH_VALUES_INDICATE("HighValuesIndicate"), 
-  LOW_VALUES_INDICATE("LowValuesIndicate")
+  HIGH_VALUES_INDICATE("High Values Indicate"),
+  LOW_VALUES_INDICATE("Low Values Indicate")
   ;
-  
+
+ 
   // static inner class
 
   /**
    * A Hibernate <code>UserType</code> to map the {@link IndicatorDirection} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<IndicatorDirection> {
-    public UserType() {
+  public static class UserType extends VocabularyUserType<IndicatorDirection>
+  {
+    public UserType()
+    {
       super(IndicatorDirection.values());
     }
   }
 
 
   // private instance field and constructor
-  
+
   private String _value;
 
   /**
-   * Constructs a <code>IndicatoryDirectionType</code> vocabulary term.
+   * Constructs a <code>IndicatorDirection</code> vocabulary term.
    * @param value The value of the term.
    */
-  private IndicatorDirection(String value) {
+  private IndicatorDirection(String value)
+  {
     _value = value;
   }
-  
-  
+
+
   // public instance methods
 
   /**
    * Get the value of the vocabulary term.
    * @return the value of the vocabulary term
    */
-  public String getValue() {
+  public String getValue()
+  {
     return _value;
   }
 
@@ -66,7 +71,8 @@ public enum IndicatorDirection implements VocabularyTerm
    * @see java.lang.Object#toString()
    */
   @Override
-  public String toString() {
+  public String toString()
+  {
     return getValue();
   }
 }

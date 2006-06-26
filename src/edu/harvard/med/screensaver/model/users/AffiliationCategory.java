@@ -7,30 +7,27 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model.libraries;
+package edu.harvard.med.screensaver.model.users;
 
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
- * The library type vocabulary.
+ * The affiliation category vocabulary.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public enum LibraryType implements VocabularyTerm
+public enum AffiliationCategory implements VocabularyTerm
 {
 
   // the vocabulary
   
-  COMMERCIAL("Commercial"),
-  DOS("DOS"),
-  ANNOTATION("Annotation"),
-  DISCRETE("Discrete"),
-  KNOWN_BIOACTIVES("Known Bioactives"),
-  NCI("NCI"),
-  NATURAL_PRODUCTS("Natural Products"),
-  RNAI("RNAi"),
+  HMS("HMS"),
+  HMS_AFFILIATED_HOSPITAL("HMS Affiliated Hospital"),
+  HSPH("HSPH"),
+  BROAD_ICG("Broad/ICG"),
+  HARVARD_FAS("Harvard FAS"),
   OTHER("Other")
   ;
 
@@ -38,13 +35,13 @@ public enum LibraryType implements VocabularyTerm
   // static inner class
 
   /**
-   * A Hibernate <code>UserType</code> to map the {@link LibraryType} vocabulary.
+   * A Hibernate <code>UserType</code> to map the {@link AffiliationCategory} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<LibraryType>
+  public static class UserType extends VocabularyUserType<AffiliationCategory>
   {
     public UserType()
     {
-      super(LibraryType.values());
+      super(AffiliationCategory.values());
     }
   }
 
@@ -54,10 +51,10 @@ public enum LibraryType implements VocabularyTerm
   private String _value;
 
   /**
-   * Constructs a <code>LibraryType</code> vocabulary term.
+   * Constructs a <code>AffiliationCategory</code> vocabulary term.
    * @param value The value of the term.
    */
-  private LibraryType(String value)
+  private AffiliationCategory(String value)
   {
     _value = value;
   }
