@@ -9,26 +9,32 @@
 
 package edu.harvard.med.screensaver.model;
 
-import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.db.SchemaUtil;
+import org.hibernate.metadata.ClassMetadata;
 
 /**
  * Test the Hibernate ClassMetadatas for the entities.
  */
 public class HibernateClassesTest extends HibernateClassesExercisor
 {
-  /**
-   * Bean property, for database access via Spring and Hibernate.
-   */
-  protected DAO dao;
-
-  /**
-   * For schema-related test setup tasks.
-   */
-  protected SchemaUtil schemaUtil;
-
-  public void testSomething()
+  public void testIsVersioned()
   {
-    
+    exercizeClassMetadatas(new ClassMetadataExercizor()
+      {
+        public void exercizeClassMetadata(ClassMetadata classMetadata)
+        {
+          String entityName = classMetadata.getEntityName();
+          assertTrue(
+            "hibernate class is versioned: " + entityName,
+            classMetadata.isVersioned());
+          int versionIndex = classMetadata.getVersionProperty();
+          String versionName = classMetadata.getPropertyNames()[versionIndex];
+          assertTrue(
+            "name of version property is version: " + entityName,
+            versionName.equals("version"));
+        }
+      });
   }
+  
+  // TODO: test getId() is public and setId() is private
+  // TODO: test hbn properties have non-hbn equivalent public getters
 }
