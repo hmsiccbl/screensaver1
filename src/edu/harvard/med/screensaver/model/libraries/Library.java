@@ -71,6 +71,14 @@ public class Library extends AbstractEntity
     setEndPlate(endPlate);
   }
   
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
+   */
+  public Integer getEntityId()
+  {
+    return getLibraryId();
+  }
+  
   /**
    * Get the library id for the library.
    * @return the library id for the library

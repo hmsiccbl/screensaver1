@@ -48,7 +48,7 @@ public class Compound extends AbstractEntity
   private String      _chembankId;
   
   
-  // public constructors and methods
+  // public constructors
   
   /**
    * Constructs an initialized <code>Compound</code> object.
@@ -70,6 +70,17 @@ public class Compound extends AbstractEntity
     _isSalt = isSalt;
   }
   
+  
+  // public methods
+  
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
+   */
+  public Integer getEntityId()
+  {
+    return getCompoundId();
+  }
+
 	/**
    * Get the compound id for the compound.
 	 * @return the compound id for the compound

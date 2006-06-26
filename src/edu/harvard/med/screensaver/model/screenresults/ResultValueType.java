@@ -115,7 +115,15 @@ public class ResultValueType extends AbstractEntity implements Comparable
     setScreenResult(screenResult);
     setName(name);
   }
-
+  
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
+   */
+  public Integer getEntityId()
+  {
+    return getResultValueTypeId();
+  }
+  
   /**
    * Get a unique identifier for the <code>ResultValueType</code>.
    * 

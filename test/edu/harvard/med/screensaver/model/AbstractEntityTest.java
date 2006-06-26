@@ -37,7 +37,15 @@ public class AbstractEntityTest extends TestCase
       _name = name;
       _great = isGreat;
     }
-
+    
+    /* (non-Javadoc)
+     * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
+     */
+    public Integer getEntityId()
+    {
+      return -1;
+    }
+    
     public String getName()
     {
       return _name;

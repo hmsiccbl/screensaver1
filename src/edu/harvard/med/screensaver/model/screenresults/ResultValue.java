@@ -85,6 +85,14 @@ public class ResultValue extends AbstractEntity implements Comparable
     setExclude(exclude);
   }
 
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
+   */
+  public Integer getEntityId()
+  {
+    return getResultValueId();
+  }
+
   /**
    * Get a unique identifier for the <code>ResultValue</code>.
    * 

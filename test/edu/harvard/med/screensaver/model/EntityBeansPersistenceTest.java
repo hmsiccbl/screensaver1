@@ -65,7 +65,7 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
             {
               public void runTransaction()
               {
-                if (dao.getEntityId(bean) == null) {
+                if (bean.getEntityId() == null) {
                   dao.persistEntity(bean);
                 }
               }
@@ -76,7 +76,7 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
               public void runTransaction()
               {
                 AbstractEntity localBean =
-                  dao.findEntityById(beanClass, dao.getEntityId(bean));
+                  dao.findEntityById(beanClass, bean.getEntityId());
 
                 Method getter = propertyDescriptor.getReadMethod();
                 // TODO: check if the getter returns a collection before
@@ -142,10 +142,10 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
 
                 // if the bean has already been persisted, then get the persisted copy, as the current
                 // copy is stale. if it has not, persist it now so we can get the entityId
-                if (dao.getEntityId(localBean) != null) {
+                if (localBean.getEntityId() != null) {
                   localBean = dao.findEntityById(
                     localBean.getClass(),
-                    dao.getEntityId(localBean));
+                    localBean.getEntityId());
                 }
                 else {
                   dao.persistEntity(localBean);
@@ -170,7 +170,7 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
               {
                 AbstractEntity localBean = dao.findEntityById(
                   bean.getClass(),
-                  dao.getEntityId(bean));
+                  bean.getEntityId());
 
                 try {
                   Object getterResult = getter.invoke(localBean); 
@@ -283,8 +283,8 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
           // if the bean has already been persisted, then get the persisted copy, as
           // the current copy is stale. if it has not, persist it now so we can get
           // the entityId
-          if (dao.getEntityId(localBean) != null) {
-            localBean = dao.findEntityById(beanClass, dao.getEntityId(localBean));
+          if (localBean.getEntityId() != null) {
+            localBean = dao.findEntityById(beanClass, localBean.getEntityId());
           }
           else {
             dao.persistEntity(localBean);
@@ -309,7 +309,7 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
         public void runTransaction()
         {
           AbstractEntity localBean =
-            dao.findEntityById(beanClass, dao.getEntityId(bean));
+            dao.findEntityById(beanClass, bean.getEntityId());
           
           try {
             Collection result = (Collection) getterMethod.invoke(localBean);
@@ -343,14 +343,14 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
             // GOOD IDEA: don't try to use the same entity across transactions!
             localTestValue = dao.findEntityById(
               (Class<? extends AbstractEntity>) testValue.getClass(),
-              dao.getEntityId((AbstractEntity) testValue));
+              ((AbstractEntity) testValue).getEntityId());
           }
           catch (ClassCastException e) {
             // don't worry - it's just that the test value isn't an entity
           }
           
           AbstractEntity localBean =
-            dao.findEntityById(beanClass, dao.getEntityId(bean));
+            dao.findEntityById(beanClass, bean.getEntityId());
           
           try {
             Boolean result = (Boolean) removeMethod.invoke(localBean, localTestValue);
@@ -371,7 +371,7 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
         public void runTransaction()
         {
           AbstractEntity localBean =
-            dao.findEntityById(beanClass, dao.getEntityId(bean));
+            dao.findEntityById(beanClass, bean.getEntityId());
           
           try {
             Collection result = (Collection) getterMethod.invoke(localBean);
@@ -483,8 +483,8 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
           // if the bean has already been persisted, then get the persisted copy, as
           // the current copy is stale. if it has not, persist it now so we can get
           // the entityId
-          if (dao.getEntityId(localBean) != null) {
-            localBean = dao.findEntityById(beanClass, dao.getEntityId(bean));
+          if (localBean.getEntityId() != null) {
+            localBean = dao.findEntityById(beanClass, bean.getEntityId());
           }
           
           try {
@@ -506,9 +506,9 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
         public void runTransaction()
         {
           AbstractEntity localBean =
-            dao.findEntityById(beanClass, dao.getEntityId(bean));
+            dao.findEntityById(beanClass, bean.getEntityId());
           AbstractEntity localRelatedBean =
-            dao.findEntityById(relatedBeanClass, dao.getEntityId(relatedBean));
+            dao.findEntityById(relatedBeanClass, relatedBean.getEntityId());
           
           if (otherSideIsMany) {
             try {
@@ -643,8 +643,8 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
           // if the bean has already been persisted, then get the persisted copy, as
           // the current copy is stale. if it has not, persist it now so we can get
           // the entityId
-          if (dao.getEntityId(localBean) != null) {
-            localBean = dao.findEntityById(beanClass, dao.getEntityId(bean));
+          if (localBean.getEntityId() != null) {
+            localBean = dao.findEntityById(beanClass, bean.getEntityId());
           }    
     
           try {
@@ -666,9 +666,9 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
         public void runTransaction()
         {
           AbstractEntity localBean =
-            dao.findEntityById(beanClass, dao.getEntityId(bean));
+            dao.findEntityById(beanClass, bean.getEntityId());
           AbstractEntity localRelatedBean =
-            dao.findEntityById(relatedBeanClass, dao.getEntityId(relatedBean));
+            dao.findEntityById(relatedBeanClass, relatedBean.getEntityId());
           
           if (otherSideIsMany) {
             try {

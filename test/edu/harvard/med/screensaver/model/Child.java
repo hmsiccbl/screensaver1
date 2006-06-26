@@ -41,7 +41,15 @@ public class Child extends AbstractEntity
     _name = name;
     setParent(parent);
   }
-
+  
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
+   */
+  public Integer getEntityId()
+  {
+    return getChildId();
+  }
+  
   /**
    * @hibernate.id
    *   generator-class="sequence"

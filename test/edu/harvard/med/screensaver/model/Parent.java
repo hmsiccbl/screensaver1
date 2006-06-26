@@ -46,6 +46,14 @@ public class Parent extends AbstractEntity
     _name = name;
   }
   
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
+   */
+  public Integer getEntityId()
+  {
+    return getParentId();
+  }
+  
   /**
    * @hibernate.id
    *   generator-class="sequence"

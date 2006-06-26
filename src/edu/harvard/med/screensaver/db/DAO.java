@@ -176,13 +176,4 @@ public interface DAO
     Class<E> entityClass,
     String propertyName,
     String propertyPattern);
-  
-  /**
-   * Get the persistence identifier for the specified entity.
-   * @param <E> the type of the entity to get the persistence identifier for
-   * @param entity the entity to get the persistence identifier for
-   * @return the persistence identifier for the entity
-   */
-  @Transactional(readOnly = true)
-  public <E extends AbstractEntity> Integer getEntityId(E entity);
 }

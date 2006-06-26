@@ -82,7 +82,15 @@ public class ScreenResult extends AbstractEntity
   {
     setDateCreated(dateCreated);
   }
-
+  
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
+   */
+  public Integer getEntityId()
+  {
+    return getScreenResultId();
+  }
+  
   /**
    * Get a unique identifier for the <code>ScreenResult</code>.
    * 

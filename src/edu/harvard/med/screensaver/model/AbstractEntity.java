@@ -21,6 +21,8 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.model.libraries.Compound;
+
 
 /**
  * An abstract superclass for the entity beans in the data model.
@@ -129,6 +131,19 @@ public abstract class AbstractEntity implements Serializable
 {
   private static Logger log = Logger.getLogger(AbstractEntity.class);
   
+  // protected methods
+  
+  /**
+   * Get the entity id. This is the identifier used by Hibernate, and is
+   * generally implemented as a separate property in the entity classes.
+   * The property is generally named by postfixing the entity name with
+   * "Id". For instance, for {@link Compound}, this method delegates to
+   * the property read method {@link Compound#getCompoundId()}.
+   * 
+   * @return the entity id
+   */
+  abstract public Integer getEntityId();
+
   /**
    * Performs a shallow compare of this <code>AbstractEntity</code> with
    * another and returns <code>true</code> iff they are the exact same class
@@ -205,7 +220,7 @@ public abstract class AbstractEntity implements Serializable
   }
 
   
-  // private methods
+  // protected methods
   
   /**
    * Return the business key for the entity.
@@ -222,6 +237,9 @@ public abstract class AbstractEntity implements Serializable
   {
     return DateUtils.round(originalDate, Calendar.DATE);
   }
+  
+  
+  // private methods
   
   /**
    * Determine if a given property should be used in determining equivalence.

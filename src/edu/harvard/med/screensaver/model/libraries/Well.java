@@ -64,6 +64,14 @@ public class Well extends AbstractEntity
     setLibrary(parentLibrary);
   }
 
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
+   */
+  public Integer getEntityId()
+  {
+    return getWellId();
+  }
+  
   /**
    * Get the well id for the well.
    * 
