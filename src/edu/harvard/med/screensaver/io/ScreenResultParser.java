@@ -226,8 +226,13 @@ public class ScreenResultParser
 
   private static void cleanOutputDirectory(File parentFile)
   {
+    if (!parentFile.isDirectory()) {
+      log.warn("cannot clean the directory '" + parentFile + "' since it is not a directory");
+      return;
+    }
+    log.info("cleaning directory " + parentFile);
     Iterator iterator = FileUtils.iterateFiles(parentFile,
-                                               new String[] { ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION, ".out" },
+                                               new String[] {ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION, ".out"},
                                                false);
     while (iterator.hasNext()) {
       File fileToDelete = (File) iterator.next();

@@ -48,7 +48,8 @@
   <property name="hibernate.cfg.xml" location="resources/hibernate.cfg.xml"/>
   <property name="javadoc.dir" location="build/api"/>
   <property name="distro.build.dir" location="build/distro/screensaver"/>
-  <property name="distro.file" location="build/screensaver.tgz"/> 
+  <property name="distro.file.tgz" location="build/screensaver.tgz"/> 
+  <property name="distro.file.zip" location="build/screensaver.zip"/> 
  
   <!-- file sets -->
 
@@ -387,6 +388,7 @@
  
   <target
     name="distro"
+    depends="clean-distro,hbm_xml"
     description="Build a single-file distribution of the project, so that classes containing Main methods can be executed from the command line"
   >
     <!-- TODO: much of this is duplicating what exploded.war target does, so we should generalize operations -->
@@ -418,11 +420,15 @@
     </copy>
     
     <tar
-      destfile="${distro.file}" 
+      destfile="${distro.file.tgz}" 
       basedir="${distro.build.dir}/.."
       compression="gzip"
-    >
-     </tar> 
+      longfile="gnu" 
+    />
+    <zip
+      destfile="${distro.file.zip}" 
+      basedir="${distro.build.dir}/.." 
+    /> 
   </target> 
     
    

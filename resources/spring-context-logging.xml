@@ -6,8 +6,9 @@
     name="logConfigurer"
     class="edu.harvard.med.screensaver.LogConfigurer">
     <constructor-arg
-      value="file:resources/log4j.properties" />
-    <!--  value="file:/home/ant/iccb/workspace/screensaver/resources/log4j.properties" /-->
+    value="classpath:log4j.properties"/>
+  <!--       value="file:resources/log4j.properties" /-->
+  <!--    value="file:/home/ant/iccb/workspace/screensaver/resources/log4j.properties" -->
     <constructor-arg 
       value="60000" />
     <constructor-arg><null/></constructor-arg>
