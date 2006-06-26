@@ -35,7 +35,7 @@ public class UnrecoverableScreenResultParseException extends Exception
   public UnrecoverableScreenResultParseException(String message, Cell cell)
   {
     super(message + " @ " + cell);
-    _cell = cell;
+    _cell = (Cell) cell.clone();
   }
   
   public Workbook getWorkbook()

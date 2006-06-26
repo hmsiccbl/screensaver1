@@ -29,7 +29,7 @@ public class ParseError
   public ParseError(String message, Cell atCell)
   {
    _message = message;
-   _atCell = atCell;
+   _atCell = (Cell) atCell.clone();
   }
   
   /**

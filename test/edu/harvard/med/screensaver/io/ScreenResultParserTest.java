@@ -313,6 +313,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
                      workbook.getWorkbook().getSheetName(3));
         assertEquals("could not read workbook: test/edu/harvard/med/screensaver/io/nonextant.xls (No such file or directory)",
                      HSSFCellUtil.getCell(sheet3.getRow(0),'A' - 'A').getStringCellValue());
+        
       }
       else if (workbook.getWorkbookFile().getName().equals("rawdata_with_errors.xls")) {
         // test raw data workbook
@@ -328,8 +329,28 @@ public class ScreenResultParserTest extends AbstractSpringTest
     }
   }
   
-
-  private void setDefaultValues(ResultValueType rvt) {
+  /**
+   * Tests that Cells are cloned when needed (a single Cell is generally
+   * recycled, as an optimization). Note that this test assumes that the test
+   * workbooks do not have more than 1 error per cell, which is a possibility in
+   * the real world, but would break our naive test. (I suppose we could also
+   * test simply that at least some of our ParseErrors' cells were different.)
+   */
+  public void testRecycledCellUsage() 
+  {
+    File workbookFile = new File("test/edu/harvard/med/screensaver/io/metadata_with_errors.xls");
+    screenResultParser.parse(workbookFile);
+    Set<Cell> cellsWithErrors = new HashSet<Cell>();
+    List<ParseError> errors = screenResultParser.getErrors();
+    for (ParseError error : errors) {
+      assertFalse("every error assigned to distinct cell",
+                  cellsWithErrors.contains(error.getCell()));
+      cellsWithErrors.add(error.getCell());
+    }
+  }
+    
+  private void setDefaultValues(ResultValueType rvt) 
+  {
     if (rvt.getAssayPhenotype() == null) {
       rvt.setAssayPhenotype("");
     }

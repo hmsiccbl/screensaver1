@@ -24,11 +24,13 @@ import org.apache.poi.hssf.util.HSSFColor;
  * Encapsulates the parsing and error annotation operations for a cell in a
  * worksheet. Instantiate new Cells via a Cell.Factory, which you must first
  * instantiate with a set of arguments that will be common to a set of related
- * <code>Cell</code>s.
+ * <code>Cell</code>s. The Cell returned by the factory may be the instance
+ * returned by a previous {@link Factory#getCell()} call, so if you need the
+ * Cell to have a longer lifetime, clone it.
  * 
  * @motivation explicitly associates sheet name with a cell, since you cannot
  *             get it from an HSSFSheet!
- * @motivation handle the fact that HSSFSheet cells can be undefined 
+ * @motivation handle the fact that HSSFSheet cells can be undefined
  * @author ant
  */
 public class Cell
@@ -104,11 +106,11 @@ public class Cell
     {
       if (_recycledCell == null) {
         _recycledCell = new Cell(_workbook,
-                                       _sheetIndex,
-                                       _errors,
-                                       column,
-                                       row,
-                                       required);
+                                 _sheetIndex,
+                                 _errors,
+                                 column,
+                                 row,
+                                 required);
       }
       else {
         _recycledCell._column = column;
@@ -392,51 +394,6 @@ public class Cell
     cell.setCellType(HSSFCell.CELL_TYPE_STRING);
   }
   
-  // protected and private methods and constructors
-
-  protected Cell(Workbook workbook,
-                       int sheetIndex,
-                       ParseErrorManager errors,
-                       short column,
-                       int row,
-                       boolean required)
-  {
-    _workbook = workbook;
-    _sheetIndex = sheetIndex;
-    _errors = errors;
-    _column = column;
-    _row = row;
-    _required = required;
-  }
-  
-  /**
-   * Returns the HSSFCell on the worksheet at the specified location.
-   * 
-   * @return an <code>HSSFCell</code>
-   * @throws CellOutOfRangeException if the specified cell has not been
-   *           initialized with a value in the worksheet
-   */
-  private HSSFCell getCell()
-    throws CellOutOfRangeException
-  {
-    HSSFRow row = getSheet().getRow(getRow());
-    if (row == null) {
-      throw new CellOutOfRangeException(CellOutOfRangeException.UndefinedInAxis.ROW,
-                                        this);
-    }
-    HSSFCell cell = row.getCell(getColumn());
-    if (cell == null) {
-      throw new CellOutOfRangeException(CellOutOfRangeException.UndefinedInAxis.COLUMN,
-                                        this);
-    }
-    return cell;
-  }
-  
-  private HSSFCell getOrCreateCell()
-  {
-    return HSSFCellUtil.getCell(HSSFCellUtil.getRow(getRow(), getSheet()), getColumn());
-  }
-
   /**
    * Returns the value of the cell as a String, regardless of the cell's type.
    * 
@@ -491,6 +448,69 @@ public class Cell
   public String getAsString()
   {
     return getAsString(false);
+  }
+
+
+  // protected and private methods and constructors
+
+  protected Cell(Workbook workbook,
+                       int sheetIndex,
+                       ParseErrorManager errors,
+                       short column,
+                       int row,
+                       boolean required)
+  {
+    _workbook = workbook;
+    _sheetIndex = sheetIndex;
+    _errors = errors;
+    _column = column;
+    _row = row;
+    _required = required;
+  }
+  
+  /**
+   * Returns the HSSFCell on the worksheet at the specified location.
+   * 
+   * @return an <code>HSSFCell</code>
+   * @throws CellOutOfRangeException if the specified cell has not been
+   *           initialized with a value in the worksheet
+   */
+  private HSSFCell getCell()
+    throws CellOutOfRangeException
+  {
+    HSSFRow row = getSheet().getRow(getRow());
+    if (row == null) {
+      throw new CellOutOfRangeException(CellOutOfRangeException.UndefinedInAxis.ROW,
+                                        this);
+    }
+    HSSFCell cell = row.getCell(getColumn());
+    if (cell == null) {
+      throw new CellOutOfRangeException(CellOutOfRangeException.UndefinedInAxis.COLUMN,
+                                        this);
+    }
+    return cell;
+  }
+  
+  private HSSFCell getOrCreateCell()
+  {
+    return HSSFCellUtil.getCell(HSSFCellUtil.getRow(getRow(), getSheet()), getColumn());
+  }
+
+  @Override
+  /**
+   * @motivation A single Cell object is recycled, to cut down on memory usage;
+   *             if you need to keep a Cell around for longer than just parsing
+   *             it (e.g. to remember the location of a parse error), you must
+   *             call this method to create a clone of the Cell.
+   */
+  public Object clone()
+  {
+    return new Cell(_workbook,
+                    _sheetIndex,
+                    _errors,
+                    _column,
+                    _row,
+                    _required);
   }
 
 }
