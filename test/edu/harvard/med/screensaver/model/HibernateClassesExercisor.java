@@ -15,7 +15,7 @@ import org.hibernate.metadata.ClassMetadata;
 /**
  * Exercize the Hibernate ClassMetadatas for the entities.
  */
-abstract class ClassMetadatasExercisor extends EntityClassesExercisor
+abstract class HibernateClassesExercisor extends EntityClassesExercisor
 {
   
   /**

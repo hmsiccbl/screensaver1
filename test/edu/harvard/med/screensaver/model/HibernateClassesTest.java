@@ -15,7 +15,7 @@ import edu.harvard.med.screensaver.db.SchemaUtil;
 /**
  * Test the Hibernate ClassMetadatas for the entities.
  */
-public class ClassMetadatasTest extends ClassMetadatasExercisor
+public class HibernateClassesTest extends HibernateClassesExercisor
 {
   /**
    * Bean property, for database access via Spring and Hibernate.
