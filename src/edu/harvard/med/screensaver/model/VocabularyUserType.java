@@ -60,7 +60,7 @@ implements UserType
 
   // private static fields
   
-  private static final int[] SQL_TYPES = {Types.VARCHAR};
+  private static final int[] SQL_TYPES = {Types.CLOB};
   
   
   // private instance fields
@@ -124,7 +124,7 @@ implements UserType
   public void nullSafeSet(PreparedStatement statement, Object value, int index)
     throws HibernateException, SQLException {
     if (value == null) {
-      statement.setNull(index, Types.VARCHAR);
+      statement.setNull(index, Types.CLOB);
     }
     else {
       statement.setString(index, value.toString());
