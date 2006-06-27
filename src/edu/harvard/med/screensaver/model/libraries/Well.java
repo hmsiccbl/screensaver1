@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 
@@ -28,9 +30,10 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
  */
 public class Well extends AbstractEntity
 {
-
+  
   // static fields
 
+  private static final Logger log = Logger.getLogger(Well.class);
   private static final long serialVersionUID = 2682270079212906959L;
 
 
@@ -64,9 +67,7 @@ public class Well extends AbstractEntity
     setLibrary(parentLibrary);
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
-   */
+  @Override
   public Integer getEntityId()
   {
     return getWellId();
@@ -351,25 +352,12 @@ public class Well extends AbstractEntity
   // package getters and setters
 
   /**
-   * Get the library the well is in.
-   * 
-   * @return the library the well is in
-   * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.libraries.Library"
-   *                        column="library_id" not-null="true"
-   *                        foreign-key="fk_well_to_library"
-   *                        cascade="save-update"
-   */
-  Library getHbnLibrary() {
-    return _library;
-  }
-
-  /**
    * Set the library the well is in. Throw a NullPointerException when the library
    * is null.
    * 
    * @param library the new library for the well
    * @throws NullPointerException when the library is null
-   * @motivation for Hibernate (exclusively)
+   * @motivation for hibernate
    */
   void setHbnLibrary(Library library)
   {
@@ -439,6 +427,20 @@ public class Well extends AbstractEntity
   private void setVersion(Integer version)
   {
     _version = version;
+  }
+
+  /**
+   * Get the library the well is in.
+   * 
+   * @return the library the well is in
+   * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.libraries.Library"
+   *                        column="library_id" not-null="true"
+   *                        foreign-key="fk_well_to_library"
+   *                        cascade="save-update"
+   */
+  private Library getHbnLibrary()
+  {
+    return _library;
   }
 
   /**
