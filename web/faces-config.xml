@@ -27,8 +27,8 @@
     <managed-bean-class>edu.harvard.med.screensaver.ui.MainController</managed-bean-class>
     <managed-bean-scope>request</managed-bean-scope>
     <managed-property>
-      <property-name>labDAO</property-name>
-      <value>#{labDAO}</value>
+      <property-name>DAO</property-name>
+      <value>#{dao}</value>
     </managed-property>
     <managed-property>
       <property-name>libraryController</property-name>
@@ -46,8 +46,8 @@
     <managed-bean-class>edu.harvard.med.screensaver.ui.LibraryController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
-      <property-name>labDAO</property-name>
-      <value>#{labDAO}</value>
+      <property-name>DAO</property-name>
+      <value>#{dao}</value>
     </managed-property>
     <managed-property>
       <property-name>messages</property-name>
@@ -102,10 +102,10 @@
   
   <!-- Converters -->
 
-  <!-- converter>
+  <converter>
     <description>Converter for LibraryType enum to/from string representation</description>
     <converter-id>LibraryTypeConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.model.libraries.LibraryType</converter-class>
-  </converter-->
+    <converter-class>edu.harvard.med.screensaver.ui.util.LibraryTypeConverter</converter-class>
+  </converter>
   
 </faces-config>

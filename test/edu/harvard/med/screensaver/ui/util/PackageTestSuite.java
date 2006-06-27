@@ -21,6 +21,7 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     addTestSuite(SpringUtilTest.class);
+    addTestSuite(EnumTypeConverterTest.class);
   }
 
   public static Test suite()

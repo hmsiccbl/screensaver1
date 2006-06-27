@@ -70,12 +70,19 @@ public class LibraryController extends AbstractController
    * A command to saved the user's edits.
    */
   public String save() {
-    _dao.persistEntity(_library);
-    return "done";
+    return create();
   }
   
   public String create() {
-    _dao.persistEntity(_library);
+    try {
+      _dao.persistEntity(_library);
+    }
+    catch (Exception e) {
+      String msg = "error during entity save/create: " + e.getMessage();
+      log.info(msg);
+      FacesContext.getCurrentInstance().addMessage("libraryForm", new FacesMessage(msg));
+      return null; // redisplay
+    }
     return "done";
   }
   
