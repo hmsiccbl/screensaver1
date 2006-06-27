@@ -21,7 +21,7 @@
   <!-- Specify Spring context configuration files, possibly one per application tier. -->
   <context-param>
     <param-name>contextConfigLocation</param-name>
-    <param-value>/WEB-INF/classes/spring-context-persistence.xml, /WEB-INF/classes/spring-context-ui.xml, /WEB-INF/classes/spring-context-logging.xml</param-value>
+    <param-value>/WEB-INF/classes/spring-context-persistence.xml, /WEB-INF/classes/spring-context-ui.xml, /WEB-INF/classes/spring-context-services.xml, /WEB-INF/classes/spring-context-logging.xml</param-value>
   </context-param>
   
   <!-- Use a servlet listener to allow us to load the above Spring application context XML files -->

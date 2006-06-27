@@ -9,13 +9,16 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.io.File;
 import java.util.List;
 
 import javax.faces.application.FacesMessage;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.io.ScreenResultParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.apache.log4j.Logger;
 
@@ -27,6 +30,9 @@ public class MainController extends AbstractController
   private DAO _dao;
   
   private LibraryController _libraryController;
+  
+  private ScreenResultParser _screenResultParser;
+  private ScreenResultViewerController _screenResultViewerController;
   
   private String _libraryNamePattern;
   
@@ -44,6 +50,38 @@ public class MainController extends AbstractController
 
   public void setLibraryName(String libraryName) {
     _libraryNamePattern = libraryName;
+  }
+  
+  public ScreenResultViewerController getScreenResultViewerController()
+  {
+    return _screenResultViewerController;
+  }
+
+  public void setScreenResultViewerController(
+    ScreenResultViewerController screenResultViewrController)
+  {
+    _screenResultViewerController = screenResultViewrController;
+  }
+
+  public ScreenResultParser getScreenResultParser()
+  {
+    return _screenResultParser;
+  }
+
+  public void setScreenResultParser(ScreenResultParser screenResultParser)
+  {
+    _screenResultParser = screenResultParser;
+  }
+
+  public String viewSampleScreenResult()
+  {
+    // TODO: remove this hack! here just to make some screen result data
+    // available; works on one developer's machine in particular (and I'm not
+    // naming names!)
+    File metadataFile = new File("/home/ant/iccb/screen-result-input-data/119/119MetaData.xls");
+    ScreenResult screenResult = _screenResultParser.parse(metadataFile);
+    _screenResultViewerController.setScreenResult(screenResult);
+    return "success";
   }
   
   public String createLibrary() {
@@ -95,4 +133,5 @@ public class MainController extends AbstractController
     _libraryNamePattern = "";
     return "reset";
   }
+
 }

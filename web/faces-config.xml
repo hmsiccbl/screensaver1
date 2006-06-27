@@ -38,6 +38,14 @@
       <property-name>messages</property-name>
       <value>#{messages}</value>
     </managed-property>
+    <managed-property>
+      <property-name>screenResultViewerController</property-name>
+      <value>#{ScreenResultViewer}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>screenResultParser</property-name>
+      <value>#{screenResultParser}</value>
+    </managed-property>
    </managed-bean>
 
   <managed-bean>
@@ -55,6 +63,21 @@
     </managed-property>
   </managed-bean>
   
+  <managed-bean>
+    <description>Screen Result Viewer form backing bean</description>
+    <managed-bean-name>ScreenResultViewer</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.ScreenResultViewerController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <!-- managed-property>
+      <property-name>DAO</property-name>
+      <value>#{dao}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
+    </managed-property-->
+  </managed-bean>
+  
   
   <!-- Navigation rules -->
   
@@ -64,6 +87,12 @@
       <from-action>#{Main.createLibrary}</from-action>
       <from-outcome>success</from-outcome>
       <to-view-id>/library.jsp</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-action>#{Main.viewSampleScreenResult}</from-action>
+      <from-outcome>success</from-outcome>
+      <to-view-id>/screenresult.jsp</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
@@ -99,6 +128,16 @@
       <to-view-id>/library.jsp</to-view-id>
     </navigation-case>
   </navigation-rule>
+  
+  <navigation-rule>
+    <from-view-id>/screenresult.jsp</from-view-id>
+    <navigation-case>
+      <from-outcome>done</from-outcome>
+      <to-view-id>/main.jsp</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
   
   <!-- Converters -->
 

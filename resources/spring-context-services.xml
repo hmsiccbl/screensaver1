@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
-
+ 
   <bean 
     id="screenResultParser"
     class="edu.harvard.med.screensaver.io.ScreenResultParser"
     singleton="false">
-    <constructor-arg  ref="screenResultParserMockDaoImpl"/>
+    <constructor-arg index="0">
+      <bean class="edu.harvard.med.screensaver.io.MockDaoForScreenResultParserTest"/>
+    </constructor-arg>
     <!-- constructor-arg ref="dao"/-->
   </bean>
   

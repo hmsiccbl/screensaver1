@@ -5,6 +5,10 @@
     <f:view>
 
       <h:form id="createLibraryForm">
+        <h:commandLink action="#{Main.viewSampleScreenResult}">
+          <h:outputText value="View Screen Result (sample)"/>
+        </h:commandLink>
+        <br>
         <h:commandLink action="#{Main.createLibrary}">
           <h:outputText value="Create library"/>
           <%--f:param name="mode" value="create"/--%>
