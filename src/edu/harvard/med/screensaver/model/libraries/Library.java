@@ -295,7 +295,7 @@ public class Library extends AbstractEntity
   // private constructors and instance methods
   
   /**
-   * Constructs an uninitialized Library object.
+   * Construct an uninitialized Library object.
    * @motivation for hibernate
    */
   private Library() {}
@@ -323,7 +323,7 @@ public class Library extends AbstractEntity
   }
 
   /**
-   * Set the version of the library
+   * Set the version of the library.
    * @param version the new version of the library
    * @motivation    for hibernate
    */
