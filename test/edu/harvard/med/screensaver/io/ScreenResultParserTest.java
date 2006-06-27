@@ -54,7 +54,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
   @Override
   protected String[] getConfigLocations()
   {
-    return new String[] {"spring-context-services.xml", "spring-context-screenresultparser-test.xml" };
+    return new String[] {
+      "spring-context-services.xml", 
+      "spring-context-screenresultparser-test.xml"
+    };
   }
 
   /**

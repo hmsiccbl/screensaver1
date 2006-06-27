@@ -195,10 +195,12 @@ public class ScreenResultParser
           "spring-context-screenresultparser-test.xml"
         });
       ScreenResultParser screenResultParser = (ScreenResultParser) appCtx.getBean("screenResultParser");
+      DAO dao = (DAO) appCtx.getBean("daoImpl");
       try {
         File metadataFileToParse = new File(cmdLine.getOptionValue("metadatafile"));
         cleanOutputDirectory(metadataFileToParse.getParentFile());
         ScreenResult screenResult = screenResultParser.parse(metadataFileToParse);
+        dao.persistEntity(screenResult);
         screenResultParser.outputErrorsInAnnotatedWorkbooks(ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
         if (cmdLine.hasOption("wellstoprint")) {
           new ScreenResultPrinter(screenResult).print(new Integer(cmdLine.getOptionValue("wellstoprint")));

@@ -3,10 +3,8 @@
 <beans>
 
   <bean 
-    id="screenResultParser"
-    class="edu.harvard.med.screensaver.io.ScreenResultParser"
-    singleton="false">
-    <constructor-arg  ref="daoImpl"/>
+    id="screenResultParserMockDaoImpl"
+    class="edu.harvard.med.screensaver.io.MockDaoForScreenResultParserTest">
   </bean>
 
 </beans>
