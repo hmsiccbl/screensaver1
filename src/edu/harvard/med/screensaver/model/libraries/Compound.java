@@ -154,13 +154,17 @@ public class Compound extends AbstractEntity
 
   /**
    * Set the compound name.
-   * TODO: since this changes the business key, we need to update all the
-   * corresponding Well.getHbnCompounds(). ugh.
    * @param compoundName the new name for the compound
    */
   public void setCompoundName(String compoundName)
   {
+    for (Well well : getHbnWells()) {
+      well.getHbnCompounds().remove(this);
+    }
     _compoundName = compoundName;
+    for (Well well : getHbnWells()) {
+      well.getHbnCompounds().add(this);
+    }
   }
 
   /**
