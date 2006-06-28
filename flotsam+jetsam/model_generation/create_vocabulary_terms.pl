@@ -113,8 +113,6 @@ my $screens_vocabularies = {
     },
 };
 
-##**** left off checking
-
 my $screenresults_vocabularies = {
     ActivityIndicatorType => {
         human_name => "activity indicator type",
