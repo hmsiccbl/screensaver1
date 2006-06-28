@@ -28,9 +28,9 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     addTestSuite(AbstractEntityTest.class);
-    addTestSuite(HibernateClassesTest.class);
     addTestSuite(EntityClassesTest.class);
     addTestSuite(EntityBeansTest.class);
     addTestSuite(EntityBeansPersistenceTest.class);
+    addTestSuite(HibernateClassesTest.class);
   }
 }
