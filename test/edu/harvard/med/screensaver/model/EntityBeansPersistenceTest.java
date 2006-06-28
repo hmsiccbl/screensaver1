@@ -1,5 +1,5 @@
-// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/test/edu/harvard/med/screensaver/model/EntityBeansTest.java $
-// $Id: EntityBeansTest.java 223 2006-06-21 21:56:57Z js163 $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
