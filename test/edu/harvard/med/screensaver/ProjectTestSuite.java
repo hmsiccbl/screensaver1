@@ -12,20 +12,20 @@ package edu.harvard.med.screensaver;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class PackageTestSuite extends TestSuite
+public class ProjectTestSuite extends TestSuite
 {
 
   public static void main(String[] args)
   {
-    junit.textui.TestRunner.run(PackageTestSuite.class);
+    junit.textui.TestRunner.run(ProjectTestSuite.class);
   }
   
   public static Test suite()
   {
-    return new PackageTestSuite();
+    return new ProjectTestSuite();
   }
 
-  public PackageTestSuite()
+  public ProjectTestSuite()
   {
     addTest(edu.harvard.med.screensaver.model.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.db.PackageTestSuite.suite());
