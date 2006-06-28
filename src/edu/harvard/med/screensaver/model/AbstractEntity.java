@@ -195,6 +195,9 @@ public abstract class AbstractEntity implements Serializable
    */
   @Override
   public boolean equals(Object object) {
+    if (object == null) {
+      return false;
+    }
     if (! getClass().equals(object.getClass())) {
       return false;
     }
