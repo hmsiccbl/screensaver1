@@ -43,6 +43,7 @@ public class Well extends AbstractEntity
   private Integer _version;
   private Library _library;
   private Set<Compound> _compounds = new HashSet<Compound>();
+  private Set<SilencingReagent> _silencingReagents = new HashSet<SilencingReagent>();
   private Integer _plateNumber;
   private String _wellName;
   private String _iccbNumber;
@@ -110,42 +111,82 @@ public class Well extends AbstractEntity
   }
 
   /**
-   * Get an unmodifiable copy of the set of compounds contained in the well.
+   * Get an unmodifiable copy of the set of compounds.
    * 
-   * @return an unmodifiable copy of the set of compounds contained in the well
+   * @return an unmodifiable copy of the set of compounds
    */
   public Set<Compound> getCompounds() {
     return Collections.unmodifiableSet(getHbnCompounds());
   }
 
   /**
-   * Add the compound to the well.
+   * Add the compound.
    * 
-   * @param compound the compound to add to the well
+   * @param compound the compound to add
    * @return true iff the compound was not already in the well
    */
   public boolean addCompound(Compound compound) {
     assert !(getHbnCompounds().contains(compound) ^ compound.getHbnWells()
       .contains(this)) : "asymmetric compound/well association encountered";
     if (getHbnCompounds().add(compound)) {
-      return compound.getHbnWells()
-        .add(this);
+      return compound.getHbnWells().add(this);
     }
     return false;
   }
 
   /**
-   * Remove the compound from the well.
+   * Remove the compound.
    * 
-   * @param compound the compound to remove from the well
+   * @param compound the compound to remove
    * @return true iff the compound was previously in the well
    */
   public boolean removeCompound(Compound compound) {
     assert !(getHbnCompounds().contains(compound) ^ compound.getHbnWells()
       .contains(this)) : "asymmetric compound/well association encountered";
     if (getHbnCompounds().remove(compound)) {
-      return compound.getHbnWells()
-        .remove(this);
+      return compound.getHbnWells().remove(this);
+    }
+    return false;
+  }
+
+
+  /**
+   * Get an unmodifiable copy of the set of silencing reagents.
+   * 
+   * @return an unmodifiable copy of the set of silencing reagents
+   */
+  public Set<SilencingReagent> getSilencingReagents() {
+    return Collections.unmodifiableSet(getHbnSilencingReagents());
+  }
+
+  /**
+   * Add the silencing reagent.
+   * 
+   * @param silencingReagent the silencing reagent to add
+   * @return true iff the silencing reagent was not already in the well
+   */
+  public boolean addSilencingReagent(SilencingReagent silencingReagent) {
+    assert !(getHbnSilencingReagents().contains(silencingReagent) ^
+      silencingReagent.getHbnWells().contains(this)) :
+        "asymmetric compound/well association encountered";
+    if (getHbnSilencingReagents().add(silencingReagent)) {
+      return silencingReagent.getHbnWells().add(this);
+    }
+    return false;
+  }
+
+  /**
+   * Remove the silencing reagent.
+   * 
+   * @param silencingReagent the silencing reagent to remove
+   * @return true iff the compound was previously in the well
+   */
+  public boolean removeSilencingReagent(SilencingReagent silencingReagent) {
+    assert ! (getHbnSilencingReagents().contains(silencingReagent) ^
+      silencingReagent.getHbnWells().contains(this)) :
+        "asymmetric compound/well association encountered";
+    if (getHbnSilencingReagents().remove(silencingReagent)) {
+      return silencingReagent.getHbnWells().remove(this);
     }
     return false;
   }
@@ -379,15 +420,36 @@ public class Well extends AbstractEntity
    *             {@link Compound} and {@link Well}).
    * @hibernate.set table="well_compound_link" cascade="all"
    * @hibernate.collection-key column="well_id"
-   * @hibernate.collection-many-to-many column="compound_id"
-   *                                    class="edu.harvard.med.screensaver.model.libraries.Compound"
-   *                                    foreign-key="fk_well_compound_link_to_well"
+   * @hibernate.collection-many-to-many
+   *   column="compound_id"
+   *   class="edu.harvard.med.screensaver.model.libraries.Compound"
+   *   foreign-key="fk_well_compound_link_to_well"
    */
   Set<Compound> getHbnCompounds()
   {
     return _compounds;
   }
 
+  /**
+   * Get the silencing reagents.
+   * 
+   * @return the silencing reagents
+   * @hibernate.set
+   *   table="well_silencing_reagent_link"
+   *   cascade="all"
+   * @hibernate.collection-key
+   *   column="well_id"
+   * @hibernate.collection-many-to-many
+   *   column="silencing_reagent_id"
+   *   class="edu.harvard.med.screensaver.model.libraries.SilencingReagent"
+   *   foreign-key="fk_well_silencing_reagent_link_to_well"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  Set<SilencingReagent> getHbnSilencingReagents()
+  {
+    return _silencingReagents;
+  }
+  
   /**
    * Constructs an uninitialized Well object.
    * 
@@ -452,6 +514,17 @@ public class Well extends AbstractEntity
   private void setHbnCompounds(Set<Compound> compounds)
   {
     _compounds = compounds;
+  }
+  
+  /**
+   * Set the silencing reagents.
+   * 
+   * @param silencingReagents the new silencing reagents
+   * @motivation for hibernate
+   */
+  private void setHbnSilencingReagents(Set<SilencingReagent> silencingReagents)
+  {
+    _silencingReagents = silencingReagents;
   }
   
   /**
