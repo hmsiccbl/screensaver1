@@ -1,0 +1,18 @@
+my $entity = {
+    name => "Gene",
+    human_name => "gene",
+    package => "libraries",
+    business_key => "entrezgeneId",
+
+    properties =>
+        [#name                       #human name                  #type               #vocab #reqd #uniq #nary #is-reln #package #OS-nary #OS-reqd #inv
+         ["silencingReagents",       "silencing reagents",        "SilencingReagent", 0,     0,    0,    1,    1,       undef,   0,       1],
+         ["geneName",                "gene name",                 "String",           0,     1,    1,    0,    0,    ],
+         ["entrezgeneId",            "EntrezGene ID",             "Integer",          0,     1,    1,    0,    0,    ],
+         ["entrezgeneSymbol",        "EntrezGene symbol",         "String",           0,     1,    1,    0,    0,    ],
+         ["oldEntrezgeneIds",        "old EntrezGene IDs",        "Integer",          0,     0,    0,    1,    0,    ],
+         ["oldEntrezgeneSymbols",    "old EntrezGene symbols",    "String",           0,     0,    0,    1,    0,    ],
+         ["genbankAccessionNumbers", "GenBank accession numbers", "Integer",          0,     0,    0,    1,    0,    ],
+         ["speciesName",             "species name",              "String",           0,     1,    0,    0,    0,    ],
+         ],
+};
