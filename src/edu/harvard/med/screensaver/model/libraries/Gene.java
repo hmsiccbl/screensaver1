@@ -64,7 +64,6 @@ public class Gene extends AbstractEntity
     String entrezgeneSymbol,
     String speciesName)
   {
-    // TODO: verify the order of assignments here is okay
     _geneName = geneName;
     _entrezgeneId = entrezgeneId;
     _entrezgeneSymbol = entrezgeneSymbol;
@@ -349,7 +348,6 @@ public class Gene extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return getEntrezgeneId();
   }
 

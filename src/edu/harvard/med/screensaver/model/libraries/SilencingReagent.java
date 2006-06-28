@@ -59,7 +59,6 @@ public class SilencingReagent extends AbstractEntity
     SilencingReagentType silencingReagentType,
     String sequence)
   {
-    // TODO: verify the order of assignments here is okay
     _gene = gene;
     _silencingReagentType = silencingReagentType;
     _sequence = sequence;
@@ -103,8 +102,9 @@ public class SilencingReagent extends AbstractEntity
    */
   public void setGene(Gene gene)
   {
+    temporarilyRemoveFromRelationships();
     _gene = gene;
-    gene.getHbnSilencingReagents().add(this);
+    reinstateRelationships();
   }
 
   /**
@@ -149,9 +149,6 @@ public class SilencingReagent extends AbstractEntity
    * Get the silencing reagent type.
    *
    * @return the silencing reagent type
-   * @hibernate.property
-   *   type="edu.harvard.med.screensaver.model.libraries.SilencingReagentType$UserType"
-   *   not-null="true"
    */
   public SilencingReagentType getSilencingReagentType()
   {
@@ -165,16 +162,15 @@ public class SilencingReagent extends AbstractEntity
    */
   public void setSilencingReagentType(SilencingReagentType silencingReagentType)
   {
+    temporarilyRemoveFromRelationships();
     _silencingReagentType = silencingReagentType;
+    reinstateRelationships();
   }
 
   /**
    * Get the sequence.
    *
    * @return the sequence
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
    */
   public String getSequence()
   {
@@ -188,7 +184,9 @@ public class SilencingReagent extends AbstractEntity
    */
   public void setSequence(String sequence)
   {
+    temporarilyRemoveFromRelationships();
     _sequence = sequence;
+    reinstateRelationships();
   }
 
   /**
@@ -238,11 +236,79 @@ public class SilencingReagent extends AbstractEntity
 
   // protected methods
 
+  /**
+   * A business key class for the silencing reagent.
+   */
+  private class BusinessKey
+  {
+    
+    /**
+     * Get the gene.
+     *
+     * @return the gene
+     */
+    public Gene getGene()
+    {
+      return _gene;
+    }
+
+    /**
+     * Get the silencing reagent type.
+     *
+     * @return the silencing reagent type
+     */
+    public SilencingReagentType getSilencingReagentType()
+    {
+      return _silencingReagentType;
+    }
+
+    /**
+     * Get the sequence.
+     *
+     * @return the sequence
+     */
+    public String getSequence()
+    {
+      return _sequence;
+    }
+
+    @Override
+    public boolean equals(Object object)
+    {
+      if (!(object instanceof BusinessKey)) {
+        return false;
+      }
+      BusinessKey that = (BusinessKey) object;
+      return
+        getGene().equals(that.getGene()) &&
+        getSilencingReagentType().equals(that.getSilencingReagentType()) &&
+        getSequence().equals(that.getSequence());
+    }
+
+    @Override
+    public int hashCode()
+    {
+      return
+        getGene().hashCode() +
+        17 * getSilencingReagentType().hashCode() +
+        37 * getSequence().hashCode();
+    }
+
+    @Override
+    public String toString()
+    {
+      return 
+        getGene().toString() + ":" +
+        getSilencingReagentType().toString() + ":" +
+        getSequence();
+    }
+  }
+  
   @Override
   protected Object getBusinessKey()
   {
     // TODO: assure changes to business key update relationships whose other side is many
-    return getSequence();
+    return new BusinessKey();
   }
 
 
@@ -358,6 +424,59 @@ public class SilencingReagent extends AbstractEntity
   }
 
   /**
+   * Get the silencing reagent type.
+   *
+   * @return the silencing reagent type
+   * @hibernate.property
+   *   column="silencing_reagent_type"
+   *   type="edu.harvard.med.screensaver.model.libraries.SilencingReagentType$UserType"
+   *   not-null="true"
+   * @motivation for hibernate
+   */
+  private SilencingReagentType getHbnSilencingReagentType()
+  {
+    return _silencingReagentType;
+  }
+
+  /**
+   * Set the silencing reagent type.
+   *
+   * @param silencingReagentType the new silencing reagent type
+   * @motivation for hibernate
+   */
+  private void setHbnSilencingReagentType(SilencingReagentType silencingReagentType)
+  {
+    _silencingReagentType = silencingReagentType;
+  }
+
+  /**
+   * Get the sequence.
+   *
+   * @return the sequence
+   * @hibernate.property
+   *   column="sequence"
+   *   type="text"
+   *   not-null="true"
+   * @motivation for hibernate
+   */
+  private String getHbnSequence()
+  {
+    return _sequence;
+  }
+
+  /**
+   * Set the sequence.
+   *
+   * @param sequence the new sequence
+   * @motivation for hibernate
+   */
+  private void setHbnSequence(String sequence)
+  {
+    _sequence = sequence;
+  }
+
+
+  /**
    * Set the non-targetted GenBank accession numbers.
    *
    * @param nonTargettedGenbankAccessionNumbers the new non-targetted GenBank accession numbers
@@ -366,5 +485,38 @@ public class SilencingReagent extends AbstractEntity
   private void setNonTargettedGenbankAccessionNumbers(Set<Integer> nonTargettedGenbankAccessionNumbers)
   {
     _nonTargettedGenbankAccessionNumbers = nonTargettedGenbankAccessionNumbers;
+  }
+  
+  /**
+   * Temporarily remove this entity from the other side of relationships whose
+   * other side is has-many.
+   * 
+   * @motivation for use when the business key changes: since these changes
+   * will affect {@link #equals} and {@link #hashCode}, we need to do extra
+   * maintenance work for any sets this entity is in.
+   */
+  private void temporarilyRemoveFromRelationships()
+  {
+    getHbnGene().getHbnSilencingReagents().remove(this);
+    for (Well well : getHbnWells()) {
+      well.getSilencingReagents().remove(this);
+    }
+  }
+  
+  /**
+   * Reinstate this entity to the other side of relationships whose other
+   * side is has-many. This is the "inverse" operation to {@link
+   * #temporarilyRemoveFromRelationships}.
+   * 
+   * @motivation for use when the business key changes: since these changes
+   * will affect {@link #equals} and {@link #hashCode}, we need to do extra
+   * maintenance work for any sets this entity is in.
+   */
+  private void reinstateRelationships()
+  {
+    getHbnGene().getHbnSilencingReagents().add(this);
+    for (Well well : getHbnWells()) {
+      well.getSilencingReagents().add(this);
+    }    
   }
 }

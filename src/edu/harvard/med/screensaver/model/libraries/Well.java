@@ -349,9 +349,6 @@ public class Well extends AbstractEntity
       return _wellName;
     }
     
-    /**
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object object)
     {
@@ -363,9 +360,6 @@ public class Well extends AbstractEntity
         that.getWellName());
     }
 
-    /**
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode()
     {
@@ -373,9 +367,6 @@ public class Well extends AbstractEntity
       return getPlateNumber().hashCode() + getWellName().hashCode();
     }
 
-    /**
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString()
     {
