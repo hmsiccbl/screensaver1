@@ -5,6 +5,15 @@
 ### grobal valuables
 
 my $base_output_dir = "../../src/edu/harvard/med/screensaver/model";
+my $odd_plural_to_singular_map = {
+    "copies" => "copy",
+    "Copies" => "Copy",
+};
+my $odd_singular_to_plural_map = {
+    "copy" => "copies",
+    "Copy" => "Copies",
+};
+my @hashcode_primes = (17, 37, 73, 1771);
 
 
 ### get the entity
@@ -12,6 +21,7 @@ my $base_output_dir = "../../src/edu/harvard/med/screensaver/model";
 my $entity_file = shift or die "usage: $0 entity_file\n";
 -r $entity_file or die "entity file $entity_file is unreadable\n";
 my $entity = eval `cat $entity_file`;
+$entity->{name} or die "malformed entity file: $entity_file";
 
 
 ### extend/convert the entity
@@ -85,8 +95,12 @@ sub convert_property_lists_to_hashes {
         $is_unique && ! $is_required &&
             die "property cannot be unique and not required: $property->{name}";
 
-        my $singular_name =
-            $has_many ? substr($name, 0, length($name) - 1) : undef;
+        my $singular_name = undef;
+        if ($has_many) {
+            $singular_name = ($odd_plural_to_singular_map->{$name}) ?
+                $odd_plural_to_singular_map->{$name} :
+                substr($name, 0, length($name) - 1);
+        }
         my $hbn_name =
             $is_relationship ? "hbn" . ucfirst($name) : undef;
         $properties->[$i] = {
@@ -130,10 +144,14 @@ sub print_imports {
     if (has_relation_has_many($entity)) {
         print $output_file "import java.util.Collections;\n";
     }
+    if (has_date($entity)) {
+        print $output_file "import java.util.Date;\n";
+    }
     if (has_has_many($entity)) {
         print $output_file "import java.util.HashSet;\n";
-        print $output_file "import java.util.Set;\n\n";
+        print $output_file "import java.util.Set;\n";
     }
+    print $output_file "\n";
     print $output_file "import org.apache.log4j.Logger;\n\n";
     print $output_file "import edu.harvard.med.screensaver.model.AbstractEntity;\n";
 
@@ -274,7 +292,7 @@ sub print_public_methods_for_property {
 }
 
 sub print_getter_for_property {
-    my ($output_file, $entity, $property, $access) = @_;
+    my ($output_file, $entity, $property, $access, $skip_hibernate_xdoclet) = @_;
     my $singular_name = lc_underscore($property->{singular_name});
 
     print $output_file "\n";
@@ -294,7 +312,7 @@ sub print_getter_for_property {
             "   * \@return the $property->{human_name}\n";
     }
 
-    unless ($property->{is_relationship}) {
+    if (! $property->{is_relationship} && ! $skip_hibernate_xdoclet) {
         if ($property->{has_many}) {
             my $entity_lc_underscore_name = $entity->{lc_underscore_name};
             if ($property->{other_side_has_many}) {
@@ -382,10 +400,14 @@ sub print_setter_for_property {
     print $output_file "    _$property->{name} = $property->{name};\n";
     if ($property->{is_relationship}) {
         if ($property->{other_side_has_many}) {
+            my $plural_name =
+                $odd_singular_to_plural_map->{$entity->{name}} ?
+                $odd_singular_to_plural_map->{$entity->{name}} :
+                $entity->{name} . "s";
             print $output_file
                 "    $property->{name}.getHbn",
-                ucfirst($entity->{name}),
-                "s().add(this);\n";
+                ucfirst($plural_name),
+                "().add(this);\n";
         }
         else {
             print $output_file
@@ -417,8 +439,12 @@ sub print_adder_and_remover_for_property {
         print $output_file
             "    if (get", ucfirst($property->{hbn_name}), "().add($property->{singular_name})) {\n";
         if ($property->{other_side_has_many}) {
+            my $plural_name =
+                $odd_singular_to_plural_map->{$entity->{name}} ?
+                $odd_singular_to_plural_map->{$entity->{name}} :
+                $entity->{name} . "s";
             print $output_file
-                "      return $property->{singular_name}.getHbn", ucfirst($entity->{name}), "s().add(this);\n";
+                "      return $property->{singular_name}.getHbn", ucfirst($plural_name), "().add(this);\n";
         }
         else {
             print $output_file
@@ -452,8 +478,12 @@ sub print_adder_and_remover_for_property {
         print $output_file
             "    if (get", ucfirst($property->{hbn_name}), "().remove($property->{singular_name})) {\n";
         if ($property->{other_side_has_many}) {
+            my $plural_name =
+                $odd_singular_to_plural_map->{$entity->{name}} ?
+                $odd_singular_to_plural_map->{$entity->{name}} :
+                $entity->{name} . "s";
             print $output_file
-                "      return $property->{singular_name}.getHbn", ucfirst($entity->{name}), "s().remove(this);\n";
+                "      return $property->{singular_name}.getHbn", ucfirst($plural_name), "().remove(this);\n";
         }
         else {
             print $output_file
@@ -475,19 +505,96 @@ sub print_protected_methods {
     my ($output_file, $entity) = @_;
     print $output_file "\n\n  // protected methods\n\n";
 
+    if (ref($entity->{business_key}) eq "ARRAY") {
+        my @key_properties = @{ $entity->{business_key} };
+
+        print $output_file
+            "  /**\n",
+            "   * A business key class for the well.\n",
+            "   */\n",
+            "  private class BusinessKey\n",
+            "  {\n";
+
+        for my $key_property (@key_properties) {
+            for my $property (@{ $entity->{properties} }) {
+                next unless $key_property eq $property->{name};
+                print_getter_for_property($output_file, $entity, $property, "public", 1);
+                last;
+            }
+        }
+
+        print $output_file "\n";
+        print $output_file
+            "    \@Override\n",
+            "    public boolean equals(Object object)\n",
+            "    {\n",
+            "      if (! (object instanceof BusinessKey)) {\n",
+            "        return false;\n",
+            "      }\n",
+            "      BusinessKey that = (BusinessKey) object;\n",
+            "      return\n";
+        for my $key_property (@key_properties) {
+            my $getter = "get" . ucfirst($key_property) . "()";
+            print $output_file "        $getter.equals(that.$getter)";
+            if ($key_property eq $key_properties[-1]) {
+                print $output_file ";\n";
+            }
+            else {
+                print $output_file " &&\n";
+            }
+        }
+        print $output_file "    }\n\n";
+
+        print $output_file
+            "    \@Override\n",
+            "    public int hashCode()\n",
+            "    {\n",
+            "      return\n";
+        for my $key_property (@key_properties) {
+            my $getter = "get" . ucfirst($key_property) . "()";
+            print $output_file "        $getter.hashCode()";
+            if ($key_property eq $key_properties[-1]) {
+                print $output_file ";\n";
+            }
+            else {
+                print $output_file " +\n";
+            }
+        }
+        print $output_file
+            "    }\n\n";
+
+        print $output_file
+            "    \@Override\n",
+            "    public String toString()\n",
+            "    {\n",
+            "      return ";
+        for my $key_property (@key_properties) {
+            my $getter = "get" . ucfirst($key_property) . "()";
+            print $output_file $getter;
+            if ($key_property eq $key_properties[-1]) {
+                print $output_file ";\n";
+            }
+            else {
+                print $output_file " + \":\" + ";
+            }
+        }
+        print $output_file
+            "    }\n",
+            "  }\n\n";
+    }
+
     print $output_file
         "  \@Override\n",
         "  protected Object getBusinessKey()\n",
         "  {\n",
         "    // TODO: assure changes to business key update relationships whose other side is many\n";
-    if ($entity->{business_key}) {
+    if (ref($entity->{business_key}) ne "ARRAY") {
         print $output_file
             "    return get", ucfirst($entity->{business_key}), "();\n";
     }
     else {
         print $output_file
-            "    // TODO: fill in stub\n",
-            "    return null;\n";
+            "    return new BusinessKey();\n";
     }
     print $output_file "  }\n";
 }
@@ -629,6 +736,8 @@ sub print_hbn_getter_for_property {
 
     if ($property->{has_many}) {
         $uc_property_name =
+            $odd_plural_to_singular_map->{$uc_property_name} ?
+            $odd_plural_to_singular_map->{$uc_property_name} :
             substr($uc_property_name, 0, length($uc_property_name) - 1);
         if ($property->{other_side_has_many}) {
             my $singular_name = substr($lc_underscore_name, 0, length($lc_underscore_name) - 1);
@@ -711,6 +820,15 @@ sub has_has_many {
     my $properties = $entity->{properties};
     for my $property (@$properties) {
         return 1 if $property->{has_many};
+    }
+    return 0;
+}
+
+sub has_date {
+    my ($entity) = @_;
+    my $properties = $entity->{properties};
+    for my $property (@$properties) {
+        return 1 if $property->{type} eq "Date";
     }
     return 0;
 }
