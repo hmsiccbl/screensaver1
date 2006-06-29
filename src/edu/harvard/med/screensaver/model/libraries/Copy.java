@@ -57,6 +57,7 @@ public class Copy extends AbstractEntity
   {
     _library = library;
     _name = name;
+    _library.getHbnCopies().add(this);
   }
 
 

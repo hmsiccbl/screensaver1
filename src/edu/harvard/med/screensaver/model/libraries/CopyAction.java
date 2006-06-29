@@ -55,10 +55,10 @@ public class CopyAction extends AbstractEntity
     String description,
     Date date)
   {
-    // TODO: verify the order of assignments here is okay
     _copyInfo = copyInfo;
     _description = description;
-    _date = date;
+    _date = truncateDate(date);
+    _copyInfo.getHbnCopyActions().add(this);
   }
 
 
@@ -145,7 +145,7 @@ public class CopyAction extends AbstractEntity
    */
   public void setDate(Date date)
   {
-    _date = date;
+    _date = truncateDate(date);
   }
 
 
@@ -207,7 +207,6 @@ public class CopyAction extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return new BusinessKey();
   }
 

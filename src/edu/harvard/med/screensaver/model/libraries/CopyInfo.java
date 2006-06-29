@@ -68,12 +68,12 @@ public class CopyInfo extends AbstractEntity
     PlateType plateType,
     String volume)
   {
-    // TODO: verify the order of assignments here is okay
     _copy = copy;
     _plateName = plateName;
     _location = location;
     _plateType = plateType;
     _volume = volume;
+    _copy.getHbnCopyInfos().add(this);
   }
 
 
@@ -275,7 +275,7 @@ public class CopyInfo extends AbstractEntity
    */
   public void setDatePlated(Date datePlated)
   {
-    _datePlated = datePlated;
+    _datePlated = truncateDate(datePlated);
   }
 
   /**
@@ -296,7 +296,7 @@ public class CopyInfo extends AbstractEntity
    */
   public void setDateRetired(Date dateRetired)
   {
-    _dateRetired = dateRetired;
+    _dateRetired = truncateDate(dateRetired);
   }
 
 
@@ -358,7 +358,6 @@ public class CopyInfo extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return new BusinessKey();
   }
 
