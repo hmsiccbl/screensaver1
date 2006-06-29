@@ -78,12 +78,14 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
     new HashMap<String, String>();
   static {
     oddPluralToSingularPropertiesMap.put("children", "child");
+    oddPluralToSingularPropertiesMap.put("copies", "copy");
     oddPluralToSingularPropertiesMap.put("typesDerivedFrom", "typeDerivedFrom");
   }
   protected static Map<String, String> oddSingularToPluralPropertiesMap =
     new HashMap<String, String>();
   static {
     oddSingularToPluralPropertiesMap.put("child", "children");
+    oddSingularToPluralPropertiesMap.put("copy", "copies");
     oddSingularToPluralPropertiesMap.put("typeDerivedFrom", "typesDerivedFrom");
   }
   

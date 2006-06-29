@@ -307,7 +307,6 @@ public class SilencingReagent extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return new BusinessKey();
   }
 
