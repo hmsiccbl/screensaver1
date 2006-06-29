@@ -1,0 +1,18 @@
+my $entity = {
+    name => "Visit",
+    human_name => "visit",
+    package => "screens",
+    business_key => "comments", #hack
+
+    properties =>
+        [#name                       #human name                  #type                    #vocab #reqd  #uniq #nary #is-reln #package #OS-nary #OS-reqd #inv
+        #["screen",                  "screen",                    "Screen",                0,     1,     0,    0,    1,       undef,   1,       0],
+        #["performedBy",             "performed by",              "ScreeningRoomUser",     0,     1,     0,    0,    1,       undef,   1,       0],
+         ["isCherryPickVisit",       "is cherry pick visit",      "boolean",               0,     1,     0,    0,    0,    ],
+         ["dateCreated",             "date created",              "Date",                  0,     1,     0,    0,    0,    ],
+         ["visitDate",               "visit date",                "Date",                  0,     1,     0,    0,    0,    ],
+         ["visitType",               "visit type",                "VisitType",             1,     1,     0,    0,    0,    ],
+         ["abaseTestsetId",          "abase testset id",          "String",                0,     0,     0,    0,    0,    ],
+         ["comments",                "comments",                  "String",                0,     0,     0,    0,    0,    ],
+         ],
+};

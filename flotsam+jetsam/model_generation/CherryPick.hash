@@ -1,0 +1,19 @@
+my $entity = {
+    name => "CherryPick",
+    human_name => "cherry pick",
+    package => "screens",
+    business_key => "volume", #hack
+
+    properties =>
+        [#name                       #human name                  #type                    #vocab #reqd  #uniq #nary #is-reln #package #OS-nary #OS-reqd #inv
+        #["cherryPickVisit",         "cherry pick visit",         "Cherry Pick Visit",     0,     1,     0,    0,    1,       undef,       1,   0],
+        #["well",                    "well",                      "Well",                  0,     1,     0,    0,    1,       "libraries", 1,   0],
+        #["copy",                    "copy",                      "Copy",                  0,     1,     0,    0,    1,       undef,       1,   0],
+        #["rnaiKnockdownConfirmation", "RNAi knockdown confirmation", "RNAiKnockdownConfirmation", 0, 0, 0,    0,    1,       undef,       0,   1,       1],
+         ["volume",                  "volume",                    "String",                0,     1,     0,    0,    0,    ],
+         ["plateMap",                "plate map",                 "String",                0,     0,     0,    0,    0,    ],
+         ["isHitConfirmedViaExperimentation", "is hit confirmed via exmperimentation", "IsHitConfirmedViaExperimentation", 1, 0, 0, 0, 0, ],
+         ["notesOnHitConfirmation",  "notes on hit confirmation", "String",                0,     0,     0,    0,    0,    ],
+         ],
+};
+
