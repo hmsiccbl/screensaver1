@@ -1,0 +1,14 @@
+my $entity = {
+    name => "DerivativeScreenResult",
+    human_name => "derivative screen result",
+    package => "derivatives",
+    business_key => ["derivative", "activityLevel", "activityType"],
+
+    properties =>
+        [#name                       #human name                  #type                    #vocab #reqd  #uniq #nary #is-reln #package #OS-nary #OS-reqd #inv
+         ["derivative",              "derivative",                "Derivative",            0,     1,     0,    0,    1,       undef,   1,       0],
+         ["activityLevel",           "activity level",            "String",                0,     1,     0,    0,    0,    ],
+         ["activityType",            "activity type",             "String",                0,     1,     0,    0,    0,    ],
+         ],
+};
+
