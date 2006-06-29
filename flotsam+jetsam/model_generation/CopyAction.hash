@@ -1,0 +1,13 @@
+my $entity = {
+    name => "CopyAction",
+    human_name => "copy action",
+    package => "libraries",
+    business_key => ["copyInfo", "description"],
+
+    properties =>
+        [#name                       #human name                  #type                    #vocab #reqd  #uniq #nary #is-reln #package #OS-nary #OS-reqd #inv
+         ["copyInfo",                "copy info",                 "CopyInfo",              0,     1,     0,    0,    1,       undef,   1,       0],
+         ["description",             "description",               "String",                0,     1,     0,    0,    0,    ],
+         ["date",                    "date",                      "Date",                  0,     1,     0,    0,    0,    ],
+         ],
+};
