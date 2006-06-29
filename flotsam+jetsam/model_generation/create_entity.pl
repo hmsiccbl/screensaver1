@@ -244,7 +244,12 @@ sub print_constructors {
     print $output_file ")\n  {\n";
     print $output_file "    // TODO: verify the order of assignments here is okay\n";
     for my $property (@required_properties) {
-        print $output_file "    _$property->{name} = $property->{name};\n";
+        if ($property->{type} eq "Date") {
+            print $output_file "    _$property->{name} = truncateDate($property->{name});\n";
+        }
+        else {
+            print $output_file "    _$property->{name} = $property->{name};\n";
+        }
     }
     print $output_file "  }\n";
 }
@@ -397,7 +402,12 @@ sub print_setter_for_property {
         print $output_file "$property->{type} $property->{name})\n",
     }
     print $output_file "  {\n";
-    print $output_file "    _$property->{name} = $property->{name};\n";
+    if ($property->{type} eq "Date") {
+        print $output_file "    _$property->{name} = truncateDate($property->{name});\n";
+    }
+    else {
+        print $output_file "    _$property->{name} = $property->{name};\n";
+    }
     if ($property->{is_relationship}) {
         if ($property->{other_side_has_many}) {
             my $plural_name =
