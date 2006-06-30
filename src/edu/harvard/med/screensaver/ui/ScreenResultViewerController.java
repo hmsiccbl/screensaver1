@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -21,6 +20,7 @@ import java.util.SortedSet;
 import javax.faces.component.UIColumn;
 import javax.faces.component.UIData;
 import javax.faces.context.FacesContext;
+import javax.faces.event.ValueChangeEvent;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -29,6 +29,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -58,7 +59,10 @@ public class ScreenResultViewerController
   private ScreenResult _screenResult;
   private int itemsPerPage = DEFAULT_ITEMS_PER_PAGE;
   private int _pageIndex;
+  private boolean _showMetadataTable = true;
+  private boolean _showRawDataTable = true;
   private UIData _dataTable;
+  private UIData _metadataTable;
   
 
   // public methods
@@ -98,6 +102,26 @@ public class ScreenResultViewerController
     _screenResult = screenResult;
   }
   
+  public boolean isShowMetadataTable()
+  {
+    return _showMetadataTable;
+  }
+
+  public void setShowMetadataTable(boolean showMetadataTable)
+  {
+    _showMetadataTable = showMetadataTable;
+  }
+
+  public boolean isShowRawDataTable()
+  {
+    return _showRawDataTable;
+  }
+
+  public void setShowRawDataTable(boolean showRawDataTable)
+  {
+    _showRawDataTable = showRawDataTable;
+  }
+
   public UIData getDataTable()
   {
     return _dataTable;
@@ -108,11 +132,52 @@ public class ScreenResultViewerController
     _dataTable = dataUIComponent;
     addDataHeaderColumns();
   }
+  
+  public UIData getMetadataTable()
+  {
+    return _metadataTable;
+  }
+
+  public void setMetadataTable(UIData dataUIComponent)
+  {
+    _metadataTable = dataUIComponent;
+    addDataHeaderColumns();
+  }
+  
+  public List<MetadataRow> getMetadata()
+  {
+    String[] properties = null;
+    try {
+      properties = new String[] {
+        "name",
+        "description",
+        "activityIndicator",
+        "derived",
+        "howDerived"
+      };
+    } catch (Exception e) {
+      e.printStackTrace();
+      log.error("property not valid for ResultValueType");
+    }
+
+    List<MetadataRow> tableData = new ArrayList<MetadataRow>();
+    for (String property : properties) {
+      try {
+        tableData.add(new MetadataRow(_screenResult.getResultValueTypes(),
+                                      property));
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+        log.error("could not obtain property value for ResultValueType");
+      }
+    }
+    return tableData;
+  }
 
   /**
    * @return a List of {@link DataRow} objects
    */
-  public List<DataRow> getTableData()
+  public List<DataRow> getRawData()
   {
     // to build our table data structure, we will iterate the ResultValueTypes'
     // ResultValues in parallel (kind of messy!)
@@ -179,6 +244,18 @@ public class ScreenResultViewerController
     reset();
     return "done";
   }
+
+  
+  // JSF event listener methods
+  
+  /**
+   * Causes the page to be re-rendered. For example, in response to a checkbox
+   * that controls which components are visible.
+   */
+  public void refresh(ValueChangeEvent event)
+  {
+    FacesContext.getCurrentInstance().renderResponse();
+  }
   
 
   // private methods
@@ -219,12 +296,16 @@ public class ScreenResultViewerController
   }
 
   /**
-   * Dynamically add table columns for Data Headers (aka ResultValueTypes), iff
-   * they have not already been added
+   * Dynamically add table columns for Data Headers (aka ResultValueTypes) to
+   * both raw data and metadata tables, iff they have not already been added
    */
   private void addDataHeaderColumns()
   {
     assert _screenResult != null : "screenResult property must be set";
+    if (_dataTable == null || _metadataTable == null) {
+      // both tables' UI components must be known before we can do our thing
+      return;
+    }
     FacesContext facesCtx = FacesContext.getCurrentInstance();
     // TODO: is there a better way to determine whether the table has already
     // been rendered?
@@ -234,7 +315,13 @@ public class ScreenResultViewerController
       log.debug("dynamically adding columns to table");
       String iteratedRowBeanVariableName = "row";
       _dataTable.setVar(iteratedRowBeanVariableName);
+      _metadataTable.setVar(iteratedRowBeanVariableName);
       for (ResultValueType rvt : _screenResult.getResultValueTypes()) {
+        JSFUtils.addTableColumn(FacesContext.getCurrentInstance(),
+                                _metadataTable,
+                                makeResultValueTypeColumnName(rvt),
+                                rvt.getName(),
+                                MetadataRow.getBindingExpression(iteratedRowBeanVariableName, rvt));
         JSFUtils.addTableColumn(FacesContext.getCurrentInstance(),
                                 _dataTable,
                                 makeResultValueTypeColumnName(rvt),
@@ -248,7 +335,62 @@ public class ScreenResultViewerController
   // inner classes
   
   /**
-   * DataRow bean, used to provide data to JSF components via EL
+   * MetadataRow bean, used to provide ScreenResult metadata to JSF components via EL
+   * @author ant
+   */
+  public static class MetadataRow
+  {
+    private String _rowLabel;
+    /**
+     * Array containing the value of the same property for each ResultValueType
+     */
+    private String[] _rvtPropertyValues;    
+
+    /**
+     * Constructs a MetadataRow object.
+     * @param rvts The {@link ResultValueType}s that contain the data for this row
+     * @param property a bean property of the {@link ResultValueType}, which defines the type of metadata to be displayed by this row
+     * @throws Exception if the specified property cannot be determined for a ResultValueType
+     */
+    public MetadataRow(Collection<ResultValueType> rvts, String propertyName) throws Exception
+    {
+      _rowLabel = propertyName; // TODO: need better display name
+      _rvtPropertyValues = new String[rvts.size()];
+      int i = 0;
+      for (ResultValueType rvt : rvts) {
+        _rvtPropertyValues[i++] = BeanUtils.getProperty(rvt, propertyName);
+      }
+    }
+
+    /**
+     * Returns a JSF EL expression that can be used to specify the bean property to
+     * bind to a UIData cell. Since the DataRow is in fact the bean providing the data
+     * to a UIData table, it is the best place for storing the knowledge of how
+     * to access its data via a JSF EL expression.
+     * 
+     * @param dataTable
+     * @param rvt
+     * @return a JSF EL expression
+     */
+    public static String getBindingExpression(String rowBeanVariableName, ResultValueType rvt)
+    {
+      return "#{" + rowBeanVariableName + ".dataHeaderSinglePropertyValues[" + rvt.getOrdinal() + "]}";
+    }
+    
+    public String getRowLabel()
+    {
+      return _rowLabel;
+    }
+    
+    public String[] getDataHeaderSinglePropertyValues()
+    {
+      return _rvtPropertyValues;
+    }
+  }
+
+  
+  /**
+   * DataRow bean, used to provide ScreenResult data to JSF components via EL
    * @author ant
    */
   public static class DataRow
@@ -267,7 +409,7 @@ public class ScreenResultViewerController
      * Returns a JSF EL expression that can be used to specify the bean property to
      * bind to a UIData cell. Since the DataRow is in fact the bean providing the data
      * to a UIData table, it is the best place for storing the knowledge of how
-     * to access its data via an JSF EL expression.
+     * to access its data via a JSF EL expression.
      * 
      * @param dataTable
      * @param rvt
