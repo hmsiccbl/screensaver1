@@ -5,8 +5,12 @@
     <f:view>
 
       <h:form id="createLibraryForm">
-        <h:commandLink action="#{Main.viewSampleScreenResult}">
-          <h:outputText value="View Screen Result (sample)"/>
+        <h:commandLink action="#{Main.viewSample1ScreenResult}">
+          <h:outputText value="View Screen Result (sample 1)"/>
+        </h:commandLink>
+        <br>
+        <h:commandLink action="#{Main.viewSample2ScreenResult}">
+          <h:outputText value="View Screen Result (sample 2)"/>
         </h:commandLink>
         <br>
         <h:commandLink action="#{Main.createLibrary}">

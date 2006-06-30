@@ -35,6 +35,9 @@ public class MainController extends AbstractController
   private ScreenResultViewerController _screenResultViewerController;
   
   private String _libraryNamePattern;
+
+  private ScreenResult _sample1ScreenResult;
+  private ScreenResult _sample2ScreenResult;
   
   public void setDAO(DAO dao) {
     _dao = dao;
@@ -73,14 +76,29 @@ public class MainController extends AbstractController
     _screenResultParser = screenResultParser;
   }
 
-  public String viewSampleScreenResult()
+  public String viewSample1ScreenResult()
   {
+    assert _screenResultParser != null : "screenResultParser property must be set";
     // TODO: remove this hack! here just to make some screen result data
     // available; works on one developer's machine in particular (and I'm not
     // naming names!)
-    File metadataFile = new File("/home/ant/iccb/screen-result-input-data/119/119MetaData.xls");
-    ScreenResult screenResult = _screenResultParser.parse(metadataFile);
-    _screenResultViewerController.setScreenResult(screenResult);
+    if (_sample1ScreenResult == null) {
+      _sample1ScreenResult = _screenResultParser.parse(new File("/home/ant/iccb/screen-result-input-data/115/115MetaData.xls"));
+    }
+    _screenResultViewerController.setScreenResult(_sample1ScreenResult);
+    return "success";
+  }
+  
+  public String viewSample2ScreenResult()
+  {
+    assert _screenResultParser != null : "screenResultParser property must be set";
+    // TODO: remove this hack! here just to make some screen result data
+    // available; works on one developer's machine in particular (and I'm not
+    // naming names!)
+    if (_sample2ScreenResult == null) {
+      _sample2ScreenResult = _screenResultParser.parse(new File("/home/ant/iccb/screen-result-input-data/119/119MetaData.xls"));
+    }
+    _screenResultViewerController.setScreenResult(_sample2ScreenResult);
     return "success";
   }
   
