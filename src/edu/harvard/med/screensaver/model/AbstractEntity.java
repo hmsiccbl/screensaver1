@@ -238,6 +238,9 @@ public abstract class AbstractEntity implements Serializable
    */
   protected Date truncateDate(Date originalDate)
   {
+    if (originalDate == null) {
+      return null;
+    }
     return DateUtils.round(originalDate, Calendar.DATE);
   }
   
