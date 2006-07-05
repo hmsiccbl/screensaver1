@@ -138,9 +138,15 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
         catch (ClassNotFoundException e) {
           continue;
         }
-        if (AbstractEntity.class.equals(entityClass)) {
+        
+        // skip abstract classes
+        if (Modifier.isAbstract(entityClass.getModifiers())) {
           continue;
         }
+        //if (AbstractEntity.class.equals(entityClass)) {
+        //  continue;
+        //}
+        
         if (AbstractEntity.class.isAssignableFrom(entityClass)) {
           entityClasses.add((Class<AbstractEntity>) entityClass);
         }

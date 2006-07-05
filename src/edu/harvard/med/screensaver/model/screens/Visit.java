@@ -22,8 +22,12 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @hibernate.class lazy="false"
+ * @hibernate.discriminator
+ *   column="is_cherry_pick_visit"
+ *   type="boolean"
+ *   not-null="true"
  */
-public class Visit extends AbstractEntity
+abstract public class Visit extends AbstractEntity
 {
   
   // static fields
@@ -86,28 +90,6 @@ public class Visit extends AbstractEntity
   public Integer getVisitId()
   {
     return _visitId;
-  }
-
-  /**
-   * Get the is cherry pick visit.
-   *
-   * @return the is cherry pick visit
-   * @hibernate.property
-   *   not-null="true"
-   */
-  public boolean getIsCherryPickVisit()
-  {
-    return _isCherryPickVisit;
-  }
-
-  /**
-   * Set the is cherry pick visit.
-   *
-   * @param isCherryPickVisit the new is cherry pick visit
-   */
-  public void setIsCherryPickVisit(boolean isCherryPickVisit)
-  {
-    _isCherryPickVisit = isCherryPickVisit;
   }
 
   /**

@@ -70,6 +70,11 @@ public class EntityClassesTest extends EntityClassesExercisor
       {
         public void exercizeEntityClass(Class<AbstractEntity> entityClass)
         {
+          // skip classes that have a getVersion from a superclass
+          if (! entityClass.getSuperclass().equals(AbstractEntity.class)) {
+            return;
+          }
+          
           // getVersion
           try {
             Method getVersionMethod = entityClass.getDeclaredMethod("getVersion");

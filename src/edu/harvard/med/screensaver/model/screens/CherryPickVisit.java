@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @hibernate.subclass
  *   lazy="false"
- *   descriminator-value="true"
+ *   discriminator-value="true"
  */
 public class CherryPickVisit extends Visit
 {
@@ -35,8 +35,6 @@ public class CherryPickVisit extends Visit
 
   // instance fields
 
-  private Integer _cherryPickVisitId;
-  private Integer _version;
   private String _volume;
 
 
@@ -57,24 +55,6 @@ public class CherryPickVisit extends Visit
 
 
   // public methods
-
-  @Override
-  public Integer getEntityId()
-  {
-    return getCherryPickVisitId();
-  }
-
-  /**
-   * Get the id for the cherry pick visit.
-   *
-   * @return the id for the cherry pick visit
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="cherry_pick_visit_id_seq"
-   */
-  public Integer getCherryPickVisitId()
-  {
-    return _cherryPickVisitId;
-  }
 
   /**
    * Get the volume.
@@ -111,38 +91,4 @@ public class CherryPickVisit extends Visit
    * @motivation for hibernate
    */
   private CherryPickVisit() {}
-
-
-  // private methods
-
-  /**
-   * Set the id for the cherry pick visit.
-   *
-   * @param cherryPickVisitId the new id for the cherry pick visit
-   * @motivation for hibernate
-   */
-  private void setCherryPickVisitId(Integer cherryPickVisitId) {
-    _cherryPickVisitId = cherryPickVisitId;
-  }
-
-  /**
-   * Get the version for the cherry pick visit.
-   *
-   * @return the version for the cherry pick visit
-   * @motivation for hibernate
-   * @hibernate.version
-   */
-  private Integer getVersion() {
-    return _version;
-  }
-
-  /**
-   * Set the version for the cherry pick visit.
-   *
-   * @param version the new version for the cherry pick visit
-   * @motivation for hibernate
-   */
-  private void setVersion(Integer version) {
-    _version = version;
-  }
 }

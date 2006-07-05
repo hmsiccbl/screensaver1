@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @hibernate.subclass
  *   lazy="false"
- *   descriminator-value="true"
+ *   discriminator-value="false"
  */
 public class NonCherryPickVisit extends Visit
 {
@@ -35,8 +35,6 @@ public class NonCherryPickVisit extends Visit
 
   // instance fields
 
-  private Integer _nonCherryPickVisitId;
-  private Integer _version;
   private Integer _numberOfReplicates;
   private String _volumeOfCompoundTransferred;
   private AssayProtocolType _assayProtocolType;
@@ -59,24 +57,6 @@ public class NonCherryPickVisit extends Visit
 
 
   // public methods
-
-  @Override
-  public Integer getEntityId()
-  {
-    return getNonCherryPickVisitId();
-  }
-
-  /**
-   * Get the id for the non-cherry pick visit.
-   *
-   * @return the id for the non-cherry pick visit
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="non_cherry_pick_visit_id_seq"
-   */
-  public Integer getNonCherryPickVisitId()
-  {
-    return _nonCherryPickVisitId;
-  }
 
   /**
    * Get the number of replicates.
@@ -156,37 +136,4 @@ public class NonCherryPickVisit extends Visit
    */
   private NonCherryPickVisit() {}
 
-
-  // private methods
-
-  /**
-   * Set the id for the non-cherry pick visit.
-   *
-   * @param nonCherryPickVisitId the new id for the non-cherry pick visit
-   * @motivation for hibernate
-   */
-  private void setNonCherryPickVisitId(Integer nonCherryPickVisitId) {
-    _nonCherryPickVisitId = nonCherryPickVisitId;
-  }
-
-  /**
-   * Get the version for the non-cherry pick visit.
-   *
-   * @return the version for the non-cherry pick visit
-   * @motivation for hibernate
-   * @hibernate.version
-   */
-  private Integer getVersion() {
-    return _version;
-  }
-
-  /**
-   * Set the version for the non-cherry pick visit.
-   *
-   * @param version the new version for the non-cherry pick visit
-   * @motivation for hibernate
-   */
-  private void setVersion(Integer version) {
-    _version = version;
-  }
 }
