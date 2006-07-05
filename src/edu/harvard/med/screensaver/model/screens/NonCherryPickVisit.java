@@ -52,7 +52,7 @@ public class NonCherryPickVisit extends Visit
     Date visitDate,
     VisitType visitType)
   {
-    super(false, dateCreated, visitDate, visitType);
+    super(dateCreated, visitDate, visitType);
   }
 
 

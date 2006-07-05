@@ -50,7 +50,7 @@ public class CherryPickVisit extends Visit
     Date visitDate,
     VisitType visitType)
   {
-    super(true, dateCreated, visitDate, visitType);
+    super(dateCreated, visitDate, visitType);
   }
 
 

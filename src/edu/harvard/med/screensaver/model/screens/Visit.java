@@ -40,7 +40,6 @@ abstract public class Visit extends AbstractEntity
 
   private Integer _visitId;
   private Integer _version;
-  private boolean _isCherryPickVisit;
   private Date _dateCreated;
   private Date _visitDate;
   private VisitType _visitType;
@@ -59,13 +58,10 @@ abstract public class Visit extends AbstractEntity
    * @param visitType the visit type
    */
   public Visit(
-    boolean isCherryPickVisit,
     Date dateCreated,
     Date visitDate,
     VisitType visitType)
   {
-    // TODO: verify the order of assignments here is okay
-    _isCherryPickVisit = isCherryPickVisit;
     _dateCreated = truncateDate(dateCreated);
     _visitDate = truncateDate(visitDate);
     _visitType = visitType;
