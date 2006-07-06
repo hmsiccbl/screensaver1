@@ -1,0 +1,36 @@
+my $entity = {
+    name => "Screen",
+    human_name => "screen",
+    package => "screens",
+    business_key => "screenNumber",
+
+    properties =>
+        [#name                       #human name                  #type                    #vocab #reqd  #uniq #nary #is-reln #package #OS-nary #OS-reqd #inv
+         ["leadScreener",            "lead screener",             "ScreeningRoomUser",     0,     1,     0,    0,    1,       "users", 1,       0],
+         ["labHead",                 "lab head",                  "ScreeningRoomUser",     0,     1,     0,    0,    1,       "users", 1,       0],
+         ["collaborators",           "collaborators",             "ScreeningRoomUser",     0,     0,     0,    1,    1,       "users", 1,       0,       0],
+         ["statusItems",             "status items",              "StatusItem",            0,     0,     0,    1,    1,       undef,   0,       1],
+         ["visits",                  "visits",                    "Visit",                 0,     0,     0,    1,    1,       undef,   0,       1],
+         ["abaseTestsets",           "abase testsets",            "AbaseTestset",          0,     0,     0,    1,    1,       undef,   0,       1],
+         ["publications",            "publications",              "Publication",           0,     0,     0,    1,    1,       undef,   0,       1],
+         ["lettersOfSupport",        "letters of support",        "LetterOfSupport",       0,     0,     0,    1,    1,       undef,   0,       1],
+         ["billingInformations",     "billing informations",      "BillingInformation",    0,     0,     0,    1,    1,       undef,   0,       1],
+         ["attachedFiles",           "attached files",            "AttachedFile",          0,     0,     0,    1,    1,       undef,   0,       1],
+
+         ["screenNumber",            "screen number",             "Integer",               0,     1,     0,    0,    0,    ],
+         ["dateCreated",             "date created",              "Date",                  0,     1,     0,    0,    0,    ],
+         ["screenType",              "screen type",               "ScreenType",            1,     1,     0,    0,    0,    ],
+         ["title",                   "title",                     "String",                0,     1,     0,    0,    0,    ],
+         ["dataMeetingScheduled",    "data meeting scheduled",    "Date",                  0,     0,     0,    0,    0,    ],
+         ["dataMeetingComplete",     "data meeting complete",     "Date",                  0,     0,     0,    0,    0,    ],
+         ["keywords",                "keywords",                  "String",                0,     0,     0,    1,    0,    ],
+         ["fundingSupport",          "funding support",           "FundingSupport",        1,     0,     0,    1,    0,    ],
+         ["summary",                 "summary",                   "String",                0,     0,     0,    0,    0,    ],
+         ["comments",                "comments",                  "String",                0,     0,     0,    0,    0,    ],
+         ["abaseStudyId",            "abase study id",            "String",                0,     0,     0,    0,    0,    ],
+         ["abaseProtocolId",         "abase protocol id",         "String",                0,     0,     0,    0,    0,    ],
+         ["assayReadoutTypes",       "assay readout types",       "AssayReadoutType",      1,     0,     0,    1,    0,    ],
+         ["publishableProtocol",     "publishable protocol",      "String",                0,     0,     0,    0,    0,    ],
+         ["dateOfApplication",       "date of application",       "Date",                  0,     0,     0,    0,    0,    ],
+         ],
+};

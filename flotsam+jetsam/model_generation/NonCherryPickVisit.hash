@@ -6,8 +6,8 @@ my $entity = {
 
     properties =>
         [#name                       #human name                  #type                    #vocab #reqd  #uniq #nary #is-reln #package #OS-nary #OS-reqd #inv
-        #["platesUsed",              "plates used",               "PlatesUsed",            0,     0,     0,    1,    1,       undef,   0,       1],
-        #["equipmentUsed",           "equipment used",            "EquipmentUsed",         0,     0,     0,    1,    1,       undef,   0,       1],
+         ["platesUsed",              "plates used",               "PlatesUsed",            0,     0,     0,    1,    1,       undef,   0,       1],
+         ["equipmentUsed",           "equipment used",            "EquipmentUsed",         0,     0,     0,    1,    1,       undef,   0,       1],
          ["numberOfReplicates",      "number of replicates",      "Integer",               0,     0,     0,    0,    0,    ],
          ["volumeOfCompoundTransferred", "volume of compound transferred", "String",       0,     0,     0,    0,    0,    ],
          ["assayProtocolType",       "assay protocol type",       "AssayProtocolType",     1,     1,     0,    0,    0,    ],

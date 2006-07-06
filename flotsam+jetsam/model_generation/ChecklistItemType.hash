@@ -1,0 +1,14 @@
+my $entity = {
+    name => "ChecklistItemType",
+    human_name => "checklist item type",
+    package => "users",
+    business_key => "orderStatistic",
+
+    properties =>
+        [#name                       #human name                  #type                    #vocab #reqd  #uniq #nary #is-reln #package #OS-nary #OS-reqd #inv
+         ["checklistItems",          "checklist items",           "ChecklistItem",         0,     0,     0,    1,    1,       undef,   0,       1],
+         ["orderStatistic",          "order statistic",           "Integer",               0,     1,     1,    0,    0,    ],
+         ["itemName",                "item name",                 "String",                0,     1,     1,    0,    0,    ],
+         ["hasDeactivation",         "has deactivation",          "boolean",               0,     1,     0,    0,    0,    ],
+         ],
+};

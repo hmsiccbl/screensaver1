@@ -1,0 +1,13 @@
+my $entity = {
+    name => "StatusItem",
+    human_name => "status item",
+    package => "screens",
+    business_key => ["screen", "statusValue"],
+
+    properties =>
+        [#name                       #human name                  #type                    #vocab #reqd  #uniq #nary #is-reln #package #OS-nary #OS-reqd #inv
+         ["screen",                  "screen",                    "Screen",                0,     1,     0,    0,    1,       undef,   1,       0],
+         ["statusDate",              "status date",               "Date",                  0,     1,     0,    0,    0,    ],
+         ["statusValue",             "status value",              "StatusValue",           1,     1,     0,    0,    0,    ],
+         ],
+};

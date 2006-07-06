@@ -1,0 +1,14 @@
+my $entity = {
+    name => "EquipmentUsed",
+    human_name => "equipment used",
+    package => "screens",
+    business_key => ["visit", "equipment"],
+
+    properties =>
+        [#name                       #human name                  #type                    #vocab #reqd  #uniq #nary #is-reln #package #OS-nary #OS-reqd #inv
+         ["visit",                   "visit",                     "NonCherryPickVisit",    0,     1,     0,    0,    1,       undef,   1,       0],
+         ["equipment",               "equipment",                 "String",                0,     1,     0,    0,    0,    ],
+         ["protocol",                "protocol",                  "String",                0,     1,     0,    0,    0,    ],
+         ["description",             "description",               "String",                0,     1,     0,    0,    0,    ],
+         ],
+};

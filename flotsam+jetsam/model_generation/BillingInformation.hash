@@ -1,0 +1,22 @@
+my $entity = {
+    name => "BillingInformation",
+    human_name => "billing information",
+    package => "screens",
+    business_key => ["screen", "feeFormRequestedDate", "feeFormRequestedInitials"],
+
+    properties =>
+        [#name                       #human name                  #type                    #vocab #reqd  #uniq #nary #is-reln #package #OS-nary #OS-reqd #inv
+         ["screen",                  "screen",                    "Screen",                0,     1,     0,    0,    1,       undef,   1,       0],
+         ["billingItems",            "billing items",             "BillingItem",           0,     0,     0,    1,    1,       undef,   0,       1],
+
+         ["isFeeToBeChargedForScreening", "is fee to be charged for screening", "IsFeeToBeChargedForScreening",  1,     1,     0,    0,    0,    ],
+         ["amountToBeChargedForScreen", "amount to be charged for screen", "String",       0,     1,     0,    0,    0,    ],
+         ["feeFormRequestedDate",    "fee form requested date",   "Date",                  0,     0,     0,    0,    0,    ],
+         ["feeFormRequestedInitials","fee form requested initials","String",               0,     0,     0,    0,    0,    ],
+         ["isFeeFormOnFile",         "is fee form on file",       "boolean",               0,     1,     0,    0,    0,    ],
+         ["dateCompleted5KCompounds","date completed 5-10K compounds", "Date",             0,     0,     0,    0,    0,    ],
+         ["dateFaxedToBillingDepartment", "date faxed to billing department", "Date",      0,     0,     0,    0,    0,    ],
+         ["dateCharged",             "date charged",              "Date",                  0,     0,     0,    0,    0,    ],
+         ["comments",                "comments",                  "String",                0,     0,     0,    0,    0,    ],
+         ],
+};

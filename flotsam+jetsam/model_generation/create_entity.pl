@@ -8,10 +8,51 @@ my $base_output_dir = "../../src/edu/harvard/med/screensaver/model";
 my $odd_plural_to_singular_map = {
     "copies" => "copy",
     "Copies" => "Copy",
+    "visitsPerformed" => "visitPerformed",
+    "VisitsPerformed" => "VisitPerformed",
+    "lettersOfSupport" => "letterOfSupport",
+    "LettersOfSupport" => "LetterOfSupport",
+    "screensLed" => "screenLed",
+    "ScreensLed" => "ScreenLed",
+    "screensHeaded" => "screenHeaded",
+    "ScreensHeaded" => "ScreenHeaded",
+    "screensCollaborated" => "screenCollaborated",
+    "ScreensCollaborated" => "ScreenCollaborated",
+    "equipmentUsed" => "equipmentUsed",
+    "EquipmentUsed" => "EquipmentUsed",
+    "platesUsed" => "platesUsed",
+    "PlatesUsed" => "PlatesUsed",
 };
 my $odd_singular_to_plural_map = {
     "copy" => "copies",
     "Copy" => "Copies",
+    "visitPerformed" => "visitsPerformed",
+    "VisitPerformed" => "VisitsPerformed",
+    "letterOfSupport" => "lettersOfSupport",
+    "LetterOfSupport" => "LettersOfSupport",
+    "screenLed" => "screensLed",
+    "ScreenLed" => "ScreensLed",
+    "screenHeaded" => "screensHeaded",
+    "ScreenHeaded" => "ScreensHeaded",
+    "screenCollaborated" => "screensCollaborated",
+    "ScreenCollaborated" => "ScreensCollaborated",
+    "equipmentUsed" => "equipmentUsed",
+    "EquipmentUsed" => "EquipmentUsed",
+    "platesUsed" => "platesUsed",
+    "PlatesUsed" => "PlatesUsed",
+};
+my $odd_inverse_relationships_map = {
+    "screensLed" => "leadScreener",
+    "screensHeaded" => "labHead",
+    "screensCollaborated" => "collaborator",
+    "visitsPerformed" => "performedBy",
+    "performedBy" => "visitPerformed",
+    "labHead" => "labMember",
+    "labMembers" => "labHead",
+    "equipmentUsed" => "visit",
+    "platesUsed" => "visit",
+    "leadScreener" => "screenLed",
+    "collaborators" => "screenCollaborated",
 };
 my @hashcode_primes = (17, 37, 73, 1771);
 
@@ -91,9 +132,9 @@ sub convert_property_lists_to_hashes {
             $is_inverse) = @$property;
 
         $is_required && $has_many &&
-            die "property cannot be required and has-many: $property->{name}";
+            die "property cannot be required and has-many: $entity->{name}.$name";
         $is_unique && ! $is_required &&
-            die "property cannot be unique and not required: $property->{name}";
+            die "property cannot be unique and not required: $entity->{name}.$name";
 
         my $singular_name = undef;
         if ($has_many) {
@@ -156,9 +197,12 @@ sub print_imports {
     print $output_file "import edu.harvard.med.screensaver.model.AbstractEntity;\n";
 
     my @entity_imports = get_entity_imports($entity);
-    for my $entity_import (@entity_imports) {
+    my $last_import = "";
+    for my $entity_import (sort @entity_imports) {
+        next if $entity_import eq $last_import;
         print $output_file
             "import edu.harvard.med.screensaver.model.", $entity_import, ";\n";
+        $last_import = $entity_import;
     }
 }
 
@@ -168,7 +212,7 @@ sub get_entity_imports {
     for my $property (@{ $entity->{properties} }) {
         if ($property->{is_relationship} &&
             $property->{package}) {
-            push @entity_imports, $property->{package} . $property->{type};
+            push @entity_imports, $property->{package} . "." . $property->{type};
         }
     }
     return @entity_imports;
@@ -409,11 +453,15 @@ sub print_setter_for_property {
         print $output_file "    _$property->{name} = $property->{name};\n";
     }
     if ($property->{is_relationship}) {
+        my $other_side_property_name =
+            $odd_inverse_relationships_map->{$property->{name}} ?
+            $odd_inverse_relationships_map->{$property->{name}} :
+            $entity->{name};
         if ($property->{other_side_has_many}) {
             my $plural_name =
-                $odd_singular_to_plural_map->{$entity->{name}} ?
-                $odd_singular_to_plural_map->{$entity->{name}} :
-                $entity->{name} . "s";
+                $odd_singular_to_plural_map->{$other_side_property_name} ?
+                $odd_singular_to_plural_map->{$other_side_property_name} :
+                $other_side_property_name . "s";
             print $output_file
                 "    $property->{name}.getHbn",
                 ucfirst($plural_name),
@@ -422,7 +470,7 @@ sub print_setter_for_property {
         else {
             print $output_file
                 "    $property->{name}.setHbn",
-                ucfirst($entity->{name}),
+                ucfirst($other_side_property_name),
                 "(this);\n";
         }
     }
@@ -448,17 +496,21 @@ sub print_adder_and_remover_for_property {
     if ($property->{is_relationship}) {
         print $output_file
             "    if (get", ucfirst($property->{hbn_name}), "().add($property->{singular_name})) {\n";
+        my $other_side_property_name =
+            $odd_inverse_relationships_map->{$property->{name}} ?
+            $odd_inverse_relationships_map->{$property->{name}} :
+            $entity->{name};
         if ($property->{other_side_has_many}) {
             my $plural_name =
-                $odd_singular_to_plural_map->{$entity->{name}} ?
-                $odd_singular_to_plural_map->{$entity->{name}} :
-                $entity->{name} . "s";
+                $odd_singular_to_plural_map->{$other_side_property_name} ?
+                $odd_singular_to_plural_map->{$other_side_property_name} :
+                $other_side_property_name . "s";
             print $output_file
                 "      return $property->{singular_name}.getHbn", ucfirst($plural_name), "().add(this);\n";
         }
         else {
             print $output_file
-                "      $property->{singular_name}.setHbn", ucfirst($entity->{name}), "(this);\n",
+                "      $property->{singular_name}.setHbn", ucfirst($other_side_property_name), "(this);\n",
                 "      return true;\n";
         }
         print $output_file
@@ -487,17 +539,21 @@ sub print_adder_and_remover_for_property {
     if ($property->{is_relationship}) {
         print $output_file
             "    if (get", ucfirst($property->{hbn_name}), "().remove($property->{singular_name})) {\n";
+        my $other_side_property_name =
+            $odd_inverse_relationships_map->{$property->{name}} ?
+            $odd_inverse_relationships_map->{$property->{name}} :
+            $entity->{name};
         if ($property->{other_side_has_many}) {
             my $plural_name =
-                $odd_singular_to_plural_map->{$entity->{name}} ?
-                $odd_singular_to_plural_map->{$entity->{name}} :
-                $entity->{name} . "s";
+                $odd_singular_to_plural_map->{$other_side_property_name} ?
+                $odd_singular_to_plural_map->{$other_side_property_name} :
+                $other_side_property_name . "s";
             print $output_file
                 "      return $property->{singular_name}.getHbn", ucfirst($plural_name), "().remove(this);\n";
         }
         else {
             print $output_file
-                "      return $property->{singular_name}.setHbn", ucfirst($entity->{name}), "(null);\n",
+                "      return $property->{singular_name}.setHbn", ucfirst($other_side_property_name), "(null);\n",
                 "      return true;\n";
         }
         print $output_file
@@ -615,11 +671,12 @@ sub print_package_methods {
 
     for my $property (@{ $entity->{properties} }) {
         next unless $property->{is_relationship};
+        my $visibility = $property->{package} ? "public" : "package";
         if ($property->{has_many}) {
-            print_hbn_getter_for_property($output_file, $entity, $property, "package");
+            print_hbn_getter_for_property($output_file, $entity, $property, $visibility);
         }
         else {
-            print_hbn_setter_for_property($output_file, $entity, $property, "package");
+            print_hbn_setter_for_property($output_file, $entity, $property, $visibility);
         }
     }
 }

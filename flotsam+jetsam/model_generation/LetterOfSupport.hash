@@ -1,0 +1,13 @@
+my $entity = {
+    name => "LetterOfSupport",
+    human_name => "letter of support",
+    package => "screens",
+    business_key => ["screen", "dateWritten", "writtenBy"],
+
+    properties =>
+        [#name                       #human name                  #type                    #vocab #reqd  #uniq #nary #is-reln #package #OS-nary #OS-reqd #inv
+         ["screen",                  "screen",                    "Screen",                0,     1,     0,    0,    1,       undef,   1,       0],
+         ["dateWritten",             "date written",              "Date",                  0,     1,     0,    0,    0,    ],
+         ["writtenBy",               "written by",                "String",                0,     1,     0,    0,    0,    ],
+         ],
+};
