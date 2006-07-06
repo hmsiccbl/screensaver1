@@ -9,10 +9,14 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 
 /**
@@ -21,8 +25,8 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @hibernate.subclass
- *   lazy="false"
  *   discriminator-value="false"
+ *   lazy="false"
  */
 public class NonCherryPickVisit extends Visit
 {
@@ -35,6 +39,8 @@ public class NonCherryPickVisit extends Visit
 
   // instance fields
 
+  private Set<PlatesUsed> _platesUsed = new HashSet<PlatesUsed>();
+  private Set<EquipmentUsed> _equipmentUsed = new HashSet<EquipmentUsed>();
   private Integer _numberOfReplicates;
   private String _volumeOfCompoundTransferred;
   private AssayProtocolType _assayProtocolType;
@@ -45,18 +51,77 @@ public class NonCherryPickVisit extends Visit
   /**
    * Constructs an initialized <code>NonCherryPickVisit</code> object.
    *
+   * @param screen the screen
+   * @param performedBy the user that performed the visit
+   * @param dateCreated the date created
+   * @param visitDate the visit date
+   * @param visitType the visit type
    * @param assayProtocolType the assay protocol type
    */
   public NonCherryPickVisit(
+    Screen screen,
+    ScreeningRoomUser performedBy,
     Date dateCreated,
     Date visitDate,
-    VisitType visitType)
+    VisitType visitType,
+    AssayProtocolType assayProtocolType)
   {
-    super(dateCreated, visitDate, visitType);
+    super(screen, performedBy, dateCreated, visitDate, visitType);
+    _assayProtocolType = assayProtocolType;
   }
 
 
   // public methods
+
+  /**
+   * Get an unmodifiable copy of the set of plates used.
+   *
+   * @return the plates used
+   */
+  public Set<PlatesUsed> getPlatesUsed()
+  {
+    return Collections.unmodifiableSet(_platesUsed);
+  }
+
+  /**
+   * Add the plates use.
+   *
+   * @param platesUsed the plates use to add
+   * @return true iff the non-cherry pick visit did not already have the plates use
+   */
+  public boolean addPlatesUsed(PlatesUsed platesUsed)
+  {
+    if (getHbnPlatesUsed().add(platesUsed)) {
+      platesUsed.setHbnVisit(this);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Get an unmodifiable copy of the set of equipment used.
+   *
+   * @return the equipment used
+   */
+  public Set<EquipmentUsed> getEquipmentUsed()
+  {
+    return Collections.unmodifiableSet(_equipmentUsed);
+  }
+
+  /**
+   * Add the equipment use.
+   *
+   * @param equipmentUsed the equipment use to add
+   * @return true iff the non-cherry pick visit did not already have the equipment use
+   */
+  public boolean addEquipmentUsed(EquipmentUsed equipmentUsed)
+  {
+    if (getHbnEquipmentUsed().add(equipmentUsed)) {
+      equipmentUsed.setHbnVisit(this);
+      return true;
+    }
+    return false;
+  }
 
   /**
    * Get the number of replicates.
@@ -126,6 +191,42 @@ public class NonCherryPickVisit extends Visit
 
   // package methods
 
+  /**
+   * Get the plates used.
+   *
+   * @return the plates used
+   * @hibernate.set
+   *   cascade="save-update"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="non_cherry_pick_visit_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.PlatesUsed"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  Set<PlatesUsed> getHbnPlatesUsed()
+  {
+    return _platesUsed;
+  }
+
+  /**
+   * Get the equipment used.
+   *
+   * @return the equipment used
+   * @hibernate.set
+   *   cascade="save-update"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="non_cherry_pick_visit_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.EquipmentUsed"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  Set<EquipmentUsed> getHbnEquipmentUsed()
+  {
+    return _equipmentUsed;
+  }
+
 
   // private constructor
 
@@ -136,4 +237,28 @@ public class NonCherryPickVisit extends Visit
    */
   private NonCherryPickVisit() {}
 
+
+  // private methods
+
+  /**
+   * Set the plates used.
+   *
+   * @param platesUsed the new plates used
+   * @motivation for hibernate
+   */
+  private void setHbnPlatesUsed(Set<PlatesUsed> platesUsed)
+  {
+    _platesUsed = platesUsed;
+  }
+
+  /**
+   * Set the equipment used.
+   *
+   * @param equipmentUsed the new equipment used
+   * @motivation for hibernate
+   */
+  private void setHbnEquipmentUsed(Set<EquipmentUsed> equipmentUsed)
+  {
+    _equipmentUsed = equipmentUsed;
+  }
 }

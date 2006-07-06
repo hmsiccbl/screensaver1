@@ -18,6 +18,10 @@ import java.util.Collection;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.model.screens.NonCherryPickVisit;
+import edu.harvard.med.screensaver.model.screens.Visit;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
 /**
  * Test the entities as JavaBeans.
  * <p>
@@ -339,16 +343,46 @@ public class EntityBeansTest extends EntityBeansExercizor
       fail("failed to introspect entity class: " + relatedBeanClass);
     }
     
+    String propertyName = propertyDescriptor.getName();
+    
     // get the property name for the other side of the reln
-    String relatedPropertyName = bean.getClass().getSimpleName();
-    relatedPropertyName =
-      relatedPropertyName.substring(0, 1).toLowerCase() +
-      relatedPropertyName.substring(1);
-    String relatedPluralPropertyName =
+    String relatedPropertyName;
+    if (oddPropertyToRelatedPropertyMap.containsKey(propertyName)) {
+      relatedPropertyName =
+        oddPropertyToRelatedPropertyMap.get(propertyName);
+    }
+    else {
+      relatedPropertyName = bean.getClass().getSimpleName();
+      relatedPropertyName =
+        relatedPropertyName.substring(0, 1).toLowerCase() +
+        relatedPropertyName.substring(1);
+    }
+    String relatedPluralPropertyName;
+    if (oddPropertyToRelatedPluralPropertyMap.containsKey(propertyName)) {
+      relatedPluralPropertyName =
+        oddPropertyToRelatedPluralPropertyMap.get(propertyName);
+    }
+    else {
+      relatedPluralPropertyName =
         oddSingularToPluralPropertiesMap.containsKey(relatedPropertyName) ?
-        oddSingularToPluralPropertiesMap.get(relatedPropertyName) :
-        relatedPropertyName + "s";
+          oddSingularToPluralPropertiesMap.get(relatedPropertyName) :
+            relatedPropertyName + "s";
+    } 
         
+
+    // HACK: cant put "screen" into the odd maps since it is ubiquitous
+    if (Visit.class.isAssignableFrom(bean.getClass()) &&
+      propertyName.equals("screen")) {
+      relatedPluralPropertyName = "visits";
+    }
+    
+    // HACK: cant put "labHead" into the odd maps twice, buts it has
+    // related screensHeaded + labMembers
+    if (bean.getClass().equals(ScreeningRoomUser.class) &&
+      propertyName.equals("labHead")) {
+      relatedPluralPropertyName = "labMembers";
+    }
+    
     // get the prop descr for the other side, and determine whether the
     // other side is one or many
     PropertyDescriptor relatedPropertyDescriptor = null;
@@ -364,9 +398,19 @@ public class EntityBeansTest extends EntityBeansExercizor
         break;
       }
     }
+    
+    // HACK - difficulty because singular and plural property names
+    // are the same
+    if (relatedBeanClass.equals(NonCherryPickVisit.class) &&
+        (relatedPropertyName.equals("platesUsed") ||
+         relatedPropertyName.equals("equipmentUsed"))) {
+      otherSideIsMany = true;
+    }
+    
     assertNotNull(
       "related bean " + relatedBeanClassName + " has property with name " +
-      relatedPropertyName + " or " + relatedPluralPropertyName,
+      relatedPropertyName + " or " + relatedPluralPropertyName + " for " +
+      propFullName,
       relatedPropertyDescriptor);
     
     // invoke the setter on this side
@@ -467,9 +511,9 @@ public class EntityBeansTest extends EntityBeansExercizor
         relatedPropertyName.substring(1);
     }
     String relatedPluralPropertyName;
-    if (oddPluralPropertyToRelatedPropertyMap.containsKey(propertyName)) {
+    if (oddPropertyToRelatedPluralPropertyMap.containsKey(propertyName)) {
       relatedPluralPropertyName =
-        oddPluralPropertyToRelatedPropertyMap.get(propertyName);
+        oddPropertyToRelatedPluralPropertyMap.get(propertyName);
     }
     else {
       relatedPluralPropertyName =
@@ -493,6 +537,7 @@ public class EntityBeansTest extends EntityBeansExercizor
         break;
       }
     }
+
     assertNotNull(
       "related bean " + relatedBeanClassName + " has property with name " +
       relatedPropertyName + " or " + relatedPluralPropertyName + " for " +

@@ -18,11 +18,15 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.time.DateUtils;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.model.screens.NonCherryPickVisit;
+import edu.harvard.med.screensaver.model.screens.Visit;
 
 /**
  * Exercise the entity classes.
@@ -89,7 +93,7 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
       }
       catch (Exception e) {
         e.printStackTrace();
-        fail("vocabular term test value code threw an exception");
+        fail("vocabulary term test value code threw an exception");
       }
     }    
     throw new IllegalArgumentException(
@@ -155,7 +159,18 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
     return entityClasses;
   }
 
-  protected AbstractEntity newInstance(Class<AbstractEntity> entityClass) {
+  private static Map<Class<? extends AbstractEntity>,Class<? extends AbstractEntity>> _concreteStandinMap =
+      new HashMap<Class<? extends AbstractEntity>,Class<? extends AbstractEntity>>();
+  static {
+    _concreteStandinMap.put(Visit.class, NonCherryPickVisit.class);
+  }
+  
+  protected AbstractEntity newInstance(Class<? extends AbstractEntity> entityClass) {
+    if (Modifier.isAbstract(entityClass.getModifiers())) {
+      Class<? extends AbstractEntity> concreteStandin =
+        _concreteStandinMap.get(entityClass);
+      return newInstance(concreteStandin);
+    }
     Constructor constructor = getMaxArgConstructor(entityClass);
     Class [] parameterTypes = constructor.getParameterTypes();
     Object[] arguments = getArgumentsForParameterTypes(parameterTypes);
@@ -177,7 +192,7 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
     return arguments;
   }
 
-  private Constructor getMaxArgConstructor(Class<AbstractEntity> entityClass)
+  private Constructor getMaxArgConstructor(Class<? extends AbstractEntity> entityClass)
   {
     int maxArgs = 0;
     Constructor maxArgConstructor = null;

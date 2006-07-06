@@ -14,6 +14,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 
 /**
@@ -40,6 +41,8 @@ abstract public class Visit extends AbstractEntity
 
   private Integer _visitId;
   private Integer _version;
+  private Screen _screen;
+  private ScreeningRoomUser _performedBy;
   private Date _dateCreated;
   private Date _visitDate;
   private VisitType _visitType;
@@ -52,16 +55,22 @@ abstract public class Visit extends AbstractEntity
   /**
    * Constructs an initialized <code>Visit</code> object.
    *
-   * @param isCherryPickVisit the is cherry pick visit
+   * @param screen the screen
+   * @param performedBy the user that performed the visit
    * @param dateCreated the date created
    * @param visitDate the visit date
    * @param visitType the visit type
    */
   public Visit(
+    Screen screen,
+    ScreeningRoomUser performedBy,
     Date dateCreated,
     Date visitDate,
     VisitType visitType)
   {
+    // TODO: verify the order of assignments here is okay
+    _screen = screen;
+    _performedBy = performedBy;
     _dateCreated = truncateDate(dateCreated);
     _visitDate = truncateDate(visitDate);
     _visitType = visitType;
@@ -86,6 +95,48 @@ abstract public class Visit extends AbstractEntity
   public Integer getVisitId()
   {
     return _visitId;
+  }
+
+  /**
+   * Get the screen.
+   *
+   * @return the screen
+   */
+  public Screen getScreen()
+  {
+    return _screen;
+  }
+
+  /**
+   * Set the screen.
+   *
+   * @param screen the new screen
+   */
+  public void setScreen(Screen screen)
+  {
+    _screen = screen;
+    screen.getHbnVisits().add(this);
+  }
+
+  /**
+   * Get the user that performed the visit.
+   *
+   * @return the user that performed the visit
+   */
+  public ScreeningRoomUser getPerformedBy()
+  {
+    return _performedBy;
+  }
+
+  /**
+   * Set the user that performed the visit.
+   *
+   * @param performedBy the new user that performed the visit
+   */
+  public void setPerformedBy(ScreeningRoomUser performedBy)
+  {
+    _performedBy = performedBy;
+    performedBy.getHbnVisitsPerformed().add(this);
   }
 
   /**
@@ -202,15 +253,112 @@ abstract public class Visit extends AbstractEntity
 
   // protected methods
 
+  /**
+   * A business key class for the well.
+   */
+  private class BusinessKey
+  {
+
+  /**
+   * Get the screen.
+   *
+   * @return the screen
+   */
+  public Screen getScreen()
+  {
+    return _screen;
+  }
+
+  /**
+   * Get the user that performed the visit.
+   *
+   * @return the user that performed the visit
+   */
+  public ScreeningRoomUser getPerformedBy()
+  {
+    return _performedBy;
+  }
+
+  /**
+   * Get the visit date.
+   *
+   * @return the visit date
+   */
+  public Date getVisitDate()
+  {
+    return _visitDate;
+  }
+
+    @Override
+    public boolean equals(Object object)
+    {
+      if (! (object instanceof BusinessKey)) {
+        return false;
+      }
+      BusinessKey that = (BusinessKey) object;
+      return
+        getScreen().equals(that.getScreen()) &&
+        getPerformedBy().equals(that.getPerformedBy()) &&
+        getVisitDate().equals(that.getVisitDate());
+    }
+
+    @Override
+    public int hashCode()
+    {
+      return
+        getScreen().hashCode() +
+        getPerformedBy().hashCode() +
+        getVisitDate().hashCode();
+    }
+
+    @Override
+    public String toString()
+    {
+      return getScreen() + ":" + getPerformedBy() + ":" + getVisitDate();
+    }
+  }
+
   @Override
   protected Object getBusinessKey()
   {
     // TODO: assure changes to business key update relationships whose other side is many
-    return getComments();
+    return new BusinessKey();
   }
 
 
   // package methods
+
+  /**
+   * Set the screen.
+   * Throw a NullPointerException when the screen is null.
+   *
+   * @param screen the new screen
+   * @throws NullPointerException when the screen is null
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  void setHbnScreen(Screen screen)
+  {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
+    _screen = screen;
+  }
+
+  /**
+   * Set the user that performed the visit.
+   * Throw a NullPointerException when the user that performed the visit is null.
+   *
+   * @param performedBy the new user that performed the visit
+   * @throws NullPointerException when the user that performed the visit is null
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  public void setHbnPerformedBy(ScreeningRoomUser performedBy)
+  {
+    if (performedBy == null) {
+      throw new NullPointerException();
+    }
+    _performedBy = performedBy;
+  }
 
 
   // private constructor
@@ -254,5 +402,39 @@ abstract public class Visit extends AbstractEntity
    */
   private void setVersion(Integer version) {
     _version = version;
+  }
+
+  /**
+   * Get the screen.
+   *
+   * @return the screen
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.Screen"
+   *   column="screen_id"
+   *   not-null="true"
+   *   foreign-key="fk_visit_to_screen"
+   *   cascade="save-update"
+   * @motivation for hibernate
+   */
+  private Screen getHbnScreen()
+  {
+    return _screen;
+  }
+
+  /**
+   * Get the user that performed the visit.
+   *
+   * @return the user that performed the visit
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser"
+   *   column="performed_by_id"
+   *   not-null="true"
+   *   foreign-key="fk_visit_to_performed_by"
+   *   cascade="save-update"
+   * @motivation for hibernate
+   */
+  private ScreeningRoomUser getHbnPerformedBy()
+  {
+    return _performedBy;
   }
 }

@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screens.CherryPick;
 
 
 /**
@@ -49,6 +50,7 @@ public class Well extends AbstractEntity
   private String _iccbNumber;
   private String _vendorIdentifier;
   private Set<ResultValue> _resultValues = new HashSet<ResultValue>();
+  private Set<CherryPick> _cherryPicks = new HashSet<CherryPick>();
 
 
   // public constructors and instance methods
@@ -322,8 +324,51 @@ public class Well extends AbstractEntity
   {
     return _resultValues;
   }
-  
 
+  /**
+   * Get an unmodifiable copy of the set of cherry picks.
+   *
+   * @return the cherry picks
+   */
+  public Set<CherryPick> getCherryPicks()
+  {
+    return Collections.unmodifiableSet(_cherryPicks);
+  }
+
+  /**
+   * Add the cherry pick.
+   *
+   * @param cherryPick the cherry pick to add
+   * @return true iff the well did not already have the cherry pick
+   */
+  public boolean addCherryPick(CherryPick cherryPick)
+  {
+    if (getHbnCherryPicks().add(cherryPick)) {
+      cherryPick.setHbnWell(this);
+      return true;
+    }
+    return false;
+  }
+  
+  /**
+   * Get the cherry picks.
+   *
+   * @return the cherry picks
+   * @hibernate.set
+   *   cascade="save-update"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="well_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.CherryPick"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  public Set<CherryPick> getHbnCherryPicks()
+  {
+    return _cherryPicks;
+  }
+
+  
   // protected getters and setters
 
   /**
@@ -409,8 +454,11 @@ public class Well extends AbstractEntity
    * @motivation for Hibernate and for associated {@link Compound} bean (so that
    *             it can maintain the bi-directional association between
    *             {@link Compound} and {@link Well}).
-   * @hibernate.set table="well_compound_link" cascade="all"
-   * @hibernate.collection-key column="well_id"
+   * @hibernate.set
+   *   table="well_compound_link"
+   *   cascade="all"
+   * @hibernate.collection-key
+   *   column="well_id"
    * @hibernate.collection-many-to-many
    *   column="compound_id"
    *   class="edu.harvard.med.screensaver.model.libraries.Compound"
@@ -486,10 +534,12 @@ public class Well extends AbstractEntity
    * Get the library the well is in.
    * 
    * @return the library the well is in
-   * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.libraries.Library"
-   *                        column="library_id" not-null="true"
-   *                        foreign-key="fk_well_to_library"
-   *                        cascade="save-update"
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.libraries.Library"
+   *   column="library_id"
+   *   not-null="true"
+   *   foreign-key="fk_well_to_library"
+   *   cascade="save-update"
    */
   private Library getHbnLibrary()
   {
@@ -521,10 +571,21 @@ public class Well extends AbstractEntity
   /**
    * Set the set of result values for the well.
    * @param wells the new set of result values for the well
-   * @motivation  for hibernate
+   * @motivation for hibernate
    */
   private void setHbnResultValues(Set<ResultValue> resultValues)
   {
     _resultValues = resultValues;
+  }
+
+  /**
+   * Set the cherry picks.
+   *
+   * @param cherryPicks the new cherry picks
+   * @motivation for hibernate
+   */
+  private void setHbnCherryPicks(Set<CherryPick> cherryPicks)
+  {
+    _cherryPicks = cherryPicks;
   }
 }

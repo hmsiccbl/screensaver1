@@ -21,6 +21,9 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.SchemaUtil;
+import edu.harvard.med.screensaver.model.screens.NonCherryPickVisit;
+import edu.harvard.med.screensaver.model.screens.Visit;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 /**
  * Tests for persisting the entities.
@@ -72,6 +75,7 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
             });
           final Class<? extends AbstractEntity> beanClass = bean.getClass();
           log.info("bean class = " + beanClass.getSimpleName());
+          log.info("bean id = " + bean.getEntityId());
           dao.doInTransaction(new DAOTransaction()
             {
               public void runTransaction()
@@ -426,6 +430,7 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
   {
     final String propFullName = bean.getClass() + "." + propertyDescriptor.getName();
     final Class<? extends AbstractEntity> beanClass = bean.getClass();
+    String propertyName = propertyDescriptor.getName();
     
     // get basic objects for the other side of the reln
     final Class<? extends AbstractEntity> relatedBeanClass =
@@ -448,10 +453,23 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
       relatedPropertyName.substring(0, 1).toLowerCase() +
       relatedPropertyName.substring(1);
     String relatedPluralPropertyName =
-        oddSingularToPluralPropertiesMap.containsKey(relatedPropertyName) ?
+      oddSingularToPluralPropertiesMap.containsKey(relatedPropertyName) ?
         oddSingularToPluralPropertiesMap.get(relatedPropertyName) :
-        relatedPropertyName + "s";
+          relatedPropertyName + "s";
+
+    // HACK: cant put "screen" into the odd maps since it is ubiquitous
+    if (Visit.class.isAssignableFrom(bean.getClass()) &&
+      propertyName.equals("screen")) {
+      relatedPluralPropertyName = "visits";
+    }
         
+    // HACK: cant put "labHead" into the odd maps twice, buts it has
+    // related screensHeaded + labMembers
+    if (bean.getClass().equals(ScreeningRoomUser.class) &&
+      propertyName.equals("labHead")) {
+      relatedPluralPropertyName = "labMembers";
+    }
+      
     // get the prop descr for the other side, and determine whether the
     // other side is one or many
     PropertyDescriptor relatedPropertyDescriptor = null;
@@ -467,6 +485,15 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
         break;
       }
     }
+    
+    // HACK - difficulty because singular and plural property names
+    // are the same
+    if (relatedBeanClass.equals(NonCherryPickVisit.class) &&
+        (relatedPropertyName.equals("platesUsed") ||
+         relatedPropertyName.equals("equipmentUsed"))) {
+      otherSideIsManyPre = true;
+    }
+    
     final boolean otherSideIsMany = otherSideIsManyPre;
     assertNotNull(
       "related bean " + relatedBeanClassName + " has property with name " +
@@ -601,9 +628,9 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
         relatedPropertyName.substring(1);
     }
     String relatedPluralPropertyName;
-    if (oddPluralPropertyToRelatedPropertyMap.containsKey(propertyName)) {
+    if (oddPropertyToRelatedPluralPropertyMap.containsKey(propertyName)) {
       relatedPluralPropertyName =
-        oddPluralPropertyToRelatedPropertyMap.get(propertyName);
+        oddPropertyToRelatedPluralPropertyMap.get(propertyName);
     }
     else {
       relatedPluralPropertyName =

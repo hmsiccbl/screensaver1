@@ -9,10 +9,14 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 
 /**
@@ -21,8 +25,8 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @hibernate.subclass
- *   lazy="false"
  *   discriminator-value="true"
+ *   lazy="false"
  */
 public class CherryPickVisit extends Visit
 {
@@ -35,7 +39,7 @@ public class CherryPickVisit extends Visit
 
   // instance fields
 
-  private String _volume;
+  private Set<CherryPick> _cherryPicks = new HashSet<CherryPick>();
 
 
   // public constructor
@@ -43,44 +47,70 @@ public class CherryPickVisit extends Visit
   /**
    * Constructs an initialized <code>CherryPickVisit</code> object.
    *
-   * 
+   * @param screen the screen
+   * @param performedBy the user that performed the visit
+   * @param dateCreated the date created
+   * @param visitDate the visit date
+   * @param visitType the visit type
    */
   public CherryPickVisit(
+    Screen screen,
+    ScreeningRoomUser performedBy,
     Date dateCreated,
     Date visitDate,
     VisitType visitType)
   {
-    super(dateCreated, visitDate, visitType);
+    super(screen, performedBy, dateCreated, visitDate, visitType);
   }
 
 
   // public methods
 
   /**
-   * Get the volume.
+   * Get an unmodifiable copy of the set of cherry picks.
    *
-   * @return the volume
-   * @hibernate.property
-   *   column="cpv_volume"
-   *   type="text"
+   * @return the cherry picks
    */
-  public String getVolume()
+  public Set<CherryPick> getCherryPicks()
   {
-    return _volume;
+    return Collections.unmodifiableSet(_cherryPicks);
   }
 
   /**
-   * Set the volume.
+   * Add the cherry pick.
    *
-   * @param volume the new volume
+   * @param cherryPick the cherry pick to add
+   * @return true iff the cherry pick visit did not already have the cherry pick
    */
-  public void setVolume(String volume)
+  public boolean addCherryPick(CherryPick cherryPick)
   {
-    _volume = volume;
+    if (getHbnCherryPicks().add(cherryPick)) {
+      cherryPick.setHbnCherryPickVisit(this);
+      return true;
+    }
+    return false;
   }
 
 
   // package methods
+
+  /**
+   * Get the cherry picks.
+   *
+   * @return the cherry picks
+   * @hibernate.set
+   *   cascade="save-update"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="cherry_pick_visit_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.CherryPick"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  Set<CherryPick> getHbnCherryPicks()
+  {
+    return _cherryPicks;
+  }
 
 
   // private constructor
@@ -91,4 +121,18 @@ public class CherryPickVisit extends Visit
    * @motivation for hibernate
    */
   private CherryPickVisit() {}
+
+
+  // private methods
+
+  /**
+   * Set the cherry picks.
+   *
+   * @param cherryPicks the new cherry picks
+   * @motivation for hibernate
+   */
+  private void setHbnCherryPicks(Set<CherryPick> cherryPicks)
+  {
+    _cherryPicks = cherryPicks;
+  }
 }

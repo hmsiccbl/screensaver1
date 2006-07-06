@@ -13,6 +13,8 @@ package edu.harvard.med.screensaver.model.screens;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.Well;
 
 
 /**
@@ -35,6 +37,10 @@ public class CherryPick extends AbstractEntity
 
   private Integer _cherryPickId;
   private Integer _version;
+  private CherryPickVisit _cherryPickVisit;
+  private Well _well;
+  private Copy _copy;
+  private RNAiKnockdownConfirmation _rnaiKnockdownConfirmation;
   private String _volume;
   private String _plateMap;
   private IsHitConfirmedViaExperimentation _isHitConfirmedViaExperimentation;
@@ -46,12 +52,21 @@ public class CherryPick extends AbstractEntity
   /**
    * Constructs an initialized <code>CherryPick</code> object.
    *
+   * @param cherryPickVisit the cherry pick visit
+   * @param well the well
+   * @param copy the copy
    * @param volume the volume
    */
   public CherryPick(
+    CherryPickVisit cherryPickVisit,
+    Well well,
+    Copy copy,
     String volume)
   {
     // TODO: verify the order of assignments here is okay
+    _cherryPickVisit = cherryPickVisit;
+    _well = well;
+    _copy = copy;
     _volume = volume;
   }
 
@@ -74,6 +89,90 @@ public class CherryPick extends AbstractEntity
   public Integer getCherryPickId()
   {
     return _cherryPickId;
+  }
+
+  /**
+   * Get the cherry pick visit.
+   *
+   * @return the cherry pick visit
+   */
+  public CherryPickVisit getCherryPickVisit()
+  {
+    return _cherryPickVisit;
+  }
+
+  /**
+   * Set the cherry pick visit.
+   *
+   * @param cherryPickVisit the new cherry pick visit
+   */
+  public void setCherryPickVisit(CherryPickVisit cherryPickVisit)
+  {
+    _cherryPickVisit = cherryPickVisit;
+    cherryPickVisit.getHbnCherryPicks().add(this);
+  }
+
+  /**
+   * Get the well.
+   *
+   * @return the well
+   */
+  public Well getWell()
+  {
+    return _well;
+  }
+
+  /**
+   * Set the well.
+   *
+   * @param well the new well
+   */
+  public void setWell(Well well)
+  {
+    _well = well;
+    well.getHbnCherryPicks().add(this);
+  }
+
+  /**
+   * Get the copy.
+   *
+   * @return the copy
+   */
+  public Copy getCopy()
+  {
+    return _copy;
+  }
+
+  /**
+   * Set the copy.
+   *
+   * @param copy the new copy
+   */
+  public void setCopy(Copy copy)
+  {
+    _copy = copy;
+    copy.getHbnCherryPicks().add(this);
+  }
+
+  /**
+   * Get the RNAi knockdown confirmation.
+   *
+   * @return the RNAi knockdown confirmation
+   */
+  public RNAiKnockdownConfirmation getRNAiKnockdownConfirmation()
+  {
+    return _rnaiKnockdownConfirmation;
+  }
+
+  /**
+   * Set the RNAi knockdown confirmation.
+   *
+   * @param rNAiKnockdownConfirmation the new RNAi knockdown confirmation
+   */
+  public void setRNAiKnockdownConfirmation(RNAiKnockdownConfirmation rNAiKnockdownConfirmation)
+  {
+    _rnaiKnockdownConfirmation = rNAiKnockdownConfirmation;
+    rNAiKnockdownConfirmation.setHbnCherryPick(this);
   }
 
   /**
@@ -168,15 +267,127 @@ public class CherryPick extends AbstractEntity
 
   // protected methods
 
+  /**
+   * A business key class for the well.
+   */
+  private class BusinessKey
+  {
+
+  /**
+   * Get the cherry pick visit.
+   *
+   * @return the cherry pick visit
+   */
+  public CherryPickVisit getCherryPickVisit()
+  {
+    return _cherryPickVisit;
+  }
+
+  /**
+   * Get the well.
+   *
+   * @return the well
+   */
+  public Well getWell()
+  {
+    return _well;
+  }
+
+    @Override
+    public boolean equals(Object object)
+    {
+      if (! (object instanceof BusinessKey)) {
+        return false;
+      }
+      BusinessKey that = (BusinessKey) object;
+      return
+        getCherryPickVisit().equals(that.getCherryPickVisit()) &&
+        getWell().equals(that.getWell());
+    }
+
+    @Override
+    public int hashCode()
+    {
+      return
+        getCherryPickVisit().hashCode() +
+        getWell().hashCode();
+    }
+
+    @Override
+    public String toString()
+    {
+      return getCherryPickVisit() + ":" + getWell();
+    }
+  }
+
   @Override
   protected Object getBusinessKey()
   {
     // TODO: assure changes to business key update relationships whose other side is many
-    return getVolume();
+    return new BusinessKey();
   }
 
 
   // package methods
+
+  /**
+   * Set the cherry pick visit.
+   * Throw a NullPointerException when the cherry pick visit is null.
+   *
+   * @param cherryPickVisit the new cherry pick visit
+   * @throws NullPointerException when the cherry pick visit is null
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  void setHbnCherryPickVisit(CherryPickVisit cherryPickVisit)
+  {
+    if (cherryPickVisit == null) {
+      throw new NullPointerException();
+    }
+    _cherryPickVisit = cherryPickVisit;
+  }
+
+  /**
+   * Set the well.
+   * Throw a NullPointerException when the well is null.
+   *
+   * @param well the new well
+   * @throws NullPointerException when the well is null
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  public void setHbnWell(Well well)
+  {
+    if (well == null) {
+      throw new NullPointerException();
+    }
+    _well = well;
+  }
+
+  /**
+   * Set the copy.
+   * Throw a NullPointerException when the copy is null.
+   *
+   * @param copy the new copy
+   * @throws NullPointerException when the copy is null
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  public void setHbnCopy(Copy copy)
+  {
+    if (copy == null) {
+      throw new NullPointerException();
+    }
+    _copy = copy;
+  }
+
+  /**
+   * Set the RNAi knockdown confirmation.
+   *
+   * @param rNAiKnockdownConfirmation the new RNAi knockdown confirmation
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  void setHbnRNAiKnockdownConfirmation(RNAiKnockdownConfirmation rNAiKnockdownConfirmation)
+  {
+    _rnaiKnockdownConfirmation = rNAiKnockdownConfirmation;
+  }
 
 
   // private constructor
@@ -220,5 +431,71 @@ public class CherryPick extends AbstractEntity
    */
   private void setVersion(Integer version) {
     _version = version;
+  }
+
+  /**
+   * Get the cherry pick visit.
+   *
+   * @return the cherry pick visit
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.CherryPickVisit"
+   *   column="cherry_pick_visit_id"
+   *   not-null="true"
+   *   foreign-key="fk_cherry_pick_to_cherry_pick_visit"
+   *   cascade="save-update"
+   * @motivation for hibernate
+   */
+  private CherryPickVisit getHbnCherryPickVisit()
+  {
+    return _cherryPickVisit;
+  }
+
+  /**
+   * Get the well.
+   *
+   * @return the well
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.libraries.Well"
+   *   column="well_id"
+   *   not-null="true"
+   *   foreign-key="fk_cherry_pick_to_well"
+   *   cascade="save-update"
+   * @motivation for hibernate
+   */
+  private Well getHbnWell()
+  {
+    return _well;
+  }
+
+  /**
+   * Get the copy.
+   *
+   * @return the copy
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.libraries.Copy"
+   *   column="copy_id"
+   *   not-null="true"
+   *   foreign-key="fk_cherry_pick_to_copy"
+   *   cascade="save-update"
+   * @motivation for hibernate
+   */
+  private Copy getHbnCopy()
+  {
+    return _copy;
+  }
+
+  /**
+   * Get the RNAi knockdown confirmation.
+   *
+   * @return the RNAi knockdown confirmation
+   * @hibernate.one-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation"
+   *   property-ref="hbnCherryPick"
+   *   cascade="save-update"
+   * @motivation for hibernate
+   */
+  private RNAiKnockdownConfirmation getHbnRNAiKnockdownConfirmation()
+  {
+    return _rnaiKnockdownConfirmation;
   }
 }

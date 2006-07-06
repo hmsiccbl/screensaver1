@@ -16,6 +16,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.screens.CherryPick;
 
 
 /**
@@ -41,7 +42,8 @@ public class Copy extends AbstractEntity
   private Library _library;
   private Set<CopyInfo> _copyInfos = new HashSet<CopyInfo>();
   private String _name;
-
+  private Set<CherryPick> _cherryPicks = new HashSet<CherryPick>();
+  
 
   // public constructor
 
@@ -150,6 +152,49 @@ public class Copy extends AbstractEntity
     _library.getHbnCopies().add(this);
   }
 
+  /**
+   * Get an unmodifiable copy of the set of cherry picks.
+   *
+   * @return the cherry picks
+   */
+  public Set<CherryPick> getCherryPicks()
+  {
+    return Collections.unmodifiableSet(_cherryPicks);
+  }
+
+  /**
+   * Add the cherry pick.
+   *
+   * @param cherryPick the cherry pick to add
+   * @return true iff the copy did not already have the cherry pick
+   */
+  public boolean addCherryPick(CherryPick cherryPick)
+  {
+    if (getHbnCherryPicks().add(cherryPick)) {
+      cherryPick.setHbnCopy(this);
+      return true;
+    }
+    return false;
+  }
+  
+  /**
+   * Get the cherry picks.
+   *
+   * @return the cherry picks
+   * @hibernate.set
+   *   cascade="save-update"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="copy_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.CherryPick"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  public Set<CherryPick> getHbnCherryPicks()
+  {
+    return _cherryPicks;
+  }
+  
 
   // protected methods
 
@@ -345,5 +390,16 @@ public class Copy extends AbstractEntity
   private void setHbnName(String name)
   {
     _name = name;
+  }
+  
+  /**
+   * Set the cherry picks.
+   *
+   * @param cherryPicks the new cherry picks
+   * @motivation for hibernate
+   */
+  private void setHbnCherryPicks(Set<CherryPick> cherryPicks)
+  {
+    _cherryPicks = cherryPicks;
   }
 }

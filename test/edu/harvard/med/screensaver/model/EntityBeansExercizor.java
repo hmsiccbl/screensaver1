@@ -80,6 +80,13 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
     oddPluralToSingularPropertiesMap.put("children", "child");
     oddPluralToSingularPropertiesMap.put("copies", "copy");
     oddPluralToSingularPropertiesMap.put("typesDerivedFrom", "typeDerivedFrom");
+    oddPluralToSingularPropertiesMap.put("lettersOfSupport", "letterOfSupport");
+    oddPluralToSingularPropertiesMap.put("equipmentUsed", "equipmentUsed");
+    oddPluralToSingularPropertiesMap.put("visitsPerformed", "visitPerformed");
+    oddPluralToSingularPropertiesMap.put("screensLed", "screenLed");
+    oddPluralToSingularPropertiesMap.put("screensHeaded", "screenHeaded");
+    oddPluralToSingularPropertiesMap.put("screensCollaborated", "screenCollaborated");
+    oddPluralToSingularPropertiesMap.put("platesUsed", "platesUsed");
   }
   protected static Map<String, String> oddSingularToPluralPropertiesMap =
     new HashMap<String, String>();
@@ -87,15 +94,36 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
     oddSingularToPluralPropertiesMap.put("child", "children");
     oddSingularToPluralPropertiesMap.put("copy", "copies");
     oddSingularToPluralPropertiesMap.put("typeDerivedFrom", "typesDerivedFrom");
+    oddSingularToPluralPropertiesMap.put("letterOfSupport", "lettersOfSupport");
+    oddSingularToPluralPropertiesMap.put("equipmentUsed", "equipmentUsed");
+    oddSingularToPluralPropertiesMap.put("visitPerformed", "visitPerformed");
+    oddSingularToPluralPropertiesMap.put("screenLed", "screensLed");
+    oddSingularToPluralPropertiesMap.put("screenHeaded", "screensHeaded");
+    oddSingularToPluralPropertiesMap.put("screenCollaborated", "screensCollaborated");
+    oddSingularToPluralPropertiesMap.put("platesUsed", "platesUsed");
   }
   
   protected static Map<String, String> oddPropertyToRelatedPropertyMap =
     new HashMap<String, String>();
-  protected static Map<String, String> oddPluralPropertyToRelatedPropertyMap =
+  static {
+    oddPropertyToRelatedPropertyMap.put("cherryPick", "RNAiKnockdownConfirmation");
+    oddPropertyToRelatedPropertyMap.put("equipmentUsed", "visit");
+    oddPropertyToRelatedPropertyMap.put("platesUsed", "visit");
+    oddPropertyToRelatedPropertyMap.put("labMembers", "labHead");
+    oddPropertyToRelatedPropertyMap.put("screensHeaded", "labHead");
+    oddPropertyToRelatedPropertyMap.put("screensLed", "leadScreener");
+    oddPropertyToRelatedPropertyMap.put("visitsPerformed", "performedBy");
+  }
+  protected static Map<String, String> oddPropertyToRelatedPluralPropertyMap =
     new HashMap<String, String>();
   static {
-    oddPluralPropertyToRelatedPropertyMap.put("derivedTypes", "typesDerivedFrom");
-    oddPluralPropertyToRelatedPropertyMap.put("typesDerivedFrom", "derivedTypes");
+    oddPropertyToRelatedPluralPropertyMap.put("derivedTypes", "typesDerivedFrom");
+    oddPropertyToRelatedPluralPropertyMap.put("typesDerivedFrom", "derivedTypes");
+    oddPropertyToRelatedPluralPropertyMap.put("collaborators", "screensCollaborated");
+    oddPropertyToRelatedPluralPropertyMap.put("screensCollaborated", "collaborators");
+    oddPropertyToRelatedPluralPropertyMap.put("labHead", "screensHeaded");
+    oddPropertyToRelatedPluralPropertyMap.put("leadScreener", "screensLed");
+    oddPropertyToRelatedPluralPropertyMap.put("performedBy", "visitsPerformed");
   }
   
 
