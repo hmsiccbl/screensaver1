@@ -55,6 +55,9 @@ public class LetterOfSupport extends AbstractEntity
     Date dateWritten,
     String writtenBy)
   {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
     _screen = screen;
     _dateWritten = truncateDate(dateWritten);
     _writtenBy = writtenBy;
@@ -99,6 +102,9 @@ public class LetterOfSupport extends AbstractEntity
    */
   public void setScreen(Screen screen)
   {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
     _screen.getHbnLettersOfSupport().remove(this);
     _screen = screen;
     _screen.getHbnLettersOfSupport().add(this);
@@ -108,8 +114,6 @@ public class LetterOfSupport extends AbstractEntity
    * Get the date written.
    *
    * @return the date written
-   * @hibernate.property
-   *   not-null="true"
    */
   public Date getDateWritten()
   {
@@ -132,9 +136,6 @@ public class LetterOfSupport extends AbstractEntity
    * Get the written by.
    *
    * @return the written by
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
    */
   public String getWrittenBy()
   {
@@ -305,5 +306,56 @@ public class LetterOfSupport extends AbstractEntity
   private Screen getHbnScreen()
   {
     return _screen;
+  }
+
+  /**
+   * Get the date written.
+   *
+   * @return the date written
+   * @hibernate.property
+   *   column="date_written"
+   *   not-null="true"
+   * @motivation for hibernate
+   */
+  private Date getHbnDateWritten()
+  {
+    return _dateWritten;
+  }
+
+  /**
+   * Set the date written.
+   *
+   * @param dateWritten the new date written
+   * @motivation for hibernate
+   */
+  private void setHbnDateWritten(Date dateWritten)
+  {
+    _dateWritten = dateWritten;
+  }
+
+  /**
+   * Get the written by.
+   *
+   * @return the written by
+   * @hibernate.property
+   *   column="written_by"
+   *   type="text"
+   *   not-null="true"
+   * @motivation for hibernate
+   */
+  private String getHbnWrittenBy()
+  {
+    return _writtenBy;
+  }
+
+  /**
+   * Set the written by.
+   *
+   * @param writtenBy the new written by
+   * @motivation for hibernate
+   */
+  private void setHbnWrittenBy(String writtenBy)
+  {
+    _writtenBy = writtenBy;
   }
 }

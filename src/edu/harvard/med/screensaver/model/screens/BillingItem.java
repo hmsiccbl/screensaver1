@@ -58,6 +58,9 @@ public class BillingItem extends AbstractEntity
     String amount,
     Date dateFaxed)
   {
+    if (billingInformation == null) {
+      throw new NullPointerException();
+    }
     _billingInformation = billingInformation;
     _itemToBeCharged = itemToBeCharged;
     _amount = amount;
@@ -103,6 +106,9 @@ public class BillingItem extends AbstractEntity
    */
   public void setBillingInformation(BillingInformation billingInformation)
   {
+    if (billingInformation == null) {
+      throw new NullPointerException();
+    }
     _billingInformation.getHbnBillingItems().remove(this);
     _billingInformation = billingInformation;
     _billingInformation.getHbnBillingItems().add(this);
@@ -112,9 +118,6 @@ public class BillingItem extends AbstractEntity
    * Get the item to be charged.
    *
    * @return the item to be charged
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
    */
   public String getItemToBeCharged()
   {
@@ -318,5 +321,31 @@ public class BillingItem extends AbstractEntity
   private BillingInformation getHbnBillingInformation()
   {
     return _billingInformation;
+  }
+
+  /**
+   * Get the item to be charged.
+   *
+   * @return the item to be charged
+   * @hibernate.property
+   *   column="item_to_be_charged"
+   *   type="text"
+   *   not-null="true"
+   * @motivation for hibernate
+   */
+  private String getHbnItemToBeCharged()
+  {
+    return _itemToBeCharged;
+  }
+
+  /**
+   * Set the item to be charged.
+   *
+   * @param itemToBeCharged the new item to be charged
+   * @motivation for hibernate
+   */
+  private void setHbnItemToBeCharged(String itemToBeCharged)
+  {
+    _itemToBeCharged = itemToBeCharged;
   }
 }

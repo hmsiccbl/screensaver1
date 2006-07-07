@@ -60,6 +60,9 @@ public class Publication extends AbstractEntity
     String authors,
     String title)
   {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
     _screen = screen;
     _pubmedId = pubmedId;
     _yearPublished = yearPublished;
@@ -106,6 +109,9 @@ public class Publication extends AbstractEntity
    */
   public void setScreen(Screen screen)
   {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
     _screen.getHbnPublications().remove(this);
     _screen = screen;
     _screen.getHbnPublications().add(this);
@@ -115,9 +121,6 @@ public class Publication extends AbstractEntity
    * Get the pubmed id.
    *
    * @return the pubmed id
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
    */
   public String getPubmedId()
   {
@@ -292,5 +295,31 @@ public class Publication extends AbstractEntity
   private Screen getHbnScreen()
   {
     return _screen;
+  }
+  
+  /**
+   * Get the pubmed id.
+   *
+   * @return the pubmed id
+   * @hibernate.property
+   *   column="pubmed_id"
+   *   type="text"
+   *   not-null="true"
+   * @motivation for hibernate
+   */
+  private String getHbnPubmedId()
+  {
+    return _pubmedId;
+  }
+
+  /**
+   * Set the pubmed id.
+   *
+   * @param pubmedId the new pubmed id
+   * @motivation for hibernate
+   */
+  private void setHbnPubmedId(String pubmedId)
+  {
+    _pubmedId = pubmedId;
   }
 }

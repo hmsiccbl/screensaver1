@@ -87,6 +87,9 @@ public class Screen extends AbstractEntity
     ScreenType screenType,
     String title)
   {
+    if (leadScreener == null || labHead == null) {
+      throw new NullPointerException();
+    }
     _leadScreener = leadScreener;
     _labHead = labHead;
     _screenNumber = screenNumber;
@@ -135,6 +138,9 @@ public class Screen extends AbstractEntity
    */
   public void setLeadScreener(ScreeningRoomUser leadScreener)
   {
+    if (leadScreener == null) {
+      throw new NullPointerException();
+    }
     _leadScreener.getHbnScreensLed().remove(this);
     _leadScreener = leadScreener;
     _leadScreener.getHbnScreensLed().add(this);
@@ -157,6 +163,9 @@ public class Screen extends AbstractEntity
    */
   public void setLabHead(ScreeningRoomUser labHead)
   {
+    if (labHead == null) {
+      throw new NullPointerException();
+    }
     _labHead.getHbnScreensHeaded().remove(this);
     _labHead = labHead;
     _labHead.getHbnScreensHeaded().add(this);
@@ -375,8 +384,6 @@ public class Screen extends AbstractEntity
    * Get the screen number.
    *
    * @return the screen number
-   * @hibernate.property
-   *   not-null="true"
    */
   public Integer getScreenNumber()
   {
@@ -952,6 +959,18 @@ public class Screen extends AbstractEntity
   }
 
   /**
+   * Set the billing information.
+   *
+   * @param billingInformation the new billing information
+   * @motivation for hibernate
+   */
+  void setHbnBillingInformation(BillingInformation billingInformation)
+  {
+    _billingInformation = billingInformation;
+  }
+
+
+  /**
    * Get the attached files.
    *
    * @return the attached files
@@ -1114,17 +1133,6 @@ public class Screen extends AbstractEntity
   }
 
   /**
-   * Set the billing information.
-   *
-   * @param billingInformation the new billing information
-   * @motivation for hibernate
-   */
-  void setHbnBillingInformation(BillingInformation billingInformation)
-  {
-    _billingInformation = billingInformation;
-  }
-
-  /**
    * Set the attached files.
    *
    * @param attachedFiles the new attached files
@@ -1166,5 +1174,31 @@ public class Screen extends AbstractEntity
   private void setAssayReadoutTypes(Set<AssayReadoutType> assayReadoutTypes)
   {
     _assayReadoutTypes = assayReadoutTypes;
+  }
+  
+
+  /**
+   * Get the screen number.
+   *
+   * @return the screen number
+   * @hibernate.property
+   *   column="screen_number"
+   *   not-null="true"
+   * @motivation for hibernate
+   */
+  private Integer getHbnScreenNumber()
+  {
+    return _screenNumber;
+  }
+
+  /**
+   * Set the screen number.
+   *
+   * @param screenNumber the new screen number
+   * @motivation for hibernate
+   */
+  private void setHbnScreenNumber(Integer screenNumber)
+  {
+    _screenNumber = screenNumber;
   }
 }

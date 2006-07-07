@@ -60,7 +60,9 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
     String timing,
     String cellLine)
   {
-    // TODO: verify the order of assignments here is okay
+    if (cherryPick == null) {
+      throw new NullPointerException();
+    }
     _cherryPick = cherryPick;
     _percentKnockdown = percentKnockdown;
     _methodOfQuantification = methodOfQuantification;
@@ -106,8 +108,11 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
    */
   public void setCherryPick(CherryPick cherryPick)
   {
+    if (cherryPick == null) {
+      throw new NullPointerException();
+    }
     _cherryPick = cherryPick;
-    cherryPick.setHbnRNAiKnockdownConfirmation(this);
+    _cherryPick.setHbnRNAiKnockdownConfirmation(this);
   }
 
   /**
@@ -207,7 +212,6 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return getCherryPick();
   }
 

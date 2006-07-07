@@ -63,6 +63,9 @@ public class CherryPick extends AbstractEntity
     Copy copy,
     String volume)
   {
+    if (cherryPickVisit == null || well == null || copy == null) {
+        throw new NullPointerException();
+    }
     _cherryPickVisit = cherryPickVisit;
     _well = well;
     _copy = copy;
@@ -105,6 +108,9 @@ public class CherryPick extends AbstractEntity
    */
   public void setCherryPickVisit(CherryPickVisit cherryPickVisit)
   {
+    if (cherryPickVisit == null) {
+      throw new NullPointerException();
+    }
     unregisterWithParents();
     _cherryPickVisit = cherryPickVisit;
     registerWithParents();
@@ -127,6 +133,9 @@ public class CherryPick extends AbstractEntity
    */
   public void setWell(Well well)
   {
+    if (well == null) {
+      throw new NullPointerException();
+    }
     unregisterWithParents();
     _well = well;
     registerWithParents();
@@ -149,6 +158,9 @@ public class CherryPick extends AbstractEntity
    */
   public void setCopy(Copy copy)
   {
+    if (copy == null) {
+      throw new NullPointerException();
+    }
     _copy = copy;
     copy.getHbnCherryPicks().add(this);
   }

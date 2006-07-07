@@ -60,6 +60,9 @@ public class ChecklistItem extends AbstractEntity
     Date activationDate,
     String activationInitials)
   {
+    if (checklistItemType == null || screeningRoomUser == null) {
+      throw new NullPointerException();
+    }
     _checklistItemType = checklistItemType;
     _screeningRoomUser = screeningRoomUser;
     _activationDate = truncateDate(activationDate);
@@ -106,6 +109,9 @@ public class ChecklistItem extends AbstractEntity
    */
   public void setChecklistItemType(ChecklistItemType checklistItemType)
   {
+    if (checklistItemType == null) {
+      throw new NullPointerException();
+    }
     _checklistItemType.getHbnChecklistItems().remove(this);
     _screeningRoomUser.getHbnChecklistItems().remove(this);
     _checklistItemType = checklistItemType;
@@ -130,6 +136,9 @@ public class ChecklistItem extends AbstractEntity
    */
   public void setScreeningRoomUser(ScreeningRoomUser screeningRoomUser)
   {
+    if (screeningRoomUser == null) {
+      throw new NullPointerException();
+    }
     _checklistItemType.getHbnChecklistItems().remove(this);
     _screeningRoomUser.getHbnChecklistItems().remove(this);
     _screeningRoomUser = screeningRoomUser;

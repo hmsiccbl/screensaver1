@@ -273,7 +273,9 @@ public class ScreeningRoomUser extends AbstractEntity
    */
   public void setLabHead(ScreeningRoomUser labHead)
   {
-    _labHead.getHbnLabMembers().remove(this);
+    if (_labHead != null) {
+      _labHead.getHbnLabMembers().remove(this);
+    }
     _labHead = labHead;
     _labHead.getHbnLabMembers().add(this);
   }
@@ -320,9 +322,13 @@ public class ScreeningRoomUser extends AbstractEntity
    */
   public void setLabAffiliation(LabAffiliation labAffiliation)
   {
-    _labAffiliation.setHbnScreeningRoomUser(null);
+    if (_labAffiliation != null) {
+      _labAffiliation.setHbnScreeningRoomUser(null);
+    }
     _labAffiliation = labAffiliation;
-    _labAffiliation.setHbnScreeningRoomUser(this);
+    if (_labAffiliation != null) {
+      _labAffiliation.setHbnScreeningRoomUser(this);
+    }
   }
 
   /**
@@ -441,12 +447,16 @@ public class ScreeningRoomUser extends AbstractEntity
     for (Screen screenCollaborated : _screensCollaborated) {
       screenCollaborated.getHbnCollaborators().remove(this);
     }
-    _labHead.getHbnLabMembers().remove(this);
+    if (_labHead != null) {
+      _labHead.getHbnLabMembers().remove(this);
+    }
     _eCommonsId = eCommonsId;
     for (Screen screenCollaborated : _screensCollaborated) {
       screenCollaborated.getHbnCollaborators().add(this);
     }
-    _labHead.getHbnLabMembers().add(this);
+    if (_labHead != null) {
+      _labHead.getHbnLabMembers().add(this);
+    } 
   }
 
   /**

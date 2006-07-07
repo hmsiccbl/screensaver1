@@ -55,6 +55,9 @@ public class StatusItem extends AbstractEntity
     Date statusDate,
     StatusValue statusValue)
   {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
     _screen = screen;
     _statusDate = truncateDate(statusDate);
     _statusValue = statusValue;
@@ -99,6 +102,9 @@ public class StatusItem extends AbstractEntity
    */
   public void setScreen(Screen screen)
   {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
     _screen.getHbnStatusItems().remove(this);
     _screen = screen;
     _screen.getHbnStatusItems().add(this);
@@ -130,9 +136,6 @@ public class StatusItem extends AbstractEntity
    * Get the status value.
    *
    * @return the status value
-   * @hibernate.property
-   *   type="edu.harvard.med.screensaver.model.screens.StatusValue$UserType"
-   *   not-null="true"
    */
   public StatusValue getStatusValue()
   {
@@ -291,5 +294,31 @@ public class StatusItem extends AbstractEntity
   private Screen getHbnScreen()
   {
     return _screen;
+  }
+
+  /**
+   * Get the status value.
+   *
+   * @return the status value
+   * @hibernate.property
+   *   column="status_value"
+   *   type="edu.harvard.med.screensaver.model.screens.StatusValue$UserType"
+   *   not-null="true"
+   * @motivation for hibernate
+   */
+  private StatusValue getHbnStatusValue()
+  {
+    return _statusValue;
+  }
+
+  /**
+   * Set the status value.
+   *
+   * @param statusValue the new status value
+   * @motivation for hibernate
+   */
+  private void setHbnStatusValue(StatusValue statusValue)
+  {
+    _statusValue = statusValue;
   }
 }

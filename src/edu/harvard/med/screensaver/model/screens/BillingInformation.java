@@ -66,6 +66,9 @@ public class BillingInformation extends AbstractEntity
     IsFeeToBeChargedForScreening isFeeToBeChargedForScreening,
     boolean isFeeFormOnFile)
   {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
     _screen = screen;
     _isFeeToBeChargedForScreening = isFeeToBeChargedForScreening;
     _isFeeFormOnFile = isFeeFormOnFile;
@@ -110,8 +113,12 @@ public class BillingInformation extends AbstractEntity
    */
   public void setScreen(Screen screen)
   {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
+    _screen.setHbnBillingInformation(null);
     _screen = screen;
-    screen.setHbnBillingInformation(this);
+    _screen.setHbnBillingInformation(this);
   }
 
   /**

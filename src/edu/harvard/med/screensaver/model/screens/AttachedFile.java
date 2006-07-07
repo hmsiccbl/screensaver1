@@ -54,6 +54,9 @@ public class AttachedFile extends AbstractEntity
     String filename,
     String fileContents)
   {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
     _screen = screen;
     _filename = filename;
     _fileContents = fileContents;
@@ -98,18 +101,18 @@ public class AttachedFile extends AbstractEntity
    */
   public void setScreen(Screen screen)
   {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
     _screen.getHbnAttachedFiles().remove(this);
     _screen = screen;
-    screen.getHbnAttachedFiles().add(this);
+    _screen.getHbnAttachedFiles().add(this);
   }
 
   /**
    * Get the filename.
    *
    * @return the filename
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
    */
   public String getFilename()
   {
@@ -291,5 +294,31 @@ public class AttachedFile extends AbstractEntity
   private Screen getHbnScreen()
   {
     return _screen;
+  }  
+
+  /**
+   * Get the filename.
+   *
+   * @return the filename
+   * @hibernate.property
+   *   column="filename"
+   *   type="text"
+   *   not-null="true"
+   * @motivation for hibernate
+   */
+  private String getHbnFilename()
+  {
+    return _filename;
+  }
+
+  /**
+   * Set the filename.
+   *
+   * @param filename the new filename
+   * @motivation for hibernate
+   */
+  private void setHbnFilename(String filename)
+  {
+    _filename = filename;
   }
 }

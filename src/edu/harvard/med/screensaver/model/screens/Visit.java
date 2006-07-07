@@ -68,6 +68,9 @@ abstract public class Visit extends AbstractEntity
     Date visitDate,
     VisitType visitType)
   {
+    if (screen == null || performedBy == null) {
+      throw new NullPointerException();
+    }
     _screen = screen;
     _performedBy = performedBy;
     _dateCreated = truncateDate(dateCreated);
@@ -115,6 +118,9 @@ abstract public class Visit extends AbstractEntity
    */
   public void setScreen(Screen screen)
   {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
     _screen.getHbnVisits().remove(this);
     _performedBy.getHbnVisitsPerformed().remove(this);
     _screen = screen;
@@ -139,6 +145,9 @@ abstract public class Visit extends AbstractEntity
    */
   public void setPerformedBy(ScreeningRoomUser performedBy)
   {
+    if (performedBy == null) {
+      throw new NullPointerException();
+    }
     _screen.getHbnVisits().remove(this);
     _performedBy.getHbnVisitsPerformed().remove(this);
     _performedBy = performedBy;
@@ -172,8 +181,6 @@ abstract public class Visit extends AbstractEntity
    * Get the visit date.
    *
    * @return the visit date
-   * @hibernate.property
-   *   not-null="true"
    */
   public Date getVisitDate()
   {
@@ -445,5 +452,30 @@ abstract public class Visit extends AbstractEntity
   private ScreeningRoomUser getHbnPerformedBy()
   {
     return _performedBy;
+  }
+
+  /**
+   * Get the visit date.
+   *
+   * @return the visit date
+   * @hibernate.property
+   *   column="visit_date"
+   *   not-null="true"
+   * @motivation for hibernate
+   */
+  private Date getHbnVisitDate()
+  {
+    return _visitDate;
+  }
+
+  /**
+   * Set the visit date.
+   *
+   * @param visitDate the new visit date
+   * @motivation for hibernate
+   */
+  private void setHbnVisitDate(Date visitDate)
+  {
+    _visitDate = truncateDate(visitDate);
   }
 }

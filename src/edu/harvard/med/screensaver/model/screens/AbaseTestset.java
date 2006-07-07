@@ -54,6 +54,9 @@ public class AbaseTestset extends AbstractEntity
     Screen screen,
     String testsetName)
   {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
     _screen = screen;
     _testsetName = testsetName;
     _screen.getHbnAbaseTestsets().add(this);
@@ -97,9 +100,12 @@ public class AbaseTestset extends AbstractEntity
    */
   public void setScreen(Screen screen)
   {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
     _screen.getHbnAbaseTestsets().remove(this);
     _screen = screen;
-    screen.getHbnAbaseTestsets().add(this);
+    _screen.getHbnAbaseTestsets().add(this);
   }
 
   /**
@@ -127,9 +133,6 @@ public class AbaseTestset extends AbstractEntity
    * Get the testset name.
    *
    * @return the testset name
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
    */
   public String getTestsetName()
   {
@@ -310,5 +313,31 @@ public class AbaseTestset extends AbstractEntity
   private Screen getHbnScreen()
   {
     return _screen;
+  }
+  
+  /**
+   * Get the testset name.
+   *
+   * @return the testset name
+   * @hibernate.property
+   *   column="testset_name"
+   *   type="text"
+   *   not-null="true"
+   * @motivation for hibernate
+   */
+  private String getHbnTestsetName()
+  {
+    return _testsetName;
+  }
+
+  /**
+   * Set the testset name.
+   *
+   * @param testsetName the new testset name
+   * @motivation for hibernate
+   */
+  private void setHbnTestsetName(String testsetName)
+  {
+    _testsetName = testsetName;
   }
 }

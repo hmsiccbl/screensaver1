@@ -57,6 +57,9 @@ public class PlatesUsed extends AbstractEntity
     String endPlate,
     String copy)
   {
+    if (visit== null) {
+      throw new NullPointerException();
+    }
     _visit = visit;
     _startPlate = startPlate;
     _endPlate = endPlate;
@@ -102,6 +105,9 @@ public class PlatesUsed extends AbstractEntity
    */
   public void setVisit(NonCherryPickVisit visit)
   {
+    if (visit== null) {
+      throw new NullPointerException();
+    }
     _visit.getHbnPlatesUsed().remove(this);
     _visit = visit;
     _visit.getHbnPlatesUsed().add(this);
@@ -111,9 +117,6 @@ public class PlatesUsed extends AbstractEntity
    * Get the start plate.
    *
    * @return the start plate
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
    */
   public String getStartPlate()
   {
@@ -318,5 +321,31 @@ public class PlatesUsed extends AbstractEntity
   private NonCherryPickVisit getHbnVisit()
   {
     return _visit;
+  }
+
+  /**
+   * Get the start plate.
+   *
+   * @return the start plate
+   * @hibernate.property
+   *   column="start_plate"
+   *   type="text"
+   *   not-null="true"
+   * @motivation for hibernate
+   */
+  private String getHbnStartPlate()
+  {
+    return _startPlate;
+  }
+
+  /**
+   * Set the start plate.
+   *
+   * @param startPlate the new start plate
+   * @motivation for hibernate
+   */
+  private void setHbnStartPlate(String startPlate)
+  {
+    _startPlate = startPlate;
   }
 }

@@ -57,6 +57,9 @@ public class EquipmentUsed extends AbstractEntity
     String protocol,
     String description)
   {
+    if (visit == null) {
+      throw new NullPointerException();
+    }
     _visit = visit;
     _equipment = equipment;
     _protocol = protocol;
@@ -102,6 +105,9 @@ public class EquipmentUsed extends AbstractEntity
    */
   public void setVisit(NonCherryPickVisit visit)
   {
+    if (visit == null) {
+      throw new NullPointerException();
+    }
     _visit.getHbnEquipmentUsed().remove(this);
     _visit = visit;
     _visit.getHbnEquipmentUsed().add(this);
@@ -111,9 +117,6 @@ public class EquipmentUsed extends AbstractEntity
    * Get the equipment.
    *
    * @return the equipment
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
    */
   public String getEquipment()
   {
@@ -318,5 +321,31 @@ public class EquipmentUsed extends AbstractEntity
   private NonCherryPickVisit getHbnVisit()
   {
     return _visit;
+  }
+
+  /**
+   * Get the equipment.
+   *
+   * @return the equipment
+   * @hibernate.property
+   *   column="equipment"
+   *   type="text"
+   *   not-null="true"
+   * @motivation for hibernate
+   */
+  private String getHbnEquipment()
+  {
+    return _equipment;
+  }
+
+  /**
+   * Set the equipment.
+   *
+   * @param equipment the new equipment
+   * @motivation for hibernate
+   */
+  private void setHbnEquipment(String equipment)
+  {
+    _equipment = equipment;
   }
 }
