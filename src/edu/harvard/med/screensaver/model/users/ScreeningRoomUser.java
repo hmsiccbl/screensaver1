@@ -634,7 +634,7 @@ public class ScreeningRoomUser extends AbstractEntity
    *   cascade="save-update"
    *   inverse="true"
    * @hibernate.collection-key
-   *   column="screening_room_user_id"
+   *   column="lead_screener_id"
    * @hibernate.collection-one-to-many
    *   class="edu.harvard.med.screensaver.model.screens.Screen"
    * @motivation for hibernate and maintenance of bi-directional relationships
@@ -652,7 +652,7 @@ public class ScreeningRoomUser extends AbstractEntity
    *   cascade="save-update"
    *   inverse="true"
    * @hibernate.collection-key
-   *   column="screening_room_user_id"
+   *   column="lab_head_id"
    * @hibernate.collection-one-to-many
    *   class="edu.harvard.med.screensaver.model.screens.Screen"
    * @motivation for hibernate and maintenance of bi-directional relationships
@@ -668,14 +668,14 @@ public class ScreeningRoomUser extends AbstractEntity
    * @return the screens for which this user was a collaborator
    * @hibernate.set
    *   inverse="true"
-   *   table="screens_collaborate_screening_room_user_link"
+   *   table="collaborator_link"
    *   cascade="all"
    * @hibernate.collection-key
-   *   column="screening_room_user_id"
+   *   column="collaborator_id"
    * @hibernate.collection-many-to-many
-   *   column="screens_collaborate_id"
+   *   column="screen_id"
    *   class="edu.harvard.med.screensaver.model.screens.Screen"
-   *   foreign-key="fk_screens_collaborate_screening_room_user_link_to_screening_room_user"
+   *   foreign-key="fk_collaborator_link_to_screening_room_user"
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
   public Set<Screen> getHbnScreensCollaborated()
@@ -691,7 +691,7 @@ public class ScreeningRoomUser extends AbstractEntity
    *   cascade="save-update"
    *   inverse="true"
    * @hibernate.collection-key
-   *   column="screening_room_user_id"
+   *   column="performed_by_id"
    * @hibernate.collection-one-to-many
    *   class="edu.harvard.med.screensaver.model.screens.Visit"
    * @motivation for hibernate and maintenance of bi-directional relationships

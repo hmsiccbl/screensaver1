@@ -813,14 +813,14 @@ public class Screen extends AbstractEntity
    *
    * @return the collaborators
    * @hibernate.set
-   *   table="screen_collaborator_link"
+   *   table="collaborator_link"
    *   cascade="all"
    * @hibernate.collection-key
    *   column="screen_id"
    * @hibernate.collection-many-to-many
    *   column="collaborator_id"
    *   class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser"
-   *   foreign-key="fk_screen_collaborator_link_to_screen"
+   *   foreign-key="fk_collaborator_link_to_screen"
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
   public Set<ScreeningRoomUser> getHbnCollaborators()

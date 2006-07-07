@@ -199,7 +199,7 @@ public class NonCherryPickVisit extends Visit
    *   cascade="save-update"
    *   inverse="true"
    * @hibernate.collection-key
-   *   column="non_cherry_pick_visit_id"
+   *   column="visit_id"
    * @hibernate.collection-one-to-many
    *   class="edu.harvard.med.screensaver.model.screens.PlatesUsed"
    * @motivation for hibernate and maintenance of bi-directional relationships
@@ -217,7 +217,7 @@ public class NonCherryPickVisit extends Visit
    *   cascade="save-update"
    *   inverse="true"
    * @hibernate.collection-key
-   *   column="non_cherry_pick_visit_id"
+   *   column="visit_id"
    * @hibernate.collection-one-to-many
    *   class="edu.harvard.med.screensaver.model.screens.EquipmentUsed"
    * @motivation for hibernate and maintenance of bi-directional relationships
