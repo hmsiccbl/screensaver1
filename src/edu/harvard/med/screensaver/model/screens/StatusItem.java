@@ -156,26 +156,26 @@ public class StatusItem extends AbstractEntity
    */
   private class BusinessKey
   {
-
-  /**
-   * Get the screen.
-   *
-   * @return the screen
-   */
-  public Screen getScreen()
-  {
-    return _screen;
-  }
-
-  /**
-   * Get the status value.
-   *
-   * @return the status value
-   */
-  public StatusValue getStatusValue()
-  {
-    return _statusValue;
-  }
+    
+    /**
+     * Get the screen.
+     *
+     * @return the screen
+     */
+    public Screen getScreen()
+    {
+      return _screen;
+    }
+    
+    /**
+     * Get the status value.
+     *
+     * @return the status value
+     */
+    public StatusValue getStatusValue()
+    {
+      return _statusValue;
+    }
 
     @Override
     public boolean equals(Object object)

@@ -250,45 +250,73 @@ abstract public class Visit extends AbstractEntity
     _comments = comments;
   }
 
+  /**
+   * Set the user that performed the visit.
+   * Throw a NullPointerException when the user that performed the visit is null.
+   *
+   * @param performedBy the new user that performed the visit
+   * @throws NullPointerException when the user that performed the visit is null
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   * this method is public only because the bi-directional relationship
+   * is cross-package.
+   */
+  public void setHbnPerformedBy(ScreeningRoomUser performedBy)
+  {
+    if (performedBy == null) {
+      throw new NullPointerException();
+    }
+    _performedBy = performedBy;
+  }
+
+  
+  // protected constructor
+  
+  /**
+   * Construct an uninitialized <code>Visit</code> object.
+   *
+   * @motivation for hibernate
+   */
+  protected Visit() {}
+
 
   // protected methods
-
+  
   /**
    * A business key class for the well.
    */
   private class BusinessKey
   {
-
-  /**
-   * Get the screen.
-   *
-   * @return the screen
-   */
-  public Screen getScreen()
-  {
-    return _screen;
-  }
-
-  /**
-   * Get the user that performed the visit.
-   *
-   * @return the user that performed the visit
-   */
-  public ScreeningRoomUser getPerformedBy()
-  {
-    return _performedBy;
-  }
-
-  /**
-   * Get the visit date.
-   *
-   * @return the visit date
-   */
-  public Date getVisitDate()
-  {
-    return _visitDate;
-  }
-
+    
+    /**
+     * Get the screen.
+     *
+     * @return the screen
+     */
+    public Screen getScreen()
+    {
+      return _screen;
+    }
+    
+    /**
+     * Get the user that performed the visit.
+     *
+     * @return the user that performed the visit
+     */
+    public ScreeningRoomUser getPerformedBy()
+    {
+      return _performedBy;
+    }
+    
+    /**
+     * Get the visit date.
+     *
+     * @return the visit date
+     */
+    public Date getVisitDate()
+    {
+      return _visitDate;
+    }
+    
     @Override
     public boolean equals(Object object)
     {
@@ -343,35 +371,6 @@ abstract public class Visit extends AbstractEntity
     }
     _screen = screen;
   }
-
-  /**
-   * Set the user that performed the visit.
-   * Throw a NullPointerException when the user that performed the visit is null.
-   *
-   * @param performedBy the new user that performed the visit
-   * @throws NullPointerException when the user that performed the visit is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  public void setHbnPerformedBy(ScreeningRoomUser performedBy)
-  {
-    if (performedBy == null) {
-      throw new NullPointerException();
-    }
-    _performedBy = performedBy;
-  }
-
-
-  // private constructor
-
-  /**
-   * Construct an uninitialized <code>Visit</code> object.
-   *
-   * @motivation for hibernate
-   */
-  protected Visit() {}
-
-
-  // private methods
 
   /**
    * Set the id for the visit.

@@ -598,34 +598,6 @@ public class ScreeningRoomUser extends AbstractEntity
 
   // protected methods
 
-  @Override
-  protected Object getBusinessKey()
-  {
-    // TODO: assure changes to business key update relationships whose other side is many
-    return getECommonsId();
-  }
-
-
-  // package methods
-
-  /**
-   * Get the checklist items.
-   *
-   * @return the checklist items
-   * @hibernate.set
-   *   cascade="save-update"
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="screening_room_user_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.users.ChecklistItem"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  Set<ChecklistItem> getHbnChecklistItems()
-  {
-    return _checklistItems;
-  }
-
   /**
    * Get the screens for which this user was the lead screener.
    *
@@ -638,6 +610,8 @@ public class ScreeningRoomUser extends AbstractEntity
    * @hibernate.collection-one-to-many
    *   class="edu.harvard.med.screensaver.model.screens.Screen"
    * @motivation for hibernate and maintenance of bi-directional relationships
+   * this method is public only because the bi-directional relationship
+   * is cross-package.
    */
   public Set<Screen> getHbnScreensLed()
   {
@@ -656,6 +630,8 @@ public class ScreeningRoomUser extends AbstractEntity
    * @hibernate.collection-one-to-many
    *   class="edu.harvard.med.screensaver.model.screens.Screen"
    * @motivation for hibernate and maintenance of bi-directional relationships
+   * this method is public only because the bi-directional relationship
+   * is cross-package.
    */
   public Set<Screen> getHbnScreensHeaded()
   {
@@ -677,6 +653,8 @@ public class ScreeningRoomUser extends AbstractEntity
    *   class="edu.harvard.med.screensaver.model.screens.Screen"
    *   foreign-key="fk_collaborator_link_to_screening_room_user"
    * @motivation for hibernate and maintenance of bi-directional relationships
+   * this method is public only because the bi-directional relationship
+   * is cross-package.
    */
   public Set<Screen> getHbnScreensCollaborated()
   {
@@ -695,10 +673,43 @@ public class ScreeningRoomUser extends AbstractEntity
    * @hibernate.collection-one-to-many
    *   class="edu.harvard.med.screensaver.model.screens.Visit"
    * @motivation for hibernate and maintenance of bi-directional relationships
+   * this method is public only because the bi-directional relationship
+   * is cross-package.
    */
   public Set<Visit> getHbnVisitsPerformed()
   {
     return _visitsPerformed;
+  }
+
+  
+  // package methods
+
+  @Override
+  protected Object getBusinessKey()
+  {
+    // TODO: assure changes to business key update relationships whose other side is many
+    return getECommonsId();
+  }
+
+  
+  // protected methods
+  
+  /**
+   * Get the checklist items.
+   *
+   * @return the checklist items
+   * @hibernate.set
+   *   cascade="save-update"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="screening_room_user_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.users.ChecklistItem"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  Set<ChecklistItem> getHbnChecklistItems()
+  {
+    return _checklistItems;
   }
 
   /**

@@ -306,7 +306,7 @@ public class PlatesUsed extends AbstractEntity
    *
    * @return the visit
    * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.Visit"
+   *   class="edu.harvard.med.screensaver.model.screens.NonCherryPickVisit"
    *   column="visit_id"
    *   not-null="true"
    *   foreign-key="fk_plates_used_to_visit"

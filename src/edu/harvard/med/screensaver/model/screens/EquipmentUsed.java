@@ -183,26 +183,26 @@ public class EquipmentUsed extends AbstractEntity
    */
   private class BusinessKey
   {
-
-  /**
-   * Get the visit.
-   *
-   * @return the visit
-   */
-  public NonCherryPickVisit getVisit()
-  {
-    return _visit;
-  }
-
-  /**
-   * Get the equipment.
-   *
-   * @return the equipment
-   */
-  public String getEquipment()
-  {
-    return _equipment;
-  }
+    
+    /**
+     * Get the visit.
+     *
+     * @return the visit
+     */
+    public NonCherryPickVisit getVisit()
+    {
+      return _visit;
+    }
+    
+    /**
+     * Get the equipment.
+     *
+     * @return the equipment
+     */
+    public String getEquipment()
+    {
+      return _equipment;
+    }
 
     @Override
     public boolean equals(Object object)
@@ -306,7 +306,7 @@ public class EquipmentUsed extends AbstractEntity
    *
    * @return the visit
    * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.Visit"
+   *   class="edu.harvard.med.screensaver.model.screens.NonCherryPickVisit"
    *   column="visit_id"
    *   not-null="true"
    *   foreign-key="fk_equipment_used_to_visit"

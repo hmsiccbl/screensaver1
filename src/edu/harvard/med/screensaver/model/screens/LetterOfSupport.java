@@ -156,37 +156,37 @@ public class LetterOfSupport extends AbstractEntity
    */
   private class BusinessKey
   {
-
-  /**
-   * Get the screen.
-   *
-   * @return the screen
-   */
-  public Screen getScreen()
-  {
-    return _screen;
-  }
-
-  /**
-   * Get the date written.
-   *
-   * @return the date written
-   */
-  public Date getDateWritten()
-  {
-    return _dateWritten;
-  }
-
-  /**
-   * Get the written by.
-   *
-   * @return the written by
-   */
-  public String getWrittenBy()
-  {
-    return _writtenBy;
-  }
-
+    
+    /**
+     * Get the screen.
+     *
+     * @return the screen
+     */
+    public Screen getScreen()
+    {
+      return _screen;
+    }
+    
+    /**
+     * Get the date written.
+     *
+     * @return the date written
+     */
+    public Date getDateWritten()
+    {
+      return _dateWritten;
+    }
+    
+    /**
+     * Get the written by.
+     *
+     * @return the written by
+     */
+    public String getWrittenBy()
+    {
+      return _writtenBy;
+    }
+    
     @Override
     public boolean equals(Object object)
     {

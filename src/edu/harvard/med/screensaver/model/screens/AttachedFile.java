@@ -156,26 +156,26 @@ public class AttachedFile extends AbstractEntity
    */
   private class BusinessKey
   {
-
-  /**
-   * Get the screen.
-   *
-   * @return the screen
-   */
-  public Screen getScreen()
-  {
-    return _screen;
-  }
-
-  /**
-   * Get the filename.
-   *
-   * @return the filename
-   */
-  public String getFilename()
-  {
-    return _filename;
-  }
+    
+    /**
+     * Get the screen.
+     *
+     * @return the screen
+     */
+    public Screen getScreen()
+    {
+      return _screen;
+    }
+    
+    /**
+     * Get the filename.
+     *
+     * @return the filename
+     */
+    public String getFilename()
+    {
+      return _filename;
+    }
 
     @Override
     public boolean equals(Object object)

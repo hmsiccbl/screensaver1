@@ -766,16 +766,6 @@ public class Screen extends AbstractEntity
 
   // protected methods
 
-  @Override
-  protected Object getBusinessKey()
-  {
-    // TODO: assure changes to business key update relationships whose other side is many
-    return getScreenNumber();
-  }
-
-
-  // package methods
-
   /**
    * Set the lead screener.
    * Throw a NullPointerException when the lead screener is null.
@@ -783,6 +773,8 @@ public class Screen extends AbstractEntity
    * @param leadScreener the new lead screener
    * @throws NullPointerException when the lead screener is null
    * @motivation for hibernate and maintenance of bi-directional relationships
+   * this method is public only because the bi-directional relationship
+   * is cross-package.
    */
   public void setHbnLeadScreener(ScreeningRoomUser leadScreener)
   {
@@ -799,6 +791,8 @@ public class Screen extends AbstractEntity
    * @param labHead the new lab head
    * @throws NullPointerException when the lab head is null
    * @motivation for hibernate and maintenance of bi-directional relationships
+   * this method is public only because the bi-directional relationship
+   * is cross-package.
    */
   public void setHbnLabHead(ScreeningRoomUser labHead)
   {
@@ -822,11 +816,23 @@ public class Screen extends AbstractEntity
    *   class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser"
    *   foreign-key="fk_collaborator_link_to_screen"
    * @motivation for hibernate and maintenance of bi-directional relationships
+   * this method is public only because the bi-directional relationship
+   * is cross-package.
    */
   public Set<ScreeningRoomUser> getHbnCollaborators()
   {
     return _collaborators;
   }
+
+  // protected methods
+  
+  @Override
+  protected Object getBusinessKey()
+  {
+    // TODO: assure changes to business key update relationships whose other side is many
+    return getScreenNumber();
+  }
+
 
   /**
    * Get the status items.

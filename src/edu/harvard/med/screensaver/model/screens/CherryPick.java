@@ -265,33 +265,69 @@ public class CherryPick extends AbstractEntity
   }
 
 
-  // protected methods
+  /**
+   * Set the well.
+   * Throw a NullPointerException when the well is null.
+   *
+   * @param well the new well
+   * @throws NullPointerException when the well is null
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   * this method is public only because the bi-directional relationship
+   * is cross-package.
+   */
+  public void setHbnWell(Well well)
+  {
+    if (well == null) {
+      throw new NullPointerException();
+    }
+    _well = well;
+  }
+
+
+  /**
+   * Set the copy.
+   * Throw a NullPointerException when the copy is null.
+   *
+   * @param copy the new copy
+   * @throws NullPointerException when the copy is null
+   * @motivation for hibernate and maintenance of bi-directional relationships.
+   * this method is public only because the bi-directional relationship
+   * is cross-package.
+   */
+  public void setHbnCopy(Copy copy)
+  {
+    if (copy == null) {
+      throw new NullPointerException();
+    }
+    _copy = copy;
+  }
+
 
   /**
    * A business key class for the well.
    */
   private class BusinessKey
   {
-
-  /**
-   * Get the cherry pick visit.
-   *
-   * @return the cherry pick visit
-   */
-  public CherryPickVisit getCherryPickVisit()
-  {
-    return _cherryPickVisit;
-  }
-
-  /**
-   * Get the well.
-   *
-   * @return the well
-   */
-  public Well getWell()
-  {
-    return _well;
-  }
+    
+    /**
+     * Get the cherry pick visit.
+     *
+     * @return the cherry pick visit
+     */
+    public CherryPickVisit getCherryPickVisit()
+    {
+      return _cherryPickVisit;
+    }
+    
+    /**
+     * Get the well.
+     *
+     * @return the well
+     */
+    public Well getWell()
+    {
+      return _well;
+    }
 
     @Override
     public boolean equals(Object object)
@@ -344,38 +380,6 @@ public class CherryPick extends AbstractEntity
       throw new NullPointerException();
     }
     _cherryPickVisit = cherryPickVisit;
-  }
-
-  /**
-   * Set the well.
-   * Throw a NullPointerException when the well is null.
-   *
-   * @param well the new well
-   * @throws NullPointerException when the well is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  public void setHbnWell(Well well)
-  {
-    if (well == null) {
-      throw new NullPointerException();
-    }
-    _well = well;
-  }
-
-  /**
-   * Set the copy.
-   * Throw a NullPointerException when the copy is null.
-   *
-   * @param copy the new copy
-   * @throws NullPointerException when the copy is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  public void setHbnCopy(Copy copy)
-  {
-    if (copy == null) {
-      throw new NullPointerException();
-    }
-    _copy = copy;
   }
 
   /**

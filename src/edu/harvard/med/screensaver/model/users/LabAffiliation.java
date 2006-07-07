@@ -156,26 +156,26 @@ public class LabAffiliation extends AbstractEntity
    */
   private class BusinessKey
   {
-
-  /**
-   * Get the screening room user.
-   *
-   * @return the screening room user
-   */
-  public ScreeningRoomUser getScreeningRoomUser()
-  {
-    return _screeningRoomUser;
-  }
-
-  /**
-   * Get the affiliation name.
-   *
-   * @return the affiliation name
-   */
-  public String getAffiliationName()
-  {
-    return _affiliationName;
-  }
+    
+    /**
+     * Get the screening room user.
+     *
+     * @return the screening room user
+     */
+    public ScreeningRoomUser getScreeningRoomUser()
+    {
+      return _screeningRoomUser;
+    }
+    
+    /**
+     * Get the affiliation name.
+     *
+     * @return the affiliation name
+     */
+    public String getAffiliationName()
+    {
+      return _affiliationName;
+    }
 
     @Override
     public boolean equals(Object object)

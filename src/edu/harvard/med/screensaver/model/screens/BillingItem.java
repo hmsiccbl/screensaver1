@@ -183,27 +183,27 @@ public class BillingItem extends AbstractEntity
    */
   private class BusinessKey
   {
-
-  /**
-   * Get the billing information.
-   *
-   * @return the billing information
-   */
-  public BillingInformation getBillingInformation()
-  {
-    return _billingInformation;
-  }
-
-  /**
-   * Get the item to be charged.
-   *
-   * @return the item to be charged
-   */
-  public String getItemToBeCharged()
-  {
-    return _itemToBeCharged;
-  }
-
+    
+    /**
+     * Get the billing information.
+     *
+     * @return the billing information
+     */
+    public BillingInformation getBillingInformation()
+    {
+      return _billingInformation;
+    }
+    
+    /**
+     * Get the item to be charged.
+     *
+     * @return the item to be charged
+     */
+    public String getItemToBeCharged()
+    {
+      return _itemToBeCharged;
+    }
+    
     @Override
     public boolean equals(Object object)
     {

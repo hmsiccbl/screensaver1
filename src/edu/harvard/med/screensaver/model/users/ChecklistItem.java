@@ -226,26 +226,26 @@ public class ChecklistItem extends AbstractEntity
    */
   private class BusinessKey
   {
-
-  /**
-   * Get the checklist item type.
-   *
-   * @return the checklist item type
-   */
-  public ChecklistItemType getChecklistItemType()
-  {
-    return _checklistItemType;
-  }
-
-  /**
-   * Get the screening room user.
-   *
-   * @return the screening room user
-   */
-  public ScreeningRoomUser getScreeningRoomUser()
-  {
-    return _screeningRoomUser;
-  }
+    
+    /**
+     * Get the checklist item type.
+     *
+     * @return the checklist item type
+     */
+    public ChecklistItemType getChecklistItemType()
+    {
+      return _checklistItemType;
+    }
+    
+    /**
+     * Get the screening room user.
+     *
+     * @return the screening room user
+     */
+    public ScreeningRoomUser getScreeningRoomUser()
+    {
+      return _screeningRoomUser;
+    }
 
     @Override
     public boolean equals(Object object)
