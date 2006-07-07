@@ -447,15 +447,30 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
       fail("failed to introspect entity class: " + relatedBeanClass);
     }
     
+    
     // get the property name for the other side of the reln
-    String relatedPropertyName = beanClass.getSimpleName();
-    relatedPropertyName =
-      relatedPropertyName.substring(0, 1).toLowerCase() +
-      relatedPropertyName.substring(1);
-    String relatedPluralPropertyName =
-      oddSingularToPluralPropertiesMap.containsKey(relatedPropertyName) ?
-        oddSingularToPluralPropertiesMap.get(relatedPropertyName) :
-          relatedPropertyName + "s";
+    String relatedPropertyName;
+    if (oddPropertyToRelatedPropertyMap.containsKey(propertyName)) {
+      relatedPropertyName =
+        oddPropertyToRelatedPropertyMap.get(propertyName);
+    }
+    else {
+      relatedPropertyName = bean.getClass().getSimpleName();
+      relatedPropertyName =
+        relatedPropertyName.substring(0, 1).toLowerCase() +
+        relatedPropertyName.substring(1);
+    }
+    String relatedPluralPropertyName;
+    if (oddPropertyToRelatedPluralPropertyMap.containsKey(propertyName)) {
+      relatedPluralPropertyName =
+        oddPropertyToRelatedPluralPropertyMap.get(propertyName);
+    }
+    else {
+      relatedPluralPropertyName =
+        oddSingularToPluralPropertiesMap.containsKey(relatedPropertyName) ?
+          oddSingularToPluralPropertiesMap.get(relatedPropertyName) :
+            relatedPropertyName + "s";
+    } 
 
     // HACK: cant put "screen" into the odd maps since it is ubiquitous
     if (Visit.class.isAssignableFrom(bean.getClass()) &&
@@ -469,7 +484,7 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
       propertyName.equals("labHead")) {
       relatedPluralPropertyName = "labMembers";
     }
-      
+
     // get the prop descr for the other side, and determine whether the
     // other side is one or many
     PropertyDescriptor relatedPropertyDescriptor = null;
@@ -546,7 +561,7 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
                 "related.getter() returns set of size 1 for " + propFullName,
                 1,
                 result.size());
-              assertSame(
+              assertEquals(
                 "related.getter() returns this after this.setter(related) for " +
                 propFullName,
                 localBean,
@@ -559,7 +574,7 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
           }
           else {
             try {
-              assertSame(
+              assertEquals(
                 "related.getter() returns this after this.setter(related) for " +
                 propFullName,
                 localBean,
