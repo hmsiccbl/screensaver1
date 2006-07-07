@@ -87,7 +87,6 @@ public class ScreeningRoomUser extends AbstractEntity
     boolean nonScreeningUser,
     boolean rnaiUser)
   {
-    // TODO: verify the order of assignments here is okay
     _dateCreated = truncateDate(dateCreated);
     _firstName = firstName;
     _lastName = lastName;
@@ -274,8 +273,9 @@ public class ScreeningRoomUser extends AbstractEntity
    */
   public void setLabHead(ScreeningRoomUser labHead)
   {
+    _labHead.getHbnLabMembers().remove(this);
     _labHead = labHead;
-    labHead.getHbnLabMembers().add(this);
+    _labHead.getHbnLabMembers().add(this);
   }
 
   /**
@@ -320,8 +320,9 @@ public class ScreeningRoomUser extends AbstractEntity
    */
   public void setLabAffiliation(LabAffiliation labAffiliation)
   {
+    _labAffiliation.setHbnScreeningRoomUser(null);
     _labAffiliation = labAffiliation;
-    labAffiliation.setHbnScreeningRoomUser(this);
+    _labAffiliation.setHbnScreeningRoomUser(this);
   }
 
   /**
@@ -437,7 +438,15 @@ public class ScreeningRoomUser extends AbstractEntity
    */
   public void setECommonsId(String eCommonsId)
   {
+    for (Screen screenCollaborated : _screensCollaborated) {
+      screenCollaborated.getHbnCollaborators().remove(this);
+    }
+    _labHead.getHbnLabMembers().remove(this);
     _eCommonsId = eCommonsId;
+    for (Screen screenCollaborated : _screensCollaborated) {
+      screenCollaborated.getHbnCollaborators().add(this);
+    }
+    _labHead.getHbnLabMembers().add(this);
   }
 
   /**
@@ -687,7 +696,6 @@ public class ScreeningRoomUser extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return getECommonsId();
   }
 

@@ -54,10 +54,10 @@ public class LabAffiliation extends AbstractEntity
     String affiliationName,
     AffiliationCategory affiliationCategory)
   {
-    // TODO: verify the order of assignments here is okay
     _screeningRoomUser = screeningRoomUser;
     _affiliationName = affiliationName;
     _affiliationCategory = affiliationCategory;
+    _screeningRoomUser.setHbnLabAffiliation(this);
   }
 
 
@@ -98,8 +98,9 @@ public class LabAffiliation extends AbstractEntity
    */
   public void setScreeningRoomUser(ScreeningRoomUser screeningRoomUser)
   {
+    _screeningRoomUser.setHbnLabAffiliation(null);
     _screeningRoomUser = screeningRoomUser;
-    screeningRoomUser.setHbnLabAffiliation(this);
+    _screeningRoomUser.setHbnLabAffiliation(this);
   }
 
   /**

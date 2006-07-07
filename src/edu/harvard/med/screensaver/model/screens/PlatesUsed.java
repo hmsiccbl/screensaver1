@@ -57,11 +57,11 @@ public class PlatesUsed extends AbstractEntity
     String endPlate,
     String copy)
   {
-    // TODO: verify the order of assignments here is okay
     _visit = visit;
     _startPlate = startPlate;
     _endPlate = endPlate;
     _copy = copy;
+    _visit.getHbnPlatesUsed().add(this);
   }
 
 
@@ -102,8 +102,9 @@ public class PlatesUsed extends AbstractEntity
    */
   public void setVisit(NonCherryPickVisit visit)
   {
+    _visit.getHbnPlatesUsed().remove(this);
     _visit = visit;
-    visit.getHbnPlatesUsed().add(this);
+    _visit.getHbnPlatesUsed().add(this);
   }
 
   /**
@@ -126,7 +127,9 @@ public class PlatesUsed extends AbstractEntity
    */
   public void setStartPlate(String startPlate)
   {
+    _visit.getHbnPlatesUsed().remove(this);
     _startPlate = startPlate;
+    _visit.getHbnPlatesUsed().add(this);
   }
 
   /**
@@ -234,7 +237,6 @@ public class PlatesUsed extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return new BusinessKey();
   }
 

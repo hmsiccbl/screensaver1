@@ -54,9 +54,9 @@ public class AbaseTestset extends AbstractEntity
     Screen screen,
     String testsetName)
   {
-    // TODO: verify the order of assignments here is okay
     _screen = screen;
     _testsetName = testsetName;
+    _screen.getHbnAbaseTestsets().add(this);
   }
 
 
@@ -97,6 +97,7 @@ public class AbaseTestset extends AbstractEntity
    */
   public void setScreen(Screen screen)
   {
+    _screen.getHbnAbaseTestsets().remove(this);
     _screen = screen;
     screen.getHbnAbaseTestsets().add(this);
   }
@@ -142,7 +143,9 @@ public class AbaseTestset extends AbstractEntity
    */
   public void setTestsetName(String testsetName)
   {
+    _screen.getHbnAbaseTestsets().remove(this);
     _testsetName = testsetName;
+    _screen.getHbnAbaseTestsets().add(this);
   }
 
   /**
@@ -226,7 +229,6 @@ public class AbaseTestset extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return new BusinessKey();
   }
 

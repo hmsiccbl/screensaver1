@@ -60,12 +60,12 @@ public class Publication extends AbstractEntity
     String authors,
     String title)
   {
-    // TODO: verify the order of assignments here is okay
     _screen = screen;
     _pubmedId = pubmedId;
     _yearPublished = yearPublished;
     _authors = authors;
     _title = title;
+    _screen.getHbnPublications().add(this);
   }
 
 
@@ -106,8 +106,9 @@ public class Publication extends AbstractEntity
    */
   public void setScreen(Screen screen)
   {
+    _screen.getHbnPublications().remove(this);
     _screen = screen;
-    screen.getHbnPublications().add(this);
+    _screen.getHbnPublications().add(this);
   }
 
   /**
@@ -130,7 +131,9 @@ public class Publication extends AbstractEntity
    */
   public void setPubmedId(String pubmedId)
   {
+    _screen.getHbnPublications().remove(this);
     _pubmedId = pubmedId;
+    _screen.getHbnPublications().add(this);
   }
 
   /**
@@ -208,7 +211,6 @@ public class Publication extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return getPubmedId();
   }
 

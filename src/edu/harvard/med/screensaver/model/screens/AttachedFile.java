@@ -54,10 +54,10 @@ public class AttachedFile extends AbstractEntity
     String filename,
     String fileContents)
   {
-    // TODO: verify the order of assignments here is okay
     _screen = screen;
     _filename = filename;
     _fileContents = fileContents;
+    _screen.getHbnAttachedFiles().add(this);
   }
 
 
@@ -98,6 +98,7 @@ public class AttachedFile extends AbstractEntity
    */
   public void setScreen(Screen screen)
   {
+    _screen.getHbnAttachedFiles().remove(this);
     _screen = screen;
     screen.getHbnAttachedFiles().add(this);
   }
@@ -122,7 +123,9 @@ public class AttachedFile extends AbstractEntity
    */
   public void setFilename(String filename)
   {
+    _screen.getHbnAttachedFiles().remove(this);
     _filename = filename;
+    _screen.getHbnAttachedFiles().add(this);
   }
 
   /**
@@ -207,7 +210,6 @@ public class AttachedFile extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return new BusinessKey();
   }
 

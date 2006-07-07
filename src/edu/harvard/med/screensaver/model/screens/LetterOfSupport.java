@@ -55,10 +55,10 @@ public class LetterOfSupport extends AbstractEntity
     Date dateWritten,
     String writtenBy)
   {
-    // TODO: verify the order of assignments here is okay
     _screen = screen;
     _dateWritten = truncateDate(dateWritten);
     _writtenBy = writtenBy;
+    _screen.getHbnLettersOfSupport().add(this);
   }
 
 
@@ -99,8 +99,9 @@ public class LetterOfSupport extends AbstractEntity
    */
   public void setScreen(Screen screen)
   {
+    _screen.getHbnLettersOfSupport().remove(this);
     _screen = screen;
-    screen.getHbnLettersOfSupport().add(this);
+    _screen.getHbnLettersOfSupport().add(this);
   }
 
   /**
@@ -122,7 +123,9 @@ public class LetterOfSupport extends AbstractEntity
    */
   public void setDateWritten(Date dateWritten)
   {
+    _screen.getHbnLettersOfSupport().remove(this);
     _dateWritten = truncateDate(dateWritten);
+    _screen.getHbnLettersOfSupport().add(this);
   }
 
   /**
@@ -145,7 +148,9 @@ public class LetterOfSupport extends AbstractEntity
    */
   public void setWrittenBy(String writtenBy)
   {
+    _screen.getHbnLettersOfSupport().remove(this);
     _writtenBy = writtenBy;
+    _screen.getHbnLettersOfSupport().add(this);
   }
 
 
@@ -219,7 +224,6 @@ public class LetterOfSupport extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return new BusinessKey();
   }
 

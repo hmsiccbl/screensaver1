@@ -68,12 +68,13 @@ abstract public class Visit extends AbstractEntity
     Date visitDate,
     VisitType visitType)
   {
-    // TODO: verify the order of assignments here is okay
     _screen = screen;
     _performedBy = performedBy;
     _dateCreated = truncateDate(dateCreated);
     _visitDate = truncateDate(visitDate);
     _visitType = visitType;
+    _screen.getHbnVisits().add(this);
+    _performedBy.getHbnVisitsPerformed().add(this);
   }
 
 
@@ -114,8 +115,11 @@ abstract public class Visit extends AbstractEntity
    */
   public void setScreen(Screen screen)
   {
+    _screen.getHbnVisits().remove(this);
+    _performedBy.getHbnVisitsPerformed().remove(this);
     _screen = screen;
-    screen.getHbnVisits().add(this);
+    _screen.getHbnVisits().add(this);
+    _performedBy.getHbnVisitsPerformed().add(this);
   }
 
   /**
@@ -135,8 +139,11 @@ abstract public class Visit extends AbstractEntity
    */
   public void setPerformedBy(ScreeningRoomUser performedBy)
   {
+    _screen.getHbnVisits().remove(this);
+    _performedBy.getHbnVisitsPerformed().remove(this);
     _performedBy = performedBy;
-    performedBy.getHbnVisitsPerformed().add(this);
+    _screen.getHbnVisits().add(this);
+    _performedBy.getHbnVisitsPerformed().add(this);
   }
 
   /**
@@ -180,7 +187,11 @@ abstract public class Visit extends AbstractEntity
    */
   public void setVisitDate(Date visitDate)
   {
+    _screen.getHbnVisits().remove(this);
+    _performedBy.getHbnVisitsPerformed().remove(this);
     _visitDate = truncateDate(visitDate);
+    _screen.getHbnVisits().add(this);
+    _performedBy.getHbnVisitsPerformed().add(this);
   }
 
   /**
@@ -349,7 +360,6 @@ abstract public class Visit extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return new BusinessKey();
   }
 

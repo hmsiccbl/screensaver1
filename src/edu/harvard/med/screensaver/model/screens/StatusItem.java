@@ -55,10 +55,10 @@ public class StatusItem extends AbstractEntity
     Date statusDate,
     StatusValue statusValue)
   {
-    // TODO: verify the order of assignments here is okay
     _screen = screen;
     _statusDate = truncateDate(statusDate);
     _statusValue = statusValue;
+    _screen.getHbnStatusItems().add(this);
   }
 
 
@@ -99,8 +99,9 @@ public class StatusItem extends AbstractEntity
    */
   public void setScreen(Screen screen)
   {
+    _screen.getHbnStatusItems().remove(this);
     _screen = screen;
-    screen.getHbnStatusItems().add(this);
+    _screen.getHbnStatusItems().add(this);
   }
 
   /**
@@ -145,7 +146,9 @@ public class StatusItem extends AbstractEntity
    */
   public void setStatusValue(StatusValue statusValue)
   {
+    _screen.getHbnStatusItems().remove(this);
     _statusValue = statusValue;
+    _screen.getHbnStatusItems().add(this);
   }
 
 
@@ -207,7 +210,6 @@ public class StatusItem extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return new BusinessKey();
   }
 

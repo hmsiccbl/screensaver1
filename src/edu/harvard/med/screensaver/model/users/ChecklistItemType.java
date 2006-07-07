@@ -58,7 +58,6 @@ public class ChecklistItemType extends AbstractEntity
     String itemName,
     boolean hasDeactivation)
   {
-    // TODO: verify the order of assignments here is okay
     _orderStatistic = orderStatistic;
     _itemName = itemName;
     _hasDeactivation = hasDeactivation;
@@ -185,7 +184,6 @@ public class ChecklistItemType extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return getOrderStatistic();
   }
 

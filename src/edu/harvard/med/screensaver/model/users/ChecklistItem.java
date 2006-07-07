@@ -60,11 +60,12 @@ public class ChecklistItem extends AbstractEntity
     Date activationDate,
     String activationInitials)
   {
-    // TODO: verify the order of assignments here is okay
     _checklistItemType = checklistItemType;
     _screeningRoomUser = screeningRoomUser;
     _activationDate = truncateDate(activationDate);
     _activationInitials = activationInitials;
+    _checklistItemType.getHbnChecklistItems().add(this);
+    _screeningRoomUser.getHbnChecklistItems().add(this);
   }
 
 
@@ -105,8 +106,11 @@ public class ChecklistItem extends AbstractEntity
    */
   public void setChecklistItemType(ChecklistItemType checklistItemType)
   {
+    _checklistItemType.getHbnChecklistItems().remove(this);
+    _screeningRoomUser.getHbnChecklistItems().remove(this);
     _checklistItemType = checklistItemType;
-    checklistItemType.getHbnChecklistItems().add(this);
+    _checklistItemType.getHbnChecklistItems().add(this);
+    _screeningRoomUser.getHbnChecklistItems().add(this);
   }
 
   /**
@@ -126,8 +130,11 @@ public class ChecklistItem extends AbstractEntity
    */
   public void setScreeningRoomUser(ScreeningRoomUser screeningRoomUser)
   {
+    _checklistItemType.getHbnChecklistItems().remove(this);
+    _screeningRoomUser.getHbnChecklistItems().remove(this);
     _screeningRoomUser = screeningRoomUser;
-    screeningRoomUser.getHbnChecklistItems().add(this);
+    _checklistItemType.getHbnChecklistItems().add(this);
+    _screeningRoomUser.getHbnChecklistItems().add(this);
   }
 
   /**
@@ -277,7 +284,6 @@ public class ChecklistItem extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return new BusinessKey();
   }
 

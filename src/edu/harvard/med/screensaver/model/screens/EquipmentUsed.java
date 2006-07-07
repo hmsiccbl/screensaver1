@@ -57,11 +57,11 @@ public class EquipmentUsed extends AbstractEntity
     String protocol,
     String description)
   {
-    // TODO: verify the order of assignments here is okay
     _visit = visit;
     _equipment = equipment;
     _protocol = protocol;
     _description = description;
+    _visit.getHbnEquipmentUsed().add(this);
   }
 
 
@@ -102,8 +102,9 @@ public class EquipmentUsed extends AbstractEntity
    */
   public void setVisit(NonCherryPickVisit visit)
   {
+    _visit.getHbnEquipmentUsed().remove(this);
     _visit = visit;
-    visit.getHbnEquipmentUsed().add(this);
+    _visit.getHbnEquipmentUsed().add(this);
   }
 
   /**
@@ -126,7 +127,9 @@ public class EquipmentUsed extends AbstractEntity
    */
   public void setEquipment(String equipment)
   {
+    _visit.getHbnEquipmentUsed().remove(this);
     _equipment = equipment;
+    _visit.getHbnEquipmentUsed().add(this);
   }
 
   /**
@@ -234,7 +237,6 @@ public class EquipmentUsed extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return new BusinessKey();
   }
 

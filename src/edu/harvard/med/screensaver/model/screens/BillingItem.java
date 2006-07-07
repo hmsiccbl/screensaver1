@@ -58,11 +58,11 @@ public class BillingItem extends AbstractEntity
     String amount,
     Date dateFaxed)
   {
-    // TODO: verify the order of assignments here is okay
     _billingInformation = billingInformation;
     _itemToBeCharged = itemToBeCharged;
     _amount = amount;
     _dateFaxed = truncateDate(dateFaxed);
+    _billingInformation.getHbnBillingItems().add(this);
   }
 
 
@@ -103,8 +103,9 @@ public class BillingItem extends AbstractEntity
    */
   public void setBillingInformation(BillingInformation billingInformation)
   {
+    _billingInformation.getHbnBillingItems().remove(this);
     _billingInformation = billingInformation;
-    billingInformation.getHbnBillingItems().add(this);
+    _billingInformation.getHbnBillingItems().add(this);
   }
 
   /**
@@ -127,7 +128,9 @@ public class BillingItem extends AbstractEntity
    */
   public void setItemToBeCharged(String itemToBeCharged)
   {
+    _billingInformation.getHbnBillingItems().remove(this);
     _itemToBeCharged = itemToBeCharged;
+    _billingInformation.getHbnBillingItems().add(this);
   }
 
   /**
@@ -234,7 +237,6 @@ public class BillingItem extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return new BusinessKey();
   }
 

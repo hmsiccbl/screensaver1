@@ -63,15 +63,12 @@ public class CherryPick extends AbstractEntity
     Copy copy,
     String volume)
   {
-    // TODO: verify the order of assignments here is okay
     _cherryPickVisit = cherryPickVisit;
     _well = well;
     _copy = copy;
     _volume = volume;
+    registerWithParents();
   }
-
-
-  // public methods
 
   @Override
   public Integer getEntityId()
@@ -108,8 +105,9 @@ public class CherryPick extends AbstractEntity
    */
   public void setCherryPickVisit(CherryPickVisit cherryPickVisit)
   {
+    unregisterWithParents();
     _cherryPickVisit = cherryPickVisit;
-    cherryPickVisit.getHbnCherryPicks().add(this);
+    registerWithParents();
   }
 
   /**
@@ -129,8 +127,9 @@ public class CherryPick extends AbstractEntity
    */
   public void setWell(Well well)
   {
+    unregisterWithParents();
     _well = well;
-    well.getHbnCherryPicks().add(this);
+    registerWithParents();
   }
 
   /**
@@ -359,7 +358,6 @@ public class CherryPick extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return new BusinessKey();
   }
 
@@ -501,5 +499,23 @@ public class CherryPick extends AbstractEntity
   private RNAiKnockdownConfirmation getHbnRNAiKnockdownConfirmation()
   {
     return _rnaiKnockdownConfirmation;
+  }
+
+  /**
+   * Register this <code>CherryPick</code> with its parent objects.
+   */
+  private void registerWithParents() {
+    _cherryPickVisit.getHbnCherryPicks().add(this);
+    _well.getHbnCherryPicks().add(this);
+    _copy.getHbnCherryPicks().add(this);
+  }
+
+  /**
+   * Unregister this <code>CherryPick</code> with its parent objects.
+   */
+  private void unregisterWithParents() {
+    _cherryPickVisit.getHbnCherryPicks().remove(this);
+    _well.getHbnCherryPicks().remove(this);
+    _copy.getHbnCherryPicks().remove(this);
   }
 }

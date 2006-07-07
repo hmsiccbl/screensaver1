@@ -87,13 +87,14 @@ public class Screen extends AbstractEntity
     ScreenType screenType,
     String title)
   {
-    // TODO: verify the order of assignments here is okay
     _leadScreener = leadScreener;
     _labHead = labHead;
     _screenNumber = screenNumber;
     _dateCreated = truncateDate(dateCreated);
     _screenType = screenType;
     _title = title;
+    _leadScreener.getHbnScreensLed().add(this);
+    _labHead.getHbnScreensHeaded().add(this);
   }
 
 
@@ -134,8 +135,9 @@ public class Screen extends AbstractEntity
    */
   public void setLeadScreener(ScreeningRoomUser leadScreener)
   {
+    _leadScreener.getHbnScreensLed().remove(this);
     _leadScreener = leadScreener;
-    leadScreener.getHbnScreensLed().add(this);
+    _leadScreener.getHbnScreensLed().add(this);
   }
 
   /**
@@ -155,8 +157,9 @@ public class Screen extends AbstractEntity
    */
   public void setLabHead(ScreeningRoomUser labHead)
   {
+    _labHead.getHbnScreensHeaded().remove(this);
     _labHead = labHead;
-    labHead.getHbnScreensHeaded().add(this);
+    _labHead.getHbnScreensHeaded().add(this);
   }
 
   /**
@@ -387,7 +390,17 @@ public class Screen extends AbstractEntity
    */
   public void setScreenNumber(Integer screenNumber)
   {
+    _leadScreener.getHbnScreensLed().remove(this);
+    _labHead.getHbnScreensHeaded().remove(this);
+    for (ScreeningRoomUser collaborator : _collaborators) {
+      collaborator.getHbnScreensCollaborated().remove(this);
+    }
     _screenNumber = screenNumber;
+    _leadScreener.getHbnScreensLed().add(this);
+    _labHead.getHbnScreensHeaded().add(this);
+    for (ScreeningRoomUser collaborator : _collaborators) {
+      collaborator.getHbnScreensCollaborated().add(this);
+    }
   }
 
   /**
@@ -829,7 +842,6 @@ public class Screen extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
     return getScreenNumber();
   }
 

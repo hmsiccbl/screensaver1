@@ -66,10 +66,10 @@ public class BillingInformation extends AbstractEntity
     IsFeeToBeChargedForScreening isFeeToBeChargedForScreening,
     boolean isFeeFormOnFile)
   {
-    // TODO: verify the order of assignments here is okay
     _screen = screen;
     _isFeeToBeChargedForScreening = isFeeToBeChargedForScreening;
     _isFeeFormOnFile = isFeeFormOnFile;
+    _screen.setHbnBillingInformation(this);
   }
 
 
