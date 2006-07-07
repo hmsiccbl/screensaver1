@@ -713,35 +713,6 @@ public class ScreeningRoomUser extends AbstractEntity
   }
 
   /**
-   * Set the lab head.
-   *
-   * @param labHead the new lab head
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  void setHbnLabHead(ScreeningRoomUser labHead)
-  {
-    _labHead = labHead;
-  }
-
-  /**
-   * Get the lab members.
-   *
-   * @return the lab members
-   * @hibernate.set
-   *   cascade="save-update"
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="lab_head_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  Set<ScreeningRoomUser> getHbnLabMembers()
-  {
-    return _labMembers;
-  }
-
-  /**
    * Set the lab affiliation.
    *
    * @param labAffiliation the new lab affiliation
@@ -866,6 +837,37 @@ public class ScreeningRoomUser extends AbstractEntity
   {
     return _labHead;
   }
+
+  /**
+   * Set the lab head.
+   *
+   * @param labHead the new lab head
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  private void setHbnLabHead(ScreeningRoomUser labHead)
+  {
+    _labHead = labHead;
+  }
+
+
+  /**
+   * Get the lab members.
+   *
+   * @return the lab members
+   * @hibernate.set
+   *   cascade="save-update"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="lab_head_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  private Set<ScreeningRoomUser> getHbnLabMembers()
+  {
+    return _labMembers;
+  }
+
 
   /**
    * Set the lab members.
