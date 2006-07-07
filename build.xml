@@ -41,7 +41,10 @@
   </condition> 
   <property name="verbose" value="false" description="controls verbosity of various Ant tasks"/> 
   <property name="war" value="build/screensaver.war"/>
-  <property name="deploy.dir" value="/usr/local/jakarta-tomcat/webapps/screensaver"/>
+  <property name="appserver.dir" value="/usr/local/jakarta-tomcat"/>
+  <property name="deploy.dir" value="${appserver.dir}/webapps/screensaver"/>
+  <property name="appserver.start.cmd" value="${appserver.dir}/bin/startup.sh"/>
+  <property name="appserver.stop.cmd" value="${appserver.dir}/bin/shutdown.sh"/>
   <property name="war.build.dir" location="build/war"/>
   <property name="src.dir" location="src"/>
   <property name="test.src.dir" location="test"/>
@@ -167,17 +170,6 @@
       optimize="${javac.optimize}"
       listfiles="${verbose}" 
     />
-  
-    <!-- TODO: run this conditionally on the test var
-    <javac 
-      srcdir="${test.src.dir}"
-      destdir="${classes.dir}"
-      classpathref="project.classpath"
-      debug="${javac.debug}" 
-      optimize="${javac.optimize}"
-      listfiles="${verbose}" 
-    />
-    -->
   
     <copy 
       file="web/manifest.mf" 
@@ -321,8 +313,30 @@
      verbose="${verbose}" 
     />
   </target>
+
+
+  <!-- start and stop web application (Tomcat) -->
+
+  <target
+    name="start"
+    description="Starts the web application on a local Tomcat server"        
+    depends="deploy"
+  >
+    <exec executable="${appserver.start.cmd}"/>
+  </target>
  
- 
+  <target
+    name="stop"
+    description="Stops the web application (running locally on a Tomcat server)"
+  >
+    <exec executable="${appserver.stop.cmd}"/>
+  </target>
+
+  <target
+    name="restart"
+    depends="stop,start"
+  />
+
   <!-- run tests -->
  
   <target 

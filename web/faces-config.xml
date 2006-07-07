@@ -77,7 +77,7 @@
       <value>#{messages}</value>
     </managed-property-->
   </managed-bean>
-  
+
   
   <!-- Navigation rules -->
   
@@ -151,6 +151,12 @@
     <description>Converter for LibraryType enum to/from string representation</description>
     <converter-id>LibraryTypeConverter</converter-id>
     <converter-class>edu.harvard.med.screensaver.ui.util.LibraryTypeConverter</converter-class>
+  </converter>
+  
+  <converter>
+    <description>Converter for UISelect{One/Many} components (SelectItem elements)</description>
+    <converter-id>PlateNumberSelectItemConverter</converter-id>
+    <converter-class>edu.harvard.med.screensaver.ui.util.PlateNumberSelectItemConverter</converter-class>
   </converter>
   
 </faces-config>

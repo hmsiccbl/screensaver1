@@ -75,16 +75,36 @@ public class MainController extends AbstractController
   {
     _screenResultParser = screenResultParser;
   }
+  
+  private ScreenResult loadScreenResult(File metadataFile)
+  {
+    ScreenResult result = null;
+//    File serializedFile = new File(metadataFile + ".serialized");
+    try {
+//      if (serializedFile.exists()) {
+//        result = (ScreenResult) new ObjectInputStream(new FileInputStream(serializedFile)).readObject();
+//      } 
+//      else {
+        result = _screenResultParser.parse(metadataFile);
+//        new ObjectOutputStream(new FileOutputStream(serializedFile)).writeObject(result);
+//      }
+    }
+    catch (Exception e) {
+      log.error("could not load screen result " + metadataFile + ": " + e.getMessage());
+    }
+    return result;
+  }
 
   public String viewSample1ScreenResult()
   {
     assert _screenResultParser != null : "screenResultParser property must be set";
+    if (_sample1ScreenResult == null) {
+      File metadataFile = new File("/home/ant/iccb/screen-result-input-data/115/115MetaData.xls");
+      _sample1ScreenResult = loadScreenResult(metadataFile);
+    }
     // TODO: remove this hack! here just to make some screen result data
     // available; works on one developer's machine in particular (and I'm not
     // naming names!)
-    if (_sample1ScreenResult == null) {
-      _sample1ScreenResult = _screenResultParser.parse(new File("/home/ant/iccb/screen-result-input-data/115/115MetaData.xls"));
-    }
     _screenResultViewerController.setScreenResult(_sample1ScreenResult);
     return "success";
   }
@@ -96,7 +116,8 @@ public class MainController extends AbstractController
     // available; works on one developer's machine in particular (and I'm not
     // naming names!)
     if (_sample2ScreenResult == null) {
-      _sample2ScreenResult = _screenResultParser.parse(new File("/home/ant/iccb/screen-result-input-data/119/119MetaData.xls"));
+      File metadatafile = new File("/home/ant/iccb/screen-result-input-data/119/119MetaData.xls");
+      _sample2ScreenResult = loadScreenResult(metadatafile);
     }
     _screenResultViewerController.setScreenResult(_sample2ScreenResult);
     return "success";

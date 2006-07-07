@@ -327,7 +327,7 @@ public class ComplexDAOTest extends AbstractSpringTest
             wells[iWell] = dao.defineEntity(
               Well.class,
               library,
-              1,
+              ( iWell / 2 ) + 1,
               "well" + iWell);
             for (int iResultValue = 0; iResultValue < rvt.length; ++iResultValue) {
               ResultValue rv = new ResultValue(rvt[iResultValue],
@@ -339,7 +339,12 @@ public class ComplexDAOTest extends AbstractSpringTest
 
           // test the calculation of replicateCount from child ResultValueTypes,
           // before setReplicate() is called by anyone
-          assertEquals(replicates,screenResult.getReplicateCount().intValue());
+          assertEquals(replicates, screenResult.getReplicateCount().intValue());
+          
+          SortedSet<Integer> expectedPlateNumbers = new TreeSet<Integer>();
+          expectedPlateNumbers.add(1);
+          expectedPlateNumbers.add(2);
+          assertEquals(expectedPlateNumbers, screenResult.getPlateNumbers());
           
           dao.persistEntity(screenResult);
         }

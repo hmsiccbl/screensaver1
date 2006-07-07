@@ -78,8 +78,11 @@ public class ScreenResultParser
 
   private static final Logger log = Logger.getLogger(ScreenResultParser.class);
   
+  
   private static final String FIRST_DATE_SCREENED = "First Date Screened";
   private static final String METADATA_META_SHEET_NAME = "meta";
+
+  // TODO: move these a messages (Spring) resource file
   private static final String NO_METADATA_META_SHEET_ERROR = "worksheet could not be found";
   private static final String NO_CREATED_DATE_FOUND_ERROR = "\"First Date Screened\" value not found";
   private static final String UNEXPECTED_DATA_HEADER_TYPE_ERROR = "unexpected data header type";
@@ -191,8 +194,7 @@ public class ScreenResultParser
       ClassPathXmlApplicationContext appCtx = 
         new ClassPathXmlApplicationContext(new String[] { 
           "spring-context-logging.xml",
-          "spring-context-services.xml", 
-          "spring-context-screenresultparser-test.xml"
+          "spring-context-services.xml",
         });
       ScreenResultParser screenResultParser = (ScreenResultParser) appCtx.getBean("screenResultParser");
       DAO dao = (DAO) appCtx.getBean("daoImpl");

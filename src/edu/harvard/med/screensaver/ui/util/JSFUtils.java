@@ -9,8 +9,12 @@
 
 package edu.harvard.med.screensaver.ui.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import javax.faces.application.Application;
 import javax.faces.component.UIColumn;
@@ -19,6 +23,7 @@ import javax.faces.component.UIData;
 import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
 import javax.faces.el.ValueBinding;
+import javax.faces.model.SelectItem;
 
 import org.apache.log4j.Logger;
 
@@ -69,6 +74,41 @@ public class JSFUtils
                               facetOutputText);
 
     log.debug("add new UIColumn '" + newColumn.getId() + "' to table '" + table.getId() + "' with header '" + facetOutputText.getValue().toString() + "'");
+  }
+  
+  /**
+   * Creates a UISelectItems object that can be assigned to the "value"
+   * attribute of a UISelectItems JSF component.
+   * 
+   * @param values
+   * @return
+   */
+  public static List<SelectItem> createUISelectItems(Collection values)
+  {
+    List<SelectItem> result = new ArrayList<SelectItem>();
+    for (Object value : values) {
+      result.add(new SelectItem(value.toString(), 
+                                value.toString()));
+    }
+    return result;
+  }
+  
+  /**
+   * Creates a UISelectItems object that can be assigned to the "value"
+   * attribute of a UISelectItems JSF component.
+   * 
+   * @param values
+   * @return
+   */
+  public static List<SelectItem> createUISelectItems(Map values)
+  {
+    List<SelectItem> result = new ArrayList<SelectItem>();
+    for (Iterator iter = values.entrySet().iterator(); iter.hasNext();) {
+      Map.Entry entry = (Map.Entry) iter.next();
+      result.add(new SelectItem(entry.getValue(),
+                                entry.getKey().toString()));
+    }
+    return result;
   }
   
   /**

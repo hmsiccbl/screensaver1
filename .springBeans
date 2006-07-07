@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beansProjectDescription>
 	<configs>
-		<config>resources/spring-context-screenresultparser-test.xml</config>
 		<config>resources/spring-context-logging.xml</config>
 		<config>resources/spring-context-ui.xml</config>
 		<config>resources/spring-context-persistence.xml</config>

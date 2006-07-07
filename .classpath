@@ -61,7 +61,7 @@
 	<classpathentry kind="lib" path="lib/myeclipse-4.1.1-jsf-1.1.1/jakarta-oro.jar"/>
 	<classpathentry kind="lib" path="lib/myeclipse-4.1.1-jsf-1.1.1/jsp-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/myeclipse-4.1.1-jsf-1.1.1/jstl.jar"/>
-	<classpathentry kind="lib" path="lib/myeclipse-4.1.1-jsf-1.1.1/myfaces-all.jar">
+	<classpathentry sourcepath="/usr/local/myfaces-1.1.1-src/src/impl" kind="lib" path="lib/myeclipse-4.1.1-jsf-1.1.1/myfaces-all.jar">
 		<attributes>
 			<attribute value="http://myfaces.apache.org/api/apidocs/index.html" name="javadoc_location"/>
 		</attributes>
@@ -76,5 +76,6 @@
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-io-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/poi-2.5.1/poi-contrib-2.5.1-final-20040804.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-lang-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/myeclipse-4.1.1/javax.servlet.jar"/>
 	<classpathentry kind="output" path=".eclipse.classes"/>
 </classpath>

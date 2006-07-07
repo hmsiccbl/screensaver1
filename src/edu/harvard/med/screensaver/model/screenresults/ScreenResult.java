@@ -52,6 +52,11 @@ public class ScreenResult extends AbstractEntity
   private boolean                    _isShareable;
   private Integer                    _replicateCount;
   private SortedSet<ResultValueType> _resultValueTypes = new TreeSet<ResultValueType>();
+  
+
+  // transient (derived) instance data
+  
+  transient private TreeSet<Integer>     _plateNumbers;
 
   
   // public constructors and instance methods
@@ -245,8 +250,18 @@ public class ScreenResult extends AbstractEntity
   {
     _replicateCount = replicateCount;
   }
-  
-  
+
+  public SortedSet<Integer> getPlateNumbers()
+  {
+    if (_plateNumbers == null) {
+      _plateNumbers = new TreeSet<Integer>();
+      for (ResultValue rv : getResultValueTypes().first().getResultValues()) {
+        _plateNumbers.add(rv.getWell().getPlateNumber());
+      }
+    }
+    return _plateNumbers;
+  }
+
   // protected getters and setters
   
   /* (non-Javadoc)
@@ -318,4 +333,5 @@ public class ScreenResult extends AbstractEntity
   private void setHbnResultValueTypes(SortedSet<ResultValueType> resultValueTypes) {
     _resultValueTypes = resultValueTypes;
   }
+
 }
