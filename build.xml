@@ -197,6 +197,13 @@
         <include name="faces-config.xml"/> 
        </fileset> 
     </copy>
+
+    <copy 
+      todir="${exploded.war.dir}/css"
+      verbose="${verbose}"
+    >
+      <fileset dir="web/css"/>
+    </copy>
   
     <!-- deploy log4j.debug.properties as log4j.properties; will be overwritten by normal log4.properties unless 'debug' property is set -->
     <copy

@@ -10,17 +10,11 @@
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
+
   <head>
     <%--base href="<%=basePath%>"--%>
-    
     <title>Screensaver</title>
-    
-    
-    <!--
-    <link rel="stylesheet" type="text/css" href="styles.css">
-    -->
-    
-
+    <link rel="stylesheet" type="text/css" href="css/screensaver.css" />
   </head>
   
   <body>
