@@ -252,6 +252,9 @@ public abstract class AbstractEntity implements Serializable
    * @return boolean (see code, since this is private method)
    * @see #isEquivalent(AbstractEntity)
    */
+  // TODO: can we annotate a bean's properties with "@equivalence" and do some
+  // introspection to retrieve these annotated "equivalence" properties, rather
+  // than relying upon the below heuristics?
   private boolean isEquivalenceProperty(PropertyDescriptor property) {
     Method method = property.getReadMethod();
     // only test methods that are declared by subclasses of AbstractEntity 
