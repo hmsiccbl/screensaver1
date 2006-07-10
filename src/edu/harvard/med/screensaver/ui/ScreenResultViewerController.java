@@ -14,8 +14,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -28,6 +28,8 @@ import javax.faces.component.UIInput;
 import javax.faces.component.UISelectBoolean;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
+import javax.faces.model.DataModel;
+import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.faces.validator.Validator;
 import javax.faces.validator.ValidatorException;
@@ -54,12 +56,6 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-// TODO: JSF issue: is it "wrong" to be modifying view structure from within
-// this class? By updating the view dynamically here, are we violating MVC
-// conventions? Already, this class is concerned with both Controller and Model
-// parts, and with the dynamic view modification (variable set of table
-// columns), we now are dealing with the all parts of MVC.
-
 // TODO: this class needs to be broken up! it's too big! (maybe)
 public class ScreenResultViewerController
 {
@@ -83,11 +79,10 @@ public class ScreenResultViewerController
   private int _firstRow;
   private boolean _showMetadataTable = true;
   private boolean _showRawDataTable = true;
-  private UIData _dataTable;
-  private UIData _metadataTable;
   private UIInput _firstDisplayedRowNumberInput;
   private UIInput _plateNumberInput;
-  private String _plateNumber;
+  private UIData _dataTable;
+ private String _plateNumber;
   private String[] _selectedDataHeaderNames;
   private String _rowRangeText;
 
@@ -107,11 +102,15 @@ public class ScreenResultViewerController
    */
   private Map<Integer,Integer> _plateNumber2FirstRow;
 
-  private List<DataRow> _rawTableData;
-
-  private HashSet _selectedDataHeaderNamesSet;
-
   private Map<ResultValueType,String> _uniqueDataHeaderNamesMap;
+
+  private DataModel _rawDataModel;
+
+  private DataModel _rawDataColumnModel;
+
+  private DataModel _dataHeaderColumnModel;
+
+  private DataModel _metadataModel;
 
   
 //  private Converter _rowToPlateConverter;
@@ -149,10 +148,9 @@ public class ScreenResultViewerController
   public void setScreenResult(ScreenResult screenResult)
   {
     if (_screenResult != screenResult) {
-      flagNeedViewLayoutUpdate();
+      resetViewLayout();
     }
     _screenResult = screenResult;
-    updateViewLayout();
   }
   
   public boolean isShowMetadataTable()
@@ -175,28 +173,6 @@ public class ScreenResultViewerController
     _showRawDataTable = showRawDataTable;
   }
 
-  public UIData getDataTable()
-  {
-    return _dataTable;
-  }
-
-  public void setDataTable(UIData dataUIComponent)
-  {
-    _dataTable = dataUIComponent;
-    updateViewLayout();
-  }
-  
-  public UIData getMetadataTable()
-  {
-    return _metadataTable;
-  }
-
-  public void setMetadataTable(UIData dataUIComponent)
-  {
-    _metadataTable = dataUIComponent;
-    updateViewLayout();
-  }
-  
   public UIInput getFirstDisplayedRowNumberInput()
   {
     return _firstDisplayedRowNumberInput;
@@ -217,81 +193,29 @@ public class ScreenResultViewerController
     _plateNumberInput = plateNumberInput;
   }
 
-//  public UIInput getShowMetadataTableInput()
-//  {
-//    return _showMetadataTableInput;
-//  }
-//
-//
-//  public void setShowMetadataTableInput(UIInput showMetadataTableInput)
-//  {
-//    _showMetadataTableInput = showMetadataTableInput;
-//  }
-//
-//
-//  public UIInput getShowRawDataTableInput()
-//  {
-//    return _showRawDataTableInput;
-//  }
-//
-//
-//  public void setShowRawDataTableInput(UIInput showRawDataTableInput)
-//  {
-//    _showRawDataTableInput = showRawDataTableInput;
-//  }
-
-
-  public List<MetadataRow> getMetadata()
+  public UIData getDataTable()
   {
-    assert _screenResult != null : "screenResult property not initialized";
-    String[] properties = null;
-    try {
-      properties = new String[] {
-        "name",
-        "description",
-        "ordinal",
-        "replicateOrdinal",
-        "assayReadoutType",
-        "timePoint",
-        "derived",
-        "howDerived",
-        "typesDerivedFrom",
-        "activityIndicator",
-        "activityIndicatorType",
-        "indicatorDirection",
-        "indicatorCutoff",
-        "followUpData",
-        "assayPhenotype",
-        "cherryPick",
-        "comments"
-      };
-    } catch (Exception e) {
-      e.printStackTrace();
-      log.error("property not valid for ResultValueType");
-    }
+    return _dataTable;
+  }
 
-    List<MetadataRow> tableData = new ArrayList<MetadataRow>();
-    for (String property : properties) {
-      try {
-        tableData.add(new MetadataRow(_screenResult.getResultValueTypes(),
-                                      getUniqueDataHeaderNamesMap(),
-                                      property));
-      }
-      catch (Exception e) {
-        e.printStackTrace();
-        log.error("could not obtain value for property ResultValueType." + property);
-      }
-    }
-    return tableData;
+  public void setDataTable(UIData dataUIComponent)
+  {
+    _dataTable = dataUIComponent;
+  }
+  
+  public DataModel getMetadata()
+  {
+    lazyBuildMetadataModel();
+    return _metadataModel;
   }
 
   /**
-   * @return a List of {@link DataRow} objects
+   * @return a List of {@link RawDataRow} objects
    */
-  public List<DataRow> getRawData()
+  public DataModel getRawData()
   {
     lazyBuildRawData();
-    return _rawTableData;
+    return _rawDataModel;
   }
   
   /**
@@ -299,7 +223,7 @@ public class ScreenResultViewerController
    */
   public int getRawDataSize()
   {
-    return getRawData().size();
+    return getRawData().getRowCount();
   }
 
   public int getItemsPerPage()
@@ -314,7 +238,7 @@ public class ScreenResultViewerController
   
   public String getRowRangeText()
   {
-    return "of " + _dataTable.getRowCount();
+    return "of " + getRawDataSize();
   }
   
   public int getFirstDisplayedRowNumber()
@@ -326,7 +250,7 @@ public class ScreenResultViewerController
   {
     log.debug("setFirstDisplayedRowNumber(" + firstDisplayedRowNumber + ")");
     _firstRow = firstDisplayedRowNumber - 1;
-    _dataTable.setFirst(_firstRow);
+    getDataTable().setFirst(_firstRow);
   }
 
   public String getPlateNumber()
@@ -372,7 +296,14 @@ public class ScreenResultViewerController
   {
     _selectedDataHeaderNames = selectedDataHeaderNames;
   }
-
+  
+  public DataModel getDataHeaderColumnModel()
+  {
+    if (_dataHeaderColumnModel == null) {
+      _dataHeaderColumnModel = new ListDataModel(Arrays.asList(getSelectedDataHeaderNames()));
+    }
+    return _dataHeaderColumnModel;
+  }
 
   public String getSessionInfo()
   {
@@ -386,8 +317,41 @@ public class ScreenResultViewerController
     lazyBuildUniqueDataHeaderNamesMap();
     return _uniqueDataHeaderNamesMap;
   }
+  
+  /**
+   * @motivation for "Columns" JSF data table component
+   * @return
+   */
+  public Object getMetadataCellValue()
+  {
+    DataModel dataModel = getMetadata();
+    DataModel columnModel = getDataHeaderColumnModel();
+    if (columnModel.isRowAvailable()) {
+      String columnName = (String) columnModel.getRowData();  // getRowData() is really getColumnData()
+      MetadataRow row = (MetadataRow) dataModel.getRowData();
+      return row.getDataHeaderSinglePropertyValues().get(columnName);
+    }
+    return null;
+  }
 
-//  public Converter getRowToPlateConverter()
+  /**
+   * @motivation for "Columns" JSF data table component
+   * @return
+   */
+  public Object getRawDataCellValue()
+  {
+    DataModel dataModel = getRawData();
+    DataModel columnModel = getDataHeaderColumnModel();
+    if (columnModel.isRowAvailable()) {
+      String columnName = (String) columnModel.getRowData(); // getRowData() is really getColumnData()
+      RawDataRow row = (RawDataRow) dataModel.getRowData();
+      return row.getResultValues().get(columnName).getValue();
+    }
+    return null;
+  }
+
+
+  //  public Converter getRowToPlateConverter()
 //  {
 //    if (_rowToPlateConverter == null) {
 //      _rowToPlateConverter = new Converter() {
@@ -418,15 +382,15 @@ public class ScreenResultViewerController
 
   // JSF application methods
   
+  @SuppressWarnings("unchecked")
   public String gotoPage(int pageIndex)
   {
     try {
-      UIData dataTable = getDataTable();
-      int firstRow = ( pageIndex * dataTable.getRows() ) + 1;
+      int firstRow = (pageIndex * getDataTable().getRows()) + 1;
       if (firstRow > 0 &&
         firstRow <= _screenResult.getResultValueTypes().first().getResultValues().size()) {
         setFirstDisplayedRowNumber(firstRow);
-        _plateNumberInput.setValue(getRawData().get(firstRow - 1).getWell().getPlateNumber().toString());
+        _plateNumberInput.setValue(((List<RawDataRow>) getRawData().getWrappedData()).get(firstRow - 1).getWell().getPlateNumber().toString());
       }
       return null;
     } 
@@ -475,11 +439,14 @@ public class ScreenResultViewerController
     ((UISelectBoolean) event.getComponent()).setValue(event.getNewValue());
   }
 
+  @SuppressWarnings("unchecked")
   public void firstDisplayedRowNumberListener(ValueChangeEvent event)
   {
     log.debug("firstDisplayedRowNumberListener called: " + event.getNewValue());
-    Object value = getRawData().get(Integer.parseInt(event.getNewValue().toString())).getWell().getPlateNumber().toString();
-    _plateNumberInput.setValue(value);
+    int newFirstDisplayRowNumber = Integer.parseInt(event.getNewValue().toString());
+    RawDataRow dataRow = ((List<RawDataRow>)getRawData().getWrappedData()).get(newFirstDisplayRowNumber);
+    Integer plateNumber = dataRow.getWell().getPlateNumber();
+    _plateNumberInput.setValue(plateNumber.toString());
   }
   
   public void plateNumberListener(ValueChangeEvent event)
@@ -493,10 +460,7 @@ public class ScreenResultViewerController
   public void selectedDataHeadersListener(ValueChangeEvent event)
   {
     log.debug("data headers selection changed: '" + event.getNewValue() + "'");
-    _selectedDataHeaderNamesSet = new HashSet(Arrays.asList((String[]) event.getNewValue()));
-    resetTables();
-    flagNeedViewLayoutUpdate();
-    updateViewLayout();
+    _dataHeaderColumnModel = null; // cause to be recreated for new set of selected data headers
   }
   
   
@@ -513,28 +477,20 @@ public class ScreenResultViewerController
   
   private void resetViewLayout()
   {
+    
     _showMetadataTable = true;
     _showRawDataTable = true;
     _plateNumber2FirstRow = null;
-    _rawTableData = null;
+    _dataHeaderColumnModel = null;
+    _metadataModel = null;
+    _rawDataModel = null;
     _firstRow = 0;
     _plateNumber = null;
     _uniqueDataHeaderNamesMap = null;
-//    _rowToPlateConverter = null;
-
-    resetTables();
+    _selectedDataHeaderNames = null;
+    // _rowToPlateConverter = null;
   }
 
-
-  private void resetTables()
-  {
-    if (getDataTable() != null && getDataTable().getChildren().size() > RAWDATA_TABLE_FIXED_COLUMN_COUNT) {
-      resetTable(getDataTable(), RAWDATA_TABLE_FIXED_COLUMN_COUNT);
-    }
-    if (getMetadataTable() != null && getMetadataTable().getChildren().size() > METADATA_TABLE_FIXED_COLUMN_COUNT) {
-      resetTable(getMetadataTable(), METADATA_TABLE_FIXED_COLUMN_COUNT);
-    }
-  }
 
   /**
    * Removes any dynamically-added columns, allowing the table's dynamic columns
@@ -563,66 +519,15 @@ public class ScreenResultViewerController
     table.setRowIndex(-1);
   }
 
-  /**
-   * Dynamically add table columns for Data Headers (aka ResultValueTypes) to
-   * both raw data and metadata tables, iff they have not already been added
-   */
-  private void updateViewLayout()
-  {
-    if (_screenResult == null || _dataTable == null || _metadataTable == null) {
-      // both tables' UI components and ScreenResult must be known before we can
-      // do our thing
-      return;
-    }
-    if (!_needViewLayoutUpdate) {
-      return;
-    }
-
-    assert _metadataTable.getChildCount() > 0 : "cannot add dynamic columns before fixed columns have been created for metadata table";
-    assert _dataTable.getChildCount() > 0 : "cannot add dynamic columns before fixed columns have been created for raw data table";
-    resetViewLayout();
-    log.debug("dynamically adding columns to tables");
-    String iteratedRowBeanVariableName = "row";
-    _dataTable.setVar(iteratedRowBeanVariableName);
-    _metadataTable.setVar(iteratedRowBeanVariableName);
-    for (ResultValueType rvt : _screenResult.getResultValueTypes()) {
-      String uniqueName = getUniqueDataHeaderNamesMap().get(rvt);
-      if (_selectedDataHeaderNamesSet == null ||
-        _selectedDataHeaderNamesSet.contains(uniqueName)) {
-        JSFUtils.addTableColumn(FacesContext.getCurrentInstance(),
-                                _metadataTable,
-                                makeResultValueTypeColumnName(uniqueName),
-                                uniqueName,
-                                MetadataRow.getBindingExpression(iteratedRowBeanVariableName, rvt));
-        JSFUtils.addTableColumn(FacesContext.getCurrentInstance(),
-                                _dataTable,
-                                makeResultValueTypeColumnName(uniqueName),
-                                uniqueName,
-                                DataRow.getBindingExpression(iteratedRowBeanVariableName, rvt));
-      }
-    }
-    resetNeedViewLayoutUpdate();
-  }
-  
-  private void flagNeedViewLayoutUpdate()
-  {
-    _needViewLayoutUpdate = true;
-  }
-  
-  private void resetNeedViewLayoutUpdate()
-  {
-    _needViewLayoutUpdate = false;
-  }
-
   private int getPageIndex()
   {
-    return _dataTable.getFirst() / _dataTable.getRows();
+    return getDataTable().getFirst() / getDataTable().getRows();
   }
 
   private void lazyBuildUniqueDataHeaderNamesMap()
   {
     if (_uniqueDataHeaderNamesMap == null) {
-      _uniqueDataHeaderNamesMap = new HashMap<ResultValueType,String>();
+      _uniqueDataHeaderNamesMap = new LinkedHashMap<ResultValueType,String>();
       List<String> names = new ArrayList<String>();
       for (ResultValueType rvt : _screenResult.getResultValueTypes()) {
         names.add(rvt.getName());
@@ -643,9 +548,10 @@ public class ScreenResultViewerController
   {
     if (_plateNumber2FirstRow == null) {
       _plateNumber2FirstRow = new HashMap<Integer,Integer>();
-      List<DataRow> rawData = getRawData();
-      for (int i = 0; i < rawData.size(); ++i) {
-        Integer plateNumber = rawData.get(i).getWell().getPlateNumber();
+      DataModel rawData = getRawData();
+      for (int i = 0; i < rawData.getRowCount(); ++i) {
+        rawData.setRowIndex(i);
+        Integer plateNumber = ((RawDataRow) rawData.getRowData()).getWell().getPlateNumber();
         if (!_plateNumber2FirstRow.containsKey(plateNumber)) {
           _plateNumber2FirstRow.put(plateNumber, i);
         }
@@ -653,26 +559,78 @@ public class ScreenResultViewerController
     }
   }
 
+  private void lazyBuildMetadataModel()
+  {
+    if (_metadataModel == null) {
+      assert _screenResult != null : "screenResult property not initialized";
+      String[] properties = null;
+      try {
+        properties = new String[] {
+          "name",
+          "description",
+          "ordinal",
+          "replicateOrdinal",
+          "assayReadoutType",
+          "timePoint",
+          "derived",
+          "howDerived",
+          "typesDerivedFrom",
+          "activityIndicator",
+          "activityIndicatorType",
+          "indicatorDirection",
+          "indicatorCutoff",
+          "followUpData",
+          "assayPhenotype",
+          "cherryPick",
+          "comments"
+        };
+      } catch (Exception e) {
+        e.printStackTrace();
+        log.error("property not valid for ResultValueType");
+      }
+      
+      List<MetadataRow> tableData = new ArrayList<MetadataRow>();
+      for (String property : properties) {
+        try {
+          tableData.add(new MetadataRow(_screenResult.getResultValueTypes(),
+                                        getUniqueDataHeaderNamesMap(),
+                                        property));
+        }
+        catch (Exception e) {
+          e.printStackTrace();
+          log.error("could not obtain value for property ResultValueType." + property);
+        }
+      }
+      _metadataModel = new ListDataModel(tableData);
+    }
+  }
+
   private void lazyBuildRawData()
   {
-    if (_rawTableData == null) {
-      // to build our table data structure, we will iterate the ResultValueTypes'
+    if (_rawDataModel == null) {
+      // to build our table data structure, we will iterate the
+      // ResultValueTypes'
       // ResultValues in parallel (kind of messy!)
       Map<ResultValueType,Iterator> rvtIterators = new HashMap<ResultValueType,Iterator>();
       for (ResultValueType rvt : _screenResult.getResultValueTypes()) {
-        rvtIterators.put(rvt,
-                         rvt.getResultValues().iterator());
+        rvtIterators.put(rvt, rvt.getResultValues()
+                                 .iterator());
       }
-      _rawTableData = new ArrayList<DataRow>();
-      for (ResultValue majorResultValue : _screenResult.getResultValueTypes().first().getResultValues()) {
-        DataRow dataRow = new DataRow(_screenResult.getResultValueTypes(), majorResultValue.getWell());
+      List<RawDataRow> tableData = new ArrayList<RawDataRow>();
+      for (ResultValue majorResultValue : _screenResult.getResultValueTypes()
+                                                       .first()
+                                                       .getResultValues()) {
+        RawDataRow dataRow = new RawDataRow(_screenResult.getResultValueTypes(),
+                                      getUniqueDataHeaderNamesMap(),
+                                      majorResultValue.getWell());
         for (Map.Entry<ResultValueType,Iterator> entry : rvtIterators.entrySet()) {
           Iterator rvtIterator = entry.getValue();
-          dataRow.addResultValue(entry.getKey(), 
+          dataRow.addResultValue(entry.getKey(),
                                  (ResultValue) rvtIterator.next());
         }
-        _rawTableData.add(dataRow);
+        tableData.add(dataRow);
       }
+      _rawDataModel = new ListDataModel(tableData);
     }
   }
   
@@ -700,7 +658,7 @@ public class ScreenResultViewerController
     /**
      * Array containing the value of the same property for each ResultValueType
      */
-    private String[] _rvtPropertyValues;    
+    private Map<String,String> _rvtPropertyValues;    
 
     /**
      * Constructs a MetadataRow object.
@@ -712,14 +670,13 @@ public class ScreenResultViewerController
     public MetadataRow(Collection<ResultValueType> rvts, Map<ResultValueType,String> uniqueNames, String propertyName) throws Exception
     {
       _rowLabel = propertyName; // TODO: need better display name
-      _rvtPropertyValues = new String[rvts.size()];
-      int i = 0;
+      _rvtPropertyValues = new HashMap<String,String>();
       for (ResultValueType rvt : rvts) {
-        _rvtPropertyValues[i] = BeanUtils.getProperty(rvt, propertyName);
+        String value = BeanUtils.getProperty(rvt, propertyName);
         // HACK: construct a string representing the typesDerivedFrom property
         // TODO: how can we do this properly?  ResultValueType.typesDerivedFromTextList property?
         if (propertyName.equals("name")) {
-          _rvtPropertyValues[i] = uniqueNames.get(i);
+          value = uniqueNames.get(rvt);
         }
         else if (propertyName.equals("typesDerivedFrom")) {
           StringBuilder typesDerivedFromText = new StringBuilder();
@@ -729,33 +686,18 @@ public class ScreenResultViewerController
             }
             typesDerivedFromText.append(uniqueNames.get(derivedFromRvt));
           }
-          _rvtPropertyValues[i] = typesDerivedFromText.toString();
+          value = typesDerivedFromText.toString();
         }
-        ++i;
+        _rvtPropertyValues.put(uniqueNames.get(rvt), value);
       }
     }
 
-    /**
-     * Returns a JSF EL expression that can be used to specify the bean property to
-     * bind to a UIData cell. Since the DataRow is in fact the bean providing the data
-     * to a UIData table, it is the best place for storing the knowledge of how
-     * to access its data via a JSF EL expression.
-     * 
-     * @param dataTable
-     * @param rvt
-     * @return a JSF EL expression
-     */
-    public static String getBindingExpression(String rowBeanVariableName, ResultValueType rvt)
-    {
-      return "#{" + rowBeanVariableName + ".dataHeaderSinglePropertyValues[" + rvt.getOrdinal() + "]}";
-    }
-    
     public String getRowLabel()
     {
       return _rowLabel;
     }
     
-    public String[] getDataHeaderSinglePropertyValues()
+    public Map getDataHeaderSinglePropertyValues()
     {
       return _rvtPropertyValues;
     }
@@ -763,36 +705,21 @@ public class ScreenResultViewerController
 
   
   /**
-   * DataRow bean, used to provide ScreenResult data to JSF components via EL
+   * RawDataRow bean, used to provide ScreenResult data to JSF components via EL
    * @author ant
    */
-  public static class DataRow
+  public static class RawDataRow
   {
     private ScreenResult _screenResult;
     private Well _well;
-    private ResultValue[] _resultValues;
+    private Map<String,ResultValue> _resultValues;
+    private Map<ResultValueType,String> _uniqueNames;
     
-    public DataRow(SortedSet<ResultValueType> rvts, Well well)
+    public RawDataRow(SortedSet<ResultValueType> rvts, Map<ResultValueType,String> uniqueNames, Well well)
     {
-      _resultValues = new ResultValue[rvts.size()];
+      _resultValues = new HashMap<String,ResultValue>();
+      _uniqueNames = uniqueNames;
       _well = well;
-    }
-
-    /**
-     * Returns a JSF EL expression that can be used to specify the bean property
-     * to bind to a UIData cell. The expression converts a null value to the
-     * empty string. Since the DataRow is in fact the bean providing the data to
-     * a UIData table, it is the best place for storing the knowledge of how to
-     * access its data via a JSF EL expression.
-     * 
-     * @param dataTable
-     * @param rvt
-     * @return a JSF EL expression
-     */
-    public static String getBindingExpression(String rowBeanVariableName, ResultValueType rvt)
-    {
-      String valueExpr = rowBeanVariableName + ".resultValues[" + rvt.getOrdinal() + "].value";
-      return "#{" + valueExpr + "}";
     }
 
     public Well getWell()
@@ -800,14 +727,14 @@ public class ScreenResultViewerController
       return _well;
     }
 
-    public ResultValue[] getResultValues()
+    public Map<String,ResultValue> getResultValues()
     {
       return _resultValues;
     }
 
     public void addResultValue(ResultValueType rvt, ResultValue rv)
     {
-      _resultValues[rvt.getOrdinal()] = rv;
+      _resultValues.put(_uniqueNames.get(rvt), rv);
     }
   }
   

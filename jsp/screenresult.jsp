@@ -54,15 +54,20 @@
           <f:verbatim>)</f:verbatim>
         </h:panelGroup>
 
-        <h:dataTable id="metadataTable" binding="#{ScreenResultViewer.metadataTable}" value="#{ScreenResultViewer.metadata}" var="row" border="1" rendered="#{ScreenResultViewer.showMetadataTable}">
+        <t:dataTable id="metadataTable" value="#{ScreenResultViewer.metadata}" var="row" border="1" rendered="#{ScreenResultViewer.showMetadataTable}">
           <h:column>
             <f:facet name="header">
-              <h:outputText value="Metadata Type" />
+              <h:outputText value="Property" />
             </f:facet>
             <h:outputText value="#{row.rowLabel}" />
           </h:column>
-          <%-- Note: columns for Data Headers (aka ResultValueTypes) will be added dynamically in backing bean --%>
-        </h:dataTable>
+          <t:columns value="#{ScreenResultViewer.dataHeaderColumnModel}" var="columnName">
+            <f:facet name="header">
+              <h:outputText value="#{columnName}" />
+            </f:facet>
+            <h:outputText value="#{ScreenResultViewer.metadataCellValue}"/>
+          </t:columns>
+        </t:dataTable>
       </h:panelGrid>
 
       <h:panelGrid columns="1">
@@ -75,7 +80,7 @@
           <f:verbatim>)</f:verbatim>
         </h:panelGroup>
 
-        <h:dataTable id="rawDataTable" binding="#{ScreenResultViewer.dataTable}" value="#{ScreenResultViewer.rawData}" var="row" rows="10" border="1" rendered="#{ScreenResultViewer.showRawDataTable}">
+        <t:dataTable id="rawDataTable" binding="#{ScreenResultViewer.dataTable}" value="#{ScreenResultViewer.rawData}" var="row" rows="10" border="1" rendered="#{ScreenResultViewer.showRawDataTable}">
           <h:column>
             <f:facet name="header">
               <h:outputText value="Plate" />
@@ -88,8 +93,13 @@
             </f:facet>
             <h:outputText value="#{row.well.wellName}" />
           </h:column>
-          <%-- Note: columns for Data Headers (aka ResultValueTypes) will be added dynamically in backing bean --%>
-        </h:dataTable>
+          <t:columns value="#{ScreenResultViewer.dataHeaderColumnModel}" var="columnName">
+            <f:facet name="header">
+              <h:outputText value="#{columnName}" />
+            </f:facet>
+            <h:outputText value="#{ScreenResultViewer.rawDataCellValue}"/>
+          </t:columns>
+        </t:dataTable>
       </h:panelGrid>
   </h:form>
 
