@@ -159,4 +159,8 @@
     <converter-class>edu.harvard.med.screensaver.ui.util.PlateNumberSelectItemConverter</converter-class>
   </converter>
   
+  
+  <!-- Validators -->
+
+  
 </faces-config>

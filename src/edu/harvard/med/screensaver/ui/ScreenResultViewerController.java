@@ -22,12 +22,15 @@ import java.util.SortedSet;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIColumn;
+import javax.faces.component.UIComponent;
 import javax.faces.component.UIData;
 import javax.faces.component.UIInput;
 import javax.faces.component.UISelectBoolean;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
+import javax.faces.validator.Validator;
+import javax.faces.validator.ValidatorException;
 import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.db.DAO;
@@ -290,6 +293,14 @@ public class ScreenResultViewerController
     lazyBuildRawData();
     return _rawTableData;
   }
+  
+  /**
+   * @motivation for firstDisplayedRow validator maximum
+   */
+  public int getRawDataSize()
+  {
+    return getRawData().size();
+  }
 
   public int getItemsPerPage()
   {
@@ -308,14 +319,14 @@ public class ScreenResultViewerController
   
   public int getFirstDisplayedRowNumber()
   {
-    return _firstRow;
+    return _firstRow + 1;
   }
   
   public void setFirstDisplayedRowNumber(int firstDisplayedRowNumber)
   {
     log.debug("setFirstDisplayedRowNumber(" + firstDisplayedRowNumber + ")");
-    _firstRow = firstDisplayedRowNumber;
-    _dataTable.setFirst(firstDisplayedRowNumber);
+    _firstRow = firstDisplayedRowNumber - 1;
+    _dataTable.setFirst(_firstRow);
   }
 
   public String getPlateNumber()
@@ -346,6 +357,13 @@ public class ScreenResultViewerController
   
   public String[] getSelectedDataHeaderNames()
   {
+    if (_selectedDataHeaderNames == null) {
+      // select all items, if selection array not yet defined
+      _selectedDataHeaderNames = new String[_screenResult.getResultValueTypes()
+                                                         .size()];
+      _selectedDataHeaderNames = getUniqueDataHeaderNamesMap().values()
+                                                              .toArray(new String[getUniqueDataHeaderNamesMap().size()]);
+    }
     return _selectedDataHeaderNames;
   }
 
@@ -396,19 +414,19 @@ public class ScreenResultViewerController
 //    }
 //    return _rowToPlateConverter;
 //  }
-
   
+
   // JSF application methods
   
   public String gotoPage(int pageIndex)
   {
     try {
       UIData dataTable = getDataTable();
-      int firstRow = pageIndex * dataTable.getRows();
-      if (firstRow >= 0 &&
-        firstRow < _screenResult.getResultValueTypes().first().getResultValues().size()) {
+      int firstRow = ( pageIndex * dataTable.getRows() ) + 1;
+      if (firstRow > 0 &&
+        firstRow <= _screenResult.getResultValueTypes().first().getResultValues().size()) {
         setFirstDisplayedRowNumber(firstRow);
-        _plateNumberInput.setValue(getRawData().get(firstRow).getWell().getPlateNumber().toString());
+        _plateNumberInput.setValue(getRawData().get(firstRow - 1).getWell().getPlateNumber().toString());
       }
       return null;
     } 
@@ -666,7 +684,7 @@ public class ScreenResultViewerController
       log.error("invalid plate number: " + selectedPlateNumber);
       return getDataTable().getFirst();
     }
-    return _plateNumber2FirstRow.get(selectedPlateNumber);
+    return _plateNumber2FirstRow.get(selectedPlateNumber) + 1;
   }
 
   
@@ -790,6 +808,22 @@ public class ScreenResultViewerController
     public void addResultValue(ResultValueType rvt, ResultValue rv)
     {
       _resultValues[rvt.getOrdinal()] = rv;
+    }
+  }
+  
+  public static class RowValidator implements Validator
+  {
+    public void validate(FacesContext ctx, UIComponent toValidate, Object value) throws ValidatorException
+    {
+        try {
+          int firstDisplayedRowNumber = Integer.parseInt(value.toString());
+          if (firstDisplayedRowNumber < 0 || firstDisplayedRowNumber >= 100) {
+            throw new ValidatorException(new FacesMessage("row number out of range"));
+          }
+        } 
+        catch (NumberFormatException e) {
+          throw new ValidatorException(new FacesMessage("invalid row number"), e);
+        }
     }
   }
 
