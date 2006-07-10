@@ -21,8 +21,6 @@ import java.util.Map;
 import java.util.SortedSet;
 
 import javax.faces.application.FacesMessage;
-import javax.faces.component.UIColumn;
-import javax.faces.component.UIComponent;
 import javax.faces.component.UIData;
 import javax.faces.component.UIInput;
 import javax.faces.component.UISelectBoolean;
@@ -31,8 +29,6 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
-import javax.faces.validator.Validator;
-import javax.faces.validator.ValidatorException;
 import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.db.DAO;
@@ -50,8 +46,6 @@ import org.apache.log4j.Logger;
  * <p>
  * The <code>screenResult</code> property should be set to the
  * {@link ScreenResult} that is to be viewed.<br>
- * The <code>itemsPerPage</code> property controls how many rows to show per
- * "page"; defaults to {@link #DEFAULT_ITEMS_PER_PAGE}.<br>
 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -75,16 +69,15 @@ public class ScreenResultViewerController
 
   private DAO _dao;
   private ScreenResult _screenResult;
-  private int itemsPerPage = DEFAULT_ITEMS_PER_PAGE;
   private int _firstRow;
   private boolean _showMetadataTable = true;
   private boolean _showRawDataTable = true;
+  private String _plateNumber;
+  private String[] _selectedDataHeaderNames;
+  private String _rowRangeText;
   private UIInput _firstDisplayedRowNumberInput;
   private UIInput _plateNumberInput;
   private UIData _dataTable;
- private String _plateNumber;
-  private String[] _selectedDataHeaderNames;
-  private String _rowRangeText;
 
   /**
    * Flag indicating whether the tables on this page need to have their columns
@@ -226,16 +219,6 @@ public class ScreenResultViewerController
     return getRawData().getRowCount();
   }
 
-  public int getItemsPerPage()
-  {
-    return itemsPerPage;
-  }
-
-  public void setItemsPerPage(int itemsPerPage)
-  {
-    this.itemsPerPage = itemsPerPage;
-  }
-  
   public String getRowRangeText()
   {
     return "of " + getRawDataSize();
@@ -248,9 +231,7 @@ public class ScreenResultViewerController
   
   public void setFirstDisplayedRowNumber(int firstDisplayedRowNumber)
   {
-    log.debug("setFirstDisplayedRowNumber(" + firstDisplayedRowNumber + ")");
     _firstRow = firstDisplayedRowNumber - 1;
-    getDataTable().setFirst(_firstRow);
   }
 
   public String getPlateNumber()
@@ -263,8 +244,7 @@ public class ScreenResultViewerController
     log.debug("setPlateNumber(" + plateNumber + ")");
     _plateNumber = plateNumber;
   }
-  
-  // TODO: rename to getPlateSelectItems
+
   public List<SelectItem> getPlateSelectItems()
   {
     return JSFUtils.createUISelectItems(_screenResult.getPlateNumbers());
@@ -290,7 +270,6 @@ public class ScreenResultViewerController
     }
     return _selectedDataHeaderNames;
   }
-
 
   public void setSelectedDataHeaderNames(String[] selectedDataHeaderNames)
   {
@@ -351,35 +330,6 @@ public class ScreenResultViewerController
   }
 
 
-  //  public Converter getRowToPlateConverter()
-//  {
-//    if (_rowToPlateConverter == null) {
-//      _rowToPlateConverter = new Converter() {
-//        public Object getAsObject(FacesContext arg0, UIComponent arg1, String arg2) throws ConverterException
-//        {
-//          for (SelectItem item : getPlates()) {
-//            if (item.getValue().toString().equals(arg2)) {
-//              return item;
-//            }
-//          }
-//          throw new ConverterException("no item matches string representation '" + arg2 + "'");
-//        }
-//        
-//        public String getAsString(FacesContext arg0, UIComponent arg1, Object arg2) throws ConverterException 
-//        {
-//          for (SelectItem item : getPlates()) {
-//            if (item.getValue().equals(arg2)) {
-//              return item.getLabel();
-//            }
-//          }
-//          throw new ConverterException("no item matches object representation '" + arg2 + "'");
-//        };
-//      };
-//    }
-//    return _rowToPlateConverter;
-//  }
-  
-
   // JSF application methods
   
   @SuppressWarnings("unchecked")
@@ -389,8 +339,12 @@ public class ScreenResultViewerController
       int firstRow = (pageIndex * getDataTable().getRows()) + 1;
       if (firstRow > 0 &&
         firstRow <= _screenResult.getResultValueTypes().first().getResultValues().size()) {
+        // update the row field
         setFirstDisplayedRowNumber(firstRow);
-        _plateNumberInput.setValue(((List<RawDataRow>) getRawData().getWrappedData()).get(firstRow - 1).getWell().getPlateNumber().toString());
+        // scroll the data table to the new row
+        getDataTable().setFirst(_firstRow);
+        // update the plate selection list to the current plate
+        _plateNumberInput.setValue(((List<RawDataRow>) getRawData().getWrappedData()).get(_firstRow).getWell().getPlateNumber().toString());
       }
       return null;
     } 
@@ -443,8 +397,11 @@ public class ScreenResultViewerController
   public void firstDisplayedRowNumberListener(ValueChangeEvent event)
   {
     log.debug("firstDisplayedRowNumberListener called: " + event.getNewValue());
-    int newFirstDisplayRowNumber = Integer.parseInt(event.getNewValue().toString());
-    RawDataRow dataRow = ((List<RawDataRow>)getRawData().getWrappedData()).get(newFirstDisplayRowNumber);
+    int newFirstDisplayRowNumber = Integer.parseInt(event.getNewValue().toString()) - 1;
+    // scroll the data table to the new row
+    getDataTable().setFirst(newFirstDisplayRowNumber);
+    // update the plate selection list to the current plate
+    RawDataRow dataRow = ((List<RawDataRow>) getRawData().getWrappedData()).get(newFirstDisplayRowNumber);
     Integer plateNumber = dataRow.getWell().getPlateNumber();
     _plateNumberInput.setValue(plateNumber.toString());
   }
@@ -452,15 +409,17 @@ public class ScreenResultViewerController
   public void plateNumberListener(ValueChangeEvent event)
   {
     log.debug("new plate number: '" + event.getNewValue() + "'");
-    int firstRowForPlateNumber = findFirstRowForPlateNumber(Integer.parseInt(event.getNewValue().toString()));
-    _firstDisplayedRowNumberInput.setValue(firstRowForPlateNumber);
+    int newFirstRowForPlateNumber = findFirstRowForPlateNumber(Integer.parseInt(event.getNewValue().toString()));
+    // scroll the data table to the new row
+    getDataTable().setFirst(newFirstRowForPlateNumber);
+    // update the row field
+    _firstDisplayedRowNumberInput.setValue(newFirstRowForPlateNumber);
   }
   
-  @SuppressWarnings("unchecked")
   public void selectedDataHeadersListener(ValueChangeEvent event)
   {
     log.debug("data headers selection changed: '" + event.getNewValue() + "'");
-    _dataHeaderColumnModel = null; // cause to be recreated for new set of selected data headers
+    _dataHeaderColumnModel = null; // cause to be reinitialized for new set of selected data headers
   }
   
   
@@ -474,7 +433,6 @@ public class ScreenResultViewerController
     return name.replaceAll("[ ()]", "") + "Column";
   }
   
-  
   private void resetViewLayout()
   {
     
@@ -484,44 +442,27 @@ public class ScreenResultViewerController
     _dataHeaderColumnModel = null;
     _metadataModel = null;
     _rawDataModel = null;
-    _firstRow = 0;
+    setFirstDisplayedRowNumber(1);
     _plateNumber = null;
     _uniqueDataHeaderNamesMap = null;
     _selectedDataHeaderNames = null;
     // _rowToPlateConverter = null;
   }
 
-
-  /**
-   * Removes any dynamically-added columns, allowing the table's dynamic columns
-   * to be added anew for a new ScreenResult.
-   */
-  @SuppressWarnings("unchecked")
-  private void resetTable(UIData table, int fixedColumnCount)
-  {
-    
-    log.debug("dynamically removing old columns from table '" + table + "'");
-    Collection dynamicColumns = table.getChildren().subList(fixedColumnCount, table.getChildCount());
-    List columns = table.getChildren();
-    // set parent of columns to remove to null, just to be safe (JSF spec says
-    // you must do this)
-    for (Iterator iter = dynamicColumns.iterator(); iter.hasNext();) {
-      UIColumn column = (UIColumn) iter.next();
-      column.setParent(null);
-      iter.remove();
-      assert !columns.contains(column) : "column was not removed";  
-    }
-    
-    // reset the 1st row to be displayed
-    table.setFirst(0);
-    // reset the "current" row (in terms of selection/editing)
-    // "-1" also causes the state of child components to be reset by UIData (according to JSF spec)
-    table.setRowIndex(-1);
-  }
-
   private int getPageIndex()
   {
     return getDataTable().getFirst() / getDataTable().getRows();
+  }
+
+  private int findFirstRowForPlateNumber(int selectedPlateNumber)
+  {
+    lazyBuildPlateNumber2FirstRow();
+    
+    if (!_plateNumber2FirstRow.containsKey(selectedPlateNumber)) {
+      log.error("invalid plate number: " + selectedPlateNumber);
+      return getDataTable().getFirst();
+    }
+    return _plateNumber2FirstRow.get(selectedPlateNumber) + 1;
   }
 
   private void lazyBuildUniqueDataHeaderNamesMap()
@@ -634,22 +575,12 @@ public class ScreenResultViewerController
     }
   }
   
-  private int findFirstRowForPlateNumber(int selectedPlateNumber)
-  {
-    lazyBuildPlateNumber2FirstRow();
-    
-    if (!_plateNumber2FirstRow.containsKey(selectedPlateNumber)) {
-      log.error("invalid plate number: " + selectedPlateNumber);
-      return getDataTable().getFirst();
-    }
-    return _plateNumber2FirstRow.get(selectedPlateNumber) + 1;
-  }
-
   
   // inner classes
   
   /**
-   * MetadataRow bean, used to provide ScreenResult metadata to JSF components via EL
+   * MetadataRow bean, used to provide ScreenResult metadata to JSF components
+   * @see ScreenResultViewerController#getMetadataCellValue()
    * @author ant
    */
   public static class MetadataRow
@@ -705,7 +636,8 @@ public class ScreenResultViewerController
 
   
   /**
-   * RawDataRow bean, used to provide ScreenResult data to JSF components via EL
+   * RawDataRow bean, used to provide ScreenResult data to JSF components
+   * @see ScreenResultViewerController#getRawDataCellValue()
    * @author ant
    */
   public static class RawDataRow
@@ -735,22 +667,6 @@ public class ScreenResultViewerController
     public void addResultValue(ResultValueType rvt, ResultValue rv)
     {
       _resultValues.put(_uniqueNames.get(rvt), rv);
-    }
-  }
-  
-  public static class RowValidator implements Validator
-  {
-    public void validate(FacesContext ctx, UIComponent toValidate, Object value) throws ValidatorException
-    {
-        try {
-          int firstDisplayedRowNumber = Integer.parseInt(value.toString());
-          if (firstDisplayedRowNumber < 0 || firstDisplayedRowNumber >= 100) {
-            throw new ValidatorException(new FacesMessage("row number out of range"));
-          }
-        } 
-        catch (NumberFormatException e) {
-          throw new ValidatorException(new FacesMessage("invalid row number"), e);
-        }
     }
   }
 
