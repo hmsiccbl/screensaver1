@@ -54,23 +54,30 @@
     <url-pattern>/jsf/*</url-pattern>
   </servlet-mapping>
 
-  <!--  Not sure what extension filters are yet... -->
-  <!-- "If you use some of the MyFaces' extended components like t:inputFileUpload, t:inputHtml, t:inputCalendar, ... then you most likely need to have this filter configured in your webapp." -http://myfaces.apache.org/tomahawk/extensionsFilter.html  -->
-  <!-- 
+ 
+  <!-- JSF Apache Tomahawk configuration (extended components w/ "t:" prefix) -http://myfaces.apache.org/tomahawk/extensionsFilter.html  -->
   <filter>
     <filter-name>MyFacesExtensionsFilter</filter-name>
-    <filter-class>org.apache.myfaces.component.html.util.ExtensionsFilter</filter-class>
+    <filter-class>org.apache.myfaces.webapp.filter.ExtensionsFilter</filter-class>
     <init-param>
       <param-name>maxFileSize</param-name>
       <param-value>20m</param-value>
+      <!-- description>Set the size limit for uploaded files</description-->
     </init-param>
   </filter>
 
+  <!-- extension mapping for adding <script/>, <link/>, and other resource tags to JSF-pages  -->
   <filter-mapping>
     <filter-name>MyFacesExtensionsFilter</filter-name>
-    <url-pattern>*.faces</url-pattern>
-  </filter-mapping>  
-  -->
+    <!-- servlet-name must match the name of your javax.faces.webapp.FacesServlet entry -->
+    <servlet-name>Faces Servlet</servlet-name>
+  </filter-mapping>
+
+  <!-- extension mapping for serving page-independent resources (javascript, stylesheets, images, etc.)  -->
+  <filter-mapping>
+    <filter-name>MyFacesExtensionsFilter</filter-name>
+    <url-pattern>/faces/myFacesExtensionResource/*</url-pattern>
+  </filter-mapping>
 
   
   <!-- JSP Configuration -->

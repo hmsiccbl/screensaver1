@@ -5,7 +5,7 @@
 </h1>
 
 <f:view>
-  <h:form id="dataForm">
+  <h:form id="dataForm" title="Screen Result Viewer">
 
     <%--
     <h:outputText id="generatedTime">Generated: <%=new java.util.Date().toString()%></h:outputText><br/>
