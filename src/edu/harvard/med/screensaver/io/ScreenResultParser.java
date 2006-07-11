@@ -53,15 +53,16 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * {@link edu.harvard.med.screensaver.model.screenresults.ResultValueType}
  * objects).
  * <p>
+ * Instantiate a new <code>ScreenResultParser</code> for each screen result
+ * file set that needs to be parsed (i.e., do not reuse the parser).
+ * <p>
  * The class attempts to parse files as fully as possible, carrying on in the
  * face of errors, in order to catch as many errors as possible, as this will
  * aid the manual effort of correcting the files' format and content between
- * import attempts. Validation checks performed include:
+ * import attempts. (Potential) validation checks performed include:
  * <ul>
  * <li> Data header count in data file matches data header definitions in
  * metadata file. (TODO)
- * <li> File name listed in cell "Sheet1:A2" of metadata file must match data
- * file name. (TODO)
  * <li> Data Header names, as defined in the metadata, match the actual Data
  * Header names in the data file. (TODO)
  * </ul>
@@ -69,6 +70,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
+// TODO: make objects of this class reusable (i.e., multiple calls to parse())
 public class ScreenResultParser
 {
   
@@ -245,9 +247,8 @@ public class ScreenResultParser
     }
   }
   
-  // instance data members
   
-
+  // instance data members
 
   private DAO _dao;
   /**
@@ -278,7 +279,10 @@ public class ScreenResultParser
   private int _nDataHeaders;
   private Map<Integer,Short> _dataHeaderIndex2DataHeaderColumn = new HashMap<Integer,Short>();
   private List<Workbook> _rawDataWorkbooks = new ArrayList<Workbook>();
+
+  private boolean _parserUsed;
   
+
   // public methods and constructors
 
   public ScreenResultParser(DAO dao) 
@@ -300,6 +304,12 @@ public class ScreenResultParser
    */
   public ScreenResult parse(File metadataExcelFile)
   {
+    // hack to prevent same parse object from being reused
+    if (_parserUsed) {
+      throw new IllegalStateException("parser already invoked; please instantiate anew");
+    }
+    _parserUsed = true;
+    
     try {
       if (!metadataExcelFile.canRead()) {
         throw new FileNotFoundException("metadata file '" + metadataExcelFile + "' cannot be read");
