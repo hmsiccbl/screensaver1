@@ -1,4 +1,4 @@
-// $HeadURL$
+  // $HeadURL$
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
@@ -190,20 +190,27 @@ public class ScreenResultParser
                                            "the number of wells to print out");
     wellsToPrintOption.setOptionalArg(true);
     options.addOption(wellsToPrintOption);
+    Option ignoreFilePaths = new Option("ignorefilepaths",
+                                        false,
+                                        "whether to ignore the file paths for the raw data spreadsheet " +
+                                        "files (as specified in the metadata spreadsheet); if option is " +
+                                        "provided all files will be expected to be found in the same directory");
+    ignoreFilePaths.setOptionalArg(true);
+    options.addOption(ignoreFilePaths);
     try {
       CommandLine cmdLine = new GnuParser().parse(options, args);
 
-      ClassPathXmlApplicationContext appCtx = 
-        new ClassPathXmlApplicationContext(new String[] { 
-          "spring-context-logging.xml",
-          "spring-context-services.xml",
-        });
+      ClassPathXmlApplicationContext appCtx = new ClassPathXmlApplicationContext(new String[] { 
+        "spring-context-logging.xml",
+        "spring-context-services.xml", 
+      });
       ScreenResultParser screenResultParser = (ScreenResultParser) appCtx.getBean("screenResultParser");
       DAO dao = (DAO) appCtx.getBean("daoImpl");
       try {
         File metadataFileToParse = new File(cmdLine.getOptionValue("metadatafile"));
         cleanOutputDirectory(metadataFileToParse.getParentFile());
-        ScreenResult screenResult = screenResultParser.parse(metadataFileToParse);
+        ScreenResult screenResult = screenResultParser.parse(metadataFileToParse,
+                                                             cmdLine.hasOption("ignoreFilePaths" ));
         dao.persistEntity(screenResult);
         screenResultParser.outputErrorsInAnnotatedWorkbooks(ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
         if (cmdLine.hasOption("wellstoprint")) {
@@ -218,7 +225,8 @@ public class ScreenResultParser
         log.error(errorMsg);
         System.err.println(errorMsg);
       }
-      if (screenResultParser.getErrors().size() > 0) {
+      if (screenResultParser.getErrors()
+                            .size() > 0) {
         System.err.println("Errors encountered during parse:");
         for (ParseError error : screenResultParser.getErrors()) {
           System.err.println(error.toString());
@@ -289,6 +297,16 @@ public class ScreenResultParser
   {
     _dao = dao;
   }
+  
+  /**
+   * @see #parse(File, boolean)
+   */
+  public ScreenResult parse(
+    File metadataExcelFile)
+  {
+    return parse(metadataExcelFile,
+                 true);
+  }
 
   /**
    * Parse the worksheets specified at instantiation time and uses the parsed
@@ -302,7 +320,9 @@ public class ScreenResultParser
    * @return a {@link ScreenResult} object containing the data parsed from the
    *         worksheet.
    */
-  public ScreenResult parse(File metadataExcelFile)
+  public ScreenResult parse(
+    File metadataExcelFile,
+    boolean ignoreFilePaths)
   {
     // hack to prevent same parse object from being reused
     if (_parserUsed) {
@@ -316,7 +336,7 @@ public class ScreenResultParser
       }
       _metadataWorkbook = new Workbook(metadataExcelFile, _errors);
       log.info("parsing " + metadataExcelFile.getAbsolutePath());
-      parseMetadata();
+      parseMetadata(ignoreFilePaths);
       for (Workbook rawDataWorkbook : _rawDataWorkbooks) {
         try {
           log.info("parsing " + rawDataWorkbook.getWorkbookFile().getAbsolutePath());
@@ -466,12 +486,13 @@ public class ScreenResultParser
   
   /**
    * Parse the workbook containing the ScreenResult metadata
+   * @param ignoreFilePaths
    * @throws UnrecoverableScreenResultParseException 
    */
-  private void parseMetadata() throws UnrecoverableScreenResultParseException 
+  private void parseMetadata(boolean ignoreFilePaths) throws UnrecoverableScreenResultParseException 
   {
     initializeMetadataSheet();
-    parseRawDataWorkbookFilenames();
+    parseRawDataWorkbookFilenames(ignoreFilePaths);
     parseMetaMetadata();
     for (int iDataHeader = 0; iDataHeader < _nDataHeaders; ++iDataHeader) {
       recordDataHeaderColumn(iDataHeader);
@@ -508,12 +529,12 @@ public class ScreenResultParser
     }
   }
 
-  private void parseRawDataWorkbookFilenames()
+  private void parseRawDataWorkbookFilenames(boolean ignoreFilePaths)
     throws UnrecoverableScreenResultParseException
   {
     Cell cell = _metadataCellParserFactory.getCell(METADATA_FILENAMES_CELL_COLUMN_INDEX,
-                                                         METADATA_FILENAMES_CELL_ROW_INDEX,
-                                                         true);
+                                                   METADATA_FILENAMES_CELL_ROW_INDEX,
+                                                   true);
     String fileNames = cell.getString();
     if (fileNames.equals("")) {
       throw new UnrecoverableScreenResultParseException(METADATA_NO_RAWDATA_FILES_SPECIFIED_ERROR,
@@ -521,10 +542,12 @@ public class ScreenResultParser
     }
     String[] fileNamesArray = fileNames.split(FILENAMES_LIST_DELIMITER);
     for (int i = 0; i < fileNamesArray.length; i++) {
-      File workbookFileInSameDirAsMetadataFile = 
-        new File(_metadataWorkbook.getWorkbookFile()
-               .getParent(),
-               new File(fileNamesArray[i]).getName());
+      
+      File workbookFileInSameDirAsMetadataFile = new File(fileNamesArray[i]);
+      if (ignoreFilePaths) {
+        workbookFileInSameDirAsMetadataFile = new File(_metadataWorkbook.getWorkbookFile().getParent(),
+                                                       new File(fileNamesArray[i]).getName());
+      } 
       _rawDataWorkbooks.add(new Workbook(workbookFileInSameDirAsMetadataFile, _errors));
     }
   }

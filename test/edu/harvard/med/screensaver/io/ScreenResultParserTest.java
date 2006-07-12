@@ -56,7 +56,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
   {
     return new String[] {
       "spring-context-services.xml", 
-      "spring-context-screenresultparser-test.xml"
     };
   }
 
