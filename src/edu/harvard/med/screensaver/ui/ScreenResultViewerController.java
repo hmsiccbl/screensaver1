@@ -25,6 +25,7 @@ import javax.faces.component.UIData;
 import javax.faces.component.UIInput;
 import javax.faces.component.UISelectBoolean;
 import javax.faces.context.FacesContext;
+import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
@@ -371,6 +372,13 @@ public class ScreenResultViewerController
     return null;
   }
   
+  public String showWell()
+  { 
+    Object wellId = (Object) FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("wellIdParam");
+    log.debug("action event on well " + wellId);
+    return "showWell";
+  }
+  
   public String update()
   {
     log.debug("update action received");
@@ -380,7 +388,6 @@ public class ScreenResultViewerController
   public String done()
   {
     log.debug("done action received");
-    //    resetViewLayout(); // don't want to do this cuz tables won't be rebuilt if screenResult is the same on next use
     return "done";
   }
   

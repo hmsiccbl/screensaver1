@@ -91,7 +91,11 @@
             <f:facet name="header">
               <h:outputText value="Well"/>
             </f:facet>
-            <h:outputText value="#{row.well.wellName}" />
+            <h:commandLink action="#{ScreenResultViewer.showWell}">
+              <%-- TODO: f:param name="wellIdParam" value="#{row.well.wellId} "/ --%>
+              <f:param name="wellIdParam" value="#{row.well.wellName} "/>
+              <h:outputText value="#{row.well.wellName}" />
+            </h:commandLink>
           </t:column>
           <t:columns value="#{ScreenResultViewer.dataHeaderColumnModel}" var="columnName">
             <f:facet name="header">
