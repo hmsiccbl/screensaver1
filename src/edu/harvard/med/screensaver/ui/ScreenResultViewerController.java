@@ -607,12 +607,12 @@ public class ScreenResultViewerController
      */
     public MetadataRow(Collection<ResultValueType> rvts, Map<ResultValueType,String> uniqueNames, String propertyName) throws Exception
     {
-      _rowLabel = propertyName; // TODO: need better display name
+      _rowLabel = edu.harvard.med.screensaver.util.BeanUtils.formatPropertyName(propertyName);
       _rvtPropertyValues = new HashMap<String,String>();
       for (ResultValueType rvt : rvts) {
         String value = BeanUtils.getProperty(rvt, propertyName);
-        // HACK: construct a string representing the typesDerivedFrom property
-        // TODO: how can we do this properly?  ResultValueType.typesDerivedFromTextList property?
+        // HACK: handle special cases, where we must format the property value of the ResultValueType
+        // TODO: how can we do this properly/generally?
         if (propertyName.equals("name")) {
           value = uniqueNames.get(rvt);
         }
