@@ -61,7 +61,7 @@ public class Workbook
         _workbook = new HSSFWorkbook(dataFs);
       }
       catch (IOException e) {
-        String errorMsg = "could not read workbook: " + e.getMessage();
+        String errorMsg = "could not read workbook '" + _workbookFile.getAbsolutePath() + "': " + e.getMessage();
         _errors.addError(errorMsg);
         log.error(errorMsg);
 

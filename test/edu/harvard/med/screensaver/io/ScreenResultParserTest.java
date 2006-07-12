@@ -313,8 +313,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
                      HSSFCellUtil.getCell(sheet1.getRow(7),'B' - 'A').getStringCellValue());
         assertEquals("Parse Errors",
                      workbook.getWorkbook().getSheetName(3));
-        assertEquals("could not read workbook: test/edu/harvard/med/screensaver/io/nonextant.xls (No such file or directory)",
-                     HSSFCellUtil.getCell(sheet3.getRow(0),'A' - 'A').getStringCellValue());
+        assertTrue(HSSFCellUtil.getCell(sheet3.getRow(0),'A' - 'A').getStringCellValue().
+                   matches("could not read workbook '.*': test/edu/harvard/med/screensaver/io/nonextant\\.xls \\(No such file or directory\\)"));
         
       }
       else if (workbook.getWorkbookFile().getName().equals("rawdata_with_errors.xls")) {

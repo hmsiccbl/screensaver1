@@ -116,9 +116,9 @@
     <fileset refid="lib.used.fileset"/>
   </path>
 
-  <path id="project.classpath">
+  <path id="distro.project.classpath">
     <path refid="project.library.path"/>
-    <pathelement path="build/war/WEB-INF/classes"/>
+    <pathelement path="${distro.build.dir}/classes"/>
   </path>
 
 
@@ -276,7 +276,7 @@
     <taskdef
       name="hibernatetool" 
       classname="org.hibernate.tool.ant.HibernateToolTask" 
-      classpathref="project.classpath"
+      classpathref="project.library.path"
     />
     <hibernatetool destdir="sql">
       <configuration
@@ -364,10 +364,6 @@
       description="Run all project's tests"
     >
       <test name="edu.harvard.med.screensaver.PackageTestSuite" outfile="test-result"></test> 
-      <!--classpath refid="project.classpath"/-->
-      <!--batchtest todir="${basedir}/.test.reports">
-        <fileset refid="junit.tests.fileset"/>
-      </batchtest-->
     </junit> 
   </target> 
  
@@ -376,12 +372,13 @@
 
   <target
    name="run"
+   depends="distro"
    description="Run the main method of a class in the Screensaver project."
   >
     <java
       classname="${run.class.name}" 
       fork="true"
-      classpathref="project.classpath"
+      classpathref="distro.project.classpath"
     >
     <arg line="${run.class.args}"/>
    </java> 
@@ -392,17 +389,25 @@
  
   <target
      name="screenresultparser"
+     depends="distro"
      description="Run the ScreenResult parser"
     >
+    <condition property="wells.to.print.option" value="-wellstoprint ${wells.to.print}" else="">
+      <isset property="wells.to.print"/>
+    </condition>
+    <condition property="ignore.file.paths.option" value="-ignorefilepaths" else="">
+      <isset property="ignore.file.paths"/>  
+    </condition>
     <java
       classname="edu.harvard.med.screensaver.io.ScreenResultParser" 
       fork="true"
-      classpathref="project.classpath"
+      classpathref="distro.project.classpath"
       output="${metadata.file}.out"
       maxmemory="1024m"
     >
-      <arg line="-metadatafile ${metadata.file} -wellstoprint ${wells.to.print}"/>
-    </java> 
+      <arg line="-metadatafile ${metadata.file} ${wells.to.print.option} ${ignore.file.paths.option}"/>
+    </java>
+    <echo message="output written to ${metadata.file}.out"/>
   </target>
  
    <!-- build a ScreenResultParser deployment -->
@@ -491,7 +496,8 @@
       >
         <fileset dir="build/distro/screensaver/classes"/>
         <fileset dir="build/distro/screensaver/lib"/>
-        <fileset file="${distro.file}"/>
+        <fileset file="${distro.file.tgz}"/>
+        <fileset file="${distro.file.zip}"/>
       </delete>
     </target>
  

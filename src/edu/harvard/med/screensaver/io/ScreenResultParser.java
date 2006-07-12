@@ -205,13 +205,13 @@ public class ScreenResultParser
         "spring-context-services.xml", 
       });
       ScreenResultParser screenResultParser = (ScreenResultParser) appCtx.getBean("screenResultParser");
-      DAO dao = (DAO) appCtx.getBean("daoImpl");
+//      DAO dao = (DAO) appCtx.getBean("daoImpl");
       try {
         File metadataFileToParse = new File(cmdLine.getOptionValue("metadatafile"));
         cleanOutputDirectory(metadataFileToParse.getParentFile());
         ScreenResult screenResult = screenResultParser.parse(metadataFileToParse,
-                                                             cmdLine.hasOption("ignoreFilePaths" ));
-        dao.persistEntity(screenResult);
+                                                             cmdLine.hasOption("ignorefilepaths" ));
+//        dao.persistEntity(screenResult);
         screenResultParser.outputErrorsInAnnotatedWorkbooks(ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
         if (cmdLine.hasOption("wellstoprint")) {
           new ScreenResultPrinter(screenResult).print(new Integer(cmdLine.getOptionValue("wellstoprint")));
@@ -543,13 +543,23 @@ public class ScreenResultParser
     String[] fileNamesArray = fileNames.split(FILENAMES_LIST_DELIMITER);
     for (int i = 0; i < fileNamesArray.length; i++) {
       
-      File workbookFileInSameDirAsMetadataFile = new File(fileNamesArray[i]);
-      if (ignoreFilePaths) {
-        workbookFileInSameDirAsMetadataFile = new File(_metadataWorkbook.getWorkbookFile().getParent(),
-                                                       new File(fileNamesArray[i]).getName());
+      File rawDataWorkbookFile = new File(fileNamesArray[i]);
+      if (ignoreFilePaths && rawDataWorkbookFile.isAbsolute()) {
+        log.info("ignoring absolute file path for raw data file (assuming it is in same directory as metadata file)");
+        rawDataWorkbookFile = makeRawDataFileInMetadataFileDirectory(rawDataWorkbookFile);
       } 
-      _rawDataWorkbooks.add(new Workbook(workbookFileInSameDirAsMetadataFile, _errors));
+      else if (!rawDataWorkbookFile.isAbsolute()) {
+        rawDataWorkbookFile = makeRawDataFileInMetadataFileDirectory(rawDataWorkbookFile);
+      }
+      _rawDataWorkbooks.add(new Workbook(rawDataWorkbookFile, _errors));
     }
+  }
+
+  private File makeRawDataFileInMetadataFileDirectory(File rawDataWorkbookFile)
+  {
+    rawDataWorkbookFile = new File(_metadataWorkbook.getWorkbookFile().getParent(),
+                            rawDataWorkbookFile.getName());
+    return rawDataWorkbookFile;
   }
 
   private void recordDataHeaderColumn(int iDataHeader)
