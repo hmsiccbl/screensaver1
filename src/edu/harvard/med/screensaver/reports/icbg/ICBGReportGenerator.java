@@ -61,8 +61,10 @@ public class ICBGReportGenerator
       mapper,
       new ScreenDBProxy());
     HSSFWorkbook report = generator.produceReport();
+    log.info("writing report..");
     try {
       report.write(new FileOutputStream(REPORT_FILENAME));
+      log.info("report written.");
     }
     catch (Exception e) {
       e.printStackTrace();
@@ -264,11 +266,14 @@ public class ICBGReportGenerator
     };
     for (File resultsSubdir : resultsDir.listFiles(directoryFilter)) {
       Integer screenNumber = Integer.valueOf(resultsSubdir.getName());
+      // if (screenNumber.intValue() <= 398) { continue; }
       log.info("examining results subdir: " + resultsSubdir.getName());
       for (File metadataFile : resultsSubdir.listFiles(metadataFilter)) {
         parseScreenResult(screenNumber, metadataFile);
+        log.info("writing report..");
         try {
           _report.write(new FileOutputStream(REPORT_FILENAME));
+          log.info("report written.");
         }
         catch (Exception e) {
           e.printStackTrace();
@@ -282,15 +287,16 @@ public class ICBGReportGenerator
   {
     log.info("parsing file: " + metadataFile.getName());
     AssayInfo assayInfo = _screenDBProxy.getAssayInfoForScreen(screenNumber);
-    printProtocolRow(assayInfo);
-
+    
     ScreenResultParser parser =
       new ScreenResultParser(new MockDaoForScreenResultParserTest());
     ScreenResult screenResult = parser.parse(metadataFile);
     if (screenResult == null) {
       return;
     }
-    printBioactivityRows(assayInfo, screenResult);
+    if (printBioactivityRows(assayInfo, screenResult)) {
+      printProtocolRow(assayInfo);  
+    }
   }
   
   private void printProtocolRow(AssayInfo assayInfo)
@@ -304,7 +310,7 @@ public class ICBGReportGenerator
     _currentProtocolRow++;
   }
   
-  private void printBioactivityRows(AssayInfo assayInfo, ScreenResult screenResult)
+  private boolean printBioactivityRows(AssayInfo assayInfo, ScreenResult screenResult)
   {
     ResultValueType scaledOrBooleanRVT =
       findRightmostIndicatingScaledOrBooleanRVT(screenResult);
@@ -312,9 +318,10 @@ public class ICBGReportGenerator
       findRightmostIndicatingNumericalRVT(screenResult);
     if (scaledOrBooleanRVT == null && numericalRVT == null) {
       log.info("no assay indicator for " + assayInfo.getAssayName());
-      return; // this return is not strictly necessary
+      return false;
     }
     
+    boolean printedBioactivityRow = false;
     Iterator<ResultValue> scaledOrBooleanRVs = (scaledOrBooleanRVT == null) ? null :
       scaledOrBooleanRVT.getResultValues().iterator();
     Iterator<ResultValue> numericalRVs = (numericalRVT == null) ? null :
@@ -325,8 +332,11 @@ public class ICBGReportGenerator
         scaledOrBooleanRVs.next();
       ResultValue numericalRV = (numericalRVs == null) ? null :
         numericalRVs.next();
-      printBioactivityRow(assayInfo, scaledOrBooleanRV, numericalRV);
+      if (printBioactivityRow(assayInfo, scaledOrBooleanRV, numericalRV)) {
+        printedBioactivityRow = true;
+      }
     }
+    return printedBioactivityRow;
   }
   
   private ResultValueType findRightmostIndicatingScaledOrBooleanRVT(
@@ -366,7 +376,7 @@ public class ICBGReportGenerator
     return rightmostNumerical;
   }
   
-  private void printBioactivityRow(
+  private boolean printBioactivityRow(
     AssayInfo assayInfo,
     ResultValue scaledOrBooleanRV,
     ResultValue numericalRV)
@@ -379,7 +389,7 @@ public class ICBGReportGenerator
       well = numericalRV.getWell();
     }
     String lq = _mapper.getLQForWell(well);
-    if (lq == null) { return; }
+    if (lq == null) { return false; }
     String assayName = assayInfo.getAssayName();
     String plateName = "P" + well.getPlateNumber();
     String wellName = well.getWellName();
@@ -429,5 +439,6 @@ public class ICBGReportGenerator
     //row.createCell((short) 16).setCellValue("COMMENTS");
     //row.createCell((short) 17).setCellValue("EXTRA");
     _currentBioactivityRow++;
+    return true;
   }
 }
