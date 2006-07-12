@@ -344,7 +344,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           SortedSet<Integer> expectedPlateNumbers = new TreeSet<Integer>();
           expectedPlateNumbers.add(1);
           expectedPlateNumbers.add(2);
-          assertEquals(expectedPlateNumbers, screenResult.getPlateNumbers());
+          assertEquals(expectedPlateNumbers, screenResult.getDerivedPlateNumbers());
           
           dao.persistEntity(screenResult);
         }

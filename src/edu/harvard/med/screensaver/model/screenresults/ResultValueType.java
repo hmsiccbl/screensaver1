@@ -692,18 +692,62 @@ public class ResultValueType extends AbstractEntity implements Comparable
   }
 
   /**
-   * Get a business key that uniquely represents this object and that is based
-   * upon some subset of its domain-model data fields.
-   * 
-   * @motivation for Hibernate (as hashCode()-based set membership cannot rely
-   *             upon database sequence ID)
-   * @motivation used by Comparable methods
-   * @return a <code>String</code> representing the business key
+   * A business key class for the <code>ResultValueType</code>.
    */
-  protected String getBusinessKey() {
-    assert _screenResult != null && _ordinal != null :
-      "business key fields have not been defined";
-    return getScreenResult().getBusinessKey().toString() + ":" + getOrdinal();
+  private class BusinessKey
+  {
+    
+    /**
+     * Get the parent {@link ScreenResult}.
+     * 
+     * @return the parent {@link ScreenResult}
+     */
+    public ScreenResult getScreenResult()
+    {
+      return _screenResult;
+    }
+    
+    /**
+     * Get the ordinal position of this <code>ResultValueType</code> within
+     * its parent {@link ScreenResult}.
+     * 
+     * @return an <code>Integer</code>
+     */
+    public Integer getOrdinal()
+    {
+      return _ordinal;
+    }
+    
+    @Override
+    public boolean equals(Object object)
+    {
+      if (! (object instanceof BusinessKey)) {
+        return false;
+      }
+      BusinessKey that = (BusinessKey) object;
+      return
+        getScreenResult().equals(that.getScreenResult()) &&
+        getOrdinal().equals(that.getOrdinal());
+    }
+
+    @Override
+    public int hashCode()
+    {
+      return
+        getScreenResult().hashCode() +
+        getOrdinal().hashCode();
+    }
+
+    @Override
+    public String toString()
+    {
+      return getScreenResult() + ":" + getOrdinal();
+    }
+  }
+
+  @Override
+  protected Object getBusinessKey() {
+    return new BusinessKey();
   }
 
 

@@ -56,7 +56,7 @@ public class ScreenResult extends AbstractEntity
 
   // transient (derived) instance data
   
-  transient private TreeSet<Integer>     _plateNumbers;
+  transient private TreeSet<Integer> _plateNumbers;
 
   
   // public constructors and instance methods
@@ -251,12 +251,14 @@ public class ScreenResult extends AbstractEntity
     _replicateCount = replicateCount;
   }
 
-  public SortedSet<Integer> getPlateNumbers()
+  public SortedSet<Integer> getDerivedPlateNumbers()
   {
     if (_plateNumbers == null) {
       _plateNumbers = new TreeSet<Integer>();
-      for (ResultValue rv : getResultValueTypes().first().getResultValues()) {
-        _plateNumbers.add(rv.getWell().getPlateNumber());
+      if (getResultValueTypes().size() > 0) {
+        for (ResultValue rv : getResultValueTypes().first().getResultValues()) {
+          _plateNumbers.add(rv.getWell().getPlateNumber());
+        }
       }
     }
     return _plateNumbers;

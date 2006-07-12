@@ -45,7 +45,8 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
             String propertyName = propertyDescriptor.getName();
             if (
               propertyName.equals("class") ||
-              propertyName.startsWith("hbn")) {
+              propertyName.startsWith("hbn") ||
+              propertyName.startsWith("derived")) {
               continue;
             }
             exercizor.exercizePropertyDescriptor(bean, beanInfo, propertyDescriptor);

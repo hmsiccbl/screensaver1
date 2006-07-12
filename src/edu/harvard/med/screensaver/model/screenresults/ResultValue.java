@@ -46,13 +46,11 @@ public class ResultValue extends AbstractEntity implements Comparable
    */
   private boolean _exclude;
   
-  
-  // non-properties instance data - used to define the business key
 
-  private Integer _plateNumber;
-  private String  _wellName;
-  private Integer _resultValueTypeOrdinal;
+  // non-properties instance data
   
+  private BusinessKey _businessKey = new BusinessKey();
+ 
 
   // public constructors and instance methods
   
@@ -76,9 +74,7 @@ public class ResultValue extends AbstractEntity implements Comparable
    */
   public ResultValue(ResultValueType resultValueType, Well well, String value, boolean exclude)
   {
-    _plateNumber = well.getPlateNumber();
-    _wellName = well.getWellName();
-    _resultValueTypeOrdinal = resultValueType.getOrdinal();
+    _businessKey = new BusinessKey(well, resultValueType);
     setResultValueType(resultValueType);
     setWell(well);
     setValue(value);
@@ -138,7 +134,7 @@ public class ResultValue extends AbstractEntity implements Comparable
     if (_well != null) {
       _well.getHbnResultValues().remove(this);
     }
-    _resultValueTypeOrdinal = resultValueType.getOrdinal();
+    _businessKey.setResultValueType(resultValueType);
     if (_well != null) {
       _well.getHbnResultValues().add(this);
     }
@@ -175,8 +171,7 @@ public class ResultValue extends AbstractEntity implements Comparable
     if (_well != null) {
       _well.getHbnResultValues().remove(this);
     }
-    _plateNumber = well.getPlateNumber();
-    _wellName = well.getWellName();
+    _businessKey.setWell(well);
     if (_resultValueType != null) {
       _resultValueType.getHbnResultValues().add(this);
     }
@@ -243,20 +238,7 @@ public class ResultValue extends AbstractEntity implements Comparable
    *             sets
    */
   public int compareTo(Object o) {
-    assert 
-    _plateNumber != null &&
-    _wellName != null &&
-    _resultValueTypeOrdinal != null :
-    "business key fields have not been defined";
-    ResultValue that = (ResultValue) o;
-    int result = _plateNumber.compareTo(that._plateNumber);
-    if (result == 0) {
-      result = this._wellName.compareTo(that._wellName);
-      if (result == 0) {
-        result = this._resultValueTypeOrdinal.compareTo(that._resultValueTypeOrdinal);
-      }
-    }
-    return result;
+    return _businessKey.compareTo(((ResultValue) o)._businessKey);
   }
 
   
@@ -274,8 +256,7 @@ public class ResultValue extends AbstractEntity implements Comparable
    */
   public void setHbnWell(Well well) {
     _well = well;
-    _plateNumber = (well == null) ? null : well.getPlateNumber();
-    _wellName = (well == null) ? null : well.getWellName();
+    _businessKey.setWell(_well);
   }
 
   
@@ -289,27 +270,89 @@ public class ResultValue extends AbstractEntity implements Comparable
    */
   void setHbnResultValueType(ResultValueType resultValueType) {
     _resultValueType = resultValueType;
-    _resultValueTypeOrdinal = (resultValueType == null) ? null : resultValueType.getOrdinal();
+    _businessKey.setResultValueType(_resultValueType);
   }
 
   /**
-   * Get a business key that uniquely represents this object and that is based
-   * upon some subset of its domain-model data fields.
-   * 
-   * @motivation for Hibernate (as hashCode()-based set membership cannot rely
-   *             upon database sequence ID)
-   * @motivation used by Comparable methods
-   * @return a <code>String</code> representing the business key
+   * A business key class for the <code>ResultValue</code>.
    */
-  protected String getBusinessKey() {
-    assert 
-      _plateNumber != null &&
-      _wellName != null &&
-      _resultValueTypeOrdinal != null :
-      "business key fields have not been defined";
-    return _plateNumber + _wellName + _resultValueTypeOrdinal;
+  private class BusinessKey implements Comparable
+  {
+    
+    private Well _well;
+    private ResultValueType _resultValueType;
+
+    public BusinessKey() {}
+
+    public BusinessKey(Well well,
+                       ResultValueType resultValueType)
+    {
+      _well = well;
+      _resultValueType = resultValueType;
+    }
+
+    public void setWell(Well well)
+    {
+      _well = well;
+    }
+
+    public void setResultValueType(ResultValueType resultValueType)
+    {
+      _resultValueType = resultValueType;
+    }
+
+    @Override
+    public boolean equals(Object object)
+    {
+      assert _well != null && _resultValueType != null :
+        "business key is not defined";
+      if (!(object instanceof BusinessKey)) {
+        return false;
+      }
+      BusinessKey that = (BusinessKey) object;
+      return 
+        _well.equals(that._well) &&
+        _resultValueType.equals(that._resultValueType);
+    }
+
+    @Override
+    public int hashCode()
+    {
+      assert _well != null && _resultValueType != null :
+        "business key is not defined";
+      return 
+        _well.hashCode() +
+        _resultValueType.hashCode();
+    }
+
+    @Override
+    public String toString()
+    {
+      assert _well != null && _resultValueType != null :
+        "business key is not defined";
+      return _well + ":" + _resultValueType;
+    }
+    
+    public int compareTo(Object o)
+    {
+      assert _well != null && _resultValueType != null :
+        "business key is not defined";
+      BusinessKey that = (BusinessKey) o;
+      int result = _well.getPlateNumber().compareTo(that._well.getPlateNumber());
+      if (result == 0) {
+        result = _well.getWellName().compareTo(that._well.getWellName());
+        if (result == 0) {
+          result = _resultValueType.getOrdinal().compareTo(that._resultValueType.getOrdinal());
+        }
+      }
+      return result;
+    }    
   }
 
+  @Override
+  protected Object getBusinessKey() {
+    return _businessKey;
+  }
   
   // private constructors and instance methods
 

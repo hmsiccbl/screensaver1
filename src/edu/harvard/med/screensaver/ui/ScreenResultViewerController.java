@@ -247,7 +247,7 @@ public class ScreenResultViewerController
 
   public List<SelectItem> getPlateSelectItems()
   {
-    return JSFUtils.createUISelectItems(_screenResult.getPlateNumbers());
+    return JSFUtils.createUISelectItems(_screenResult.getDerivedPlateNumbers());
   }
   
   public List<SelectItem> getDataHeaderSelectItems()
