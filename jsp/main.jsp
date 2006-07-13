@@ -19,7 +19,7 @@
       <h:outputText value="Create library" />
       <%--f:param name="mode" value="create"/--%>
     </h:commandLink>
-  </h:form>
+  </h:form> 
 
   <h:form id="queryForm">
     <h:message for="queryForm" />
@@ -36,9 +36,11 @@
     </h:panelGroup>
   </h:form>
 
-  <h:form id="calendarForm">
+  <%@include file="screenResultImport.jspf"%>
+
+  <%-- h:form id="calendarForm">
     <t:inputCalendar />
-  </h:form>
+  </h:form --%>
 
 </f:view>
 

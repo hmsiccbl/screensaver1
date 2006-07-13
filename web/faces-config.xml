@@ -84,6 +84,21 @@
     <managed-bean-class>edu.harvard.med.screensaver.ui.WellViewerController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
   </managed-bean>
+  
+  <managed-bean>
+    <description>Screen Result Importer backing bean</description>
+    <managed-bean-name>ScreenResultImporter</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.ScreenResultImporterController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>screenResultViewer</property-name>
+      <value>#{screenResultViewer}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>screenResultParser</property-name>
+      <value>#{screenResultParser}</value>
+    </managed-property>
+  </managed-bean>
 
   
   <!-- Navigation rules -->
@@ -120,6 +135,38 @@
       <!--  TODO to-view-id>/libraries.jsp</to-view-id-->
       <to-view-id>/main.jsp</to-view-id>
       <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-action>#{ScreenResultImporter.submit}</from-action>
+      <from-outcome>success</from-outcome>
+      <to-view-id>/screenresult.jsp</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-action>#{ScreenResultImporter.submit}</from-action>
+      <from-outcome>screenresult-parse-errors</from-outcome>
+      <to-view-id>/screenResultImportErrors.jsp</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+  
+  <navigation-rule>
+    <from-view-id>/screenResultImportErrors.jsp</from-view-id>
+    <navigation-case>
+      <from-action>#{ScreenResultImporter.done}</from-action>
+      <to-view-id>/main.jsp</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-action>#{ScreenResultImporter.submit}</from-action>
+      <from-outcome>success</from-outcome>
+      <to-view-id>/screenresult.jsp</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-action>#{ScreenResultImporter.submit}</from-action>
+      <from-outcome>screen-result-parse-errors</from-outcome>
+      <to-view-id>/screenResultImportErrors.jsp</to-view-id>
     </navigation-case>
   </navigation-rule>
 
@@ -177,7 +224,7 @@
     <converter-id>PlateNumberSelectItemConverter</converter-id>
     <converter-class>edu.harvard.med.screensaver.ui.util.PlateNumberSelectItemConverter</converter-class>
   </converter>
-  
+
   
   <!-- Validators -->
 
