@@ -399,7 +399,7 @@
       <isset property="ignore.file.paths"/>  
     </condition>
     <java
-      classname="edu.harvard.med.screensaver.io.ScreenResultParser" 
+      classname="edu.harvard.med.screensaver.io.screenresult.ScreenResultParser" 
       fork="true"
       classpathref="distro.project.classpath"
       output="${metadata.file}.out"

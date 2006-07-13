@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL: svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/io/CellOutOfRangeException.java $
+// $Id: CellOutOfRangeException.java 275 2006-06-28 15:32:40Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.io;
+package edu.harvard.med.screensaver.io.workbook;
 
 /**
  * Exception for reporting attempt to read a cell that is outside of the range

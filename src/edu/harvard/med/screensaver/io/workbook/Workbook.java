@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL: svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/io/Workbook.java $
+// $Id: Workbook.java 324 2006-07-12 16:58:16Z ant4 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.io;
+package edu.harvard.med.screensaver.io.workbook;
 
 import java.io.BufferedInputStream;
 import java.io.File;

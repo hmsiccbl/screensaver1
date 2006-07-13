@@ -7,7 +7,10 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.io;
+package edu.harvard.med.screensaver.io.screenresult;
+
+import edu.harvard.med.screensaver.io.workbook.Cell;
+import edu.harvard.med.screensaver.io.workbook.Workbook;
 
 /**
  * Used to report an unrecoverable parse error; indicates that further parsing

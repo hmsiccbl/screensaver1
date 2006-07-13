@@ -15,7 +15,7 @@ import java.util.List;
 import javax.faces.application.FacesMessage;
 
 import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.io.ScreenResultParser;
+import edu.harvard.med.screensaver.io.screenresult.ScreenResultParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;

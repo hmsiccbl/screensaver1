@@ -1,0 +1,16 @@
+Screen Result Viewer:
+//display screenresult data fields
+//download link
+//goto plate/well (w/validation)
+//goto row (w/validation)
+//hide/show columns
+//css decoration
+//numbered/lettered column headers
+aligned layout of metadata with raw data?
+//display plate set as selection list
+numeric format config for raw data values
+first/last nav buttons
+//link plate/well to compounds and silencing reagents
+//human-readable metadata type names
+//ordinal field: 1-based, not 0-based
+use Integer value for platenumber, not string (must get converter to work)
