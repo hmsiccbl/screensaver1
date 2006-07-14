@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL: svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/test/edu/harvard/med/screensaver/io/PackageTestSuite.java $
+// $Id: PackageTestSuite.java 275 2006-06-28 15:32:40Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -7,7 +7,9 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.io;
+package edu.harvard.med.screensaver.io.screenresultparser;
+
+import edu.harvard.med.screensaver.io.screenresultparser.ScreenResultParserTest;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -24,7 +26,7 @@ public class PackageTestSuite extends TestSuite
   }
 
   public PackageTestSuite() {
-    addTest(edu.harvard.med.screensaver.io.screenresultparser.PackageTestSuite.suite());
+    addTestSuite(ScreenResultParserTest.class);
   }
   
 }

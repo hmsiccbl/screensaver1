@@ -57,4 +57,16 @@ public class ParseError
   {
     return _atCell;
   }
+  
+  /**
+   * @motivation for unit testing
+   */
+  public boolean equals(Object o)
+  {
+    if (!(o instanceof ParseError)) {
+      return false;
+    }
+    ParseError that = (ParseError) o;
+    return this.toString().equals(that.toString());
+  }
 }

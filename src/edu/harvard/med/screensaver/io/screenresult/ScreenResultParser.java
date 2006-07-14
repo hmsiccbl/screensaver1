@@ -1,4 +1,4 @@
-  // $HeadURL$
+// $HeadURL$
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
@@ -26,6 +26,8 @@ import java.util.regex.Pattern;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.workbook.Cell;
+import edu.harvard.med.screensaver.io.workbook.CellValueParser;
+import edu.harvard.med.screensaver.io.workbook.CellVocabularyParser;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
@@ -57,9 +59,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * {@link edu.harvard.med.screensaver.model.screenresults.ResultValueType}
  * objects).
  * <p>
- * Instantiate a new <code>ScreenResultParser</code> for each screen result
- * file set that needs to be parsed (i.e., do not reuse the parser).
- * <p>
  * The class attempts to parse files as fully as possible, carrying on in the
  * face of errors, in order to catch as many errors as possible, as this will
  * aid the manual effort of correcting the files' format and content between
@@ -70,11 +69,13 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * <li> Data Header names, as defined in the metadata, match the actual Data
  * Header names in the data file. (TODO)
  * </ul>
+ * <p>
+ * Each call to {@link #parse} will clear the errors accumulated from the
+ * previous call.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-// TODO: make objects of this class reusable (i.e., multiple calls to parse())
 public class ScreenResultParser
 {
   
@@ -209,13 +210,11 @@ public class ScreenResultParser
         "spring-context-services.xml", 
       });
       ScreenResultParser screenResultParser = (ScreenResultParser) appCtx.getBean("screenResultParser");
-//      DAO dao = (DAO) appCtx.getBean("daoImpl");
       try {
         File metadataFileToParse = new File(cmdLine.getOptionValue("metadatafile"));
         cleanOutputDirectory(metadataFileToParse.getParentFile());
         ScreenResult screenResult = screenResultParser.parse(metadataFileToParse,
                                                              cmdLine.hasOption("ignorefilepaths" ));
-//        dao.persistEntity(screenResult);
         screenResultParser.outputErrorsInAnnotatedWorkbooks(ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
         if (cmdLine.hasOption("wellstoprint")) {
           new ScreenResultPrinter(screenResult).print(new Integer(cmdLine.getOptionValue("wellstoprint")));
@@ -262,39 +261,29 @@ public class ScreenResultParser
   
   // instance data members
 
-  private DAO _dao;
   /**
    * The ScreenResult object to be populated with data parsed from the spreadsheet.
    */
   private ScreenResult _screenResult;
-  private Workbook _metadataWorkbook;
-  
-  private SortedMap<String,ResultValueType> _columnsDerivedFromMap = new TreeMap<String,ResultValueType>();
-  private CellVocabularyParser<ResultValueType> _columnsDerivedFromParser = 
-    new CellVocabularyParser<ResultValueType>(_columnsDerivedFromMap);
-  private CellVocabularyParser<IndicatorDirection> indicatorDirectionParser = 
-    new CellVocabularyParser<IndicatorDirection>(indicatorDirectionMap);
-  private CellVocabularyParser<ActivityIndicatorType> _activityIndicatorTypeParser = 
-    new CellVocabularyParser<ActivityIndicatorType>(activityIndicatorTypeMap, ActivityIndicatorType.NUMERICAL);
-  private CellVocabularyParser<Boolean> _rawOrDerivedParser = 
-    new CellVocabularyParser<Boolean>(rawOrDerivedMap, Boolean.FALSE);
-  private CellVocabularyParser<Boolean> _primaryOrFollowUpParser = 
-    new CellVocabularyParser<Boolean>(primaryOrFollowUpMap, Boolean.FALSE);
-  private CellVocabularyParser<Boolean> _booleanParser = 
-    new CellVocabularyParser<Boolean>(booleanMap, Boolean.FALSE);
+  private ParseErrorManager _errors;
+  private SortedMap<String,ResultValueType> _columnsDerivedFromMap;
+
+  private CellVocabularyParser<ResultValueType> _columnsDerivedFromParser;
+  private CellVocabularyParser<IndicatorDirection> _indicatorDirectionParser;
+  private CellVocabularyParser<ActivityIndicatorType> _activityIndicatorTypeParser;
+  private CellVocabularyParser<Boolean> _rawOrDerivedParser;
+  private CellVocabularyParser<Boolean> _primaryOrFollowUpParser;
+  private CellVocabularyParser<Boolean> _booleanParser;
   private PlateNumberParser _plateNumberParser = new PlateNumberParser();
   private WellNameParser _wellNameParser = new WellNameParser();
-  private ParseErrorManager _errors = new ParseErrorManager();
+
+  private DAO _dao;
   private Factory _metadataCellParserFactory;
   private Factory _dataCellParserFactory;
   private Short _metadataFirstDataHeaderColumnIndex;
-  private int _nDataHeaders;
-  private Map<Integer,Short> _dataHeaderIndex2DataHeaderColumn = new HashMap<Integer,Short>();
-  private List<Workbook> _rawDataWorkbooks = new ArrayList<Workbook>();
+  private Map<Integer,Short> _dataHeaderIndex2DataHeaderColumn;
 
-  private boolean _parserUsed;
   
-
   // public methods and constructors
 
   public ScreenResultParser(DAO dao) 
@@ -325,32 +314,38 @@ public class ScreenResultParser
    *         worksheet.
    */
   public ScreenResult parse(
-    File metadataExcelFile,
+    File metadataWorkbookFile,
     boolean ignoreFilePaths)
   {
-    // hack to prevent same parse object from being reused
-    if (_parserUsed) {
-      throw new IllegalStateException("parser already invoked; please instantiate anew");
-    }
-    _parserUsed = true;
-    
+    _screenResult = null;
+    _errors = new ParseErrorManager();
+    _columnsDerivedFromMap = new TreeMap<String,ResultValueType>();
+    _columnsDerivedFromParser = new CellVocabularyParser<ResultValueType>(_columnsDerivedFromMap, _errors);
+    _indicatorDirectionParser = new CellVocabularyParser<IndicatorDirection>(indicatorDirectionMap, _errors);
+    _activityIndicatorTypeParser = new CellVocabularyParser<ActivityIndicatorType>(activityIndicatorTypeMap, ActivityIndicatorType.NUMERICAL, _errors);
+    _rawOrDerivedParser = new CellVocabularyParser<Boolean>(rawOrDerivedMap, Boolean.FALSE, _errors);
+    _primaryOrFollowUpParser = new CellVocabularyParser<Boolean>(primaryOrFollowUpMap, Boolean.FALSE, _errors);
+    _booleanParser = new CellVocabularyParser<Boolean>(booleanMap, Boolean.FALSE, _errors);
     try {
-      if (!metadataExcelFile.canRead()) {
-        throw new FileNotFoundException("metadata file '" + metadataExcelFile + "' cannot be read");
+      if (!metadataWorkbookFile.canRead()) {
+        throw new FileNotFoundException("metadata file '" + metadataWorkbookFile + "' cannot be read");
       }
-      _metadataWorkbook = new Workbook(metadataExcelFile, _errors);
-      log.info("parsing " + metadataExcelFile.getAbsolutePath());
-      parseMetadata(ignoreFilePaths);
-      for (Workbook rawDataWorkbook : _rawDataWorkbooks) {
+      Workbook metadataWorkbook = new Workbook(metadataWorkbookFile, _errors);
+      log.info("parsing " + metadataWorkbookFile.getAbsolutePath());
+      MetadataParseResult metadataParseResult = parseMetadata(metadataWorkbook, 
+                                                              ignoreFilePaths);
+      for (Workbook rawDataWorkbook : metadataParseResult.getRawDataWorkbooks()) {
         try {
           log.info("parsing " + rawDataWorkbook.getWorkbookFile().getAbsolutePath());
-          parseData(rawDataWorkbook);
+          parseData(rawDataWorkbook,
+                    metadataParseResult.getScreenResult());
         }
         catch (IOException e) {
           _errors.addError("raw data workbook file " + rawDataWorkbook.getWorkbookFile() + " cannot be read and will be ignored");
           throw e;
         }
       }
+      _screenResult = metadataParseResult.getScreenResult();
     }
     catch (UnrecoverableScreenResultParseException e) {
       _errors.addError("serious parse error encountered (could not continue further parsing): " + e.getMessage());
@@ -381,51 +376,73 @@ public class ScreenResultParser
     return _errors.getErrors();
   }
   
+  public ScreenResult getParsedScreenResult()
+  {
+    return _screenResult;
+  }
+  
 
   // private methods
 
   /**
    * Initialize the metadata worksheet and related data members.
    * 
-   * @throws UnrecoverableScreenResultParseException if metadata worksheet could not be
-   *           initialized or does not appear to be a valid metadata definition
+   * @throws UnrecoverableScreenResultParseException if metadata worksheet could
+   *           not be initialized or does not appear to be a valid metadata
+   *           definition
    */
-  private void initializeMetadataSheet() throws UnrecoverableScreenResultParseException
+  private HSSFSheet initializeMetadataSheet(Workbook metadataWorkbook)
+    throws UnrecoverableScreenResultParseException
   {
-    // TODO: find the sheet in a more reliable, flexible fashion
-    HSSFSheet metadataSheet = _metadataWorkbook.getWorkbook().getSheetAt(0);
-    
+    // TODO: don't assume the metadata sheet is the first one
+    HSSFSheet metadataSheet = metadataWorkbook.getWorkbook().getSheetAt(0);
+
     // at this point, we know we have a valid metadata workbook, to which we can
     // append errors
-    _errors.setErrorsWorbook(_metadataWorkbook);
-
-    // TODO: take action if verification fails
-    verifyStandardMetadataFormat(metadataSheet);
-
-    _metadataCellParserFactory = new Cell.Factory(_metadataWorkbook,
-                                                        0,
-                                                        _errors);
-
-    initializeFirstDataHeaderColumnIndex(metadataSheet);
+    _errors.setErrorsWorbook(metadataWorkbook);
+    _metadataCellParserFactory = new Cell.Factory(metadataWorkbook, 0, _errors);
+    _dataHeaderIndex2DataHeaderColumn = new HashMap<Integer,Short>();
+    _metadataFirstDataHeaderColumnIndex = findFirstDataHeaderColumnIndex(metadataSheet);
+    if (_metadataFirstDataHeaderColumnIndex == null) {
+      throw new UnrecoverableScreenResultParseException(METADATA_DATA_HEADER_COLUMNS_NOT_FOUND_ERROR,
+                                                        metadataWorkbook);
+    }
+    return metadataSheet;
   }
 
-  private void initializeFirstDataHeaderColumnIndex(HSSFSheet metadataSheet) throws UnrecoverableScreenResultParseException
+  /**
+   * Finds the index of the first data header column, initializing
+   * _metadataFirstDataHeaderColumnIndex.
+   * 
+   * @param metadataSheet
+   * @throws UnrecoverableScreenResultParseException
+   */
+  private Short findFirstDataHeaderColumnIndex(HSSFSheet metadataSheet) throws UnrecoverableScreenResultParseException
   {
+    Short metadataFirstDataHeaderColumnIndex = null;
     int row = MetadataRow.COLUMN_TYPE.ordinal() + METADATA_FIRST_DATA_ROW_INDEX;
     int metadataLastDataHeaderColumnIndex = metadataSheet.getRow(row).getLastCellNum();
     for (short iCol = 0; iCol < metadataLastDataHeaderColumnIndex; ++iCol) {
       Cell cell = _metadataCellParserFactory.getCell(iCol, row);
       String dataType = cell.getString();
       if (dataType != null && dataType.equalsIgnoreCase("data")) {
-        _metadataFirstDataHeaderColumnIndex = new Short(iCol);
+        metadataFirstDataHeaderColumnIndex = new Short(iCol);
         break;
       }
     }
-    if (_metadataFirstDataHeaderColumnIndex == null) {
-      throw new UnrecoverableScreenResultParseException(METADATA_DATA_HEADER_COLUMNS_NOT_FOUND_ERROR,
-                                                        _metadataWorkbook);
-    }
-
+    return metadataFirstDataHeaderColumnIndex;
+  }
+  
+  /**
+   * Finds the total number of data header columns.
+   * 
+   * @param metadataSheet
+   * @throws UnrecoverableScreenResultParseException
+   */
+  private int findDataHeaderColumnCount(HSSFSheet metadataSheet) throws UnrecoverableScreenResultParseException
+  {
+    int row = MetadataRow.COLUMN_TYPE.ordinal() + METADATA_FIRST_DATA_ROW_INDEX;
+    int metadataLastDataHeaderColumnIndex = metadataSheet.getRow(row).getLastCellNum();
     for (short iCol = _metadataFirstDataHeaderColumnIndex; iCol <= metadataLastDataHeaderColumnIndex; ++iCol) {
       Cell cell = _metadataCellParserFactory.getCell(iCol, row);
       String dataType = cell.getString();
@@ -441,20 +458,17 @@ public class ScreenResultParser
         break;
       }
     }
-    _nDataHeaders = (metadataLastDataHeaderColumnIndex - _metadataFirstDataHeaderColumnIndex) + 1;
+    return (metadataLastDataHeaderColumnIndex - _metadataFirstDataHeaderColumnIndex) + 1;
   }
-  
+
   private HSSFSheet initializeDataSheet(Workbook workbook, int sheetIndex)
   {
     // TODO: find the sheet in a more reliable, flexible fashion
     HSSFSheet dataSheet = workbook.getWorkbook().getSheetAt(sheetIndex);
 
-    // TODO: take action if verification fails
-    //verifyStandardDataFormat(metadataSheet);
-
     _dataCellParserFactory = new Cell.Factory(workbook,
-                                                    sheetIndex,
-                                                    _errors);  
+                                              sheetIndex,
+                                              _errors);  
     return dataSheet;
   }
 
@@ -462,8 +476,8 @@ public class ScreenResultParser
   private Cell metadataCell(MetadataRow row, int dataHeader, boolean isRequired) 
   {
     return _metadataCellParserFactory.getCell((short) (_metadataFirstDataHeaderColumnIndex + dataHeader),
-                                                    (METADATA_FIRST_DATA_ROW_INDEX + row.ordinal()),
-                                                    isRequired);
+                                              (METADATA_FIRST_DATA_ROW_INDEX + row.ordinal()),
+                                              isRequired);
   }
   
   private Cell metadataCell(MetadataRow row, int dataHeader)
@@ -484,24 +498,55 @@ public class ScreenResultParser
   private Cell dataCell(int row, int iDataHeader)
   {
     return _dataCellParserFactory.getCell((short) (_dataHeaderIndex2DataHeaderColumn.get(iDataHeader)),
-                                                row);
+                                          row);
   }
                                         
   
+  private static class MetadataParseResult
+  {
+    private ScreenResult _screenResult;
+    private ArrayList<Workbook> _rawDataWorkbooks;
+
+    public ArrayList<Workbook> getRawDataWorkbooks()
+    {
+      return _rawDataWorkbooks;
+    }
+
+    public void setRawDataWorkbooks(ArrayList<Workbook> rawDataWorkbooks)
+    {
+      _rawDataWorkbooks = rawDataWorkbooks;
+    }
+
+    public ScreenResult getScreenResult()
+    {
+      return _screenResult;
+    }
+
+    public void setScreenResult(ScreenResult screenResult)
+    {
+      _screenResult = screenResult;
+    }
+  }
+  
   /**
    * Parse the workbook containing the ScreenResult metadata
+   * @param metadataWorkbook
    * @param ignoreFilePaths
    * @throws UnrecoverableScreenResultParseException 
    */
-  private void parseMetadata(boolean ignoreFilePaths) throws UnrecoverableScreenResultParseException 
+  private MetadataParseResult parseMetadata(Workbook metadataWorkbook, boolean ignoreFilePaths) throws UnrecoverableScreenResultParseException 
   {
-    initializeMetadataSheet();
-    parseRawDataWorkbookFilenames(ignoreFilePaths);
-    parseMetaMetadata();
-    for (int iDataHeader = 0; iDataHeader < _nDataHeaders; ++iDataHeader) {
+    MetadataParseResult metadataParseResult = new MetadataParseResult();
+    HSSFSheet metadataSheet = initializeMetadataSheet(metadataWorkbook);
+    metadataParseResult.setRawDataWorkbooks(parseRawDataWorkbookFilenames(metadataWorkbook,
+                                                                          ignoreFilePaths));
+    Date screenResultDate = parseMetaMetadata(metadataWorkbook);
+    metadataParseResult.setScreenResult(new ScreenResult(screenResultDate));
+    int dataHeaderCount = findDataHeaderColumnCount(metadataSheet);
+    for (int iDataHeader = 0; iDataHeader < dataHeaderCount; ++iDataHeader) {
       recordDataHeaderColumn(iDataHeader);
       ResultValueType rvt = 
-        new ResultValueType(_screenResult,
+        new ResultValueType(metadataParseResult.getScreenResult(),
                             metadataCell(MetadataRow.NAME, iDataHeader, true).getString(),
                             metadataCell(MetadataRow.REPLICATE, iDataHeader).getInteger(),
                             _rawOrDerivedParser.parse(metadataCell(MetadataRow.RAW_OR_DERIVED, iDataHeader)),
@@ -524,18 +569,20 @@ public class ScreenResultParser
       if (rvt.isActivityIndicator()) {
         rvt.setActivityIndicatorType(_activityIndicatorTypeParser.parse(metadataCell(MetadataRow.ACTIVITY_INDICATOR_TYPE, iDataHeader, true)));
         if (rvt.getActivityIndicatorType().equals(ActivityIndicatorType.NUMERICAL)) {
-          rvt.setIndicatorDirection(indicatorDirectionParser.parse(metadataCell(MetadataRow.INDICATOR_DIRECTION, iDataHeader, true)));
+          rvt.setIndicatorDirection(_indicatorDirectionParser.parse(metadataCell(MetadataRow.INDICATOR_DIRECTION, iDataHeader, true)));
           rvt.setIndicatorCutoff(metadataCell(MetadataRow.INDICATOR_CUTOFF, iDataHeader, true).getDouble());
         }
         // TODO: should warn if these values *are* defined and !isActivityIndicator()
       }
       rvt.setComments(metadataCell(MetadataRow.COMMENTS, iDataHeader).getString());
     }
+    return metadataParseResult;
   }
 
-  private void parseRawDataWorkbookFilenames(boolean ignoreFilePaths)
+  private ArrayList<Workbook> parseRawDataWorkbookFilenames(Workbook metadataWorkbook, boolean ignoreFilePaths)
     throws UnrecoverableScreenResultParseException
   {
+    ArrayList<Workbook> rawDataWorkbooksResult = new ArrayList<Workbook>();
     Cell cell = _metadataCellParserFactory.getCell(METADATA_FILENAMES_CELL_COLUMN_INDEX,
                                                    METADATA_FILENAMES_CELL_ROW_INDEX,
                                                    true);
@@ -550,24 +597,31 @@ public class ScreenResultParser
       File rawDataWorkbookFile = new File(fileNamesArray[i]);
       if (ignoreFilePaths && rawDataWorkbookFile.isAbsolute()) {
         log.info("ignoring absolute file path for raw data file (assuming it is in same directory as metadata file)");
-        rawDataWorkbookFile = makeRawDataFileInMetadataFileDirectory(rawDataWorkbookFile);
+        rawDataWorkbookFile = 
+          makeRawDataFileInMetadataFileDirectory(rawDataWorkbookFile,
+                                                 metadataWorkbook.getWorkbookFile());
       } 
       else if (!rawDataWorkbookFile.isAbsolute()) {
-        rawDataWorkbookFile = makeRawDataFileInMetadataFileDirectory(rawDataWorkbookFile);
+        rawDataWorkbookFile = 
+          makeRawDataFileInMetadataFileDirectory(rawDataWorkbookFile,
+                                                 metadataWorkbook.getWorkbookFile());
       }
-      _rawDataWorkbooks.add(new Workbook(rawDataWorkbookFile, _errors));
+      rawDataWorkbooksResult.add(new Workbook(rawDataWorkbookFile, _errors));
     }
+    return rawDataWorkbooksResult;
   }
 
-  private File makeRawDataFileInMetadataFileDirectory(File rawDataWorkbookFile)
+  private File makeRawDataFileInMetadataFileDirectory(File rawDataWorkbookFile, File metadataWorkbookFile)
   {
-    rawDataWorkbookFile = new File(_metadataWorkbook.getWorkbookFile().getParent(),
-                            rawDataWorkbookFile.getName());
+    rawDataWorkbookFile = new File(metadataWorkbookFile.getParent(),
+                                   rawDataWorkbookFile.getName());
     return rawDataWorkbookFile;
   }
 
   private void recordDataHeaderColumn(int iDataHeader)
   {
+    assert _dataHeaderIndex2DataHeaderColumn != null :
+      "uninitialized _dataHeaderIndex2DataHeaderColumn";
     String forColumnInRawDataWorksheet = metadataCell(MetadataRow.COLUMN_IN_TEMPLATE, iDataHeader, true).getString();
     if (forColumnInRawDataWorksheet != null) {
       _dataHeaderIndex2DataHeaderColumn.put(iDataHeader,
@@ -584,7 +638,10 @@ public class ScreenResultParser
    *           in the database
    * @throws IOException 
    */
-  private void parseData(Workbook workbook) throws ExtantLibraryException, IOException
+  private void parseData(
+    Workbook workbook,
+    ScreenResult screenResult) 
+    throws ExtantLibraryException, IOException
   {
     for (int iSheet = 0; iSheet < workbook.getWorkbook().getNumberOfSheets(); ++iSheet) {
       HSSFSheet sheet = initializeDataSheet(workbook, iSheet);
@@ -595,7 +652,7 @@ public class ScreenResultParser
         boolean excludeWell = _booleanParser.parse(dataCell(iRow,
                                                             DataColumn.EXCLUDE));
         int iDataHeader = 0;
-        for (ResultValueType rvt : _screenResult.getResultValueTypes()) {
+        for (ResultValueType rvt : screenResult.getResultValueTypes()) {
           Cell cell = dataCell(iRow, iDataHeader);
           Object value = !rvt.isActivityIndicator()
               ? cell.getAsString()
@@ -636,30 +693,20 @@ public class ScreenResultParser
   }
 
   /**
-   * Returns <code>true</code> iff the specified worksheet "looks like" it
-   * contains a valid metadata structure. It could be wrong.
-   * 
-   * @param sheet the sheet to verify
-   * @return <code>true</code> iff the specified worksheet "looks like" it
-   *         contains a valid metadata structure
-   */
-  private boolean verifyStandardMetadataFormat(HSSFSheet sheet) {
-    // TODO: implement
-    return true;
-  }
-
-  /**
    * Parses the "meta" worksheet. Yes, we actually have a tab called "meta" in a
    * workbook file that itself contains metadata for our ScreenResult metadata;
    * thus the double-meta prefix. Life is complex.
+   * <p>
+   * For now, we just parse the ScreenResult date, but if we ever need to parse
+   * more, we should return a composite object, rather than just a Date.
    */
-  private void parseMetaMetadata()
+  private Date parseMetaMetadata(Workbook metadataWorkbook)
   {
     Date date = null;
-    int metaMetaSheetIndex = _metadataWorkbook.findSheetIndex(METADATA_META_SHEET_NAME);
-    HSSFSheet metametaSheet = _metadataWorkbook.getWorkbook()
+    int metaMetaSheetIndex = metadataWorkbook.findSheetIndex(METADATA_META_SHEET_NAME);
+    HSSFSheet metametaSheet = metadataWorkbook.getWorkbook()
                                                .getSheetAt(metaMetaSheetIndex);
-    Cell.Factory factory = new Cell.Factory(_metadataWorkbook,
+    Cell.Factory factory = new Cell.Factory(metadataWorkbook,
                                             metaMetaSheetIndex,
                                             _errors);
     if (metametaSheet != null) {
@@ -676,135 +723,7 @@ public class ScreenResultParser
       _errors.addError(NO_CREATED_DATE_FOUND_ERROR);
       date = new Date();
     }
-    _screenResult = new ScreenResult(date);
-  }
-  
-  /**
-   * Interface for the various cell parsers used by the
-   * {@link ScreenResultParser} class. Cell parsers read the value from a cell
-   * and convert to a more strictly typed object, for use within our entity
-   * model. (This interface is probably a case of over-engineering.)
-   * 
-   * @author ant
-   */
-  public interface CellValueParser<T>
-  {
-    /**
-     * Parse the value in a cell, returning <T>
-     * @param cell the cell to be parsed
-     * @return a <T>, representing the value of the cell
-     */
-    T parse(Cell cell);
-    
-    List<T> parseList(Cell cell);
-  }
-
-  /**
-   * Parses the value of a cell, mapping a text value to an internal, system
-   * object representation. Handles single-valued cells as well as cells that
-   * contain lists of values. Note that this class is a non-static inner class
-   * and references instance methods of {@link ScreenResultParser}.
-   */
-  public class CellVocabularyParser<T> implements CellValueParser<T>
-  {
-    // TODO: class methods needs javadocs
-    
-    // static data members
-    
-    private static final String DEFAULT_ERROR_MESSAGE = "unparseable value";
-    private static final String DEFAULT_DELIMITER_REGEX = ",";
-
-    
-    // instance data members
-    
-    private SortedMap<String,T> _parsedValue2SystemValue;
-    private T _valueToReturnIfUnparseable = null;
-    private String _delimiterRegex = ",";
-    private String _errorMessage;
-    
-    
-    // constructors
-
-    public CellVocabularyParser(SortedMap<String,T> parsedValue2SystemValue) 
-    {
-      this(parsedValue2SystemValue,
-           null,
-           DEFAULT_ERROR_MESSAGE,
-           DEFAULT_DELIMITER_REGEX);
-    }
-                           
-    public CellVocabularyParser(SortedMap<String,T> parsedValue2SystemValue,
-                                T valueToReturnIfUnparseable)
-    {
-      this(parsedValue2SystemValue,
-           valueToReturnIfUnparseable,
-           DEFAULT_ERROR_MESSAGE,
-           DEFAULT_DELIMITER_REGEX);
-    }
-    
-    public CellVocabularyParser(SortedMap<String,T> parsedValue2SystemValue,
-                                T valueToReturnIfUnparseable,
-                                String errorMessage)
-    {
-      this(parsedValue2SystemValue,
-           valueToReturnIfUnparseable,
-           errorMessage,
-           DEFAULT_DELIMITER_REGEX);
-    }
-    
-    public CellVocabularyParser(SortedMap<String,T> parsedValue2SystemValue,
-                                T valueToReturnIfUnparseable,
-                                String errorMessage,
-                                String delimiterRegex)
-    {
-      _parsedValue2SystemValue = parsedValue2SystemValue;
-      _valueToReturnIfUnparseable = valueToReturnIfUnparseable;
-      _errorMessage = errorMessage;
-      _delimiterRegex = delimiterRegex;
-    }
-    
-    
-    // public methods
-
-    public T parse(Cell cell) 
-    {
-      return doParse(cell.getString(), cell);
-    }
-
-    public List<T> parseList(Cell cell) {
-      List<T> result = new ArrayList<T>();
-      String textMultiValue = cell.getString();
-      if (textMultiValue == null) {
-        return result;
-      }
-      String[] textValues = textMultiValue.split(_delimiterRegex);
-      for (int i = 0; i < textValues.length; i++) {
-        String text = textValues[i];
-        result.add(doParse(text, cell));
-      }
-      return result;
-    }
-    
-
-    // private methods
-
-    private T doParse(String text, Cell cell)
-    {
-      if (text == null) {
-        return _valueToReturnIfUnparseable;
-      }
-      text = text.toLowerCase().trim();
-      for (Iterator iter = _parsedValue2SystemValue.keySet()
-                                                   .iterator(); iter.hasNext();) {
-        String pattern = (String) iter.next();
-        if (pattern.equalsIgnoreCase(text)) {
-          return _parsedValue2SystemValue.get(pattern);
-        }
-      }
-      _errors.addError(_errorMessage + " \"" + text + "\" (expected one of " + _parsedValue2SystemValue.keySet() + ")", cell);
-      return _valueToReturnIfUnparseable;
-    }
-
+    return date;
   }
   
   /**

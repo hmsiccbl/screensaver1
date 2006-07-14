@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.io;
+package edu.harvard.med.screensaver.io.screenresultparser;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +50,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
   protected ScreenResultParser screenResultParser;
 
   protected void onSetUp() throws Exception {}
-
   protected void onTearDown() throws Exception {
     // TODO: delete *.error.xls files
   }
@@ -103,7 +102,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
   public void testParseScreenResult() throws Exception
   {
-    ScreenResult screenResult = screenResultParser.parse(new File("test/edu/harvard/med/screensaver/io/258MetaData.xls"));
+    ScreenResult screenResult = screenResultParser.parse(new File("test/edu/harvard/med/screensaver/io/screenresultparser/258MetaData.xls"));
     assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
 
     Calendar expectedDate = Calendar.getInstance();
@@ -269,7 +268,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testReadMultiWorkbookMultiWorksheet()
   {
-    ScreenResult screenResult = screenResultParser.parse(new File("test/edu/harvard/med/screensaver/io/464MetaData.xls"));
+    ScreenResult screenResult = screenResultParser.parse(new File("test/edu/harvard/med/screensaver/io/screenresultparser/464MetaData.xls"));
     assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
     Integer[] expectedPlateNumbers = { 1409, 1410, 1369, 1370, 1371, 1453, 1454 };
     Set<Integer> expectedPlateNumbersSet = new HashSet<Integer>(Arrays.asList(expectedPlateNumbers));
@@ -293,7 +292,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testSaveScreenResultErrors() throws IOException
   {
-    File workbookFile = new File("test/edu/harvard/med/screensaver/io/metadata_with_errors.xls");
+    File workbookFile = new File("test/edu/harvard/med/screensaver/io/screenresultparser/metadata_with_errors.xls");
     screenResultParser.parse(workbookFile);
     String extension = "errors.xls";
     Set<Workbook> errorAnnotatedWorkbookFiles = screenResultParser.outputErrorsInAnnotatedWorkbooks(extension);
@@ -318,7 +317,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
         assertEquals("Parse Errors",
                      workbook.getWorkbook().getSheetName(3));
         assertTrue(HSSFCellUtil.getCell(sheet3.getRow(0),'A' - 'A').getStringCellValue().
-                   matches("could not read workbook '.*': test/edu/harvard/med/screensaver/io/nonextant\\.xls \\(No such file or directory\\)"));
+                   matches("could not read workbook '.*': test/edu/harvard/med/screensaver/io/screenresultparser/nonextant\\.xls \\(No such file or directory\\)"));
         
       }
       else if (workbook.getWorkbookFile().getName().equals("rawdata_with_errors.xls")) {
@@ -344,7 +343,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testRecycledCellUsage() 
   {
-    File workbookFile = new File("test/edu/harvard/med/screensaver/io/metadata_with_errors.xls");
+    File workbookFile = new File("test/edu/harvard/med/screensaver/io/screenresultparser/metadata_with_errors.xls");
     screenResultParser.parse(workbookFile);
     Set<Cell> cellsWithErrors = new HashSet<Cell>();
     List<ParseError> errors = screenResultParser.getErrors();
@@ -354,6 +353,32 @@ public class ScreenResultParserTest extends AbstractSpringTest
       cellsWithErrors.add(error.getCell());
     }
   }
+  
+  /*
+   * In fact, Spring provides us with the same parser instance for each test
+   * (singleton="true"), but good to have an explicit test for parser reuse in
+   * case this assumption changes.
+   */
+  public void testParserReuse() throws Exception
+  {
+    File workbookFile = new File("test/edu/harvard/med/screensaver/io/screenresultparser/metadata_with_errors.xls");
+    ScreenResult result1 = screenResultParser.parse(workbookFile);
+    List<ParseError> errors1 = screenResultParser.getErrors();
+    ScreenResult result2 = screenResultParser.parse(workbookFile);
+    List<ParseError> errors2 = screenResultParser.getErrors();
+    assertNotNull("2nd parse returned a result", result2);
+    assertNotSame("parses returned different ScreenResult objects", result1, result2);
+    assertTrue(errors1.size() > 0);
+    assertTrue(errors2.size() > 0);
+    assertEquals("errors not accumulating across multiple parse() calls", errors1, errors2);
+    // allow GC
+    result1 = null;
+    result2 = null;
+    System.gc();
+
+    // now test reading yet another spreadsheet, for which we can test the parsed result
+    testParseScreenResult();
+   }
     
   private void setDefaultValues(ResultValueType rvt) 
   {
