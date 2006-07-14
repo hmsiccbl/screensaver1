@@ -92,7 +92,7 @@
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>screenResultViewer</property-name>
-      <value>#{screenResultViewer}</value>
+      <value>#{ScreenResultViewer}</value>
     </managed-property>
     <managed-property>
       <property-name>screenResultParser</property-name>

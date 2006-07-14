@@ -52,6 +52,10 @@ public class Cell
   private short _column;
   private int _row;
   private boolean _required;
+  /**
+   * Used to build formatted cell strings.
+   */
+  private StringBuilder _formattedRowAndColumnBuilder = new StringBuilder("(A,1)");
   
   // inner class definitions
   
@@ -165,6 +169,14 @@ public class Cell
    */
   public int getRow() { return _row; }
   
+  public String getFormattedRowAndColumn()
+  {
+    // TODO: only handles A-Z, not AA...
+    _formattedRowAndColumnBuilder.replace(1, 2, Character.toString((char) (_column + 'A')));
+    _formattedRowAndColumnBuilder.replace(3, 4, Integer.toString(_row + 1));
+    return _formattedRowAndColumnBuilder.toString();
+  }
+  
   public boolean isRequired() { return _required; }
   
   /**
@@ -172,9 +184,8 @@ public class Cell
    * @return a <code>String</code>
    */
   public String toString() {
-    // TODO: only handles A-Z, not AA...
     return _workbook.getWorkbookFile().getName() + ":" + getSheetName() + 
-      ":(" + Character.toString((char) (_column + 'A')) + ", " + (_row + 1) + ")";
+      ":" + getFormattedRowAndColumn();
   }
   
   /**

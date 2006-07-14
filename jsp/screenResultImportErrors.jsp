@@ -10,7 +10,7 @@
 
     <h:panelGroup>
       <h:commandButton id="doneCommand" immediate="true" action="#{ScreenResultImporter.done}" value="Done" styleClass="command" />
-      <h:commandButton id="downloadCommand" action="#{ScreenResultImporter.downloadErrorAnnotatedWorkbook}" value="Download Error-Annotated Workbook" styleClass="command" />
+      <h:commandButton id="downloadCommand" actionListener="#{ScreenResultImporter.downloadErrorAnnotatedWorkbookListener}" value="Download Error-Annotated Workbook" styleClass="command" />
     </h:panelGroup>
 
   </h:form>
@@ -27,24 +27,22 @@
 
     <h:form id="errorsTableForm">
 
-      <h:outputText styleClass="sectionHeader">
-        Import errors for <h:outputText value="#{ScreenResultImporter.uploadedFile.name}"/>
-      </h:outputText>
+      <h:outputText value="Import Errors for #{ScreenResultImporter.uploadedFile.name}" styleClass="sectionHeader"/>
 
-      <t:dataTable id="importErrorsTable" value="#{ScreenResultImporter.importErrors}" var="row" styleClass="standardTable" headerClass="" rowClasses="row1,row2" columnClasses="">
-        <t:column>
+      <t:dataTable id="importErrorsTable" value="#{ScreenResultImporter.importErrors}" var="row" styleClass="standardTable" headerClass="tableHeader" rowClasses="row1,row2" columnClasses="">
+        <t:column styleClass="column">
           <f:facet name="header">
             <h:outputText value="Worksheet" />
           </f:facet>
           <h:outputText value="#{row.cell.sheetName}" />
         </t:column>
-        <t:column>
+        <t:column styleClass="column">
           <f:facet name="header">
             <h:outputText value="Cell" />
           </f:facet>
-          <h:outputText value="#{row.cell.column}" />
+          <h:outputText value="#{row.cell.formattedRowAndColumn}" />
         </t:column>
-        <t:column>
+        <t:column styleClass="column">
           <f:facet name="header">
             <h:outputText value="Error" />
           </f:facet>

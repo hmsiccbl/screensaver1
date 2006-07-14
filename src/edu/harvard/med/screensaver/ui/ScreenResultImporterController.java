@@ -10,13 +10,21 @@
 package edu.harvard.med.screensaver.ui;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Set;
 
+import javax.faces.context.FacesContext;
+import javax.faces.event.ActionEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
+import javax.servlet.http.HttpServletResponse;
 
 import edu.harvard.med.screensaver.io.screenresult.ScreenResultParser;
+import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.apache.commons.io.IOUtils;
@@ -31,6 +39,11 @@ import org.apache.myfaces.custom.fileupload.UploadedFile;
 public class ScreenResultImporterController
 {
 
+  // static data
+  
+  private static final String ERRORS_XLS_FILE_EXTENSION = ".errors.xls";
+
+  
   // instance data
 
   private ScreenResultParser _screenResultParser;
@@ -118,11 +131,34 @@ public class ScreenResultImporterController
       throw new RuntimeException("IOException during parse of uploaded file: " + e.getMessage());
     }
   }
+  
+  
+  // JSF event handlers
 
-  public String downloadErrorAnnotatedWorkbook()
+  public void downloadErrorAnnotatedWorkbookListener(ActionEvent event)
   {
-    // TODO: implement
-    return "";
+    try {
+      Set<Workbook> workbooks = _screenResultParser.outputErrorsInAnnotatedWorkbooks(ERRORS_XLS_FILE_EXTENSION);
+      if (workbooks.size() != 1) {
+        // TODO: output error message
+        // should always be exactly 1, because we only accept all-in-one screen
+        // result workbooks and we shouldn't be on this web page if no import
+        // errors occurred
+        return;
+      }
+      HttpServletResponse response = (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext().getResponse();
+      response.setContentType("application/vnd.ms-excel");
+      InputStream in = new FileInputStream(new File(workbooks.iterator().next().getWorkbookFile().getPath() + ERRORS_XLS_FILE_EXTENSION));
+      OutputStream out = response.getOutputStream();
+      IOUtils.copy(in, out);
+      out.close();
+      // skip Render-Response JSF lifecycle phase, since we're generating a non-Faces response
+      FacesContext.getCurrentInstance().responseComplete();
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+      // TODO
+    }
   }
 
 }

@@ -54,14 +54,14 @@
           <f:verbatim>)</f:verbatim>
         </h:panelGroup>
 
-        <t:dataTable id="metadataTable" value="#{ScreenResultViewer.metadata}" var="row" border="1" rendered="#{ScreenResultViewer.showMetadataTable}" styleClass="standardTable" headerClass="" rowClasses="row1,row2" columnClasses="">
+        <t:dataTable id="metadataTable" value="#{ScreenResultViewer.metadata}" var="row" rendered="#{ScreenResultViewer.showMetadataTable}" styleClass="standardTable" headerClass="" rowClasses="row1,row2" columnClasses="">
           <t:column styleClass="keyColumn">
             <f:facet name="header">
               <h:outputText value="Property" />
             </f:facet>
             <h:outputText value="#{row.rowLabel}" />
           </t:column>
-          <t:columns value="#{ScreenResultViewer.dataHeaderColumnModel}" var="columnName">
+          <t:columns value="#{ScreenResultViewer.dataHeaderColumnModel}" var="columnName" styleClass="column">
             <f:facet name="header">
               <h:outputText value="#{columnName}" />
             </f:facet>
@@ -80,7 +80,7 @@
           <f:verbatim>)</f:verbatim>
         </h:panelGroup>
 
-        <t:dataTable id="rawDataTable" binding="#{ScreenResultViewer.dataTable}" value="#{ScreenResultViewer.rawData}" var="row" rows="10" border="1" rendered="#{ScreenResultViewer.showRawDataTable}" styleClass="standardTable" headerClass="" rowClasses="row1,row2" columnClasses="" >
+        <t:dataTable id="rawDataTable" binding="#{ScreenResultViewer.dataTable}" value="#{ScreenResultViewer.rawData}" var="row" rows="10" rendered="#{ScreenResultViewer.showRawDataTable}" styleClass="standardTable" headerClass="" rowClasses="row1,row2" columnClasses="" >
           <t:column styleClass="keyColumn">
             <f:facet name="header">
               <h:outputText value="Plate"/>
@@ -97,7 +97,7 @@
               <h:outputText value="#{row.well.wellName}" />
             </h:commandLink>
           </t:column>
-          <t:columns value="#{ScreenResultViewer.dataHeaderColumnModel}" var="columnName">
+          <t:columns value="#{ScreenResultViewer.dataHeaderColumnModel}" var="columnName" styleClass="column">
             <f:facet name="header">
               <h:outputText value="#{columnName}" />
             </f:facet>

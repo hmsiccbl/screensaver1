@@ -10,7 +10,13 @@ h1 {
   font-size: 24px;
 }
 
-h2,.sectionHeader {
+h2 {
+  font-weight: bold;
+  font-variant: small-caps;
+  font-size: 16px;
+}
+
+.sectionHeader {
   font-weight: bold;
   font-variant: small-caps;
   font-size: 16px;
@@ -45,10 +51,11 @@ hr {
   padding: 1;
   border-style: solid;
   border-width: 1px;
-  empty-cells: show;
+  border-color: gray;
+  border-collapse: collapse;
 }
 
-.command, .input {
+.command,.input {
   margin-right: 4px;
 }
 
@@ -56,14 +63,26 @@ hr {
   font-weight: bold;
 }
 
-.row1 {
-  background-color: aqua;
+.column {
+  border-left-width: 10px;
+  border-color: white;
+}
+
+.tableHeader {
+  background-color: #00ffff;
+}
+
+.row1,.row2 {
   font-family: monospace;
   font-size: 10px;
+  border-top: none;
+  border-bottom: none;
+}
+
+.row1 {
+  background-color: #ffffff;
 }
 
 .row2 {
-  background-color: white;
-  font-family: monospace;
-  font-size: 10px;
+  background-color: #eeeeee
 }

@@ -96,13 +96,14 @@ public class ScreenResultParser
 {
   
   // static data members
-  
+
   private static final String ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION = "errors.xls";
 
   private static final Logger log = Logger.getLogger(ScreenResultParser.class);
   
   private static final String FIRST_DATE_SCREENED = "First Date Screened";
   private static final String METADATA_META_SHEET_NAME = "meta";
+  private static final String DATA_HEADER_COLUMN_TYPE = "data";
 
   // TODO: move these a messages (Spring) resource file
   private static final String NO_METADATA_META_SHEET_ERROR = "worksheet could not be found";
@@ -439,8 +440,8 @@ public class ScreenResultParser
     int metadataLastDataHeaderColumnIndex = metadataSheet.getRow(row).getLastCellNum();
     for (short iCol = 0; iCol < metadataLastDataHeaderColumnIndex; ++iCol) {
       Cell cell = _metadataCellParserFactory.getCell(iCol, row);
-      String dataType = cell.getString();
-      if (dataType != null && dataType.equalsIgnoreCase("data")) {
+      String columnType = cell.getString();
+      if (columnType != null && columnType.equalsIgnoreCase(DATA_HEADER_COLUMN_TYPE)) {
         metadataFirstDataHeaderColumnIndex = new Short(iCol);
         break;
       }
@@ -461,7 +462,7 @@ public class ScreenResultParser
     for (short iCol = _metadataFirstDataHeaderColumnIndex; iCol <= metadataLastDataHeaderColumnIndex; ++iCol) {
       Cell cell = _metadataCellParserFactory.getCell(iCol, row);
       String dataType = cell.getString();
-      if (dataType != null && !dataType.equalsIgnoreCase("data")) {
+      if (dataType != null && !dataType.equalsIgnoreCase(DATA_HEADER_COLUMN_TYPE)) {
         _errors.addError(METADATA_UNEXPECTED_COLUMN_TYPE_ERROR, cell);
         metadataLastDataHeaderColumnIndex = (short) (iCol - 1);
         break;
@@ -764,8 +765,9 @@ public class ScreenResultParser
    * containing errors are written. In fact, we simply save the workbooks, since
    * cells have already been modified in the in-memory representation.
    * 
-   * @return a set of the error-annotated <@link Workbook>s that were written
-   *         out
+   * @return a set of the <@link Workbook>s for which error-annotate workbooks
+   *         (copies) were written out; the returned Workbooks will <i>not</i>
+   *         have the <code>savedFileExtension</code> append to their filenames
    * @throws IOException
    */
   public Set<Workbook> outputErrorsInAnnotatedWorkbooks(String savedFileExtension) throws IOException
