@@ -47,6 +47,8 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 public class ScreenResultParserTest extends AbstractSpringTest
 {
 
+  private static final File TEST_INPUT_FILE_DIR = new File("test/edu/harvard/med/screensaver/io/screenresultparser");
+  
   protected ScreenResultParser screenResultParser;
 
   protected void onSetUp() throws Exception {}
@@ -102,7 +104,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
   public void testParseScreenResult() throws Exception
   {
-    ScreenResult screenResult = screenResultParser.parse(new File("test/edu/harvard/med/screensaver/io/screenresultparser/258MetaData.xls"));
+    ScreenResult screenResult = screenResultParser.parse(new File(TEST_INPUT_FILE_DIR, "258MetaData.xls"));
     assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
 
     Calendar expectedDate = Calendar.getInstance();
@@ -268,7 +270,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testReadMultiWorkbookMultiWorksheet()
   {
-    ScreenResult screenResult = screenResultParser.parse(new File("test/edu/harvard/med/screensaver/io/screenresultparser/464MetaData.xls"));
+    ScreenResult screenResult = screenResultParser.parse(new File(TEST_INPUT_FILE_DIR, "464MetaData.xls"));
     assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
     Integer[] expectedPlateNumbers = { 1409, 1410, 1369, 1370, 1371, 1453, 1454 };
     Set<Integer> expectedPlateNumbersSet = new HashSet<Integer>(Arrays.asList(expectedPlateNumbers));
@@ -292,7 +294,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testSaveScreenResultErrors() throws IOException
   {
-    File workbookFile = new File("test/edu/harvard/med/screensaver/io/screenresultparser/metadata_with_errors.xls");
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, "metadata_with_errors.xls");
     screenResultParser.parse(workbookFile);
     String extension = "errors.xls";
     Set<Workbook> errorAnnotatedWorkbookFiles = screenResultParser.outputErrorsInAnnotatedWorkbooks(extension);
@@ -343,7 +345,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testRecycledCellUsage() 
   {
-    File workbookFile = new File("test/edu/harvard/med/screensaver/io/screenresultparser/metadata_with_errors.xls");
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, "metadata_with_errors.xls");
     screenResultParser.parse(workbookFile);
     Set<Cell> cellsWithErrors = new HashSet<Cell>();
     List<ParseError> errors = screenResultParser.getErrors();
@@ -361,7 +363,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testParserReuse() throws Exception
   {
-    File workbookFile = new File("test/edu/harvard/med/screensaver/io/screenresultparser/metadata_with_errors.xls");
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, "metadata_with_errors.xls");
     ScreenResult result1 = screenResultParser.parse(workbookFile);
     List<ParseError> errors1 = screenResultParser.getErrors();
     ScreenResult result2 = screenResultParser.parse(workbookFile);
@@ -379,6 +381,88 @@ public class ScreenResultParserTest extends AbstractSpringTest
     // now test reading yet another spreadsheet, for which we can test the parsed result
     testParseScreenResult();
    }
+  
+  public void testAllInOne() throws Exception
+  {
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, "all-in-one.xls");
+    ScreenResult screenResult = screenResultParser.parse(workbookFile);
+    assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
+
+    Calendar expectedDate = Calendar.getInstance();
+    expectedDate.set(2006, 1 - 1, 1, 0, 0, 0);
+    expectedDate.set(Calendar.MILLISECOND, 0);
+    ScreenResult expectedScreenResult = new ScreenResult(expectedDate.getTime());
+    assertEquals("date",
+                 expectedScreenResult.getDateCreated(),
+                 screenResult.getDateCreated());
+    assertEquals("replicate count", 1, screenResult.getReplicateCount()
+                                                   .intValue());
+
+    Map<Integer,ResultValueType> expectedResultValueTypes = new HashMap<Integer,ResultValueType>();
+
+    ResultValueType rvt0 = new ResultValueType(expectedScreenResult,
+                                               "Luminescence");
+    rvt0.setDescription("Luminescence");
+    rvt0.setReplicateOrdinal(1);
+    rvt0.setActivityIndicator(true);
+    rvt0.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
+    rvt0.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);
+    rvt0.setIndicatorCutoff(10000.0);
+
+    expectedResultValueTypes.put(0, rvt0);
+
+    Integer[] expectedInitialPlateNumbers = {1, 1, 1};
+
+    String[] expectedInitialWellNames = {"A01", "A02", "A03"};
+
+    Object[][] expectedInitialResultValues = {
+      {1071894.0},
+      {1071894.0},
+      {1174576.0}};
+
+    SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
+    int iRvt = 0;
+    for (ResultValueType rvt : resultValueTypes) {
+      ResultValueType expectedRvt = expectedResultValueTypes.get(iRvt);
+      if (expectedRvt != null) {
+        setDefaultValues(expectedRvt);
+        setDefaultValues(rvt);
+        assertTrue("ResultValueType " + iRvt, expectedRvt.isEquivalent(rvt));
+
+        // compare result values
+        assertEquals(3, rvt.getResultValues().size());
+        int iWell = 0;
+        for (ResultValue rv : rvt.getResultValues()) {
+          assertEquals("rvt " + iRvt + " well #" + iWell + " plate name",
+                       expectedInitialPlateNumbers[iWell],
+                       rv.getWell()
+                         .getPlateNumber());
+          assertEquals("rvt " + iRvt + " well #" + iWell + " well name",
+                       expectedInitialWellNames[iWell],
+                       rv.getWell()
+                         .getWellName());
+          if (iRvt == 0) {
+            assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
+                         expectedInitialResultValues[iWell][iRvt].toString(),
+                         rv.getValue().toString());
+          }
+          else {
+            assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
+                         ((Double) expectedInitialResultValues[iWell][iRvt]).doubleValue(),
+                         Double.parseDouble(rv.getValue()),
+                         0.0001);
+          }
+          ++iWell;
+          if (iWell == expectedInitialResultValues.length) {
+            // done testing the initial rows of data, now jump to testing the
+            // final rows of data
+            break;
+          }
+        }
+      }
+      ++iRvt;
+    }
+  }
     
   private void setDefaultValues(ResultValueType rvt) 
   {
@@ -401,6 +485,5 @@ public class ScreenResultParserTest extends AbstractSpringTest
       rvt.setTimePoint("");
     }
   }
-  
-  // TODO: test errors
+
 }

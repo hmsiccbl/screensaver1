@@ -50,28 +50,44 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
- * Parses data from Excel spreadsheet files necessary for instantiating a
- * {@link edu.harvard.med.screensaver.model.screenresults.ScreenResult}. Two
- * files are parsed to obtain the required data: the first contains the
- * raw/derived data (which populates
- * {@link edu.harvard.med.screensaver.model.screenresults.ResultValue} objects,
- * while the second contains the "data header" metadata (which populates
- * {@link edu.harvard.med.screensaver.model.screenresults.ResultValueType}
- * objects).
+ * Parses data from a workbook files (a.k.a. Excel spreadsheets) necessary for
+ * instantiating a
+ * {@link edu.harvard.med.screensaver.model.screenresults.ScreenResult}.
+ * ScreenResult data consists of both metadata and raw data. The parser will
+ * accept an all-in-one import file, where the metadata and raw data are in the
+ * same workbook, but also will accept the metadata and raw data in separate
+ * workbooks. For this latter case, the raw data can be in multiple workbooks
+ * and the workbook file names must be specified as comma-delimited list in cell
+ * B1 of the first sheet of the metadata workbook. In the former case, the names
+ * of the worksheets containing the raw data must be listed in this cell
+ * instead. By convention, each worksheet contains the raw data for a single
+ * plate, but the parser is indifferent to how data may be arranged across
+ * worksheets.
  * <p>
- * The class attempts to parse files as fully as possible, carrying on in the
- * face of errors, in order to catch as many errors as possible, as this will
- * aid the manual effort of correcting the files' format and content between
- * import attempts. (Potential) validation checks performed include:
- * <ul>
- * <li> Data header count in data file matches data header definitions in
- * metadata file. (TODO)
- * <li> Data Header names, as defined in the metadata, match the actual Data
- * Header names in the data file. (TODO)
- * </ul>
+ * The metadata is used to instantiate
+ * {@link edu.harvard.med.screensaver.model.screenresults.ResultValueType}
+ * objects, while the raw data is used to instantiate each of the
+ * <code>ResultValueType</code>'s
+ * {@link edu.harvard.med.screensaver.model.screenresults.ResultValue} objects.
+ * Altogether these objects are used instantiate a {@link ScreenResult} object,
+ * which is the returned result of the {@link #parse(File, boolean)} method.
+ * <p>
+ * The class attempts to parse the file(s) as fully as possible, carrying on in
+ * the face of errors, in order to catch as many errors as possible, as this
+ * will aid the manual effort of correcting the files' format and content
+ * between import attempts. By calling
+ * {@link #outputErrorsInAnnotatedWorkbooks(String)}, a new set of workbooks
+ * will be written to the same directory as the metadata file. These workbooks
+ * will contain errors messages in each cell that encountered an error during
+ * parsing. Error messages that are not cell-specific will be written to a new
+ * "Parse Errors" sheet in the new metadata workbook. Error-annotated workbook
+ * files will only be written for input workbooks that generated parse errors.
+ * Each error annotated workbook will be named the same as its respective
+ * workbook input file with an ".errors.xls" suffix.
  * <p>
  * Each call to {@link #parse} will clear the errors accumulated from the
- * previous call.
+ * previous call, and so the result of calling {@link #getErrors()} will change
+ * after each call to {@link #parse(File, boolean)}.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -84,7 +100,6 @@ public class ScreenResultParser
   private static final String ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION = "errors.xls";
 
   private static final Logger log = Logger.getLogger(ScreenResultParser.class);
-  
   
   private static final String FIRST_DATE_SCREENED = "First Date Screened";
   private static final String METADATA_META_SHEET_NAME = "meta";
@@ -105,7 +120,7 @@ public class ScreenResultParser
   
   private static final int METADATA_FIRST_DATA_ROW_INDEX = 1;
   private static final int RAWDATA_FIRST_DATA_ROW_INDEX = 1;
-  
+  private static final int RAWDATA_HEADER_ROW_INDEX = 0;
   /**
    * The data rows of the metadata worksheet. Order of enum values is
    * significant, as we use the ordinal() method.
@@ -368,8 +383,8 @@ public class ScreenResultParser
    * correct a workbook's errors in a batch fashion, rather than in a piecemeal
    * fashion.
    * 
-   * @return a
-   *         <code>List&lt;String&gt;</code of all errors generated during parsing
+   * @return a <code>List&lt;String&gt;</code> of all errors generated during
+   *         parsing
    */
   public List<ParseError> getErrors()
   {
@@ -579,34 +594,45 @@ public class ScreenResultParser
     return metadataParseResult;
   }
 
+  /**
+   * @param metadataWorkbook
+   * @param ignoreFilePaths
+   * @return a List of Workbooks, one for each raw data filename specified; if
+   *         no files were specified (indicating that raw data is in the same
+   *         workbook), return a one-element list, containing the
+   *         <code>metadataWorkbook</code>
+   * @throws UnrecoverableScreenResultParseException
+   */
   private ArrayList<Workbook> parseRawDataWorkbookFilenames(Workbook metadataWorkbook, boolean ignoreFilePaths)
     throws UnrecoverableScreenResultParseException
   {
     ArrayList<Workbook> rawDataWorkbooksResult = new ArrayList<Workbook>();
     Cell cell = _metadataCellParserFactory.getCell(METADATA_FILENAMES_CELL_COLUMN_INDEX,
-                                                   METADATA_FILENAMES_CELL_ROW_INDEX,
-                                                   true);
+                                                   METADATA_FILENAMES_CELL_ROW_INDEX);
+
     String fileNames = cell.getString();
-    if (fileNames.equals("")) {
-      throw new UnrecoverableScreenResultParseException(METADATA_NO_RAWDATA_FILES_SPECIFIED_ERROR,
-                                                        cell);
+    if (fileNames == null || fileNames.trim().length() == 0) {
+      log.info("no raw data files; assuming metadata and raw data in same workbook");
+      rawDataWorkbooksResult.add(metadataWorkbook);
     }
-    String[] fileNamesArray = fileNames.split(FILENAMES_LIST_DELIMITER);
-    for (int i = 0; i < fileNamesArray.length; i++) {
-      
-      File rawDataWorkbookFile = new File(fileNamesArray[i]);
-      if (ignoreFilePaths && rawDataWorkbookFile.isAbsolute()) {
-        log.info("ignoring absolute file path for raw data file (assuming it is in same directory as metadata file)");
-        rawDataWorkbookFile = 
-          makeRawDataFileInMetadataFileDirectory(rawDataWorkbookFile,
-                                                 metadataWorkbook.getWorkbookFile());
-      } 
-      else if (!rawDataWorkbookFile.isAbsolute()) {
-        rawDataWorkbookFile = 
-          makeRawDataFileInMetadataFileDirectory(rawDataWorkbookFile,
-                                                 metadataWorkbook.getWorkbookFile());
+    else {
+      String[] fileNamesArray = fileNames.split(FILENAMES_LIST_DELIMITER);
+      for (int i = 0; i < fileNamesArray.length; i++) {
+        
+        File rawDataWorkbookFile = new File(fileNamesArray[i]);
+        if (ignoreFilePaths && rawDataWorkbookFile.isAbsolute()) {
+          log.info("ignoring absolute file path for raw data file (assuming it is in same directory as metadata file)");
+          rawDataWorkbookFile = 
+            makeRawDataFileInMetadataFileDirectory(rawDataWorkbookFile,
+                                                   metadataWorkbook.getWorkbookFile());
+        } 
+        else if (!rawDataWorkbookFile.isAbsolute()) {
+          rawDataWorkbookFile = 
+            makeRawDataFileInMetadataFileDirectory(rawDataWorkbookFile,
+                                                   metadataWorkbook.getWorkbookFile());
+        }
+        rawDataWorkbooksResult.add(new Workbook(rawDataWorkbookFile, _errors));
       }
-      rawDataWorkbooksResult.add(new Workbook(rawDataWorkbookFile, _errors));
     }
     return rawDataWorkbooksResult;
   }
@@ -645,31 +671,38 @@ public class ScreenResultParser
   {
     for (int iSheet = 0; iSheet < workbook.getWorkbook().getNumberOfSheets(); ++iSheet) {
       HSSFSheet sheet = initializeDataSheet(workbook, iSheet);
-      log.info("parsing sheet " + workbook.getWorkbookFile().getName() + ":" + workbook.getWorkbook().getSheetName(iSheet));
-      for (int iRow = RAWDATA_FIRST_DATA_ROW_INDEX; iRow <= sheet.getLastRowNum(); ++iRow) {
-        Well well = findWell(iRow);
-        dataCell(iRow, DataColumn.TYPE).getString(); // TODO: use this value?
-        boolean excludeWell = _booleanParser.parse(dataCell(iRow,
-                                                            DataColumn.EXCLUDE));
-        int iDataHeader = 0;
-        for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-          Cell cell = dataCell(iRow, iDataHeader);
-          Object value = !rvt.isActivityIndicator()
-              ? cell.getAsString()
+      if (isActiveSheetRawDataSheet()) {
+        log.info("parsing sheet " + workbook.getWorkbookFile().getName() + ":" + workbook.getWorkbook().getSheetName(iSheet));
+        for (int iRow = RAWDATA_FIRST_DATA_ROW_INDEX; iRow <= sheet.getLastRowNum(); ++iRow) {
+          Well well = findWell(iRow);
+          dataCell(iRow, DataColumn.TYPE).getString(); // TODO: use this value?
+          boolean excludeWell = _booleanParser.parse(dataCell(iRow,
+                                                              DataColumn.EXCLUDE));
+          int iDataHeader = 0;
+          for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+            Cell cell = dataCell(iRow, iDataHeader);
+            Object value = !rvt.isActivityIndicator()
+            ? cell.getAsString()
               : rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN
-                ? _booleanParser.parse(cell)
+              ? _booleanParser.parse(cell)
                 : rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL
-                  ? cell.getDouble()
+                ? cell.getDouble()
                   : rvt.getActivityIndicatorType() == ActivityIndicatorType.PARTITION
-                    ? cell.getString() : cell.getString();
-          if (value == null) {
-            value = "";
+                  ? cell.getString() : cell.getString();
+                  if (value == null) {
+                    value = "";
+                  }
+                  new ResultValue(rvt, well, value.toString(), excludeWell);
+                  ++iDataHeader;
           }
-          new ResultValue(rvt, well, value.toString(), excludeWell);
-          ++iDataHeader;
         }
       }
     }
+  }
+
+  private boolean isActiveSheetRawDataSheet()
+  {
+    return dataCell(RAWDATA_HEADER_ROW_INDEX, DataColumn.STOCK_PLATE_ID).getAsString().equals("Stock_ID");
   }
 
   // TODO: this needs to be moved to our DAO; probably as a
