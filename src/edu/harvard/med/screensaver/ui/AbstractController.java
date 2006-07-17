@@ -17,13 +17,9 @@ import java.util.Map;
 import javax.faces.application.Application;
 import javax.faces.component.NamingContainer;
 import javax.faces.component.UIComponent;
-import javax.faces.component.UIMessage;
-import javax.faces.component.UIParameter;
 import javax.faces.context.FacesContext;
 
 import edu.harvard.med.screensaver.ui.util.Messages;
-
-import org.springframework.context.ApplicationContext;
 
 /**
  * A base Controller class for JSF backing beans (beans that handle JSF actions
