@@ -9,7 +9,21 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.faces.application.Application;
+import javax.faces.component.NamingContainer;
+import javax.faces.component.UIComponent;
+import javax.faces.component.UIMessage;
+import javax.faces.component.UIParameter;
+import javax.faces.context.FacesContext;
+
 import edu.harvard.med.screensaver.ui.util.Messages;
+
+import org.springframework.context.ApplicationContext;
 
 /**
  * A base Controller class for JSF backing beans (beans that handle JSF actions
@@ -19,15 +33,64 @@ import edu.harvard.med.screensaver.ui.util.Messages;
  */
 public abstract class AbstractController
 {
-
   private Messages _messages;
+  private FacesContext _cachedFacesContext;
 
-  protected Messages getMessages() {
+  protected Messages getMessages() 
+  {
     return _messages;
   }
 
-  public void setMessages(Messages messages) {
+  public void setMessages(Messages messages) 
+  {
     _messages = messages;
   }
-
+  
+  
+  // JSF convenience methods
+  
+  public FacesContext getFacesContext()
+  {
+    if (_cachedFacesContext == null) {
+      _cachedFacesContext = FacesContext.getCurrentInstance();
+    }
+    return _cachedFacesContext;
+  }
+  
+  public Application getApplicationContext()
+  {
+    return getFacesContext().getApplication();
+  }
+  
+  /**
+   * Adds the message of the specified key to the specified component. Any
+   * request parameters that have a name of the form "<componentId>MessageParam*" will
+   * be used to parameterize the messsage.
+   * 
+   * @param messageKey
+   * @param componentId
+   */
+  public void setMessage(String messageKey, String componentId)
+  {
+    List<Object> messageParams = new ArrayList<Object>();
+    Map requestMap = getFacesContext().getExternalContext().getRequestMap();
+    for (Iterator iter = requestMap.keySet().iterator(); iter.hasNext();) {
+      String paramName = (String) iter.next();
+      if (paramName.startsWith(componentId + "MessageParam")) {
+        Object paramValue = (Object) requestMap.get(paramName);
+        messageParams.add(paramValue);
+      }
+    }  
+    _messages.setFacesMessageForComponent(messageKey, messageParams.toArray(), componentId);
+  }
+  
+  public UIComponent findComponent(String componentId)
+  {
+    return getFacesContext().getViewRoot().findComponent(componentId);
+  }
+  
+  public UIComponent findComponent(String componentId, String parentId)
+  {
+    return getFacesContext().getViewRoot().findComponent(parentId + NamingContainer.SEPARATOR_CHAR + componentId);
+  }
 }

@@ -98,6 +98,10 @@
       <property-name>screenResultParser</property-name>
       <value>#{screenResultParser}</value>
     </managed-property>
+    <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
+    </managed-property>
   </managed-bean>
 
   

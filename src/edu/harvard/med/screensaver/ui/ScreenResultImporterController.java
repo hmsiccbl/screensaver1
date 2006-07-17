@@ -36,7 +36,7 @@ import org.apache.myfaces.custom.fileupload.UploadedFile;
  * 
  * @author ant
  */
-public class ScreenResultImporterController
+public class ScreenResultImporterController extends AbstractController
 {
 
   // static data
@@ -111,24 +111,39 @@ public class ScreenResultImporterController
   
   public String submit()
   {
-    File tmpUploadedFile;
+    File tmpUploadedFile = null;
     try {
-      tmpUploadedFile = File.createTempFile("screensaver.import.screenresult.", ".xls");
-      IOUtils.copy(_uploadedFile.getInputStream(),
-                   new FileOutputStream(tmpUploadedFile));
-      ScreenResult screenResult = _screenResultParser.parse(tmpUploadedFile);
+      ScreenResult screenResult = null;
+
+      if (_uploadedFile.getInputStream().available() > 0) {
+        tmpUploadedFile = File.createTempFile("screensaver.import.screenresult.", ".xls");
+        IOUtils.copy(_uploadedFile.getInputStream(),
+                     new FileOutputStream(tmpUploadedFile));
+        screenResult = _screenResultParser.parse(tmpUploadedFile);
+      }
+
       if (screenResult == null) {
-        throw new RuntimeException("system error during parse of uploaded file: " + tmpUploadedFile);
+        setMessage("badUploadedFile",
+                   // TODO: we only want to have to specify the base componentID, not the entire path!
+                   "screenResultImportSubview:uploadScreenResultFileForm:uploadScreenResultFile");
+        return null;
       }
       else if (_screenResultParser.getErrors().size() > 0) {
         return "screenresult-parse-errors";
       }
-      _screenResultViewer.setScreenResult(screenResult);
-      return "success";
+      else {
+        _screenResultViewer.setScreenResult(screenResult);
+        return "success";
+      }
     }
     catch (IOException e) {
       e.printStackTrace();
       throw new RuntimeException("IOException during parse of uploaded file: " + e.getMessage());
+    }
+    finally {
+      if (tmpUploadedFile != null) {
+        tmpUploadedFile.delete();
+      }
     }
   }
   

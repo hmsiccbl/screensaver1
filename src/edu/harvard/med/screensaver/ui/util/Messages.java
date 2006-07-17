@@ -56,40 +56,54 @@ public class Messages
    * @param args
    * @param componentId
    */
-  public FacesMessage setFacesMessageForComponent(String messageKey,
-                                                  Object[] args,
-                                                  String componentId)
+  public FacesMessage setFacesMessageForComponent(
+    String messageKey,
+    Object[] args,
+    String componentId)
   {
     FacesMessage msg = getFacesMessage(messageKey, args);
-    FacesContext.getCurrentInstance().addMessage(componentId,
-                                                 msg);
+    assert msg != null : "expected non-null FacesMessage";
+    FacesContext.getCurrentInstance()
+                .addMessage(componentId, msg);
     return msg;
   }
   
-  public FacesMessage setFacesMessageForComponent(String messageKey,
-                                          String componentId) {
-    return setFacesMessageForComponent(messageKey,
-                                       EMPTY_ARGS,
-                                       componentId);
+  public FacesMessage setFacesMessageForComponent(
+    String messageKey,
+    String componentId)
+  {
+    return setFacesMessageForComponent(messageKey, EMPTY_ARGS, componentId);
   }
 
   
   /* Property methods */
 
-  public Locale getLocale() {
+  public Locale getLocale()
+  {
     return _locale;
   }
 
-  public void setLocale(Locale locale) {
+  public void setLocale(Locale locale)
+  {
     _locale = locale;
   }
 
-  public MessageSource getMessageSource() {
+  public MessageSource getMessageSource()
+  {
     return _messageSource;
   }
 
-  public void setMessageSource(MessageSource messageSource) {
+  public void setMessageSource(MessageSource messageSource) 
+  {
     _messageSource = messageSource;
+  }
+  
+  /**
+   * @see FacesContext#renderResponse()
+   */
+  public void renderResponse() 
+  {
+    FacesContext.getCurrentInstance().renderResponse();
   }
 
 }
