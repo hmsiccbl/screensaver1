@@ -1,4 +1,7 @@
-<%@include file="header.jspf"%>
+<%-- includes are commented out to prevent MyEclipse from complaining about
+     missing header files
+--%>
+<%-- <%@include file="header.jspf"%> --%>
 
 <h1>
   Synchronized Fields Test
@@ -17,4 +20,4 @@
 
 </f:view>
 
-<%@include file="footer.jspf"%>
+<%-- <%@include file="footer.jspf"%> --%>
