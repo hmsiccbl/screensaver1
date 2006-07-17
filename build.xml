@@ -336,7 +336,7 @@
     name="stop"
     description="Stops the web application (running locally on a Tomcat server)"
   >
-    <exec executable="${appserver.stop.cmd}"/>
+    <exec executable="${appserver.stop.cmd}"><arg line="-force"/></exec>
   </target>
 
   <target

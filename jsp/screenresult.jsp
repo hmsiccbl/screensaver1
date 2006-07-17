@@ -14,8 +14,8 @@
     --%>
 
     <h:panelGroup>
-      <h:commandButton id="doneCommand" action="#{ScreenResultViewer.done}" value="Done" />
-      <h:commandButton action="#{ScreenResultViewer.download}" value="Download" />
+      <h:commandButton id="doneCommand" action="#{ScreenResultViewer.done}" value="Done" styleClass="command"/>
+      <h:commandButton action="#{ScreenResultViewer.download}" value="Download" styleClass="command"/>
     </h:panelGroup>
 
     <p />
@@ -41,7 +41,10 @@
         <h:selectManyListbox id="dataHeadersList" value="#{ScreenResultViewer.selectedDataHeaderNames}" valueChangeListener="#{ScreenResultViewer.selectedDataHeadersListener}" styleClass="input">
           <f:selectItems id="dataHeaders" value="#{ScreenResultViewer.dataHeaderSelectItems}" />
         </h:selectManyListbox>
-        <h:commandButton id="updateButton1" value="Update" action="#{ScreenResultViewer.update}" />
+        <h:panelGroup>
+          <h:commandButton id="updateButton1" value="Update" action="#{ScreenResultViewer.update}" styleClass="command" />
+          <h:commandButton id="allDataHeadersButton" value="All" action="#{ScreenResultViewer.showAllDataHeaders}" styleClass="command"/>
+        </h:panelGroup>
       </h:panelGrid>
 
       <h:panelGrid columns="1">

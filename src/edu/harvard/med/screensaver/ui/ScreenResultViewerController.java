@@ -24,6 +24,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.component.UIData;
 import javax.faces.component.UIInput;
 import javax.faces.component.UISelectBoolean;
+import javax.faces.component.UISelectMany;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
@@ -229,6 +230,10 @@ public class ScreenResultViewerController
     return _firstRow + 1;
   }
   
+  /**
+   * 
+   * @param firstDisplayedRowNumber 1-based index
+   */
   public void setFirstDisplayedRowNumber(int firstDisplayedRowNumber)
   {
     _firstRow = firstDisplayedRowNumber - 1;
@@ -262,11 +267,7 @@ public class ScreenResultViewerController
   public String[] getSelectedDataHeaderNames()
   {
     if (_selectedDataHeaderNames == null) {
-      // select all items, if selection array not yet defined
-      _selectedDataHeaderNames = new String[_screenResult.getResultValueTypes()
-                                                         .size()];
-      _selectedDataHeaderNames = getUniqueDataHeaderNamesMap().values()
-                                                              .toArray(new String[getUniqueDataHeaderNamesMap().size()]);
+      selectAllDataHeaders();
     }
     return _selectedDataHeaderNames;
   }
@@ -336,15 +337,16 @@ public class ScreenResultViewerController
   public String gotoPage(int pageIndex)
   {
     try {
+      // firstRow is a 1-based index
       int firstRow = (pageIndex * getDataTable().getRows()) + 1;
       if (firstRow > 0 &&
         firstRow <= _screenResult.getResultValueTypes().first().getResultValues().size()) {
         // update the row field
         setFirstDisplayedRowNumber(firstRow);
         // scroll the data table to the new row
-        getDataTable().setFirst(_firstRow);
+        getDataTable().setFirst(getFirstDisplayedRowNumber() - 1);
         // update the plate selection list to the current plate
-        _plateNumberInput.setValue(((List<RawDataRow>) getRawData().getWrappedData()).get(_firstRow).getWell().getPlateNumber().toString());
+        _plateNumberInput.setValue(((List<RawDataRow>) getRawData().getWrappedData()).get(getFirstDisplayedRowNumber() - 1).getWell().getPlateNumber().toString());
       }
       return null;
     } 
@@ -384,6 +386,12 @@ public class ScreenResultViewerController
     return null; // redisplay
   }
   
+  public String showAllDataHeaders()
+  {
+    selectAllDataHeaders();
+    return null;
+  }
+  
   public String done()
   {
     log.debug("done action received");
@@ -399,15 +407,21 @@ public class ScreenResultViewerController
     ((UISelectBoolean) event.getComponent()).setValue(event.getNewValue());
   }
 
-  @SuppressWarnings("unchecked")
   public void firstDisplayedRowNumberListener(ValueChangeEvent event)
   {
     log.debug("firstDisplayedRowNumberListener called: " + event.getNewValue());
-    int newFirstDisplayRowNumber = Integer.parseInt(event.getNewValue().toString()) - 1;
+    int newFirstDisplayRowIndex = Integer.parseInt(event.getNewValue().toString()) - 1;
+    // ensure value is within valid range, and in particular that we never show
+    // less than the table's configured row count (unless it's more than the
+    // total number of rows)
+    newFirstDisplayRowIndex = Math.max(0,
+                                        Math.min(newFirstDisplayRowIndex,
+                                                 getRawDataSize() - _dataTable.getRows()));
     // scroll the data table to the new row
-    getDataTable().setFirst(newFirstDisplayRowNumber);
+    getDataTable().setFirst(newFirstDisplayRowIndex);
     // update the plate selection list to the current plate
-    RawDataRow dataRow = ((List<RawDataRow>) getRawData().getWrappedData()).get(newFirstDisplayRowNumber);
+    @SuppressWarnings("unchecked")
+    RawDataRow dataRow = ((List<RawDataRow>) getRawData().getWrappedData()).get(newFirstDisplayRowIndex);
     Integer plateNumber = dataRow.getWell().getPlateNumber();
     _plateNumberInput.setValue(plateNumber.toString());
   }
@@ -415,11 +429,11 @@ public class ScreenResultViewerController
   public void plateNumberListener(ValueChangeEvent event)
   {
     log.debug("new plate number: '" + event.getNewValue() + "'");
-    int newFirstRowForPlateNumber = findFirstRowForPlateNumber(Integer.parseInt(event.getNewValue().toString()));
+    int newFirstRowNumberForPlateNumber = findFirstRowNumberForPlateNumber(Integer.parseInt(event.getNewValue().toString()));
     // scroll the data table to the new row
-    getDataTable().setFirst(newFirstRowForPlateNumber);
+    getDataTable().setFirst(newFirstRowNumberForPlateNumber - 1);
     // update the row field
-    _firstDisplayedRowNumberInput.setValue(newFirstRowForPlateNumber);
+    _firstDisplayedRowNumberInput.setValue(newFirstRowNumberForPlateNumber);
   }
   
   public void selectedDataHeadersListener(ValueChangeEvent event)
@@ -452,7 +466,13 @@ public class ScreenResultViewerController
     _plateNumber = null;
     _uniqueDataHeaderNamesMap = null;
     _selectedDataHeaderNames = null;
-    // _rowToPlateConverter = null;
+
+    // clear the bound UI components, so that they get recreated next time this view is used
+    _dataTable = null;
+    _firstDisplayedRowNumberInput = null;
+    _plateNumberInput = null;
+
+    // _rowToPlateConverter = null;    
   }
 
   private int getPageIndex()
@@ -460,7 +480,7 @@ public class ScreenResultViewerController
     return getDataTable().getFirst() / getDataTable().getRows();
   }
 
-  private int findFirstRowForPlateNumber(int selectedPlateNumber)
+  private int findFirstRowNumberForPlateNumber(int selectedPlateNumber)
   {
     lazyBuildPlateNumber2FirstRow();
     
@@ -581,7 +601,16 @@ public class ScreenResultViewerController
     }
   }
   
-  
+  private void selectAllDataHeaders()
+  {
+    _selectedDataHeaderNames = new String[_screenResult.getResultValueTypes()
+                                                       .size()];
+    _selectedDataHeaderNames = getUniqueDataHeaderNamesMap().values()
+                                                            .toArray(new String[getUniqueDataHeaderNamesMap().size()]);
+    _dataHeaderColumnModel = null; // cause to be reinitialized for new set of selected data headers
+  }
+
+
   // inner classes
   
   /**
