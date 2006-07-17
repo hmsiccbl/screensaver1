@@ -86,3 +86,7 @@ hr {
 .row2 {
   background-color: #eeeeee
 }
+
+.scroller_activePage {
+  font-weight: bold
+}

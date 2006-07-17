@@ -205,6 +205,13 @@
       <fileset dir="web/css"/>
     </copy>
   
+    <copy 
+      todir="${exploded.war.dir}/images"
+      verbose="${verbose}"
+    >
+      <fileset dir="web/images"/>
+    </copy>
+
     <!-- deploy log4j.debug.properties as log4j.properties; will be overwritten by normal log4.properties unless 'debug' property is set -->
     <copy
       file="resources/log4j.debug.properties"

@@ -171,9 +171,19 @@ public class Cell
   
   public String getFormattedRowAndColumn()
   {
-    // TODO: only handles A-Z, not AA...
-    _formattedRowAndColumnBuilder.replace(1, 2, Character.toString((char) (_column + 'A')));
-    _formattedRowAndColumnBuilder.replace(3, 4, Integer.toString(_row + 1));
+
+    _formattedRowAndColumnBuilder.setLength(0);
+    _formattedRowAndColumnBuilder.append('(');
+    if (_column < (int) 'Z') {
+      _formattedRowAndColumnBuilder.append(Character.toString((char) (_column + 'A')));
+    }
+    else {
+      _formattedRowAndColumnBuilder.append(Character.toString((char) ((_column / 256) + 'A')));
+      _formattedRowAndColumnBuilder.append(Character.toString((char) ((_column % 256) + 'A')));
+    }
+    _formattedRowAndColumnBuilder.append(',');
+    _formattedRowAndColumnBuilder.append(Integer.toString(_row + 1));
+    _formattedRowAndColumnBuilder.append(')');
     return _formattedRowAndColumnBuilder.toString();
   }
   
