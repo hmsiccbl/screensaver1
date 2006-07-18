@@ -10,9 +10,11 @@
 package edu.harvard.med.screensaver.model.screenresults;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -192,7 +194,7 @@ public class ScreenResult extends AbstractEntity
   public boolean addResultValueType(ResultValueType resultValueType)
   {
     assert !(_resultValueTypes.contains(resultValueType) ^ resultValueType.getScreenResult().equals(this)) :
-      "assymetic screen result/result value type encountered";
+      "asymmetric screen result/result value type encountered";
     if (_resultValueTypes.add(resultValueType)) {
       resultValueType.setHbnScreenResult(this);
       return true;
@@ -263,6 +265,19 @@ public class ScreenResult extends AbstractEntity
     }
     return _plateNumbers;
   }
+  
+  
+  /**
+   * Return a list of ResultValueTypes
+   * 
+   * @motivation random access to ResultValueTypes by ordinal
+   * @return an ordered list of ResultValueTypes
+   */
+  public List<ResultValueType> getDerivedResultValueTypesList()
+  {
+    return new ArrayList<ResultValueType>(_resultValueTypes);
+  }
+  
 
   // protected getters and setters
   

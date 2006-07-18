@@ -73,18 +73,6 @@ public class ScreenResultImporterController extends AbstractController
     _screenResultViewer = screenResultViewer;
   }
 
-  public int getMaxAllowedUploadSize()
-  {
-    // TODO: should inject via Spring-managed application configuration object
-    return 128 * (1024 * 1024);
-  }
-
-  public String getAcceptedMimeType()
-  {
-    // TODO: should inject via Spring-managed application configuration object
-    return "application/vnd.ms-excel";
-  }
-
   public void setUploadedFile(UploadedFile uploadedFile)
   {
     _uploadedFile = uploadedFile;

@@ -17,6 +17,7 @@ import java.util.Map;
 import javax.faces.application.Application;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.ui.util.Messages;
 
@@ -71,6 +72,22 @@ public abstract class AbstractController
     return getFacesContext().getApplication();
   }
   
+  public HttpSession getHttpSession()
+  {
+    Object httpSession = getFacesContext().getExternalContext().getSession(false);
+    if (httpSession == null) {
+      return null;
+    }
+    assert httpSession instanceof HttpSession : "not running in an HTTP-based application server";
+    return (HttpSession) httpSession;
+  }
+  
+  public String getSessionDebugInfoString()
+  {
+    return "ID: " + getHttpSession().getId() + "\n" +
+    "last accessed time: " + getHttpSession().getLastAccessedTime();
+  }
+
   /**
    * Adds the message of the specified key to the specified component. Any
    * request parameters that have a name of the form "<componentId>MessageParam*"

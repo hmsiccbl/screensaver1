@@ -47,7 +47,7 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 public class ScreenResultParserTest extends AbstractSpringTest
 {
 
-  private static final File TEST_INPUT_FILE_DIR = new File("test/edu/harvard/med/screensaver/io/screenresultparser");
+  public static final File TEST_INPUT_FILE_DIR = new File("test/edu/harvard/med/screensaver/io/screenresultparser");
   
   protected ScreenResultParser screenResultParser;
 

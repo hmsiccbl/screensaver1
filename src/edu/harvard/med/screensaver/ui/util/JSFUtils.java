@@ -80,15 +80,15 @@ public class JSFUtils
    * Creates a UISelectItems object that can be assigned to the "value"
    * attribute of a UISelectItems JSF component.
    * 
-   * @param values
+   * @param items
    * @return
    */
-  public static List<SelectItem> createUISelectItems(Collection values)
+  public static List<SelectItem> createUISelectItems(Collection items)
   {
     List<SelectItem> result = new ArrayList<SelectItem>();
-    for (Object value : values) {
-      result.add(new SelectItem(value.toString(), 
-                                value.toString()));
+    for (Object item : items) {
+      result.add(new SelectItem(item.toString(), 
+                                item.toString()));
     }
     return result;
   }
@@ -97,8 +97,46 @@ public class JSFUtils
    * Creates a UISelectItems object that can be assigned to the "value"
    * attribute of a UISelectItems JSF component.
    * 
+   * @param labels the display labels for each SelectItem
+   * @param values the values for each SelectItem (this is a "parallel" list to labels)
+   * @return a List of SelectItems, one for each label/value pair
+   */
+  public static List<SelectItem> createUISelectItems(List<String> labels,
+                                                     List values)
+  {
+    List<SelectItem> result = new ArrayList<SelectItem>();
+    assert labels.size() == values.size() : "size of 'labels' and 'values' collections differ";
+    for (int i = 0; i < labels.size(); ++i) {
+      result.add(new SelectItem(values.get(i).toString(),
+                                labels.get(i)));
+    }
+    return result;
+  }
+
+  /**
+   * Creates a UISelectItems object that can be assigned to the "value"
+   * attribute of a UISelectItems JSF component.
+   * 
+   * @param labels the display labels for each SelectItem
+   * @return a List of SelectItems, one for each label, where the value property
+   *         of each SelectItem is its index in the returned list
+   */
+  public static List<SelectItem> createUISelectItemsWithIndexValues(List<String> labels)
+  {
+    List<SelectItem> result = new ArrayList<SelectItem>();
+    for (int i = 0; i < labels.size(); ++i) {
+      result.add(new SelectItem(new Integer(i),
+                                labels.get(i)));
+    }
+    return result;
+  }
+
+  /**
+   * Creates a UISelectItems object that can be assigned to the "value"
+   * attribute of a UISelectItems JSF component.
+   * 
    * @param values
-   * @return
+   * @return a List of SelectItems, one for each Map entry (label/value pair)
    */
   public static List<SelectItem> createUISelectItems(Map values)
   {

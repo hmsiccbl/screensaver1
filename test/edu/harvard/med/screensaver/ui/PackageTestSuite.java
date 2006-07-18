@@ -26,6 +26,7 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     addTest(edu.harvard.med.screensaver.ui.util.PackageTestSuite.suite());
+    addTestSuite(UniqueDataHeaderNamesTest.class);
   }
 
 }

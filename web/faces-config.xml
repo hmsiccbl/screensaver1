@@ -68,6 +68,10 @@
     <managed-bean-name>ScreenResultViewer</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.ScreenResultViewerController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>heatMapViewer</property-name>
+      <value>#{HeatMapViewer}</value>
+    </managed-property>
     <!-- managed-property>
       <property-name>DAO</property-name>
       <value>#{dao}</value>
@@ -77,6 +81,18 @@
       <value>#{messages}</value>
     </managed-property-->
   </managed-bean>
+  
+  <managed-bean>
+    <description>Heat Map Viewer backing bean</description>
+    <managed-bean-name>HeatMapViewer</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.HeatMapViewerController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
+    </managed-property>
+  </managed-bean>
+  
   
   <managed-bean>
     <description>Well viewer backing bean</description>
@@ -205,12 +221,26 @@
       <to-view-id>/well.jsp</to-view-id>
       <redirect/>
     </navigation-case>
+    <navigation-case>
+      <from-outcome>viewHeatMaps</from-outcome>
+      <to-view-id>/heatMapViewer.jsp</to-view-id>
+      <redirect/>
+    </navigation-case>
   </navigation-rule>
   
   <navigation-rule>
     <from-view-id>/well.jsp</from-view-id>
     <navigation-case>
       <to-view-id>/main.jsp</to-view-id>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <from-view-id>/heatMapViewer.jsp</from-view-id>
+    <navigation-case>
+      <from-outcome>done</from-outcome>
+      <to-view-id>/screenresult.jsp</to-view-id>
+      <redirect/>
     </navigation-case>
   </navigation-rule>
 

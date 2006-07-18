@@ -16,11 +16,13 @@
     <h:panelGroup>
       <h:commandButton id="doneCommand" action="#{ScreenResultViewer.done}" value="Done" styleClass="command"/>
       <h:commandButton action="#{ScreenResultViewer.download}" value="Download" styleClass="command"/>
+      <h:commandButton action="#{ScreenResultViewer.delete}" value="Delete" styleClass="command"/>
+      <h:commandButton action="#{ScreenResultViewer.viewHeatMaps}" value="View Heat Maps" styleClass="command"/>
     </h:panelGroup>
 
     <p />
 
-      <h:messages id="allMessages" globalOnly="false" showDetail="true" styleClass="errorMessage"/>
+      <h:messages id="allMessages" globalOnly="true" showDetail="true" styleClass="errorMessage"/>
     <p />
 
       <h:panelGrid columns="2" styleClass="standardTable">
@@ -57,7 +59,7 @@
           <f:verbatim>)</f:verbatim>
         </h:panelGroup>
 
-        <t:dataTable id="metadataTable" value="#{ScreenResultViewer.metadata}" var="row" rendered="#{ScreenResultViewer.showMetadataTable}" styleClass="standardTable" headerClass="" rowClasses="row1,row2" columnClasses="">
+        <t:dataTable id="metadataTable" value="#{ScreenResultViewer.metadata}" var="row" rendered="#{ScreenResultViewer.showMetadataTable}" styleClass="standardTable" headerClass="tableHeader" rowClasses="row1,row2" columnClasses="">
           <t:column styleClass="keyColumn">
             <f:facet name="header">
               <h:outputText value="Property" />
@@ -83,7 +85,7 @@
           <f:verbatim>)</f:verbatim>
         </h:panelGroup>
 
-        <t:dataTable id="rawDataTable" binding="#{ScreenResultViewer.dataTable}" value="#{ScreenResultViewer.rawData}" var="row" rows="10" rendered="#{ScreenResultViewer.showRawDataTable}" styleClass="standardTable" headerClass="" rowClasses="row1,row2" columnClasses="" >
+        <t:dataTable id="rawDataTable" binding="#{ScreenResultViewer.dataTable}" value="#{ScreenResultViewer.rawData}" var="row" rows="10" rendered="#{ScreenResultViewer.showRawDataTable}" styleClass="standardTable" headerClass="tableHeader" rowClasses="row1,row2" columnClasses="" >
           <t:column styleClass="keyColumn">
             <f:facet name="header">
               <h:outputText value="Plate"/>
@@ -120,8 +122,8 @@
         valueChangeListener="#{ScreenResultViewer.plateNumberListener}" converter="PlateNumberSelectItemConverter" styleClass="input">
         <f:selectItems value="#{ScreenResultViewer.plateSelectItems}" />
       </h:selectOneMenu>
-      <h:commandButton id="prevPageCommand" action="#{ScreenResultViewer.prevPage}" value="Prev" styleClass="command"/>
-      <h:commandButton id="nextPageCommand" action="#{ScreenResultViewer.nextPage}" value="Next" styleClass="command"/>
+      <h:commandButton id="prevPageCommand" action="#{ScreenResultViewer.prevPage}" value="Prev" image="images/arrow-previous.gif" styleClass="command"/>
+      <h:commandButton id="nextPageCommand" action="#{ScreenResultViewer.nextPage}" value="Next" image="images/arrow-next.gif" styleClass="command"/>
       <h:outputLabel id="rowLabel" value="Row" for="firstDisplayedRowNumber"/>
       <h:inputText id="firstDisplayedRowNumber" value="#{ScreenResultViewer.firstDisplayedRowNumber}" binding="#{ScreenResultViewer.firstDisplayedRowNumberInput}" valueChangeListener="#{ScreenResultViewer.firstDisplayedRowNumberListener}" size="6" styleClass="input">
         <f:validateLongRange minimum="1" maximum="#{ScreenResultViewer.rawDataSize}" />

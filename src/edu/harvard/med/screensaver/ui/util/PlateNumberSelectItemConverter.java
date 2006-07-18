@@ -14,6 +14,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
+// TODO: make this work for Integer-type Plate Numbers, rather than Strings (it's not really doing anything for us in its current incarnation)
 public class PlateNumberSelectItemConverter implements Converter
 {
 

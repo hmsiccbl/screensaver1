@@ -12,10 +12,8 @@ package edu.harvard.med.screensaver.ui;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -29,7 +27,6 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
-import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -51,7 +48,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 // TODO: this class needs to be broken up! it's too big! (maybe)
-public class ScreenResultViewerController
+public class ScreenResultViewerController extends AbstractController
 {
 
   // static data members
@@ -94,8 +91,8 @@ public class ScreenResultViewerController
    * @motivation optimization
    */
   private Map<Integer,Integer> _plateNumber2FirstRow;
-
-  private Map<ResultValueType,String> _uniqueDataHeaderNamesMap;
+  
+  private UniqueDataHeaderNames _uniqueDataHeaderNames;
 
   private DataModel _rawDataModel;
 
@@ -104,6 +101,8 @@ public class ScreenResultViewerController
   private DataModel _dataHeaderColumnModel;
 
   private DataModel _metadataModel;
+
+  private HeatMapViewerController _heatMapViewer;
 
   
 //  private Converter _rowToPlateConverter;
@@ -128,20 +127,25 @@ public class ScreenResultViewerController
     _dao = dao;
   }
 
+  public HeatMapViewerController getHeatMapViewer()
+  {
+    return _heatMapViewer;
+  }
+
+  public void setHeatMapViewer(HeatMapViewerController heatMapViewer)
+  {
+    _heatMapViewer = heatMapViewer;
+  }
+
   public ScreenResult getScreenResult()
   {
     return _screenResult;
   }
   
-  public List<ResultValueType> getDataHeaders()
-  {
-    return new ArrayList<ResultValueType>(_screenResult.getResultValueTypes());
-  }
-
   public void setScreenResult(ScreenResult screenResult)
   {
     if (_screenResult != screenResult) {
-      resetViewLayout();
+      resetView();
     }
     _screenResult = screenResult;
   }
@@ -256,11 +260,7 @@ public class ScreenResultViewerController
   
   public List<SelectItem> getDataHeaderSelectItems()
   {
-    List<SelectItem> result = new ArrayList<SelectItem>();
-    for (ResultValueType rvt : _screenResult.getResultValueTypes()) {
-      result.add(new SelectItem(getUniqueDataHeaderNamesMap().get(rvt)));
-    }
-    return result;
+    return JSFUtils.createUISelectItems(getUniqueDataHeaderNames().asList());
   }
   
   public String[] getSelectedDataHeaderNames()
@@ -284,17 +284,12 @@ public class ScreenResultViewerController
     return _dataHeaderColumnModel;
   }
 
-  public String getSessionInfo()
+  public UniqueDataHeaderNames getUniqueDataHeaderNames()
   {
-    HttpSession session = (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(false);
-    return "ID: " + session.getId() + "\n" +
-    "last accessed time: " + session.getLastAccessedTime();
-  }
-  
-  public Map<ResultValueType,String> getUniqueDataHeaderNamesMap()
-  {
-    lazyBuildUniqueDataHeaderNamesMap();
-    return _uniqueDataHeaderNamesMap;
+    if (_uniqueDataHeaderNames == null) {
+      _uniqueDataHeaderNames = new UniqueDataHeaderNames(_screenResult);
+    }
+    return _uniqueDataHeaderNames;
   }
   
   /**
@@ -323,7 +318,9 @@ public class ScreenResultViewerController
     DataModel columnModel = getDataHeaderColumnModel();
     if (columnModel.isRowAvailable()) {
       String columnName = (String) columnModel.getRowData(); // getRowData() is really getColumnData()
+      assert columnName != null : "columnName is null";
       RawDataRow row = (RawDataRow) dataModel.getRowData();
+      assert row != null : "row is null";
       return row.getResultValues().get(columnName).getValue();
     }
     return null;
@@ -366,10 +363,24 @@ public class ScreenResultViewerController
   
   public String download()
   {
-    FacesContext.getCurrentInstance().addMessage("dataForm",
-                                                 new FacesMessage("Download feature not yet implemented!"));
+    getFacesContext().addMessage("dataForm",
+                                 new FacesMessage("Download feature not yet implemented!"));
     // TODO: implement
     return null;
+  }
+  
+  public String delete()
+  {
+    getFacesContext().addMessage("dataForm",
+                                 new FacesMessage("Delete feature not yet implemented!"));
+    // TODO: implement
+    return null;
+  }
+  
+  public String viewHeatMaps()
+  {
+    _heatMapViewer.setScreenResult(_screenResult);
+    return "viewHeatMaps";
   }
   
   public String showWell()
@@ -452,9 +463,8 @@ public class ScreenResultViewerController
     return name.replaceAll("[ ()]", "") + "Column";
   }
   
-  private void resetViewLayout()
+  private void resetView()
   {
-    
     _showMetadataTable = true;
     _showRawDataTable = true;
     _plateNumber2FirstRow = null;
@@ -463,8 +473,8 @@ public class ScreenResultViewerController
     _rawDataModel = null;
     setFirstDisplayedRowNumber(1);
     _plateNumber = null;
-    _uniqueDataHeaderNamesMap = null;
     _selectedDataHeaderNames = null;
+    _uniqueDataHeaderNames = null;
 
     // clear the bound UI components, so that they get recreated next time this view is used
     _dataTable = null;
@@ -488,26 +498,6 @@ public class ScreenResultViewerController
       return getDataTable().getFirst();
     }
     return _plateNumber2FirstRow.get(selectedPlateNumber) + 1;
-  }
-
-  private void lazyBuildUniqueDataHeaderNamesMap()
-  {
-    if (_uniqueDataHeaderNamesMap == null) {
-      _uniqueDataHeaderNamesMap = new LinkedHashMap<ResultValueType,String>();
-      List<String> names = new ArrayList<String>();
-      for (ResultValueType rvt : _screenResult.getResultValueTypes()) {
-        names.add(rvt.getName());
-      }
-      List<String> names2 = new ArrayList<String>();
-      for (ResultValueType rvt : _screenResult.getResultValueTypes()) {
-        String name = rvt.getName();
-        if (Collections.frequency(names, name) > 1) {
-          names2.add(name);
-          name += " (" + Collections.frequency(names2, name) + ")";
-        }
-        _uniqueDataHeaderNamesMap.put(rvt, name);
-      }
-    }
   }
 
   private void lazyBuildPlateNumber2FirstRow()
@@ -559,7 +549,7 @@ public class ScreenResultViewerController
       for (String property : properties) {
         try {
           tableData.add(new MetadataRow(_screenResult.getResultValueTypes(),
-                                        getUniqueDataHeaderNamesMap(),
+                                        getUniqueDataHeaderNames(),
                                         property));
         }
         catch (Exception e) {
@@ -587,8 +577,8 @@ public class ScreenResultViewerController
                                                        .first()
                                                        .getResultValues()) {
         RawDataRow dataRow = new RawDataRow(_screenResult.getResultValueTypes(),
-                                      getUniqueDataHeaderNamesMap(),
-                                      majorResultValue.getWell());
+                                            getUniqueDataHeaderNames(),
+                                            majorResultValue.getWell());
         for (Map.Entry<ResultValueType,Iterator> entry : rvtIterators.entrySet()) {
           Iterator rvtIterator = entry.getValue();
           dataRow.addResultValue(entry.getKey(),
@@ -602,10 +592,7 @@ public class ScreenResultViewerController
   
   private void selectAllDataHeaders()
   {
-    _selectedDataHeaderNames = new String[_screenResult.getResultValueTypes()
-                                                       .size()];
-    _selectedDataHeaderNames = getUniqueDataHeaderNamesMap().values()
-                                                            .toArray(new String[getUniqueDataHeaderNamesMap().size()]);
+    _selectedDataHeaderNames = getUniqueDataHeaderNames().asArray();
     _dataHeaderColumnModel = null; // cause to be reinitialized for new set of selected data headers
   }
 
@@ -632,7 +619,7 @@ public class ScreenResultViewerController
      * @param property a bean property of the {@link ResultValueType}, which defines the type of metadata to be displayed by this row
      * @throws Exception if the specified property cannot be determined for a ResultValueType
      */
-    public MetadataRow(Collection<ResultValueType> rvts, Map<ResultValueType,String> uniqueNames, String propertyName) throws Exception
+    public MetadataRow(Collection<ResultValueType> rvts, UniqueDataHeaderNames uniqueNames, String propertyName) throws Exception
     {
       _rowLabel = edu.harvard.med.screensaver.util.BeanUtils.formatPropertyName(propertyName);
       _rvtPropertyValues = new HashMap<String,String>();
@@ -679,9 +666,9 @@ public class ScreenResultViewerController
     private ScreenResult _screenResult;
     private Well _well;
     private Map<String,ResultValue> _resultValues;
-    private Map<ResultValueType,String> _uniqueNames;
+    private UniqueDataHeaderNames _uniqueNames;
     
-    public RawDataRow(SortedSet<ResultValueType> rvts, Map<ResultValueType,String> uniqueNames, Well well)
+    public RawDataRow(SortedSet<ResultValueType> rvts, UniqueDataHeaderNames uniqueNames, Well well)
     {
       _resultValues = new HashMap<String,ResultValue>();
       _uniqueNames = uniqueNames;
