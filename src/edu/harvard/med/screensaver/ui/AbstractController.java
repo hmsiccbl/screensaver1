@@ -15,11 +15,12 @@ import java.util.List;
 import java.util.Map;
 
 import javax.faces.application.Application;
-import javax.faces.component.NamingContainer;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
 import edu.harvard.med.screensaver.ui.util.Messages;
+
+import org.apache.log4j.Logger;
 
 /**
  * A base Controller class for JSF backing beans (beans that handle JSF actions
@@ -29,9 +30,20 @@ import edu.harvard.med.screensaver.ui.util.Messages;
  */
 public abstract class AbstractController
 {
+
+  // static data members
+  
+  private static Logger log = Logger.getLogger(AbstractController.class);
+
+  
+  // private data members
+  
   private Messages _messages;
   private FacesContext _cachedFacesContext;
 
+
+  // bean property methods
+  
   protected Messages getMessages() 
   {
     return _messages;
@@ -43,13 +55,14 @@ public abstract class AbstractController
   }
   
   
-  // JSF convenience methods
+  // public JSF convenience methods
   
   public FacesContext getFacesContext()
   {
-    if (_cachedFacesContext == null) {
+    if (true/*_cachedFacesContext == null*/) {
       _cachedFacesContext = FacesContext.getCurrentInstance();
     }
+    
     return _cachedFacesContext;
   }
   
@@ -60,11 +73,14 @@ public abstract class AbstractController
   
   /**
    * Adds the message of the specified key to the specified component. Any
-   * request parameters that have a name of the form "<componentId>MessageParam*" will
-   * be used to parameterize the messsage.
+   * request parameters that have a name of the form "<componentId>MessageParam*"
+   * will be used to parameterize the messsage.
    * 
    * @param messageKey
-   * @param componentId
+   * @param componentId the "simple" component ID, as specified in the "id"
+   *          attribute of its defining JSF tag (not the fully-qualified client
+   *          ID expression required by UIComponent.findComponent(), such as
+   *          ":formId:subviewId:fieldId").
    */
   public void setMessage(String messageKey, String componentId)
   {
@@ -72,21 +88,61 @@ public abstract class AbstractController
     Map requestMap = getFacesContext().getExternalContext().getRequestMap();
     for (Iterator iter = requestMap.keySet().iterator(); iter.hasNext();) {
       String paramName = (String) iter.next();
+      log.debug("inspecting param " + paramName);
       if (paramName.startsWith(componentId + "MessageParam")) {
+        log.debug("found param " + paramName);
         Object paramValue = (Object) requestMap.get(paramName);
         messageParams.add(paramValue);
       }
-    }  
-    _messages.setFacesMessageForComponent(messageKey, messageParams.toArray(), componentId);
+    }
+    String clientId = getClientId(findComponent(componentId));
+    _messages.setFacesMessageForComponent(messageKey, 
+                                          messageParams.toArray(), 
+                                          clientId);
   }
   
+  /**
+   * Returns the fully-qualified "client" ID of the component, which can be used to 
+   * @param component
+   * @return
+   */
+  public String getClientId(UIComponent component)
+  {
+    if (component == null) {
+      return null;
+    }
+    return component.getClientId(getFacesContext());
+  }
+
   public UIComponent findComponent(String componentId)
   {
-    return getFacesContext().getViewRoot().findComponent(componentId);
+    return doFindComponent(getFacesContext().getViewRoot(), componentId);
   }
   
   public UIComponent findComponent(String componentId, String parentId)
   {
-    return getFacesContext().getViewRoot().findComponent(parentId + NamingContainer.SEPARATOR_CHAR + componentId);
+    UIComponent container = findComponent(parentId);
+    return doFindComponent(container,
+                           componentId);
   }
+  
+  
+  // private methods
+  
+  private UIComponent doFindComponent(UIComponent container, String componentId)
+  {
+    if (componentId.equals(container.getId())) {
+      return container;
+    }
+    
+    for (Iterator iter = container.getChildren().iterator(); iter.hasNext();) {
+      UIComponent child = (UIComponent) iter.next();
+      UIComponent result = doFindComponent(child, componentId);
+      if (result != null) {
+        return result;
+      }
+    }
+    return null;
+  }
+  
 }

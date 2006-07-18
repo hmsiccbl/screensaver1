@@ -42,7 +42,9 @@ hr {
 .errorMessage {
   font-style: italic;
   font-size: 14px;
-  color: red;
+  color: black;
+  background-color: yellow;
+  border: 1px;
 }
 
 .standardTable {

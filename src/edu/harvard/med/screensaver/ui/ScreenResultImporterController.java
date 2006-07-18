@@ -124,8 +124,7 @@ public class ScreenResultImporterController extends AbstractController
 
       if (screenResult == null) {
         setMessage("badUploadedFile",
-                   // TODO: we only want to have to specify the base componentID, not the entire path!
-                   "screenResultImportSubview:uploadScreenResultFileForm:uploadScreenResultFile");
+                   "uploadScreenResultFile");
         return null;
       }
       else if (_screenResultParser.getErrors().size() > 0) {

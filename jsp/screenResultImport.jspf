@@ -6,10 +6,8 @@
   <h:form id="uploadScreenResultFileForm" enctype="multipart/form-data">
     <h:outputLabel for="uploadScreenResultFile" value="Import Screen Result file:" />
     <t:inputFileUpload id="uploadScreenResultFile" value="#{ScreenResultImporter.uploadedFile}" storage="file" accept="application/vnd.ms-excel" required="true" maxlength="134217728" styleClass="input">
-        <h:message for="uploadScreenResultFile" showDetail="true" styleClass="errorMessage">
-          <f:param name="uploadScreenResultFileMessageParam1" value="#{ScreenResultImporter.uploadedFile"/>
-        </h:message>
-        
+      <h:message for="uploadScreenResultFile" showDetail="true" styleClass="errorMessage"/>
+      <f:param name="uploadScreenResultFileMessageParam1" value="#{ScreenResultImporter.uploadedFile"/>
     </t:inputFileUpload>
     <h:commandButton value="Import" action="#{ScreenResultImporter.submit}" styleClass="command" />
   </h:form>

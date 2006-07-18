@@ -54,25 +54,25 @@ public class Messages
   /**
    * @param messageKey
    * @param args
-   * @param componentId
+   * @param clientId the fully-qualified "client" ID of the component
    */
   public FacesMessage setFacesMessageForComponent(
     String messageKey,
     Object[] args,
-    String componentId)
+    String clientId)
   {
     FacesMessage msg = getFacesMessage(messageKey, args);
     assert msg != null : "expected non-null FacesMessage";
     FacesContext.getCurrentInstance()
-                .addMessage(componentId, msg);
+                .addMessage(clientId, msg);
     return msg;
   }
   
   public FacesMessage setFacesMessageForComponent(
     String messageKey,
-    String componentId)
+    String clientId)
   {
-    return setFacesMessageForComponent(messageKey, EMPTY_ARGS, componentId);
+    return setFacesMessageForComponent(messageKey, EMPTY_ARGS, clientId);
   }
 
   
