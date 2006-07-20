@@ -312,7 +312,7 @@
 
   <target 
     name="ddl" 
-    depends="hbm_xml"
+    depends="hbm_xml,distro"
   >
     <description>
       Generate the DDL from the beans classes and associated hbm.xml files
@@ -320,7 +320,7 @@
     <taskdef
       name="hibernatetool" 
       classname="org.hibernate.tool.ant.HibernateToolTask" 
-      classpathref="project.library.path"
+      classpathref="distro.project.classpath"
     />
     <hibernatetool destdir="sql">
       <configuration
