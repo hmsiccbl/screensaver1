@@ -9,6 +9,14 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.sql.SQLException;
+
+import edu.harvard.med.screensaver.CommandLineApplication;
+
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -22,6 +30,9 @@ import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 public class SchemaUtil implements ApplicationContextAware
 {
 
+  private static Logger log = Logger.getLogger(SchemaUtil.class);
+  
+  
   /**
    * The Spring application context.
    * 
@@ -70,6 +81,7 @@ public class SchemaUtil implements ApplicationContextAware
    * Drop the schema that is configured for this Spring+Hibernate enabled project.
    */
   public void dropSchema() throws DataAccessException {
+    log.info("dropping schema for " + makeDataSourceString());
     getSessionFactory().dropDatabaseSchema();
   }
   
@@ -77,6 +89,7 @@ public class SchemaUtil implements ApplicationContextAware
    * Create the schema that is configured for this Spring+Hibernate enabled project.
    */
   public void createSchema() throws DataAccessException {
+    log.info("creating schema for " + makeDataSourceString());
     getSessionFactory().createDatabaseSchema();
   }
   
@@ -87,6 +100,79 @@ public class SchemaUtil implements ApplicationContextAware
   public void recreateSchema() {
     dropSchema();
     createSchema();
+  }
+
+  
+  // private methods
+  
+  private String makeDataSourceString()
+  {
+   BasicDataSource dataSource = (BasicDataSource) _appCtx.getBean("screensaverDataSource");
+   String userName = dataSource.getUsername();
+   if (userName == null || userName.length() == 0) {
+     try {
+      userName = dataSource.getConnection().getMetaData().getUserName();
+    }
+    catch (SQLException e) {
+      userName = "<unknown username>";
+    }
+   }
+   String databaseName = dataSource.getDefaultCatalog();
+   if (databaseName == null || databaseName.length() == 0) {
+     try {
+       databaseName = dataSource.getConnection().getCatalog();
+     }
+     catch (SQLException e) {
+       databaseName = "<unknown database>";
+     }
+   }
+   return userName + "@" + dataSource.getUrl() + databaseName;
+  }
+  
+  
+  // static methods
+  
+  @SuppressWarnings("static-access")
+  public static void main(String[] args)
+  {
+    CommandLineApplication app = new CommandLineApplication(args);
+    app.addCommandLineOption(OptionBuilder.
+                             withArgName("create").
+                             withLongOpt("create").
+                             withDescription("create database schema in an empty database").
+                             create());
+    app.addCommandLineOption(OptionBuilder.
+                             withArgName("drop").
+                             withLongOpt("drop").
+                             withDescription("drop database schema").
+                             create());
+    app.addCommandLineOption(OptionBuilder.
+                             withArgName("recreate").
+                             withLongOpt("recreate").
+                             withDescription("drop and then create database schema").
+                             create());
+    try {
+      if (!app.processOptions(/*acceptDatabaseOptions=*/true, /*showHelpOnError=*/true)) {
+        return;
+      }
+      
+      if (app.isCommandLineFlagSet("drop")) {
+        app.getSpringBean("schemaUtil", SchemaUtil.class).dropSchema();
+      }
+      else if (app.isCommandLineFlagSet("create")) {
+        app.getSpringBean("schemaUtil", SchemaUtil.class).createSchema();
+      }
+      else if (app.isCommandLineFlagSet("recreate")) {
+        app.getSpringBean("schemaUtil", SchemaUtil.class).recreateSchema();
+      }
+    }
+    catch (DataAccessException e) {
+      log.error("DataAccessException: " + e.getMessage());
+      e.printStackTrace();
+    }
+    catch (ParseException e) {
+      // handled sufficiently by CommandLineApplication
+    }
   }
 
 }

@@ -1,0 +1,15 @@
+<%-- MyEclipse HACK: uncomment the next line to enable smart editing features within MyEclipse - -%>
+<jsp:include file="header.jspf"--%>
+
+<f:subview id="screenResultUploaderSubview">
+
+  <h:form id="uploadScreenResultFileForm" enctype="multipart/form-data">
+    <h:outputLabel for="uploadScreenResultFile" value="Import Screen Result file:" />
+    <t:inputFileUpload id="uploadScreenResultFile" value="#{screenResultImporter.uploadedFile}" storage="file" accept="application/vnd.ms-excel" required="true" maxlength="134217728" styleClass="input">
+      <h:message for="uploadScreenResultFile" showDetail="true" styleClass="errorMessage"/>
+      <f:param name="uploadScreenResultFileMessageParam1" value="#{screenResultImporter.uploadedFile"/>
+    </t:inputFileUpload>
+    <h:commandButton value="Import" action="#{screenResultImporter.submit}" styleClass="command" />
+  </h:form>
+
+</f:subview>

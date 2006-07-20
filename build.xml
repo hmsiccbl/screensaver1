@@ -105,6 +105,20 @@
     <srcfiles refid="test.model.src.fileset"/>
   </uptodate> 
 
+  <uptodate property="distro.uptodate" targetfile="${distro.file.tgz}">
+    <srcfiles refid="lib.used.fileset"/>
+    <srcfiles dir="src"/>
+    <srcfiles dir="resources"/>
+  </uptodate>
+      
+  <uptodate property="war.uptodate" targetfile="${war}">
+    <srcfiles refid="lib.used.fileset"/>
+    <srcfiles dir="src"/>
+    <srcfiles dir="resources"/>
+    <srcfiles dir="web"/>
+    <srcfiles dir="jsp"/>
+  </uptodate>
+      
   
   <!-- classpaths --> 
 
@@ -123,10 +137,11 @@
 
 
   <!-- build and deploy -->
-
-  <target name="deploy">
+  
+  
+  <target name="deploy-local">
     <description>
-      Deploy Screensaver to the application server
+      Deploy Screensaver to a localhost application server, building the exploded WAR deployment directly in its destination directory.
     </description>
     <delete dir="${deploy.dir}"/>
     <antcall target="exploded.war">
@@ -134,9 +149,28 @@
     </antcall>
   </target>
 
-  <target name="war">
+  <target 
+    name="deploy-remote"
+    depends="war"
+  >
     <description>
-      Build Screensaver into a Web ARchive file
+      Deploy Screensaver to a remote application server.  Builds WAR deployment, then scp's to destination.
+    </description>
+    <!-- TODO -->
+  </target>
+
+  <!-- an alias for deploy-local target -->
+  <target name="deploy" depends="deploy-local"/>
+
+  <!-- an alias for deploy-remote target -->
+  <target name="release" depends="deploy-remote"/>
+
+  <target 
+    name="war"
+    unless="war.uptodate"
+  >   
+    <description>
+      Build Screensaver into a Web ARchive (WAR) file
     </description>
     <antcall target="exploded.war">
       <param name="exploded.war.dir" location="${war.build.dir}"/>
@@ -276,7 +310,10 @@
 
   <!-- generate ddl -->
 
-  <target name="ddl" depends="hbm_xml">
+  <target 
+    name="ddl" 
+    depends="hbm_xml"
+  >
     <description>
       Generate the DDL from the beans classes and associated hbm.xml files
     </description>
@@ -329,7 +366,7 @@
   </target>
 
 
-  <!-- start and stop web application (Tomcat) -->
+  <!-- Start and stop web application (Tomcat).  (Currently just operates on a localhost Tomcat installation. -->
 
   <target
     name="start"
@@ -416,12 +453,33 @@
     </java>
     <echo message="output written to ${metadata.file}.out"/>
   </target>
+  
+  
+  <!-- schema create/drop operations -->
+  
+  <target 
+    name="schema-recreate"
+    depends="distro"
+    description="Recreate the schema"
+  >
+    <property name="db.options" value=""/>
+    <java
+      classname="edu.harvard.med.screensaver.db.SchemaUtil" 
+      fork="true"
+      classpathref="distro.project.classpath"
+      maxmemory="128m"
+    >
+      <arg line="--recreate ${db.options}"/>
+    </java>
+  </target>
+
  
-   <!-- build a ScreenResultParser deployment -->
+   <!-- build .tgz and .zip distribution files for command-line applications (main methods) into build/distro -->
  
   <target
     name="distro"
-    depends="clean-distro,hbm_xml"
+    depends="hbm_xml"
+    unless="distro.uptodate"
     description="Build a single-file distribution of the project, so that classes containing Main methods can be executed from the command line"
   >
     <!-- TODO: much of this is duplicating what exploded.war target does, so we should generalize operations -->

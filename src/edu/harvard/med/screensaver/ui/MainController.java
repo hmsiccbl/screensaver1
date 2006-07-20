@@ -39,7 +39,7 @@ public class MainController extends AbstractController
   private ScreenResult _sample1ScreenResult;
   private ScreenResult _sample2ScreenResult;
   
-  public void setDAO(DAO dao) {
+  public void setDao(DAO dao) {
     _dao = dao;
   }
 

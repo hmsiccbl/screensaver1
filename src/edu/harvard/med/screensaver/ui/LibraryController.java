@@ -29,7 +29,7 @@ public class LibraryController extends AbstractController
   
   /* Property getter/setter methods */
   
-  public void setDAO(DAO dao) {
+  public void setDao(DAO dao) {
     _dao = dao;
   }
   

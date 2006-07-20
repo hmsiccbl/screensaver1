@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.ui;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.faces.model.SelectItem;
@@ -25,7 +24,7 @@ public class HeatMapViewerController extends AbstractController
 
   // static data members
 
-  private static Logger log = Logger.getLogger(ScreenResultViewerController.class);
+  private static Logger log = Logger.getLogger(HeatMapViewerController.class);
   
   
   // instance data members

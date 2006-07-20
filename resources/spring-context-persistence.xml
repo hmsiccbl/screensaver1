@@ -5,19 +5,19 @@
   <!-- Data sources -->
 
   <bean
-    id="screensaverDevDataSource"
+    id="screensaverDataSource"
     class="org.apache.commons.dbcp.BasicDataSource">
     <property name="driverClassName">
       <value>org.postgresql.Driver</value>
     </property>
     <property name="url">
-      <value>jdbc:postgresql://localhost/screensaverdev</value>
+      <value>jdbc:postgresql://localhost/devscreensaver</value>
     </property>
     <property name="username">
-      <value>screensaverdev</value>
+      <value>devscreensaver</value>
     </property>
     <property name="password">
-      <value>screensaverdev</value>
+      <value>devscreensaver</value>
     </property>
   </bean>
 
@@ -31,11 +31,10 @@
     <property
       name="configLocation"
       value="classpath:hibernate.cfg.xml" />
-    <!-- Add to (override?) datasources found in hbernate.cfg.xml, to support local dev/testing. 
+    <!--  Add to (override?) datasources found in hbernate.cfg.xml, to support local dev/testing. -->
     <property
       name="dataSource"
-      ref="screensaverDevDataSource" />
-    -->      
+      ref="screensaverDataSource" />
     <!-- Use a naming strategy that uses underscores in schema's field names -->
     <property name="namingStrategy">
       <bean

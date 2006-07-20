@@ -8,7 +8,7 @@
   <h:form id="wellForm" title="Well Viewer">
 
     <h:panelGroup>
-      <h:commandButton id="doneCommand" action="#{WellViewer.done}" value="Done" />
+      <h:commandButton id="doneCommand" action="#{wellViewer.done}" value="Done" />
     </h:panelGroup>
 
     <p />

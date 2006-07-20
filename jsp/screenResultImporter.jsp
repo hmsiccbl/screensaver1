@@ -1,7 +1,7 @@
 <%@include file="header.jspf"%>
 
 <h1>
-  Screen Result Import Errors
+  Screen Result Importer and Error Viewer
 </h1>
 
 <f:view>
@@ -9,8 +9,8 @@
   <h:form id="commandForm">
 
     <h:panelGroup>
-      <h:commandButton id="doneCommand" immediate="true" action="#{ScreenResultImporter.done}" value="Done" styleClass="command" />
-      <h:commandButton id="downloadCommand" actionListener="#{ScreenResultImporter.downloadErrorAnnotatedWorkbookListener}" value="Download Error-Annotated Workbook" styleClass="command" />
+      <h:commandButton id="doneCommand" immediate="true" action="#{screenResultImporter.done}" value="Done" styleClass="command" />
+      <h:commandButton id="downloadCommand" actionListener="#{screenResultImporter.downloadErrorAnnotatedWorkbookListener}" value="Download Error-Annotated Workbook" styleClass="command" />
     </h:panelGroup>
 
   </h:form>
@@ -22,14 +22,14 @@
   <p />
 
     <h:panelGroup>
-      <%@include file="screenResultImport.jspf"%>
+      <%@include file="screenResultUploader.jspf"%>
     </h:panelGroup>
 
-    <h:form id="errorsTableForm">
+    <h:form id="errorsTableForm" rendered="#{screenResultImporter.screenResultParser.errors.length > 0}">
 
-      <h:outputText value="Import Errors for #{ScreenResultImporter.uploadedFile.name}" styleClass="sectionHeader"/>
+      <h:outputText value="Import Errors for #{screenResultImporter.uploadedFile.name}" styleClass="sectionHeader"/>
 
-      <t:dataTable id="importErrorsTable" value="#{ScreenResultImporter.importErrors}" var="row" rows="10" styleClass="standardTable" headerClass="tableHeader" rowClasses="row1,row2" columnClasses="">
+      <t:dataTable id="importErrorsTable" value="#{screenResultImporter.importErrors}" var="row" rows="10" styleClass="standardTable" headerClass="tableHeader" rowClasses="row1,row2" columnClasses="">
         <t:column styleClass="column">
           <f:facet name="header">
             <h:outputText value="Worksheet" />

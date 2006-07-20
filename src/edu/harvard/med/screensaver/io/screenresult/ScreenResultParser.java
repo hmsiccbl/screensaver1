@@ -24,6 +24,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.CellValueParser;
@@ -39,15 +40,11 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
+import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Parses data from a workbook files (a.k.a. Excel spreadsheets) necessary for
@@ -200,40 +197,40 @@ public class ScreenResultParser
 
   // static methods
 
-  public static void main(String[] args) throws FileNotFoundException
+@SuppressWarnings("static-access")
+public static void main(String[] args) throws FileNotFoundException
   {
-    Options options = new Options();
-    options.addOption(new Option("metadatafile",
-                                 true,
-                                 "the file location of the Excel spreadsheet holding the Screen Result metadata"));
-    Option wellsToPrintOption = new Option("wellstoprint",
-                                           true,
-                                           "the number of wells to print out");
-    wellsToPrintOption.setOptionalArg(true);
-    options.addOption(wellsToPrintOption);
-    Option ignoreFilePaths = new Option("ignorefilepaths",
-                                        false,
-                                        "whether to ignore the file paths for the raw data spreadsheet " +
-                                        "files (as specified in the metadata spreadsheet); if option is " +
-                                        "provided all files will be expected to be found in the same directory");
-    ignoreFilePaths.setOptionalArg(true);
-    options.addOption(ignoreFilePaths);
+    CommandLineApplication app = new CommandLineApplication(args);
+    app.addCommandLineOption(OptionBuilder.
+                             withArgName("metadatafile").
+                             withLongOpt("metadatafile").
+                             hasArg().
+                             withDescription("the file location of the Excel spreadsheet holding the Screen Result metadata").
+                             create());
+    app.addCommandLineOption(OptionBuilder.
+                             withArgName("wellstoprint").
+                             withLongOpt("wellstoprint").
+                             hasArg().
+                             isRequired(false).
+                             withDescription("the number of wells to print out").
+                             create());
+    app.addCommandLineOption(OptionBuilder.
+                             withArgName("ignorefilepaths").
+                             withLongOpt("ignorefilepaths").
+                             withDescription("whether to ignore the file paths for the raw data spreadsheet " +
+                                             "files (as specified in the metadata spreadsheet); if option is " +
+                                             "provided all files will be expected to be found in the same directory").
+                             create());
     try {
-      CommandLine cmdLine = new GnuParser().parse(options, args);
-
-      ClassPathXmlApplicationContext appCtx = new ClassPathXmlApplicationContext(new String[] { 
-        "spring-context-logging.xml",
-        "spring-context-services.xml", 
-      });
-      ScreenResultParser screenResultParser = (ScreenResultParser) appCtx.getBean("screenResultParser");
+      ScreenResultParser screenResultParser = (ScreenResultParser) app.getSpringBean("screenResultParser");
       try {
-        File metadataFileToParse = new File(cmdLine.getOptionValue("metadatafile"));
+        File metadataFileToParse = app.getCommandLineOptionValue("metadatafile", File.class);
         cleanOutputDirectory(metadataFileToParse.getParentFile());
         ScreenResult screenResult = screenResultParser.parse(metadataFileToParse,
-                                                             cmdLine.hasOption("ignorefilepaths" ));
+                                                             app.isCommandLineFlagSet("ignorefilepaths"));
         screenResultParser.outputErrorsInAnnotatedWorkbooks(ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
-        if (cmdLine.hasOption("wellstoprint")) {
-          new ScreenResultPrinter(screenResult).print(new Integer(cmdLine.getOptionValue("wellstoprint")));
+        if (app.isCommandLineFlagSet("wellstoprint")) {
+          new ScreenResultPrinter(screenResult).print(app.getCommandLineOptionValue("wellstoprint", Integer.class));
         }
         else {
           new ScreenResultPrinter(screenResult).print();
@@ -254,6 +251,10 @@ public class ScreenResultParser
     }
     catch (ParseException e) {
       System.err.println("error parsing command line options: " + e.getMessage());
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      System.err.println("application error: " + e.getMessage());
     }
   }
 
@@ -843,6 +844,5 @@ public class ScreenResultParser
       throw new UnsupportedOperationException();
     }
   }
-
 
 }
