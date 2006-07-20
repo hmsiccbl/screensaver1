@@ -205,7 +205,8 @@ public static void main(String[] args) throws FileNotFoundException
                              withArgName("metadatafile").
                              withLongOpt("metadatafile").
                              hasArg().
-                             withDescription("the file location of the Excel spreadsheet holding the Screen Result metadata").
+                             isRequired().
+                             withDescription("the file location of the Excel workbook file holding the Screen Result metadata").
                              create());
     app.addCommandLineOption(OptionBuilder.
                              withArgName("wellstoprint").
@@ -217,13 +218,15 @@ public static void main(String[] args) throws FileNotFoundException
     app.addCommandLineOption(OptionBuilder.
                              withArgName("ignorefilepaths").
                              withLongOpt("ignorefilepaths").
-                             withDescription("whether to ignore the file paths for the raw data spreadsheet " +
-                                             "files (as specified in the metadata spreadsheet); if option is " +
+                             hasArg(false).
+                             withDescription("whether to ignore the file paths for the raw data workbook " +
+                                             "files (as specified in the metadata workbook); if option is " +
                                              "provided all files will be expected to be found in the same directory").
                              create());
     try {
       ScreenResultParser screenResultParser = (ScreenResultParser) app.getSpringBean("screenResultParser");
       try {
+        app.processOptions(/*acceptDatabaseOptions=*/false, /*showHelpOnError=*/true);
         File metadataFileToParse = app.getCommandLineOptionValue("metadatafile", File.class);
         cleanOutputDirectory(metadataFileToParse.getParentFile());
         ScreenResult screenResult = screenResultParser.parse(metadataFileToParse,

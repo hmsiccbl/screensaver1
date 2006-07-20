@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
@@ -108,7 +109,7 @@ public class CommandLineApplication
       _option2DefaultValue.containsKey(optionName)) {
       return _option2DefaultValue.get(optionName).toString();
     }
-    Object optionValue = _cmdLine.getOptionObject(optionName);
+    Object optionValue = _cmdLine.getOptionValue(optionName);
     return optionValue == null ? "" : optionValue.toString();
   }
   
@@ -127,7 +128,8 @@ public class CommandLineApplication
       _option2DefaultValue.containsKey(optionName)) {
       return (T) _option2DefaultValue.get(optionName);
     }
-    return (T) ofType.getClass().getConstructor(String.class).newInstance(getCommandLineOptionValue(optionName));
+    Constructor cstr = ofType.getConstructor(String.class);
+    return (T) cstr.newInstance(getCommandLineOptionValue(optionName));
   }
   
   public boolean isCommandLineFlagSet(String optionName) throws ParseException
@@ -173,13 +175,15 @@ public class CommandLineApplication
       showHelp();
     }
 
-    BasicDataSource dataSource = getSpringBean("screensaverDataSource",
-                                               BasicDataSource.class);
-    dataSource.setUsername(getCommandLineOptionValue("dbuser"));
-    dataSource.setPassword(getCommandLineOptionValue("dbpassword"));
-    dataSource.setUrl("jdbc:postgresql://" + getCommandLineOptionValue("dbhost") + (getCommandLineOptionValue("dbport").length() > 0
-      ? (":" + getCommandLineOptionValue("dbport")) : "") + "/" + getCommandLineOptionValue("dbname"));
-    
+    if (acceptDatabaseOptions) {
+      BasicDataSource dataSource = getSpringBean("screensaverDataSource",
+                                                 BasicDataSource.class);
+      dataSource.setUsername(getCommandLineOptionValue("dbuser"));
+      dataSource.setPassword(getCommandLineOptionValue("dbpassword"));
+      dataSource.setUrl("jdbc:postgresql://" + getCommandLineOptionValue("dbhost") + (getCommandLineOptionValue("dbport").length() > 0
+        ? (":" + getCommandLineOptionValue("dbport")) : "") + "/" + getCommandLineOptionValue("dbname"));
+    }
+      
     return true;
   }
 
