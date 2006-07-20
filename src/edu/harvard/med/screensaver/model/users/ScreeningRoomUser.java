@@ -63,7 +63,7 @@ public class ScreeningRoomUser extends AbstractEntity
   private String _comments;
 
 
-  // public constructor
+  // public constructors
 
   /**
    * Constructs an initialized <code>ScreeningRoomUser</code> object.
@@ -72,7 +72,51 @@ public class ScreeningRoomUser extends AbstractEntity
    * @param firstName the first name
    * @param lastName the last name
    * @param email the email
-   * @param eCommonsId the eCommons ID
+   * @param eCommonsId the eCommonds ID
+   * @param harvardId the harvard ID
+   * @param phone the phone number
+   * @param userClassification the user classification
+   * @param nonScreeningUser the non-screening user
+   * @param rnaiUser the RNAi user
+   * @param mailingAddress the mailing address
+   * @param comments the comments
+   */
+  public ScreeningRoomUser(
+    Date dateCreated,
+    String firstName,
+    String lastName,
+    String email,
+    String eCommonsId,
+    String harvardId,
+    String phone,
+    UserClassification userClassification,
+    boolean nonScreeningUser,
+    boolean rnaiUser,
+    String mailingAddress,
+    String comments)
+  {
+    this(
+      dateCreated,
+      firstName,
+      lastName,
+      email,
+      userClassification, 
+      nonScreeningUser,
+      rnaiUser);
+    setECommonsId(eCommonsId);
+    setHarvardId(harvardId);
+    setPhone(phone);
+    setMailingAddress(mailingAddress);
+    setComments(comments);
+  }
+
+  /**
+   * Constructs an initialized <code>ScreeningRoomUser</code> object.
+   *
+   * @param dateCreated the date created
+   * @param firstName the first name
+   * @param lastName the last name
+   * @param email the email
    * @param userClassification the user classification
    * @param nonScreeningUser the non-screening user
    * @param rnaiUser the RNAi user
@@ -82,7 +126,6 @@ public class ScreeningRoomUser extends AbstractEntity
     String firstName,
     String lastName,
     String email,
-    String eCommonsId,
     UserClassification userClassification,
     boolean nonScreeningUser,
     boolean rnaiUser)
@@ -91,7 +134,6 @@ public class ScreeningRoomUser extends AbstractEntity
     _firstName = firstName;
     _lastName = lastName;
     _email = email;
-    _eCommonsId = eCommonsId;
     _userClassification = userClassification;
     _nonScreeningUser = nonScreeningUser;
     _rnaiUser = rnaiUser;
@@ -429,8 +471,6 @@ public class ScreeningRoomUser extends AbstractEntity
    * @return the eCommons ID
    * @hibernate.property
    *   type="text"
-   *   not-null="true"
-   *   unique="true"
    */
   public String getECommonsId()
   {
@@ -706,7 +746,7 @@ public class ScreeningRoomUser extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    return getECommonsId();
+    return getEmail();
   }
 
   
