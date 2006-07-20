@@ -70,10 +70,19 @@ implements UserType
   
   // protected constructor
   
-  protected VocabularyUserType(VT [] vocabularyTerms) {
+  protected VocabularyUserType(VT [] vocabularyTerms)
+  {
     for (VT vocabularyTerm : vocabularyTerms) {
       _valueToTerm.put(vocabularyTerm.getValue(), vocabularyTerm);
     }
+  }
+  
+  
+  // public method for general use
+  
+  public VT getTermForValue(String value)
+  {
+    return _valueToTerm.get(value);
   }
   
   
