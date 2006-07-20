@@ -12,4 +12,13 @@
     <!-- constructor-arg ref="dao"/-->
   </bean>
   
+  <bean 
+    id="screenDBDataLoader"
+    class="edu.harvard.med.screensaver.db.screendb.ScreenDBDataLoader"
+    singleton="true"
+  >
+    <constructor-arg ref="dao"/>
+    <constructor-arg ref="schemaUtil"/>
+  </bean>
+
 </beans>
