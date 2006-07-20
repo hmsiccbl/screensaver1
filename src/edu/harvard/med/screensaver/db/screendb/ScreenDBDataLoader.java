@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -39,10 +40,13 @@ public class ScreenDBDataLoader
   }
   
   private DAO _dao;
+  private SchemaUtil _schemaUtil;
   
-  public ScreenDBDataLoader(DAO dao)
+  public ScreenDBDataLoader(DAO dao, SchemaUtil schemaUtil)
   {
     _dao = dao;
+    _schemaUtil = schemaUtil;
+    _schemaUtil.recreateSchema();
   }
   
   public void loadScreenDBData()
@@ -52,6 +56,8 @@ public class ScreenDBDataLoader
       _dao.persistEntity(library);
     }
     for (ScreeningRoomUser screeningRoomUser : screenDBProxy.getScreeningRoomUsers()) {
+      log.info("saving user " + screeningRoomUser);
+      log.info("with lab head " + screeningRoomUser.getLabHead());
       _dao.persistEntity(screeningRoomUser);
     }
     for (Screen screen : screenDBProxy.getScreens()) {
