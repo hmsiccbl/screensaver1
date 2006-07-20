@@ -29,7 +29,8 @@ public enum UserClassification implements VocabularyTerm
   RESEARCH_ASSISTANT("Research Assistant"),
   POSTDOC("Postdoc"),
   ICCBL_NSRB_STAFF("ICCB-L/NSRB staff"),
-  OTHER("Other")
+  OTHER("Other"),
+  UNASSIGNED("Unassigned");
   ;
 
  

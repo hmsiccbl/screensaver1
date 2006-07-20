@@ -139,8 +139,6 @@ public class ScreenDBProxy
         String shortName = resultSet.getString("short_name");
         LibraryType libraryType = libraryTypeUserType.getTermForValue(
           resultSet.getString("library_type"));
-        log.info("lib type 1 = " + resultSet.getString("library_type"));
-        log.info("lib type 2 = " + libraryType);
         Integer startPlate = resultSet.getInt("start_plate");
         Integer endPlate = resultSet.getInt("end_plate");
         Library library = new Library(
@@ -183,6 +181,11 @@ public class ScreenDBProxy
             resultSet.getString("first") + "." +
             resultSet.getString("last") + "@email.is.a.required.field.com";
         }
+        UserClassification classification = 
+          userClassificationUserType.getTermForValue(resultSet.getString("classification"));
+        if (classification == null) {
+          classification = UserClassification.UNASSIGNED;
+        }
         ScreeningRoomUser user = new ScreeningRoomUser(
           resultSet.getDate("date_created"),
           resultSet.getString("first"),
@@ -191,7 +194,7 @@ public class ScreenDBProxy
           null, // TODO: put in the eCommonsId when it is in ScreenDB
           resultSet.getString("harvard_id"),
           resultSet.getString("phone"),
-          userClassificationUserType.getTermForValue(resultSet.getString("classification")),
+          classification,
           resultSet.getBoolean("non_user"),
           resultSet.getBoolean("rani_user"),
           resultSet.getString("lab_location"),
