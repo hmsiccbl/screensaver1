@@ -85,6 +85,45 @@ public class Screen extends AbstractEntity
     Integer screenNumber,
     Date dateCreated,
     ScreenType screenType,
+    String title,
+    Date dataMeetingScheduled,
+    Date dataMeetingComplete,
+    String summary,
+    String comments,
+    String abaseStudyId,
+    String abaseProtocolId)
+  {
+    this(
+      leadScreener,
+      labHead,
+      screenNumber,
+      dateCreated,
+      screenType,
+      title);
+    _dataMeetingScheduled = dataMeetingScheduled;
+    _dataMeetingComplete = dataMeetingComplete;
+    _summary = summary;
+    _comments = comments;
+    _abaseStudyId = abaseStudyId;
+    _abaseProtocolId = abaseProtocolId;
+  }
+  
+  /**
+   * Constructs an initialized <code>Screen</code> object.
+   *
+   * @param leadScreener the lead screener
+   * @param labHead the lab head
+   * @param screenNumber the screen number
+   * @param dateCreated the date created
+   * @param screenType the screen type
+   * @param title the title
+   */
+  public Screen(
+    ScreeningRoomUser leadScreener,
+    ScreeningRoomUser labHead,
+    Integer screenNumber,
+    Date dateCreated,
+    ScreenType screenType,
     String title)
   {
     if (leadScreener == null || labHead == null) {
