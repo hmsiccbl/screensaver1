@@ -13,8 +13,8 @@ my $entity = {
          ["description",             "description",               "String",                0,     0,     0,    0,    0,    ],
          ["vendor",                  "vendor",                    "String",                0,     0,     0,    0,    0,    ],
          ["libraryType",             "library type",              "LibraryType",           1,     1,     0,    0,    0,    ],
-         ["startPlate",              "start plate",               "Integer",               0,     1,     1,    0,    0,    ],
-         ["endPlate",                "end plate",                 "Integer",               0,     1,     1,    0,    0,    ],
+         ["startPlate",              "start plate",               "Integer",               0,     1,     0,    0,    0,    ],
+         ["endPlate",                "end plate",                 "Integer",               0,     1,     0,    0,    0,    ],
 
          ["alias",                   "alias",                     "String",                0,     0,     0,    0,    0,    ],
          ["isScreenable",            "screenability",             "IsScreenable",          1,     0,     0,    0,    0,    ],

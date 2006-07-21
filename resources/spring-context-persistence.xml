@@ -10,22 +10,18 @@
     class="org.apache.commons.dbcp.BasicDataSource">
     <description>DataSource used for running web application and utility programs</description>
     <property name="driverClassName" value="org.postgresql.Driver"/>
-    <property name="url" value="jdbc:postgresql://${host}/${database}"/>
-    <property name="username" value="${user}"/>
+    <property name="url" value="jdbc:postgresql://${SCREENSAVER_PGSQL_SERVER}/${SCREENSAVER_PGSQL_DB}"/>
+    <property name="username" value="${SCREENSAVER_PGSQL_USER}"/>
+    <property name="password" value="${SCREENSAVER_PGSQL_PASSWORD}"/>
   </bean>
   
   <bean
     id="dataSourceConfigurer"
     class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <property name="location" value="classpath:datasource.properties"/>
-    <!-- Specify default properties, used if running from the Eclipse environment (can override these by defining Java system properties) -->
-    <property name="properties">
-      <props>
-        <prop key="host">localhost</prop>
-        <prop key="database">testscreensaver1</prop>
-        <prop key="user">testscreensaver1</prop>
-      </props>
-    </property>
+    <!-- On orchestra-hosted Tomcat, datasource settings will be available as environment variables, so use them -->
+    <property name="searchSystemEnvironment" value="true"/>
+    <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
   </bean>
 
 

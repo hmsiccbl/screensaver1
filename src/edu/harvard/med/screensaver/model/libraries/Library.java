@@ -288,7 +288,7 @@ public class Library extends AbstractEntity
    * @return the start plate
    * @hibernate.property
    *   not-null="true"
-   *   unique="true"
+   *   unique="false"
    */
   public Integer getStartPlate()
   {
@@ -311,7 +311,7 @@ public class Library extends AbstractEntity
    * @return the end plate
    * @hibernate.property
    *   not-null="true"
-   *   unique="true"
+   *   unique="false"
    */
   public Integer getEndPlate()
   {

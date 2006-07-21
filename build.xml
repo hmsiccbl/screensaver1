@@ -53,9 +53,9 @@
   <property name="distro.build.dir" location="build/distro/screensaver"/>
   <property name="distro.file.tgz" location="build/screensaver.tgz"/> 
   <property name="distro.file.zip" location="build/screensaver.zip"/>
-  <property name="data.source" value="local" 
+  <property name="datasource" value="local" 
     description="Valid values are wildcard substring of 'resources/datasource-*.properties'"/>
-  <property name="data.source.file" location="resources/datasource-${data.source}.properties"/>
+  <property name="datasource.file" location="resources/datasource-${datasource}.properties"/>
   <condition 
     property="log4j.properties.file"
     value="resources/log4j.properties"
@@ -461,7 +461,7 @@
       for either a WAR or non-web build.  Builds into the directory specified by
       the 'build.dir' property.  This target directory will contain 'classes/', 
       'resources/', and 'lib/' subdirectories.  Configures the build to use a 
-      the DataSource specified by the 'data.source' property.
+      the DataSource specified by the 'datasource' property.
     </description>
     
     <property name="classes.dir" value="${build.dir}/classes"/>
@@ -504,16 +504,7 @@
     </copy>
     
     <!-- copy the selected datasource properties file to its standard name ("datasource.properties") in the build directory -->
-    <copy tofile="${classes.dir}/datasource.properties" verbose="${verbose}" file="${data.source.file}"/>
-
-    <!-- update DataSource configuration from command line options 
-    <echo message="setting data source to ${data.source}"/>
-    <replaceregexp
-      file="${classes.dir}/spring-context-persistence.xml"
-      match="(ref=.).+DataSource"
-      replace="\1${data.source}"
-    />
-    -->
+    <copy file="${datasource.file}" tofile="${classes.dir}/datasource.properties" verbose="${verbose}"/>
   </target>
     
 
