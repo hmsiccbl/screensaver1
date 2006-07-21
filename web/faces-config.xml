@@ -32,7 +32,7 @@
     </managed-property>
     <managed-property>
       <property-name>libraryController</property-name>
-      <value>#{Library}</value>
+      <value>#{library}</value>
     </managed-property>
     <managed-property>
       <property-name>messages</property-name>
@@ -40,7 +40,7 @@
     </managed-property>
     <managed-property>
       <property-name>screenResultViewerController</property-name>
-      <value>#{ScreenResultViewer}</value>
+      <value>#{screenResultViewer}</value>
     </managed-property>
     <managed-property>
       <property-name>screenResultParser</property-name>

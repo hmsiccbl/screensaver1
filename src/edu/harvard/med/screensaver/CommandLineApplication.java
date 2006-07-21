@@ -27,14 +27,22 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Convenience class for instantiating a Screensaver-based command-line
- * application.  The main purpose of this class is to house the Spring framework
+ * application. The main purpose of this class is to house the Spring framework
  * bootstrapping code, so that developers can forget the details of how to do
  * this (and don't have to cut and paste code between various main() methods).
- * Also provides a some help with
+ * Also provides a some help with:
  * <ul>
- * <li>command-line argument parsing
- * <li>obtaining Spring-managed beans
+ * <li>command-line argument parsing (including special-case handling of
+ * database connection options)
+ * <li>obtaining Spring-managed beans.
  * <ul>.
+ * <p>
+ * Normally, a screensaver distribution will use the database connection
+ * settings specified in "classpath:datasource.properties". However, if
+ * {@link #processOptions(boolean, boolean)} is called with
+ * acceptDatabaseOptions=true, the command line options 'dbhost', 'dbport',
+ * 'dbname', 'dbuser', and 'dbpassword' will be used to configure the database
+ * connection settings.
  * 
  * @author ant
  */
@@ -143,10 +151,13 @@ public class CommandLineApplication
     new HelpFormatter().printHelp("<command>", _options);
   }
   
-  
-  // private methods
-
   /**
+   * @param acceptDatabaseOptions
+   * @param showHelpOnError if <code>true</code> and method returns
+   *          <code>false</code>, calling code should not call
+   *          {@link #getCommandLineOptionValue} or
+   *          {@link #isCommandLineFlagSet(String)}.
+   * @return
    * @throws ParseException
    */
   public boolean processOptions(
@@ -188,6 +199,8 @@ public class CommandLineApplication
   }
 
   
+  // private methods
+
   /**
    * Adds "dbhost", "dbport", "dbuser", "dbpassword", and "dbname" options to
    * the command line parser, enabling this CommandLineApplication to access a

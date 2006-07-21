@@ -4,20 +4,27 @@
 
   <!-- Data sources -->
 
+  <!-- Will be modified by our dataSourceConfigurer (PropertyPlaceholderConfigurer) bean, to replace the ${...} variable references with real values from a properties file. -->
   <bean
     id="screensaverDataSource"
     class="org.apache.commons.dbcp.BasicDataSource">
-    <property name="driverClassName">
-      <value>org.postgresql.Driver</value>
-    </property>
-    <property name="url">
-      <value>jdbc:postgresql://localhost/devscreensaver</value>
-    </property>
-    <property name="username">
-      <value>devscreensaver</value>
-    </property>
-    <property name="password">
-      <value>devscreensaver</value>
+    <description>DataSource used for running web application and utility programs</description>
+    <property name="driverClassName" value="org.postgresql.Driver"/>
+    <property name="url" value="jdbc:postgresql://${host}/${database}"/>
+    <property name="username" value="${user}"/>
+  </bean>
+  
+  <bean
+    id="dataSourceConfigurer"
+    class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="location" value="classpath:datasource.properties"/>
+    <!-- Specify default properties, used if running from the Eclipse environment (can override these by defining Java system properties) -->
+    <property name="properties">
+      <props>
+        <prop key="host">localhost</prop>
+        <prop key="database">testscreensaver1</prop>
+        <prop key="user">testscreensaver1</prop>
+      </props>
     </property>
   </bean>
 
@@ -31,7 +38,8 @@
     <property
       name="configLocation"
       value="classpath:hibernate.cfg.xml" />
-    <!--  Add to (override?) datasources found in hbernate.cfg.xml, to support local dev/testing. -->
+    <!-- Specify the DataSource.  Overrides the datasource found in
+    hibernate.cfg.xml.  -->
     <property
       name="dataSource"
       ref="screensaverDataSource" />

@@ -22,9 +22,9 @@
   <!-- properties -->
 
   <property 
-   name="debug"
-   description="controls whether tasks should be 'debug-aware'; provides a short-hand command-line option for setting all *.debug options appropriately"
-   value="false"/>
+    name="debug"
+    description="controls whether tasks should be 'debug-aware'; provides a short-hand command-line option for setting all *.debug options appropriately"
+    value="false"/>
   <property
     name="javac.debug"
     description="controls whether Java compilation generates debug information in class files"
@@ -52,8 +52,18 @@
   <property name="javadoc.dir" location="build/api"/>
   <property name="distro.build.dir" location="build/distro/screensaver"/>
   <property name="distro.file.tgz" location="build/screensaver.tgz"/> 
-  <property name="distro.file.zip" location="build/screensaver.zip"/> 
- 
+  <property name="distro.file.zip" location="build/screensaver.zip"/>
+  <property name="data.source" value="local" 
+    description="Valid values are wildcard substring of 'resources/datasource-*.properties'"/>
+  <property name="data.source.file" location="resources/datasource-${data.source}.properties"/>
+  <condition 
+    property="log4j.properties.file"
+    value="resources/log4j.properties"
+    else="resources/log4j.debug.properties">
+    <isfalse value="${debug}"/>
+  </condition>  
+
+
   <!-- file sets -->
 
   <fileset
@@ -181,30 +191,24 @@
     />
   </target>
 
+
   <target
     name="exploded.war"
-    depends="hbm_xml"
   >
     <description>
-      Generate exploded Web ARchive directory structure for the Screensaver web application.
-      Used to 1) create a WAR file, and 2) deploy exploded WAR file to application server.
+      A "subroutine" target that generates an exploded Web ARchive (WAR) 
+      directory structure for the Screensaver web application.
+      Used to 1) create a WAR file, and 2) build an exploded WAR 
+      directory structure directly to a localhost application server.
     </description>
     <property name="webinf.dir" value="${exploded.war.dir}/WEB-INF"/>
     <property name="metainf.dir" value="${exploded.war.dir}/META-INF"/>
     <property name="classes.dir" value="${webinf.dir}/classes"/>
 
-    <mkdir dir="${classes.dir}"/>
-  
-    <!-- note: javac task clears out ${classes.dir}, so any files we copy there should be done afterwards -->
-    <javac 
-      srcdir="${src.dir}"
-      destdir="${classes.dir}"
-      classpathref="project.library.path"
-      debug="${javac.debug}" 
-      optimize="${javac.optimize}"
-      listfiles="${verbose}" 
-    />
-  
+    <antcall target="build">
+      <param name="build.dir" location="${webinf.dir}"/>
+    </antcall>
+
     <copy 
       file="web/manifest.mf" 
       tofile="${metainf.dir}/MANIFEST.MF" 
@@ -246,32 +250,6 @@
       <fileset dir="web/images"/>
     </copy>
 
-    <!-- deploy log4j.debug.properties as log4j.properties; will be overwritten by normal log4.properties unless 'debug' property is set -->
-    <copy
-      file="resources/log4j.debug.properties"
-      tofile="${classes.dir}/log4j.properties"
-      verbose="${verbose}"/>
-      
-    <copy 
-      todir="${classes.dir}" 
-      verbose="${verbose}"
-    >
-      <fileset dir="resources">
-        <include name="**/*"/>
-        
-        <exclude name="log4j.debug.properties"/>
-        <excludesfile name="log4j.properties" if="${debug}"/>
-      </fileset>    
-    </copy>
-  
-    <copy
-      todir="${webinf.dir}/lib"
-      flatten="true"
-      verbose="${verbose}"      
-    >
-      <fileset refid="lib.used.fileset"/>
-    </copy>
-  
   </target>
 
   <target 
@@ -473,43 +451,86 @@
     </java>
   </target>
 
- 
-   <!-- build .tgz and .zip distribution files for command-line applications (main methods) into build/distro -->
- 
+
+  <!-- TODO: should call hbm_xml with a destination dir parameter, to allow generated hibernate files to be custom-built into ${build.dir}, since they can differ depending upon Ant cmd-line options (e.g., -Dtest=true) -->
   <target
-    name="distro"
+    name="build"
     depends="hbm_xml"
-    unless="distro.uptodate"
-    description="Build a single-file distribution of the project, so that classes containing Main methods can be executed from the command line"
   >
-    <!-- TODO: much of this is duplicating what exploded.war target does, so we should generalize operations -->
-    <mkdir dir="${distro.build.dir}/classes"/>
+    <description>A "subroutine" target that performs the common build operations 
+      for either a WAR or non-web build.  Builds into the directory specified by
+      the 'build.dir' property.  This target directory will contain 'classes/', 
+      'resources/', and 'lib/' subdirectories.  Configures the build to use a 
+      the DataSource specified by the 'data.source' property.
+    </description>
+    
+    <property name="classes.dir" value="${build.dir}/classes"/>
+
+    <mkdir dir="${classes.dir}"/>
+    <!-- note: javac task clears out ${classes.dir}, so any files we copy there should be done afterwards -->
     <javac 
       srcdir="${src.dir}"
-      destdir="${distro.build.dir}/classes"
+      destdir="${classes.dir}"
       classpathref="project.library.path"
       debug="${javac.debug}" 
       optimize="${javac.optimize}"
       listfiles="${verbose}" 
     />
+
     <copy
-      todir="${distro.build.dir}/lib"
+      todir="${build.dir}/lib"
       flatten="true"
       verbose="${verbose}" 
     >
       <fileset refid="lib.used.fileset"/>
-   </copy> 
-      <copy 
-      todir="${distro.build.dir}/classes" 
+    </copy> 
+
+    <!-- conditionally use log4j.debug.properties in place of log4j.properties; will be
+    overwritten by normal log4.properties unless 'debug' property is set -->
+    <copy
+      file="${log4j.properties.file}"
+      tofile="${classes.dir}/log4j.properties"
+      verbose="${verbose}"/>
+      
+    <copy 
+      todir="${classes.dir}" 
       verbose="${verbose}"
     >
       <fileset dir="resources">
         <include name="**/*"/>
-        <exclude name="log4j.debug.properties"/>
-        <excludesfile name="log4j.properties" if="${debug}"/>
+        <exclude name="log4j*properties"/>
+        <exclude name="datasource*properties"/>
       </fileset>    
     </copy>
     
+    <!-- copy the selected datasource properties file to its standard name ("datasource.properties") in the build directory -->
+    <copy tofile="${classes.dir}/datasource.properties" verbose="${verbose}" file="${data.source.file}"/>
+
+    <!-- update DataSource configuration from command line options 
+    <echo message="setting data source to ${data.source}"/>
+    <replaceregexp
+      file="${classes.dir}/spring-context-persistence.xml"
+      match="(ref=.).+DataSource"
+      replace="\1${data.source}"
+    />
+    -->
+  </target>
+    
+
+ 
+  <!-- build .tgz and .zip distribution files for command-line applications (main methods) into build/distro -->
+ 
+  <target
+    name="distro"
+    unless="distro.uptodate"
+    description="Build a single-file distribution of the non-web portions of
+       the project, so that classes containing Main methods can be executed from
+       the command line."
+  >
+    <antcall target="build">
+      <param name="build.dir" location="${distro.build.dir}"/>
+    </antcall>
+
     <tar
       destfile="${distro.file.tgz}" 
       basedir="${distro.build.dir}/.."

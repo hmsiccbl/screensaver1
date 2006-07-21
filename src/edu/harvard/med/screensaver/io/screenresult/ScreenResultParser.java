@@ -226,7 +226,9 @@ public static void main(String[] args) throws FileNotFoundException
     try {
       ScreenResultParser screenResultParser = (ScreenResultParser) app.getSpringBean("screenResultParser");
       try {
-        app.processOptions(/*acceptDatabaseOptions=*/false, /*showHelpOnError=*/true);
+        if (!app.processOptions(/*acceptDatabaseOptions=*/false, /*showHelpOnError=*/true)) {
+          return;
+        }
         File metadataFileToParse = app.getCommandLineOptionValue("metadatafile", File.class);
         cleanOutputDirectory(metadataFileToParse.getParentFile());
         ScreenResult screenResult = screenResultParser.parse(metadataFileToParse,
