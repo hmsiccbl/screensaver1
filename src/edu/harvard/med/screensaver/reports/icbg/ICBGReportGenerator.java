@@ -13,7 +13,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 
 import org.apache.log4j.Logger;
@@ -23,6 +26,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import edu.harvard.med.screensaver.io.screenresult.MockDaoForScreenResultParserTest;
 import edu.harvard.med.screensaver.io.screenresult.ScreenResultParser;
+import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -44,6 +48,57 @@ public class ICBGReportGenerator
   private static final String RESULTS_DIR =
     "icbg-support/screen-result-input-data";
   private static final String REPORT_FILENAME = "report.xls";
+  private static final Set<Integer> icbgScreens = new HashSet<Integer>();
+  static {
+    icbgScreens.add(116);
+    icbgScreens.add(131);
+    icbgScreens.add(227);
+    icbgScreens.add(272);
+    icbgScreens.add(276);
+    icbgScreens.add(301);
+    icbgScreens.add(327);
+    icbgScreens.add(337);
+    icbgScreens.add(343);
+    icbgScreens.add(367);
+    icbgScreens.add(412);
+    icbgScreens.add(415);
+    icbgScreens.add(422);
+    icbgScreens.add(428);
+    icbgScreens.add(430);
+    icbgScreens.add(449);
+    icbgScreens.add(452);
+    icbgScreens.add(453);
+    icbgScreens.add(454);
+    icbgScreens.add(460);
+    icbgScreens.add(461);
+    icbgScreens.add(462);
+    icbgScreens.add(464);    
+    icbgScreens.add(472);
+    icbgScreens.add(473);
+    icbgScreens.add(476);
+    icbgScreens.add(477);
+    icbgScreens.add(499);
+    icbgScreens.add(500);
+    icbgScreens.add(501);
+    icbgScreens.add(504);
+    icbgScreens.add(506);
+    icbgScreens.add(508);
+    icbgScreens.add(514);
+    icbgScreens.add(516);
+    icbgScreens.add(517);
+    icbgScreens.add(518);
+    icbgScreens.add(525);
+    icbgScreens.add(526);
+    icbgScreens.add(534);
+    icbgScreens.add(535);
+    icbgScreens.add(536);
+    icbgScreens.add(537);
+    icbgScreens.add(548);
+    icbgScreens.add(563);
+    icbgScreens.add(583);
+    icbgScreens.add(585);
+    icbgScreens.add(605);
+  }
 
   
   // public static methods
@@ -107,93 +162,93 @@ public class ICBGReportGenerator
     _report = new HSSFWorkbook();
     HSSFSheet sheet;
     HSSFRow row;
-    sheet = _report.createSheet("SITE");
-    row = sheet.createRow(0);
-    row.createCell((short) 0).setCellValue("SITE_ID");
-    row.createCell((short) 1).setCellValue("COLLECT_DATE");
-    row.createCell((short) 2).setCellValue("LATITUDE");
-    row.createCell((short) 3).setCellValue("LONGITUDE");
-    row.createCell((short) 4).setCellValue("COLLECTOR_ID");
-    row.createCell((short) 5).setCellValue("REGION");
-    row.createCell((short) 6).setCellValue("COUNTRY");
-    row.createCell((short) 7).setCellValue("ENTITY");
-    row.createCell((short) 8).setCellValue("LOCALE");
-    row.createCell((short) 9).setCellValue("ADMINISTRATION");
-    row.createCell((short) 10).setCellValue("BIOME");
-    row.createCell((short) 11).setCellValue("ENVIRONMENT");
-    row.createCell((short) 12).setCellValue("ZONE");
-    row.createCell((short) 13).setCellValue("SUBSTRATE");
-    row.createCell((short) 14).setCellValue("EXPOSURE");
-    row.createCell((short) 15).setCellValue("VERTICAL_M");
-    row.createCell((short) 16).setCellValue("TEMP_C");
-    row.createCell((short) 17).setCellValue("SEASON");
-    row.createCell((short) 18).setCellValue("ASPECT");
-    row.createCell((short) 19).setCellValue("NOTE");
-    sheet = _report.createSheet("SOURCE");
-    row = sheet.createRow(0);
-    row.createCell((short) 0).setCellValue("MICRO_SOURCE_ID");
-    row.createCell((short) 1).setCellValue("SITE_ID");
-    row.createCell((short) 2).setCellValue("MICRO_SOURCE_TYPE");
-    row.createCell((short) 3).setCellValue("MICRO_METHOD");
-    row.createCell((short) 4).setCellValue("MICRO_FOME");
-    row.createCell((short) 5).setCellValue("MICRO_QUALITY");
-    row.createCell((short) 6).setCellValue("M_GENNOTES");
-    row.createCell((short) 7).setCellValue("KINGDOM");
-    row.createCell((short) 8).setCellValue("PHYLUM");
-    row.createCell((short) 9).setCellValue("CLASS");
-    row.createCell((short) 10).setCellValue("ORDER_T");
-    row.createCell((short) 11).setCellValue("FAMILY");
-    row.createCell((short) 12).setCellValue("GENUS");
-    row.createCell((short) 13).setCellValue("SPECIES");
-    row.createCell((short) 14).setCellValue("PART_DESCR");
-    sheet = _report.createSheet("COLLECTION");
-    row = sheet.createRow(0);
-    row.createCell((short) 0).setCellValue("COLLECT_ID");
-    row.createCell((short) 1).setCellValue("SITE_ID");
-    row.createCell((short) 2).setCellValue("MICRO_SOURCE_ID");
-    row.createCell((short) 3).setCellValue("KINGDOM");
-    row.createCell((short) 4).setCellValue("PHYLUM");
-    row.createCell((short) 5).setCellValue("CLASS");
-    row.createCell((short) 6).setCellValue("ORDER");
-    row.createCell((short) 7).setCellValue("FAMILY");
-    row.createCell((short) 8).setCellValue("GENUS");
-    row.createCell((short) 9).setCellValue("SPECIES");
-    row.createCell((short) 10).setCellValue("VARIANT");
-    row.createCell((short) 11).setCellValue("AUTHORITY");
-    row.createCell((short) 12).setCellValue("VAUTHORITY");
-    row.createCell((short) 13).setCellValue("COMMON_NAME");
-    row.createCell((short) 14).setCellValue("DET");
-    row.createCell((short) 15).setCellValue("DET_DATE");
-    row.createCell((short) 16).setCellValue("MORPH_DESCR");
-    row.createCell((short) 17).setCellValue("ABUND_DESCR");
-    row.createCell((short) 18).setCellValue("ODOR_DESCR");
-    row.createCell((short) 19).setCellValue("COLOR");
-    row.createCell((short) 20).setCellValue("TYPE_NO (ACCESSION)");
-    row.createCell((short) 21).setCellValue("NO_VOUCHERS_TAKEN");
-    row.createCell((short) 22).setCellValue("RATIONALE");
-    row.createCell((short) 23).setCellValue("TAXONOMY");
-    row.createCell((short) 24).setCellValue("NOTE");
-    sheet = _report.createSheet("SAMPLE");
-    row = sheet.createRow(0);
-    row.createCell((short) 0).setCellValue("SAMPLE_ID");
-    row.createCell((short) 1).setCellValue("COLLECT_ID");
-    row.createCell((short) 2).setCellValue("SAMPLE_TYPE");
-    row.createCell((short) 3).setCellValue("MEDIA_ID");
-    row.createCell((short) 4).setCellValue("PRTOCOL_ID");
-    row.createCell((short) 5).setCellValue("HARVEST_DATE");
-    row.createCell((short) 6).setCellValue("PERSON_ID");
-    row.createCell((short) 7).setCellValue("COMMENTS");
-    sheet = _report.createSheet("EXTRACT");
-    row = sheet.createRow(0);
-    row.createCell((short) 0).setCellValue("MATERIAL_ID");
-    row.createCell((short) 1).setCellValue("MATERIAL_TYPE");
-    row.createCell((short) 2).setCellValue("SAMPLE_ID");
-    row.createCell((short) 3).setCellValue("PARENT_MATERIAL_ID_01");
-    row.createCell((short) 4).setCellValue("WT_G");
-    row.createCell((short) 5).setCellValue("PROTOCOL_ID");
-    row.createCell((short) 6).setCellValue("PROJECT_ID");
-    row.createCell((short) 7).setCellValue("NOTEBOOK");
-    row.createCell((short) 8).setCellValue("NOTE");
+//    sheet = _report.createSheet("SITE");
+//    row = sheet.createRow(0);
+//    row.createCell((short) 0).setCellValue("SITE_ID");
+//    row.createCell((short) 1).setCellValue("COLLECT_DATE");
+//    row.createCell((short) 2).setCellValue("LATITUDE");
+//    row.createCell((short) 3).setCellValue("LONGITUDE");
+//    row.createCell((short) 4).setCellValue("COLLECTOR_ID");
+//    row.createCell((short) 5).setCellValue("REGION");
+//    row.createCell((short) 6).setCellValue("COUNTRY");
+//    row.createCell((short) 7).setCellValue("ENTITY");
+//    row.createCell((short) 8).setCellValue("LOCALE");
+//    row.createCell((short) 9).setCellValue("ADMINISTRATION");
+//    row.createCell((short) 10).setCellValue("BIOME");
+//    row.createCell((short) 11).setCellValue("ENVIRONMENT");
+//    row.createCell((short) 12).setCellValue("ZONE");
+//    row.createCell((short) 13).setCellValue("SUBSTRATE");
+//    row.createCell((short) 14).setCellValue("EXPOSURE");
+//    row.createCell((short) 15).setCellValue("VERTICAL_M");
+//    row.createCell((short) 16).setCellValue("TEMP_C");
+//    row.createCell((short) 17).setCellValue("SEASON");
+//    row.createCell((short) 18).setCellValue("ASPECT");
+//    row.createCell((short) 19).setCellValue("NOTE");
+//    sheet = _report.createSheet("SOURCE");
+//    row = sheet.createRow(0);
+//    row.createCell((short) 0).setCellValue("MICRO_SOURCE_ID");
+//    row.createCell((short) 1).setCellValue("SITE_ID");
+//    row.createCell((short) 2).setCellValue("MICRO_SOURCE_TYPE");
+//    row.createCell((short) 3).setCellValue("MICRO_METHOD");
+//    row.createCell((short) 4).setCellValue("MICRO_FOME");
+//    row.createCell((short) 5).setCellValue("MICRO_QUALITY");
+//    row.createCell((short) 6).setCellValue("M_GENNOTES");
+//    row.createCell((short) 7).setCellValue("KINGDOM");
+//    row.createCell((short) 8).setCellValue("PHYLUM");
+//    row.createCell((short) 9).setCellValue("CLASS");
+//    row.createCell((short) 10).setCellValue("ORDER_T");
+//    row.createCell((short) 11).setCellValue("FAMILY");
+//    row.createCell((short) 12).setCellValue("GENUS");
+//    row.createCell((short) 13).setCellValue("SPECIES");
+//    row.createCell((short) 14).setCellValue("PART_DESCR");
+//    sheet = _report.createSheet("COLLECTION");
+//    row = sheet.createRow(0);
+//    row.createCell((short) 0).setCellValue("COLLECT_ID");
+//    row.createCell((short) 1).setCellValue("SITE_ID");
+//    row.createCell((short) 2).setCellValue("MICRO_SOURCE_ID");
+//    row.createCell((short) 3).setCellValue("KINGDOM");
+//    row.createCell((short) 4).setCellValue("PHYLUM");
+//    row.createCell((short) 5).setCellValue("CLASS");
+//    row.createCell((short) 6).setCellValue("ORDER");
+//    row.createCell((short) 7).setCellValue("FAMILY");
+//    row.createCell((short) 8).setCellValue("GENUS");
+//    row.createCell((short) 9).setCellValue("SPECIES");
+//    row.createCell((short) 10).setCellValue("VARIANT");
+//    row.createCell((short) 11).setCellValue("AUTHORITY");
+//    row.createCell((short) 12).setCellValue("VAUTHORITY");
+//    row.createCell((short) 13).setCellValue("COMMON_NAME");
+//    row.createCell((short) 14).setCellValue("DET");
+//    row.createCell((short) 15).setCellValue("DET_DATE");
+//    row.createCell((short) 16).setCellValue("MORPH_DESCR");
+//    row.createCell((short) 17).setCellValue("ABUND_DESCR");
+//    row.createCell((short) 18).setCellValue("ODOR_DESCR");
+//    row.createCell((short) 19).setCellValue("COLOR");
+//    row.createCell((short) 20).setCellValue("TYPE_NO (ACCESSION)");
+//    row.createCell((short) 21).setCellValue("NO_VOUCHERS_TAKEN");
+//    row.createCell((short) 22).setCellValue("RATIONALE");
+//    row.createCell((short) 23).setCellValue("TAXONOMY");
+//    row.createCell((short) 24).setCellValue("NOTE");
+//    sheet = _report.createSheet("SAMPLE");
+//    row = sheet.createRow(0);
+//    row.createCell((short) 0).setCellValue("SAMPLE_ID");
+//    row.createCell((short) 1).setCellValue("COLLECT_ID");
+//    row.createCell((short) 2).setCellValue("SAMPLE_TYPE");
+//    row.createCell((short) 3).setCellValue("MEDIA_ID");
+//    row.createCell((short) 4).setCellValue("PRTOCOL_ID");
+//    row.createCell((short) 5).setCellValue("HARVEST_DATE");
+//    row.createCell((short) 6).setCellValue("PERSON_ID");
+//    row.createCell((short) 7).setCellValue("COMMENTS");
+//    sheet = _report.createSheet("EXTRACT");
+//    row = sheet.createRow(0);
+//    row.createCell((short) 0).setCellValue("MATERIAL_ID");
+//    row.createCell((short) 1).setCellValue("MATERIAL_TYPE");
+//    row.createCell((short) 2).setCellValue("SAMPLE_ID");
+//    row.createCell((short) 3).setCellValue("PARENT_MATERIAL_ID_01");
+//    row.createCell((short) 4).setCellValue("WT_G");
+//    row.createCell((short) 5).setCellValue("PROTOCOL_ID");
+//    row.createCell((short) 6).setCellValue("PROJECT_ID");
+//    row.createCell((short) 7).setCellValue("NOTEBOOK");
+//    row.createCell((short) 8).setCellValue("NOTE");
     sheet = _report.createSheet("BIOACTIVITY");
     row = sheet.createRow(0);
     row.createCell((short) 0).setCellValue("MATERIAL_ID");
@@ -226,25 +281,25 @@ public class ICBGReportGenerator
     row.createCell((short) 1).setCellValue("MATERIAL_ID");
     row.createCell((short) 2).setCellValue("CL_EXTRA_1");
     row.createCell((short) 3).setCellValue("MOLSTRUCTURE_FILE");
-    sheet = _report.createSheet("COMPOUND_PLUS");
-    row = sheet.createRow(0);
-    row.createCell((short) 0).setCellValue("COMPOUND_ID");
-    row.createCell((short) 1).setCellValue("MATERIAL_ID");
-    row.createCell((short) 2).setCellValue("MOLSTRUCTURE_FILE");
-    row.createCell((short) 3).setCellValue("SHORT_NAME");
-    row.createCell((short) 4).setCellValue("CHEMICAL_NAME");
-    row.createCell((short) 5).setCellValue("CHEMICAL_CLASS");
-    row.createCell((short) 6).setCellValue("CHEMICAL_FAMILY");
-    row.createCell((short) 7).setCellValue("UV_MAX");
-    row.createCell((short) 8).setCellValue("PH");
-    row.createCell((short) 9).setCellValue("PHYSICAL_APPEARANCE");
-    row.createCell((short) 10).setCellValue("MELTING_POINT");
-    row.createCell((short) 11).setCellValue("SOLUBILILTY");
-    row.createCell((short) 12).setCellValue("FORMULA");
-    row.createCell((short) 13).setCellValue("INVESTIGATOR");
-    row.createCell((short) 14).setCellValue("CL_EXTRA_1");
-    row.createCell((short) 15).setCellValue("PROJECT_ID");
-    row.createCell((short) 16).setCellValue("NOTE");
+//    sheet = _report.createSheet("COMPOUND_PLUS");
+//    row = sheet.createRow(0);
+//    row.createCell((short) 0).setCellValue("COMPOUND_ID");
+//    row.createCell((short) 1).setCellValue("MATERIAL_ID");
+//    row.createCell((short) 2).setCellValue("MOLSTRUCTURE_FILE");
+//    row.createCell((short) 3).setCellValue("SHORT_NAME");
+//    row.createCell((short) 4).setCellValue("CHEMICAL_NAME");
+//    row.createCell((short) 5).setCellValue("CHEMICAL_CLASS");
+//    row.createCell((short) 6).setCellValue("CHEMICAL_FAMILY");
+//    row.createCell((short) 7).setCellValue("UV_MAX");
+//    row.createCell((short) 8).setCellValue("PH");
+//    row.createCell((short) 9).setCellValue("PHYSICAL_APPEARANCE");
+//    row.createCell((short) 10).setCellValue("MELTING_POINT");
+//    row.createCell((short) 11).setCellValue("SOLUBILILTY");
+//    row.createCell((short) 12).setCellValue("FORMULA");
+//    row.createCell((short) 13).setCellValue("INVESTIGATOR");
+//    row.createCell((short) 14).setCellValue("CL_EXTRA_1");
+//    row.createCell((short) 15).setCellValue("PROJECT_ID");
+//    row.createCell((short) 16).setCellValue("NOTE");
   }
   
   private void parseScreenResults()
@@ -266,10 +321,14 @@ public class ICBGReportGenerator
     };
     for (File resultsSubdir : resultsDir.listFiles(directoryFilter)) {
       Integer screenNumber = Integer.valueOf(resultsSubdir.getName());
-      // if (screenNumber.intValue() <= 398) { continue; }
+      if (! icbgScreens.contains(screenNumber)) {
+        continue;
+      }
       log.info("examining results subdir: " + resultsSubdir.getName());
       for (File metadataFile : resultsSubdir.listFiles(metadataFilter)) {
         parseScreenResult(screenNumber, metadataFile);
+        
+        // this is not necessary, but helpful if you want early versions of the results
         log.info("writing report..");
         try {
           _report.write(new FileOutputStream(REPORT_FILENAME));
@@ -291,23 +350,23 @@ public class ICBGReportGenerator
     ScreenResultParser parser =
       new ScreenResultParser(new MockDaoForScreenResultParserTest());
     ScreenResult screenResult = parser.parse(metadataFile);
+    logErrors(parser);
     if (screenResult == null) {
       return;
     }
+    // TODO: printBioactivityRows should be called once for each assay phenotype
     if (printBioactivityRows(assayInfo, screenResult)) {
+      log.info("printed bioactivity rows.");
       printProtocolRow(assayInfo);  
     }
   }
   
-  private void printProtocolRow(AssayInfo assayInfo)
+  private void logErrors(ScreenResultParser parser)
   {
-    HSSFSheet sheet = _report.getSheet("PROTOCOL");
-    HSSFRow row = sheet.createRow(_currentProtocolRow);
-    row.createCell((short) 0).setCellValue(assayInfo.getAssayName());
-    row.createCell((short) 1).setCellValue("B");
-    row.createCell((short) 2).setCellValue(assayInfo.getProtocolDescription());
-    row.createCell((short) 3).setCellValue(assayInfo.getPNote());
-    _currentProtocolRow++;
+    List<ParseError> errors = parser.getErrors();
+    for (ParseError error : errors) {
+      log.info("error: " + error.getMessage());
+    }
   }
   
   private boolean printBioactivityRows(AssayInfo assayInfo, ScreenResult screenResult)
@@ -440,5 +499,16 @@ public class ICBGReportGenerator
     //row.createCell((short) 17).setCellValue("EXTRA");
     _currentBioactivityRow++;
     return true;
+  }
+
+  private void printProtocolRow(AssayInfo assayInfo)
+  {
+    HSSFSheet sheet = _report.getSheet("PROTOCOL");
+    HSSFRow row = sheet.createRow(_currentProtocolRow);
+    row.createCell((short) 0).setCellValue(assayInfo.getAssayName());
+    row.createCell((short) 1).setCellValue("B");
+    row.createCell((short) 2).setCellValue(assayInfo.getProtocolDescription());
+    row.createCell((short) 3).setCellValue(assayInfo.getPNote());
+    _currentProtocolRow++;
   }
 }

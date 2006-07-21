@@ -94,13 +94,20 @@ public class ICCBLPlateWellToINBioLQMapper
     for (int i = 1; i <= lastRowNum; i++) {
       HSSFRow row = _mappingWorksheet.getRow(i);
       HSSFCell plateNumberCell = row.getCell((short) 0);
-      int plateNumber = (int) plateNumberCell.getNumericCellValue();
+      //int plateNumber = (int) plateNumberCell.getNumericCellValue();
+      int plateNumber = Integer.parseInt(plateNumberCell.getStringCellValue());
       HSSFCell wellNameCell = row.getCell((short) 1);
       String wellName = wellNameCell.getStringCellValue();
       HSSFCell lqCell = row.getCell((short) 3);
-      String lq = lqCell.getStringCellValue();
-      //String lq = String.valueOf((int) lqCell.getNumericCellValue());
-      
+      String lq;
+      //lq = lqCell.getStringCellValue();
+      //if (lq.equals("")) { continue; }
+      try {
+        lq = String.valueOf((int) lqCell.getNumericCellValue());
+      }
+      catch (NullPointerException e) {
+        continue;
+      }
       Well well = new Well(library, plateNumber, wellName);
       _wellToLQMap.put(well, lq);
     }

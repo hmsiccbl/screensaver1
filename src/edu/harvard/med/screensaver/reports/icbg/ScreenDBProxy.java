@@ -107,6 +107,12 @@ public class ScreenDBProxy
       e.printStackTrace();
     }
     
+    setAssayCategory(assayInfo, assayCategoryText);
+    return assayInfo;
+  }
+
+  private void setAssayCategory(AssayInfo assayInfo, String assayCategoryText)
+  {
     if (
       assayCategoryText.contains("MALARIA")) {
       assayInfo.setAssayCategory("ANTI-MALARIA");
@@ -164,6 +170,7 @@ public class ScreenDBProxy
       assayCategoryText.contains("CHOLER") ||
       assayCategoryText.contains("AERUGINOSA") ||
       assayCategoryText.contains("YERSINIA PESTIS") ||
+      assayCategoryText.contains("AMINOARABINOSE") ||
       assayCategoryText.contains("BACTERI")) {
       assayInfo.setAssayCategory("ANTI-BACTERIAL");
     }
@@ -182,7 +189,5 @@ public class ScreenDBProxy
     else {
       assayInfo.setAssayCategory("OTHER");
     }
-
-    return assayInfo;
   }
 }
