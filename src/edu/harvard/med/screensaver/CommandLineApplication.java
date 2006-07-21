@@ -53,11 +53,6 @@ public class CommandLineApplication
     "spring-context.persistence.xml",
     "spring-context-services.xml",
   };
-  private static final String DEFAULT_DB_NAME = "devscreensaver";
-  private static final String DEFAULT_DB_PASSWORD = "devscreensaver";
-  private static final String DEFAULT_DB_USER = "devscreensaver";
-  private static final String DEFAULT_DB_HOST = "localhost";
-  private static final String DEFAULT_DB_PORT = "5432";
   
   private ApplicationContext _appCtx;
   private Options _options;
@@ -214,35 +209,30 @@ public class CommandLineApplication
                          withLongOpt("dbhost").
                          hasArg().
                          withDescription("database host").
-                         create(), 
-                         DEFAULT_DB_HOST);
+                         create());
     addCommandLineOption(OptionBuilder.
                          withArgName("dbport").
                          withLongOpt("dbport").
                          hasArg().
                          withDescription("database port").
-                         create(), 
-                         DEFAULT_DB_PORT);
+                         create());
     addCommandLineOption(OptionBuilder.
                          withArgName("dbuser").
                          withLongOpt("dbuser").
                          hasArg().
                          withDescription("database user name").
-                         create(), 
-                         DEFAULT_DB_USER);
+                         create());
     addCommandLineOption(OptionBuilder.withArgName("dbpassword").
                          withLongOpt("dbpassword").
                          hasArg().
                          withDescription("database user's password").
-                         create(), 
-                         DEFAULT_DB_PASSWORD);
+                         create());
     addCommandLineOption(OptionBuilder.
                          withArgName("dbname").
                          withLongOpt("dbname").
                          hasArg().
                          withDescription("database name").
-                         create(), 
-                         DEFAULT_DB_NAME);
+                         create());
   }
   
 }

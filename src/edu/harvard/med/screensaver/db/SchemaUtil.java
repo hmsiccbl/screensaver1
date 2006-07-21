@@ -109,16 +109,7 @@ public class SchemaUtil implements ApplicationContextAware
   {
     BasicDataSource dataSource = (BasicDataSource) _appCtx.getBean("screensaverDataSource");
     assert dataSource != null : "spring bean 'screensaverDataSource' not found";
-    String userName = dataSource.getUsername();
-    if (userName == null || userName.length() == 0) {
-      try {
-        userName = dataSource.getConnection().getMetaData().getUserName();
-      }
-      catch (SQLException e) {
-        userName = "<unknown username>";
-      }
-    }
-    return userName + "@" + dataSource.getUrl();
+    return dataSource.getUsername() + "@" + dataSource.getUrl();
   }
   
   
