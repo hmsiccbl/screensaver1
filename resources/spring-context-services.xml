@@ -13,8 +13,8 @@
   </bean>
   
   <bean 
-    id="screenDBDataLoader"
-    class="edu.harvard.med.screensaver.db.screendb.ScreenDBDataLoader"
+    id="screenDBDataImporter"
+    class="edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter"
     singleton="true"
   >
     <constructor-arg ref="dao"/>

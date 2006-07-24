@@ -35,7 +35,7 @@ public class ScreenDBDataImporter
       "spring-context-services.xml", 
       "spring-context-persistence.xml", 
     });
-    ScreenDBDataImporter importer = (ScreenDBDataImporter) appCtx.getBean("screenDBDataLoader");
+    ScreenDBDataImporter importer = (ScreenDBDataImporter) appCtx.getBean("screenDBDataImporter");
     importer.loadScreenDBData();
   }
   
