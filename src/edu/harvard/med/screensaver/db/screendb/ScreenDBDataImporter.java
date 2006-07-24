@@ -23,10 +23,10 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
  * moment, only the tables with the most critical data are loaded:
  * {@link Library}, {@link Screen}, and {@link ScreeningRoomUser}. 
  */
-public class ScreenDBDataLoader
+public class ScreenDBDataImporter
 {
 
-  private static Logger log = Logger.getLogger(ScreenDBDataLoader.class);
+  private static Logger log = Logger.getLogger(ScreenDBDataImporter.class);
   
   public static void main(String [] args)
   {
@@ -35,14 +35,14 @@ public class ScreenDBDataLoader
       "spring-context-services.xml", 
       "spring-context-persistence.xml", 
     });
-    ScreenDBDataLoader loader = (ScreenDBDataLoader) appCtx.getBean("screenDBDataLoader");
-    loader.loadScreenDBData();
+    ScreenDBDataImporter importer = (ScreenDBDataImporter) appCtx.getBean("screenDBDataLoader");
+    importer.loadScreenDBData();
   }
   
   private DAO _dao;
   private SchemaUtil _schemaUtil;
   
-  public ScreenDBDataLoader(DAO dao, SchemaUtil schemaUtil)
+  public ScreenDBDataImporter(DAO dao, SchemaUtil schemaUtil)
   {
     _dao = dao;
     _schemaUtil = schemaUtil;
