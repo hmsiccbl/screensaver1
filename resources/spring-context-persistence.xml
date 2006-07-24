@@ -19,11 +19,11 @@
     id="dataSourceConfigurer"
     class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <property name="location" value="classpath:datasource.properties"/>
-    <!-- On orchestra-hosted Tomcat, datasource settings will be available as environment variables, so use them -->
+    <!-- if datasource settings are available as environment variables, use them instead of datasource.properties file -->
     <property name="searchSystemEnvironment" value="true"/>
     <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
   </bean>
-
+  
 
   <!-- Hibernate configuration -->
 
@@ -146,4 +146,17 @@
     />
   </bean>
   
+  
+  <!-- Development/Debug related beans -->
+  
+  <bean
+    id="envInfo"
+    class="edu.harvard.med.screensaver.ui.Environment">
+    <property name="host" value="${SCREENSAVER_PGSQL_SERVER}"/>
+    <property name="db" value="${SCREENSAVER_PGSQL_DB}"/>
+    <property name="user" value="${SCREENSAVER_PGSQL_USER}"/>
+    <property name="url" value="jdbc:postgresql://${SCREENSAVER_PGSQL_SERVER}/${SCREENSAVER_PGSQL_DB}"/>
+  </bean>
+
+
 </beans>

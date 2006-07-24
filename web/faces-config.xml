@@ -20,7 +20,7 @@
   <!-- Managed beans -->
   
   <!-- TODO: Is it possible to configure managed-bean superclass so that common properties are not repeated in each bean definition?  Or must we use Spring to manage our JSF managed-beans in order have such a feature? -->
-
+  
   <managed-bean>
     <description>Main</description>
     <managed-bean-name>main</managed-bean-name>
@@ -119,7 +119,7 @@
       <value>#{messages}</value>
     </managed-property>
   </managed-bean>
-
+  
   
   <!-- Navigation rules -->
   
