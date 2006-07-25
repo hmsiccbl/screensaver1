@@ -176,10 +176,13 @@ public class ScreenDBProxy
         "SELECT * FROM users");
       while (resultSet.next()) {
         String email = resultSet.getString("email");
-        if (email == null) { // HACK: 3 users currently have no email
+        if (email == null || // HACK: 3 users currently have no email
+          email.contains("unknown") || // HACK: unknown emails have dups
+          email.contains("notknown")
+          ) {
           email =
             resultSet.getString("first") + "." +
-            resultSet.getString("last") + "@email.is.a.required.field.com";
+            resultSet.getString("last") + "@has.missing.email";
         }
         UserClassification classification = 
           userClassificationUserType.getTermForValue(resultSet.getString("classification"));
