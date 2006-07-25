@@ -21,7 +21,29 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 /**
  * Uploads a partial set of data from ScreenDB into Screensaver. For the
  * moment, only the tables with the most critical data are loaded:
- * {@link Library}, {@link Screen}, and {@link ScreeningRoomUser}. 
+ * {@link Library}, {@link Screen}, and {@link ScreeningRoomUser}.
+ * 
+ * <p>
+ * In order to run this program, perform the following steps:
+ * <ol>
+ *   <li>
+ *     create a database user <code>screendbweb</code> with password
+ *     <code>screendbweb</code>
+ *   </li>
+ *   <li>
+ *     create a database <code>screendb</code>
+ *   </li>
+ *   <li>
+ *     load the contents of
+ *     <code>screensaver/flotsam+jetsam/screendb/screendb-20060725.sql</code>
+ *     into the <code>screendb</code> database (you can do this with the
+ *     <code>psql</code> command <code>\i</code>)
+ *   </li>
+ *   <li>
+ *     run {@link #main}.
+ *   </li>
+ * </ol>
+ * </p>
  */
 public class ScreenDBDataImporter
 {
@@ -42,6 +64,11 @@ public class ScreenDBDataImporter
   private DAO _dao;
   private SchemaUtil _schemaUtil;
   
+  /**
+   * Construct a new <code>ScreenDBDataImporter</code> object.
+   * @param dao
+   * @param schemaUtil
+   */
   public ScreenDBDataImporter(DAO dao, SchemaUtil schemaUtil)
   {
     _dao = dao;
@@ -49,6 +76,9 @@ public class ScreenDBDataImporter
     _schemaUtil.recreateSchema();
   }
   
+  /**
+   * Use a {@link ScreenDBProxy} to load the ScreenDB data into Screensaver.
+   */
   public void loadScreenDBData()
   {
     ScreenDBProxy screenDBProxy = new ScreenDBProxy();
