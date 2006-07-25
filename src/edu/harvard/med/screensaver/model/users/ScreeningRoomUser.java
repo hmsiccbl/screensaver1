@@ -907,25 +907,28 @@ public class ScreeningRoomUser extends AbstractEntity
     _labHead = labHead;
   }
 
-
   /**
    * Get the lab members.
    *
    * @return the lab members
    * @hibernate.set
-   *   cascade="save-update"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="lab_head_id"
    * @hibernate.collection-one-to-many
    *   class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser"
    * @motivation for hibernate and maintenance of bi-directional relationships
+   * @motivation in order to avoid what I believe is a Hibernate bug, I
+   *   have removed the cascade="save-update" from the hibernate.set
+   *   annotation. this means that lab members will not automatically
+   *   get saved or updated when you save or update the lab head! (to
+   *   reproduce the bug, but the cascade back in, and run the
+   *   {@link edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter}.
    */
   private Set<ScreeningRoomUser> getHbnLabMembers()
   {
     return _labMembers;
   }
-
 
   /**
    * Set the lab members.
