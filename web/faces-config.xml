@@ -69,6 +69,10 @@
     <managed-bean-class>edu.harvard.med.screensaver.ui.ScreenResultViewerController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
+      <property-name>screenResultExporter</property-name>
+      <value>#{screenResultExporter}</value>
+    </managed-property>
+    <managed-property>
       <property-name>heatMapViewer</property-name>
       <value>#{heatMapViewer}</value>
     </managed-property>
@@ -165,7 +169,7 @@
     <navigation-case>
       <from-action>#{screenResultImporter.submit}</from-action>
       <from-outcome>screenresult-parse-errors</from-outcome>
-      <to-view-id>/screenResultImportErrors.jsp</to-view-id>
+      <to-view-id>/screenResultImporter.jsp</to-view-id>
       <redirect/>
     </navigation-case>
   </navigation-rule>

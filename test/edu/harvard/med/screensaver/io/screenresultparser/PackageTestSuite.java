@@ -27,6 +27,7 @@ public class PackageTestSuite extends TestSuite
 
   public PackageTestSuite() {
     addTestSuite(ScreenResultParserTest.class);
+    addTestSuite(ScreenResultExporterTest.class);
   }
   
 }

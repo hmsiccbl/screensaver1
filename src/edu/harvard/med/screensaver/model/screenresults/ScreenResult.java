@@ -253,7 +253,7 @@ public class ScreenResult extends AbstractEntity
     _replicateCount = replicateCount;
   }
 
-  public SortedSet<Integer> getDerivedPlateNumbers()
+  public SortedSet<Integer> generatePlateNumbers()
   {
     if (_plateNumbers == null) {
       _plateNumbers = new TreeSet<Integer>();
@@ -266,14 +266,13 @@ public class ScreenResult extends AbstractEntity
     return _plateNumbers;
   }
   
-  
   /**
    * Return a list of ResultValueTypes
    * 
    * @motivation random access to ResultValueTypes by ordinal
    * @return an ordered list of ResultValueTypes
    */
-  public List<ResultValueType> getDerivedResultValueTypesList()
+  public List<ResultValueType> generateResultValueTypesList()
   {
     return new ArrayList<ResultValueType>(_resultValueTypes);
   }

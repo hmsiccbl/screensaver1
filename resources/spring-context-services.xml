@@ -13,10 +13,15 @@
   </bean>
   
   <bean 
+    id="screenResultExporter"
+    class="edu.harvard.med.screensaver.io.screenresult.ScreenResultExporter"
+    singleton="true">
+  </bean>
+  
+  <bean 
     id="screenDBDataImporter"
     class="edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter"
-    singleton="true"
-  >
+    singleton="true">
     <constructor-arg ref="dao"/>
     <constructor-arg ref="schemaUtil"/>
   </bean>

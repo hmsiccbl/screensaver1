@@ -36,6 +36,7 @@ import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
+import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -89,7 +90,8 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class ScreenResultParser
+// TODO: consider renaming "metadata" to "dataHeaders" (methods and variables), as this is more in keeping with the new file format
+public class ScreenResultParser implements ScreenResultWorkbookSpecification
 {
   
   // static data members
@@ -98,9 +100,6 @@ public class ScreenResultParser
 
   private static final Logger log = Logger.getLogger(ScreenResultParser.class);
   
-  private static final String FIRST_DATE_SCREENED = "First Date Screened";
-  private static final String METADATA_META_SHEET_NAME = "meta";
-  private static final String DATA_HEADER_COLUMN_TYPE = "data";
 
   // TODO: move these a messages (Spring) resource file
   private static final String NO_METADATA_META_SHEET_ERROR = "worksheet could not be found";
@@ -113,75 +112,36 @@ public class ScreenResultParser
   private static final String METADATA_NO_RAWDATA_FILES_SPECIFIED_ERROR = "raw data workbook files not specified";
   private static final String UNKNOWN_ERROR = "unknown error";
 
-  private static final short METADATA_FILENAMES_CELL_COLUMN_INDEX = 1;
-  private static final int   METADATA_FILENAMES_CELL_ROW_INDEX = 0;
-  
-  private static final int METADATA_FIRST_DATA_ROW_INDEX = 1;
-  private static final int RAWDATA_FIRST_DATA_ROW_INDEX = 1;
-  private static final int RAWDATA_HEADER_ROW_INDEX = 0;
-  /**
-   * The data rows of the metadata worksheet. Order of enum values is
-   * significant, as we use the ordinal() method.
-   */
-  private enum MetadataRow { 
-    COLUMN_IN_TEMPLATE,
-    COLUMN_TYPE,
-    NAME,
-    DESCRIPTION,
-    REPLICATE,
-    TIME_POINT,
-    RAW_OR_DERIVED,
-    HOW_DERIVED,
-    COLUMNS_DERIVED_FROM,
-    IS_ASSAY_ACTIVITY_INDICATOR,
-    ACTIVITY_INDICATOR_TYPE,
-    INDICATOR_DIRECTION,
-    INDICATOR_CUTOFF,
-    PRIMARY_OR_FOLLOWUP,
-    ASSAY_PHENOTYPE,
-    IS_CHERRY_PICK,
-    COMMENTS 
-  };
-  private static final int METADATA_ROW_COUNT = MetadataRow.values().length;
-  public static final String FILENAMES_LIST_DELIMITER = "\\s*,\\s*";
-
-  /**
-   * The standard columns of a data worksheet. Order of enum values is
-   * significant, as we use the ordinal() method.
-   */
-  private enum DataColumn {
-    STOCK_PLATE_ID,
-    WELL_NAME,
-    TYPE,
-    EXCLUDE,
-    FIRST_DATA_HEADER
-  };
-
   private static SortedMap<String,IndicatorDirection> indicatorDirectionMap = new TreeMap<String,IndicatorDirection>();
   private static SortedMap<String,ActivityIndicatorType> activityIndicatorTypeMap = new TreeMap<String,ActivityIndicatorType>();
   private static SortedMap<String,Boolean> rawOrDerivedMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,Boolean> primaryOrFollowUpMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,Boolean> booleanMap = new TreeMap<String,Boolean>();
+  private static SortedMap<String,PartitionedValue> partitionedValueMap = new TreeMap<String,PartitionedValue>();
   static {
     indicatorDirectionMap.put("<",IndicatorDirection.LOW_VALUES_INDICATE);
     indicatorDirectionMap.put(">",IndicatorDirection.HIGH_VALUES_INDICATE);
     
-    activityIndicatorTypeMap.put("High values",ActivityIndicatorType.NUMERICAL);
-    activityIndicatorTypeMap.put("A",ActivityIndicatorType.NUMERICAL);
-    activityIndicatorTypeMap.put("Low values",ActivityIndicatorType.NUMERICAL);
-    activityIndicatorTypeMap.put("B",ActivityIndicatorType.NUMERICAL);
+    activityIndicatorTypeMap.put("High values",ActivityIndicatorType.NUMERICAL); // legacy format
+    activityIndicatorTypeMap.put("Low values",ActivityIndicatorType.NUMERICAL); // legacy format
+    activityIndicatorTypeMap.put("Numeric",ActivityIndicatorType.NUMERICAL);
+    activityIndicatorTypeMap.put("Numerical",ActivityIndicatorType.NUMERICAL);
+    activityIndicatorTypeMap.put("A",ActivityIndicatorType.NUMERICAL); // legacy format
+    activityIndicatorTypeMap.put("B",ActivityIndicatorType.NUMERICAL); // legacy format
     activityIndicatorTypeMap.put("Boolean",ActivityIndicatorType.BOOLEAN);
-    activityIndicatorTypeMap.put("C",ActivityIndicatorType.BOOLEAN);
-    activityIndicatorTypeMap.put("Scaled",ActivityIndicatorType.PARTITION);
-    activityIndicatorTypeMap.put("D",ActivityIndicatorType.PARTITION);
+    activityIndicatorTypeMap.put("C",ActivityIndicatorType.BOOLEAN);  // legacy format
+    activityIndicatorTypeMap.put("Scaled",ActivityIndicatorType.PARTITION);  // legacy format
+    activityIndicatorTypeMap.put("Partitioned",ActivityIndicatorType.PARTITION);
+    activityIndicatorTypeMap.put("Partition",ActivityIndicatorType.PARTITION);
+    activityIndicatorTypeMap.put("D",ActivityIndicatorType.PARTITION);  // legacy format
     
     rawOrDerivedMap.put("", false);
-    rawOrDerivedMap.put("raw", false);
-    rawOrDerivedMap.put("derived", true);
+    rawOrDerivedMap.put(RAW_VALUE, false);
+    rawOrDerivedMap.put(DERIVED_VALUE, true);
 
     primaryOrFollowUpMap.put("", false);
-    primaryOrFollowUpMap.put("Primary", false);
-    primaryOrFollowUpMap.put("Follow Up", true);
+    primaryOrFollowUpMap.put(PRIMARY_VALUE, false);
+    primaryOrFollowUpMap.put(FOLLOWUP_VALUE, true);
     
     booleanMap.put("", false);
     booleanMap.put("false", false);
@@ -192,6 +152,13 @@ public class ScreenResultParser
     booleanMap.put("yes", true);
     booleanMap.put("y", true);
     booleanMap.put("1", true);
+    
+    for (PartitionedValue pv : PartitionedValue.values()) {
+      partitionedValueMap.put(pv.getValue().toLowerCase(),
+                              pv);
+      partitionedValueMap.put(pv.getValue().toUpperCase(),
+                              pv);
+    }
   }
   
 
@@ -296,6 +263,7 @@ public static void main(String[] args) throws FileNotFoundException
   private CellVocabularyParser<Boolean> _rawOrDerivedParser;
   private CellVocabularyParser<Boolean> _primaryOrFollowUpParser;
   private CellVocabularyParser<Boolean> _booleanParser;
+  private CellVocabularyParser<PartitionedValue> _partitionedValueParser;
   private PlateNumberParser _plateNumberParser = new PlateNumberParser();
   private WellNameParser _wellNameParser = new WellNameParser();
 
@@ -348,6 +316,7 @@ public static void main(String[] args) throws FileNotFoundException
     _rawOrDerivedParser = new CellVocabularyParser<Boolean>(rawOrDerivedMap, Boolean.FALSE, _errors);
     _primaryOrFollowUpParser = new CellVocabularyParser<Boolean>(primaryOrFollowUpMap, Boolean.FALSE, _errors);
     _booleanParser = new CellVocabularyParser<Boolean>(booleanMap, Boolean.FALSE, _errors);
+    _partitionedValueParser = new CellVocabularyParser<PartitionedValue>(partitionedValueMap, PartitionedValue.NONE, _errors);
     try {
       if (!metadataWorkbookFile.canRead()) {
         throw new FileNotFoundException("metadata file '" + metadataWorkbookFile + "' cannot be read");
@@ -398,6 +367,11 @@ public static void main(String[] args) throws FileNotFoundException
     return _errors.getErrors();
   }
   
+  public boolean getHasErrors()
+  {
+    return _errors.getHasErrors();
+  }
+  
   public ScreenResult getParsedScreenResult()
   {
     return _screenResult;
@@ -416,13 +390,20 @@ public static void main(String[] args) throws FileNotFoundException
   private HSSFSheet initializeMetadataSheet(Workbook metadataWorkbook)
     throws UnrecoverableScreenResultParseException
   {
-    // TODO: don't assume the metadata sheet is the first one
-    HSSFSheet metadataSheet = metadataWorkbook.getWorkbook().getSheetAt(0);
+    // find the "Data Headers" sheet, handling legacy format as well
+    int dataHeadersSheetIndex;
+    try {
+      dataHeadersSheetIndex = metadataWorkbook.findSheetIndex(DATA_HEADERS_SHEET_NAME);
+    }
+    catch (IllegalArgumentException e) {
+      dataHeadersSheetIndex = LEGACY_DATA_HEADERS_SHEET_INDEX;      
+    }
+    HSSFSheet metadataSheet = metadataWorkbook.getWorkbook().getSheetAt(dataHeadersSheetIndex);
 
-    // at this point, we know we have a valid metadata workbook, to which we can
+    // at this point, we know we have a valid metadata workbook, to which we ca
     // append errors
     _errors.setErrorsWorbook(metadataWorkbook);
-    _metadataCellParserFactory = new Cell.Factory(metadataWorkbook, 0, _errors);
+    _metadataCellParserFactory = new Cell.Factory(metadataWorkbook, dataHeadersSheetIndex, _errors);
     _dataHeaderIndex2DataHeaderColumn = new HashMap<Integer,Short>();
     _metadataFirstDataHeaderColumnIndex = findFirstDataHeaderColumnIndex(metadataSheet);
     if (_metadataFirstDataHeaderColumnIndex == null) {
@@ -556,13 +537,16 @@ public static void main(String[] args) throws FileNotFoundException
    * @param ignoreFilePaths
    * @throws UnrecoverableScreenResultParseException 
    */
-  private MetadataParseResult parseMetadata(Workbook metadataWorkbook, boolean ignoreFilePaths) throws UnrecoverableScreenResultParseException 
+  private MetadataParseResult parseMetadata(
+    Workbook metadataWorkbook, 
+    boolean ignoreFilePaths) 
+    throws UnrecoverableScreenResultParseException 
   {
     MetadataParseResult metadataParseResult = new MetadataParseResult();
     HSSFSheet metadataSheet = initializeMetadataSheet(metadataWorkbook);
     metadataParseResult.setRawDataWorkbooks(parseRawDataWorkbookFilenames(metadataWorkbook,
                                                                           ignoreFilePaths));
-    Date screenResultDate = parseMetaMetadata(metadataWorkbook);
+    Date screenResultDate = parseScreenInfo(metadataWorkbook);
     metadataParseResult.setScreenResult(new ScreenResult(screenResultDate));
     int dataHeaderCount = findDataHeaderColumnCount(metadataSheet);
     for (int iDataHeader = 0; iDataHeader < dataHeaderCount; ++iDataHeader) {
@@ -576,7 +560,7 @@ public static void main(String[] args) throws FileNotFoundException
                             _primaryOrFollowUpParser.parse(metadataCell(MetadataRow.PRIMARY_OR_FOLLOWUP, iDataHeader)),
                             metadataCell(MetadataRow.ASSAY_PHENOTYPE, iDataHeader).getString(),
                             _booleanParser.parse(metadataCell(MetadataRow.IS_CHERRY_PICK, iDataHeader)));
-      _columnsDerivedFromMap.put(metadataCell(MetadataRow.COLUMN_IN_TEMPLATE, iDataHeader, true).getString(), rvt);
+      _columnsDerivedFromMap.put(metadataCell(MetadataRow.COLUMN_IN_DATA_WORKSHEET, iDataHeader, true).getString(), rvt);
       rvt.setDescription(metadataCell(MetadataRow.DESCRIPTION, iDataHeader).getString());
       rvt.setTimePoint(metadataCell(MetadataRow.TIME_POINT, iDataHeader).getString());
       if (rvt.isDerived()) {
@@ -591,8 +575,8 @@ public static void main(String[] args) throws FileNotFoundException
       if (rvt.isActivityIndicator()) {
         rvt.setActivityIndicatorType(_activityIndicatorTypeParser.parse(metadataCell(MetadataRow.ACTIVITY_INDICATOR_TYPE, iDataHeader, true)));
         if (rvt.getActivityIndicatorType().equals(ActivityIndicatorType.NUMERICAL)) {
-          rvt.setIndicatorDirection(_indicatorDirectionParser.parse(metadataCell(MetadataRow.INDICATOR_DIRECTION, iDataHeader, true)));
-          rvt.setIndicatorCutoff(metadataCell(MetadataRow.INDICATOR_CUTOFF, iDataHeader, true).getDouble());
+          rvt.setIndicatorDirection(_indicatorDirectionParser.parse(metadataCell(MetadataRow.NUMERICAL_INDICATOR_DIRECTION, iDataHeader, true)));
+          rvt.setIndicatorCutoff(metadataCell(MetadataRow.NUMERICAL_INDICATOR_CUTOFF, iDataHeader, true).getDouble());
         }
         // TODO: should warn if these values *are* defined and !isActivityIndicator()
       }
@@ -655,7 +639,7 @@ public static void main(String[] args) throws FileNotFoundException
   {
     assert _dataHeaderIndex2DataHeaderColumn != null :
       "uninitialized _dataHeaderIndex2DataHeaderColumn";
-    String forColumnInRawDataWorksheet = metadataCell(MetadataRow.COLUMN_IN_TEMPLATE, iDataHeader, true).getString();
+    String forColumnInRawDataWorksheet = metadataCell(MetadataRow.COLUMN_IN_DATA_WORKSHEET, iDataHeader, true).getString();
     if (forColumnInRawDataWorksheet != null) {
       _dataHeaderIndex2DataHeaderColumn.put(iDataHeader,
                                             new Short((short) (forColumnInRawDataWorksheet.charAt(0) - 'A')));
@@ -683,8 +667,9 @@ public static void main(String[] args) throws FileNotFoundException
         for (int iRow = RAWDATA_FIRST_DATA_ROW_INDEX; iRow <= sheet.getLastRowNum(); ++iRow) {
           Well well = findWell(iRow);
           dataCell(iRow, DataColumn.TYPE).getString(); // TODO: use this value?
-          boolean excludeWell = _booleanParser.parse(dataCell(iRow,
-                                                              DataColumn.EXCLUDE));
+          
+          List<ResultValueType> wellExcludes = new ExcludeParser(screenResult).parseList(dataCell(iRow, DataColumn.EXCLUDE));
+          
           int iDataHeader = 0;
           for (ResultValueType rvt : screenResult.getResultValueTypes()) {
             Cell cell = dataCell(iRow, iDataHeader);
@@ -695,11 +680,15 @@ public static void main(String[] args) throws FileNotFoundException
                 : rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL
                 ? cell.getDouble()
                   : rvt.getActivityIndicatorType() == ActivityIndicatorType.PARTITION
-                  ? cell.getString() : cell.getString();
+                  ? _partitionedValueParser.parse(cell) 
+                    : cell.getString();
                   if (value == null) {
                     value = "";
                   }
-                  new ResultValue(rvt, well, value.toString(), excludeWell);
+                  new ResultValue(rvt, 
+                                  well, 
+                                  value.toString(), 
+                                  (wellExcludes != null && wellExcludes.contains(rvt)));
                   ++iDataHeader;
           }
         }
@@ -709,7 +698,8 @@ public static void main(String[] args) throws FileNotFoundException
 
   private boolean isActiveSheetRawDataSheet()
   {
-    return dataCell(RAWDATA_HEADER_ROW_INDEX, DataColumn.STOCK_PLATE_ID).getAsString().equals("Stock_ID");
+    // must handle both old and new file formats ("Stock_ID" and "Stock Plate ID")
+    return dataCell(RAWDATA_HEADER_ROW_INDEX, DataColumn.STOCK_PLATE_ID).getAsString().startsWith("Stock");
   }
 
   // TODO: this needs to be moved to our DAO; probably as a
@@ -733,17 +723,26 @@ public static void main(String[] args) throws FileNotFoundException
   }
 
   /**
-   * Parses the "meta" worksheet. Yes, we actually have a tab called "meta" in a
-   * workbook file that itself contains metadata for our ScreenResult metadata;
-   * thus the double-meta prefix. Life is complex.
+   * Parses the "Screen Info" worksheet (was "meta" in legacy format). Yes, we
+   * actually had a tab called "meta" in a workbook file that itself contains
+   * metadata (data header definitions) for our ScreenResult metadata; thus the
+   * double-meta prefix. Life is complex.
    * <p>
    * For now, we just parse the ScreenResult date, but if we ever need to parse
    * more, we should return a composite object, rather than just a Date.
    */
-  private Date parseMetaMetadata(Workbook metadataWorkbook)
+  private Date parseScreenInfo(Workbook metadataWorkbook)
   {
     Date date = null;
-    int metaMetaSheetIndex = metadataWorkbook.findSheetIndex(METADATA_META_SHEET_NAME);
+    int metaMetaSheetIndex;
+    try {
+      // legacy format
+      metaMetaSheetIndex = metadataWorkbook.findSheetIndex(METADATA_META_SHEET_NAME);
+    } 
+    catch (IllegalArgumentException e) {
+      // new format
+      metaMetaSheetIndex = metadataWorkbook.findSheetIndex(SCREEN_INFO_SHEET_NAME);
+    }
     HSSFSheet metametaSheet = metadataWorkbook.getWorkbook()
                                                .getSheetAt(metaMetaSheetIndex);
     Cell.Factory factory = new Cell.Factory(metadataWorkbook,
@@ -795,7 +794,7 @@ public static void main(String[] args) throws FileNotFoundException
     
     // instance data members
     
-    private Pattern plateNumberPattern = Pattern.compile("(PL[-_])?(\\d+)");
+    private Pattern plateNumberPattern = Pattern.compile(ScreenResultWorkbookSpecification.PLATE_NUMBER_REGEX);
 
     
     // public methods
@@ -850,4 +849,88 @@ public static void main(String[] args) throws FileNotFoundException
     }
   }
 
+  /**
+   * Parses the value of a cell containing a "well name". Validates that the
+   * well name follows proper syntax, defined by the regex "[A-Z]\d\d".
+   * 
+   * @author ant
+   */
+  public class ExcludeParser implements CellValueParser<ResultValueType>
+  {
+    private ScreenResult _screenResult;
+    private Pattern columnIdPattern = Pattern.compile("[A-Z]");
+    
+
+    // public methods
+    
+    public ExcludeParser(ScreenResult screenResult)
+    {
+      _screenResult = screenResult;
+    }
+
+    public ResultValueType parse(Cell cell) 
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public List<ResultValueType> parseList(Cell cell)
+    {
+      String textMultiValue = cell.getString();
+      if (textMultiValue != null && 
+        textMultiValue.equalsIgnoreCase(ScreenResultWorkbookSpecification.EXCLUDE_ALL_VALUE)) {
+        return makeRawResultValueTypeList(_screenResult);
+      }
+      List<ResultValueType> result = new ArrayList<ResultValueType>();
+      if (textMultiValue == null) {
+        return result;
+      }
+      String[] textValues = textMultiValue.split(",");
+      for (int i = 0; i < textValues.length; i++) {
+        String text = textValues[i];
+        ResultValueType rvt = doParseSingleValue(text, cell);
+        if (rvt != null) {
+          result.add(rvt);
+        }
+      }
+      if (result.size() >= 0) {
+        return result;
+      }
+      // to support legacy format, any non-blank value denotes "exclude all"
+      // (note: prevents us from generating errors for our list-based parsing,
+      // above)
+      return makeRawResultValueTypeList(_screenResult);
+    }
+
+    
+    // private methods
+    
+    private ResultValueType doParseSingleValue(String value, Cell cell)
+    {
+      Matcher matcher = columnIdPattern.matcher(value);
+      if (!matcher.matches()) {
+        return null;
+      }
+      char parsedValue = matcher.group(0).charAt(0);
+      int rvtOrdinal = parsedValue - ScreenResultWorkbookSpecification.RAWDATA_FIRST_DATA_HEADER_COLUMN_ID;
+      if (rvtOrdinal < 0 || rvtOrdinal >= _screenResult.getResultValueTypes().size() ) {
+        // can't report error since legacy format uses *any* non-null value to denote "exclude"=true
+        //_errors.addError("unparseable Exclude value '" + value + "'", cell)
+        return null;
+      }
+      return _screenResult.generateResultValueTypesList().get(rvtOrdinal);
+    }
+    
+    private List<ResultValueType> makeRawResultValueTypeList(ScreenResult screenResult) 
+    {
+      List<ResultValueType> result = new ArrayList<ResultValueType>();
+      for (Iterator iter = screenResult.getResultValueTypes().iterator(); iter.hasNext();) {
+        ResultValueType rvt = (ResultValueType) iter.next();
+        if (!rvt.isDerived()) {
+          result.add(rvt);
+        }
+      }
+      return result;
+    }
+    
+  }
 }

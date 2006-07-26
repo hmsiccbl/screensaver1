@@ -9,6 +9,11 @@
 
 package edu.harvard.med.screensaver.ui.util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,12 +29,68 @@ import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
 import javax.faces.el.ValueBinding;
 import javax.faces.model.SelectItem;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 public class JSFUtils
 {
   private static Logger log = Logger.getLogger(JSFUtils.class);
+
+  /**
+   * Performs the necessary steps to return a server-side file to an HTTP
+   * client. Must be called within a JSF-enabled servlet environment.
+   * 
+   * @param facesContext the JSF FacesContext
+   * @param file the File to send to the HTTP client
+   * @param mimeType the MIME type of the file being sent
+   * @throws IOException
+   */
+  public static void handleUserFileDownloadRequest(
+    FacesContext facesContext,
+    File file, 
+    String mimeType)
+    throws IOException
+  {
+    InputStream in = new FileInputStream(file);
+    handleUserDownloadRequest(facesContext,
+                              in,
+                              file.getName(),
+                              mimeType);
+  }
+
+  /**
+   * Performs the necessary steps to return server-side data, provided as an
+   * InputStream, to an HTTP client. Must be called within a JSF-enabled servlet
+   * environment.
+   * 
+   * @param facesContext the JSF FacesContext
+   * @param dataInputStream an InputStream containing the data to send to the HTTP client
+   * @param contentLocation set the "content-location" HTTP header to this value, allowing the downloaded file to be named
+   * @param mimeType the MIME type of the file being sent
+   * @throws IOException
+   */
+  public static void handleUserDownloadRequest(
+    FacesContext facesContext,
+    InputStream dataInputStream,
+    String contentLocation,
+    String mimeType)
+    throws IOException
+  {
+    HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
+    response.setContentType(mimeType);
+    // TODO: not working!!!
+    response.setHeader("Content-Location",
+                       contentLocation);
+    OutputStream out = response.getOutputStream();
+    IOUtils.copy(dataInputStream, out);
+    out.close();
+    // skip Render-Response JSF lifecycle phase, since we're generating a
+    // non-Faces response
+    facesContext.responseComplete();
+  }
+
 
   /**
    * Dynamically add a column to a JSF UIData (table) component.

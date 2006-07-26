@@ -25,7 +25,7 @@
       <%@include file="screenResultUploader.jspf"%>
     </h:panelGroup>
 
-    <h:form id="errorsTableForm" rendered="#{screenResultImporter.screenResultParser.errors.length > 0}">
+    <h:form id="errorsTableForm" rendered="#{screenResultImporter.screenResultParser.hasErrors}">
 
       <h:outputText value="Import Errors for #{screenResultImporter.uploadedFile.name}" styleClass="sectionHeader"/>
 

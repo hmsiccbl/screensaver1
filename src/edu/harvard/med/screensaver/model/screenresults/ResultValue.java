@@ -189,6 +189,51 @@ public class ResultValue extends AbstractEntity implements Comparable
   public String getValue() {
     return _value;
   }
+  
+  /**
+   * Returns the value of this <code>ResultValue</code> as an appropriately
+   * typed object, depending upon {@link ResultValueType#isActivityIndicator()},
+   * {@link ResultValueType#isDerived()()}, and
+   * {@link ResultValueType#getActivityIndicatorType()}, as follows:
+   * <ul>
+   * <li> Not Derived (Raw): returns Double
+   * <li> Not an Activity Indicator: returns String
+   * <li> ActivityIndicatorType.BOOLEAN: returns Boolean
+   * <li> ActivityIndicatorType.NUMERICAL: returns Double
+   * <li> ActivityIndicatorType.PARTITION: returns PartitionedValue
+   * </ul>
+   * 
+   * @return a Boolean, Double, or String
+   * @motivation to preserve typed data in exported Workbooks (rather than treat
+   *             all result values as text strings)
+   */
+  public Object generateTypedValue()
+  {
+    if (!getResultValueType().isDerived()) {
+      return Double.valueOf(_value);
+    }
+      
+    if (getResultValueType().isActivityIndicator()) {
+      ActivityIndicatorType activityIndicatorType = getResultValueType().getActivityIndicatorType();
+      if (activityIndicatorType.equals(ActivityIndicatorType.BOOLEAN)) {
+        return Boolean.valueOf(_value);
+      }
+      else if (activityIndicatorType.equals(ActivityIndicatorType.NUMERICAL)) {
+        return Double.valueOf(_value);
+      }
+      else if (activityIndicatorType.equals(ActivityIndicatorType.PARTITION)) {
+        for (PartitionedValue pv: PartitionedValue.values()) {
+          if (pv.getValue().equals(_value)) {
+            return pv;
+          }
+        }
+        assert false : "not a PartitionValue in ResultValue.generateTypedValue()";
+        /* return PartitionedValue.valueOf(_value);*/
+      }
+      assert false : "unhandled ActivityIndicatorType in ResultValue.generateTypedValue()";
+    }
+    return _value.toString();
+  }
 
   /**
    * Set the actual value of this <code>ResultValue</code>.

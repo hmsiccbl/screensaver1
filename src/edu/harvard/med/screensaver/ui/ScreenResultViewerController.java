@@ -9,6 +9,9 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,13 +25,14 @@ import javax.faces.application.FacesMessage;
 import javax.faces.component.UIData;
 import javax.faces.component.UIInput;
 import javax.faces.component.UISelectBoolean;
-import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.io.screenresult.ScreenResultExporter;
+import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -36,7 +40,10 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+
 
 /**
  * JSF backing bean for Screen Result Viewer web page (screenresultviewer.jsp).
@@ -66,6 +73,7 @@ public class ScreenResultViewerController extends AbstractController
 
   private DAO _dao;
   private ScreenResult _screenResult;
+  private ScreenResultExporter _screenResultExporter;
   private int _firstRow;
   private boolean _showMetadataTable = true;
   private boolean _showRawDataTable = true;
@@ -150,6 +158,18 @@ public class ScreenResultViewerController extends AbstractController
     _screenResult = screenResult;
   }
   
+  public ScreenResultExporter getScreenResultExporter()
+  {
+    return _screenResultExporter;
+  }
+
+
+  public void setScreenResultExporter(ScreenResultExporter screenResultExporter)
+  {
+    _screenResultExporter = screenResultExporter;
+  }
+
+
   public boolean isShowMetadataTable()
   {
     return _showMetadataTable;
@@ -255,7 +275,7 @@ public class ScreenResultViewerController extends AbstractController
 
   public List<SelectItem> getPlateSelectItems()
   {
-    return JSFUtils.createUISelectItems(_screenResult.getDerivedPlateNumbers());
+    return JSFUtils.createUISelectItems(_screenResult.generatePlateNumbers());
   }
   
   public List<SelectItem> getDataHeaderSelectItems()
@@ -363,9 +383,30 @@ public class ScreenResultViewerController extends AbstractController
   
   public String download()
   {
-    getFacesContext().addMessage("dataForm",
-                                 new FacesMessage("Download feature not yet implemented!"));
-    // TODO: implement
+    File exportedWorkbookFile = null;
+    FileOutputStream out = null;
+    try {
+      HSSFWorkbook workbook = _screenResultExporter.build(_screenResult);
+      exportedWorkbookFile = File.createTempFile("workbook-export.",
+                                                 ".xls");
+      out = new FileOutputStream(exportedWorkbookFile);
+      workbook.write(out);
+      out.close();
+      JSFUtils.handleUserFileDownloadRequest(getFacesContext(),
+                                             exportedWorkbookFile,
+                                             Workbook.MIME_TYPE);
+    }
+    catch (IOException e)
+    {
+      e.printStackTrace();
+      // TODO
+    }
+    finally {
+      IOUtils.closeQuietly(out);
+      if (exportedWorkbookFile != null && exportedWorkbookFile.exists()) {
+        exportedWorkbookFile.delete();
+      }
+    }
     return null;
   }
   
@@ -385,7 +426,7 @@ public class ScreenResultViewerController extends AbstractController
   
   public String showWell()
   { 
-    Object wellId = (Object) FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("wellIdParam");
+    Object wellId = (Object) getFacesContext().getExternalContext().getRequestParameterMap().get("wellIdParam");
     log.debug("action event on well " + wellId);
     return "showWell";
   }

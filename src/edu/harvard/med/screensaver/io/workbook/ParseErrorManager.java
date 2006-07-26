@@ -94,6 +94,15 @@ public class ParseErrorManager
   {
     return _errors;
   }
+  
+  /**
+   * @motivation jsp inspection
+   * @return
+   */
+  public boolean getHasErrors()
+  {
+    return _errors.size() > 0;
+  }
 
   public Set<Workbook> getWorkbooksWithErrors()
   {

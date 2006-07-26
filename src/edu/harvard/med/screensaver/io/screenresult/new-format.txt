@@ -1,0 +1,22 @@
+- "filenames" row on metasheet removed
+
+- "excluded" data column contains comma-delimited list of RVTs excluded, or
+"all"; blank cell means "none"
+
+- "Sheet1" is now "Data Headers"
+
+- "meta" worksheet name is now "Screen Info"
+
+- all data is on one sheet named "Data" (single sheet allows formulas to be added easily)
+
+- removed "Plate", "Well", "Well type", and "Well exclude" from data headers
+
+- Partitioned values now *must* be S, M, W, <empty>
+
+ - Combined "High values" and "Low values" values into "Numerical" for Assay
+ Activity Indicator Type field
+
+ - Accepts "Partitioned" value in place of "Scaled" value in Assay Activity
+ Indicator Type field
+
+- "Data" worksheet column header "Stock_ID" is now "Stock Plate ID"

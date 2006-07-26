@@ -77,7 +77,7 @@ public class HeatMapViewerController extends AbstractController
 
   public List<SelectItem> getPlateSelectItems()
   {
-    return JSFUtils.createUISelectItems(_screenResult.getDerivedPlateNumbers());
+    return JSFUtils.createUISelectItems(_screenResult.generatePlateNumbers());
   }
   
   public List<SelectItem> getDataHeaderSelectItems()
@@ -122,7 +122,7 @@ public class HeatMapViewerController extends AbstractController
   private void selectAllPlates()
   {
     _plateNumbers = new ArrayList<String>();
-    for (Integer plateNumber : _screenResult.getDerivedPlateNumbers()) {
+    for (Integer plateNumber : _screenResult.generatePlateNumbers()) {
       _plateNumbers.add(plateNumber.toString());
     }
   }

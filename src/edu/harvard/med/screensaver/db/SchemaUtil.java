@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.sql.SQLException;
-
 import edu.harvard.med.screensaver.CommandLineApplication;
 
 import org.apache.commons.cli.OptionBuilder;

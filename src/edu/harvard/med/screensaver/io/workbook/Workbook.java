@@ -32,6 +32,8 @@ public class Workbook
 {
   private static Logger log = Logger.getLogger(Workbook.class);
   
+  public static final String MIME_TYPE = "application/vnd.ms-excel";
+  
   private File _workbookFile;
   private HSSFWorkbook _workbook;
   private ParseErrorManager _errors;

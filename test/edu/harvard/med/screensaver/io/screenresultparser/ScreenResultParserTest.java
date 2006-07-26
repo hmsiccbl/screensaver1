@@ -66,9 +66,9 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
   /**
    * Tests basic usage of the HSSF API to read an Excel spreadsheet, but does
-   * not Screensaver functionality. Basically, just a check that the technology
-   * we're using actually works. Somewhat useful to keep around in case we
-   * upgrade jar version, etc.
+   * not test Screensaver-related functionality. Basically, just a check that
+   * the technology we're using actually works. Somewhat useful to keep around
+   * in case we upgrade jar version, etc.
    */
   public void testReadExcelSpreadsheet() throws Exception 
   {
@@ -102,7 +102,12 @@ public class ScreenResultParserTest extends AbstractSpringTest
   // String.class);
   // }
 
-  public void testParseScreenResult() throws Exception
+  /**
+   * Tests legacy file format, as well as testing most parsing cases (field
+   * types and values). This is the most comprehensive test of low-level parsing
+   * functionality.
+   */
+  public void testParseLegacyScreenResult() throws Exception
   {
     ScreenResult screenResult = screenResultParser.parse(new File(TEST_INPUT_FILE_DIR, "258MetaData.xls"));
     assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
@@ -268,7 +273,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    * Test that ScreenResultParser can handle raw data from multiple workbooks,
    * where each workbook also uses multiple worksheets.
    */
-  public void testReadMultiWorkbookMultiWorksheet()
+  public void testParseLegacyMultiWorkbookMultiWorksheet()
   {
     ScreenResult screenResult = screenResultParser.parse(new File(TEST_INPUT_FILE_DIR, "464MetaData.xls"));
     assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
@@ -379,10 +384,16 @@ public class ScreenResultParserTest extends AbstractSpringTest
     System.gc();
 
     // now test reading yet another spreadsheet, for which we can test the parsed result
-    testParseScreenResult();
+    testParseLegacyScreenResult();
    }
   
-  public void testAllInOne() throws Exception
+  /**
+   * Tests parsing of the new ScreenResult workbook format, which is an
+   * "all-in-one" format, and has significant structural changes.
+   * 
+   * @throws Exception
+   */
+  public void testParseNewScreenResult() throws Exception
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, "all-in-one.xls");
     ScreenResult screenResult = screenResultParser.parse(workbookFile);
@@ -407,19 +418,35 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt0.setActivityIndicator(true);
     rvt0.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
     rvt0.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);
-    rvt0.setIndicatorCutoff(10000.0);
+    rvt0.setIndicatorCutoff(1070000.0);
+    rvt0.setAssayPhenotype("Human");
+    rvt0.setComments("None");
+
+    ResultValueType rvt1 = new ResultValueType(expectedScreenResult,
+                                               "Cherry Pick");
+    rvt1.setDescription("Cherry Pick");
+    rvt1.setDerived(true);
+    rvt1.setHowDerived("E > 1070000");
+    rvt1.addTypeDerivedFrom(rvt0);
+    rvt1.setActivityIndicator(true);
+    rvt1.setActivityIndicatorType(ActivityIndicatorType.BOOLEAN);
+    rvt1.setCherryPick(true);
 
     expectedResultValueTypes.put(0, rvt0);
+    expectedResultValueTypes.put(1, rvt1);
 
-    Integer[] expectedInitialPlateNumbers = {1, 1, 1};
+    Integer[] expectedInitialPlateNumbers = {1, 1, 1, 2, 2, 2};
 
-    String[] expectedInitialWellNames = {"A01", "A02", "A03"};
+    String[] expectedInitialWellNames = {"A01", "A02", "A03", "A01", "A02", "A03"};
 
     Object[][] expectedInitialResultValues = {
-      {1071894.0},
-      {1071894.0},
-      {1174576.0}};
-
+      {1071894.0, true},
+      {1071894.0, true},
+      {1174576.0, false},
+      {1089391.0, true},
+      {1030000.0, false},
+      {1020000.0, false}};
+    
     SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
     int iRvt = 0;
     for (ResultValueType rvt : resultValueTypes) {
@@ -430,7 +457,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
         assertTrue("ResultValueType " + iRvt, expectedRvt.isEquivalent(rvt));
 
         // compare result values
-        assertEquals(3, rvt.getResultValues().size());
+        assertEquals(6, rvt.getResultValues().size());
         int iWell = 0;
         for (ResultValue rv : rvt.getResultValues()) {
           assertEquals("rvt " + iRvt + " well #" + iWell + " plate name",
@@ -441,10 +468,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
                        expectedInitialWellNames[iWell],
                        rv.getWell()
                          .getWellName());
-          if (iRvt == 0) {
+          if (iRvt == 1) {
             assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
                          expectedInitialResultValues[iWell][iRvt].toString(),
-                         rv.getValue().toString());
+                         rv.getValue());
           }
           else {
             assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
@@ -453,11 +480,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
                          0.0001);
           }
           ++iWell;
-          if (iWell == expectedInitialResultValues.length) {
-            // done testing the initial rows of data, now jump to testing the
-            // final rows of data
-            break;
-          }
         }
       }
       ++iRvt;

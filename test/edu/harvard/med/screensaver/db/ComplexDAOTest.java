@@ -18,8 +18,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.model.Child;
-import edu.harvard.med.screensaver.model.Parent;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -73,29 +71,6 @@ public class ComplexDAOTest extends AbstractSpringTest
 
   
   // JUnit test methods 
-  
-  public void testParentChildRelationship()
-  {
-    Parent parent = new Parent("parent1");
-    new Child("a", parent);
-    new Child("b", parent);
-    dao.persistEntity(parent);
-    
-    Parent loadedParent = dao.findEntityById(Parent.class, parent.getParentId());
-    assertNotSame("distinct parent objects for save and load operations", parent, loadedParent);
-    Set<Child> loadedChildren = loadedParent.getChildren();
-    assertNotSame("distinct children set objects for save and load operations", parent.getChildren(), loadedChildren);
-    assertEquals(parent, loadedParent);
-    assertEquals(parent.getChildren(), loadedChildren);
-    
-    // now test whether we can add another child to our Parent that was loaded from the database
-    Child childC = new Child("c", loadedParent);
-    assertTrue("child added to loaded parent", loadedParent.getChildren().contains(childC));
-    dao.persistEntity(loadedParent);
-    
-    Parent loadedParent2 = dao.findEntityById(Parent.class, parent.getParentId());
-    assertTrue("child added to re-loaded parent", loadedParent2.getChildren().contains(childC));
-  }
   
   public void testCreateAndModifyCompound()
   {
@@ -344,7 +319,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           SortedSet<Integer> expectedPlateNumbers = new TreeSet<Integer>();
           expectedPlateNumbers.add(1);
           expectedPlateNumbers.add(2);
-          assertEquals(expectedPlateNumbers, screenResult.getDerivedPlateNumbers());
+          assertEquals(expectedPlateNumbers, screenResult.generatePlateNumbers());
           
           dao.persistEntity(screenResult);
         }

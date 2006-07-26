@@ -49,7 +49,7 @@ public class UniqueDataHeaderNames
 
   public String get(Integer ordinal)
   {
-    return _uniqueDataHeaderNamesMap.get(_screenResult.getDerivedResultValueTypesList().get(ordinal));
+    return _uniqueDataHeaderNamesMap.get(_screenResult.generateResultValueTypesList().get(ordinal));
   }
 
   public List<String> asList()
