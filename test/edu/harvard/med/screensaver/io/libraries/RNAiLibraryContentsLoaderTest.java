@@ -9,7 +9,20 @@
 
 package edu.harvard.med.screensaver.io.libraries;
 
-public class RNAiLibraryParser
-{
+import java.io.File;
 
+import edu.harvard.med.screensaver.AbstractSpringTest;
+
+
+public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
+{
+  public static final File TEST_INPUT_FILE_DIR =
+    new File("test/edu/harvard/med/screensaver/io/libraries");
+  
+  protected RNAiLibraryContentsLoader rnaiLibraryContentsLoader;
+
+  public void testSanity()
+  {
+    assertNotNull("loader is not null", rnaiLibraryContentsLoader);
+  }
 }
