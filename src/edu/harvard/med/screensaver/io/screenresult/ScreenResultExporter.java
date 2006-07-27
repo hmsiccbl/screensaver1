@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.io.screenresult;
 
-import java.io.IOException;
-
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -19,20 +17,10 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
  * Write a ScreenResult to a workbook file.
  * @author ant
  */
-// TODO: place shared file format information in one place, and share with ScreenResultParser
 public class ScreenResultExporter
 {
 
-  public ScreenResultExporter() throws IOException
-  {
-  }
-  
   public HSSFWorkbook build(ScreenResult screenResult)
-  {
-    return writeData(screenResult);
-  }
-  
-  private HSSFWorkbook writeData(ScreenResult screenResult)
   {
     HSSFWorkbook workbook = new HSSFWorkbook();
     new ScreenInfoWorksheet().build(workbook, screenResult);
@@ -40,4 +28,5 @@ public class ScreenResultExporter
     new DataWorksheet().build(workbook, screenResult);
     return workbook;
   }
+
 }

@@ -7,5 +7,16 @@
 		<config>resources/spring-context-services.xml</config>
 	</configs>
 	<configSets>
+		<configSet>
+			<name>all</name>
+			<allowBeanDefinitionOverriding>false</allowBeanDefinitionOverriding>
+			<incomplete>false</incomplete>
+			<configs>
+				<config>resources/spring-context-logging.xml</config>
+				<config>resources/spring-context-persistence.xml</config>
+				<config>resources/spring-context-services.xml</config>
+				<config>resources/spring-context-ui.xml</config>
+			</configs>
+		</configSet>
 	</configSets>
 </beansProjectDescription>
