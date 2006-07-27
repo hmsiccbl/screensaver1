@@ -66,6 +66,8 @@ public class ScreenDBDataImporter
   
   /**
    * Construct a new <code>ScreenDBDataImporter</code> object.
+   * Recreates the schema.
+   * 
    * @param dao
    * @param schemaUtil
    */
@@ -86,8 +88,6 @@ public class ScreenDBDataImporter
       _dao.persistEntity(library);
     }
     for (ScreeningRoomUser screeningRoomUser : screenDBProxy.getScreeningRoomUsers()) {
-      log.info("saving user " + screeningRoomUser);
-      log.info("with lab head " + screeningRoomUser.getLabHead());
       _dao.persistEntity(screeningRoomUser);
     }
     for (Screen screen : screenDBProxy.getScreens()) {
