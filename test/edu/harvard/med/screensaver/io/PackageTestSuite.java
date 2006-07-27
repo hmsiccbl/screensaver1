@@ -15,16 +15,19 @@ import junit.framework.TestSuite;
 public class PackageTestSuite extends TestSuite
 {
 
-  public static void main(String[] args) {
+  public static void main(String[] args)
+  {
     junit.textui.TestRunner.run(PackageTestSuite.class);
   }
 
-  public static Test suite() {
+  public static Test suite()
+  {
     return new PackageTestSuite();
   }
 
-  public PackageTestSuite() {
+  public PackageTestSuite()
+  {
     addTest(edu.harvard.med.screensaver.io.screenresultparser.PackageTestSuite.suite());
+    addTest(edu.harvard.med.screensaver.io.libraries.PackageTestSuite.suite());
   }
-  
 }

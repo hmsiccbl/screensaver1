@@ -19,7 +19,7 @@ import java.util.Set;
 
 import javax.faces.application.FacesMessage;
 
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import edu.harvard.med.screensaver.AbstractSpringTest;
 
 /**
  * Tests Spring/Hibernate integration. This is one of the rare cases where
@@ -30,19 +30,9 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
  * 
  * @author andrew tolopko
  */
-public class SpringUtilTest
-extends AbstractDependencyInjectionSpringContextTests
+public class SpringUtilTest extends AbstractSpringTest
 {
-  
-  /**
-   * Spring configuration will be loaded from the configuration file(s)
-   * specified in this constant.
-   */
-  private static final String[] SPRING_CONFIG_FILES = new String[] {
-    "spring-context-ui.xml", 
-    "spring-context-logging.xml"
-  };
-  
+
   protected Messages messages;
   
   
@@ -57,17 +47,6 @@ extends AbstractDependencyInjectionSpringContextTests
   
   public void setSpringUiUtil(Messages messages) {
     this.messages = messages;
-  }
-  
-  
-  @Override
-  /**
-   * Provides the Spring framework with the configuration files we need loaded
-   * in order to execute our tests.
-   */
-  protected String[] getConfigLocations()
-  {
-    return SPRING_CONFIG_FILES;
   }
   
   

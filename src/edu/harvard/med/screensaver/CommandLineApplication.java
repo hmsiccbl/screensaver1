@@ -49,9 +49,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class CommandLineApplication
 {
   public static final String[] SPRING_CONFIG_FILES = {
-    "spring-context-logging.xml",
-    "spring-context.persistence.xml",
-    "spring-context-services.xml",
+    "spring-context.xml",
   };
   
   private ApplicationContext _appCtx;
@@ -64,11 +62,7 @@ public class CommandLineApplication
   @SuppressWarnings("static-access")
   public CommandLineApplication(String[] cmdLineArgs)
   {
-    _appCtx = new ClassPathXmlApplicationContext(new String[] { 
-      "spring-context-logging.xml",
-      "spring-context-services.xml", 
-      "spring-context-persistence.xml",
-    });
+    _appCtx = new ClassPathXmlApplicationContext(SPRING_CONFIG_FILES);
     _cmdLineArgs = cmdLineArgs;
     _options = new Options();
     _options.addOption(OptionBuilder.

@@ -25,13 +25,6 @@ public class UniqueDataHeaderNamesTest extends AbstractSpringTest
 {
   
   protected ScreenResultParser screenResultParser;
-  
-  protected String[] getConfigLocations() {
-    List<String> configLocations = new ArrayList<String>();
-    configLocations.add("spring-context-services.xml");
-    CollectionUtils.addAll(configLocations, super.getConfigLocations());
-    return configLocations.toArray(new String[configLocations.size()]);
-  }
 
   public void testClass()
   {

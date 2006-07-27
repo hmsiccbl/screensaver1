@@ -55,14 +55,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
   protected void onTearDown() throws Exception {
     // TODO: delete *.error.xls files
   }
-  
-  @Override
-  protected String[] getConfigLocations()
-  {
-    return new String[] {
-      "spring-context-services.xml", 
-    };
-  }
 
   /**
    * Tests basic usage of the HSSF API to read an Excel spreadsheet, but does

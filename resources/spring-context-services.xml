@@ -19,6 +19,13 @@
   </bean>
   
   <bean 
+    id="rnaiLibraryContentsLoader"
+    class="edu.harvard.med.screensaver.io.libraries.RNAiLibraryContentsLoader"
+    singleton="true"
+  >
+  </bean>
+  
+  <bean 
     id="screenDBDataImporter"
     class="edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter"
     singleton="true">

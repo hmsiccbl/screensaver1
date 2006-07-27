@@ -29,7 +29,7 @@ public abstract class AbstractSpringTest
    * specified in this constant.
    */
    private static final String[] SPRING_CONFIG_FILES = new String[] {
-     "spring-context-persistence.xml", "spring-context-logging.xml", "spring-context-services.xml",
+     "spring-context.xml",
    };
    
    

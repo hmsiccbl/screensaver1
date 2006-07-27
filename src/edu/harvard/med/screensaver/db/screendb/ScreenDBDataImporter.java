@@ -53,9 +53,7 @@ public class ScreenDBDataImporter
   public static void main(String [] args)
   {
     ClassPathXmlApplicationContext appCtx = new ClassPathXmlApplicationContext(new String[] { 
-      "spring-context-logging.xml",
-      "spring-context-services.xml", 
-      "spring-context-persistence.xml", 
+      "spring-context.xml",
     });
     ScreenDBDataImporter importer = (ScreenDBDataImporter) appCtx.getBean("screenDBDataImporter");
     importer.loadScreenDBData();
