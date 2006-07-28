@@ -9,8 +9,10 @@
 
 package edu.harvard.med.screensaver.io.libraries;
 
+import java.io.File;
 import java.io.InputStream;
 
+import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 import edu.harvard.med.screensaver.model.libraries.Library;
 
 /**
@@ -22,14 +24,22 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 public class RNAiLibraryContentsLoader implements LibraryContentsLoader
 {
 
+  // private instance data
+  
+  private ParseErrorManager _errorManager = new ParseErrorManager();
+  
+  
+  // public instance methods
+  
   /**
    * Load library contents (either partial or complete) from an input
    * stream of an Excel spreadsheet into a library.
    * @param library the library to load contents of
+   * @param file the name of the file that contains the library contents
    * @param stream the input stream to load library contents from
    * @return the library with the contents loaded
    */
-  public Library loadLibraryContents(Library library, InputStream stream)
+  public Library loadLibraryContents(Library library, File file, InputStream stream)
   {
     return library;
   }

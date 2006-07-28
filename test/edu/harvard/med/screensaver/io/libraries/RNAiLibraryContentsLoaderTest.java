@@ -10,8 +10,15 @@
 package edu.harvard.med.screensaver.io.libraries;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.Well;
 
 
 public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
@@ -21,8 +28,23 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
   
   protected RNAiLibraryContentsLoader rnaiLibraryContentsLoader;
 
-  public void testSanity()
+  public void testHuman1()
   {
-    assertNotNull("loader is not null", rnaiLibraryContentsLoader);
+    Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 5003);
+    String filename = "Human1.xls";
+    File file = new File(TEST_INPUT_FILE_DIR, filename);
+    InputStream stream = null;
+    try {
+      stream = new FileInputStream(file);
+    }
+    catch (FileNotFoundException e) {
+      fail("file not found: " + filename);
+    }
+    library = rnaiLibraryContentsLoader.loadLibraryContents(library, file, stream);
+    Set<Well> wells = library.getWells();
+    
+    // this library has 779 wells according to
+    // http://iccb.med.harvard.edu/screening/RNAi%20Libraries/index.htm
+    assertEquals("well count in Human1", 779, wells.size());
   }
 }
