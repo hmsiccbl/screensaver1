@@ -36,16 +36,16 @@ class RNAiLibraryColumnHeaders
     new HashMap<String,RequiredRNAiLibraryColumn>();
   static {
     for (RequiredRNAiLibraryColumn rnaiColumn : RequiredRNAiLibraryColumn.values()) {
-      _columnHeaders.put(rnaiColumn.getDefaultColumnHeader(), rnaiColumn);
+      _columnHeaders.put(rnaiColumn.getDefaultColumnHeader().toLowerCase(), rnaiColumn);
     }
     // some accepted synonyms:
-    _columnHeaders.put("384 Plate",      RequiredRNAiLibraryColumn.PLATE);
-    _columnHeaders.put("384 Well",       RequiredRNAiLibraryColumn.WELL);
-    _columnHeaders.put("Catalog Number", RequiredRNAiLibraryColumn.VENDOR_IDENTIFIER);
-    _columnHeaders.put("Gene Symbol",    RequiredRNAiLibraryColumn.ENTREZGENE_SYMBOL);
-    _columnHeaders.put("Locus ID",       RequiredRNAiLibraryColumn.ENTREZGENE_ID);
-    _columnHeaders.put("Accession",      RequiredRNAiLibraryColumn.GENBANK_ACCESSION_NUMBER);
-    _columnHeaders.put("Sequence",       RequiredRNAiLibraryColumn.SEQUENCES);
+    _columnHeaders.put("384 plate",      RequiredRNAiLibraryColumn.PLATE);
+    _columnHeaders.put("384 well",       RequiredRNAiLibraryColumn.WELL);
+    _columnHeaders.put("catalog number", RequiredRNAiLibraryColumn.VENDOR_IDENTIFIER);
+    _columnHeaders.put("gene symbol",    RequiredRNAiLibraryColumn.ENTREZGENE_SYMBOL);
+    _columnHeaders.put("locus id",       RequiredRNAiLibraryColumn.ENTREZGENE_ID);
+    _columnHeaders.put("accession",      RequiredRNAiLibraryColumn.GENBANK_ACCESSION_NUMBER);
+    _columnHeaders.put("sequence",       RequiredRNAiLibraryColumn.SEQUENCES);
   }
 
   
@@ -114,7 +114,7 @@ class RNAiLibraryColumnHeaders
       if (columnHeader == null) {
         continue;
       }
-      RequiredRNAiLibraryColumn column = _columnHeaders.get(columnHeader);
+      RequiredRNAiLibraryColumn column = _columnHeaders.get(columnHeader.toLowerCase());
       if (column == null) {
         continue;
       }
