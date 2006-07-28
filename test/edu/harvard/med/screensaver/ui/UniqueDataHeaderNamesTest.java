@@ -19,8 +19,6 @@ import edu.harvard.med.screensaver.io.screenresultparser.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
-import org.apache.commons.collections.CollectionUtils;
-
 public class UniqueDataHeaderNamesTest extends AbstractSpringTest
 {
   
@@ -37,6 +35,8 @@ public class UniqueDataHeaderNamesTest extends AbstractSpringTest
     expectedUniqueNames.add("FI (2)");
     expectedUniqueNames.add("FI (3)");
     expectedUniqueNames.add("FI (4)");
+    expectedUniqueNames.add("AssayIndicator");
+    expectedUniqueNames.add("Cherry Pick");
     
     ScreenResult screenResult = screenResultParser.parse(new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "115.xls"));
     assertNotNull("pretest: screenResult parsed", screenResult);
