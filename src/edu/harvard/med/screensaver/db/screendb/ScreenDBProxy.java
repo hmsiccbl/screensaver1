@@ -217,7 +217,7 @@ public class ScreenDBProxy
       Integer headId = memberToHead.get(memberId);
       ScreeningRoomUser member = _screeningRoomUserMap.get(memberId);
       ScreeningRoomUser head = _screeningRoomUserMap.get(headId);
-      if (head != null) {
+      if (head != null && head != member) {
         member.setLabHead(head);
       }
     }

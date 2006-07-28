@@ -48,32 +48,34 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 public class ScreenDBDataImporter
 {
 
+  
+  // static stuff
+  
   private static Logger log = Logger.getLogger(ScreenDBDataImporter.class);
   
   public static void main(String [] args)
   {
-    ClassPathXmlApplicationContext appCtx = new ClassPathXmlApplicationContext(new String[] { 
+    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { 
       "spring-context.xml",
     });
-    ScreenDBDataImporter importer = (ScreenDBDataImporter) appCtx.getBean("screenDBDataImporter");
+    SchemaUtil schemaUtil = (SchemaUtil) context.getBean("schemaUtil");
+    schemaUtil.recreateSchema();
+    ScreenDBDataImporter importer = (ScreenDBDataImporter) context.getBean("screenDBDataImporter");
     importer.loadScreenDBData();
   }
   
+  
+  // instance stuff
+  
   private DAO _dao;
-  private SchemaUtil _schemaUtil;
   
   /**
    * Construct a new <code>ScreenDBDataImporter</code> object.
-   * Recreates the schema.
-   * 
    * @param dao
-   * @param schemaUtil
    */
-  public ScreenDBDataImporter(DAO dao, SchemaUtil schemaUtil)
+  public ScreenDBDataImporter(DAO dao)
   {
     _dao = dao;
-    _schemaUtil = schemaUtil;
-    _schemaUtil.recreateSchema();
   }
   
   /**
