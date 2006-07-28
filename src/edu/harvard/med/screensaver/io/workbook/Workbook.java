@@ -35,13 +35,20 @@ public class Workbook
   public static final String MIME_TYPE = "application/vnd.ms-excel";
   
   private File _workbookFile;
+  private InputStream _workbookStream;
   private HSSFWorkbook _workbook;
   private ParseErrorManager _errors;
 
 
   public Workbook(File workbookFile, ParseErrorManager errors)
   {
+    this(workbookFile, null, errors);
+  }
+
+  public Workbook(File workbookFile, InputStream workbookStream, ParseErrorManager errors)
+  {
     _workbookFile = workbookFile;
+    _workbookStream = workbookStream;
     _errors = errors;
   }
   
@@ -54,12 +61,10 @@ public class Workbook
   {
     if (_workbook == null) {
       try {
-        InputStream inputStream = new FileInputStream(_workbookFile);
-        // TODO: do we need this check?
-        if (inputStream == null) {
-          throw new FileNotFoundException("could not find file " + _workbookFile);
+        if (_workbookStream == null) {
+          _workbookStream = new FileInputStream(_workbookFile);
         }
-        POIFSFileSystem dataFs = new POIFSFileSystem(new BufferedInputStream(inputStream));
+        POIFSFileSystem dataFs = new POIFSFileSystem(new BufferedInputStream(_workbookStream));
         _workbook = new HSSFWorkbook(dataFs);
       }
       catch (IOException e) {
@@ -116,5 +121,4 @@ public class Workbook
     log.info("saved workbook " + _workbookFile + " as " + outputFileName);
     return new File(outputFileName);
   }
-  
 }
