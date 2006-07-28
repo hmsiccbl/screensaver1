@@ -106,7 +106,7 @@ public class MainController extends AbstractController
     // available; works on one developer's machine in particular (and I'm not
     // naming names!)
     _screenResultViewerController.setScreenResult(_sample1ScreenResult);
-    return "success";
+    return SUCCESS_ACTION_RESULT;
   }
   
   public String viewSample2ScreenResult()
@@ -120,7 +120,7 @@ public class MainController extends AbstractController
       _sample2ScreenResult = loadScreenResult(metadatafile);
     }
     _screenResultViewerController.setScreenResult(_sample2ScreenResult);
-    return "success";
+    return SUCCESS_ACTION_RESULT;
   }
   
   public String createLibrary() {
@@ -131,7 +131,7 @@ public class MainController extends AbstractController
       1,
       2));
     _libraryController.setUsageMode("create");
-    return "success";
+    return SUCCESS_ACTION_RESULT;
   }
   
   public String findLibrary() {
@@ -147,7 +147,7 @@ public class MainController extends AbstractController
                                                   new Object[] {_libraryNamePattern},
                                                   "queryForm");
       log.debug(msg.getDetail());
-      return null; // return to same view
+      return REDISPLAY_PAGE_ACTION_RESULT; // return to same view
     }
     else if (librariesFound.size() == 1) {
       _libraryController.setLibrary(librariesFound.get(0));
@@ -164,7 +164,7 @@ public class MainController extends AbstractController
       // TODO: show all libraries in a table
       // _libraryListController.setLibraries(librariesFound);
       // return "found many";
-      return null;
+      return REDISPLAY_PAGE_ACTION_RESULT;
     }
   }
   

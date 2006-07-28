@@ -19,4 +19,37 @@
   
   <body>
 
-  
+    <table>
+      <tr>
+      <td colspan="2">
+          <div class="navPanel">Screensaver 1.0</div>
+      </td>
+      </tr>
+      <tr>
+        <td width="240" class="navPanel" style="margin-bottom: 0px">
+          <f:view>
+            <t:panelNavigation2 layout="table"  itemClass="navMenuItem" openItemClass="navMenuItem" activeItemClass="navMenuItemActive" separatorClass="">
+              <t:commandNavigation2 action="#{menu.search}" value="#{\"Search\"}" accesskey="" />
+              <t:commandNavigation2 action="#{menu.myScreens}" value="#{\"My Screens\"}" accesskey="" />
+              <t:commandNavigation2 action="#{menu.myAccount}" value="#{\"My Account\"}" accesskey="" />
+              <t:commandNavigation2 action="#{menu.help}" value="#{\"Help\"}" accesskey="" />
+              <t:commandNavigation2 action="#{menu.logout}" value="#{\"Logout\"}" accesskey="" />
+              <t:commandNavigation2 value="#{\"Admin\"}" accesskey="" open="true">
+                <t:commandNavigation2 action="#{menu.importScreenResult}" value="#{\"Import Screen Result\"}" accesskey="" />
+                <t:commandNavigation2 action="#{menu.editUser}" value="#{\"Edit Users\"}" accesskey="" />
+                <t:commandNavigation2 action="#{menu.editLibraries}" value="#{\"Edit Libraries\"}" accesskey="" />
+              </t:commandNavigation2>
+            </t:panelNavigation2>
+
+            <h:form id="quickFindWell" styleClass="navPanel">
+              <h:panelGroup>
+                <t:outputLabel for="stockPlateNumber" value="Plate" styleClass="navMenuItem" />
+                <t:inputText id="stockPlateNumber" value="#{query.quickFindStockPlateNumber}" size="5" styleClass="input" />
+                <t:outputLabel for="wellName" value="Well" styleClass="navMenuItem" />
+                <t:inputText id="wellName" value="#{query.quickFindWellName}" size="3" styleClass="input" />
+                <t:commandButton id="quickFindSubmit" value="Go" styleClass="command" />
+              </h:panelGroup>
+            </h:form>
+          </f:view>
+        </td>
+        <td valign="top">

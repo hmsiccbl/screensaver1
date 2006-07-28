@@ -97,7 +97,6 @@
     </managed-property>
   </managed-bean>
   
-  
   <managed-bean>
     <description>Well viewer backing bean</description>
     <managed-bean-name>wellViewer</managed-bean-name>
@@ -124,6 +123,20 @@
     </managed-property>
   </managed-bean>
   
+  <managed-bean>
+    <description>Query</description>
+    <managed-bean-name>query</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.QueryController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Menu navigation panel</description>
+    <managed-bean-name>menu</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.MenuController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+
   
   <!-- Navigation rules -->
   

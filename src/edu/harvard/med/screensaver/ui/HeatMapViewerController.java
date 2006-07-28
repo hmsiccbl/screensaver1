@@ -94,19 +94,19 @@ public class HeatMapViewerController extends AbstractController
 
   public String update()
   {
-    return null; // redisplay
+    return REDISPLAY_PAGE_ACTION_RESULT; // redisplay
   }
   
   public String showAllPlates()
   {
     log.debug("handling showAllPlates command");
     selectAllPlates();
-    return null;
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   public String done()
   {
-    return "done";
+    return DONE_ACTION_RESULT;
   }
 
   

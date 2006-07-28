@@ -9,13 +9,13 @@
 
 package edu.harvard.med.screensaver.ui;
 
-public class WellViewerController
+public class WellViewerController extends AbstractController
 {
 
   // JSF application methods
   
   public String done()
   {
-    return "done";
+    return DONE_ACTION_RESULT;
   }
 }

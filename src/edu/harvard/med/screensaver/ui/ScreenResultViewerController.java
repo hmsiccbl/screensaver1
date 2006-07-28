@@ -364,10 +364,10 @@ public class ScreenResultViewerController extends AbstractController
         // update the plate selection list to the current plate
         _plateNumberInput.setValue(((List<RawDataRow>) getRawData().getWrappedData()).get(getFirstDisplayedRowNumber() - 1).getWell().getPlateNumber().toString());
       }
-      return null;
+      return REDISPLAY_PAGE_ACTION_RESULT;
     } 
     catch (Exception e) {
-      return "error";
+      return ERROR_ACTION_RESULT;
     }
   }
   
@@ -407,7 +407,7 @@ public class ScreenResultViewerController extends AbstractController
         exportedWorkbookFile.delete();
       }
     }
-    return null;
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   public String delete()
@@ -415,7 +415,7 @@ public class ScreenResultViewerController extends AbstractController
     getFacesContext().addMessage("dataForm",
                                  new FacesMessage("Delete feature not yet implemented!"));
     // TODO: implement
-    return null;
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   public String viewHeatMaps()
@@ -434,19 +434,19 @@ public class ScreenResultViewerController extends AbstractController
   public String update()
   {
     log.debug("update action received");
-    return null; // redisplay
+    return REDISPLAY_PAGE_ACTION_RESULT; // redisplay
   }
   
   public String showAllDataHeaders()
   {
     selectAllDataHeaders();
-    return null;
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   public String done()
   {
     log.debug("done action received");
-    return "done";
+    return DONE_ACTION_RESULT;
   }
   
   

@@ -81,9 +81,9 @@ public class LibraryController extends AbstractController
       String msg = "error during entity save/create: " + e.getMessage();
       log.info(msg);
       FacesContext.getCurrentInstance().addMessage("libraryForm", new FacesMessage(msg));
-      return null; // redisplay
+      return REDISPLAY_PAGE_ACTION_RESULT; // redisplay
     }
-    return "done";
+    return DONE_ACTION_RESULT;
   }
   
   public String cancel() {

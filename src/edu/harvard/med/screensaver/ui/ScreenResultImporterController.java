@@ -90,7 +90,7 @@ public class ScreenResultImporterController extends AbstractController
   
   public String done()
   {
-    return "done";
+    return DONE_ACTION_RESULT;
   }
   
   public String submit()
@@ -109,14 +109,14 @@ public class ScreenResultImporterController extends AbstractController
       if (screenResult == null) {
         setMessage("badUploadedFile",
                    "uploadScreenResultFile");
-        return null;
+        return REDISPLAY_PAGE_ACTION_RESULT;
       }
       else if (_screenResultParser.getErrors().size() > 0) {
         return "screenresult-parse-errors";
       }
       else {
         _screenResultViewer.setScreenResult(screenResult);
-        return "success";
+        return SUCCESS_ACTION_RESULT;
       }
     }
     catch (IOException e) {

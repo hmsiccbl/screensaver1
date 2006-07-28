@@ -31,6 +31,11 @@ import org.apache.log4j.Logger;
  */
 public abstract class AbstractController
 {
+  
+  public static final String REDISPLAY_PAGE_ACTION_RESULT = null;
+  public static final String SUCCESS_ACTION_RESULT = "success";
+  public static final String ERROR_ACTION_RESULT = "error";
+  public static final String DONE_ACTION_RESULT = "done";
 
   // static data members
   
