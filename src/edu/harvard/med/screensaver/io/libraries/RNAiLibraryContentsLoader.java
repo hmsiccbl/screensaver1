@@ -102,8 +102,6 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
     if (columnHeaders == null) {
       return;
     }
-    // TODO: test existing code
-    // TODO: write a test for handled file format errors
     // TODO: load library contents
   }
 
