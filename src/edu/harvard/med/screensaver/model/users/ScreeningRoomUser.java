@@ -924,7 +924,8 @@ public class ScreeningRoomUser extends AbstractEntity
    *   get saved or updated when you save or update the lab head! (to
    *   reproduce the bug, but the cascade back in, and run the
    *   {@link edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter}.
-   *   (NOTE: if/when you fix this, make sure to remove the hack in EntityBeansPersistenceTest!)
+   *   (NOTE: if/when you fix this, make sure to remove the 2 hacks in
+   *   EntityBeansPersistenceTest!)
    */
   private Set<ScreeningRoomUser> getHbnLabMembers()
   {
