@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.io.libraries;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -21,6 +22,7 @@ import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
+import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Library;
 
 
@@ -31,7 +33,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class RNAiLibraryContentsLoader implements LibraryContentsLoader
-{
+{ 
 
   // private instance data
   
@@ -98,24 +100,30 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
    */
   private void loadLibraryContentsFromHSSFSheet(int sheetIndex, HSSFSheet hssfSheet)
   {
-    RNAiLibraryColumnHeaders columnHeaders = parseColumnHeaders(sheetIndex, hssfSheet);
+    Cell.Factory cellFactory = new Cell.Factory(_workbook, sheetIndex, _errorManager);
+    String sheetName = _workbook.getWorkbook().getSheetName(sheetIndex);
+    RNAiLibraryColumnHeaders columnHeaders =
+      parseColumnHeaders(hssfSheet.getRow(0), sheetName, cellFactory);
     if (columnHeaders == null) {
       return;
     }
-    // TODO: load library contents
+    for (short i = 1; i <= hssfSheet.getLastRowNum(); i++) {
+      parseDataRow(columnHeaders, hssfSheet.getRow(i), i, cellFactory);
+    }
   }
-
 
   /**
    * Parse the column headers. Return the resulting {@link RNAiLibraryColumnHeaders}.
-   * @param sheetIndex the index of the worksheet to parse column headers from
-   * @param hssfSheet the worksheet to parse column headers from
+   * @param columnHeaderRow the row containing the column headers
+   * @param sheetName the name of the worksheet
+   * @param cellFactory the cell factory 
    * @return the RequiredRNAiLibraryColumn
    */
-  private RNAiLibraryColumnHeaders parseColumnHeaders(int sheetIndex, HSSFSheet hssfSheet) {
-    Cell.Factory cellFactory = new Cell.Factory(_workbook, sheetIndex, _errorManager);
-    HSSFRow columnHeaderRow = hssfSheet.getRow(0);
-    String sheetName = _workbook.getWorkbook().getSheetName(sheetIndex);
+  private RNAiLibraryColumnHeaders parseColumnHeaders(
+    HSSFRow columnHeaderRow,
+    String sheetName,
+    Factory cellFactory)
+  {
     if (columnHeaderRow == null) {
       _errorManager.addError("ecountered a sheet without any rows: " + sheetName);
       return null;
@@ -128,5 +136,47 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
       return null;
     }
     return columnHeaders;
+  }
+  
+  /**
+   * Parse the data row
+   * @param columnHeaders the column headers
+   * @param dataRow the data row
+   * @param rowIndex the index of the data row in the sheet
+   * @param cellFactory the cell factory
+   */
+  private void parseDataRow(
+    RNAiLibraryColumnHeaders columnHeaders,
+    HSSFRow dataRow,
+    short rowIndex,
+    Factory cellFactory)
+  {
+    Map<RequiredRNAiLibraryColumn,String> dataRowContents =
+      columnHeaders.getDataRowContents(dataRow, rowIndex);
+    if (! (hasContent(dataRowContents, RequiredRNAiLibraryColumn.PLATE) &&
+           hasContent(dataRowContents, RequiredRNAiLibraryColumn.WELL))) {
+      return;
+    }
+    // TODO: extract PlateNumberParser and WellNameParser from ScreenResultParser into the
+    // workbook package. (or into the screenresult package)?
+    // TODO: parse the plate & well; create the well and add it to library
+    // TODO: etc
+  }
+  
+  /**
+   * Return true whenever the data row has content for the specified column
+   * @param dataRowContents the data row contents
+   * @param column the column to check for content for
+   * @return true whenever the data row has content for the specified column
+   */
+  private boolean hasContent(
+    Map<RequiredRNAiLibraryColumn,String> dataRowContents,
+    RequiredRNAiLibraryColumn column)
+  {
+    String content = dataRowContents.get(column);
+    if (content == null || content.equals("")) {
+      return false;
+    }
+    return true;
   }
 }

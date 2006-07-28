@@ -85,22 +85,26 @@ class RNAiLibraryColumnHeaders
   }
   
   /**
-   * Return the column index for the {@link RequiredRNAiLibraryColumn required library column}.
-   * @param column the required library column to return an index for
-   * @return the column index
+   * Build and return a map from {@link RequiredRNAiLibraryColumn required columns} to the
+   * contents of the row for that column.
+   * @param dataRow the data row to build the map for
+   * @param rowIndex the index of the data row in the sheet
+   * @return a map from required columns to the contents of the row for that column
    */
-  short getColumnIndex(RequiredRNAiLibraryColumn column)
+  Map<RequiredRNAiLibraryColumn,String> getDataRowContents(HSSFRow dataRow, short rowIndex)
   {
-    Integer index = _columnIndexes.get(column);
-    if (index == null) {
-      throw new IndexOutOfBoundsException();
+    Map<RequiredRNAiLibraryColumn,String> dataRowContents =
+      new HashMap<RequiredRNAiLibraryColumn,String>();
+    for (RequiredRNAiLibraryColumn column : RequiredRNAiLibraryColumn.values()) {
+      Cell cell = _cellFactory.getCell(getColumnIndex(column), (short) rowIndex);
+      dataRowContents.put(column, cell.getAsString());
     }
-    return index.shortValue();
+    return dataRowContents;
   }
-
+  
   
   // private instance methods
-
+  
   /**
    * Parse the column headers, populating the {@link #_columnIndexes}. Return false whenever two
    * columns refer to the same {@link RequiredRNAiLibraryColumn}.
@@ -130,7 +134,7 @@ class RNAiLibraryColumnHeaders
     }
     return hasNoDuplicateHeaders;
   }
-  
+
   /**
    * Make sure that all the required column headers have been parsed. Log every missing required
    * column header as an error. Return true whenever all required column headers are present
@@ -148,5 +152,19 @@ class RNAiLibraryColumnHeaders
       }
     }
     return hasRequiredHeaders;
+  }
+
+  /**
+   * Return the column index for the {@link RequiredRNAiLibraryColumn required library column}.
+   * @param column the required library column to return an index for
+   * @return the column index
+   */
+  private short getColumnIndex(RequiredRNAiLibraryColumn column)
+  {
+    Integer index = _columnIndexes.get(column);
+    if (index == null) {
+      throw new IndexOutOfBoundsException();
+    }
+    return index.shortValue();
   }
 }
