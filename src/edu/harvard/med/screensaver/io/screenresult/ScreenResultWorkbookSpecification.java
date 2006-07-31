@@ -140,7 +140,7 @@ public interface ScreenResultWorkbookSpecification
 
   public static final String EXCLUDE_ALL_VALUE = "all";
 
-  public static final String PLATE_NUMBER_REGEX = "(PL[-_])?(\\d+)";
+  public static final String PLATE_NUMBER_REGEX = "(PL[-_])?(\\d+)(\\.0)?";
   public static final String PLATE_NUMBER_FORMAT = "PL-%05d";
 
 }

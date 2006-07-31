@@ -34,9 +34,9 @@ public class PlateNumberParser implements CellValueParser<Integer>
   
   public Integer parse(Cell cell) 
   {
-    Matcher matcher = plateNumberPattern.matcher(cell.getString());
+    Matcher matcher = plateNumberPattern.matcher(cell.getAsString());
     if (!matcher.matches()) {
-      _errors.addError("unparseable plate number '" + cell.getString() + "'",
+      _errors.addError("unparseable plate number '" + cell.getAsString() + "'",
                        cell);
       return -1;
     }
