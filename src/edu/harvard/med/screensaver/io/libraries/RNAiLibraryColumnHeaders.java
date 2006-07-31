@@ -101,7 +101,21 @@ class RNAiLibraryColumnHeaders
     }
     return dataRowContents;
   }
-  
+ 
+  /**
+   * Return the column index for the {@link RequiredRNAiLibraryColumn required library column}.
+   * @param column the required library column to return an index for
+   * @return the column index
+   */
+  short getColumnIndex(RequiredRNAiLibraryColumn column)
+  {
+    Integer index = _columnIndexes.get(column);
+    if (index == null) {
+      throw new IndexOutOfBoundsException();
+    }
+    return index.shortValue();
+  }
+ 
   
   // private instance methods
   
@@ -152,19 +166,5 @@ class RNAiLibraryColumnHeaders
       }
     }
     return hasRequiredHeaders;
-  }
-
-  /**
-   * Return the column index for the {@link RequiredRNAiLibraryColumn required library column}.
-   * @param column the required library column to return an index for
-   * @return the column index
-   */
-  private short getColumnIndex(RequiredRNAiLibraryColumn column)
-  {
-    Integer index = _columnIndexes.get(column);
-    if (index == null) {
-      throw new IndexOutOfBoundsException();
-    }
-    return index.shortValue();
   }
 }
