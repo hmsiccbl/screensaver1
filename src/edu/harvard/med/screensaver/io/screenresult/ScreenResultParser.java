@@ -31,6 +31,8 @@ import edu.harvard.med.screensaver.io.workbook.CellValueParser;
 import edu.harvard.med.screensaver.io.workbook.CellVocabularyParser;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
+import edu.harvard.med.screensaver.io.workbook.PlateNumberParser;
+import edu.harvard.med.screensaver.io.workbook.WellNameParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -264,8 +266,8 @@ public static void main(String[] args) throws FileNotFoundException
   private CellVocabularyParser<Boolean> _primaryOrFollowUpParser;
   private CellVocabularyParser<Boolean> _booleanParser;
   private CellVocabularyParser<PartitionedValue> _partitionedValueParser;
-  private PlateNumberParser _plateNumberParser = new PlateNumberParser();
-  private WellNameParser _wellNameParser = new WellNameParser();
+  private PlateNumberParser _plateNumberParser;
+  private WellNameParser _wellNameParser;
 
   private DAO _dao;
   private Factory _metadataCellParserFactory;
@@ -317,6 +319,8 @@ public static void main(String[] args) throws FileNotFoundException
     _primaryOrFollowUpParser = new CellVocabularyParser<Boolean>(primaryOrFollowUpMap, Boolean.FALSE, _errors);
     _booleanParser = new CellVocabularyParser<Boolean>(booleanMap, Boolean.FALSE, _errors);
     _partitionedValueParser = new CellVocabularyParser<PartitionedValue>(partitionedValueMap, PartitionedValue.NONE, _errors);
+    _plateNumberParser = new PlateNumberParser(_errors);
+    _wellNameParser = new WellNameParser(_errors);
     try {
       if (!metadataWorkbookFile.canRead()) {
         throw new FileNotFoundException("metadata file '" + metadataWorkbookFile + "' cannot be read");
@@ -783,72 +787,6 @@ public static void main(String[] args) throws FileNotFoundException
     return _errors.getWorkbooksWithErrors();
   }
   
-  /**
-   * Parses the value of a cell containing a "plate number". Converts from a
-   * "PL-####" format to an <code>Integer</code>.
-   * 
-   * @author ant
-   */
-  public class PlateNumberParser implements CellValueParser<Integer>
-  {
-    
-    // instance data members
-    
-    private Pattern plateNumberPattern = Pattern.compile(ScreenResultWorkbookSpecification.PLATE_NUMBER_REGEX);
-
-    
-    // public methods
-    
-    public Integer parse(Cell cell) 
-    {
-      Matcher matcher = plateNumberPattern.matcher(cell.getString());
-      if (!matcher.matches()) {
-        _errors.addError("unparseable plate number '" + cell.getString() + "'",
-                         cell);
-        return -1;
-      }
-      return new Integer(matcher.group(2));
-    }
-
-    public List<Integer> parseList(Cell cell)
-    {
-      throw new UnsupportedOperationException();
-    }
-  }
-
-  /**
-   * Parses the value of a cell containing a "well name". Validates that the
-   * well name follows proper syntax, defined by the regex "[A-Z]\d\d".
-   * 
-   * @author ant
-   */
-  public class WellNameParser implements CellValueParser<String>
-  {
-    
-    // instance data members
-    
-    private Pattern plateNumberPattern = Pattern.compile("[A-P]\\d\\d");
-
-    
-    // public methods
-    
-    public String parse(Cell cell) 
-    {
-      Matcher matcher = plateNumberPattern.matcher(cell.getString());
-      if (!matcher.matches()) {
-        _errors.addError("unparseable well name '" + cell.getString() + "'",
-                         cell);
-        return "";
-      }
-      return matcher.group(0);
-    }
-
-    public List<String> parseList(Cell cell)
-    {
-      throw new UnsupportedOperationException();
-    }
-  }
-
   /**
    * Parses the value of a cell containing a "well name". Validates that the
    * well name follows proper syntax, defined by the regex "[A-Z]\d\d".
