@@ -44,11 +44,33 @@ public class Gene extends AbstractEntity
   private String _entrezgeneSymbol;
   private Set<Integer> _oldEntrezgeneIds = new HashSet<Integer>();
   private Set<String> _oldEntrezgeneSymbols = new HashSet<String>();
-  private Set<Integer> _genbankAccessionNumbers = new HashSet<Integer>();
+  private Set<String> _genbankAccessionNumbers = new HashSet<String>();
   private String _speciesName;
 
 
   // public constructor
+
+  // public constructor
+  
+  /**
+   * Constructs an initialized <code>Gene</code> object.
+   *
+   * @param geneName the gene name
+   * @param entrezgeneId the EntrezGene ID
+   * @param entrezgeneSymbol the EntrezGene symbol
+   * @param speciesName the species name
+   */
+  public Gene(
+    String geneName,
+    Integer entrezgeneId,
+    String entrezgeneSymbol,
+    String genbankAccessionNumber,
+    String speciesName)
+  {
+    this(geneName, entrezgeneId, entrezgeneSymbol, speciesName);
+    _genbankAccessionNumbers.add(genbankAccessionNumber);
+  }
+
 
   /**
    * Constructs an initialized <code>Gene</code> object.
@@ -288,11 +310,11 @@ public class Gene extends AbstractEntity
    *   column="gene_id"
    *   foreign-key="fk_gene_genbank_accession_number_to_gene"
    * @hibernate.collection-element
-   *   type="int"
+   *   type="text"
    *   column="genbank_accession_number"
    *   not-null="true"
    */
-  public Set<Integer> getGenbankAccessionNumbers()
+  public Set<String> getGenbankAccessionNumbers()
   {
     return _genbankAccessionNumbers;
   }
@@ -303,7 +325,7 @@ public class Gene extends AbstractEntity
    * @param genbankAccessionNumber the GenBank accession number to add
    * @return true iff the gene did not already have the GenBank accession number
    */
-  public boolean addGenbankAccessionNumber(Integer genbankAccessionNumber)
+  public boolean addGenbankAccessionNumber(String genbankAccessionNumber)
   {
     return _genbankAccessionNumbers.add(genbankAccessionNumber);
   }
@@ -314,7 +336,7 @@ public class Gene extends AbstractEntity
    * @param genbankAccessionNumber the GenBank accession number to remove
    * @return true iff the gene previously had the GenBank accession number
    */
-  public boolean removeGenbankAccessionNumber(Integer genbankAccessionNumber)
+  public boolean removeGenbankAccessionNumber(String genbankAccessionNumber)
   {
     return _genbankAccessionNumbers.remove(genbankAccessionNumber);
   }
@@ -455,7 +477,7 @@ public class Gene extends AbstractEntity
    * @param genbankAccessionNumbers the new GenBank accession numbers
    * @motivation for hibernate
    */
-  private void setGenbankAccessionNumbers(Set<Integer> genbankAccessionNumbers)
+  private void setGenbankAccessionNumbers(Set<String> genbankAccessionNumbers)
   {
     _genbankAccessionNumbers = genbankAccessionNumbers;
   }

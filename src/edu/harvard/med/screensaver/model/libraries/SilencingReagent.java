@@ -42,7 +42,7 @@ public class SilencingReagent extends AbstractEntity
   private Set<Well> _wells = new HashSet<Well>();
   private SilencingReagentType _silencingReagentType;
   private String _sequence;
-  private Set<Integer> _nonTargettedGenbankAccessionNumbers = new HashSet<Integer>();
+  private Set<String> _nonTargettedGenbankAccessionNumbers = new HashSet<String>();
 
 
   // public constructor
@@ -202,11 +202,11 @@ public class SilencingReagent extends AbstractEntity
    *   column="silencing_reagent_id"
    *   foreign-key="fk_silencing_reagent_non_targetted_genbank_accession_number_to_silencing_reagent"
    * @hibernate.collection-element
-   *   type="int"
+   *   type="text"
    *   column="non_targetted_genbank_accession_number"
    *   not-null="true"
    */
-  public Set<Integer> getNonTargettedGenbankAccessionNumbers()
+  public Set<String> getNonTargettedGenbankAccessionNumbers()
   {
     return _nonTargettedGenbankAccessionNumbers;
   }
@@ -217,7 +217,7 @@ public class SilencingReagent extends AbstractEntity
    * @param nonTargettedGenbankAccessionNumber the non-targetted GenBank accession number to add
    * @return true iff the silencing reagent did not already have the non-targetted GenBank accession number
    */
-  public boolean addNonTargettedGenbankAccessionNumber(Integer nonTargettedGenbankAccessionNumber)
+  public boolean addNonTargettedGenbankAccessionNumber(String nonTargettedGenbankAccessionNumber)
   {
     return _nonTargettedGenbankAccessionNumbers.add(nonTargettedGenbankAccessionNumber);
   }
@@ -481,7 +481,7 @@ public class SilencingReagent extends AbstractEntity
    * @param nonTargettedGenbankAccessionNumbers the new non-targetted GenBank accession numbers
    * @motivation for hibernate
    */
-  private void setNonTargettedGenbankAccessionNumbers(Set<Integer> nonTargettedGenbankAccessionNumbers)
+  private void setNonTargettedGenbankAccessionNumbers(Set<String> nonTargettedGenbankAccessionNumbers)
   {
     _nonTargettedGenbankAccessionNumbers = nonTargettedGenbankAccessionNumbers;
   }
