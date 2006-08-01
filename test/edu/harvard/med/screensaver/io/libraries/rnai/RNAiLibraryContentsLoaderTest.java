@@ -30,7 +30,7 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
   public static final Logger log = Logger.getLogger(RNAiLibraryContentsLoaderTest.class);
   
   public static final File TEST_INPUT_FILE_DIR =
-    new File("test/edu/harvard/med/screensaver/io/libraries");
+    new File("test/edu/harvard/med/screensaver/io/libraries/rnai");
   
   protected RNAiLibraryContentsLoader rnaiLibraryContentsLoader;
 
@@ -249,20 +249,18 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
     }
     library = rnaiLibraryContentsLoader.loadLibraryContents(library, file, stream);
     List<ParseError> errors = rnaiLibraryContentsLoader.getErrors();
-    //assertEquals("workbook has no errors", 0, errors.size());
-    //assertEquals("library has 5 wells", 5, library.getWells().size());
-    ParseError error;
-    
-    for (ParseError error1 : errors) {
-      log.info("error: " + error1.getMessage());
-      log.info("cell:  " + error1.getCell());
-    }
+    assertEquals("workbook has no errors", 0, errors.size());
+    assertEquals("library has 5 wells", 5, library.getWells().size());
+
+    // TODO: check contents of wells
   }
   
+  
+  // TODO: fix this
   public void testHuman1()
   {
     Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 5003);
-    String filename = "Human1 abbreviated.xls";
+    String filename = "Human1.xls";
     File file = new File(TEST_INPUT_FILE_DIR, filename);
     InputStream stream = null;
     try {
@@ -277,6 +275,8 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
     // this library has 779 wells according to
     // http://iccb.med.harvard.edu/screening/RNAi%20Libraries/index.htm
     // however, Human1 abbreviated.xls only has 10
-    assertEquals("well count in Human1", 10, wells.size());
+    assertEquals("well count in Human1", 779, wells.size());
   }
+  
+  // TODO: test against some data already in the database
 }
