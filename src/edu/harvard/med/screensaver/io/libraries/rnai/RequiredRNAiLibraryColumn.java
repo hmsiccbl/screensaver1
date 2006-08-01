@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.io.libraries;
+package edu.harvard.med.screensaver.io.libraries.rnai;
 
 /**
  * The required column for an RNAi library contents Excel spreadsheet.

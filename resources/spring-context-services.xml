@@ -20,7 +20,7 @@
   
   <bean 
     id="rnaiLibraryContentsLoader"
-    class="edu.harvard.med.screensaver.io.libraries.RNAiLibraryContentsLoader"
+    class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsLoader"
     singleton="true"
   >
   </bean>

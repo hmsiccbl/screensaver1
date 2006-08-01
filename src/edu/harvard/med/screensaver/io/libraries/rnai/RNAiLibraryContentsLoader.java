@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.io.libraries;
+package edu.harvard.med.screensaver.io.libraries.rnai;
 
 import java.io.File;
 import java.io.InputStream;
@@ -21,6 +21,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
+import edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
@@ -182,7 +183,7 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
       return;
     }
     for (short i = 1; i <= hssfSheet.getLastRowNum(); i++) {
-      parseDataRow(columnHeaders, hssfSheet.getRow(i), i, cellFactory);
+      parseDataRowContent(columnHeaders, hssfSheet.getRow(i), i, cellFactory);
     }
   }
 
@@ -220,6 +221,23 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
    * @param cellFactory the cell factory
    */
   private void parseDataRow(
+    RNAiLibraryColumnHeaders columnHeaders,
+    HSSFRow dataRow,
+    short rowIndex,
+    Factory cellFactory)
+  {
+    
+    parseDataRowContent(columnHeaders, dataRow, rowIndex, cellFactory);
+  }
+
+  /**
+   * Parse the data row content
+   * @param columnHeaders the column headers
+   * @param dataRow the data row
+   * @param rowIndex the index of the data row in the sheet
+   * @param cellFactory the cell factory
+   */
+  private void parseDataRowContent(
     RNAiLibraryColumnHeaders columnHeaders,
     HSSFRow dataRow,
     short rowIndex,
@@ -391,7 +409,7 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
     String vendorIdentifier = cellFactory.getCell(
       columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.VENDOR_IDENTIFIER),
       rowIndex).getString();
-    if (! vendorIdentifier.equals("")) {
+    if (! (vendorIdentifier == null || vendorIdentifier.equals(""))) {
       well.setVendorIdentifier(vendorIdentifier);
     }
     return well;
