@@ -20,8 +20,11 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
+import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 
 
@@ -252,9 +255,70 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
     assertEquals("workbook has no errors", 0, errors.size());
     assertEquals("library has 5 wells", 5, library.getWells().size());
 
-    // TODO: check contents of wells
+    Well a05 = null, a07 = null, a09 = null, a11 = null, a15 = null;
+    for (Well well: library.getWells()) {
+      String wellName = well.getWellName();
+      log.info("well name " + wellName);
+      if (wellName.equals("A05")) {
+        a05 = well;
+      }
+      else if (wellName.equals("A07")) {
+        a07 = well;
+      }
+      else if (wellName.equals("A09")) {
+        a09 = well;
+      }
+      else if (wellName.equals("A11")) {
+        a11 = well;
+      }
+      else if (wellName.equals("A15")) {
+        a15 = well;
+      }
+    }
+      
+    assertNotNull("library has well A05", a05);
+    assertNotNull("library has well A07", a07);
+    assertNotNull("library has well A09", a09);
+    assertNotNull("library has well A11", a11);
+    assertNotNull("library has well A15", a15);
+      
+    assertNull("well A11 has no vendor id", a11.getVendorIdentifier());
+    assertEquals("well A05 vendor id", "M-005300-00", a05.getVendorIdentifier());
+    assertNull("well A07 has no vendor id", a07.getVendorIdentifier());
+    assertEquals("well A09 vendor id", "M-004061-00", a09.getVendorIdentifier());
+    assertNull("well A11 has no vendor id", a11.getVendorIdentifier());
+    assertEquals("well A15 vendor id", "M-003256-05", a15.getVendorIdentifier());
+    
+    // silencing reagents and genes for A05 and A09
+    assertEquals("well A05 has 4 silencing reagents", 4, a05.getSilencingReagents().size());
+    for (SilencingReagent a05reagent: a05.getSilencingReagents()) {
+      assertEquals("a05 silencing reagent type",
+        SilencingReagentType.SIRNA,
+        a05reagent.getSilencingReagentType());
+      // TODO: test the SilencingReagent.sequence more
+      assertEquals("a05 silencing reagent sequence length", 19, a05reagent.getSequence().length());
+      
+      Gene a05gene = a05reagent.getGene();
+      assertEquals("a05 gene symbol",     "AAK1",                    a05gene.getEntrezgeneSymbol());
+      assertEquals("a05 gene id",         new Integer(22848),        a05gene.getEntrezgeneId());
+      assertEquals("a05 gene name",       "AP2 associated kinase 1", a05gene.getGeneName());
+      assertEquals("a05 species name",    "Homo sapiens",            a05gene.getSpeciesName());
+
+      assertEquals("a05 accession count", 1,                         a05gene.getGenbankAccessionNumbers().size());
+      assertEquals("a05 accession",       "NM_014911",               a05gene.getGenbankAccessionNumbers().iterator().next());
+    }
+    
+    assertEquals("well A09 has 1 silencing reagent", 1, a09.getSilencingReagents().size());
+    SilencingReagent a09reagent = a09.getSilencingReagents().iterator().next();
+    assertEquals("a09 silencing reagent type",
+      SilencingReagentType.POOL_OF_UNKNOWN_SIRNAS,
+      a09reagent.getSilencingReagentType());
+    assertEquals("a09 silencing reagent sequence",
+      "",
+      a09reagent.getSequence());
+    Gene a09gene = a09reagent.getGene();
+    assertEquals("a09 gene symbol", "CERK", a09gene.getEntrezgeneSymbol());
   }
-  
   
   // TODO: fix this
   public void testHuman1()
