@@ -27,6 +27,13 @@ import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 
 
 /**
+ * Retrieves the information needed from NCBI for a {@link Gene}, based on the EntrezGene ID.
+ * The information needed from NCBI is encapsulated in an {@link NCBIGeneInfo} object.
+ * <p>
+ * Uses <a href="http://eutils.ncbi.nlm.nih.gov/entrez/query/static/eutils_help.html">NCBI
+ * E-utilities</a> to gather the necessary information.
+ * 
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class NCBIGeneInfoProvider
 {
@@ -42,10 +49,16 @@ public class NCBIGeneInfoProvider
   
   private ParseErrorManager _errorManager;
   private DocumentBuilder _documentBuilder;
+  private Integer _entrezgeneId;
+  private Cell _cell;
 
   
   // public constructor and instance methods
   
+  /**
+   * Construct a <code>NCBIGeneInfoProvider</code> object.
+   * @param errorManager
+   */
   public NCBIGeneInfoProvider(ParseErrorManager errorManager)
   {
     _errorManager = errorManager;
@@ -59,26 +72,45 @@ public class NCBIGeneInfoProvider
     }
   }
   
-  public NCBIGeneInfo getGeneInfoForEntrezgeneId(Integer entrezGeneId, Cell cell)
+  /**
+   * Get the {@link NCBIGeneInfo information needed from NCBI} for a {@link Gene}, based on
+   * the EntrezGene ID. If any errors occur, report the error and return null.
+   * @param entrezgeneId the EntrezGene ID for the Gene.
+   * @param cell the cell to specify when reporting an error
+   * @return the NCBIGeneInfo
+   */
+  public synchronized NCBIGeneInfo getGeneInfoForEntrezgeneId(Integer entrezgeneId, Cell cell)
   {
     if (_documentBuilder == null) {
       return null;
     }
-    String efetchURL = EFETCH_URL_PREFIX + entrezGeneId;
-    InputStream efetchContent = getContent(efetchURL, entrezGeneId, cell);
+    _entrezgeneId = entrezgeneId;
+    _cell = cell;
+    InputStream efetchContent = getContent(EFETCH_URL_PREFIX + entrezgeneId);
     if (efetchContent == null) {
       return null;
     }
-    Document efetchDocument = getEfetchDocument(efetchContent, entrezGeneId, cell);
+    Document efetchDocument = getEfetchDocument(efetchContent);
     if (efetchDocument == null) {
       return null;
     }
-    String geneName = getGeneNameFromDocument(efetchDocument);
-    String speciesName = getSpeciesNameFromDocument(efetchDocument);
+    NodeList nodes = efetchDocument.getElementsByTagName("Item");
+    String geneName = getGeneNameFromNodeList(nodes);
+    String speciesName = getSpeciesNameFromNodeList(nodes);
+    if (geneName == null || speciesName == null) {
+      return null;
+    }
     return new NCBIGeneInfo(geneName, speciesName);
   }
 
-  private InputStream getContent(String url, Integer entrezGeneId, Cell cell)
+  /**
+   * Get the content of the response to an HTTP request as an {@link InputStream}.
+   * Report an error and return null if there is any problem making the request.
+   * @param url the URL of the HTTP request
+   * @return the content of the response. Return null if there is any problem making the
+   * request.
+   */
+  private InputStream getContent(String url)
   {
     try {
       HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
@@ -87,53 +119,70 @@ public class NCBIGeneInfoProvider
     }
     catch (Exception e) {
       _errorManager.addError(
-        "unable to get URL connection to NCBI for " + entrezGeneId + ": " + e.getMessage(),
-        cell);
+        "unable to get URL connection to NCBI for " + _entrezgeneId + ": " + e.getMessage(),
+        _cell);
       return null;
     }
   }
 
   /**
-   * @param efetchContent
-   * @return
+   * Translate the EFetch result content into a DOM Document. Return the Document. Report an
+   * error and return null if there is a problem building the Document.
+   * @param efetchContent the EFetch result content as an input stream
+   * @return the DOM Document. Return null if there is a problem building the Document.
    */
-  private Document getEfetchDocument(
-    InputStream efetchContent,
-    Integer entrezGeneId,
-    Cell cell)
+  private Document getEfetchDocument(InputStream efetchContent)
   {
     try {
       return _documentBuilder.parse(efetchContent);
     }
     catch (Exception e) {
       _errorManager.addError(
-        "unable to get content from NCBI for " + entrezGeneId + ": " + e.getMessage(),
-        cell);
+        "unable to get content from NCBI for " + _entrezgeneId + ": " + e.getMessage(),
+        _cell);
       return null;
     }
   }
   
-  private String getGeneNameFromDocument(Document efetchDocument)
+  /**
+   * Get the gene name from the list of "Item" element nodes.
+   * @param nodes the list of "Item" element nodes
+   * @return the species name from the list of "Item" element nodes
+   */
+  private String getGeneNameFromNodeList(NodeList nodes)
   {
-    NodeList nodes = efetchDocument.getElementsByTagName("Item");
-    for (int i = 0; i < nodes.getLength(); i++) {
-      Node node = nodes.item(i);
-      if (node.getAttributes().getNamedItem("Name").getNodeValue().equals("Description")) {
-        return node.getTextContent();
-      }
-    }
-    return null;
+    return getNamedItemFromNodeList(nodes, "Description");
   }
 
-  private String getSpeciesNameFromDocument(Document efetchDocument)
+  /**
+   * Get the species name from the list of "Item" element nodes.
+   * @param nodes the list of "Item" element nodes
+   * @return the species name from the list of "Item" element nodes
+   */
+  private String getSpeciesNameFromNodeList(NodeList nodes)
   {
-    NodeList nodes = efetchDocument.getElementsByTagName("Item");
+    return getNamedItemFromNodeList(nodes, "Orgname");
+  }
+
+  /**
+   * Find the element node in the node list that has an attribute named "Name" with the
+   * specified attribute value. Return the text content of that element node. 
+   * @param nodes the list of element nodes
+   * @param attributeValue the attribute value
+   * @return the text content of the specified element node. Return null if the specified
+   * element node is not found. 
+   */
+  private String getNamedItemFromNodeList(NodeList nodes, String attributeValue)
+  {
     for (int i = 0; i < nodes.getLength(); i++) {
       Node node = nodes.item(i);
-      if (node.getAttributes().getNamedItem("Name").getNodeValue().equals("Orgname")) {
+      if (node.getAttributes().getNamedItem("Name").getNodeValue().equals(attributeValue)) {
         return node.getTextContent();
       }
     }
+    _errorManager.addError(
+      "NCBI EFetch did not return " + attributeValue + " for " + _entrezgeneId,
+      _cell);
     return null;
   }
 }

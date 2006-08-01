@@ -14,6 +14,7 @@ package edu.harvard.med.screensaver.io.libraries;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public enum RequiredRNAiLibraryColumn {
+  
   PLATE("Plate"),
   WELL("Well"),
   VENDOR_IDENTIFIER("Vendor Identifier"),
@@ -23,10 +24,21 @@ public enum RequiredRNAiLibraryColumn {
   SEQUENCES("Sequences");
   
   private String _defaultColumnHeader;
+  
+  
+  /**
+   * Construct a new <code>RequiredRNAiLibraryColumn</code> object.
+   * @param defaultColumnHeader the default column header
+   */
   private RequiredRNAiLibraryColumn(String defaultColumnHeader)
   {
     _defaultColumnHeader = defaultColumnHeader;
   }
+  
+  /**
+   * Return the default column header.
+   * @return the default column header
+   */
   public String getDefaultColumnHeader()
   {
     return _defaultColumnHeader;

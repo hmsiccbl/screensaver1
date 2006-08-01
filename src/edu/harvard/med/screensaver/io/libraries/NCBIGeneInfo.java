@@ -9,19 +9,46 @@
 
 package edu.harvard.med.screensaver.io.libraries;
 
+/**
+ * Encapsulates the information needed from NCBI for a {@link Gene}.
+ * 
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ */
 public class NCBIGeneInfo
 {
+  
+  // private instance fields
+  
   private String _geneName;
   private String _speciesName;
+  
+
+  // public constructor and instance methods
+  
+  /**
+   * Construct a new <code>NCBIGeneInfo</code> object.
+   * @param geneName the gene name
+   * @param speciesName the species name
+   */
   public NCBIGeneInfo(String geneName, String speciesName)
   {
     _geneName = geneName;
     _speciesName = speciesName;
   }
+  
+  /**
+   * Get the gene name.
+   * @return the gene name
+   */
   public String getGeneName()
   {
     return _geneName;
   }
+  
+  /**
+   * Get the species name.
+   * @return the species name
+   */
   public String getSpeciesName()
   {
     return _speciesName;

@@ -42,6 +42,8 @@ import edu.harvard.med.screensaver.model.libraries.Well;
  * TODO: don't create duplicate Well/SilencingReagent/Gene objects! requires a dao to check
  * database for existing records. (or maybe hibernate has a findOrCreate?)
  * 
+ * TODO: comments
+ * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class RNAiLibraryContentsLoader implements LibraryContentsLoader
@@ -230,7 +232,7 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
     if (plateWellAbbreviation == null) {
       return;
     }
-    log.info("loading data for plate/well " + plateWellAbbreviation);
+    log.info("loading data for plate-well " + plateWellAbbreviation);
     
     // get the well last, so that if we encounter any errors, we dont end up with a bogus
     // well in the library
@@ -283,36 +285,47 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
     short rowIndex,
     Factory cellFactory)
   {
-    Integer entrezGeneId = cellFactory.getCell(
+
+    // entrezgeneId
+    Cell entrezgeneIdCell = cellFactory.getCell(
       columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.ENTREZGENE_ID),
-      rowIndex).getInteger();
-    if (entrezGeneId == null) {
+      rowIndex,
+      true);
+    Integer entrezgeneId = entrezgeneIdCell.getInteger();
+    if (entrezgeneId == 0) {
       return null;
     }
-    String entrezGeneSymbol = cellFactory.getCell(
+    
+    // entrezgeneSymbol
+    String entrezgeneSymbol = cellFactory.getCell(
       columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.ENTREZGENE_SYMBOL),
-      rowIndex).getString();
-    if (entrezGeneSymbol == null) {
+      rowIndex,
+      true).getString();
+    if (entrezgeneSymbol.equals("")) {
       return null;
     }
+    
+    // genbankAccessionNumber
     String genbankAccessionNumber = cellFactory.getCell(
       columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.GENBANK_ACCESSION_NUMBER),
-      rowIndex).getString();
-    if (genbankAccessionNumber == null) {
+      rowIndex,
+      true).getString();
+    if (genbankAccessionNumber.equals("")) {
       return null;
     }
-    NCBIGeneInfo geneInfo = _geneInfoProvider.getGeneInfoForEntrezgeneId(
-      entrezGeneId,
-      cellFactory.getCell(
-        columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.ENTREZGENE_ID),
-        rowIndex));
+    
+    // gene name and species name
+    NCBIGeneInfo geneInfo =
+      _geneInfoProvider.getGeneInfoForEntrezgeneId(entrezgeneId, entrezgeneIdCell);
     if (geneInfo == null) {
       return null;
     }
+    
+    // buildin tha gene
     return new Gene(
       geneInfo.getGeneName(),
-      entrezGeneId,
-      entrezGeneSymbol,
+      entrezgeneId,
+      entrezgeneSymbol,
       genbankAccessionNumber,
       geneInfo.getSpeciesName());
   }
