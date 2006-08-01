@@ -320,7 +320,6 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
     assertEquals("a09 gene symbol", "CERK", a09gene.getEntrezgeneSymbol());
   }
   
-  // TODO: fix this
   public void testHuman1()
   {
     Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 5003);
@@ -338,8 +337,8 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
     
     // this library has 779 wells according to
     // http://iccb.med.harvard.edu/screening/RNAi%20Libraries/index.htm
-    // however, Human1 abbreviated.xls only has 10
-    assertEquals("well count in Human1", 779, wells.size());
+    // but add 18 for the controls - 6 controls on each of 3 plates
+    assertEquals("well count in Human1", 797, wells.size());
   }
   
   // TODO: test against some data already in the database
