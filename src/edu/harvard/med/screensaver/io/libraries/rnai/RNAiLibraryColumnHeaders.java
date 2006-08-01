@@ -13,8 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 
+import edu.harvard.med.screensaver.io.libraries.DataRowType;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 
@@ -85,6 +87,42 @@ class RNAiLibraryColumnHeaders
   }
   
   /**
+   * Get the {@link DataRowType} of the specified data row
+   * @param dataRow the data row to get the type of
+   * @return the data row type
+   */
+  DataRowType getDataRowType(HSSFRow dataRow)
+  {
+    boolean hasPlate = false;
+    boolean hasWell = false;
+    boolean hasOther = false;
+    for (RequiredRNAiLibraryColumn column : RequiredRNAiLibraryColumn.values()) {
+      short columnIndex = getColumnIndex(column);
+      HSSFCell cell = dataRow.getCell(columnIndex);
+      if (! (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK ||
+             (cell.getCellType() == HSSFCell.CELL_TYPE_STRING &&
+              cell.getStringCellValue().equals("")))) {
+        if (column.equals(RequiredRNAiLibraryColumn.PLATE)) {
+          hasPlate = true;
+        }
+        else if (column.equals(RequiredRNAiLibraryColumn.WELL)) {
+          hasWell = true;
+        }
+        else {
+          hasOther = true;
+        }
+      }
+    }
+    if (! (hasPlate || hasWell || hasOther)) {
+      return DataRowType.EMPTY;
+    }
+    if (hasPlate && hasWell && ! hasOther) {
+      return DataRowType.PLATE_WELL_ONLY;
+    }
+    return DataRowType.NON_EMPTY;
+  }
+  
+  /**
    * Build and return a map from {@link RequiredRNAiLibraryColumn required columns} to the
    * contents of the row for that column.
    * @param dataRow the data row to build the map for
@@ -97,7 +135,7 @@ class RNAiLibraryColumnHeaders
       new HashMap<RequiredRNAiLibraryColumn,String>();
     for (RequiredRNAiLibraryColumn column : RequiredRNAiLibraryColumn.values()) {
       Cell cell = _cellFactory.getCell(getColumnIndex(column), (short) rowIndex);
-      dataRowContents.put(column, cell.getAsString());
+      dataRowContents.put(column, cell.getAsString());      
     }
     return dataRowContents;
   }
