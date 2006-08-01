@@ -33,10 +33,14 @@ public class WellNameParser implements CellValueParser<String>
   
   public String parse(Cell cell) 
   {
-    Matcher matcher = plateNumberPattern.matcher(cell.getString());
+    String cellString = cell.getString();
+    if (cellString == null) {
+      _errors.addError("well name cell is empty", cell);
+      return "";      
+    }
+    Matcher matcher = plateNumberPattern.matcher(cellString);
     if (!matcher.matches()) {
-      _errors.addError("unparseable well name '" + cell.getString() + "'",
-                       cell);
+      _errors.addError("unparseable well name '" + cellString + "'", cell);
       return "";
     }
     return matcher.group(0);
