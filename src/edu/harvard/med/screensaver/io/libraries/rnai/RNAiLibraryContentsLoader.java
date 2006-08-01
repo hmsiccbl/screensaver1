@@ -11,10 +11,7 @@ package edu.harvard.med.screensaver.io.libraries.rnai;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -29,11 +26,9 @@ import edu.harvard.med.screensaver.io.workbook.PlateNumberParser;
 import edu.harvard.med.screensaver.io.workbook.WellNameParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
-import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
-import edu.harvard.med.screensaver.model.libraries.Well;
 
 
 /**
@@ -42,8 +37,6 @@ import edu.harvard.med.screensaver.model.libraries.Well;
  * 
  * TODO: don't create duplicate Well/SilencingReagent/Gene objects! requires a dao to check
  * database for existing records. (or maybe hibernate has a findOrCreate?)
- * 
- * TODO: comments
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -150,10 +143,49 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
   }
   
   
+  // package getters, for the DataRowParser
+
+  /**
+   * Get the {@link NCBIGeneInfoProvider}.
+   * @return the geneInfoProvider.
+   */
+  NCBIGeneInfoProvider getGeneInfoProvider()
+  {
+    return _geneInfoProvider;
+  }
+
+  /**
+   * Get the {@link Library}.
+   * @return the library.
+   */
+  Library getLibrary()
+  {
+    return _library;
+  }
+
+  /**
+   * Get the {@link PlateNumberParser}.
+   * @return the plateNumberParser.
+   */
+  PlateNumberParser getPlateNumberParser()
+  {
+    return _plateNumberParser;
+  }
+
+  /**
+   * Get the {@link WellNameParser}.
+   * @return the wellNameParser.
+   */
+  WellNameParser getWellNameParser()
+  {
+    return _wellNameParser;
+  }
+  
+  
   // private instance methods
 
   /**
-   * Initialize the instance variables
+   * Initialize the instance variables.
    * @param library the library to load contents of
    * @param file the name of the file that contains the library contents
    * @param stream the input stream to load library contents from
@@ -169,7 +201,7 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
   }
   
   /**
-   * Load library contents from a single worksheet
+   * Load library contents from a single worksheet.
    * @param sheetIndex the index of the worksheet to load library contents from
    * @param hssfSheet the worksheet to load library contents from
    */
@@ -183,7 +215,13 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
       return;
     }
     for (short i = 1; i <= hssfSheet.getLastRowNum(); i++) {
-      parseDataRowContent(columnHeaders, hssfSheet.getRow(i), i, cellFactory);
+      DataRowParser dataRowParser = new DataRowParser(
+        this,
+        columnHeaders,
+        hssfSheet.getRow(i),
+        i,
+        cellFactory);
+      dataRowParser.parseDataRow();
     }
   }
 
@@ -211,224 +249,5 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
       return null;
     }
     return columnHeaders;
-  }
-  
-  /**
-   * Parse the data row
-   * @param columnHeaders the column headers
-   * @param dataRow the data row
-   * @param rowIndex the index of the data row in the sheet
-   * @param cellFactory the cell factory
-   */
-  private void parseDataRow(
-    RNAiLibraryColumnHeaders columnHeaders,
-    HSSFRow dataRow,
-    short rowIndex,
-    Factory cellFactory)
-  {
-    
-    parseDataRowContent(columnHeaders, dataRow, rowIndex, cellFactory);
-  }
-
-  /**
-   * Parse the data row content
-   * @param columnHeaders the column headers
-   * @param dataRow the data row
-   * @param rowIndex the index of the data row in the sheet
-   * @param cellFactory the cell factory
-   */
-  private void parseDataRowContent(
-    RNAiLibraryColumnHeaders columnHeaders,
-    HSSFRow dataRow,
-    short rowIndex,
-    Factory cellFactory)
-  {
-    Map<RequiredRNAiLibraryColumn,String> dataRowContents =
-      columnHeaders.getDataRowContents(dataRow, rowIndex);
-    String plateWellAbbreviation =
-      getPlateWellAbbreviation(columnHeaders, rowIndex, cellFactory, dataRowContents);
-    if (plateWellAbbreviation == null) {
-      return;
-    }
-    log.info("loading data for plate-well " + plateWellAbbreviation);
-    
-    // get the well last, so that if we encounter any errors, we dont end up with a bogus
-    // well in the library
-
-    Gene gene = getGene(columnHeaders, rowIndex, cellFactory);
-    if (gene == null) {
-      return;
-    }
-    Set<SilencingReagent> silencingReagents =
-      getSilencingReagents(columnHeaders, rowIndex, cellFactory, gene);
-    Well well = getWell(columnHeaders, rowIndex, cellFactory, dataRowContents);
-    if (well == null) {
-      return;
-    }
-    for (SilencingReagent silencingReagent : silencingReagents) {
-      well.addSilencingReagent(silencingReagent);
-    }
-  }
-
-  private String getPlateWellAbbreviation(
-    RNAiLibraryColumnHeaders columnHeaders,
-    short rowIndex,
-    Factory cellFactory,
-    Map<RequiredRNAiLibraryColumn,String> dataRowContents)
-  {
-    Integer plateNumber = _plateNumberParser.parse(cellFactory.getCell(
-      columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.PLATE),
-      rowIndex));
-    if (plateNumber == -1) {
-      return null;
-    }
-    String wellName = _wellNameParser.parse(cellFactory.getCell(
-      columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.WELL),
-      rowIndex));
-    if (wellName.equals("")) {
-      return null;
-    }
-    return plateNumber + "-" + wellName;
-  }
-  
-  /**
-   * @param columnHeaders
-   * @param rowIndex
-   * @param cellFactory
-   * @param gene
-   * @return
-   */
-  private Gene getGene(
-    RNAiLibraryColumnHeaders columnHeaders,
-    short rowIndex,
-    Factory cellFactory)
-  {
-
-    // entrezgeneId
-    Cell entrezgeneIdCell = cellFactory.getCell(
-      columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.ENTREZGENE_ID),
-      rowIndex,
-      true);
-    Integer entrezgeneId = entrezgeneIdCell.getInteger();
-    if (entrezgeneId == 0) {
-      return null;
-    }
-    
-    // entrezgeneSymbol
-    String entrezgeneSymbol = cellFactory.getCell(
-      columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.ENTREZGENE_SYMBOL),
-      rowIndex,
-      true).getString();
-    if (entrezgeneSymbol.equals("")) {
-      return null;
-    }
-    
-    // genbankAccessionNumber
-    String genbankAccessionNumber = cellFactory.getCell(
-      columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.GENBANK_ACCESSION_NUMBER),
-      rowIndex,
-      true).getString();
-    if (genbankAccessionNumber.equals("")) {
-      return null;
-    }
-    
-    // gene name and species name
-    NCBIGeneInfo geneInfo =
-      _geneInfoProvider.getGeneInfoForEntrezgeneId(entrezgeneId, entrezgeneIdCell);
-    if (geneInfo == null) {
-      return null;
-    }
-    
-    // buildin tha gene
-    return new Gene(
-      geneInfo.getGeneName(),
-      entrezgeneId,
-      entrezgeneSymbol,
-      genbankAccessionNumber,
-      geneInfo.getSpeciesName());
-  }
-
-  /**
-   * @param columnHeaders
-   * @param rowIndex
-   * @param cellFactory
-   * @param gene
-   * @return
-   */
-  private Set<SilencingReagent> getSilencingReagents(
-    RNAiLibraryColumnHeaders columnHeaders,
-    short rowIndex,
-    Factory cellFactory,
-    Gene gene)
-  {
-    Set<SilencingReagent> silencingReagents = new HashSet<SilencingReagent>();
-    String sequences = cellFactory.getCell(
-      columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.SEQUENCES),
-      rowIndex).getString();
-    if (sequences == null || sequences.equals("")) {
-      SilencingReagent silencingReagent =
-        new SilencingReagent(gene, _unknownSilencingReagentType, "");
-      silencingReagents.add(silencingReagent);
-    }
-    else {
-      for (String sequence : sequences.split("[,;]")) {
-        SilencingReagent silencingReagent =
-          new SilencingReagent(gene, _silencingReagentType, sequence);
-        silencingReagents.add(silencingReagent);        
-      }
-    }
-    return silencingReagents;
-  }
-
-  /**
-   * @param columnHeaders
-   * @param rowIndex
-   * @param cellFactory
-   * @param dataRowContents
-   * @return
-   */
-  private Well getWell(
-    RNAiLibraryColumnHeaders columnHeaders,
-    short rowIndex,
-    Factory cellFactory,
-    Map<RequiredRNAiLibraryColumn,String> dataRowContents)
-  {
-    Integer plateNumber = _plateNumberParser.parse(cellFactory.getCell(
-      columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.PLATE),
-      rowIndex));
-    if (plateNumber == -1) {
-      return null;
-    }
-    String wellName = _wellNameParser.parse(cellFactory.getCell(
-      columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.WELL),
-      rowIndex));
-    if (wellName.equals("")) {
-      return null;
-    }
-    Well well = new Well(_library, plateNumber, wellName);
-    String vendorIdentifier = cellFactory.getCell(
-      columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.VENDOR_IDENTIFIER),
-      rowIndex).getString();
-    if (! (vendorIdentifier == null || vendorIdentifier.equals(""))) {
-      well.setVendorIdentifier(vendorIdentifier);
-    }
-    return well;
-  }
-  
-  /**
-   * Return true whenever the data row has content for the specified column
-   * @param dataRowContents the data row contents
-   * @param column the column to check for content for
-   * @return true whenever the data row has content for the specified column
-   */
-  private boolean hasContent(
-    Map<RequiredRNAiLibraryColumn,String> dataRowContents,
-    RequiredRNAiLibraryColumn column)
-  {
-    String content = dataRowContents.get(column);
-    if (content == null || content.equals("")) {
-      return false;
-    }
-    return true;
   }
 }
