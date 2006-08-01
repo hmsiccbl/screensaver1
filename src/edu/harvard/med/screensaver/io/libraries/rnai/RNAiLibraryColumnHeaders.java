@@ -99,9 +99,10 @@ class RNAiLibraryColumnHeaders
     for (RequiredRNAiLibraryColumn column : RequiredRNAiLibraryColumn.values()) {
       short columnIndex = getColumnIndex(column);
       HSSFCell cell = dataRow.getCell(columnIndex);
-      if (! (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK ||
-             (cell.getCellType() == HSSFCell.CELL_TYPE_STRING &&
-              cell.getStringCellValue().equals("")))) {
+      if (cell                != null                      &&
+          cell.getCellType()  != HSSFCell.CELL_TYPE_BLANK  &&
+          (cell.getCellType() != HSSFCell.CELL_TYPE_STRING ||
+           ! cell.getStringCellValue().equals("")          )) {
         if (column.equals(RequiredRNAiLibraryColumn.PLATE)) {
           hasPlate = true;
         }
