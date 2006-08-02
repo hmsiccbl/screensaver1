@@ -39,16 +39,11 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   
   // public instance methods
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DAO#doInTransaction(edu.harvard.med.screensaver.db.DAOTransaction)
-   */
-  public void doInTransaction(DAOTransaction daoTransaction) {
+  public void doInTransaction(DAOTransaction daoTransaction)
+  {
     daoTransaction.runTransaction();
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DAO#defineEntity(java.lang.Class, java.lang.Object[])
-   */
   public <E extends AbstractEntity> E defineEntity(
     Class<E> entityClass,
     Object... constructorArguments)
@@ -59,17 +54,11 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     return entity;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DAO#persistEntity(edu.harvard.med.screensaver.model.AbstractEntity)
-   */
   public void persistEntity(AbstractEntity entity)
   {
     getHibernateTemplate().saveOrUpdate(entity);
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DAO#findAllEntitiesWithType(java.lang.Class)
-   */
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> List<E> findAllEntitiesWithType(
     Class<E> entityClass)
@@ -77,9 +66,6 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     return (List<E>) getHibernateTemplate().loadAll(entityClass);
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DAO#findEntityById(java.lang.Class, java.lang.Integer)
-   */
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> E findEntityById(
     final Class<E> entityClass,
@@ -100,12 +86,6 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
       });
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see edu.harvard.med.screensaver.db.DAO#findEntitiesByProperty(java.lang.Class,
-   *      java.lang.String, java.lang.String)
-   */
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> List<E> findEntitiesByProperties(
     Class<E> entityClass,
@@ -131,12 +111,6 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
                                                            .toArray());
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see edu.harvard.med.screensaver.db.DAO#findEntityByProperty(java.lang.Class,
-   *      java.lang.String, java.lang.Object)
-   */
   public <E extends AbstractEntity> E findEntityByProperties(
     Class<E> entityClass,
     Map<String,Object> name2Value)
@@ -154,9 +128,6 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     return entities.get(0);
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DAO#findEntitiesByProperty(java.lang.Class, java.lang.String, java.lang.String)
-   */
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> List<E> findEntitiesByProperty(
     Class<E> entityClass,
@@ -171,9 +142,6 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     return (List<E>) getHibernateTemplate().find(hql, propertyValue);
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DAO#findEntityByProperty(java.lang.Class, java.lang.String, java.lang.Object)
-   */
   public <E extends AbstractEntity> E findEntityByProperty(
     Class<E> entityClass,
     String propertyName,
@@ -193,9 +161,6 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     return entities.get(0);
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DAO#findEntitiesByPropertyPattern(java.lang.Class, java.lang.String, java.lang.String)
-   */
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> List<E> findEntitiesByPropertyPattern(
     Class<E> entityClass,
