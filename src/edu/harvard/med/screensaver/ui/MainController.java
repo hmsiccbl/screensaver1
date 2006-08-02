@@ -25,6 +25,8 @@ import org.apache.log4j.Logger;
 
 public class MainController extends AbstractController
 {
+  private static final String APPLICATION_TITLE = null;
+
   private static Logger log = Logger.getLogger(MainController.class);
   
   private DAO _dao;

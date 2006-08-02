@@ -19,6 +19,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpSession;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.ui.util.Messages;
 
 import org.apache.log4j.Logger;
@@ -29,14 +30,9 @@ import org.apache.log4j.Logger;
  * 
  * @author ant
  */
-public abstract class AbstractController
+public abstract class AbstractController implements ScreensaverConstants
 {
   
-  public static final String REDISPLAY_PAGE_ACTION_RESULT = null;
-  public static final String SUCCESS_ACTION_RESULT = "success";
-  public static final String ERROR_ACTION_RESULT = "error";
-  public static final String DONE_ACTION_RESULT = "done";
-
   // static data members
   
   private static Logger log = Logger.getLogger(AbstractController.class);
@@ -49,6 +45,11 @@ public abstract class AbstractController
 
 
   // bean property methods
+  
+  public String getApplicationTitle()
+  {
+    return APPLICATION_TITLE;
+  }
   
   protected Messages getMessages() 
   {

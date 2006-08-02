@@ -151,7 +151,7 @@
   
   <bean
     id="envInfo"
-    class="edu.harvard.med.screensaver.ui.Environment">
+    class="edu.harvard.med.screensaver.ui.EnvironmentController">
     <property name="host" value="${SCREENSAVER_PGSQL_SERVER}"/>
     <property name="db" value="${SCREENSAVER_PGSQL_DB}"/>
     <property name="user" value="${SCREENSAVER_PGSQL_USER}"/>

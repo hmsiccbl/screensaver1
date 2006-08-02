@@ -8,7 +8,7 @@
   <h:form id="dataForm" title="Screen Result Heat Map Viewer">
 
     <h:panelGroup>
-      <h:commandButton id="doneCommand" action="#{heatMapViewer.done}" value="Done" styleClass="command" />
+      <h:commandButton id="doneCommand" action="done" value="Done" styleClass="command" />
     </h:panelGroup>
 
     <p />

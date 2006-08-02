@@ -16,8 +16,9 @@ import java.util.Properties;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
+import javax.servlet.http.Cookie;
 
-public class Environment extends AbstractController
+public class EnvironmentController extends AbstractController
 {
   private String _db;
   private String _user;
@@ -94,6 +95,17 @@ public class Environment extends AbstractController
                       sessionParamMap.get(paramName).toString()));
     }
     return new ListDataModel(data);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public DataModel getCookiesTableModel()
+  {
+    List<Row> cookies = new ArrayList<Row>();
+    Map<String,Cookie> cookieMap = (Map<String,Cookie>) getFacesContext().getExternalContext().getRequestCookieMap();
+    for (String cookieName : cookieMap.keySet()) {
+      cookies.add(new Row(cookieName, cookieMap.get(cookieName).getValue()));
+    }
+    return new ListDataModel(cookies);
   }
 
   public DataModel getEnvTableModel()

@@ -1,23 +1,28 @@
 body {
-  font-family: verdana, arial, helvetica, sans-serif;
-  font-size: 10pt;
+  font-family: helvetica, arial, sans-serif;
+  font-size: medium;
   font-weight: normal;
   color: #000000;
   background-color: #ffffff;
 }
 
-h1,.title {
-  font-size: 36pt;
+h1,
+.title {
+  font-size: x-large;
   font-weight: bold;
 }
 
-h2,.sectionHeader {
+h2,
+.sectionHeader {
   font-weight: bold;
   font-variant: small-caps;
-  font-size: 16pt;
+  font-size: large;
 }
 
-a,a:link,a:visited,a:active {
+a,
+a:link,
+a:visited,
+a:active {
   color: #000000;
   background-color: inherit;
 }
@@ -36,7 +41,7 @@ hr {
 
 .errorMessage {
   font-style: italic;
-  font-size: 14pt;
+  font-size: large;
   color: black;
   background-color: yellow;
   border: 1px;
@@ -51,17 +56,20 @@ hr {
   border-collapse: collapse;
 }
 
-.command,.input {
+.command,
+.input,
+.inputLabel {
   margin-right: 4px;
+  color: inherit;
+}
+
+.column,.keyColumn {
+  padding-right: 10px;
+  vertical-align: top;
 }
 
 .keyColumn {
   font-weight: bold;
-}
-
-.column {
-  border-left-width: 10px;
-  border-color: white;
 }
 
 .tableHeader {
@@ -70,7 +78,7 @@ hr {
 
 .row1,.row2 {
   font-family: monospace;
-  font-size: 10pt;
+  font-size: small;
   border-top: none;
   border-bottom: none;
 }
@@ -87,10 +95,22 @@ hr {
   font-weight: bold;
 }
 
-.navPanel {
+.navPanelColumn, 
+.contentColumn {
+  vertical-align: top;
+}
+
+.navPanelColumn {
+  width: 240px;
   background-color: green;
   color: white;
-  font-size: 8pt;
+  font-size: small;
+  min-height: 1024px;
+}
+
+.navMenuItem,
+.navMenuItemActive {
+  color: white;
 }
 
 .navMenuItemActive {
@@ -98,15 +118,21 @@ hr {
 }
 
 a.navMenuItem:link,
-a.navMenuItemActive:link,
 a.navMenuItem:visited,
+a.navMenuItemActive:link,
 a.navMenuItemActive:visited {
   color: white;
   text-decoration: none;
 }
 
-a.navMenuItem:hover,a.navMenuItemActive:hover {
+a.navMenuItem:hover, 
+a.navMenuItemActive:hover {
+  color: white;
   font-weight: bold;
   text-decoration: underline;
 }
 
+.navSeparator {
+    line-height: 12px;
+    border-bottom: 1px solid white;
+}

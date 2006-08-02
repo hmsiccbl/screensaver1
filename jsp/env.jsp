@@ -1,88 +1,98 @@
 <%@include file="header.jspf"%>
 
-<h1>
-  Screensaver Environment Information
-</h1>
 
 <f:view>
 
-  <t:outputLabel for="dbConfigPanel" value="Database Connection Settings" styleClass="sectionHeader"/>
-  <h:panelGrid id="dbConfigPanel" columns="1">
-    <h:outputText value="Host=#{envInfo.host}" />
-    <h:outputText value="Database=#{envInfo.db}" />
-    <h:outputText value="User=#{envInfo.user}" />
-    <h:outputText value="URL=#{envInfo.url}"/>
-  </h:panelGrid>
+  <t:panelGrid id="navAndContentPanel" columns="2" style="table-layout: fixed" columnClasses="navPanelColumn,contentColumn">
 
-  <p/>
-  
-  <t:outputLabel for="requestParamsTable" value="Request Parameters" styleClass="sectionHeader"/>
-  <t:dataTable id="requestParamsTable" value="#{envInfo.requestParamsModel}" var="row" styleClass="standardTable" rowClasses="row1,row2">
-    <t:column>
-      <f:facet name="header">Name</f:facet>
-      <t:outputText value="#{row.name}"></t:outputText>
-    </t:column>
-    <t:column>
-      <f:facet name="header">Value</f:facet>
-      <t:outputText value="#{row.value}"></t:outputText>
-    </t:column>
-  </t:dataTable>
+    <%@include file="navPanel.jspf"%>
 
-  <p/>
+    <t:panelGrid id="envInfoPanel" columns="1">
 
-  <t:outputLabel for="sessionParamsTable" value="Session Parameters" styleClass="sectionHeader"/>
-  <t:dataTable id="sessionParamsTable" value="#{envInfo.sessionParamsModel}" var="row" styleClass="standardTable" rowClasses="row1,row2">
-    <t:column>
-      <f:facet name="header">Name</f:facet>
-      <t:outputText value="#{row.name}"></t:outputText>
-    </t:column>
-    <t:column>
-      <f:facet name="header">Value</f:facet>
-      <t:outputText value="#{row.value}"></t:outputText>
-    </t:column>
-  </t:dataTable>
+      <t:outputText value="Screensaver Environment Information" styleClass="title" />
 
-  <p/>
+      <t:outputText value="Database Connection Settings" styleClass="sectionHeader" />
+      <h:panelGrid id="dbConfigPanel" columns="1">
+        <h:outputText value="Host=#{envInfo.host}" />
+        <h:outputText value="Database=#{envInfo.db}" />
+        <h:outputText value="User=#{envInfo.user}" />
+        <h:outputText value="URL=#{envInfo.url}" />
+      </h:panelGrid>
 
-  <t:outputLabel for="applicationParamsTable" value="Application Parameters" styleClass="sectionHeader"/>
-  <t:dataTable id="applicationParamsTable" value="#{envInfo.applicationParamsModel}" var="row" styleClass="standardTable" rowClasses="row1,row2">
-    <t:column>
-      <f:facet name="header">Name</f:facet>
-      <t:outputText value="#{row.name}"></t:outputText>
-    </t:column>
-    <t:column>
-      <f:facet name="header">Value</f:facet>
-      <t:outputText value="#{row.value}"></t:outputText>
-    </t:column>
-  </t:dataTable>
+      <t:outputText value="Cookies" styleClass="sectionHeader" />
+      <t:dataTable id="cookiesTable" value="#{envInfo.cookiesTableModel}" var="row" styleClass="standardTable" rowClasses="row1,row2">
+        <t:column>
+          <f:facet name="header">Name</f:facet>
+          <t:outputText value="#{row.name}"></t:outputText>
+        </t:column>
+        <t:column>
+          <f:facet name="header">Value</f:facet>
+          <t:outputText value="#{row.value}"></t:outputText>
+        </t:column>
+      </t:dataTable>
 
-  <p/>
+      <t:outputText value="Request Parameters" styleClass="sectionHeader" />
+      <t:dataTable id="requestParamsTable" value="#{envInfo.requestParamsModel}" var="row" styleClass="standardTable" rowClasses="row1,row2">
+        <t:column>
+          <f:facet name="header">Name</f:facet>
+          <t:outputText value="#{row.name}"></t:outputText>
+        </t:column>
+        <t:column>
+          <f:facet name="header">Value</f:facet>
+          <t:outputText value="#{row.value}"></t:outputText>
+        </t:column>
+      </t:dataTable>
 
-  <t:outputLabel for="envVarsTable" value="Environment Variables" styleClass="sectionHeader"/>
-  <t:dataTable id="envVarsTable" value="#{envInfo.envTableModel}" var="row" styleClass="standardTable" rowClasses="row1,row2">
-    <t:column>
-      <f:facet name="header">Name</f:facet>
-      <t:outputText value="#{row.name}"></t:outputText>
-    </t:column>
-    <t:column>
-      <f:facet name="header">Value</f:facet>
-      <t:outputText value="#{row.value}"></t:outputText>
-    </t:column>
-  </t:dataTable>
-  
-  <p/>
+      <t:outputText value="Session Parameters" styleClass="sectionHeader" />
+      <t:dataTable id="sessionParamsTable" value="#{envInfo.sessionParamsModel}" var="row" styleClass="standardTable" rowClasses="row1,row2">
+        <t:column>
+          <f:facet name="header">Name</f:facet>
+          <t:outputText value="#{row.name}"></t:outputText>
+        </t:column>
+        <t:column>
+          <f:facet name="header">Value</f:facet>
+          <t:outputText value="#{row.value}"></t:outputText>
+        </t:column>
+      </t:dataTable>
 
-  <t:outputLabel for="sysPropsTable" value="Java Systems Properties" styleClass="sectionHeader"/>
-  <t:dataTable id="sysPropsTable" value="#{envInfo.sysPropsTableModel}" var="row" styleClass="standardTable" rowClasses="row1,row2">
-    <t:column>
-      <f:facet name="header">Name</f:facet>
-      <t:outputText value="#{row.name}"></t:outputText>
-    </t:column>
-    <t:column>
-      <f:facet name="header">Value</f:facet>
-      <t:outputText value="#{row.value}"></t:outputText>
-    </t:column>
-  </t:dataTable>
+      <t:outputText value="Application Parameters" styleClass="sectionHeader" />
+      <t:dataTable id="applicationParamsTable" value="#{envInfo.applicationParamsModel}" var="row" styleClass="standardTable" rowClasses="row1,row2">
+        <t:column>
+          <f:facet name="header">Name</f:facet>
+          <t:outputText value="#{row.name}"></t:outputText>
+        </t:column>
+        <t:column>
+          <f:facet name="header">Value</f:facet>
+          <t:outputText value="#{row.value}"></t:outputText>
+        </t:column>
+      </t:dataTable>
+
+      <t:outputText value="Environment Variables" styleClass="sectionHeader" />
+      <t:dataTable id="envVarsTable" value="#{envInfo.envTableModel}" var="row" styleClass="standardTable" rowClasses="row1,row2">
+        <t:column>
+          <f:facet name="header">Name</f:facet>
+          <t:outputText value="#{row.name}"></t:outputText>
+        </t:column>
+        <t:column>
+          <f:facet name="header">Value</f:facet>
+          <t:outputText value="#{row.value}"></t:outputText>
+        </t:column>
+      </t:dataTable>
+
+      <t:outputText value="Java Systems Properties" styleClass="sectionHeader" />
+      <t:dataTable id="sysPropsTable" value="#{envInfo.sysPropsTableModel}" var="row" styleClass="standardTable" rowClasses="row1,row2">
+        <t:column>
+          <f:facet name="header">Name</f:facet>
+          <t:outputText value="#{row.name}"></t:outputText>
+        </t:column>
+        <t:column>
+          <f:facet name="header">Value</f:facet>
+          <t:outputText value="#{row.value}"></t:outputText>
+        </t:column>
+      </t:dataTable>
+
+    </t:panelGrid>
+  </t:panelGrid>
 
 </f:view>
 

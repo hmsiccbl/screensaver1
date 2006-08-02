@@ -256,7 +256,7 @@ public static void main(String[] args) throws FileNotFoundException
    * The ScreenResult object to be populated with data parsed from the spreadsheet.
    */
   private ScreenResult _screenResult;
-  private ParseErrorManager _errors;
+  private ParseErrorManager _errors = new ParseErrorManager(); // init at instantiation, to avoid NPE from various method calls before parse() is called
   private SortedMap<String,ResultValueType> _columnsDerivedFromMap;
 
   private CellVocabularyParser<ResultValueType> _columnsDerivedFromParser;

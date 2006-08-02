@@ -140,6 +140,15 @@
   
   <!-- Navigation rules -->
   
+  <!-- lastly, define the navigation rules that are applicable from *all* views (e.g. those that contain a navigation panel) -->
+  <navigation-rule>
+    <from-view-id>*</from-view-id>
+    <navigation-case>
+      <from-outcome>goImportScreenResult</from-outcome>
+      <to-view-id>/screenResultImporter.jsp</to-view-id>
+    </navigation-case>
+  </navigation-rule>
+
   <navigation-rule>
     <from-view-id>/main.jsp</from-view-id>
     <navigation-case>
@@ -260,7 +269,7 @@
       <redirect/>
     </navigation-case>
   </navigation-rule>
-
+  
 
   <!-- Converters -->
 

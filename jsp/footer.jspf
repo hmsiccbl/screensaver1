@@ -1,4 +1,6 @@
-      </tr>
-    </table>
+    <%-- TODO: this should rendenred via JSF components! --%>
+    <div style="text-align: center">
+      Screensaver 1.0 | <a href="http://iccb.med.harvard.edu/">ICCB-L</a>
+    </div>
   </body>
 </html>

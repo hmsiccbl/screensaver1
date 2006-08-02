@@ -22,6 +22,11 @@
   <!-- properties -->
 
   <property 
+    name="app.name" 
+    value="screensaver"
+    description="used to define distribution file names, deployment directories, default database name, etc."
+  />
+  <property 
     name="debug"
     description="controls whether tasks should be 'debug-aware'; provides a short-hand command-line option for setting all *.debug options appropriately"
     value="false"/>
@@ -40,9 +45,10 @@
     <isfalse value="${debug}"/> 
   </condition> 
   <property name="verbose" value="false" description="controls verbosity of various Ant tasks"/> 
-  <property name="war" value="build/screensaver.war"/>
-  <property name="appserver.dir" value="/usr/local/jakarta-tomcat"/>
-  <property name="deploy.dir" value="${appserver.dir}/webapps/screensaver"/>
+  <property name="war" value="build/${app.name}.war"/>
+  <property name="appserver.dir" location="/usr/local/jakarta-tomcat"/>
+  <property name="appserver.app.work.dir" location="${appserver.dir}/work/Catalina/localhost/${app.name}"/>
+  <property name="deploy.dir" location="${appserver.dir}/webapps/${app.name}"/>
   <property name="appserver.start.cmd" value="${appserver.dir}/bin/startup.sh"/>
   <property name="appserver.stop.cmd" value="${appserver.dir}/bin/shutdown.sh"/>
   <property name="war.build.dir" location="build/war"/>
@@ -50,9 +56,9 @@
   <property name="test.src.dir" location="test"/>
   <property name="hibernate.cfg.xml" location="resources/hibernate.cfg.xml"/>
   <property name="javadoc.dir" location="build/api"/>
-  <property name="distro.build.dir" location="build/distro/screensaver"/>
-  <property name="distro.file.tgz" location="build/screensaver.tgz"/> 
-  <property name="distro.file.zip" location="build/screensaver.zip"/>
+  <property name="distro.build.dir" location="build/distro/${app.name}"/>
+  <property name="distro.file.tgz" location="build/${app.name}.tgz"/> 
+  <property name="distro.file.zip" location="build/${app.name}.zip"/>
   <property name="datasource" value="local" 
     description="Valid values are wildcard substring of 'resources/datasource-*.properties'"/>
   <property name="datasource.file" location="resources/datasource-${datasource}.properties"/>
@@ -148,6 +154,7 @@
       Deploy Screensaver to a localhost application server, building the exploded WAR deployment directly in its destination directory.
     </description>
     <delete dir="${deploy.dir}"/>
+    <delete dir="${appserver.app.work.dir}"/>
     <antcall target="exploded.war">
       <param name="exploded.war.dir" location="${deploy.dir}"/>
     </antcall>
@@ -161,6 +168,7 @@
       Deploy Screensaver to a remote application server.  Builds WAR deployment, then scp's to destination.
     </description>
     <!-- TODO -->
+    <echo message="The 'deploy-remote' target is currently unimplemented.  For now, run the 'deploy' target from your web server host (e.g. orchestra), and provide a value for the '-Ddeploy.dir' option on the command line"></echo>
   </target>
 
   <!-- an alias for deploy-local target -->
@@ -269,9 +277,9 @@
         version="3.0" 
         showsql="true"
         driver="org.postgresql.Driver"
-        jdbcurl="jdbc:postgresql://localhost/screensaver"
-        username="screensaver"
-        password="screensaver"
+        jdbcurl="jdbc:postgresql://localhost/${app.name}"
+        username="${app.name}"
+        password="${app.name}"
         dialect="org.hibernate.dialect.PostgreSQLDialect"
       />
       <!-- TODO: make 'hibernate.cfg.xml' property match this destinationFile attribute value -->   
@@ -565,8 +573,8 @@
        includeemptydirs="true"
        failonerror="false"
       >
-        <fileset dir="build/distro/screensaver/classes"/>
-        <fileset dir="build/distro/screensaver/lib"/>
+        <fileset dir="build/distro/${app.name}/classes"/>
+        <fileset dir="build/distro/${app.name}/lib"/>
         <fileset file="${distro.file.tgz}"/>
         <fileset file="${distro.file.zip}"/>
       </delete>
