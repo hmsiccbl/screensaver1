@@ -154,8 +154,12 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
     createSchema();
   }
   
+  /**
+   * Truncate all the tables in the schema. If there are no tables in the schema, then
+   * {@link #createSchema() create the schema}.
+   */
   @SuppressWarnings("unchecked")
-  public void truncateTables()
+  public void truncateTablesOrCreateSchema()
   {
     log.info("truncating tables for " + makeDataSourceString());
     Connection connection = getSession().connection();
@@ -177,8 +181,8 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
         sql += resultSet.getString(1) + ", ";
       }
       
-      // in case there are no tables in the schema
-      if (sql.equals("TRUNCATE TABLE ")) {
+      if (sql.equals("TRUNCATE TABLE ")) { // no tables in the schema
+        createSchema();
         return;
       }
       

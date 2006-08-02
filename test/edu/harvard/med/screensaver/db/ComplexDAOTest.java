@@ -66,7 +66,7 @@ public class ComplexDAOTest extends AbstractSpringTest
   @Override
   protected void onSetUp() throws Exception
   {
-    schemaUtil.truncateTables();
+    schemaUtil.truncateTablesOrCreateSchema();
   }
 
   

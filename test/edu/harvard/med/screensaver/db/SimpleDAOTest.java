@@ -58,7 +58,7 @@ public class SimpleDAOTest extends AbstractSpringTest
   @Override
   protected void onSetUp() throws Exception
   {
-    schemaUtil.truncateTables();
+    schemaUtil.truncateTablesOrCreateSchema();
   }
 
   

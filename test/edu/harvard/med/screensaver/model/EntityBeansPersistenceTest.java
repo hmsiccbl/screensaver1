@@ -48,7 +48,7 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
   @Override
   protected void onSetUp() throws Exception
   {
-    schemaUtil.truncateTables();
+    schemaUtil.truncateTablesOrCreateSchema();
   }
   
   /**
