@@ -23,6 +23,7 @@
     class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsLoader"
     singleton="false"
   >
+    <constructor-arg ref="dao"/>
   </bean>
   
   <bean 

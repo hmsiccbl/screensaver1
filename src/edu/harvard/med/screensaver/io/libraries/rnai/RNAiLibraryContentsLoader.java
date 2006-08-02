@@ -18,6 +18,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
+import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
@@ -56,6 +57,7 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
   
   // private instance data
   
+  private DAO _dao;
   private Library _library;
   private Workbook _workbook;
   private ParseErrorManager _errorManager;
@@ -67,7 +69,16 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
     DEFAULT_UNKNOWN_SILENCING_REAGENT_TYPE;
   
   
-  // public instance methods
+  // public constructor and instance methods
+  
+  /**
+   * Construct a new <code>RNAiLibraryContentsLoader</code> object.
+   * @param dao the data access object
+   */
+  public RNAiLibraryContentsLoader(DAO dao)
+  {
+    _dao = dao;
+  }
   
   /**
    * Get the {@link SilencingReagentType} for the {@link SilencingReagent SilencingReagents}
@@ -119,7 +130,10 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
    * @param stream the input stream to load library contents from
    * @return the library with the contents loaded
    */
-  public synchronized Library loadLibraryContents(Library library, File file, InputStream stream)
+  public synchronized Library loadLibraryContents(
+    Library library,
+    File file,
+    InputStream stream)
   {
     initialize(library, file, stream);
     HSSFWorkbook hssfWorkbook = _workbook.getWorkbook();
