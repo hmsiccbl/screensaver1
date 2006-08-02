@@ -45,7 +45,8 @@ public class SchemaUtil implements ApplicationContextAware
 
   private String _sessionFactoryBeanId;
 
-  public void setSessionFactoryBeanId(String sessionFactoryBeanId) {
+  public void setSessionFactoryBeanId(String sessionFactoryBeanId)
+  {
     // we go through some hoops to get the sessionFactory bean, because Spring
     // normally wants to provide a *product* of a factory, when a factory bean
     // is injected; but we want the factory itself, so we have to use getBean()
@@ -61,7 +62,8 @@ public class SchemaUtil implements ApplicationContextAware
    *             depend upon multiple properties.
    * @return
    */
-  private LocalSessionFactoryBean getSessionFactory() {
+  private LocalSessionFactoryBean getSessionFactory()
+  {
     if ( _sessionFactory == null ) {
       _sessionFactory = (LocalSessionFactoryBean) _appCtx.getBean("&" + _sessionFactoryBeanId);
     }
@@ -71,14 +73,17 @@ public class SchemaUtil implements ApplicationContextAware
   /**
    * Setter for applicationContext Property.
    */
-  public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+  public void setApplicationContext(ApplicationContext applicationContext)
+  throws BeansException
+  {
     _appCtx = applicationContext;
   }
   
   /**
    * Drop the schema that is configured for this Spring+Hibernate enabled project.
    */
-  public void dropSchema() throws DataAccessException {
+  public void dropSchema() throws DataAccessException
+  {
     log.info("dropping schema for " + makeDataSourceString());
     getSessionFactory().dropDatabaseSchema();
   }
@@ -86,7 +91,8 @@ public class SchemaUtil implements ApplicationContextAware
   /**
    * Create the schema that is configured for this Spring+Hibernate enabled project.
    */
-  public void createSchema() throws DataAccessException {
+  public void createSchema() throws DataAccessException
+  {
     log.info("creating schema for " + makeDataSourceString());
     getSessionFactory().createDatabaseSchema();
   }
@@ -95,7 +101,8 @@ public class SchemaUtil implements ApplicationContextAware
    * Drop and create (in that order) the schema that is configured for this
    * Spring+Hibernate enabled project.
    */
-  public void recreateSchema() {
+  public void recreateSchema()
+  {
     dropSchema();
     createSchema();
   }
