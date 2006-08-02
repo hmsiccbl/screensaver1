@@ -119,9 +119,9 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
     for (String entityPackage : entityPackages) {
       String packagePath = "/" + entityPackage.replace('.', '/');
       URL packageURL = getClass().getResource(packagePath);
-      File directory = new File(packageURL.getFile());
+      File directory = new File(packageURL.getFile().replace("%20", " "));
       if (! directory.exists()) {
-        throw new RuntimeException("directory " + directory + "doesn't exist");
+        throw new RuntimeException("directory " + directory + " doesn't exist");
       }
       for (String file : directory.list()) {
         if (! file.endsWith(".class")) {
