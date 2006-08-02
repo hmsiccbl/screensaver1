@@ -131,6 +131,10 @@
     <property name="sessionFactoryBeanId">
       <idref bean="hibernateSessionFactory"/>
     </property>
+    <property
+      name="hibernateTemplate"
+      ref="hibernateTemplate"
+    />
   </bean>
 
 
