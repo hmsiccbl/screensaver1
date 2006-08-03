@@ -162,6 +162,15 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
   // package getters, for the DataRowParser
 
   /**
+   * Get the {@link DAO data access object}.
+   * @return the data access object
+   */
+  DAO getDAO()
+  {
+    return _dao;
+  }
+  
+  /**
    * Get the {@link NCBIGeneInfoProvider}.
    * @return the geneInfoProvider.
    */

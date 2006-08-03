@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.io.libraries.rnai;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -16,11 +17,14 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 
+import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.libraries.DataRowType;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 
 
@@ -102,6 +106,35 @@ public class DataRowParser
   }
   
   /**
+   * Parse the data row content
+   */
+  private void parseDataRowContent()
+  {
+    String plateWellAbbreviation = getPlateWellAbbreviation();
+    if (plateWellAbbreviation == null) {
+      return;
+    }
+    log.info("loading data for plate-well " + plateWellAbbreviation);
+    
+    // get the well last, so that if we encounter any errors, we dont end up with a bogus
+    // well in the library
+  
+    Gene gene = getGene();
+    if (gene == null) {
+      return;
+    }
+    Set<SilencingReagent> silencingReagents = getSilencingReagents(gene);
+    Well well = getWell();
+    if (well == null) {
+      return;
+    }
+    for (SilencingReagent silencingReagent : silencingReagents) {
+      well.addSilencingReagent(silencingReagent);
+      log.info("sr count = " + well.getSilencingReagents().size());
+    }
+  }
+
+  /**
    * Parse the well.
    */
   private void parseWell()
@@ -132,7 +165,16 @@ public class DataRowParser
     if (wellName.equals("")) {
       return null;
     }
-    Well well = new Well(_loader.getLibrary(), plateNumber, wellName);
+    log.info("get well for " + plateNumber + "-" + wellName);
+    Well well = getExistingWell(plateNumber, wellName);
+    if (well == null) {
+      log.info("no existing well!");
+      well = new Well(_loader.getLibrary(), plateNumber, wellName);
+    }
+    else {
+      log.info("got well = " + well);
+      log.info("sr count = " + well.getSilencingReagents().size());
+    }
     String vendorIdentifier = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.VENDOR_IDENTIFIER),
       _rowIndex).getString();
@@ -141,33 +183,28 @@ public class DataRowParser
     }
     return well;
   }
-
-  /**
-   * Parse the data row content
-   */
-  private void parseDataRowContent()
-  {
-    String plateWellAbbreviation = getPlateWellAbbreviation();
-    if (plateWellAbbreviation == null) {
-      return;
-    }
-    log.info("loading data for plate-well " + plateWellAbbreviation);
-    
-    // get the well last, so that if we encounter any errors, we dont end up with a bogus
-    // well in the library
   
-    Gene gene = getGene();
-    if (gene == null) {
-      return;
+  /**
+   * Get an existing well from the database with the specified plate number and well name,
+   * and the library from the parent {@link RNAiLibraryContentsLoader}. Return null if no
+   * such well exists in the database. 
+   * @param plateNumber the plate number
+   * @param wellName the well name
+   * @return the existing well from the database. Return null if no such well exists in
+   * the database
+   */
+  private Well getExistingWell(Integer plateNumber, String wellName)
+  {
+    Library library = _loader.getLibrary();
+    if (library.getLibraryId() == null) {
+      return null;
     }
-    Set<SilencingReagent> silencingReagents = getSilencingReagents(gene);
-    Well well = getWell();
-    if (well == null) {
-      return;
-    }
-    for (SilencingReagent silencingReagent : silencingReagents) {
-      well.addSilencingReagent(silencingReagent);
-    }
+    DAO dao = _loader.getDAO();
+    Map<String,Object> propertiesMap = new HashMap<String,Object>();
+    propertiesMap.put("hbnLibrary", _loader.getLibrary());
+    propertiesMap.put("plateNumber", plateNumber);
+    propertiesMap.put("wellName", wellName);
+    return dao.findEntityByProperties(Well.class, propertiesMap);
   }
 
   /**
@@ -233,6 +270,16 @@ public class DataRowParser
       return null;
     }
     
+    // lookup existing gene
+    Gene gene = getExistingGene(entrezgeneId);
+    if (gene != null) {
+      gene.setGeneName(geneInfo.getGeneName());
+      gene.setEntrezgeneSymbol(entrezgeneSymbol);
+      gene.addGenbankAccessionNumber(genbankAccessionNumber);
+      gene.setSpeciesName(geneInfo.getSpeciesName());
+      return gene;
+    }
+    
     // buildin tha gene
     return new Gene(
       geneInfo.getGeneName(),
@@ -240,6 +287,18 @@ public class DataRowParser
       entrezgeneSymbol,
       genbankAccessionNumber,
       geneInfo.getSpeciesName());
+  }
+  
+  /**
+   * Get an existing gene from the database with the specified EntrezGene ID. Return null
+   * if no such well exists in the database. 
+   * @param entrezgeneId the EntrezGene ID
+   * @return the existing gene from the database. Return null if no such gene exists in
+   * the database
+   */
+  private Gene getExistingGene(Integer entrezgeneId)
+  {
+    return _loader.getDAO().findEntityByProperty(Gene.class, "entrezgeneId", entrezgeneId);
   }
 
   /**
@@ -249,22 +308,56 @@ public class DataRowParser
    */
   private Set<SilencingReagent> getSilencingReagents(Gene gene)
   {
+    SilencingReagentType unknownSilencingReagentType =
+      _loader.getUnknownSilencingReagentType();
+    SilencingReagentType silencingReagentType = _loader.getSilencingReagentType();
     Set<SilencingReagent> silencingReagents = new HashSet<SilencingReagent>();
     String sequences = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.SEQUENCES),
       _rowIndex).getString();
     if (sequences == null || sequences.equals("")) {
       SilencingReagent silencingReagent =
-        new SilencingReagent(gene, _loader.getUnknownSilencingReagentType(), "");
+        getExistingSilencingReagent(gene, unknownSilencingReagentType, "");
+      if (silencingReagent == null) {
+        silencingReagent = new SilencingReagent(gene, unknownSilencingReagentType, "");
+      }
       silencingReagents.add(silencingReagent);
     }
     else {
       for (String sequence : sequences.split("[,;]")) {
         SilencingReagent silencingReagent =
-          new SilencingReagent(gene, _loader.getSilencingReagentType(), sequence);
+          getExistingSilencingReagent(gene, silencingReagentType, sequence);
+        if (silencingReagent == null) {
+          silencingReagent = new SilencingReagent(gene, silencingReagentType, sequence);
+        }
         silencingReagents.add(silencingReagent);        
       }
     }
     return silencingReagents;
+  }
+  
+  /**
+   * Get an existing silencing reagent from the database with the specified properties.
+   * Return null if no such silencing reagent exists in the database. 
+   * @param gene the gene
+   * @param silencingReagentType the silencing reagent type
+   * @param sequence the sequence
+   * @return the existing silencing reagent from the database. Return null if no such
+   * silencing reagent exists in the database
+   */
+  private SilencingReagent getExistingSilencingReagent(
+    Gene gene,
+    SilencingReagentType silencingReagentType,
+    String sequence)
+  {
+    if (gene.getGeneId() == null) {
+      return null;
+    }
+    DAO dao = _loader.getDAO();
+    Map<String,Object> propertiesMap = new HashMap<String,Object>();
+    propertiesMap.put("hbnGene", gene);
+    propertiesMap.put("hbnSilencingReagentType", silencingReagentType);
+    propertiesMap.put("hbnSequence", sequence);
+    return dao.findEntityByProperties(SilencingReagent.class, propertiesMap);
   }
 }
