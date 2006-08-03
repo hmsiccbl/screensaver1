@@ -22,6 +22,18 @@
   <!-- TODO: Is it possible to configure managed-bean superclass so that common properties are not repeated in each bean definition?  Or must we use Spring to manage our JSF managed-beans in order have such a feature? -->
   
   <managed-bean>
+    <description>
+      Backing bean for the reportException.jsp view, enabling exception stack traces to be viewed in
+      a custom manner.
+    </description>
+    <managed-bean-name>exceptionReporter</managed-bean-name>
+    <managed-bean-class>
+      edu.harvard.med.screensaver.ui.ExceptionReporterController
+    </managed-bean-class>            
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
     <description>Main</description>
     <managed-bean-name>main</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.MainController</managed-bean-class>

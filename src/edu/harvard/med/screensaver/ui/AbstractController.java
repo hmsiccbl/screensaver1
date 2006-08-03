@@ -16,6 +16,7 @@ import java.util.Map;
 
 import javax.faces.application.Application;
 import javax.faces.component.UIComponent;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpSession;
 
@@ -76,6 +77,16 @@ public abstract class AbstractController implements ScreensaverConstants
   public Application getApplicationContext()
   {
     return getFacesContext().getApplication();
+  }
+  
+  public ExternalContext getExternalContext()
+  {
+    return getFacesContext().getExternalContext();
+  }
+  
+  public Map getRequestMap()
+  {
+    return getExternalContext().getRequestMap();
   }
   
   public HttpSession getHttpSession()

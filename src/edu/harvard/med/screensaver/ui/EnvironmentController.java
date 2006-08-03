@@ -168,5 +168,11 @@ public class EnvironmentController extends AbstractController
   {
     _user = user;
   }
+
+  /** for testing purposes only! */
+  public String throwAnException() throws Exception
+  {
+    throw new Exception("You asked for it!");
+  }
   
 }

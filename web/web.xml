@@ -32,16 +32,6 @@
 
   <!--  JSF/MyFaces configuration (by MyEclipse) -->
   
-  <context-param>
-    <param-name>javax.faces.CONFIG_FILES</param-name>
-    <!-- comma-separated list of faces config files, which contain declarations of the application's JSF UI components -->
-    <param-value>/WEB-INF/faces-config.xml</param-value>
-  </context-param>
-
-  <listener>
-    <listener-class>org.apache.myfaces.webapp.StartupServletContextListener</listener-class>
-  </listener>
-
   <servlet>
     <servlet-name>Faces Servlet</servlet-name>
     <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
@@ -54,8 +44,132 @@
     <url-pattern>/jsf/*</url-pattern>
   </servlet-mapping>
 
+  <!-- Configure a handler for exceptions thrown during server-side processing
+  -->
+  <error-page>
+    <error-code>500</error-code>
+    <location>/reportException.jsp</location>
+  </error-page>
  
-  <!-- JSF Apache Tomahawk configuration (extended components w/ "t:" prefix) -http://myfaces.apache.org/tomahawk/extensionsFilter.html  -->
+  <context-param>
+    <description>
+      Comma separated list of URIs of (additional) faces config
+      files. (e.g. /WEB-INF/my-config.xml) See JSF 1.0 PRD2, 10.3.2 Attention:
+      You should not put /WEB-INF/faces-config.xml in here.  Doing so will
+      force any JSF implementation to load the configuration twice, therefore
+      registering each phase listener twice.
+    </description>
+    <param-name>javax.faces.CONFIG_FILES</param-name>
+    <param-value></param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+      State saving method: "client" or "server" (= default). See JSF
+      Specification 2.5.3.  Server performs better.
+    </description>
+    <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+    <param-value>client</param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+      Only applicable if state saving method is "server" (= default). Defines
+      the amount (default = 20) of the latest views are stored in
+      session.
+    </description>
+    <param-name>org.apache.myfaces.NUMBER_OF_VIEWS_IN_SESSION</param-name>
+    <param-value>20</param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+      Only applicable if state saving method is "server". If true (default)
+      the state will be serialized to a byte stream before it is written to
+      the session. If false the state will not be serialized to a byte
+      stream.  Serializing negatively impacts perfomance.
+    </description>
+    <param-name>org.apache.myfaces.SERIALIZE_STATE_IN_SESSION</param-name>
+    <param-value>false</param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+      Only applicable if state saving method is "server" and if
+      org.apache.myfaces.SERIALIZE_STATE_IN_SESSION is true.  If true (default)
+      the serialized state will be compressed before it is written to the
+      session. If false the state will not be compressed.
+    </description>
+    <param-name>org.apache.myfaces.COMPRESS_STATE_IN_SESSION</param-name>
+    <param-value>false</param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+      This parameter tells MyFaces if javascript code should be allowed in the
+      rendered HTML output.  If javascript is allowed, command_link anchors
+      will have javascript code that submits the corresponding form.  If
+      javascript is not allowed, the state saving info and nested parameters
+      will be added as url parameters.  Default: "true"
+    </description>
+    <param-name>org.apache.myfaces.ALLOW_JAVASCRIPT</param-name>
+    <param-value>true</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>org.apache.myfaces.DETECT_JAVASCRIPT</param-name>
+    <param-value>false</param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+      If true, rendered HTML code will be formatted, so that it is "human readable".
+      i.e. additional line separators and whitespace will be written, that do not
+      influence the HTML code.  Default: "true"
+    </description>
+    <param-name>org.apache.myfaces.PRETTY_HTML</param-name>
+    <param-value>true</param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+      If true, a javascript function will be rendered that is able
+      to restore the former vertical scroll on every request. Convenient feature
+      if you have pages with long lists and you do not want the browser page to
+      always jump to the top if you trigger a link or button action that stays
+      on the same page.  Default: "false"
+    </description>
+    <param-name>org.apache.myfaces.AUTO_SCROLL</param-name>
+    <param-value>true</param-value>
+  </context-param>
+  
+  <context-param>
+    <description>
+      Used for encrypting view state.  Only relevant for client side state saving.
+      See MyFaces wiki/web site documentation for instructions on how to configure
+      an application for diffenent encryption strengths.  see
+      http://wiki.apache.org/myfaces/Secure_Your_Application
+    </description>
+    <param-name>org.apache.myfaces.secret</param-name>
+    <param-value>NzY1NDMyMTA=</param-value>
+  </context-param>
+  
+  <context-param>
+    <description>
+      Validate managed beans and navigation rules.  See
+      http://wiki.apache.org/myfaces/A_Little_Quality_Assurance
+    </description>
+    <param-name>org.apache.myfaces.validate</param-name>
+    <param-value>true</param-value>
+  </context-param>  
+  
+
+  <listener>
+    <listener-class>org.apache.myfaces.webapp.StartupServletContextListener</listener-class>
+  </listener>
+
+  <!-- JSF Apache Tomahawk configuration (extended components w/ "t:" prefix)
+  -http://myfaces.apache.org/tomahawk/extensionsFilter.html -->
   <filter>
     <filter-name>MyFacesExtensionsFilter</filter-name>
     <filter-class>org.apache.myfaces.webapp.filter.ExtensionsFilter</filter-class>
@@ -69,7 +183,7 @@
   <!-- extension mapping for adding <script/>, <link/>, and other resource tags to JSF-pages  -->
   <filter-mapping>
     <filter-name>MyFacesExtensionsFilter</filter-name>
-    <!-- servlet-name must match the name of your javax.faces.webapp.FacesServlet entry -->
+    <!-- servlet-name must match the name of our javax.faces.webapp.FacesServlet entry -->
     <servlet-name>Faces Servlet</servlet-name>
   </filter-mapping>
 

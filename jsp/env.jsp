@@ -94,6 +94,8 @@
     </t:panelGrid>
   </t:panelGrid>
 
+  <h:form><t:commandButton action="#{envInfo.throwAnException}" value="Throw an exception!"/></h:form>
+  
 </f:view>
 
 <%@include file="footer.jspf"%>
