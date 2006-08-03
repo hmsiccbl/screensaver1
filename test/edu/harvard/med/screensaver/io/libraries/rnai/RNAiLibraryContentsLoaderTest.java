@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -380,93 +381,100 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
   */
   public void testUseOfExistingEntities()
   {
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 5003);
+        dao.persistEntity(library);
 
-    // parse the first spreadsheet
-    Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 5003);
-    String filename = "existing entities 1.xls";
-    File file = new File(TEST_INPUT_FILE_DIR, filename);
-    InputStream stream = null;
-    try {
-      stream = new FileInputStream(file);
-    }
-    catch (FileNotFoundException e) {
-      fail("file not found: " + filename);
-    }
-    library = rnaiLibraryContentsLoader.loadLibraryContents(library, file, stream);
-    List<ParseError> errors = rnaiLibraryContentsLoader.getErrors();
-    assertEquals("workbook has no errors", 0, errors.size());
-    assertEquals("library has 5 wells", 5, library.getWells().size());
+        // parse the first spreadsheet
+        String filename = "existing entities 1.xls";
+        File file = new File(TEST_INPUT_FILE_DIR, filename);
+        InputStream stream = null;
+        try {
+          stream = new FileInputStream(file);
+        }
+        catch (FileNotFoundException e) {
+          fail("file not found: " + filename);
+        }
+        library = rnaiLibraryContentsLoader.loadLibraryContents(library, file, stream);
+        List<ParseError> errors = rnaiLibraryContentsLoader.getErrors();
+        assertEquals("workbook has no errors", 0, errors.size());
+        assertEquals("library has 5 wells", 5, library.getWells().size());
 
-    // persist the new well/sr/genes, so the next
-    dao.persistEntity(library);
-    
-    // parse the second spreadsheet
-    filename = "existing entities 2.xls";
-    file = new File(TEST_INPUT_FILE_DIR, filename);
-    stream = null;
-    try {
-      stream = new FileInputStream(file);
-    }
-    catch (FileNotFoundException e) {
-      fail("file not found: " + filename);
-    }
-    library = rnaiLibraryContentsLoader.loadLibraryContents(library, file, stream);
-    errors = rnaiLibraryContentsLoader.getErrors();
-    assertEquals("workbook has no errors", 0, errors.size());
-    assertEquals("library has 7 wells", 7, library.getWells().size());
-    
-    // test the overlaps
-    Well a05 = null, a07 = null, a09 = null, a11 = null, a13 = null, a15 = null, a17 = null;
-    for (Well well: library.getWells()) {
-      String wellName = well.getWellName();
-      log.info("well name " + wellName);
-      if (wellName.equals("A05"))      { a05 = well; }
-      else if (wellName.equals("A07")) { a07 = well; }
-      else if (wellName.equals("A09")) { a09 = well; }
-      else if (wellName.equals("A11")) { a11 = well; }
-      else if (wellName.equals("A13")) { a13 = well; }
-      else if (wellName.equals("A15")) { a15 = well; }
-      else if (wellName.equals("A17")) { a17 = well; }
-    }
-      
-    assertNotNull("library has well A05", a05);
-    assertNotNull("library has well A07", a07);
-    assertNotNull("library has well A09", a09);
-    assertNotNull("library has well A11", a11);
-    assertNotNull("library has well A13", a13);
-    assertNotNull("library has well A15", a15);
-    assertNotNull("library has well A17", a17);
+        // persist the new well/sr/genes, so the next
+        dao.persistEntity(library);
 
-    // a05 has one sr
-    assertEquals("a05 has 1 sr", 1, a05.getSilencingReagents().size());
-    
-    // a07 has two srs with same gene
-    assertEquals("a07 has 2 srs", 2, a07.getSilencingReagents().size());
-    Iterator<SilencingReagent> srs = a07.getSilencingReagents().iterator();
-    SilencingReagent sr1 = srs.next();
-    SilencingReagent sr2 = srs.next();
-    assertSame("a07 srs have same gene", sr1.getGene(), sr2.getGene());
-    
-    // a09 has two srs with different genes
-    assertEquals("a07 has 2 srs", 2, a07.getSilencingReagents().size());
-    srs = a07.getSilencingReagents().iterator();
-    sr1 = srs.next();
-    sr2 = srs.next();
-    assertNotSame("a07 srs have same gene", sr1.getGene(), sr2.getGene());
+        // parse the second spreadsheet
+        filename = "existing entities 2.xls";
+        file = new File(TEST_INPUT_FILE_DIR, filename);
+        stream = null;
+        try {
+          stream = new FileInputStream(file);
+        }
+        catch (FileNotFoundException e) {
+          fail("file not found: " + filename);
+        }
+        library = rnaiLibraryContentsLoader.loadLibraryContents(library, file, stream);
+        errors = rnaiLibraryContentsLoader.getErrors();
+        assertEquals("workbook has no errors", 0, errors.size());
+        assertEquals("library has 7 wells", 7, library.getWells().size());
 
-    // a11 and a15 have same sr
-    assertEquals("a11 has 1 sr", 1, a11.getSilencingReagents().size());
-    assertEquals("a15 has 1 sr", 1, a15.getSilencingReagents().size());
-    assertSame("a11 and a15 have same sr",
-      a11.getSilencingReagents().iterator().next(),
-      a15.getSilencingReagents().iterator().next());
-    
-    // a13 and 17 have different srs, same gene
-    assertEquals("a13 has 1 sr", 1, a13.getSilencingReagents().size());
-    assertEquals("a17 has 1 sr", 1, a17.getSilencingReagents().size());
-    sr1 = a13.getSilencingReagents().iterator().next();
-    sr2 = a17.getSilencingReagents().iterator().next();
-    assertNotSame("a13 and a17 have different srs", sr1, sr2);
-    assertSame("a13 and a17 have same gene", sr1.getGene(), sr2.getGene());
+        // test the overlaps
+        Well a05 = null, a07 = null, a09 = null, a11 = null, a13 = null, a15 = null, a17 = null;
+        for (Well well: library.getWells()) {
+          String wellName = well.getWellName();
+          log.info("well name " + wellName);
+          if (wellName.equals("A05"))      { a05 = well; }
+          else if (wellName.equals("A07")) { a07 = well; }
+          else if (wellName.equals("A09")) { a09 = well; }
+          else if (wellName.equals("A11")) { a11 = well; }
+          else if (wellName.equals("A13")) { a13 = well; }
+          else if (wellName.equals("A15")) { a15 = well; }
+          else if (wellName.equals("A17")) { a17 = well; }
+        }
+
+        assertNotNull("library has well A05", a05);
+        assertNotNull("library has well A07", a07);
+        assertNotNull("library has well A09", a09);
+        assertNotNull("library has well A11", a11);
+        assertNotNull("library has well A13", a13);
+        assertNotNull("library has well A15", a15);
+        assertNotNull("library has well A17", a17);
+
+        // a05 has one sr
+        assertEquals("a05 has 1 sr", 1, a05.getSilencingReagents().size());
+
+        // a07 has two srs with same gene
+        assertEquals("a07 has 2 srs", 2, a07.getSilencingReagents().size());
+        Iterator<SilencingReagent> srs = a07.getSilencingReagents().iterator();
+        SilencingReagent sr1 = srs.next();
+        SilencingReagent sr2 = srs.next();
+        assertSame("a07 srs have same gene", sr1.getGene(), sr2.getGene());
+
+        // a09 has two srs with different genes
+        assertEquals("a09 has 2 srs", 2, a09.getSilencingReagents().size());
+        srs = a09.getSilencingReagents().iterator();
+        sr1 = srs.next();
+        sr2 = srs.next();
+        assertNotSame("a09 srs have different genes", sr1.getGene(), sr2.getGene());
+
+        // a11 and a15 have same sr
+        assertEquals("a11 has 1 sr", 1, a11.getSilencingReagents().size());
+        assertEquals("a15 has 1 sr", 1, a15.getSilencingReagents().size());
+        assertSame("a11 and a15 have same sr",
+          a11.getSilencingReagents().iterator().next(),
+          a15.getSilencingReagents().iterator().next());
+
+        // a13 and 17 have different srs, same gene
+        assertEquals("a13 has 1 sr", 1, a13.getSilencingReagents().size());
+        assertEquals("a17 has 1 sr", 1, a17.getSilencingReagents().size());
+        sr1 = a13.getSilencingReagents().iterator().next();
+        sr2 = a17.getSilencingReagents().iterator().next();
+        assertNotSame("a13 and a17 have different srs", sr1, sr2);
+        assertSame("a13 and a17 have same gene", sr1.getGene(), sr2.getGene());
+      }
+    });
   }
 }
