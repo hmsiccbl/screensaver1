@@ -28,6 +28,6 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     addTest(edu.harvard.med.screensaver.io.screenresultparser.PackageTestSuite.suite());
-    addTest(edu.harvard.med.screensaver.io.libraries.PackageTestSuite.suite());
+    addTest(edu.harvard.med.screensaver.io.libraries.rnai.PackageTestSuite.suite());
   }
 }
