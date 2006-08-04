@@ -14,6 +14,12 @@
     
     <!-- user interface text messages -->
     <message-bundle>org.springframework.context.support.ReloadableResourcebundleMessagesource</message-bundle>
+
+    <!-- Tiles support.  This ViewHandler takes requests for *.jsp JSF views and processes them with their 
+         corresponding *.tiles definition (found in /WEB-INF/tiles.xml, or whatever the 'tiles-definition' 
+         context param defines in web.xml) -->
+    <view-handler>org.apache.myfaces.tomahawk.application.jsp.JspTilesViewHandlerImpl</view-handler>
+
   </application>
   
 
@@ -23,7 +29,7 @@
   
   <managed-bean>
     <description>
-      Backing bean for the reportException.jsp view, enabling exception stack traces to be viewed in
+      Backing bean for the reportException view, enabling exception stack traces to be viewed in
       a custom manner.
     </description>
     <managed-bean-name>exceptionReporter</managed-bean-name>
@@ -152,12 +158,24 @@
   
   <!-- Navigation rules -->
   
-  <!-- lastly, define the navigation rules that are applicable from *all* views (e.g. those that contain a navigation panel) -->
+  <!-- Note:  We are able to leave off the extension for the view defined in each <to-view-id>, 
+       since Tiles accepts and handles missing extensions.  This is kind of nice. Unfortunately, 
+       the <from-view-id> views require a ".jsp" extension, although intuitively one would like 
+       to use ".jsf".
+  -->
+  
+  <!-- define navigation rules that are applicable from *all* views (e.g. those that contain a navigation panel) -->
   <navigation-rule>
     <from-view-id>*</from-view-id>
     <navigation-case>
+      <from-outcome>goMain</from-outcome>
+      <to-view-id>/main</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>goImportScreenResult</from-outcome>
-      <to-view-id>/screenResultImporter.jsp</to-view-id>
+      <to-view-id>/screenResultImporter</to-view-id>
+      <redirect/>
     </navigation-case>
   </navigation-rule>
 
@@ -166,44 +184,44 @@
     <navigation-case>
       <from-action>#{main.createLibrary}</from-action>
       <from-outcome>success</from-outcome>
-      <to-view-id>/library.jsp</to-view-id>
+      <to-view-id>/library</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-action>#{main.viewSample1ScreenResult}</from-action>
       <from-outcome>success</from-outcome>
-      <to-view-id>/screenResultViewer.jsp</to-view-id>
+      <to-view-id>/screenResultViewer</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-action>#{main.viewSample2ScreenResult}</from-action>
       <from-outcome>success</from-outcome>
-      <to-view-id>/screenResultViewer.jsp</to-view-id>
+      <to-view-id>/screenResultViewer</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-action>#{main.findLibrary}</from-action>
       <from-outcome>found</from-outcome>
-      <to-view-id>/library.jsp</to-view-id>
+      <to-view-id>/library</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-action>#{main.findLibrary}</from-action>
       <from-outcome>found many</from-outcome>
-      <!--  TODO to-view-id>/libraries.jsp</to-view-id-->
-      <to-view-id>/main.jsp</to-view-id>
+      <!--  TODO to-view-id>/libraries</to-view-id-->
+      <to-view-id>/main</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-action>#{screenResultImporter.submit}</from-action>
       <from-outcome>success</from-outcome>
-      <to-view-id>/screenResultViewer.jsp</to-view-id>
+      <to-view-id>/screenResultViewer</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-action>#{screenResultImporter.submit}</from-action>
       <from-outcome>screenresult-parse-errors</from-outcome>
-      <to-view-id>/screenResultImporter.jsp</to-view-id>
+      <to-view-id>/screenResultImporter</to-view-id>
       <redirect/>
     </navigation-case>
   </navigation-rule>
@@ -212,19 +230,19 @@
     <from-view-id>/screenResultImporter.jsp</from-view-id>
     <navigation-case>
       <from-action>#{screenResultImporter.done}</from-action>
-      <to-view-id>/main.jsp</to-view-id>
+      <to-view-id>/main</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-action>#{screenResultImporter.submit}</from-action>
       <from-outcome>success</from-outcome>
-      <to-view-id>/screenResultViewer.jsp</to-view-id>
+      <to-view-id>/screenResultViewer</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-action>#{screenResultImporter.submit}</from-action>
       <from-outcome>screen-result-parse-errors</from-outcome>
-      <to-view-id>/screenResultImporter.jsp</to-view-id>
+      <to-view-id>/screenResultImporter</to-view-id>
     </navigation-case>
   </navigation-rule>
 
@@ -232,18 +250,18 @@
     <from-view-id>/library.jsp</from-view-id>
     <navigation-case>
       <from-outcome>cancel</from-outcome>
-      <to-view-id>/main.jsp</to-view-id>
+      <to-view-id>/main</to-view-id>
       <redirect /> 
     </navigation-case>
     <navigation-case>
       <!--from-action>...</from-action-->            
       <from-outcome>done</from-outcome>
-      <to-view-id>/main.jsp</to-view-id>
+      <to-view-id>/main</to-view-id>
       <redirect /> 
     </navigation-case>
     <navigation-case>
       <from-outcome>revert</from-outcome>
-      <to-view-id>/library.jsp</to-view-id>
+      <to-view-id>/library</to-view-id>
     </navigation-case>
   </navigation-rule>
   
@@ -251,25 +269,26 @@
     <from-view-id>/screenResultViewer.jsp</from-view-id>
     <navigation-case>
       <from-outcome>done</from-outcome>
-      <to-view-id>/main.jsp</to-view-id>
+      <to-view-id>/main</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-outcome>showWell</from-outcome>
-      <to-view-id>/well.jsp</to-view-id>
+      <to-view-id>/well</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-outcome>viewHeatMaps</from-outcome>
-      <to-view-id>/heatMapViewer.jsp</to-view-id>
+      <to-view-id>/heatMapViewer</to-view-id>
       <redirect/>
     </navigation-case>
   </navigation-rule>
   
   <navigation-rule>
-    <from-view-id>/well.jsp</from-view-id>
+    <from-view-id>/wellViewer.jsp</from-view-id>
     <navigation-case>
-      <to-view-id>/main.jsp</to-view-id>
+      <to-view-id>/main</to-view-id>
+      <redirect/>
     </navigation-case>
   </navigation-rule>
 
@@ -277,7 +296,7 @@
     <from-view-id>/heatMapViewer.jsp</from-view-id>
     <navigation-case>
       <from-outcome>done</from-outcome>
-      <to-view-id>/screenResultViewer.jsp</to-view-id>
+      <to-view-id>/screenResultViewer</to-view-id>
       <redirect/>
     </navigation-case>
   </navigation-rule>

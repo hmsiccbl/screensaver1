@@ -14,8 +14,15 @@
   <welcome-file-list>
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
-
-
+  
+  <!-- Configure a handler for exceptions thrown during server-side processing
+  -->
+  <error-page>
+    <error-code>500</error-code>
+    <location>/reportException.jsp</location>
+  </error-page>
+  
+  
   <!-- Spring initialization -->
   
   <!-- Specify Spring context configuration files, possibly one per application tier. -->
@@ -40,17 +47,15 @@
 
   <servlet-mapping>
     <servlet-name>Faces Servlet</servlet-name>
-    <!-- TODO: a url-pattern of "/*" does not work (JSF generates a stack fault) -->
-    <url-pattern>/jsf/*</url-pattern>
+    <!-- the types of URLs to handle as JSF pages -->
+    <url-pattern>*.jsf</url-pattern>
   </servlet-mapping>
+  
+  <!-- MyFaces initialization is performed by this servlet context listener -->
+  <listener>
+    <listener-class>org.apache.myfaces.webapp.StartupServletContextListener</listener-class>
+  </listener>
 
-  <!-- Configure a handler for exceptions thrown during server-side processing
-  -->
-  <error-page>
-    <error-code>500</error-code>
-    <location>/reportException.jsp</location>
-  </error-page>
- 
   <context-param>
     <description>
       Comma separated list of URIs of (additional) faces config
@@ -163,13 +168,9 @@
     <param-value>true</param-value>
   </context-param>  
   
+  <!-- JSF Apache Tomahawk configuration (MyFaces extended components, w/ "t:" prefix)
+    (see http://myfaces.apache.org/tomahawk/extensionsFilter.html) -->
 
-  <listener>
-    <listener-class>org.apache.myfaces.webapp.StartupServletContextListener</listener-class>
-  </listener>
-
-  <!-- JSF Apache Tomahawk configuration (extended components w/ "t:" prefix)
-  -http://myfaces.apache.org/tomahawk/extensionsFilter.html -->
   <filter>
     <filter-name>MyFacesExtensionsFilter</filter-name>
     <filter-class>org.apache.myfaces.webapp.filter.ExtensionsFilter</filter-class>
@@ -192,7 +193,20 @@
     <filter-name>MyFacesExtensionsFilter</filter-name>
     <url-pattern>/faces/myFacesExtensionResource/*</url-pattern>
   </filter-mapping>
+  
+  
+  <!-- Tiles configuration -->
 
+  <!-- Tiles ViewHandler config file.  The file specified here contains the application's various "tiles" definitions for each page. -->
+  <context-param>
+         <description>
+           Tiles configuration definition files and a listener need to be defined. The listener will
+           initialize JspTilesViewHandlerImpl with our tiles definitions.
+         </description>
+         <param-name>tiles-definitions</param-name>
+         <param-value>/WEB-INF/tiles.xml</param-value>
+  </context-param>
+  
   
   <!-- JSP Configuration -->
   

@@ -233,7 +233,9 @@
       to provide an explicit mapping for each .tld file in our web.xml <jsp-config> element -->  
       <fileset dir="web/taglib"/>
       <fileset dir="web">
+        <include name="*.dtd" />
         <include name="web.xml" />
+        <include name="tiles.xml" />
         <include name="faces-config.xml"/> 
        </fileset> 
     </copy>

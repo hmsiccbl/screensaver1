@@ -6,23 +6,23 @@ body {
   background-color: #ffffff;
 }
 
-h1,
-.title {
+h1,.title {
   font-size: x-large;
   font-weight: bold;
 }
 
-h2,
-.sectionHeader {
+h2,.sectionHeader {
   font-weight: bold;
   font-variant: small-caps;
   font-size: large;
 }
 
-a,
-a:link,
-a:visited,
-a:active {
+.footer {
+  color: graytext;
+  font-size: small;
+}
+
+a,a:link,a:visited,a:active {
   color: #000000;
   background-color: inherit;
 }
@@ -56,9 +56,7 @@ hr {
   border-collapse: collapse;
 }
 
-.command,
-.input,
-.inputLabel {
+.command,.input,.inputLabel {
   margin-right: 4px;
   color: inherit;
 }
@@ -95,44 +93,37 @@ hr {
   font-weight: bold;
 }
 
-.navPanelColumn, 
-.contentColumn {
+.menuColumn,.contentColumn {
   vertical-align: top;
 }
 
-.navPanelColumn {
-  width: 240px;
-  background-color: green;
+.menuColumn {
+  width: 220px;
+  background-color: blue;
   color: white;
   font-size: small;
-  min-height: 1024px;
 }
 
-.navMenuItem,
-.navMenuItemActive {
+.menuItem,.menuItemActive {
   color: white;
 }
 
-.navMenuItemActive {
+.menuItemActive {
   font-weight: bold;
 }
 
-a.navMenuItem:link,
-a.navMenuItem:visited,
-a.navMenuItemActive:link,
-a.navMenuItemActive:visited {
+a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited {
   color: white;
   text-decoration: none;
 }
 
-a.navMenuItem:hover, 
-a.navMenuItemActive:hover {
+a.menuItem:hover,a.menuItemActive:hover {
   color: white;
   font-weight: bold;
   text-decoration: underline;
 }
 
 .navSeparator {
-    line-height: 12px;
-    border-bottom: 1px solid white;
+  line-height: 12px;
+  border-bottom: 1px solid white;
 }

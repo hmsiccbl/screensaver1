@@ -29,8 +29,8 @@ Directory Contents
 
 .settings/        The Eclipse .settings directory.
 
-build/            Destination for exploded WAR, JAR, and EAR files (the project 
-                  only builds a WAR file currently).
+build/            Destination for WAR, JAR, and EAR files (etc.), along with their 
+                  respective exploded directories.
                   
 jsp/              JavaServer Pages files.  Defines web application user interface.                  
 

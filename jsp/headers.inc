@@ -1,6 +1,4 @@
-<%@ page 
-  contentType="text/html; charset=ISO-8859-1"
-%>
+<%@ page contentType="text/html;charset=UTF-8" language="java"%>
 
 <%-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
@@ -10,15 +8,8 @@
 <%--@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" --%>
 <%-- The Apache Tomahawk JSF components --%>
 <%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
-
+<%-- Tiles --%>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
 
-  <head>
-    <%--base href="<%=basePath%>"--%>
-    <title>Screensaver</title>
-    <link rel="stylesheet" type="text/css" href="css/screensaver.css" />
-  </head>
-
-  <body>

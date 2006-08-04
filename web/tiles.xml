@@ -1,0 +1,85 @@
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 1.1//EN"
+       "http://struts.apache.org/dtds/tiles-config_1_1.dtd">
+
+<!-- 
+  One definition per view/page.
+  "name" attribute of definition tag is inferred from the requested *.jsp URL.
+  "put" elements define the parameters that are used to generate an instance of the referenced template.
+-->
+
+
+<tiles-definitions>
+
+  <!-- The base definition, defining common attributes for our "concrete" definitions, below -->
+  <definition
+    name=".base"
+    path="/template.jsp">
+    <put
+      name="title"
+      type="string"
+      value="Screensaver" />
+    <put
+      name="menu"
+      value="/menu.jsp" />
+  </definition>
+  
+  <!-- Concrete definitions -->
+
+  <definition
+    name="/main.tiles"
+    extends=".base">
+    <put
+      name="body"
+      value="/main.jsp" />
+  </definition>
+  
+  <definition
+    name="/screenResultImporter.tiles"
+    extends=".base">
+    <put
+      name="body"
+      value="/screenResultImporter.jsp" />
+  </definition>
+
+  <definition
+    name="/screenResultViewer.tiles"
+    extends=".base">
+    <put
+      name="body"
+      value="/screenResultViewer.jsp" />
+  </definition>
+
+  <definition
+    name="/heatMapViewer.tiles"
+    extends=".base">
+    <put
+      name="body"
+      value="/heatMapViewer.jsp" />
+  </definition>
+  
+  <definition
+    name="/wellViewer.tiles"
+    extends=".base">
+    <put
+      name="body"
+      value="/wellViewer.jsp" />
+  </definition>
+  
+  <definition
+    name="/env.tiles"
+    extends=".base">
+    <put
+      name="body"
+      value="/env.jsp" />
+  </definition>
+  
+  <definition
+    name="/debugInfo.tiles"
+    extends=".base">
+    <put
+      name="body"
+      value="/env.jsp" />
+  </definition>
+  
+</tiles-definitions>
