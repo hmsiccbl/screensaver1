@@ -369,7 +369,7 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
   }
 
   /**
-   * test that existing wells, silencing reagents, and genes are appropriately reused
+   * test that previously loaded wells, silencing reagents, and genes are appropriately reused.
    * test:
    * <ol>
    * <li> duplicate well/sr/gene
