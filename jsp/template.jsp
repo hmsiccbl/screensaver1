@@ -19,13 +19,13 @@
     <t:documentHead>
       <f:verbatim>
         <meta http-equiv="Content-Type" content="text/html;CHARSET=iso-8859-1" />
-        <title>Title</title>
+        <title><t:outputText value="#{main.applicationTitle}"/></title>
         <link rel="stylesheet" type="text/css" href="css/screensaver.css" />
       </f:verbatim>
     </t:documentHead>
 
     <t:documentBody>
-      <t:panelGrid id="menuAndBodyPanel" columns="2" style="table-layout: fixed"
+      <t:panelGrid id="menuAndBodyPanel" columns="2" style="table-layout: fixed; overflow: scroll"
         columnClasses="menuColumn,contentColumn">
         <tiles:insert attribute="menu" flush="false" />
         <tiles:insert attribute="body" flush="false" />
@@ -33,7 +33,7 @@
 
       <t:div style="text-align: center">
         <t:htmlTag value="hr"/>
-        <h:outputText value="Screensaver 1.0 | "/>
+        <h:outputText value="#{main.applicationTitle} | "/>
         <h:outputLink value="http://iccb.med.harvard.edu">
           <h:outputText value="Harvard Medical School: ICCB-Longwood" />
         </h:outputLink>

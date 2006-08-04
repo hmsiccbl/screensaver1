@@ -58,7 +58,6 @@ hr {
 
 .command,.input,.inputLabel {
   margin-right: 4px;
-  color: inherit;
 }
 
 .column,.keyColumn {
@@ -98,7 +97,6 @@ hr {
 }
 
 .menuColumn {
-  width: 220px;
   background-color: blue;
   color: white;
   font-size: small;
@@ -119,7 +117,6 @@ a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visite
 
 a.menuItem:hover,a.menuItemActive:hover {
   color: white;
-  font-weight: bold;
   text-decoration: underline;
 }
 

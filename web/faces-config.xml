@@ -155,6 +155,17 @@
     <managed-bean-scope>session</managed-bean-scope>
   </managed-bean>
 
+  <managed-bean>
+    <description>Login form backing bean</description>
+    <managed-bean-name>login</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.LoginController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
+    </managed-property>
+  </managed-bean>
+
   
   <!-- Navigation rules -->
   
@@ -169,6 +180,7 @@
     <from-view-id>*</from-view-id>
     <navigation-case>
       <from-outcome>goMain</from-outcome>
+      <from-outcome>goLogout</from-outcome>
       <to-view-id>/main</to-view-id>
       <redirect/>
     </navigation-case>

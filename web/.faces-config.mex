@@ -4,15 +4,15 @@
   <JSFFlowResource path="*" location="30,330" dimension="54,36" />
   <JSFFlowResource path="/main" location="180,330" dimension="107,36" />
   <JSFFlowResource path="/screenResultImporter" location="480,330" dimension="299,36" />
+  <JSFFlowResource path="/main.jsp" location="520,100" dimension="106,36" />
   <JSFFlowResource path="/library" location="30,130" dimension="126,36" />
   <JSFFlowResource path="/screenResultViewer" location="330,130" dimension="277,36" />
-  <JSFFlowResource path="/well" location="480,430" dimension="97,36" />
-  <JSFFlowResource path="/heatMapViewer" location="30,530" dimension="229,36" />
-  <JSFFlowResource path="/main.jsp" location="520,100" dimension="106,36" />
   <JSFFlowResource path="/screenResultImporter.jsp" location="330,230" dimension="221,36" />
   <JSFFlowResource path="/library.jsp" location="860,100" dimension="111,36" />
   <JSFFlowResource path="/screenResultViewer.jsp" location="30,230" dimension="209,36" />
-  <JSFFlowResource path="/well.jsp" location="880,660" dimension="99,36" />
+  <JSFFlowResource path="/well" location="480,430" dimension="97,36" />
+  <JSFFlowResource path="/heatMapViewer" location="30,530" dimension="229,36" />
+  <JSFFlowResource path="/wellViewer.jsp" location="30,430" dimension="213,36" />
   <JSFFlowResource path="/heatMapViewer.jsp" location="180,130" dimension="267,36" />
   <JSFFlowNavigationCase id="*,/main,goMain,null" routingType="0">
     <AutomaticBendpoints>
@@ -23,9 +23,9 @@
   <JSFFlowNavigationCase id="*,/screenResultImporter,goImportScreenResult,null" routingType="0">
     <AutomaticBendpoints>
       <AbsolutePoint location="57,330" />
-      <AbsolutePoint location="57,288" />
-      <AbsolutePoint location="560,288" />
-      <AbsolutePoint location="560,330" />
+      <AbsolutePoint location="57,318" />
+      <AbsolutePoint location="614,318" />
+      <AbsolutePoint location="614,330" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
   <JSFFlowNavigationCase id="/main.jsp,/library,success,#{main.createLibrary}" routingType="0">
@@ -37,55 +37,55 @@
   </JSFFlowNavigationCase>
   <JSFFlowNavigationCase id="/main.jsp,/screenResultViewer,success,#{main.viewSample1ScreenResult}" routingType="0">
     <AutomaticBendpoints>
-      <AbsolutePoint location="614,136" />
-      <AbsolutePoint location="614,148" />
-      <AbsolutePoint location="607,148" />
+      <AbsolutePoint location="520,118" />
+      <AbsolutePoint location="483,118" />
+      <AbsolutePoint location="483,130" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
   <JSFFlowNavigationCase id="/main.jsp,/screenResultViewer,success,#{main.viewSample2ScreenResult}" routingType="0">
     <AutomaticBendpoints>
-      <AbsolutePoint location="520,118" />
-      <AbsolutePoint location="468,118" />
-      <AbsolutePoint location="468,130" />
+      <AbsolutePoint location="573,100" />
+      <AbsolutePoint location="573,62" />
+      <AbsolutePoint location="453,62" />
+      <AbsolutePoint location="453,130" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
   <JSFFlowNavigationCase id="/main.jsp,/library,found,#{main.findLibrary}" routingType="0">
     <AutomaticBendpoints>
-      <AbsolutePoint location="573,100" />
-      <AbsolutePoint location="573,73" />
-      <AbsolutePoint location="93,73" />
-      <AbsolutePoint location="93,130" />
+      <AbsolutePoint location="588,100" />
+      <AbsolutePoint location="588,32" />
+      <AbsolutePoint location="78,32" />
+      <AbsolutePoint location="78,130" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
   <JSFFlowNavigationCase id="/main.jsp,/main,found many,#{main.findLibrary}" routingType="0">
     <AutomaticBendpoints>
-      <AbsolutePoint location="626,118" />
-      <AbsolutePoint location="707,118" />
-      <AbsolutePoint location="707,318" />
-      <AbsolutePoint location="231,318" />
+      <AbsolutePoint location="614,136" />
+      <AbsolutePoint location="614,303" />
+      <AbsolutePoint location="231,303" />
       <AbsolutePoint location="231,330" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
   <JSFFlowNavigationCase id="/main.jsp,/screenResultViewer,success,#{screenResultImporter.submit}" routingType="0">
     <AutomaticBendpoints>
-      <AbsolutePoint location="626,133" />
-      <AbsolutePoint location="662,133" />
-      <AbsolutePoint location="662,163" />
-      <AbsolutePoint location="607,163" />
+      <AbsolutePoint location="558,100" />
+      <AbsolutePoint location="558,77" />
+      <AbsolutePoint location="468,77" />
+      <AbsolutePoint location="468,130" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
   <JSFFlowNavigationCase id="/main.jsp,/screenResultImporter,screenresult-parse-errors,#{screenResultImporter.submit}" routingType="0">
     <AutomaticBendpoints>
-      <AbsolutePoint location="626,103" />
-      <AbsolutePoint location="722,103" />
-      <AbsolutePoint location="722,330" />
+      <AbsolutePoint location="626,118" />
+      <AbsolutePoint location="633,118" />
+      <AbsolutePoint location="633,330" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
   <JSFFlowNavigationCase id="/screenResultImporter.jsp,/main,null,#{screenResultImporter.done}" routingType="0">
     <AutomaticBendpoints>
-      <AbsolutePoint location="440,266" />
-      <AbsolutePoint location="440,348" />
-      <AbsolutePoint location="287,348" />
+      <AbsolutePoint location="330,248" />
+      <AbsolutePoint location="261,248" />
+      <AbsolutePoint location="261,330" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
   <JSFFlowNavigationCase id="/screenResultImporter.jsp,/screenResultViewer,success,#{screenResultImporter.submit}" routingType="0">
@@ -102,26 +102,26 @@
   </JSFFlowNavigationCase>
   <JSFFlowNavigationCase id="/library.jsp,/main,cancel,null" routingType="0">
     <AutomaticBendpoints>
-      <AbsolutePoint location="915,136" />
-      <AbsolutePoint location="915,273" />
-      <AbsolutePoint location="246,273" />
-      <AbsolutePoint location="246,330" />
+      <AbsolutePoint location="930,136" />
+      <AbsolutePoint location="930,273" />
+      <AbsolutePoint location="216,273" />
+      <AbsolutePoint location="216,330" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
   <JSFFlowNavigationCase id="/library.jsp,/main,done,null" routingType="0">
     <AutomaticBendpoints>
-      <AbsolutePoint location="930,136" />
-      <AbsolutePoint location="930,303" />
-      <AbsolutePoint location="216,303" />
-      <AbsolutePoint location="216,330" />
+      <AbsolutePoint location="915,136" />
+      <AbsolutePoint location="915,203" />
+      <AbsolutePoint location="246,203" />
+      <AbsolutePoint location="246,330" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
   <JSFFlowNavigationCase id="/library.jsp,/library,revert,null" routingType="0">
     <AutomaticBendpoints>
-      <AbsolutePoint location="900,136" />
-      <AbsolutePoint location="900,193" />
-      <AbsolutePoint location="93,193" />
-      <AbsolutePoint location="93,166" />
+      <AbsolutePoint location="915,100" />
+      <AbsolutePoint location="915,47" />
+      <AbsolutePoint location="93,47" />
+      <AbsolutePoint location="93,130" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
   <JSFFlowNavigationCase id="/screenResultViewer.jsp,/main,done,null" routingType="0">
@@ -146,12 +146,10 @@
       <AbsolutePoint location="30,548" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
-  <JSFFlowNavigationCase id="/well.jsp,/main,null,null" routingType="0">
+  <JSFFlowNavigationCase id="/wellViewer.jsp,/main,null,null" routingType="0">
     <AutomaticBendpoints>
-      <AbsolutePoint location="930,660" />
-      <AbsolutePoint location="930,373" />
-      <AbsolutePoint location="233,373" />
-      <AbsolutePoint location="233,366" />
+      <AbsolutePoint location="187,430" />
+      <AbsolutePoint location="187,366" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
   <JSFFlowNavigationCase id="/heatMapViewer.jsp,/screenResultViewer,done,null" routingType="0">

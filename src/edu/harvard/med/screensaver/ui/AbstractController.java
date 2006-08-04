@@ -9,10 +9,9 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import javax.faces.application.Application;
 import javax.faces.component.UIComponent;
@@ -42,7 +41,6 @@ public abstract class AbstractController implements ScreensaverConstants
   // private data members
   
   private Messages _messages;
-  private FacesContext _cachedFacesContext;
 
 
   // bean property methods
@@ -67,11 +65,7 @@ public abstract class AbstractController implements ScreensaverConstants
   
   public FacesContext getFacesContext()
   {
-    if (true/*_cachedFacesContext == null*/) {
-      _cachedFacesContext = FacesContext.getCurrentInstance();
-    }
-    
-    return _cachedFacesContext;
+    return FacesContext.getCurrentInstance();
   }
   
   public Application getApplicationContext()
@@ -105,6 +99,24 @@ public abstract class AbstractController implements ScreensaverConstants
     "last accessed time: " + getHttpSession().getLastAccessedTime();
   }
 
+//  // The "JSF way" to get a message (ignores Spring)
+//  public String getMessage(String messageKey)
+//  {
+//    String text = null;
+//    try {
+//      ResourceBundle bundle =
+//        // TODO: parameterize bundle name
+//        ResourceBundle.getBundle("messages",
+//                                 getFacesContext().getViewRoot().getLocale());
+//      text = bundle.getString(messageKey);
+//    } catch (Exception e) {
+//      log.error("message key '" + messageKey + "' not found");
+//      text = "???" + messageKey + "???";
+//    }
+//    return text;
+//  } 
+
+
   /**
    * Adds the message of the specified key to the specified component. Any
    * request parameters that have a name of the form "<componentId>MessageParam*"
@@ -118,20 +130,21 @@ public abstract class AbstractController implements ScreensaverConstants
    */
   public void setMessage(String messageKey, String componentId)
   {
-    List<Object> messageParams = new ArrayList<Object>();
-    Map requestMap = getFacesContext().getExternalContext().getRequestMap();
-    for (Iterator iter = requestMap.keySet().iterator(); iter.hasNext();) {
-      String paramName = (String) iter.next();
-      log.debug("inspecting param " + paramName);
-      if (paramName.startsWith(componentId + "MessageParam")) {
-        log.debug("found param " + paramName);
-        Object paramValue = (Object) requestMap.get(paramName);
-        messageParams.add(paramValue);
-      }
-    }
+    // TODO: this parameter stuff ain't workin'
+//    List<Object> messageParams = new ArrayList<Object>();
+//    Map requestMap = getFacesContext().getExternalContext().getRequestMap();
+//    for (Iterator iter = requestMap.keySet().iterator(); iter.hasNext();) {
+//      String paramName = (String) iter.next();
+//      log.debug("inspecting param " + paramName);
+//      if (paramName.startsWith(componentId + "MessageParam")) {
+//        log.debug("found param " + paramName);
+//        Object paramValue = (Object) requestMap.get(paramName);
+//        messageParams.add(paramValue);
+//      }
+//    }
     String clientId = getClientId(findComponent(componentId));
     _messages.setFacesMessageForComponent(messageKey, 
-                                          messageParams.toArray(), 
+                                          null, // messageParams.toArray(),
                                           clientId);
   }
   
@@ -165,6 +178,10 @@ public abstract class AbstractController implements ScreensaverConstants
   
   private UIComponent doFindComponent(UIComponent container, String componentId)
   {
+    if (componentId == null) {
+      return null;
+    }
+       
     if (componentId.equals(container.getId())) {
       return container;
     }
