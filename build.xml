@@ -277,7 +277,7 @@
       <fileset refid="test.model.src.fileset"/>
       <hibernatecfg
         version="3.0" 
-        showsql="true"
+        showsql="false"
         driver="org.postgresql.Driver"
         jdbcurl="jdbc:postgresql://localhost/${app.name}"
         username="${app.name}"
