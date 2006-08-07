@@ -19,8 +19,8 @@
   </bean>
   
   <bean 
-    id="rnaiLibraryContentsLoader"
-    class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsLoader"
+    id="rnaiLibraryContentsParser"
+    class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser"
     singleton="false"
   >
     <constructor-arg ref="dao"/>
