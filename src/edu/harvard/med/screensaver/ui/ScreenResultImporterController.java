@@ -107,7 +107,7 @@ public class ScreenResultImporterController extends AbstractController
       }
 
       if (screenResult == null) {
-        setMessage("badUploadedFile",
+        showMessage("badUploadedFile",
                    "uploadScreenResultFile");
         return REDISPLAY_PAGE_ACTION_RESULT;
       }

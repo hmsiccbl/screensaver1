@@ -12,8 +12,6 @@ package edu.harvard.med.screensaver.ui;
 import java.io.File;
 import java.util.List;
 
-import javax.faces.application.FacesMessage;
-
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.screenresult.ScreenResultParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -144,11 +142,9 @@ public class MainController extends AbstractController
         "libraryName",
         _libraryNamePattern);
     if (librariesFound.size() == 0) {
-      FacesMessage msg =
-        getMessages().setFacesMessageForComponent("libraryPatternNotFound",
-                                                  new Object[] {_libraryNamePattern},
-                                                  "queryForm");
-      log.debug(msg.getDetail());
+      showMessage("libraryPatternNotFound",
+                 new Object[] {_libraryNamePattern},
+                 "queryForm");
       return REDISPLAY_PAGE_ACTION_RESULT; // return to same view
     }
     else if (librariesFound.size() == 1) {
@@ -158,11 +154,9 @@ public class MainController extends AbstractController
       return "found";
     }
     else {
-      FacesMessage msg =
-        getMessages().setFacesMessageForComponent("multipleLibrariesFoundForPattern",
-                                                  new Object[] {_libraryNamePattern},
-                                                  "queryForm");
-      log.debug(msg.getDetail());
+      showMessage("multipleLibrariesFoundForPattern",
+                 new Object[] {_libraryNamePattern},
+                 "queryForm");
       // TODO: show all libraries in a table
       // _libraryListController.setLibraries(librariesFound);
       // return "found many";

@@ -398,8 +398,8 @@ public class ScreenResultViewerController extends AbstractController
     }
     catch (IOException e)
     {
-      e.printStackTrace();
-      // TODO
+      showMessage("systemError");
+      log.error(e.getMessage());
     }
     finally {
       IOUtils.closeQuietly(out);

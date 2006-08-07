@@ -11,7 +11,11 @@ package edu.harvard.med.screensaver;
 
 public interface ScreensaverConstants
 {
-  public String APPLICATION_TITLE = "Screensaver 1.0";
+  // static data members
+  
+  public String APPLICATION_NAME = "Screensaver";
+  public String APPLICATION_VERSION = "1.0";
+  public String APPLICATION_TITLE = APPLICATION_NAME + " " + APPLICATION_VERSION;
 
   
   // JSF Action Results 

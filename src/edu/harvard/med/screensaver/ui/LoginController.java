@@ -47,7 +47,7 @@ public class LoginController extends AbstractController
   
   public String login()
   {
-    setMessage("invalidCredentials", null);
+    showMessage("invalidCredentials", null);
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
