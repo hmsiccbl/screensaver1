@@ -180,6 +180,10 @@
     <from-view-id>*</from-view-id>
     <navigation-case>
       <from-outcome>goMain</from-outcome>
+      <to-view-id>/main</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>goLogout</from-outcome>
       <to-view-id>/main</to-view-id>
       <redirect/>
