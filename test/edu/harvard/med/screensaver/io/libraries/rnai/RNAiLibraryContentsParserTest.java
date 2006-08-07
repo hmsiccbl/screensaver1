@@ -32,12 +32,12 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 
 
-public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
+public class RNAiLibraryContentsParserTest extends AbstractSpringTest
 {
 
   // static fields
   
-  private static final Logger log = Logger.getLogger(RNAiLibraryContentsLoaderTest.class);
+  private static final Logger log = Logger.getLogger(RNAiLibraryContentsParserTest.class);
   private static final File TEST_INPUT_FILE_DIR =
     new File("test/edu/harvard/med/screensaver/io/libraries/rnai");
   

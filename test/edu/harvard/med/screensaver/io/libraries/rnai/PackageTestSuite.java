@@ -27,6 +27,6 @@ public class PackageTestSuite extends TestSuite
 
   public PackageTestSuite()
   {
-    addTestSuite(RNAiLibraryContentsLoaderTest.class);
+    addTestSuite(RNAiLibraryContentsParserTest.class);
   }
 }
