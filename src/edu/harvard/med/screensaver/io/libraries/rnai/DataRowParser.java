@@ -130,7 +130,6 @@ public class DataRowParser
     }
     for (SilencingReagent silencingReagent : silencingReagents) {
       well.addSilencingReagent(silencingReagent);
-      log.info("sr count = " + well.getSilencingReagents().size());
     }
   }
 
@@ -165,15 +164,9 @@ public class DataRowParser
     if (wellName.equals("")) {
       return null;
     }
-    log.info("get well for " + plateNumber + "-" + wellName);
     Well well = getExistingWell(plateNumber, wellName);
     if (well == null) {
-      log.info("no existing well!");
       well = new Well(_loader.getLibrary(), plateNumber, wellName);
-    }
-    else {
-      log.info("got well = " + well);
-      log.info("sr count = " + well.getSilencingReagents().size());
     }
     String vendorIdentifier = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.VENDOR_IDENTIFIER),
@@ -181,6 +174,7 @@ public class DataRowParser
     if (! (vendorIdentifier == null || vendorIdentifier.equals(""))) {
       well.setVendorIdentifier(vendorIdentifier);
     }
+    _loader.getDAO().persistEntity(well);
     return well;
   }
   
@@ -277,16 +271,19 @@ public class DataRowParser
       gene.setEntrezgeneSymbol(entrezgeneSymbol);
       gene.addGenbankAccessionNumber(genbankAccessionNumber);
       gene.setSpeciesName(geneInfo.getSpeciesName());
-      return gene;
     }
-    
-    // buildin tha gene
-    return new Gene(
-      geneInfo.getGeneName(),
-      entrezgeneId,
-      entrezgeneSymbol,
-      genbankAccessionNumber,
-      geneInfo.getSpeciesName());
+    else {
+      // buildin tha gene
+      gene = new Gene(
+        geneInfo.getGeneName(),
+        entrezgeneId,
+        entrezgeneSymbol,
+        genbankAccessionNumber,
+        geneInfo.getSpeciesName());      
+    }
+
+    _loader.getDAO().persistEntity(gene);
+    return gene;
   }
   
   /**
@@ -316,24 +313,28 @@ public class DataRowParser
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.SEQUENCES),
       _rowIndex).getString();
     if (sequences == null || sequences.equals("")) {
-      SilencingReagent silencingReagent =
-        getExistingSilencingReagent(gene, unknownSilencingReagentType, "");
-      if (silencingReagent == null) {
-        silencingReagent = new SilencingReagent(gene, unknownSilencingReagentType, "");
-      }
-      silencingReagents.add(silencingReagent);
+      silencingReagents.add(getSilencingReagent(gene, unknownSilencingReagentType, ""));
     }
     else {
       for (String sequence : sequences.split("[,;]")) {
-        SilencingReagent silencingReagent =
-          getExistingSilencingReagent(gene, silencingReagentType, sequence);
-        if (silencingReagent == null) {
-          silencingReagent = new SilencingReagent(gene, silencingReagentType, sequence);
-        }
-        silencingReagents.add(silencingReagent);        
+        silencingReagents.add(getSilencingReagent(gene, silencingReagentType, sequence));
       }
     }
     return silencingReagents;
+  }
+  
+  private SilencingReagent getSilencingReagent(
+    Gene gene,
+    SilencingReagentType silencingReagentType,
+    String sequence)
+  {
+    SilencingReagent silencingReagent =
+      getExistingSilencingReagent(gene, silencingReagentType, sequence);
+    if (silencingReagent == null) {
+      silencingReagent = new SilencingReagent(gene, silencingReagentType, sequence);
+    }
+    _loader.getDAO().persistEntity(silencingReagent);
+    return silencingReagent;
   }
   
   /**
