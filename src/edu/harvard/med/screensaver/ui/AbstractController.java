@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.ui;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 import javax.faces.application.Application;
 import javax.faces.component.UIComponent;

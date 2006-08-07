@@ -202,7 +202,8 @@ public static void main(String[] args) throws FileNotFoundException
         cleanOutputDirectory(metadataFileToParse.getParentFile());
         ScreenResult screenResult = screenResultParser.parse(metadataFileToParse,
                                                              app.isCommandLineFlagSet("ignorefilepaths"));
-        screenResultParser.outputErrorsInAnnotatedWorkbooks(ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
+        screenResultParser.outputErrorsInAnnotatedWorkbooks(null,
+                                                            ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
         if (app.isCommandLineFlagSet("wellstoprint")) {
           new ScreenResultPrinter(screenResult).print(app.getCommandLineOptionValue("wellstoprint", Integer.class));
         }
@@ -776,13 +777,23 @@ public static void main(String[] args) throws FileNotFoundException
    * 
    * @return a set of the <@link Workbook>s for which error-annotate workbooks
    *         (copies) were written out; the returned Workbooks will <i>not</i>
-   *         have the <code>savedFileExtension</code> append to their filenames
+   *         have the <code>savedFileExtension</code> append to their
+   *         filenames
+   * @param newDirectory the output directory; if null the workbook's original
+   *          file directory is used.
+   * @param newExtension the extension to use when saving the workbook,
+   *          replacing the workbook's original filename extension; if null
+   *          original filename extension is used. A leading period will added
+   *          iff it does not exist.
    * @throws IOException
    */
-  public Set<Workbook> outputErrorsInAnnotatedWorkbooks(String savedFileExtension) throws IOException
+  public Set<Workbook> outputErrorsInAnnotatedWorkbooks(
+    File newDirectory,
+    String newExtension) throws IOException
   {
     for (Workbook workbook : _errors.getWorkbooksWithErrors()) {
-      workbook.save(savedFileExtension);
+      workbook.save(newDirectory,
+                    newExtension);
     }
     return _errors.getWorkbooksWithErrors();
   }

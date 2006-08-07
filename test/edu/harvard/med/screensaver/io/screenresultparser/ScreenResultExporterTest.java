@@ -28,7 +28,8 @@ public class ScreenResultExporterTest extends AbstractSpringTest
     ScreenResult originalScreenResult  = screenResultParser.parse(new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "115.xls"));
     ScreenResultExporter exporter = new ScreenResultExporter();
     HSSFWorkbook workbook = exporter.build(originalScreenResult);
-    workbook.write(new FileOutputStream(new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "115.exported.xls")));
+    File exportedFile = File.createTempFile("115", ".exported.xls");
+    workbook.write(new FileOutputStream(exportedFile));
     
     // TODO: assert something!
   }

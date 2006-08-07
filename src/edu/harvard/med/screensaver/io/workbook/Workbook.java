@@ -16,6 +16,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import edu.harvard.med.screensaver.util.FileUtils;
+
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
@@ -108,16 +110,30 @@ public class Workbook
     return _workbookFile.getName();
   }
 
-  public File save(String copyExtension) throws IOException
+  /**
+   * Saves the Workbook, optionally to a new outputDirectory and/or optionally
+   * with a new file extension.
+   * 
+   * @param newDirectory the output directory; if null the workbook's original
+   *          file directory is used.
+   * @param newExtension the extension to use when saving the workbook,
+   *          replacing the workbook's original filename extension; if null
+   *          original filename extension is used. A leading period will added
+   *          iff it does not exist.
+   * @return the File the workbook was saved as
+   * @throws IOException
+   */
+  public File save(File newDirectory, String newExtension)
+    throws IOException
   {
-    if (copyExtension.startsWith(".")) {
-      copyExtension = copyExtension.substring(1);
-    }
-    String outputFileName = _workbookFile.getAbsoluteFile() + "." + copyExtension;
-    FileOutputStream out = new FileOutputStream(outputFileName);
+    File outputFile = FileUtils.modifyFileDirectoryAndExtension(_workbookFile,
+                                                                newDirectory,
+                                                                newExtension);
+    FileOutputStream out = new FileOutputStream(outputFile);
     _workbook.write(out);
     out.close();
-    log.info("saved workbook " + _workbookFile + " as " + outputFileName);
-    return new File(outputFileName);
+    log.info("saved workbook " + _workbookFile + " as " + outputFile);
+    return outputFile;
   }
+
 }

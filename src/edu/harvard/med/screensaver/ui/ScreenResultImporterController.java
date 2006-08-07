@@ -136,7 +136,8 @@ public class ScreenResultImporterController extends AbstractController
   public void downloadErrorAnnotatedWorkbookListener(ActionEvent event)
   {
     try {
-      Set<Workbook> workbooks = _screenResultParser.outputErrorsInAnnotatedWorkbooks(ERRORS_XLS_FILE_EXTENSION);
+      Set<Workbook> workbooks = _screenResultParser.outputErrorsInAnnotatedWorkbooks(null,
+                                                                                     ERRORS_XLS_FILE_EXTENSION);
       if (workbooks.size() != 1) {
         // TODO: output error message
         // should always be exactly 1, because we only accept all-in-one screen
