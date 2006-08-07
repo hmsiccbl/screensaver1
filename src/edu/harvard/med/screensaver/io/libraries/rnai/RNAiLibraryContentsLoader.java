@@ -36,11 +36,6 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
  * Loads the contents (either partial or complete) of an RNAi library
  * from an Excel spreadsheet.
  * 
- * TODO: don't create duplicate Well/SilencingReagent/Gene objects! requires a dao to check
- * database for existing records. (or maybe hibernate has a findOrCreate?)
- * 
- * TODO: handle singleton/asynch access issue
- * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class RNAiLibraryContentsLoader implements LibraryContentsLoader
