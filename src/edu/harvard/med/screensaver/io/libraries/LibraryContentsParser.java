@@ -15,21 +15,22 @@ import java.io.InputStream;
 import edu.harvard.med.screensaver.model.libraries.Library;
 
 /**
- * Loads library contents (either partial or complete) from an input
- * stream.
+ * Parses library contents (either partial or complete) from an input
+ * stream into the entity model.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public interface LibraryContentsLoader
+public interface LibraryContentsParser
 {
   
   /**
-   * Load library contents (either partial or complete) from an input
-   * stream into a library.
+   * Parse library contents (either partial or complete) from an input
+   * stream into a library into the entity model.
+   * 
    * @param library the library to load contents of
    * @param file the name of the file that contains the library contents
    * @param stream the input stream to load library contents from
    * @return the library with the contents loaded
    */
-  public Library loadLibraryContents(Library library, File file, InputStream stream);
+  public Library parseLibraryContents(Library library, File file, InputStream stream);
 }

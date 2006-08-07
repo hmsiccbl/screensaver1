@@ -29,7 +29,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 
 
 /**
- * Parses a single data row for the {@link RNAiLibraryContentsLoader}.
+ * Parses a single data row for the {@link RNAiLibraryContentsParser}.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -43,7 +43,7 @@ public class DataRowParser
   
   // private instance data
   
-  private RNAiLibraryContentsLoader _loader;
+  private RNAiLibraryContentsParser _parser;
   private RNAiLibraryColumnHeaders _columnHeaders;
   private HSSFRow _dataRow;
   private short _rowIndex;
@@ -56,20 +56,20 @@ public class DataRowParser
   
   /**
    * Construct a new <code>DataRowParser</code> object.
-   * @param loader the parent library contents loader
+   * @param parser the parent library contents loader
    * @param columnHeaders the column headers
    * @param dataRow the data row
    * @param rowIndex the index of the data row in the sheet
    * @param cellFactory the cell factory
    */
   public DataRowParser(
-    RNAiLibraryContentsLoader loader,
+    RNAiLibraryContentsParser parser,
     RNAiLibraryColumnHeaders columnHeaders,
     HSSFRow dataRow,
     short rowIndex,
     Factory cellFactory)
   {
-    _loader = loader;
+    _parser = parser;
     _columnHeaders = columnHeaders;
     _dataRow = dataRow;
     _rowIndex = rowIndex;
@@ -152,13 +152,13 @@ public class DataRowParser
    */
   private Well getWell()
   {
-    Integer plateNumber = _loader.getPlateNumberParser().parse(_cellFactory.getCell(
+    Integer plateNumber = _parser.getPlateNumberParser().parse(_cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.PLATE),
       _rowIndex));
     if (plateNumber == -1) {
       return null;
     }
-    String wellName = _loader.getWellNameParser().parse(_cellFactory.getCell(
+    String wellName = _parser.getWellNameParser().parse(_cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.WELL),
       _rowIndex));
     if (wellName.equals("")) {
@@ -166,7 +166,7 @@ public class DataRowParser
     }
     Well well = getExistingWell(plateNumber, wellName);
     if (well == null) {
-      well = new Well(_loader.getLibrary(), plateNumber, wellName);
+      well = new Well(_parser.getLibrary(), plateNumber, wellName);
     }
     String vendorIdentifier = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.VENDOR_IDENTIFIER),
@@ -174,13 +174,13 @@ public class DataRowParser
     if (! (vendorIdentifier == null || vendorIdentifier.equals(""))) {
       well.setVendorIdentifier(vendorIdentifier);
     }
-    _loader.getDAO().persistEntity(well);
+    _parser.getDAO().persistEntity(well);
     return well;
   }
   
   /**
    * Get an existing well from the database with the specified plate number and well name,
-   * and the library from the parent {@link RNAiLibraryContentsLoader}. Return null if no
+   * and the library from the parent {@link RNAiLibraryContentsParser}. Return null if no
    * such well exists in the database. 
    * @param plateNumber the plate number
    * @param wellName the well name
@@ -189,13 +189,13 @@ public class DataRowParser
    */
   private Well getExistingWell(Integer plateNumber, String wellName)
   {
-    Library library = _loader.getLibrary();
+    Library library = _parser.getLibrary();
     if (library.getLibraryId() == null) {
       return null;
     }
-    DAO dao = _loader.getDAO();
+    DAO dao = _parser.getDAO();
     Map<String,Object> propertiesMap = new HashMap<String,Object>();
-    propertiesMap.put("hbnLibrary", _loader.getLibrary());
+    propertiesMap.put("hbnLibrary", _parser.getLibrary());
     propertiesMap.put("plateNumber", plateNumber);
     propertiesMap.put("wellName", wellName);
     return dao.findEntityByProperties(Well.class, propertiesMap);
@@ -207,13 +207,13 @@ public class DataRowParser
    */
   private String getPlateWellAbbreviation()
   {
-    Integer plateNumber = _loader.getPlateNumberParser().parse(_cellFactory.getCell(
+    Integer plateNumber = _parser.getPlateNumberParser().parse(_cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.PLATE),
       _rowIndex));
     if (plateNumber == -1) {
       return null;
     }
-    String wellName = _loader.getWellNameParser().parse(_cellFactory.getCell(
+    String wellName = _parser.getWellNameParser().parse(_cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.WELL),
       _rowIndex));
     if (wellName.equals("")) {
@@ -259,7 +259,7 @@ public class DataRowParser
     
     // gene name and species name
     NCBIGeneInfo geneInfo =
-      _loader.getGeneInfoProvider().getGeneInfoForEntrezgeneId(entrezgeneId, entrezgeneIdCell);
+      _parser.getGeneInfoProvider().getGeneInfoForEntrezgeneId(entrezgeneId, entrezgeneIdCell);
     if (geneInfo == null) {
       return null;
     }
@@ -282,7 +282,7 @@ public class DataRowParser
         geneInfo.getSpeciesName());      
     }
 
-    _loader.getDAO().persistEntity(gene);
+    _parser.getDAO().persistEntity(gene);
     return gene;
   }
   
@@ -295,7 +295,7 @@ public class DataRowParser
    */
   private Gene getExistingGene(Integer entrezgeneId)
   {
-    return _loader.getDAO().findEntityByProperty(Gene.class, "entrezgeneId", entrezgeneId);
+    return _parser.getDAO().findEntityByProperty(Gene.class, "entrezgeneId", entrezgeneId);
   }
 
   /**
@@ -306,8 +306,8 @@ public class DataRowParser
   private Set<SilencingReagent> getSilencingReagents(Gene gene)
   {
     SilencingReagentType unknownSilencingReagentType =
-      _loader.getUnknownSilencingReagentType();
-    SilencingReagentType silencingReagentType = _loader.getSilencingReagentType();
+      _parser.getUnknownSilencingReagentType();
+    SilencingReagentType silencingReagentType = _parser.getSilencingReagentType();
     Set<SilencingReagent> silencingReagents = new HashSet<SilencingReagent>();
     String sequences = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.SEQUENCES),
@@ -333,7 +333,7 @@ public class DataRowParser
     if (silencingReagent == null) {
       silencingReagent = new SilencingReagent(gene, silencingReagentType, sequence);
     }
-    _loader.getDAO().persistEntity(silencingReagent);
+    _parser.getDAO().persistEntity(silencingReagent);
     return silencingReagent;
   }
   
@@ -354,7 +354,7 @@ public class DataRowParser
     if (gene.getGeneId() == null) {
       return null;
     }
-    DAO dao = _loader.getDAO();
+    DAO dao = _parser.getDAO();
     Map<String,Object> propertiesMap = new HashMap<String,Object>();
     propertiesMap.put("hbnGene", gene);
     propertiesMap.put("hbnSilencingReagentType", silencingReagentType);

@@ -44,7 +44,7 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
   
   // instance fields
   
-  protected RNAiLibraryContentsLoader rnaiLibraryContentsLoader;
+  protected RNAiLibraryContentsParser rnaiLibraryContentsParser;
   protected DAO dao;
   protected SchemaUtil schemaUtil;
   
@@ -68,8 +68,8 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
     catch (FileNotFoundException e) {
       fail("file not found: " + filename);
     }
-    library = rnaiLibraryContentsLoader.loadLibraryContents(library, file, stream);
-    List<ParseError> errors = rnaiLibraryContentsLoader.getErrors();
+    library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+    List<ParseError> errors = rnaiLibraryContentsParser.getErrors();
     assertEquals("workbook has 5 errors", 5, errors.size());
     ParseError error;
     
@@ -137,8 +137,8 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
     catch (FileNotFoundException e) {
       fail("file not found: " + filename);
     }
-    library = rnaiLibraryContentsLoader.loadLibraryContents(library, file, stream);
-    List<ParseError> errors = rnaiLibraryContentsLoader.getErrors();
+    library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+    List<ParseError> errors = rnaiLibraryContentsParser.getErrors();
     assertEquals("workbook has 9 errors", 9, errors.size());
     assertEquals("library has no wells", 0, library.getWells().size());
     ParseError error;
@@ -269,8 +269,8 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
     catch (FileNotFoundException e) {
       fail("file not found: " + filename);
     }
-    library = rnaiLibraryContentsLoader.loadLibraryContents(library, file, stream);
-    List<ParseError> errors = rnaiLibraryContentsLoader.getErrors();
+    library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+    List<ParseError> errors = rnaiLibraryContentsParser.getErrors();
     assertEquals("workbook has no errors", 0, errors.size());
     assertEquals("library has 5 wells", 5, library.getWells().size());
 
@@ -369,8 +369,8 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
         catch (FileNotFoundException e) {
           fail("file not found: " + filename);
         }
-        library = rnaiLibraryContentsLoader.loadLibraryContents(library, file, stream);
-        List<ParseError> errors = rnaiLibraryContentsLoader.getErrors();
+        library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+        List<ParseError> errors = rnaiLibraryContentsParser.getErrors();
         assertEquals("workbook has no errors", 0, errors.size());
         assertEquals("library has 5 wells", 5, library.getWells().size());
   
@@ -387,8 +387,8 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
         catch (FileNotFoundException e) {
           fail("file not found: " + filename);
         }
-        library = rnaiLibraryContentsLoader.loadLibraryContents(library, file, stream);
-        errors = rnaiLibraryContentsLoader.getErrors();
+        library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+        errors = rnaiLibraryContentsParser.getErrors();
         assertEquals("workbook has no errors", 0, errors.size());
         assertEquals("library has 7 wells", 7, library.getWells().size());
   
@@ -451,6 +451,7 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
 
   public void testHuman1()
   {
+    log.info("test human1 started at " + new java.util.Date());
     dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -465,7 +466,7 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
         catch (FileNotFoundException e) {
           fail("file not found: " + filename);
         }
-        library = rnaiLibraryContentsLoader.loadLibraryContents(library, file, stream);
+        library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
         Set<Well> wells = library.getWells();
 
         // this library has 779 wells according to
@@ -474,5 +475,6 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
         assertEquals("well count in Human1", 797, wells.size());
       }
     });
+    log.info("test human1 finished at " + new java.util.Date());
   }
 }

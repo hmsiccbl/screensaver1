@@ -19,7 +19,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader;
+import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
@@ -33,17 +33,17 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 
 
 /**
- * Loads the contents (either partial or complete) of an RNAi library
- * from an Excel spreadsheet.
+ * Parses the contents (either partial or complete) of an RNAi library
+ * from an Excel spreadsheet into the entity model.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class RNAiLibraryContentsLoader implements LibraryContentsLoader
+public class RNAiLibraryContentsParser implements LibraryContentsParser
 {
   
   // private static data
   
-  private static final Logger log = Logger.getLogger(RNAiLibraryContentsLoader.class);
+  private static final Logger log = Logger.getLogger(RNAiLibraryContentsParser.class);
   private static final SilencingReagentType DEFAULT_SILENCING_REAGENT_TYPE =
     SilencingReagentType.SIRNA;
   private static final SilencingReagentType DEFAULT_UNKNOWN_SILENCING_REAGENT_TYPE =
@@ -67,10 +67,10 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
   // public constructor and instance methods
   
   /**
-   * Construct a new <code>RNAiLibraryContentsLoader</code> object.
+   * Construct a new <code>RNAiLibraryContentsParser</code> object.
    * @param dao the data access object
    */
-  public RNAiLibraryContentsLoader(DAO dao)
+  public RNAiLibraryContentsParser(DAO dao)
   {
     _dao = dao;
   }
@@ -125,7 +125,7 @@ public class RNAiLibraryContentsLoader implements LibraryContentsLoader
    * @param stream the input stream to load library contents from
    * @return the library with the contents loaded
    */
-  public synchronized Library loadLibraryContents(
+  public synchronized Library parseLibraryContents(
     Library library,
     File file,
     InputStream stream)
