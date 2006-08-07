@@ -57,14 +57,14 @@
         <h:selectBooleanCheckbox id="showMetadataTableCheckbox"
           value="#{screenResultViewer.showMetadataTable}"
           valueChangeListener="#{screenResultViewer.showTableOptionListener}"
-          onclick="javascript:document.getElementById('dataForm:updateButton1').click()" />
+          onclick="javascript:document.getElementById('screenResultViewer:dataForm:updateButton1').click()" />
         <h:outputLabel for="showMetadataTableCheckbox" value="show" />
         <f:verbatim>)</f:verbatim>
       </h:panelGroup>
 
       <t:dataTable id="metadataTable" value="#{screenResultViewer.metadata}" var="row"
         rendered="#{screenResultViewer.showMetadataTable}" styleClass="standardTable"
-        headerClass="tableHeader" rowClasses="row1,row2" columnClasses="">
+        headerClass="tableHeader" rowClasses="row1,row2">
         <t:column styleClass="keyColumn">
           <f:facet name="header">
             <h:outputText value="Property" />
@@ -88,7 +88,7 @@
         <h:selectBooleanCheckbox id="showRawDataTableCheckbox"
           value="#{screenResultViewer.showRawDataTable}"
           valueChangeListener="#{screenResultViewer.showTableOptionListener}"
-          onclick="javascript:document.getElementById('dataForm:updateButton1').click()" />
+          onclick="javascript:document.getElementById('screenResultViewer:dataForm:updateButton1').click()" />
         <h:outputLabel for="showRawDataTableCheckbox" value="show" />
         <f:verbatim>)</f:verbatim>
       </h:panelGroup>
@@ -96,7 +96,7 @@
       <t:dataTable id="rawDataTable" binding="#{screenResultViewer.dataTable}"
         value="#{screenResultViewer.rawData}" var="row" rows="10"
         rendered="#{screenResultViewer.showRawDataTable}" styleClass="standardTable"
-        headerClass="tableHeader" rowClasses="row1,row2" columnClasses="">
+        headerClass="tableHeader" rowClasses="row1,row2">
         <t:column styleClass="keyColumn">
           <f:facet name="header">
             <h:outputText value="Plate" />
@@ -131,7 +131,7 @@
       <h:outputLabel for="plateNumber" value="Jump to plate:" />
       <h:selectOneMenu id="plateNumber" value="#{screenResultViewer.plateNumber}"
         binding="#{screenResultViewer.plateNumberInput}"
-        onchange="javascript:document.getElementById('navigationForm:updateButton2').click()"
+        onchange="javascript:document.getElementById('screenResultViewer:navigationForm:updateButton2').click()"
         valueChangeListener="#{screenResultViewer.plateNumberListener}"
         converter="PlateNumberSelectItemConverter" styleClass="input">
         <f:selectItems value="#{screenResultViewer.plateSelectItems}" />
