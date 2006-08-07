@@ -13,6 +13,8 @@
    - Content will need "<%@ include file="headers.inc" %>" as first line
 --%>
 
+<%-- Push component attributes defined in Tiles definitions into request context (scope="request" required for JSF integration) --%>
+<tiles:importAttribute scope="request" name="pageTitle" />
 
 <f:view>
   <t:document>
@@ -28,7 +30,10 @@
       <t:panelGrid id="menuAndBodyPanel" columns="2" style="table-layout: fixed; overflow: scroll"
         columnClasses="menuColumn,contentColumn">
         <tiles:insert attribute="menu" flush="false" />
-        <tiles:insert attribute="body" flush="false" />
+        <t:panelGrid id="bodyPanel" columns="1">
+          <tiles:insert attribute="header" flush="false" />
+          <tiles:insert attribute="body" flush="false" />
+        </t:panelGrid>
       </t:panelGrid>
 
       <t:div style="text-align: center">

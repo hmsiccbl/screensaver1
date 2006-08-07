@@ -16,9 +16,12 @@
     name=".base"
     path="/template.jsp">
     <put
-      name="title"
+      name="pageTitle"
       type="string"
       value="Screensaver" />
+    <put
+      name="header"
+      value="/header.jsp" />
     <put
       name="menu"
       value="/menu.jsp" />
@@ -29,6 +32,9 @@
   <definition
     name="/main.tiles"
     extends=".base">
+    <put 
+      name="pageTitle"
+      value="Welcome to Screensaver!"/>
     <put
       name="body"
       value="/main.jsp" />
@@ -38,6 +44,9 @@
     name="/screenResultImporter.tiles"
     extends=".base">
     <put
+      name="pageTitle"
+      value="Screen Result Importer and Error Viewer"/>
+    <put
       name="body"
       value="/screenResultImporter.jsp" />
   </definition>
@@ -45,6 +54,9 @@
   <definition
     name="/screenResultViewer.tiles"
     extends=".base">
+    <put
+      name="pageTitle"
+      value="Screen Result Viewer"/>
     <put
       name="body"
       value="/screenResultViewer.jsp" />
@@ -54,6 +66,9 @@
     name="/heatMapViewer.tiles"
     extends=".base">
     <put
+      name="pageTitle"
+      value="Screen Result Heat Map Viewer"/>
+    <put
       name="body"
       value="/heatMapViewer.jsp" />
   </definition>
@@ -61,6 +76,9 @@
   <definition
     name="/wellViewer.tiles"
     extends=".base">
+    <put
+      name="pageTitle"
+      value="Well Viewer"/>
     <put
       name="body"
       value="/wellViewer.jsp" />
@@ -70,13 +88,8 @@
     name="/env.tiles"
     extends=".base">
     <put
-      name="body"
-      value="/env.jsp" />
-  </definition>
-  
-  <definition
-    name="/debugInfo.tiles"
-    extends=".base">
+      name="pageTitle"
+      value="Screen Result Environment"/>
     <put
       name="body"
       value="/env.jsp" />

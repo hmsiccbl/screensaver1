@@ -2,15 +2,11 @@
 
 <f:subview id="well">
 
-  <h:form id="wellForm" title="Well Viewer">
+  <h:form id="wellForm">
 
     <h:panelGroup>
       <h:commandButton id="doneCommand" action="#{wellViewer.done}" value="Done" />
     </h:panelGroup>
-
-    <t:div />
-
-    <h:messages id="allMessages" globalOnly="false" showDetail="true" styleClass="errorMessage" />
 
     <t:div />
 

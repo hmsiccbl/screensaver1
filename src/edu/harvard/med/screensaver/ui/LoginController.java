@@ -16,6 +16,7 @@ public class LoginController extends AbstractController
   
   private String _userId;
   private String _password;
+  private boolean _disableAdministrativePrivileges;
 
   public String getAuthenticationIdDescription()
   {
@@ -42,12 +43,23 @@ public class LoginController extends AbstractController
     _userId = userId;
   }
   
+  public boolean isDisableAdministrativePrivileges()
+  {
+    return _disableAdministrativePrivileges;
+  }
+
+  public void setDisableAdministrativePrivileges(
+    boolean disableAdministrativePrivileges)
+  {
+    _disableAdministrativePrivileges = disableAdministrativePrivileges;
+  }
+
 
   // JSF application methods
   
   public String login()
   {
-    showMessage("invalidCredentials", null);
+    showMessage("invalidCredentials");
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   

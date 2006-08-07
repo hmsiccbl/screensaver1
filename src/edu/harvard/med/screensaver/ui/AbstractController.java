@@ -160,6 +160,21 @@ public abstract class AbstractController implements ScreensaverConstants
   }
   
   /**
+   * Adds the message of the specified key to the view (requires an h:messages
+   * JSF element in the view).
+   * 
+   * @param messageKey the key of the message to be shown
+   * @param messageArgs the args that will be used to parameterize this message
+   *          (replacing the "{0}", ..., "{n}" placeholders in the message
+   *          string)
+   * @return the FacesMessage that was set
+   */
+  public FacesMessage showMessage(String messageKey, Object[] messageArgs)
+  {
+    return showMessage(messageKey, messageArgs, null);
+  }
+  
+  /**
    * Adds the message of the specified key to the specified component. Any
    * request parameters that have a name of the form "<componentId>MessageParam*"
    * will be used to parameterize the messsage.
@@ -253,6 +268,35 @@ public abstract class AbstractController implements ScreensaverConstants
     UIComponent container = findComponent(parentId);
     return doFindComponent(container,
                            componentId);
+  }
+  
+  /**
+   * Report the provided error message via the appropriate communication
+   * channels, which are currently: stacktrace to standard error, error-level
+   * log message, and JSF view message (assumes an <code>h:messages</code>
+   * component exists).
+   * 
+   * @param errorMesssage the error message to report
+   */
+  public void reportSystemError(String errorMessage)
+  {
+    showMessage("systemError",
+                new Object[] {errorMessage});
+    log.error(errorMessage);
+  }
+
+  /**
+   * Report the provided Throwable via the appropriate communication channels,
+   * which are currently: stacktrace to standard error, error-level log message,
+   * and JSF view message (assumes an <code>h:messages</code> component
+   * exists).
+   * 
+   * @param throwable the Throwable to report
+   */
+  public void reportSystemError(Throwable throwable)
+  {
+    throwable.printStackTrace();
+    reportSystemError(throwable.getMessage());
   }
   
   

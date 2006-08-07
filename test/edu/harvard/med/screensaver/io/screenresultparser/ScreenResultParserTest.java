@@ -294,11 +294,11 @@ public class ScreenResultParserTest extends AbstractSpringTest
     File workbookFile = new File(TEST_INPUT_FILE_DIR, "metadata_with_errors.xls");
     screenResultParser.parse(workbookFile);
     String extension = "errors.xls";
-    Set<Workbook> errorAnnotatedWorkbookFiles = 
+    Map<Workbook,File> workbook2File =
       screenResultParser.outputErrorsInAnnotatedWorkbooks(new File(System.getProperty("java.io.tmpdir")),
                                                           extension);
 
-    for (Workbook workbook : errorAnnotatedWorkbookFiles) {
+    for (Workbook workbook : workbook2File.keySet()) {
       if (workbook.getWorkbookFile().equals(workbookFile))
       {
         // test metadata workbook

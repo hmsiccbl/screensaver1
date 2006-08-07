@@ -2,24 +2,6 @@
 
 <f:subview id="screenResultImporter">
 
-  <t:outputText styleClass="title" value="Screen Result Importer and Error Viewer" />
-
-  <h:form id="commandForm">
-    <h:panelGroup>
-      <%--h:commandButton id="doneCommand" immediate="true" action="#{screenResultImporter.done}" value="Done" styleClass="command" /--%>
-      <h:commandButton id="downloadCommand"
-        actionListener="#{screenResultImporter.downloadErrorAnnotatedWorkbookListener}"
-        value="Download Error-Annotated Workbook"
-        rendered="#{screenResultImporter.screenResultParser.hasErrors}" styleClass="command" />
-    </h:panelGroup>
-  </h:form>
-
-  <t:div />
-
-  <h:messages id="allMessages" globalOnly="false" showDetail="true" styleClass="errorMessage" />
-
-  <t:div />
-
   <h:panelGroup>
     <%@include file="screenResultUploader.jspf"%>
   </h:panelGroup>
@@ -77,5 +59,14 @@
     </t:dataScroller>
 
   </h:form>
+  
+  <h:form id="commandForm">
+    <h:commandButton id="downloadCommand"
+      actionListener="#{screenResultImporter.downloadErrorAnnotatedWorkbookListener}"
+      value="View Error-Annotated Workbook"
+      rendered="#{screenResultImporter.screenResultParser.hasErrors}" styleClass="command" />
+  </h:form>
+
+
 
 </f:subview>

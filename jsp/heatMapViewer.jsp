@@ -2,15 +2,11 @@
 
 <f:subview id="heatMapViewer">
 
-  <h:form id="dataForm" title="Screen Result Heat Map Viewer">
+  <h:form id="dataForm">
 
     <h:panelGroup>
       <h:commandButton id="doneCommand" action="done" value="Done" styleClass="command" />
     </h:panelGroup>
-
-    <t:div />
-
-    <h:messages id="allMessages" globalOnly="true" showDetail="true" styleClass="errorMessage" />
 
     <t:div />
 

@@ -1,9 +1,8 @@
 <%@ include file="headers.inc"%>
 
 <f:subview id="screenResultViewer">
-  <t:outputText styleClass="title" value="Screen Result Viewer" />
 
-  <h:form id="dataForm" title="Screen Result Viewer">
+  <h:form id="dataForm">
 
     <h:panelGroup>
       <h:commandButton action="#{screenResultViewer.download}" value="Download" styleClass="command" />
@@ -12,9 +11,7 @@
         styleClass="command" />
     </h:panelGroup>
 
-    <t:div />
-
-    <h:messages id="allMessages" globalOnly="true" showDetail="true" styleClass="errorMessage" />
+    <%@ include file="cherryPickUploader.jspf" %>
 
     <t:div />
 
@@ -30,7 +27,6 @@
       <h:outputLabel for="screenResultDateCreated" value="Shareable" styleClass="keyColumn" />
       <h:outputText id="screenResultIsShareable"
         value="#{screenResultViewer.screenResult.shareable}" />
-
     </h:panelGrid>
 
     <t:div />

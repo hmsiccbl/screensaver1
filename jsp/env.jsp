@@ -2,10 +2,6 @@
 
 <f:subview id="env">
 
-  <t:outputText value="Screensaver Environment Information" styleClass="title" />
-  
-  <t:div/>
-
   <t:outputText value="Database Connection Settings" styleClass="sectionHeader" />
   <h:panelGrid id="dbConfigPanel" columns="1">
     <h:outputText value="Host=#{envInfo.host}" />

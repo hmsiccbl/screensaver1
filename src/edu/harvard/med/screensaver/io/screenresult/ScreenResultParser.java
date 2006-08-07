@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -775,27 +774,27 @@ public static void main(String[] args) throws FileNotFoundException
    * containing errors are written. In fact, we simply save the workbooks, since
    * cells have already been modified in the in-memory representation.
    * 
-   * @return a set of the <@link Workbook>s for which error-annotate workbooks
-   *         (copies) were written out; the returned Workbooks will <i>not</i>
-   *         have the <code>savedFileExtension</code> append to their
-   *         filenames
    * @param newDirectory the output directory; if null the workbook's original
    *          file directory is used.
    * @param newExtension the extension to use when saving the workbook,
    *          replacing the workbook's original filename extension; if null
    *          original filename extension is used. A leading period will added
    *          iff it does not exist.
+   * @return a Map of the <@link Workbook>s for which error-annotate workbooks
+   *         (copies) were written out, mapped to their respective output file
    * @throws IOException
    */
-  public Set<Workbook> outputErrorsInAnnotatedWorkbooks(
+  public Map<Workbook,File> outputErrorsInAnnotatedWorkbooks(
     File newDirectory,
     String newExtension) throws IOException
   {
+    Map<Workbook,File> result = new HashMap<Workbook,File>();
     for (Workbook workbook : _errors.getWorkbooksWithErrors()) {
-      workbook.save(newDirectory,
-                    newExtension);
+      File file = workbook.save(newDirectory,
+                                newExtension);
+      result.put(workbook, file);
     }
-    return _errors.getWorkbooksWithErrors();
+    return result;
   }
   
   /**

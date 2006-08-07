@@ -12,7 +12,7 @@ package edu.harvard.med.screensaver.ui;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Set;
+import java.util.Map;
 
 import javax.faces.event.ActionEvent;
 import javax.faces.model.DataModel;
@@ -112,7 +112,7 @@ public class ScreenResultImporterController extends AbstractController
         return REDISPLAY_PAGE_ACTION_RESULT;
       }
       else if (_screenResultParser.getErrors().size() > 0) {
-        return "screenresult-parse-errors";
+        return ERROR_ACTION_RESULT;
       }
       else {
         _screenResultViewer.setScreenResult(screenResult);
@@ -120,8 +120,8 @@ public class ScreenResultImporterController extends AbstractController
       }
     }
     catch (IOException e) {
-      e.printStackTrace();
-      throw new RuntimeException("IOException during parse of uploaded file: " + e.getMessage());
+      reportSystemError(e);
+      return REDISPLAY_PAGE_ACTION_RESULT;
     }
     finally {
       if (tmpUploadedFile != null) {
@@ -135,23 +135,27 @@ public class ScreenResultImporterController extends AbstractController
 
   public void downloadErrorAnnotatedWorkbookListener(ActionEvent event)
   {
+    File errorAnnotatedWorkbookFile = null;
     try {
-      Set<Workbook> workbooks = _screenResultParser.outputErrorsInAnnotatedWorkbooks(null,
-                                                                                     ERRORS_XLS_FILE_EXTENSION);
-      if (workbooks.size() != 1) {
-        // TODO: output error message
-        // should always be exactly 1, because we only accept all-in-one screen
-        // result workbooks and we shouldn't be on this web page if no import
-        // errors occurred
+      Map<Workbook,File> workbook2File = _screenResultParser.outputErrorsInAnnotatedWorkbooks(null,
+                                                                                              ERRORS_XLS_FILE_EXTENSION);
+      if (workbook2File.size() != 1) {
+        reportSystemError("expected exactly 1 error-annotated workbook to be generated");
         return;
       }
+      Workbook errorAnnotatedWorkbook = workbook2File.keySet().iterator().next();
+      errorAnnotatedWorkbookFile = workbook2File.get(errorAnnotatedWorkbook);
       JSFUtils.handleUserFileDownloadRequest(getFacesContext(),
-                                             new File(workbooks.iterator().next().getWorkbookFile().getPath() + ERRORS_XLS_FILE_EXTENSION),
+                                             errorAnnotatedWorkbookFile,
                                              Workbook.MIME_TYPE);
     }
     catch (IOException e) {
-      e.printStackTrace();
-      // TODO
+      reportSystemError(e);
+    }
+    finally {
+      if (errorAnnotatedWorkbookFile != null) {
+        errorAnnotatedWorkbookFile.delete();
+      }
     }
   }
 

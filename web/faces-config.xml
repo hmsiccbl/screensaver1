@@ -236,7 +236,7 @@
     </navigation-case>
     <navigation-case>
       <from-action>#{screenResultImporter.submit}</from-action>
-      <from-outcome>screenresult-parse-errors</from-outcome>
+      <from-outcome>error</from-outcome>
       <to-view-id>/screenResultImporter</to-view-id>
       <redirect/>
     </navigation-case>
@@ -257,7 +257,7 @@
     </navigation-case>
     <navigation-case>
       <from-action>#{screenResultImporter.submit}</from-action>
-      <from-outcome>screen-result-parse-errors</from-outcome>
+      <from-outcome>error</from-outcome>
       <to-view-id>/screenResultImporter</to-view-id>
     </navigation-case>
   </navigation-rule>
