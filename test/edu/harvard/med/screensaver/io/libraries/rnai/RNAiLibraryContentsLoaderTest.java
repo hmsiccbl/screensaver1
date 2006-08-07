@@ -47,21 +47,13 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
   protected RNAiLibraryContentsLoader rnaiLibraryContentsLoader;
   protected DAO dao;
   protected SchemaUtil schemaUtil;
-  private boolean _tablesTruncated = false;
   
   
   // constructor and test methods
   
   protected void onSetUp() throws Exception
   {
-    // NOTE: all of these tests depend somewhat on an empty schema. only
-    // testUseOfExistingEntities inserts to the schema. so if you add any tests after
-    // testUseOfExistingEntities, or you write another test that writes to schema, you
-    // will have to add in more calls to truncateTablesOrCreateSchema somewhere
-    if (! _tablesTruncated) {
-      schemaUtil.truncateTablesOrCreateSchema();
-      _tablesTruncated = true;
-    }
+    schemaUtil.truncateTablesOrCreateSchema();
   }
 
   public void testColumnHeaderErrors()
@@ -347,27 +339,6 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
     assertEquals("a09 gene symbol", "CERK", a09gene.getEntrezgeneSymbol());
   }
   
-  public void testHuman1()
-  {
-    Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 5003);
-    String filename = "Human1.xls";
-    File file = new File(TEST_INPUT_FILE_DIR, filename);
-    InputStream stream = null;
-    try {
-      stream = new FileInputStream(file);
-    }
-    catch (FileNotFoundException e) {
-      fail("file not found: " + filename);
-    }
-    library = rnaiLibraryContentsLoader.loadLibraryContents(library, file, stream);
-    Set<Well> wells = library.getWells();
-    
-    // this library has 779 wells according to
-    // http://iccb.med.harvard.edu/screening/RNAi%20Libraries/index.htm
-    // but add 18 for the controls - 6 controls on each of 3 plates
-    assertEquals("well count in Human1", 797, wells.size());
-  }
-
   /**
    * test that previously loaded wells, silencing reagents, and genes are appropriately reused.
    * test:
@@ -387,7 +358,7 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
       {
         Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 5003);
         dao.persistEntity(library);
-
+  
         // parse the first spreadsheet
         String filename = "existing entities 1.xls";
         File file = new File(TEST_INPUT_FILE_DIR, filename);
@@ -402,10 +373,10 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
         List<ParseError> errors = rnaiLibraryContentsLoader.getErrors();
         assertEquals("workbook has no errors", 0, errors.size());
         assertEquals("library has 5 wells", 5, library.getWells().size());
-
+  
         // persist the new well/sr/genes, so the next
         dao.persistEntity(library);
-
+  
         // parse the second spreadsheet
         filename = "existing entities 2.xls";
         file = new File(TEST_INPUT_FILE_DIR, filename);
@@ -420,7 +391,7 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
         errors = rnaiLibraryContentsLoader.getErrors();
         assertEquals("workbook has no errors", 0, errors.size());
         assertEquals("library has 7 wells", 7, library.getWells().size());
-
+  
         // test the overlaps
         Well a05 = null, a07 = null, a09 = null, a11 = null, a13 = null, a15 = null, a17 = null;
         for (Well well: library.getWells()) {
@@ -434,7 +405,7 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
           else if (wellName.equals("A15")) { a15 = well; }
           else if (wellName.equals("A17")) { a17 = well; }
         }
-
+  
         assertNotNull("library has well A05", a05);
         assertNotNull("library has well A07", a07);
         assertNotNull("library has well A09", a09);
@@ -442,31 +413,31 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
         assertNotNull("library has well A13", a13);
         assertNotNull("library has well A15", a15);
         assertNotNull("library has well A17", a17);
-
+  
         // a05 has one sr
         assertEquals("a05 has 1 sr", 1, a05.getSilencingReagents().size());
-
+  
         // a07 has two srs with same gene
         assertEquals("a07 has 2 srs", 2, a07.getSilencingReagents().size());
         Iterator<SilencingReagent> srs = a07.getSilencingReagents().iterator();
         SilencingReagent sr1 = srs.next();
         SilencingReagent sr2 = srs.next();
         assertSame("a07 srs have same gene", sr1.getGene(), sr2.getGene());
-
+  
         // a09 has two srs with different genes
         assertEquals("a09 has 2 srs", 2, a09.getSilencingReagents().size());
         srs = a09.getSilencingReagents().iterator();
         sr1 = srs.next();
         sr2 = srs.next();
         assertNotSame("a09 srs have different genes", sr1.getGene(), sr2.getGene());
-
+  
         // a11 and a15 have same sr
         assertEquals("a11 has 1 sr", 1, a11.getSilencingReagents().size());
         assertEquals("a15 has 1 sr", 1, a15.getSilencingReagents().size());
         assertSame("a11 and a15 have same sr",
           a11.getSilencingReagents().iterator().next(),
           a15.getSilencingReagents().iterator().next());
-
+  
         // a13 and 17 have different srs, same gene
         assertEquals("a13 has 1 sr", 1, a13.getSilencingReagents().size());
         assertEquals("a17 has 1 sr", 1, a17.getSilencingReagents().size());
@@ -474,6 +445,33 @@ public class RNAiLibraryContentsLoaderTest extends AbstractSpringTest
         sr2 = a17.getSilencingReagents().iterator().next();
         assertNotSame("a13 and a17 have different srs", sr1, sr2);
         assertSame("a13 and a17 have same gene", sr1.getGene(), sr2.getGene());
+      }
+    });
+  }
+
+  public void testHuman1()
+  {
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 5003);
+        String filename = "Human1.xls";
+        File file = new File(TEST_INPUT_FILE_DIR, filename);
+        InputStream stream = null;
+        try {
+          stream = new FileInputStream(file);
+        }
+        catch (FileNotFoundException e) {
+          fail("file not found: " + filename);
+        }
+        library = rnaiLibraryContentsLoader.loadLibraryContents(library, file, stream);
+        Set<Well> wells = library.getWells();
+
+        // this library has 779 wells according to
+        // http://iccb.med.harvard.edu/screening/RNAi%20Libraries/index.htm
+        // but add 18 for the controls - 6 controls on each of 3 plates
+        assertEquals("well count in Human1", 797, wells.size());
       }
     });
   }
