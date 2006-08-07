@@ -59,6 +59,7 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
   private PlateNumberParser _plateNumberParser;
   private WellNameParser _wellNameParser;
   private NCBIGeneInfoProvider _geneInfoProvider;
+  private ParsedEntitiesMap _parsedEntitiesMap;
   private SilencingReagentType _silencingReagentType = DEFAULT_SILENCING_REAGENT_TYPE;
   private SilencingReagentType _unknownSilencingReagentType =
     DEFAULT_UNKNOWN_SILENCING_REAGENT_TYPE;
@@ -218,6 +219,7 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
     _plateNumberParser = new PlateNumberParser(_errorManager);
     _wellNameParser = new WellNameParser(_errorManager);
     _geneInfoProvider = new NCBIGeneInfoProvider(_errorManager);
+    _parsedEntitiesMap = new ParsedEntitiesMap();
   }
   
   /**
@@ -240,7 +242,8 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
         columnHeaders,
         hssfSheet.getRow(i),
         i,
-        cellFactory);
+        cellFactory,
+        _parsedEntitiesMap);
       dataRowParser.parseDataRow();
     }
   }

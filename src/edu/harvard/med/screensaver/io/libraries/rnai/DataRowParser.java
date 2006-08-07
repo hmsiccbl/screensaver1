@@ -48,6 +48,7 @@ public class DataRowParser
   private HSSFRow _dataRow;
   private short _rowIndex;
   private Factory _cellFactory;
+  private ParsedEntitiesMap _parsedEntitiesMap;
   
   private Map<RequiredRNAiLibraryColumn,String> _dataRowContents;
   
@@ -67,13 +68,15 @@ public class DataRowParser
     RNAiLibraryColumnHeaders columnHeaders,
     HSSFRow dataRow,
     short rowIndex,
-    Factory cellFactory)
+    Factory cellFactory,
+    ParsedEntitiesMap parsedEntitiesMap)
   {
     _parser = parser;
     _columnHeaders = columnHeaders;
     _dataRow = dataRow;
     _rowIndex = rowIndex;
-    _cellFactory = cellFactory;   
+    _cellFactory = cellFactory;
+    _parsedEntitiesMap = parsedEntitiesMap;
   }
   
   /**
@@ -167,6 +170,7 @@ public class DataRowParser
     Well well = getExistingWell(plateNumber, wellName);
     if (well == null) {
       well = new Well(_parser.getLibrary(), plateNumber, wellName);
+      _parsedEntitiesMap.addWell(well);
     }
     String vendorIdentifier = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.VENDOR_IDENTIFIER),
@@ -174,14 +178,14 @@ public class DataRowParser
     if (! (vendorIdentifier == null || vendorIdentifier.equals(""))) {
       well.setVendorIdentifier(vendorIdentifier);
     }
-    _parser.getDAO().persistEntity(well);
     return well;
   }
   
   /**
    * Get an existing well from the database with the specified plate number and well name,
    * and the library from the parent {@link RNAiLibraryContentsParser}. Return null if no
-   * such well exists in the database. 
+   * such well exists in the database.
+   *  
    * @param plateNumber the plate number
    * @param wellName the well name
    * @return the existing well from the database. Return null if no such well exists in
@@ -189,6 +193,10 @@ public class DataRowParser
    */
   private Well getExistingWell(Integer plateNumber, String wellName)
   {
+    Well well = _parsedEntitiesMap.getWell(plateNumber, wellName);
+    if (well != null) {
+      return well;
+    }
     Library library = _parser.getLibrary();
     if (library.getLibraryId() == null) {
       return null;
@@ -279,10 +287,10 @@ public class DataRowParser
         entrezgeneId,
         entrezgeneSymbol,
         genbankAccessionNumber,
-        geneInfo.getSpeciesName());      
+        geneInfo.getSpeciesName());
+      _parsedEntitiesMap.addGene(gene);
     }
 
-    _parser.getDAO().persistEntity(gene);
     return gene;
   }
   
@@ -295,6 +303,10 @@ public class DataRowParser
    */
   private Gene getExistingGene(Integer entrezgeneId)
   {
+    Gene gene = _parsedEntitiesMap.getGene(entrezgeneId);
+    if (gene != null) {
+      return gene;
+    }
     return _parser.getDAO().findEntityByProperty(Gene.class, "entrezgeneId", entrezgeneId);
   }
 
@@ -332,8 +344,8 @@ public class DataRowParser
       getExistingSilencingReagent(gene, silencingReagentType, sequence);
     if (silencingReagent == null) {
       silencingReagent = new SilencingReagent(gene, silencingReagentType, sequence);
+      _parsedEntitiesMap.addSilencingReagent(silencingReagent);
     }
-    _parser.getDAO().persistEntity(silencingReagent);
     return silencingReagent;
   }
   
@@ -351,6 +363,11 @@ public class DataRowParser
     SilencingReagentType silencingReagentType,
     String sequence)
   {
+    SilencingReagent silencingReagent =
+      _parsedEntitiesMap.getSilencingReagent(gene, silencingReagentType, sequence);
+    if (silencingReagent != null) {
+      return silencingReagent;
+    }
     if (gene.getGeneId() == null) {
       return null;
     }
