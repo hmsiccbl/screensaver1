@@ -4,6 +4,8 @@
   <t:panelGrid columns="1">
     
     <t:outputText id="menuTitle" styleClass="menuItem title" value="#{menu.applicationTitle}"/>
+    
+    <t:outputText value="#{menu.userPrincipalName}" rendered="#{menu.authenticatedUser}"/>
   
     <t:htmlTag id="menuSectionSeparator1" value="hr" />
 
@@ -16,11 +18,12 @@
         <t:commandNavigation2 action="goMyAccount" value="#{\"My Account\"}" accesskey="" />
         <t:commandNavigation2 action="goHelp" value="#{\"Help\"}" accesskey="H" />
         <t:commandNavigation2 action="#{menu.logout}" value="#{\"Logout\"}" accesskey="" />
-        <t:commandNavigation2 id="navPanelAdminNode" value="#{\"Admin >>\"}" open="true" accesskey="">
+        <t:commandNavigation2 id="navPanelAdminNode" value="#{\"Admin >>\"}" accesskey="" visibleOnUserRole="admin" >
           <t:commandNavigation2 action="goImportScreenResult" value="#{\"Import Screen Result\"}" accesskey="I" />
           <t:commandNavigation2 action="goEditUser" value="#{\"Edit Users\"}" accesskey="" />
           <t:commandNavigation2 action="goEditLibraries" value="#{\"Edit Libraries\"}" accesskey="" />
         </t:commandNavigation2>
+        <t:commandNavigation2 action="goEnvironmentInfo" value="#{\"Env Info\"}" visibleOnUserRole="developer"/>
       </t:panelNavigation2>
     </h:form>
     

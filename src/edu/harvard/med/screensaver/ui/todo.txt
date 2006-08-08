@@ -1,3 +1,4 @@
+make failed login result in an appropriate message on login form
 internationalize all messages
 use JSF or Spring messages?
 nav menu is not highlighting active item

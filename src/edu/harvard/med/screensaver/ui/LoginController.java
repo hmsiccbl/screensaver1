@@ -61,13 +61,6 @@ public class LoginController extends AbstractController
 
   // JSF application methods
   
-  public String login()
-  {
-    log.info("login for session " + getHttpSession().getId());
-    showMessage("invalidCredentials");
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-  
   public String forgotIdOrPassword()
   {
     return REDISPLAY_PAGE_ACTION_RESULT;

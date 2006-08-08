@@ -17,6 +17,8 @@ import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
@@ -98,12 +100,32 @@ public abstract class AbstractController implements ScreensaverConstants
   
   public HttpSession getHttpSession()
   {
-    Object httpSession = getFacesContext().getExternalContext().getSession(false);
+    Object httpSession = getExternalContext().getSession(false);
     if (httpSession == null) {
       return null;
     }
     assert httpSession instanceof HttpSession : "not running in an HTTP-based application server";
     return (HttpSession) httpSession;
+  }
+  
+  public HttpServletRequest getHttpServletRequest()
+  {
+    Object request = getExternalContext().getRequest();
+    if (request == null) {
+      return null;
+    }
+    assert request instanceof HttpServletRequest : "not running in an Servlet-based application server";
+    return (HttpServletRequest) request;
+  }
+  
+  public HttpServletResponse getHttpServletResponse()
+  {
+    Object response = getExternalContext().getResponse();
+    if (response == null) {
+      return null;
+    }
+    assert response instanceof HttpServletResponse : "not running in an Servlet-based application server";
+    return (HttpServletResponse) response;
   }
   
   public String getSessionDebugInfoString()

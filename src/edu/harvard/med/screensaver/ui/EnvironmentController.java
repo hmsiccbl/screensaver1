@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +56,7 @@ public class EnvironmentController extends AbstractController
   public DataModel getRequestParamsModel()
   {
     List<Row> data = new ArrayList<Row>();
-    Map reqParamMap = getFacesContext().getExternalContext().getRequestParameterMap();
+    Map reqParamMap = getExternalContext().getRequestParameterMap();
     for (Object paramName : reqParamMap.keySet()) {
       data.add(new Row(paramName.toString(), 
                       reqParamMap.get(paramName).toString()));
@@ -78,7 +79,7 @@ public class EnvironmentController extends AbstractController
   public DataModel getSessionParamsModel()
   {
     List<Row> data = new ArrayList<Row>();
-    Map sessionParamMap = getFacesContext().getExternalContext().getSessionMap();
+    Map sessionParamMap = getExternalContext().getSessionMap();
     for (Object paramName : sessionParamMap.keySet()) {
       data.add(new Row(paramName.toString(), 
                       sessionParamMap.get(paramName).toString()));
@@ -89,7 +90,7 @@ public class EnvironmentController extends AbstractController
   public DataModel getApplicationParamsModel()
   {
     List<Row> data = new ArrayList<Row>();
-    Map sessionParamMap = getFacesContext().getExternalContext().getApplicationMap();
+    Map sessionParamMap = getExternalContext().getApplicationMap();
     for (Object paramName : sessionParamMap.keySet()) {
       data.add(new Row(paramName.toString(), 
                       sessionParamMap.get(paramName).toString()));
@@ -101,11 +102,23 @@ public class EnvironmentController extends AbstractController
   public DataModel getCookiesTableModel()
   {
     List<Row> cookies = new ArrayList<Row>();
-    Map<String,Cookie> cookieMap = (Map<String,Cookie>) getFacesContext().getExternalContext().getRequestCookieMap();
+    Map<String,Cookie> cookieMap = (Map<String,Cookie>) getExternalContext().getRequestCookieMap();
     for (String cookieName : cookieMap.keySet()) {
       cookies.add(new Row(cookieName, cookieMap.get(cookieName).getValue()));
     }
     return new ListDataModel(cookies);
+  }
+  
+  public DataModel getUserSecurityTableModel()
+  {
+    List<Row> userSecurityItems = new ArrayList<Row>();
+    
+    userSecurityItems.add(new Row("authenticationType", getExternalContext().getAuthType()));
+    Principal principal = getExternalContext().getUserPrincipal();
+    userSecurityItems.add(new Row("userPrincipal", principal == null ? "<none>" : principal.getName()));
+    userSecurityItems.add(new Row("userInAdminRole", Boolean.toString(getExternalContext().isUserInRole("admin"))));
+    userSecurityItems.add(new Row("remoteUser", getExternalContext().getRemoteUser()));
+    return new ListDataModel(userSecurityItems);
   }
 
   public DataModel getEnvTableModel()

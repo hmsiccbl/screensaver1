@@ -10,6 +10,19 @@
     <h:outputText value="URL=#{envInfo.url}" />
   </h:panelGrid>
 
+  <t:outputText value="User Security" styleClass="sectionHeader" />
+  <t:dataTable id="userSecurityTable" value="#{envInfo.userSecurityTableModel}" var="row"
+    styleClass="standardTable" rowClasses="row1,row2">
+    <t:column>
+      <f:facet name="header">Name</f:facet>
+      <t:outputText value="#{row.name}"></t:outputText>
+    </t:column>
+    <t:column>
+      <f:facet name="header">Value</f:facet>
+      <t:outputText value="#{row.value}"></t:outputText>
+    </t:column>
+  </t:dataTable>
+
   <t:outputText value="Cookies" styleClass="sectionHeader" />
   <t:dataTable id="cookiesTable" value="#{envInfo.cookiesTableModel}" var="row"
     styleClass="standardTable" rowClasses="row1,row2">

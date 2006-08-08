@@ -161,6 +161,11 @@
       <to-view-id>/screenResultImporter</to-view-id>
       <redirect/>
     </navigation-case>
+    <navigation-case>
+      <from-outcome>goEnvironmentInfo</from-outcome>
+      <to-view-id>/env</to-view-id>
+      <redirect/>
+    </navigation-case>
   </navigation-rule>
 
   <navigation-rule>

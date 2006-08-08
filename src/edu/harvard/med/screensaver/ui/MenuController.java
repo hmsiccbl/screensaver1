@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.security.Principal;
+
 import javax.faces.event.ActionEvent;
 
 import org.apache.log4j.Logger;
@@ -20,6 +22,23 @@ public class MenuController extends AbstractController
   // static data members
   
   private static Logger log = Logger.getLogger(MenuController.class);
+  
+ 
+  // bean property methods
+  
+  public String getUserPrincipalName()
+  {
+    Principal principal = getExternalContext().getUserPrincipal();
+    if (principal == null) {
+      return "";
+    }
+    return principal.getName();
+  }
+  
+  public boolean isAuthenticatedUser()
+  {
+    return getExternalContext().getUserPrincipal() != null;
+  }
   
 
   // JSF application methods
