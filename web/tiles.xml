@@ -30,14 +30,14 @@
   <!-- Concrete definitions -->
 
   <definition
-    name="/main.tiles"
+    name="/login.tiles"
     extends=".base">
     <put 
       name="pageTitle"
       value="Welcome to Screensaver!"/>
     <put
       name="body"
-      value="/main.jsp" />
+      value="/login.jsp" />
   </definition>
   
   <definition

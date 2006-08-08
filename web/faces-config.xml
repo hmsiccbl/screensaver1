@@ -40,33 +40,6 @@
   </managed-bean>
   
   <managed-bean>
-    <description>Main</description>
-    <managed-bean-name>main</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.MainController</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>libraryController</property-name>
-      <value>#{library}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>messages</property-name>
-      <value>#{messages}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>screenResultViewerController</property-name>
-      <value>#{screenResultViewer}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>screenResultParser</property-name>
-      <value>#{screenResultParser}</value>
-    </managed-property>
-   </managed-bean>
-
-  <managed-bean>
     <description>Edit Library form backing bean</description>
     <managed-bean-name>library</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.LibraryController</managed-bean-class>
@@ -159,7 +132,7 @@
     <description>Login form backing bean</description>
     <managed-bean-name>login</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.LoginController</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
+    <managed-bean-scope>request</managed-bean-scope>
     <managed-property>
       <property-name>messages</property-name>
       <value>#{messages}</value>
@@ -179,13 +152,8 @@
   <navigation-rule>
     <from-view-id>*</from-view-id>
     <navigation-case>
-      <from-outcome>goMain</from-outcome>
-      <to-view-id>/main</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>goLogout</from-outcome>
-      <to-view-id>/main</to-view-id>
+      <from-outcome>logout</from-outcome>
+      <to-view-id>/login</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
@@ -196,59 +164,7 @@
   </navigation-rule>
 
   <navigation-rule>
-    <from-view-id>/main.jsp</from-view-id>
-    <navigation-case>
-      <from-action>#{main.createLibrary}</from-action>
-      <from-outcome>success</from-outcome>
-      <to-view-id>/library</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-action>#{main.viewSample1ScreenResult}</from-action>
-      <from-outcome>success</from-outcome>
-      <to-view-id>/screenResultViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-action>#{main.viewSample2ScreenResult}</from-action>
-      <from-outcome>success</from-outcome>
-      <to-view-id>/screenResultViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-action>#{main.findLibrary}</from-action>
-      <from-outcome>found</from-outcome>
-      <to-view-id>/library</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-action>#{main.findLibrary}</from-action>
-      <from-outcome>found many</from-outcome>
-      <!--  TODO to-view-id>/libraries</to-view-id-->
-      <to-view-id>/main</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-action>#{screenResultImporter.submit}</from-action>
-      <from-outcome>success</from-outcome>
-      <to-view-id>/screenResultViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-action>#{screenResultImporter.submit}</from-action>
-      <from-outcome>error</from-outcome>
-      <to-view-id>/screenResultImporter</to-view-id>
-      <redirect/>
-    </navigation-case>
-  </navigation-rule>
-  
-  <navigation-rule>
     <from-view-id>/screenResultImporter.jsp</from-view-id>
-    <navigation-case>
-      <from-action>#{screenResultImporter.done}</from-action>
-      <to-view-id>/main</to-view-id>
-      <redirect/>
-    </navigation-case>
     <navigation-case>
       <from-action>#{screenResultImporter.submit}</from-action>
       <from-outcome>success</from-outcome>
@@ -263,31 +179,7 @@
   </navigation-rule>
 
   <navigation-rule>
-    <from-view-id>/library.jsp</from-view-id>
-    <navigation-case>
-      <from-outcome>cancel</from-outcome>
-      <to-view-id>/main</to-view-id>
-      <redirect /> 
-    </navigation-case>
-    <navigation-case>
-      <!--from-action>...</from-action-->            
-      <from-outcome>done</from-outcome>
-      <to-view-id>/main</to-view-id>
-      <redirect /> 
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>revert</from-outcome>
-      <to-view-id>/library</to-view-id>
-    </navigation-case>
-  </navigation-rule>
-  
-  <navigation-rule>
     <from-view-id>/screenResultViewer.jsp</from-view-id>
-    <navigation-case>
-      <from-outcome>done</from-outcome>
-      <to-view-id>/main</to-view-id>
-      <redirect/>
-    </navigation-case>
     <navigation-case>
       <from-outcome>showWell</from-outcome>
       <to-view-id>/well</to-view-id>
@@ -303,7 +195,7 @@
   <navigation-rule>
     <from-view-id>/wellViewer.jsp</from-view-id>
     <navigation-case>
-      <to-view-id>/main</to-view-id>
+      <to-view-id>/screenResultViewer</to-view-id>
       <redirect/>
     </navigation-case>
   </navigation-rule>

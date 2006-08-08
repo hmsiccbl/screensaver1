@@ -80,7 +80,7 @@
       <AbsolutePoint location="468,130" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
-  <JSFFlowNavigationCase id="/main.jsp,/screenResultImporter,screenresult-parse-errors,#{screenResultImporter.submit}" routingType="0">
+  <JSFFlowNavigationCase id="/main.jsp,/screenResultImporter,error,#{screenResultImporter.submit}" routingType="0">
     <AutomaticBendpoints>
       <AbsolutePoint location="626,118" />
       <AbsolutePoint location="633,118" />
@@ -100,7 +100,7 @@
       <AbsolutePoint location="439,166" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
-  <JSFFlowNavigationCase id="/screenResultImporter.jsp,/screenResultImporter,screen-result-parse-errors,#{screenResultImporter.submit}" routingType="0">
+  <JSFFlowNavigationCase id="/screenResultImporter.jsp,/screenResultImporter,error,#{screenResultImporter.submit}" routingType="0">
     <AutomaticBendpoints>
       <AbsolutePoint location="487,266" />
       <AbsolutePoint location="487,330" />

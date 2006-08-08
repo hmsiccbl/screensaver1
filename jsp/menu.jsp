@@ -3,7 +3,7 @@
 <f:subview id="menu">
   <t:panelGrid columns="1">
     
-    <t:outputText id="menuTitle" styleClass="menuItem title" value="#{main.applicationTitle}"/>
+    <t:outputText id="menuTitle" styleClass="menuItem title" value="#{menu.applicationTitle}"/>
   
     <t:htmlTag id="menuSectionSeparator1" value="hr" />
 
@@ -11,12 +11,11 @@
       <t:panelNavigation2 id="navMenu" layout="table" itemClass="menuItem"
         openItemClass="menuItem" activeItemClass="menuItemActive"
         separatorClass="navSeparator">
-        <t:commandNavigation2 action="goMain" value="#{\"Main\"}" accesskey="" />
         <t:commandNavigation2 action="goSearch" value="#{\"Search\"}" accesskey="S" />
         <t:commandNavigation2 action="goMyScreens" value="#{\"My Screens\"}" accesskey="" />
         <t:commandNavigation2 action="goMyAccount" value="#{\"My Account\"}" accesskey="" />
         <t:commandNavigation2 action="goHelp" value="#{\"Help\"}" accesskey="H" />
-        <t:commandNavigation2 action="goLogout" value="#{\"Logout\"}" accesskey="" />
+        <t:commandNavigation2 action="#{menu.logout}" value="#{\"Logout\"}" accesskey="" />
         <t:commandNavigation2 id="navPanelAdminNode" value="#{\"Admin >>\"}" open="true" accesskey="">
           <t:commandNavigation2 action="goImportScreenResult" value="#{\"Import Screen Result\"}" accesskey="I" />
           <t:commandNavigation2 action="goEditUser" value="#{\"Edit Users\"}" accesskey="" />

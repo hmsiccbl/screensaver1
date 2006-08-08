@@ -1,3 +1,28 @@
+internationalize all messages
+use JSF or Spring messages?
+nav menu is not highlighting active item
+//tiles variables?  e.g., title?
+fixed menu width (can get squeezed if body pane is too wide)
+
+//rename screenresult.jsp -> screenResultViewer.jsp
+make all JSF component tags use tomahawk components ("t:")
+   
+//download screen result (generate excel file)
+heat map; generate each map as a table nested within row of a parent "all heat maps" table?
+
+//screenResultViewer: "jump to plate" and "show" checkboxes not working
+error message if specified import file is bad
+appropriate error message if multi-file screen result metadata file import is attempted
+inter-column table spacing (via css)
+//consistent border styles for tables (SR viewer and import errors)
+//persist error messages (?) [not going to do this]
+//cell col in error table must be "(row,col)"
+//download error-annotated workbook (create session-temporary files)
+//navigation controls for error table
+//better alternating colors for table rows (match wiki)
+//SR Viewer is showing *imported* SR, not sample, if sample link clicked
+
+
 Screen Result Viewer:
 //display screenresult data fields
 //download link
@@ -9,7 +34,7 @@ Screen Result Viewer:
 aligned layout of metadata with raw data?
 //display plate set as selection list
 numeric format config for raw data values
-first/last nav buttons
+//first/last nav buttons
 //link plate/well to compounds and silencing reagents
 //human-readable metadata type names
 //ordinal field: 1-based, not 0-based

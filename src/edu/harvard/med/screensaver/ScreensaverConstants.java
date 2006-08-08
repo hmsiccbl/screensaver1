@@ -26,6 +26,7 @@ public interface ScreensaverConstants
   public static final String SUCCESS_ACTION_RESULT = "success";
   public static final String ERROR_ACTION_RESULT = "error";
   public static final String DONE_ACTION_RESULT = "done";
+  public static final String LOGOUT_ACTION_RESULT = "logout";
   public static final String GO_IMPORT_SCREEN_RESULT_ACTION_RESULT = "goImportScreenResult";
   
 }

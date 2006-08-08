@@ -21,7 +21,7 @@
     <t:documentHead>
       <f:verbatim>
         <meta http-equiv="Content-Type" content="text/html;CHARSET=iso-8859-1" />
-        <title><t:outputText value="#{main.applicationTitle}"/></title>
+        <title><t:outputText value="#{menu.applicationTitle}"/></title>
         <link rel="stylesheet" type="text/css" href="css/screensaver.css" />
       </f:verbatim>
     </t:documentHead>
@@ -38,7 +38,7 @@
 
       <t:div style="text-align: center">
         <t:htmlTag value="hr"/>
-        <h:outputText value="#{main.applicationTitle} | "/>
+        <h:outputText value="#{menu.applicationTitle} | "/>
         <h:outputLink value="http://iccb.med.harvard.edu">
           <h:outputText value="Harvard Medical School: ICCB-Longwood" />
         </h:outputLink>

@@ -9,8 +9,12 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import org.apache.log4j.Logger;
+
 public class LoginController extends AbstractController
 {
+  
+  public static Logger log = Logger.getLogger(LoginController.class);
   
   private static final String AUTHENTICATION_ID_DESCRIPTION = "eCommons ID";
   
@@ -59,6 +63,7 @@ public class LoginController extends AbstractController
   
   public String login()
   {
+    log.info("login for session " + getHttpSession().getId());
     showMessage("invalidCredentials");
     return REDISPLAY_PAGE_ACTION_RESULT;
   }

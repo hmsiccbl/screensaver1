@@ -35,12 +35,16 @@ public class Messages
 
   /**
    * TODO
+   * 
    * @param messageKey
    * @param args
    * @return
    */
-  public FacesMessage getFacesMessage(String messageKey,
-                                      Object[] args) {
+  public FacesMessage getFacesMessage(
+    FacesMessage.Severity severity,
+    String messageKey,
+    Object[] args)
+  {
     String message = _messageSource.getMessage(messageKey,
                                                args,
                                                DEFAULT_MESSAGE,
@@ -48,9 +52,20 @@ public class Messages
     if (message.equals(DEFAULT_MESSAGE)) {
       log.error("message not found for key '" + messageKey + "'");
     }
-    return new FacesMessage(message);
+    return new FacesMessage(severity, message,
+    // if detail is null, FacesMessage repeats summary when asked for detail! :(
+                            "");
   }
   
+  public FacesMessage getFacesMessage(
+    String messageKey,
+    Object[] args)
+  {
+    return getFacesMessage(FacesMessage.SEVERITY_ERROR,
+                           messageKey,
+                           args);
+  }
+
   /**
    * @param messageKey
    * @param args

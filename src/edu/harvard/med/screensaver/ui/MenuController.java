@@ -23,6 +23,17 @@ public class MenuController extends AbstractController
   
 
   // JSF application methods
+
+  /**
+   * Logs out the user of the current session and redirects to the login page.
+   */
+  // TODO: should we move this to a more session-centric class? (maybe LoginController and then rename?)
+  public String logout()
+  {
+    log.info("logout for session "  + getHttpSession().getId());
+    getHttpSession().invalidate();
+    return LOGOUT_ACTION_RESULT;
+  }
   
   public String goSearch()
   {
@@ -44,11 +55,6 @@ public class MenuController extends AbstractController
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  public String goLogout()
-  {
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-  
   public String goImportScreenResult()
   {
     return GO_IMPORT_SCREEN_RESULT_ACTION_RESULT;
