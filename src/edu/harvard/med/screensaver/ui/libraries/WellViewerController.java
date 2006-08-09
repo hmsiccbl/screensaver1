@@ -7,7 +7,9 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui;
+package edu.harvard.med.screensaver.ui.libraries;
+
+import edu.harvard.med.screensaver.ui.AbstractController;
 
 public class WellViewerController extends AbstractController
 {

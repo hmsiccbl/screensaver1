@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui;
+package edu.harvard.med.screensaver.ui.libraries;
 
 import java.util.List;
 
@@ -15,13 +15,15 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.SearchResult;
 
 public class LibrariesViewerController extends AbstractController
 {
   private static Logger log = Logger.getLogger(LibrariesViewerController.class);
   
   private DAO _dao;
-  private List<Library> _libraries;
+  private SearchResult<Library> _libraries;
 
   
   // property getter/setter methods
@@ -30,7 +32,7 @@ public class LibrariesViewerController extends AbstractController
     _dao = dao;
   }
 
-  public List<Library> getLibraries() {
+  public SearchResult<Library> getLibraries() {
     if (_libraries == null) {
       initializeLibraries();
     }
@@ -45,6 +47,7 @@ public class LibrariesViewerController extends AbstractController
   
   private void initializeLibraries()
   {
-    _libraries = _dao.findAllEntitiesWithType(Library.class);
+    List<Library> libraries = _dao.findAllEntitiesWithType(Library.class);
+    _libraries = new SearchResult<Library>(libraries);
   }
 }

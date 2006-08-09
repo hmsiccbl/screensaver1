@@ -42,7 +42,7 @@
   <managed-bean>
     <description>Libraries Viewer backing bean</description>
     <managed-bean-name>librariesViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.LibrariesViewerController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.LibrariesViewerController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>dao</property-name>
@@ -57,7 +57,7 @@
   <managed-bean>
     <description>Library Viewer backing bean</description>
     <managed-bean-name>libraryViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.LibraryViewerController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.LibraryViewerController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>dao</property-name>
@@ -106,7 +106,7 @@
   <managed-bean>
     <description>Well viewer backing bean</description>
     <managed-bean-name>wellViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.WellViewerController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.WellViewerController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
   </managed-bean>
   
@@ -132,7 +132,7 @@
   <managed-bean>
     <description>RNAi Library Contents Importer backing bean</description>
     <managed-bean-name>rnaiLibraryContentsImporter</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.RNAiLibraryContentsImporterController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporterController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>libraryViewer</property-name>
