@@ -13,7 +13,7 @@
       <t:panelNavigation2 id="navMenu" layout="table" itemClass="menuItem"
         openItemClass="menuItem" activeItemClass="menuItemActive"
         separatorClass="navSeparator">
-        <t:commandNavigation2 action="goSearch" value="#{\"Search\"}" accesskey="S" />
+        <t:commandNavigation2 action="goQuery" value="#{\"Search\"}" accesskey="S" />
         <t:commandNavigation2 action="goMyScreens" value="#{\"My Screens\"}" accesskey="" />
         <t:commandNavigation2 action="goMyAccount" value="#{\"My Account\"}" accesskey="" />
         <t:commandNavigation2 action="goHelp" value="#{\"Help\"}" accesskey="H" />
@@ -34,10 +34,10 @@
         <t:outputLabel id="stockPlateNumberLabel" for="stockPlateNumber" value="Plate"
           styleClass="menuItem inputLabel" />
         <t:outputLabel id="wellNameLabel" for="wellName" value="Well"
-          styleClass="menuItem inputLabel" />
-        <t:inputText id="stockPlateNumber" value="#{query.quickFindStockPlateNumber}" size="5"
+          styleClass="menuItem inputLabel" />[
+        <t:inputText id="stockPlateNumber" value="#{query.stockPlateNumber}" size="5"
           styleClass="input" />
-        <t:inputText id="wellName" value="#{query.quickFindWellName}" size="3" styleClass="input" />
+        <t:inputText id="wellName" value="#{query.wellName}" size="3" styleClass="input" />
       </t:panelGrid>
       <t:commandButton id="quickFindSubmit" value="Go" styleClass="command"/>
     </h:form>

@@ -54,7 +54,7 @@ public class MenuController extends AbstractController
     return LOGOUT_ACTION_RESULT;
   }
   
-  public String goSearch()
+  public String goQuery()
   {
     return REDISPLAY_PAGE_ACTION_RESULT;
   }

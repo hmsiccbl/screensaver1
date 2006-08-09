@@ -48,7 +48,23 @@ public abstract class AbstractController implements ScreensaverConstants
   // bean property methods
   
   /**
-   * Get the application title (usually "[Application Name] [Version]").
+   * Get the application name (without version number).
+   */
+  public String getApplicationName()
+  {
+    return APPLICATION_NAME;
+  }
+  
+  /**
+   * Get the application version number, as a string.
+   */
+  public String getApplicationVersion()
+  {
+    return APPLICATION_VERSION;
+  }
+  
+  /**
+   * Get the application title as "[Application Name] [Version]".
    */
   public String getApplicationTitle()
   {

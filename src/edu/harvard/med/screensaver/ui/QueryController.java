@@ -11,26 +11,26 @@ package edu.harvard.med.screensaver.ui;
 
 public class QueryController extends AbstractController
 {
-  private String _quickFindStockPlateNumber;
-  private String _quickFindWellName;
+  private String _stockPlateNumber;
+  private String _wellName;
 
-  public String getQuickFindStockPlateNumber()
+  public String getStockPlateNumber()
   {
-    return _quickFindStockPlateNumber;
+    return _stockPlateNumber;
   }
 
-  public void setQuickFindStockPlateNumber(String quickFindStockPlateNumber)
+  public void setStockPlateNumber(String stockPlateNumber)
   {
-    _quickFindStockPlateNumber = quickFindStockPlateNumber;
+    _stockPlateNumber = stockPlateNumber;
   }
 
-  public String getQuickFindWellName()
+  public String getWellName()
   {
-    return _quickFindWellName;
+    return _wellName;
   }
 
-  public void setQuickFindWellName(String quickFindWellName)
+  public void setWellName(String WellName)
   {
-    _quickFindWellName = quickFindWellName;
+    _wellName = WellName;
   }
 }

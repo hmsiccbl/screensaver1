@@ -4,6 +4,7 @@
   <JSFFlowResource path="*" location="30,330" dimension="54,36" />
   <JSFFlowResource path="/login" location="180,30" dimension="78,36" />
   <JSFFlowResource path="/screenResultImporter" location="480,330" dimension="299,36" />
+  <JSFFlowResource path="/env" location="480,30" dimension="70,36" />
   <JSFFlowResource path="/screenResultImporter.jsp" location="330,230" dimension="221,36" />
   <JSFFlowResource path="/screenResultViewer" location="330,130" dimension="277,36" />
   <JSFFlowResource path="/screenResultViewer.jsp" location="30,230" dimension="209,36" />
@@ -13,8 +14,8 @@
   <JSFFlowResource path="/heatMapViewer.jsp" location="180,130" dimension="267,36" />
   <JSFFlowNavigationCase id="*,/login,logout,null" routingType="0">
     <AutomaticBendpoints>
-      <AbsolutePoint location="30,348" />
-      <AbsolutePoint location="-7,348" />
+      <AbsolutePoint location="30,363" />
+      <AbsolutePoint location="-7,363" />
       <AbsolutePoint location="-7,48" />
       <AbsolutePoint location="180,48" />
     </AutomaticBendpoints>
@@ -23,6 +24,15 @@
     <AutomaticBendpoints>
       <AbsolutePoint location="84,348" />
       <AbsolutePoint location="480,348" />
+    </AutomaticBendpoints>
+  </JSFFlowNavigationCase>
+  <JSFFlowNavigationCase id="*,/env,goEnvironmentInfo,null" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="30,348" />
+      <AbsolutePoint location="7,348" />
+      <AbsolutePoint location="7,103" />
+      <AbsolutePoint location="515,103" />
+      <AbsolutePoint location="515,66" />
     </AutomaticBendpoints>
   </JSFFlowNavigationCase>
   <JSFFlowNavigationCase id="/screenResultImporter.jsp,/screenResultViewer,success,#{screenResultImporter.submit}" routingType="0">

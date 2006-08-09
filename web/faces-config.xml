@@ -142,7 +142,12 @@
   
   <!-- Navigation rules -->
   
-  <!-- Note:  We are able to leave off the extension for the view defined in each <to-view-id>, 
+  <!-- Note: By convention we use "success" and "error" action outcome strings to denote generic 
+       outcomes.  Feel free to use others, as needed, but add them to the ScreenResultConstants 
+       class, please! 
+  -->
+
+  <!-- Note: We are able to leave off the extension for the view defined in each <to-view-id>, 
        since Tiles accepts and handles missing extensions.  This is kind of nice. Unfortunately, 
        the <from-view-id> views require a ".jsp" extension, although intuitively one would like 
        to use ".jsf".
@@ -153,7 +158,13 @@
     <from-view-id>*</from-view-id>
     <navigation-case>
       <from-outcome>logout</from-outcome>
-      <to-view-id>/login</to-view-id>
+      <!-- maybe we want a "you have been logged out" page; for now we send to the query page, which will force a login -->
+      <to-view-id>/query</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>goQuery</from-outcome>
+      <to-view-id>/query</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>

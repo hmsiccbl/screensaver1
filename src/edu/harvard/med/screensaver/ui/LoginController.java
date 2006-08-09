@@ -11,6 +11,14 @@ package edu.harvard.med.screensaver.ui;
 
 import org.apache.log4j.Logger;
 
+/**
+ * JSF backing bean for login view. Properties are not needed for userID and
+ * password, as the form submission is actually sent to the special
+ * j_security_check servlet (see login.jsp), and so this form never actually
+ * processes a successful login.
+ * 
+ * @author ant
+ */
 public class LoginController extends AbstractController
 {
   
@@ -18,8 +26,6 @@ public class LoginController extends AbstractController
   
   private static final String AUTHENTICATION_ID_DESCRIPTION = "eCommons ID";
   
-  private String _userId;
-  private String _password;
   private boolean _disableAdministrativePrivileges;
 
   public String getAuthenticationIdDescription()
@@ -27,26 +33,6 @@ public class LoginController extends AbstractController
     return AUTHENTICATION_ID_DESCRIPTION;
   }
 
-  public String getPassword()
-  {
-    return _password;
-  }
-
-  public void setPassword(String password)
-  {
-    _password = password;
-  }
-
-  public String getUserId()
-  {
-    return _userId;
-  }
-
-  public void setUserId(String userId)
-  {
-    _userId = userId;
-  }
-  
   public boolean isDisableAdministrativePrivileges()
   {
     return _disableAdministrativePrivileges;

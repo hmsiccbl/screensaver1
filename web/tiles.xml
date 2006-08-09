@@ -34,12 +34,34 @@
     extends=".base">
     <put 
       name="pageTitle"
-      value="Welcome to Screensaver!"/>
+      value="Screensaver kindly requests that you identify yourself as an authorized user."/>
     <put
       name="body"
       value="/login.jsp" />
   </definition>
   
+  <definition
+    name="/main.tiles"
+    extends=".base">
+    <put 
+      name="pageTitle"
+      value=""/>
+    <put
+      name="body"
+      value="/main.jsp" />
+  </definition>
+  
+  <definition
+    name="/query.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="Search"/>
+    <put
+      name="body"
+      value="/query.jsp" />
+  </definition>
+
   <definition
     name="/screenResultImporter.tiles"
     extends=".base">

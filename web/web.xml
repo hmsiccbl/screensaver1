@@ -267,6 +267,14 @@
 
   <security-constraint>
     <display-name>Public</display-name>
+
+    <web-resource-collection>
+      <web-resource-name>Home</web-resource-name>
+      <description>Allow unauthenticated user to request the home URL (i.e., the URL(s) in the welcome-file-list).</description>
+      <url-pattern>/index.jsp</url-pattern>
+      <http-method>GET</http-method>
+    </web-resource-collection>
+    
     <web-resource-collection>
       <web-resource-name>Resources</web-resource-name>
       <description>Images, stylesheets, etc.  Access via HTTP GET and HEAD methods only.</description>
@@ -293,7 +301,9 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>user</web-resource-name>
+      <url-pattern>/main.jsf</url-pattern>
       <url-pattern>/login.jsf</url-pattern>
+      <url-pattern>/query.jsf</url-pattern>
       <url-pattern>/screenResultViewer.jsf</url-pattern>
       <url-pattern>/wellViewer.jsf</url-pattern>
       <url-pattern>/heatMapViewer.jsf</url-pattern>
