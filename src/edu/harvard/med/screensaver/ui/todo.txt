@@ -27,6 +27,7 @@ inter-column table spacing (via css)
 Screen Result Viewer:
 //display screenresult data fields
 //download link
+download of workbook should suggest an appropriate file name (not "screenResultViewer.jsp")
 //goto plate/well (w/validation)
 //goto row (w/validation)
 //hide/show columns

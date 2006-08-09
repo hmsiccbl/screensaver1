@@ -2,7 +2,7 @@
 
 <f:subview id="screenResultViewer">
 
-  <h:form id="dataForm">
+  <h:form id="commandForm">
 
     <h:panelGroup>
       <h:commandButton action="#{screenResultViewer.download}" value="Download" styleClass="command" />
@@ -11,9 +11,11 @@
         styleClass="command" />
     </h:panelGroup>
 
-    <%@ include file="cherryPickUploader.jspf" %>
+  </h:form>
 
-    <t:div />
+  <%@ include file="cherryPickUploader.jspf" %>
+  
+  <h:form id="dataForm">
 
     <h:panelGrid columns="2" styleClass="standardTable">
       <h:outputLabel for="screenResultDateCreated" value="Date created" styleClass="keyColumn" />
