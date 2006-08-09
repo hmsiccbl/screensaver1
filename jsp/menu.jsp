@@ -2,10 +2,10 @@
 
 <f:subview id="menu">
   <t:panelGrid columns="1">
-    
-    <t:outputText id="menuTitle" styleClass="menuItem title" value="#{menu.applicationTitle}"/>
-    
-    <t:outputText value="#{menu.userPrincipalName}" rendered="#{menu.authenticatedUser}"/>
+
+    <t:commandLink id="menuTitle" action="goMain" value="#{menu.applicationTitle}" styleClass="menuItem title"  />
+
+    <t:commandLink id="userName" action="goMyAccount" value="#{menu.userPrincipalName}" rendered="#{menu.authenticatedUser}" styleClass="menuItem userName"/>
   
     <t:htmlTag id="menuSectionSeparator1" value="hr" />
 
