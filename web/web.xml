@@ -306,6 +306,7 @@
       <url-pattern>/query.jsf</url-pattern>
       <url-pattern>/screenResultViewer.jsf</url-pattern>
       <url-pattern>/wellViewer.jsf</url-pattern>
+      <url-pattern>/libraryViewer.jsf</url-pattern>
       <url-pattern>/heatMapViewer.jsf</url-pattern>
     </web-resource-collection>
 
@@ -326,6 +327,7 @@
       <web-resource-name>admin</web-resource-name>
       <url-pattern>/admin/*</url-pattern>
       <url-pattern>/screenResultImporter.jsf</url-pattern>
+      <url-pattern>/rnaiLibraryContentsImporter.jsf</url-pattern>
     </web-resource-collection>
 
     <auth-constraint>

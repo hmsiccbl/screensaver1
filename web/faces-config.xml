@@ -40,9 +40,9 @@
   </managed-bean>
   
   <managed-bean>
-    <description>Edit Library form backing bean</description>
-    <managed-bean-name>library</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.LibraryController</managed-bean-class>
+    <description>Library Viewer backing bean</description>
+    <managed-bean-name>libraryViewer</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.LibraryViewerController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>dao</property-name>
@@ -113,6 +113,25 @@
       <value>#{messages}</value>
     </managed-property>
   </managed-bean>
+    
+  <managed-bean>
+    <description>RNAi Library Contents Importer backing bean</description>
+    <managed-bean-name>rnaiLibraryContentsImporter</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.RNAiLibraryContentsImporterController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>libraryViewer</property-name>
+      <value>#{libraryViewer}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>rnaiLibraryContentsParser</property-name>
+      <value>#{rnaiLibraryContentsParser}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
+    </managed-property>
+  </managed-bean>
   
   <managed-bean>
     <description>Query</description>
@@ -173,6 +192,11 @@
       <redirect/>
     </navigation-case>
     <navigation-case>
+      <from-outcome>goImportRNAiLibraryContents</from-outcome>
+      <to-view-id>/rnaiLibraryContentsImporter</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>goEnvironmentInfo</from-outcome>
       <to-view-id>/env</to-view-id>
       <redirect/>
@@ -191,6 +215,21 @@
       <from-action>#{screenResultImporter.submit}</from-action>
       <from-outcome>error</from-outcome>
       <to-view-id>/screenResultImporter</to-view-id>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <from-view-id>/rnaiLibraryContentsImporter.jsp</from-view-id>
+    <navigation-case>
+      <from-action>#{rnaiLibraryContentsImporter.submit}</from-action>
+      <from-outcome>success</from-outcome>
+      <to-view-id>/libraryViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-action>#{rnaiLibraryContentsImporter.submit}</from-action>
+      <from-outcome>error</from-outcome>
+      <to-view-id>/rnaiLibraryContentsImporter</to-view-id>
     </navigation-case>
   </navigation-rule>
 

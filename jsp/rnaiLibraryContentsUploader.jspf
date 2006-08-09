@@ -1,0 +1,12 @@
+<%-- MyEclipse HACK: uncomment the next line to enable smart editing features within MyEclipse - -%>
+<jsp:include file="header.jspf"--%>
+
+<f:subview id="rnaiLibraryContentsUploaderSubview">
+
+  <h:form id="uploadRNAiLibraryContentsFileForm" enctype="multipart/form-data">
+    <t:outputLabel for="uploadRNAiLibraryContentsFile" value="Import RNAi Library Contents file:" />
+    <t:inputFileUpload id="uploadRNAiLibraryContentsFile" value="#{rnaiLibraryContentsImporter.uploadedFile}" storage="file" accept="application/vnd.ms-excel" required="true" maxlength="134217728" styleClass="input"/>
+    <t:commandButton value="Import" action="#{rnaiLibraryContentsImporter.submit}" styleClass="command" />
+  </h:form>
+
+</f:subview>

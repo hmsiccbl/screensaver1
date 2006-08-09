@@ -55,7 +55,7 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
   private DAO _dao;
   private Library _library;
   private Workbook _workbook;
-  private ParseErrorManager _errorManager;
+  private ParseErrorManager _errorManager = new ParseErrorManager();
   private PlateNumberParser _plateNumberParser;
   private WellNameParser _wellNameParser;
   private NCBIGeneInfoProvider _geneInfoProvider;
@@ -126,7 +126,7 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
    * @param stream the input stream to load library contents from
    * @return the library with the contents loaded
    */
-  public synchronized Library parseLibraryContents(
+  public Library parseLibraryContents(
     Library library,
     File file,
     InputStream stream)
@@ -154,7 +154,12 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
     return _errorManager.getErrors();
   }
   
+  public boolean getHasErrors()
+  {
+    return _errorManager.getHasErrors();
+  }
   
+    
   // package getters, for the DataRowParser
 
   /**
@@ -215,7 +220,6 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
   {
     _library = library;
     _workbook = new Workbook(file, stream, _errorManager);
-    _errorManager = new ParseErrorManager();
     _plateNumberParser = new PlateNumberParser(_errorManager);
     _wellNameParser = new WellNameParser(_errorManager);
     _geneInfoProvider = new NCBIGeneInfoProvider(_errorManager);

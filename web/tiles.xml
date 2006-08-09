@@ -73,6 +73,17 @@
       value="/screenResultImporter.jsp" />
   </definition>
 
+   <definition
+    name="/rnaiLibraryContentsImporter.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="RNAi Library Contents Importer and Error Viewer"/>
+    <put
+      name="body"
+      value="/rnaiLibraryContentsImporter.jsp" />
+  </definition>
+
   <definition
     name="/screenResultViewer.tiles"
     extends=".base">

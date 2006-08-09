@@ -18,9 +18,9 @@ import edu.harvard.med.screensaver.db.DAO;
 
 import org.apache.log4j.Logger;
 
-public class LibraryController extends AbstractController
+public class LibraryViewerController extends AbstractController
 {
-  private static Logger log = Logger.getLogger(LibraryController.class);
+  private static Logger log = Logger.getLogger(LibraryViewerController.class);
   
   private DAO _dao;
   private Library _library;

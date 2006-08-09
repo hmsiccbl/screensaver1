@@ -20,6 +20,7 @@
         <t:commandNavigation2 action="#{menu.logout}" value="#{\"Logout\"}" accesskey="" />
         <t:commandNavigation2 id="navPanelAdminNode" value="#{\"Admin >>\"}" accesskey="" visibleOnUserRole="admin" >
           <t:commandNavigation2 action="goImportScreenResult" value="#{\"Import Screen Result\"}" accesskey="I" />
+          <t:commandNavigation2 action="goImportRNAiLibraryContents" value="#{\"Import RNAi Library Contents\"}" accesskey="I" />
           <t:commandNavigation2 action="goEditUser" value="#{\"Edit Users\"}" accesskey="" />
           <t:commandNavigation2 action="goEditLibraries" value="#{\"Edit Libraries\"}" accesskey="" />
         </t:commandNavigation2>
