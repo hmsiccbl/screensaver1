@@ -177,12 +177,30 @@ public class NCBIGeneInfoProvider
     for (int i = 0; i < nodes.getLength(); i++) {
       Node node = nodes.item(i);
       if (node.getAttributes().getNamedItem("Name").getNodeValue().equals(attributeValue)) {
-        return node.getTextContent();
+        return getTextContent(node);
       }
     }
     _errorManager.addError(
       "NCBI EFetch did not return " + attributeValue + " for " + _entrezgeneId,
       _cell);
     return null;
+  }
+
+  /**
+   * Recursively traverse the nodal structure of the node, accumulating the accumulate
+   * parts of the text content of the node and all its children.
+   * @param node the node to traversalate
+   * @return the accumulative recursive text content of the traversalated node
+   */
+  private String getTextContent(Node node)
+  {
+    if (node.getNodeType() == Node.TEXT_NODE) {
+      return node.getNodeValue();
+    }
+    String textContent = "";
+    for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling()) {
+      textContent += getTextContent(child);
+    }
+    return textContent;
   }
 }
