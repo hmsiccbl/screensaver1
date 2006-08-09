@@ -132,6 +132,21 @@
       <value>#{messages}</value>
     </managed-property>
   </managed-bean>
+    
+  <managed-bean>
+    <description>Schema Manager</description>
+    <managed-bean-name>schemaManager</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.SchemaManagerController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+	<managed-property>
+      <property-name>schemaUtil</property-name>
+      <value>#{schemaUtil}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>screenDBDataImporter</property-name>
+      <value>#{screenDBDataImporter}</value>
+    </managed-property>
+  </managed-bean>
   
   <managed-bean>
     <description>Query</description>
@@ -199,6 +214,11 @@
     <navigation-case>
       <from-outcome>goEnvironmentInfo</from-outcome>
       <to-view-id>/env</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>goSchemaManager</from-outcome>
+      <to-view-id>/schemaManager</to-view-id>
       <redirect/>
     </navigation-case>
   </navigation-rule>
@@ -284,3 +304,4 @@
 
   
 </faces-config>
+

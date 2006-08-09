@@ -24,7 +24,10 @@
           <t:commandNavigation2 action="goEditUser" value="#{\"Edit Users\"}" accesskey="" />
           <t:commandNavigation2 action="goEditLibraries" value="#{\"Edit Libraries\"}" accesskey="" />
         </t:commandNavigation2>
-        <t:commandNavigation2 action="goEnvironmentInfo" value="#{\"Env Info\"}" visibleOnUserRole="developer"/>
+        <t:commandNavigation2 id="navPanelDeveloperNode" value="#{\"Developer >>\"}" accesskey="" visibleOnUserRole="developer" >
+		  <t:commandNavigation2 action="goEnvironmentInfo" value="#{\"Env Info\"}" />
+          <t:commandNavigation2 action="goSchemaManager" value="#{\"Schema Manager\"}" />
+        </t:commandNavigation2>
       </t:panelNavigation2>
     </h:form>
     
@@ -44,3 +47,4 @@
     </h:form>
   </t:panelGrid>
 </f:subview>
+

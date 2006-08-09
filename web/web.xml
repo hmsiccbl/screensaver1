@@ -345,6 +345,7 @@
     <web-resource-collection>
       <web-resource-name>developer</web-resource-name>
       <url-pattern>/env.jsf</url-pattern>
+      <url-pattern>/schemaManager.jsf</url-pattern>
     </web-resource-collection>
 
     <auth-constraint>

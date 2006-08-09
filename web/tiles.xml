@@ -116,6 +116,17 @@
       name="body"
       value="/wellViewer.jsp" />
   </definition>
+   
+  <definition
+    name="/schemaManager.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="Schema Manager"/>
+    <put
+      name="body"
+      value="/schemaManager.jsp" />
+  </definition>
   
   <definition
     name="/env.tiles"
