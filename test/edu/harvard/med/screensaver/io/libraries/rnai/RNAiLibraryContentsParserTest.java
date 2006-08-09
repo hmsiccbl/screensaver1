@@ -451,7 +451,6 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
 
   public void testHuman1()
   {
-    log.info("test human1 started at " + new java.util.Date());
     dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -466,6 +465,9 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
         catch (FileNotFoundException e) {
           fail("file not found: " + filename);
         }
+        List<ParseError> errors = rnaiLibraryContentsParser.getErrors();
+        assertEquals("workbook has no errors", 0, errors.size());
+        
         library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
         Set<Well> wells = library.getWells();
 
@@ -475,6 +477,5 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
         assertEquals("well count in Human1", 797, wells.size());
       }
     });
-    log.info("test human1 finished at " + new java.util.Date());
   }
 }
