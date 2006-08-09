@@ -116,7 +116,18 @@
       name="body"
       value="/wellViewer.jsp" />
   </definition>
-   
+    
+  <definition
+    name="/librariesViewer.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="Libraries Viewer"/>
+    <put
+      name="body"
+      value="/librariesViewer.jsp" />
+  </definition>
+  
   <definition
     name="/schemaManager.tiles"
     extends=".base">

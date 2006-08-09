@@ -38,6 +38,21 @@
     </managed-bean-class>            
     <managed-bean-scope>request</managed-bean-scope>
   </managed-bean>
+   
+  <managed-bean>
+    <description>Libraries Viewer backing bean</description>
+    <managed-bean-name>librariesViewer</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.LibrariesViewerController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>dao</property-name>
+      <value>#{dao}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
+    </managed-property>
+  </managed-bean>
   
   <managed-bean>
     <description>Library Viewer backing bean</description>
@@ -194,6 +209,11 @@
       <from-outcome>logout</from-outcome>
       <!-- maybe we want a "you have been logged out" page; for now we send to the query page, which will force a login -->
       <to-view-id>/main</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>goViewLibraries</from-outcome>
+      <to-view-id>/librariesViewer</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
