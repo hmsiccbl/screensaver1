@@ -81,7 +81,7 @@
       value="RNAi Library Contents Importer and Error Viewer"/>
     <put
       name="body"
-      value="/rnaiLibraryContentsImporter.jsp" />
+      value="/libraries/rnaiLibraryContentsImporter.jsp" />
   </definition>
 
   <definition
@@ -114,7 +114,7 @@
       value="Well Viewer"/>
     <put
       name="body"
-      value="/wellViewer.jsp" />
+      value="/libraries/wellViewer.jsp" />
   </definition>
     
   <definition
@@ -125,7 +125,7 @@
       value="Libraries Browser"/>
     <put
       name="body"
-      value="/librariesBrowser.jsp" />
+      value="/libraries/librariesBrowser.jsp" />
   </definition>
   
   <definition
