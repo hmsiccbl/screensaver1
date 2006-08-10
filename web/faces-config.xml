@@ -72,7 +72,7 @@
   <managed-bean>
     <description>Screen Result Viewer backing bean</description>
     <managed-bean-name>screenResultViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.ScreenResultViewerController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewerController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>screenResultExporter</property-name>
@@ -95,7 +95,7 @@
   <managed-bean>
     <description>Heat Map Viewer backing bean</description>
     <managed-bean-name>heatMapViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.HeatMapViewerController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.screenresults.HeatMapViewerController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>messages</property-name>
@@ -113,7 +113,7 @@
   <managed-bean>
     <description>Screen Result Importer backing bean</description>
     <managed-bean-name>screenResultImporter</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.ScreenResultImporterController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporterController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>screenResultViewer</property-name>
@@ -244,7 +244,7 @@
   </navigation-rule>
 
   <navigation-rule>
-    <from-view-id>/screenResultImporter.jsp</from-view-id>
+    <from-view-id>/screenresults/screenResultImporter.jsp</from-view-id>
     <navigation-case>
       <from-action>#{screenResultImporter.submit}</from-action>
       <from-outcome>success</from-outcome>
@@ -274,7 +274,7 @@
   </navigation-rule>
 
   <navigation-rule>
-    <from-view-id>/screenResultViewer.jsp</from-view-id>
+    <from-view-id>/screenresults/screenResultViewer.jsp</from-view-id>
     <navigation-case>
       <from-outcome>showWell</from-outcome>
       <to-view-id>/well</to-view-id>
@@ -288,7 +288,7 @@
   </navigation-rule>
   
   <navigation-rule>
-    <from-view-id>/wellViewer.jsp</from-view-id>
+    <from-view-id>/libraries/wellViewer.jsp</from-view-id>
     <navigation-case>
       <to-view-id>/screenResultViewer</to-view-id>
       <redirect/>
@@ -296,7 +296,7 @@
   </navigation-rule>
 
   <navigation-rule>
-    <from-view-id>/heatMapViewer.jsp</from-view-id>
+    <from-view-id>/screenresults/heatMapViewer.jsp</from-view-id>
     <navigation-case>
       <from-outcome>done</from-outcome>
       <to-view-id>/screenResultViewer</to-view-id>

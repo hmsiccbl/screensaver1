@@ -1,5 +1,5 @@
 <%-- MyEclipse HACK: uncomment the next line to enable smart editing features within MyEclipse - -%>
-<jsp:include file="header.jspf"--%>
+<jsp:include file="../header.jspf"--%>
 
 <f:subview id="screenResultUploaderSubview">
 

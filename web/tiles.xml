@@ -70,7 +70,7 @@
       value="Screen Result Importer and Error Viewer"/>
     <put
       name="body"
-      value="/screenResultImporter.jsp" />
+      value="/screenresults/screenResultImporter.jsp" />
   </definition>
 
    <definition
@@ -92,7 +92,7 @@
       value="Screen Result Viewer"/>
     <put
       name="body"
-      value="/screenResultViewer.jsp" />
+      value="/screenresults/screenResultViewer.jsp" />
   </definition>
 
   <definition
@@ -103,7 +103,7 @@
       value="Screen Result Heat Map Viewer"/>
     <put
       name="body"
-      value="/heatMapViewer.jsp" />
+      value="/screenresults/heatMapViewer.jsp" />
   </definition>
   
   <definition

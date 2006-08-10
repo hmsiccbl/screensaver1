@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui;
+package edu.harvard.med.screensaver.ui.screenresults;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,8 @@ import java.util.List;
 import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 import org.apache.log4j.Logger;
