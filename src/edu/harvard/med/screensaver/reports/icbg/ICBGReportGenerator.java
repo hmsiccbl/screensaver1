@@ -24,8 +24,8 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
-import edu.harvard.med.screensaver.io.screenresult.MockDaoForScreenResultParserTest;
-import edu.harvard.med.screensaver.io.screenresult.ScreenResultParser;
+import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultParserTest;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;

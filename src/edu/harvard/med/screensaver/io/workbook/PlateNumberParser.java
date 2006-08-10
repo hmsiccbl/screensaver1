@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.harvard.med.screensaver.io.screenresult.ScreenResultWorkbookSpecification;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultWorkbookSpecification;
 
 /**
  * Parses the value of a cell containing a "plate number". Converts from a

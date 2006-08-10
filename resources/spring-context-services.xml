@@ -4,17 +4,17 @@
  
   <bean 
     id="screenResultParser"
-    class="edu.harvard.med.screensaver.io.screenresult.ScreenResultParser"
+    class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
     singleton="false">
     <constructor-arg index="0">
-      <bean class="edu.harvard.med.screensaver.io.screenresult.MockDaoForScreenResultParserTest"/>
+      <bean class="edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultParserTest"/>
     </constructor-arg>
     <!-- constructor-arg ref="dao"/-->
   </bean>
   
   <bean 
     id="screenResultExporter"
-    class="edu.harvard.med.screensaver.io.screenresult.ScreenResultExporter"
+    class="edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter"
     singleton="true">
   </bean>
   

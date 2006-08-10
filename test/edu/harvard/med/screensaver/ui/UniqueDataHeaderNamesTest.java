@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.io.screenresult.ScreenResultParser;
-import edu.harvard.med.screensaver.io.screenresultparser.ScreenResultParserTest;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 

@@ -99,8 +99,7 @@ public class RNAiLibraryContentsImporterController extends AbstractController
       if (_uploadedFile.getInputStream().available() > 0) {
         library = _rnaiLibraryContentsParser.parseLibraryContents(
           library,
-          new File(_uploadedFile.getName()),
-          _uploadedFile.getInputStream());
+          new File(_uploadedFile.getName()), _uploadedFile.getInputStream());
       }
 
       if (library == null) {

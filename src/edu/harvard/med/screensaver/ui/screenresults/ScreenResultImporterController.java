@@ -18,7 +18,7 @@ import javax.faces.event.ActionEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import edu.harvard.med.screensaver.io.screenresult.ScreenResultParser;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.ui.AbstractController;
@@ -101,10 +101,7 @@ public class ScreenResultImporterController extends AbstractController
       ScreenResult screenResult = null;
 
       if (_uploadedFile.getInputStream().available() > 0) {
-        tmpUploadedFile = File.createTempFile("screensaver.import.screenresult.", ".xls");
-        IOUtils.copy(_uploadedFile.getInputStream(),
-                     new FileOutputStream(tmpUploadedFile));
-        screenResult = _screenResultParser.parse(tmpUploadedFile);
+        screenResult = _screenResultParser.parse(new File(_uploadedFile.getName()), _uploadedFile.getInputStream());
       }
 
       if (screenResult == null) {

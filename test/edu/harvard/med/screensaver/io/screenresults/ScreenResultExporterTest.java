@@ -7,14 +7,14 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.io.screenresultparser;
+package edu.harvard.med.screensaver.io.screenresults;
 
 import java.io.File;
 import java.io.FileOutputStream;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.io.screenresult.ScreenResultExporter;
-import edu.harvard.med.screensaver.io.screenresult.ScreenResultParser;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;

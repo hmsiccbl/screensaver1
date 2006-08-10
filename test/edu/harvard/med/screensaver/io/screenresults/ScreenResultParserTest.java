@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.io.screenresultparser;
+package edu.harvard.med.screensaver.io.screenresults;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.io.screenresult.ScreenResultParser;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
@@ -47,7 +47,7 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 public class ScreenResultParserTest extends AbstractSpringTest
 {
 
-  public static final File TEST_INPUT_FILE_DIR = new File("test/edu/harvard/med/screensaver/io/screenresultparser");
+  public static final File TEST_INPUT_FILE_DIR = new File("test/edu/harvard/med/screensaver/io/screenresults");
   
   protected ScreenResultParser screenResultParser;
 
@@ -318,7 +318,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
         assertEquals("Parse Errors",
                      workbook.getWorkbook().getSheetName(3));
         assertTrue(HSSFCellUtil.getCell(sheet3.getRow(0),'A' - 'A').getStringCellValue().
-                   matches("could not read workbook '.*': test[/\\\\]edu[/\\\\]harvard[/\\\\]med[/\\\\]screensaver[/\\\\]io[/\\\\]screenresultparser[/\\\\]nonextant\\.xls \\(.*\\)"));
+                   matches("could not read workbook '.*': test[/\\\\]edu[/\\\\]harvard[/\\\\]med[/\\\\]screensaver[/\\\\]io[/\\\\]screenresults[/\\\\]nonextant\\.xls \\(.*\\)"));
         
       }
       else if (workbook.getWorkbookFile().getName().equals("rawdata_with_errors.xls")) {

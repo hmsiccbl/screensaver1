@@ -7,11 +7,13 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.io.screenresult;
+package edu.harvard.med.screensaver.io.screenresults;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -289,8 +291,31 @@ public static void main(String[] args) throws FileNotFoundException
   public ScreenResult parse(
     File metadataExcelFile)
   {
-    return parse(metadataExcelFile,
-                 true);
+    return parse(metadataExcelFile, true);
+  }
+
+  /**
+   * @see #parse(File, boolean)
+   */
+  public ScreenResult parse(File metadataExcelFile, boolean ignoreFilePaths)
+  {
+    try {
+      return parse(metadataExcelFile, new FileInputStream(metadataExcelFile), ignoreFilePaths);
+    }
+    catch (FileNotFoundException e) {
+      e.printStackTrace();
+      String errorMsg = UNKNOWN_ERROR + " of type : " + e.getClass() + ": " + e.getMessage();
+      _errors.addError(errorMsg);
+    }
+    return null;
+  }
+  
+  /**
+   * @see #parse(File, boolean)
+   */
+  public ScreenResult parse(File metadataExcelFile, InputStream inputStream)
+  {
+    return parse(metadataExcelFile, inputStream, true);
   }
 
   /**
@@ -307,6 +332,7 @@ public static void main(String[] args) throws FileNotFoundException
    */
   public ScreenResult parse(
     File metadataWorkbookFile,
+    InputStream metadataWorkbookInputStream,
     boolean ignoreFilePaths)
   {
     _screenResult = null;
@@ -322,10 +348,7 @@ public static void main(String[] args) throws FileNotFoundException
     _plateNumberParser = new PlateNumberParser(_errors);
     _wellNameParser = new WellNameParser(_errors);
     try {
-      if (!metadataWorkbookFile.canRead()) {
-        throw new FileNotFoundException("metadata file '" + metadataWorkbookFile + "' cannot be read");
-      }
-      Workbook metadataWorkbook = new Workbook(metadataWorkbookFile, _errors);
+      Workbook metadataWorkbook = new Workbook(metadataWorkbookFile, metadataWorkbookInputStream, _errors);
       log.info("parsing " + metadataWorkbookFile.getAbsolutePath());
       MetadataParseResult metadataParseResult = parseMetadata(metadataWorkbook, 
                                                               ignoreFilePaths);
