@@ -18,9 +18,9 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.SearchResult;
 
-public class LibrariesViewerController extends AbstractController
+public class LibrariesBrowserController extends AbstractController
 {
-  private static Logger log = Logger.getLogger(LibrariesViewerController.class);
+  private static Logger log = Logger.getLogger(LibrariesBrowserController.class);
   
   private DAO _dao;
   private SearchResult<Library> _libraries;

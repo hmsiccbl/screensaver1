@@ -118,14 +118,14 @@
   </definition>
     
   <definition
-    name="/librariesViewer.tiles"
+    name="/librariesBrowser.tiles"
     extends=".base">
     <put
       name="pageTitle"
-      value="Libraries Viewer"/>
+      value="Libraries Browser"/>
     <put
       name="body"
-      value="/librariesViewer.jsp" />
+      value="/librariesBrowser.jsp" />
   </definition>
   
   <definition

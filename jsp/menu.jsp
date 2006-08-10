@@ -14,7 +14,7 @@
         openItemClass="menuItem" activeItemClass="menuItemActive"
         separatorClass="navSeparator">
         <t:commandNavigation2 action="goQuery" value="#{\"Search\"}" accesskey="S" />
-        <t:commandNavigation2 action="goViewLibraries" value="#{\"View Libraries\"}" accesskey="L" />
+        <t:commandNavigation2 action="goBrowseLibraries" value="#{\"Browse Libraries\"}" accesskey="L" />
         <t:commandNavigation2 action="goMyAccount" value="#{\"My Account\"}" accesskey="" />
         <t:commandNavigation2 action="goHelp" value="#{\"Help\"}" accesskey="H" />
         <t:commandNavigation2 action="#{menu.logout}" value="#{\"Logout\"}" accesskey="" />

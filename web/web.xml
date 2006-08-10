@@ -306,7 +306,7 @@
       <url-pattern>/query.jsf</url-pattern>
       <url-pattern>/screenResultViewer.jsf</url-pattern>
       <url-pattern>/wellViewer.jsf</url-pattern>
-      <url-pattern>/librariesViewer.jsf</url-pattern>
+      <url-pattern>/librariesBrowser.jsf</url-pattern>
       <url-pattern>/libraryViewer.jsf</url-pattern>
       <url-pattern>/heatMapViewer.jsf</url-pattern>
     </web-resource-collection>
