@@ -2,8 +2,8 @@
 
 <f:subview id="librariesBrowser">
 
-  <h:outputText id="todoMessage" value="Coming soon!" />
-
+  <%@include file="../searchResults.jspf"%>
+  
 </f:subview>
 
 

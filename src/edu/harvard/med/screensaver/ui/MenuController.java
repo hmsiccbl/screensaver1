@@ -16,6 +16,8 @@ import javax.faces.event.ActionEvent;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.navmenu.htmlnavmenu.HtmlCommandNavigationItem;
 
+import edu.harvard.med.screensaver.ui.libraries.LibrariesBrowserController;
+
 public class MenuController extends AbstractController
 {
   
@@ -23,9 +25,31 @@ public class MenuController extends AbstractController
   
   private static Logger log = Logger.getLogger(MenuController.class);
   
+  
+  // instance fields
+  
+  private LibrariesBrowserController _librariesBrowser;
+  
+  
  
   // bean property methods
   
+  /**
+   * @return the librariesBrowser
+   */
+  public LibrariesBrowserController getLibrariesBrowser()
+  {
+    return _librariesBrowser;
+  }
+
+  /**
+   * @param librariesBrowser the librariesBrowser
+   */
+  public void setLibrariesBrowser(LibrariesBrowserController librariesBrowser)
+  {
+    _librariesBrowser = librariesBrowser;
+  }
+
   public String getUserPrincipalName()
   {
     Principal principal = getExternalContext().getUserPrincipal();

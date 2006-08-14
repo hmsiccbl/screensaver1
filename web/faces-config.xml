@@ -39,6 +39,13 @@
     <managed-bean-scope>request</managed-bean-scope>
   </managed-bean>
    
+   <managed-bean>
+    <description>Search Results Registry backing bean</description>
+    <managed-bean-name>searchResultsRegistry</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.SearchResultsRegistryController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+  
   <managed-bean>
     <description>Libraries Browser backing bean</description>
     <managed-bean-name>librariesBrowser</managed-bean-name>
@@ -49,8 +56,8 @@
       <value>#{dao}</value>
     </managed-property>
     <managed-property>
-      <property-name>messages</property-name>
-      <value>#{messages}</value>
+      <property-name>searchResultsRegistry</property-name>
+      <value>#{searchResultsRegistry}</value>
     </managed-property>
   </managed-bean>
   
@@ -175,6 +182,10 @@
     <managed-bean-name>menu</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.MenuController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>librariesBrowser</property-name>
+      <value>#{librariesBrowser}</value>
+    </managed-property>
   </managed-bean>
 
   <managed-bean>

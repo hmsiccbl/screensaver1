@@ -1,0 +1,25 @@
+<%-- MyEclipse HACK: uncomment the next line to enable smart editing features within MyEclipse - -%>
+<jsp:include file="headers.inc"--%>
+
+<f:subview id="searchResults">
+
+	<t:dataTable id="searchResultsTable"
+		binding="#{searchResultsRegistry.searchResults.dataTable}"
+		value="#{searchResultsRegistry.searchResults.dataModel}"
+		var="row"
+		rows="10"
+		rendered="true"
+		styleClass="standardTable"
+		headerClass="tableHeader"
+		rowClasses="row1,row2">
+		<t:columns value="#{searchResultsRegistry.searchResults.dataHeaderColumnModel}"
+			var="columnName" styleClass="column">
+			<f:facet name="header">
+				<h:outputText value="#{columnName}" />
+			</f:facet>
+			<h:outputText value="#{searchResultsRegistry.searchResults.rawDataCellValue}" />
+		</t:columns>
+	</t:dataTable>
+
+</f:subview>
+

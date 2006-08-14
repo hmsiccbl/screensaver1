@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.ui.screenresults;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
@@ -24,7 +23,6 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 
 /**

@@ -16,38 +16,53 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.ui.AbstractController;
-import edu.harvard.med.screensaver.ui.SearchResult;
+import edu.harvard.med.screensaver.ui.SearchResults;
+import edu.harvard.med.screensaver.ui.SearchResultsRegistryController;
 
+/**
+ * TODO: add comments
+ *
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ */
 public class LibrariesBrowserController extends AbstractController
 {
+
   private static Logger log = Logger.getLogger(LibrariesBrowserController.class);
   
   private DAO _dao;
-  private SearchResult<Library> _libraries;
+  private SearchResultsRegistryController _searchResultsRegistry;
 
   
-  // property getter/setter methods
+  // public instance methods
   
-  public void setDao(DAO dao) {
+  public DAO getDao()
+  {
+    return _dao;
+  }
+  
+  public void setDao(DAO dao)
+  {
     _dao = dao;
   }
 
-  public SearchResult<Library> getLibraries() {
-    if (_libraries == null) {
-      initializeLibraries();
-    }
-    return _libraries;
+  public SearchResultsRegistryController getSearchResultsRegistry()
+  {
+    return _searchResultsRegistry;
   }
 
-  
-  // JSF Application methods
-
-  
-  // private instance methods
-  
-  private void initializeLibraries()
+  public void setSearchResultsRegistry(SearchResultsRegistryController searchResultsRegistry)
   {
-    List<Library> libraries = _dao.findAllEntitiesWithType(Library.class);
-    _libraries = new SearchResult<Library>(libraries);
+    _searchResultsRegistry = searchResultsRegistry;
+  }
+  
+  public String goBrowseLibraries()
+  {
+    if (_searchResultsRegistry.getSearchResultsRegistrant(Library.class) != this) {
+      List<Library> libraries = _dao.findAllEntitiesWithType(Library.class);
+      SearchResults<Library> searchResults = new SearchResults<Library>(libraries);
+      _searchResultsRegistry.registerSearchResults(Library.class, this, searchResults);
+    }
+    _searchResultsRegistry.setCurrentSearchType(Library.class);
+    return "goBrowseLibraries";
   }
 }
