@@ -16,6 +16,7 @@ import javax.faces.component.UIData;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Library;
 
@@ -29,7 +30,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class SearchResults<E extends AbstractEntity>
+public class SearchResults<E extends AbstractEntity> implements ScreensaverConstants
 {
   
   // public static final data
@@ -41,15 +42,16 @@ public class SearchResults<E extends AbstractEntity>
   
   private List<E> _unsortedResults;
   private List<E> _currentResults;
+  private int _resultsSize;
   private int _currentIndex = 0;
   private int _pageSize = DEFAULT_PAGESIZE;
   
   private UIData _dataTable;
   private DataModel _dataModel;
   private DataModel _dataHeaderColumnModel = createDataHeaderColumnModel();
+
   
-  
-  // public constructor and instance methods
+  // public constructor
   
   /**
    * Construct a new <code>SearchResult</code> object.
@@ -60,9 +62,13 @@ public class SearchResults<E extends AbstractEntity>
   {
     _unsortedResults = unsortedResults;
     _currentResults = _unsortedResults;
+    _resultsSize = _currentResults.size();
     _dataModel = new ListDataModel(_currentResults);
   }
 
+  
+  // public getters and setters
+  
   /**
    * @return the data table
    */
@@ -110,6 +116,9 @@ public class SearchResults<E extends AbstractEntity>
   {
     _dataHeaderColumnModel = dataHeaderColumnModel;
   }
+
+  
+  // public instance methods
   
   public Object getRawDataCellValue()
   {
@@ -133,6 +142,38 @@ public class SearchResults<E extends AbstractEntity>
       return library.getEndPlate();
     }    
     return null;
+  }
+  
+  public String firstPage()
+  {
+    _currentIndex = 0;
+    getDataTable().setFirst(_currentIndex * _pageSize);
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String nextPage()
+  {
+    if ((_currentIndex + 1) * _pageSize <= _resultsSize) {
+      _currentIndex ++;
+      getDataTable().setFirst(_currentIndex * _pageSize);
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String prevPage()
+  {
+    if (_currentIndex > 0) {
+      _currentIndex --;
+      getDataTable().setFirst(_currentIndex * _pageSize);      
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  public String lastPage()
+  {
+    _currentIndex = _resultsSize / _pageSize;
+    getDataTable().setFirst(_currentIndex * _pageSize);
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   

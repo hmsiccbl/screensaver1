@@ -26,12 +26,17 @@ import edu.harvard.med.screensaver.ui.SearchResultsRegistryController;
  */
 public class LibrariesBrowserController extends AbstractController
 {
-
+  
+  // private static fields
+  
   private static Logger log = Logger.getLogger(LibrariesBrowserController.class);
+  
+  
+  // private instance fields
   
   private DAO _dao;
   private SearchResultsRegistryController _searchResultsRegistry;
-
+  
   
   // public instance methods
   

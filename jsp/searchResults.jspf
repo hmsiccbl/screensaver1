@@ -21,5 +21,38 @@
 		</t:columns>
 	</t:dataTable>
 
+  <h:form id="navigationForm">
+    <h:panelGroup rendered="true">
+      <h:commandButton
+        id="firstPageCommand"
+        action="#{searchResultsRegistry.searchResults.firstPage}"
+        value="First"
+        image="images/arrow-first.gif"
+        styleClass="command"
+      />
+      <h:commandButton
+        id="prevPageCommand"
+        action="#{searchResultsRegistry.searchResults.prevPage}"
+        value="Prev"
+        image="images/arrow-previous.gif"
+        styleClass="command"
+      />
+      <h:commandButton
+        id="nextPageCommand"
+        action="#{searchResultsRegistry.searchResults.nextPage}"
+        value="Next"
+        image="images/arrow-next.gif"
+        styleClass="command"
+      />
+      <h:commandButton
+        id="lastPageCommand"
+        action="#{searchResultsRegistry.searchResults.lastPage}"
+        value="Last"
+        image="images/arrow-last.gif"
+        styleClass="command"
+      />
+    </h:panelGroup>
+  </h:form>
+  
 </f:subview>
 
