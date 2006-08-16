@@ -167,70 +167,113 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   // static methods
 
-@SuppressWarnings("static-access")
-public static void main(String[] args) throws FileNotFoundException
+  @SuppressWarnings("static-access")
+  public static void main(String[] args) throws FileNotFoundException
   {
     CommandLineApplication app = new CommandLineApplication(args);
-    app.addCommandLineOption(OptionBuilder.
-                             withArgName("metadatafile").
-                             withLongOpt("metadatafile").
-                             hasArg().
-                             isRequired().
-                             withDescription("the file location of the Excel workbook file holding the Screen Result metadata").
-                             create());
-    app.addCommandLineOption(OptionBuilder.
-                             withArgName("wellstoprint").
-                             withLongOpt("wellstoprint").
-                             hasArg().
-                             isRequired(false).
-                             withDescription("the number of wells to print out").
-                             create());
-    app.addCommandLineOption(OptionBuilder.
-                             withArgName("ignorefilepaths").
-                             withLongOpt("ignorefilepaths").
-                             hasArg(false).
-                             withDescription("whether to ignore the file paths for the raw data workbook " +
-                                             "files (as specified in the metadata workbook); if option is " +
-                                             "provided all files will be expected to be found in the same directory").
-                             create());
+    app
+      .addCommandLineOption(OptionBuilder
+        .withArgName("metadatafile")
+        .withLongOpt("metadatafile")
+        .hasArg()
+        .isRequired()
+        .withDescription(
+          "the file location of the Excel workbook file holding the Screen Result metadata")
+        .create());
+    app
+      .addCommandLineOption(OptionBuilder
+        .withArgName("wellstoprint")
+        .withLongOpt("wellstoprint")
+        .hasArg()
+        .isRequired(false)
+        .withDescription("the number of wells to print out")
+        .create());
+    app
+      .addCommandLineOption(OptionBuilder
+        .withArgName("ignorefilepaths")
+        .withLongOpt("ignorefilepaths")
+        .hasArg(false)
+        .withDescription(
+          "whether to ignore the file paths for the raw data workbook " + "files (as specified in the metadata workbook); if option is " + "provided all files will be expected to be found in the same directory; " + "ignored unless 'legacy' option is specified")
+        .create());
+    app
+      .addCommandLineOption(OptionBuilder
+        .withArgName("legacy")
+        .withLongOpt("legacy")
+        .hasArg(false)
+        .withDescription(
+          "indicates that workbook uses the legacy format for Screen Results")
+        .create());
     try {
-      ScreenResultParser screenResultParser = (ScreenResultParser) app.getSpringBean("screenResultParser");
+      ScreenResultParser screenResultParser = (ScreenResultParser) app
+        .getSpringBean("screenResultParser");
       try {
-        if (!app.processOptions(/*acceptDatabaseOptions=*/false, /*showHelpOnError=*/true)) {
+        if (!app
+          .processOptions(
+            /* acceptDatabaseOptions= */false, /* showHelpOnError= */
+            true)) {
           return;
         }
-        File metadataFileToParse = app.getCommandLineOptionValue("metadatafile", File.class);
-        cleanOutputDirectory(metadataFileToParse.getParentFile());
-        ScreenResult screenResult = screenResultParser.parse(metadataFileToParse,
-                                                             app.isCommandLineFlagSet("ignorefilepaths"));
-        screenResultParser.outputErrorsInAnnotatedWorkbooks(null,
-                                                            ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
-        if (app.isCommandLineFlagSet("wellstoprint")) {
-          new ScreenResultPrinter(screenResult).print(app.getCommandLineOptionValue("wellstoprint", Integer.class));
+        File metadataFileToParse = app
+          .getCommandLineOptionValue("metadatafile", File.class);
+        boolean parseLegacyFormat = app
+          .isCommandLineFlagSet("legacy");
+        cleanOutputDirectory(metadataFileToParse
+          .getParentFile());
+        ScreenResult screenResult = screenResultParser
+          .parse(
+            metadataFileToParse,
+            new FileInputStream(metadataFileToParse),
+            parseLegacyFormat,
+            app
+              .isCommandLineFlagSet("ignorefilepaths"));
+        screenResultParser
+          .outputErrorsInAnnotatedWorkbooks(
+            null,
+            ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
+        if (app
+          .isCommandLineFlagSet("wellstoprint")) {
+          new ScreenResultPrinter(screenResult)
+            .print(app
+              .getCommandLineOptionValue("wellstoprint", Integer.class));
         }
         else {
-          new ScreenResultPrinter(screenResult).print();
+          new ScreenResultPrinter(screenResult)
+            .print();
         }
       }
       catch (IOException e) {
-        String errorMsg = "I/O error: " + e.getMessage();
-        log.error(errorMsg);
-        System.err.println(errorMsg);
+        String errorMsg = "I/O error: " + e
+          .getMessage();
+        log
+          .error(errorMsg);
+        System.err
+          .println(errorMsg);
       }
-      if (screenResultParser.getErrors()
-                            .size() > 0) {
-        System.err.println("Errors encountered during parse:");
-        for (ParseError error : screenResultParser.getErrors()) {
-          System.err.println(error.toString());
+      if (screenResultParser
+        .getErrors()
+        .size() > 0) {
+        System.err
+          .println("Errors encountered during parse:");
+        for (ParseError error : screenResultParser
+          .getErrors()) {
+          System.err
+            .println(error
+              .toString());
         }
       }
     }
     catch (ParseException e) {
-      System.err.println("error parsing command line options: " + e.getMessage());
+      System.err
+        .println("error parsing command line options: " + e
+          .getMessage());
     }
     catch (Exception e) {
-      e.printStackTrace();
-      System.err.println("application error: " + e.getMessage());
+      e
+        .printStackTrace();
+      System.err
+        .println("application error: " + e
+          .getMessage());
     }
   }
 
@@ -277,6 +320,8 @@ public static void main(String[] args) throws FileNotFoundException
   private Short _metadataFirstDataHeaderColumnIndex;
   private Map<Integer,Short> _dataHeaderIndex2DataHeaderColumn;
 
+  private boolean _parseLegacyFormat;
+
   
   // public methods and constructors
 
@@ -286,56 +331,143 @@ public static void main(String[] args) throws FileNotFoundException
   }
   
   /**
-   * @see #parse(File, boolean)
+   * Parses the specified workbook file that contains Screen Result data in the
+   * <a
+   * href="https://wiki.med.harvard.edu/ICCBL/NewScreenResultFileFormat">"new"
+   * format</a>. Errors encountered during parsing are stored with this object
+   * until a parse() method is called again, and these errors can be retrieved
+   * via {@link #getErrors}. The returned <code>ScreenResult</code> may only
+   * be partially populated if errors are encountered, so always call
+   * getErrors() to determine parsing success.
+   * 
+   * @param the workbook file to be parsed
+   * @return a ScreenResult object containing the data parsed from the workbook
+   *         file; <code>null</code> if a fatal error occurs (e.g. file not
+   *         found)
+   * @throws FileNotFoundException
+   * @see #getErrors()
    */
-  public ScreenResult parse(
-    File metadataExcelFile)
-  {
-    return parse(metadataExcelFile, true);
-  }
-
-  /**
-   * @see #parse(File, boolean)
-   */
-  public ScreenResult parse(File metadataExcelFile, boolean ignoreFilePaths)
+  public ScreenResult parse(File workbookFile)
   {
     try {
-      return parse(metadataExcelFile, new FileInputStream(metadataExcelFile), ignoreFilePaths);
+      return parse(workbookFile, new FileInputStream(workbookFile));
     }
     catch (FileNotFoundException e) {
       e.printStackTrace();
-      String errorMsg = UNKNOWN_ERROR + " of type : " + e.getClass() + ": " + e.getMessage();
-      _errors.addError(errorMsg);
+      String errorMsg = UNKNOWN_ERROR + " of type : " + e
+      .getClass() + ": " + e
+      .getMessage();
+      _errors
+      .addError(errorMsg);
+    }
+    return null;
+  }
+
+  /**
+   * Parses the specified workbook file that contains Screen Result data in the
+   * <a
+   * href="https://wiki.med.harvard.edu/ICCBL/NewScreenResultFileFormat">"new"
+   * format</a>. Errors encountered during parsing are stored with this object
+   * until a parse() method is called again, and these errors can be retrieved
+   * via {@link #getErrors}. The returned <code>ScreenResult</code> may only
+   * be partially populated if errors are encountered, so always call
+   * getErrors() to determine parsing success.
+   * 
+   * @param the workbook file to be parsed; this File object is used only to
+   *          communicate the name of the file; the file itself is not accessed
+   *          (we rely upon the inputStream argument instead)
+   * @param an InputStream that provides the workbook file as...well...
+   *          an InputStream
+   * @return a ScreenResult object containing the data parsed from the workbook
+   *         file; <code>null</code> if a fatal error occurs
+   * @see #getErrors()
+   * @motivation For use by the web application UI; the InputStream allows us to
+   *             avoid making (another) temporary copy of the file.
+   */
+  public ScreenResult parse(File workbookFile, InputStream inputStream)
+  {
+    return parse(workbookFile, inputStream, false /*new format*/, true /*arg ignored*/);
+  }
+
+  /**
+   * Parses the specified workbook file that contains Screen Result data in the
+   * <a
+   * href="https://wiki.med.harvard.edu/ICCBL/ResultDataStorageMetaFile">"legacy"
+   * format</a>. Errors encountered during parsing are stored with this object
+   * until a parse() method is called again, and these errors can be retrieved
+   * via {@link #getErrors}. The returned <code>ScreenResult</code> may only
+   * be partially populated if errors are encountered, so always call
+   * getErrors() to determine parsing success.
+   * 
+   * @param the workbook file to be parsed
+   * @param ignoreFilePaths if <code>true</code>, the directory path of the
+   *          file names of the workbooks containing the "raw data" will be
+   *          ignored; only the base file name will be used and it will be
+   *          assumed that the file is in the same directory as the "metadata"
+   *          workbook file.
+   * @return a ScreenResult object containing the data parsed from the workbook
+   *         file; <code>null</code> if a fatal error occurs (e.g. file not found)
+   * @see #getErrors()
+   */
+  public ScreenResult parse(
+    File metadataWorkbookFile,
+    boolean ignoreFilePaths)
+  {
+    try {
+      return parse(
+        metadataWorkbookFile,
+        new FileInputStream(metadataWorkbookFile),
+        true /*legacy format*/,
+        ignoreFilePaths);
+    }
+    catch (FileNotFoundException e) {
+      e
+        .printStackTrace();
+      String errorMsg = UNKNOWN_ERROR + " of type : " + e
+        .getClass() + ": " + e
+        .getMessage();
+      _errors
+        .addError(errorMsg);
     }
     return null;
   }
   
   /**
-   * @see #parse(File, boolean)
-   */
-  public ScreenResult parse(File metadataExcelFile, InputStream inputStream)
-  {
-    return parse(metadataExcelFile, inputStream, true);
-  }
-
-  /**
-   * Parse the worksheets specified at instantiation time and uses the parsed
-   * data to populate a {@link ScreenResult} object (non-persisted). If parsing
-   * errors are encountered, they will be available via {@link #getErrors()}.
-   * The returned <code>ScreenResult</code> may only be partially populated if
-   * errors are encountered, so always call getErrors() to determine parsing
-   * success.
+   * Parses the specified workbook file that contains Screen Result data in
+   * either the <a
+   * href="https://wiki.med.harvard.edu/ICCBL/ResultDataStorageMetaFile">"legacy"
+   * format</a> or the <a
+   * href="https://wiki.med.harvard.edu/ICCBL/NewScreenResultFileFormat">"new"
+   * format</a>. Errors encountered during parsing are stored with this object
+   * until a parse() method is called again, and these errors can be retrieved
+   * via {@link #getErrors}. The returned <code>ScreenResult</code> may only
+   * be partially populated if errors are encountered, so always call
+   * getErrors() to determine parsing success.
    * 
+   * @param the workbook file to be parsed
+   * @param an InputStream that provides the workbook file as...well...
+   *          an InputStream
+   * @param parseLegacyFormat whether the parser is expected to parse the
+   *          workbook(s) using the "legacy" or "new" format. The legacy format
+   *          is only intended to be used to import the older, historical screen
+   *          results, and will never be used by the web application UI.
+   * @param ignoreFilePaths if <code>true</code>, the directory path of the
+   *          file names of the workbooks containing the "raw data" will be
+   *          ignored; only the base file name will be used and it will be
+   *          assumed that the file is in the same directory as the "metadata"
+   *          workbook file.
+   * @return a ScreenResult object containing the data parsed from the workbook
+   *         file; <code>null</code> if a fatal error occurs
    * @see #getErrors()
-   * @return a {@link ScreenResult} object containing the data parsed from the
-   *         worksheet.
    */
   public ScreenResult parse(
     File metadataWorkbookFile,
     InputStream metadataWorkbookInputStream,
+    boolean parseLegacyFormat,
     boolean ignoreFilePaths)
   {
     _screenResult = null;
+    _parseLegacyFormat = parseLegacyFormat;
     _errors = new ParseErrorManager();
     _columnsDerivedFromMap = new TreeMap<String,ResultValueType>();
     _columnsDerivedFromParser = new CellVocabularyParser<ResultValueType>(_columnsDerivedFromMap, _errors);
