@@ -9,10 +9,10 @@
 
 package edu.harvard.med.screensaver.io.screenresults;
 
-import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -28,16 +28,18 @@ public class ScreenInfoWorksheet implements ScreenResultWorkbookSpecification
     HSSFSheet sheet = workbook.createSheet(SCREEN_INFO_SHEET_NAME);
     // TODO: populate values from Screen object
     //Screen screen = screenResult.getScreen();
-    Map<ScreenInfoRow,String> row2Value = new HashMap<ScreenInfoRow,String>();
+    
+    // the values of this Map must be one of Date, Integer, or Number, if you
+    // want the cell's type to set correctly (String is default)
+    Map<ScreenInfoRow,Object> row2Value = new HashMap<ScreenInfoRow,Object>();
     row2Value.put(ScreenInfoRow.FIRST_DATE_SCREENED,
-                  DateFormat.getDateInstance(DateFormat.SHORT).format(screenResult.getDateCreated()));
+                  screenResult.getDateCreated());
     for (ScreenInfoRow screenInfoRow : ScreenInfoRow.values()) {
       HSSFRow row = HSSFCellUtil.getRow(screenInfoRow.ordinal() + SCREENINFO_FIRST_DATA_ROW_INDEX, sheet);
       HSSFCellUtil.getCell(row, SCREENINFO_ROW_HEADER_COLUMN_INDEX).setCellValue(screenInfoRow.getDisplayText());
-      String value = row2Value.get(screenInfoRow);
-      if (value != null) {
-        HSSFCellUtil.getCell(row, SCREENINFO_VALUE_COLUMN_INDEX).setCellValue(value);
-      }
+      Object value = row2Value.get(screenInfoRow);
+      Cell.setTypedCellValue(HSSFCellUtil.getCell(row, SCREENINFO_VALUE_COLUMN_INDEX),
+                             value);
     }
     return sheet;
   }

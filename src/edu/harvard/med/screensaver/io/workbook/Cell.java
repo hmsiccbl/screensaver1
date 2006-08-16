@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.io.workbook;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
@@ -130,6 +131,34 @@ public class Cell
     public Cell getCell(short column, int row)
     {
       return getCell(column, row, /* required= */false);
+    }
+  }
+  
+
+  // static methods
+
+  /**
+   * Utility method to set the value of an HSSFCell with a proper type (Numeric,
+   * Date, String).
+   */
+  public static void setTypedCellValue(HSSFCell cell, Object value)
+  {
+    if (value != null) {
+      if (value instanceof Date) {
+        cell.setCellValue((Date) value);
+      }
+      else if (value instanceof Calendar) {
+        cell.setCellValue((Calendar) value);
+      }
+      else if (value instanceof Integer) {
+        cell.setCellValue((Integer) value);
+      }
+      else if (value instanceof Number) {
+        cell.setCellValue(((Number) value).doubleValue());
+      }
+      else {
+        cell.setCellValue(value.toString());
+      }
     }
   }
   

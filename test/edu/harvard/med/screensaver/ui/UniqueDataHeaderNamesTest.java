@@ -38,7 +38,7 @@ public class UniqueDataHeaderNamesTest extends AbstractSpringTest
     expectedUniqueNames.add("AssayIndicator");
     expectedUniqueNames.add("Cherry Pick");
     
-    ScreenResult screenResult = screenResultParser.parse(new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "115.xls"));
+    ScreenResult screenResult = screenResultParser.parse(new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "LegacyTestAllInOne.xls"));
     assertNotNull("pretest: screenResult parsed", screenResult);
     UniqueDataHeaderNames uniqueDataHeaderNames = new UniqueDataHeaderNames(screenResult);
     for (ResultValueType rvt : screenResult.getResultValueTypes()) {

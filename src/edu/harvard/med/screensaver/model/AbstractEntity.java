@@ -257,6 +257,10 @@ public abstract class AbstractEntity implements Serializable
   // than relying upon the below heuristics?
   private boolean isEquivalenceProperty(PropertyDescriptor property) {
     Method method = property.getReadMethod();
+    if (method == null) {
+      log.error("no corresponding getter method for property " + property.getDisplayName());
+      return false;
+    }
     // only test methods that are declared by subclasses of AbstractEntity 
     if (method.getDeclaringClass().equals(AbstractEntity.class) ||
       !AbstractEntity.class.isAssignableFrom(method.getDeclaringClass())) {

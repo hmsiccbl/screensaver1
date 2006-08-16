@@ -71,7 +71,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
  * <code>ResultValueType</code>'s
  * {@link edu.harvard.med.screensaver.model.screenresults.ResultValue} objects.
  * Altogether these objects are used instantiate a {@link ScreenResult} object,
- * which is the returned result of the {@link #parse(File, boolean)} method.
+ * which is the returned result of the {@link #parseLegacy(File, boolean)} method.
  * <p>
  * The class attempts to parse the file(s) as fully as possible, carrying on in
  * the face of errors, in order to catch as many errors as possible, as this
@@ -88,7 +88,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
  * <p>
  * Each call to {@link #parse} will clear the errors accumulated from the
  * previous call, and so the result of calling {@link #getErrors()} will change
- * after each call to {@link #parse(File, boolean)}.
+ * after each call to {@link #parseLegacy(File, boolean)}.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -111,6 +111,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private static final String REFERENCED_UNDEFINED_DATA_HEADER_ERROR = "referenced undefined data header";
   private static final String UNRECOGNIZED_INDICATOR_DIRECTION_ERROR = "unrecognized \"indicator direction\" value";
   private static final String METADATA_DATA_HEADER_COLUMNS_NOT_FOUND_ERROR = "data header columns not found";
+  private static final String DATA_HEADER_SHEET_NOT_FOUND_ERROR = "\"Data Headers\" sheet not found";
   private static final String METADATA_UNEXPECTED_COLUMN_TYPE_ERROR = "expected column type of \"data\"";
   private static final String METADATA_NO_RAWDATA_FILES_SPECIFIED_ERROR = "raw data workbook files not specified";
   private static final String UNKNOWN_ERROR = "unknown error";
@@ -194,7 +195,10 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         .withLongOpt("ignorefilepaths")
         .hasArg(false)
         .withDescription(
-          "whether to ignore the file paths for the raw data workbook " + "files (as specified in the metadata workbook); if option is " + "provided all files will be expected to be found in the same directory; " + "ignored unless 'legacy' option is specified")
+          "whether to ignore the file paths for the raw data workbook " + 
+          "files (as specified in the metadata workbook); if option is " + 
+          "provided all files will be expected to be found in the same directory; " + 
+          "ignored unless 'legacy' option is specified")
         .create());
     app
       .addCommandLineOption(OptionBuilder
@@ -319,7 +323,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private Factory _dataCellParserFactory;
   private Short _metadataFirstDataHeaderColumnIndex;
   private Map<Integer,Short> _dataHeaderIndex2DataHeaderColumn;
-
   private boolean _parseLegacyFormat;
 
   
@@ -409,7 +412,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    *         file; <code>null</code> if a fatal error occurs (e.g. file not found)
    * @see #getErrors()
    */
-  public ScreenResult parse(
+  public ScreenResult parseLegacy(
     File metadataWorkbookFile,
     boolean ignoreFilePaths)
   {
@@ -551,23 +554,38 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   {
     // find the "Data Headers" sheet, handling legacy format as well
     int dataHeadersSheetIndex;
-    try {
-      dataHeadersSheetIndex = metadataWorkbook.findSheetIndex(DATA_HEADERS_SHEET_NAME);
+    if (_parseLegacyFormat) {
+      dataHeadersSheetIndex = LEGACY_DATA_HEADERS_SHEET_INDEX;
     }
-    catch (IllegalArgumentException e) {
-      dataHeadersSheetIndex = LEGACY_DATA_HEADERS_SHEET_INDEX;      
+    else {
+      try {
+        dataHeadersSheetIndex = metadataWorkbook
+          .findSheetIndex(DATA_HEADERS_SHEET_NAME);
+      }
+      catch (IllegalArgumentException e) {
+        throw new UnrecoverableScreenResultParseException(
+          DATA_HEADER_SHEET_NOT_FOUND_ERROR,
+          metadataWorkbook);
+      }
     }
-    HSSFSheet metadataSheet = metadataWorkbook.getWorkbook().getSheetAt(dataHeadersSheetIndex);
+    HSSFSheet metadataSheet = metadataWorkbook
+      .getWorkbook()
+      .getSheetAt(dataHeadersSheetIndex);
 
-    // at this point, we know we have a valid metadata workbook, to which we ca
+    // at this point, we know we have a valid metadata workbook, to which we can
     // append errors
-    _errors.setErrorsWorbook(metadataWorkbook);
-    _metadataCellParserFactory = new Cell.Factory(metadataWorkbook, dataHeadersSheetIndex, _errors);
+    _errors
+      .setErrorsWorbook(metadataWorkbook);
+    _metadataCellParserFactory = new Cell.Factory(
+      metadataWorkbook,
+      dataHeadersSheetIndex,
+      _errors);
     _dataHeaderIndex2DataHeaderColumn = new HashMap<Integer,Short>();
     _metadataFirstDataHeaderColumnIndex = findFirstDataHeaderColumnIndex(metadataSheet);
     if (_metadataFirstDataHeaderColumnIndex == null) {
-      throw new UnrecoverableScreenResultParseException(METADATA_DATA_HEADER_COLUMNS_NOT_FOUND_ERROR,
-                                                        metadataWorkbook);
+      throw new UnrecoverableScreenResultParseException(
+        METADATA_DATA_HEADER_COLUMNS_NOT_FOUND_ERROR,
+        metadataWorkbook);
     }
     return metadataSheet;
   }
@@ -894,12 +912,10 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   {
     Date date = null;
     int metaMetaSheetIndex;
-    try {
-      // legacy format
-      metaMetaSheetIndex = metadataWorkbook.findSheetIndex(METADATA_META_SHEET_NAME);
+    if (_parseLegacyFormat) {
+      metaMetaSheetIndex = metadataWorkbook.findSheetIndex(LEGACY_METADATA_META_SHEET_NAME);
     } 
-    catch (IllegalArgumentException e) {
-      // new format
+    else {
       metaMetaSheetIndex = metadataWorkbook.findSheetIndex(SCREEN_INFO_SHEET_NAME);
     }
     HSSFSheet metametaSheet = metadataWorkbook.getWorkbook()
@@ -979,14 +995,26 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     public List<ResultValueType> parseList(Cell cell)
     {
       String textMultiValue = cell.getString();
+      List<ResultValueType> result = new ArrayList<ResultValueType>();
+      List<ResultValueType> excludeAllResult = makeRawResultValueTypeList(_screenResult);
+
+      if (_parseLegacyFormat) {
+        if (textMultiValue != null &&
+          textMultiValue.trim().length() > 0) {
+          return excludeAllResult;
+        }
+        return result;
+      }
+      
       if (textMultiValue != null && 
         textMultiValue.equalsIgnoreCase(ScreenResultWorkbookSpecification.EXCLUDE_ALL_VALUE)) {
-        return makeRawResultValueTypeList(_screenResult);
+        return excludeAllResult;
       }
-      List<ResultValueType> result = new ArrayList<ResultValueType>();
+      
       if (textMultiValue == null) {
         return result;
       }
+      
       String[] textValues = textMultiValue.split(",");
       for (int i = 0; i < textValues.length; i++) {
         String text = textValues[i];
@@ -994,14 +1022,13 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         if (rvt != null) {
           result.add(rvt);
         }
+        else {
+          _errors.addError("invalid Data Header column reference '" + text + 
+            "' (expected one of " + _columnsDerivedFromMap.keySet() + ")", 
+            cell);
+        }
       }
-      if (result.size() >= 0) {
-        return result;
-      }
-      // to support legacy format, any non-blank value denotes "exclude all"
-      // (note: prevents us from generating errors for our list-based parsing,
-      // above)
-      return makeRawResultValueTypeList(_screenResult);
+      return result;
     }
 
     
@@ -1014,7 +1041,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         return null;
       }
       char parsedValue = matcher.group(0).charAt(0);
-      int rvtOrdinal = parsedValue - ScreenResultWorkbookSpecification.RAWDATA_FIRST_DATA_HEADER_COLUMN_ID;
+      int rvtOrdinal = parsedValue - ScreenResultWorkbookSpecification.RAWDATA_FIRST_DATA_HEADER_COLUMN_LABEL;
       if (rvtOrdinal < 0 || rvtOrdinal >= _screenResult.getResultValueTypes().size() ) {
         // can't report error since legacy format uses *any* non-null value to denote "exclude"=true
         //_errors.addError("unparseable Exclude value '" + value + "'", cell)

@@ -51,8 +51,13 @@ public class ScreenResultParserTest extends AbstractSpringTest
   
   protected ScreenResultParser screenResultParser;
 
-  protected void onSetUp() throws Exception {}
-  protected void onTearDown() throws Exception {
+  protected void onSetUp() throws Exception 
+  {
+    super.onSetUp();
+  }
+
+  protected void onTearDown() throws Exception 
+  {
     // TODO: delete *.error.xls files
   }
 
@@ -101,7 +106,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testParseLegacyScreenResult() throws Exception
   {
-    ScreenResult screenResult = screenResultParser.parse(new File(TEST_INPUT_FILE_DIR, "258MetaData.xls"));
+    ScreenResult screenResult = screenResultParser.parseLegacy(new File(TEST_INPUT_FILE_DIR, "LegacyTestMetaData.xls"), true);
     assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
 
     Calendar expectedDate = Calendar.getInstance();
@@ -115,14 +120,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
                                                    .intValue());
 
     Map<Integer,ResultValueType> expectedResultValueTypes = new HashMap<Integer,ResultValueType>();
-
-    ResultValueType rvt0 = new ResultValueType(expectedScreenResult,
-                                               "Cherry Pick");
-    rvt0.setDescription("Cherry Pick");
-    rvt0.setCherryPick(true);
-    rvt0.setActivityIndicator(true);
-    rvt0.setActivityIndicatorType(ActivityIndicatorType.BOOLEAN);
-    rvt0.setComments("Use this to determine cherry picks");
 
     ResultValueType rvt1 = new ResultValueType(expectedScreenResult,
                                                "Absorbance");
@@ -156,36 +153,57 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt4.setReplicateOrdinal(2);
     rvt4.setDerived(true);
     rvt4.setHowDerived("Divide compound well by plate median");
-    rvt4.addTypeDerivedFrom(rvt1);
     rvt4.addTypeDerivedFrom(rvt3);
     rvt4.setActivityIndicator(true);
     rvt4.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
     rvt4.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);
     rvt4.setIndicatorCutoff(1.4);
 
-    expectedResultValueTypes.put(0, rvt0);
-    expectedResultValueTypes.put(1, rvt1);
-    expectedResultValueTypes.put(2, rvt2);
-    expectedResultValueTypes.put(3, rvt3);
-    expectedResultValueTypes.put(4, rvt4);
+    ResultValueType rvt0 = new ResultValueType(expectedScreenResult,"Cherry Pick");
+    rvt0.setDescription("Cherry Pick");
+    rvt0.setCherryPick(true);
+    rvt4.setDerived(true);
+    rvt0.setHowDerived("Manual selection");
+    rvt0.addTypeDerivedFrom(rvt1);
+    rvt0.addTypeDerivedFrom(rvt3);
+    rvt0.setActivityIndicator(true);
+    rvt0.setActivityIndicatorType(ActivityIndicatorType.BOOLEAN);
+    rvt0.setComments("Use this to determine cherry picks");
+    
+    expectedResultValueTypes.put(0, rvt1);
+    expectedResultValueTypes.put(1, rvt2);
+    expectedResultValueTypes.put(2, rvt3);
+    expectedResultValueTypes.put(3, rvt4);
+    expectedResultValueTypes.put(4, rvt0);
 
     Integer[] expectedInitialPlateNumbers = { 686, 686, 686 };
 
     String[] expectedInitialWellNames = { "A03", "A04", "A05" };
 
     Object[][] expectedInitialResultValues = {
-      {false, 1.05300000,  2.27922078, 0.88100000,  2.12801932},
-      {true, 0.53100000,  1.14935065,  0.49600000,  1.19806763},
-      {false, 0.56800000,  1.22943723,  0.45000000,  1.08695652}};
+      {1.05300000,  2.27922078, 0.88100000,  2.12801932, false},
+      {0.53100000,  1.14935065,  0.49600000,  1.19806763, true},
+      {0.56800000,  1.22943723,  0.45000000,  1.08695652, false}};
+    
+    Object[][] expectedInitialExcludeValues = {
+      {false, false, false, false, false},
+      {false, false, false, false, false},
+      {true, false, true, false, false}};
 
     Integer[] expectedFinalPlateNumbers = { 842, 842, 842 };
 
     String[] expectedFinalWellNames = { "P20", "P21", "P22" };
 
     Object[][] expectedFinalResultValues = {
-      {false, 0.29600000,  1.07832423,  0.28600000,  1.00000000},
-      {true, 0.30100000,  1.09653916,  0.29200000,  1.02097902},
-      {false, 0.28000000,  1.02003643,  0.29900000,  1.04545455}};
+      {0.29600000,  1.07832423,  0.28600000,  1.00000000, false},
+      {0.30100000,  1.09653916,  0.29200000,  1.02097902, true},
+      {0.28000000,  1.02003643,  0.29900000,  1.04545455, false}};
+    
+    Object[][] expectedFinalExcludeValues = {
+      {false, false, false, false, false},
+      {false, false, false, false, false},
+      {false, false, false, false, false}};
+    
 
     SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
     int iRvt = 0;
@@ -197,7 +215,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
         assertTrue("ResultValueType " + iRvt, expectedRvt.isEquivalent(rvt));
 
         // compare result values
-        assertEquals(50240, rvt.getResultValues().size());
+        assertEquals(15, rvt.getResultValues().size());
         int iWell = 0;
         for (ResultValue rv : rvt.getResultValues()) {
           assertEquals("rvt " + iRvt + " well #" + iWell + " plate name",
@@ -208,7 +226,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
                        expectedInitialWellNames[iWell],
                        rv.getWell()
                          .getWellName());
-          if (iRvt == 0) {
+          if (iRvt == 4) {
             assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
                          expectedInitialResultValues[iWell][iRvt].toString(),
                          rv.getValue().toString());
@@ -219,6 +237,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
                          Double.parseDouble(rv.getValue()),
                          0.0001);
           }
+          assertEquals("rvt " + iRvt + " well #" + (iWell) + " excluded",
+            expectedInitialExcludeValues[iWell][iRvt],
+            rv.isExclude());
+
           ++iWell;
           if (iWell == expectedInitialResultValues.length) {
             // done testing the initial rows of data, now jump to testing the
@@ -240,7 +262,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
                        expectedFinalWellNames[iWell],
                        rv.getWell()
                          .getWellName());
-          if (iRvt == 0) {
+          if (iRvt == 4) {
             assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
                          expectedFinalResultValues[iWell][iRvt].toString(),
                          rv.getValue().toString());
@@ -251,6 +273,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
                          Double.parseDouble(rv.getValue()),
                          0.0001);
           }
+          assertEquals("rvt " + iRvt + " well #" + (iWell + startIndex) + " excluded",
+            expectedFinalExcludeValues[iWell][iRvt],
+            rv.isExclude());
+            
           ++iWell;
           if (iWell == expectedFinalResultValues.length) {
             break;
@@ -267,7 +293,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testParseLegacyMultiWorkbookMultiWorksheet()
   {
-    ScreenResult screenResult = screenResultParser.parse(new File(TEST_INPUT_FILE_DIR, "464MetaData.xls"));
+    ScreenResult screenResult = screenResultParser.parseLegacy(new File(TEST_INPUT_FILE_DIR, "464MetaData.xls"), true);
     assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
     Integer[] expectedPlateNumbers = { 1409, 1410, 1369, 1370, 1371, 1453, 1454 };
     Set<Integer> expectedPlateNumbersSet = new HashSet<Integer>(Arrays.asList(expectedPlateNumbers));
@@ -363,11 +389,12 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testParserReuse() throws Exception
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, "metadata_with_errors.xls");
-    ScreenResult result1 = screenResultParser.parse(workbookFile);
+    ScreenResult result1 = screenResultParser.parseLegacy(workbookFile, true);
     List<ParseError> errors1 = screenResultParser.getErrors();
-    ScreenResult result2 = screenResultParser.parse(workbookFile);
+    assertNotNull("1st parse returns a result", result1);
+    ScreenResult result2 = screenResultParser.parseLegacy(workbookFile, true);
     List<ParseError> errors2 = screenResultParser.getErrors();
-    assertNotNull("2nd parse returned a result", result2);
+    assertNotNull("2nd parse returns a result", result2);
     assertNotSame("parses returned different ScreenResult objects", result1, result2);
     assertTrue(errors1.size() > 0);
     assertTrue(errors2.size() > 0);
