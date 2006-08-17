@@ -25,7 +25,9 @@ public class ScreenResultExporter
     HSSFWorkbook workbook = new HSSFWorkbook();
     new ScreenInfoWorksheet().build(workbook, screenResult);
     new DataHeadersWorksheet().build(workbook, screenResult);
-    new DataWorksheet().build(workbook, screenResult);
+    for (Integer plateNumber : screenResult.generatePlateNumbers()) {
+      new DataWorksheet().build(workbook, screenResult, plateNumber);
+    }
     return workbook;
   }
 

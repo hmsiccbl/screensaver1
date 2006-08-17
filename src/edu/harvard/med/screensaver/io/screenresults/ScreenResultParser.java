@@ -464,8 +464,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @see #getErrors()
    */
   public ScreenResult parse(
-    File metadataWorkbookFile,
-    InputStream metadataWorkbookInputStream,
+    File workbookFile,
+    InputStream workbookInputStream,
     boolean parseLegacyFormat,
     boolean ignoreFilePaths)
   {
@@ -483,8 +483,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     _plateNumberParser = new PlateNumberParser(_errors);
     _wellNameParser = new WellNameParser(_errors);
     try {
-      Workbook metadataWorkbook = new Workbook(metadataWorkbookFile, metadataWorkbookInputStream, _errors);
-      log.info("parsing " + metadataWorkbookFile.getAbsolutePath());
+      Workbook metadataWorkbook = new Workbook(workbookFile, workbookInputStream, _errors);
+      log.info("parsing " + workbookFile.getAbsolutePath());
       MetadataParseResult metadataParseResult = parseMetadata(metadataWorkbook, 
                                                               ignoreFilePaths);
       for (Workbook rawDataWorkbook : metadataParseResult.getRawDataWorkbooks()) {
@@ -538,7 +538,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   {
     return _screenResult;
   }
-  
+
 
   // private methods
 
@@ -555,7 +555,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     // find the "Data Headers" sheet, handling legacy format as well
     int dataHeadersSheetIndex;
     if (_parseLegacyFormat) {
-      dataHeadersSheetIndex = LEGACY_DATA_HEADERS_SHEET_INDEX;
+      dataHeadersSheetIndex = LEGACY__DATA_HEADERS_SHEET_INDEX;
     }
     else {
       try {
@@ -875,8 +875,13 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   private boolean isActiveSheetRawDataSheet()
   {
-    // must handle both old and new file formats ("Stock_ID" and "Stock Plate ID")
-    return dataCell(RAWDATA_HEADER_ROW_INDEX, DataColumn.STOCK_PLATE_ID).getAsString().startsWith("Stock");
+    String stockPlateColumnName = dataCell(RAWDATA_HEADER_ROW_INDEX, DataColumn.STOCK_PLATE_ID).getAsString();
+    if (_parseLegacyFormat) {
+      return stockPlateColumnName.equals(LEGACY__DATA_SHEET__STOCK_PLATE_COLUMN_NAME);
+    }
+    else {
+      return stockPlateColumnName.equals(DATA_SHEET__STOCK_PLATE_COLUMN_NAME);
+    }
   }
 
   // TODO: this needs to be moved to our DAO; probably as a
@@ -913,7 +918,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     Date date = null;
     int metaMetaSheetIndex;
     if (_parseLegacyFormat) {
-      metaMetaSheetIndex = metadataWorkbook.findSheetIndex(LEGACY_METADATA_META_SHEET_NAME);
+      metaMetaSheetIndex = metadataWorkbook.findSheetIndex(LEGACY__METADATA_META_SHEET_NAME);
     } 
     else {
       metaMetaSheetIndex = metadataWorkbook.findSheetIndex(SCREEN_INFO_SHEET_NAME);

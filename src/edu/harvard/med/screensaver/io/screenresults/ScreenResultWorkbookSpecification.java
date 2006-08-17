@@ -14,10 +14,13 @@ public interface ScreenResultWorkbookSpecification
 {
   public static final String FIRST_DATE_SCREENED = "First Date Screened";
   public static final String SCREEN_INFO_SHEET_NAME = "Screen Info";
-  public static final String LEGACY_METADATA_META_SHEET_NAME = "meta";
+  public static final String LEGACY__METADATA_META_SHEET_NAME = "meta";
   public static final String DATA_HEADERS_SHEET_NAME = "Data Headers";
   public static final String DATA_SHEET_NAME = "Data";
-  public static final int LEGACY_DATA_HEADERS_SHEET_INDEX = 0;
+  public static final Object LEGACY__DATA_SHEET__STOCK_PLATE_COLUMN_NAME = "Stock_ID";
+  public static final Object DATA_SHEET__STOCK_PLATE_COLUMN_NAME = "Stock Plate ID";
+
+  public static final int LEGACY__DATA_HEADERS_SHEET_INDEX = 0;
 
   public static final String DATA_HEADER_COLUMN_TYPE = "data"; // for legacy format
   public static final short METADATA_FILENAMES_CELL_COLUMN_INDEX = 1;

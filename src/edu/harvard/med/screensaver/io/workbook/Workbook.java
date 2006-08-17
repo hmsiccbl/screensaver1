@@ -51,6 +51,10 @@ public class Workbook
     _workbookFile = workbookFile;
     _workbookStream = workbookStream;
     _errors = errors;
+    if (_errors == null) {
+      // to avoid NPEs
+      _errors = new ParseErrorManager();
+    }
   }
   
   /**

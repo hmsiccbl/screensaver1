@@ -139,7 +139,11 @@ public class Cell
 
   /**
    * Utility method to set the value of an HSSFCell with a proper type (Numeric,
-   * Date, String).
+   * Date, Boolean, String), based upon the class of the <code>value</code>
+   * argument. As a special case, if <code>value</code> happens to be a String
+   * that can be interpreted as a Double, the cell type will set to double, not
+   * string. If <code>value</code> is a Date or Calendar object, the cell's
+   * style will also be set to a date format.
    */
   public static void setTypedCellValue(HSSFWorkbook workbook, HSSFCell cell, Object value)
   {
@@ -162,13 +166,22 @@ public class Cell
       else if (value instanceof Number) {
         cell.setCellValue(((Number) value).doubleValue());
       }
+      else if (value instanceof Boolean) {
+        cell.setCellValue((Boolean) value);
+      }
       else {
-        cell.setCellValue(value.toString());
+        try {
+          double d = Double.parseDouble(value.toString());
+          cell.setCellValue(d);
+        }
+        catch (NumberFormatException e) {
+          cell.setCellValue(value.toString());
+        }
       }
     }
   }
-  
 
+  
   // public methods
   
   /**
