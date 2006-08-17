@@ -43,13 +43,13 @@ public class Cell
 
   private static final String INVALID_CELL_TYPE_ERROR = "invalid cell type";
   private static final String CELL_VALUE_REQUIRED_ERROR = "value required";
-  
-  
+
+
   // instance data members
   
-  private ParseErrorManager _errors;
-  private Workbook _workbook;
-  private int _sheetIndex;
+  protected ParseErrorManager _errors;
+  protected Workbook _workbook;
+  protected int _sheetIndex;
   private short _column;
   private int _row;
   private boolean _required;
@@ -78,11 +78,13 @@ public class Cell
      *             we must read, since we do this a whole lot
      */
     private Cell _recycledCell;
+    private short _columnOffset;
+    private int _rowOffset;
     
 
     /**
      * Constructs a Factory object that can be used instantiate Cell
-     * objects with a shared set of arguments
+     * objects with a shared set of arguments.
      * 
      * @param sheetName the name of the worksheet
      * @param sheet the worksheet itself
@@ -94,6 +96,30 @@ public class Cell
     {
       _workbook = workbook;
       _sheetIndex = sheetIndex;
+      _errors = errors;
+    }
+    
+    /**
+     * Constructs a Factory object that can be used instantiate Cell objects
+     * with a shared set of arguments and a new origin, allowing requested Cell
+     * coordinates to be made relative to this origin.
+     * 
+     * @param sheetName the name of the worksheet
+     * @param sheet the worksheet itself
+     * @param columnOffset the "x" component of the new origin, to which all requested Cell coordinates will be relative
+     * @param rowOffset the "y" component of the new origin, to which all requested Cell coordinates will be relative
+     * @param errors the error manager that will be notified of parse errors
+     */
+    public Factory(Workbook workbook,
+                   int sheetIndex,
+                   short columnOffset,
+                   int rowOffset,
+                   ParseErrorManager errors)
+    {
+      _workbook = workbook;
+      _sheetIndex = sheetIndex;
+      _columnOffset = columnOffset;
+      _rowOffset = rowOffset;
       _errors = errors;
     }
     
@@ -118,8 +144,8 @@ public class Cell
                                  required);
       }
       else {
-        _recycledCell._column = column;
-        _recycledCell._row = row;
+        _recycledCell._column = (short) (column + _columnOffset);
+        _recycledCell._row = row + _rowOffset;
         _recycledCell._required = required;
       }
       return _recycledCell;
@@ -131,6 +157,11 @@ public class Cell
     public Cell getCell(short column, int row)
     {
       return getCell(column, row, /* required= */false);
+    }
+    
+    public Cell getNullCell()
+    {
+      return new NullCell(_workbook, _sheetIndex, _errors);
     }
   }
   
@@ -522,12 +553,13 @@ public class Cell
 
   // protected and private methods and constructors
 
-  protected Cell(Workbook workbook,
-                       int sheetIndex,
-                       ParseErrorManager errors,
-                       short column,
-                       int row,
-                       boolean required)
+  protected Cell(
+    Workbook workbook,
+    int sheetIndex,
+    ParseErrorManager errors,
+    short column,
+    int row,
+    boolean required)
   {
     _workbook = workbook;
     _sheetIndex = sheetIndex;
@@ -537,6 +569,8 @@ public class Cell
     _required = required;
   }
   
+
+
   /**
    * Returns the HSSFCell on the worksheet at the specified location.
    * 

@@ -94,6 +94,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 // TODO: consider renaming "metadata" to "dataHeaders" (methods and variables), as this is more in keeping with the new file format
+// TODO: now that this class supports dual formats ("legacy" and "new"), we should separate behavior via polymorphism, having 2 subclasses that allow each format to handled appropriately
 public class ScreenResultParser implements ScreenResultWorkbookSpecification
 {
   
@@ -126,6 +127,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     indicatorDirectionMap.put("<",IndicatorDirection.LOW_VALUES_INDICATE);
     indicatorDirectionMap.put(">",IndicatorDirection.HIGH_VALUES_INDICATE);
     
+    // TODO: add conditional code that disallows legacy values when parsing new format
     activityIndicatorTypeMap.put("High values",ActivityIndicatorType.NUMERICAL); // legacy format
     activityIndicatorTypeMap.put("Low values",ActivityIndicatorType.NUMERICAL); // legacy format
     activityIndicatorTypeMap.put("Numeric",ActivityIndicatorType.NUMERICAL);
@@ -483,20 +485,27 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     _plateNumberParser = new PlateNumberParser(_errors);
     _wellNameParser = new WellNameParser(_errors);
     try {
-      Workbook metadataWorkbook = new Workbook(workbookFile, workbookInputStream, _errors);
+      Workbook workbook = new Workbook(workbookFile, workbookInputStream, _errors);
       log.info("parsing " + workbookFile.getAbsolutePath());
-      MetadataParseResult metadataParseResult = parseMetadata(metadataWorkbook, 
+      MetadataParseResult metadataParseResult = parseMetadata(workbook, 
                                                               ignoreFilePaths);
-      for (Workbook rawDataWorkbook : metadataParseResult.getRawDataWorkbooks()) {
-        try {
-          log.info("parsing " + rawDataWorkbook.getWorkbookFile().getAbsolutePath());
-          parseData(rawDataWorkbook,
-                    metadataParseResult.getScreenResult());
+      if (_parseLegacyFormat) {
+        for (Workbook rawDataWorkbook : metadataParseResult.getRawDataWorkbooks()) {
+          try {
+            log.info("parsing " + rawDataWorkbook.getWorkbookFile().getAbsolutePath());
+            parseData(rawDataWorkbook,
+                      metadataParseResult.getScreenResult());
+          }
+          catch (IOException e) {
+            _errors.addError("raw data workbook file " + rawDataWorkbook.getWorkbookFile() + " cannot be read and will be ignored");
+            throw e;
+          }
         }
-        catch (IOException e) {
-          _errors.addError("raw data workbook file " + rawDataWorkbook.getWorkbookFile() + " cannot be read and will be ignored");
-          throw e;
-        }
+      }
+      else {
+        log.info("parsing data sheets");
+        parseData(workbook,
+                  metadataParseResult.getScreenResult());
       }
       _screenResult = metadataParseResult.getScreenResult();
     }
@@ -574,12 +583,10 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
     // at this point, we know we have a valid metadata workbook, to which we can
     // append errors
-    _errors
-      .setErrorsWorbook(metadataWorkbook);
-    _metadataCellParserFactory = new Cell.Factory(
-      metadataWorkbook,
-      dataHeadersSheetIndex,
-      _errors);
+    _errors.setErrorsWorbook(metadataWorkbook);
+    _metadataCellParserFactory = new Cell.Factory(metadataWorkbook,
+                                                  dataHeadersSheetIndex,
+                                                  _errors);
     _dataHeaderIndex2DataHeaderColumn = new HashMap<Integer,Short>();
     _metadataFirstDataHeaderColumnIndex = findFirstDataHeaderColumnIndex(metadataSheet);
     if (_metadataFirstDataHeaderColumnIndex == null) {
@@ -591,26 +598,30 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   }
 
   /**
-   * Finds the index of the first data header column, initializing
-   * _metadataFirstDataHeaderColumnIndex.
+   * Finds the index of the first data header column.
    * 
    * @param metadataSheet
    * @throws UnrecoverableScreenResultParseException
    */
   private Short findFirstDataHeaderColumnIndex(HSSFSheet metadataSheet) throws UnrecoverableScreenResultParseException
   {
-    Short metadataFirstDataHeaderColumnIndex = null;
-    int row = MetadataRow.COLUMN_TYPE.ordinal() + METADATA_FIRST_DATA_ROW_INDEX;
-    int metadataLastDataHeaderColumnIndex = metadataSheet.getRow(row).getLastCellNum();
-    for (short iCol = 0; iCol < metadataLastDataHeaderColumnIndex; ++iCol) {
-      Cell cell = _metadataCellParserFactory.getCell(iCol, row);
-      String columnType = cell.getString();
-      if (columnType != null && columnType.equalsIgnoreCase(DATA_HEADER_COLUMN_TYPE)) {
-        metadataFirstDataHeaderColumnIndex = new Short(iCol);
-        break;
+    if (_parseLegacyFormat) {
+      Short metadataFirstDataHeaderColumnIndex = null;
+      int row = MetadataRow.COLUMN_TYPE.getRowIndex(_parseLegacyFormat);
+      int metadataLastDataHeaderColumnIndex = metadataSheet.getRow(row).getLastCellNum();
+      for (short iCol = 0; iCol < metadataLastDataHeaderColumnIndex; ++iCol) {
+        Cell cell = _metadataCellParserFactory.getCell(iCol, row);
+        String columnType = cell.getString();
+        if (columnType != null && columnType.equalsIgnoreCase(DATA_HEADER_COLUMN_TYPE)) {
+          metadataFirstDataHeaderColumnIndex = new Short(iCol);
+          break;
+        }
       }
+      return metadataFirstDataHeaderColumnIndex;
     }
-    return metadataFirstDataHeaderColumnIndex;
+    else {
+      return (short) METADATA_FIRST_DATA_HEADER_COLUMN_INDEX;
+    }
   }
   
   /**
@@ -621,24 +632,29 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    */
   private int findDataHeaderColumnCount(HSSFSheet metadataSheet) throws UnrecoverableScreenResultParseException
   {
-    int row = MetadataRow.COLUMN_TYPE.ordinal() + METADATA_FIRST_DATA_ROW_INDEX;
-    int metadataLastDataHeaderColumnIndex = metadataSheet.getRow(row).getLastCellNum();
-    for (short iCol = _metadataFirstDataHeaderColumnIndex; iCol <= metadataLastDataHeaderColumnIndex; ++iCol) {
-      Cell cell = _metadataCellParserFactory.getCell(iCol, row);
-      String dataType = cell.getString();
-      if (dataType != null && !dataType.equalsIgnoreCase(DATA_HEADER_COLUMN_TYPE)) {
-        _errors.addError(METADATA_UNEXPECTED_COLUMN_TYPE_ERROR, cell);
-        metadataLastDataHeaderColumnIndex = (short) (iCol - 1);
-        break;
+    if (_parseLegacyFormat) {
+      int row = MetadataRow.COLUMN_TYPE.getRowIndex(_parseLegacyFormat);
+      int metadataLastDataHeaderColumnIndex = metadataSheet.getRow(row).getLastCellNum();
+      for (short iCol = _metadataFirstDataHeaderColumnIndex; iCol <= metadataLastDataHeaderColumnIndex; ++iCol) {
+        Cell cell = _metadataCellParserFactory.getCell(iCol, row);
+        String dataType = cell.getString();
+        if (dataType != null && !dataType.equalsIgnoreCase(DATA_HEADER_COLUMN_TYPE)) {
+          _errors.addError(METADATA_UNEXPECTED_COLUMN_TYPE_ERROR, cell);
+          metadataLastDataHeaderColumnIndex = (short) (iCol - 1);
+          break;
+        }
+        if (dataType == null || dataType.trim().equals("")) {
+          // okay if column is blank
+          // TODO: verify *entire* column in blank, otherwise report error
+          metadataLastDataHeaderColumnIndex = (short) (iCol - 1);
+          break;
+        }
       }
-      if (dataType == null || dataType.trim().equals("")) {
-        // okay if column is blank
-        // TODO: verify *entire* column in blank, otherwise report error
-        metadataLastDataHeaderColumnIndex = (short) (iCol - 1);
-        break;
-      }
+      return (metadataLastDataHeaderColumnIndex - _metadataFirstDataHeaderColumnIndex) + 1;
     }
-    return (metadataLastDataHeaderColumnIndex - _metadataFirstDataHeaderColumnIndex) + 1;
+    else {
+      return metadataSheet.getRow(MetadataRow.COLUMN_IN_DATA_WORKSHEET.getRowIndex()).getLastCellNum() - 1;
+    }
   }
 
   private HSSFSheet initializeDataSheet(Workbook workbook, int sheetIndex)
@@ -655,8 +671,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   private Cell metadataCell(MetadataRow row, int dataHeader, boolean isRequired) 
   {
+    if (!row.isUsed(_parseLegacyFormat)) {
+      return _metadataCellParserFactory.getNullCell();
+    }
     return _metadataCellParserFactory.getCell((short) (_metadataFirstDataHeaderColumnIndex + dataHeader),
-                                              (METADATA_FIRST_DATA_ROW_INDEX + row.ordinal()),
+                                              row.getRowIndex(_parseLegacyFormat),
                                               isRequired);
   }
   
@@ -721,8 +740,10 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   {
     MetadataParseResult metadataParseResult = new MetadataParseResult();
     HSSFSheet metadataSheet = initializeMetadataSheet(metadataWorkbook);
-    metadataParseResult.setRawDataWorkbooks(parseRawDataWorkbookFilenames(metadataWorkbook,
-                                                                          ignoreFilePaths));
+    if (_parseLegacyFormat) {
+      metadataParseResult.setRawDataWorkbooks(parseRawDataWorkbookFilenames(metadataWorkbook,
+                                                                            ignoreFilePaths));
+    } 
     Date screenResultDate = parseScreenInfo(metadataWorkbook);
     metadataParseResult.setScreenResult(new ScreenResult(screenResultDate));
     int dataHeaderCount = findDataHeaderColumnCount(metadataSheet);
@@ -774,10 +795,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private ArrayList<Workbook> parseRawDataWorkbookFilenames(Workbook metadataWorkbook, boolean ignoreFilePaths)
     throws UnrecoverableScreenResultParseException
   {
+    assert _parseLegacyFormat : "only used for legacy format";
     ArrayList<Workbook> rawDataWorkbooksResult = new ArrayList<Workbook>();
-    Cell cell = _metadataCellParserFactory.getCell(METADATA_FILENAMES_CELL_COLUMN_INDEX,
-                                                   METADATA_FILENAMES_CELL_ROW_INDEX);
-
+    Cell cell = _metadataCellParserFactory.getCell(LEGACY__METADATA_FILENAMES_CELL_COLUMN_INDEX,
+                                                   LEGACY__METADATA_FILENAMES_CELL_ROW_INDEX);
+    
     String fileNames = cell.getString();
     if (fileNames == null || fileNames.trim().length() == 0) {
       log.info("no raw data files; assuming metadata and raw data in same workbook");

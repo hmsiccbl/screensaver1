@@ -23,9 +23,8 @@ public interface ScreenResultWorkbookSpecification
   public static final int LEGACY__DATA_HEADERS_SHEET_INDEX = 0;
 
   public static final String DATA_HEADER_COLUMN_TYPE = "data"; // for legacy format
-  public static final short METADATA_FILENAMES_CELL_COLUMN_INDEX = 1;
-  public static final int METADATA_FILENAMES_CELL_ROW_INDEX = 0; // legacy format only
-  public static final int METADATA_FIRST_DATA_ROW_INDEX = 1;
+  public static final short LEGACY__METADATA_FILENAMES_CELL_COLUMN_INDEX = 1;
+  public static final int LEGACY__METADATA_FILENAMES_CELL_ROW_INDEX = 0; // legacy format only
   public static final int METADATA_FIRST_DATA_HEADER_COLUMN_INDEX = 1;
   public static final char DATA_SHEET__FIRST_DATA_HEADER_COLUMN_LABEL = 'E';
   public static final int METADATA_ROW_NAMES_COLUMN_INDEX = 0;
@@ -42,35 +41,62 @@ public interface ScreenResultWorkbookSpecification
    * significant, as we use the ordinal() method.
    */
   public enum MetadataRow { 
-    COLUMN_IN_DATA_WORKSHEET("\"Data\" Worksheet Column"),
-    COLUMN_TYPE("Type"), // for legacy format 
-    NAME("Name"),
-    DESCRIPTION("Description"),
-    REPLICATE("Replicate Number"),
-    TIME_POINT("Time point"),
-    RAW_OR_DERIVED("Raw or Derived?"),
-    HOW_DERIVED("If derived, how?"),
-    COLUMNS_DERIVED_FROM("If derived, from which columns?"),
-    IS_ASSAY_ACTIVITY_INDICATOR("Is it an Assay Activity Indicator? (yes/no)"),
-    ACTIVITY_INDICATOR_TYPE("Assay Activity Indicator Type (numerical, partitioned (S/M/W), boolean)"),
-    NUMERICAL_INDICATOR_DIRECTION("Assay Activity Indicator Numeric Cutoff Direction (< or >)"),
-    NUMERICAL_INDICATOR_CUTOFF("Assay Activity Indicator Numeric Cutoff Value"),
-    PRIMARY_OR_FOLLOWUP("Primary or Follow Up?"),
-    ASSAY_PHENOTYPE("Which Assay Phenotype does it belong to?"),
-    IS_CHERRY_PICK("Is it a cherry pick? (yes/no)"),
-    COMMENTS("Comments"),
+    COLUMN_IN_DATA_WORKSHEET("\"Data\" Worksheet Column", 0, 1),
+    COLUMN_TYPE("Type", null, 2), // for legacy format 
+    NAME("Name", 1, 3),
+    DESCRIPTION("Description", 2, 4),
+    REPLICATE("Replicate Number", 3, 5),
+    TIME_POINT("Time point", 4, 6),
+    RAW_OR_DERIVED("Raw or Derived?", 5, 7),
+    HOW_DERIVED("If derived, how?", 6, 8),
+    COLUMNS_DERIVED_FROM("If derived, from which columns?", 7, 9),
+    IS_ASSAY_ACTIVITY_INDICATOR("Is it an Assay Activity Indicator? (yes/no)", 8, 10),
+    ACTIVITY_INDICATOR_TYPE("Assay Activity Indicator Type (numerical, partitioned (S/M/W), boolean)", 9, 11),
+    NUMERICAL_INDICATOR_DIRECTION("Assay Activity Indicator Numeric Cutoff Direction (< or >)", 10, 12),
+    NUMERICAL_INDICATOR_CUTOFF("Assay Activity Indicator Numeric Cutoff Value", 11, 13),
+    PRIMARY_OR_FOLLOWUP("Primary or Follow Up?", 12, 14),
+    ASSAY_PHENOTYPE("Which Assay Phenotype does it belong to?", 13, 15),
+    IS_CHERRY_PICK("Is it a cherry pick? (yes/no)", null, 16),
+    COMMENTS("Comments", 14, 17),
     ;
     
     private String _displayText;
+    private Integer _rowIndex;
+    private Integer _legacyRowIndex;
     
-    private MetadataRow(String displayText)
-    { 
+    private MetadataRow(String displayText,
+                        Integer rowIndex,
+                        Integer legacyRowIndex)
+    {
       _displayText = displayText;
+      _rowIndex = rowIndex;
+      _legacyRowIndex = legacyRowIndex;
     }
     
     public String getDisplayText()
     {
       return _displayText;
+    }
+    
+    public boolean isUsed(boolean legacyFormat)
+    {
+      if (legacyFormat && _legacyRowIndex != null) {
+        return true;
+      }
+      if (!legacyFormat && _rowIndex != null) {
+        return true;
+      }
+      return false;
+    }
+    
+    public Integer getRowIndex()
+    {
+      return getRowIndex(false);
+    }
+    
+    public Integer getRowIndex(boolean legacyFormat)
+    {
+      return legacyFormat ? _legacyRowIndex : _rowIndex;
     }
   };
   
@@ -142,7 +168,7 @@ public interface ScreenResultWorkbookSpecification
   public static final String EXCLUDE_ALL_VALUE = "all";
 
   public static final String PLATE_NUMBER_REGEX = "(PL[-_])?(\\d+)(\\.0)?";
-  public static final String PLATE_NUMBER_FORMAT = "PL-%05d";
+  public static final String PLATE_NUMBER_FORMAT = "PL_%05d";
 
 }
 

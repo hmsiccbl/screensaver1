@@ -43,7 +43,6 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
     for (ResultValueType rvt : screenResult.getResultValueTypes()) {
       columnValues.clear();
       columnValues.put(MetadataRow.COLUMN_IN_DATA_WORKSHEET, makeDataWorksheetColumnLabelForDataHeader(rvt));
-      columnValues.put(MetadataRow.COLUMN_TYPE, DATA_HEADER_COLUMN_TYPE); // for compatibility with legacy format (parser uses this value)
       columnValues.put(MetadataRow.NAME, rvt.getName());
       columnValues.put(MetadataRow.DESCRIPTION, rvt.getDescription());
       if (rvt.getReplicateOrdinal() != null) {
@@ -65,12 +64,11 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
       }
       columnValues.put(MetadataRow.PRIMARY_OR_FOLLOWUP, (rvt.isFollowUpData() ? FOLLOWUP_VALUE : PRIMARY_VALUE).toLowerCase());
       columnValues.put(MetadataRow.ASSAY_PHENOTYPE, rvt.getAssayPhenotype());
-      columnValues.put(MetadataRow.IS_CHERRY_PICK, makeYesOrNoString(rvt.isCherryPick()));
       columnValues.put(MetadataRow.COMMENTS, rvt.getComments());
       
       for (MetadataRow metadataRow : columnValues.keySet()) {
         Object value = columnValues.get(metadataRow);
-        HSSFRow row = HSSFCellUtil.getRow(metadataRow.ordinal() + METADATA_FIRST_DATA_ROW_INDEX, sheet);
+        HSSFRow row = HSSFCellUtil.getRow(metadataRow.getRowIndex(), sheet);
         Cell.setTypedCellValue(workbook,
                                HSSFCellUtil.getCell(row, rvt.getOrdinal() + METADATA_FIRST_DATA_HEADER_COLUMN_INDEX),
                                value);
@@ -103,10 +101,12 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
   private void writeDataHeaderRowNames(HSSFSheet sheet, ScreenResult screenResult)
   {
     for (MetadataRow metadataRow : MetadataRow.values()) {
-      HSSFRow row = HSSFCellUtil.getRow(metadataRow.ordinal() + METADATA_FIRST_DATA_ROW_INDEX,
-                                        sheet);
-      HSSFCell cell = HSSFCellUtil.getCell(row, METADATA_ROW_NAMES_COLUMN_INDEX);
-      cell.setCellValue(metadataRow.getDisplayText());
+      if (metadataRow.isUsed(false)) {
+        HSSFRow row = HSSFCellUtil.getRow(metadataRow.getRowIndex(),
+                                          sheet);
+        HSSFCell cell = HSSFCellUtil.getCell(row, METADATA_ROW_NAMES_COLUMN_INDEX);
+        cell.setCellValue(metadataRow.getDisplayText());
+      }
     }
     
   }

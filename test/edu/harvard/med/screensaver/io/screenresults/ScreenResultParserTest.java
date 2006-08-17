@@ -416,7 +416,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testParseNewScreenResult() throws Exception
   {
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, "all-in-one.xls");
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, "NewFormatTest.xls");
     ScreenResult screenResult = screenResultParser.parse(workbookFile);
     assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
 
@@ -436,22 +436,20 @@ public class ScreenResultParserTest extends AbstractSpringTest
                                                "Luminescence");
     rvt0.setDescription("Luminescence");
     rvt0.setReplicateOrdinal(1);
-    rvt0.setActivityIndicator(true);
-    rvt0.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
-    rvt0.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);
-    rvt0.setIndicatorCutoff(1070000.0);
+    rvt0.setActivityIndicator(false);
     rvt0.setAssayPhenotype("Human");
     rvt0.setComments("None");
 
     ResultValueType rvt1 = new ResultValueType(expectedScreenResult,
-                                               "Cherry Pick");
-    rvt1.setDescription("Cherry Pick");
+                                               "FI");
+    rvt1.setDescription("Fold Induction");
     rvt1.setDerived(true);
-    rvt1.setHowDerived("E > 1070000");
+    rvt1.setHowDerived("Divide compound well by plate median");
     rvt1.addTypeDerivedFrom(rvt0);
     rvt1.setActivityIndicator(true);
-    rvt1.setActivityIndicatorType(ActivityIndicatorType.BOOLEAN);
-    rvt1.setCherryPick(true);
+    rvt1.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
+    rvt1.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);
+    rvt1.setIndicatorCutoff(1070000.0);
 
     expectedResultValueTypes.put(0, rvt0);
     expectedResultValueTypes.put(1, rvt1);
@@ -461,12 +459,12 @@ public class ScreenResultParserTest extends AbstractSpringTest
     String[] expectedInitialWellNames = {"A01", "A02", "A03", "A01", "A02", "A03"};
 
     Object[][] expectedInitialResultValues = {
-      {1071894.0, true},
-      {1071894.0, true},
-      {1174576.0, false},
-      {1089391.0, true},
-      {1030000.0, false},
-      {1020000.0, false}};
+      {1071894.0, 0.9691},
+      {1071894.0, 0.9543},
+      {1174576.0, 1.0},
+      {1089391.0, 1.041},
+      {1030000.0, 1.0049},
+      {1020000.0, 1.0}};
     
     SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
     int iRvt = 0;
@@ -489,17 +487,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
                        expectedInitialWellNames[iWell],
                        rv.getWell()
                          .getWellName());
-          if (iRvt == 1) {
-            assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
-                         expectedInitialResultValues[iWell][iRvt].toString(),
-                         rv.getValue());
-          }
-          else {
-            assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
-                         ((Double) expectedInitialResultValues[iWell][iRvt]).doubleValue(),
-                         Double.parseDouble(rv.getValue()),
-                         0.0001);
-          }
+          assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
+                       ((Double) expectedInitialResultValues[iWell][iRvt]).doubleValue(),
+                       Double.parseDouble(rv.getValue()),
+                       0.001);
           ++iWell;
         }
       }
