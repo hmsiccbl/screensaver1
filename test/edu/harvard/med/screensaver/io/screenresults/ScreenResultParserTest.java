@@ -159,22 +159,22 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt4.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);
     rvt4.setIndicatorCutoff(1.4);
 
-    ResultValueType rvt0 = new ResultValueType(expectedScreenResult,"Cherry Pick");
-    rvt0.setDescription("Cherry Pick");
-    rvt0.setCherryPick(true);
-    rvt4.setDerived(true);
-    rvt0.setHowDerived("Manual selection");
-    rvt0.addTypeDerivedFrom(rvt1);
-    rvt0.addTypeDerivedFrom(rvt3);
-    rvt0.setActivityIndicator(true);
-    rvt0.setActivityIndicatorType(ActivityIndicatorType.BOOLEAN);
-    rvt0.setComments("Use this to determine cherry picks");
+    ResultValueType rvt5 = new ResultValueType(expectedScreenResult,"Cherry Pick");
+    rvt5.setDescription("Cherry Pick");
+    rvt5.setCherryPick(true);
+    rvt5.setDerived(true);
+    rvt5.setHowDerived("Manual selection");
+    rvt5.addTypeDerivedFrom(rvt1);
+    rvt5.addTypeDerivedFrom(rvt3);
+    rvt5.setActivityIndicator(true);
+    rvt5.setActivityIndicatorType(ActivityIndicatorType.BOOLEAN);
+    rvt5.setComments("Use this to determine cherry picks");
     
     expectedResultValueTypes.put(0, rvt1);
     expectedResultValueTypes.put(1, rvt2);
     expectedResultValueTypes.put(2, rvt3);
     expectedResultValueTypes.put(3, rvt4);
-    expectedResultValueTypes.put(4, rvt0);
+    expectedResultValueTypes.put(4, rvt5);
 
     Integer[] expectedInitialPlateNumbers = { 686, 686, 686 };
 

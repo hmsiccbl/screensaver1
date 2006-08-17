@@ -141,14 +141,20 @@ public class Cell
    * Utility method to set the value of an HSSFCell with a proper type (Numeric,
    * Date, String).
    */
-  public static void setTypedCellValue(HSSFCell cell, Object value)
+  public static void setTypedCellValue(HSSFWorkbook workbook, HSSFCell cell, Object value)
   {
     if (value != null) {
+
+      // allow us to handle Date and Calendar types in the same way
+      if (value instanceof Calendar) {
+        value = ((Calendar) value).getTime();
+      }
+
       if (value instanceof Date) {
         cell.setCellValue((Date) value);
-      }
-      else if (value instanceof Calendar) {
-        cell.setCellValue((Calendar) value);
+        HSSFCellStyle dateStyle = workbook.createCellStyle();
+        dateStyle.setDataFormat((short) 0xe);
+        cell.setCellStyle(dateStyle); // set date format to "m/d/yy"
       }
       else if (value instanceof Integer) {
         cell.setCellValue((Integer) value);

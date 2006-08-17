@@ -258,7 +258,8 @@ public abstract class AbstractEntity implements Serializable
   private boolean isEquivalenceProperty(PropertyDescriptor property) {
     Method method = property.getReadMethod();
     if (method == null) {
-      log.error("no corresponding getter method for property " + property.getDisplayName());
+      // this can occur if there is a public setter method, but a non-public getter method
+      log.debug("no corresponding getter method for property " + property.getDisplayName());
       return false;
     }
     // only test methods that are declared by subclasses of AbstractEntity 

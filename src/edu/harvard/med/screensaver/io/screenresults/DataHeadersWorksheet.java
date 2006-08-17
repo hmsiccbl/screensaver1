@@ -31,12 +31,13 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
     HSSFSheet sheet = workbook.createSheet(DATA_HEADERS_SHEET_NAME);
     writeDataHeaderRowNames(sheet,
                             screenResult);
-    writeDataHeaders(sheet, 
+    writeDataHeaders(workbook,
+                     sheet, 
                      screenResult);
     return sheet;
   }
 
-  private void writeDataHeaders(HSSFSheet sheet, ScreenResult screenResult)
+  private void writeDataHeaders(HSSFWorkbook workbook, HSSFSheet sheet, ScreenResult screenResult)
   {
     Map<MetadataRow,Object> columnValues = new HashMap<MetadataRow,Object>();
     for (ResultValueType rvt : screenResult.getResultValueTypes()) {
@@ -70,7 +71,8 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
       for (MetadataRow metadataRow : columnValues.keySet()) {
         Object value = columnValues.get(metadataRow);
         HSSFRow row = HSSFCellUtil.getRow(metadataRow.ordinal() + METADATA_FIRST_DATA_ROW_INDEX, sheet);
-        Cell.setTypedCellValue(HSSFCellUtil.getCell(row, rvt.getOrdinal() + METADATA_FIRST_DATA_HEADER_COLUMN_INDEX),
+        Cell.setTypedCellValue(workbook,
+                               HSSFCellUtil.getCell(row, rvt.getOrdinal() + METADATA_FIRST_DATA_HEADER_COLUMN_INDEX),
                                value);
       }
     }

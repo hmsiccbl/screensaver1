@@ -15,6 +15,7 @@ import java.util.Map;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -36,9 +37,11 @@ public class ScreenInfoWorksheet implements ScreenResultWorkbookSpecification
                   screenResult.getDateCreated());
     for (ScreenInfoRow screenInfoRow : ScreenInfoRow.values()) {
       HSSFRow row = HSSFCellUtil.getRow(screenInfoRow.ordinal() + SCREENINFO_FIRST_DATA_ROW_INDEX, sheet);
-      HSSFCellUtil.getCell(row, SCREENINFO_ROW_HEADER_COLUMN_INDEX).setCellValue(screenInfoRow.getDisplayText());
+      HSSFCell cell = HSSFCellUtil.getCell(row, SCREENINFO_ROW_HEADER_COLUMN_INDEX);
+      cell.setCellValue(screenInfoRow.getDisplayText());
       Object value = row2Value.get(screenInfoRow);
-      Cell.setTypedCellValue(HSSFCellUtil.getCell(row, SCREENINFO_VALUE_COLUMN_INDEX),
+      Cell.setTypedCellValue(workbook,
+                             HSSFCellUtil.getCell(row, SCREENINFO_VALUE_COLUMN_INDEX),
                              value);
     }
     return sheet;
