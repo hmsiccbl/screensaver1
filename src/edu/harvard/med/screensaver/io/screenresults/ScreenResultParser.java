@@ -773,8 +773,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       if (rvt.isActivityIndicator()) {
         rvt.setActivityIndicatorType(_activityIndicatorTypeParser.parse(metadataCell(MetadataRow.ACTIVITY_INDICATOR_TYPE, iDataHeader, true)));
         if (rvt.getActivityIndicatorType().equals(ActivityIndicatorType.NUMERICAL)) {
-          rvt.setIndicatorDirection(_indicatorDirectionParser.parse(metadataCell(MetadataRow.NUMERICAL_INDICATOR_DIRECTION, iDataHeader, true)));
-          rvt.setIndicatorCutoff(metadataCell(MetadataRow.NUMERICAL_INDICATOR_CUTOFF, iDataHeader, true).getDouble());
+          rvt.setIndicatorDirection(_indicatorDirectionParser.parse(metadataCell(MetadataRow.NUMERICAL_INDICATOR_DIRECTION, iDataHeader)));
+          rvt.setIndicatorCutoff(metadataCell(MetadataRow.NUMERICAL_INDICATOR_CUTOFF, iDataHeader).getDouble());
         }
         // TODO: should warn if these values *are* defined and !isActivityIndicator()
       }
