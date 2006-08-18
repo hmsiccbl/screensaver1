@@ -119,6 +119,7 @@
     <srcfiles refid="lib.used.fileset"/>
     <srcfiles dir="src"/>
     <srcfiles dir="resources"/>
+    <srcfiles dir="build/distro/screensaver/"/>
   </uptodate>
       
   <uptodate property="war.uptodate" targetfile="${war}">
