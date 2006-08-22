@@ -26,7 +26,7 @@ import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.UserClassification;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 
 
 /**
@@ -169,7 +169,7 @@ public class ScreenDBProxy
     }
     _screeningRoomUserMap = new HashMap<Integer,ScreeningRoomUser>();
     Map<Integer,Integer> memberToHead = new HashMap<Integer,Integer>();
-    UserClassification.UserType userClassificationUserType = new UserClassification.UserType();
+    ScreeningRoomUserClassification.UserType userClassificationUserType = new ScreeningRoomUserClassification.UserType();
     try {
       Statement statement = _connection.createStatement();
       ResultSet resultSet = statement.executeQuery(
@@ -184,24 +184,25 @@ public class ScreenDBProxy
             resultSet.getString("first") + "." +
             resultSet.getString("last") + "@has.missing.email";
         }
-        UserClassification classification = 
+        ScreeningRoomUserClassification classification = 
           userClassificationUserType.getTermForValue(resultSet.getString("classification"));
         if (classification == null) {
-          classification = UserClassification.UNASSIGNED;
+          classification = ScreeningRoomUserClassification.UNASSIGNED;
         }
         ScreeningRoomUser user = new ScreeningRoomUser(
           resultSet.getDate("date_created"),
           resultSet.getString("first"),
           resultSet.getString("last"),
           email,
+          resultSet.getString("phone"),
+          resultSet.getString("lab_location"), // mailing address
+          resultSet.getString("comments"),
           null, // TODO: put in the eCommonsId when it is in ScreenDB
           resultSet.getString("harvard_id"),
-          resultSet.getString("phone"),
           classification,
           resultSet.getBoolean("non_user"),
-          resultSet.getBoolean("rani_user"),
-          resultSet.getString("lab_location"),
-          resultSet.getString("comments"));
+          resultSet.getBoolean("rnai_user")
+        );
         // TODO: include the lab affiliation
         Integer id = resultSet.getInt("id");
         Integer head = resultSet.getInt("lab_name");

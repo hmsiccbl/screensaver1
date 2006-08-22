@@ -228,7 +228,7 @@ public class SilencingReagent extends AbstractEntity
    * @param nonTargettedGenbankAccessionNumber the non-targetted GenBank accession number to remove
    * @return true iff the silencing reagent previously had the non-targetted GenBank accession number
    */
-  public boolean removeNonTargettedGenbankAccessionNumber(Integer nonTargettedGenbankAccessionNumber)
+  public boolean removeNonTargettedGenbankAccessionNumber(String nonTargettedGenbankAccessionNumber)
   {
     return _nonTargettedGenbankAccessionNumbers.remove(nonTargettedGenbankAccessionNumber);
   }

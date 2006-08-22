@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  $HeadURL$
-  $Id$
+  $HeadURL: svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/build.xml $
+  $Id: build.xml 465 2006-08-18 13:16:47Z ant4 $
 
   Copyright 2006 by the President and Fellows of Harvard College.
 
@@ -60,7 +60,7 @@
   <property name="distro.file.tgz" location="build/${app.name}.tgz"/> 
   <property name="distro.file.zip" location="build/${app.name}.zip"/>
   <property name="datasource" value="local" 
-    description="Valid values are wildcard substring of 'resources/datasource-*.properties'"/>
+    description="Determines which datasource*.properties file is used when generating a build or deployment.  Valid values are wildcard substring of 'resources/datasource-*.properties'"/>
   <property name="datasource.file" location="resources/datasource-${datasource}.properties"/>
   <condition 
     property="log4j.properties.file"
@@ -275,7 +275,7 @@
       verbose="${verbose}"
     >
       <fileset refid="model.src.fileset"/>
-      <fileset refid="test.model.src.fileset"/>
+      <!--fileset refid="test.model.src.fileset"/-->
       <hibernatecfg
         version="3.0" 
         showsql="false"
@@ -395,68 +395,6 @@
   </target> 
  
   
-   <!-- run arbitrary Screensaver class  -->
-
-  <target
-   name="run"
-   depends="distro"
-   description="Run the main method of a class in the Screensaver project."
-  >
-    <java
-      classname="${run.class.name}" 
-      fork="true"
-      classpathref="distro.project.classpath"
-    >
-    <arg line="${run.class.args}"/>
-   </java> 
-  </target>
- 
- 
-   <!-- run the ScreenResultParser --> 
- 
-  <target
-     name="screenresultparser"
-     depends="distro"
-     description="Run the ScreenResult parser"
-    >
-    <condition property="wells.to.print.option" value="-wellstoprint ${wells.to.print}" else="">
-      <isset property="wells.to.print"/>
-    </condition>
-    <condition property="ignore.file.paths.option" value="-ignorefilepaths" else="">
-      <isset property="ignore.file.paths"/>  
-    </condition>
-    <java
-      classname="edu.harvard.med.screensaver.io.screenresult.ScreenResultParser" 
-      fork="true"
-      classpathref="distro.project.classpath"
-      output="${metadata.file}.out"
-      maxmemory="1024m"
-    >
-      <arg line="-metadatafile ${metadata.file} ${wells.to.print.option} ${ignore.file.paths.option}"/>
-    </java>
-    <echo message="output written to ${metadata.file}.out"/>
-  </target>
-  
-  
-  <!-- schema create/drop operations -->
-  
-  <target 
-    name="schema-recreate"
-    depends="distro"
-    description="Recreate the schema"
-  >
-    <property name="db.options" value=""/>
-    <java
-      classname="edu.harvard.med.screensaver.db.SchemaUtil" 
-      fork="true"
-      classpathref="distro.project.classpath"
-      maxmemory="128m"
-    >
-      <arg line="--recreate ${db.options}"/>
-    </java>
-  </target>
-
-
   <!-- TODO: should call hbm_xml with a destination dir parameter, to allow generated hibernate files to be custom-built into ${build.dir}, since they can differ depending upon Ant cmd-line options (e.g., -Dtest=true) -->
   <target
     name="build"

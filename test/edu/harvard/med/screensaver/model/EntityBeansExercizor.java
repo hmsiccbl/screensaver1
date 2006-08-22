@@ -63,15 +63,14 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
   {
     for (Class<AbstractEntity> entityClass : getEntityClasses()) {
       try {
-        exercizor.exercizeJavaBeanEntity(
-          newInstance(entityClass),
-          Introspector.getBeanInfo(entityClass));
+        exercizor.exercizeJavaBeanEntity(newInstance(entityClass),
+                                         Introspector.getBeanInfo(entityClass));
       }
       catch (IntrospectionException e) {
         e.printStackTrace();
         fail(e.getMessage());
       }
-    }    
+    }
   }
 
   protected static Map<String, String> oddPluralToSingularPropertiesMap =
@@ -145,7 +144,10 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
   {
     String fullMethodName = beanClass.getName() + "." + methodName;
     Method foundMethod = null;
-    for (Method method : beanClass.getDeclaredMethods()) {
+    // note: we're calling getMethods() instead of getDeclaredMethods() to allow
+    // inherited methods to satisfy our isRequiredMethod constraint (e.g. for
+    // AdministratorUser.addRole())
+    for (Method method : beanClass.getMethods()) {
       if (method.getName().equals(methodName)) {
         foundMethod = method;
         break;
@@ -162,5 +164,49 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
       foundMethod.getReturnType(),
       Boolean.TYPE);
     return foundMethod;
+  }
+  
+  /**
+   * Returns true iff the property corresponds to the entity's Hibernate ID.
+   * 
+   * @param beanInfo the bean the property belongs to
+   * @param propertyDescriptor the property
+   * @return true iff property is "entityId" or the property that is named the
+   * same as the entity, but with an "Id" suffix; otherwise false
+   */
+  public boolean isHibernateIdProperty(
+    BeanInfo beanInfo, 
+    PropertyDescriptor propertyDescriptor)
+  {
+    if (propertyDescriptor.getName().equals("entityId")) {
+      return true;
+    }
+
+    // Check whether property corresponds to the bean's Hibernate ID method, which is named similary to the bean.
+    // We also check the parent classes, to handle the case where the property
+    // has been inherited, as the property name will depend upon the class it
+    // was declared in.
+    String capitalizedPropertyName = propertyDescriptor.getName().substring(0, 1).toUpperCase() + propertyDescriptor.getName().substring(1);
+    Class clazz = beanInfo.getBeanDescriptor().getBeanClass();
+    while (!clazz.equals(AbstractEntity.class) && clazz != null) {
+      if (capitalizedPropertyName.endsWith(clazz.getSimpleName() + "Id")) {
+        return true;
+      }
+      clazz = clazz.getSuperclass();
+    }
+    return false;
+  }
+  
+  
+  // HACK: special case handling 
+  protected int getExpectedInitialCollectionSize(
+    String beanName,
+    PropertyDescriptor propertyDescriptor)
+  {
+    if (beanName.equals("Gene") &&
+      propertyDescriptor.getName().equals("genbankAccessionNumbers")) {
+      return 1;
+    }
+    return 0;
   }
 }

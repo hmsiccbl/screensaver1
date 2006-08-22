@@ -61,7 +61,7 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
       {
         public void exercizePropertyDescriptor(
           final AbstractEntity bean,
-          BeanInfo beanInfo,
+          final BeanInfo beanInfo,
           final PropertyDescriptor propertyDescriptor)
         {
           dao.doInTransaction(new DAOTransaction()
@@ -99,9 +99,10 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
                 }
                 if (result instanceof Collection) {
                   assertEquals(
-                    "getter for uninitialized property returns empty collection: " +
+                    "getter for uninitialized property returns collection of expected initial size (usually 0): " +
                     localBean.getClass() + "." + getter.getName(),
-                    0,
+                    getExpectedInitialCollectionSize(beanInfo.getBeanDescriptor().getName(), 
+                                                     propertyDescriptor),
                     ((Collection) result).size());
                 }
               }
@@ -125,9 +126,7 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
           BeanInfo beanInfo,
           final PropertyDescriptor propertyDescriptor)
         {
-          // HACK: kludging endsWith("Id") <=> is hibernate id. should really
-          // make sure this is the hibernate id
-          if (propertyDescriptor.getName().endsWith("Id")) {
+          if (isHibernateIdProperty(beanInfo, propertyDescriptor)) {
             return;
           }
           
@@ -238,7 +237,7 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
   private void testCollectionProperty(
     final AbstractEntity bean,
     Method getter,
-    PropertyDescriptor propertyDescriptor)
+    final PropertyDescriptor propertyDescriptor)
   {
     final Class<? extends AbstractEntity> beanClass = bean.getClass();
     String beanClassName = beanClass.getSimpleName();
@@ -326,13 +325,13 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
           try {
             Collection result = (Collection) getterMethod.invoke(localBean);
             assertEquals(
-              "collection prop with one element added has size one: " + fullPropName,
-              1,
+              "collection prop with one element added has size one more than uninitialized size (usually 1): " + fullPropName,
+              getExpectedInitialCollectionSize(localBean.getClass().getSimpleName(), 
+                                               propertyDescriptor) + 1,
               result.size());
-            assertEquals(
+            assertTrue(
               "collection prop with one element added has that element: " + fullPropName,
-              testValue,
-              result.iterator().next());
+              result.contains(testValue));
           }
           catch (Exception e) {
             e.printStackTrace();
@@ -388,8 +387,10 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
           try {
             Collection result = (Collection) getterMethod.invoke(localBean);
             assertEquals(
-              "collection prop with element removed has size zero: " + fullPropName,
-              0,
+              "collection prop with element removed has original uninitialized size: " + fullPropName,
+              getExpectedInitialCollectionSize(localBean.getClass().getSimpleName(), 
+                                               propertyDescriptor),
+
               result.size());
           }
           catch (Exception e) {
@@ -410,19 +411,30 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
           PropertyDescriptor propertyDescriptor)
         {
           Method getter = propertyDescriptor.getReadMethod();
-          if (AbstractEntity.class.isAssignableFrom(getter.getReturnType())) {
-            testBidirectionalityOfOneSideOfRelationship(
-              bean,
-              beanInfo,
-              propertyDescriptor,
-              getter);
-          }
-          else if (Collection.class.isAssignableFrom(getter.getReturnType())) {
-            testBidirectionalityOfManySideOfRelationship(
-              bean,
-              beanInfo,
-              propertyDescriptor,
-              getter);
+          // note: if a property is declared in a superclass, we won't test that
+          // property from any subclasses that inherits it; we could, but then
+          // we'll need to make our reflection code that finds methods consider
+          // inherited methods as well, and then be smart when inferring the
+          // expected names of these methods, as the method name will be based
+          // upon the superclass name, not the subclass name.
+          // For example, consider AdministratorUser, which has a bidirectional
+          // relationship with ScreenSaverUserRole, but only via it's superclass
+          // ScreensaverUser. In this case, we only want to require that
+          // ScreensaverUserRole has a bidir relationship with ScreensaverUser,
+          // NOT also with AdministratorUser (although it does via its parent).
+          if (getter.getDeclaringClass().equals(bean.getClass())) {
+            if (AbstractEntity.class.isAssignableFrom(getter.getReturnType())) {
+              testBidirectionalityOfOneSideOfRelationship(bean,
+                                                          beanInfo,
+                                                          propertyDescriptor,
+                                                          getter);
+            }
+            else if (Collection.class.isAssignableFrom(getter.getReturnType())) {
+              testBidirectionalityOfManySideOfRelationship(bean,
+                                                           beanInfo,
+                                                           propertyDescriptor,
+                                                           getter);
+            }
           }
         }
       });

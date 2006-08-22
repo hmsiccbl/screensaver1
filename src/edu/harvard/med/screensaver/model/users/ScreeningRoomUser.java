@@ -14,11 +14,10 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Visit;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -26,9 +25,10 @@ import edu.harvard.med.screensaver.model.screens.Visit;
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.class lazy="false"
+ * @hibernate.joined-subclass table="screening_room_user" lazy="false"
+ * @hibernate.joined-subclass-key column="screensaver_user_id"
  */
-public class ScreeningRoomUser extends AbstractEntity
+public class ScreeningRoomUser extends ScreensaverUser
 {
   
   // static fields
@@ -39,8 +39,7 @@ public class ScreeningRoomUser extends AbstractEntity
 
   // instance fields
 
-  private Integer _screeningRoomUserId;
-  private Integer _version;
+  private ScreeningRoomUserClassification _userClassification;
   private Set<ChecklistItem> _checklistItems = new HashSet<ChecklistItem>();
   private Set<Screen> _screensLed = new HashSet<Screen>();
   private Set<Screen> _screensHeaded = new HashSet<Screen>();
@@ -49,17 +48,8 @@ public class ScreeningRoomUser extends AbstractEntity
   private ScreeningRoomUser _labHead;
   private Set<ScreeningRoomUser> _labMembers = new HashSet<ScreeningRoomUser>();
   private LabAffiliation _labAffiliation;
-  private Date _dateCreated;
-  private String _firstName;
-  private String _lastName;
-  private String _email;
-  private String _eCommonsId;
-  private String _harvardId;
-  private String _phone;
-  private UserClassification _userClassification;
-  private boolean _nonScreeningUser;
-  private boolean _rnaiUser;
-  private String _mailingAddress;
+  private boolean _isNonScreeningUser;
+  private boolean _isRnaiUser;
   private String _comments;
 
 
@@ -72,93 +62,44 @@ public class ScreeningRoomUser extends AbstractEntity
    * @param firstName the first name
    * @param lastName the last name
    * @param email the email
-   * @param eCommonsId the eCommonds ID
-   * @param harvardId the harvard ID
    * @param phone the phone number
-   * @param userClassification the user classification
-   * @param nonScreeningUser the non-screening user
-   * @param rnaiUser the RNAi user
    * @param mailingAddress the mailing address
    * @param comments the comments
+   * @param eCommonsId the eCommonds ID
+   * @param harvardId the harvard ID
+   * @param userClassification the user classification
+   * @param isNonScreeningUser does not perform any screening, but is otherwise associated with Screens in this system
+   * @param isRnaiUser performs RNAi screening
    */
   public ScreeningRoomUser(
     Date dateCreated,
     String firstName,
     String lastName,
     String email,
+    String phone,
+    String mailingAddress,
+    String comments,
     String eCommonsId,
     String harvardId,
-    String phone,
-    UserClassification userClassification,
-    boolean nonScreeningUser,
-    boolean rnaiUser,
-    String mailingAddress,
-    String comments)
+    ScreeningRoomUserClassification userClassification,
+    boolean isNonScreeningUser,
+    boolean isRnaiUser)
   {
-    this(
-      dateCreated,
-      firstName,
-      lastName,
-      email,
-      userClassification, 
-      nonScreeningUser,
-      rnaiUser);
+    super(dateCreated,
+          firstName,
+          lastName,
+          email,
+          phone,
+          mailingAddress,
+          comments);
     setECommonsId(eCommonsId);
     setHarvardId(harvardId);
-    setPhone(phone);
-    setMailingAddress(mailingAddress);
-    setComments(comments);
-  }
-
-  /**
-   * Constructs an initialized <code>ScreeningRoomUser</code> object.
-   *
-   * @param dateCreated the date created
-   * @param firstName the first name
-   * @param lastName the last name
-   * @param email the email
-   * @param userClassification the user classification
-   * @param nonScreeningUser the non-screening user
-   * @param rnaiUser the RNAi user
-   */
-  public ScreeningRoomUser(
-    Date dateCreated,
-    String firstName,
-    String lastName,
-    String email,
-    UserClassification userClassification,
-    boolean nonScreeningUser,
-    boolean rnaiUser)
-  {
-    _dateCreated = truncateDate(dateCreated);
-    _firstName = firstName;
-    _lastName = lastName;
-    _email = email;
-    _userClassification = userClassification;
-    _nonScreeningUser = nonScreeningUser;
-    _rnaiUser = rnaiUser;
+    setUserClassification(userClassification);
+    setRnaiUser(isRnaiUser);
   }
 
 
   // public methods
-
-  @Override
-  public Integer getEntityId()
-  {
-    return getScreeningRoomUserId();
-  }
-
-  /**
-   * Get the id for the screening room user.
-   *
-   * @return the id for the screening room user
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="screening_room_user_id_seq"
-   */
-  public Integer getScreeningRoomUserId()
-  {
-    return _screeningRoomUserId;
-  }
 
   /**
    * Get an unmodifiable copy of the set of checklist items.
@@ -373,126 +314,29 @@ public class ScreeningRoomUser extends AbstractEntity
     }
   }
 
-  /**
-   * Get the date created.
-   *
-   * @return the date created
-   * @hibernate.property
-   *   not-null="true"
-   */
-  public Date getDateCreated()
-  {
-    return _dateCreated;
-  }
 
   /**
-   * Set the date created.
-   *
-   * @param dateCreated the new date created
-   */
-  public void setDateCreated(Date dateCreated)
-  {
-    _dateCreated = truncateDate(dateCreated);
-  }
-
-  /**
-   * Get the first name.
-   *
-   * @return the first name
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
-   */
-  public String getFirstName()
-  {
-    return _firstName;
-  }
-
-  /**
-   * Set the first name.
-   *
-   * @param firstName the new first name
-   */
-  public void setFirstName(String firstName)
-  {
-    _firstName = firstName;
-  }
-
-  /**
-   * Get the last name.
-   *
-   * @return the last name
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
-   */
-  public String getLastName()
-  {
-    return _lastName;
-  }
-
-  /**
-   * Set the last name.
-   *
-   * @param lastName the new last name
-   */
-  public void setLastName(String lastName)
-  {
-    _lastName = lastName;
-  }
-
-  /**
-   * Get the email.
-   *
-   * @return the email
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
-   *   unique="true"
-   */
-  public String getEmail()
-  {
-    return _email;
-  }
-
-  /**
-   * Set the email.
-   *
+   * Set the email, updating this entity's membership in any related entity sets
+   * that it already is a member of.
+   * 
    * @param email the new email
    */
+  @Override
   public void setEmail(String email)
   {
-    _email = email;
-  }
-
-  /**
-   * Get the eCommons ID.
-   *
-   * @return the eCommons ID
-   * @hibernate.property
-   *   type="text"
-   */
-  public String getECommonsId()
-  {
-    return _eCommonsId;
-  }
-
-  /**
-   * Set the eCommons ID.
-   *
-   * @param eCommonsId the new eCommons ID
-   */
-  public void setECommonsId(String eCommonsId)
-  {
-    for (Screen screenCollaborated : _screensCollaborated) {
-      screenCollaborated.getHbnCollaborators().remove(this);
+    if (_screensCollaborated != null) {
+      for (Screen screenCollaborated : _screensCollaborated) {
+        screenCollaborated.getHbnCollaborators().remove(this);
+      }
     }
     if (_labHead != null) {
       _labHead.getHbnLabMembers().remove(this);
     }
-    _eCommonsId = eCommonsId;
-    for (Screen screenCollaborated : _screensCollaborated) {
-      screenCollaborated.getHbnCollaborators().add(this);
+    super.setEmail(email);
+    if (_screensCollaborated != null) {
+      for (Screen screenCollaborated : _screensCollaborated) {
+        screenCollaborated.getHbnCollaborators().add(this);
+      }
     }
     if (_labHead != null) {
       _labHead.getHbnLabMembers().add(this);
@@ -500,58 +344,14 @@ public class ScreeningRoomUser extends AbstractEntity
   }
 
   /**
-   * Get the harvard id.
-   *
-   * @return the harvard id
-   * @hibernate.property
-   *   type="text"
-   */
-  public String getHarvardId()
-  {
-    return _harvardId;
-  }
-
-  /**
-   * Set the harvard id.
-   *
-   * @param harvardId the new harvard id
-   */
-  public void setHarvardId(String harvardId)
-  {
-    _harvardId = harvardId;
-  }
-
-  /**
-   * Get the phone.
-   *
-   * @return the phone
-   * @hibernate.property
-   *   type="text"
-   */
-  public String getPhone()
-  {
-    return _phone;
-  }
-
-  /**
-   * Set the phone.
-   *
-   * @param phone the new phone
-   */
-  public void setPhone(String phone)
-  {
-    _phone = phone;
-  }
-
-  /**
    * Get the user classification.
    *
    * @return the user classification
    * @hibernate.property
-   *   type="edu.harvard.med.screensaver.model.users.UserClassification$UserType"
+   *   type="edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification$UserType"
    *   not-null="true"
    */
-  public UserClassification getUserClassification()
+  public ScreeningRoomUserClassification getUserClassification()
   {
     return _userClassification;
   }
@@ -561,97 +361,52 @@ public class ScreeningRoomUser extends AbstractEntity
    *
    * @param userClassification the new user classification
    */
-  public void setUserClassification(UserClassification userClassification)
+  public void setUserClassification(ScreeningRoomUserClassification userClassification)
   {
     _userClassification = userClassification;
   }
 
   /**
-   * Get the non-screening user.
-   *
-   * @return the non-screening user
-   * @hibernate.property
-   *   not-null="true"
+   * Get non-screening flag, indicating whether this user performs screening.
+   * 
+   * @return a flag indicating whether this user performs screening
+   * @hibernate.property not-null="true"
    */
   public boolean getNonScreeningUser()
   {
-    return _nonScreeningUser;
+    return _isNonScreeningUser;
   }
 
   /**
-   * Set the non-screening user.
+   * Set the non-screening flag.
    *
-   * @param nonScreeningUser the new non-screening user
+   * @param isNonScreeningUser a flag indicating whether this user performs screening.
    */
-  public void setNonScreeningUser(boolean nonScreeningUser)
+  public void setNonScreeningUser(boolean isNonScreeningUser)
   {
-    _nonScreeningUser = nonScreeningUser;
+    _isNonScreeningUser = isNonScreeningUser;
   }
 
   /**
-   * Get the RNAi user.
+   * Get the RNAi flag, indicating whether this user performs RNAi screening.
    *
-   * @return the RNAi user
+   * @return the RNAi flag
    * @hibernate.property
    *   not-null="true"
    */
   public boolean getRnaiUser()
   {
-    return _rnaiUser;
+    return _isRnaiUser;
   }
 
   /**
-   * Set the RNAi user.
+   * Set the RNAi flag, indicating whether this user performs RNAi screening.
    *
-   * @param rnaiUser the new RNAi user
+   * @param rnaiUser a flag indicating whether this user performs RNAi screening
    */
-  public void setRnaiUser(boolean rnaiUser)
+  public void setRnaiUser(boolean isRnaiUser)
   {
-    _rnaiUser = rnaiUser;
-  }
-
-  /**
-   * Get the mailing address.
-   *
-   * @return the mailing address
-   * @hibernate.property
-   *   type="text"
-   */
-  public String getMailingAddress()
-  {
-    return _mailingAddress;
-  }
-
-  /**
-   * Set the mailing address.
-   *
-   * @param mailingAddress the new mailing address
-   */
-  public void setMailingAddress(String mailingAddress)
-  {
-    _mailingAddress = mailingAddress;
-  }
-
-  /**
-   * Get the comments.
-   *
-   * @return the comments
-   * @hibernate.property
-   *   type="text"
-   */
-  public String getComments()
-  {
-    return _comments;
-  }
-
-  /**
-   * Set the comments.
-   *
-   * @param comments the new comments
-   */
-  public void setComments(String comments)
-  {
-    _comments = comments;
+    _isRnaiUser = isRnaiUser;
   }
 
 
@@ -743,13 +498,7 @@ public class ScreeningRoomUser extends AbstractEntity
   
   // package methods
 
-  @Override
-  protected Object getBusinessKey()
-  {
-    return getEmail();
-  }
 
-  
   // protected methods
   
   /**
@@ -760,7 +509,7 @@ public class ScreeningRoomUser extends AbstractEntity
    *   cascade="save-update"
    *   inverse="true"
    * @hibernate.collection-key
-   *   column="screening_room_user_id"
+   *   column="screensaver_user_id"
    * @hibernate.collection-one-to-many
    *   class="edu.harvard.med.screensaver.model.users.ChecklistItem"
    * @motivation for hibernate and maintenance of bi-directional relationships
@@ -793,37 +542,6 @@ public class ScreeningRoomUser extends AbstractEntity
 
 
   // private methods
-
-  /**
-   * Set the id for the screening room user.
-   *
-   * @param screeningRoomUserId the new id for the screening room user
-   * @motivation for hibernate
-   */
-  private void setScreeningRoomUserId(Integer screeningRoomUserId) {
-    _screeningRoomUserId = screeningRoomUserId;
-  }
-
-  /**
-   * Get the version for the screening room user.
-   *
-   * @return the version for the screening room user
-   * @motivation for hibernate
-   * @hibernate.version
-   */
-  private Integer getVersion() {
-    return _version;
-  }
-
-  /**
-   * Set the version for the screening room user.
-   *
-   * @param version the new version for the screening room user
-   * @motivation for hibernate
-   */
-  private void setVersion(Integer version) {
-    _version = version;
-  }
 
   /**
    * Set the checklist items.
@@ -958,4 +676,6 @@ public class ScreeningRoomUser extends AbstractEntity
   {
     return _labAffiliation;
   }
+  
+ 
 }

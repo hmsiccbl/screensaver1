@@ -398,7 +398,7 @@ public class ChecklistItem extends AbstractEntity
    * @return the screening room user
    * @hibernate.many-to-one
    *   class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser"
-   *   column="screening_room_user_id"
+   *   column="screensaver_user_id"
    *   not-null="true"
    *   foreign-key="fk_checklist_item_to_screening_room_user"
    *   cascade="save-update"

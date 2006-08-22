@@ -94,12 +94,12 @@ public class SimpleDAOTest extends AbstractSpringTest
   public void testFindAllEntitiesWithType()
   {
     List<Compound> compounds = dao.findAllEntitiesWithType(Compound.class);
-    assertEquals("no compounds in an empty database", compounds.size(), 0);
+    assertEquals("no compounds in an empty database", 0, compounds.size());
     
     dao.defineEntity(Compound.class, "compoundName");
     compounds = dao.findAllEntitiesWithType(Compound.class);
     assertEquals("one compound in the machine", compounds.size(), 1);
-    assertEquals("names match", compounds.get(0).getCompoundName(), "compoundName");
+    assertEquals("names match", "compoundName", compounds.get(0).getCompoundName());
   }
   
   public void testFindEntityById()

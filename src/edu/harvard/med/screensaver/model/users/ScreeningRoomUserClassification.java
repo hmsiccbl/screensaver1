@@ -18,7 +18,7 @@ import edu.harvard.med.screensaver.model.VocabularyUserType;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public enum UserClassification implements VocabularyTerm
+public enum ScreeningRoomUserClassification implements VocabularyTerm
 {
 
   // the vocabulary
@@ -37,13 +37,13 @@ public enum UserClassification implements VocabularyTerm
   // static inner class
 
   /**
-   * A Hibernate <code>UserType</code> to map the {@link UserClassification} vocabulary.
+   * A Hibernate <code>UserType</code> to map the {@link ScreeningRoomUserClassification} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<UserClassification>
+  public static class UserType extends VocabularyUserType<ScreeningRoomUserClassification>
   {
     public UserType()
     {
-      super(UserClassification.values());
+      super(ScreeningRoomUserClassification.values());
     }
   }
 
@@ -53,10 +53,10 @@ public enum UserClassification implements VocabularyTerm
   private String _value;
 
   /**
-   * Constructs a <code>UserClassification</code> vocabulary term.
+   * Constructs a <code>ScreeningRoomUserClassification</code> vocabulary term.
    * @param value The value of the term.
    */
-  private UserClassification(String value)
+  private ScreeningRoomUserClassification(String value)
   {
     _value = value;
   }
