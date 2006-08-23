@@ -14,8 +14,9 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 /**
  * A simple wrapper for the
  * <code>AbstractDependencyInjectionSpringContextTests</code> that implements
- * the abstract method {@link org.springframework.test.AbstractDependencyInjectionSpringContextTests#getConfigLocations}
- * by loading our <code>spring-context-persistence.xml</code> resource file.
+ * the abstract method
+ * {@link org.springframework.test.AbstractDependencyInjectionSpringContextTests#getConfigLocations}
+ * by loading our <code>spring-context.xml</code> resource file.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>

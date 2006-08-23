@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<!-- This file declares a bean that is itself an ApplicationContext (i.e., the top-level Spring bean factory).  
+     THIS FILE EXISTS AT A LEVEL "ABOVE" THE OTHER spring-context-*.xml SPRING CONFIGURATION FILES, 
+     AND IS NOT NEEDED TO INSTANTIATE A "NORMAL" SPRING-MANAGED APPLICATION.
+     It is used only by BeanFactoryLocators, which allow classes instantiated by third-party code 
+     (e.g., Tomcat instantiates our ScreensaverTomcatLoginModule class)  to make use of Spring-managed/injected beans.
+     See http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html
+-->
+     
+<beans>
+
+  <bean
+    id="edu.harvard.med.screensaver.Screensaver"
+    class="org.springframework.context.support.ClassPathXmlApplicationContext">
+    <constructor-arg>
+      <list>
+        <value>spring-context.xml</value>
+      </list>
+    </constructor-arg>
+  </bean>
+
+</beans>

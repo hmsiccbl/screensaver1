@@ -2,6 +2,27 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
  
+  <bean
+    id="eCommonsAuthenticationClient"
+    class="edu.harvard.med.authentication.eCommons.ECommonsAuthenticationClient">
+    <description>Client for an HMS network service that authenticates a given eCommons ID / password pair.</description>
+    <!-- requesting application's name; arbitrary, for server auditing only -->
+    <constructor-arg index="0" value="Screensaver1"/>
+    <!-- the HMS-assigned "issuer" ID; must be approved -->
+    <constructor-arg index="1" value="Orchestra_ATTR_CLIENT"/>
+    <!-- the URL of the eCommons authentication server -->
+    <constructor-arg index="2" value="https://authenticate.med.harvard.edu/wsAuthenticate.asp"/>
+  </bean>
+
+  <bean
+    id="screensaverLoginModule"
+    class="edu.harvard.med.screensaver.ui.authentication.ScreensaverLoginModule"
+    singleton="true">
+    <description>JAAS LoginModule implementation that can be used to authenticate and authorize a user.  In our case, the Tomcat app server will make calls to this bean.  Maintains state between method calls, so cannot be a singleton.</description>
+    <property name="dao" ref="dao"/>
+    <property name="authenticationClient" ref="eCommonsAuthenticationClient"/>
+  </bean>
+
   <bean 
     id="screenResultParser"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"

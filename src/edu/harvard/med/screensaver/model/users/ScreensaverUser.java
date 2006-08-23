@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.model.users;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -23,7 +24,8 @@ import org.apache.log4j.Logger;
 
 /**
  * A Hibernate entity bean representing a Screensaver user. A Screensaver user
- * may be an {@link AdministratorUser} and/or a {@link ScreeningRoomUser}.
+ * may be an {@link AdministratorUser} and/or a {@link ScreeningRoomUser}. 
+ * Also acts as JAAS {@link java.security.Principal}.
  * <p>
  * This parent "user" class supports multiple forms of login IDs. The
  * <code>loginID</code> property is a Screensaver-managed login ID, whereas
@@ -36,7 +38,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @hibernate.class lazy="false"
  */
-public class ScreensaverUser extends AbstractEntity
+public class ScreensaverUser extends AbstractEntity implements Principal
 {
   
   // static fields
@@ -57,13 +59,35 @@ public class ScreensaverUser extends AbstractEntity
   private String _mailingAddress;
   private String _comments;
   private Set<ScreensaverUserRole> _roles = new HashSet<ScreensaverUserRole>();
-  private String _loginID;
+  private String _loginId;
   private String _digestedPassword;
   private String _eCommonsId;
   private String _harvardId;
 
 
   // public constructors
+
+  /**
+   * Constructs an initialized <code>ScreensaverUser</code> object.
+   *
+   * @param dateCreated the date created
+   * @param firstName the first name
+   * @param lastName the last name
+   * @param email the email
+   * @param phone the phone number
+   * @param mailingAddress the mailing address
+   * @param comments the comments
+   */
+  public ScreensaverUser(
+    String firstName,
+    String lastName,
+    String email)
+  {
+    setDateCreated(new Date());
+    setFirstName(firstName);
+    setLastName(lastName);
+    setEmail(email);
+  }
 
   /**
    * Constructs an initialized <code>ScreensaverUser</code> object.
@@ -432,7 +456,7 @@ public class ScreensaverUser extends AbstractEntity
    */
   public String getLoginId()
   {
-    return _loginID;
+    return _loginId;
   }
 
   /**
@@ -442,7 +466,7 @@ public class ScreensaverUser extends AbstractEntity
    */
   public void setLoginId(String loginId)
   {
-    _loginID = loginId;
+    _loginId = loginId;
   }
 
   /**
@@ -541,6 +565,16 @@ public class ScreensaverUser extends AbstractEntity
   public void setHarvardId(String harvardId)
   {
     _harvardId = harvardId;
+  }
+
+  // Principal interface methods
+  
+  /**
+   * Get the user Principal name.
+   */
+  public String getName()
+  {
+    return getBusinessKey().toString();
   }
   
   

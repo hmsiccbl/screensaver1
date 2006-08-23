@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.users;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,12 +21,13 @@ import org.apache.log4j.Logger;
 
 /**
  * A Hibernate entity bean representing a screening room user role.
+ * Also acts as JAAS {@link java.security.Principal}.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @hibernate.class lazy="false"
  */
-public class ScreensaverUserRole extends AbstractEntity
+public class ScreensaverUserRole extends AbstractEntity implements Principal
 {
   
   // static fields
@@ -165,6 +167,17 @@ public class ScreensaverUserRole extends AbstractEntity
   }
 
 
+  // Principal interface methods
+  
+  /**
+   * Get the user Principal name.
+   */
+  public String getName()
+  {
+    return getBusinessKey().toString();
+  }
+
+  
   // protected methods
 
   @Override

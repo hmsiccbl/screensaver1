@@ -68,6 +68,7 @@
     else="resources/log4j.debug.properties">
     <isfalse value="${debug}"/>
   </condition>  
+  <property name="login.conf.file" location="web/login.config" description="The JAAS login configuration file, which Tomcat needs in order to provide our custom JAAS LoginModule to our application."/>
 
 
   <!-- file sets -->
@@ -159,6 +160,9 @@
     <antcall target="exploded.war">
       <param name="exploded.war.dir" location="${deploy.dir}"/>
     </antcall>
+    
+    <!-- now copy files that are for Tomcat (and so cannot be included in the war or exploded directory) -->
+    <copy file="${login.conf.file}" todir="${appserver.dir}/conf" verbose="${verbose}"/>
   </target>
 
   <target 
