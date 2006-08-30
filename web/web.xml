@@ -31,7 +31,7 @@
   <!-- Specify Spring context configuration files, possibly one per application tier. -->
   <context-param>
     <param-name>contextConfigLocation</param-name>
-    <param-value>/WEB-INF/classes/spring-context.xml</param-value>
+    <param-value>classpath*:spring-context.xml</param-value>
   </context-param>
 
   <!-- Use a servlet listener to allow us to load the above Spring application context XML files -->
@@ -238,7 +238,15 @@
   <listener>
     <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
   </listener>
+  
 
+  <!-- JNDI setup -->
+  
+  <resource-env-ref>
+    <description>Mutable capsule that allows us to store a LoginModuleFactory in JNDI, which is instantiated by our web app, and not available at Tomcat initialization time.</description>
+    <resource-env-ref-name>bean/loginModuleFactoryCapsule</resource-env-ref-name>
+    <resource-env-ref-type>edu.harvard.med.screensaver.ui.authentication.tomcat.LoginModuleFactoryCapsule</resource-env-ref-type>
+  </resource-env-ref>
 
 
   <!-- Authentication/Security configuration -->
@@ -349,9 +357,9 @@
       <url-pattern>/schemaManager.jsf</url-pattern>
     </web-resource-collection>
 
-    <auth-constraint>
+    <!--auth-constraint>
       <role-name>developer</role-name>
-    </auth-constraint>
+    </auth-constraint-->
   </security-constraint>
 
 </web-app>

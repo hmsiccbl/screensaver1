@@ -1,0 +1,18 @@
+<!--
+    Tomcat Context configuration file for the Screensaver Web App
+-->
+
+<Context path="/screensaver" docBase="screensaver" debug="99" >
+  <Resource
+    name="bean/loginModuleFactoryCapsule"
+    auth="Container" 
+    type="edu.harvard.med.screensaver.ui.authentication.tomcat.LoginModuleFactoryCapsule">
+  </Resource>
+  <ResourceParams name="bean/loginModuleFactoryCapsule">
+    <parameter>
+      <name>factory</name>
+      <value>org.apache.naming.factory.BeanFactory</value>
+    </parameter>
+  </ResourceParams>
+
+</Context>

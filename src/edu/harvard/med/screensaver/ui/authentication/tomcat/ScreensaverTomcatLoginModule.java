@@ -7,18 +7,17 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.authentication;
+package edu.harvard.med.screensaver.ui.authentication.tomcat;
 
 import java.util.Map;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
-
-import org.springframework.beans.factory.access.BeanFactoryLocator;
-import org.springframework.beans.factory.access.BeanFactoryReference;
-import org.springframework.beans.factory.access.SingletonBeanFactoryLocator;
 
 /**
  * A JAAS LoginModule that can be instantiated by Tomcat's JAASRealm, via its
@@ -36,12 +35,12 @@ import org.springframework.beans.factory.access.SingletonBeanFactoryLocator;
  */
 public class ScreensaverTomcatLoginModule implements LoginModule
 {
-  // It sure would be nice to place these paramaters in a configuration file,
+  // It sure would be nice to place these parameters in a configuration file,
   // like, say, a Spring config file, but then we'd have a bootstrapping
   // problem, now wouldn't we? :)
   private static final String LOGIN_MODULE_BEAN_NAME = "screensaverLoginModule";
   private static final String APPLICATION_CONTEXT_BEAN_NAME = "edu.harvard.med.screensaver.Screensaver";
-  private static final String META_SPRING_CONTEXT_FILE = "classpath:meta-spring-context.xml";
+  private static final String META_SPRING_CONTEXT_FILE = "classpath*:meta-spring-context.xml";
   
   private LoginModule _delegate;
 
@@ -53,9 +52,33 @@ public class ScreensaverTomcatLoginModule implements LoginModule
   {
     // Use a Spring-endorsed hack to obtain a Spring-managed LoginModule, since
     // this class cannot be Spring managed.
-    BeanFactoryLocator bfl = SingletonBeanFactoryLocator.getInstance(META_SPRING_CONTEXT_FILE);
-    BeanFactoryReference bf = bfl.useBeanFactory(APPLICATION_CONTEXT_BEAN_NAME);
-    _delegate = (LoginModule) bf.getFactory().getBean(LOGIN_MODULE_BEAN_NAME);
+    // TODO: this does not work as expected: we are not getting the same
+    // instance of the login module bean as is in the ApplicationContext created
+    // by the ServletListener.
+//    System.out.println("ClassPathXmlApplicationContext is-a BeanFactory: " + BeanFactory.class.isAssignableFrom(ClassPathXmlApplicationContext.class));
+//    BeanFactoryLocator bfl = SingletonBeanFactoryLocator.getInstance(META_SPRING_CONTEXT_FILE);
+//    BeanFactoryReference bf = bfl.useBeanFactory(APPLICATION_CONTEXT_BEAN_NAME);
+//    _delegate = (LoginModule) bf.getFactory().getBean(LOGIN_MODULE_BEAN_NAME);
+
+    Context initialCtx;
+    try {
+      initialCtx = new InitialContext();
+      Context envCtx = (Context) initialCtx.lookup("java:comp/env");
+      LoginModuleFactoryCapsule loginModuleFactoryCapsule = (LoginModuleFactoryCapsule) envCtx.lookup("bean/loginModuleFactoryCapsule");
+      LoginModuleFactory loginModuleFactory = loginModuleFactoryCapsule.getLoginModuleFactory();
+      _delegate = loginModuleFactory.newLoginModule();
+    }
+    catch (NamingException e) {
+      e.printStackTrace();
+      return;
+    }
+    
+    System.out.println("ScreensaverTomcatLoginModule._delegate=" + _delegate);
+
+    _delegate.initialize(subject,
+                         callbackHandler,
+                         sharedState,
+                         options);
   }
 
   public boolean login() throws LoginException

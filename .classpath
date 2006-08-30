@@ -21,15 +21,10 @@
 			<attribute value="http://www.hibernate.org/hib_docs/v3/api/" name="javadoc_location"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry sourcepath="/usr/local/spring-framework" kind="lib" path="lib/springframework-1.2.8/spring.jar">
-		<attributes>
-			<attribute value="file:/usr/local/spring-framework/docs/api/" name="javadoc_location"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-aop.jar"/>
-	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-beans.jar"/>
-	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-context.jar"/>
-	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-core.jar">
+	<classpathentry sourcepath="/usr/local/spring-framework/src" kind="lib" path="lib/springframework-1.2.8/spring-beans.jar"/>
+	<classpathentry sourcepath="/usr/local/spring-framework/src" kind="lib" path="lib/springframework-1.2.8/spring-context.jar"/>
+	<classpathentry sourcepath="/usr/local/spring-framework/src" kind="lib" path="lib/springframework-1.2.8/spring-core.jar">
 		<attributes>
 			<attribute value="file:/usr/local/spring-framework/docs/api/" name="javadoc_location"/>
 		</attributes>
@@ -37,18 +32,12 @@
 	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-dao.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-hibernate.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-orm.jar"/>
-	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-remoting.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-support.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-web.jar"/>
 	<classpathentry kind="lib" path="lib/xdoclet-1.2.3/xdoclet-1.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/xdoclet-1.2.3/xdoclet-hibernate-module-1.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/xdoclet-1.2.3/xdoclet-xdoclet-module-1.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/xdoclet-1.2.3/xjavadoc-1.5-snapshot050611.jar"/>
-	<classpathentry sourcepath="/usr/local/spring-framework/src" kind="lib" path="lib/springframework-1.2.8/spring-mock.jar">
-		<attributes>
-			<attribute value="file:/usr/local/spring-framework/docs/api/" name="javadoc_location"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/myeclipse-4.1.1/junit.jar"/>
 	<classpathentry kind="lib" path="lib/myeclipse-4.1.1/commons-dbcp.jar"/>
 	<classpathentry kind="lib" path="lib/myeclipse-4.1.1/commons-pool.jar"/>
@@ -75,5 +64,6 @@
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-fileupload-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/myeclipse-4.1.1/struts.jar"/>
 	<classpathentry sourcepath="/eCommonsAuth/src" kind="lib" path="lib/hms/eCommonsAuth.jar"/>
+	<classpathentry kind="lib" path="lib/springframework-1.2.8/unused/spring-mock.jar"/>
 	<classpathentry kind="output" path=".eclipse.classes"/>
 </classpath>

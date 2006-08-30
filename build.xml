@@ -42,9 +42,9 @@
     property="javac.optimize" 
     value="true"
     else="false" >
-    <isfalse value="${debug}"/> 
-  </condition> 
-  <property name="verbose" value="false" description="controls verbosity of various Ant tasks"/> 
+    <isfalse value="${debug}"/>
+  </condition>
+  <property name="verbose" value="false" description="controls verbosity of various Ant tasks"/>
   <property name="war" value="build/${app.name}.war"/>
   <property name="appserver.dir" location="/usr/local/jakarta-tomcat"/>
   <property name="appserver.app.work.dir" location="${appserver.dir}/work/Catalina/localhost/${app.name}"/>
@@ -57,7 +57,7 @@
   <property name="hibernate.cfg.xml" location="resources/hibernate.cfg.xml"/>
   <property name="javadoc.dir" location="build/api"/>
   <property name="distro.build.dir" location="build/distro/${app.name}"/>
-  <property name="distro.file.tgz" location="build/${app.name}.tgz"/> 
+  <property name="distro.file.tgz" location="build/${app.name}.tgz"/>
   <property name="distro.file.zip" location="build/${app.name}.zip"/>
   <property name="datasource" value="local" 
     description="Determines which datasource*.properties file is used when generating a build or deployment.  Valid values are wildcard substring of 'resources/datasource-*.properties'"/>
@@ -67,8 +67,12 @@
     value="resources/log4j.properties"
     else="resources/log4j.debug.properties">
     <isfalse value="${debug}"/>
-  </condition>  
-  <property name="login.conf.file" location="web/login.config" description="The JAAS login configuration file, which Tomcat needs in order to provide our custom JAAS LoginModule to our application."/>
+  </condition>
+
+  <!-- properties for configuring Tomcat JAAS functionality -->
+  <property name="login.conf.filename" value="login.config" description="The base name of the JAAS login configuration file, which Tomcat needs in order to provide our custom JAAS LoginModule to our application."/>
+  <property name="context.conf.filename" value="${app.name}.xml" description="The base name of the XML file containing the Tomcat Context configuration for our application."/>
+  <property name="jaas.jar" value="build/screensaver-jaas.jar" />
 
 
   <!-- file sets -->
@@ -80,7 +84,7 @@
     <include name="**/*.jar"/>
     <exclude name="**/unused/**"/>
   </fileset>
- 
+
   <fileset
     id="model.src.fileset"
     description="defines the Java source files comprising the application's domain model" 
@@ -89,7 +93,7 @@
   >
     <include name="edu/harvard/med/screensaver/model/**/*.java"/>
   </fileset>
-  
+
   <fileset 
     id="test.model.src.fileset"
     description="defines the Java source files comprising a domain model for testing purposes; 'test' property must be set"
@@ -97,7 +101,7 @@
     casesensitive="yes"
   >
   </fileset>
- 
+
   <fileset
     id="junit.tests.fileset"
     description="defines the Java source files that are JUnit tests" 
@@ -108,13 +112,34 @@
     <exclude name="edu/harvard/med/screensaver/**/Abstract*.java"/>
     <exclude name="edu/harvard/med/screensaver/**/*Suite.java"/>
   </fileset>
- 
+
+  <fileset
+    id="jaas.libraries.fileset"
+    description="defines the JAR library files needed by Tomcat (in its common/lib directory) to perform JAAS authentication"
+    dir="."
+  >
+    <include name="${jaas.jar}"/>
+    <include name="lib/hms/eCommonsAuth.jar"/>
+    <!--include name="lib/springframework-1.2.8/*.jar"/>
+    <include name="lib/hibernate-3.1.3/*.jar"/>
+    <include name="jakarta-commons/used/*.jar"/-->
+  </fileset>
+
+  <fileset
+    id="endorsed.libraries.fileset"
+    description="defines the endorsed JAR library files that our application depends upon, which are needed in Tomcat's common/endorsed directory"
+    dir="lib"
+  >
+    <include name="endorsed/*.jar"/>
+  </fileset>
+
+  
   <!-- uptodate properties (depends on "file sets" section) -->
- 
+
   <uptodate property="hbm_xml.uptodate" targetfile="${hibernate.cfg.xml}" >
     <srcfiles refid="model.src.fileset"/>
     <srcfiles refid="test.model.src.fileset"/>
-  </uptodate> 
+  </uptodate>
 
   <uptodate property="distro.uptodate" targetfile="${distro.file.tgz}">
     <srcfiles refid="lib.used.fileset"/>
@@ -122,7 +147,7 @@
     <srcfiles dir="resources"/>
     <srcfiles dir="build/distro/screensaver/"/>
   </uptodate>
-      
+
   <uptodate property="war.uptodate" targetfile="${war}">
     <srcfiles refid="lib.used.fileset"/>
     <srcfiles dir="src"/>
@@ -130,9 +155,9 @@
     <srcfiles dir="web"/>
     <srcfiles dir="jsp"/>
   </uptodate>
-      
-  
-  <!-- classpaths --> 
+
+
+  <!-- classpaths -->
 
   <path id="project.sourcepath" path="${src.dir}"/>
 
@@ -149,9 +174,12 @@
 
 
   <!-- build and deploy -->
-  
-  
-  <target name="deploy-local">
+
+
+  <target 
+    name="deploy-local" 
+    depends="jaas-jar"
+  >
     <description>
       Deploy Screensaver to a localhost application server, building the exploded WAR deployment directly in its destination directory.
     </description>
@@ -160,20 +188,30 @@
     <antcall target="exploded.war">
       <param name="exploded.war.dir" location="${deploy.dir}"/>
     </antcall>
-    
+
     <!-- now copy files that are for Tomcat (and so cannot be included in the war or exploded directory) -->
-    <copy file="${login.conf.file}" todir="${appserver.dir}/conf" verbose="${verbose}"/>
+    <copy file="web/${login.conf.filename}" todir="${appserver.dir}/conf" verbose="${verbose}"/>
+    <copy file="web/${context.conf.filename}" todir="${appserver.dir}/conf/Catalina/localhost/" verbose="${verbose}"/>
+    <copy todir="${appserver.dir}/common/lib" flatten="true" verbose="${verbose}">
+      <fileset refid="jaas.libraries.fileset"/>
+    </copy>
+    <copy todir="${appserver.dir}/common/endorsed" flatten="true" verbose="${verbose}">
+      <fileset refid="endorsed.libraries.fileset"/>
+    </copy>
+
+
+    <!-- these classes must only be available from Tomcat's "common" classloader, and not available to the web app's classloader -->
+    <delete dir="${deploy.dir}/WEB-INF/classes/edu/harvard/med/screensaver/ui/authentication/tomcat"/>
+
   </target>
 
-  <target 
-    name="deploy-remote"
-    depends="war"
-  >
+  <target name="deploy-remote" depends="war">
     <description>
       Deploy Screensaver to a remote application server.  Builds WAR deployment, then scp's to destination.
     </description>
     <!-- TODO -->
-    <echo message="The 'deploy-remote' target is currently unimplemented.  For now, run the 'deploy' target from your web server host (e.g. orchestra), and provide a value for the '-Ddeploy.dir' option on the command line"></echo>
+    <echo message="The 'deploy-remote' target is currently unimplemented.  For now, run the 'deploy' target from your web server host (e.g. orchestra), and provide a value for the '-Ddeploy.dir' option on the command line">
+    </echo>
   </target>
 
   <!-- an alias for deploy-local target -->
@@ -185,7 +223,7 @@
   <target 
     name="war"
     unless="war.uptodate"
-  >   
+  >
     <description>
       Build Screensaver into a Web ARchive (WAR) file
     </description>
@@ -229,20 +267,20 @@
     >
       <fileset dir="jsp" includes="**/*"/>
     </copy>
-  
+
     <copy 
       todir="${webinf.dir}" 
       verbose="${verbose}"
     >
       <!-- we have to copy taglibs directly into the WEB-INF directory, if we want to avoid having
-      to provide an explicit mapping for each .tld file in our web.xml <jsp-config> element -->  
+      to provide an explicit mapping for each .tld file in our web.xml <jsp-config> element -->
       <fileset dir="web/taglib"/>
       <fileset dir="web">
         <include name="*.dtd" />
         <include name="web.xml" />
         <include name="tiles.xml" />
-        <include name="faces-config.xml"/> 
-       </fileset> 
+        <include name="faces-config.xml"/>
+      </fileset>
     </copy>
 
     <copy 
@@ -251,7 +289,7 @@
     >
       <fileset dir="web/css"/>
     </copy>
-  
+
     <copy 
       todir="${exploded.war.dir}/images"
       verbose="${verbose}"
@@ -260,6 +298,19 @@
     </copy>
 
   </target>
+
+  <target
+    name="jaas-jar"
+    depends="distro"
+  >
+    <jar
+      jarfile="${jaas.jar}"
+      basedir="${distro.build.dir}/classes"
+    >
+      <include name="edu/harvard/med/screensaver/ui/authentication/tomcat/*.class"/>
+    </jar>
+  </target>
+
 
   <target 
     name="hbm_xml"
@@ -289,7 +340,7 @@
         password="${app.name}"
         dialect="org.hibernate.dialect.PostgreSQLDialect"
       />
-      <!-- TODO: make 'hibernate.cfg.xml' property match this destinationFile attribute value -->   
+      <!-- TODO: make 'hibernate.cfg.xml' property match this destinationFile attribute value -->
       <hibernate version="3.0" destinationFile="{0}.hbm.xml"/>
     </hibernatedoclet>
   </target>
@@ -328,9 +379,9 @@
       />
     </hibernatetool>
   </target>
- 
-  <!-- generate javadoc --> 
- 
+
+  <!-- generate javadoc -->
+
   <target name="javadoc">
     <javadoc 
      doctitle="Screensaver 1.00" 
@@ -360,14 +411,19 @@
     description="Starts the web application on a local Tomcat server"        
     depends="deploy"
   >
-    <exec executable="${appserver.start.cmd}"/>
+    <exec executable="${appserver.start.cmd}">
+      <arg line="-Djava.security.auth.login.config=${appserver.dir}/conf/${login.conf.filename}"/>
+    </exec>
+
   </target>
- 
+
   <target
     name="stop"
     description="Stops the web application (running locally on a Tomcat server)"
   >
-    <exec executable="${appserver.stop.cmd}"><arg line="-force"/></exec>
+    <exec executable="${appserver.stop.cmd}">
+      <arg line="-force"/>
+    </exec>
   </target>
 
   <target
@@ -376,7 +432,7 @@
   />
 
   <!-- run tests -->
- 
+
   <target 
     name="test"
     description="Runs all JUnit tests, after performing a clean build" 
@@ -394,11 +450,12 @@
       showoutput="true" 
       description="Run all project's tests"
     >
-      <test name="edu.harvard.med.screensaver.PackageTestSuite" outfile="test-result"></test> 
-    </junit> 
-  </target> 
- 
-  
+      <test name="edu.harvard.med.screensaver.PackageTestSuite" outfile="test-result">
+      </test>
+    </junit>
+  </target>
+
+
   <!-- TODO: should call hbm_xml with a destination dir parameter, to allow generated hibernate files to be custom-built into ${build.dir}, since they can differ depending upon Ant cmd-line options (e.g., -Dtest=true) -->
   <target
     name="build"
@@ -410,7 +467,7 @@
       'resources/', and 'lib/' subdirectories.  Configures the build to use a 
       the DataSource specified by the 'datasource' property.
     </description>
-    
+
     <property name="classes.dir" value="${build.dir}/classes"/>
 
     <mkdir dir="${classes.dir}"/>
@@ -422,7 +479,8 @@
       debug="${javac.debug}" 
       optimize="${javac.optimize}"
       listfiles="${verbose}" 
-    />
+    >
+    </javac>
 
     <copy
       todir="${build.dir}/lib"
@@ -430,7 +488,7 @@
       verbose="${verbose}" 
     >
       <fileset refid="lib.used.fileset"/>
-    </copy> 
+    </copy>
 
     <!-- conditionally use log4j.debug.properties in place of log4j.properties; will be
     overwritten by normal log4.properties unless 'debug' property is set -->
@@ -438,7 +496,7 @@
       file="${log4j.properties.file}"
       tofile="${classes.dir}/log4j.properties"
       verbose="${verbose}"/>
-      
+
     <copy 
       todir="${classes.dir}" 
       verbose="${verbose}"
@@ -447,17 +505,17 @@
         <include name="**/*"/>
         <exclude name="log4j*properties"/>
         <exclude name="datasource*properties"/>
-      </fileset>    
+      </fileset>
     </copy>
-    
+
     <!-- copy the selected datasource properties file to its standard name ("datasource.properties") in the build directory -->
     <copy file="${datasource.file}" tofile="${classes.dir}/datasource.properties" verbose="${verbose}"/>
   </target>
-    
 
- 
+
+
   <!-- build .tgz and .zip distribution files for command-line applications (main methods) into build/distro -->
- 
+
   <target
     name="distro"
     unless="distro.uptodate"
@@ -478,10 +536,11 @@
     <zip
       destfile="${distro.file.zip}" 
       basedir="${distro.build.dir}/.." 
-    /> 
-  </target> 
-    
-   
+    />
+  </target>
+
+
+
   <!-- cleanup routines -->
 
   <target
@@ -493,7 +552,7 @@
       <fileset dir="resources" includes="**/*.hbm.xml" />
       <fileset dir="sql" includes="create_schema.sql" />
       <fileset dir="sql" includes="drop_schema.sql" />
-      <fileset dir="${javadoc.dir}" includes="**/*"/>   
+      <fileset dir="${javadoc.dir}" includes="**/*"/>
     </delete>
   </target>
 
@@ -510,21 +569,21 @@
     </delete>
   </target>
 
-    <target
+  <target
       name="clean-distro"
       description="Clean distro file, and directory structure used to build the distro file"
     >
-      <delete
+    <delete
        includeemptydirs="true"
        failonerror="false"
       >
-        <fileset dir="build/distro/${app.name}/classes"/>
-        <fileset dir="build/distro/${app.name}/lib"/>
-        <fileset file="${distro.file.tgz}"/>
-        <fileset file="${distro.file.zip}"/>
-      </delete>
-    </target>
- 
+      <fileset dir="build/distro/${app.name}/classes"/>
+      <fileset dir="build/distro/${app.name}/lib"/>
+      <fileset file="${distro.file.tgz}"/>
+      <fileset file="${distro.file.zip}"/>
+    </delete>
+  </target>
+
   <target 
     name="clean" 
     description="Clean out generated files." 
@@ -532,8 +591,9 @@
   >
     <delete includeemptydirs="true">
       <fileset dir="resources" includes="edu/**" />
+      <fileset file="${jaas.jar}"/>
     </delete>
   </target>
-  
+
 
 </project>
