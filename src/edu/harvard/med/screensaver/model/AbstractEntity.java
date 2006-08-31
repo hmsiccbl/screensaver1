@@ -21,8 +21,6 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.model.libraries.Compound;
-
 
 /**
  * An abstract superclass for the entity beans in the data model.
@@ -127,6 +125,7 @@ import edu.harvard.med.screensaver.model.libraries.Compound;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
+
 public abstract class AbstractEntity implements Serializable
 {
   private static Logger log = Logger.getLogger(AbstractEntity.class);
