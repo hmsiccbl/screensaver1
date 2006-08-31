@@ -9,9 +9,18 @@
 
 package edu.harvard.med.screensaver.ui.authentication.tomcat;
 
+import org.apache.log4j.Logger;
+
 public class LoginModuleFactoryCapsule
 {
+  private static Logger log = Logger.getLogger(LoginModuleFactoryCapsule.class);
+  
   private LoginModuleFactory _factory;
+  
+  public LoginModuleFactoryCapsule()
+  {
+    log.debug("instantiated a LoginModuleFactoryCapsule: " + this);
+  }
 
   public LoginModuleFactory getLoginModuleFactory() 
   {

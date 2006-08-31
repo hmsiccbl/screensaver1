@@ -72,7 +72,6 @@
   <!-- properties for configuring Tomcat JAAS functionality -->
   <property name="login.conf.filename" value="login.config" description="The base name of the JAAS login configuration file, which Tomcat needs in order to provide our custom JAAS LoginModule to our application."/>
   <property name="context.conf.filename" value="${app.name}.xml" description="The base name of the XML file containing the Tomcat Context configuration for our application."/>
-  <property name="jaas.jar" value="build/screensaver-jaas.jar" />
 
 
   <!-- file sets -->
@@ -111,18 +110,6 @@
     <include name="edu/harvard/med/screensaver/**/*Test.java"/>
     <exclude name="edu/harvard/med/screensaver/**/Abstract*.java"/>
     <exclude name="edu/harvard/med/screensaver/**/*Suite.java"/>
-  </fileset>
-
-  <fileset
-    id="jaas.libraries.fileset"
-    description="defines the JAR library files needed by Tomcat (in its common/lib directory) to perform JAAS authentication"
-    dir="."
-  >
-    <include name="${jaas.jar}"/>
-    <include name="lib/hms/eCommonsAuth.jar"/>
-    <!--include name="lib/springframework-1.2.8/*.jar"/>
-    <include name="lib/hibernate-3.1.3/*.jar"/>
-    <include name="jakarta-commons/used/*.jar"/-->
   </fileset>
 
   <fileset
@@ -178,7 +165,6 @@
 
   <target 
     name="deploy-local" 
-    depends="jaas-jar"
   >
     <description>
       Deploy Screensaver to a localhost application server, building the exploded WAR deployment directly in its destination directory.
@@ -192,9 +178,6 @@
     <!-- now copy files that are for Tomcat (and so cannot be included in the war or exploded directory) -->
     <copy file="web/${login.conf.filename}" todir="${appserver.dir}/conf" verbose="${verbose}"/>
     <copy file="web/${context.conf.filename}" todir="${appserver.dir}/conf/Catalina/localhost/" verbose="${verbose}"/>
-    <copy todir="${appserver.dir}/common/lib" flatten="true" verbose="${verbose}">
-      <fileset refid="jaas.libraries.fileset"/>
-    </copy>
     <copy todir="${appserver.dir}/common/endorsed" flatten="true" verbose="${verbose}">
       <fileset refid="endorsed.libraries.fileset"/>
     </copy>
@@ -299,19 +282,6 @@
 
   </target>
 
-  <target
-    name="jaas-jar"
-    depends="distro"
-  >
-    <jar
-      jarfile="${jaas.jar}"
-      basedir="${distro.build.dir}/classes"
-    >
-      <include name="edu/harvard/med/screensaver/ui/authentication/tomcat/*.class"/>
-    </jar>
-  </target>
-
-
   <target 
     name="hbm_xml"
     unless="hbm_xml.uptodate"
@@ -405,6 +375,8 @@
 
 
   <!-- Start and stop web application (Tomcat).  (Currently just operates on a localhost Tomcat installation. -->
+  
+  <!-- TODO: Tomcat provides a catalina.xml Ant file to perform server start/stop operations.  We should use it! -->
 
   <target
     name="start"
@@ -591,7 +563,6 @@
   >
     <delete includeemptydirs="true">
       <fileset dir="resources" includes="edu/**" />
-      <fileset file="${jaas.jar}"/>
     </delete>
   </target>
 
