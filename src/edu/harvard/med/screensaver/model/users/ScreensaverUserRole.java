@@ -88,6 +88,7 @@ public class ScreensaverUserRole extends AbstractEntity implements Principal
    * @return the role name
    * @hibernate.property
    *   type="text"
+   *   not-null="true"
    */
   public String getRoleName()
   {
