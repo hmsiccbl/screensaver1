@@ -19,6 +19,8 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
+import org.apache.log4j.Logger;
+
 /**
  * A JAAS LoginModule that can be instantiated by Tomcat's JAASRealm, via its
  * default constructor. This class delegates its behavior to a Spring-managed
@@ -35,6 +37,8 @@ import javax.security.auth.spi.LoginModule;
  */
 public class ScreensaverTomcatLoginModule implements LoginModule
 {
+  private static Logger log = Logger.getLogger(ScreensaverTomcatLoginModule.class);
+  
   // It sure would be nice to place these parameters in a configuration file,
   // like, say, a Spring config file, but then we'd have a bootstrapping
   // problem, now wouldn't we? :)
@@ -50,6 +54,7 @@ public class ScreensaverTomcatLoginModule implements LoginModule
     Map sharedState,
     Map options)
   {
+    log.debug("initialize()");
     // Use a Spring-endorsed hack to obtain a Spring-managed LoginModule, since
     // this class cannot be Spring managed.
     // TODO: this does not work as expected: we are not getting the same
@@ -67,14 +72,13 @@ public class ScreensaverTomcatLoginModule implements LoginModule
       LoginModuleFactoryCapsule loginModuleFactoryCapsule = (LoginModuleFactoryCapsule) envCtx.lookup("bean/loginModuleFactoryCapsule");
       LoginModuleFactory loginModuleFactory = loginModuleFactoryCapsule.getLoginModuleFactory();
       _delegate = loginModuleFactory.newLoginModule();
+      log.debug("obtained reference to LoginModule delegate via JNDI: " + _delegate);
     }
     catch (NamingException e) {
       e.printStackTrace();
       return;
     }
     
-    System.out.println("ScreensaverTomcatLoginModule._delegate=" + _delegate);
-
     _delegate.initialize(subject,
                          callbackHandler,
                          sharedState,
@@ -83,21 +87,25 @@ public class ScreensaverTomcatLoginModule implements LoginModule
 
   public boolean login() throws LoginException
   {
+    log.debug("login()");
     return _delegate.login();
   }
 
   public boolean commit() throws LoginException
   {
+    log.debug("commit()");
     return _delegate.commit();
   }
 
   public boolean abort() throws LoginException
   {
+    log.debug("abort()");
     return _delegate.abort();
   }
 
   public boolean logout() throws LoginException
   {
+    log.debug("logout()");
     return _delegate.logout();
   }
 

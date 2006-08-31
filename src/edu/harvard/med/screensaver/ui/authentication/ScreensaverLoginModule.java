@@ -159,6 +159,7 @@ public class ScreensaverLoginModule implements LoginModule
     Map sharedState,
     Map options)
   {
+    log.debug("initialize()");
     _subject = subject;
     _callbackHandler = callbackHandler;
     _sharedState = sharedState;
@@ -175,6 +176,8 @@ public class ScreensaverLoginModule implements LoginModule
    *           perform the authentication.
    */
   public boolean login() throws LoginException {
+    
+    log.debug("login()");
     
     // prompt for a user name and _password
     if (_callbackHandler == null)
@@ -254,6 +257,8 @@ public class ScreensaverLoginModule implements LoginModule
    *         or false otherwise.
    */
   public boolean commit() throws LoginException {
+    log.debug("commit()");
+
     if (!_isAuthenticated) {
       reset(true);
       return false;
@@ -295,6 +300,8 @@ public class ScreensaverLoginModule implements LoginModule
    *         failed, and true otherwise.
    */
   public boolean abort() throws LoginException {
+    log.debug("abort()");
+    
     if (!_isAuthenticated) {
       return false;
     } 
@@ -322,6 +329,8 @@ public class ScreensaverLoginModule implements LoginModule
    */
   public boolean logout() throws LoginException 
   {
+    log.debug("logout()");
+
     // remove the Principals from the Subject (i.e., authorizations begone!)
     if (_grantedPrincipals != null) {
       _subject.getPrincipals().removeAll(_grantedPrincipals);
