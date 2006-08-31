@@ -182,10 +182,6 @@
       <fileset refid="endorsed.libraries.fileset"/>
     </copy>
 
-
-    <!-- these classes must only be available from Tomcat's "common" classloader, and not available to the web app's classloader -->
-    <delete dir="${deploy.dir}/WEB-INF/classes/edu/harvard/med/screensaver/ui/authentication/tomcat"/>
-
   </target>
 
   <target name="deploy-remote" depends="war">
