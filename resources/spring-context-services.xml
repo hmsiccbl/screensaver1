@@ -15,19 +15,12 @@
   </bean>
 
   <bean
-    id="mockAuthenticationClient"
-    class="edu.harvard.med.screensaver.ui.authentication.MockAuthenticationClient">
-    <description>Client for an HMS network service that authenticates ANY given ID/password pair.</description>
-  </bean>
-
-  <bean
     id="screensaverLoginModule"
     class="edu.harvard.med.screensaver.ui.authentication.ScreensaverLoginModule"
     singleton="false">
     <description>JAAS LoginModule implementation that can be used to authenticate and authorize a user.  In our case, the Tomcat app server will make calls to this bean.  Maintains state between method calls, so cannot be a singleton.</description>
     <property name="dao" ref="dao"/>
-    <!-- property name="authenticationClient" ref="eCommonsAuthenticationClient"/-->
-    <property name="authenticationClient" ref="mockAuthenticationClient"/>
+    <property name="authenticationClient" ref="eCommonsAuthenticationClient"/>
   </bean>
   
   <bean
