@@ -44,7 +44,6 @@ public class ScreensaverTomcatLoginModule implements LoginModule
   // problem, now wouldn't we? :)
   private static final String LOGIN_MODULE_BEAN_NAME = "screensaverLoginModule";
   private static final String APPLICATION_CONTEXT_BEAN_NAME = "edu.harvard.med.screensaver.Screensaver";
-  private static final String META_SPRING_CONTEXT_FILE = "classpath*:meta-spring-context.xml";
   
   private LoginModule _delegate;
 
