@@ -65,5 +65,6 @@
 	<classpathentry kind="lib" path="lib/myeclipse-4.1.1/struts.jar"/>
 	<classpathentry sourcepath="/eCommonsAuth/src" kind="lib" path="lib/hms/eCommonsAuth.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-1.2.8/unused/spring-mock.jar"/>
+	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-jdbc.jar"/>
 	<classpathentry kind="output" path=".eclipse.classes"/>
 </classpath>

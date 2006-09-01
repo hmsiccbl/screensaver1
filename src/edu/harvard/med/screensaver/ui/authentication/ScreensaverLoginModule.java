@@ -71,6 +71,7 @@ import edu.harvard.med.authentication.AuthenticationResult;
 import edu.harvard.med.authentication.Credentials;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.util.CryptoUtils;
 
 import org.apache.log4j.Logger;
     
@@ -87,6 +88,12 @@ public class ScreensaverLoginModule implements LoginModule
 {
   
   private static final Logger log = Logger.getLogger(ScreensaverLoginModule.class);
+
+  private static final String NO_SUCH_USER = "No such user";
+
+  private static final String FOUND_SCREENSAVER_USER = "Found Screensaver user";
+
+  private static final String FOUND_ECOMMONS_USER = "Found eCommons user";
   
   private DAO _dao;
   private AuthenticationClient _authenticationClient;
@@ -114,6 +121,8 @@ public class ScreensaverLoginModule implements LoginModule
    * the "user" Principal, while the others are "role" Principals.
    */
   private ArrayList<Principal> _grantedPrincipals;
+
+  private ScreensaverUser _user;
 
   
   // property getter and setter methods
@@ -213,9 +222,43 @@ public class ScreensaverLoginModule implements LoginModule
     
     // verify the username/password
     try {
-      _authenticationResult = _authenticationClient.authenticate(new Credentials(_username,
-                                                                                 new String(_password)));
-      _isAuthenticated = _authenticationResult.isAuthenticated();
+      _user = findUser(_username, "loginId");
+      if (_user != null) {
+        log.info(FOUND_SCREENSAVER_USER + " '" + _username + "'");
+        if (_user.getDigestedPassword().equals(CryptoUtils.digest(_password))) {
+          _isAuthenticated = true;
+          _authenticationResult = new SimpleAuthenticationResult(_username,
+                                                                 new String(_password), 
+                                                                 true,
+                                                                 1,
+                                                                 "success",
+                                                                 "user authenticated with native Screensaver account");
+        } 
+        else {
+          _isAuthenticated = false;
+          _authenticationResult = new SimpleAuthenticationResult(_username,
+                                                                 new String(_password), 
+                                                                 _isAuthenticated,
+                                                                 0,
+                                                                 "failure",
+                                                                 "user authentication failed for native Screensaver account");
+        }
+      }
+      else {
+        _user = findUser(_username, "ECommonsId");
+        if (_user != null) {
+          log.info(FOUND_ECOMMONS_USER + " '" + _username + "'");
+          _authenticationResult = _authenticationClient.authenticate(new Credentials(_username,
+                                                                                     new String(_password)));
+          _isAuthenticated = _authenticationResult.isAuthenticated();
+        }
+        else {
+          String message = NO_SUCH_USER + " '" + _username + "'";
+          log.info(message);
+          throw new FailedLoginException(message);
+        }
+      }
+
       if (_isAuthenticated) {
         log.info("authentication succeeded with status code " + _authenticationResult.getStatusCode() + 
                  " (" + _authenticationResult.getStatusCodeCategory() + ")");
@@ -264,14 +307,9 @@ public class ScreensaverLoginModule implements LoginModule
       return false;
     } 
     else {
-      ScreensaverUser user = _dao.findEntityByProperty(ScreensaverUser.class, 
-                                                       "loginId",
-                                                       _username);
-      log.debug("found user '" + user + "' in database");
-
       _grantedPrincipals = new ArrayList<Principal>();
-      _grantedPrincipals.add(user);
-      _grantedPrincipals.addAll(user.getScreensaverUserRoles());
+      _grantedPrincipals.add(_user);
+      _grantedPrincipals.addAll(_user.getScreensaverUserRoles());
       
       // add Principals (authenticated identities) to the Subject
       _subject.getPrincipals().addAll(_grantedPrincipals);
@@ -283,6 +321,27 @@ public class ScreensaverLoginModule implements LoginModule
       _commitSucceeded = true;
       return true;
     }
+  }
+
+  /**
+   * @param userId the userId
+   * @param userIdField the field in {@link ScreensaverUser} entity bean:
+   *          "loginId" or "eCommonsId" to lookup the userId in
+   * @return a {@link ScreensaverUser} or <code>null</code> if no user found
+   *         with userId for given userIdField
+   */
+  private ScreensaverUser findUser(String userId, String userIdField)
+  {
+    ScreensaverUser user = _dao.findEntityByProperty(ScreensaverUser.class, 
+                                                     userIdField,
+                                                     userId);
+    if (user != null) {
+      log.debug("found user '" + user + "' in database using field '" + userIdField +"'" );
+    }
+    else {
+      log.debug("no such user '" + user + "' in database using field '" + userIdField +"'" );
+    }
+    return user;
   }
 
   /**

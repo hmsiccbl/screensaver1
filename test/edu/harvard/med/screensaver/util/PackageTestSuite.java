@@ -27,6 +27,7 @@ public class PackageTestSuite extends TestSuite
   {
     addTestSuite(BeanUtilsTest.class);
     addTestSuite(FileUtilsTest.class);
+    addTestSuite(CryptoUtilsTest.class);
   }
 
 }

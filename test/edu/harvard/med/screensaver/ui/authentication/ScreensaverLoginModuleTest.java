@@ -43,10 +43,12 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
   
   private static final Logger log = Logger.getLogger(ScreensaverLoginModuleTest.class);
   
-  private static final String TEST_VALID_USER_LOGIN = "testUser";
-  private static final char[] TEST_VALID_PASSWORD = "testPassword".toCharArray();
+  private static final String TEST_VALID_ECOMMONS_USER_LOGIN = "eCommonId";
+  private static final String TEST_VALID_SCREENSAVER_USER_LOGIN = "screensaverId";
+  private static final String TEST_VALID_ECOMMONS_PASSWORD = "eCommonsPassword";
+  private static final String TEST_VALID_SCREENSAVER_PASSWORD = "screensaverPassword";
   private static final String TEST_INVALID_USER_LOGIN = "!testUser";
-  private static final char[] TEST_INVALID_PASSWORD = "!testPassword".toCharArray();
+  private static final String TEST_INVALID_PASSWORD = "!testPassword";
 
   
   // Spring-injected data members (must have protected access)
@@ -58,10 +60,12 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
   
   // instance data
   
-  private CallbackHandler _mockCallbackHandlerForValidUserAndPassword;
-  private CallbackHandler _mockCallbackHandlerForValidUserInvalidPassword;
+  private CallbackHandler _mockCallbackHandlerForValidEcommonsUserAndPassword;
+  private CallbackHandler _mockCallbackHandlerForValidEcommonsUserInvalidPassword;
+  private CallbackHandler _mockCallbackHandlerForValidScreensaverUserAndPassword;
+  private CallbackHandler _mockCallbackHandlerForValidScreensaverUserInvalidPassword;
   private CallbackHandler _mockCallbackHandlerForInvalidUser;
-  private AuthenticationClient _mockAuthenticationClient;
+  private AuthenticationClient _mockECommonsAuthenticationClient;
   private Subject _subject;
   private ScreensaverUser _validUser;
   private List<ScreensaverUserRole> _allRoles;
@@ -76,22 +80,40 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     
     _subject = new Subject();
     
-    _mockCallbackHandlerForValidUserAndPassword = new CallbackHandler() {
+    _mockCallbackHandlerForValidEcommonsUserAndPassword = new CallbackHandler() {
       public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException
       {
         NameCallback nameCallback = (NameCallback) callbacks[0];
         PasswordCallback passwordCallback = (PasswordCallback) callbacks[1];
-        nameCallback.setName(TEST_VALID_USER_LOGIN);
-        passwordCallback.setPassword(TEST_VALID_PASSWORD);
+        nameCallback.setName(TEST_VALID_ECOMMONS_USER_LOGIN);
+        passwordCallback.setPassword(TEST_VALID_ECOMMONS_PASSWORD.toCharArray());
       }
     };
-    _mockCallbackHandlerForValidUserInvalidPassword = new CallbackHandler() {
+    _mockCallbackHandlerForValidEcommonsUserInvalidPassword = new CallbackHandler() {
       public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException
       {
         NameCallback nameCallback = (NameCallback) callbacks[0];
         PasswordCallback passwordCallback = (PasswordCallback) callbacks[1];
-        nameCallback.setName(TEST_VALID_USER_LOGIN);
-        passwordCallback.setPassword(TEST_INVALID_PASSWORD);
+        nameCallback.setName(TEST_VALID_ECOMMONS_USER_LOGIN);
+        passwordCallback.setPassword(TEST_INVALID_PASSWORD.toCharArray());
+      }
+    };
+    _mockCallbackHandlerForValidScreensaverUserAndPassword = new CallbackHandler() {
+      public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException
+      {
+        NameCallback nameCallback = (NameCallback) callbacks[0];
+        PasswordCallback passwordCallback = (PasswordCallback) callbacks[1];
+        nameCallback.setName(TEST_VALID_SCREENSAVER_USER_LOGIN);
+        passwordCallback.setPassword(TEST_VALID_SCREENSAVER_PASSWORD.toCharArray());
+      }
+    };
+    _mockCallbackHandlerForValidScreensaverUserInvalidPassword = new CallbackHandler() {
+      public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException
+      {
+        NameCallback nameCallback = (NameCallback) callbacks[0];
+        PasswordCallback passwordCallback = (PasswordCallback) callbacks[1];
+        nameCallback.setName(TEST_VALID_SCREENSAVER_USER_LOGIN);
+        passwordCallback.setPassword(TEST_INVALID_PASSWORD.toCharArray());
       }
     };
     _mockCallbackHandlerForInvalidUser = new CallbackHandler() {
@@ -100,18 +122,19 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
         NameCallback nameCallback = (NameCallback) callbacks[0];
         PasswordCallback passwordCallback = (PasswordCallback) callbacks[1];
         nameCallback.setName(TEST_INVALID_USER_LOGIN);
-        passwordCallback.setPassword(TEST_INVALID_PASSWORD);
+        passwordCallback.setPassword(TEST_INVALID_PASSWORD.toCharArray());
       }
     };
     
-    _mockAuthenticationClient = new AuthenticationClient() {
+    _mockECommonsAuthenticationClient = new AuthenticationClient() {
       public AuthenticationResult authenticate(Credentials credentials) throws AuthenticationRequestException, AuthenticationResponseException
       {
         return new TestAuthenticationResult(credentials,
-                                            credentials.getUserId().equals(TEST_VALID_USER_LOGIN) && credentials.getPassword().equals(new String(TEST_VALID_PASSWORD)));
+                                            credentials.getUserId().equals(TEST_VALID_ECOMMONS_USER_LOGIN) && 
+                                            credentials.getPassword().equals(TEST_VALID_ECOMMONS_PASSWORD));
       }
     };
-    screensaverLoginModule.setAuthenticationClient(_mockAuthenticationClient);
+    screensaverLoginModule.setAuthenticationClient(_mockECommonsAuthenticationClient);
     
     if (!getName().startsWith("testLogin")) {
       log.debug("skipping expensive database initialization for test " + getName());
@@ -130,8 +153,9 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     
     // create a user
     _validUser = dao.defineEntity(ScreensaverUser.class, "Iam", "Authorized", "iam_authorized@unittest.com");
-    _validUser.setLoginId(TEST_VALID_USER_LOGIN);
-    _validUser.updateScreensaverPassword(new String(TEST_VALID_PASSWORD));
+    _validUser.setLoginId(TEST_VALID_SCREENSAVER_USER_LOGIN);
+    _validUser.updateScreensaverPassword(new String(TEST_VALID_SCREENSAVER_PASSWORD));
+    _validUser.setECommonsId(TEST_VALID_ECOMMONS_USER_LOGIN);
     _validUser.addScreensaverUserRole(_allRoles.get(0));
     _validUser.addScreensaverUserRole(_allRoles.get(1));
     dao.persistEntity(_validUser);
@@ -149,39 +173,21 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
   public void testInitialize()
   {
     screensaverLoginModule.initialize(_subject,
-                                      _mockCallbackHandlerForValidUserAndPassword,
+                                      _mockCallbackHandlerForValidEcommonsUserAndPassword,
                                       new HashMap(),
                                       new HashMap());
     // hmmm...nothing we can assert...well, that's an easy test to pass! (simply don't throw an exception!)
   }
 
-  public void testLoginLogoutValidUserAndPassword() 
+  public void testLoginLogoutValidScreensaverUserAndPassword() 
   {
     try {
       screensaverLoginModule.initialize(_subject,
-                                        _mockCallbackHandlerForValidUserAndPassword,
+                                        _mockCallbackHandlerForValidScreensaverUserAndPassword,
                                         new HashMap(),
                                         new HashMap());
-      assertEquals("principals count", 0, _subject.getPrincipals().size());
-      boolean loginResult = screensaverLoginModule.login();
-      assertTrue("LoginModule's login method is \"in use\"", loginResult);
-      assertEquals("principals count", 0, _subject.getPrincipals().size());
-
-      boolean commitResult = screensaverLoginModule.commit();
-      assertTrue("LoginModule's commit succeeded", commitResult);
-      assertEquals("principals count", 3, _subject.getPrincipals().size());
-      assertTrue("subject contains \"user\" Principal",
-                 _subject.getPrincipals().contains(_validUser));
-      assertTrue("subject contains user role 1 Principal",
-                   _subject.getPrincipals().contains(_allRoles.get(0)));
-      assertTrue("subject contains user role 2 Principal",
-                 _subject.getPrincipals().contains(_allRoles.get(1)));
-      assertFalse("subject does not contain user role 2 Principal",
-                  _subject.getPrincipals().contains(_allRoles.get(2)));
-
-      boolean logoutResult = screensaverLoginModule.logout();
-      assertTrue("LoginModule's logout method is \"in use\"", logoutResult);
-      assertEquals("principals count reset", 0, _subject.getPrincipals().size());
+      
+      assertSuccessfulLoginAndLogout();
     }
     catch (LoginException e) {
       e.printStackTrace();
@@ -189,11 +195,47 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     }
   }
 
-  public void testLoginValidUserInvalidPassword() 
+  public void testLoginLogoutValidEcommonsUserAndPassword() 
   {
     try {
       screensaverLoginModule.initialize(_subject,
-                                        _mockCallbackHandlerForValidUserInvalidPassword,
+                                        _mockCallbackHandlerForValidEcommonsUserAndPassword,
+                                        new HashMap(),
+                                        new HashMap());
+      
+      assertSuccessfulLoginAndLogout();
+    }
+    catch (LoginException e) {
+      e.printStackTrace();
+      fail("login failed due to exception: " + e.getMessage());
+    }
+  }
+
+  public void testLoginValidEcommonsUserInvalidPassword() 
+  {
+    try {
+      screensaverLoginModule.initialize(_subject,
+                                        _mockCallbackHandlerForValidEcommonsUserInvalidPassword,
+                                        new HashMap(),
+                                        new HashMap());
+      screensaverLoginModule.login();
+      fail("expected login failure");
+    }
+    catch (FailedLoginException e) {
+      assertEquals("principals count", 0, _subject.getPrincipals().size());
+      // test passed!
+    }
+    catch (LoginException e) {
+      e.printStackTrace();
+      fail("login failed due to exception " + e.getMessage());
+    }
+  }
+  
+  public void testLoginValidScreensaverUserInvalidPassword() 
+  {
+    try {
+      screensaverLoginModule.initialize(_subject,
+                                        _mockCallbackHandlerForValidScreensaverUserInvalidPassword,
                                         new HashMap(),
                                         new HashMap());
       screensaverLoginModule.login();
@@ -235,6 +277,32 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     // TODO: implement (but code can practically be verified by inspection alone...)
   }
   
+  private void assertSuccessfulLoginAndLogout() throws LoginException
+  {
+    screensaverLoginModule.login();
+
+    assertEquals("principals count", 0, _subject.getPrincipals().size());
+    boolean loginResult = screensaverLoginModule.login();
+    assertTrue("LoginModule's login method is \"in use\"", loginResult);
+    assertEquals("principals count", 0, _subject.getPrincipals().size());
+
+    boolean commitResult = screensaverLoginModule.commit();
+    assertTrue("LoginModule's commit succeeded", commitResult);
+    assertEquals("principals count", 3, _subject.getPrincipals().size());
+    assertTrue("subject contains \"user\" Principal",
+               _subject.getPrincipals().contains(_validUser));
+    assertTrue("subject contains user role 1 Principal",
+                 _subject.getPrincipals().contains(_allRoles.get(0)));
+    assertTrue("subject contains user role 2 Principal",
+               _subject.getPrincipals().contains(_allRoles.get(1)));
+    assertFalse("subject does not contain user role 2 Principal",
+                _subject.getPrincipals().contains(_allRoles.get(2)));
+
+    boolean logoutResult = screensaverLoginModule.logout();
+    assertTrue("LoginModule's logout method is \"in use\"", logoutResult);
+    assertEquals("principals count reset", 0, _subject.getPrincipals().size());
+  }
+
   private static class TestAuthenticationResult implements AuthenticationResult
   {
     

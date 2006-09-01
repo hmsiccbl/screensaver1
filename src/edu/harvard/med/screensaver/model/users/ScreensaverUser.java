@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.users;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Date;
@@ -18,6 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.util.CryptoUtils;
 
 import org.apache.log4j.Logger;
 
@@ -498,28 +497,12 @@ public class ScreensaverUser extends AbstractEntity implements Principal
    */
   public void updateScreensaverPassword(String screensaverPassword)
   {
-    String digestedPassword = digestPassword(screensaverPassword);
+    String digestedPassword = CryptoUtils.digest(screensaverPassword);
     if (digestedPassword != null) {
       setDigestedPassword(digestedPassword);
     }
     else {
       log.error("could not set new password for ScreensaverUser " + this);
-    }
-  }
-
-  /**
-   * Utility method for generating a digested (hashed) version of the user's password.
-   * @param screensaverPassword
-   * @return the digested (hashed) version of the user's password, as a hex String.
-   */
-  private String digestPassword(String screensaverPassword)
-  {
-    try {
-      return MessageDigest.getInstance("SHA").digest(screensaverPassword.getBytes()).toString();
-    }
-    catch (NoSuchAlgorithmException e) {
-      log.error("error trying to digest password: " + e.getMessage());
-      return null;
     }
   }
 

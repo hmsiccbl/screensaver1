@@ -18,38 +18,15 @@ import edu.harvard.med.authentication.Credentials;
 public class MockAuthenticationClient implements AuthenticationClient
 {
 
-  public AuthenticationResult authenticate(final Credentials credentials)
+  public AuthenticationResult authenticate(Credentials credentials)
     throws AuthenticationRequestException,
     AuthenticationResponseException
   {
-    return new AuthenticationResult() {
-
-      public Credentials getCredentials()
-      {
-        return credentials;
-      }
-
-      public int getStatusCode() throws AuthenticationResponseException
-      {
-        return 1;
-      }
-
-      public String getStatusCodeCategory() throws AuthenticationResponseException
-      {
-        return "success";
-      }
-
-      public String getStatusMessage() throws AuthenticationResponseException
-      {
-        return "user authorized";
-      }
-
-      public boolean isAuthenticated() throws AuthenticationResponseException
-      {
-        return true;
-      }
-      
-    };
+    return new SimpleAuthenticationResult(credentials,
+                                          true,
+                                          1,
+                                          "success",
+                                          "user authorized");
   }
 
 }
