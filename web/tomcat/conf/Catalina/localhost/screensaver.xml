@@ -1,5 +1,5 @@
 <!--
-    Tomcat Context configuration file for the Screensaver Web App
+    Context configuration file for the Screensaver Web App
 -->
 
 <Context path="/screensaver" docBase="screensaver" debug="99" >

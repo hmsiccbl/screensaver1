@@ -46,7 +46,8 @@
   </condition>
   <property name="verbose" value="false" description="controls verbosity of various Ant tasks"/>
   <property name="war" value="build/${app.name}.war"/>
-  <property name="appserver.dir" location="/usr/local/jakarta-tomcat"/>
+  <property environment="env"/>
+  <property name="appserver.dir" location="${env.CATALINA_BASE}"/>
   <property name="appserver.app.work.dir" location="${appserver.dir}/work/Catalina/localhost/${app.name}"/>
   <property name="deploy.dir" location="${appserver.dir}/webapps/${app.name}"/>
   <property name="appserver.start.cmd" value="${appserver.dir}/bin/startup.sh"/>
@@ -68,12 +69,10 @@
     else="resources/log4j.debug.properties">
     <isfalse value="${debug}"/>
   </condition>
-
-  <!-- properties for configuring Tomcat JAAS functionality -->
-  <property name="login.conf.filename" value="login.config" description="The base name of the JAAS login configuration file, which Tomcat needs in order to provide our custom JAAS LoginModule to our application."/>
-  <property name="context.conf.filename" value="${app.name}.xml" description="The base name of the XML file containing the Tomcat Context configuration for our application."/>
-
-
+  <property name="loginmodule.config.filename" value="login.config"/>
+  <property name="deployed.loginmodule.config.file" location="${appserver.dir}/conf/${loginmodule.config.filename}"/>
+  <property name="dev.loginmodule.config.file" location="web/tomcat/conf/${loginmodule.config.filename}"/>
+  
   <!-- file sets -->
 
   <fileset
@@ -112,14 +111,6 @@
     <exclude name="edu/harvard/med/screensaver/**/*Suite.java"/>
   </fileset>
 
-  <fileset
-    id="endorsed.libraries.fileset"
-    description="defines the endorsed JAR library files that our application depends upon, which are needed in Tomcat's common/endorsed directory"
-    dir="lib"
-  >
-    <include name="endorsed/*.jar"/>
-  </fileset>
-
   
   <!-- uptodate properties (depends on "file sets" section) -->
 
@@ -143,6 +134,10 @@
     <srcfiles dir="jsp"/>
   </uptodate>
 
+  <!-- TODO: should also check endorsed libs when setting this uptoddate property -->
+  <uptodate property="tomcat.configured" targetfile="${deployed.loginmodule.config.file}">
+    <srcfiles file="${dev.loginmodule.config.file}"/>
+  </uptodate>
 
   <!-- classpaths -->
 
@@ -161,10 +156,17 @@
 
 
   <!-- build and deploy -->
-
+  
+  <target 
+    name="tomcat-config"
+    unless="tomcat.configured"
+  >
+    <fail message="Tomcat installation (at '${appserver.dir}') has not been properly configured for Screensaver (or Screensaver-specific files in Tomcat installation have become out-of-date).  Configuration of Tomcat cannot be (reliably) automated because it differs depending upon whether you are deploying to a local Tomcat development environment or to an orchestra-hosted Tomcat environment. Please see https://wiki.med.harvard.edu/ICCBL/TomcatConfiguration.  Good luck!"/>
+  </target>
 
   <target 
     name="deploy-local" 
+    depends="tomcat-config"
   >
     <description>
       Deploy Screensaver to a localhost application server, building the exploded WAR deployment directly in its destination directory.
@@ -175,29 +177,10 @@
       <param name="exploded.war.dir" location="${deploy.dir}"/>
     </antcall>
 
-    <!-- now copy files that are for Tomcat (and so cannot be included in the war or exploded directory) -->
-    <copy file="web/${login.conf.filename}" todir="${appserver.dir}/conf" verbose="${verbose}"/>
-    <copy file="web/${context.conf.filename}" todir="${appserver.dir}/conf/Catalina/localhost/" verbose="${verbose}"/>
-    <copy todir="${appserver.dir}/common/endorsed" flatten="true" verbose="${verbose}">
-      <fileset refid="endorsed.libraries.fileset"/>
-    </copy>
-
-  </target>
-
-  <target name="deploy-remote" depends="war">
-    <description>
-      Deploy Screensaver to a remote application server.  Builds WAR deployment, then scp's to destination.
-    </description>
-    <!-- TODO -->
-    <echo message="The 'deploy-remote' target is currently unimplemented.  For now, run the 'deploy' target from your web server host (e.g. orchestra), and provide a value for the '-Ddeploy.dir' option on the command line">
-    </echo>
   </target>
 
   <!-- an alias for deploy-local target -->
   <target name="deploy" depends="deploy-local"/>
-
-  <!-- an alias for deploy-remote target -->
-  <target name="release" depends="deploy-remote"/>
 
   <target 
     name="war"
@@ -380,7 +363,7 @@
     depends="deploy"
   >
     <exec executable="${appserver.start.cmd}">
-      <arg line="-Djava.security.auth.login.config=${appserver.dir}/conf/${login.conf.filename}"/>
+      <!--arg line="-Djava.security.auth.login.config=${appserver.dir}/conf/${login.conf.filename}"/-->
     </exec>
 
   </target>
