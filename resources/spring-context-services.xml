@@ -60,4 +60,10 @@
     <constructor-arg ref="dao"/>
   </bean>
 
+  <bean
+    id="userInitializer"
+    class="edu.harvard.med.screensaver.io.users.UserInitializer">
+    <property name="dao" ref="dao"/>
+  </bean>
+
 </beans>

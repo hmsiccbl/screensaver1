@@ -88,6 +88,7 @@ public class ScreenDBDataImporter
       _dao.persistEntity(library);
     }
     for (ScreeningRoomUser screeningRoomUser : screenDBProxy.getScreeningRoomUsers()) {
+      // TODO: add ScreensaverUserRoles to this user
       _dao.persistEntity(screeningRoomUser);
     }
     for (Screen screen : screenDBProxy.getScreens()) {
