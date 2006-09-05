@@ -19,6 +19,21 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
+/**
+ * Bootstraps users and roles in the Screensaver database, via invocation as a
+ * command-line application. Aborts if any user or roles already exist. Also
+ * adds a single user with the 'developer' role and 'usersAdmin' role, allowing
+ * this special user to create/import new users. The login, password, and email
+ * of this user are specified with the <code>--developer-login</code>,
+ * <code>--developer-password</code>, and <code>--developer-email</code>
+ * command-line options, respectively. Database connection settings are taken
+ * from the datasource.properties file (on the classpath), unless the
+ * SCREENSAVER_PGSQL_{SERVER,DB,USER,PASSWORD} environment variables are
+ * specified.
+ * 
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ */
 public class UserInitializer
 {
   private static Logger log = Logger.getLogger(UserInitializer.class);
