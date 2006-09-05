@@ -255,7 +255,7 @@
     <auth-method>FORM</auth-method>
     <form-login-config>
       <form-login-page>/login.jsf</form-login-page>
-      <form-error-page>/login.jsf</form-error-page>
+      <form-error-page>/login-error.jsf</form-error-page>
     </form-login-config>
   </login-config>
 
@@ -357,9 +357,9 @@
       <url-pattern>/schemaManager.jsf</url-pattern>
     </web-resource-collection>
 
-    <!--auth-constraint>
+    <auth-constraint>
       <role-name>developer</role-name>
-    </auth-constraint-->
+    </auth-constraint>
   </security-constraint>
 
 </web-app>

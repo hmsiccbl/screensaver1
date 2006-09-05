@@ -41,6 +41,17 @@
   </definition>
   
   <definition
+    name="/login-error.tiles"
+    extends=".base">
+    <put 
+      name="pageTitle"
+      value="Login failed! (sorry)"/>
+    <put
+      name="body"
+      value="/login-error.jsp" />
+  </definition>
+  
+  <definition
     name="/main.tiles"
     extends=".base">
     <put 

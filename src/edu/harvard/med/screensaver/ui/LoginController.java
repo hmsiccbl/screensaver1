@@ -24,7 +24,7 @@ public class LoginController extends AbstractController
   
   public static Logger log = Logger.getLogger(LoginController.class);
   
-  private static final String AUTHENTICATION_ID_DESCRIPTION = "eCommons ID";
+  private static final String AUTHENTICATION_ID_DESCRIPTION = "User ID";
   
   private boolean _disableAdministrativePrivileges;
 
@@ -49,7 +49,15 @@ public class LoginController extends AbstractController
   
   public String forgotIdOrPassword()
   {
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    // TODO: implement!
+    // this will force another login attempt
+    return LOGOUT_ACTION_RESULT;
+  }
+
+  public String tryAgain()
+  {
+    // this will force another login attempt
+    return LOGOUT_ACTION_RESULT;
   }
 
 }
