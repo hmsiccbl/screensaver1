@@ -14,6 +14,7 @@ import javax.naming.InitialContext;
 import javax.naming.NameClassPair;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.NoInitialContextException;
 import javax.security.auth.spi.LoginModule;
 
 import edu.harvard.med.screensaver.ui.authentication.tomcat.LoginModuleFactory;
@@ -64,6 +65,9 @@ public class LoginModuleFactoryImpl implements LoginModuleFactory, ApplicationCo
       LoginModuleFactoryCapsule factoryHolder = (LoginModuleFactoryCapsule) envCtx.lookup("bean/loginModuleFactoryCapsule");
       factoryHolder.setLoginModuleFactory(this);
       log.debug("LoginModuleFactoryImpl bound to JNDI directory");
+    }
+    catch (NoInitialContextException e) {
+      log.warn("JNDI server not available, so LoginModuleFactory willl not be made available: " + e.getMessage());
     }
     catch (NamingException e) {
       log.error("could not set LoginModuleFactory in JNDI server: " + e.getMessage());
