@@ -39,7 +39,7 @@ public class UserInitializer
     final String developerLoginId,
     final String developerPassword,
     final String developerEmail)
-    {
+  {
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
@@ -54,20 +54,23 @@ public class UserInitializer
         }
       }
     });
-    }
+  }
   
-  private void initializeDeveloper(String developerLoginId, String developerPassword, String developerEmail) throws UserInitializerException
+  private void initializeDeveloper(
+    String developerLoginId,
+    String developerPassword,
+    String developerEmail) throws UserInitializerException
   {
     ScreensaverUserRole readEverythingAdminRole = _dao.findEntityByProperty(ScreensaverUserRole.class,
                                                                             "roleName",
-    "readEverythingAdmin");
+                                                                            "readEverythingAdmin");
     ScreensaverUserRole usersAdminRole = _dao.findEntityByProperty(ScreensaverUserRole.class,
                                                                    "roleName",
-    "usersAdmin");
+                                                                   "usersAdmin");
     ScreensaverUserRole developerRole = _dao.findEntityByProperty(ScreensaverUserRole.class,
                                                                   "roleName",
-    "developer");
-    
+                                                                  "developer");
+
     ScreensaverUser developer = _dao.defineEntity(ScreensaverUser.class,
                                                   "",
                                                   "",
@@ -78,45 +81,46 @@ public class UserInitializer
     developer.setLoginId(developerLoginId);
     developer.updateScreensaverPassword(developerPassword);
     _dao.persistEntity(developer);
-    
+
   }
   
   private void initializeUserRoles() throws UserInitializerException
   {
 
-    // TODO: read these roles from a file, thus justifying the package this class in
-    _dao.defineEntity(ScreensaverUserRole.class, 
+    // TODO: read these roles from a file, thus justifying the package this
+    // class in
+    _dao.defineEntity(ScreensaverUserRole.class,
                       "readEverythingAdmin",
-    "Read-everything administrators will have the ability to view and search over data of all categories, except a screen's billing information. In addition, they will have the ability to generate various reports on screens.");
-    _dao.defineEntity(ScreensaverUserRole.class, 
+                      "Read-everything administrators will have the ability to view and search over data of all categories, except a screen's billing information. In addition, they will have the ability to generate various reports on screens.");
+    _dao.defineEntity(ScreensaverUserRole.class,
                       "librariesAdmin",
-    "Administrators that can create and modify libraries.");
-    _dao.defineEntity(ScreensaverUserRole.class, 
+                      "Administrators that can create and modify libraries.");
+    _dao.defineEntity(ScreensaverUserRole.class,
                       "usersAdmin",
-    "Administrators that can create and modify user accounts.");
-    _dao.defineEntity(ScreensaverUserRole.class, 
+                      "Administrators that can create and modify user accounts.");
+    _dao.defineEntity(ScreensaverUserRole.class,
                       "screensAdmin",
-    "Administrators that can create and modify screens.");
-    _dao.defineEntity(ScreensaverUserRole.class, 
+                      "Administrators that can create and modify screens.");
+    _dao.defineEntity(ScreensaverUserRole.class,
                       "screenResultsAdmin",
-    "Administrators that can create and modify screen results.");
-    _dao.defineEntity(ScreensaverUserRole.class, 
+                      "Administrators that can create and modify screen results.");
+    _dao.defineEntity(ScreensaverUserRole.class,
                       "billingAdmin",
-    "Administrators that can view, create, and modify billing information for a screen.");
-    _dao.defineEntity(ScreensaverUserRole.class, 
+                      "Administrators that can view, create, and modify billing information for a screen.");
+    _dao.defineEntity(ScreensaverUserRole.class,
                       "screeningRoomUser",
-    "User that have permission to view and search over non-administrative information for certain data records.");
-    _dao.defineEntity(ScreensaverUserRole.class, 
+                      "User that have permission to view and search over non-administrative information for certain data records.");
+    _dao.defineEntity(ScreensaverUserRole.class,
                       "rnaiScreeningRoomUser",
-    "User that have permission to view and search over non-administrative information for all RNAi screens.");
-    _dao.defineEntity(ScreensaverUserRole.class, 
+                      "User that have permission to view and search over non-administrative information for all RNAi screens.");
+    _dao.defineEntity(ScreensaverUserRole.class,
                       "compoundScreeningRoomUser",
-    "User that have permission to view and search over non-administrative information for all compound screens and any compound screen results which are demarked 'shareable'.");
-    _dao.defineEntity(ScreensaverUserRole.class, 
+                      "User that have permission to view and search over non-administrative information for all compound screens and any compound screen results which are demarked 'shareable'.");
+    _dao.defineEntity(ScreensaverUserRole.class,
                       "developer",
-    "User that have permission to invoke development-related functionality and view low-level system information.");
+                      "User that have permission to invoke development-related functionality and view low-level system information.");
   }
-
+  
   private void initializeAdministrators() throws UserInitializerException
   {
     // TODO:
@@ -129,7 +133,7 @@ public class UserInitializer
     }
   }
   
-
+  
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws ParseException
   {
