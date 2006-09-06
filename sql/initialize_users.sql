@@ -16,10 +16,15 @@ insert into screensaver_user_role (screensaver_user_role_id, version, role_name,
 insert into screensaver_user_role (screensaver_user_role_id, version, role_name, comments) values (nextval('screensaver_user_role_id_seq'), 1, 'rnaiScreeningRoomUser', 'Users that have permission to view and search over non-administrative information for all RNAi screens.');
 insert into screensaver_user_role (screensaver_user_role_id, version, role_name, comments) values (nextval('screensaver_user_role_id_seq'), 1, 'medicinalChemistUser', 'Users that are medicinal chemists.');
 
+/*
+ * Need to generate a SHA1 hashed password?  Try: 
+ *   perl -e 'use Digest::SHA1; my $sha1 = Digest::SHA1->new; $sha1->add("YOUR_PASSWORD"); print $sha1->hexdigest(), "\n";'
+ */
+
 insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Andrew', 'Tolopko', 'andrew_tolopko@hms.harvard.edu', 'ant', 'd015cc465bdb4e51987df7fb870472d3fb9a3505');
 insert into role_user_link (screensaver_user_id, screensaver_user_role_id) select currval('screensaver_user_id_seq'), screensaver_user_role_id from screensaver_user_role where role_name in ('developer', 'readEverythingAdmin', 'usersAdmin');
 
-insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password) values (nextval('screensaver_user_id_seq'), 1, 'today', 'John', 'Sullivan', 'john_sullivan@hms.harvard.edu', 's', '');
+insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password) values (nextval('screensaver_user_id_seq'), 1, 'today', 'John', 'Sullivan', 'john_sullivan@hms.harvard.edu', 's', 'a');
 insert into role_user_link (screensaver_user_id, screensaver_user_role_id) select currval('screensaver_user_id_seq'), screensaver_user_role_id from screensaver_user_role where role_name in ('developer', 'readEverythingAdmin', 'usersAdmin');
 
 commit;
