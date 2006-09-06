@@ -1,0 +1,15 @@
+# Invokes psql on Screensaver database, w/o requiring any
+# database connection arguments from user.
+#
+# Must be run from host 'trumpet'.
+#
+# If arg 1 is "dev", connects to development server, otherwise
+# connects to production server.
+
+if [[ `hostname -s` != "trumpet" ]]; then
+	echo Please invoke this script from host 'trumpet'
+	exit 1
+fi
+
+. ss-db-params $1
+echo $PASSWD | psql -U $USER -d $DB -h $HOST -W

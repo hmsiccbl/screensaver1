@@ -1,0 +1,6 @@
+# Restarts the Screensaver Tomcat server.
+#
+# If arg 1 is "dev", restarts development server, otherwise restarts
+# production server.
+
+ssh trumpet "sudo /etc/init.d/tomcat-${1}${1:+.}screensaver1 restart"

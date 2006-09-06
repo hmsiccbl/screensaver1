@@ -1,0 +1,13 @@
+# Deploys Screensaver to Tomcat server.  
+#
+# If arg 1 is "dev", deploys to development server, otherwise deploys
+# to production server.
+#
+# SCREENSAVER_ROOT should be set to the directory where screensaver
+# has been checked out (defaults to $HOME/screensaver
+
+cd ${SCREENSAVER_ROOT:-$HOME/screensaver}
+ant \
+  -Ddeploy.dir=/www/screensaver1.med.harvard.edu/docroot/screensaver/ \
+  -Dappserver.dir=/www/screensaver1.med.harvard.edu/tomcat/ \
+  deploy
