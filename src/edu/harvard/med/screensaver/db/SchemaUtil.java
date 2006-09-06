@@ -9,24 +9,19 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import edu.harvard.med.screensaver.CommandLineApplication;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
-import org.hibernate.HibernateException;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
-
-import edu.harvard.med.screensaver.CommandLineApplication;
 
 /**
  * Utility for manipulating schemas, via Spring+Hibernate.
@@ -63,6 +58,11 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
                              withLongOpt("recreate").
                              withDescription("drop and then create database schema").
                              create());
+    app.addCommandLineOption(OptionBuilder.
+                             withArgName("truncate").
+                             withLongOpt("truncate").
+                             withDescription("truncate all tables in the database schema (create new tables, if necessary)").
+                             create());
     try {
       if (!app.processOptions(/*acceptDatabaseOptions=*/true, /*showHelpOnError=*/true)) {
         return;
@@ -76,6 +76,9 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
       }
       else if (app.isCommandLineFlagSet("recreate")) {
         app.getSpringBean("schemaUtil", SchemaUtil.class).recreateSchema();
+      }
+      else if (app.isCommandLineFlagSet("reset")) {
+        app.getSpringBean("schemaUtil", SchemaUtil.class).truncateTablesOrCreateSchema();
       }
     }
     catch (DataAccessException e) {
@@ -155,53 +158,56 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
   }
   
   /**
-   * Truncate all the tables in the schema. If there are no tables in the schema, then
-   * {@link #createSchema() create the schema}.
+   * Truncate all the tables in the schema. If there are no tables in the
+   * schema, then {@link #createSchema() create the schema}. Note: will not
+   * create new tables that may have been added to the schema, if any tables
+   * already exist. For this use must use createSchema().
    */
   @SuppressWarnings("unchecked")
   public void truncateTablesOrCreateSchema()
   {
-    log.info("truncating tables for " + makeDataSourceString());
-    Connection connection = getSession().connection();
-    
-    try {
-      String url = connection.getMetaData().getURL();
-      String schemaName = url.substring(url.lastIndexOf('/') + 1);
-
-      Statement statement = connection.createStatement();
-      statement.execute(
-        "SELECT table_name FROM information_schema.tables\n" +
-        "WHERE\n" +
-        " table_catalog = '" + schemaName + "' AND\n" +
-        " table_schema = 'public'\n");
-      
-      String sql = "TRUNCATE TABLE "; 
-      ResultSet resultSet = statement.getResultSet();
-      while (resultSet.next()) {
-        sql += resultSet.getString(1) + ", ";
-      }
-      
-      if (sql.equals("TRUNCATE TABLE ")) { // no tables in the schema
-        createSchema();
-        return;
-      }
-      
-      sql = sql.substring(0, sql.length() - 2);
-      statement.close();
-
-      statement = connection.createStatement();
-      statement.execute(sql);
-      statement.close();
-    }
-    catch (HibernateException e) {
-      throw convertHibernateAccessException(e);
-    }
-    catch (IllegalStateException e) {
-      log.error("bad illegal state exception", e);
-    }
-    catch (SQLException e) {
-      log.error("bad sql exception", e);
-    }
+    recreateSchema();
+//    log.info("truncating tables for " + makeDataSourceString());
+//    Connection connection = getSession().connection();
+//    
+//    try {
+//      String url = connection.getMetaData().getURL();
+//      String schemaName = url.substring(url.lastIndexOf('/') + 1);
+//
+//      Statement statement = connection.createStatement();
+//      statement.execute(
+//        "SELECT table_name FROM information_schema.tables\n" +
+//        "WHERE\n" +
+//        " table_catalog = '" + schemaName + "' AND\n" +
+//        " table_schema = 'public'\n");
+//      
+//      String sql = "TRUNCATE TABLE "; 
+//      ResultSet resultSet = statement.getResultSet();
+//      while (resultSet.next()) {
+//        sql += resultSet.getString(1) + ", ";
+//      }
+//      
+//      if (sql.equals("TRUNCATE TABLE ")) { // no tables in the schema
+//        createSchema();
+//        return;
+//      }
+//      
+//      sql = sql.substring(0, sql.length() - 2);
+//      statement.close();
+//
+//      statement = connection.createStatement();
+//      statement.execute(sql);
+//      statement.close();
+//    }
+//    catch (HibernateException e) {
+//      throw convertHibernateAccessException(e);
+//    }
+//    catch (IllegalStateException e) {
+//      log.error("bad illegal state exception", e);
+//    }
+//    catch (SQLException e) {
+//      log.error("bad sql exception", e);
+//    }
   }
 
   

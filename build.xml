@@ -161,7 +161,7 @@
     name="tomcat-config"
     unless="tomcat.configured"
   >
-    <fail message="Tomcat installation (at '${appserver.dir}') has not been properly configured for Screensaver (or Screensaver-specific files in Tomcat installation have become out-of-date).  Configuration of Tomcat cannot be (reliably) automated because it differs depending upon whether you are deploying to a local Tomcat development environment or to an orchestra-hosted Tomcat environment. Please see https://wiki.med.harvard.edu/ICCBL/TomcatConfiguration.  Good luck!"/>
+    <fail message="Tomcat installation (at '${appserver.dir}') has not been properly configured for Screensaver OR Screensaver-specific files in Tomcat installation have become out-of-date, relative to the Screensaver development directory.  Note that configuration of Tomcat cannot be (reliably) automated because it differs depending upon whether you are deploying to a local Tomcat development environment or to an orchestra-hosted Tomcat environment.  Please see https://wiki.med.harvard.edu/ICCBL/TomcatConfiguration.  Good luck!"/>
   </target>
 
   <target 
