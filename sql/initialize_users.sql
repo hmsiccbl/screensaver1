@@ -24,7 +24,7 @@ insert into screensaver_user_role (screensaver_user_role_id, version, role_name,
 insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Andrew', 'Tolopko', 'andrew_tolopko@hms.harvard.edu', 'ant', 'd015cc465bdb4e51987df7fb870472d3fb9a3505');
 insert into role_user_link (screensaver_user_id, screensaver_user_role_id) select currval('screensaver_user_id_seq'), screensaver_user_role_id from screensaver_user_role where role_name in ('developer', 'readEverythingAdmin', 'usersAdmin');
 
-insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password) values (nextval('screensaver_user_id_seq'), 1, 'today', 'John', 'Sullivan', 'john_sullivan@hms.harvard.edu', 's', 'a');
+insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password) values (nextval('screensaver_user_id_seq'), 1, 'today', 'John', 'Sullivan', 'john_sullivan@hms.harvard.edu', 's', '');
 insert into role_user_link (screensaver_user_id, screensaver_user_role_id) select currval('screensaver_user_id_seq'), screensaver_user_role_id from screensaver_user_role where role_name in ('developer', 'readEverythingAdmin', 'usersAdmin');
 
 commit;
