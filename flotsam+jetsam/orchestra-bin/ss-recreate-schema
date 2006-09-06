@@ -5,7 +5,7 @@
 # connects to production server.
 
 cd ~/ss || exit 1
-#ant ddl || exit 1
+ant ddl || exit 1
 
 function prompt {
 	echo $1
