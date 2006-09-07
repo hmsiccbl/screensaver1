@@ -36,8 +36,8 @@ public class PlatesUsed extends AbstractEntity
   private Integer _platesUsedId;
   private Integer _version;
   private NonCherryPickVisit _visit;
-  private String _startPlate;
-  private String _endPlate;
+  private Integer _startPlate;
+  private Integer _endPlate;
   private String _copy;
 
 
@@ -53,8 +53,8 @@ public class PlatesUsed extends AbstractEntity
    */
   public PlatesUsed(
     NonCherryPickVisit visit,
-    String startPlate,
-    String endPlate,
+    Integer startPlate,
+    Integer endPlate,
     String copy)
   {
     if (visit== null) {
@@ -118,7 +118,7 @@ public class PlatesUsed extends AbstractEntity
    *
    * @return the start plate
    */
-  public String getStartPlate()
+  public Integer getStartPlate()
   {
     return _startPlate;
   }
@@ -128,7 +128,7 @@ public class PlatesUsed extends AbstractEntity
    *
    * @param startPlate the new start plate
    */
-  public void setStartPlate(String startPlate)
+  public void setStartPlate(Integer startPlate)
   {
     _visit.getHbnPlatesUsed().remove(this);
     _startPlate = startPlate;
@@ -143,7 +143,7 @@ public class PlatesUsed extends AbstractEntity
    *   type="text"
    *   not-null="true"
    */
-  public String getEndPlate()
+  public Integer getEndPlate()
   {
     return _endPlate;
   }
@@ -153,7 +153,7 @@ public class PlatesUsed extends AbstractEntity
    *
    * @param endPlate the new end plate
    */
-  public void setEndPlate(String endPlate)
+  public void setEndPlate(Integer endPlate)
   {
     _endPlate = endPlate;
   }
@@ -205,7 +205,7 @@ public class PlatesUsed extends AbstractEntity
      *
      * @return the start plate
      */
-    public String getStartPlate()
+    public Integer getStartPlate()
     {
       return _startPlate;
     }
@@ -329,11 +329,10 @@ public class PlatesUsed extends AbstractEntity
    * @return the start plate
    * @hibernate.property
    *   column="start_plate"
-   *   type="text"
    *   not-null="true"
    * @motivation for hibernate
    */
-  private String getHbnStartPlate()
+  private Integer getHbnStartPlate()
   {
     return _startPlate;
   }
@@ -344,7 +343,7 @@ public class PlatesUsed extends AbstractEntity
    * @param startPlate the new start plate
    * @motivation for hibernate
    */
-  private void setHbnStartPlate(String startPlate)
+  private void setHbnStartPlate(Integer startPlate)
   {
     _startPlate = startPlate;
   }
