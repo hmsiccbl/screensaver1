@@ -1,4 +1,4 @@
-<%@ include file="headers.inc"%>
+<%@ include file="/headers.inc"%>
 
 <f:subview id="main">
   <t:outputText value="Welcome #{menu.userPrincipalName}!" styleClass="title"/>

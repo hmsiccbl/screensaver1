@@ -1,4 +1,4 @@
-<%@ include file="headers.inc"%>
+<%@ include file="/headers.inc"%>
 
 <f:subview id="login">
   <%-- To invoke the Servlet container's /j_security_check servlet (instead of FacesServlet), we have to invoke some Javascript to override JSF behavior --%>

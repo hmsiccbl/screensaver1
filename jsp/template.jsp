@@ -1,4 +1,4 @@
-<%@ include file="headers.inc" %>
+<%@ include file="/headers.inc" %>
 
 <%-- 
    Note!  Warning!  N.B.!  Achtung!  Read this first!  For Developers!  Hey you, yes YOU!
@@ -22,7 +22,10 @@
       <f:verbatim>
         <meta http-equiv="Content-Type" content="text/html;CHARSET=iso-8859-1" />
         <title><t:outputText value="#{menu.applicationTitle}"/></title>
-        <link rel="stylesheet" type="text/css" href="css/screensaver.css" />
+        <%-- It seems that with Tiles, the context-relative path of this template changes with the 
+             requested URL, so we need to specify an absolute location for our CSS file.  Using
+             "css/screensaver.css", or even "/css/screensaver.css", does not work. --%>
+        <link rel="stylesheet" type="text/css" href="/screensaver/css/screensaver.css" />
       </f:verbatim>
     </t:documentHead>
 

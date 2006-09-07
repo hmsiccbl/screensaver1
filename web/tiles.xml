@@ -74,29 +74,29 @@
   </definition>
 
   <definition
-    name="/screenResultImporter.tiles"
+    name="/screenresults/admin/screenResultImporter.tiles"
     extends=".base">
     <put
       name="pageTitle"
       value="Screen Result Importer and Error Viewer"/>
     <put
       name="body"
-      value="/screenresults/screenResultImporter.jsp" />
+      value="/screenresults/admin/screenResultImporter.jsp" />
   </definition>
 
    <definition
-    name="/rnaiLibraryContentsImporter.tiles"
+    name="/libraries/admin/rnaiLibraryContentsImporter.tiles"
     extends=".base">
     <put
       name="pageTitle"
       value="RNAi Library Contents Importer and Error Viewer"/>
     <put
       name="body"
-      value="/libraries/rnaiLibraryContentsImporter.jsp" />
+      value="/libraries/admin/rnaiLibraryContentsImporter.jsp" />
   </definition>
 
   <definition
-    name="/screenResultViewer.tiles"
+    name="/screenresults/screenResultViewer.tiles"
     extends=".base">
     <put
       name="pageTitle"
@@ -107,7 +107,7 @@
   </definition>
 
   <definition
-    name="/heatMapViewer.tiles"
+    name="/screenresults/heatMapViewer.tiles"
     extends=".base">
     <put
       name="pageTitle"
@@ -118,7 +118,7 @@
   </definition>
   
   <definition
-    name="/wellViewer.tiles"
+    name="/libraries/wellViewer.tiles"
     extends=".base">
     <put
       name="pageTitle"
@@ -129,7 +129,7 @@
   </definition>
     
   <definition
-    name="/librariesBrowser.tiles"
+    name="/libraries/librariesBrowser.tiles"
     extends=".base">
     <put
       name="pageTitle"
@@ -140,25 +140,25 @@
   </definition>
   
   <definition
-    name="/schemaManager.tiles"
+    name="/dev/schemaManager.tiles"
     extends=".base">
     <put
       name="pageTitle"
       value="Schema Manager"/>
     <put
       name="body"
-      value="/schemaManager.jsp" />
+      value="/dev/schemaManager.jsp" />
   </definition>
   
   <definition
-    name="/env.tiles"
+    name="/dev/env.tiles"
     extends=".base">
     <put
       name="pageTitle"
       value="Screen Result Environment"/>
     <put
       name="body"
-      value="/env.jsp" />
+      value="/dev/env.jsp" />
   </definition>
   
 </tiles-definitions>

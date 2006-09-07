@@ -1,4 +1,4 @@
-<%@ include file="../headers.inc"%>
+<%@ include file="/headers.inc"%>
 
 <f:subview id="screenResultViewer">
 
@@ -13,7 +13,7 @@
 
   </h:form>
 
-  <%@ include file="cherryPickUploader.jspf" %>
+  <%@ include file="admin/cherryPickUploader.jspf" %>
   
   <h:form id="dataForm">
 

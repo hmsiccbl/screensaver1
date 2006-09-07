@@ -224,7 +224,7 @@
     </navigation-case>
     <navigation-case>
       <from-outcome>goBrowseLibraries</from-outcome>
-      <to-view-id>/librariesBrowser</to-view-id>
+      <to-view-id>/libraries/librariesBrowser</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
@@ -234,38 +234,38 @@
     </navigation-case>
     <navigation-case>
       <from-outcome>goImportScreenResult</from-outcome>
-      <to-view-id>/screenResultImporter</to-view-id>
+      <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-outcome>goImportRNAiLibraryContents</from-outcome>
-      <to-view-id>/rnaiLibraryContentsImporter</to-view-id>
+      <to-view-id>/libraries/admin/rnaiLibraryContentsImporter</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-outcome>goEnvironmentInfo</from-outcome>
-      <to-view-id>/env</to-view-id>
+      <to-view-id>/dev/env</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-outcome>goSchemaManager</from-outcome>
-      <to-view-id>/schemaManager</to-view-id>
+      <to-view-id>/dev/schemaManager</to-view-id>
       <redirect/>
     </navigation-case>
   </navigation-rule>
 
   <navigation-rule>
-    <from-view-id>/screenresults/screenResultImporter.jsp</from-view-id>
+    <from-view-id>/screenresults/admin/screenResultImporter.jsp</from-view-id>
     <navigation-case>
       <from-action>#{screenResultImporter.submit}</from-action>
       <from-outcome>success</from-outcome>
-      <to-view-id>/screenResultViewer</to-view-id>
+      <to-view-id>/screenresults/screenResultViewer</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-action>#{screenResultImporter.submit}</from-action>
       <from-outcome>error</from-outcome>
-      <to-view-id>/screenResultImporter</to-view-id>
+      <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
     </navigation-case>
   </navigation-rule>
 
@@ -274,13 +274,13 @@
     <navigation-case>
       <from-action>#{rnaiLibraryContentsImporter.submit}</from-action>
       <from-outcome>success</from-outcome>
-      <to-view-id>/libraryViewer</to-view-id>
+      <to-view-id>/libraries/libraryViewer</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-action>#{rnaiLibraryContentsImporter.submit}</from-action>
       <from-outcome>error</from-outcome>
-      <to-view-id>/rnaiLibraryContentsImporter</to-view-id>
+      <to-view-id>/libraries/admin/rnaiLibraryContentsImporter</to-view-id>
     </navigation-case>
   </navigation-rule>
 
@@ -288,12 +288,12 @@
     <from-view-id>/screenresults/screenResultViewer.jsp</from-view-id>
     <navigation-case>
       <from-outcome>showWell</from-outcome>
-      <to-view-id>/well</to-view-id>
+      <to-view-id>/libraries/wellViewer</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-outcome>viewHeatMaps</from-outcome>
-      <to-view-id>/heatMapViewer</to-view-id>
+      <to-view-id>/screenresults/heatMapViewer</to-view-id>
       <redirect/>
     </navigation-case>
   </navigation-rule>
@@ -301,7 +301,7 @@
   <navigation-rule>
     <from-view-id>/libraries/wellViewer.jsp</from-view-id>
     <navigation-case>
-      <to-view-id>/screenResultViewer</to-view-id>
+      <to-view-id>/screenresults/screenResultViewer</to-view-id>
       <redirect/>
     </navigation-case>
   </navigation-rule>
@@ -310,7 +310,7 @@
     <from-view-id>/screenresults/heatMapViewer.jsp</from-view-id>
     <navigation-case>
       <from-outcome>done</from-outcome>
-      <to-view-id>/screenResultViewer</to-view-id>
+      <to-view-id>/screenresults/screenResultViewer</to-view-id>
       <redirect/>
     </navigation-case>
   </navigation-rule>

@@ -308,20 +308,18 @@
 
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>user</web-resource-name>
+      <web-resource-name>unrestricted</web-resource-name>
       <url-pattern>/main.jsf</url-pattern>
       <url-pattern>/login.jsf</url-pattern>
+      <url-pattern>/login-error.jsf</url-pattern>
       <url-pattern>/query.jsf</url-pattern>
-      <url-pattern>/screenResultViewer.jsf</url-pattern>
-      <url-pattern>/wellViewer.jsf</url-pattern>
-      <url-pattern>/librariesBrowser.jsf</url-pattern>
-      <url-pattern>/libraryViewer.jsf</url-pattern>
-      <url-pattern>/heatMapViewer.jsf</url-pattern>
+      <url-pattern>/screenresults/*</url-pattern>
+      <url-pattern>/libraries/*</url-pattern>
     </web-resource-collection>
 
     <auth-constraint>
-      <role-name>user</role-name>
-      <role-name>admin</role-name>
+      <role-name>screeningRoomUser</role-name>
+      <role-name>readEverythingAdmin</role-name>
       <role-name>developer</role-name>
     </auth-constraint>
 
@@ -333,15 +331,28 @@
 
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>admin</web-resource-name>
-      <url-pattern>/admin/*</url-pattern>
-      <url-pattern>/screenResultImporter.jsf</url-pattern>
-      <url-pattern>/rnaiLibraryContentsImporter.jsf</url-pattern>
+      <web-resource-name>librariesAdmin</web-resource-name>
+      <url-pattern>/libraries/admin/*</url-pattern>
     </web-resource-collection>
 
     <auth-constraint>
-      <role-name>admin</role-name>  
-      <role-name>developer</role-name>
+      <role-name>librariesAdmin</role-name>  
+    </auth-constraint>
+
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+      <!--  TODO: transport-guarantee>CONFIDENTIAL</transport-guarantee -->
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>screenResultsAdmin</web-resource-name>
+      <url-pattern>/screenResults/admin/*</url-pattern>
+    </web-resource-collection>
+
+    <auth-constraint>
+      <role-name>screenResultsAdmin</role-name>  
     </auth-constraint>
 
     <user-data-constraint>
@@ -353,8 +364,7 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>developer</web-resource-name>
-      <url-pattern>/env.jsf</url-pattern>
-      <url-pattern>/schemaManager.jsf</url-pattern>
+      <url-pattern>/dev/*</url-pattern>
     </web-resource-collection>
 
     <auth-constraint>

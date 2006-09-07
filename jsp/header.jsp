@@ -1,4 +1,4 @@
-<%@ include file="headers.inc" %>
+<%@ include file="/headers.inc" %>
 
 <t:outputText styleClass="title" value="#{pageTitle}" rendered="#{!empty pageTitle}"/>
 

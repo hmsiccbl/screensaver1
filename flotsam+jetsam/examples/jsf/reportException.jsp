@@ -1,4 +1,4 @@
-<%-- %@ include file="headers.inc" --%>
+<%-- %@ include file="/headers.inc" --%>
 
 <%@ page 
   contentType="text/html; charset=ISO-8859-1"
@@ -12,7 +12,7 @@
   <html>
   <head>
     <title>Screensaver Server Error</title>
-    <link rel="stylesheet" type="text/css" href="css/screensaver.css" />
+    <link rel="stylesheet" type="text/css" href="/css/screensaver.css" />
   </head>
 
   <body>

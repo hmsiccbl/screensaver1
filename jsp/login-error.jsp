@@ -1,4 +1,4 @@
-<%@ include file="headers.inc"%>
+<%@ include file="/headers.inc"%>
 
 <f:subview id="login">
   <h:form id="loginErrorForm">
