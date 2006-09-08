@@ -41,7 +41,7 @@ public class CopyInfo extends AbstractEntity
   private Integer _version;
   private Copy _copy;
   private Set<CopyAction> _copyActions = new HashSet<CopyAction>();
-  private String _plateName;
+  private Integer _plateNumber;
   private String _location;
   private PlateType _plateType;
   private String _volume;
@@ -56,20 +56,20 @@ public class CopyInfo extends AbstractEntity
    * Constructs an initialized <code>CopyInfo</code> object.
    *
    * @param copy the copy
-   * @param plateName the plate name
+   * @param plateNumber the plate number
    * @param location the location
    * @param plateType the plate type
    * @param volume the volume
    */
   public CopyInfo(
     Copy copy,
-    String plateName,
+    Integer plateNumber,
     String location,
     PlateType plateType,
     String volume)
   {
     _copy = copy;
-    _plateName = plateName;
+    _plateNumber = plateNumber;
     _location = location;
     _plateType = plateType;
     _volume = volume;
@@ -145,24 +145,24 @@ public class CopyInfo extends AbstractEntity
   }
 
   /**
-   * Get the plate name.
+   * Get the plate number.
    *
-   * @return the plate name
+   * @return the plate number
    */
-  public String getPlateName()
+  public Integer getPlateNumber()
   {
-    return _plateName;
+    return _plateNumber;
   }
 
   /**
-   * Set the plate name.
+   * Set the plate number.
    *
-   * @param plateName the new plate name
+   * @param plateNumber the new plate number
    */
-  public void setPlateName(String plateName)
+  public void setPlateNumber(Integer plateNumber)
   {
     _copy.getHbnCopyInfos().remove(this);
-    _plateName = plateName;
+    _plateNumber = plateNumber;
     _copy.getHbnCopyInfos().add(this);
   }
 
@@ -319,13 +319,13 @@ public class CopyInfo extends AbstractEntity
     }
     
     /**
-     * Get the plate name.
+     * Get the plate number.
      *
-     * @return the plate name
+     * @return the plate number
      */
-    public String getPlateName()
+    public Integer getPlateNumber()
     {
-      return _plateName;
+      return _plateNumber;
     }
 
     @Override
@@ -337,7 +337,7 @@ public class CopyInfo extends AbstractEntity
       BusinessKey that = (BusinessKey) object;
       return
         getCopy().equals(that.getCopy()) &&
-        getPlateName().equals(that.getPlateName());
+        getPlateNumber().equals(that.getPlateNumber());
     }
 
     @Override
@@ -345,13 +345,13 @@ public class CopyInfo extends AbstractEntity
     {
       return
         getCopy().hashCode() +
-        getPlateName().hashCode();
+        getPlateNumber().hashCode();
     }
 
     @Override
     public String toString()
     {
-      return getCopy() + ":" + getPlateName();
+      return getCopy() + ":" + getPlateNumber();
     }
   }
 
@@ -471,28 +471,27 @@ public class CopyInfo extends AbstractEntity
   }
   
   /**
-   * Get the plate name.
+   * Get the plate number.
    *
-   * @return the plate name
+   * @return the plate number
    * @hibernate.property
-   *   column="plate_name"
-   *   type="text"
+   *   column="plate_number"
    *   not-null="true"
    * @motivation for hibernate
    */
-  private String getHbnPlateName()
+  private Integer getHbnPlateNumber()
   {
-    return _plateName;
+    return _plateNumber;
   }
 
   /**
-   * Set the plate name.
+   * Set the plate number.
    *
-   * @param plateName the new plate name
+   * @param plateNumber the new plate number
    * @motivation for hibernate
    */
-  private void setHbnPlateName(String plateName)
+  private void setHbnPlateNumber(Integer plateNumber)
   {
-    _plateName = plateName;
+    _plateNumber = plateNumber;
   }
 }
