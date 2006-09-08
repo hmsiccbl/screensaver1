@@ -9,8 +9,11 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.util.List;
+
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 
 
@@ -20,14 +23,14 @@ import edu.harvard.med.screensaver.util.CryptoUtils;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class UserDigestedPasswordTest extends AbstractSpringTest
+public class UserTest extends AbstractSpringTest
 {
   
   // public static methods
   
   public static void main(String[] args)
   {
-    junit.textui.TestRunner.run(UserDigestedPasswordTest.class);
+    junit.textui.TestRunner.run(UserTest.class);
   }
 
   
@@ -73,6 +76,40 @@ public class UserDigestedPasswordTest extends AbstractSpringTest
         assertNotNull(user);
         assertEquals(CryptoUtils.digest("myPassword"),
                      user.getDigestedPassword());
+      }
+    });
+    
+  }
+  
+  public void testAddRoleToUser()
+  {
+    final String userEmail1 = "first_last1@hms.harvard.edu";
+    final String userEmail2 = "first_last2@hms.harvard.edu";
+
+    dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        ScreensaverUser user1 = dao.defineEntity(ScreensaverUser.class, "First1", "Last1", userEmail1);
+        user1.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
+        ScreensaverUser user2 = dao.defineEntity(ScreensaverUser.class, "First2", "Last2", userEmail2);
+        user2.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
+      }
+    });
+    
+    dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        ScreensaverUser user1 = dao.findEntityByProperty(ScreensaverUser.class, "email", userEmail1);
+        assertEquals(user1.getScreensaverUserRoles().size(), 1);
+        assertTrue(user1.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER));
+        
+        ScreensaverUser user2 = dao.findEntityByProperty(ScreensaverUser.class, "email", userEmail2);
+        assertEquals(user2.getScreensaverUserRoles().size(), 1);
+        assertTrue(user2.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER));
+        
+        assertEquals(user1.getScreensaverUserRoles().iterator().next(),
+                     user2.getScreensaverUserRoles().iterator().next());
+        
       }
     });
     

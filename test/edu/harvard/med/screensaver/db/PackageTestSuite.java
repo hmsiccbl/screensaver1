@@ -29,7 +29,7 @@ public class PackageTestSuite extends TestSuite
   {
     addTestSuite(SimpleDAOTest.class);
     addTestSuite(ComplexDAOTest.class);
-    addTestSuite(UserDigestedPasswordTest.class);
+    addTestSuite(UserTest.class);
   }
 
 }

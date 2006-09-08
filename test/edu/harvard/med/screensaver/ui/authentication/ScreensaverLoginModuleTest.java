@@ -10,9 +10,7 @@
 package edu.harvard.med.screensaver.ui.authentication;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -68,7 +66,6 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
   private AuthenticationClient _mockECommonsAuthenticationClient;
   private Subject _subject;
   private ScreensaverUser _validUser;
-  private List<ScreensaverUserRole> _allRoles;
   
 
   // test setup methods
@@ -144,20 +141,13 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     
     schemaUtil.truncateTablesOrCreateSchema();
     
-    // create some user roles
-    int testRolesCount = 3;
-    _allRoles = new ArrayList<ScreensaverUserRole>(testRolesCount);
-    for (int i = 1; i <= testRolesCount; ++i) {
-      _allRoles.add(dao.defineEntity(ScreensaverUserRole.class, "role" + i, "role" + i + " comments"));
-    }
-    
     // create a user
     _validUser = dao.defineEntity(ScreensaverUser.class, "Iam", "Authorized", "iam_authorized@unittest.com");
     _validUser.setLoginId(TEST_VALID_SCREENSAVER_USER_LOGIN);
     _validUser.updateScreensaverPassword(new String(TEST_VALID_SCREENSAVER_PASSWORD));
     _validUser.setECommonsId(TEST_VALID_ECOMMONS_USER_LOGIN);
-    _validUser.addScreensaverUserRole(_allRoles.get(0));
-    _validUser.addScreensaverUserRole(_allRoles.get(1));
+    _validUser.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
+    _validUser.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
     dao.persistEntity(_validUser);
   }
   
@@ -291,12 +281,12 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     assertEquals("principals count", 3, _subject.getPrincipals().size());
     assertTrue("subject contains \"user\" Principal",
                _subject.getPrincipals().contains(_validUser));
-    assertTrue("subject contains user role 1 Principal",
-                 _subject.getPrincipals().contains(_allRoles.get(0)));
-    assertTrue("subject contains user role 2 Principal",
-               _subject.getPrincipals().contains(_allRoles.get(1)));
-    assertFalse("subject does not contain user role 2 Principal",
-                _subject.getPrincipals().contains(_allRoles.get(2)));
+    assertTrue("subject contains user role compoundScreeningRoomUser Principal",
+                 _subject.getPrincipals().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER));
+    assertTrue("subject contains user role rnaiScreeningRoomUser Principal",
+               _subject.getPrincipals().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER));
+    assertFalse("subject does not contain user role userAdmin Principal",
+                _subject.getPrincipals().contains(ScreensaverUserRole.USERS_ADMIN));
 
     boolean logoutResult = screensaverLoginModule.logout();
     assertTrue("LoginModule's logout method is \"in use\"", logoutResult);

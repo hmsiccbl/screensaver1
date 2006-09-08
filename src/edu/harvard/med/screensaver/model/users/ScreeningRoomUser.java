@@ -49,7 +49,6 @@ public class ScreeningRoomUser extends ScreensaverUser
   private Set<ScreeningRoomUser> _labMembers = new HashSet<ScreeningRoomUser>();
   private LabAffiliation _labAffiliation;
   private boolean _isNonScreeningUser;
-  private boolean _isRnaiUser;
   private String _comments;
 
 
@@ -69,7 +68,6 @@ public class ScreeningRoomUser extends ScreensaverUser
    * @param harvardId the harvard ID
    * @param userClassification the user classification
    * @param isNonScreeningUser does not perform any screening, but is otherwise associated with Screens in this system
-   * @param isRnaiUser performs RNAi screening
    */
   public ScreeningRoomUser(
     Date dateCreated,
@@ -82,8 +80,7 @@ public class ScreeningRoomUser extends ScreensaverUser
     String eCommonsId,
     String harvardId,
     ScreeningRoomUserClassification userClassification,
-    boolean isNonScreeningUser,
-    boolean isRnaiUser)
+    boolean isNonScreeningUser)
   {
     super(dateCreated,
           firstName,
@@ -95,7 +92,6 @@ public class ScreeningRoomUser extends ScreensaverUser
     setECommonsId(eCommonsId);
     setHarvardId(harvardId);
     setUserClassification(userClassification);
-    setRnaiUser(isRnaiUser);
   }
 
 
@@ -388,27 +384,25 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Get the RNAi flag, indicating whether this user performs RNAi screening.
+   * Get whether this user is an RNAi screener.
    *
-   * @return the RNAi flag
-   * @hibernate.property
-   *   not-null="true"
+   * @return <code>true</code> iff this user is an RNAi screener.
    */
-  public boolean getRnaiUser()
+  public boolean _getRnaiUser()
   {
-    return _isRnaiUser;
+    return getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
   }
-
+  
   /**
-   * Set the RNAi flag, indicating whether this user performs RNAi screening.
+   * Get whether this user is a small compound screener.
    *
-   * @param rnaiUser a flag indicating whether this user performs RNAi screening
+   * @return <code>true</code> iff this user is a small compound screener.
    */
-  public void setRnaiUser(boolean isRnaiUser)
+  public boolean _getCompoundUser()
   {
-    _isRnaiUser = isRnaiUser;
+    return getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
   }
-
+  
 
   // protected methods
 

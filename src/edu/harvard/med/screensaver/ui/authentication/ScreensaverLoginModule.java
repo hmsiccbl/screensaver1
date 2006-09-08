@@ -307,11 +307,10 @@ public class ScreensaverLoginModule implements LoginModule
       return false;
     } 
     else {
-      _grantedPrincipals = new ArrayList<Principal>();
-      _grantedPrincipals.add(_user);
-      _grantedPrincipals.addAll(_user.getScreensaverUserRoles());
       
       // add Principals (authenticated identities) to the Subject
+      _grantedPrincipals = new ArrayList<Principal>(_user.getScreensaverUserRoles());
+      _grantedPrincipals.add(_user);
       _subject.getPrincipals().addAll(_grantedPrincipals);
       log.debug("authorized Subject with these Principals: " + _grantedPrincipals);
       
@@ -336,10 +335,10 @@ public class ScreensaverLoginModule implements LoginModule
                                                      userIdField,
                                                      userId);
     if (user != null) {
-      log.debug("found user '" + user + "' in database using field '" + userIdField +"'" );
+      log.debug("found user '" + userId + "' in database using field '" + userIdField +"'" );
     }
     else {
-      log.debug("no such user '" + user + "' in database using field '" + userIdField +"'" );
+      log.debug("no such user '" + userId + "' in database using field '" + userIdField +"'" );
     }
     return user;
   }

@@ -18,8 +18,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -27,6 +25,9 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -74,7 +75,7 @@ public class ScreenDBProxy
         "screendbweb");
     }
     catch (SQLException e) {
-      log.error("couldnt connection to database: " + e.getMessage());
+      log.error("could not connect to database: " + e.getMessage());
       e.printStackTrace();
     }
   }
@@ -200,9 +201,17 @@ public class ScreenDBProxy
           null, // TODO: put in the eCommonsId when it is in ScreenDB
           resultSet.getString("harvard_id"),
           classification,
-          resultSet.getBoolean("non_user"),
-          resultSet.getBoolean("rnai_user")
+          resultSet.getBoolean("non_user")
         );
+        
+        // TODO: Currently, a user is an RNAi screener OR a Compound screener, but not both.  If not explicitly an RNAi screener, we assume a Compound screener.  Is this a valid assumption? [ant]
+        if (resultSet.getBoolean("rnai_user")) {
+          user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
+        }
+        else {
+          user.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
+        }
+        
         // TODO: include the lab affiliation
         Integer id = resultSet.getInt("id");
         Integer head = resultSet.getInt("lab_name");

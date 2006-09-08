@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.model.users;
 
 import java.security.Principal;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -328,12 +327,25 @@ public class ScreensaverUser extends AbstractEntity implements Principal
    * Get an unmodifiable copy of the set of user roles that this user belongs to.
    * 
    * @return an unmodifiable copy of the set of user roles that this user belongs to
+   *
+   * @hibernate.set
+   *   order-by="screensaver_user_role"
+   *   table="screensaver_user_role_type"
+   *   cascade="delete"
+   *   lazy="false"
+   * @hibernate.collection-key
+   *   column="screensaver_user_id"
+   *   foreign-key="fk_screensaver_user_role_type_to_screensaver_user"
+   * @hibernate.collection-element
+   *   type="edu.harvard.med.screensaver.model.users.ScreensaverUserRole$UserType"
+   *   column="screensaver_user_role"
+   *   not-null="true"
    */
-   public Set<ScreensaverUserRole> getScreensaverUserRoles()
-   {
-     return Collections.unmodifiableSet(_roles);
-   }
-
+  public Set<ScreensaverUserRole> getScreensaverUserRoles()
+  {
+    return _roles;
+  }
+  
   /**
    * Add a role to this user (i.e., place the user into a new role).
    *
@@ -342,13 +354,7 @@ public class ScreensaverUser extends AbstractEntity implements Principal
    */
   public boolean addScreensaverUserRole(ScreensaverUserRole role)
   {
-    assert !(role.getHbnScreensaverUsers().contains(this) ^
-      getHbnScreensaverUserRoles().contains(this)) :
-      "asymmetric user/role association encountered";
-    if (getHbnScreensaverUserRoles().add(role)) {
-      return role.getHbnScreensaverUsers().add(this);
-    }
-    return false;
+    return _roles.add(role);
   }
   
   /**
@@ -358,95 +364,9 @@ public class ScreensaverUser extends AbstractEntity implements Principal
    */
   public boolean removeScreensaverUserRole(ScreensaverUserRole role)
   {
-    assert !(role.getHbnScreensaverUsers().contains(this) ^
-      getHbnScreensaverUserRoles().contains(this)) :
-      "asymmetric user/role association encountered";
-    if (getHbnScreensaverUserRoles().remove(role)) {
-      return role.getHbnScreensaverUsers().remove(this);
-    }
-    return false;
-  }
-
-  // package methods
-
-  @Override
-  protected Object getBusinessKey()
-  {
-    return getEmail();
-  }
-
-  /**
-   * Get the roles this user belongs to.
-   * 
-   * @motivation for hibernate
-   * @return the set of roles this user belongs to
-   * @hibernate.set inverse="true" table="role_user_link" cascade="all"
-   * @hibernate.collection-key column="screensaver_user_id"
-   * @hibernate.collection-many-to-many column="screensaver_user_role_id"
-   *                                    class="edu.harvard.med.screensaver.model.users.ScreensaverUserRole"
-   *                                    foreign-key="fk_role_user_link_to_user"
-   */
-  Set<ScreensaverUserRole> getHbnScreensaverUserRoles()
-  {
-    return _roles;
-  }
-
-  
-  // protected constructor
-
-  /**
-   * Construct an uninitialized <code>ScreeningRoomUser</code> object.
-   *
-   * @motivation for hibernate
-   */
-  protected ScreensaverUser() {}
-
-
-  // private methods
-
-  /**
-   * Set the id for the Screensaver user.
-   *
-   * @param screeningRoomUserId the new id for the Screensaver user
-   * @motivation for hibernate
-   */
-  private void setScreensaverUserId(Integer screensaverUserId) 
-  {
-    _screensaverUserId = screensaverUserId;
+    return _roles.remove(this);
   }
   
-  /**
-   * Get the version for the Screensaver user.
-   *
-   * @return the version for the Screensaver user
-   * @motivation for hibernate
-   * @hibernate.version
-   */
-  private Integer getVersion() {
-    return _version;
-  }
-
-  /**
-   * Set the version for the Screensaver user.
-   *
-   * @param version the new version for the Screensaver user
-   * @motivation for hibernate
-   */
-  private void setVersion(Integer version) {
-    _version = version;
-  }
-
-  /**
-   * Set the roles this user belongs to.
-   *
-   * @param roles the new set of roles
-   * @motivation for hibernate
-   */
-  private void setHbnScreensaverUserRoles(Set<ScreensaverUserRole> roles)
-  {
-    _roles = roles;
-  }
-
   /**
    * Get the user's Screensaver-managed login ID.
    * 
@@ -550,7 +470,7 @@ public class ScreensaverUser extends AbstractEntity implements Principal
     _harvardId = harvardId;
   }
 
-  // Principal interface methods
+  // public Principal interface methods
   
   /**
    * Get the user Principal name.
@@ -560,5 +480,70 @@ public class ScreensaverUser extends AbstractEntity implements Principal
     return getBusinessKey().toString();
   }
   
+
+  // package methods
+
+  @Override
+  protected Object getBusinessKey()
+  {
+    return getEmail();
+  }
+
+  
+  // protected constructor
+
+  /**
+   * Construct an uninitialized <code>ScreeningRoomUser</code> object.
+   *
+   * @motivation for hibernate
+   */
+  protected ScreensaverUser() {}
+
+
+  // private methods
+
+  /**
+   * Set the id for the Screensaver user.
+   *
+   * @param screeningRoomUserId the new id for the Screensaver user
+   * @motivation for hibernate
+   */
+  private void setScreensaverUserId(Integer screensaverUserId) 
+  {
+    _screensaverUserId = screensaverUserId;
+  }
+  
+  /**
+   * Get the version for the Screensaver user.
+   *
+   * @return the version for the Screensaver user
+   * @motivation for hibernate
+   * @hibernate.version
+   */
+  private Integer getVersion() {
+    return _version;
+  }
+
+  /**
+   * Set the version for the Screensaver user.
+   *
+   * @param version the new version for the Screensaver user
+   * @motivation for hibernate
+   */
+  private void setVersion(Integer version) {
+    _version = version;
+  }
+
+  /**
+   * Set the screensaver user roles.
+   *
+   * @param roles the new screensaver user roles
+   * @motivation for hibernate
+   */
+  private void setScreensaverUserRoles(Set<ScreensaverUserRole> roles)
+  {
+    _roles = roles;
+  }
+
   
 }
