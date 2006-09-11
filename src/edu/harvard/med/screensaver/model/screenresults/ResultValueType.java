@@ -114,6 +114,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   {
     setScreenResult(screenResult);
     setName(name);
+    setReplicateOrdinal(1);
   }
   
   /* (non-Javadoc)
