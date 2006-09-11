@@ -207,6 +207,10 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
       propertyDescriptor.getName().equals("genbankAccessionNumbers")) {
       return 1;
     }
+    if (beanName.equals("PlatesUsed") &&
+      propertyDescriptor.getName().equals("hbnPlatesUsed")) {
+      return 1;
+    }
     return 0;
   }
 }

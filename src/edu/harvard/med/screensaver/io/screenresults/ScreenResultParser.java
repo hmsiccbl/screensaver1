@@ -38,6 +38,7 @@ import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -123,6 +124,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private static SortedMap<String,Boolean> primaryOrFollowUpMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,Boolean> booleanMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,PartitionedValue> partitionedValueMap = new TreeMap<String,PartitionedValue>();
+  private static SortedMap<String,AssayWellType> assayWellTypeMap = new TreeMap<String,AssayWellType>();
   static {
     indicatorDirectionMap.put("<",IndicatorDirection.LOW_VALUES_INDICATE);
     indicatorDirectionMap.put(">",IndicatorDirection.HIGH_VALUES_INDICATE);
@@ -165,6 +167,12 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       partitionedValueMap.put(pv.getValue().toUpperCase(),
                               pv);
     }
+    
+    assayWellTypeMap.put("X", AssayWellType.EXPERIMENTAL);
+    assayWellTypeMap.put("E", AssayWellType.EMPTY);
+    assayWellTypeMap.put("P", AssayWellType.POSITIVE_CONTROL);
+    assayWellTypeMap.put("N", AssayWellType.NEGATIVE_CONTROL);
+    assayWellTypeMap.put("O", AssayWellType.OTHER);
   }
   
 
@@ -317,6 +325,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private CellVocabularyParser<Boolean> _primaryOrFollowUpParser;
   private CellVocabularyParser<Boolean> _booleanParser;
   private CellVocabularyParser<PartitionedValue> _partitionedValueParser;
+  private CellVocabularyParser<AssayWellType> _assayWellTypeParser;
   private PlateNumberParser _plateNumberParser;
   private WellNameParser _wellNameParser;
 
@@ -355,7 +364,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   public ScreenResult parse(File workbookFile)
   {
     try {
-      return parse(workbookFile, new FileInputStream(workbookFile));
+      return parse(workbookFile, new FileInputStream(workbookFile), /*legacy format=*/ true, /*ignored file paths=*/ true);
     }
     catch (FileNotFoundException e) {
       e.printStackTrace();
@@ -482,6 +491,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     _primaryOrFollowUpParser = new CellVocabularyParser<Boolean>(primaryOrFollowUpMap, Boolean.FALSE, _errors);
     _booleanParser = new CellVocabularyParser<Boolean>(booleanMap, Boolean.FALSE, _errors);
     _partitionedValueParser = new CellVocabularyParser<PartitionedValue>(partitionedValueMap, PartitionedValue.NONE, _errors);
+    _assayWellTypeParser = new CellVocabularyParser<AssayWellType>(assayWellTypeMap, AssayWellType.EXPERIMENTAL, _errors);
     _plateNumberParser = new PlateNumberParser(_errors);
     _wellNameParser = new WellNameParser(_errors);
     try {
@@ -865,7 +875,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         log.info("parsing sheet " + workbook.getWorkbookFile().getName() + ":" + workbook.getWorkbook().getSheetName(iSheet));
         for (int iRow = RAWDATA_FIRST_DATA_ROW_INDEX; iRow <= sheet.getLastRowNum(); ++iRow) {
           Well well = findWell(iRow);
-          dataCell(iRow, DataColumn.TYPE).getString(); // TODO: use this value?
+          AssayWellType assayWellType = _assayWellTypeParser.parse(dataCell(iRow, DataColumn.ASSAY_WELL_TYPE));
           
           List<ResultValueType> wellExcludes = new ExcludeParser(screenResult).parseList(dataCell(iRow, DataColumn.EXCLUDE));
           
@@ -886,7 +896,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                   }
                   new ResultValue(rvt, 
                                   well, 
-                                  value.toString(), 
+                                  assayWellType,
+                                  value.toString(),
                                   (wellExcludes != null && wellExcludes.contains(rvt)));
                   ++iDataHeader;
           }

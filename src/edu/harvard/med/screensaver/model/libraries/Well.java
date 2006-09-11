@@ -15,11 +15,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -49,6 +49,7 @@ public class Well extends AbstractEntity
   private String _wellName;
   private String _iccbNumber;
   private String _vendorIdentifier;
+  private WellType _wellType = WellType.EXPERIMENTAL;
   private Set<ResultValue> _resultValues = new HashSet<ResultValue>();
   private Set<CherryPick> _cherryPicks = new HashSet<CherryPick>();
 
@@ -62,12 +63,24 @@ public class Well extends AbstractEntity
    * @param plateNumber
    * @param wellName
    */
-  public Well(Library parentLibrary, Integer plateNumber, String wellName) {
+  public Well(Library parentLibrary, Integer plateNumber, String wellName, WellType wellType) {
     _plateNumber = plateNumber;
     _wellName = wellName;
+    _wellType = wellType;
     // this call must occur after assignments of wellName and plateNumber (to
     // ensure hashCode() works)
     setLibrary(parentLibrary);
+  }
+
+  /**
+   * Constructs an initialized <code>Well</code> object.
+   * 
+   * @param parentLibrary
+   * @param plateNumber
+   * @param wellName
+   */
+  public Well(Library parentLibrary, Integer plateNumber, String wellName) {
+    this(parentLibrary, plateNumber, wellName, WellType.EXPERIMENTAL);
   }
 
   @Override
@@ -273,6 +286,28 @@ public class Well extends AbstractEntity
   }
   
   /**
+   * Get the well's type.
+   * 
+   * @return the well's type
+   * @hibernate.property type="edu.harvard.med.screensaver.model.libraries.WellType$UserType"
+   *                     not-null="true"
+   */
+  public WellType getWellType()
+  {
+    return _wellType;
+  }
+
+  /**
+   * Set the well's type.
+   * 
+   * @param wellType the new type of the well
+   */
+  public void setWellType(WellType wellType)
+  {
+    _wellType = wellType;
+  }
+  
+  /**
    * Get an unmodifiable copy of the set of the result values for the well.
    * 
    * @return an unmodifiable copy of the set of the result values for the well
@@ -367,9 +402,14 @@ public class Well extends AbstractEntity
   {
     return _cherryPicks;
   }
-
   
+
   // protected getters and setters
+
+  protected Object getBusinessKey()
+  {
+    return new BusinessKey();
+  }
 
   /**
    * A business key class for the well.
@@ -419,12 +459,6 @@ public class Well extends AbstractEntity
       return getPlateNumber() + getWellName();
     }
   }
-
-  protected Object getBusinessKey()
-  {
-    return new BusinessKey();
-  }
-
 
   // package getters and setters
 
@@ -488,6 +522,9 @@ public class Well extends AbstractEntity
   {
     return _silencingReagents;
   }
+
+  
+  // private methods
   
   /**
    * Constructs an uninitialized Well object.

@@ -52,6 +52,7 @@ package edu.harvard.med.screensaver.ui.authentication;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.security.auth.Subject;
@@ -71,6 +72,7 @@ import edu.harvard.med.authentication.AuthenticationResult;
 import edu.harvard.med.authentication.Credentials;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 
 import org.apache.log4j.Logger;
@@ -309,8 +311,9 @@ public class ScreensaverLoginModule implements LoginModule
     else {
       
       // add Principals (authenticated identities) to the Subject
-      _grantedPrincipals = new ArrayList<Principal>(_user.getScreensaverUserRoles());
-      _grantedPrincipals.add(_user);
+      _grantedPrincipals = new ArrayList<Principal>();
+      _grantedPrincipals.add(new ScreensaverUserPrincipal(_user));
+      _grantedPrincipals.addAll(_user.getScreensaverUserRoles());
       _subject.getPrincipals().addAll(_grantedPrincipals);
       log.debug("authorized Subject with these Principals: " + _grantedPrincipals);
       

@@ -283,7 +283,7 @@ public class EntityBeansTest extends EntityBeansExercizor
     try {
       Boolean result = (Boolean) removeMethod.invoke(bean, testValue);
       assertTrue(
-        "removing from empty collection prop returns true: " + fullPropName,
+        "removing previously added element returns true: " + fullPropName,
         result.booleanValue());
     }
     catch (Exception e) {

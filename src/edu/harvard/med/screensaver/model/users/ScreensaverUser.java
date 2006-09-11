@@ -10,8 +10,11 @@
 package edu.harvard.med.screensaver.model.users;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -36,7 +39,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @hibernate.class lazy="false"
  */
-public class ScreensaverUser extends AbstractEntity implements Principal
+public class ScreensaverUser extends AbstractEntity
 {
   
   // static fields
@@ -364,7 +367,7 @@ public class ScreensaverUser extends AbstractEntity implements Principal
    */
   public boolean removeScreensaverUserRole(ScreensaverUserRole role)
   {
-    return _roles.remove(this);
+    return _roles.remove(role);
   }
   
   /**
@@ -470,16 +473,6 @@ public class ScreensaverUser extends AbstractEntity implements Principal
     _harvardId = harvardId;
   }
 
-  // public Principal interface methods
-  
-  /**
-   * Get the user Principal name.
-   */
-  public String getName()
-  {
-    return getBusinessKey().toString();
-  }
-  
 
   // package methods
 

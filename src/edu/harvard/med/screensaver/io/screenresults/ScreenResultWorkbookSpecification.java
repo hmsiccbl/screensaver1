@@ -110,7 +110,7 @@ public interface ScreenResultWorkbookSpecification
   public enum DataColumn {
     STOCK_PLATE_ID("Stock Plate ID"),
     WELL_NAME("Well"),
-    TYPE("Type"),
+    ASSAY_WELL_TYPE("Type"),
     EXCLUDE("Exclude");
 
     private String _displayText;

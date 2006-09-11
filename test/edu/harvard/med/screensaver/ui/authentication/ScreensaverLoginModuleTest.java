@@ -280,7 +280,7 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     assertTrue("LoginModule's commit succeeded", commitResult);
     assertEquals("principals count", 3, _subject.getPrincipals().size());
     assertTrue("subject contains \"user\" Principal",
-               _subject.getPrincipals().contains(_validUser));
+               _subject.getPrincipals().contains(new ScreensaverUserPrincipal(_validUser)));
     assertTrue("subject contains user role compoundScreeningRoomUser Principal",
                  _subject.getPrincipals().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER));
     assertTrue("subject contains user role rnaiScreeningRoomUser Principal",

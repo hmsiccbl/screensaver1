@@ -36,6 +36,7 @@ public class ResultValue extends AbstractEntity implements Comparable
   private ResultValueType _resultValueType;
   private Well            _well;
   private String          _value;
+  private AssayWellType   _assayWellType;
   
   /**
    * Note that we maintain an "exclude" flag on a per-ResultValue basis. It is
@@ -62,21 +63,23 @@ public class ResultValue extends AbstractEntity implements Comparable
    */
   public ResultValue(ResultValueType resultValueType, Well well, String value)
   {
-    this(resultValueType, well, value, false);
+    this(resultValueType, well, AssayWellType.EXPERIMENTAL, value, false);
   }
 
   /**
    * Constructs an initialized <code>ResultValue</code> object.
    * @param resultValueType
    * @param well
+   * @param assayWellType
    * @param value
    * @param exclude
    */
-  public ResultValue(ResultValueType resultValueType, Well well, String value, boolean exclude)
+  public ResultValue(ResultValueType resultValueType, Well well, AssayWellType assayWellType, String value, boolean exclude)
   {
     _businessKey = new BusinessKey(well, resultValueType);
     setResultValueType(resultValueType);
     setWell(well);
+    setAssayWellType(assayWellType);
     setValue(value);
     setExclude(exclude);
   }
@@ -177,6 +180,36 @@ public class ResultValue extends AbstractEntity implements Comparable
     }
     _well = well;
     well.getHbnResultValues().add(this);
+  }
+
+  /**
+   * Get the assay well's type.
+   * 
+   * @return the assay well's type
+   * @hibernate.property type="edu.harvard.med.screensaver.model.screenresults.AssayWellType$UserType"
+   *                     not-null="true"
+   */
+  public AssayWellType getAssayWellType()
+  {
+    return _assayWellType;
+  }
+  
+  /**
+   * Set the assay well's type. <i>Note: This is implemented as a denormalized
+   * attribute. If you call this method, you must also call it for every
+   * ResultValue that has the same Well (within the same parent screen result).</i>
+   * Technically, we should have an AssayWell entity, which groups all the
+   * ResultValues for a given stock plate well (within the parent screen
+   * result). But it's creates a lot of new bidirectional relationships!
+   * 
+   * @param assayWellType the new type of the assay well
+   */
+  public void setAssayWellType(AssayWellType assayWellType)
+  {
+    // TODO: consider updating all related ResultValues (i.e., for the same well
+    // within this ScreenResult); would require parallel
+    // {get,set}HbnAssayWellType methods.
+    _assayWellType = assayWellType;
   }
 
   /**

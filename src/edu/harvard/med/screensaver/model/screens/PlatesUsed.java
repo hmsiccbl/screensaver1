@@ -140,7 +140,7 @@ public class PlatesUsed extends AbstractEntity
    *
    * @return the end plate
    * @hibernate.property
-   *   type="text"
+   *   type="integer"
    *   not-null="true"
    */
   public Integer getEndPlate()
@@ -328,6 +328,7 @@ public class PlatesUsed extends AbstractEntity
    *
    * @return the start plate
    * @hibernate.property
+   * 
    *   column="start_plate"
    *   not-null="true"
    * @motivation for hibernate

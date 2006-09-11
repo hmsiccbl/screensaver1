@@ -30,6 +30,7 @@ import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -185,6 +186,11 @@ public class ScreenResultParserTest extends AbstractSpringTest
       {0.53100000,  1.14935065,  0.49600000,  1.19806763, true},
       {0.56800000,  1.22943723,  0.45000000,  1.08695652, false}};
     
+    AssayWellType[] expectedInitialAssayWellTypes = {
+      AssayWellType.EXPERIMENTAL,
+      AssayWellType.POSITIVE_CONTROL,
+      AssayWellType.EXPERIMENTAL};
+      
     Object[][] expectedInitialExcludeValues = {
       {false, false, false, false, false},
       {false, false, false, false, false},
@@ -199,6 +205,11 @@ public class ScreenResultParserTest extends AbstractSpringTest
       {0.30100000,  1.09653916,  0.29200000,  1.02097902, true},
       {0.28000000,  1.02003643,  0.29900000,  1.04545455, false}};
     
+    AssayWellType[] expectedFinalAssayWellTypes = {
+      AssayWellType.EXPERIMENTAL,
+      AssayWellType.OTHER,
+      AssayWellType.EXPERIMENTAL};
+
     Object[][] expectedFinalExcludeValues = {
       {false, false, false, false, false},
       {false, false, false, false, false},
@@ -237,6 +248,9 @@ public class ScreenResultParserTest extends AbstractSpringTest
                          Double.parseDouble(rv.getValue()),
                          0.0001);
           }
+          assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
+                       expectedInitialAssayWellTypes[iWell],
+                       rv.getAssayWellType());
           assertEquals("rvt " + iRvt + " well #" + (iWell) + " excluded",
             expectedInitialExcludeValues[iWell][iRvt],
             rv.isExclude());
@@ -262,6 +276,9 @@ public class ScreenResultParserTest extends AbstractSpringTest
                        expectedFinalWellNames[iWell],
                        rv.getWell()
                          .getWellName());
+          assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
+                       expectedFinalAssayWellTypes[iWell],
+                       rv.getAssayWellType());
           if (iRvt == 4) {
             assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
                          expectedFinalResultValues[iWell][iRvt].toString(),
@@ -458,6 +475,14 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
     String[] expectedInitialWellNames = {"A01", "A02", "A03", "A01", "A02", "A03"};
 
+    AssayWellType[] expectedInitialAssayWellTypes = {
+      AssayWellType.EXPERIMENTAL,
+      AssayWellType.OTHER,
+      AssayWellType.EXPERIMENTAL,
+      AssayWellType.EXPERIMENTAL,
+      AssayWellType.POSITIVE_CONTROL,
+      AssayWellType.EXPERIMENTAL};
+
     Object[][] expectedInitialResultValues = {
       {1071894.0, 0.9691},
       {1071894.0, 0.9543},
@@ -487,6 +512,9 @@ public class ScreenResultParserTest extends AbstractSpringTest
                        expectedInitialWellNames[iWell],
                        rv.getWell()
                          .getWellName());
+          assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
+                       expectedInitialAssayWellTypes[iWell],
+                       rv.getAssayWellType());
           assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
                        ((Double) expectedInitialResultValues[iWell][iRvt]).doubleValue(),
                        Double.parseDouble(rv.getValue()),
