@@ -43,10 +43,13 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
     "edu.harvard.med.screensaver.model.users"
   };
   
+  private static String STRING_TEST_VALUE_PREFIX = "test:";
+  private static int STRING_TEST_VALUE_RADIX = 36;
+  
   private Integer _integerTestValue = 77;
   private double  _doubleTestValue = 77.1;
   private boolean _booleanTestValue = true;
-  private String  _stringTestValue = "test:a";
+  private int     _stringTestValueIndex = Integer.parseInt("antz", STRING_TEST_VALUE_RADIX);
   private long    _dateMilliseconds = 0;
   private int     _vocabularyTermCounter = 0;
   
@@ -66,15 +69,7 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
       return _booleanTestValue;
     }
     if (type.equals(String.class)) {
-      char lastChar = _stringTestValue.charAt(_stringTestValue.length() - 1);
-      if (lastChar == 'z') {
-        lastChar = 'a';
-      }
-      else {
-        lastChar++;
-      }
-      _stringTestValue += lastChar;
-      return _stringTestValue;
+      return STRING_TEST_VALUE_PREFIX + Integer.toString(++_stringTestValueIndex, STRING_TEST_VALUE_RADIX);
     }
     if (type.equals(Date.class)) {
       _dateMilliseconds += 1000 * 60 * 60 * 24 * 1.32;
