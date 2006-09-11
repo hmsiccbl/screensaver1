@@ -20,6 +20,7 @@ import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screens.Screen;
 
 /**
  * A <code>ScreenResult</code> represents the data produced by machine-reading
@@ -50,6 +51,7 @@ public class ScreenResult extends AbstractEntity
   
   private Integer                    _screenResultId;
   private Integer                    _version;
+  private Screen                     _screen;
   private Date                       _dateCreated;
   private boolean                    _isShareable;
   private Integer                    _replicateCount;
@@ -65,28 +67,32 @@ public class ScreenResult extends AbstractEntity
   
   /**
    * Constructs an initialized ScreenResult object.
+   * @param screen
    * @param dateCreated
    * @param isShareable
    * @param replicateCount
    */
   public ScreenResult(
+    Screen screen,
     Date dateCreated,
     boolean isShareable,
     Integer replicateCount)
   {
+    _screen = screen;
     setDateCreated(dateCreated);
     setShareable(isShareable);
     setReplicateCount(replicateCount);
   }
 
-  
-  // TODO: jps: I suggest this as the minimal constructor.
   /**
    * Constructs an initialized ScreenResult object.
+   * 
+   * @param screen
    * @param dateCreated
    */
-  public ScreenResult(Date dateCreated)
+  public ScreenResult(Screen screen, Date dateCreated)
   {
+    _screen = screen;
     setDateCreated(dateCreated);
   }
   
@@ -277,7 +283,50 @@ public class ScreenResult extends AbstractEntity
     return new ArrayList<ResultValueType>(_resultValueTypes);
   }
   
+  /**
+   * Get the screen.
+   *
+   * @return the screen
+   */
+  public Screen getScreen()
+  {
+    return _screen;
+  }
 
+  /**
+   * Set the screen.
+   *
+   * @param screen the new screen
+   */
+  public void setScreen(Screen screen)
+  {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
+    _screen.getHbnScreenResults().remove(this);
+    _screen = screen;
+    _screen.getHbnScreenResults().add(this);
+  }
+
+  /**
+   * Set the screen.
+   * Throw a NullPointerException when the screen is null.
+   *
+   * @param screen the new screen
+   * @throws NullPointerException when the screen is null
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   * this method is public only because the bi-directional relationship
+   * is cross-package.
+   */
+  public void setHbnScreen(Screen screen)
+  {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
+    _screen = screen;
+  }
+
+  
   // protected getters and setters
   
   /* (non-Javadoc)
@@ -285,8 +334,7 @@ public class ScreenResult extends AbstractEntity
    */
   protected Object getBusinessKey()
   {
-    // TODO: replace with "return getScreen();" when it is implemented
-    return DateFormat.getDateInstance().format(getDateCreated());
+    return _screen.getScreenNumber() + ":" + DateFormat.getDateInstance().format(getDateCreated());
   }
   
   
@@ -350,4 +398,20 @@ public class ScreenResult extends AbstractEntity
     _resultValueTypes = resultValueTypes;
   }
 
+  /**
+   * Get the screen.
+   *
+   * @return the screen
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.Screen"
+   *   column="screen_id"
+   *   not-null="true"
+   *   foreign-key="fk_screen_result_to_screen"
+   *   cascade="save-update"
+   * @motivation for hibernate
+   */
+  private Screen getHbnScreen()
+  {
+    return _screen;
+  }
 }

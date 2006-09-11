@@ -755,7 +755,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                                                             ignoreFilePaths));
     } 
     Date screenResultDate = parseScreenInfo(metadataWorkbook);
-    metadataParseResult.setScreenResult(new ScreenResult(screenResultDate));
+    // TODO: specify a real screen
+    metadataParseResult.setScreenResult(new ScreenResult(null, screenResultDate));
     int dataHeaderCount = findDataHeaderColumnCount(metadataSheet);
     for (int iDataHeader = 0; iDataHeader < dataHeaderCount; ++iDataHeader) {
       recordDataHeaderColumn(iDataHeader);

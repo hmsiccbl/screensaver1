@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -121,8 +122,7 @@ public class SimpleDAOTest extends AbstractSpringTest
                         {
       public void runTransaction()
       {
-        ScreenResult screenResult = dao.defineEntity(ScreenResult.class,
-                                                     new Date());
+        ScreenResult screenResult = ScreenResultParserTest.makeScreenResult(new Date());
         rvts[0] = dao.defineEntity(ResultValueType.class, screenResult, "rvt0");
         rvts[0].setDerived(true);
         rvts[0].setAssayPhenotype("Mouse");

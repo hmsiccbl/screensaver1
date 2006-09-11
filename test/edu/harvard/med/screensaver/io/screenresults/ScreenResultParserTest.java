@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,7 +26,6 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
@@ -35,6 +35,10 @@ import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -113,7 +117,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     Calendar expectedDate = Calendar.getInstance();
     expectedDate.set(2003, 3 - 1, 5, 0, 0, 0);
     expectedDate.set(Calendar.MILLISECOND, 0);
-    ScreenResult expectedScreenResult = new ScreenResult(expectedDate.getTime());
+    ScreenResult expectedScreenResult = makeScreenResult(expectedDate.getTime());
     assertEquals("date",
                  expectedScreenResult.getDateCreated(),
                  screenResult.getDateCreated());
@@ -440,7 +444,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     Calendar expectedDate = Calendar.getInstance();
     expectedDate.set(2006, 1 - 1, 1, 0, 0, 0);
     expectedDate.set(Calendar.MILLISECOND, 0);
-    ScreenResult expectedScreenResult = new ScreenResult(expectedDate.getTime());
+    ScreenResult expectedScreenResult = makeScreenResult(expectedDate.getTime());
     assertEquals("date",
                  expectedScreenResult.getDateCreated(),
                  screenResult.getDateCreated());
@@ -546,6 +550,17 @@ public class ScreenResultParserTest extends AbstractSpringTest
     if (rvt.getTimePoint() == null) {
       rvt.setTimePoint("");
     }
+  }
+  
+
+  // testing  utility methods 
+  
+  public static ScreenResult makeScreenResult(Date date)
+  {
+    ScreeningRoomUser screener = new ScreeningRoomUser(date, "first", "last", "first_last@hms.harvard.edu", "", "", "", "", "", ScreeningRoomUserClassification.ICCBL_NSRB_STAFF, false);
+    Screen screen = new Screen(screener, screener, 1, date, ScreenType.SMALL_MOLECULE, "test screen");
+    ScreenResult screenResult = new ScreenResult(screen, date);
+    return screenResult;
   }
 
 }

@@ -18,6 +18,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -272,8 +273,7 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         public void runTransaction()
         {
-          ScreenResult screenResult = new ScreenResult(new Date());
-          
+          ScreenResult screenResult = ScreenResultParserTest.makeScreenResult(new Date());
           ResultValueType[] rvt = new ResultValueType[replicates];
           for (int i = 0; i < replicates; i++) {
             rvt[i] = new ResultValueType(
@@ -323,6 +323,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           
           dao.persistEntity(screenResult);
         }
+
       });
 
     dao.doInTransaction(new DAOTransaction()
@@ -386,7 +387,7 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         public void runTransaction()
         {
-          ScreenResult screenResult = new ScreenResult(new Date());
+          ScreenResult screenResult = ScreenResultParserTest.makeScreenResult(new Date());
           
           for (int i = 0; i < replicates; i++) {
             ResultValueType rvt = new ResultValueType(
@@ -453,4 +454,5 @@ public class ComplexDAOTest extends AbstractSpringTest
         }
       });
   }
+  
 }
