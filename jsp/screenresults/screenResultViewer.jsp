@@ -6,7 +6,7 @@
 
     <h:panelGroup>
       <h:commandButton action="#{screenResultViewer.download}" value="Download" styleClass="command" />
-      <h:commandButton action="#{screenResultViewer.delete}" value="Delete" styleClass="command" />
+      <h:commandButton action="#{screenResultViewer.delete}" value="Delete" styleClass="command" visibleOnUserRole="screenResultsAdmin""/>
       <h:commandButton action="#{screenResultViewer.viewHeatMaps}" value="View Heat Maps"
         styleClass="command" />
     </h:panelGroup>
@@ -135,9 +135,9 @@
         <f:selectItems value="#{screenResultViewer.plateSelectItems}" />
       </h:selectOneMenu>
       <h:commandButton id="prevPageCommand" action="#{screenResultViewer.prevPage}" value="Prev"
-        image="images/arrow-previous.gif" styleClass="command" />
+        image="../../images/arrow-previous.gif" styleClass="command" />
       <h:commandButton id="nextPageCommand" action="#{screenResultViewer.nextPage}" value="Next"
-        image="images/arrow-next.gif" styleClass="command" />
+        image="../../images/arrow-next.gif" styleClass="command" />
       <h:outputLabel id="rowLabel" value="Row" for="firstDisplayedRowNumber" />
       <h:inputText id="firstDisplayedRowNumber"
         value="#{screenResultViewer.firstDisplayedRowNumber}"
