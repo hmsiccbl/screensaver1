@@ -47,6 +47,7 @@ public class ScreensaverTomcatLoginModule implements LoginModule
   
   private LoginModule _delegate;
 
+  @SuppressWarnings("unchecked")
   public void initialize(
     Subject subject,
     CallbackHandler callbackHandler,

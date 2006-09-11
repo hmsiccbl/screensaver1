@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.util.List;
-
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
