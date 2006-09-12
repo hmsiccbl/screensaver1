@@ -205,7 +205,7 @@ public class ScreenDBProxy
         );
         
         // TODO: Currently, a user is an RNAi screener OR a Compound screener, but not both.  If not explicitly an RNAi screener, we assume a Compound screener.  Is this a valid assumption? [ant]
-        if (resultSet.getBoolean("rnai_user")) {
+        if (resultSet.getBoolean("rani_user" /*[sic]*/)) {
           user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
         }
         else {
