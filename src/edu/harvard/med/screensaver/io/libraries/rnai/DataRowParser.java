@@ -117,7 +117,7 @@ public class DataRowParser
     if (plateWellAbbreviation == null) {
       return;
     }
-    log.info("loading data for plate-well " + plateWellAbbreviation);
+    log.debug("loading data for plate-well " + plateWellAbbreviation);
     
     // get the well last, so that if we encounter any errors, we dont end up with a bogus
     // well in the library
@@ -145,7 +145,7 @@ public class DataRowParser
     if (plateWellAbbreviation == null) {
       return;
     }
-    log.info("loading empty plate-well " + plateWellAbbreviation);
+    log.debug("loading empty plate-well " + plateWellAbbreviation);
     getWell();
   }
 
