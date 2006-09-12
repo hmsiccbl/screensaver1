@@ -19,6 +19,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
+import org.hibernate.Session;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -162,7 +163,8 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
   public void truncateTablesOrCreateSchema()
   {
     log.info("truncating tables for " + makeDataSourceString());
-    Connection connection = getSession().connection();
+    Session session = getSession();
+    Connection connection = session.connection();
     
     try {
       String url = connection.getMetaData().getURL();
@@ -180,6 +182,7 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
       while (resultSet.next()) {
         sql += resultSet.getString(1) + ", ";
       }
+      statement.close();
       
       if (sql.equals("TRUNCATE TABLE ")) { // no tables in the schema
         createSchema();
@@ -187,11 +190,12 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
       }
       
       sql = sql.substring(0, sql.length() - 2);
-      statement.close();
 
       statement = connection.createStatement();
       statement.execute(sql);
       statement.close();
+
+      connection.close();
     }
     catch (HibernateException e) {
       throw convertHibernateAccessException(e);
@@ -201,6 +205,9 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
     }
     catch (SQLException e) {
       log.error("bad sql exception", e);
+    }
+    finally {
+      releaseSession(session);
     }
   }
 
