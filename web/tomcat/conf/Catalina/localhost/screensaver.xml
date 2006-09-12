@@ -3,6 +3,16 @@
 -->
 
 <Context path="/screensaver" docBase="screensaver" debug="99" >
+
+  <Realm 
+    className="org.apache.catalina.realm.JAASRealm"                 
+    appName="Screensaver1"
+    userClassNames="edu.harvard.med.screensaver.model.users.ScreensaverUser"
+    roleClassNames="edu.harvard.med.screensaver.model.users.ScreensaverUserRole"
+    debug="99"
+    useContextClassLoader="false"
+    />
+
   <Resource
     name="bean/loginModuleFactoryCapsule"
     auth="Container" 
