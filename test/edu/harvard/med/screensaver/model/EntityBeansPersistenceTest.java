@@ -65,7 +65,6 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
           final PropertyDescriptor propertyDescriptor)
         {
           final Class<? extends AbstractEntity> beanClass = bean.getClass();
-          log.info("bean class = " + beanClass.getSimpleName());
           dao.doInTransaction(new DAOTransaction()
             {
               public void runTransaction()
@@ -75,7 +74,6 @@ public class EntityBeansPersistenceTest extends EntityBeansExercizor
                 }
               }
             });
-          log.info("bean id = " + bean.getEntityId());
           dao.doInTransaction(new DAOTransaction()
             {
               public void runTransaction()
