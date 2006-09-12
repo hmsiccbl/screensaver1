@@ -133,7 +133,8 @@ public class AttachedFile extends AbstractEntity
 
   /**
    * Get the file contents.
-   *
+   * TODO: this should really be a BLOB, not TEXT.
+   * 
    * @return the file contents
    * @hibernate.property
    *   type="text"
