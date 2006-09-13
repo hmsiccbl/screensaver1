@@ -53,6 +53,14 @@
     <constructor-arg ref="dao"/>
   </bean>
   
+    <bean 
+    id="sdfileCompoundLibraryContentsParser"
+    class="edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser"
+    singleton="false"
+  >
+    <constructor-arg ref="dao"/>
+  </bean>
+  
   <bean 
     id="screenDBDataImporter"
     class="edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter"
