@@ -4,12 +4,13 @@
 
 <Context path="/screensaver" docBase="screensaver" debug="99" >
 
+  <!-- note: a 'debug' value greater than 2 will cause passwords to be output to Tomcat's log. -->
   <Realm 
     className="org.apache.catalina.realm.JAASRealm"                 
     appName="Screensaver1"
     userClassNames="edu.harvard.med.screensaver.model.users.ScreensaverUser"
     roleClassNames="edu.harvard.med.screensaver.model.users.ScreensaverUserRole"
-    debug="99"
+    debug="2"
     useContextClassLoader="false"
     />
 
