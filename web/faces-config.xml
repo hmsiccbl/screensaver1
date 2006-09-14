@@ -75,6 +75,36 @@
       <value>#{messages}</value>
     </managed-property>
   </managed-bean>
+   
+  <managed-bean>
+    <description>Screens Browser backing bean</description>
+    <managed-bean-name>screensBrowser</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.screens.ScreensBrowserController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>dao</property-name>
+      <value>#{dao}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>searchResultsRegistry</property-name>
+      <value>#{searchResultsRegistry}</value>
+    </managed-property>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>ScreenViewer backing bean</description>
+    <managed-bean-name>screenViewer</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.screens.ScreenViewerController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>dao</property-name>
+      <value>#{dao}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
+    </managed-property>
+  </managed-bean>
   
   <managed-bean>
     <description>Screen Result Viewer backing bean</description>
@@ -223,8 +253,18 @@
       <redirect/>
     </navigation-case>
     <navigation-case>
+      <from-outcome>/libraries/librariesBrowser.jsp</from-outcome>
+      <to-view-id>goBrowseLibraries</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>goBrowseLibraries</from-outcome>
       <to-view-id>/libraries/librariesBrowser</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>goBrowseScreens</from-outcome>
+      <to-view-id>/screens/screensBrowser</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>

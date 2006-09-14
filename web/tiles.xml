@@ -11,7 +11,9 @@
 
 <tiles-definitions>
 
+
   <!-- The base definition, defining common attributes for our "concrete" definitions, below -->
+  
   <definition
     name=".base"
     path="/template.jsp">
@@ -26,9 +28,13 @@
       name="menu"
       value="/menu.jsp" />
   </definition>
-  
+
+
   <!-- Concrete definitions -->
 
+
+  <!-- top-level tiles -->
+  
   <definition
     name="/login.tiles"
     extends=".base">
@@ -73,6 +79,45 @@
       value="/query.jsp" />
   </definition>
 
+
+  <!-- libraries tiles -->
+  
+  <definition
+    name="/libraries/admin/rnaiLibraryContentsImporter.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="RNAi Library Contents Importer and Error Viewer"/>
+    <put
+      name="body"
+      value="/libraries/admin/rnaiLibraryContentsImporter.jsp" />
+  </definition>
+     
+  <definition
+    name="/libraries/librariesBrowser.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="Libraries Browser"/>
+    <put
+      name="body"
+      value="/libraries/librariesBrowser.jsp" />
+  </definition>
+     
+  <definition
+    name="/libraries/wellViewer.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="Well Viewer"/>
+    <put
+      name="body"
+      value="/libraries/wellViewer.jsp" />
+  </definition>
+  
+  
+  <!-- screenresults tiles -->
+  
   <definition
     name="/screenresults/admin/screenResultImporter.tiles"
     extends=".base">
@@ -84,15 +129,15 @@
       value="/screenresults/admin/screenResultImporter.jsp" />
   </definition>
 
-   <definition
-    name="/libraries/admin/rnaiLibraryContentsImporter.tiles"
+  <definition
+    name="/screenresults/heatMapViewer.tiles"
     extends=".base">
     <put
       name="pageTitle"
-      value="RNAi Library Contents Importer and Error Viewer"/>
+      value="Screen Result Heat Map Viewer"/>
     <put
       name="body"
-      value="/libraries/admin/rnaiLibraryContentsImporter.jsp" />
+      value="/screenresults/heatMapViewer.jsp" />
   </definition>
 
   <definition
@@ -106,50 +151,23 @@
       value="/screenresults/screenResultViewer.jsp" />
   </definition>
 
-  <definition
-    name="/screenresults/heatMapViewer.tiles"
-    extends=".base">
-    <put
-      name="pageTitle"
-      value="Screen Result Heat Map Viewer"/>
-    <put
-      name="body"
-      value="/screenresults/heatMapViewer.jsp" />
-  </definition>
+
+  <!-- screens tiles -->
   
   <definition
-    name="/libraries/wellViewer.tiles"
+    name="/screens/screensBrowser.tiles"
     extends=".base">
     <put
       name="pageTitle"
-      value="Well Viewer"/>
+      value="Screens Browser"/>
     <put
       name="body"
-      value="/libraries/wellViewer.jsp" />
-  </definition>
-    
-  <definition
-    name="/libraries/librariesBrowser.tiles"
-    extends=".base">
-    <put
-      name="pageTitle"
-      value="Libraries Browser"/>
-    <put
-      name="body"
-      value="/libraries/librariesBrowser.jsp" />
+      value="/screens/screensBrowser.jsp" />
   </definition>
   
-  <definition
-    name="/dev/schemaManager.tiles"
-    extends=".base">
-    <put
-      name="pageTitle"
-      value="Schema Manager"/>
-    <put
-      name="body"
-      value="/dev/schemaManager.jsp" />
-  </definition>
   
+  <!-- dev tiles -->
+
   <definition
     name="/dev/env.tiles"
     extends=".base">
@@ -159,6 +177,17 @@
     <put
       name="body"
       value="/dev/env.jsp" />
+  </definition>
+    
+  <definition
+    name="/dev/schemaManager.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="Schema Manager"/>
+    <put
+      name="body"
+      value="/dev/schemaManager.jsp" />
   </definition>
   
 </tiles-definitions>

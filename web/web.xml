@@ -313,8 +313,9 @@
       <url-pattern>/login.jsf</url-pattern>
       <url-pattern>/login-error.jsf</url-pattern>
       <url-pattern>/query.jsf</url-pattern>
-      <url-pattern>/screenresults/*</url-pattern>
       <url-pattern>/libraries/*</url-pattern>
+      <url-pattern>/screenresults/*</url-pattern>
+      <url-pattern>/screens/*</url-pattern>
     </web-resource-collection>
 
     <auth-constraint>

@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.faces.component.UIData;
@@ -30,7 +29,8 @@ import edu.harvard.med.screensaver.model.libraries.Library;
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class SearchResults<E extends AbstractEntity> implements ScreensaverConstants
+abstract public class SearchResults<E extends AbstractEntity>
+implements ScreensaverConstants
 {
   
   // public static final data
@@ -120,29 +120,7 @@ public class SearchResults<E extends AbstractEntity> implements ScreensaverConst
   
   // public instance methods
   
-  public Object getRawDataCellValue()
-  {
-    DataModel dataModel = getDataModel();
-    Library library = (Library) dataModel.getRowData();
-    DataModel columnModel = getDataHeaderColumnModel();
-    String columnName = (String) columnModel.getRowData();
-    if (columnName.equals("Short Name")) {
-      return library.getShortName();
-    }
-    if (columnName.equals("Library Name")) {
-      return library.getLibraryName();
-    }
-    if (columnName.equals("Library Type")) {
-      return library.getLibraryType();
-    }
-    if (columnName.equals("Start Plate")) {
-      return library.getStartPlate();
-    }
-    if (columnName.equals("End Plate")) {
-      return library.getEndPlate();
-    }    
-    return null;
-  }
+  abstract public Object getRawDataCellValue();
   
   public String firstPage()
   {
@@ -179,14 +157,5 @@ public class SearchResults<E extends AbstractEntity> implements ScreensaverConst
   
   // private instance methods
 
-  private DataModel createDataHeaderColumnModel()
-  {
-    List<String> tableData = new ArrayList<String>();
-    tableData.add("Short Name");
-    tableData.add("Library Name");
-    tableData.add("Library Type");
-    tableData.add("Start Plate");
-    tableData.add("End Plate");
-    return new ListDataModel(tableData);
-  }
+  abstract protected DataModel createDataHeaderColumnModel();
 }
