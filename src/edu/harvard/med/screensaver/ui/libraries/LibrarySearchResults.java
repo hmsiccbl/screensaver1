@@ -33,14 +33,20 @@ public class LibrarySearchResults extends SearchResults<Library>
   {
     super(unsortedResults);
   }
-  
 
-  public Object getRawDataCellValue()
+  protected DataModel createDataHeaderColumnModel()
   {
-    DataModel dataModel = getDataModel();
-    Library library = (Library) dataModel.getRowData();
-    DataModel columnModel = getDataHeaderColumnModel();
-    String columnName = (String) columnModel.getRowData();
+    List<String> tableData = new ArrayList<String>();
+    tableData.add("Short Name");
+    tableData.add("Library Name");
+    tableData.add("Library Type");
+    tableData.add("Start Plate");
+    tableData.add("End Plate");
+    return new ListDataModel(tableData);
+  }
+  
+  protected Object getColumnValue(Library library, String columnName)
+  {
     if (columnName.equals("Short Name")) {
       return library.getShortName();
     }
@@ -57,17 +63,5 @@ public class LibrarySearchResults extends SearchResults<Library>
       return library.getEndPlate();
     }    
     return null;
-  }
-  
-
-  protected DataModel createDataHeaderColumnModel()
-  {
-    List<String> tableData = new ArrayList<String>();
-    tableData.add("Short Name");
-    tableData.add("Library Name");
-    tableData.add("Library Type");
-    tableData.add("Start Plate");
-    tableData.add("End Plate");
-    return new ListDataModel(tableData);
   }
 }

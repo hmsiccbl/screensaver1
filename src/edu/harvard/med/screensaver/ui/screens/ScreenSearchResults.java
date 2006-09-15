@@ -34,14 +34,18 @@ public class ScreenSearchResults extends SearchResults<Screen>
   {
     super(unsortedResults);
   }
-  
 
-  public Object getRawDataCellValue()
+  protected DataModel createDataHeaderColumnModel()
   {
-    DataModel dataModel = getDataModel();
-    Screen screen = (Screen) dataModel.getRowData();
-    DataModel columnModel = getDataHeaderColumnModel();
-    String columnName = (String) columnModel.getRowData();
+    List<String> tableData = new ArrayList<String>();
+    tableData.add("Screen Number");
+    tableData.add("Lead Screener");
+    tableData.add("Title");
+    return new ListDataModel(tableData);
+  }
+  
+  protected Object getColumnValue(Screen screen, String columnName)
+  {
     if (columnName.equals("Screen Number")) {
       return screen.getScreenNumber();
     }
@@ -54,14 +58,5 @@ public class ScreenSearchResults extends SearchResults<Screen>
     }
     return null;
   }
-  
 
-  protected DataModel createDataHeaderColumnModel()
-  {
-    List<String> tableData = new ArrayList<String>();
-    tableData.add("Screen Number");
-    tableData.add("Lead Screener");
-    tableData.add("Title");
-    return new ListDataModel(tableData);
-  }
 }

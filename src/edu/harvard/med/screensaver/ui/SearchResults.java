@@ -120,7 +120,15 @@ implements ScreensaverConstants
   
   // public instance methods
   
-  abstract public Object getRawDataCellValue();
+  @SuppressWarnings("unchecked")
+  public Object getRawDataCellValue()
+  {
+    DataModel dataModel = getDataModel();
+    E entity = (E) dataModel.getRowData();
+    DataModel columnModel = getDataHeaderColumnModel();
+    String columnName = (String) columnModel.getRowData();
+    return getColumnValue(entity, columnName);
+  }
   
   public String firstPage()
   {
@@ -158,4 +166,5 @@ implements ScreensaverConstants
   // private instance methods
 
   abstract protected DataModel createDataHeaderColumnModel();
+  abstract protected Object getColumnValue(E entity, String columnName);
 }
