@@ -4,6 +4,8 @@
 
 <f:subview id="searchResults">
 
+  <h:form id="searchResultsForm">
+  
 	<t:dataTable id="searchResultsTable"
 		binding="#{searchResultsRegistry.searchResults.dataTable}"
 		value="#{searchResultsRegistry.searchResults.dataModel}"
@@ -18,10 +20,22 @@
 			<f:facet name="header">
 				<h:outputText value="#{columnName}" />
 			</f:facet>
-			<h:outputText value="#{searchResultsRegistry.searchResults.rawDataCellValue}" />
+			<h:outputText
+			  value="#{searchResultsRegistry.searchResults.cellValue}"
+			  rendered="#{! searchResultsRegistry.searchResults.isCommandLink}"
+		    />
+		    <h:commandLink
+		      action="#{searchResultsRegistry.searchResults.getCellAction}"
+			  value="#{searchResultsRegistry.searchResults.cellValue}"
+			  rendered="#{searchResultsRegistry.searchResults.isCommandLink}"
+			>
+			  <f:param name="entity" value="#{searchResultsRegistry.searchResults.entity}" />
+		    </h:commandLink>
 		</t:columns>
 	</t:dataTable>
 
+  </h:form>
+  
   <h:form id="navigationForm">
     <h:panelGroup rendered="true">
       <h:commandButton

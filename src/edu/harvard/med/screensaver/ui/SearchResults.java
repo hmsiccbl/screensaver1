@@ -121,13 +121,31 @@ implements ScreensaverConstants
   // public instance methods
   
   @SuppressWarnings("unchecked")
-  public Object getRawDataCellValue()
+  public E getEntity()
   {
-    DataModel dataModel = getDataModel();
-    E entity = (E) dataModel.getRowData();
-    DataModel columnModel = getDataHeaderColumnModel();
-    String columnName = (String) columnModel.getRowData();
-    return getColumnValue(entity, columnName);
+    return (E) getDataModel().getRowData();
+  }
+  
+  public String getColumnName()
+  {
+    return (String) getDataHeaderColumnModel().getRowData();
+  }
+  
+  public boolean getIsCommandLink()
+  {
+    return isCommandLink(getColumnName());
+  }
+  
+  @SuppressWarnings("unchecked")
+  public Object getCellValue()
+  {
+    return getCellValue(getEntity(), getColumnName());
+  }
+
+  @SuppressWarnings("unchecked")
+  public Object getCellAction()
+  {
+    return getCellAction(getEntity(), getColumnName());
   }
   
   public String firstPage()
@@ -166,5 +184,7 @@ implements ScreensaverConstants
   // private instance methods
 
   abstract protected DataModel createDataHeaderColumnModel();
-  abstract protected Object getColumnValue(E entity, String columnName);
+  abstract protected boolean isCommandLink(String columnName);
+  abstract protected Object getCellValue(E entity, String columnName);
+  abstract protected Object getCellAction(E entity, String columnName);
 }

@@ -253,11 +253,6 @@
       <redirect/>
     </navigation-case>
     <navigation-case>
-      <from-outcome>/libraries/librariesBrowser.jsp</from-outcome>
-      <to-view-id>goBrowseLibraries</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
       <from-outcome>goBrowseLibraries</from-outcome>
       <to-view-id>/libraries/librariesBrowser</to-view-id>
       <redirect/>
@@ -321,6 +316,24 @@
       <from-action>#{rnaiLibraryContentsImporter.submit}</from-action>
       <from-outcome>error</from-outcome>
       <to-view-id>/libraries/admin/rnaiLibraryContentsImporter</to-view-id>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <from-view-id>/libraries/librariesBrowser.jsp</from-view-id>
+    <navigation-case>
+      <from-outcome>showLibrary</from-outcome>
+      <to-view-id>/libraries/libraryViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <from-view-id>/screens/screensBrowser.jsp</from-view-id>
+    <navigation-case>
+      <from-outcome>showScreen</from-outcome>
+      <to-view-id>/screens/screenViewer</to-view-id>
+      <redirect/>
     </navigation-case>
   </navigation-rule>
 

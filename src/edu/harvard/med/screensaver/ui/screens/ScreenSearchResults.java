@@ -24,7 +24,10 @@ import edu.harvard.med.screensaver.ui.SearchResults;
  */
 public class ScreenSearchResults extends SearchResults<Screen>
 {
-
+  private static final String SCREEN_NUMBER = "Screen Number";
+  private static final String LEAD_SCREENER = "Lead Screener";
+  private static final String TITLE = "Title";
+  
   /**
    * Construct a new <code>ScreenSearchResult</code> object.
    * @param unsortedResults the unsorted list of the results, as they are returned from the
@@ -35,28 +38,42 @@ public class ScreenSearchResults extends SearchResults<Screen>
     super(unsortedResults);
   }
 
+  public String goScreenViewer()
+  {
+    return "goScreenViewer";
+  }
+  
   protected DataModel createDataHeaderColumnModel()
   {
     List<String> tableData = new ArrayList<String>();
-    tableData.add("Screen Number");
-    tableData.add("Lead Screener");
-    tableData.add("Title");
+    tableData.add(SCREEN_NUMBER);
+    tableData.add(LEAD_SCREENER);
+    tableData.add(TITLE);
     return new ListDataModel(tableData);
   }
-  
-  protected Object getColumnValue(Screen screen, String columnName)
+
+  protected boolean isCommandLink(String columnName)
   {
-    if (columnName.equals("Screen Number")) {
+    return columnName.equals(SCREEN_NUMBER);
+  }
+  
+  protected Object getCellValue(Screen screen, String columnName)
+  {
+    if (columnName.equals(SCREEN_NUMBER)) {
       return screen.getScreenNumber();
     }
-    if (columnName.equals("Lead Screener")) {
+    if (columnName.equals(LEAD_SCREENER)) {
       ScreeningRoomUser leadScreener = screen.getLeadScreener();
       return leadScreener.getFirstName() + " " + leadScreener.getLastName();      
     }
-    if (columnName.equals("Title")) {
+    if (columnName.equals(TITLE)) {
       return screen.getTitle();
     }
     return null;
   }
 
+  protected Object getCellAction(Screen screen, String columnName)
+  {
+    return "showScreen";
+  }
 }
