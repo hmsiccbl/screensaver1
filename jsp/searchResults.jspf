@@ -6,33 +6,32 @@
 
   <h:form id="searchResultsForm">
   
-	<t:dataTable id="searchResultsTable"
-		binding="#{searchResultsRegistry.searchResults.dataTable}"
-		value="#{searchResultsRegistry.searchResults.dataModel}"
-		var="row"
-		rows="10"
-		rendered="true"
-		styleClass="standardTable"
-		headerClass="tableHeader"
-		rowClasses="row1,row2">
-		<t:columns value="#{searchResultsRegistry.searchResults.dataHeaderColumnModel}"
-			var="columnName" styleClass="column">
-			<f:facet name="header">
-				<h:outputText value="#{columnName}" />
-			</f:facet>
-			<h:outputText
-			  value="#{searchResultsRegistry.searchResults.cellValue}"
-			  rendered="#{! searchResultsRegistry.searchResults.isCommandLink}"
-		    />
-		    <h:commandLink
-		      action="#{searchResultsRegistry.searchResults.getCellAction}"
-			  value="#{searchResultsRegistry.searchResults.cellValue}"
-			  rendered="#{searchResultsRegistry.searchResults.isCommandLink}"
-			>
-			  <f:param name="entity" value="#{searchResultsRegistry.searchResults.entity}" />
-		    </h:commandLink>
-		</t:columns>
-	</t:dataTable>
+    <t:dataTable id="searchResultsTable"
+      binding="#{searchResultsRegistry.searchResults.dataTable}"
+      value="#{searchResultsRegistry.searchResults.dataModel}"
+      var="row"
+      rows="10"
+      rendered="true"
+      styleClass="standardTable"
+      headerClass="tableHeader"
+      rowClasses="row1,row2">
+      <t:columns
+        value="#{searchResultsRegistry.searchResults.dataHeaderColumnModel}"
+        var="columnName" styleClass="column">
+        <f:facet name="header">
+          <h:outputText value="#{columnName}" />
+        </f:facet>
+        <h:outputText
+          value="#{searchResultsRegistry.searchResults.cellValue}"
+          rendered="#{! searchResultsRegistry.searchResults.isCommandLink}"
+        />
+        <h:commandLink
+          action="#{searchResultsRegistry.searchResults.getCellAction}"
+          value="#{searchResultsRegistry.searchResults.cellValue}"
+          rendered="#{searchResultsRegistry.searchResults.isCommandLink}"
+        />
+      </t:columns>
+    </t:dataTable>
 
   </h:form>
   

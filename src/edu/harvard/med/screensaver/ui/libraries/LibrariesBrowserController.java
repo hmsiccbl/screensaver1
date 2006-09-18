@@ -36,7 +36,7 @@ public class LibrariesBrowserController extends AbstractController
   
   private DAO _dao;
   private SearchResultsRegistryController _searchResultsRegistry;
-  
+  private LibraryViewerController _libraryViewerController;
   
   // public instance methods
   
@@ -60,11 +60,21 @@ public class LibrariesBrowserController extends AbstractController
     _searchResultsRegistry = searchResultsRegistry;
   }
   
+  public LibraryViewerController getLibraryViewer()
+  {
+    return _libraryViewerController;
+  }
+
+  public void setLibraryViewer(LibraryViewerController viewerController)
+  {
+    _libraryViewerController = viewerController;
+  }
+
   public String goBrowseLibraries()
   {
     if (_searchResultsRegistry.getSearchResultsRegistrant(Library.class) != this) {
       List<Library> libraries = _dao.findAllEntitiesWithType(Library.class);
-      SearchResults<Library> searchResults = new LibrarySearchResults(libraries);
+      SearchResults<Library> searchResults = new LibrarySearchResults(libraries, _libraryViewerController);
       _searchResultsRegistry.registerSearchResults(Library.class, this, searchResults);
     }
     _searchResultsRegistry.setCurrentSearchType(Library.class);

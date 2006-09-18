@@ -36,6 +36,7 @@ public class ScreensBrowserController extends AbstractController
   
   private DAO _dao;
   private SearchResultsRegistryController _searchResultsRegistry;
+  private ScreenViewerController _screenViewerController;
   
   
   // public instance methods
@@ -60,11 +61,21 @@ public class ScreensBrowserController extends AbstractController
     _searchResultsRegistry = searchResultsRegistry;
   }
   
+  public ScreenViewerController getScreenViewer()
+  {
+    return _screenViewerController;
+  }
+
+  public void setScreenViewer(ScreenViewerController viewerController)
+  {
+    _screenViewerController = viewerController;
+  }
+
   public String goBrowseScreens()
   {
     if (_searchResultsRegistry.getSearchResultsRegistrant(Screen.class) != this) {
       List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
-      SearchResults<Screen> searchResults = new ScreenSearchResults(screens);
+      SearchResults<Screen> searchResults = new ScreenSearchResults(screens, _screenViewerController);
       _searchResultsRegistry.registerSearchResults(Screen.class, this, searchResults);
     }
     _searchResultsRegistry.setCurrentSearchType(Screen.class);

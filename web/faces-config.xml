@@ -47,21 +47,6 @@
   </managed-bean>
   
   <managed-bean>
-    <description>Libraries Browser backing bean</description>
-    <managed-bean-name>librariesBrowser</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.LibrariesBrowserController</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>searchResultsRegistry</property-name>
-      <value>#{searchResultsRegistry}</value>
-    </managed-property>
-  </managed-bean>
-  
-  <managed-bean>
     <description>Library Viewer backing bean</description>
     <managed-bean-name>libraryViewer</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.LibraryViewerController</managed-bean-class>
@@ -75,7 +60,41 @@
       <value>#{messages}</value>
     </managed-property>
   </managed-bean>
-   
+  
+  <managed-bean>
+    <description>Libraries Browser backing bean</description>
+    <managed-bean-name>librariesBrowser</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.LibrariesBrowserController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>dao</property-name>
+      <value>#{dao}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>searchResultsRegistry</property-name>
+      <value>#{searchResultsRegistry}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>libraryViewer</property-name>
+      <value>#{libraryViewer}</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Screen Viewer backing bean</description>
+    <managed-bean-name>screenViewer</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.screens.ScreenViewerController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>dao</property-name>
+      <value>#{dao}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
+    </managed-property>
+  </managed-bean>
+  
   <managed-bean>
     <description>Screens Browser backing bean</description>
     <managed-bean-name>screensBrowser</managed-bean-name>
@@ -89,22 +108,11 @@
       <property-name>searchResultsRegistry</property-name>
       <value>#{searchResultsRegistry}</value>
     </managed-property>
-  </managed-bean>
-  
-  <managed-bean>
-    <description>ScreenViewer backing bean</description>
-    <managed-bean-name>screenViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.screens.ScreenViewerController</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
+      <property-name>screenViewer</property-name>
+      <value>#{screenViewer}</value>
     </managed-property>
-    <managed-property>
-      <property-name>messages</property-name>
-      <value>#{messages}</value>
-    </managed-property>
-  </managed-bean>
+  </managed-bean>  
   
   <managed-bean>
     <description>Screen Result Viewer backing bean</description>

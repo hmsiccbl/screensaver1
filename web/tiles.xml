@@ -92,7 +92,7 @@
       name="body"
       value="/libraries/admin/rnaiLibraryContentsImporter.jsp" />
   </definition>
-     
+   
   <definition
     name="/libraries/librariesBrowser.tiles"
     extends=".base">
@@ -103,7 +103,18 @@
       name="body"
       value="/libraries/librariesBrowser.jsp" />
   </definition>
-     
+  
+  <definition
+    name="/libraries/libraryViewer.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="Library Viewer"/>
+    <put
+      name="body"
+      value="/libraries/libraryViewer.jsp" />
+  </definition>
+
   <definition
     name="/libraries/wellViewer.tiles"
     extends=".base">
@@ -163,6 +174,17 @@
     <put
       name="body"
       value="/screens/screensBrowser.jsp" />
+  </definition>
+  
+  <definition
+    name="/screens/screenViewer.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="Screen Viewer"/>
+    <put
+      name="body"
+      value="/screens/screenViewer.jsp" />
   </definition>
   
   

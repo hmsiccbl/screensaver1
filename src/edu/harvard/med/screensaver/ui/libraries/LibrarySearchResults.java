@@ -34,14 +34,19 @@ public class LibrarySearchResults extends SearchResults<Library>
   private static final String START_PLATE  = "Start Plate";
   private static final String END_PLATE    = "End Plate";
   
+  private LibraryViewerController _libraryViewerController;
+  
   /**
    * Construct a new <code>LibrarySearchResult</code> object.
    * @param unsortedResults the unsorted list of the results, as they are returned from the
    * database
    */
-  public LibrarySearchResults(List<Library> unsortedResults)
+  public LibrarySearchResults(
+    List<Library> unsortedResults,
+    LibraryViewerController libraryViewerController)
   {
     super(unsortedResults);
+    _libraryViewerController = libraryViewerController;
   }
 
   protected DataModel createDataHeaderColumnModel()
@@ -82,8 +87,7 @@ public class LibrarySearchResults extends SearchResults<Library>
   
   protected Object getCellAction(Library library, String columnName)
   {
-    log.info("get cell action YAY for " + library);
-    //if (true) throw new NullPointerException();
+    _libraryViewerController.setLibrary(library);
     return "showLibrary";
   }
 }

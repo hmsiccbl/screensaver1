@@ -28,14 +28,19 @@ public class ScreenSearchResults extends SearchResults<Screen>
   private static final String LEAD_SCREENER = "Lead Screener";
   private static final String TITLE = "Title";
   
+  private ScreenViewerController _screenViewerController;
+  
   /**
    * Construct a new <code>ScreenSearchResult</code> object.
    * @param unsortedResults the unsorted list of the results, as they are returned from the
    * database
    */
-  public ScreenSearchResults(List<Screen> unsortedResults)
+  public ScreenSearchResults(
+    List<Screen> unsortedResults,
+    ScreenViewerController screenViewerController)
   {
     super(unsortedResults);
+    _screenViewerController = screenViewerController;
   }
 
   public String goScreenViewer()
@@ -74,6 +79,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
 
   protected Object getCellAction(Screen screen, String columnName)
   {
+    _screenViewerController.setScreen(screen);
     return "showScreen";
   }
 }
