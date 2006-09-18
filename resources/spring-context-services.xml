@@ -66,6 +66,9 @@
     class="edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter"
     singleton="true">
     <constructor-arg ref="dao"/>
+    <property name="screendbUser" value="${SCREENDB_PGSQL_USER}"/>
+    <property name="screendbPassword" value="${SCREENDB_PGSQL_PASSWORD}"/>
+    <property name="screendbUrl" value="jdbc:postgresql://${SCREENDB_PGSQL_SERVER}/${SCREENDB_PGSQL_DB}"/>
   </bean>
 
 </beans>

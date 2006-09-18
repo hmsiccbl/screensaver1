@@ -55,11 +55,16 @@ public class ScreenDBProxy
   
   // instance fields
   
+
+  private String _screendbUser;
+  private String _screendbPassword;
+  private String _screendbUrl;
+
   private Connection _connection;
   private Map<Integer,Library> _libraryMap;
   private Map<Integer,ScreeningRoomUser> _screeningRoomUserMap;
   private Map<Integer,Screen> _screenMap;
-  
+    
   
   // public constructor and instance methods
   
@@ -70,9 +75,9 @@ public class ScreenDBProxy
   {
     try {
       _connection = DriverManager.getConnection(
-        "jdbc:postgresql://localhost/screendb",
-        "screendbweb",
-        "screendbweb");
+        getScreendbUrl(),
+        getScreendbUser(),
+        getScreendbPassword());
     }
     catch (SQLException e) {
       log.error("could not connect to database: " + e.getMessage());
@@ -80,6 +85,39 @@ public class ScreenDBProxy
     }
   }
   
+  public String getScreendbPassword() {
+    if (_screendbPassword == null) {
+      return "screendbweb";
+    }
+    return _screendbPassword;
+  }
+
+  public void setScreendbPassword(String screendbPassword) {
+    _screendbPassword = screendbPassword;
+  }
+
+  public String getScreendbUrl() {
+    if (_screendbUrl == null) {
+      return "jdbc:postgresql://localhost/screendb";
+    }
+    return _screendbUrl;
+  }
+
+  public void setScreendbUrl(String screendbUrl) {
+    _screendbUrl = screendbUrl;
+  }
+
+  public String getScreendbUser() {
+    if (_screendbUser == null) {
+      return "screendbweb";
+    }
+    return _screendbUser;
+  }
+
+  public void setScreendbUser(String screendbUser) {
+    _screendbUser = screendbUser;
+  }
+
   /**
    * Get all the libraries from ScreenDB as a collection of {@link
    * Library} entities.
