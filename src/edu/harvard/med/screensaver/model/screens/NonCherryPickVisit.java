@@ -44,6 +44,7 @@ public class NonCherryPickVisit extends Visit
   private Integer _numberOfReplicates;
   private String _volumeOfCompoundTransferred;
   private AssayProtocolType _assayProtocolType;
+  private String _assayProtocol;
 
 
   // public constructor
@@ -186,6 +187,28 @@ public class NonCherryPickVisit extends Visit
   public void setAssayProtocolType(AssayProtocolType assayProtocolType)
   {
     _assayProtocolType = assayProtocolType;
+  }
+  
+  /**
+   * Get the assay protocol.
+   * 
+   * @return the assay protocol
+   * @hibernate.property
+   *   type="text"
+   */
+  public String getAssayProtocol()
+  {
+    return _assayProtocol;
+  }
+  
+  /**
+   * Set the assay protocol.
+   * 
+   * @param assayProtocol the new assay protocol
+   */
+  public void setAssayProtocol(String assayProtocol)
+  {
+    _assayProtocol = assayProtocol;
   }
 
 
