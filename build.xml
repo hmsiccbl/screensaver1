@@ -50,8 +50,14 @@
   <property name="appserver.dir" location="${env.CATALINA_BASE}"/>
   <property name="appserver.app.work.dir" location="${appserver.dir}/work/Catalina/localhost/${app.name}"/>
   <property name="deploy.dir" location="${appserver.dir}/webapps/${app.name}"/>
-  <property name="appserver.start.cmd" value="${appserver.dir}/bin/startup.sh"/>
+  <property name="appserver.start.cmd" value="${appserver.dir}/bin/catalina.sh"/>
   <property name="appserver.stop.cmd" value="${appserver.dir}/bin/shutdown.sh"/>
+  <condition 
+    property="appserver.start.cmd.options" 
+    value="jpda start"
+    else="">
+    <istrue value="${debug}"/>
+  </condition>
   <property name="war.build.dir" location="build/war"/>
   <property name="src.dir" location="src"/>
   <property name="test.src.dir" location="test"/>
@@ -76,11 +82,23 @@
   <!-- file sets -->
 
   <fileset
-    id="lib.used.fileset"
+    id="build.lib.fileset"
     dir="lib" 
+    description="JAR library files needed to build the project."
   >
     <include name="**/*.jar"/>
     <exclude name="**/unused/**"/>
+  </fileset>
+
+  <fileset
+    id="deploy.lib.fileset"
+    dir="lib" 
+    description="JAR library files needed to run the project on a web application server (may exclude JAR files that are known to be provided by the web application server)."
+  >
+    <include name="**/*.jar"/>
+    <exclude name="**/unused/**"/>
+    <!-- javax.servlet.jar will be explicitly ignored by any servlet container that obeys the 2.3 Servlet specification (sec 9.7.2). -->
+    <exclude name="**/javax.servlet.jar"/>
   </fileset>
 
   <fileset
@@ -120,14 +138,14 @@
   </uptodate>
 
   <uptodate property="distro.uptodate" targetfile="${distro.file.tgz}">
-    <srcfiles refid="lib.used.fileset"/>
+    <srcfiles refid="deploy.lib.fileset"/>
     <srcfiles dir="src"/>
     <srcfiles dir="resources"/>
     <srcfiles dir="build/distro/screensaver/"/>
   </uptodate>
 
   <uptodate property="war.uptodate" targetfile="${war}">
-    <srcfiles refid="lib.used.fileset"/>
+    <srcfiles refid="deploy.lib.fileset"/>
     <srcfiles dir="src"/>
     <srcfiles dir="resources"/>
     <srcfiles dir="web"/>
@@ -145,12 +163,12 @@
 
   <path id="project.test.sourcepath" path="${test.src.dir}"/>
 
-  <path id="project.library.path">
-    <fileset refid="lib.used.fileset"/>
+  <path id="build.library.path">
+    <fileset refid="build.lib.fileset"/>
   </path>
 
   <path id="distro.project.classpath">
-    <path refid="project.library.path"/>
+    <path refid="build.library.path"/>
     <pathelement path="${distro.build.dir}/classes"/>
   </path>
 
@@ -271,7 +289,7 @@
     <taskdef
       name="hibernatedoclet"
       classname="xdoclet.modules.hibernate.HibernateDocletTask"
-      classpathref="project.library.path"
+      classpathref="build.library.path"
     />
     <hibernatedoclet
       destdir="resources"
@@ -335,7 +353,7 @@
     <javadoc 
      doctitle="Screensaver 1.00" 
      sourcepathref="project.sourcepath"
-     classpathref="project.library.path"
+     classpathref="build.library.path"
      packagenames="edu.harvard.med.screensaver.*" 
      destdir="${javadoc.dir}" 
      access="package" 
@@ -363,7 +381,7 @@
     depends="deploy"
   >
     <exec executable="${appserver.start.cmd}">
-      <!--arg line="-Djava.security.auth.login.config=${appserver.dir}/conf/${login.conf.filename}"/-->
+      <arg line="${appserver.start.cmd.options}"/>
     </exec>
 
   </target>
@@ -393,7 +411,7 @@
     <taskdef
       name="junit"
       classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask"
-      classpathref="project.library.path"
+      classpathref="build.library.path"
     />
 
     <junit
@@ -426,7 +444,7 @@
     <javac 
       srcdir="${src.dir}"
       destdir="${classes.dir}"
-      classpathref="project.library.path"
+      classpathref="build.library.path"
       debug="${javac.debug}" 
       optimize="${javac.optimize}"
       listfiles="${verbose}" 
@@ -438,7 +456,7 @@
       flatten="true"
       verbose="${verbose}" 
     >
-      <fileset refid="lib.used.fileset"/>
+      <fileset refid="deploy.lib.fileset"/>
     </copy>
 
     <!-- conditionally use log4j.debug.properties in place of log4j.properties; will be
