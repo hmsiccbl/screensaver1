@@ -9,15 +9,21 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.faces.component.UIData;
+import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
+import javax.faces.model.SelectItem;
+
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 /**
  * A sortable, paging search result of {@link AbstractEntity model entities}.
@@ -35,6 +41,8 @@ implements ScreensaverConstants
   
   // public static final data
   
+  private static final Logger log = Logger.getLogger(SearchResults.class);
+  public static final int [] PAGESIZES = { 10, 20, 50, 100 };
   public static final int DEFAULT_PAGESIZE = 10;
   
 
@@ -44,7 +52,7 @@ implements ScreensaverConstants
   private List<E> _currentResults;
   private int _resultsSize;
   private int _currentIndex = 0;
-  private int _pageSize = DEFAULT_PAGESIZE;
+  private int _itemsPerPage = DEFAULT_PAGESIZE;
   
   private UIData _dataTable;
   private DataModel _dataModel;
@@ -148,18 +156,42 @@ implements ScreensaverConstants
     return getCellAction(getEntity(), getColumnName());
   }
   
+  public int getFirstIndex()
+  {
+    return _currentIndex * _itemsPerPage + 1;
+  }
+  
+  public int getLastIndex()
+  {
+    int lastIndex = (_currentIndex + 1) * _itemsPerPage;
+    if (lastIndex > _resultsSize) {
+      lastIndex = _resultsSize;
+    }
+    return lastIndex;
+  }
+  
+  public int getResultsSize()
+  {
+    return _resultsSize;
+  }
+  
+  public int getItemsPerPage()
+  {
+    return _itemsPerPage;
+  }
+  
   public String firstPage()
   {
     _currentIndex = 0;
-    getDataTable().setFirst(_currentIndex * _pageSize);
+    getDataTable().setFirst(_currentIndex * _itemsPerPage);
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   public String nextPage()
   {
-    if ((_currentIndex + 1) * _pageSize <= _resultsSize) {
+    if ((_currentIndex + 1) * _itemsPerPage <= _resultsSize) {
       _currentIndex ++;
-      getDataTable().setFirst(_currentIndex * _pageSize);
+      getDataTable().setFirst(_currentIndex * _itemsPerPage);
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -168,19 +200,41 @@ implements ScreensaverConstants
   {
     if (_currentIndex > 0) {
       _currentIndex --;
-      getDataTable().setFirst(_currentIndex * _pageSize);      
+      getDataTable().setFirst(_currentIndex * _itemsPerPage);      
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   public String lastPage()
   {
-    _currentIndex = _resultsSize / _pageSize;
-    getDataTable().setFirst(_currentIndex * _pageSize);
+    _currentIndex = _resultsSize / _itemsPerPage;
+    getDataTable().setFirst(_currentIndex * _itemsPerPage);
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
+  public List<SelectItem> getItemsPerPageSelections()
+  {
+    List<Integer> selections = new ArrayList<Integer>();
+    for (int i : PAGESIZES) {
+      selections.add(i);
+    }
+    return JSFUtils.createUISelectItems(selections);
+  }
   
+  public void itemsPerPageListener(ValueChangeEvent event)
+  {
+    _itemsPerPage = (Integer) event.getNewValue();
+    getDataTable().setRows(_itemsPerPage);
+    _currentIndex = 0;
+    getDataTable().setFirst(0);
+  }
+  
+  public String updateItemsPerPage()
+  {
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+
   // private instance methods
 
   abstract protected DataModel createDataHeaderColumnModel();
