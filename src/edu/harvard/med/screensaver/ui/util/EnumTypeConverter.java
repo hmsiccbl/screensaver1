@@ -19,8 +19,6 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
-import edu.harvard.med.screensaver.model.libraries.LibraryType;
-
 /**
  * A generic class that can convert between an Enum type's string values and
  * enum values. To use in a JSF application, extend this type and add a
@@ -117,7 +115,7 @@ public class EnumTypeConverter<E extends Enum<E>> implements Converter
     Object objectValue) 
     throws ConverterException
   {
-    return ((LibraryType) objectValue).getValue();
+    return objectValue.toString();
   }
 
 }

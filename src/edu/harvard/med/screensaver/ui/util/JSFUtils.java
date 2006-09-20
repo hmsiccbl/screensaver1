@@ -31,6 +31,8 @@ import javax.faces.el.ValueBinding;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletResponse;
 
+import edu.harvard.med.screensaver.model.VocabularyTerm;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
@@ -210,6 +212,24 @@ public class JSFUtils
     return result;
   }
   
+  /**
+   * Creates a UISelectItems object that can be assigned to the "value"
+   * attribute of a UISelectItems JSF component.
+   * 
+   * @param values
+   * @return a List of SelectItems, one for each VocabularyTerm provided
+   */
+  public static List<SelectItem> createUISelectItems(VocabularyTerm[] terms)
+  {
+    List<SelectItem> result = new ArrayList<SelectItem>();
+    for (int i = 0; i < terms.length; i++) {
+      VocabularyTerm term = terms[i];
+      result.add(new SelectItem(term,
+                                term.getValue()));
+    }
+    return result;
+  }
+
   /**
    * Output the names of all registered JSF components to the logger, as debug output.
    * 

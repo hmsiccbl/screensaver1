@@ -17,7 +17,7 @@ import junit.framework.TestCase;
 
 public class EnumTypeConverterTest extends TestCase
 {
-  public void testSimple()
+  public void testGetAsObject()
   {
     LibraryTypeConverter converter = new LibraryTypeConverter();
     for (LibraryType libraryType : LibraryType.values()) {
@@ -44,5 +44,12 @@ public class EnumTypeConverterTest extends TestCase
     {
       fail("expected ConverterException");
     }
+  }
+  
+  public void testGetAsString()
+  {
+    LibraryTypeConverter converter = new LibraryTypeConverter();
+    String s = converter.getAsString(null, null, LibraryType.COMMERCIAL);
+    assertEquals(s, LibraryType.COMMERCIAL.getValue());
   }
 }
