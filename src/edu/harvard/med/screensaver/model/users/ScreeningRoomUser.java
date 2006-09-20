@@ -413,6 +413,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    * @hibernate.set
    *   cascade="save-update"
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="lead_screener_id"
    * @hibernate.collection-one-to-many
@@ -433,6 +434,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    * @hibernate.set
    *   cascade="save-update"
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="lab_head_id"
    * @hibernate.collection-one-to-many
@@ -454,6 +456,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    *   inverse="true"
    *   table="collaborator_link"
    *   cascade="all"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="collaborator_id"
    * @hibernate.collection-many-to-many
@@ -476,6 +479,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    * @hibernate.set
    *   cascade="save-update"
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="performed_by_id"
    * @hibernate.collection-one-to-many
@@ -502,6 +506,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    * @hibernate.set
    *   cascade="save-update"
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="screensaver_user_id"
    * @hibernate.collection-one-to-many
@@ -601,6 +606,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    *   column="lab_head_id"
    *   foreign-key="fk_screening_room_user_to_lab_head"
    *   cascade="save-update"
+   *   lazy="no-proxy"
    * @motivation for hibernate
    */
   private ScreeningRoomUser getHbnLabHead()
@@ -625,6 +631,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    * @return the lab members
    * @hibernate.set
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="lab_head_id"
    * @hibernate.collection-one-to-many
@@ -664,12 +671,11 @@ public class ScreeningRoomUser extends ScreensaverUser
    *   column="lab_affiliation_id"
    *   foreign-key="fk_screening_room_user_to_lab_affiliation"
    *   cascade="save-update"
+   *   lazy="no-proxy"
    * @motivation for hibernate
    */
   private LabAffiliation getHbnLabAffiliation()
   {
     return _labAffiliation;
   }
-  
- 
 }

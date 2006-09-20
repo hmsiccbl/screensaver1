@@ -894,6 +894,7 @@ public class Screen extends AbstractEntity
    * @return the collaborators
    * @hibernate.set
    *   table="collaborator_link"
+   *   lazy="true"
    *   cascade="all"
    * @hibernate.collection-key
    *   column="screen_id"
@@ -925,6 +926,7 @@ public class Screen extends AbstractEntity
    * @return the status items
    * @hibernate.set
    *   cascade="save-update"
+   *   lazy="true"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="screen_id"
@@ -943,6 +945,7 @@ public class Screen extends AbstractEntity
    * @return the visits
    * @hibernate.set
    *   cascade="save-update"
+   *   lazy="true"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="screen_id"
@@ -961,6 +964,7 @@ public class Screen extends AbstractEntity
    * @return the abase testsets
    * @hibernate.set
    *   cascade="save-update"
+   *   lazy="true"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="screen_id"
@@ -979,6 +983,7 @@ public class Screen extends AbstractEntity
    * @return the publications
    * @hibernate.set
    *   cascade="save-update"
+   *   lazy="true"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="screen_id"
@@ -997,6 +1002,7 @@ public class Screen extends AbstractEntity
    * @return the letters of support
    * @hibernate.set
    *   cascade="save-update"
+   *   lazy="true"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="screen_id"
@@ -1042,6 +1048,7 @@ public class Screen extends AbstractEntity
    * @return the attached files
    * @hibernate.set
    *   cascade="save-update"
+   *   lazy="true"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="screen_id"
@@ -1108,6 +1115,7 @@ public class Screen extends AbstractEntity
    *   not-null="true"
    *   foreign-key="fk_screen_to_lead_screener"
    *   cascade="save-update"
+   *   lazy="no-proxy"
    * @motivation for hibernate
    */
   private ScreeningRoomUser getHbnLeadScreener()
@@ -1125,6 +1133,7 @@ public class Screen extends AbstractEntity
    *   not-null="true"
    *   foreign-key="fk_screen_to_lab_head"
    *   cascade="save-update"
+   *   lazy="no-proxy"
    * @motivation for hibernate
    */
   private ScreeningRoomUser getHbnLabHead()
@@ -1274,6 +1283,7 @@ public class Screen extends AbstractEntity
    * @return the screen results
    * @hibernate.set
    *   cascade="save-update"
+   *   lazy="true"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="screen_id"

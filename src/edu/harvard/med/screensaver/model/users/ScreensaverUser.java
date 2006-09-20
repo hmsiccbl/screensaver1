@@ -332,9 +332,9 @@ public class ScreensaverUser extends AbstractEntity
   }
   
   /**
-   * Get an unmodifiable copy of the set of user roles that this user belongs to.
+   * Get the set of user roles that this user belongs to.
    * 
-   * @return an unmodifiable copy of the set of user roles that this user belongs to
+   * @return the set of user roles that this user belongs to
    *
    * @hibernate.set
    *   order-by="screensaver_user_role"
@@ -541,7 +541,5 @@ public class ScreensaverUser extends AbstractEntity
   private void setScreensaverUserRoles(Set<ScreensaverUserRole> roles)
   {
     _roles = roles;
-  }
-
-  
+  }  
 }
