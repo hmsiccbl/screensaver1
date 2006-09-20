@@ -210,7 +210,11 @@ public class ScreenResult extends AbstractEntity
   
   /**
    * Get the number of replicates (assay plates) associated with this
-   * <code>ScreenResult</code>.
+   * <code>ScreenResult</code>. If replicate count was not explicitly
+   * specified at instantiation time, calculates the replicate count by finding
+   * the maximum replicate ordinal value from the ScreenResult's
+   * ResultValueTypes; if none of the ResultValueTypes have their replicate
+   * ordinal values defined, replicate count is 1.
    * 
    * @return the number of replicates (assay plates) associated with this
    *         <code>ScreenResult</code>
@@ -242,6 +246,10 @@ public class ScreenResult extends AbstractEntity
               }
             } );
         _replicateCount = maxOrdinalRvt.getReplicateOrdinal();
+        if (_replicateCount == null) {
+          // every ResultValueType had null replicateOrdinal value
+          _replicateCount = 1;
+        }
       }
     }
     return _replicateCount;
@@ -334,6 +342,9 @@ public class ScreenResult extends AbstractEntity
    */
   protected Object getBusinessKey()
   {
+    // note: we accommodate null _screen value, allowing ScreenResult objects to
+    // exist without a parent Screen; this is for pragmatic reasons: our unit
+    // tests are simpler, ICBG reporter, etc.
     int screenNumber = _screen == null ? -1 : _screen.getScreenNumber();
     return screenNumber + ":" + DateFormat.getDateInstance().format(getDateCreated());
   }
