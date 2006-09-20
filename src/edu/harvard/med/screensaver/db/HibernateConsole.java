@@ -18,6 +18,7 @@ import java.util.List;
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.util.StringUtils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 
@@ -33,15 +34,16 @@ public class HibernateConsole
   @SuppressWarnings("unchecked")
   public static void main(String[] args)
   {
+    BufferedReader br = null;
     try {
       CommandLineApplication app = new CommandLineApplication(args);
       if (!app.processOptions(true, true)) {
         System.exit(1);
       }
+      br = new BufferedReader(new InputStreamReader(System.in));
+      HibernateTemplate hib = (HibernateTemplate) app.getSpringBean("hibernateTemplate");
       do {
         System.out.println("Enter HQL query (blank to quit): ");
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        HibernateTemplate hib = (HibernateTemplate) app.getSpringBean("hibernateTemplate");
         String input = br.readLine();
         if (input.length() == 0) {
           System.out.println("Goodbye!");
@@ -74,6 +76,9 @@ public class HibernateConsole
       System.err.println("Fatal Error: " + e.getMessage());
       e.printStackTrace();
     }
+    finally {
+      IOUtils.closeQuietly(br);
+    }      
   }
 
 }
