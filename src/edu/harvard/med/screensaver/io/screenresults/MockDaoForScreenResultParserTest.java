@@ -18,6 +18,7 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 /**
  * Enable testing of ScreenResultParser (via ScreenResultParserTest), in mock
@@ -99,4 +100,11 @@ public class MockDaoForScreenResultParserTest implements DAO
   {
     return null;
   }
+
+  public List<ScreeningRoomUser> findAllLabHeads()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
 }
