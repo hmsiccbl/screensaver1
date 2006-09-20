@@ -15,6 +15,7 @@ import java.util.Map;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 
 /**
@@ -176,4 +177,10 @@ public interface DAO
     Class<E> entityClass,
     String propertyName,
     String propertyPattern);
+
+  /**
+   * Find all the screening room users that are lab heads.
+   * @return a List of {@link ScreeningRoomUsers}s.
+   */
+  public List<ScreeningRoomUser> findAllLabHeads();
 }

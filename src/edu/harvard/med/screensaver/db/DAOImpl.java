@@ -20,6 +20,7 @@ import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 
 /**
@@ -171,6 +172,16 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     String hql = "from " + entityName + " x where x." + propertyName + " like ?";
     propertyPattern = propertyPattern.replaceAll( "\\*", "%" );
     return (List<E>) getHibernateTemplate().find(hql, propertyPattern);
+  }
+  
+  
+  // public special-case data access methods
+  
+  @SuppressWarnings("unchecked")
+  public List<ScreeningRoomUser> findAllLabHeads()
+  {
+    String hql = "select distinct labHead from ScreeningRoomUser u join u.hbnLabHead labHead";
+    return (List<ScreeningRoomUser>) getHibernateTemplate().find(hql);
   }
   
   

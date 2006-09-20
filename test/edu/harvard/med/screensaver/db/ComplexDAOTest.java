@@ -18,6 +18,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter;
+import edu.harvard.med.screensaver.db.screendb.ScreenDBProxy;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -29,6 +31,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 
 /**
@@ -61,6 +64,7 @@ public class ComplexDAOTest extends AbstractSpringTest
    */
   protected SchemaUtil schemaUtil;
 
+  protected ScreenDBDataImporter screenDBDataImporter;
   
   // AbstractDependencyInjectionSpringContextTests methods
 
@@ -453,6 +457,18 @@ public class ComplexDAOTest extends AbstractSpringTest
           assertEquals(derivedRvtSet1, derivedFromSet);
         }
       });
+  }
+  
+  /**
+   * Assumes that only test screendb data has been loaded!
+   */
+  public void testFindLabHeads()
+  {
+    // prime database
+    screenDBDataImporter.loadScreenDBData();
+    
+    List<ScreeningRoomUser> labHeads = dao.findAllLabHeads();
+    assertEquals(172, labHeads.size());
   }
   
 }
