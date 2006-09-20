@@ -34,15 +34,16 @@ public class ScreenViewerController extends AbstractController
   private Screen _screen;
   private String _usageMode; // "create" or "edit"
   private boolean _advancedMode;
+
+  private List<ScreeningRoomUser> _selectedCollaborators;
+  private List<ScreeningRoomUser> _selectedNonCollaborators;
   
 
   /* Property getter/setter methods */
   
   public void setDao(DAO dao) {
     _dao = dao;
-    _screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 214);
-    log.warn("using harcoded screen: " + _screen);
-  }
+   }
   
   public void setScreen(Screen screen) {
     _screen = screen;
@@ -54,6 +55,11 @@ public class ScreenViewerController extends AbstractController
    * @return
    */
   public Screen getScreen() {
+    if (_screen == null) {
+      Screen defaultScreen = _dao.findEntityById(Screen.class, 92);
+      log.warn("no screen defined: defaulting to screen " + defaultScreen.getScreenNumber());
+      _screen = defaultScreen;
+    }
     return _screen;
   }
 
@@ -91,6 +97,63 @@ public class ScreenViewerController extends AbstractController
     return labHeadSelectItems;
   }
 
+  public List<SelectItem> getLeadScreenerSelectItems()
+  {
+    List<SelectItem> leadScreenerSelectItems = new ArrayList<SelectItem>();
+    for (ScreeningRoomUser screener : _screen.getLabHead().getLabMembers()) {
+      leadScreenerSelectItems.add(new SelectItem(screener, screener.generateFullName()));
+    }
+    return leadScreenerSelectItems;
+  }
+
+  public List<SelectItem> getCollaboratorSelectItems()
+  {
+    List<SelectItem> collaboratorSelectItems = new ArrayList<SelectItem>();
+    // TODO: what is the valid set of collaborators?
+    for (ScreeningRoomUser screener : _screen.getCollaborators()) {
+      collaboratorSelectItems.add(new SelectItem(screener, screener.generateFullName()));
+    }
+    return collaboratorSelectItems;
+  }
+
+  public List<ScreeningRoomUser> getSelectedCollaborators()
+  {
+    if (_selectedCollaborators == null) {
+      return new ArrayList<ScreeningRoomUser>();
+    }
+    return _selectedCollaborators;
+  }
+
+  public void setSelectedCollaborators(List<ScreeningRoomUser> selectedCollaborators)
+  {
+    _selectedCollaborators = selectedCollaborators;
+  }
+
+  public List<SelectItem> getNonCollaboratorSelectItems()
+  {
+    List<SelectItem> nonCollaboratorSelectItems = new ArrayList<SelectItem>();
+    List<ScreeningRoomUser> nonCollaborators = _dao.findAllEntitiesWithType(ScreeningRoomUser.class);
+    nonCollaborators.removeAll(_screen.getCollaborators());
+    for (ScreeningRoomUser screener : nonCollaborators) {
+      nonCollaboratorSelectItems.add(new SelectItem(screener, screener.generateFullName()));
+    }
+    return nonCollaboratorSelectItems;
+  }
+
+  public List<ScreeningRoomUser> getSelectedNonCollaborators()
+  {
+    if (_selectedNonCollaborators == null) {
+      return new ArrayList<ScreeningRoomUser>();
+    }
+    return _selectedNonCollaborators;
+  }
+
+  public void setSelectedNonCollaborators(List<ScreeningRoomUser> selectedNonCollaborators)
+  {
+    _selectedNonCollaborators = selectedNonCollaborators;
+  }
+
+  
   
   /* JSF Application methods */
 
@@ -117,6 +180,21 @@ public class ScreenViewerController extends AbstractController
   public String cancel() {
     return "cancel";
   }
+  
+  public String addSelectedNonCollaborators() {
+    for (ScreeningRoomUser screener : getSelectedNonCollaborators()) {
+      _screen.addCollaborator(screener);
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String removeSelectedCollaborators() {
+    for (ScreeningRoomUser screener : getSelectedCollaborators()) {
+      _screen.removeCollaborator(screener);
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
 
   
   /* JSF Action event listeners */
