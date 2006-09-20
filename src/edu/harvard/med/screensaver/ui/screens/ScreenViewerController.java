@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.ui.screens;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.faces.application.FacesMessage;
@@ -18,15 +17,14 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
-
-import org.apache.log4j.Logger;
 
 public class ScreenViewerController extends AbstractController
 {
