@@ -231,6 +231,15 @@ public class ScreensaverUser extends AbstractEntity
   {
     _lastName = lastName;
   }
+  
+  /**
+   * Get the full name (last, first).
+   * @return the full name
+   */
+  public String generateFullName()
+  {
+    return _lastName + ", " + _firstName;
+  }
 
   /**
    * Get the email.

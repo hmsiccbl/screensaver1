@@ -9,15 +9,24 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
-
-import org.apache.log4j.Logger;
+import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.LabAffiliation;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.util.JSFUtils;
+
+import org.apache.log4j.Logger;
 
 public class ScreenViewerController extends AbstractController
 {
@@ -28,10 +37,13 @@ public class ScreenViewerController extends AbstractController
   private String _usageMode; // "create" or "edit"
   private boolean _advancedMode;
   
+
   /* Property getter/setter methods */
   
   public void setDao(DAO dao) {
     _dao = dao;
+    _screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 214);
+    log.warn("using harcoded screen: " + _screen);
   }
   
   public void setScreen(Screen screen) {
@@ -62,6 +74,23 @@ public class ScreenViewerController extends AbstractController
 
   public void setAdvancedMode(boolean advancedMode) {
     _advancedMode = advancedMode;
+  }
+  
+  public List<SelectItem> getScreenTypeSelectItems()
+  {
+    return JSFUtils.createUISelectItems(ScreenType.values());
+  }
+
+  public List<SelectItem> getLabNameSelectItems()
+  {
+    List<SelectItem> labHeadSelectItems = new ArrayList<SelectItem>();
+    List<ScreeningRoomUser> labHeads = _dao.findAllLabHeads();
+    for (ScreeningRoomUser labHead : labHeads) {
+      labHeadSelectItems.add(new SelectItem(labHead,
+                                            // requirements state that "lab name" is last name of the "lab head"
+                                            labHead.getLastName()));
+    }
+    return labHeadSelectItems;
   }
 
   

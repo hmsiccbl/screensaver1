@@ -391,6 +391,20 @@
     <converter-class>edu.harvard.med.screensaver.ui.util.PlateNumberSelectItemConverter</converter-class>
   </converter>
 
+  <converter>
+    <converter-id>ScreenTypeConverter</converter-id>
+    <converter-class>edu.harvard.med.screensaver.ui.util.ScreenTypeConverter</converter-class>
+  </converter>
+  
+  <converter>
+    <converter-id>ScreeningRoomUserConverter</converter-id>
+    <converter-class>edu.harvard.med.screensaver.ui.util.ScreeningRoomUserConverter</converter-class>
+    <!-- property>
+     <property-name>dao</property-name>
+     <property-class>edu.harvard.med.screensaver.db.DAO</property-class>
+     <default-value>#{dao}</default-value>
+    </property-->
+  </converter>
   
   <!-- Validators -->
 
