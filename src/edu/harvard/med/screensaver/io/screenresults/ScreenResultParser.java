@@ -44,6 +44,7 @@ import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
@@ -170,9 +171,12 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     
     assayWellTypeMap.put("X", AssayWellType.EXPERIMENTAL);
     assayWellTypeMap.put("E", AssayWellType.EMPTY);
-    assayWellTypeMap.put("P", AssayWellType.POSITIVE_CONTROL);
-    assayWellTypeMap.put("N", AssayWellType.NEGATIVE_CONTROL);
+    assayWellTypeMap.put("P", AssayWellType.ASSAY_POSITIVE_CONTROL);
+    assayWellTypeMap.put("N", AssayWellType.ASSAY_NEGATIVE_CONTROL);
     assayWellTypeMap.put("O", AssayWellType.OTHER);
+    assayWellTypeMap.put("C", AssayWellType.LIBRARY_CONTROL);
+    assayWellTypeMap.put("B", AssayWellType.BUFFER);
+    assert assayWellTypeMap.size() == AssayWellType.values().length : "assayWellTypeMap not initialized properly";
   }
   
 
@@ -182,113 +186,98 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   public static void main(String[] args) throws FileNotFoundException
   {
     CommandLineApplication app = new CommandLineApplication(args);
-    app
-      .addCommandLineOption(OptionBuilder
-        .withArgName("metadatafile")
-        .withLongOpt("metadatafile")
-        .hasArg()
-        .isRequired()
-        .withDescription(
-          "the file location of the Excel workbook file holding the Screen Result metadata")
-        .create());
-    app
-      .addCommandLineOption(OptionBuilder
-        .withArgName("wellstoprint")
-        .withLongOpt("wellstoprint")
-        .hasArg()
-        .isRequired(false)
-        .withDescription("the number of wells to print out")
-        .create());
-    app
-      .addCommandLineOption(OptionBuilder
-        .withArgName("ignorefilepaths")
-        .withLongOpt("ignorefilepaths")
-        .hasArg(false)
-        .withDescription(
-          "whether to ignore the file paths for the raw data workbook " + 
-          "files (as specified in the metadata workbook); if option is " + 
-          "provided all files will be expected to be found in the same directory; " + 
-          "ignored unless 'legacy' option is specified")
-        .create());
-    app
-      .addCommandLineOption(OptionBuilder
-        .withArgName("legacy")
-        .withLongOpt("legacy")
-        .hasArg(false)
-        .withDescription(
-          "indicates that workbook uses the legacy format for Screen Results")
-        .create());
+    app.addCommandLineOption(OptionBuilder.withArgName("screen")
+                             .withLongOpt("metadatafile")
+                             .hasArg()
+                             .isRequired()
+                             .withDescription("the screen number of the screen for which the screen result is being parsed")
+                             .create());
+    app.addCommandLineOption(OptionBuilder.withArgName("metadatafile")
+                                          .withLongOpt("metadatafile")
+                                          .hasArg()
+                                          .isRequired()
+                                          .withDescription("the file location of the Excel workbook file holding the Screen Result metadata")
+                                          .create());
+    app.addCommandLineOption(OptionBuilder.withArgName("wellstoprint")
+                                          .withLongOpt("wellstoprint")
+                                          .hasArg()
+                                          .isRequired(false)
+                                          .withDescription("the number of wells to print out")
+                                          .create());
+    app.addCommandLineOption(OptionBuilder.withArgName("ignorefilepaths")
+                                          .withLongOpt("ignorefilepaths")
+                                          .hasArg(false)
+                                          .withDescription("whether to ignore the file paths for the raw data workbook " + 
+                                                           "files (as specified in the metadata workbook); if option is " + 
+                                                           "provided all files will be expected to be found in the same directory; " + 
+                                                           "ignored unless 'legacy' option is specified")
+                                          .create());
+    app.addCommandLineOption(OptionBuilder.withArgName("legacy")
+                                          .withLongOpt("legacy")
+                                          .hasArg(false)
+                                          .withDescription("indicates that workbook uses the legacy format for Screen Results")
+                                          .create());
     try {
-      ScreenResultParser screenResultParser = (ScreenResultParser) app
-        .getSpringBean("screenResultParser");
+      Screen screen = findScreenOrExit(app);
+      
+      ScreenResultParser screenResultParser = (ScreenResultParser) app.getSpringBean("screenResultParser");
       try {
-        if (!app
-          .processOptions(
-            /* acceptDatabaseOptions= */false, /* showHelpOnError= */
-            true)) {
+        if (!app.processOptions(/*acceptDatabaseOptions=*/ false, /*showHelpOnError=*/ true)) {
           return;
         }
-        File metadataFileToParse = app
-          .getCommandLineOptionValue("metadatafile", File.class);
-        boolean parseLegacyFormat = app
-          .isCommandLineFlagSet("legacy");
-        cleanOutputDirectory(metadataFileToParse
-          .getParentFile());
-        ScreenResult screenResult = screenResultParser
-          .parse(
-            metadataFileToParse,
-            new FileInputStream(metadataFileToParse),
-            parseLegacyFormat,
-            app
-              .isCommandLineFlagSet("ignorefilepaths"));
-        screenResultParser
-          .outputErrorsInAnnotatedWorkbooks(
-            null,
-            ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
-        if (app
-          .isCommandLineFlagSet("wellstoprint")) {
-          new ScreenResultPrinter(screenResult)
-            .print(app
-              .getCommandLineOptionValue("wellstoprint", Integer.class));
+        File metadataFileToParse = app.getCommandLineOptionValue("metadatafile",
+                                                                 File.class);
+        boolean parseLegacyFormat = app.isCommandLineFlagSet("legacy");
+        cleanOutputDirectory(metadataFileToParse.getParentFile());
+        ScreenResult screenResult = screenResultParser.parse(screen,
+                                                             metadataFileToParse,
+                                                             new FileInputStream(metadataFileToParse),
+                                                             parseLegacyFormat,
+                                                             app.isCommandLineFlagSet("ignorefilepaths"));
+        screenResultParser.outputErrorsInAnnotatedWorkbooks(null,
+                                                            ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
+        if (app.isCommandLineFlagSet("wellstoprint")) {
+          new ScreenResultPrinter(screenResult).print(app.getCommandLineOptionValue("wellstoprint",
+                                                                                    Integer.class));
         }
         else {
-          new ScreenResultPrinter(screenResult)
-            .print();
+          new ScreenResultPrinter(screenResult).print();
         }
       }
       catch (IOException e) {
-        String errorMsg = "I/O error: " + e
-          .getMessage();
-        log
-          .error(errorMsg);
-        System.err
-          .println(errorMsg);
+        String errorMsg = "I/O error: " + e.getMessage();
+        log.error(errorMsg);
+        System.err.println(errorMsg);
       }
-      if (screenResultParser
-        .getErrors()
-        .size() > 0) {
-        System.err
-          .println("Errors encountered during parse:");
-        for (ParseError error : screenResultParser
-          .getErrors()) {
-          System.err
-            .println(error
-              .toString());
+      if (screenResultParser.getErrors()
+                            .size() > 0) {
+        System.err.println("Errors encountered during parse:");
+        for (ParseError error : screenResultParser.getErrors()) {
+          System.err.println(error.toString());
         }
       }
     }
     catch (ParseException e) {
-      System.err
-        .println("error parsing command line options: " + e
-          .getMessage());
+      System.err.println("error parsing command line options: " + e.getMessage());
     }
     catch (Exception e) {
-      e
-        .printStackTrace();
-      System.err
-        .println("application error: " + e
-          .getMessage());
+      e.printStackTrace();
+      System.err.println("application error: " + e.getMessage());
     }
+  }
+
+  private static Screen findScreenOrExit(CommandLineApplication app) throws ParseException
+  {
+    int screenNumber = Integer.parseInt(app.getCommandLineOptionValue("screen"));
+                     DAO dao = (DAO) app.getSpringBean("dao");
+    Screen screen = dao.findEntityByProperty(Screen.class, 
+                                             "screenNumber", 
+                                             screenNumber);
+    if (screen == null) {
+      System.err.println("screen " + screenNumber + " does not exist");
+      System.exit(1);
+    }
+    return screen;
   }
 
   private static void cleanOutputDirectory(File parentFile)
@@ -354,6 +343,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * be partially populated if errors are encountered, so always call
    * getErrors() to determine parsing success.
    * 
+   * @param the parent Screen of the Screen Result being parsed
    * @param the workbook file to be parsed
    * @return a ScreenResult object containing the data parsed from the workbook
    *         file; <code>null</code> if a fatal error occurs (e.g. file not
@@ -361,10 +351,14 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @throws FileNotFoundException
    * @see #getErrors()
    */
-  public ScreenResult parse(File workbookFile)
+  public ScreenResult parse(Screen screen, File workbookFile)
   {
     try {
-      return parse(workbookFile, new FileInputStream(workbookFile), /*legacy format=*/ true, /*ignored file paths=*/ true);
+      return parse(screen, 
+                   workbookFile, 
+                   new FileInputStream(workbookFile), 
+                   /*legacy format=*/ false, 
+                   /*ignored file paths=*/ true);
     }
     catch (FileNotFoundException e) {
       e.printStackTrace();
@@ -387,6 +381,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * be partially populated if errors are encountered, so always call
    * getErrors() to determine parsing success.
    * 
+   * @param the parent Screen of the Screen Result being parsed
    * @param the workbook file to be parsed; this File object is used only to
    *          communicate the name of the file; the file itself is not accessed
    *          (we rely upon the inputStream argument instead)
@@ -398,9 +393,13 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @motivation For use by the web application UI; the InputStream allows us to
    *             avoid making (another) temporary copy of the file.
    */
-  public ScreenResult parse(File workbookFile, InputStream inputStream)
+  public ScreenResult parse(Screen screen, File workbookFile, InputStream inputStream)
   {
-    return parse(workbookFile, inputStream, false /*new format*/, true /*arg ignored*/);
+    return parse(screen, 
+                 workbookFile, 
+                 inputStream, 
+                 false /*new format*/, 
+                 true /*arg ignored*/);
   }
 
   /**
@@ -413,6 +412,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * be partially populated if errors are encountered, so always call
    * getErrors() to determine parsing success.
    * 
+   * @param the parent Screen of the Screen Result being parsed
    * @param the workbook file to be parsed
    * @param ignoreFilePaths if <code>true</code>, the directory path of the
    *          file names of the workbooks containing the "raw data" will be
@@ -424,15 +424,16 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @see #getErrors()
    */
   public ScreenResult parseLegacy(
+    Screen screen,
     File metadataWorkbookFile,
     boolean ignoreFilePaths)
   {
     try {
-      return parse(
-        metadataWorkbookFile,
-        new FileInputStream(metadataWorkbookFile),
-        true /*legacy format*/,
-        ignoreFilePaths);
+      return parse(screen,
+                   metadataWorkbookFile,
+                   new FileInputStream(metadataWorkbookFile),
+                   true /*legacy format*/,
+                   ignoreFilePaths);
     }
     catch (FileNotFoundException e) {
       e
@@ -458,6 +459,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * be partially populated if errors are encountered, so always call
    * getErrors() to determine parsing success.
    * 
+   * @param the parent Screen of the Screen Result being parsed
    * @param the workbook file to be parsed
    * @param an InputStream that provides the workbook file as...well...
    *          an InputStream
@@ -475,6 +477,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @see #getErrors()
    */
   public ScreenResult parse(
+    Screen screen,
     File workbookFile,
     InputStream workbookInputStream,
     boolean parseLegacyFormat,
@@ -497,7 +500,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     try {
       Workbook workbook = new Workbook(workbookFile, workbookInputStream, _errors);
       log.info("parsing " + workbookFile.getAbsolutePath());
-      MetadataParseResult metadataParseResult = parseMetadata(workbook, 
+      MetadataParseResult metadataParseResult = parseMetadata(screen,
+                                                              workbook, 
                                                               ignoreFilePaths);
       if (_parseLegacyFormat) {
         for (Workbook rawDataWorkbook : metadataParseResult.getRawDataWorkbooks()) {
@@ -744,6 +748,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @throws UnrecoverableScreenResultParseException 
    */
   private MetadataParseResult parseMetadata(
+    Screen screen,
     Workbook metadataWorkbook, 
     boolean ignoreFilePaths) 
     throws UnrecoverableScreenResultParseException 
@@ -755,8 +760,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                                                             ignoreFilePaths));
     } 
     Date screenResultDate = parseScreenInfo(metadataWorkbook);
-    // TODO: specify a real screen
-    metadataParseResult.setScreenResult(new ScreenResult(null, screenResultDate));
+    metadataParseResult.setScreenResult(new ScreenResult(screen, screenResultDate));
     int dataHeaderCount = findDataHeaderColumnCount(metadataSheet);
     for (int iDataHeader = 0; iDataHeader < dataHeaderCount; ++iDataHeader) {
       recordDataHeaderColumn(iDataHeader);

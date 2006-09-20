@@ -26,6 +26,8 @@ public enum WellType implements VocabularyTerm
   
   EXPERIMENTAL("experimental"),
   EMPTY("empty"),
+  BUFFER("buffer"),
+  LIBRARY_CONTROL("library control"),
   OTHER("other"),
   ;
  

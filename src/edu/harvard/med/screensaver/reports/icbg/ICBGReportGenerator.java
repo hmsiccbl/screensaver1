@@ -349,7 +349,8 @@ public class ICBGReportGenerator
     
     ScreenResultParser parser =
       new ScreenResultParser(new MockDaoForScreenResultParserTest());
-    ScreenResult screenResult = parser.parse(metadataFile);
+    // TODO: need a real screen here...is this reasonable? [ant]
+    ScreenResult screenResult = parser.parse(null, metadataFile);
     logErrors(parser);
     if (screenResult == null) {
       return;

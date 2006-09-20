@@ -111,12 +111,16 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testParseLegacyScreenResult() throws Exception
   {
-    ScreenResult screenResult = screenResultParser.parseLegacy(new File(TEST_INPUT_FILE_DIR, "LegacyTestMetaData.xls"), true);
-    assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
-
     Calendar expectedDate = Calendar.getInstance();
     expectedDate.set(2003, 3 - 1, 5, 0, 0, 0);
     expectedDate.set(Calendar.MILLISECOND, 0);
+
+    ScreenResult screenResult = screenResultParser.parseLegacy(null,
+                                                               new File(TEST_INPUT_FILE_DIR, 
+                                                                        "LegacyTestMetaData.xls"), 
+                                                               true);
+    assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
+
     ScreenResult expectedScreenResult = makeScreenResult(expectedDate.getTime());
     assertEquals("date",
                  expectedScreenResult.getDateCreated(),
@@ -192,7 +196,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     
     AssayWellType[] expectedInitialAssayWellTypes = {
       AssayWellType.EXPERIMENTAL,
-      AssayWellType.POSITIVE_CONTROL,
+      AssayWellType.ASSAY_POSITIVE_CONTROL,
       AssayWellType.EXPERIMENTAL};
       
     Object[][] expectedInitialExcludeValues = {
@@ -314,7 +318,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testParseLegacyMultiWorkbookMultiWorksheet()
   {
-    ScreenResult screenResult = screenResultParser.parseLegacy(new File(TEST_INPUT_FILE_DIR, "464MetaData.xls"), true);
+    ScreenResult screenResult = screenResultParser.parseLegacy(null, new File(TEST_INPUT_FILE_DIR, "464MetaData.xls"), true);
     assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
     Integer[] expectedPlateNumbers = { 1409, 1410, 1369, 1370, 1371, 1453, 1454 };
     Set<Integer> expectedPlateNumbersSet = new HashSet<Integer>(Arrays.asList(expectedPlateNumbers));
@@ -339,7 +343,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testSaveScreenResultErrors() throws IOException
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, "metadata_with_errors.xls");
-    screenResultParser.parse(workbookFile);
+    screenResultParser.parse(null, workbookFile);
     String extension = "errors.xls";
     Map<Workbook,File> workbook2File =
       screenResultParser.outputErrorsInAnnotatedWorkbooks(new File(System.getProperty("java.io.tmpdir")),
@@ -392,7 +396,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testRecycledCellUsage() 
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, "metadata_with_errors.xls");
-    screenResultParser.parse(workbookFile);
+    screenResultParser.parse(null, workbookFile);
     Set<Cell> cellsWithErrors = new HashSet<Cell>();
     List<ParseError> errors = screenResultParser.getErrors();
     for (ParseError error : errors) {
@@ -410,10 +414,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testParserReuse() throws Exception
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, "metadata_with_errors.xls");
-    ScreenResult result1 = screenResultParser.parseLegacy(workbookFile, true);
+    ScreenResult result1 = screenResultParser.parseLegacy( null, workbookFile, true);
     List<ParseError> errors1 = screenResultParser.getErrors();
     assertNotNull("1st parse returns a result", result1);
-    ScreenResult result2 = screenResultParser.parseLegacy(workbookFile, true);
+    ScreenResult result2 = screenResultParser.parseLegacy(null, workbookFile, true);
     List<ParseError> errors2 = screenResultParser.getErrors();
     assertNotNull("2nd parse returns a result", result2);
     assertNotSame("parses returned different ScreenResult objects", result1, result2);
@@ -438,7 +442,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testParseNewScreenResult() throws Exception
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, "NewFormatTest.xls");
-    ScreenResult screenResult = screenResultParser.parse(workbookFile);
+    ScreenResult screenResult = screenResultParser.parse(null, workbookFile);
     assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
 
     Calendar expectedDate = Calendar.getInstance();
@@ -484,7 +488,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
       AssayWellType.OTHER,
       AssayWellType.EXPERIMENTAL,
       AssayWellType.EXPERIMENTAL,
-      AssayWellType.POSITIVE_CONTROL,
+      AssayWellType.ASSAY_POSITIVE_CONTROL,
       AssayWellType.EXPERIMENTAL};
 
     Object[][] expectedInitialResultValues = {
@@ -557,10 +561,16 @@ public class ScreenResultParserTest extends AbstractSpringTest
   
   public static ScreenResult makeScreenResult(Date date)
   {
-    ScreeningRoomUser screener = new ScreeningRoomUser(date, "first", "last", "first_last@hms.harvard.edu", "", "", "", "", "", ScreeningRoomUserClassification.ICCBL_NSRB_STAFF, false);
-    Screen screen = new Screen(screener, screener, 1, date, ScreenType.SMALL_MOLECULE, "test screen");
+    Screen screen = makeScreen(date);
     ScreenResult screenResult = new ScreenResult(screen, date);
     return screenResult;
+  }
+
+  private static Screen makeScreen(Date date)
+  {
+    ScreeningRoomUser screener = new ScreeningRoomUser(date, "first", "last", "first_last@hms.harvard.edu", "", "", "", "", "", ScreeningRoomUserClassification.ICCBL_NSRB_STAFF, false);
+    Screen screen = new Screen(screener, screener, 1, date, ScreenType.SMALL_MOLECULE, "test screen");
+    return screen;
   }
 
 }

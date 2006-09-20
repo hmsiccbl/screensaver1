@@ -334,7 +334,8 @@ public class ScreenResult extends AbstractEntity
    */
   protected Object getBusinessKey()
   {
-    return _screen.getScreenNumber() + ":" + DateFormat.getDateInstance().format(getDateCreated());
+    int screenNumber = _screen == null ? -1 : _screen.getScreenNumber();
+    return screenNumber + ":" + DateFormat.getDateInstance().format(getDateCreated());
   }
   
   

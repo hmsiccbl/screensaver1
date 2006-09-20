@@ -20,6 +20,7 @@ import javax.faces.model.ListDataModel;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
@@ -44,6 +45,7 @@ public class ScreenResultImporterController extends AbstractController
   private ScreenResultParser _screenResultParser;
   private ScreenResultViewerController _screenResultViewer;
   private UploadedFile _uploadedFile;
+  private Screen _screen;
 
 
   // backing bean property getter and setter methods
@@ -56,6 +58,16 @@ public class ScreenResultImporterController extends AbstractController
   public void setScreenResultParser(ScreenResultParser screenResultParser)
   {
     _screenResultParser = screenResultParser;
+  }
+
+  public Screen getScreen()
+  {
+    return _screen;
+  }
+
+  public void setScreen(Screen screen)
+  {
+    _screen = screen;
   }
 
   public ScreenResultViewerController getScreenResultViewer()
@@ -96,10 +108,14 @@ public class ScreenResultImporterController extends AbstractController
   {
     File tmpUploadedFile = null;
     try {
+      if (_screen == null) {
+        throw new IllegalStateException("no screen specified");
+      }
+
       ScreenResult screenResult = null;
 
       if (_uploadedFile.getInputStream().available() > 0) {
-        screenResult = _screenResultParser.parse(new File(_uploadedFile.getName()), _uploadedFile.getInputStream());
+        screenResult = _screenResultParser.parse(_screen, new File(_uploadedFile.getName()), _uploadedFile.getInputStream());
       }
 
       if (screenResult == null) {
@@ -115,7 +131,7 @@ public class ScreenResultImporterController extends AbstractController
         return SUCCESS_ACTION_RESULT;
       }
     }
-    catch (IOException e) {
+    catch (Exception e) {
       reportSystemError(e);
       return REDISPLAY_PAGE_ACTION_RESULT;
     }

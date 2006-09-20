@@ -26,8 +26,10 @@ public enum AssayWellType implements VocabularyTerm
   
   EXPERIMENTAL("experimental"),
   EMPTY("empty"),
-  POSITIVE_CONTROL("positive control"),
-  NEGATIVE_CONTROL("negative control"),
+  LIBRARY_CONTROL("library control"),
+  ASSAY_POSITIVE_CONTROL("assay positive control"),
+  ASSAY_NEGATIVE_CONTROL("negative control"),
+  BUFFER("buffer"),
   OTHER("other"),
   ;
  
