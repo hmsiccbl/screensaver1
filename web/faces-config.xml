@@ -237,6 +237,22 @@
     </managed-property>
   </managed-bean>
 
+  <managed-bean>
+    <description>Hibernate Session Test</description>
+    <managed-bean-name>hibernateSessionTest</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.HibernateSessionTest</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>dao</property-name>
+      <value>#{dao}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>hibernateTemplate</property-name>
+      <value>#{hibernateTemplate}</value>
+    </managed-property>
+    
+  </managed-bean>
+
   
   <!-- Navigation rules -->
   

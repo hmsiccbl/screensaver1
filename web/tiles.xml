@@ -212,4 +212,17 @@
       value="/dev/schemaManager.jsp" />
   </definition>
   
+  <definition
+    name="/dev/hibernateSessionTest.tiles"
+    extends=".base">
+    <put 
+      name="pageTitle"
+      value="Hibernate Session Test"/>
+    <put
+      name="body"
+      value="/dev/hibernateSessionTest.jsp" />
+  </definition>
+  
+  
+  
 </tiles-definitions>

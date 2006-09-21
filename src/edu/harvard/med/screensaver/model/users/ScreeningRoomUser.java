@@ -630,7 +630,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    *
    * @return the lab members
    * @hibernate.set
-   *   inverse="true"
+   *   inverse="true" 
    *   lazy="true"
    * @hibernate.collection-key
    *   column="lab_head_id"
