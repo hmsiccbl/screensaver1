@@ -30,7 +30,11 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-dao.jar"/>
-	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-hibernate.jar"/>
+	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-hibernate.jar">
+		<attributes>
+			<attribute value="http://static.springframework.org/spring/docs/1.2.x/api/" name="javadoc_location"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-orm.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-support.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-1.2.8/spring-web.jar"/>
