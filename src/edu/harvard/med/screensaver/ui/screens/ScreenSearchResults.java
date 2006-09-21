@@ -19,16 +19,29 @@ import javax.faces.model.ListDataModel;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.SearchResults;
 
+
 /**
- * @author s
+ * A {@link SearchResults} for {@link Screen Screens}.
+ *
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 public class ScreenSearchResults extends SearchResults<Screen>
 {
+  
+  // private static final fields
+  
   private static final String SCREEN_NUMBER = "Screen Number";
   private static final String LEAD_SCREENER = "Lead Screener";
   private static final String TITLE = "Title";
   
+  
+  // instance fields
+  
   private ScreenViewerController _screenViewerController;
+  
+  
+  // public constructor
   
   /**
    * Construct a new <code>ScreenSearchResult</code> object.
@@ -42,12 +55,11 @@ public class ScreenSearchResults extends SearchResults<Screen>
     super(unsortedResults);
     _screenViewerController = screenViewerController;
   }
-
-  public String goScreenViewer()
-  {
-    return "goScreenViewer";
-  }
   
+  
+  // implementations of the SearchResults abstract methods
+  
+  @Override
   protected DataModel createDataHeaderColumnModel()
   {
     List<String> tableData = new ArrayList<String>();
@@ -57,11 +69,13 @@ public class ScreenSearchResults extends SearchResults<Screen>
     return new ListDataModel(tableData);
   }
 
+  @Override
   protected boolean isCommandLink(String columnName)
   {
     return columnName.equals(SCREEN_NUMBER);
   }
   
+  @Override
   protected Object getCellValue(Screen screen, String columnName)
   {
     if (columnName.equals(SCREEN_NUMBER)) {
@@ -76,12 +90,14 @@ public class ScreenSearchResults extends SearchResults<Screen>
     return null;
   }
 
+  @Override
   protected Object getCellAction(Screen screen, String columnName)
   {
     _screenViewerController.setScreen(screen);
     return "showScreen";
   }
   
+  @Override
   protected Comparator<Screen> getComparatorForColumnName(String columnName)
   {
     if (columnName.equals(SCREEN_NUMBER)) {

@@ -21,11 +21,17 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.ui.SearchResults;
 
+
 /**
- * @author s
+ * A {@link SearchResults} for {@link Library Libraries}.
+ *
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 public class LibrarySearchResults extends SearchResults<Library>
 {
+  
+  // private static final fields
   
   private static final Logger log = Logger.getLogger(LibrarySearchResults.class);
 
@@ -35,7 +41,13 @@ public class LibrarySearchResults extends SearchResults<Library>
   private static final String START_PLATE  = "Start Plate";
   private static final String END_PLATE    = "End Plate";
   
+  
+  // instance fields
+  
   private LibraryViewerController _libraryViewerController;
+  
+  
+  // public contructor
   
   /**
    * Construct a new <code>LibrarySearchResult</code> object.
@@ -50,6 +62,10 @@ public class LibrarySearchResults extends SearchResults<Library>
     _libraryViewerController = libraryViewerController;
   }
 
+  
+  // implementations of the SearchResults abstract methods
+  
+  @Override
   protected DataModel createDataHeaderColumnModel()
   {
     List<String> tableData = new ArrayList<String>();
@@ -61,11 +77,13 @@ public class LibrarySearchResults extends SearchResults<Library>
     return new ListDataModel(tableData);
   }
   
+  @Override
   protected boolean isCommandLink(String columnName)
   {
     return columnName.equals(SHORT_NAME);
   }
   
+  @Override
   protected Object getCellValue(Library library, String columnName)
   {
     if (columnName.equals(SHORT_NAME)) {
@@ -86,12 +104,14 @@ public class LibrarySearchResults extends SearchResults<Library>
     return null;
   }
   
+  @Override
   protected Object getCellAction(Library library, String columnName)
   {
     _libraryViewerController.setLibrary(library);
     return "showLibrary";
   }
   
+  @Override
   protected Comparator<Library> getComparatorForColumnName(String columnName)
   {
     if (columnName.equals(SHORT_NAME)) {
