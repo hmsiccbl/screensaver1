@@ -10,7 +10,11 @@
 package edu.harvard.med.screensaver.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.faces.component.UIData;
 import javax.faces.event.ValueChangeEvent;
@@ -49,7 +53,11 @@ implements ScreensaverConstants
   // private instance data
   
   private List<E> _unsortedResults;
-  private List<E> _currentResults;
+  private List<E> _currentSort;
+  private String _currentSortColumnName;
+  private boolean _isCurrentSortForward;
+  private Map<String,List<E>> _forwardSorts = new HashMap<String,List<E>>();
+  private Map<String,List<E>> _reverseSorts = new HashMap<String,List<E>>();
   private int _resultsSize;
   private int _currentIndex = 0;
   private int _itemsPerPage = DEFAULT_PAGESIZE;
@@ -69,9 +77,9 @@ implements ScreensaverConstants
   public SearchResults(List<E> unsortedResults)
   {
     _unsortedResults = unsortedResults;
-    _currentResults = _unsortedResults;
-    _resultsSize = _currentResults.size();
-    _dataModel = new ListDataModel(_currentResults);
+    _currentSort = _unsortedResults;
+    _resultsSize = _currentSort.size();
+    _dataModel = new ListDataModel(_currentSort);
   }
 
   
@@ -144,9 +152,40 @@ implements ScreensaverConstants
     return isCommandLink(getColumnName());
   }
   
+  public Object sortOnColumn()
+  {
+    log.debug("sortOnColumn: " + getColumnName());
+    String sortColumnName = getColumnName();
+    boolean isSortForward =
+      sortColumnName.equals(_currentSortColumnName) ? ! _isCurrentSortForward : true;
+    List<E> forwardSort = _forwardSorts.get(sortColumnName);
+    if (forwardSort == null) {
+      forwardSort = new ArrayList<E>(_unsortedResults);
+      Collections.sort(forwardSort, getComparatorForColumnName(sortColumnName));
+      _forwardSorts.put(sortColumnName, forwardSort);
+    }
+    if (isSortForward) {
+      _currentSort = forwardSort;
+    }
+    else {
+      List<E> reverseSort = _reverseSorts.get(sortColumnName);
+      if (reverseSort == null) {
+        reverseSort = new ArrayList<E>(forwardSort);
+        Collections.reverse(reverseSort);
+        _reverseSorts.put(sortColumnName, reverseSort);
+      }
+      _currentSort = reverseSort;
+    }
+    _currentSortColumnName = sortColumnName;
+    _isCurrentSortForward = isSortForward;
+    _dataModel = new ListDataModel(_currentSort);
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
   @SuppressWarnings("unchecked")
   public Object getCellValue()
   {
+    log.debug("SANITY");
     return getCellValue(getEntity(), getColumnName());
   }
 
@@ -241,4 +280,5 @@ implements ScreensaverConstants
   abstract protected boolean isCommandLink(String columnName);
   abstract protected Object getCellValue(E entity, String columnName);
   abstract protected Object getCellAction(E entity, String columnName);
+  abstract protected Comparator<E> getComparatorForColumnName(String columnName);
 }

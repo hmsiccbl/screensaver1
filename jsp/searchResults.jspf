@@ -90,7 +90,10 @@
           value="#{searchResultsRegistry.searchResults.dataHeaderColumnModel}"
           var="columnName" styleClass="column">
           <f:facet name="header">
-            <h:outputText value="#{columnName}" />
+            <h:commandLink
+              action="#{searchResultsRegistry.searchResults.sortOnColumn}"
+              value="#{columnName}"
+            />
           </f:facet>
           <h:outputText
             value="#{searchResultsRegistry.searchResults.cellValue}"

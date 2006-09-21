@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.ui.libraries;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.faces.model.DataModel;
@@ -89,5 +90,45 @@ public class LibrarySearchResults extends SearchResults<Library>
   {
     _libraryViewerController.setLibrary(library);
     return "showLibrary";
+  }
+  
+  protected Comparator<Library> getComparatorForColumnName(String columnName)
+  {
+    if (columnName.equals(SHORT_NAME)) {
+      return new Comparator<Library>() {
+        public int compare(Library l1, Library l2) {
+          return l1.getShortName().compareTo(l2.getShortName());
+        }
+      };
+    }
+    if (columnName.equals(LIBRARY_NAME)) {
+      return new Comparator<Library>() {
+        public int compare(Library l1, Library l2) {
+          return l1.getLibraryName().compareTo(l2.getLibraryName());
+        }
+      };
+    }
+    if (columnName.equals(LIBRARY_TYPE)) {
+      return new Comparator<Library>() {
+        public int compare(Library l1, Library l2) {
+          return l1.getLibraryType().getValue().compareTo(l2.getLibraryType().getValue());
+        }
+      };
+    }
+    if (columnName.equals(START_PLATE)) {
+      return new Comparator<Library>() {
+        public int compare(Library l1, Library l2) {
+          return l1.getStartPlate().compareTo(l2.getStartPlate());
+        }
+      };
+    }
+    if (columnName.equals(END_PLATE)) {
+      return new Comparator<Library>() {
+        public int compare(Library l1, Library l2) {
+          return l1.getEndPlate().compareTo(l2.getEndPlate());
+        }
+      };
+    }
+    return null;
   }
 }

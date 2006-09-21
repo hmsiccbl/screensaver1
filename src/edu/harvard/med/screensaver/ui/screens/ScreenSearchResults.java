@@ -10,13 +10,13 @@
 package edu.harvard.med.screensaver.ui.screens;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.SearchResults;
 
 /**
@@ -68,8 +68,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
       return screen.getScreenNumber();
     }
     if (columnName.equals(LEAD_SCREENER)) {
-      ScreeningRoomUser leadScreener = screen.getLeadScreener();
-      return leadScreener.getFirstName() + " " + leadScreener.getLastName();      
+      return screen.computeLeadScreenerFullname();  
     }
     if (columnName.equals(TITLE)) {
       return screen.getTitle();
@@ -81,5 +80,31 @@ public class ScreenSearchResults extends SearchResults<Screen>
   {
     _screenViewerController.setScreen(screen);
     return "showScreen";
+  }
+  
+  protected Comparator<Screen> getComparatorForColumnName(String columnName)
+  {
+    if (columnName.equals(SCREEN_NUMBER)) {
+      return new Comparator<Screen>() {
+        public int compare(Screen s1, Screen s2) {
+          return s1.getScreenNumber().compareTo(s2.getScreenNumber());
+        }
+      };
+    }
+    if (columnName.equals(LEAD_SCREENER)) {
+      return new Comparator<Screen>() {
+        public int compare(Screen s1, Screen s2) {
+          return s1.computeLeadScreenerFullname().compareTo(s2.computeLeadScreenerFullname());
+        }
+      };
+    }
+    if (columnName.equals(TITLE)) {
+      return new Comparator<Screen>() {
+        public int compare(Screen s1, Screen s2) {
+          return s1.getTitle().compareTo(s2.getTitle());
+        }
+      };
+    }
+    return null;
   }
 }
