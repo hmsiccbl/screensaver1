@@ -187,6 +187,11 @@ public class Screen extends AbstractEntity
     _leadScreener.getHbnScreensLed().add(this);
   }
 
+  public String computeLeadScreenerFullname()
+  {
+    return _leadScreener.getFirstName() + " " + _leadScreener.getLastName();
+  }
+  
   /**
    * Get the lab head.
    *
