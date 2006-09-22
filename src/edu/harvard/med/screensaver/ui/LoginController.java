@@ -26,22 +26,9 @@ public class LoginController extends AbstractController
   
   private static final String AUTHENTICATION_ID_DESCRIPTION = "User ID";
   
-  private boolean _disableAdministrativePrivileges;
-
   public String getAuthenticationIdDescription()
   {
     return AUTHENTICATION_ID_DESCRIPTION;
-  }
-
-  public boolean isDisableAdministrativePrivileges()
-  {
-    return _disableAdministrativePrivileges;
-  }
-
-  public void setDisableAdministrativePrivileges(
-    boolean disableAdministrativePrivileges)
-  {
-    _disableAdministrativePrivileges = disableAdministrativePrivileges;
   }
 
 
