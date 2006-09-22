@@ -17,14 +17,14 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+
+import org.apache.log4j.Logger;
 
 public class ScreenViewerController extends AbstractController
 {
@@ -160,7 +160,8 @@ public class ScreenViewerController extends AbstractController
   /**
    * A command to saved the user's edits.
    */
-  public String save() {
+  public String submit() {
+    log.debug("ScreenViewerController.submit()");
     return create();
   }
   

@@ -13,6 +13,10 @@
 
 	<h:form id="screenForm">
 
+		<t:commandButton id="save" value="Save"
+			action="#{screenViewer.submit}" styleClass="command"
+			visibleOnUserRole="screensAdmin" />
+
 		<t:panelGrid columns="2">
 
 			<t:outputLabel for="screenId" value="Screen ID" />
@@ -30,11 +34,11 @@
 			<t:inputText id="title" value="#{screenViewer.screen.title}"
 				enabledOnUserRole="screensAdmin" styleClass="input" />
 
-			<t:outputLabel for="dateCreated" value="Date Created"
+			<%--t:outputLabel for="dateCreated" value="Date Created"
 				styleClass="inputLabel" />
 			<t:inputDate id="dateCreated"
 				value="#{screenViewer.screen.dateCreated}" popupCalendar="true"
-				enabledOnUserRole="screensAdmin" styleClass="input" />
+				enabledOnUserRole="screensAdmin" styleClass="input" /--%>
 
 			<t:outputLabel for="screenType" value="Screen Type"
 				styleClass="inputLabel" />
@@ -105,8 +109,6 @@
 
 
 		<t:panelGroup id="commandPanel">
-			<t:commandButton id="save" value="Save" action="#{screenViewer.save}"
-				styleClass="command" visibleOnUserRole="screensAdmin" />
 		</t:panelGroup>
 	</h:form>
 </f:subview>

@@ -197,8 +197,8 @@
   <!-- Hibernate/Spring session management -->  
 
   <filter>
-    <filter-name>OpenSessionInViewFilter</filter-name>
-    <filter-class>org.springframework.orm.hibernate3.support.OpenSessionInViewFilter</filter-class>
+    <filter-name>HibernateSessionManagementFilter</filter-name>
+    <filter-class>edu.harvard.med.screensaver.ui.util.HibernateSessionManagementFilter</filter-class>
     <init-param>
       <param-name>sessionFactoryBeanName</param-name>
       <param-value>hibernateSessionFactory</param-value>
@@ -206,7 +206,7 @@
   </filter>
 
   <filter-mapping>
-    <filter-name>OpenSessionInViewFilter</filter-name>
+    <filter-name>HibernateSessionManagementFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 

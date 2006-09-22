@@ -45,6 +45,10 @@
         id="org.hibernate.cfg.ImprovedNamingStrategy.INSTANCE"
         class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean" />
     </property>
+    <!-- Release database connections after a transaction completes.  This is critical for us, since we use long-conversation Hibernate sessions, which span numerous HTTP requests; so we can't keep database connections tied up indefinitely.  -->
+    <property name="hibernateProperties">
+      <props><prop key="hibernate.connection.release_mode">after_transaction</prop></props>
+    </property>
   </bean>
 
   <!-- The bean through which our application will access Hibernate, and thus our persistent data.

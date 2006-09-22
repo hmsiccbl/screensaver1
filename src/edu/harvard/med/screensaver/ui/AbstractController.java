@@ -358,14 +358,15 @@ public abstract class AbstractController implements ScreensaverConstants
   
   public void closeUserSession()
   {
-    releaseHibernateSession();
-    getHttpSession().invalidate();
+    closeHttpAndHibernateSessions();
+    
+    //getHttpSession().invalidate();
   }
 
-  public void releaseHibernateSession()
+  public void closeHttpAndHibernateSessions()
   {
-    log.debug("requesting release of Hibernate session");
-    getHttpSession().setAttribute(HibernateSessionManagementFilter.RELEASE_HIBERNATE_SESSION, Boolean.TRUE);
+    log.debug("requesting release of HTTP and Hibernate sessions");
+    getHttpSession().setAttribute(HibernateSessionManagementFilter.RELEASE_HTTP_AND_HIBERNATE_SESSIONS, Boolean.TRUE);
   }
   
   
