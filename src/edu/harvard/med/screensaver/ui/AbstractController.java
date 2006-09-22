@@ -23,6 +23,7 @@ import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.ui.util.Messages;
+import edu.harvard.med.screensaver.ui.util.HibernateSessionManagementFilter;
 
 import org.apache.log4j.Logger;
 
@@ -148,6 +149,24 @@ public abstract class AbstractController implements ScreensaverConstants
   {
     return "ID: " + getHttpSession().getId() + "\n" +
     "last accessed time: " + getHttpSession().getLastAccessedTime();
+  }
+  
+  /**
+   * Acquire a JSF bean (e.g. a controller) or a Spring bean by name. Spring
+   * beans are accessible thanks to
+   * org.springframework.web.jsf.DelegatingVariableResolver, which must be
+   * configured for use in faces-config.xml. <i>In general, you should <b>not</b> need
+   * to call this method. Use JSF or Spring injection mechanisms to make the
+   * required beans available to your class!</i>
+   * 
+   * @return the bean of the given name, or <code>null</code> if no such named
+   *         bean exists
+   */
+  public Object getBean(String beanName)
+  {
+    log.warn("you are using AbstractController.getBean() to acquire bean " + beanName + "; please reconsider your use of this method!  Use injection!");
+    return getFacesContext().getApplication().getVariableResolver().resolveVariable(getFacesContext(), 
+                                                                                    beanName);
   }
 
 //  // The "JSF way" to get a message (ignores Spring)
@@ -336,6 +355,19 @@ public abstract class AbstractController implements ScreensaverConstants
     throwable.printStackTrace();
     reportSystemError(throwable.getMessage());
   }
+  
+  public void closeUserSession()
+  {
+    releaseHibernateSession();
+    getHttpSession().invalidate();
+  }
+
+  public void releaseHibernateSession()
+  {
+    log.debug("requesting release of Hibernate session");
+    getHttpSession().setAttribute(HibernateSessionManagementFilter.RELEASE_HIBERNATE_SESSION, Boolean.TRUE);
+  }
+  
   
   
   // private methods

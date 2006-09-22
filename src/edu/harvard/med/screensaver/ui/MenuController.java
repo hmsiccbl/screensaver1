@@ -13,10 +13,10 @@ import java.security.Principal;
 
 import javax.faces.event.ActionEvent;
 
+import edu.harvard.med.screensaver.ui.libraries.LibrariesBrowserController;
+
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.navmenu.htmlnavmenu.HtmlCommandNavigationItem;
-
-import edu.harvard.med.screensaver.ui.libraries.LibrariesBrowserController;
 
 public class MenuController extends AbstractController
 {
@@ -74,7 +74,7 @@ public class MenuController extends AbstractController
   public String logout()
   {
     log.info("logout for session "  + getHttpSession().getId());
-    getHttpSession().invalidate();
+    closeUserSession();
     return LOGOUT_ACTION_RESULT;
   }
   
