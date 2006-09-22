@@ -19,6 +19,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
+import org.apache.log4j.Logger;
+
 /**
  * A generic class that can convert between an Enum type's string values and
  * enum values. To use in a JSF application, extend this type and add a
@@ -44,11 +46,11 @@ import javax.faces.convert.ConverterException;
  */
 public class EnumTypeConverter<E extends Enum<E>> implements Converter
 {
+  private static Logger log = Logger.getLogger(EnumTypeConverter.class);
   
   private static class NormalizedString
   {
     private String _normalized;
-    private String _removeMatchingRegex;
     private Pattern _pattern;
     
     public NormalizedString(String s)

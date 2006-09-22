@@ -87,7 +87,7 @@
     extends=".base">
     <put
       name="pageTitle"
-      value="RNAi Library Contents Importer and Error Viewer"/>
+      value="RNAi Library Contents Importer"/>
     <put
       name="body"
       value="/libraries/admin/rnaiLibraryContentsImporter.jsp" />

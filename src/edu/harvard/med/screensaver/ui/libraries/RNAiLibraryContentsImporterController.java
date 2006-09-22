@@ -11,33 +11,58 @@ package edu.harvard.med.screensaver.ui.libraries;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
+import javax.faces.model.SelectItem;
 
+import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 
+import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 /**
  * The JSF backing bean for the rnaiLibraryContentsImporter subview.
  * 
- * @author ant
+ * @author s
  */
 public class RNAiLibraryContentsImporterController extends AbstractController
 {
+  
+  private static Logger log = Logger.getLogger(RNAiLibraryContentsImporterController.class);
 
   // instance data
 
+  private DAO _dao;
   private RNAiLibraryContentsParser _rnaiLibraryContentsParser;
   private LibraryViewerController _libraryViewer;
   private UploadedFile _uploadedFile;
   private Library _library;
+  private SilencingReagentType _silencingReagentType =
+    RNAiLibraryContentsParser.DEFAULT_SILENCING_REAGENT_TYPE;
+  private SilencingReagentType _unknownSilencingReagentType =
+    RNAiLibraryContentsParser.DEFAULT_UNKNOWN_SILENCING_REAGENT_TYPE;
 
 
   // backing bean property getter and setter methods
+
+  public DAO getDao()
+  {
+    return _dao;
+  }
+
+  public void setDao(DAO dao)
+  {
+    _dao = dao;
+  }
 
   public RNAiLibraryContentsParser getRnaiLibraryContentsParser()
   {
@@ -79,6 +104,15 @@ public class RNAiLibraryContentsImporterController extends AbstractController
     _library = library;
   }
 
+  public List<SelectItem> getSilencingReagentTypeSelections()
+  {
+    List<SilencingReagentType> selections = new ArrayList<SilencingReagentType>();
+    for (SilencingReagentType silencingReagentType : SilencingReagentType.values()) {
+      selections.add(silencingReagentType);
+    }
+    return JSFUtils.createUISelectItems(selections);
+  }
+
   public DataModel getImportErrors()
   {
     return new ListDataModel(_rnaiLibraryContentsParser.getErrors());
@@ -87,6 +121,11 @@ public class RNAiLibraryContentsImporterController extends AbstractController
 
   // JSF application methods
   
+  public String update()
+  {
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
   public String done()
   {
     return DONE_ACTION_RESULT;
@@ -94,24 +133,51 @@ public class RNAiLibraryContentsImporterController extends AbstractController
   
   public String submit()
   {
+    log.error("xxx in submit!");
     try {
+      
+      if (_uploadedFile == null) {
+        // TODO: HANDLE
+      }
+      _uploadedFile.getInputStream();
       if (_uploadedFile.getInputStream().available() > 0) {
+        log.error("is available!");
+        _rnaiLibraryContentsParser.setSilencingReagentType(_silencingReagentType);
+        _rnaiLibraryContentsParser.setUnknownSilencingReagentType(_unknownSilencingReagentType);
         _rnaiLibraryContentsParser.parseLibraryContents(
           _library,
           new File(_uploadedFile.getName()), _uploadedFile.getInputStream());
+        _dao.persistEntity(_library);
+      }
+      else {
+        log.error("not available!");
+        showMessage("badUploadedFile", "uploadRNAiLibraryContentsFile");
+        return REDISPLAY_PAGE_ACTION_RESULT;
       }
 
       if (_rnaiLibraryContentsParser.getHasErrors()) {
+        log.error("has errors!");
         return ERROR_ACTION_RESULT;
       }
       else {
-        _libraryViewer.setLibrary(_library);
+        log.error("has success!");
         return SUCCESS_ACTION_RESULT;
       }
     }
     catch (IOException e) {
+      log.error("system error!");
       reportSystemError(e);
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
+  }
+  
+  public void silencingReagentTypeListener(ValueChangeEvent event)
+  {
+    _silencingReagentType = (SilencingReagentType) event.getNewValue();
+  }
+  
+  public void unknownSilencingReagentTypeListener(ValueChangeEvent event)
+  {
+    _unknownSilencingReagentType = (SilencingReagentType) event.getNewValue();
   }
 }

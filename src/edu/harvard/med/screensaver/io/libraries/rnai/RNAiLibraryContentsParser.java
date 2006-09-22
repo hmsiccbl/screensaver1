@@ -41,16 +41,16 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 public class RNAiLibraryContentsParser implements LibraryContentsParser
 {
   
-  // private static data
+  // static fields
   
   private static final Logger log = Logger.getLogger(RNAiLibraryContentsParser.class);
-  private static final SilencingReagentType DEFAULT_SILENCING_REAGENT_TYPE =
+  public static final SilencingReagentType DEFAULT_SILENCING_REAGENT_TYPE =
     SilencingReagentType.SIRNA;
-  private static final SilencingReagentType DEFAULT_UNKNOWN_SILENCING_REAGENT_TYPE =
+  public static final SilencingReagentType DEFAULT_UNKNOWN_SILENCING_REAGENT_TYPE =
     SilencingReagentType.POOL_OF_UNKNOWN_SIRNAS;
 
   
-  // private instance data
+  // private instance fields
   
   private DAO _dao;
   private Library _library;
@@ -76,6 +76,16 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
     _dao = dao;
   }
   
+  public SilencingReagentType getDefaultSilencingReagentType()
+  {
+    return DEFAULT_SILENCING_REAGENT_TYPE;
+  }
+
+  public SilencingReagentType getDefaultUnknownSilencingReagentType()
+  {
+    return DEFAULT_UNKNOWN_SILENCING_REAGENT_TYPE;
+  }
+
   /**
    * Get the {@link SilencingReagentType} for the {@link SilencingReagent SilencingReagents}
    * in this RNAi library.

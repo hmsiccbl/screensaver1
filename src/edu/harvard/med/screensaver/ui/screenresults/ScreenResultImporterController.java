@@ -106,7 +106,6 @@ public class ScreenResultImporterController extends AbstractController
   
   public String submit()
   {
-    File tmpUploadedFile = null;
     try {
       if (_screen == null) {
         throw new IllegalStateException("no screen specified");
@@ -134,11 +133,6 @@ public class ScreenResultImporterController extends AbstractController
     catch (Exception e) {
       reportSystemError(e);
       return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    finally {
-      if (tmpUploadedFile != null) {
-        tmpUploadedFile.delete();
-      }
     }
   }
   

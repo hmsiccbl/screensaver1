@@ -191,6 +191,10 @@
       <property-name>messages</property-name>
       <value>#{messages}</value>
     </managed-property>
+    <managed-property>
+      <property-name>dao</property-name>
+      <value>#{dao}</value>
+    </managed-property>
   </managed-bean>
     
   <managed-bean>
@@ -329,7 +333,7 @@
   </navigation-rule>
 
   <navigation-rule>
-    <from-view-id>/rnaiLibraryContentsImporter.jsp</from-view-id>
+    <from-view-id>/libraries/admin/rnaiLibraryContentsImporter.jsp</from-view-id>
     <navigation-case>
       <from-action>#{rnaiLibraryContentsImporter.submit}</from-action>
       <from-outcome>success</from-outcome>
@@ -410,6 +414,11 @@
   <converter>
     <converter-id>ScreenTypeConverter</converter-id>
     <converter-class>edu.harvard.med.screensaver.ui.util.ScreenTypeConverter</converter-class>
+  </converter>
+  
+  <converter>
+    <converter-id>SilencingReagentTypeConverter</converter-id>
+    <converter-class>edu.harvard.med.screensaver.ui.util.SilencingReagentTypeConverter</converter-class>
   </converter>
   
   <converter>
