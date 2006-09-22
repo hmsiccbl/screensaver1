@@ -11,19 +11,15 @@ package edu.harvard.med.screensaver.ui.libraries;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
-import javax.faces.event.ActionEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 
 import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
-import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.ui.AbstractController;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 /**
  * The JSF backing bean for the rnaiLibraryContentsImporter subview.
@@ -33,16 +29,12 @@ import edu.harvard.med.screensaver.ui.util.JSFUtils;
 public class RNAiLibraryContentsImporterController extends AbstractController
 {
 
-  // static data
-  
-  private static final String ERRORS_XLS_FILE_EXTENSION = ".errors.xls";
-
-  
   // instance data
 
   private RNAiLibraryContentsParser _rnaiLibraryContentsParser;
   private LibraryViewerController _libraryViewer;
   private UploadedFile _uploadedFile;
+  private Library _library;
 
 
   // backing bean property getter and setter methods
@@ -77,6 +69,16 @@ public class RNAiLibraryContentsImporterController extends AbstractController
     return _uploadedFile;
   }
 
+  public Library getLibrary()
+  {
+    return _library;
+  }
+
+  public void setLibrary(Library library)
+  {
+    _library = library;
+  }
+
   public DataModel getImportErrors()
   {
     return new ListDataModel(_rnaiLibraryContentsParser.getErrors());
@@ -92,25 +94,18 @@ public class RNAiLibraryContentsImporterController extends AbstractController
   
   public String submit()
   {
-    File tmpUploadedFile = null;
     try {
-      Library library = null;
-
       if (_uploadedFile.getInputStream().available() > 0) {
-        library = _rnaiLibraryContentsParser.parseLibraryContents(
-          library,
+        _rnaiLibraryContentsParser.parseLibraryContents(
+          _library,
           new File(_uploadedFile.getName()), _uploadedFile.getInputStream());
       }
 
-      if (library == null) {
-        showMessage("badUploadedFile", "uploadRNAiLibraryContentsFile");
-        return REDISPLAY_PAGE_ACTION_RESULT;
-      }
-      else if (_rnaiLibraryContentsParser.getHasErrors()) {
+      if (_rnaiLibraryContentsParser.getHasErrors()) {
         return ERROR_ACTION_RESULT;
       }
       else {
-        _libraryViewer.setLibrary(library);
+        _libraryViewer.setLibrary(_library);
         return SUCCESS_ACTION_RESULT;
       }
     }
@@ -118,41 +113,5 @@ public class RNAiLibraryContentsImporterController extends AbstractController
       reportSystemError(e);
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    finally {
-      if (tmpUploadedFile != null) {
-        tmpUploadedFile.delete();
-      }
-    }
   }
-  
-  
-  // JSF event handlers
-
-  public void downloadErrorAnnotatedWorkbookListener(ActionEvent event)
-  {
-    File errorAnnotatedWorkbookFile = null;
-    try {
-      Map<Workbook,File> workbook2File = null;
-      //TODO _rnaiLibraryContentsParser.outputErrorsInAnnotatedWorkbooks(null,
-             //TODO                                             ERRORS_XLS_FILE_EXTENSION);
-      if (workbook2File.size() != 1) {
-        reportSystemError("expected exactly 1 error-annotated workbook to be generated");
-        return;
-      }
-      Workbook errorAnnotatedWorkbook = workbook2File.keySet().iterator().next();
-      errorAnnotatedWorkbookFile = workbook2File.get(errorAnnotatedWorkbook);
-      JSFUtils.handleUserFileDownloadRequest(getFacesContext(),
-                                             errorAnnotatedWorkbookFile,
-                                             Workbook.MIME_TYPE);
-    }
-    catch (IOException e) {
-      reportSystemError(e);
-    }
-    finally {
-      if (errorAnnotatedWorkbookFile != null) {
-        errorAnnotatedWorkbookFile.delete();
-      }
-    }
-  }
-
 }
