@@ -59,6 +59,10 @@
       <property-name>messages</property-name>
       <value>#{messages}</value>
     </managed-property>
+    <managed-property>
+      <property-name>rnaiLibraryContentsImporter</property-name>
+      <value>#{rnaiLibraryContentsImporter}</value>
+    </managed-property>
   </managed-bean>
   
   <managed-bean>
@@ -179,10 +183,6 @@
     <managed-bean-name>rnaiLibraryContentsImporter</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporterController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>libraryViewer</property-name>
-      <value>#{libraryViewer}</value>
-    </managed-property>
     <managed-property>
       <property-name>rnaiLibraryContentsParser</property-name>
       <value>#{rnaiLibraryContentsParser}</value>
