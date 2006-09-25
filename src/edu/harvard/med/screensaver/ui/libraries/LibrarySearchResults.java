@@ -13,9 +13,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.faces.model.DataModel;
-import javax.faces.model.ListDataModel;
-
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -66,15 +63,15 @@ public class LibrarySearchResults extends SearchResults<Library>
   // implementations of the SearchResults abstract methods
   
   @Override
-  protected DataModel createDataHeaderColumnModel()
+  protected List<String> getColumnHeaders()
   {
-    List<String> tableData = new ArrayList<String>();
-    tableData.add(SHORT_NAME);
-    tableData.add(LIBRARY_NAME);
-    tableData.add(LIBRARY_TYPE);
-    tableData.add(START_PLATE);
-    tableData.add(END_PLATE);
-    return new ListDataModel(tableData);
+    List<String> columnHeaders = new ArrayList<String>();
+    columnHeaders.add(SHORT_NAME);
+    columnHeaders.add(LIBRARY_NAME);
+    columnHeaders.add(LIBRARY_TYPE);
+    columnHeaders.add(START_PLATE);
+    columnHeaders.add(END_PLATE);
+    return columnHeaders;
   }
   
   @Override

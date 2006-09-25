@@ -13,9 +13,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.faces.model.DataModel;
-import javax.faces.model.ListDataModel;
-
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.SearchResults;
 
@@ -60,13 +57,13 @@ public class ScreenSearchResults extends SearchResults<Screen>
   // implementations of the SearchResults abstract methods
   
   @Override
-  protected DataModel createDataHeaderColumnModel()
+  protected List<String> getColumnHeaders()
   {
-    List<String> tableData = new ArrayList<String>();
-    tableData.add(SCREEN_NUMBER);
-    tableData.add(LEAD_SCREENER);
-    tableData.add(TITLE);
-    return new ListDataModel(tableData);
+    List<String> columnHeaders = new ArrayList<String>();
+    columnHeaders.add(SCREEN_NUMBER);
+    columnHeaders.add(LEAD_SCREENER);
+    columnHeaders.add(TITLE);
+    return columnHeaders;
   }
 
   @Override

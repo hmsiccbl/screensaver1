@@ -59,7 +59,7 @@ implements ScreensaverConstants
   
   private UIData _dataTable;
   private DataModel _dataModel;
-  private DataModel _dataHeaderColumnModel = createDataHeaderColumnModel();
+  private DataModel _dataHeaderColumnModel = new ListDataModel(getColumnHeaders());
 
   
   // public constructor
@@ -363,12 +363,11 @@ implements ScreensaverConstants
   // abstract protected instance methods
   
   /**
-   * Create and return a model for the column headers. This basically consists of a list
-   * of the column header values.
+   * Create and return a list of the column header values.
    * 
-   * @return a model for the column headers
+   * @return a list of the column headers
    */
-  abstract protected DataModel createDataHeaderColumnModel();
+  abstract protected List<String> getColumnHeaders();
   
   /**
    * Return true whenever the cell values for the column with the specified name should

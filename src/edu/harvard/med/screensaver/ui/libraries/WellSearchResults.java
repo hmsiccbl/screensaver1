@@ -13,9 +13,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.faces.model.DataModel;
-import javax.faces.model.ListDataModel;
-
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -65,16 +62,16 @@ public class WellSearchResults extends SearchResults<Well>
 
   
   // implementations of the SearchResults abstract methods
-  
+
   @Override
-  protected DataModel createDataHeaderColumnModel()
+  protected List<String> getColumnHeaders()
   {
-    List<String> tableData = new ArrayList<String>();
-    tableData.add(LIBRARY);
-    tableData.add(PLATE);
-    tableData.add(WELL);
-    tableData.add(WELL_TYPE);
-    return new ListDataModel(tableData);
+    List<String> columnHeaders = new ArrayList<String>();
+    columnHeaders.add(LIBRARY);
+    columnHeaders.add(PLATE);
+    columnHeaders.add(WELL);
+    columnHeaders.add(WELL_TYPE);
+    return columnHeaders;
   }
   
   @Override
