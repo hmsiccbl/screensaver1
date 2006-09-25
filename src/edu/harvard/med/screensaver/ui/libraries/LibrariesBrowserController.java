@@ -38,6 +38,7 @@ public class LibrariesBrowserController extends AbstractController
   private SearchResultsRegistryController _searchResultsRegistry;
   private LibraryViewerController _libraryViewerController;
   
+  
   // public instance methods
   
   public DAO getDao()

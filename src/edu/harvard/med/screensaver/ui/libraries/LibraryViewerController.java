@@ -9,16 +9,21 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import java.util.ArrayList;
+
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 
+import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractController;
-import edu.harvard.med.screensaver.db.DAO;
-
-import org.apache.log4j.Logger;
+import edu.harvard.med.screensaver.ui.SearchResults;
+import edu.harvard.med.screensaver.ui.SearchResultsRegistryController;
 
 public class LibraryViewerController extends AbstractController
 {
@@ -27,6 +32,8 @@ public class LibraryViewerController extends AbstractController
   private DAO _dao;
   private Library _library;
   private RNAiLibraryContentsImporterController _rnaiLibraryContentsImporter;
+  private SearchResultsRegistryController _searchResultsRegistry;
+  private WellViewerController _wellViewerController;
   private String _usageMode; // "create" or "edit"
   private boolean _advancedMode;
   
@@ -63,6 +70,26 @@ public class LibraryViewerController extends AbstractController
     _rnaiLibraryContentsImporter = rnaiLibraryContentsImporter;
   }
 
+  public SearchResultsRegistryController getSearchResultsRegistry()
+  {
+    return _searchResultsRegistry;
+  }
+
+  public void setSearchResultsRegistry(SearchResultsRegistryController searchResultsRegistry)
+  {
+    _searchResultsRegistry = searchResultsRegistry;
+  }
+  
+  public WellViewerController getWellViewer()
+  {
+    return _wellViewerController;
+  }
+
+  public void setWellViewer(WellViewerController wellViewerController)
+  {
+    _wellViewerController = wellViewerController;
+  }
+
   public void setUsageMode(String usageMode)
   {
     _usageMode = usageMode;
@@ -91,6 +118,14 @@ public class LibraryViewerController extends AbstractController
   public boolean getIsCompoundLibrary()
   {
     return _library != null && ! _library.getLibraryType().equals(LibraryType.RNAI);
+  }
+  
+  public int getLibrarySize()
+  {
+    if (_library == null) {
+      return 0;
+    }
+    return _library.getWells().size();
   }
   
   
@@ -126,7 +161,6 @@ public class LibraryViewerController extends AbstractController
   public String goImportRNAiLibraryContents()
   {
     _rnaiLibraryContentsImporter.setLibraryViewer(this);
-    _rnaiLibraryContentsImporter.setLibrary(_library);
     return "goImportRNAiLibraryContents";
   }
 
@@ -137,8 +171,34 @@ public class LibraryViewerController extends AbstractController
     // - create a controller and a viewer for it
     // - add a navigation rule for goImportCompoundLibraryContents
     
-    //_rnaiLibraryContentsImporter.setLibrary(_library);
     return "goImportCompoundLibraryContents";
+  }
+
+  public String viewRNAiLibraryContents()
+  {
+    if (_searchResultsRegistry.getSearchResultsRegistrant(Library.class) != this) {
+      SearchResults<Well> searchResults = new WellSearchResults(
+        new ArrayList<Well>(_library.getWells()),
+        this,
+        _wellViewerController);
+      _searchResultsRegistry.registerSearchResults(Well.class, this, searchResults);
+    }
+    _searchResultsRegistry.setCurrentSearchType(Well.class);
+    return "goWellSearchResults";
+  }
+  
+  public String viewCompoundLibraryContents()
+  {
+    // TODO: subclass WellSearchResults, conditionally based on whether lib is compound or rnai
+    if (_searchResultsRegistry.getSearchResultsRegistrant(Library.class) != this) {
+      SearchResults<Well> searchResults = new WellSearchResults(
+        new ArrayList<Well>(_library.getWells()),
+        this,
+        _wellViewerController);
+      _searchResultsRegistry.registerSearchResults(Well.class, this, searchResults);
+    }
+    _searchResultsRegistry.setCurrentSearchType(Well.class);
+    return "goWellSearchResults";
   }
   
   

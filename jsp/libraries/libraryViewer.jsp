@@ -9,9 +9,22 @@
     <h:outputText value="#{libraryViewer.library.libraryName}" />
     <h:outputText value="library type:" />
     <h:outputText value="#{libraryViewer.library.libraryType}" />
+    <h:outputText value="number of wells:" />
+    <h:outputText value="#{libraryViewer.librarySize}" />
   </h:panelGrid>
 
-  <t:div />
+  <h:form id="viewLibraryContentsForm">
+    <h:commandLink
+      value="view RNAi library contents"
+      action="#{libraryViewer.viewRNAiLibraryContents}"
+      rendered="#{libraryViewer.isRNAiLibrary}"
+    />
+    <h:commandLink
+      value="view compound library contents"
+      action="#{libraryViewer.viewCompoundLibraryContents}"
+      rendered="#{libraryViewer.isCompoundLibrary}"
+    />
+  </h:form>
   
   <h:form id="loadLibraryContentsForm">
     <t:panelGroup visibleOnUserRole="librariesAdmin">

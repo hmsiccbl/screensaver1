@@ -59,14 +59,5 @@
     </t:dataScroller>
 
   </h:form>
-  
-  <h:form id="commandForm">
-    <h:commandButton id="downloadCommand"
-      actionListener="#{rnaiLibraryContentsImporter.downloadErrorAnnotatedWorkbookListener}"
-      value="View Error-Annotated Workbook"
-      rendered="#{rnaiLibraryContentsImporter.rnaiLibraryContentsParser.hasErrors}" styleClass="command" />
-  </h:form>
-
-
 
 </f:subview>

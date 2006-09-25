@@ -63,6 +63,14 @@
       <property-name>rnaiLibraryContentsImporter</property-name>
       <value>#{rnaiLibraryContentsImporter}</value>
     </managed-property>
+    <managed-property>
+      <property-name>searchResultsRegistry</property-name>
+      <value>#{searchResultsRegistry}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>wellViewer</property-name>
+      <value>#{wellViewer}</value>
+    </managed-property>
   </managed-bean>
   
   <managed-bean>
@@ -286,6 +294,21 @@
       <redirect/>
     </navigation-case>
     <navigation-case>
+      <from-outcome>goWellSearchResults</from-outcome>
+      <to-view-id>/libraries/wellSearchResults</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>showLibrary</from-outcome>
+      <to-view-id>/libraries/libraryViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>showWell</from-outcome>
+      <to-view-id>/libraries/wellViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>goBrowseScreens</from-outcome>
       <to-view-id>/screens/screensBrowser</to-view-id>
       <redirect/>
@@ -348,15 +371,6 @@
   </navigation-rule>
 
   <navigation-rule>
-    <from-view-id>/libraries/librariesBrowser.jsp</from-view-id>
-    <navigation-case>
-      <from-outcome>showLibrary</from-outcome>
-      <to-view-id>/libraries/libraryViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-  </navigation-rule>
-
-  <navigation-rule>
     <from-view-id>/screens/screensBrowser.jsp</from-view-id>
     <navigation-case>
       <from-outcome>showScreen</from-outcome>
@@ -367,11 +381,6 @@
 
   <navigation-rule>
     <from-view-id>/screenresults/screenResultViewer.jsp</from-view-id>
-    <navigation-case>
-      <from-outcome>showWell</from-outcome>
-      <to-view-id>/libraries/wellViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
     <navigation-case>
       <from-outcome>viewHeatMaps</from-outcome>
       <to-view-id>/screenresults/heatMapViewer</to-view-id>

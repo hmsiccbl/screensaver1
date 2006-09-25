@@ -4,14 +4,15 @@
 
   <h:form id="wellForm">
 
-    <h:panelGroup>
+    <h:panelGroup rendered="#{wellViewer.displayDone}">
       <h:commandButton id="doneCommand" action="#{wellViewer.done}" value="Done" />
     </h:panelGroup>
 
     <t:div />
 
     <h:panelGrid columns="2" styleClass="standardTable">
-      <h:outputText id="well" value="[Display Well Here]" />
+      <h:outputText id="plate" value="#{wellViewer.well.plateNumber}" />
+      <h:outputText id="well" value="#{wellViewer.well.wellName}" />
     </h:panelGrid>
 
     <t:div />

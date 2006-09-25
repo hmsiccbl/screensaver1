@@ -168,6 +168,9 @@ implements ScreensaverConstants
    */
   public int getFirstIndex()
   {
+    if (_resultsSize == 0) {    // special case if results are empty
+      return 0;
+    }
     return _currentIndex * _itemsPerPage + 1;
   }
   

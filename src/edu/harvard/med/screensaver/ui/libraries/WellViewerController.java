@@ -9,12 +9,30 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractController;
 
 public class WellViewerController extends AbstractController
 {
+  private Well well;
 
-  // JSF application methods
+  public Well getWell()
+  {
+    return well;
+  }
+
+  public void setWell(Well well)
+  {
+    this.well = well;
+  }
+
+  
+  // NOTE: I turned off the Done button for the time being. Sorry! -s
+  
+  public boolean getDisplayDone()
+  {
+    return false;
+  }
   
   public String done()
   {

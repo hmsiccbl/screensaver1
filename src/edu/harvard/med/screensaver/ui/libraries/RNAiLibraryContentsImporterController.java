@@ -80,6 +80,9 @@ public class RNAiLibraryContentsImporterController extends AbstractController
   public void setLibraryViewer(LibraryViewerController libraryViewer)
   {
     _libraryViewer = libraryViewer;
+    _library = _libraryViewer.getLibrary();
+    _uploadedFile = null;
+    _rnaiLibraryContentsParser.clearErrors();
   }
 
   public void setUploadedFile(UploadedFile uploadedFile)
@@ -151,12 +154,7 @@ public class RNAiLibraryContentsImporterController extends AbstractController
   {
     log.error("xxx in submit!");
     try {
-      
-      if (_uploadedFile == null) {
-        // TODO: HANDLE
-      }
-      _uploadedFile.getInputStream();
-      if (_uploadedFile.getInputStream().available() > 0) {
+      if (_uploadedFile != null && _uploadedFile.getInputStream().available() > 0) {
         log.error("is available!");
         _rnaiLibraryContentsParser.setSilencingReagentType(_silencingReagentType);
         _rnaiLibraryContentsParser.parseLibraryContents(
