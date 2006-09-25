@@ -74,7 +74,7 @@ public class MenuController extends AbstractController
   public String logout()
   {
     log.info("logout for session "  + getHttpSession().getId());
-    closeHttpAndHibernateSessions();
+    closeHttpAndDatabaseSessions();
     return LOGOUT_ACTION_RESULT;
   }
   

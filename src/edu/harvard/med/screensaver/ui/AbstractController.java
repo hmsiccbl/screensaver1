@@ -14,7 +14,9 @@ import java.util.Map;
 
 import javax.faces.application.Application;
 import javax.faces.application.FacesMessage;
+import javax.faces.application.ViewHandler;
 import javax.faces.component.UIComponent;
+import javax.faces.component.UIViewRoot;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
@@ -22,8 +24,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
-import edu.harvard.med.screensaver.ui.util.ScreensaverSessionManagementFilter;
 import edu.harvard.med.screensaver.ui.util.Messages;
+import edu.harvard.med.screensaver.ui.util.ScreensaverSessionManagementFilter;
 
 import org.apache.log4j.Logger;
 
@@ -370,14 +372,52 @@ public abstract class AbstractController implements ScreensaverConstants
                                   Boolean.TRUE);
   }
   
-  public void closeHttpAndHibernateSessions()
+  public void closeHttpAndDatabaseSessions()
   {
     log.debug("requesting release of HTTP and Hibernate sessions");
     getHttpSession().setAttribute(ScreensaverSessionManagementFilter.CLOSE_HTTP_AND_HIBERNATE_SESSIONS,
                                   Boolean.TRUE);
   }
   
-  
+  /**
+   * Each JSF component maintains "local" state its value, which is in addition
+   * to the state that is maintained by the application's model. This local
+   * state is used during the JSF validation phase, and eventually is copied to
+   * the application's model state later during the JSF Update Model phase. This
+   * local state is used to repopulate the controls when a view is re-rendered
+   * (after an initial visit). I believe this local state also corresponds to
+   * more than just the value, and, where applicable, includes other rendering
+   * state such as item selections, scroll bar state, etc. Sometimes a view will
+   * want to redisplay itself in a completely re-initialized state, where the
+   * values of the components are freshly read from the model, and all other
+   * rendering state. Calling this method will cause the view to be recreated;
+   * the existing view's component tree, and thus any state stored in that tree,
+   * will be thrown away.
+   * 
+   * @param renderResponseImmediately true, if you want
+   *          FacesContext.renderResponse() to be called after the view has been
+   *          recreated. Set to false if you intend to modify the new view after
+   *          this method call (e.g., setting a message, or updating some of the
+   *          component's values manually).
+   * @motivation Components that hang onto Hibernate proxy objects (e.g. lazy
+   *             instantiation collections), may become invalid after their
+   *             parent entity is reloaded in response to a concurrent
+   *             modification exception. We must recreate the view's component
+   *             tree to avoid accessing these now-invalid HIbernate proxy
+   *             objects.
+   */
+  public void recreateView(boolean renderResponseImmediately)
+  {
+    FacesContext facesCtx = getFacesContext();
+    log.debug("recreating JSF view ID " + facesCtx.getViewRoot().getViewId());
+    ViewHandler viewHandler = getApplicationContext().getViewHandler();
+    UIViewRoot recreatedViewRoot = viewHandler.createView(facesCtx,
+                                                          facesCtx.getViewRoot().getViewId());
+    facesCtx.setViewRoot(recreatedViewRoot);
+    if (renderResponseImmediately) {
+      facesCtx.renderResponse();
+    }
+  }
   
   // private methods
   

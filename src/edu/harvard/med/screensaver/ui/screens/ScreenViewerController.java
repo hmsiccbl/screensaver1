@@ -25,6 +25,7 @@ import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 import org.apache.log4j.Logger;
+import org.springframework.dao.ConcurrencyFailureException;
 
 public class ScreenViewerController extends AbstractController
 {
@@ -37,7 +38,7 @@ public class ScreenViewerController extends AbstractController
 
   private List<ScreeningRoomUser> _selectedCollaborators;
   private List<ScreeningRoomUser> _selectedNonCollaborators;
-  
+
 
   /* Property getter/setter methods */
   
@@ -169,11 +170,15 @@ public class ScreenViewerController extends AbstractController
     try {
       _dao.persistEntity(_screen);
     }
-    catch (Exception e) {
-      String msg = "error during entity save/create: " + e.getMessage();
-      log.info(msg);
-      FacesContext.getCurrentInstance().addMessage("screenForm", new FacesMessage(msg));
-      return REDISPLAY_PAGE_ACTION_RESULT; // redisplay
+    catch (ConcurrencyFailureException e) {
+      _screen = _dao.findEntityById(_screen.getClass(), _screen.getEntityId());
+      recreateView(false);
+      showMessage("concurrentModificationConflict");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    catch (Throwable e) {
+      reportSystemError(e);
+      return REDISPLAY_PAGE_ACTION_RESULT;
     }
     return DONE_ACTION_RESULT;
   }
