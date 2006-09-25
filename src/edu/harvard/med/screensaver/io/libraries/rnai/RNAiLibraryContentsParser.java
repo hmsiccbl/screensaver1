@@ -46,8 +46,6 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
   private static final Logger log = Logger.getLogger(RNAiLibraryContentsParser.class);
   public static final SilencingReagentType DEFAULT_SILENCING_REAGENT_TYPE =
     SilencingReagentType.SIRNA;
-  public static final SilencingReagentType DEFAULT_UNKNOWN_SILENCING_REAGENT_TYPE =
-    SilencingReagentType.POOL_OF_UNKNOWN_SIRNAS;
 
   
   // private instance fields
@@ -61,8 +59,6 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
   private NCBIGeneInfoProvider _geneInfoProvider;
   private ParsedEntitiesMap _parsedEntitiesMap;
   private SilencingReagentType _silencingReagentType = DEFAULT_SILENCING_REAGENT_TYPE;
-  private SilencingReagentType _unknownSilencingReagentType =
-    DEFAULT_UNKNOWN_SILENCING_REAGENT_TYPE;
   
   
   // public constructor and instance methods
@@ -75,16 +71,6 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
   {
     _dao = dao;
   }
-  
-  public SilencingReagentType getDefaultSilencingReagentType()
-  {
-    return DEFAULT_SILENCING_REAGENT_TYPE;
-  }
-
-  public SilencingReagentType getDefaultUnknownSilencingReagentType()
-  {
-    return DEFAULT_UNKNOWN_SILENCING_REAGENT_TYPE;
-  }
 
   /**
    * Get the {@link SilencingReagentType} for the {@link SilencingReagent SilencingReagents}
@@ -92,7 +78,8 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
    * @return the SilencingReagentType for the SilencingReagents
    * in this RNAi library.
    */
-  public SilencingReagentType getSilencingReagentType() {
+  public SilencingReagentType getSilencingReagentType()
+  {
     return _silencingReagentType;
   }
 
@@ -102,32 +89,11 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
    * @param reagentType the SilencingReagentType for the SilencingReagents
    * in this RNAi library.
    */
-  public void setSilencingReagentType(SilencingReagentType reagentType) {
+  public void setSilencingReagentType(SilencingReagentType reagentType)
+  {
     _silencingReagentType = reagentType;
   }
 
-  /**
-   * Get the {@link SilencingReagentType} used for {@link SilencingReagent SilencingReagents}
-   * when the sequence(s) are unknown.
-   * @return the SilencingReagentType used for SilencingReagents
-   * when the sequence(s) are unknown.
-   */
-  public SilencingReagentType getUnknownSilencingReagentType() {
-    return _unknownSilencingReagentType;
-  }
-
-  /**
-   * Set the {@link SilencingReagentType} used for {@link SilencingReagent SilencingReagents}
-   * when the sequence(s) are unknown.
-   * @param silencingReagentType the SilencingReagentType to use for SilencingReagents
-   * when the sequence(s) are unknown.
-   */
-  public void setUnknownSilencingReagentType(
-    SilencingReagentType silencingReagentType)
-  {
-    _unknownSilencingReagentType = silencingReagentType;
-  }
-  
   /**
    * Load library contents (either partial or complete) from an input
    * stream of an Excel spreadsheet into a library.

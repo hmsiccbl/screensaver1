@@ -329,9 +329,8 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     
     assertEquals("well A09 has 1 silencing reagent", 1, a09.getSilencingReagents().size());
     SilencingReagent a09reagent = a09.getSilencingReagents().iterator().next();
-    assertEquals("a09 silencing reagent type",
-      SilencingReagentType.POOL_OF_UNKNOWN_SIRNAS,
-      a09reagent.getSilencingReagentType());
+    assertTrue("a09 is pool of unknown sequences",
+      a09reagent.isPoolOfUnknownSequences());
     assertEquals("a09 silencing reagent sequence",
       "",
       a09reagent.getSequence());

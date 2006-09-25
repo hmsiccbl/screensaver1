@@ -19,31 +19,8 @@
         />
         <h:selectOneMenu
           id="silencingReagentType"
-          value="#{rnaiLibraryContentsImporter.rnaiLibraryContentsParser.defaultSilencingReagentType}"
+          value="#{rnaiLibraryContentsImporter.rnaiLibraryContentsParser.silencingReagentType}"
           valueChangeListener="#{rnaiLibraryContentsImporter.silencingReagentTypeListener}"
-          onchange="this.previousSibling.click();"
-          converter="SilencingReagentTypeConverter"
-          styleClass="input"
-        >
-          <f:selectItems value="#{rnaiLibraryContentsImporter.silencingReagentTypeSelections}" />
-        </h:selectOneMenu>
-      </t:panelGroup>
-      
-      <t:outputLabel
-        for="unknownSilencingReagentType"
-        value="Unknown silencing reagent type:"
-      />
-      <t:panelGroup>
-        <h:commandButton
-          id="updateUnknownSilencingReagentType"
-          value="updateUnknownSilencingReagentType"
-          action="#{rnaiLibraryContentsImporter.update}"
-          style="display: none"
-        />
-        <h:selectOneMenu
-          id="unknownSilencingReagentType"
-          value="#{rnaiLibraryContentsImporter.rnaiLibraryContentsParser.defaultUnknownSilencingReagentType}"
-          valueChangeListener="#{rnaiLibraryContentsImporter.unknownSilencingReagentTypeListener}"
           onchange="this.previousSibling.click();"
           converter="SilencingReagentTypeConverter"
           styleClass="input"

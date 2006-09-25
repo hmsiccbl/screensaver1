@@ -43,12 +43,13 @@ public class SilencingReagent extends AbstractEntity
   private SilencingReagentType _silencingReagentType;
   private String _sequence;
   private Set<String> _nonTargettedGenbankAccessionNumbers = new HashSet<String>();
+  private boolean _isPoolOfUnknownSequences;
 
 
-  // public constructor
+  // public constructors
 
   /**
-   * Constructs an initialized <code>SilencingReagent</code> object.
+   * Construct an initialized <code>SilencingReagent</code> object.
    *
    * @param gene the gene
    * @param silencingReagentType the silencing reagent type
@@ -59,11 +60,29 @@ public class SilencingReagent extends AbstractEntity
     SilencingReagentType silencingReagentType,
     String sequence)
   {
+    this(gene, silencingReagentType, sequence, false);
+  }
+
+
+  /**
+   * Construct an initialized <code>SilencingReagent</code> object.
+   *
+   * @param gene the gene
+   * @param silencingReagentType the silencing reagent type
+   * @param sequence the sequence
+   * @param isPoolOfUnknownSequences
+   */
+  public SilencingReagent(
+    Gene gene,
+    SilencingReagentType silencingReagentType,
+    String sequence,
+    boolean isPoolOfUnknownSequences)
+  {
     _gene = gene;
     _silencingReagentType = silencingReagentType;
     _sequence = sequence;
+    _isPoolOfUnknownSequences = isPoolOfUnknownSequences;
   }
-
 
   // public methods
 
@@ -233,8 +252,24 @@ public class SilencingReagent extends AbstractEntity
     return _nonTargettedGenbankAccessionNumbers.remove(nonTargettedGenbankAccessionNumber);
   }
 
+  /**
+   * Get the isPoolOfUnknownSequences.
+   * @return the isPoolOfUnknownSequences
+   * @hibernate.property not-null="true"
+   */
+  public boolean isPoolOfUnknownSequences()
+  {
+    return _isPoolOfUnknownSequences;
+  }
 
-  // protected methods
+  /**
+   * Set the isPoolOfUnknownSequences.
+   * @param isPoolOfUnknownSequences the isPoolOfUnknownSequences
+   */
+  public void setPoolOfUnknownSequences(boolean isPoolOfUnknownSequences)
+  {
+    _isPoolOfUnknownSequences = isPoolOfUnknownSequences;
+  }
 
   /**
    * A business key class for the silencing reagent.

@@ -26,8 +26,7 @@ public enum SilencingReagentType implements VocabularyTerm
   SIRNA("siRNA"),
   SHRNA("shRNA"),
   DSRNA("dsRNA"),
-  ESIRNA("esiRNA"),
-  POOL_OF_UNKNOWN_SIRNAS("pool of unknown siRNAs")
+  ESIRNA("esiRNA")
   ;
 
  

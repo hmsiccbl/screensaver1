@@ -48,8 +48,6 @@ public class RNAiLibraryContentsImporterController extends AbstractController
   private Library _library;
   private SilencingReagentType _silencingReagentType =
     RNAiLibraryContentsParser.DEFAULT_SILENCING_REAGENT_TYPE;
-  private SilencingReagentType _unknownSilencingReagentType =
-    RNAiLibraryContentsParser.DEFAULT_UNKNOWN_SILENCING_REAGENT_TYPE;
 
 
   // backing bean property getter and setter methods
@@ -104,6 +102,24 @@ public class RNAiLibraryContentsImporterController extends AbstractController
     _library = library;
   }
 
+  /**
+   * Get the silencingReagentType.
+   * @return the silencingReagentType
+   */
+  public SilencingReagentType getSilencingReagentType()
+  {
+    return _silencingReagentType;
+  }
+
+  /**
+   * Set the silencingReagentType.
+   * @param silencingReagentType the silencingReagentType
+   */
+  public void setSilencingReagentType(SilencingReagentType silencingReagentType)
+  {
+    _silencingReagentType = silencingReagentType;
+  }
+
   public List<SelectItem> getSilencingReagentTypeSelections()
   {
     List<SilencingReagentType> selections = new ArrayList<SilencingReagentType>();
@@ -143,7 +159,6 @@ public class RNAiLibraryContentsImporterController extends AbstractController
       if (_uploadedFile.getInputStream().available() > 0) {
         log.error("is available!");
         _rnaiLibraryContentsParser.setSilencingReagentType(_silencingReagentType);
-        _rnaiLibraryContentsParser.setUnknownSilencingReagentType(_unknownSilencingReagentType);
         _rnaiLibraryContentsParser.parseLibraryContents(
           _library,
           new File(_uploadedFile.getName()), _uploadedFile.getInputStream());
@@ -174,10 +189,5 @@ public class RNAiLibraryContentsImporterController extends AbstractController
   public void silencingReagentTypeListener(ValueChangeEvent event)
   {
     _silencingReagentType = (SilencingReagentType) event.getNewValue();
-  }
-  
-  public void unknownSilencingReagentTypeListener(ValueChangeEvent event)
-  {
-    _unknownSilencingReagentType = (SilencingReagentType) event.getNewValue();
   }
 }

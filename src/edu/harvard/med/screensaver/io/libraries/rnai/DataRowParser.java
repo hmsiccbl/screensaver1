@@ -317,19 +317,17 @@ public class DataRowParser
    */
   private Set<SilencingReagent> getSilencingReagents(Gene gene)
   {
-    SilencingReagentType unknownSilencingReagentType =
-      _parser.getUnknownSilencingReagentType();
     SilencingReagentType silencingReagentType = _parser.getSilencingReagentType();
     Set<SilencingReagent> silencingReagents = new HashSet<SilencingReagent>();
     String sequences = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.SEQUENCES),
       _rowIndex).getString();
     if (sequences == null || sequences.equals("")) {
-      silencingReagents.add(getSilencingReagent(gene, unknownSilencingReagentType, ""));
+      silencingReagents.add(getSilencingReagent(gene, silencingReagentType, "", true));
     }
     else {
       for (String sequence : sequences.split("[,;]")) {
-        silencingReagents.add(getSilencingReagent(gene, silencingReagentType, sequence));
+        silencingReagents.add(getSilencingReagent(gene, silencingReagentType, sequence, false));
       }
     }
     return silencingReagents;
@@ -338,12 +336,17 @@ public class DataRowParser
   private SilencingReagent getSilencingReagent(
     Gene gene,
     SilencingReagentType silencingReagentType,
-    String sequence)
+    String sequence,
+    boolean isPoolOfUnknownSequences)
   {
     SilencingReagent silencingReagent =
       getExistingSilencingReagent(gene, silencingReagentType, sequence);
     if (silencingReagent == null) {
-      silencingReagent = new SilencingReagent(gene, silencingReagentType, sequence);
+      silencingReagent = new SilencingReagent(
+        gene,
+        silencingReagentType,
+        sequence,
+        isPoolOfUnknownSequences);
       _parsedEntitiesMap.addSilencingReagent(silencingReagent);
     }
     return silencingReagent;
