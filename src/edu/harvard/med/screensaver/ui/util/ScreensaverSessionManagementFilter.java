@@ -107,7 +107,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
     log.info("destroying filter");
     for (Iterator iter = _httpSession2HibernateSession.values().iterator(); iter.hasNext();) {
       Session hibSession = (Session) iter.next();
-      log.info("closing Hibernate session " + hibSession);
+      log.info("closing Hibernate session " + SessionFactoryUtils.toString(hibSession));
       hibSession.close();
     }
   }
@@ -133,11 +133,14 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
     HttpServletRequest request, 
     HttpServletResponse response, 
     FilterChain filterChain)
-  throws ServletException, IOException {
-
-    SessionFactory sessionFactory = lookupSessionFactory();
+  throws ServletException, IOException 
+  {
     HttpSession httpSession = request.getSession();
     String httpSessionId = httpSession.getId();
+    
+    log.info(">>>> Screensaver STARTING to process HTTP request for session " + httpSessionId + " @ " + request.getRequestURI());
+
+    SessionFactory sessionFactory = lookupSessionFactory();
 
     Session hibSession = getOrCreateHibernateSession(sessionFactory, httpSessionId);
     String hibSessionLogId = SessionFactoryUtils.toString(hibSession);
@@ -171,9 +174,14 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
           log.info("closed HTTP session " + httpSessionId);
         }
       }
+      log.debug("Hibernate session " + hibSessionLogId + 
+        " for HTTP session " + httpSessionId +
+        " is " + (hibSession.isOpen() ? "open" : "closed"));
       assert !hibSession.isOpen() : 
         "Hibernate session " + hibSessionLogId + 
         " was not closed for HTTP session " + httpSessionId;
+      
+      log.info("<<<< Screensaver FINISHED processing HTTP request for session " + httpSessionId + " @ " + request.getRequestURI());
     }
   }
 
