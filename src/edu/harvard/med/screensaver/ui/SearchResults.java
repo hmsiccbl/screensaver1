@@ -408,14 +408,14 @@ implements ScreensaverConstants
   abstract protected Comparator<E> getComparatorForColumnName(String columnName);
   
   
-  // private instance methods
+  // protected instance methods
   
   /**
    * Get the entity in the current cell.
    * @return the entity in the current cell
    */
   @SuppressWarnings("unchecked")
-  private E getEntity()
+  protected E getEntity()
   {
     return (E) getDataModel().getRowData();
   }

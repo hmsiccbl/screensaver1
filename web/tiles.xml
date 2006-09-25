@@ -148,6 +148,17 @@
       name="body"
       value="/libraries/wellViewer.jsp" />
   </definition>
+   
+  <definition
+    name="/libraries/geneViewer.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="Gene Viewer"/>
+    <put
+      name="body"
+      value="/libraries/geneViewer.jsp" />
+  </definition>
   
   
   <!-- screenresults tiles -->

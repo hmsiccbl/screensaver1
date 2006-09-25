@@ -34,6 +34,7 @@ public class LibraryViewerController extends AbstractController
   private RNAiLibraryContentsImporterController _rnaiLibraryContentsImporter;
   private SearchResultsRegistryController _searchResultsRegistry;
   private WellViewerController _wellViewerController;
+  private GeneViewerController _geneViewerController;
   private String _usageMode; // "create" or "edit"
   private boolean _advancedMode;
   
@@ -88,6 +89,16 @@ public class LibraryViewerController extends AbstractController
   public void setWellViewer(WellViewerController wellViewerController)
   {
     _wellViewerController = wellViewerController;
+  }
+
+  public GeneViewerController getGeneViewer()
+  {
+    return _geneViewerController;
+  }
+
+  public void setGeneViewer(GeneViewerController geneViewerController)
+  {
+    _geneViewerController = geneViewerController;
   }
 
   public void setUsageMode(String usageMode)
@@ -177,10 +188,11 @@ public class LibraryViewerController extends AbstractController
   public String viewRNAiLibraryContents()
   {
     if (_searchResultsRegistry.getSearchResultsRegistrant(Library.class) != this) {
-      SearchResults<Well> searchResults = new WellSearchResults(
+      SearchResults<Well> searchResults = new RNAiWellSearchResults(
         new ArrayList<Well>(_library.getWells()),
         this,
-        _wellViewerController);
+        _wellViewerController,
+        _geneViewerController);
       _searchResultsRegistry.registerSearchResults(Well.class, this, searchResults);
     }
     _searchResultsRegistry.setCurrentSearchType(Well.class);
