@@ -183,4 +183,6 @@ public interface DAO
    * @return a List of {@link ScreeningRoomUsers}s.
    */
   public List<ScreeningRoomUser> findAllLabHeads();
+
+  void refreshEntity(AbstractEntity e);
 }

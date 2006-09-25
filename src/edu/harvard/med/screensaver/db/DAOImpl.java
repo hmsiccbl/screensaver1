@@ -78,13 +78,31 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
           throws org.hibernate.HibernateException, java.sql.SQLException
         {
           try {
-            return session.load(entityClass, id);
+            return session.get(entityClass, id);
           }
           catch (ObjectNotFoundException e) {
             return null;
           }
         } 
       });
+  }
+  
+  public void refreshEntity(final AbstractEntity e)
+  {
+    getHibernateTemplate().execute(new HibernateCallback()
+    {
+      public Object doInHibernate(org.hibernate.Session session)
+        throws org.hibernate.HibernateException, java.sql.SQLException
+      {
+        _logger.debug("entity " + e + "is " +
+                      (session.contains(e) ? "" : "NOT ") +
+                      "already in Hibernate session cache");
+        session.load(e, e.getEntityId());
+        _logger.error("entity " + e + "is " +
+                      (session.contains(e) ? "now " : "STILL NOT ") + "in Hibernate session cache");
+        return e;
+      }
+    });
   }
   
   @SuppressWarnings("unchecked")

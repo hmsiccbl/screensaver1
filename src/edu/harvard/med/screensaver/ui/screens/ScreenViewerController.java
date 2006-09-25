@@ -171,7 +171,7 @@ public class ScreenViewerController extends AbstractController
       _dao.persistEntity(_screen);
     }
     catch (ConcurrencyFailureException e) {
-      _screen = _dao.findEntityById(_screen.getClass(), _screen.getEntityId());
+      _dao.refreshEntity(_screen);
       recreateView(false);
       showMessage("concurrentModificationConflict");
       return REDISPLAY_PAGE_ACTION_RESULT;

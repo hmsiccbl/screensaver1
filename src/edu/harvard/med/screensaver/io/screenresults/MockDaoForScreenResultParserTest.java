@@ -107,4 +107,8 @@ public class MockDaoForScreenResultParserTest implements DAO
     return null;
   }
 
+  public void refreshEntity(AbstractEntity e)
+  {
+  }
+
 }
