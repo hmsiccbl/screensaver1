@@ -56,7 +56,9 @@ class RNAiLibraryColumnHeaders
   private HSSFRow _columnHeaderRow;
   private ParseErrorManager _errorManager;
   private Cell.Factory _cellFactory;
-  private Map<RequiredRNAiLibraryColumn,Integer> _columnIndexes = new HashMap<RequiredRNAiLibraryColumn,Integer>();
+  private String _sheetName;
+  private Map<RequiredRNAiLibraryColumn,Integer> _columnIndexes =
+    new HashMap<RequiredRNAiLibraryColumn,Integer>();
   
   
   // package constructor and methods
@@ -70,11 +72,13 @@ class RNAiLibraryColumnHeaders
   RNAiLibraryColumnHeaders(
     HSSFRow columnHeaderRow,
     ParseErrorManager errorManager,
-    Cell.Factory cellFactory)
+    Cell.Factory cellFactory,
+    String sheetName)
   {
     _columnHeaderRow = columnHeaderRow;
     _errorManager = errorManager;
     _cellFactory = cellFactory;
+    _sheetName = sheetName;
   }
   
   /**
@@ -178,8 +182,7 @@ class RNAiLibraryColumnHeaders
       if (_columnIndexes.get(column) != null) {
         _errorManager.addError(
           "required column \"" + column.getDefaultColumnHeader() +
-          "\" matches multiple column headers in the same sheet (columns " +
-          _columnIndexes.get(column) + " and " + i + ")",
+          "\" matches multiple column headers in the same sheet",
           cell);
         hasNoDuplicateHeaders = false;
       }
@@ -200,7 +203,7 @@ class RNAiLibraryColumnHeaders
       if (_columnIndexes.get(column) == null) {
         _errorManager.addError(
           "required column \"" + column.getDefaultColumnHeader() +
-          "\" does not match any column headers in sheet");
+          "\" does not match any column headers in sheet: " + _sheetName);
         hasRequiredHeaders = false;
       }
     }

@@ -244,8 +244,11 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
       _errorManager.addError("ecountered a sheet without any rows: " + sheetName);
       return null;
     }
-    RNAiLibraryColumnHeaders columnHeaders =
-      new RNAiLibraryColumnHeaders(columnHeaderRow, _errorManager, cellFactory);
+    RNAiLibraryColumnHeaders columnHeaders = new RNAiLibraryColumnHeaders(
+      columnHeaderRow,
+      _errorManager,
+      cellFactory,
+      sheetName);
     if (! columnHeaders.parseColumnHeaders()) {
       _errorManager.addError(
         "couldn't import sheet contents due to problems with column headers: " + sheetName);
