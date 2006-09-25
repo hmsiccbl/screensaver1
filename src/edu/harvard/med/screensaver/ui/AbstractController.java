@@ -22,14 +22,21 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.ui.util.ScreensaverSessionManagementFilter;
 import edu.harvard.med.screensaver.ui.util.Messages;
-import edu.harvard.med.screensaver.ui.util.HibernateSessionManagementFilter;
 
 import org.apache.log4j.Logger;
 
 /**
  * A base Controller class for JSF backing beans (beans that handle JSF actions
- * and events).
+ * and events). Provides convenience methods for
+ * <ul>
+ * <li>accessing servlet state</li>
+ * <li>accessing JSF state and current view's components</li>
+ * <li>reporting system errors back to the user</li>
+ * <li>obtaining internationalized message strings (not ready for prime-time)</li>
+ * <li>closing Hibernate and HTTP sessions</li>
+ * </ul>
  * 
  * @author ant
  */
@@ -356,17 +363,18 @@ public abstract class AbstractController implements ScreensaverConstants
     reportSystemError(throwable.getMessage());
   }
   
-  public void closeUserSession()
+  public void closeDatabaseSession()
   {
-    closeHttpAndHibernateSessions();
-    
-    //getHttpSession().invalidate();
+    log.debug("requesting release of Hibernate session");
+    getHttpSession().setAttribute(ScreensaverSessionManagementFilter.CLOSE_HIBERNATE_SESSION,
+                                  Boolean.TRUE);
   }
-
+  
   public void closeHttpAndHibernateSessions()
   {
     log.debug("requesting release of HTTP and Hibernate sessions");
-    getHttpSession().setAttribute(HibernateSessionManagementFilter.RELEASE_HTTP_AND_HIBERNATE_SESSIONS, Boolean.TRUE);
+    getHttpSession().setAttribute(ScreensaverSessionManagementFilter.CLOSE_HTTP_AND_HIBERNATE_SESSIONS,
+                                  Boolean.TRUE);
   }
   
   
