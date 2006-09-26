@@ -3,37 +3,23 @@
 
 <f:subview id="rnaiLibraryContentsUploaderSubview">
 
-  <h:form id="silencingReagentTypeForm">
+  <h:form id="silencingReagentTypeForm" enctype="multipart/form-data">
     <t:panelGrid columns="2">
 
       <t:outputLabel
         for="silencingReagentType"
         value="Silencing reagent type:"
       />
-      <t:panelGroup>
-        <h:commandButton
-          id="updateSilencingReagentType"
-          value="updateSilencingReagentType"
-          action="#{rnaiLibraryContentsImporter.update}"
-          style="display: none"
+      <h:selectOneMenu
+        id="silencingReagentType"
+        value="#{rnaiLibraryContentsImporter.rnaiLibraryContentsParser.silencingReagentType}"
+        converter="SilencingReagentTypeConverter"
+        styleClass="input"
+      >
+        <f:selectItems
+          value="#{rnaiLibraryContentsImporter.silencingReagentTypeSelections}"
         />
-        <h:selectOneMenu
-          id="silencingReagentType"
-          value="#{rnaiLibraryContentsImporter.rnaiLibraryContentsParser.silencingReagentType}"
-          valueChangeListener="#{rnaiLibraryContentsImporter.silencingReagentTypeListener}"
-          onchange="this.previousSibling.click();"
-          converter="SilencingReagentTypeConverter"
-          styleClass="input"
-        >
-          <f:selectItems value="#{rnaiLibraryContentsImporter.silencingReagentTypeSelections}" />
-        </h:selectOneMenu>
-      </t:panelGroup>
-
-    </t:panelGrid>
-  </h:form>
-    
-  <h:form id="importForm" enctype="multipart/form-data">
-    <t:panelGrid columns="2">
+      </h:selectOneMenu>
 
       <t:outputLabel
         for="uploadRNAiLibraryContentsFile"

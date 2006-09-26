@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
@@ -152,10 +151,8 @@ public class RNAiLibraryContentsImporterController extends AbstractController
   
   public String submit()
   {
-    log.error("xxx in submit!");
     try {
       if (_uploadedFile != null && _uploadedFile.getInputStream().available() > 0) {
-        log.error("is available!");
         _rnaiLibraryContentsParser.setSilencingReagentType(_silencingReagentType);
         _rnaiLibraryContentsParser.parseLibraryContents(
           _library,
@@ -163,29 +160,24 @@ public class RNAiLibraryContentsImporterController extends AbstractController
         _dao.persistEntity(_library);
       }
       else {
-        log.error("not available!");
-        showMessage("badUploadedFile", "uploadRNAiLibraryContentsFile");
+        // TODO: connect this back to component "uploadRNAiLibraryContentsFile" when
+        // messages connect to components again
+        showMessage("badUploadedFile");
         return REDISPLAY_PAGE_ACTION_RESULT;
       }
 
       if (_rnaiLibraryContentsParser.getHasErrors()) {
-        log.error("has errors!");
         return ERROR_ACTION_RESULT;
       }
       else {
-        log.error("has success!");
+        // TODO: check that this works when messages connect to components again
+        showMessage("uploadRNAiLibraryContentsFile", "libraryViewer");
         return SUCCESS_ACTION_RESULT;
       }
     }
     catch (IOException e) {
-      log.error("system error!");
       reportSystemError(e);
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-  }
-  
-  public void silencingReagentTypeListener(ValueChangeEvent event)
-  {
-    _silencingReagentType = (SilencingReagentType) event.getNewValue();
   }
 }
