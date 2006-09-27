@@ -20,6 +20,7 @@
     class="edu.harvard.med.screensaver.db.OrchestraHackedPropertyPlaceholderConfigurer"
   >
     <property name="location" value="classpath:datasource.properties"/>
+    <property name="ignoreResourceNotFound" value="true"/>
     <!-- if datasource settings are available as environment variables, use them instead of datasource.properties file -->
     <property name="searchSystemEnvironment" value="true"/>
     <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
