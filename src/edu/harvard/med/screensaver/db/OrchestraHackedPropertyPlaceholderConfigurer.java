@@ -9,10 +9,18 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.beans.factory.config.PropertyResourceConfigurer;
 
 /**
  * A <code>PropertyPlaceholderConfigurer</code> that applies an extra filter to correctly
@@ -33,47 +41,62 @@ extends PropertyPlaceholderConfigurer
 
   private static Logger log = Logger
     .getLogger(OrchestraHackedPropertyPlaceholderConfigurer.class);
-
-  private static final String [] _propertiesToFixUp = {
-    "SCREENSAVER_PGSQL_SERVER",
-    "SCREENSAVER_PGSQL_DB",
-    "SCREENSAVER_PGSQL_USER",
-    "SCREENSAVER_PGSQL_PASSWORD",
-  };
   
   
-  // protected and private instance methods
+  // protected instance method
 
   protected void convertProperties(Properties properties)
   {
-    if (properties.getProperty(_propertiesToFixUp[0]) == null) {
+    if (properties.getProperty("SCREENSAVER_PGSQL_SERVER") == null) {
       
       // we have null values for the required datasource properties, so assume we are on
       // orchestra, and apply orchestra-specific method for obtaining them
       
       String catalinaBase = System.getenv("CATALINA_BASE");
-      log.debug("catalinaBase = " + catalinaBase);
-      if (! catalinaBase.matches("/www/[!/]/tomcat")) {
-        log.debug("catalinaBase doesnt match");
-
+      if (! catalinaBase.matches("/www/[^/]+/tomcat")) {
+        log.warn("We (admittedly not so cleverly) assumed that since the property " +
+          "\"SCREENSAVER_PGSQL_SERVER\" was not set, either in database.properties, or " +
+          "in the environment variables passed to the JVM, that this was an instance " +
+          "of Screensaver running on the orchestra webserver \"trumpet\". However, we " +
+          "also expect such instances to have a \"CATALINA_BASE\" environment variable " +
+          "passed to the JVM, whose value starts with \"/www/\", and ends with " +
+          "\"/tomcat\", and whose remainder is the site name. Unfortunately, our " +
+          "expectations in regards to the \"CATALINA_BASE\" environment variable " +
+          "failed to hold. In this situation, we are afraid we have absolutely no way of " +
+          "being able to appropriately set the datasource properties necessary for " +
+          "Screensaver to run. (The value we found for the \"CATALINA_BASE\" environment " +
+          "variable is \"" + catalinaBase + "\".)");
+        
         // well, it turns out we are not actually on orchestra, so give up 
         return;
       }
-      log.debug("catalinaBase matches");
-      String orchestraSite = catalinaBase.substring(5, catalinaBase.length() - 7);
-      log.debug("orch site = " + orchestraSite);
 
-      
-      for (String property : _propertiesToFixUp) {
-        fixUpProperty(property, properties);
+      // obscurely trim the "/www/" and "/tomcat" prefix and postfix to get the site name
+      String orchestraSite = catalinaBase.substring(5, catalinaBase.length() - 7);
+      String authFilename = "/opt/apache/conf/auth/" + orchestraSite;
+
+      // parse the datasource properties out of the file
+      try {
+        Pattern pattern = Pattern.compile("SetEnv\\s+(\\S+)\\s+(\\S+)");
+        File authFile = new File(authFilename);
+        FileInputStream authFileInputStream = new FileInputStream(authFile);
+        InputStreamReader authInputStreamReader = new InputStreamReader(authFileInputStream);
+        BufferedReader authBufferedReader = new BufferedReader(authInputStreamReader);
+        String line = authBufferedReader.readLine();
+        while (line != null) {
+          Matcher matcher = pattern.matcher(line);
+          if (matcher.matches()) {
+            String property = matcher.group(1);
+            String propertyValue = matcher.group(2);
+            properties.setProperty(property, propertyValue);
+          }
+          line = authBufferedReader.readLine();
+        }
+      }
+      catch (IOException e) {
+        log.warn("unable to read and parse the orchestra auth file", e);
       }
     }
-  }
-  
-  private void fixUpProperty(String property, Properties properties)
-  {
-    String propertyValue = properties.getProperty(property);
-    log.debug("HACK: " + property + " = " + propertyValue);
   }
 }
 
