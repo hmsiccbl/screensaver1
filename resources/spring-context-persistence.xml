@@ -17,7 +17,8 @@
   
   <bean
     id="dataSourceConfigurer"
-    class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    class="edu.harvard.med.screensaver.db.OrchestraHackedPropertyPlaceholderConfigurer"
+  >
     <property name="location" value="classpath:datasource.properties"/>
     <!-- if datasource settings are available as environment variables, use them instead of datasource.properties file -->
     <property name="searchSystemEnvironment" value="true"/>
