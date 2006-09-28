@@ -40,8 +40,8 @@ class SDRecordData
   String getIccbNumber() {
     return _iccbNumber;
   }
-  void setIccbNumber(String icbbNumber) {
-    _iccbNumber = icbbNumber;
+  void setIccbNumber(String iccbNumber) {
+    _iccbNumber = iccbNumber;
   }
   String getMolfile() {
     return _molfile;
