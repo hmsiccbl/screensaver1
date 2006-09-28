@@ -13,14 +13,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.List;
+
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
-
-import org.apache.log4j.Logger;
 
 
 public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
@@ -63,8 +64,10 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
       fail("file not found: " + filename);
     }
     library = sdfileCompoundLibraryContentsParser.parseLibraryContents(library, file, stream);
-    //List<SDFileParseError> errors = sdfileCompoundLibraryContentsParser.getErrors();
-    //assertEquals("workbook has 5 errors", 5, errors.size());
+    
+    List<SDFileParseError> errors = sdfileCompoundLibraryContentsParser.getErrors();
+    assertEquals("workbook has no errors", 0, errors.size());
     //ParseError error;
+    dao.persistEntity(library);
   }
 }
