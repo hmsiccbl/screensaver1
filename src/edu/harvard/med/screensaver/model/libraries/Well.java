@@ -52,6 +52,8 @@ public class Well extends AbstractEntity
   private WellType _wellType = WellType.EXPERIMENTAL;
   private Set<ResultValue> _resultValues = new HashSet<ResultValue>();
   private Set<CherryPick> _cherryPicks = new HashSet<CherryPick>();
+  private String _smiles;
+  private String _molfile;
 
 
   // public constructors and instance methods
@@ -240,7 +242,8 @@ public class Well extends AbstractEntity
    * 
    * @param wellName the new well name for the well
    */
-  public void setWellName(String wellName) {
+  public void setWellName(String wellName)
+  {
     _wellName = wellName;
   }
 
@@ -250,7 +253,8 @@ public class Well extends AbstractEntity
    * @return the ICCB number for the well
    * @hibernate.property type="text"
    */
-  public String getIccbNumber() {
+  public String getIccbNumber()
+  {
     return _iccbNumber;
   }
 
@@ -305,6 +309,48 @@ public class Well extends AbstractEntity
   public void setWellType(WellType wellType)
   {
     _wellType = wellType;
+  }
+  
+  /**
+   * Get the SMILES for the well.
+   * 
+   * @return the SMILES for the well
+   * @hibernate.property type="text"
+   */
+  public String getSmiles()
+  {
+    return _smiles;
+  }
+
+  /**
+   * Set the SMILES for the well.
+   * 
+   * @param smiles The new SMILES for the well
+   */
+  public void setSmiles(String smiles)
+  {
+    _smiles = smiles;
+  }
+
+  /**
+   * Get the molfile for the well.
+   * 
+   * @return the molfile for the well
+   * @hibernate.property type="text"
+   */
+  public String getMolfile()
+  {
+    return _molfile;
+  }
+
+  /**
+   * Set the molfile for the well.
+   * 
+   * @param molfile The new molfile for the well
+   */
+  public void setMolfile(String molfile)
+  {
+    _molfile = molfile;
   }
   
   /**
