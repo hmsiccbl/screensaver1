@@ -171,8 +171,9 @@ public class ScreenViewerController extends AbstractController
       _dao.persistEntity(_screen);
     }
     catch (ConcurrencyFailureException e) {
-      _dao.refreshEntity(_screen);
-      recreateView(false);
+      // TODO: handle this exception in a way that works with Hibernate
+      //_dao.refreshEntity(_screen);
+      //recreateView(false);
       showMessage("concurrentModificationConflict");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }

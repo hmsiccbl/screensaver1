@@ -184,5 +184,4 @@ public interface DAO
    */
   public List<ScreeningRoomUser> findAllLabHeads();
 
-  void refreshEntity(AbstractEntity e);
 }
