@@ -68,6 +68,19 @@ public class MolfileInterpreter
 
   private void initialize()
   {
+    BasicConformerMolecule molecule = getMoleculeFromMolfile();
+    _smiles = getSmilesForMolecule(molecule);
+    // TODO: get the rest of the compounds. choose the one that inherits the name and numbers
+  }
+
+  /**
+   * Get the molecule from the molfile. Return it.
+   * @return
+   * @throws IOException
+   * @throws MoleculeIOException
+   */
+  private BasicConformerMolecule getMoleculeFromMolfile()
+  {
     try {
       IOTypeHolder typeHolder = BasicIOTypeHolder.instance();
       BasicIOType sdfType = typeHolder.getIOType("SDF");
@@ -78,12 +91,7 @@ public class MolfileInterpreter
       
       BasicConformerMolecule molecule = new BasicConformerMolecule(sdfType, smilesType);
       reader.readNext(molecule);
-      
-      String moleculeAsString = molecule.toString();
-      Pattern pattern = Pattern.compile("\\S+");
-      Matcher matcher = pattern.matcher(moleculeAsString);
-      matcher.find();
-      _smiles = matcher.group();
+      return molecule;
     }
     catch (IOException e) {
       log.error("highly unexpected IOException initializing MolfileInterpreter!", e);
@@ -91,6 +99,22 @@ public class MolfileInterpreter
     catch (MoleculeIOException e) {
       log.error("unexpected MoleculeIOException initializing MolfileInterpreter!", e);
     }
+    return null;
+  }
+
+  /**
+   * Get the SMILES string for the given molecule. NOTE this method requires that the
+   * <code>molecule.getOutputType()</code> is SMILES.
+   *  
+   * @param molecule the molecule to get the SMILES string for
+   * @return the SMILES string
+   */
+  private String getSmilesForMolecule(BasicConformerMolecule molecule) {
+    String moleculeAsString = molecule.toString();
+    Pattern pattern = Pattern.compile("\\S+");
+    Matcher matcher = pattern.matcher(moleculeAsString);
+    matcher.find();
+    return matcher.group();
   }
 }
 
