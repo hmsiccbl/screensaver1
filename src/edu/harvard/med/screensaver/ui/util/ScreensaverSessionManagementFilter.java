@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
+import org.hibernate.FlushMode;
 import org.hibernate.SessionFactory;
 import org.hibernate.classic.Session;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
@@ -135,16 +136,23 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
     FilterChain filterChain)
   throws ServletException, IOException 
   {
+    // we don't perform any of our filter's special logic unless this is a
+    // request for one of our application's views; static resources do not
+    // require us to perform these steps
+    if (!isRequestForApplicationView(request)) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     HttpSession httpSession = request.getSession();
     String httpSessionId = httpSession.getId();
-    
-    log.info(">>>> Screensaver STARTING to process HTTP request for session " + httpSessionId + " @ " + request.getRequestURI());
-
-    SessionFactory sessionFactory = lookupSessionFactory();
-
+    log.info(">>>> Screensaver STARTING to process HTTP request for session " + 
+             httpSessionId + " @ " + request.getRequestURI());
+    SessionFactory sessionFactory = lookupSessionFactoryViaSpring();
     Session hibSession = getOrCreateHibernateSession(sessionFactory, httpSessionId);
     String hibSessionLogId = SessionFactoryUtils.toString(hibSession);
-
+    hibSession.setFlushMode(FlushMode.COMMIT); // not sure this is any better/worse then FlushMode.AUTO
+    
     // set the Hibernate session that Spring/Hibernate will use for this thread/request.
     TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(hibSession));
 
@@ -152,15 +160,22 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
     }
     finally {
+      log.debug("Hibernate session " + hibSessionLogId + 
+                " for HTTP session " + httpSessionId +
+                " is " + (hibSession.isOpen() ? "open" : "closed") +
+                // call isDirty() apparently causes a flush side effect! causes all kinds of strange problems...
+                // ", " + (hibSession.isDirty() ? "dirty" : "clean") +
+                ", " + (hibSession.isConnected() ? "connected" : "disconnected"));
+      
       // unset the Hibernate session that Spring/Hibernate was used for this thread/request.
       TransactionSynchronizationManager.unbindResource(sessionFactory);
-
+      
       boolean closeHttpSession = 
         Boolean.TRUE.equals(httpSession.getAttribute(CLOSE_HTTP_AND_HIBERNATE_SESSIONS));
       boolean closeHibernateSession = 
         closeHttpSession || 
         Boolean.TRUE.equals(httpSession.getAttribute(CLOSE_HIBERNATE_SESSION));
-
+      
       if (closeHibernateSession) {
         SessionFactoryUtils.releaseSession(hibSession, sessionFactory);
         synchronized (this) {
@@ -168,21 +183,24 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
         }
         log.info("closed Hibernate session " + hibSessionLogId + 
                  " for HTTP session " + httpSessionId);
-
+        
         if (closeHttpSession) {
           httpSession.invalidate();
           log.info("closed HTTP session " + httpSessionId);
         }
       }
-      log.debug("Hibernate session " + hibSessionLogId + 
-        " for HTTP session " + httpSessionId +
-        " is " + (hibSession.isOpen() ? "open" : "closed"));
       assert !hibSession.isOpen() : 
         "Hibernate session " + hibSessionLogId + 
         " was not closed for HTTP session " + httpSessionId;
       
-      log.info("<<<< Screensaver FINISHED processing HTTP request for session " + httpSessionId + " @ " + request.getRequestURI());
+      log.info("<<<< Screensaver FINISHED processing HTTP request for session " + 
+               httpSessionId + " @ " + request.getRequestURI());
     }
+  }
+
+  private boolean isRequestForApplicationView(HttpServletRequest request)
+  {
+    return request.getRequestURI().endsWith(".jsf") || request.getRequestURI().endsWith(".jsp");
   }
 
   protected Session getOrCreateHibernateSession(SessionFactory sessionFactory, String httpSessionId)
@@ -212,7 +230,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
    * @return the SessionFactory to use
    * @see #getSessionFactoryBeanName
    */
-  protected SessionFactory lookupSessionFactory() {
+  protected SessionFactory lookupSessionFactoryViaSpring() {
     if (logger.isDebugEnabled()) {
       logger.debug("Using SessionFactory '" + getSessionFactoryBeanName() + "' for " + getClass().getName());
     }
