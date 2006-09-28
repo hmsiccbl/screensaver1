@@ -27,6 +27,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellType;
 
 
 /**
@@ -128,7 +129,7 @@ public class DataRowParser
       return;
     }
     Set<SilencingReagent> silencingReagents = getSilencingReagents(gene);
-    Well well = getWell();
+    Well well = getWell(false);
     if (well == null) {
       return;
     }
@@ -138,7 +139,8 @@ public class DataRowParser
   }
 
   /**
-   * Parse the well.
+   * Parse the well. Assume an empty plate-well is a control. (This is true for the
+   * Excel files I've been handling so far, but it is pretty ad-hoc. -s)
    */
   private void parseWell()
   {
@@ -147,14 +149,14 @@ public class DataRowParser
       return;
     }
     log.debug("loading empty plate-well " + plateWellAbbreviation);
-    getWell();
+    getWell(true);
   }
 
   /**
    * Build and return the {@link Well} represented by this data row.
    * @return the well represented by this data row
    */
-  private Well getWell()
+  private Well getWell(boolean isControl)
   {
     Integer plateNumber = _parser.getPlateNumberParser().parse(_cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.PLATE),
@@ -172,6 +174,9 @@ public class DataRowParser
     if (well == null) {
       well = new Well(_parser.getLibrary(), plateNumber, wellName);
       _parsedEntitiesMap.addWell(well);
+    }
+    if (isControl) {
+      well.setWellType(WellType.LIBRARY_CONTROL);
     }
     String vendorIdentifier = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.VENDOR_IDENTIFIER),
