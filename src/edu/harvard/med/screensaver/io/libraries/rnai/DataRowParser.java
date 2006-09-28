@@ -19,6 +19,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.libraries.DataRowType;
+import edu.harvard.med.screensaver.io.libraries.ParsedEntitiesMap;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Gene;
