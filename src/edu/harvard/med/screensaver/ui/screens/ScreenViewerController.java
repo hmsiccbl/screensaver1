@@ -29,16 +29,14 @@ import org.springframework.dao.ConcurrencyFailureException;
 
 public class ScreenViewerController extends AbstractController
 {
+  private static final String COLLABORATOR_ID_TO_VIEW_PARAM_NAME = "collaboratorToView";
+
   private static Logger log = Logger.getLogger(ScreenViewerController.class);
   
   private DAO _dao;
   private Screen _screen;
   private String _usageMode; // "create" or "edit"
   private boolean _advancedMode;
-
-  private List<ScreeningRoomUser> _selectedCollaborators;
-  private List<ScreeningRoomUser> _selectedNonCollaborators;
-
 
   /* Property getter/setter methods */
   
@@ -64,6 +62,11 @@ public class ScreenViewerController extends AbstractController
     return _screen;
   }
 
+  public String getCollaboratorIdToViewParamName()
+  {
+    return COLLABORATOR_ID_TO_VIEW_PARAM_NAME;
+  }
+  
   public void setUsageMode(String usageMode) {
     _usageMode = usageMode;
   }
@@ -110,48 +113,10 @@ public class ScreenViewerController extends AbstractController
   public List<SelectItem> getCollaboratorSelectItems()
   {
     List<SelectItem> collaboratorSelectItems = new ArrayList<SelectItem>();
-    // TODO: what is the valid set of collaborators?
-    for (ScreeningRoomUser screener : _screen.getCollaborators()) {
+    for (ScreeningRoomUser screener : _dao.findAllEntitiesWithType(ScreeningRoomUser.class)) {
       collaboratorSelectItems.add(new SelectItem(screener, screener.generateFullName()));
     }
     return collaboratorSelectItems;
-  }
-
-  public List<ScreeningRoomUser> getSelectedCollaborators()
-  {
-    if (_selectedCollaborators == null) {
-      return new ArrayList<ScreeningRoomUser>();
-    }
-    return _selectedCollaborators;
-  }
-
-  public void setSelectedCollaborators(List<ScreeningRoomUser> selectedCollaborators)
-  {
-    _selectedCollaborators = selectedCollaborators;
-  }
-
-  public List<SelectItem> getNonCollaboratorSelectItems()
-  {
-    List<SelectItem> nonCollaboratorSelectItems = new ArrayList<SelectItem>();
-    List<ScreeningRoomUser> nonCollaborators = _dao.findAllEntitiesWithType(ScreeningRoomUser.class);
-    nonCollaborators.removeAll(_screen.getCollaborators());
-    for (ScreeningRoomUser screener : nonCollaborators) {
-      nonCollaboratorSelectItems.add(new SelectItem(screener, screener.generateFullName()));
-    }
-    return nonCollaboratorSelectItems;
-  }
-
-  public List<ScreeningRoomUser> getSelectedNonCollaborators()
-  {
-    if (_selectedNonCollaborators == null) {
-      return new ArrayList<ScreeningRoomUser>();
-    }
-    return _selectedNonCollaborators;
-  }
-
-  public void setSelectedNonCollaborators(List<ScreeningRoomUser> selectedNonCollaborators)
-  {
-    _selectedNonCollaborators = selectedNonCollaborators;
   }
 
   
@@ -161,8 +126,8 @@ public class ScreenViewerController extends AbstractController
   /**
    * A command to saved the user's edits.
    */
-  public String submit() {
-    log.debug("ScreenViewerController.submit()");
+  public String save() {
+    log.debug("ScreenViewerController.save()");
     return create();
   }
   
@@ -188,20 +153,12 @@ public class ScreenViewerController extends AbstractController
     return "cancel";
   }
   
-  public String addSelectedNonCollaborators() {
-    for (ScreeningRoomUser screener : getSelectedNonCollaborators()) {
-      _screen.addCollaborator(screener);
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
+  public String viewCollaborator()
+  {
+    //String collaboratorIdToView = getHttpServletRequest().getParameter(COLLABORATOR_ID_TO_VIEW_PARAM_NAME);
+    //_screeningRoomUserViewer.setScreensaverUserId(collaboratorIdToView);
+    return VIEW_SCREENING_ROOM_USER_ACTION_RESULT;
   }
-  
-  public String removeSelectedCollaborators() {
-    for (ScreeningRoomUser screener : getSelectedCollaborators()) {
-      _screen.removeCollaborator(screener);
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-  
 
   
   /* JSF Action event listeners */

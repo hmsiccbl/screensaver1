@@ -22,17 +22,23 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
+import org.apache.log4j.Logger;
+
 
 /**
  * A sortable, paging search result of {@link AbstractEntity model entities}.
+ * Supports two modes of operation: "summary" and "detail" modes, corresponding
+ * to UI browsers and UI viewers, respectively. Maintains the current page for
+ * summary mode and the current entity for detail mode, allowing each of these
+ * to be scrolled independently. The current sort column and sort order,
+ * however, are shared between the two modes.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 abstract public class SearchResults<E extends AbstractEntity>
 implements ScreensaverConstants
@@ -50,12 +56,14 @@ implements ScreensaverConstants
   private List<E> _unsortedResults;
   private List<E> _currentSort;
   private String _currentSortColumnName;
-  private boolean _isCurrentSortForward;
+  private SortDirection  _currentSortDirection = SortDirection.ASCENDING;
   private Map<String,List<E>> _forwardSorts = new HashMap<String,List<E>>();
   private Map<String,List<E>> _reverseSorts = new HashMap<String,List<E>>();
   private int _resultsSize;
-  private int _currentIndex = 0;
+  private int _currentPageIndex = 0;
+  private int _currentEntityIndex = 0;
   private int _itemsPerPage = DEFAULT_PAGESIZE;
+  private SearchResultsViewMode _viewMode = SearchResultsViewMode.SUMMARY;
   
   private UIData _dataTable;
   private DataModel _dataModel;
@@ -171,7 +179,7 @@ implements ScreensaverConstants
     if (_resultsSize == 0) {    // special case if results are empty
       return 0;
     }
-    return _currentIndex * _itemsPerPage + 1;
+    return (_currentPageIndex * getItemsPerPage()) + 1;
   }
   
   /**
@@ -180,11 +188,20 @@ implements ScreensaverConstants
    */
   public int getLastIndex()
   {
-    int lastIndex = (_currentIndex + 1) * _itemsPerPage;
+    int lastIndex = (_currentPageIndex + 1) * getItemsPerPage();
     if (lastIndex > _resultsSize) {
       lastIndex = _resultsSize;
     }
     return lastIndex;
+  }
+  
+  /**
+   * Get the (1-based) index of the current item displayed on the current page.
+   * @return the (1-based) index of the current item displayed on the current page
+   */
+  public int getCurrentIndex()
+  {
+    return _currentEntityIndex + 1;
   }
   
   /**
@@ -204,7 +221,7 @@ implements ScreensaverConstants
   {
     return _itemsPerPage;
   }
-
+  
   /**
    * Get the contents of the list selection box for the number of items per page.
    * @return the contents of the list selection box for the number of items per page
@@ -217,56 +234,129 @@ implements ScreensaverConstants
     }
     return JSFUtils.createUISelectItems(selections);
   }
+  
+  /**
+   * Get the current sort column name.
+   * 
+   * @motivation allow sort column to be set from a drop-down list UI component
+   *             (in addition to clicking on table column headers)
+   * @return the current sort column name
+   */
+  public String getCurrentSortColumnName()
+  {
+    return _currentSortColumnName;
+  }
 
+  /**
+   * Set the current sort column name.
+   * 
+   * @motivation allow sort column to be set from a drop-down list UI component
+   *             (in addition to clicking on table column headers)
+   * @param currentSortColumnName the new current sort column name
+   */
+  public void setCurrentSortColumnName(String currentSortColumnName)
+  {
+    _currentSortColumnName = currentSortColumnName;
+  }
 
+  /**
+   * Get the current sort direction.
+   * 
+   * @motivation allow sort direction to be set from a drop-down list UI
+   *             component (in addition to clicking on table column headers)
+   * @return the current sort column name
+   */
+  public SortDirection getCurrentSortDirection()
+  {
+    return _currentSortDirection;
+  }
+
+  /**
+   * Set the current sort direction.
+   * 
+   * @motivation allow sort direction to be set from a drop-down list UI
+   *             component (in addition to clicking on table column headers)
+   * @param currentSortDirection the new current sort direction
+   */
+  public void setCurrentSortDirection(SortDirection currentSortDirection)
+  {
+    _currentSortDirection = currentSortDirection;
+  }
+
+  /**
+   * Get a list of SelectItem objects for the set of columns that can be sorted
+   * on.
+   * 
+   * @return list of SelectItem objects for the set of columns that can be
+   *         sorted on
+   */
+  public List<SelectItem> getSortColumnSelections()
+  {
+    List<String> selections = new ArrayList<String>();
+    for (String columnName : getColumnHeaders()) {
+      selections.add(columnName);
+    }
+    return JSFUtils.createUISelectItems(selections);
+  }
+
+  /**
+   * Get a list of SelectItem objects for the set of sort directions (ascending,
+   * descending).
+   * 
+   * @return list of SelectItem objects for the set of sort directions
+   *         (ascending, descending)
+   */
+  public List<SelectItem> getSortDirectionSelections()
+  {
+    List<SelectItem> selections = new ArrayList<SelectItem>();
+    for (SortDirection sortOrder : SortDirection.values()) {
+      selections.add(new SelectItem(sortOrder,
+                                    sortOrder.toString()));
+    }
+    return selections;
+  }
+  
+  
   // public action command methods & action listeners
 
   /**
-   * Resort the results according to the current column, and redisplay the page. Sort
-   * descending if the previous sort order was ascending and on the same column. Otherwise,
-   * sort descending. Cache any newly computed sorts of the results for reuse.
+   * Resort the results according to the column most recently selected by the
+   * user (via the UI), and redisplay the page. Sort descending if the previous
+   * sort order was ascending and on the same column. Otherwise, sort
+   * descending. Cache any newly computed sorts of the results for reuse.
    * 
    * @return the navigation rule to redisplay the current page
    */
   public Object sortOnColumn()
   {
     String sortColumnName = getColumnName();
-    boolean isSortForward =
-      sortColumnName.equals(_currentSortColumnName) ? ! _isCurrentSortForward : true;
-    
-    // get the forward sort for the specified column, computing it if needed
-    List<E> forwardSort = _forwardSorts.get(sortColumnName);
-    if (forwardSort == null) {
-      forwardSort = new ArrayList<E>(_unsortedResults);
-      Collections.sort(forwardSort, getComparatorForColumnName(sortColumnName));
-      _forwardSorts.put(sortColumnName, forwardSort);
-    }
-    
-    // set the _currentSort variable appropriately
-    if (isSortForward) {
-      _currentSort = forwardSort;
-    }
-    else {
-      
-      // get the reverse sort for the specified column, computing it if needed
-      List<E> reverseSort = _reverseSorts.get(sortColumnName);
-      if (reverseSort == null) {
-        reverseSort = new ArrayList<E>(forwardSort);
-        Collections.reverse(reverseSort);
-        _reverseSorts.put(sortColumnName, reverseSort);
-      }
-      
-      _currentSort = reverseSort;
-    }
-    
-    // update other instance fields that need to be set to track the current sort
-    _currentSortColumnName = sortColumnName;
-    _isCurrentSortForward = isSortForward;
-    _dataModel = new ListDataModel(_currentSort);
-    
+
+    // toggle sort order
+    SortDirection sortDirection = sortColumnName.equals(_currentSortColumnName) ? 
+      _currentSortDirection.equals(SortDirection.ASCENDING) ? 
+        SortDirection.DESCENDING : SortDirection.ASCENDING : 
+          SortDirection.ASCENDING;
+
+    doSort(sortColumnName, sortDirection);
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
+  /**
+   * Resort the results according to the current column, as selected by the user
+   * in a drop-down list (in the UI), and redisplay the page. Sort direction is
+   * determined by last call to {@link #setCurrentSortDirection(SortDirection)}.
+   * Cache any newly computed sorts of the results for reuse.
+   * 
+   * @return the navigation rule to redisplay the current page
+   */
+  public Object sortOnSelectedColumn()
+  {
+    Object currentEntity = _currentSort.get(_currentEntityIndex);
+    doSort(_currentSortColumnName, _currentSortDirection);
+    _currentEntityIndex = _currentSort.indexOf(currentEntity);
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
   /**
    * Perform the action for clicking on the current cell. Return the navigation rule to go
    * along with the action for clicking on the current cell. This method is only called when
@@ -275,9 +365,10 @@ implements ScreensaverConstants
    * @return the navigation rule to go along with the action for clicking on the current cell 
    */
   @SuppressWarnings("unchecked")
-  public Object getCellAction()
+  public Object cellAction()
   {
-    return getCellAction(getEntity(), getColumnName());
+    _currentEntityIndex = _dataModel.getRowIndex();
+    return cellAction(getEntity(), getColumnName());
   }
 
   /**
@@ -287,9 +378,13 @@ implements ScreensaverConstants
    */
   public String firstPage()
   {
-    _currentIndex = 0;
-    getDataTable().setFirst(_currentIndex * _itemsPerPage);
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
+      _currentPageIndex = 0;
+    }
+    else {
+      _currentEntityIndex = 0;
+    }
+    return gotoCurrentIndex();
   }
 
   /**
@@ -299,11 +394,15 @@ implements ScreensaverConstants
    */
   public String prevPage()
   {
-    if (_currentIndex > 0) {
-      _currentIndex --;
-      getDataTable().setFirst(_currentIndex * _itemsPerPage);      
+    if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
+      _currentPageIndex = Math.max(0,
+                                   _currentPageIndex - 1);
     }
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    else {
+      _currentEntityIndex = Math.max(0,
+                                     _currentEntityIndex - 1);
+    }
+    return gotoCurrentIndex();
   }
 
   /**
@@ -313,11 +412,16 @@ implements ScreensaverConstants
    */
   public String nextPage()
   {
-    if ((_currentIndex + 1) * _itemsPerPage <= _resultsSize) {
-      _currentIndex ++;
-      getDataTable().setFirst(_currentIndex * _itemsPerPage);
+    if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
+      _currentPageIndex = Math.min(_currentPageIndex + 1,
+                                   Math.max(0, _resultsSize - 1) / getItemsPerPage());
     }
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    else {
+      _currentEntityIndex = Math.min(_currentEntityIndex + 1,
+                                     _resultsSize - 1);
+    }
+    
+    return gotoCurrentIndex();
   }
 
   /**
@@ -327,9 +431,48 @@ implements ScreensaverConstants
    */
   public String lastPage()
   {
-    _currentIndex = _resultsSize / _itemsPerPage;
-    getDataTable().setFirst(_currentIndex * _itemsPerPage);
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
+      _currentPageIndex = Math.max(0, _resultsSize - 1) / getItemsPerPage();
+    }
+    else {
+      _currentEntityIndex = _resultsSize - 1;
+    }
+    return gotoCurrentIndex();
+  }
+  
+  /**
+   * Set the current view mode.
+   * @param viewMode the new current view mode
+   */
+  public void setViewMode(SearchResultsViewMode viewMode)
+  {
+    _viewMode = viewMode;
+  }
+  
+  /**
+   * Get the current view mode.
+   * @return the current view mode as a {@link SearchResultsViewMode} object
+   */
+  public SearchResultsViewMode getViewMode()
+  {
+    return _viewMode;
+  }
+  
+  /**
+   * Returns whether the current view mode is a "summary" view.
+   * 
+   * @return <code>true</code> iff the view mode is
+   *         SearchResultsViewMode.SUMMARY, else <code>false</code>
+   */
+  public boolean isSummaryView()
+  {
+    return _viewMode.equals(SearchResultsViewMode.SUMMARY);
+  }
+  
+  public String showSummaryView()
+  {
+    setViewMode(SearchResultsViewMode.SUMMARY);
+    return SHOW_SEARCH_RESULTS_SUMMARY_ACTION;
   }
   
   /**
@@ -342,8 +485,8 @@ implements ScreensaverConstants
   public void itemsPerPageListener(ValueChangeEvent event)
   {
     _itemsPerPage = (Integer) event.getNewValue();
-    getDataTable().setRows(_itemsPerPage);
-    _currentIndex = 0;
+    getDataTable().setRows(getItemsPerPage());
+    _currentPageIndex = 0;
     getDataTable().setFirst(0);
   }
   
@@ -397,7 +540,7 @@ implements ScreensaverConstants
    * @param columnName the name of the column for the current cell (the column index)
    * @return the navigation rule to go along with the action for clicking on the current cell 
    */
-  abstract protected Object getCellAction(E entity, String columnName);
+  abstract protected Object cellAction(E entity, String columnName);
   
   /**
    * Get a comparator for sorting the entities according to the specified column.
@@ -406,6 +549,12 @@ implements ScreensaverConstants
    * @return a comparator for sorting the entities according to the specified column
    */
   abstract protected Comparator<E> getComparatorForColumnName(String columnName);
+  
+  /**
+   * Set the entity to be displayed in detail mode.
+   * @param entity the entity to be displayed in detail mode
+   */
+  abstract protected void setEntityToView(E entity);
   
   
   // protected instance methods
@@ -419,4 +568,66 @@ implements ScreensaverConstants
   {
     return (E) getDataModel().getRowData();
   }
+  
+  
+  // private instance methods
+  
+  /**
+   * Update the search browser's data table, or the search viewer's current
+   * entity, depending upon the current SearchResultsViewMode.
+   */
+  private String gotoCurrentIndex()
+  {
+    if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
+      // update the search results summary table
+      getDataTable().setFirst(_currentPageIndex * getItemsPerPage());
+    }
+    else {
+      // update the entity viewer
+      setEntityToView(_currentSort.get(_currentEntityIndex));
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  /**
+   * Internal method for peforming and caching sorted results, by both sort
+   * column and direction.
+   * 
+   * @param sortColumnName
+   * @param sortDirection
+   */
+  private void doSort(String sortColumnName, SortDirection sortDirection)
+  {
+    // get the forward sort for the specified column, computing it if needed
+    List<E> forwardSort = _forwardSorts.get(sortColumnName);
+    if (forwardSort == null) {
+      forwardSort = new ArrayList<E>(_unsortedResults);
+      Collections.sort(forwardSort, getComparatorForColumnName(sortColumnName));
+      _forwardSorts.put(sortColumnName, forwardSort);
+    }
+    
+    // set the _currentSort variable appropriately
+    if (sortDirection.equals(SortDirection.ASCENDING)) {
+      _currentSort = forwardSort;
+    }
+    else {
+      
+      // get the reverse sort for the specified column, computing it if needed
+      List<E> reverseSort = _reverseSorts.get(sortColumnName);
+      if (reverseSort == null) {
+        reverseSort = new ArrayList<E>(forwardSort);
+        Collections.reverse(reverseSort);
+        _reverseSorts.put(sortColumnName, reverseSort);
+      }
+      
+      _currentSort = reverseSort;
+    }
+    
+    // update other instance fields that need to be set to track the current sort
+    _currentSortColumnName = sortColumnName;
+    _currentSortDirection = sortDirection;
+    _dataModel = new ListDataModel(_currentSort);
+  }
+
+  
 }

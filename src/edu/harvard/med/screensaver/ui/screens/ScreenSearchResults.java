@@ -15,6 +15,7 @@ import java.util.List;
 
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.SearchResults;
+import edu.harvard.med.screensaver.ui.SearchResultsViewMode;
 
 
 /**
@@ -52,8 +53,8 @@ public class ScreenSearchResults extends SearchResults<Screen>
     super(unsortedResults);
     _screenViewerController = screenViewerController;
   }
-  
-  
+
+
   // implementations of the SearchResults abstract methods
   
   @Override
@@ -88,9 +89,11 @@ public class ScreenSearchResults extends SearchResults<Screen>
   }
 
   @Override
-  protected Object getCellAction(Screen screen, String columnName)
+  protected Object cellAction(Screen screen, String columnName)
   {
     _screenViewerController.setScreen(screen);
+    
+    setViewMode(SearchResultsViewMode.DETAIL);
     return "showScreen";
   }
   
@@ -119,5 +122,12 @@ public class ScreenSearchResults extends SearchResults<Screen>
       };
     }
     return null;
+  }
+
+
+  @Override
+  protected void setEntityToView(Screen entity)
+  {
+    _screenViewerController.setScreen(entity);
   }
 }

@@ -85,13 +85,13 @@ public class RNAiWellSearchResults extends WellSearchResults
 
 
   @Override
-  protected Object getCellAction(Well well, String columnName)
+  protected Object cellAction(Well well, String columnName)
   {
     if (columnName.equals(GENE)) {
       _geneViewerController.setGene(getGenesForWell(well).iterator().next());
       return "showGene";
     }
-    return super.getCellAction(well, columnName);
+    return super.cellAction(well, columnName);
   }
   
   @Override

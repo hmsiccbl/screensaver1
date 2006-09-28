@@ -28,5 +28,7 @@ public interface ScreensaverConstants
   public static final String DONE_ACTION_RESULT = "done";
   public static final String LOGOUT_ACTION_RESULT = "logout";
   public static final String GO_IMPORT_SCREEN_RESULT_ACTION_RESULT = "goImportScreenResult";
-  
+  public static final String VIEW_SCREENING_ROOM_USER_ACTION_RESULT = "viewScreeningRoomUser";
+  public static final String SHOW_SEARCH_RESULTS_SUMMARY_ACTION = "showSearchResultsSummary";
+
 }

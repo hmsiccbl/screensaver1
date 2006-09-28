@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.ui.SearchResults;
+import edu.harvard.med.screensaver.ui.SearchResultsViewMode;
 
 
 /**
@@ -102,9 +103,10 @@ public class LibrarySearchResults extends SearchResults<Library>
   }
   
   @Override
-  protected Object getCellAction(Library library, String columnName)
+  protected Object cellAction(Library library, String columnName)
   {
     _libraryViewerController.setLibrary(library);
+    setViewMode(SearchResultsViewMode.DETAIL);
     return "showLibrary";
   }
   
@@ -147,5 +149,12 @@ public class LibrarySearchResults extends SearchResults<Library>
       };
     }
     return null;
+  }
+
+
+  @Override
+  protected void setEntityToView(Library entity)
+  {
+    _libraryViewerController.setLibrary(entity);
   }
 }

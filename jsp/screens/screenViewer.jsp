@@ -1,5 +1,3 @@
-<%@include file="/headers.inc"%>
-
 <%-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
 <%-- The core taglib contains all the logic, validation, controller, and other tags specific to JSF. --%>
@@ -11,12 +9,15 @@
 
 <f:subview id="screenViewer">
 
+	<t:aliasBean alias="#{navigator}" value="#{searchResultsRegistry.searchResults}" >
+		<%@ include file="../searchResultsNavPanel.jspf"  %>
+	</t:aliasBean>
+
 	<h:form id="screenForm">
 
-		<t:commandButton id="save" value="Save"
-			action="#{screenViewer.submit}" styleClass="command"
-			visibleOnUserRole="screensAdmin" />
-
+		<t:commandButton id="save" value="Save" action="#{screenViewer.save}"
+			styleClass="command" visibleOnUserRole="screensAdmin" />
+		
 		<t:panelGrid columns="2">
 
 			<t:outputLabel for="screenId" value="Screen ID" />
@@ -68,37 +69,24 @@
 			<t:outputLabel for="collaboratorsForm:collaborators"
 				value="Collaborators" />
 
-			<%--h:form id="collaboratorsForm"--%>
+			<t:panelGrid columns="2" >
 
-			<t:panelGrid columns="2" visibleOnUserRole="screensAdmin">
-
-				<t:outputLabel for="collaborators" value="Existing Collaborators" />
-
-				<t:outputLabel for="nonCollaborators" value="Non-Collaborators" />
+				<t:dataList var="collaborator" value="#{screenViewer.screen.collaborators}" layout="unorderedList">
+					<t:commandLink action="#{screenViewer.viewCollaborator}" 
+						value="#{collaborator.lastName}, #{collaborator.firstName}" 
+						styleClass="command">
+						<f:param name="collaboratorIdToView" value="#{collaborator}"/>
+					</t:commandLink>
+				</t:dataList>
 
 				<t:selectManyListbox id="collaborators"
-					value="#{screenViewer.selectedCollaborators}"
-					converter="ScreeningRoomUserConverter" size="5" styleClass="input">
+					value="#{screenViewer.screen.collaboratorsList}"
+					converter="ScreeningRoomUserConverter" size="5" styleClass="input"
+					visibleOnUserRole="screensAdmin">
 					<f:selectItems value="#{screenViewer.collaboratorSelectItems}" />
 				</t:selectManyListbox>
 
-				<t:selectManyListbox id="nonCollaborators"
-					value="#{screenViewer.selectedNonCollaborators}"
-					converter="ScreeningRoomUserConverter" size="5" styleClass="input">
-					<f:selectItems value="#{screenViewer.nonCollaboratorSelectItems}" />
-				</t:selectManyListbox>
-
-				<t:commandButton id="removeSelectedCollaborators" value="Remove"
-					action="#{screenViewer.removeSelectedCollaborators}"
-					styleClass="command" />
-
-				<t:commandButton id="addSelectedNonCollaborators" value="Add"
-					action="#{screenViewer.addSelectedNonCollaborators}"
-					styleClass="command" />
-
 			</t:panelGrid>
-
-			<%--/h:form--%>
 
 			<t:outputLabel for="publishableProtocol" value="Publishable Protocol"
 				enabledOnUserRole="screensAdmin" styleClass="inputLabel" />

@@ -1,0 +1,95 @@
+<%-- To use this subview, use the following snippet in the jsp page in which it is to be included:
+
+		<t:aliasBean alias="#{navigator}" value="#{searchResultsRegistry.searchResults}" >
+			<%@ include file="searchResultsNavPanel.jspf"%>
+		</t:aliasBean>
+		
+		You may substitue a different bean for the value attribute, if it implements all of the bean methods referenced here.
+ %>
+
+<%-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
+<%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
+<%-- The core taglib contains all the logic, validation, controller, and other tags specific to JSF. --%>
+<%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
+<%-- The Apache Tomahawk JSF components --%>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%-- Tiles --%>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
+
+<f:subview id="searchResultsNavPanelSubview">
+
+	<h:panelGrid style="margin: 0px; border: 1px solid grey; padding: 1px;"
+		border="0" cellpadding="0" cellspacing="0" columns="4" width="100%">
+
+		<h:form id="navigationButtons">
+			<h:panelGroup style="float: left;">
+				<h:commandButton id="firstPageCommand"
+					action="#{navigator.firstPage}"
+					value="First" image="/images/arrow-first.gif" styleClass="command" />
+				<h:commandButton id="prevPageCommand"
+					action="#{navigator.prevPage}"
+					value="Prev" image="/images/arrow-previous.gif"
+					styleClass="command" />
+				<h:commandButton id="nextPageCommand"
+					action="#{navigator.nextPage}"
+					value="Next" image="/images/arrow-next.gif" styleClass="command" />
+				<h:commandButton id="lastPageCommand"
+					action="#{navigator.lastPage}"
+					value="Last" image="/images/arrow-last.gif" styleClass="command" />
+			</h:panelGroup>
+		</h:form>
+
+		<h:panelGroup style="">
+			<h:outputText
+				rendered="#{navigator.summaryView}"
+				value="#{navigator.firstIndex}..#{navigator.lastIndex} out of #{navigator.resultsSize}" />
+			<h:outputText
+				rendered="#{! navigator.summaryView}"
+				value="#{navigator.currentIndex} of #{navigator.resultsSize}" />
+		</h:panelGroup>
+		
+		<h:form id="sortOrderForm" style="vertical-align: middle">
+			<t:outputLabel for="sortOrderMenu" value="Sort by" styleClass="inputLabel"/>
+			<h:commandButton id="updateSortOder" value="update sort order"
+				action="#{navigator.sortOnSelectedColumn}" style="display: none" />
+			<t:selectOneMenu id="sortOrderMenu"
+				value="#{navigator.currentSortColumnName}"
+				onchange="this.previousSibling.click();">
+				<f:selectItems value="#{navigator.sortColumnSelections}" />
+			</t:selectOneMenu>
+			<t:selectOneMenu id="sortDirection"
+				value="#{navigator.currentSortDirection}" converter="SortDirectionConverter" styleClass="command"
+				onchange="this.previousSibling.previousSibling.click();" >
+				<f:selectItems value="#{navigator.sortDirectionSelections}" />
+			</t:selectOneMenu>
+		</h:form>
+
+		<h:form id="itemsPerPageForm"
+			rendered="#{navigator.summaryView}">
+			<h:panelGroup style="float: right">
+				<h:commandButton id="updateItemsPerPage"
+					value="update items per page"
+					action="#{navigator.updateItemsPerPage}"
+					style="display: none" />
+				<h:selectOneMenu id="itemsPerPage"
+					value="#{navigator.itemsPerPage}"
+					valueChangeListener="#{navigator.itemsPerPageListener}"
+					onchange="this.previousSibling.click();">
+					<f:selectItems
+						value="#{navigator.itemsPerPageSelections}" />
+				</h:selectOneMenu>
+				<h:outputText value=" per page" />
+			</h:panelGroup>
+		</h:form>
+
+		<h:form id="showSummaryViewForm"
+			rendered="#{! navigator.summaryView}">
+			<h:commandButton id="summaryView" value="Results Summary"
+				action="#{navigator.showSummaryView}"
+				style="vertical-align: middle"
+				styleClass="command" />
+		</h:form>
+
+	</h:panelGrid>
+
+</f:subview>

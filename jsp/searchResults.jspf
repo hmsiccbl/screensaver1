@@ -1,113 +1,47 @@
-<%-- MyEclipse HACK: uncomment the next line to enable smart editing features within MyEclipse - -%>
-
-<jsp:include file="headers.inc"/--%>
+<%-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
+<%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
+<%-- The core taglib contains all the logic, validation, controller, and other tags specific to JSF. --%>
+<%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
+<%-- The Apache Tomahawk JSF components --%>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%-- Tiles --%>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
 <f:subview id="searchResultsSubview">
-  <h:panelGrid
-    style="margin: 0px; border: 0px solid grey; padding: 0px; width: 100%;"
-    columns="1"
-    width="100%"
-  >
+	<h:panelGrid
+		style="margin: 0px; border: 0px solid grey; padding: 0px; width: 100%;"
+		columns="1" width="100%">
 
-    <h:panelGrid
-      style="margin: 0px; border: 1px solid grey; padding: 1px;"
-      border="0"
-      cellpadding="0"
-      cellspacing="0"
-      columns="3"
-      width="100%"
-    >
-      <h:form id="navigationButtons">
-        <h:panelGroup style="float: left;">
-          <h:commandButton
-            id="firstPageCommand"
-            action="#{searchResultsRegistry.searchResults.firstPage}"
-            value="First"
-            image="/images/arrow-first.gif"
-            styleClass="command"
-          />
-          <h:commandButton
-            id="prevPageCommand"
-            action="#{searchResultsRegistry.searchResults.prevPage}"
-            value="Prev"
-            image="/images/arrow-previous.gif"
-            styleClass="command"
-          />
-          <h:commandButton
-            id="nextPageCommand"
-            action="#{searchResultsRegistry.searchResults.nextPage}"
-            value="Next"
-            image="/images/arrow-next.gif"
-            styleClass="command"
-          />
-          <h:commandButton
-            id="lastPageCommand"
-            action="#{searchResultsRegistry.searchResults.lastPage}"
-            value="Last"
-            image="/images/arrow-last.gif"
-            styleClass="command"
-          />
-        </h:panelGroup>
-      </h:form>
-      <h:panelGroup style="">
-        <h:outputText value="#{searchResultsRegistry.searchResults.firstIndex}..#{searchResultsRegistry.searchResults.lastIndex} out of #{searchResultsRegistry.searchResults.resultsSize}" />
-      </h:panelGroup>
-      <h:form id="itemsPerPageForm">
-        <h:panelGroup style="float: right">
-          <h:commandButton
-            id="updateItemsPerPage"
-            value="update items per page"
-            action="#{searchResultsRegistry.searchResults.updateItemsPerPage}"
-            style="display: none"
-          />
-          <h:selectOneMenu
-            id="itemsPerPage"
-            value="#{searchResultsRegistry.searchResults.itemsPerPage}"
-            valueChangeListener="#{searchResultsRegistry.searchResults.itemsPerPageListener}"
-            onchange="this.previousSibling.click();"
-          >
-            <f:selectItems value="#{searchResultsRegistry.searchResults.itemsPerPageSelections}" />
-          </h:selectOneMenu>
-          <h:outputText value=" per page" />
-        </h:panelGroup>
-      </h:form>
-    </h:panelGrid>
+		<t:aliasBean alias="#{navigator}" value="#{searchResultsRegistry.searchResults}" >
+			<%@ include file="searchResultsNavPanel.jspf"%>
+		</t:aliasBean>
 
-    <h:form id="searchResultsTableForm">
-      <t:dataTable
-        id="searchResultsTable"
-        binding="#{searchResultsRegistry.searchResults.dataTable}"
-        value="#{searchResultsRegistry.searchResults.dataModel}"
-        var="row"
-        rows="#{searchResultsRegistry.searchResults.itemsPerPage}"
-        rendered="true"
-        styleClass="standardTable"
-        headerClass="tableHeader"
-        rowClasses="row1,row2"
-        width="100%"
-      >
-        <t:columns
-          value="#{searchResultsRegistry.searchResults.dataHeaderColumnModel}"
-          var="columnName" styleClass="column">
-          <f:facet name="header">
-            <h:commandLink
-              action="#{searchResultsRegistry.searchResults.sortOnColumn}"
-              value="#{columnName}"
-            />
-          </f:facet>
-          <h:outputText
-            value="#{searchResultsRegistry.searchResults.cellValue}"
-            rendered="#{! searchResultsRegistry.searchResults.isCommandLink}"
-          />
-          <h:commandLink
-            action="#{searchResultsRegistry.searchResults.getCellAction}"
-            value="#{searchResultsRegistry.searchResults.cellValue}"
-            rendered="#{searchResultsRegistry.searchResults.isCommandLink}"
-          />
-        </t:columns>
-      </t:dataTable>
-    </h:form>
+		<h:form id="searchResultsTableForm">
+			<t:dataTable id="searchResultsTable"
+				binding="#{searchResultsRegistry.searchResults.dataTable}"
+				value="#{searchResultsRegistry.searchResults.dataModel}" var="row"
+				rows="#{searchResultsRegistry.searchResults.itemsPerPage}"
+				rendered="true" styleClass="standardTable" headerClass="tableHeader"
+				rowClasses="row1,row2" width="100%">
+				<t:columns
+					value="#{searchResultsRegistry.searchResults.dataHeaderColumnModel}"
+					var="columnName" styleClass="column">
+					<f:facet name="header">
+						<h:commandLink
+							action="#{searchResultsRegistry.searchResults.sortOnColumn}"
+							value="#{columnName}" />
+					</f:facet>
+					<h:outputText
+						value="#{searchResultsRegistry.searchResults.cellValue}"
+						rendered="#{! searchResultsRegistry.searchResults.isCommandLink}" />
+					<h:commandLink
+						action="#{searchResultsRegistry.searchResults.cellAction}"
+						value="#{searchResultsRegistry.searchResults.cellValue}"
+						rendered="#{searchResultsRegistry.searchResults.isCommandLink}" />
+				</t:columns>
+			</t:dataTable>
+		</h:form>
 
-  </h:panelGrid>
+	</h:panelGrid>
 </f:subview>
 

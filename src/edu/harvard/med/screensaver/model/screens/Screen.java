@@ -9,16 +9,18 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-
-import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -225,6 +227,26 @@ public class Screen extends AbstractEntity
   public Set<ScreeningRoomUser> getCollaborators()
   {
     return Collections.unmodifiableSet(_collaborators);
+  }
+  
+  /**
+   * @motivation JSF EL binding
+   */
+  public List<ScreeningRoomUser> getCollaboratorsList()
+  {
+    return Collections.unmodifiableList(new ArrayList<ScreeningRoomUser>(_collaborators));
+  }
+
+  /**
+   * @motivation JSF EL binding
+   * @param collaborators
+   */
+  public void setCollaboratorsList(List<ScreeningRoomUser> collaborators)
+  {
+    getHbnCollaborators().clear();
+    for (ScreeningRoomUser collaborator : collaborators) {
+      addCollaborator(collaborator);
+    }
   }
 
   /**

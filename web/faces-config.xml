@@ -397,6 +397,47 @@
   </navigation-rule>
 
   <navigation-rule>
+    <from-view-id>/screens/screenViewer.jsp</from-view-id>
+    <navigation-case>
+      <from-outcome>showScreeningRoomUser</from-outcome>
+      <to-view-id>/users/screeningRoomUserViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+     <from-outcome>showSearchResultsSummary</from-outcome>
+     <to-view-id>/screens/screensBrowser</to-view-id>
+     <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <from-view-id>/libraries/libraryViewer.jsp</from-view-id>
+    <navigation-case>
+     <from-outcome>showSearchResultsSummary</from-outcome>
+     <to-view-id>/libraries/librariesBrowser</to-view-id>
+     <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <from-view-id>/libraries/wellViewer.jsp</from-view-id>
+    <navigation-case>
+     <from-outcome>showSearchResultsSummary</from-outcome>
+     <to-view-id>/libraries/wellSearchResults</to-view-id>
+     <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <from-view-id>/libraries/geneViewer.jsp</from-view-id>
+    <navigation-case>
+     <from-outcome>showSearchResultsSummary</from-outcome>
+     <to-view-id>/libraries/genesBrowser</to-view-id>
+     <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
     <from-view-id>/screenresults/screenResultViewer.jsp</from-view-id>
     <navigation-case>
       <from-outcome>viewHeatMaps</from-outcome>
@@ -456,6 +497,12 @@
      <default-value>#{dao}</default-value>
     </property-->
   </converter>
+  
+  <converter>
+    <converter-id>SortDirectionConverter</converter-id>
+    <converter-class>edu.harvard.med.screensaver.ui.util.SortDirectionConverter</converter-class>
+  </converter>
+  
   
   <!-- Validators -->
 
