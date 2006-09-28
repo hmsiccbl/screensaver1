@@ -9,6 +9,18 @@
 
 package edu.harvard.med.screensaver.io.libraries.compound;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import joelib2.io.BasicIOType;
+import joelib2.io.BasicIOTypeHolder;
+import joelib2.io.BasicReader;
+import joelib2.io.IOTypeHolder;
+import joelib2.io.MoleculeIOException;
+import joelib2.molecule.BasicConformerMolecule;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -56,8 +68,29 @@ public class MolfileInterpreter
 
   private void initialize()
   {
-    // TODO: initialize the smiles from the molfile
-    _smiles = "UNINITIALIZED";
+    try {
+      IOTypeHolder typeHolder = BasicIOTypeHolder.instance();
+      BasicIOType sdfType = typeHolder.getIOType("SDF");
+      BasicIOType smilesType = typeHolder.getIOType("SMILES");
+      
+      ByteArrayInputStream inputStream = new ByteArrayInputStream(_molfile.getBytes());
+      BasicReader reader = new BasicReader(inputStream, sdfType);
+      
+      BasicConformerMolecule molecule = new BasicConformerMolecule(sdfType, smilesType);
+      reader.readNext(molecule);
+      
+      String moleculeAsString = molecule.toString();
+      Pattern pattern = Pattern.compile("\\S+");
+      Matcher matcher = pattern.matcher(moleculeAsString);
+      matcher.find();
+      _smiles = matcher.group();
+    }
+    catch (IOException e) {
+      log.error("highly unexpected IOException initializing MolfileInterpreter!", e);
+    }
+    catch (MoleculeIOException e) {
+      log.error("unexpected MoleculeIOException initializing MolfileInterpreter!", e);
+    }
   }
 }
 
