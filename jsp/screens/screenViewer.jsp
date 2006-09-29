@@ -20,7 +20,8 @@
 		
 		<t:panelGrid columns="2">
 
-			<t:outputLabel for="screenId" value="Screen ID" />
+			<t:outputLabel for="screenId" value="Screen ID"
+				visibleOnUserRole="developer" />
 			<t:inputText id="screenId" value="#{screenViewer.screen.screenId}"
 				displayValueOnly="true" styleClass="restrictedInput"
 				visibleOnUserRole="developer" />
@@ -73,13 +74,14 @@
 
 				<t:selectManyListbox id="collaborators"
 					value="#{screenViewer.screen.collaboratorsList}"
-					converter="ScreeningRoomUserConverter" size="5" styleClass="input"
-					visibleOnUserRole="screensAdmin">
+					converter="ScreeningRoomUserConverter" size="5" styleClass="input">
 					<f:selectItems value="#{screenViewer.collaboratorSelectItems}" />
 				</t:selectManyListbox>
 
-				<t:dataTable var="collaborator" value="#{screenViewer.screen.collaborators}">
-					<h:column >
+				<t:dataTable var="collaborator"
+					value="#{screenViewer.screen.collaborators}"
+					visibleOnUserRole="screensAdmin">
+					<h:column>
 						<t:commandLink action="#{screenViewer.viewCollaborator}"
 							value="#{collaborator.lastName}, #{collaborator.firstName}"
 							styleClass="command">

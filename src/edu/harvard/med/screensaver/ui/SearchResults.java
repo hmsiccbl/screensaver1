@@ -47,7 +47,6 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractCo
   private static final Logger log = Logger.getLogger(SearchResults.class);
   public static final int [] PAGESIZES = { 10, 20, 50, 100 };
   public static final int DEFAULT_PAGESIZE = PAGESIZES[0];
-  private static final String SEARCH_RESULTS_VIEW_MODE = "viewMode";
   
 
   // private instance data
@@ -78,8 +77,8 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractCo
   public SearchResults(List<E> unsortedResults)
   {
     _unsortedResults = unsortedResults;
-    _currentSort = _unsortedResults;
-    _resultsSize = _currentSort.size();
+    _resultsSize = unsortedResults.size();
+    doSort(getColumnHeaders().get(0), SortDirection.ASCENDING);
     _dataModel = new ListDataModel(_currentSort);
   }
 
@@ -199,6 +198,9 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractCo
    */
   public int getCurrentIndex()
   {
+    if (_resultsSize == 0) {    // special case if results are empty
+      return 0;
+    }
     return _currentEntityIndex + 1;
   }
   
@@ -576,7 +578,9 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractCo
     }
     else {
       // update the entity viewer
-      setEntityToView(_currentSort.get(_currentEntityIndex));
+      if (_resultsSize > 0) {
+        setEntityToView(_currentSort.get(_currentEntityIndex));
+      }
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }

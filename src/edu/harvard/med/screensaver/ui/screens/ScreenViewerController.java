@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.ui.screens;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.faces.application.FacesMessage;
@@ -23,6 +24,8 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.util.ScreeningRoomUserConverter;
+import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -113,7 +116,9 @@ public class ScreenViewerController extends AbstractController
   public List<SelectItem> getCollaboratorSelectItems()
   {
     List<SelectItem> collaboratorSelectItems = new ArrayList<SelectItem>();
-    for (ScreeningRoomUser screener : _dao.findAllEntitiesWithType(ScreeningRoomUser.class)) {
+    List<ScreeningRoomUser> screeningRoomUsers = _dao.findAllEntitiesWithType(ScreeningRoomUser.class);
+    Collections.sort(screeningRoomUsers, ScreensaverUserComparator.getInstance());
+    for (ScreeningRoomUser screener : screeningRoomUsers) {
       collaboratorSelectItems.add(new SelectItem(screener, screener.generateFullName()));
     }
     return collaboratorSelectItems;
