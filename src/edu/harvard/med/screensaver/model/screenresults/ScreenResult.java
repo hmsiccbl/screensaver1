@@ -78,10 +78,10 @@ public class ScreenResult extends AbstractEntity
     boolean isShareable,
     Integer replicateCount)
   {
-    _screen = screen;
-    setDateCreated(dateCreated);
+    setDateCreated(dateCreated); // must occur before setScreen(), as dateCreate is part of our business key
     setShareable(isShareable);
     setReplicateCount(replicateCount);
+    setScreen(screen);
   }
 
   /**
@@ -92,8 +92,8 @@ public class ScreenResult extends AbstractEntity
    */
   public ScreenResult(Screen screen, Date dateCreated)
   {
-    _screen = screen;
-    setDateCreated(dateCreated);
+    setDateCreated(dateCreated); // must occur before setScreen(), as dateCreate is part of our business key
+    setScreen(screen);
   }
   
   /* (non-Javadoc)
@@ -311,7 +311,9 @@ public class ScreenResult extends AbstractEntity
     if (screen == null) {
       throw new NullPointerException();
     }
-    _screen.getHbnScreenResults().remove(this);
+    if (_screen != null) {
+      _screen.getHbnScreenResults().remove(this);
+    }
     _screen = screen;
     _screen.getHbnScreenResults().add(this);
   }

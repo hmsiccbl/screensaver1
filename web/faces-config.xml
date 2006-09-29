@@ -109,6 +109,10 @@
       <property-name>messages</property-name>
       <value>#{messages}</value>
     </managed-property>
+    <managed-property>
+      <property-name>screenResultViewer</property-name>
+      <value>#{screenResultViewer}</value>
+    </managed-property>
   </managed-bean>
   
   
@@ -154,11 +158,11 @@
     <!-- managed-property>
       <property-name>dao</property-name>
       <value>#{dao}</value>
-    </managed-property>
+    </managed-property-->
     <managed-property>
       <property-name>messages</property-name>
       <value>#{messages}</value>
-    </managed-property-->
+    </managed-property>
   </managed-bean>
   
   <managed-bean>
@@ -184,6 +188,10 @@
     <managed-bean-name>screenResultImporter</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporterController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>screenViewer</property-name>
+      <value>#{screenViewer}</value>
+    </managed-property>
     <managed-property>
       <property-name>screenResultViewer</property-name>
       <value>#{screenResultViewer}</value>
@@ -408,6 +416,20 @@
      <to-view-id>/screens/screensBrowser</to-view-id>
      <redirect/>
     </navigation-case>
+    <navigation-case>
+     <from-action>#{screenResultImporter.doImport}</from-action>
+     <from-outcome>success</from-outcome>
+     <to-view-id>/screens/screenViewer.jsp</to-view-id>
+    </navigation-case>
+    <navigation-case>
+     <from-action>#{screenResultImporter.doImport}</from-action>
+     <from-outcome>error</from-outcome>
+     <to-view-id>/screenresults/admin/screenResultImporter.jsp</to-view-id>
+    </navigation-case>
+    <navigation-case>
+     <from-outcome>viewScreenResult</from-outcome>
+     <to-view-id>/screenresults/screenResultViewer.jsp</to-view-id>
+    </navigation-case>
   </navigation-rule>
 
   <navigation-rule>
@@ -443,6 +465,10 @@
       <from-outcome>viewHeatMaps</from-outcome>
       <to-view-id>/screenresults/heatMapViewer</to-view-id>
       <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewScreen</from-outcome>
+      <to-view-id>/screens/screenViewer</to-view-id>
     </navigation-case>
   </navigation-rule>
   

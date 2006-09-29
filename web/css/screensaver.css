@@ -59,7 +59,7 @@ hr {
 
 .standardTable {
   color: #000000;
-  padding: 1;
+  padding: 2px;
   border-style: solid;
   border-width: 1px;
   border-color: gray;
@@ -76,7 +76,6 @@ hr {
 }
 
 .column,.keyColumn {
-  padding-right: 10px;
   vertical-align: top;
 }
 
@@ -86,6 +85,7 @@ hr {
 
 .tableHeader {
   background-color: #eeffff;
+  padding-right: 4px;
 }
 
 .row1,.row2 {

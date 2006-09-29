@@ -22,8 +22,10 @@ import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.screens.ScreenViewerController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
+import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 
 /**
@@ -38,14 +40,15 @@ public class ScreenResultImporterController extends AbstractController
   // static data
   
   private static final String ERRORS_XLS_FILE_EXTENSION = ".errors.xls";
+  private static final Logger log = Logger.getLogger(ScreenResultImporterController.class);
 
   
   // instance data
 
+  private ScreenViewerController _screenViewer;
   private ScreenResultParser _screenResultParser;
   private ScreenResultViewerController _screenResultViewer;
   private UploadedFile _uploadedFile;
-  private Screen _screen;
 
 
   // backing bean property getter and setter methods
@@ -60,16 +63,6 @@ public class ScreenResultImporterController extends AbstractController
     _screenResultParser = screenResultParser;
   }
 
-  public Screen getScreen()
-  {
-    return _screen;
-  }
-
-  public void setScreen(Screen screen)
-  {
-    _screen = screen;
-  }
-
   public ScreenResultViewerController getScreenResultViewer()
   {
     return _screenResultViewer;
@@ -78,6 +71,16 @@ public class ScreenResultImporterController extends AbstractController
   public void setScreenResultViewer(ScreenResultViewerController screenResultViewer)
   {
     _screenResultViewer = screenResultViewer;
+  }
+
+  public ScreenViewerController getScreenViewer()
+  {
+    return _screenViewer;
+  }
+
+  public void setScreenViewer(ScreenViewerController screenViewer)
+  {
+    _screenViewer = screenViewer;
   }
 
   public void setUploadedFile(UploadedFile uploadedFile)
@@ -104,17 +107,19 @@ public class ScreenResultImporterController extends AbstractController
     return DONE_ACTION_RESULT;
   }
   
-  public String submit()
+  public String doImport()
   {
     try {
-      if (_screen == null) {
-        throw new IllegalStateException("no screen specified");
+      Screen screen = _screenViewer.getScreen();
+      if (screen == null) {
+        throw new IllegalStateException("screen viewer has not been initialized with a Screen");
       }
+      log.info("starting import of ScreenResult for Screen " + screen);
 
       ScreenResult screenResult = null;
 
       if (_uploadedFile.getInputStream().available() > 0) {
-        screenResult = _screenResultParser.parse(_screen, new File(_uploadedFile.getName()), _uploadedFile.getInputStream());
+        screenResult = _screenResultParser.parse(screen, new File(_uploadedFile.getName()), _uploadedFile.getInputStream());
       }
 
       if (screenResult == null) {
@@ -123,10 +128,12 @@ public class ScreenResultImporterController extends AbstractController
         return REDISPLAY_PAGE_ACTION_RESULT;
       }
       else if (_screenResultParser.getErrors().size() > 0) {
+        log.info("error during import of ScreenResult for Screen " + screen);
         return ERROR_ACTION_RESULT;
       }
       else {
         _screenResultViewer.setScreenResult(screenResult);
+        log.info("successfully imported " + screenResult + " for Screen " + screen);
         return SUCCESS_ACTION_RESULT;
       }
     }

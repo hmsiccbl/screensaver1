@@ -69,6 +69,7 @@ public class ScreenResultViewerController extends AbstractController
   private static final int RAWDATA_TABLE_FIXED_COLUMN_COUNT = 2;
 
   private static final int METADATA_TABLE_FIXED_COLUMN_COUNT = 1;
+
   
 
   // instance data members
@@ -383,6 +384,11 @@ public class ScreenResultViewerController extends AbstractController
     return gotoPage(getPageIndex() - 1); 
   }
   
+  public String viewScreen()
+  {
+    return VIEW_SCREEN_ACTION;
+  }
+  
   public String download()
   {
     File exportedWorkbookFile = null;
@@ -414,9 +420,6 @@ public class ScreenResultViewerController extends AbstractController
   
   public String delete()
   {
-    getFacesContext().addMessage("dataForm",
-                                 new FacesMessage("Delete feature not yet implemented!"));
-    // TODO: implement
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   

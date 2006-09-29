@@ -40,7 +40,6 @@
         <t:commandNavigation2 accesskey="" />
         <t:commandNavigation2 action="goHelp" value="#{\"Help\"}" accesskey="H" />
         <t:commandNavigation2 id="navPanelAdminNode" value="#{\"Admin >>\"}" accesskey="" visibleOnUserRole="readEverythingAdmin" >
-          <t:commandNavigation2 action="goImportScreenResult" value="#{\"Import Screen Result\"}" accesskey="I" enabledOnUserRole="screenResultsAdmin"/>
           <t:commandNavigation2 action="goEditUser" value="#{\"Edit Users\"}" accesskey="usersAdmin" />
           <t:commandNavigation2 action="goEditLibraries" value="#{\"Edit Libraries\"}" accesskey="librariesAdmin" />
         </t:commandNavigation2>

@@ -36,6 +36,7 @@ import edu.harvard.med.screensaver.io.workbook.PlateNumberParser;
 import edu.harvard.med.screensaver.io.workbook.WellNameParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
+import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
@@ -118,6 +119,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private static final String METADATA_UNEXPECTED_COLUMN_TYPE_ERROR = "expected column type of \"data\"";
   private static final String METADATA_NO_RAWDATA_FILES_SPECIFIED_ERROR = "raw data workbook files not specified";
   private static final String UNKNOWN_ERROR = "unknown error";
+  private static final String NO_DATA_SHEETS_FOUND_ERROR = "no data worksheets were found; no result data was imported";
 
   private static SortedMap<String,IndicatorDirection> indicatorDirectionMap = new TreeMap<String,IndicatorDirection>();
   private static SortedMap<String,ActivityIndicatorType> activityIndicatorTypeMap = new TreeMap<String,ActivityIndicatorType>();
@@ -874,9 +876,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     ScreenResult screenResult) 
     throws ExtantLibraryException, IOException
   {
+    int dataSheetsParsed = 0;
     for (int iSheet = 0; iSheet < workbook.getWorkbook().getNumberOfSheets(); ++iSheet) {
       HSSFSheet sheet = initializeDataSheet(workbook, iSheet);
       if (isActiveSheetRawDataSheet()) {
+        ++dataSheetsParsed;
         log.info("parsing sheet " + workbook.getWorkbookFile().getName() + ":" + workbook.getWorkbook().getSheetName(iSheet));
         for (int iRow = RAWDATA_FIRST_DATA_ROW_INDEX; iRow <= sheet.getLastRowNum(); ++iRow) {
           Well well = findWell(iRow);
@@ -908,6 +912,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
           }
         }
       }
+    }
+    if (dataSheetsParsed == 0) {
+      _errors.addError(NO_DATA_SHEETS_FOUND_ERROR);
     }
   }
 

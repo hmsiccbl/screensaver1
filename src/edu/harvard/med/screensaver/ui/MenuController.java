@@ -98,11 +98,6 @@ public class MenuController extends AbstractController
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  public String goImportScreenResult()
-  {
-    return GO_IMPORT_SCREEN_RESULT_ACTION_RESULT;
-  }
-
   public String goEditUser()
   {
     return REDISPLAY_PAGE_ACTION_RESULT;

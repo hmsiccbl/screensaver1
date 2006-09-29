@@ -1,19 +1,39 @@
-<%@ include file="/headers.inc"%>
+<%-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
+<%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
+<%-- The core taglib contains all the logic, validation, controller, and other tags specific to JSF. --%>
+<%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
+<%-- The core taglib for JSTL; commented out until we really need it (we'll try to get by without and instead use pure JSF componentry --%>
+<%--@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" --%>
+<%-- The Apache Tomahawk JSF components --%>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%-- Tiles --%>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
+
+<!-- 
+TODO:
+- show parent screen's number (linked), and some basic info, like title, perhaps
+- move screen attributes out of data table and into independent UI components (like ScreenViewer)
+- fix View Screen button
+ -->
 
 <f:subview id="screenResultViewer">
 
   <h:form id="commandForm">
 
     <h:panelGroup>
-      <h:commandButton action="#{screenResultViewer.download}" value="Download" styleClass="command" />
-      <h:commandButton action="#{screenResultViewer.delete}" value="Delete" styleClass="command" visibleOnUserRole="screenResultsAdmin""/>
-      <h:commandButton action="#{screenResultViewer.viewHeatMaps}" value="View Heat Maps"
-        styleClass="command" />
-    </h:panelGroup>
+			<t:commandButton action="#{screenResultViewer.viewScreen}"
+				value="View Screen" styleClass="command" />
+			<t:commandButton action="#{screenResultViewer.download}"
+				value="Download" styleClass="command" />
+			<t:commandButton action="#{screenResultViewer.delete}" value="Delete"
+				styleClass="command" visibleOnUserRole="screenResultsAdmin" />
+			<t:commandButton action="#{screenResultViewer.viewHeatMaps}"
+				value="View Heat Maps" styleClass="command" />
+		</h:panelGroup>
 
   </h:form>
 
-  <%@ include file="admin/cherryPickUploader.jspf" %>
+  <%--@ include file="admin/cherryPickUploader.jspf" --%>
   
   <h:form id="dataForm">
 

@@ -19,11 +19,13 @@ import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewerController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
@@ -32,9 +34,11 @@ import org.springframework.dao.ConcurrencyFailureException;
 
 public class ScreenViewerController extends AbstractController
 {
-  private static final String COLLABORATOR_ID_TO_VIEW_PARAM_NAME = "collaboratorToView";
+  private static final String COLLABORATOR_ID_TO_VIEW_PARAM_NAME = "collaboratorIdToView";
+  private static final String SCREEN_RESULT_ID_TO_VIEW_PARAM_NAME = "screenResultIdToView";
 
   private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.SCREENS_ADMIN;
+
 
   private static Logger log = Logger.getLogger(ScreenViewerController.class);
   
@@ -42,6 +46,7 @@ public class ScreenViewerController extends AbstractController
   private Screen _screen;
   private String _usageMode; // "create" or "edit"
   private boolean _advancedMode;
+  private ScreenResultViewerController _screenResultViewer;
 
   /* Property getter/setter methods */
   
@@ -65,11 +70,22 @@ public class ScreenViewerController extends AbstractController
     if (_screen == null) {
       Screen defaultScreen = _dao.findEntityById(Screen.class, 92);
       log.warn("no screen defined: defaulting to screen " + defaultScreen.getScreenNumber());
-      _screen = defaultScreen;
+      setScreen(defaultScreen);
     }
     return _screen;
   }
   
+  public ScreenResultViewerController getScreenResultViewer()
+  {
+    return _screenResultViewer;
+  }
+
+  public void setScreenResultViewer(
+    ScreenResultViewerController screenResultViewer)
+  {
+    _screenResultViewer = screenResultViewer;
+  }
+
   public boolean isReadOnly() 
   {
     return !isUserInRole(EDITING_ROLE);
@@ -78,6 +94,11 @@ public class ScreenViewerController extends AbstractController
   public String getCollaboratorIdToViewParamName()
   {
     return COLLABORATOR_ID_TO_VIEW_PARAM_NAME;
+  }
+  
+  public String getScreenResultIdToViewParamName()
+  {
+    return SCREEN_RESULT_ID_TO_VIEW_PARAM_NAME;
   }
   
   public void setUsageMode(String usageMode) 
@@ -179,6 +200,26 @@ public class ScreenViewerController extends AbstractController
     return VIEW_SCREENING_ROOM_USER_ACTION_RESULT;
   }
 
+  public String viewScreenResult()
+  {
+    try {
+      int screenResultIdToView = Integer.parseInt(getHttpServletRequest().getParameter(SCREEN_RESULT_ID_TO_VIEW_PARAM_NAME));
+      
+      // TODO: ah, there's nothing like implmenting yet another linear search...yuck!
+      for (ScreenResult screenResult : _screen.getScreenResults()) {
+        if (screenResult.getEntityId().equals(screenResultIdToView)) {
+          _screenResultViewer.setScreenResult(screenResult);
+          return VIEW_SCREEN_RESULT_ACTION;
+        }
+      }
+      throw new IllegalArgumentException("invalid value '" + screenResultIdToView + "' for param " + SCREEN_RESULT_ID_TO_VIEW_PARAM_NAME);
+    }
+    catch (Exception e) {
+      reportSystemError(e);
+      return ERROR_ACTION_RESULT;
+    }
+  }
+    
   
   /* JSF Action event listeners */
 

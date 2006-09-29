@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.net.InetAddress;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -362,12 +364,13 @@ public abstract class AbstractController implements ScreensaverConstants
   }
   
   /**
-   * Report the provided error message via the appropriate communication
-   * channels, which are currently: stacktrace to standard error, error-level
-   * log message, and JSF view message (assumes an <code>h:messages</code>
-   * component exists).
+   * Report the provided system error message via the appropriate communication
+   * channels, which are currently: error-level log message, and JSF view
+   * message (assumes an <code>h:messages</code> component exists). System
+   * errors are errors that developers should be concerned about.
    * 
    * @param errorMesssage the error message to report
+   * @see #reportApplicationError(String)
    */
   protected void reportSystemError(String errorMessage)
   {
@@ -380,14 +383,31 @@ public abstract class AbstractController implements ScreensaverConstants
    * Report the provided Throwable via the appropriate communication channels,
    * which are currently: stacktrace to standard error, error-level log message,
    * and JSF view message (assumes an <code>h:messages</code> component
-   * exists).
+   * exists). System errors are errors that developers should be concerned
+   * about.
    * 
    * @param throwable the Throwable to report
+   * @see #reportApplicationError(String)
    */
-  protected void reportSystemError(Throwable throwable)
+  protected void reportSystemError(Throwable throwable) 
   {
     throwable.printStackTrace();
     reportSystemError(throwable.getMessage());
+  }
+  
+  /**
+   * Report the provided application error message to the user. An application
+   * error is one that a developer would not be concerned about, and that
+   * occurred due to so-called "user error".
+   * 
+   * @param errorMesssage the error message to report
+   * @see #reportSystemError(String)
+   * @see #reportSystemError(Throwable)
+   */
+  protected void reportApplicationError(String errorMessage)
+  {
+    showMessage("systemError",
+                new Object[] {errorMessage});
   }
   
   protected void closeDatabaseSession()
