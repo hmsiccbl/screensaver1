@@ -40,12 +40,12 @@
 		</h:form>
 
 		<h:panelGroup style="">
-			<h:outputText
-				rendered="#{navigator.summaryView}"
-				value="#{navigator.firstIndex}..#{navigator.lastIndex} out of #{navigator.resultsSize}" />
-			<h:outputText
-				rendered="#{! navigator.summaryView}"
-				value="#{navigator.currentIndex} of #{navigator.resultsSize}" />
+			<h:outputText rendered="#{navigator.summaryView}"
+				value="#{navigator.firstIndex}..#{navigator.lastIndex} out of #{navigator.resultsSize}"
+				styleClass="resultsNavPanelStatus" />
+			<h:outputText rendered="#{! navigator.summaryView}"
+				value="#{navigator.currentIndex} of #{navigator.resultsSize}"
+				styleClass="resultsNavPanelStatus" />
 		</h:panelGroup>
 		
 		<h:form id="sortOrderForm" style="vertical-align: middle">

@@ -129,3 +129,16 @@ a.menuItem:hover,a.menuItemActive:hover {
   line-height: 12px;
   border-bottom: 1px solid white;
 }
+
+.resultsNavPanelStatus {
+	font-weight: bold;
+	font-size: large;
+	margin-left : 4px;
+	margin-right: 4px;
+}
+
+.nonSpacingPanel {
+	padding: 0px;
+	margin: 0px;
+	border: 0px;
+}

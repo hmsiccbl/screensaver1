@@ -13,11 +13,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.SearchResults;
-import edu.harvard.med.screensaver.ui.SearchResultsViewMode;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -104,12 +103,10 @@ public class WellSearchResults extends SearchResults<Well>
   {
     if (columnName.equals(LIBRARY)) {
       _libraryViewerController.setLibrary(well.getLibrary());
-      setViewMode(SearchResultsViewMode.DETAIL);
       return "showLibrary";
     }
     if (columnName.equals(WELL)) {
       _wellViewerController.setWell(well);
-      setViewMode(SearchResultsViewMode.DETAIL);
       return "showWell";
     }
     return null;

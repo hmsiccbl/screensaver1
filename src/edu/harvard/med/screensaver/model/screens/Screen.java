@@ -19,6 +19,7 @@ import java.util.Set;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
 import org.apache.log4j.Logger;
 
@@ -189,11 +190,6 @@ public class Screen extends AbstractEntity
     _leadScreener.getHbnScreensLed().add(this);
   }
 
-  public String computeLeadScreenerFullname()
-  {
-    return _leadScreener.getFirstName() + " " + _leadScreener.getLastName();
-  }
-  
   /**
    * Get the lab head.
    *
@@ -232,9 +228,12 @@ public class Screen extends AbstractEntity
   /**
    * @motivation JSF EL binding
    */
+  @SuppressWarnings("unchecked")
   public List<ScreeningRoomUser> getCollaboratorsList()
   {
-    return Collections.unmodifiableList(new ArrayList<ScreeningRoomUser>(_collaborators));
+    List collaboratorsList = new ArrayList<ScreeningRoomUser>(_collaborators);
+    Collections.sort(collaboratorsList, ScreensaverUserComparator.getInstance());
+    return Collections.unmodifiableList(collaboratorsList);
   }
 
   /**

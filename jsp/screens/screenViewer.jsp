@@ -69,15 +69,7 @@
 			<t:outputLabel for="collaboratorsForm:collaborators"
 				value="Collaborators" />
 
-			<t:panelGrid columns="2" >
-
-				<t:dataList var="collaborator" value="#{screenViewer.screen.collaborators}" layout="unorderedList">
-					<t:commandLink action="#{screenViewer.viewCollaborator}" 
-						value="#{collaborator.lastName}, #{collaborator.firstName}" 
-						styleClass="command">
-						<f:param name="collaboratorIdToView" value="#{collaborator}"/>
-					</t:commandLink>
-				</t:dataList>
+			<t:panelGrid columns="2" styleClass="nonSpacingPanel">
 
 				<t:selectManyListbox id="collaborators"
 					value="#{screenViewer.screen.collaboratorsList}"
@@ -85,6 +77,16 @@
 					visibleOnUserRole="screensAdmin">
 					<f:selectItems value="#{screenViewer.collaboratorSelectItems}" />
 				</t:selectManyListbox>
+
+				<t:dataTable var="collaborator" value="#{screenViewer.screen.collaborators}">
+					<h:column >
+						<t:commandLink action="#{screenViewer.viewCollaborator}"
+							value="#{collaborator.lastName}, #{collaborator.firstName}"
+							styleClass="command">
+							<f:param name="collaboratorIdToView" value="#{collaborator}" />
+						</t:commandLink>
+					</h:column>
+				</t:dataTable>
 
 			</t:panelGrid>
 

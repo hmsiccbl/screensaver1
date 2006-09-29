@@ -15,7 +15,7 @@ import java.util.List;
 
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.SearchResults;
-import edu.harvard.med.screensaver.ui.SearchResultsViewMode;
+import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
 
 /**
@@ -80,7 +80,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
       return screen.getScreenNumber();
     }
     if (columnName.equals(LEAD_SCREENER)) {
-      return screen.computeLeadScreenerFullname();  
+      return screen.getLeadScreener().generateFullName();
     }
     if (columnName.equals(TITLE)) {
       return screen.getTitle();
@@ -92,8 +92,6 @@ public class ScreenSearchResults extends SearchResults<Screen>
   protected Object cellAction(Screen screen, String columnName)
   {
     _screenViewerController.setScreen(screen);
-    
-    setViewMode(SearchResultsViewMode.DETAIL);
     return "showScreen";
   }
   
@@ -110,7 +108,8 @@ public class ScreenSearchResults extends SearchResults<Screen>
     if (columnName.equals(LEAD_SCREENER)) {
       return new Comparator<Screen>() {
         public int compare(Screen s1, Screen s2) {
-          return s1.computeLeadScreenerFullname().compareTo(s2.computeLeadScreenerFullname());
+          return ScreensaverUserComparator.getInstance().compare(s1.getLeadScreener(), 
+                                                                 s2.getLeadScreener());
         }
       };
     }

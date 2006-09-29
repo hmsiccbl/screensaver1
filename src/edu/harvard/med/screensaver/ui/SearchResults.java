@@ -22,7 +22,6 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
-import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
@@ -40,8 +39,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-abstract public class SearchResults<E extends AbstractEntity>
-implements ScreensaverConstants
+abstract public class SearchResults<E extends AbstractEntity> extends AbstractController
 {
   
   // public static final data
@@ -49,6 +47,7 @@ implements ScreensaverConstants
   private static final Logger log = Logger.getLogger(SearchResults.class);
   public static final int [] PAGESIZES = { 10, 20, 50, 100 };
   public static final int DEFAULT_PAGESIZE = PAGESIZES[0];
+  private static final String SEARCH_RESULTS_VIEW_MODE = "viewMode";
   
 
   // private instance data
@@ -63,7 +62,6 @@ implements ScreensaverConstants
   private int _currentPageIndex = 0;
   private int _currentEntityIndex = 0;
   private int _itemsPerPage = DEFAULT_PAGESIZE;
-  private SearchResultsViewMode _viewMode = SearchResultsViewMode.SUMMARY;
   
   private UIData _dataTable;
   private DataModel _dataModel;
@@ -441,21 +439,16 @@ implements ScreensaverConstants
   }
   
   /**
-   * Set the current view mode.
-   * @param viewMode the new current view mode
-   */
-  public void setViewMode(SearchResultsViewMode viewMode)
-  {
-    _viewMode = viewMode;
-  }
-  
-  /**
    * Get the current view mode.
    * @return the current view mode as a {@link SearchResultsViewMode} object
    */
   public SearchResultsViewMode getViewMode()
   {
-    return _viewMode;
+    // HACK: is there a better way of determining the context in which this controller is being used???
+    if (getFacesContext().getViewRoot().getViewId().contains("Browser")) {
+      return SearchResultsViewMode.SUMMARY;
+    }
+    return SearchResultsViewMode.DETAIL;
   }
   
   /**
@@ -466,12 +459,11 @@ implements ScreensaverConstants
    */
   public boolean isSummaryView()
   {
-    return _viewMode.equals(SearchResultsViewMode.SUMMARY);
+    return getViewMode().equals(SearchResultsViewMode.SUMMARY);
   }
   
   public String showSummaryView()
   {
-    setViewMode(SearchResultsViewMode.SUMMARY);
     return SHOW_SEARCH_RESULTS_SUMMARY_ACTION;
   }
   

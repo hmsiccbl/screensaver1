@@ -10,7 +10,20 @@
 package edu.harvard.med.screensaver.ui;
 
 public enum SortDirection {
-  ASCENDING,
-  DESCENDING;
+  ASCENDING("Ascending"),
+  DESCENDING("Descending");
+  
+  private String _displayText;
+
+  private SortDirection(String displayText)
+  {
+    _displayText = displayText;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return _displayText;
+  }
 }
 
