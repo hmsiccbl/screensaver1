@@ -12,9 +12,21 @@
 <f:subview id="menu">
   <t:panelGrid columns="1">
 
-    <t:commandLink id="menuTitle" action="goMain" value="#{menu.applicationTitle}" styleClass="menuItem title"  />
+    <t:commandLink id="menuTitle" action="goMain" value="#{menu.applicationTitle}" styleClass="menuItem title"/>
 
-    <t:commandLink id="userName" action="goMyAccount" value="#{menu.userPrincipalName}" rendered="#{menu.authenticatedUser}" styleClass="menuItem userName"/>
+    <t:htmlTag id="menuSectionSeparator0" value="hr" rendered="#{menu.authenticatedUser}"/>
+
+		<%-- TODO: this layout won't work well for long user names... --%>
+		<t:panelGroup rendered="#{menu.authenticatedUser}">
+			<h:form id="userForm">
+				<t:outputText value="User " styleClass="label"/>
+				<t:commandLink id="userName" action="goMyAccount" value="#{menu.userPrincipalName}" styleClass="menuItem userName"/>
+				<t:outputText value="|" styleClass="spacer"/>
+				<t:commandLink id="account" action="goMyAccount" value="#{\"Edit\"}" styleClass="menuItem"/>
+				<t:outputText value="|" styleClass="spacer"/>
+				<t:commandLink id="logout" action="#{menu.logout}" value="#{\"Logout\"}" styleClass="menuItem"/>
+			</h:form>
+		</t:panelGroup>
   
     <t:htmlTag id="menuSectionSeparator1" value="hr" />
 
@@ -25,9 +37,8 @@
         <t:commandNavigation2 action="goQuery" value="#{\"Search\"}" accesskey="S" />
         <t:commandNavigation2 action="#{librariesBrowser.goBrowseLibraries}" value="#{\"Browse Libraries\"}" accesskey="L" />
         <t:commandNavigation2 action="#{screensBrowser.goBrowseScreens}" value="#{\"Browse Screens\"}" accesskey="S" />
-        <t:commandNavigation2 action="goMyAccount" value="#{\"My Account\"}" accesskey="" />
+        <t:commandNavigation2 accesskey="" />
         <t:commandNavigation2 action="goHelp" value="#{\"Help\"}" accesskey="H" />
-        <t:commandNavigation2 action="#{menu.logout}" value="#{\"Logout\"}" accesskey="" />
         <t:commandNavigation2 id="navPanelAdminNode" value="#{\"Admin >>\"}" accesskey="" visibleOnUserRole="readEverythingAdmin" >
           <t:commandNavigation2 action="goImportScreenResult" value="#{\"Import Screen Result\"}" accesskey="I" enabledOnUserRole="screenResultsAdmin"/>
           <t:commandNavigation2 action="goEditUser" value="#{\"Edit Users\"}" accesskey="usersAdmin" />

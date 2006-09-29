@@ -22,9 +22,9 @@ import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
-import edu.harvard.med.screensaver.ui.util.ScreeningRoomUserConverter;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
 import org.apache.log4j.Logger;
@@ -33,6 +33,8 @@ import org.springframework.dao.ConcurrencyFailureException;
 public class ScreenViewerController extends AbstractController
 {
   private static final String COLLABORATOR_ID_TO_VIEW_PARAM_NAME = "collaboratorToView";
+
+  private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.SCREENS_ADMIN;
 
   private static Logger log = Logger.getLogger(ScreenViewerController.class);
   
@@ -43,11 +45,13 @@ public class ScreenViewerController extends AbstractController
 
   /* Property getter/setter methods */
   
-  public void setDao(DAO dao) {
+  public void setDao(DAO dao) 
+  {
     _dao = dao;
    }
   
-  public void setScreen(Screen screen) {
+  public void setScreen(Screen screen) 
+  {
     _screen = screen;
   }
 
@@ -56,7 +60,8 @@ public class ScreenViewerController extends AbstractController
    * @motivation allows properties of the Library to be bound to UI components
    * @return
    */
-  public Screen getScreen() {
+  public Screen getScreen() 
+  {
     if (_screen == null) {
       Screen defaultScreen = _dao.findEntityById(Screen.class, 92);
       log.warn("no screen defined: defaulting to screen " + defaultScreen.getScreenNumber());
@@ -64,26 +69,35 @@ public class ScreenViewerController extends AbstractController
     }
     return _screen;
   }
+  
+  public boolean isReadOnly() 
+  {
+    return !isUserInRole(EDITING_ROLE);
+  }
 
   public String getCollaboratorIdToViewParamName()
   {
     return COLLABORATOR_ID_TO_VIEW_PARAM_NAME;
   }
   
-  public void setUsageMode(String usageMode) {
+  public void setUsageMode(String usageMode) 
+  {
     _usageMode = usageMode;
   }
   
-  public String getUsageMode() {
+  public String getUsageMode() 
+  {
     return _usageMode;
   }
   
   
-  public boolean isAdvancedMode() {
+  public boolean isAdvancedMode() 
+  {
     return _advancedMode;
   }
 
-  public void setAdvancedMode(boolean advancedMode) {
+  public void setAdvancedMode(boolean advancedMode) 
+  {
     _advancedMode = advancedMode;
   }
   

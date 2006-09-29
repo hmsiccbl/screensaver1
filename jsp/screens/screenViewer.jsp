@@ -7,80 +7,92 @@
 <%-- Tiles --%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
+<%-- 
+TODO:
+
+- hyperlink lab head and lead screener (in read-only mode)
+- consider forcing a resort after a sort column value is edited
+--%>
+
 <f:subview id="screenViewer">
 
-	<t:aliasBean alias="#{navigator}" value="#{searchResultsRegistry.searchResults}" >
-		<%@ include file="../searchResultsNavPanel.jspf"  %>
+	<t:aliasBean alias="#{navigator}"
+		value="#{searchResultsRegistry.searchResults}">
+		<%@ include file="../searchResultsNavPanel.jspf"%>
 	</t:aliasBean>
 
 	<h:form id="screenForm">
 
 		<t:commandButton id="save" value="Save" action="#{screenViewer.save}"
-			styleClass="command" visibleOnUserRole="screensAdmin" />
-		
+			styleClass="command" rendered="#{!screenViewer.readOnly}" />
+
 		<t:panelGrid columns="2">
 
 			<t:outputLabel for="screenId" value="Screen ID"
-				visibleOnUserRole="developer" />
-			<t:inputText id="screenId" value="#{screenViewer.screen.screenId}"
-				displayValueOnly="true" styleClass="restrictedInput"
-				visibleOnUserRole="developer" />
+				visibleOnUserRole="developer" styleClass="inputLabel" />
+			<t:outputText id="screenId" value="#{screenViewer.screen.screenId}"
+				styleClass="dataText" visibleOnUserRole="developer" />
 
 			<t:outputLabel for="screenNumber" value="Screen Number"
 				styleClass="inputLabel" />
 			<t:inputText id="screenNumber"
 				value="#{screenViewer.screen.screenNumber}" styleClass="input"
-				displayValueOnly="true" />
+				displayValueOnly="#{screenViewer.readOnly}" />
 
 			<t:outputLabel for="title" value="Title" styleClass="inputLabel" />
 			<t:inputText id="title" value="#{screenViewer.screen.title}"
-				enabledOnUserRole="screensAdmin" styleClass="input" />
+				displayValueOnly="#{screenViewer.readOnly}" size="80"
+				styleClass="input" />
 
-			<%--t:outputLabel for="dateCreated" value="Date Created"
+			<t:outputLabel for="dateCreatedEditable" value="Date Created"
 				styleClass="inputLabel" />
-			<t:inputDate id="dateCreated"
+			<t:inputDate id="dateCreatedEditable"
 				value="#{screenViewer.screen.dateCreated}" popupCalendar="true"
-				enabledOnUserRole="screensAdmin" styleClass="input" /--%>
+				rendered="#{!screenViewer.readOnly}" styleClass="input" />
+			<t:outputText id="dateCreated"
+				value="#{screenViewer.screen.dateCreated}"
+				rendered="#{screenViewer.readOnly}" styleClass="dataText" />
 
 			<t:outputLabel for="screenType" value="Screen Type"
 				styleClass="inputLabel" />
 			<t:selectOneMenu id="screenType"
 				value="#{screenViewer.screen.screenType}"
 				converter="ScreenTypeConverter" styleClass="input"
-				enabledOnUserRole="screensAdmin">
+				displayValueOnly="#{screenViewer.readOnly}">
 				<f:selectItems value="#{screenViewer.screenTypeSelectItems}" />
 			</t:selectOneMenu>
 
 			<%-- "lab name" == last name of "lead head", but former is required for UI, latter is for internal design --%>
-			<t:outputLabel for="labName" value="Lab Name" />
+			<t:outputLabel for="labName" value="Lab Name" styleClass="inputLabel" />
 			<t:selectOneMenu id="labName" value="#{screenViewer.screen.labHead}"
 				converter="ScreeningRoomUserConverter"
-				enabledOnUserRole="screensAdmin" styleClass="input">
+				displayValueOnly="#{screenViewer.readOnly}" styleClass="input">
 				<f:selectItems value="#{screenViewer.labNameSelectItems}" />
 			</t:selectOneMenu>
 
-			<t:outputLabel for="leadScreener" value="Lead Screener" />
+			<t:outputLabel for="leadScreener" value="Lead Screener"
+				styleClass="inputLabel" />
 			<t:selectOneMenu id="leadScreener"
 				value="#{screenViewer.screen.leadScreener}"
 				converter="ScreeningRoomUserConverter"
-				enabledOnUserRole="screensAdmin" styleClass="input">
+				displayValueOnly="#{screenViewer.readOnly}" styleClass="input">
 				<f:selectItems value="#{screenViewer.leadScreenerSelectItems}" />
 			</t:selectOneMenu>
 
 			<t:outputLabel for="collaboratorsForm:collaborators"
-				value="Collaborators" />
+				value="Collaborators" styleClass="inputLabel" />
 
 			<t:panelGrid columns="2" styleClass="nonSpacingPanel">
 
 				<t:selectManyListbox id="collaborators"
 					value="#{screenViewer.screen.collaboratorsList}"
-					converter="ScreeningRoomUserConverter" size="5" styleClass="input">
+					converter="ScreeningRoomUserConverter"
+					rendered="#{!screenViewer.readOnly}" rows="8" styleClass="input">
 					<f:selectItems value="#{screenViewer.collaboratorSelectItems}" />
 				</t:selectManyListbox>
 
 				<t:dataTable var="collaborator"
-					value="#{screenViewer.screen.collaborators}"
-					visibleOnUserRole="screensAdmin">
+					value="#{screenViewer.screen.collaborators}">
 					<h:column>
 						<t:commandLink action="#{screenViewer.viewCollaborator}"
 							value="#{collaborator.lastName}, #{collaborator.firstName}"
@@ -93,10 +105,10 @@
 			</t:panelGrid>
 
 			<t:outputLabel for="publishableProtocol" value="Publishable Protocol"
-				enabledOnUserRole="screensAdmin" styleClass="inputLabel" />
-			<t:inputTextarea id="publishableProtocol" rows="3"
+				styleClass="inputLabel" />
+			<t:inputTextarea id="publishableProtocol" rows="3" cols="80"
 				value="#{screenViewer.screen.publishableProtocol}"
-				styleClass="input" />
+				readonly="#{screenViewer.readOnly}" styleClass="input" />
 		</t:panelGrid>
 
 

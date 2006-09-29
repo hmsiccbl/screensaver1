@@ -52,6 +52,11 @@ hr {
   border: 1px;
 }
 
+.spacer {
+	margin-left: 4px;
+	margin-right: 4px;
+}	
+
 .standardTable {
   color: #000000;
   padding: 1;
@@ -59,6 +64,11 @@ hr {
   border-width: 1px;
   border-color: gray;
   border-collapse: collapse;
+}
+
+.dataText, .input {
+	font-family: sans-serif;
+	font-size: small;
 }
 
 .command,.input,.inputLabel {

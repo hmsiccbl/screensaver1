@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.util.Messages;
 import edu.harvard.med.screensaver.ui.util.ScreensaverSessionManagementFilter;
 
@@ -101,30 +102,54 @@ public abstract class AbstractController implements ScreensaverConstants
     _messages = messages;
   }
   
+  /**
+   * Override this method to indicate whether the current user is allowed to
+   * perform editing operations on the data in the view. Components in the JSF
+   * view can call this method/property via the JSF EL, to set component
+   * attributes, such as 'displayValueOnly', 'rendered', 'readonly', 'disables',
+   * etc.
+   * 
+   * @motivation the Tomahawk components have 'enabledOnUserRole' and
+   *             'visibleOnUserRole' attributes, which are convenient, but 1)
+   *             'enabledOnUserRole' shows a grayed-out component, rather than a
+   *             nice plain text value, as does 'displayValueOnly'; 2) cannot
+   *             handle the case where the visibility/enabling of a component is
+   *             controlled by the user *not* being in a particular role (e.g.
+   *             user is not an admin of any type)
+   * @return true iff the view is read-only for the current user, based upon the
+   *         user's roles. Defaults to false, unless a subclass overrides this
+   *         method.
+   * @see #isUserInRole(ScreensaverUserRole)
+   */
+  public boolean isReadOnly()
+  {
+    return true;
+  }
   
-  // public JSF convenience methods
+
+  // protected methods
   
-  public FacesContext getFacesContext()
+  protected FacesContext getFacesContext()
   {
     return FacesContext.getCurrentInstance();
   }
   
-  public Application getApplicationContext()
+  protected Application getApplicationContext()
   {
     return getFacesContext().getApplication();
   }
   
-  public ExternalContext getExternalContext()
+  protected ExternalContext getExternalContext()
   {
     return getFacesContext().getExternalContext();
   }
   
-  public Map getRequestMap()
+  protected Map getRequestMap()
   {
     return getExternalContext().getRequestMap();
   }
   
-  public HttpSession getHttpSession()
+  protected HttpSession getHttpSession()
   {
     Object httpSession = getExternalContext().getSession(false);
     if (httpSession == null) {
@@ -134,7 +159,7 @@ public abstract class AbstractController implements ScreensaverConstants
     return (HttpSession) httpSession;
   }
   
-  public HttpServletRequest getHttpServletRequest()
+  protected HttpServletRequest getHttpServletRequest()
   {
     Object request = getExternalContext().getRequest();
     if (request == null) {
@@ -144,7 +169,7 @@ public abstract class AbstractController implements ScreensaverConstants
     return (HttpServletRequest) request;
   }
   
-  public HttpServletResponse getHttpServletResponse()
+  protected HttpServletResponse getHttpServletResponse()
   {
     Object response = getExternalContext().getResponse();
     if (response == null) {
@@ -154,7 +179,7 @@ public abstract class AbstractController implements ScreensaverConstants
     return (HttpServletResponse) response;
   }
   
-  public String getSessionDebugInfoString()
+  protected String getSessionDebugInfoString()
   {
     return "ID: " + getHttpSession().getId() + "\n" +
     "last accessed time: " + getHttpSession().getLastAccessedTime();
@@ -171,7 +196,7 @@ public abstract class AbstractController implements ScreensaverConstants
    * @return the bean of the given name, or <code>null</code> if no such named
    *         bean exists
    */
-  public Object getBean(String beanName)
+  protected Object getBean(String beanName)
   {
     log.warn("you are using AbstractController.getBean() to acquire bean " + beanName + "; please reconsider your use of this method!  Use injection!");
     return getFacesContext().getApplication().getVariableResolver().resolveVariable(getFacesContext(), 
@@ -208,7 +233,7 @@ public abstract class AbstractController implements ScreensaverConstants
    *          ":formId:subviewId:fieldId").
    * @return the FacesMessage that was set
    */
-  public FacesMessage showMessage(String messageKey, String componentId)
+  protected FacesMessage showMessage(String messageKey, String componentId)
   {
     return showMessage(messageKey, null, componentId);
   }
@@ -220,7 +245,7 @@ public abstract class AbstractController implements ScreensaverConstants
    * @param messageKey the key of the message to be shown
    * @return the FacesMessage that was set
    */
-  public FacesMessage showMessage(String messageKey)
+  protected FacesMessage showMessage(String messageKey)
   {
     return showMessage(messageKey, null, null);
   }
@@ -235,7 +260,7 @@ public abstract class AbstractController implements ScreensaverConstants
    *          string)
    * @return the FacesMessage that was set
    */
-  public FacesMessage showMessage(String messageKey, Object[] messageArgs)
+  protected FacesMessage showMessage(String messageKey, Object[] messageArgs)
   {
     return showMessage(messageKey, messageArgs, null);
   }
@@ -254,7 +279,7 @@ public abstract class AbstractController implements ScreensaverConstants
    *          ":formId:subviewId:fieldId").
    * @return the FacesMessage that was set
    */
-  public FacesMessage showMessage(
+  protected FacesMessage showMessage(
     String messageKey,
     Object[] messageArgs,
     String componentId)
@@ -291,7 +316,7 @@ public abstract class AbstractController implements ScreensaverConstants
    * @param component
    * @return
    */
-  public String getClientId(UIComponent component)
+  protected String getClientId(UIComponent component)
   {
     if (component == null) {
       return null;
@@ -310,7 +335,7 @@ public abstract class AbstractController implements ScreensaverConstants
    *          components.
    * @return the (first) component found with the given ID
    */
-  public UIComponent findComponent(String componentId)
+  protected UIComponent findComponent(String componentId)
   {
     return doFindComponent(getFacesContext().getViewRoot(), componentId);
   }
@@ -329,7 +354,7 @@ public abstract class AbstractController implements ScreensaverConstants
    *          of the parent)
    * @return the (first) component found with the given ID
    */
-  public UIComponent findComponent(String componentId, String parentId)
+  protected UIComponent findComponent(String componentId, String parentId)
   {
     UIComponent container = findComponent(parentId);
     return doFindComponent(container,
@@ -344,7 +369,7 @@ public abstract class AbstractController implements ScreensaverConstants
    * 
    * @param errorMesssage the error message to report
    */
-  public void reportSystemError(String errorMessage)
+  protected void reportSystemError(String errorMessage)
   {
     showMessage("systemError",
                 new Object[] {errorMessage});
@@ -359,20 +384,20 @@ public abstract class AbstractController implements ScreensaverConstants
    * 
    * @param throwable the Throwable to report
    */
-  public void reportSystemError(Throwable throwable)
+  protected void reportSystemError(Throwable throwable)
   {
     throwable.printStackTrace();
     reportSystemError(throwable.getMessage());
   }
   
-  public void closeDatabaseSession()
+  protected void closeDatabaseSession()
   {
     log.debug("requesting release of Hibernate session");
     getHttpSession().setAttribute(ScreensaverSessionManagementFilter.CLOSE_HIBERNATE_SESSION,
                                   Boolean.TRUE);
   }
   
-  public void closeHttpAndDatabaseSessions()
+  protected void closeHttpAndDatabaseSessions()
   {
     log.debug("requesting release of HTTP and Hibernate sessions");
     getHttpSession().setAttribute(ScreensaverSessionManagementFilter.CLOSE_HTTP_AND_HIBERNATE_SESSIONS,
@@ -406,7 +431,7 @@ public abstract class AbstractController implements ScreensaverConstants
    *             tree to avoid accessing these now-invalid HIbernate proxy
    *             objects.
    */
-  public void recreateView(boolean renderResponseImmediately)
+  protected void recreateView(boolean renderResponseImmediately)
   {
     FacesContext facesCtx = getFacesContext();
     log.debug("recreating JSF view ID " + facesCtx.getViewRoot().getViewId());
@@ -418,6 +443,19 @@ public abstract class AbstractController implements ScreensaverConstants
       facesCtx.renderResponse();
     }
   }
+  
+  /**
+   * A convenience method for determining if the current user is in a particular
+   * role (with role type safety!)
+   * 
+   * @param role
+   * @return true iff the user is in the specified role
+   */
+  protected boolean isUserInRole(ScreensaverUserRole role)
+  {
+    return getExternalContext().isUserInRole(role.toString());
+  }
+
   
   // private methods
   
@@ -440,5 +478,6 @@ public abstract class AbstractController implements ScreensaverConstants
     }
     return null;
   }
+
   
 }
