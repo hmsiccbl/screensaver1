@@ -136,10 +136,11 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
     FilterChain filterChain)
   throws ServletException, IOException 
   {
-    // we don't perform any of our filter's special logic unless this is a
-    // request for one of our application's views; static resources do not
-    // require us to perform these steps
-    if (!isRequestForApplicationView(request)) {
+    // we don't perform Hibernate session management unless:
+    // 1) this is a request for one of our application's JSF views (static resources do not require us to perform these steps)
+    // 2) a logged-in user is associated with the session (to avoid consuming Hibernate session & associated database resources unnecessarily)
+    if (!isRequestForApplicationView(request) ||
+      request.getRemoteUser() == null) {
       filterChain.doFilter(request, response);
       return;
     }
@@ -197,7 +198,16 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
                httpSessionId + " @ " + request.getRequestURI());
     }
   }
-
+  
+  /**
+   * Returns <code>true</code> iff the request is for a JSF view, and thus
+   * would make use of a Hibernate session.
+   * 
+   * @motivation We use this to avoid performing Hibernate session management
+   *             tasks for URLs of static resources (images, etc.).
+   * @param request
+   * @return
+   */
   private boolean isRequestForApplicationView(HttpServletRequest request)
   {
     return request.getRequestURI().endsWith(".jsf") || request.getRequestURI().endsWith(".jsp");
