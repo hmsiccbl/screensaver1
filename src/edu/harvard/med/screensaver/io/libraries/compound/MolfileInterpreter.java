@@ -9,19 +9,13 @@
 
 package edu.harvard.med.screensaver.io.libraries.compound;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import joelib2.io.BasicIOType;
-import joelib2.io.BasicIOTypeHolder;
-import joelib2.io.BasicReader;
-import joelib2.io.IOTypeHolder;
-import joelib2.io.MoleculeIOException;
-import joelib2.molecule.BasicConformerMolecule;
+import java.io.StringReader;
 
 import org.apache.log4j.Logger;
+import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.Molecule;
+import org.openscience.cdk.io.MDLReader;
+import org.openscience.cdk.smiles.SmilesGenerator;
 
 /**
  * An interpreter of the MDL molfile records embedded in the SD file records. Performs
@@ -68,53 +62,42 @@ public class MolfileInterpreter
 
   private void initialize()
   {
-    BasicConformerMolecule molecule = getMoleculeFromMolfile();
+    Molecule molecule = getMoleculeFromMolfile();
     _smiles = getSmilesForMolecule(molecule);
     // TODO: get the rest of the compounds. choose the one that inherits the name and numbers
+    
+    log.info("smiles = " + _smiles);
+    
   }
 
   /**
    * Get the molecule from the molfile. Return it.
    * @return
-   * @throws IOException
-   * @throws MoleculeIOException
    */
-  private BasicConformerMolecule getMoleculeFromMolfile()
+  private Molecule getMoleculeFromMolfile()
   {
     try {
-      IOTypeHolder typeHolder = BasicIOTypeHolder.instance();
-      BasicIOType sdfType = typeHolder.getIOType("SDF");
-      BasicIOType smilesType = typeHolder.getIOType("SMILES");
-      
-      ByteArrayInputStream inputStream = new ByteArrayInputStream(_molfile.getBytes());
-      BasicReader reader = new BasicReader(inputStream, sdfType);
-      
-      BasicConformerMolecule molecule = new BasicConformerMolecule(sdfType, smilesType);
-      reader.readNext(molecule);
+      MDLReader mdlReader = new MDLReader(new StringReader(_molfile));
+      Molecule molecule = new Molecule();
+      mdlReader.read(molecule);
+      //new HydrogenAdder().addExplicitHydrogensToSatisfyValency(molecule);
       return molecule;
     }
-    catch (IOException e) {
-      log.error("highly unexpected IOException initializing MolfileInterpreter!", e);
-    }
-    catch (MoleculeIOException e) {
-      log.error("unexpected MoleculeIOException initializing MolfileInterpreter!", e);
+    catch (Exception e) {
+      log.error("encountered Exception reading the MDL!", e);
     }
     return null;
   }
 
   /**
-   * Get the SMILES string for the given molecule. NOTE this method requires that the
-   * <code>molecule.getOutputType()</code> is SMILES.
+   * Get the SMILES string for the given molecule.
    *  
    * @param molecule the molecule to get the SMILES string for
    * @return the SMILES string
    */
-  private String getSmilesForMolecule(BasicConformerMolecule molecule) {
-    String moleculeAsString = molecule.toString();
-    Pattern pattern = Pattern.compile("\\S+");
-    Matcher matcher = pattern.matcher(moleculeAsString);
-    matcher.find();
-    return matcher.group();
+  private String getSmilesForMolecule(Molecule molecule) {
+    SmilesGenerator smilesGenerator = new SmilesGenerator(DefaultChemObjectBuilder.getInstance());
+    return smilesGenerator.createSMILES(molecule);
   }
 }
 

@@ -73,14 +73,15 @@ class SDRecordParser
 
     String molfile = _sdRecordData.getMolfile();
     if (molfile == null) {
-      reportError("encountered an SD record an empty MDL molfile specification");
+      reportError("encountered an SD record with an empty MDL molfile specification");
       prepareNextRecord();
       return;
     }
+    //log.info("record data = " + _sdRecordData);
+    //log.info("molfile = " + molfile);
     _molfileInterpreter = new MolfileInterpreter(molfile);
     
     // TODO: do something [more] with the record data
-    log.info("record data = " + _sdRecordData);
     Well well = getWell();
     if (well == null) {
       prepareNextRecord();
@@ -124,6 +125,8 @@ class SDRecordParser
       molfile.append(line).append('\n');
       line = readNextLine();
     }
+    molfile.append("M  END\n");
+    //molfile.append("$$$$\n");
     SDRecordData recordData = new SDRecordData();
     recordData.setMolfile(new String(molfile));
     while (! line.equals("$$$$")) {
