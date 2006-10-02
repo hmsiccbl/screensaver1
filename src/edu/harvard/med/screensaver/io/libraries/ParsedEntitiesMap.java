@@ -14,6 +14,7 @@ import java.util.Map;
 
 import edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser;
 import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
+import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
@@ -31,6 +32,7 @@ import edu.harvard.med.screensaver.util.Triple;
  * <li>{@link Well}
  * <li>{@link SilencingReagent}
  * <li>{@link Gene}
+ * <li>{@link Compound}
  * </ul>
  * 
  * Entities are tracked by the fields of their business key, with one exception: because this
@@ -48,6 +50,9 @@ public class ParsedEntitiesMap
     new HashMap<Triple<Gene,SilencingReagentType,String>,SilencingReagent>(4000);
   private Map<Integer,Gene> _genes =
     new HashMap<Integer,Gene>(1000);
+  private Map<String,Compound> _compounds =
+    new HashMap<String,Compound>(1000);
+  
   
   public void addWell(Well well)
   {
@@ -86,5 +91,15 @@ public class ParsedEntitiesMap
   public Gene getGene(Integer entrezgeneId)
   {
     return _genes.get(entrezgeneId);
+  }
+  
+  public void addCompound(Compound compound)
+  {
+    _compounds.put(compound.getSmiles(), compound);
+  }
+  
+  public Compound getCompound(String smiles)
+  {
+    return _compounds.get(smiles);
   }
 }

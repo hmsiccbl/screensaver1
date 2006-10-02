@@ -17,7 +17,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
+import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
 
@@ -77,17 +77,17 @@ class SDRecordParser
       prepareNextRecord();
       return;
     }
-    //log.info("record data = " + _sdRecordData);
-    //log.info("molfile = " + molfile);
     _molfileInterpreter = new MolfileInterpreter(molfile);
     
-    // TODO: do something [more] with the record data
     Well well = getWell();
     if (well == null) {
       prepareNextRecord();
       return;
     }
-    
+    addSmilesToWell(_molfileInterpreter.getPrimaryCompoundSmiles(), well, true);
+    for (String secondaryCompoundSmiles : _molfileInterpreter.getSecondaryCompoundsSmiles()) {
+      addSmilesToWell(secondaryCompoundSmiles, well, false);
+    }
     prepareNextRecord();
   }
   
@@ -125,8 +125,7 @@ class SDRecordParser
       molfile.append(line).append('\n');
       line = readNextLine();
     }
-    molfile.append("M  END\n");
-    //molfile.append("$$$$\n");
+    molfile.append(line);
     SDRecordData recordData = new SDRecordData();
     recordData.setMolfile(new String(molfile));
     while (! line.equals("$$$$")) {
@@ -209,8 +208,8 @@ class SDRecordParser
   
   /**
    * Get an existing well from the database with the specified plate number and well name,
-   * and the library from the parent {@link RNAiLibraryContentsParser}. Return null if no
-   * such well exists in the database.
+   * and the library from the parent {@link SDFileCompoundLibraryContentsParser}. Return null
+   * if no such well exists in the database.
    *  
    * @param plateNumber the plate number
    * @param wellName the well name
@@ -232,6 +231,71 @@ class SDRecordParser
     propertiesMap.put("hbnLibrary", library);
     propertiesMap.put("plateNumber", plateNumber);
     propertiesMap.put("wellName", wellName);
-    return dao.findEntityByProperties(Well.class, propertiesMap);
+    well = dao.findEntityByProperties(Well.class, propertiesMap);
+    if (well != null) {
+      _libraryContentsParser.getParsedEntitiesMap().addWell(well);
+    }
+    return well;
+  }
+  
+  /**
+   * Retrieve or create a compound for the smiles. If it is the primary compound, then add
+   * naming information such as the CAS number and the compound name. Add the compound to
+   * the well.
+   * 
+   * @param smiles
+   * @param well
+   * @param isPrimaryCompound
+   */
+  private void addSmilesToWell(String smiles, Well well, boolean isPrimaryCompound)
+  {
+    Compound compound = getExistingCompound(smiles);
+    if (compound == null) {
+      compound = new Compound(smiles);
+      _libraryContentsParser.getParsedEntitiesMap().addCompound(compound);
+    }
+    if (isPrimaryCompound) {
+      String compoundName = _sdRecordData.getCompoundName();
+      if (compoundName != null) {
+
+        // IDEA: maybe it would be better to replace Compound.synonynoms and
+        // Compound.compoundName with Compound.compoundNames???
+        
+        // NOTE: definitely don't want to find compoundName among the synonyms!!
+
+        // TODO: find out what it is all about
+
+        compound.addSynonym(compoundName);
+      }
+      String casNumber = _sdRecordData.getCasNumber();
+      if (casNumber != null) {
+        compound.addCasNumber(casNumber);
+      }
+    }
+    well.addCompound(compound);
+  }
+  
+  /**
+   * Get an existing compound from the database with the specified SMILES. Return null
+   * if no such compound exists in the database.
+   *  
+   * @param smiles the SMILES string for the compound
+   * @return the existing compound from the database. Return null if no such compound exists in
+   * the database
+   */
+  private Compound getExistingCompound(String smiles)
+  {
+    Compound compound = _libraryContentsParser.getParsedEntitiesMap().getCompound(smiles);
+    if (compound != null) {
+      return compound;
+    }
+    DAO dao = _libraryContentsParser.getDAO();
+    Map<String,Object> propertiesMap = new HashMap<String,Object>();
+    propertiesMap.put("hbnSmiles", smiles);
+    compound = dao.findEntityByProperties(Compound.class, propertiesMap);
+    if (compound != null) {
+      _libraryContentsParser.getParsedEntitiesMap().addCompound(compound);
+    }
+    return compound;
   }
 }
