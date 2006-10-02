@@ -232,8 +232,6 @@ insert into compound (compound_id, version, compound_name, is_salt, smiles) valu
 
 insert into compound (compound_id, version, compound_name, is_salt, smiles) values (nextval('compound_id_seq'), 1, NULL, 't', 'O=C=O');
 
-insert into compound (compound_id, version, compound_name, is_salt, smiles) values (nextval('compound_id_seq'), 1, NULL, 't', 'O=S(=O)=O');
-
 insert into compound (compound_id, version, compound_name, is_salt, smiles) values (nextval('compound_id_seq'), 1, NULL, 't', 'OC(=O)/C=C/C(=O)O');
 
 insert into compound (compound_id, version, compound_name, is_salt, smiles) values (nextval('compound_id_seq'), 1, NULL, 't', 'OC(=O)/C=C\C(=O)O');
