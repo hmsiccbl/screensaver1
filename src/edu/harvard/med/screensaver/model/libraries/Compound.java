@@ -19,6 +19,8 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 /**
  * A Hibernate entity bean representing a molecular compound.
  * 
+ * TODO: consider replacing properties compoundName and synonyms with compoundNames
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * 
@@ -52,21 +54,21 @@ public class Compound extends AbstractEntity
   
   /**
    * Constructs an initialized <code>Compound</code> object.
-   * @param compoundName
+   * @param smiles
    */
-  public Compound(String compoundName)
+  public Compound(String smiles)
   {
-    this(compoundName, false);
+    this(smiles, false);
   }
   
   /**
    * Constructs an initialized <code>Compound</code> object.
-   * @param compoundName
+   * @param smiles
    * @param isSalt
    */
-  public Compound(String compoundName, boolean isSalt)
+  public Compound(String smiles, boolean isSalt)
   {
-    _compoundName = compoundName;
+    _smiles = smiles;
     _isSalt = isSalt;
   }
   
@@ -144,8 +146,6 @@ public class Compound extends AbstractEntity
    * 
    * @hibernate.property
    *   type="text"
-   *   not-null="true"
-   *   unique="true"
    */
   public String getCompoundName()
   {
@@ -158,26 +158,16 @@ public class Compound extends AbstractEntity
    */
   public void setCompoundName(String compoundName)
   {
-    for (Well well : getHbnWells()) {
-      well.getHbnCompounds().remove(this);
-    }
     _compoundName = compoundName;
-    for (Well well : getHbnWells()) {
-      well.getHbnCompounds().add(this);
-    }
   }
 
   /**
    * Get the SMILES string for the compound.
    * @return the SMILES string for the compound
-   * 
-   * @hibernate.property
-   *   type="text"
-   *   unique="true"
    */
   public String getSmiles()
   {
-    return _smiles;
+    return getHbnSmiles();
   }
 
   /**
@@ -186,7 +176,13 @@ public class Compound extends AbstractEntity
    */
   public void setSmiles(String smiles)
   {
-    _smiles = smiles;
+    for (Well well : getHbnWells()) {
+      well.getHbnCompounds().remove(this);
+    }
+    setHbnSmiles(smiles);
+    for (Well well : getHbnWells()) {
+      well.getHbnCompounds().add(this);
+    }
   }
 
   /**
@@ -386,7 +382,7 @@ public class Compound extends AbstractEntity
    */
   protected Object getBusinessKey()
   {
-    return getCompoundName();
+    return getSmiles();
   }
 
   
@@ -463,6 +459,32 @@ public class Compound extends AbstractEntity
     _wells = wells;
   }
 
+  /**
+   * Get the SMILES string for the compound.
+   * @return the SMILES string for the compound
+   * 
+   * @hibernate.property
+   *   type="text"
+   *   column="smiles"
+   *   not-null="true"
+   *   unique="true"
+   * @motivation for hibernate
+   */
+  private String getHbnSmiles()
+  {
+    return _smiles;
+  }
+
+  /**
+   * Set the SMILES string for the compound.
+   * @param smiles the new SMILES string for the compound
+   * @motivation for hibernate
+   */
+  private void setHbnSmiles(String smiles)
+  {
+    _smiles = smiles;
+  }
+  
   /**
    * Set the set of synonyms for the compound.
    * @param synonyms the new set of synonyms for the compound
