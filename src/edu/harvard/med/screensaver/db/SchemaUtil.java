@@ -9,10 +9,17 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
@@ -41,6 +48,7 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
   // static fields
 
   private static Logger log = Logger.getLogger(SchemaUtil.class);
+  private static String INITIALIZE_DATABASE_DIR = "/sql/initialize_database";
   
   
   // static methods
@@ -53,6 +61,11 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
                              withArgName("create").
                              withLongOpt("create").
                              withDescription("create database schema in an empty database").
+                             create());
+    app.addCommandLineOption(OptionBuilder.
+                             withArgName("initialize").
+                             withLongOpt("initialize").
+                             withDescription("initialize the database by running database initialization scripts").
                              create());
     app.addCommandLineOption(OptionBuilder.
                              withArgName("drop").
@@ -74,6 +87,9 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
       }
       else if (app.isCommandLineFlagSet("create")) {
         app.getSpringBean("schemaUtil", SchemaUtil.class).createSchema();
+      }
+      else if (app.isCommandLineFlagSet("initialize")) {
+        app.getSpringBean("schemaUtil", SchemaUtil.class).initializeDatabase();
       }
       else if (app.isCommandLineFlagSet("recreate")) {
         app.getSpringBean("schemaUtil", SchemaUtil.class).recreateSchema();
@@ -143,6 +159,52 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
   {
     log.info("creating schema for " + makeDataSourceString());
     getLocalSessionFactoryBean().createDatabaseSchema();
+  }
+  
+  /**
+   * Initialize the database by running SQL initialization scripts
+   */
+  public void initializeDatabase() throws DataAccessException
+  {
+    log.info("initializing database for " + makeDataSourceString());
+    Session session = getSession();
+    Connection connection = session.connection();
+
+    try {
+      URL url = getClass().getResource(INITIALIZE_DATABASE_DIR);
+      File directory = new File(url.getFile().replace("%20", " "));
+      if (! directory.exists()) {
+        throw new RuntimeException("directory " + directory + " doesn't exist");
+      }
+      String [] filenames = directory.list(new FilenameFilter() {
+        public boolean accept(File file, String filename) {
+          return filename.endsWith(".sql");
+        }
+      });
+      Arrays.sort(filenames);
+      for (String filename : filenames) {
+        log.info("processing file = " + filename);
+        File file = new File(directory, filename);
+        BufferedReader reader =
+          new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+        
+        Statement statement = connection.createStatement();
+        String line;
+        while ((line = reader.readLine()) != null) {
+          if (line.endsWith(";")) {
+            log.info("executing sql = " + line);
+            statement.execute(line);
+          }
+        }
+        statement.close();
+      }
+    }
+    catch (Exception e) {
+      log.error("couldnt initialize database: " + e.getMessage(), e);
+    }
+    finally {
+      releaseSession(session);
+    }
   }
   
   /**

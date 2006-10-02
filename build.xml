@@ -327,7 +327,7 @@
       classname="org.hibernate.tool.ant.HibernateToolTask" 
       classpathref="distro.project.classpath"
     />
-    <hibernatetool destdir="sql">
+    <hibernatetool destdir="resources/sql">
       <configuration
         configurationfile="resources/hibernate.cfg.xml"
         namingstrategy="org.hibernate.cfg.ImprovedNamingStrategy"
@@ -476,6 +476,13 @@
         <exclude name="datasource*properties"/>
       </fileset>
     </copy>
+  	
+  	<copy
+  	  todir="${classes.dir}/sql/initialize_database"
+  	  verbose="true"
+  	>
+  	  <fileset dir="sql/initialize_database"/>
+    </copy>
 
     <!-- copy the selected datasource properties file to its standard name ("datasource.properties") in the build directory -->
     <copy file="${datasource.file}" tofile="${classes.dir}/datasource.properties" verbose="${verbose}"/>
@@ -519,8 +526,8 @@
     <delete includeemptydirs="true">
       <fileset file="${hibernate.cfg.xml}"/>
       <fileset dir="resources" includes="**/*.hbm.xml" />
-      <fileset dir="sql" includes="create_schema.sql" />
-      <fileset dir="sql" includes="drop_schema.sql" />
+      <fileset dir="resources/sql" includes="create_schema.sql" />
+      <fileset dir="resources/sql" includes="drop_schema.sql" />
       <fileset dir="${javadoc.dir}" includes="**/*"/>
     </delete>
   </target>
