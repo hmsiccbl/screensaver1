@@ -195,6 +195,17 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
             log.info("executing sql = " + line);
             statement.execute(line);
           }
+          else {
+            String longLine = line + " ";
+            while ((line = reader.readLine()) != null) {
+              longLine += line + " ";
+              if (line.endsWith(";")) {
+                log.info("executing sql = " + longLine);
+                statement.execute(longLine);
+                break;
+              }
+            }
+          }
         }
         statement.close();
       }
