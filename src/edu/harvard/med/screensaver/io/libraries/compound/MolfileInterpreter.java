@@ -52,7 +52,6 @@ public class MolfileInterpreter
   private String _molfile;
   private String _smiles;
   private String _primaryCompoundSmiles;
-  private String _iupac;
   private List<String> _secondaryCompoundsSmiles = new ArrayList<String>(); 
   
   
