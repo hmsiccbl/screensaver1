@@ -476,13 +476,6 @@
         <exclude name="datasource*properties"/>
       </fileset>
     </copy>
-  	
-  	<copy
-  	  todir="${classes.dir}/sql/initialize_database"
-  	  verbose="true"
-  	>
-  	  <fileset dir="sql/initialize_database"/>
-    </copy>
 
     <!-- copy the selected datasource properties file to its standard name ("datasource.properties") in the build directory -->
     <copy file="${datasource.file}" tofile="${classes.dir}/datasource.properties" verbose="${verbose}"/>
