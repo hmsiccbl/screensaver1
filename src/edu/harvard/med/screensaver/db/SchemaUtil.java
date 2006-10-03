@@ -63,11 +63,6 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
                              withDescription("create database schema in an empty database").
                              create());
     app.addCommandLineOption(OptionBuilder.
-                             withArgName("initialize").
-                             withLongOpt("initialize").
-                             withDescription("initialize the database by running database initialization scripts").
-                             create());
-    app.addCommandLineOption(OptionBuilder.
                              withArgName("drop").
                              withLongOpt("drop").
                              withDescription("drop database schema").
@@ -77,22 +72,33 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
                              withLongOpt("recreate").
                              withDescription("drop and then create database schema").
                              create());
+    app.addCommandLineOption(OptionBuilder.
+                             withArgName("initialize").
+                             withLongOpt("initialize").
+                             withDescription("initialize the database by running database initialization scripts (assumes empty database tables)").
+                             create());
     try {
       if (!app.processOptions(/*acceptDatabaseOptions=*/true, /*showHelpOnError=*/true)) {
         return;
       }
       
-      if (app.isCommandLineFlagSet("drop")) {
-        app.getSpringBean("schemaUtil", SchemaUtil.class).dropSchema();
-      }
-      else if (app.isCommandLineFlagSet("create")) {
-        app.getSpringBean("schemaUtil", SchemaUtil.class).createSchema();
-      }
-      else if (app.isCommandLineFlagSet("initialize")) {
-        app.getSpringBean("schemaUtil", SchemaUtil.class).initializeDatabase();
-      }
-      else if (app.isCommandLineFlagSet("recreate")) {
+      boolean canInitialize = true; // do not allow initialize 'drop' invoked w/o 'create'
+      
+      if (app.isCommandLineFlagSet("recreate")) {
         app.getSpringBean("schemaUtil", SchemaUtil.class).recreateSchema();
+      } 
+      else {
+        if (app.isCommandLineFlagSet("drop")) {
+          app.getSpringBean("schemaUtil", SchemaUtil.class).dropSchema();
+          canInitialize = false;
+        }
+        if (app.isCommandLineFlagSet("create")) {
+          app.getSpringBean("schemaUtil", SchemaUtil.class).createSchema();
+          canInitialize = true;
+        }
+      }
+      if (app.isCommandLineFlagSet("initialize") && canInitialize) {
+        app.getSpringBean("schemaUtil", SchemaUtil.class).initializeDatabase();
       }
     }
     catch (DataAccessException e) {
@@ -111,9 +117,9 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
    * The Spring application context.
    * 
    * @motivation Needed to get a Hibernate SessionFactory from Spring. Normal
-   *             injection of a SessionFactory is problematic, as Spring appears
-   *             to treat factory beans as special cases, and injects the
-   *             product of a factory, rather than the factory itself.
+   *             injection of a SessionFactory is problematic, as Spring 
+   *             treats factory beans as special cases, and injects the
+   *             product of the factory, rather than the factory itself.
    */
   private ApplicationContext _appCtx;
   
@@ -192,7 +198,7 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
         String line;
         while ((line = reader.readLine()) != null) {
           if (line.endsWith(";")) {
-            log.info("executing sql = " + line);
+            log.debug("executing sql = " + line);
             statement.execute(line);
           }
           else {
@@ -200,7 +206,7 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
             while ((line = reader.readLine()) != null) {
               longLine += line + " ";
               if (line.endsWith(";")) {
-                log.info("executing sql = " + longLine);
+                log.debug("executing sql = " + longLine);
                 statement.execute(longLine);
                 break;
               }
@@ -231,6 +237,7 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
   /**
    * Truncate all the tables in the schema. If there are no tables in the schema, then
    * {@link #createSchema() create the schema}.
+   * @motivation efficient means of wiping the schema clean between running a unit test
    */
   @SuppressWarnings("unchecked")
   public void truncateTablesOrCreateSchema()
@@ -306,7 +313,15 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
   {
     BasicDataSource dataSource = (BasicDataSource) _appCtx.getBean("screensaverDataSource");
     assert dataSource != null : "spring bean 'screensaverDataSource' not found";
-    return dataSource.getUsername() + "@" + dataSource.getUrl();
+    try {
+      String connectionUrl = dataSource.getConnection().getMetaData().getURL();
+      String connectionUserName = dataSource.getConnection().getMetaData().getUserName();
+      return connectionUserName + "@" + connectionUrl;
+    }
+    catch (SQLException e) {
+      log.error("could not determine connection properties");
+      return "<unknown database connection>";
+    }
   }
 
 }
