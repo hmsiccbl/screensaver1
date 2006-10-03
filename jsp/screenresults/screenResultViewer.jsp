@@ -155,9 +155,9 @@ TODO:
         <f:selectItems value="#{screenResultViewer.plateSelectItems}" />
       </h:selectOneMenu>
       <h:commandButton id="prevPageCommand" action="#{screenResultViewer.prevPage}" value="Prev"
-        image="../../images/arrow-previous.gif" styleClass="command" />
+        image="/images/arrow-previous.gif" styleClass="command" />
       <h:commandButton id="nextPageCommand" action="#{screenResultViewer.nextPage}" value="Next"
-        image="../../images/arrow-next.gif" styleClass="command" />
+        image="/images/arrow-next.gif" styleClass="command" />
       <h:outputLabel id="rowLabel" value="Row" for="firstDisplayedRowNumber" />
       <h:inputText id="firstDisplayedRowNumber"
         value="#{screenResultViewer.firstDisplayedRowNumber}"
