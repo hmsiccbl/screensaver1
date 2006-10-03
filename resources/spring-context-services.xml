@@ -33,12 +33,19 @@
     id="screenResultParser"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
     singleton="false">
-    <constructor-arg index="0">
+    <constructor-arg index="0" ref="dao"/>
+  </bean>
+
+  <!-- TODO: place this in a spring-context-testing.xml file, or something similar -->  
+  <bean 
+    id="mockScreenResultParser"
+    class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
+    singleton="false">
+    <constructor-arg index="0" >
       <bean class="edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultParserTest"/>
     </constructor-arg>
-    <!-- constructor-arg ref="dao"/-->
   </bean>
-  
+
   <bean 
     id="screenResultExporter"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter"
