@@ -304,6 +304,9 @@
       <description>Images, stylesheets, etc.  Access via HTTP GET and HEAD methods only.</description>
       <url-pattern>/css/*</url-pattern>
       <url-pattern>/images/*</url-pattern>
+      <!-- resources provided by Apache MyFaces and by Apache Tomahawk components -->
+      <url-pattern>/faces/*</url-pattern>
+
       <http-method>GET</http-method>
       <http-method>HEAD</http-method>
     </web-resource-collection>
