@@ -463,8 +463,7 @@ public class ComplexDAOTest extends AbstractSpringTest
    */
   public void testFindLabHeads()
   {
-    // prime database
-    screenDBDataImporter.loadScreenDBData();
+    schemaUtil.initializeDatabase();
     
     List<ScreeningRoomUser> labHeads = dao.findAllLabHeads();
     assertEquals(172, labHeads.size());
