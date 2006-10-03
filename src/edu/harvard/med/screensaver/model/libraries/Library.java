@@ -24,7 +24,7 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.class lazy="false"
+ * @hibernate.class
  */
 public class Library extends AbstractEntity
 {
@@ -88,7 +88,6 @@ public class Library extends AbstractEntity
     Integer startPlate,
     Integer endPlate)
   {
-    // TODO: verify the order of assignments here is okay
     _libraryName = libraryName;
     _shortName = shortName;
     _libraryType = libraryType;
@@ -786,6 +785,7 @@ public class Library extends AbstractEntity
    *   order-by="plate_number,well_name"
    *   cascade="save-update"
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="library_id"
    * @hibernate.collection-one-to-many
@@ -804,6 +804,7 @@ public class Library extends AbstractEntity
    * @hibernate.set
    *   cascade="save-update"
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="library_id"
    * @hibernate.collection-one-to-many
