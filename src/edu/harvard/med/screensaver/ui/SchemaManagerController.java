@@ -53,6 +53,11 @@ public class SchemaManagerController extends AbstractController
     _schemaUtil.createSchema();
   }
   
+  public void initializeDatabase()
+  {
+    _schemaUtil.initializeDatabase();
+  }
+  
   public void truncateTables()
   {
     _schemaUtil.truncateTablesOrCreateSchema();
