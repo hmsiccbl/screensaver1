@@ -111,6 +111,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   // TODO: move these a messages (Spring) resource file
   private static final String NO_METADATA_META_SHEET_ERROR = "worksheet could not be found";
   private static final String NO_CREATED_DATE_FOUND_ERROR = "\"First Date Screened\" value not found";
+  private static final String NO_SCREEN_ID_FOUND_ERROR = "no screen ID found";
   private static final String UNEXPECTED_DATA_HEADER_TYPE_ERROR = "unexpected data header type";
   private static final String REFERENCED_UNDEFINED_DATA_HEADER_ERROR = "referenced undefined data header";
   private static final String UNRECOGNIZED_INDICATOR_DIRECTION_ERROR = "unrecognized \"indicator direction\" value";
@@ -120,6 +121,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private static final String METADATA_NO_RAWDATA_FILES_SPECIFIED_ERROR = "raw data workbook files not specified";
   private static final String UNKNOWN_ERROR = "unknown error";
   private static final String NO_DATA_SHEETS_FOUND_ERROR = "no data worksheets were found; no result data was imported";
+
 
   private static SortedMap<String,IndicatorDirection> indicatorDirectionMap = new TreeMap<String,IndicatorDirection>();
   private static SortedMap<String,ActivityIndicatorType> activityIndicatorTypeMap = new TreeMap<String,ActivityIndicatorType>();
@@ -222,7 +224,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     try {
       Screen screen = findScreenOrExit(app);
       
-      ScreenResultParser screenResultParser = (ScreenResultParser) app.getSpringBean("screenResultParser");
+      ScreenResultParser screenResultParser = (ScreenResultParser) app.getSpringBean("mockScreenResultParser");
       try {
         if (!app.processOptions(/*acceptDatabaseOptions=*/ false, /*showHelpOnError=*/ true)) {
           return;
@@ -761,8 +763,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       metadataParseResult.setRawDataWorkbooks(parseRawDataWorkbookFilenames(metadataWorkbook,
                                                                             ignoreFilePaths));
     } 
-    Date screenResultDate = parseScreenInfo(metadataWorkbook);
-    metadataParseResult.setScreenResult(new ScreenResult(screen, screenResultDate));
+    ParsedScreenInfo parsedScreenInfo = parseScreenInfo(metadataWorkbook);
+    
+    metadataParseResult.setScreenResult(new ScreenResult(screen, parsedScreenInfo.getDateCreated()));
     int dataHeaderCount = findDataHeaderColumnCount(metadataSheet);
     for (int iDataHeader = 0; iDataHeader < dataHeaderCount; ++iDataHeader) {
       recordDataHeaderColumn(iDataHeader);
@@ -944,11 +947,41 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                                    true)));
     Well well = _dao.findEntityByProperties(Well.class, businessKey);
     if (well == null) {
-      throw new ExtantLibraryException("well entity has not been loaded for plate " + businessKey.get("plateNumber") + " and well " + businessKey.get("wellName"));
+      // TODO: reinstate exception
+      //throw new ExtantLibraryException("well entity has not been loaded for plate " + businessKey.get("plateNumber") + " and well " + businessKey.get("wellName"));
+      well = _dao.defineEntity(Well.class, 
+                               (Library) _dao.findEntityById(Library.class, 1),
+                               businessKey.get("plateNumber"),
+                               businessKey.get("wellName"));
     }
     return well;
   }
 
+  private static class ParsedScreenInfo {
+    private Integer _screenId;
+    private Date _date;
+
+    public Date getDateCreated()
+    {
+      return _date;
+    }
+
+    public void setDate(Date date)
+    {
+      _date = date;
+    }
+
+    public Integer getScreenNumber()
+    {
+      return _screenId;
+    }
+
+    public void setScreenId(Integer screenId)
+    {
+      _screenId = screenId;
+    }
+  }
+  
   /**
    * Parses the "Screen Info" worksheet (was "meta" in legacy format). Yes, we
    * actually had a tab called "meta" in a workbook file that itself contains
@@ -957,10 +990,12 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * <p>
    * For now, we just parse the ScreenResult date, but if we ever need to parse
    * more, we should return a composite object, rather than just a Date.
+   * @throws UnrecoverableScreenResultParseException if a screen ID is not found
    */
-  private Date parseScreenInfo(Workbook metadataWorkbook)
+  private ParsedScreenInfo parseScreenInfo(Workbook metadataWorkbook) 
+    throws UnrecoverableScreenResultParseException
   {
-    Date date = null;
+    ParsedScreenInfo parsedScreenInfo = new ParsedScreenInfo();
     int metaMetaSheetIndex;
     if (_parseLegacyFormat) {
       metaMetaSheetIndex = metadataWorkbook.findSheetIndex(LEGACY__METADATA_META_SHEET_NAME);
@@ -975,19 +1010,27 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                             _errors);
     if (metametaSheet != null) {
       for (int iRow = metametaSheet.getFirstRowNum(); iRow < metametaSheet.getLastRowNum(); iRow++) {
-        Cell cell = factory.getCell((short) 0, iRow);
-        String rowLabel = cell.getString();
-        if (rowLabel != null && rowLabel.equalsIgnoreCase(FIRST_DATE_SCREENED)) {
-          Cell dateCell = factory.getCell((short) 1, iRow, true);
-          date = dateCell.getDate();
+        Cell labelCell = factory.getCell((short) 0, iRow);
+        String rowLabel = labelCell.getString();
+        if (rowLabel != null) {
+          Cell valueCell = factory.getCell((short) 1, iRow, true);
+          if (rowLabel.equalsIgnoreCase(FIRST_DATE_SCREENED)) {
+            parsedScreenInfo.setDate(valueCell.getDate());
+          }
+          else if (rowLabel.equalsIgnoreCase(SCREEN_ID_LABEL)) {
+            parsedScreenInfo.setScreenId(valueCell.getInteger());
+          }
         }
       }
     }
-    if (date == null) {
-      _errors.addError(NO_CREATED_DATE_FOUND_ERROR);
-      date = new Date();
+    if (parsedScreenInfo.getScreenNumber() == null) {
+      throw new UnrecoverableScreenResultParseException(NO_SCREEN_ID_FOUND_ERROR, metadataWorkbook);
     }
-    return date;
+    if (parsedScreenInfo.getDateCreated() == null) {
+      _errors.addError(NO_CREATED_DATE_FOUND_ERROR);
+      parsedScreenInfo.setDate(new Date());
+    }
+    return parsedScreenInfo;
   }
   
   /**

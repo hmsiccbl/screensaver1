@@ -19,7 +19,6 @@ import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -143,7 +142,7 @@ public class ScreenViewerController extends AbstractController
   {
     List<SelectItem> leadScreenerSelectItems = new ArrayList<SelectItem>();
     for (ScreeningRoomUser screener : _screen.getLabHead().getLabMembers()) {
-      leadScreenerSelectItems.add(new SelectItem(screener, screener.generateFullName()));
+      leadScreenerSelectItems.add(new SelectItem(screener, screener.getFullName()));
     }
     return leadScreenerSelectItems;
   }
@@ -154,7 +153,7 @@ public class ScreenViewerController extends AbstractController
     List<ScreeningRoomUser> screeningRoomUsers = _dao.findAllEntitiesWithType(ScreeningRoomUser.class);
     Collections.sort(screeningRoomUsers, ScreensaverUserComparator.getInstance());
     for (ScreeningRoomUser screener : screeningRoomUsers) {
-      collaboratorSelectItems.add(new SelectItem(screener, screener.generateFullName()));
+      collaboratorSelectItems.add(new SelectItem(screener, screener.getFullName()));
     }
     return collaboratorSelectItems;
   }
@@ -164,7 +163,7 @@ public class ScreenViewerController extends AbstractController
   /* JSF Application methods */
 
   /**
-   * A command to saved the user's edits.
+   * A command to save the user's edits.
    */
   public String save() {
     log.debug("ScreenViewerController.save()");
@@ -202,20 +201,11 @@ public class ScreenViewerController extends AbstractController
 
   public String viewScreenResult()
   {
-    try {
-      int screenResultIdToView = Integer.parseInt(getHttpServletRequest().getParameter(SCREEN_RESULT_ID_TO_VIEW_PARAM_NAME));
-      
-      // TODO: ah, there's nothing like implmenting yet another linear search...yuck!
-      for (ScreenResult screenResult : _screen.getScreenResults()) {
-        if (screenResult.getEntityId().equals(screenResultIdToView)) {
-          _screenResultViewer.setScreenResult(screenResult);
-          return VIEW_SCREEN_RESULT_ACTION;
-        }
-      }
-      throw new IllegalArgumentException("invalid value '" + screenResultIdToView + "' for param " + SCREEN_RESULT_ID_TO_VIEW_PARAM_NAME);
+    if (_screen.getScreenResult() != null ) {
+      return VIEW_SCREEN_RESULT_ACTION;
     }
-    catch (Exception e) {
-      reportSystemError(e);
+    else {
+      reportSystemError("screen does not have a screen result");
       return ERROR_ACTION_RESULT;
     }
   }

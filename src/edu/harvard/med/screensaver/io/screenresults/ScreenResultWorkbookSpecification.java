@@ -13,6 +13,7 @@ package edu.harvard.med.screensaver.io.screenresults;
 public interface ScreenResultWorkbookSpecification
 {
   public static final String FIRST_DATE_SCREENED = "First Date Screened";
+  public static final String SCREEN_ID_LABEL = "ID";
   public static final String SCREEN_INFO_SHEET_NAME = "Screen Info";
   public static final String LEGACY__METADATA_META_SHEET_NAME = "meta";
   public static final String DATA_HEADERS_SHEET_NAME = "Data Headers";

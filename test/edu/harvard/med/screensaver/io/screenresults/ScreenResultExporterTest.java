@@ -19,6 +19,7 @@ import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -29,8 +30,9 @@ public class ScreenResultExporterTest extends AbstractSpringTest
 {
   private static Logger log = Logger.getLogger(ScreenResultExporterTest.class);
   
-  protected ScreenResultParser screenResultParser;
-    
+  protected ScreenResultParser mockScreenResultParser;
+  
+
   /**
    * Tests the ScreenResultExporter by exporting to a file, parsing the exported
    * file, and comparing to the original, exported ScreenResult.
@@ -39,17 +41,19 @@ public class ScreenResultExporterTest extends AbstractSpringTest
    */
   public void testScreenResultExporter() throws Exception
   {
-    ScreenResult originalScreenResult  = screenResultParser.parseLegacy(null, new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "LegacyTestAllInOne.xls"), false);
+    ScreenResult originalScreenResult  = mockScreenResultParser.parseLegacy(ScreenResultParserTest.makeDummyScreen(), 
+                                                                            new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "LegacyTestAllInOne.xls"), false);
     ScreenResultExporter exporter = new ScreenResultExporter();
     HSSFWorkbook workbook = exporter.build(originalScreenResult);
     File exportedFile = File.createTempFile("LegacyTestAllInOne", ".exported.xls");
     workbook.write(new FileOutputStream(exportedFile));
-    ScreenResult exportedScreenResult  = screenResultParser.parse(null, exportedFile); // parse with "new" format
-    if (screenResultParser.getHasErrors()) {
+    ScreenResult exportedScreenResult  = mockScreenResultParser.parse(ScreenResultParserTest.makeDummyScreen(), 
+                                                                      exportedFile); // parse with "new" format
+    if (mockScreenResultParser.getHasErrors()) {
       // okay, so I'm using our unit test to help with debugging...sue me!
-      log.debug(screenResultParser.getErrors());
+      log.debug(mockScreenResultParser.getErrors());
     }
-    assertFalse("parse errors on exported screen result", screenResultParser.getHasErrors());
+    assertFalse("parse errors on exported screen result", mockScreenResultParser.getHasErrors());
     exportedFile.deleteOnExit(); // delete only after confirmation of no errors, to allow developers to inspect file if parse errors encountered
     
     assertEquals("one data worksheet per assay plate: PL_00001", "PL_00001", workbook.getSheetName(2));

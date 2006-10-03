@@ -77,6 +77,7 @@ public class ResultValue extends AbstractEntity implements Comparable
   public ResultValue(ResultValueType resultValueType, Well well, AssayWellType assayWellType, String value, boolean exclude)
   {
     _businessKey = new BusinessKey(well, resultValueType);
+    _well = well; // HACK: to allow setResultValueType() to suceeed; ideally, we want to set both resultValueType and Well before adding to relationships' collections
     setResultValueType(resultValueType);
     setWell(well);
     setAssayWellType(assayWellType);
@@ -179,7 +180,7 @@ public class ResultValue extends AbstractEntity implements Comparable
       _resultValueType.getHbnResultValues().add(this);
     }
     _well = well;
-    well.getHbnResultValues().add(this);
+    _well.getHbnResultValues().add(this);
   }
 
   /**
@@ -206,6 +207,9 @@ public class ResultValue extends AbstractEntity implements Comparable
    */
   public void setAssayWellType(AssayWellType assayWellType)
   {
+    if (assayWellType == null) {
+      throw new NullPointerException("assayWellType must be non-null");
+    }
     // TODO: consider updating all related ResultValues (i.e., for the same well
     // within this ScreenResult); would require parallel
     // {get,set}HbnAssayWellType methods.

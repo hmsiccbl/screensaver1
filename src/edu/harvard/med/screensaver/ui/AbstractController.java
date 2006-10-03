@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import java.net.InetAddress;
-import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
 

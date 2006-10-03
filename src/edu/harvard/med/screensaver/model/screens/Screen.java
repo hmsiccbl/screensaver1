@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
@@ -69,7 +70,7 @@ public class Screen extends AbstractEntity
   private Set<AssayReadoutType> _assayReadoutTypes = new HashSet<AssayReadoutType>();
   private String _publishableProtocol;
   private Date _dateOfApplication;
-  private Set<ScreenResult> _screenResults = new HashSet<ScreenResult>();
+  private ScreenResult _screenResult;
 
 
   // public constructor
@@ -229,6 +230,7 @@ public class Screen extends AbstractEntity
    * @motivation JSF EL binding
    */
   @SuppressWarnings("unchecked")
+  @DerivedEntityProperty
   public List<ScreeningRoomUser> getCollaboratorsList()
   {
     List collaboratorsList = new ArrayList<ScreeningRoomUser>(_collaborators);
@@ -851,31 +853,37 @@ public class Screen extends AbstractEntity
   }
 
   /**
-   * Get an unmodifiable copy of the set of screen results.
+   * Get the set of screen result.
    *
-   * @return the screen results
+   * @return the screen result
+   * @hibernate.one-to-one
+   *   class="edu.harvard.med.screensaver.model.screenresults.ScreenResult"
+   *   property-ref="hbnScreen"
+   *   cascade="save-update"
+   * @motivation for hibernate and maintenance of bi-directional relationships
    */
-  public Set<ScreenResult> getScreenResults()
+  public ScreenResult getHbnScreenResult()
   {
-    return Collections.unmodifiableSet(_screenResults);
+    return _screenResult;
   }
 
-  /**
-   * Add the screen result.
-   *
-   * @param screenResult the screen result to add
-   * @return true iff the screen did not already have the screen result
-   */
-  public boolean addScreenResult(ScreenResult screenResult)
+  public void setHbnScreenResult(ScreenResult screenResult)
   {
-    if (getHbnScreenResults().add(screenResult)) {
-      screenResult.setHbnScreen(this);
-      return true;
-    }
-    return false;
+    _screenResult = screenResult;
   }
 
+  public ScreenResult getScreenResult()
+  {
+    return getHbnScreenResult();
+  }
+  
+  public void setScreenResult(ScreenResult screenResult)
+  {
+    _screenResult = screenResult;
+    _screenResult.setHbnScreen(this);
+  }
 
+  
   // protected methods
 
   /**
@@ -1303,35 +1311,4 @@ public class Screen extends AbstractEntity
     _screenNumber = screenNumber;
   }
 
-  /**
-   * Get the screen results.
-   *
-   * @return the screen results
-   * @hibernate.set
-   *   cascade="save-update"
-   *   lazy="true"
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="screen_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screenresults.ScreenResult"
-   * @motivation for hibernate and maintenance of bi-directional relationships;
-   * this method is public only because the bi-directional relationship
-   * is cross-package.
-   */
-  public Set<ScreenResult> getHbnScreenResults()
-  {
-    return _screenResults;
-  }
-
-  /**
-   * Set the screen results.
-   *
-   * @param screenResults the new screen results
-   * @motivation for hibernate
-   */
-  private void setHbnScreenResults(Set<ScreenResult> screenResults)
-  {
-    _screenResults = screenResults;
-  }
 }

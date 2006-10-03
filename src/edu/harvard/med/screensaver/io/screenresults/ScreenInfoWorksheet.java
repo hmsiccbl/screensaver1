@@ -27,12 +27,12 @@ public class ScreenInfoWorksheet implements ScreenResultWorkbookSpecification
   public HSSFSheet build(HSSFWorkbook workbook, ScreenResult screenResult)
   {
     HSSFSheet sheet = workbook.createSheet(SCREEN_INFO_SHEET_NAME);
-    // TODO: populate values from Screen object
-    //Screen screen = screenResult.getScreen();
     
     // the values of this Map must be one of Date, Integer, or Number, if you
     // want the cell's type to set correctly (String is default)
     Map<ScreenInfoRow,Object> row2Value = new HashMap<ScreenInfoRow,Object>();
+    row2Value.put(ScreenInfoRow.ID,
+                  screenResult.getScreen().getScreenNumber());
     row2Value.put(ScreenInfoRow.FIRST_DATE_SCREENED,
                   screenResult.getDateCreated());
     for (ScreenInfoRow screenInfoRow : ScreenInfoRow.values()) {
