@@ -18,7 +18,7 @@
 			value="#{screenResultImporter.uploadedFile}" storage="file"
 			accept="application/vnd.ms-excel" required="true"
 			maxlength="134217728" styleClass="input" />
-		<t:commandButton value="Import"
+		<t:commandButton value="#{empty screenViewer.screen.screenResult ? \"Import\" : \"Import & Replace\"}"
 			action="#{screenResultImporter.doImport}" styleClass="command" />
 	</h:form>
 

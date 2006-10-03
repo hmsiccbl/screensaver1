@@ -12,6 +12,7 @@ TODO:
 
 - hyperlink lab head and lead screener (in read-only mode)
 - consider forcing a resort after a sort column value is edited
+- fix/test import errors cause screenResultImporter to open, showing errors table
 --%>
 
 <f:subview id="screenViewer">
@@ -80,7 +81,6 @@ TODO:
 				value="Collaborators" styleClass="inputLabel" />
 
 			<t:panelGrid columns="2" styleClass="nonSpacingPanel">
-
 				<t:selectManyListbox id="collaborators"
 					value="#{screenViewer.screen.collaboratorsList}"
 					converter="ScreeningRoomUserConverter"
@@ -98,7 +98,6 @@ TODO:
 						</t:commandLink>
 					</h:column>
 				</t:dataTable>
-
 			</t:panelGrid>
 
 			<t:outputLabel for="publishableProtocol" value="Publishable Protocol"
@@ -109,54 +108,27 @@ TODO:
 
 			<t:outputLabel for="screenResults" value="Screen Results"
 				styleClass="inputLabel" />
-			<h:panelGrid id="screenResultsPanel" columns="1">
-				<t:outputText id="noScreenResults"
-					rendered="#{empty screenViewer.screen.screenResults}"
-					value="<none>" />
-				<t:dataTable id="screenResults"
-					value="#{screenViewer.screen.screenResults}" var="screenResult"
-					rendered="#{!empty screenViewer.screen.screenResults}"
-					styleClass="standardTable" headerClass="tableHeader"
-					rowClasses="row1,row2">
-					<t:column>
-						<f:facet name="header">
-							<t:outputText value="Date Created" />
-						</f:facet>
-						<t:outputText value="#{screenResult.dateCreated}" />
-					</t:column>
-					<t:column>
-						<f:facet name="header">
-							<t:outputText value="Replicates" />
-						</f:facet>
-						<t:outputText value="#{screenResult.replicateCount}" />
-					</t:column>
-					<t:column>
-						<f:facet name="header">
-							<t:outputText value="Action" />
-						</f:facet>
-						<t:commandLink
-							value="#{screenViewer.readOnly ? \"View\" : \"Edit\"}"
-							action="#{screenViewer.viewScreenResult}">
-							<f:param name="#{screenViewer.screenResultIdToViewParamName}"
-								value="#{screenResult.entityId}" />
-						</t:commandLink>
-					</t:column>
-				</t:dataTable>
-			</h:panelGrid>
+			<t:panelGroup>
+				<t:outputLabel value="<none>" styleClass="inputLabel" rendered="#{empty screenViewer.screen.screenResult}" />
+				<t:outputLabel value="Date created: " styleClass="inputLabel" rendered="#{!empty screenViewer.screen.screenResult}" />
+				<t:outputText value="#{screenViewer.screen.screenResult.dateCreated}" styleClass="data" rendered="#{!empty screenViewer.screen.screenResult}"/>
+				<t:commandButton
+					value="#{screenViewer.readOnly ? \"View\" : \"Edit\"}"
+					action="#{screenViewer.viewScreenResult}" styleClass="command" rendered="#{!empty screenViewer.screen.screenResult}"/>
+			</t:panelGroup>
+
+			<t:panelGroup id="commandPanel">
+				<t:commandButton id="save" value="Save"
+					action="#{screenViewer.save}" styleClass="command"
+					rendered="#{!screenViewer.readOnly}" />
+			</t:panelGroup>
 
 		</t:panelGrid>
-		
-
-		<t:panelGroup id="commandPanel">
-			<t:commandButton id="save" value="Save" action="#{screenViewer.save}"
-				styleClass="command" rendered="#{!screenViewer.readOnly}" />
-		</t:panelGroup>
-
 	</h:form>
-	
+
 	<%-- TODO: figure out how to nest in form; want it below the screenResult table --%>
 	<%@include file="../screenresults/admin/screenResultUploader.jspf"%>
-	
+
 </f:subview>
 
 
