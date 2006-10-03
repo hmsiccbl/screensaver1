@@ -48,6 +48,14 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
               propertyName.startsWith("hbn")) {
               continue;
             }
+            
+            // skip what appears to be an entity's property, but that has been
+            // explicitly annotated as a non-property
+            if (propertyDescriptor.getReadMethod().isAnnotationPresent(DerivedEntityProperty.class)) {
+              log.debug("skipping derived property " + propertyDescriptor.getName());
+              continue;
+            }
+            
             exercizor.exercizePropertyDescriptor(bean, beanInfo, propertyDescriptor);
           }
         }
@@ -182,7 +190,7 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
       return true;
     }
 
-    // Check whether property corresponds to the bean's Hibernate ID method, which is named similary to the bean.
+    // Check whether property corresponds to the bean's Hibernate ID method, which is named similarly to the bean.
     // We also check the parent classes, to handle the case where the property
     // has been inherited, as the property name will depend upon the class it
     // was declared in.
@@ -203,13 +211,10 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
     String beanName,
     PropertyDescriptor propertyDescriptor)
   {
-    if (beanName.equals("Gene") &&
-      propertyDescriptor.getName().equals("genbankAccessionNumbers")) {
-      return 1;
-    }
-    if (beanName.equals("PlatesUsed") &&
-      propertyDescriptor.getName().equals("hbnPlatesUsed")) {
-      return 1;
+    InitialCollectionSize initialCollectionSizeAnnot =
+      propertyDescriptor.getReadMethod().getAnnotation(InitialCollectionSize.class);
+    if (initialCollectionSizeAnnot != null) {
+      return initialCollectionSizeAnnot.value();
     }
     return 0;
   }

@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Visit;
 
@@ -388,7 +389,8 @@ public class ScreeningRoomUser extends ScreensaverUser
    *
    * @return <code>true</code> iff this user is an RNAi screener.
    */
-  public boolean _getRnaiUser()
+  @DerivedEntityProperty
+  public boolean isRnaiUser()
   {
     return getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
   }
@@ -398,7 +400,8 @@ public class ScreeningRoomUser extends ScreensaverUser
    *
    * @return <code>true</code> iff this user is a small compound screener.
    */
-  public boolean _getCompoundUser()
+  @DerivedEntityProperty
+  public boolean isCompoundUser()
   {
     return getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
   }

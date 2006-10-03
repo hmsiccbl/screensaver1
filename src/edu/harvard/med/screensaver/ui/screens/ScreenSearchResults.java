@@ -80,7 +80,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
       return screen.getScreenNumber();
     }
     if (columnName.equals(LEAD_SCREENER)) {
-      return screen.getLeadScreener().generateFullName();
+      return screen.getLeadScreener().getFullName();
     }
     if (columnName.equals(TITLE)) {
       return screen.getTitle();

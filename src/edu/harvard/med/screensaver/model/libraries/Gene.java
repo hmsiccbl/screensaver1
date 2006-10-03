@@ -16,6 +16,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.InitialCollectionSize;
 
 
 /**
@@ -314,6 +315,7 @@ public class Gene extends AbstractEntity
    *   column="genbank_accession_number"
    *   not-null="true"
    */
+  @InitialCollectionSize(1)
   public Set<String> getGenbankAccessionNumbers()
   {
     return _genbankAccessionNumbers;

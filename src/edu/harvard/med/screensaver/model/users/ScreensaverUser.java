@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 
 import org.apache.log4j.Logger;
@@ -236,7 +237,8 @@ public class ScreensaverUser extends AbstractEntity
    * Get the full name (last, first).
    * @return the full name
    */
-  public String generateFullName()
+  @DerivedEntityProperty
+  public String getFullName()
   {
     return _lastName + ", " + _firstName;
   }
