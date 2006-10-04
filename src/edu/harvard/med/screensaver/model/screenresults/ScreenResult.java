@@ -306,8 +306,9 @@ public class ScreenResult extends AbstractEntity
 
   /**
    * Set the screen.
-   *
+   * 
    * @param screen the new screen
+   * @throws NullPointerException when the screen is null
    */
   public void setScreen(Screen screen)
   {
@@ -321,19 +322,14 @@ public class ScreenResult extends AbstractEntity
 
   /**
    * Set the screen.
-   * Throw a NullPointerException when the screen is null.
    *
    * @param screen the new screen
-   * @throws NullPointerException when the screen is null
    * @motivation for hibernate and maintenance of bi-directional relationships
    * this method is public only because the bi-directional relationship
    * is cross-package.
    */
   public void setHbnScreen(Screen screen)
   {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
     _screen = screen;
   }
 
@@ -362,7 +358,7 @@ public class ScreenResult extends AbstractEntity
    * @motivation for Hibernate
    * @return an {@link java.util.SortedSet} of all {@link ResultValueType}s for
    *         this <code>ScreenResult</code>
-   * @hibernate.set cascade="save-update" inverse="true" sort="natural"
+   * @hibernate.set cascade="all" inverse="true" sort="natural"
    * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
    * @hibernate.collection-key column="screen_result_id"
    */

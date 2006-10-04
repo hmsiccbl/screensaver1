@@ -15,6 +15,7 @@ import java.util.Map;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 
@@ -183,5 +184,11 @@ public interface DAO
    * @return a List of {@link ScreeningRoomUsers}s.
    */
   public List<ScreeningRoomUser> findAllLabHeads();
+
+  /**
+   * Delete a screen result.
+   * @param screenResult the screen result to delete.
+   */
+  void deleteScreenResult(ScreenResult screenResult);
 
 }

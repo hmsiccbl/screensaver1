@@ -684,7 +684,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @motivation for Hibernate and bi-directional association management
    * @return the {@link java.util.SortedSet} of {@link ResultValue}s generated
    *         for this <code>ResultValueType</code>
-   * @hibernate.set cascade="save-update" inverse="true" sort="natural"
+   * @hibernate.set cascade="all" inverse="true" sort="natural"
    * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValue"
    * @hibernate.collection-key column="result_value_type_id"
    */

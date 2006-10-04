@@ -30,6 +30,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 
@@ -469,4 +470,43 @@ public class ComplexDAOTest extends AbstractSpringTest
     assertEquals(172, labHeads.size());
   }
   
+  // TODO: this test needs to be updated
+  public void testDeleteScreenResult()
+  {
+    final int[] screenResultIds = new int[1];
+
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen1 = ScreenResultParserTest.makeDummyScreen(1); 
+        dao.persistEntity(screen1);
+        new ScreenResult(screen1, new Date());
+      }
+    });
+
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen1 = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        assertNotNull("screen1 has screen result initially", screen1.getScreenResult());
+        screenResultIds[0] = screen1.getScreenResult().getEntityId();
+        dao.deleteScreenResult(screen1.getScreenResult());
+        assertNull("screen1 has no screen result after delete from screen, but before commit", screen1.getScreenResult());
+      }
+    });
+    
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen1 = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        assertNull("screen1 has no screen result after delete and commit", screen1.getScreenResult());
+
+        ScreenResult screenResult1 = dao.findEntityById(ScreenResult.class, screenResultIds[0]);
+        assertNull("screenResult1 was deleted from database", screenResult1);
+      }
+    });
+  }
 }

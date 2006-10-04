@@ -877,12 +877,24 @@ public class Screen extends AbstractEntity
     return getHbnScreenResult();
   }
   
+  /**
+   * Set the screen result.
+   * 
+   * @param screenResult
+   */
   public void setScreenResult(ScreenResult screenResult)
   {
+    // remove self from previous screen result
+    if (_screenResult != null) {
+      _screenResult.setHbnScreen(null);
+    }
     _screenResult = screenResult;
-    _screenResult.setHbnScreen(this);
+    // add self to new screen result
+    if (_screenResult != null) {
+      _screenResult.setHbnScreen(this);
+    }
   }
-
+  
   
   // protected methods
 

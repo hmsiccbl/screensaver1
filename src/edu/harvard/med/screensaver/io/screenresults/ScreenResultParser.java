@@ -950,7 +950,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       // TODO: reinstate exception
       //throw new ExtantLibraryException("well entity has not been loaded for plate " + businessKey.get("plateNumber") + " and well " + businessKey.get("wellName"));
       well = _dao.defineEntity(Well.class, 
-                               (Library) _dao.findEntityById(Library.class, 1),
+                               (Library) _dao.findEntityByProperty(Library.class, "shortName", "ChemDiv1"),
                                businessKey.get("plateNumber"),
                                businessKey.get("wellName"));
     }

@@ -180,7 +180,9 @@ public class ResultValue extends AbstractEntity implements Comparable
       _resultValueType.getHbnResultValues().add(this);
     }
     _well = well;
-    _well.getHbnResultValues().add(this);
+    if (_well != null) { // in case we're deleting this ResultValue, in which case it's okay to violate non-null Well constraint
+      _well.getHbnResultValues().add(this);
+    }
   }
 
   /**
@@ -361,7 +363,8 @@ public class ResultValue extends AbstractEntity implements Comparable
   private class BusinessKey implements Comparable
   {
     
-    private Well _well;
+    private String _wellPlateNumber;
+    private String _wellName;
     private ResultValueType _resultValueType;
 
     public BusinessKey() {}
@@ -369,13 +372,17 @@ public class ResultValue extends AbstractEntity implements Comparable
     public BusinessKey(Well well,
                        ResultValueType resultValueType)
     {
-      _well = well;
+      setWell(well);
       _resultValueType = resultValueType;
     }
 
     public void setWell(Well well)
     {
-      _well = well;
+      // HACK: keep well properties as part of business key, to handle null Well case during delete of ScreenResult
+      if (well != null) {
+        _wellPlateNumber = well.getPlateNumber().toString();
+        _wellName = well.getWellName();
+      }
     }
 
     public void setResultValueType(ResultValueType resultValueType)
@@ -386,43 +393,37 @@ public class ResultValue extends AbstractEntity implements Comparable
     @Override
     public boolean equals(Object object)
     {
-      assert _well != null && _resultValueType != null :
-        "business key is not defined";
       if (!(object instanceof BusinessKey)) {
         return false;
       }
       BusinessKey that = (BusinessKey) object;
       return 
-        _well.equals(that._well) &&
+        _wellName.equals(that._wellName) &&
+        _wellPlateNumber.equals(that._wellPlateNumber) &&
         _resultValueType.equals(that._resultValueType);
     }
 
     @Override
     public int hashCode()
     {
-      assert _well != null && _resultValueType != null :
-        "business key is not defined";
       return 
-        _well.hashCode() +
+        _wellName.hashCode() +
+        _wellPlateNumber.hashCode() +
         _resultValueType.hashCode();
     }
 
     @Override
     public String toString()
     {
-      assert _well != null && _resultValueType != null :
-        "business key is not defined";
-      return _well + ":" + _resultValueType;
+      return _wellPlateNumber + _wellName + ":" + _resultValueType;
     }
     
     public int compareTo(Object o)
     {
-      assert _well != null && _resultValueType != null :
-        "business key is not defined";
       BusinessKey that = (BusinessKey) o;
-      int result = _well.getPlateNumber().compareTo(that._well.getPlateNumber());
+      int result = _wellPlateNumber.compareTo(that._wellPlateNumber);
       if (result == 0) {
-        result = _well.getWellName().compareTo(that._well.getWellName());
+        result = _wellName.compareTo(that._wellName);
         if (result == 0) {
           result = _resultValueType.getOrdinal().compareTo(that._resultValueType.getOrdinal());
         }
