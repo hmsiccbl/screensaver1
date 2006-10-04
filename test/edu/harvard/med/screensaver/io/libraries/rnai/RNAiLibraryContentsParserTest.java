@@ -77,7 +77,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     error = errors.get(0);
     assertEquals(
       "error text for error 0",
-      "required column \"Plate\" matches multiple column headers in the same sheet (columns 0 and 2)",
+      "required column \"Plate\" matches multiple column headers in the same sheet",
       error.getMessage());
     assertNotNull("error 0 has cell", error.getCell());
     assertEquals(
@@ -97,7 +97,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     error = errors.get(2);
     assertEquals(
       "error text for error 2",
-      "required column \"Plate\" does not match any column headers in sheet",
+      "required column \"Plate\" does not match any column headers in sheet: missing plate",
       error.getMessage());
     assertNull("no cell for error 2", error.getCell());
   
@@ -464,12 +464,14 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
         catch (FileNotFoundException e) {
           fail("file not found: " + filename);
         }
-        List<ParseError> errors = rnaiLibraryContentsParser.getErrors();
-        assertEquals("workbook has no errors", 0, errors.size());
-        
         library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
         Set<Well> wells = library.getWells();
 
+        List<ParseError> errors = rnaiLibraryContentsParser.getErrors();
+        assertEquals("workbook has no errors", 0, errors.size());
+
+        dao.persistEntity(library);
+        
         // this library has 779 wells according to
         // http://iccb.med.harvard.edu/screening/RNAi%20Libraries/index.htm
         // but add 18 for the controls - 6 controls on each of 3 plates
