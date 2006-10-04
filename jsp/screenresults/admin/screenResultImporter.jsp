@@ -48,22 +48,22 @@
       fastStep="10" renderFacetsIfSinglePage="true" styleClass="scroller"
       paginatorActiveColumnClass="scroller_activePage">
       <f:facet name="first">
-        <t:graphicImage url="../../images/arrow-first.gif" border="1" />
+        <t:graphicImage url="/images/arrow-first.gif" border="1" />
       </f:facet>
       <f:facet name="last">
-        <t:graphicImage url="../../images/arrow-last.gif" border="1" />
+        <t:graphicImage url="/images/arrow-last.gif" border="1" />
       </f:facet>
       <f:facet name="previous">
-        <t:graphicImage url="../../images/arrow-previous.gif" border="1" />
+        <t:graphicImage url="/images/arrow-previous.gif" border="1" />
       </f:facet>
       <f:facet name="next">
-        <t:graphicImage url="../../images/arrow-next.gif" border="1" />
+        <t:graphicImage url="/images/arrow-next.gif" border="1" />
       </f:facet>
       <f:facet name="fastforward">
-        <t:graphicImage url="../../images/arrow-fastforward.gif" border="1" />
+        <t:graphicImage url="/images/arrow-fastforward.gif" border="1" />
       </f:facet>
       <f:facet name="fastrewind">
-        <t:graphicImage url="../../images/arrow-fastrewind.gif" border="1" />
+        <t:graphicImage url="/images/arrow-fastrewind.gif" border="1" />
       </f:facet>
       <t:outputText value="Showing error #{fromRow} to #{toRow} of #{rowCount}" />
     </t:dataScroller>

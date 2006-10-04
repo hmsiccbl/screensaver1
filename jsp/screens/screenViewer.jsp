@@ -109,12 +109,19 @@ TODO:
 			<t:outputLabel for="screenResults" value="Screen Results"
 				styleClass="inputLabel" />
 			<t:panelGroup>
-				<t:outputLabel value="<none>" styleClass="inputLabel" rendered="#{empty screenViewer.screen.screenResult}" />
-				<t:outputLabel value="Date created: " styleClass="inputLabel" rendered="#{!empty screenViewer.screen.screenResult}" />
-				<t:outputText value="#{screenViewer.screen.screenResult.dateCreated}" styleClass="data" rendered="#{!empty screenViewer.screen.screenResult}"/>
+				<t:outputLabel value="<none>" styleClass="inputLabel"
+					rendered="#{empty screenViewer.screen.screenResult}" />
+				<t:outputLabel value="Date created: " styleClass="inputLabel"
+					rendered="#{!empty screenViewer.screen.screenResult}" />
+				<t:outputText
+					value="#{screenViewer.screen.screenResult.dateCreated}"
+					styleClass="data"
+					rendered="#{!empty screenViewer.screen.screenResult}" />
 				<t:commandButton
-					value="#{screenViewer.readOnly ? \"View\" : \"Edit\"}"
-					action="#{screenViewer.viewScreenResult}" styleClass="command" rendered="#{!empty screenViewer.screen.screenResult}"/>
+					value="#{screenViewer.readOnly ? \"View...\" : \"View/Edit/Load...\"}"
+					action="#{screenViewer.viewScreenResult}" styleClass="command"
+					rendered="#{!empty screenViewer.screen.screenResult || !screenViewer.readOnly}" />
+
 			</t:panelGroup>
 
 			<t:panelGroup id="commandPanel">
@@ -126,8 +133,6 @@ TODO:
 		</t:panelGrid>
 	</h:form>
 
-	<%-- TODO: figure out how to nest in form; want it below the screenResult table --%>
-	<%@include file="../screenresults/admin/screenResultUploader.jspf"%>
 
 </f:subview>
 

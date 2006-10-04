@@ -41,6 +41,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
@@ -68,8 +69,9 @@ public class ScreenResultViewerController extends AbstractController
   private static final int RAWDATA_TABLE_FIXED_COLUMN_COUNT = 2;
 
   private static final int METADATA_TABLE_FIXED_COLUMN_COUNT = 1;
-
   
+  private static final DataModel EMPTY_METADATA_MODEL = new ListDataModel(new ArrayList<MetadataRow>());
+  private static final DataModel EMPTY_RAW_DATA_MODEL = new ListDataModel(new ArrayList<RawDataRow>());
 
   // instance data members
 
@@ -127,12 +129,12 @@ public class ScreenResultViewerController extends AbstractController
 
   // bean property methods
 
-  public DAO getDAO()
+  public DAO getDao()
   {
     return _dao;
   }
 
-  public void setDAO(DAO dao)
+  public void setDao(DAO dao)
   {
     _dao = dao;
   }
@@ -225,6 +227,9 @@ public class ScreenResultViewerController extends AbstractController
   public DataModel getMetadata()
   {
     lazyBuildMetadataModel();
+    if (_metadataModel == null) {
+      return EMPTY_METADATA_MODEL;
+    }
     return _metadataModel;
   }
 
@@ -234,6 +239,9 @@ public class ScreenResultViewerController extends AbstractController
   public DataModel getRawData()
   {
     lazyBuildRawData();
+    if (_rawDataModel == null) {
+      return EMPTY_RAW_DATA_MODEL;
+    }
     return _rawDataModel;
   }
   
@@ -348,6 +356,12 @@ public class ScreenResultViewerController extends AbstractController
     return null;
   }
 
+  @Override
+  public boolean isReadOnly()
+  {
+    return !isUserInRole(ScreensaverUserRole.SCREEN_RESULTS_ADMIN);
+  }
+
 
   // JSF application methods
   
@@ -363,8 +377,13 @@ public class ScreenResultViewerController extends AbstractController
         setFirstDisplayedRowNumber(firstRow);
         // scroll the data table to the new row
         getDataTable().setFirst(getFirstDisplayedRowNumber() - 1);
+
         // update the plate selection list to the current plate
-        _plateNumberInput.setValue(((List<RawDataRow>) getRawData().getWrappedData()).get(getFirstDisplayedRowNumber() - 1).getWell().getPlateNumber().toString());
+        if (getRawData() != EMPTY_RAW_DATA_MODEL) {
+         String plateNumber = ((List<RawDataRow>) getRawData().getWrappedData()).
+           get(getFirstDisplayedRowNumber() - 1).getWell().getPlateNumber().toString();
+         _plateNumberInput.setValue(plateNumber);
+        }
       }
       return REDISPLAY_PAGE_ACTION_RESULT;
     } 
@@ -419,6 +438,8 @@ public class ScreenResultViewerController extends AbstractController
   
   public String delete()
   {
+    _dao.deleteScreenResult(_screenResult);
+    _screenResult = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
@@ -608,7 +629,7 @@ public class ScreenResultViewerController extends AbstractController
 
   private void lazyBuildRawData()
   {
-    if (_rawDataModel == null) {
+    if (_rawDataModel == null && _screenResult != null) {
       // to build our table data structure, we will iterate the
       // ResultValueTypes'
       // ResultValues in parallel (kind of messy!)

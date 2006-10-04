@@ -17,6 +17,7 @@ import javax.faces.event.ActionEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -45,6 +46,7 @@ public class ScreenResultImporterController extends AbstractController
   
   // instance data
 
+  private DAO _dao;
   private ScreenViewerController _screenViewer;
   private ScreenResultParser _screenResultParser;
   private ScreenResultViewerController _screenResultViewer;
@@ -83,6 +85,16 @@ public class ScreenResultImporterController extends AbstractController
     _screenViewer = screenViewer;
   }
 
+  public DAO getDao()
+  {
+    return _dao;
+  }
+
+  public void setDao(DAO dao)
+  {
+    _dao = dao;
+  }
+
   public void setUploadedFile(UploadedFile uploadedFile)
   {
     _uploadedFile = uploadedFile;
@@ -114,6 +126,11 @@ public class ScreenResultImporterController extends AbstractController
       if (screen == null) {
         throw new IllegalStateException("screen viewer has not been initialized with a Screen");
       }
+      
+      if (screen.getScreenResult() != null) {
+        _dao.deleteScreenResult(screen.getScreenResult());
+      }
+      
       log.info("starting import of ScreenResult for Screen " + screen);
 
       ScreenResult screenResult = null;
@@ -122,13 +139,13 @@ public class ScreenResultImporterController extends AbstractController
         screenResult = _screenResultParser.parse(screen, new File(_uploadedFile.getName()), _uploadedFile.getInputStream());
       }
 
+      // TODO: if an error occurs, we probably want to rollback the deletion of the original screenResult
       if (screenResult == null) {
-        showMessage("badUploadedFile",
-                   "uploadScreenResultFile");
-        return REDISPLAY_PAGE_ACTION_RESULT;
+        log.error("fatal error during import of ScreenResult for Screen " + screen);
+        return ERROR_ACTION_RESULT;
       }
       else if (_screenResultParser.getErrors().size() > 0) {
-        log.info("error during import of ScreenResult for Screen " + screen);
+        log.error("parse error during import of ScreenResult for Screen " + screen);
         return ERROR_ACTION_RESULT;
       }
       else {

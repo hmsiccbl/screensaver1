@@ -201,13 +201,8 @@ public class ScreenViewerController extends AbstractController
 
   public String viewScreenResult()
   {
-    if (_screen.getScreenResult() != null ) {
-      return VIEW_SCREEN_RESULT_ACTION;
-    }
-    else {
-      reportSystemError("screen does not have a screen result");
-      return ERROR_ACTION_RESULT;
-    }
+    _screenResultViewer.setScreenResult(_screen.getScreenResult());
+    return VIEW_OR_EDIT_SCREEN_RESULT_ACTION;
   }
     
   

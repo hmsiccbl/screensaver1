@@ -20,96 +20,105 @@ TODO:
 
   <h:form id="commandForm">
 
-    <h:panelGroup>
+    <t:panelGroup>
 			<t:commandButton action="#{screenResultViewer.viewScreen}"
 				value="View Screen" styleClass="command" />
 			<t:commandButton action="#{screenResultViewer.download}"
-				value="Download" styleClass="command" />
+				value="Download" rendered="#{!empty screenResultViewer.screenResult}" styleClass="command" />
 			<t:commandButton action="#{screenResultViewer.delete}" value="Delete"
-				styleClass="command" visibleOnUserRole="screenResultsAdmin" />
+				styleClass="command" rendered="#{! screenResultViewer.readOnly && !empty screenResultViewer.screenResult}" />
 			<t:commandButton action="#{screenResultViewer.viewHeatMaps}"
-				value="View Heat Maps" styleClass="command" />
-		</h:panelGroup>
+				value="View Heat Maps" rendered="#{!empty screenResultViewer.screenResult}" styleClass="command" />
+		</t:panelGroup>
 
   </h:form>
 
-  <%--@ include file="admin/cherryPickUploader.jspf" --%>
-  
-  <h:form id="dataForm">
+	<t:panelGroup rendered="#{!screenResultViewer.readOnly}">
+		<%@include file="admin/screenResultUploader.jspf"%>
+		<%--@ include file="admin/cherryPickUploader.jspf" --%>
+	</t:panelGroup>
+	
 
-    <h:panelGrid columns="2" styleClass="standardTable">
-      <h:outputLabel for="screenResultDateCreated" value="Date created" styleClass="keyColumn" />
-      <h:outputText id="screenResultDateCreated"
+	<t:panelGroup rendered="#{!screenResultViewer.readOnly && empty screenResultViewer.screenResult}">
+		<t:outputText value="No screen result loaded." styleClass="sectionHeader"/>
+	</t:panelGroup>
+	
+	<h:form id="dataForm" rendered="#{!empty screenResultViewer.screenResult}">
+
+    <t:panelGrid columns="2" >
+      <t:outputLabel for="screenResultDateCreated" value="Date Created" styleClass="keyColumn" />
+      <t:outputText id="screenResultDateCreated"
         value="#{screenResultViewer.screenResult.dateCreated}" />
 
-      <h:outputLabel for="screenResultDateCreated" value="Replicate count" styleClass="keyColumn" />
-      <h:outputText id="screenResultReplicateCount"
+      <t:outputLabel for="screenResultReplicateCount" value="Replicates" styleClass="keyColumn" />
+      <t:outputText id="screenResultReplicateCount"
         value="#{screenResultViewer.screenResult.replicateCount}" />
 
-      <h:outputLabel for="screenResultDateCreated" value="Shareable" styleClass="keyColumn" />
-      <h:outputText id="screenResultIsShareable"
-        value="#{screenResultViewer.screenResult.shareable}" />
-    </h:panelGrid>
+			<t:outputLabel for="screenResultDateCreated" value="Shareable" styleClass="keyColumn" />
+			<t:outputText id="screenResultIsShareable"
+        value="#{screenResultViewer.screenResult.shareable}" 
+        visibleOnUserRole="developer" />
+    </t:panelGrid>
 
     <t:div />
 
-    <h:panelGrid columns="1">
-      <h:outputLabel for="dataHeadersList" value="Show selected data headers:" />
-      <h:selectManyListbox id="dataHeadersList"
+    <t:panelGrid columns="1">
+      <t:outputLabel for="dataHeadersList" value="Show selected data headers:" />
+      <t:selectManyListbox id="dataHeadersList"
         value="#{screenResultViewer.selectedDataHeaderNames}"
         valueChangeListener="#{screenResultViewer.selectedDataHeadersListener}" styleClass="input">
         <f:selectItems id="dataHeaders" value="#{screenResultViewer.dataHeaderSelectItems}" />
-      </h:selectManyListbox>
-      <h:panelGroup>
-        <h:commandButton id="updateButton1" value="Update" action="#{screenResultViewer.update}"
+      </t:selectManyListbox>
+      <t:panelGroup>
+        <t:commandButton id="updateButton1" value="Update" action="#{screenResultViewer.update}"
           styleClass="command" />
-        <h:commandButton id="allDataHeadersButton" value="All"
+        <t:commandButton id="allDataHeadersButton" value="All"
           action="#{screenResultViewer.showAllDataHeaders}" styleClass="command" />
-      </h:panelGroup>
-    </h:panelGrid>
+      </t:panelGroup>
+    </t:panelGrid>
 
-    <h:panelGrid columns="1">
-      <h:panelGroup>
-        <h:outputLabel for="metadataTable" value="Data Headers" styleClass="sectionHeader" />
+    <t:panelGrid columns="1">
+      <t:panelGroup>
+        <t:outputLabel for="metadataTable" value="Data Headers" styleClass="sectionHeader" />
         <f:verbatim>&nbsp;(</f:verbatim>
-        <h:selectBooleanCheckbox id="showMetadataTableCheckbox"
+        <t:selectBooleanCheckbox id="showMetadataTableCheckbox"
           value="#{screenResultViewer.showMetadataTable}"
           valueChangeListener="#{screenResultViewer.showTableOptionListener}"
           onclick="javascript:document.getElementById('screenResultViewer:dataForm:updateButton1').click()" />
-        <h:outputLabel for="showMetadataTableCheckbox" value="show" />
+        <t:outputLabel for="showMetadataTableCheckbox" value="show" />
         <f:verbatim>)</f:verbatim>
-      </h:panelGroup>
+      </t:panelGroup>
 
       <t:dataTable id="metadataTable" value="#{screenResultViewer.metadata}" var="row"
         rendered="#{screenResultViewer.showMetadataTable}" styleClass="standardTable"
         headerClass="tableHeader" rowClasses="row1,row2">
         <t:column styleClass="keyColumn">
           <f:facet name="header">
-            <h:outputText value="Property" />
+            <t:outputText value="Property" />
           </f:facet>
-          <h:outputText value="#{row.rowLabel}" />
+          <t:outputText value="#{row.rowLabel}" />
         </t:column>
         <t:columns value="#{screenResultViewer.dataHeaderColumnModel}" var="columnName"
           styleClass="column">
           <f:facet name="header">
-            <h:outputText value="#{columnName}" />
+            <t:outputText value="#{columnName}" />
           </f:facet>
-          <h:outputText value="#{screenResultViewer.metadataCellValue}" />
+          <t:outputText value="#{screenResultViewer.metadataCellValue}" />
         </t:columns>
       </t:dataTable>
-    </h:panelGrid>
+    </t:panelGrid>
 
-    <h:panelGrid columns="1">
-      <h:panelGroup>
-        <h:outputLabel for="rawDataTable" value="Data" styleClass="sectionHeader" />
+    <t:panelGrid columns="1">
+      <t:panelGroup>
+        <t:outputLabel for="rawDataTable" value="Data" styleClass="sectionHeader" />
         <f:verbatim>&nbsp;(</f:verbatim>
-        <h:selectBooleanCheckbox id="showRawDataTableCheckbox"
+        <t:selectBooleanCheckbox id="showRawDataTableCheckbox"
           value="#{screenResultViewer.showRawDataTable}"
           valueChangeListener="#{screenResultViewer.showTableOptionListener}"
           onclick="javascript:document.getElementById('screenResultViewer:dataForm:updateButton1').click()" />
-        <h:outputLabel for="showRawDataTableCheckbox" value="show" />
+        <t:outputLabel for="showRawDataTableCheckbox" value="show" />
         <f:verbatim>)</f:verbatim>
-      </h:panelGroup>
+      </t:panelGroup>
 
       <t:dataTable id="rawDataTable" binding="#{screenResultViewer.dataTable}"
         value="#{screenResultViewer.rawData}" var="row" rows="10"
@@ -117,57 +126,57 @@ TODO:
         headerClass="tableHeader" rowClasses="row1,row2">
         <t:column styleClass="keyColumn">
           <f:facet name="header">
-            <h:outputText value="Plate" />
+            <t:outputText value="Plate" />
           </f:facet>
-          <h:outputText value="#{row.well.plateNumber}" />
+          <t:outputText value="#{row.well.plateNumber}" />
         </t:column>
         <t:column styleClass="keyColumn">
           <f:facet name="header">
-            <h:outputText value="Well" />
+            <t:outputText value="Well" />
           </f:facet>
-          <h:commandLink action="#{screenResultViewer.showWell}">
+          <t:commandLink action="#{screenResultViewer.showWell}">
             <%-- TODO: f:param name="wellIdParam" value="#{row.well.wellId} "/ --%>
             <f:param name="wellIdParam" value="#{row.well.wellName} " />
-            <h:outputText value="#{row.well.wellName}" />
-          </h:commandLink>
+            <t:outputText value="#{row.well.wellName}" />
+          </t:commandLink>
         </t:column>
         <t:columns value="#{screenResultViewer.dataHeaderColumnModel}" var="columnName"
           styleClass="column">
           <f:facet name="header">
-            <h:outputText value="#{columnName}" />
+            <t:outputText value="#{columnName}" />
           </f:facet>
-          <h:outputText value="#{screenResultViewer.rawDataCellValue}" />
+          <t:outputText value="#{screenResultViewer.rawDataCellValue}" />
         </t:columns>
       </t:dataTable>
-    </h:panelGrid>
+    </t:panelGrid>
   </h:form>
 
-  <h:form id="navigationForm">
-    <h:panelGroup rendered="#{screenResultViewer.showRawDataTable}">
-      <h:commandButton id="updateButton2" value="Update" action="#{screenResultViewer.update}"
+  <h:form id="navigationForm" rendered="#{!empty screenResultViewer.screenResult}">
+    <t:panelGroup rendered="#{screenResultViewer.showRawDataTable}">
+      <t:commandButton id="updateButton2" value="Update" action="#{screenResultViewer.update}"
         style="display: none" />
-      <h:outputLabel for="plateNumber" value="Jump to plate:" />
-      <h:selectOneMenu id="plateNumber" value="#{screenResultViewer.plateNumber}"
+      <t:outputLabel for="plateNumber" value="Jump to plate:" />
+      <t:selectOneMenu id="plateNumber" value="#{screenResultViewer.plateNumber}"
         binding="#{screenResultViewer.plateNumberInput}"
         onchange="javascript:document.getElementById('screenResultViewer:navigationForm:updateButton2').click()"
         valueChangeListener="#{screenResultViewer.plateNumberListener}"
         converter="PlateNumberSelectItemConverter" styleClass="input">
         <f:selectItems value="#{screenResultViewer.plateSelectItems}" />
-      </h:selectOneMenu>
-      <h:commandButton id="prevPageCommand" action="#{screenResultViewer.prevPage}" value="Prev"
+      </t:selectOneMenu>
+      <t:commandButton id="prevPageCommand" action="#{screenResultViewer.prevPage}" value="Prev"
         image="/images/arrow-previous.gif" styleClass="command" />
-      <h:commandButton id="nextPageCommand" action="#{screenResultViewer.nextPage}" value="Next"
+      <t:commandButton id="nextPageCommand" action="#{screenResultViewer.nextPage}" value="Next"
         image="/images/arrow-next.gif" styleClass="command" />
-      <h:outputLabel id="rowLabel" value="Row" for="firstDisplayedRowNumber" />
-      <h:inputText id="firstDisplayedRowNumber"
+      <t:outputLabel id="rowLabel" value="Row" for="firstDisplayedRowNumber" />
+      <t:inputText id="firstDisplayedRowNumber"
         value="#{screenResultViewer.firstDisplayedRowNumber}"
         binding="#{screenResultViewer.firstDisplayedRowNumberInput}"
         valueChangeListener="#{screenResultViewer.firstDisplayedRowNumberListener}" size="6"
         styleClass="input">
         <f:validateLongRange minimum="1" maximum="#{screenResultViewer.rawDataSize}" />
-      </h:inputText>
-      <h:outputLabel id="rowRange" value="#{screenResultViewer.rowRangeText}"
+      </t:inputText>
+      <t:outputLabel id="rowRange" value="#{screenResultViewer.rowRangeText}"
         for="firstDisplayedRowNumber" />
-    </h:panelGroup>
+    </t:panelGroup>
   </h:form>
 </f:subview>
