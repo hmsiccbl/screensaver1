@@ -61,15 +61,15 @@ public class ScreenResultParserTest extends AbstractSpringTest
   protected void onSetUp() throws Exception
   {
     super.onSetUp();
-    _screen = makeDummyScreen();
+    _screen = makeDummyScreen(1);
   }
 
-  public static Screen makeDummyScreen()
+  public static Screen makeDummyScreen(int screenNumber)
   {
     ScreeningRoomUser labHead = new ScreeningRoomUser(new Date(),
                                                       "Unit",
                                                       "Tester",
-                                                      "unit_tester@hms.harvard.edu",
+                                                      "unit_tester_ " + screenNumber + "@hms.harvard.edu",
                                                       "",
                                                       "",
                                                       "",
@@ -79,7 +79,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
                                                       true);
     return new Screen(labHead,
                       labHead,
-                      1,
+                      screenNumber,
                       new Date(),
                       ScreenType.SMALL_MOLECULE,
                       "Screen for Unit Testing");

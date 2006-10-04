@@ -19,7 +19,6 @@ import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.Screen;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -41,13 +40,13 @@ public class ScreenResultExporterTest extends AbstractSpringTest
    */
   public void testScreenResultExporter() throws Exception
   {
-    ScreenResult originalScreenResult  = mockScreenResultParser.parseLegacy(ScreenResultParserTest.makeDummyScreen(), 
+    ScreenResult originalScreenResult  = mockScreenResultParser.parseLegacy(ScreenResultParserTest.makeDummyScreen(1), 
                                                                             new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "LegacyTestAllInOne.xls"), false);
     ScreenResultExporter exporter = new ScreenResultExporter();
     HSSFWorkbook workbook = exporter.build(originalScreenResult);
     File exportedFile = File.createTempFile("LegacyTestAllInOne", ".exported.xls");
     workbook.write(new FileOutputStream(exportedFile));
-    ScreenResult exportedScreenResult  = mockScreenResultParser.parse(ScreenResultParserTest.makeDummyScreen(), 
+    ScreenResult exportedScreenResult  = mockScreenResultParser.parse(ScreenResultParserTest.makeDummyScreen(2), 
                                                                       exportedFile); // parse with "new" format
     if (mockScreenResultParser.getHasErrors()) {
       // okay, so I'm using our unit test to help with debugging...sue me!
