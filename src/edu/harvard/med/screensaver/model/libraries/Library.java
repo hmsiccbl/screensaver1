@@ -24,7 +24,7 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.class
+ * @hibernate.class lazy="false"
  */
 public class Library extends AbstractEntity
 {
