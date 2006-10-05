@@ -33,14 +33,14 @@ import org.springframework.beans.factory.config.PropertyResourceConfigurer;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class OrchestraHackedPropertyPlaceholderConfigurer
+public class OrchestraPropertyPlaceholderConfigurer
 extends PropertyPlaceholderConfigurer
 {
   
   // static members
 
   private static Logger log = Logger
-    .getLogger(OrchestraHackedPropertyPlaceholderConfigurer.class);
+    .getLogger(OrchestraPropertyPlaceholderConfigurer.class);
   
   
   // protected instance method

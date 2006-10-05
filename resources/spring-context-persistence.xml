@@ -17,7 +17,7 @@
   
   <bean
     id="dataSourceConfigurer"
-    class="edu.harvard.med.screensaver.db.OrchestraHackedPropertyPlaceholderConfigurer"
+    class="edu.harvard.med.screensaver.db.OrchestraPropertyPlaceholderConfigurer"
   >
     <property name="location" value="classpath:datasource.properties"/>
     <property name="ignoreResourceNotFound" value="true"/>
