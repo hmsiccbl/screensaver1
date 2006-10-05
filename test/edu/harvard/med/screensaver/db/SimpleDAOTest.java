@@ -67,8 +67,8 @@ public class SimpleDAOTest extends AbstractSpringTest
   
   public void testCreateEntity()
   {
-    Compound compound = dao.defineEntity(Compound.class, "compoundName");
-    assertEquals("compound name", compound.getCompoundName(), "compoundName");
+    Compound compound = dao.defineEntity(Compound.class, "smiles");
+    assertEquals("smiles", compound.getSmiles(), "smiles");
     
     try {
       dao.defineEntity(Compound.class, "foo", "bar");
@@ -83,12 +83,12 @@ public class SimpleDAOTest extends AbstractSpringTest
   
   public void testPersistEntity()
   {
-    Compound compound = new Compound("cname");
+    Compound compound = new Compound("smiles");
     compound.setSalt(true);
     dao.persistEntity(compound);
     List<Compound> compounds = dao.findAllEntitiesWithType(Compound.class);
     assertEquals("one compound in the machine", compounds.size(), 1);
-    assertEquals("names match", compounds.get(0).getCompoundName(), "cname");
+    assertEquals("names match", compounds.get(0).getSmiles(), "smiles");
     assertEquals("salty match", compounds.get(0).isSalt(), true);
   }
   
@@ -97,15 +97,15 @@ public class SimpleDAOTest extends AbstractSpringTest
     List<Compound> compounds = dao.findAllEntitiesWithType(Compound.class);
     assertEquals("no compounds in an empty database", 0, compounds.size());
     
-    dao.defineEntity(Compound.class, "compoundName");
+    dao.defineEntity(Compound.class, "smiles");
     compounds = dao.findAllEntitiesWithType(Compound.class);
     assertEquals("one compound in the machine", compounds.size(), 1);
-    assertEquals("names match", "compoundName", compounds.get(0).getCompoundName());
+    assertEquals("smiles match", "smiles", compounds.get(0).getSmiles());
   }
   
   public void testFindEntityById()
   {
-    Compound compound = dao.defineEntity(Compound.class, "compoundNameZ");
+    Compound compound = dao.defineEntity(Compound.class, "smilesZ");
     Integer id = compound.getCompoundId();
 
     Compound compound2 = dao.findEntityById(Compound.class, id);
@@ -175,11 +175,11 @@ public class SimpleDAOTest extends AbstractSpringTest
   {
     Compound compound = dao.defineEntity(Compound.class, "spaz");
     
-    List<Compound> compounds = dao.findEntitiesByProperty(Compound.class, "compoundName", "spaz");
+    List<Compound> compounds = dao.findEntitiesByProperty(Compound.class, "hbnSmiles", "spaz");
     assertEquals(1, compounds.size());
     assertEquals(compound, compounds.get(0));
 
-    compounds = dao.findEntitiesByProperty(Compound.class, "compoundName", "something other than spaz");
+    compounds = dao.findEntitiesByProperty(Compound.class, "hbnSmiles", "something other than spaz");
     assertEquals(0, compounds.size());
   }
   
@@ -200,10 +200,10 @@ public class SimpleDAOTest extends AbstractSpringTest
   {
     Compound compound = dao.defineEntity(Compound.class, "spaz");
     
-    Compound compound2 = dao.findEntityByProperty(Compound.class, "compoundName", "spaz");
+    Compound compound2 = dao.findEntityByProperty(Compound.class, "hbnSmiles", "spaz");
     assertEquals(compound, compound2);
 
-    compound2 = dao.findEntityByProperty(Compound.class, "compoundName", "something other than spaz");
+    compound2 = dao.findEntityByProperty(Compound.class, "hbnSmiles", "something other than spaz");
     assertNull(compound2);
   }
   

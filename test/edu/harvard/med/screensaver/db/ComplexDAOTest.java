@@ -84,7 +84,7 @@ public class ComplexDAOTest extends AbstractSpringTest
         public void runTransaction()
         {
           Compound compound = dao.defineEntity(Compound.class, "compound P");
-          compound.setSmiles("P");
+          compound.setCompoundName("P");
         }
       });
 
@@ -95,11 +95,11 @@ public class ComplexDAOTest extends AbstractSpringTest
           // look up a compound and modify it
           Compound compound = dao.findEntityByProperty(
             Compound.class,
-            "compoundName",
+            "hbnSmiles",
             "compound P");
           assertNotNull("compound exists", compound);
-          assertEquals("compound smiles", "P", compound.getSmiles());
-          compound.setSmiles("P'");
+          assertEquals("compound name", "P", compound.getCompoundName());
+          compound.setCompoundName("P'");
         }
       });
 
@@ -110,10 +110,10 @@ public class ComplexDAOTest extends AbstractSpringTest
           // look up a compound and modify it
           Compound compound = dao.findEntityByProperty(
             Compound.class,
-            "compoundName",
+            "hbnSmiles",
             "compound P");
           assertNotNull("compound exists", compound);
-          assertEquals("compound modified", "P'", compound.getSmiles());
+          assertEquals("compound name modified", "P'", compound.getCompoundName());
         }
       });
   }
@@ -135,7 +135,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           Compound compound = dao.defineEntity(
             Compound.class,
             "compound P");
-          compound.setSmiles("P");
+          compound.setCompoundName("P");
           Well well = dao.defineEntity(
             Well.class,
             library,
@@ -158,12 +158,12 @@ public class ComplexDAOTest extends AbstractSpringTest
           Well well = library.getWells().iterator().next();
           Compound compound = dao.findEntityByProperty(
             Compound.class,
-            "compoundName",
+            "hbnSmiles",
             "compound P");
           assertEquals("library has well", "A01", well.getWellName());
           assertEquals("Well's Compound count", 1, well.getCompounds().size());
           assertEquals("Compound's Well count", 1, compound.getWells().size());
-          assertEquals("Well-Compound association", "compound P", well.getCompounds().iterator().next().getCompoundName());
+          assertEquals("Well-Compound association", "compound P", well.getCompounds().iterator().next().getSmiles());
           assertEquals("Compound-Well association", "A01", compound.getWells().iterator().next().getWellName());
       }
     });
@@ -198,7 +198,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           Library library = dao.findEntityByProperty(Library.class, "libraryName", "library Q");
           Well well = library.getWells().iterator().next();
           Compound compound = dao.defineEntity(Compound.class, "compound P");
-          compound.setSmiles("P");
+          compound.setCompoundName("P");
           well.addCompound(compound);
         }
       });
@@ -264,9 +264,24 @@ public class ComplexDAOTest extends AbstractSpringTest
     catch (Exception e) {
       fail("unexpected exception e");
     }
-    Library library = dao.findEntityByProperty(Library.class, "libraryName", "library Q");
-    assertEquals("commit of all Wells", 3, library.getWells().size());
-  }    
+    
+    try {
+      dao.doInTransaction(new DAOTransaction()
+        {
+          public void runTransaction()
+          {
+            Library library = dao.findEntityByProperty(
+              Library.class,
+              "libraryName",
+              "library Q");
+            assertEquals("commit of all Wells", 3, library.getWells().size());
+          }
+        });
+    }
+    catch (Exception e) {
+      fail("unexpected exception e");
+    }
+  }
   
   
   public void testScreenResults() 
