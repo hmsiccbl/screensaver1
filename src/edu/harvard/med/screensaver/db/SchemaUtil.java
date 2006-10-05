@@ -23,7 +23,6 @@ import java.util.Arrays;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -215,6 +214,7 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
         }
         statement.close();
       }
+      connection.close();
     }
     catch (Exception e) {
       log.error("couldnt initialize database: " + e.getMessage(), e);
@@ -275,7 +275,10 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
       statement.execute(sql);
       statement.close();
 
-      connection.close();
+      // QUESTION: any reason to close the connection here? presumably if i am going
+      // to release the session, the connection will get closed anyways. but who tf
+      // knows? -s
+      //connection.close();
     }
     catch (HibernateException e) {
       throw convertHibernateAccessException(e);
@@ -311,17 +314,25 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
 
   private String makeDataSourceString()
   {
-    BasicDataSource dataSource = (BasicDataSource) _appCtx.getBean("screensaverDataSource");
-    assert dataSource != null : "spring bean 'screensaverDataSource' not found";
+    Session session = getSession();
     try {
-      String connectionUrl = dataSource.getConnection().getMetaData().getURL();
-      String connectionUserName = dataSource.getConnection().getMetaData().getUserName();
-      return connectionUserName + "@" + connectionUrl;
+      Connection connection = session.connection();
+      
+      String connectionUrl = connection.getMetaData().getURL();
+      String connectionUserName = connection.getMetaData().getUserName();
+      String dataSourceString = connectionUserName + "@" + connectionUrl;
+      
+      // QUESTION: any need to close the connection? test suite stalling problem goes
+      // away whether or not i close the conn. -s
+      
+      return dataSourceString;
     }
     catch (SQLException e) {
       log.error("could not determine connection properties");
       return "<unknown database connection>";
     }
+    finally {
+      releaseSession(session);
+    }
   }
-
 }
