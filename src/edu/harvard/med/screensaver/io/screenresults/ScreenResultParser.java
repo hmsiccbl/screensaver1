@@ -763,7 +763,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       metadataParseResult.setRawDataWorkbooks(parseRawDataWorkbookFilenames(metadataWorkbook,
                                                                             ignoreFilePaths));
     } 
-    ParsedScreenInfo parsedScreenInfo = parseScreenInfo(metadataWorkbook);
+    ParsedScreenInfo parsedScreenInfo = parseScreenInfo(metadataWorkbook, screen);
     
     metadataParseResult.setScreenResult(new ScreenResult(screen, parsedScreenInfo.getDateCreated()));
     int dataHeaderCount = findDataHeaderColumnCount(metadataSheet);
@@ -992,7 +992,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * more, we should return a composite object, rather than just a Date.
    * @throws UnrecoverableScreenResultParseException if a screen ID is not found
    */
-  private ParsedScreenInfo parseScreenInfo(Workbook metadataWorkbook) 
+  private ParsedScreenInfo parseScreenInfo(Workbook metadataWorkbook, Screen screen) 
     throws UnrecoverableScreenResultParseException
   {
     ParsedScreenInfo parsedScreenInfo = new ParsedScreenInfo();
@@ -1024,7 +1024,10 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       }
     }
     if (parsedScreenInfo.getScreenNumber() == null) {
-      throw new UnrecoverableScreenResultParseException(NO_SCREEN_ID_FOUND_ERROR, metadataWorkbook);
+      _errors.addError(NO_SCREEN_ID_FOUND_ERROR);
+    }
+    else if (!parsedScreenInfo.getScreenNumber().equals(screen.getScreenNumber())) {
+        _errors.addError("screen result data file is for screen number " + parsedScreenInfo.getScreenNumber() + ", expected " + screen.getScreenNumber());
     }
     if (parsedScreenInfo.getDateCreated() == null) {
       _errors.addError(NO_CREATED_DATE_FOUND_ERROR);

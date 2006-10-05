@@ -56,12 +56,9 @@ public class ScreenResultParserTest extends AbstractSpringTest
   
   protected ScreenResultParser mockScreenResultParser;
 
-  private Screen _screen;
-
   protected void onSetUp() throws Exception
   {
     super.onSetUp();
-    _screen = makeDummyScreen(1);
   }
 
   public static Screen makeDummyScreen(int screenNumber)
@@ -130,10 +127,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
     expectedDate.set(2003, 3 - 1, 5, 0, 0, 0);
     expectedDate.set(Calendar.MILLISECOND, 0);
 
-    ScreenResult screenResult = mockScreenResultParser.parseLegacy(_screen,
-                                                               new File(TEST_INPUT_FILE_DIR, 
-                                                                        "LegacyTestMetaData.xls"), 
-                                                               true);
+    ScreenResult screenResult = mockScreenResultParser.parseLegacy(makeDummyScreen(258),
+                                                                   new File(TEST_INPUT_FILE_DIR, 
+                                                                            "LegacyTestMetaData.xls"), 
+                                                                   true);
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
 
     ScreenResult expectedScreenResult = makeScreenResult(expectedDate.getTime());
@@ -333,7 +330,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testParseLegacyMultiWorkbookMultiWorksheet()
   {
-    ScreenResult screenResult = mockScreenResultParser.parseLegacy(_screen, new File(TEST_INPUT_FILE_DIR, "464MetaData.xls"), true);
+    ScreenResult screenResult = mockScreenResultParser.parseLegacy(makeDummyScreen(464), 
+                                                                   new File(TEST_INPUT_FILE_DIR, 
+                                                                            "464MetaData.xls"), 
+                                                                   true);
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
     Integer[] expectedPlateNumbers = { 1409, 1410, 1369, 1370, 1371, 1453, 1454 };
     Set<Integer> expectedPlateNumbersSet = new HashSet<Integer>(Arrays.asList(expectedPlateNumbers));
@@ -358,7 +358,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testSaveScreenResultErrors() throws IOException
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, "metadata_with_errors.xls");
-    mockScreenResultParser.parse(_screen, workbookFile);
+    mockScreenResultParser.parse(makeDummyScreen(115), workbookFile);
     String extension = "errors.xls";
     Map<Workbook,File> workbook2File =
       mockScreenResultParser.outputErrorsInAnnotatedWorkbooks(new File(System.getProperty("java.io.tmpdir")),
@@ -411,7 +411,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testRecycledCellUsage() 
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, "metadata_with_errors.xls");
-    mockScreenResultParser.parse(_screen, workbookFile);
+    mockScreenResultParser.parse(makeDummyScreen(115), workbookFile);
     Set<Cell> cellsWithErrors = new HashSet<Cell>();
     List<ParseError> errors = mockScreenResultParser.getErrors();
     for (ParseError error : errors) {
@@ -429,10 +429,11 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testParserReuse() throws Exception
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, "metadata_with_errors.xls");
-    ScreenResult result1 = mockScreenResultParser.parseLegacy(_screen, workbookFile, true);
+    Screen screen = makeDummyScreen(115);
+    ScreenResult result1 = mockScreenResultParser.parseLegacy(screen, workbookFile, true);
     List<ParseError> errors1 = mockScreenResultParser.getErrors();
     assertNotNull("1st parse returns a result", result1);
-    ScreenResult result2 = mockScreenResultParser.parseLegacy(_screen, workbookFile, true);
+    ScreenResult result2 = mockScreenResultParser.parseLegacy(screen, workbookFile, true);
     List<ParseError> errors2 = mockScreenResultParser.getErrors();
     assertNotNull("2nd parse returns a result", result2);
     assertNotSame("parses returned different ScreenResult objects", result1, result2);
@@ -457,7 +458,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testParseNewScreenResult() throws Exception
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, "NewFormatTest.xls");
-    ScreenResult screenResult = mockScreenResultParser.parse(_screen, workbookFile);
+    ScreenResult screenResult = mockScreenResultParser.parse(makeDummyScreen(115), 
+                                                             workbookFile);
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
 
     Calendar expectedDate = Calendar.getInstance();
@@ -548,6 +550,16 @@ public class ScreenResultParserTest extends AbstractSpringTest
       ++iRvt;
     }
   }
+  
+  public void testIllegalScreenNumber()
+  {
+    Screen screen = makeDummyScreen(999);
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, "NewFormatTest.xls");
+    mockScreenResultParser.parse(screen,
+                                 workbookFile);
+    assertEquals("screen result data file is for screen number 115, expected 999",
+                 mockScreenResultParser.getErrors().get(0).getMessage());
+  }
     
   private void setDefaultValues(ResultValueType rvt) 
   {
@@ -571,7 +583,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
     }
   }
   
-
   // testing  utility methods 
   
   public static ScreenResult makeScreenResult(Date date)
