@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
 
 import org.apache.log4j.Logger;
@@ -40,7 +39,7 @@ public class Well extends AbstractEntity
 
   // instance fields
 
-  private Integer _wellId;
+  private String _wellId;
   private Integer _version;
   private Library _library;
   private Set<Compound> _compounds = new HashSet<Compound>();
@@ -50,7 +49,6 @@ public class Well extends AbstractEntity
   private String _iccbNumber;
   private String _vendorIdentifier;
   private WellType _wellType = WellType.EXPERIMENTAL;
-  private Set<ResultValue> _resultValues = new HashSet<ResultValue>();
   private Set<CherryPick> _cherryPicks = new HashSet<CherryPick>();
   private String _smiles;
   private String _molfile;
@@ -88,18 +86,17 @@ public class Well extends AbstractEntity
   @Override
   public Integer getEntityId()
   {
-    return getWellId();
+    return getBusinessKey().toString().hashCode();
   }
   
   /**
    * Get the well id for the well.
    * 
    * @return the well id for the well
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="well_id_seq"
+   * @hibernate.id generator-class="assigned"
    */
-  public Integer getWellId() {
-    return _wellId;
+  public String getWellId() {
+    return getBusinessKey().toString();
   }
 
   /**
@@ -353,58 +350,10 @@ public class Well extends AbstractEntity
     _molfile = molfile;
   }
   
-  /**
-   * Get an unmodifiable copy of the set of the result values for the well.
-   * 
-   * @return an unmodifiable copy of the set of the result values for the well
-   */
-  public Set<ResultValue> getResultValues()
-  {
-    return Collections.unmodifiableSet(_resultValues);
-  }
-  
-  /**
-   * Add the result value to the well.
-   * 
-   * @param resultValue the result value to add to the well
-   * @return true iff the result value was not already in the well
-   */
-  public boolean addResultValue(ResultValue resultValue)
-  {
-    assert !(getHbnResultValues().contains(resultValue) ^
-      resultValue.getWell().equals(this)) :
-      "asymmetric well / result value association encountered";
-    if (getHbnResultValues().contains(resultValue)) {
-      return false;
-    }
-    resultValue.setHbnWell(this);
-    getHbnResultValues().add(resultValue);
-    return true;
-  }
 
   
   // public hibernate methods for cross-package relationships
   
-  /**
-   * Get the modifiable set of result values for the well. If the caller
-   * modifies the returned collection, it must ensure that the bi-directional
-   * relationship is maintained by updating the related {@link ResultValue}
-   * bean(s).
-   * 
-   * @return the set of result values for the well
-   * @motivation for Hibernate and for associated {@link ResultValue} bean (so
-   *             that it can maintain the bi-directional association between
-   *             {@link ResultValue} and {@link Well}).
-   * @hibernate.set
-   *    inverse="true"
-   *    cascade="save-update"
-   * @hibernate.collection-key column="well_id"
-   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValue"
-   */
-  public Set<ResultValue> getHbnResultValues()
-  {
-    return _resultValues;
-  }
 
   /**
    * Get an unmodifiable copy of the set of cherry picks.
@@ -438,6 +387,7 @@ public class Well extends AbstractEntity
    * @hibernate.set
    *   cascade="save-update"
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="well_id"
    * @hibernate.collection-one-to-many
@@ -537,6 +487,7 @@ public class Well extends AbstractEntity
    * @hibernate.set
    *   table="well_compound_link"
    *   cascade="all"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="well_id"
    * @hibernate.collection-many-to-many
@@ -556,6 +507,7 @@ public class Well extends AbstractEntity
    * @hibernate.set
    *   table="well_silencing_reagent_link"
    *   cascade="all"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="well_id"
    * @hibernate.collection-many-to-many
@@ -585,7 +537,7 @@ public class Well extends AbstractEntity
    * @param wellId the new well id for the well
    * @motivation for hibernate
    */
-  private void setWellId(Integer wellId)
+  private void setWellId(String wellId)
   {
     _wellId = wellId;
   }
@@ -623,6 +575,7 @@ public class Well extends AbstractEntity
    *   not-null="true"
    *   foreign-key="fk_well_to_library"
    *   cascade="save-update"
+   *   lazy="true"
    */
   private Library getHbnLibrary()
   {
@@ -651,16 +604,6 @@ public class Well extends AbstractEntity
     _silencingReagents = silencingReagents;
   }
   
-  /**
-   * Set the set of result values for the well.
-   * @param wells the new set of result values for the well
-   * @motivation for hibernate
-   */
-  private void setHbnResultValues(Set<ResultValue> resultValues)
-  {
-    _resultValues = resultValues;
-  }
-
   /**
    * Set the cherry picks.
    *

@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.io.screenresults;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +52,8 @@ public class MockDaoForScreenResultParserTest implements DAO
   public void doInTransaction(DAOTransaction daoTransaction)
   {
   }
+  
+  public void flush() {}
 
   public <E extends AbstractEntity> E defineEntity(Class<E> entityClass, Object... constructorArguments)
   {
@@ -66,7 +69,7 @@ public class MockDaoForScreenResultParserTest implements DAO
     return null;
   }
 
-  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass, Integer id)
+  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass, Serializable id)
   {
     return null;
   }

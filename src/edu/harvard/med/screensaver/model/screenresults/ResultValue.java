@@ -135,13 +135,7 @@ public class ResultValue extends AbstractEntity implements Comparable
     if (_resultValueType != null) {
       _resultValueType.getHbnResultValues().remove(this);
     }
-    if (_well != null) {
-      _well.getHbnResultValues().remove(this);
-    }
     _businessKey.setResultValueType(resultValueType);
-    if (_well != null) {
-      _well.getHbnResultValues().add(this);
-    }
     _resultValueType = resultValueType;
     _resultValueType.getHbnResultValues().add(this);
   }
@@ -172,17 +166,11 @@ public class ResultValue extends AbstractEntity implements Comparable
     if (_resultValueType != null) {
       _resultValueType.getHbnResultValues().remove(this);
     }
-    if (_well != null) {
-      _well.getHbnResultValues().remove(this);
-    }
     _businessKey.setWell(well);
     if (_resultValueType != null) {
       _resultValueType.getHbnResultValues().add(this);
     }
     _well = well;
-    if (_well != null) { // in case we're deleting this ResultValue, in which case it's okay to violate non-null Well constraint
-      _well.getHbnResultValues().add(this);
-    }
   }
 
   /**

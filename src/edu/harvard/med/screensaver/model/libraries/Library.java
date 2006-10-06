@@ -14,9 +14,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -140,7 +140,7 @@ public class Library extends AbstractEntity
     }
     return false;
   }
-
+  
   /**
    * Get an unmodifiable copy of the set of copies.
    *
@@ -786,6 +786,7 @@ public class Library extends AbstractEntity
    *   cascade="save-update"
    *   inverse="true"
    *   lazy="true"
+   *   batch-size="11520"
    * @hibernate.collection-key
    *   column="library_id"
    * @hibernate.collection-one-to-many

@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -23,8 +24,6 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
-import org.hibernate.ObjectNotFoundException;
-import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 
@@ -74,22 +73,10 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
 
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> E findEntityById(
-    final Class<E> entityClass,
-    final Integer id)
+    Class<E> entityClass,
+    Serializable id)
   {
-    return (E) getHibernateTemplate().execute(new HibernateCallback()
-      {
-        public Object doInHibernate(org.hibernate.Session session)
-          throws org.hibernate.HibernateException, java.sql.SQLException
-        {
-          try {
-            return session.get(entityClass, id);
-          }
-          catch (ObjectNotFoundException e) {
-            return null;
-          }
-        } 
-      });
+    return (E) getHibernateTemplate().get(entityClass, id);
   }
   
 //  /**

@@ -9,14 +9,15 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -89,7 +90,7 @@ public interface DAO
   @Transactional(readOnly = true)
   public <E extends AbstractEntity> E findEntityById(
     Class<E> entityClass,
-    Integer id);
+    Serializable id);
 
   /**
    * Retrieve and return the entity that has a specific value for the
@@ -102,6 +103,7 @@ public interface DAO
    * @return a list of entities that have the specified values for the specified
    *         set of properties
    */
+  @Transactional(readOnly = true)
   public <E extends AbstractEntity> List<E> findEntitiesByProperties(
     Class<E> entityClass,
     Map<String,Object> name2Value);
@@ -183,6 +185,7 @@ public interface DAO
    * Find all the screening room users that are lab heads.
    * @return a List of {@link ScreeningRoomUsers}s.
    */
+  @Transactional(readOnly = true)
   public List<ScreeningRoomUser> findAllLabHeads();
 
   /**
