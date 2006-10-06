@@ -78,6 +78,9 @@
     <property
       name="sessionFactory"
       ref="hibernateSessionFactory" />
+    <property
+      name="nestedTransactionAllowed" 
+      value="true"/>
   </bean>
 
   <!-- The beans that are to be wrapped by transactional proxies -->
