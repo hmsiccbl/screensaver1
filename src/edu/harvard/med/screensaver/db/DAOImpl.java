@@ -12,14 +12,10 @@ package edu.harvard.med.screensaver.db;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
@@ -207,7 +203,10 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   
   public void deleteScreenResult(ScreenResult screenResult)
   {
-    diassociateScreenResult(screenResult);
+    // disassociate ScreenResult from Screen
+    screenResult.getScreen().setScreenResult(null);
+    screenResult.setHbnScreen(null);
+
     getHibernateTemplate().delete(screenResult);
     _logger.debug("deleted " + screenResult);
   }
@@ -287,26 +286,6 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     catch (InvocationTargetException e) {
       throw new IllegalArgumentException(e);
     }
-  }
-  
-  /**
-   * Break relationships between ScreenResult's object network and any entities
-   * that do not have a "contained-in" relationship with this ScreenResult
-   * object. For example, Wells, which are associated via
-   * ScreenResult.ResultValueType.ResultValue.Well.
-   */
-  private void diassociateScreenResult(ScreenResult screenResult)
-  {
-    for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-      // we copy collection of result values to avoid ConcurrentModificationException during iteration!
-      Collection<ResultValue> resultValues = new ArrayList<ResultValue>(rvt.getResultValues());
-      for (ResultValue rv : resultValues) {
-        rv.setWell(null);
-      }
-    }
-    
-    screenResult.getScreen().setScreenResult(null);
-    screenResult.setHbnScreen(null);
   }
 
 }
