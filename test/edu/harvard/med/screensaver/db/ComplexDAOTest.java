@@ -485,7 +485,9 @@ public class ComplexDAOTest extends AbstractSpringTest
     assertEquals(172, labHeads.size());
   }
   
-  // TODO: this test needs to be updated
+  // TODO: this test needs to be updated to include an *imported* screen result,
+  // with ResultValueTypes and ResultValues, which are linked to Wells.
+  // Otherwise we're testing fluff!
   public void testDeleteScreenResult()
   {
     final int[] screenResultIds = new int[1];
