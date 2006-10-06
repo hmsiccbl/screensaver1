@@ -32,6 +32,7 @@ public class LibraryViewerController extends AbstractController
   private DAO _dao;
   private Library _library;
   private RNAiLibraryContentsImporterController _rnaiLibraryContentsImporter;
+  private CompoundLibraryContentsImporterController _compoundLibraryContentsImporter;
   private SearchResultsRegistryController _searchResultsRegistry;
   private WellViewerController _wellViewerController;
   private GeneViewerController _geneViewerController;
@@ -69,6 +70,17 @@ public class LibraryViewerController extends AbstractController
     RNAiLibraryContentsImporterController rnaiLibraryContentsImporter)
   {
     _rnaiLibraryContentsImporter = rnaiLibraryContentsImporter;
+  }
+
+  public CompoundLibraryContentsImporterController getCompoundLibraryContentsImporter()
+  {
+    return _compoundLibraryContentsImporter;
+  }
+
+  public void setCompoundLibraryContentsImporter(
+    CompoundLibraryContentsImporterController compoundLibraryContentsImporter)
+  {
+    _compoundLibraryContentsImporter = compoundLibraryContentsImporter;
   }
 
   public SearchResultsRegistryController getSearchResultsRegistry()
@@ -177,11 +189,7 @@ public class LibraryViewerController extends AbstractController
 
   public String goImportCompoundLibraryContents()
   {
-    // TODO before this will work:
-    // - write the compoundlibrarycontentsimporter
-    // - create a controller and a viewer for it
-    // - add a navigation rule for goImportCompoundLibraryContents
-    
+    _compoundLibraryContentsImporter.setLibraryViewer(this);
     return "goImportCompoundLibraryContents";
   }
 

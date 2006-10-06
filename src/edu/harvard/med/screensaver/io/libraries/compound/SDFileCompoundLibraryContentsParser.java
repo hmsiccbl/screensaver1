@@ -84,6 +84,16 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
     return _errorManager.getErrors();
   }
   
+  public boolean getHasErrors()
+  {
+    return _errorManager != null && _errorManager.getHasErrors();
+  }
+  
+  public void clearErrors()
+  {
+    _errorManager = null;
+  }
+  
     
   // package getters, for the SDRecordParser
 

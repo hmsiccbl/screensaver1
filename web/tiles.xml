@@ -92,6 +92,17 @@
       name="body"
       value="/libraries/admin/rnaiLibraryContentsImporter.jsp" />
   </definition>
+    
+  <definition
+    name="/libraries/admin/compoundLibraryContentsImporter.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="Compound Library Contents Importer"/>
+    <put
+      name="body"
+      value="/libraries/admin/compoundLibraryContentsImporter.jsp" />
+  </definition>
    
   <definition
     name="/libraries/librariesBrowser.tiles"

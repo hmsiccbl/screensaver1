@@ -64,6 +64,10 @@
       <value>#{rnaiLibraryContentsImporter}</value>
     </managed-property>
     <managed-property>
+      <property-name>compoundLibraryContentsImporter</property-name>
+      <value>#{compoundLibraryContentsImporter}</value>
+    </managed-property>
+    <managed-property>
       <property-name>searchResultsRegistry</property-name>
       <value>#{searchResultsRegistry}</value>
     </managed-property>
@@ -228,7 +232,26 @@
       <value>#{dao}</value>
     </managed-property>
   </managed-bean>
-    
+
+  <managed-bean>
+    <description>Compound Library Contents Importer backing bean</description>
+    <managed-bean-name>compoundLibraryContentsImporter</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.CompoundLibraryContentsImporterController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>compoundLibraryContentsParser</property-name>
+      <value>#{compoundLibraryContentsParser}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>dao</property-name>
+      <value>#{dao}</value>
+    </managed-property>
+  </managed-bean>
+
   <managed-bean>
     <description>Schema Manager</description>
     <managed-bean-name>schemaManager</managed-bean-name>
@@ -358,6 +381,11 @@
       <redirect/>
     </navigation-case>
     <navigation-case>
+      <from-outcome>goImportCompoundLibraryContents</from-outcome>
+      <to-view-id>/libraries/admin/compoundLibraryContentsImporter</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>goEnvironmentInfo</from-outcome>
       <to-view-id>/dev/env</to-view-id>
       <redirect/>
@@ -401,6 +429,21 @@
     </navigation-case>
   </navigation-rule>
 
+  <navigation-rule>
+    <from-view-id>/libraries/admin/compoundLibraryContentsImporter.jsp</from-view-id>
+    <navigation-case>
+      <from-action>#{compoundLibraryContentsImporter.submit}</from-action>
+      <from-outcome>success</from-outcome>
+      <to-view-id>/libraries/libraryViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-action>#{compoundLibraryContentsImporter.submit}</from-action>
+      <from-outcome>error</from-outcome>
+      <to-view-id>/libraries/admin/compoundLibraryContentsImporter</to-view-id>
+    </navigation-case>
+  </navigation-rule>
+  
   <navigation-rule>
     <from-view-id>/screens/screensBrowser.jsp</from-view-id>
     <navigation-case>
