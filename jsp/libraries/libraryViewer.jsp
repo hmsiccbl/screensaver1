@@ -22,6 +22,8 @@
     <h:outputText value="#{libraryViewer.library.libraryName}" />
     <h:outputText value="library type:" />
     <h:outputText value="#{libraryViewer.library.libraryType}" />
+    <h:outputText value="description:" />
+    <h:outputText value="#{libraryViewer.library.description}" />
     <h:outputText value="number of wells:" />
     <h:outputText value="#{libraryViewer.librarySize}" />
   </h:panelGrid>
