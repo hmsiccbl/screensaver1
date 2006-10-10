@@ -96,13 +96,21 @@ import org.apache.log4j.Logger;
  *     represent a relationship.)
  *   </li>
  *   <li>
- *     relationship properties always maintain bidirectionality of the
- *     relationship. Because this usage conflicts with Hibernate usage,
- *     relationship properties always come in pairs: a "JavaBean" version of
- *     the property, which is named traditionally, e.g., <code>getFoo</code>
+ *     relationship properties shold maintain bidirectionality of the
+ *     relationship. If, for performance reasons, a relationship is made
+ *     unidirectional, the non-Hibernate getter method should be annotated 
+ *     with the {@link UnidirectionalRelationship} annotation.
+ *   <li>
+ *     bidirectional relationships require that the entity Java objects on both 
+ *     sides of the relationship be updated to reflect a new or deleted association 
+ *     between the two entities.  
+ *     As Hibernate does not allow an entity's collections to be modified while it 
+ *     is loading its state from the database (via its setter methods), we are 
+ *     forced into having pairs of getter and setter methods for each relationship:
+ *     "JavaBean" version of the property, which is named traditionally, e.g., <code>getFoo</code>
  *     and <code>setFoo</code>; and a Hibernate version of the property, which
  *     is named by prefixing the JavaBean property with "hbn", e.g.,
- *     <code>getHbnFoo</code> and <code>setHbnFoo</code>
+ *     <code>getHbnFoo</code> and <code>setHbnFoo</code>.  
  *   </li>
  *   <li>
  *     note that the combination of the previous two bullet items will dictate

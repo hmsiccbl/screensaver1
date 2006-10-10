@@ -352,6 +352,11 @@ public class EntityBeansTest extends EntityBeansExercizor
     PropertyDescriptor propertyDescriptor,
     Method getter)
   {
+    // do not test bidirectionality of relationships that are explicitly annotated as unidirectional
+    if (isUnidirectionalRelationship(beanInfo, propertyDescriptor)) {
+      return;
+    }
+    
     String propFullName = bean.getClass() + "." + propertyDescriptor.getName();
     
     // get basic objects for the other side of the reln
@@ -488,6 +493,11 @@ public class EntityBeansTest extends EntityBeansExercizor
     PropertyDescriptor propertyDescriptor,
     Method getter)
   {
+    // do not test bidirectionality of relationships that are explicitly annotated as unidirectional
+    if (isUnidirectionalRelationship(beanInfo, propertyDescriptor)) {
+      return;
+    }
+    
     // get basic objects related to the bean
     Class<? extends AbstractEntity> beanClass = bean.getClass();
     String propertyName = propertyDescriptor.getName();

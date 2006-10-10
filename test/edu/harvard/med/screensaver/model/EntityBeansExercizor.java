@@ -17,6 +17,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.harvard.med.screensaver.util.StringUtils;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -218,4 +220,24 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
     }
     return 0;
   }
+
+  protected boolean isUnidirectionalRelationship(BeanInfo beanInfo, PropertyDescriptor propertyDescriptor)
+  {
+    Method getter = propertyDescriptor.getReadMethod();
+    if (getter.isAnnotationPresent(UnidirectionalRelationship.class)) {
+      return true;
+    }
+    // the UnidirectionalRelationship may be on the hibernate version of the getter method
+    try {
+      Method hbnGetter = beanInfo.getBeanDescriptor().getBeanClass().
+       getDeclaredMethod("getHbn" + StringUtils.capitalize(propertyDescriptor.getName()));
+      return hbnGetter.isAnnotationPresent(UnidirectionalRelationship.class);
+    }
+    catch (Exception e) {
+      return false;
+    }
+  }
+
+  
 }
+
