@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.io.libraries.rnai;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -17,7 +16,6 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 
-import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.libraries.DataRowType;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
