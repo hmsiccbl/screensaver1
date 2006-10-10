@@ -28,7 +28,7 @@ public enum AssayWellType implements VocabularyTerm
   EMPTY("empty"),
   LIBRARY_CONTROL("library control"),
   ASSAY_POSITIVE_CONTROL("assay positive control"),
-  ASSAY_NEGATIVE_CONTROL("negative control"),
+  ASSAY_NEGATIVE_CONTROL("assay negative control"),
   BUFFER("buffer"),
   OTHER("other"),
   ;
