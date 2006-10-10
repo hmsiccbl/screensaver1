@@ -170,7 +170,18 @@
       name="body"
       value="/libraries/geneViewer.jsp" />
   </definition>
-  
+   
+  <definition
+    name="/libraries/compoundViewer.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="Compound Viewer"/>
+    <put
+      name="body"
+      value="/libraries/compoundViewer.jsp" />
+  </definition>
+    
   
   <!-- screenresults tiles -->
   

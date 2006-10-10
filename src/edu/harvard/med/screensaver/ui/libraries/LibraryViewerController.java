@@ -36,6 +36,7 @@ public class LibraryViewerController extends AbstractController
   private SearchResultsRegistryController _searchResultsRegistry;
   private WellViewerController _wellViewerController;
   private GeneViewerController _geneViewerController;
+  private CompoundViewerController _compoundViewerController;
   private String _usageMode; // "create" or "edit"
   private boolean _advancedMode;
   
@@ -111,6 +112,16 @@ public class LibraryViewerController extends AbstractController
   public void setGeneViewer(GeneViewerController geneViewerController)
   {
     _geneViewerController = geneViewerController;
+  }
+
+  public CompoundViewerController getCompoundViewer()
+  {
+    return _compoundViewerController;
+  }
+
+  public void setCompoundViewer(CompoundViewerController compoundViewerController)
+  {
+    _compoundViewerController = compoundViewerController;
   }
 
   public void setUsageMode(String usageMode)
@@ -209,12 +220,12 @@ public class LibraryViewerController extends AbstractController
   
   public String viewCompoundLibraryContents()
   {
-    // TODO: subclass WellSearchResults, conditionally based on whether lib is compound or rnai
     if (_searchResultsRegistry.getSearchResultsRegistrant(Library.class) != this) {
-      SearchResults<Well> searchResults = new WellSearchResults(
+      SearchResults<Well> searchResults = new CompoundWellSearchResults(
         new ArrayList<Well>(_library.getWells()),
         this,
-        _wellViewerController);
+        _wellViewerController,
+        _compoundViewerController);
       _searchResultsRegistry.registerSearchResults(Well.class, this, searchResults);
     }
     _searchResultsRegistry.setCurrentSearchType(Well.class);

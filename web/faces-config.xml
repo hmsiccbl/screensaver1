@@ -79,6 +79,10 @@
       <property-name>geneViewer</property-name>
       <value>#{geneViewer}</value>
     </managed-property>
+    <managed-property>
+      <property-name>compoundViewer</property-name>
+      <value>#{compoundViewer}</value>
+    </managed-property>
   </managed-bean>
   
   <managed-bean>
@@ -124,6 +128,13 @@
     <description>Gene Viewer backing bean</description>
     <managed-bean-name>geneViewer</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.GeneViewerController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+    
+  <managed-bean>
+    <description>Compound Viewer backing bean</description>
+    <managed-bean-name>compoundViewer</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.CompoundViewerController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
   </managed-bean>
   
@@ -358,6 +369,11 @@
     <navigation-case>
       <from-outcome>showGene</from-outcome>
       <to-view-id>/libraries/geneViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>showCompound</from-outcome>
+      <to-view-id>/libraries/compoundViewer</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>

@@ -10,14 +10,12 @@
 package edu.harvard.med.screensaver.ui.libraries;
 
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.model.libraries.Gene;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Well;
 
 /**
@@ -26,17 +24,18 @@ import edu.harvard.med.screensaver.model.libraries.Well;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class RNAiWellSearchResults extends WellSearchResults
+public class CompoundWellSearchResults extends WellSearchResults
 {
+  
   // static members
 
-  private static Logger log = Logger.getLogger(RNAiWellSearchResults.class);
-  private static final String GENE = "Gene";
+  private static Logger log = Logger.getLogger(CompoundWellSearchResults.class);
+  private static final String COMPOUND = "Compound";
 
   
   // instance members
   
-  private GeneViewerController _geneViewerController;
+  private CompoundViewerController _compoundViewerController;
   
 
   // public constructor
@@ -45,14 +44,14 @@ public class RNAiWellSearchResults extends WellSearchResults
    * Construct a new <code>RNAiWellSearchResults</code> object.
    * @param wells the list of wells
    */
-  public RNAiWellSearchResults(
+  public CompoundWellSearchResults(
     List<Well> unsortedResults,
     LibraryViewerController libraryViewerController,
     WellViewerController wellViewerController,
-    GeneViewerController geneViewerController)
+    CompoundViewerController compoundViewerController)
   {
     super(unsortedResults, libraryViewerController, wellViewerController);
-    _geneViewerController = geneViewerController;
+    _compoundViewerController = compoundViewerController;
   }
 
   
@@ -63,7 +62,7 @@ public class RNAiWellSearchResults extends WellSearchResults
   protected List<String> getColumnHeaders()
   {
     List<String> columnHeaders = super.getColumnHeaders();
-    columnHeaders.add(GENE);
+    columnHeaders.add(COMPOUND);
     return columnHeaders;
   }
   
@@ -71,14 +70,14 @@ public class RNAiWellSearchResults extends WellSearchResults
   protected boolean isCommandLink(String columnName)
   {
     return
-      (columnName.equals(GENE) && getGeneCount() == 1) || super.isCommandLink(columnName);
+      (columnName.equals(COMPOUND) && getCompoundCount() == 1) || super.isCommandLink(columnName);
   }
   
   @Override
   protected Object getCellValue(Well well, String columnName)
   {
-    if (columnName.equals(GENE)) {
-      return getGeneName(well);
+    if (columnName.equals(COMPOUND)) {
+      return getCompoundSmiles(well);
     }
     return super.getCellValue(well, columnName);
   }
@@ -87,9 +86,9 @@ public class RNAiWellSearchResults extends WellSearchResults
   @Override
   protected Object cellAction(Well well, String columnName)
   {
-    if (columnName.equals(GENE)) {
-      _geneViewerController.setGene(getGenesForWell(well).iterator().next());
-      return "showGene";
+    if (columnName.equals(COMPOUND)) {
+      _compoundViewerController.setCompound(getCompoundsForWell(well).iterator().next());
+      return "showCompound";
     }
     return super.cellAction(well, columnName);
   }
@@ -97,10 +96,10 @@ public class RNAiWellSearchResults extends WellSearchResults
   @Override
   protected Comparator<Well> getComparatorForColumnName(String columnName)
   {
-    if (columnName.equals(GENE)) {
+    if (columnName.equals(COMPOUND)) {
       return new Comparator<Well>() {
         public int compare(Well w1, Well w2) {
-          return getGeneName(w1).compareTo(getGeneName(w2));
+          return getCompoundSmiles(w1).compareTo(getCompoundSmiles(w2));
         }
       };
     }
@@ -110,37 +109,33 @@ public class RNAiWellSearchResults extends WellSearchResults
   
   // private instance methods
   
-  private int getGeneCount()
+  private int getCompoundCount()
   {
-    return getGenesForWell(getEntity()).size();
+    return getCompoundsForWell(getEntity()).size();
   }
   
-  private Set<Gene> getGenesForWell(Well well)
+  private Set<Compound> getCompoundsForWell(Well well)
   {
-    Set<Gene> genes = new HashSet<Gene>();
-    for (SilencingReagent reagent : well.getSilencingReagents()) {
-      genes.add(reagent.getGene());
-    }
-    return genes;
+    return well.getCompounds();
   }
 
-  private String getGeneName(Well well) {
-    Set<Gene> genes = getGenesForWell(well);
-    int count = genes.size();
+  private String getCompoundSmiles(Well well) {
+    Set<Compound> compounds = getCompoundsForWell(well);
+    int count = compounds.size();
     switch (count) {
     case 0:
-      return "no gene";
+      return "no compound";
     case 1:
-      return genes.iterator().next().getGeneName();
+      return compounds.iterator().next().getSmiles();
     default:
-      return "multiple genes";  
+      return "multiple compounds";  
     }
   }
   
   @Override
   protected void setEntityToView(Well well)
   {
-    _geneViewerController.setGene(getGenesForWell(well).iterator().next());
+    _compoundViewerController.setCompound(getCompoundsForWell(well).iterator().next());
   }
 }
 
