@@ -16,8 +16,11 @@ import java.util.Map;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -119,4 +122,16 @@ public class MockDaoForScreenResultParserTest implements DAO
   {
   }
 
+  public Well findWell(Integer plateNumber, String wellName)
+  {
+    return null;
+  }
+  
+  public SilencingReagent findSilencingReagent(
+    Gene gene,
+    SilencingReagentType silencingReagentType,
+    String sequence)
+  {
+    return null;
+  }
 }

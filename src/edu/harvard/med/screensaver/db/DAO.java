@@ -13,11 +13,15 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
-import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -192,6 +196,27 @@ public interface DAO
    * Delete a screen result.
    * @param screenResult the screen result to delete.
    */
-  void deleteScreenResult(ScreenResult screenResult);
+  public void deleteScreenResult(ScreenResult screenResult);
 
+  /**
+   * Find and return the well. Return null if there is no well.
+   * @param plateNumber the plate number
+   * @param wellName the beautiful well name. remember - a through h, and 1 through 24!
+   * @return the well. Return null if there is no well.
+   */
+  public Well findWell(Integer plateNumber, String wellName);
+  
+  /**
+   * Find and return the silencing reagent. Return null if there is no matching
+   * silencing reagent.
+   * @param gene the gene the silencing reagent silences
+   * @param silencingReagentType the type of silencing reagent
+   * @param sequence the sequence of the silencing reagent
+   * @return the silencing reagent. Return null if there is no matching
+   * silencing reagent.
+   */
+  public SilencingReagent findSilencingReagent(
+    Gene gene,
+    SilencingReagentType silencingReagentType,
+    String sequence);
 }

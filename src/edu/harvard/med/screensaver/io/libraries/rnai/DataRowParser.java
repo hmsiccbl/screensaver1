@@ -9,7 +9,7 @@
 
 package edu.harvard.med.screensaver.io.libraries.rnai;
 
-import java.util.HashMap;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -19,11 +19,9 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.libraries.DataRowType;
-import edu.harvard.med.screensaver.io.libraries.ParsedEntitiesMap;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Gene;
-import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -50,8 +48,6 @@ public class DataRowParser
   private HSSFRow _dataRow;
   private short _rowIndex;
   private Factory _cellFactory;
-  private ParsedEntitiesMap _parsedEntitiesMap;
-  
   private Map<RequiredRNAiLibraryColumn,String> _dataRowContents;
   
   
@@ -70,15 +66,13 @@ public class DataRowParser
     RNAiLibraryColumnHeaders columnHeaders,
     HSSFRow dataRow,
     short rowIndex,
-    Factory cellFactory,
-    ParsedEntitiesMap parsedEntitiesMap)
+    Factory cellFactory)
   {
     _parser = parser;
     _columnHeaders = columnHeaders;
     _dataRow = dataRow;
     _rowIndex = rowIndex;
     _cellFactory = cellFactory;
-    _parsedEntitiesMap = parsedEntitiesMap;
   }
   
   /**
@@ -170,10 +164,10 @@ public class DataRowParser
     if (wellName.equals("")) {
       return null;
     }
-    Well well = getExistingWell(plateNumber, wellName);
+    Well well = _parser.getDAO().findWell(plateNumber, wellName);
     if (well == null) {
       well = new Well(_parser.getLibrary(), plateNumber, wellName);
-      _parsedEntitiesMap.addWell(well);
+      _parser.getDAO().persistEntity(well);
     }
     if (isControl) {
       well.setWellType(WellType.LIBRARY_CONTROL);
@@ -185,34 +179,6 @@ public class DataRowParser
       well.setVendorIdentifier(vendorIdentifier);
     }
     return well;
-  }
-  
-  /**
-   * Get an existing well from the database with the specified plate number and well name,
-   * and the library from the parent {@link RNAiLibraryContentsParser}. Return null if no
-   * such well exists in the database.
-   *  
-   * @param plateNumber the plate number
-   * @param wellName the well name
-   * @return the existing well from the database. Return null if no such well exists in
-   * the database
-   */
-  private Well getExistingWell(Integer plateNumber, String wellName)
-  {
-    Well well = _parsedEntitiesMap.getWell(plateNumber, wellName);
-    if (well != null) {
-      return well;
-    }
-    Library library = _parser.getLibrary();
-    if (library.getLibraryId() == null) {
-      return null;
-    }
-    DAO dao = _parser.getDAO();
-    Map<String,Object> propertiesMap = new HashMap<String,Object>();
-    propertiesMap.put("hbnLibrary", _parser.getLibrary());
-    propertiesMap.put("plateNumber", plateNumber);
-    propertiesMap.put("wellName", wellName);
-    return dao.findEntityByProperties(Well.class, propertiesMap);
   }
 
   /**
@@ -294,7 +260,7 @@ public class DataRowParser
         entrezgeneSymbol,
         genbankAccessionNumber,
         geneInfo.getSpeciesName());
-      _parsedEntitiesMap.addGene(gene);
+      _parser.getDAO().persistEntity(gene);
     }
 
     return gene;
@@ -309,11 +275,9 @@ public class DataRowParser
    */
   private Gene getExistingGene(Integer entrezgeneId)
   {
-    Gene gene = _parsedEntitiesMap.getGene(entrezgeneId);
-    if (gene != null) {
-      return gene;
-    }
-    return _parser.getDAO().findEntityByProperty(Gene.class, "entrezgeneId", entrezgeneId);
+    return _parser.getDAO().findEntityById(
+      Gene.class,
+      new Gene(null, entrezgeneId, null, null).getEntityId());
   }
 
   /**
@@ -346,45 +310,15 @@ public class DataRowParser
     boolean isPoolOfUnknownSequences)
   {
     SilencingReagent silencingReagent =
-      getExistingSilencingReagent(gene, silencingReagentType, sequence);
+      _parser.getDAO().findSilencingReagent(gene, silencingReagentType, sequence);
     if (silencingReagent == null) {
       silencingReagent = new SilencingReagent(
         gene,
         silencingReagentType,
         sequence,
         isPoolOfUnknownSequences);
-      _parsedEntitiesMap.addSilencingReagent(silencingReagent);
+      _parser.getDAO().persistEntity(silencingReagent);
     }
     return silencingReagent;
-  }
-  
-  /**
-   * Get an existing silencing reagent from the database with the specified properties.
-   * Return null if no such silencing reagent exists in the database. 
-   * @param gene the gene
-   * @param silencingReagentType the silencing reagent type
-   * @param sequence the sequence
-   * @return the existing silencing reagent from the database. Return null if no such
-   * silencing reagent exists in the database
-   */
-  private SilencingReagent getExistingSilencingReagent(
-    Gene gene,
-    SilencingReagentType silencingReagentType,
-    String sequence)
-  {
-    SilencingReagent silencingReagent =
-      _parsedEntitiesMap.getSilencingReagent(gene, silencingReagentType, sequence);
-    if (silencingReagent != null) {
-      return silencingReagent;
-    }
-    if (gene.getGeneId() == null) {
-      return null;
-    }
-    DAO dao = _parser.getDAO();
-    Map<String,Object> propertiesMap = new HashMap<String,Object>();
-    propertiesMap.put("hbnGene", gene);
-    propertiesMap.put("hbnSilencingReagentType", silencingReagentType);
-    propertiesMap.put("hbnSequence", sequence);
-    return dao.findEntityByProperties(SilencingReagent.class, propertiesMap);
   }
 }

@@ -37,7 +37,7 @@ public class Compound extends AbstractEntity
   
   // instance fields
   
-	private Integer     _compoundId;
+	private String      _compoundId;
   private Integer     _version;
   private Set<Well>   _wells = new HashSet<Well>();
 	private String      _compoundName;
@@ -74,13 +74,11 @@ public class Compound extends AbstractEntity
   
   
   // public methods
-  
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
-   */
-  public Integer getEntityId()
+
+  @Override
+  public String getEntityId()
   {
-    return getCompoundId();
+    return getBusinessKey().toString();
   }
 
 	/**
@@ -88,14 +86,11 @@ public class Compound extends AbstractEntity
 	 * @return the compound id for the compound
    * 
 	 * @hibernate.id
-   *   generator-class="sequence"
-   * @hibernate.generator-param
-   *   name="sequence"
-   *   value="compound_id_seq"
+   *   generator-class="assigned"
    */
-	public Integer getCompoundId()
+	public String getCompoundId()
   {
-		return _compoundId;
+		return getBusinessKey().toString();
 	}
   
   /**
@@ -422,7 +417,7 @@ public class Compound extends AbstractEntity
    * @param compoundId the new compound id for the compound
    * @motivation       for hibernate
    */
-  private void setCompoundId(Integer compoundId)
+  private void setCompoundId(String compoundId)
   {
     _compoundId = compoundId;
   }

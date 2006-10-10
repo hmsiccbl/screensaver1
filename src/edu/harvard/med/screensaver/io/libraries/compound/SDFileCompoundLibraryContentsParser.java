@@ -18,8 +18,8 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
-import edu.harvard.med.screensaver.io.libraries.ParsedEntitiesMap;
 import edu.harvard.med.screensaver.model.libraries.Library;
 
 
@@ -44,7 +44,6 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
   private File _sdFile;
   private BufferedReader _sdFileReader;
   private SDFileParseErrorManager _errorManager;
-  private ParsedEntitiesMap _parsedEntitiesMap;
 
   
   // public constructor and instance methods
@@ -67,15 +66,22 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
    * @return the library with the contents loaded
    */
   public Library parseLibraryContents(
-    Library library,
-    File file,
-    InputStream stream)
+    final Library library,
+    final File file,
+    final InputStream stream)
   {
-    initialize(library, file, stream);
-    SDRecordParser sdRecordParser = new SDRecordParser(_sdFileReader, this);
-    while (sdRecordParser.sdFileHasMoreRecords()) {
-      sdRecordParser.parseSDRecord();
-    }
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        initialize(library, file, stream);
+        SDRecordParser sdRecordParser = new SDRecordParser(
+          _sdFileReader,
+          SDFileCompoundLibraryContentsParser.this);
+        while (sdRecordParser.sdFileHasMoreRecords()) {
+          sdRecordParser.parseSDRecord();
+        }
+      }
+    });
     return _library;
   }
   
@@ -132,15 +138,6 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
   {
     return _errorManager;
   }
-  
-  /**
-   * Get the parsed entities map.
-   * @return the parsed entities map
-   */
-  ParsedEntitiesMap getParsedEntitiesMap()
-  {
-    return _parsedEntitiesMap;
-  }
 
   
   // private instance methods
@@ -158,6 +155,5 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
     _sdFile = file;
     _sdFileReader = new BufferedReader(new InputStreamReader(stream));
     _errorManager = new SDFileParseErrorManager();
-    _parsedEntitiesMap = new ParsedEntitiesMap();
   }
 }

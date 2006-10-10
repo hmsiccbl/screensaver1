@@ -15,12 +15,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
 import org.apache.log4j.Logger;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
+
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 
 /**
@@ -74,36 +78,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   {
     return (E) getHibernateTemplate().get(entityClass, id);
   }
-  
-//  /**
-//   * Broken. Do not use.
-//   * @deprecated
-//   */
-//  public void refreshEntity(final AbstractEntity e)
-//  {
-//    getHibernateTemplate().execute(new HibernateCallback()
-//    {
-//      public Object doInHibernate(org.hibernate.Session session)
-//        throws org.hibernate.HibernateException, java.sql.SQLException
-//      {
-//        AbstractEntity localEntity = e; // for debug inspection 
-//        _logger.debug("entity " + e + " is " +
-//                      (session.contains(e) ? "" : "NOT ") +
-//                      "already in Hibernate session cache");
-//        session.evict(e);
-//        _logger.debug("entity " + e + "is " +
-//                      (session.contains(e) ? " still " : "no longer ") +
-//                      "in Hibernate session cache after evict");
-//        session.load(e, e.getEntityId());
-//        //session.refresh(e, LockMode.NONE);
-//        _logger.debug("entity " + e + " is " +
-//                      (session.contains(e) ? "no " : "STILL NOT ") + 
-//                      " in Hibernate session cache after reload");
-//        return e;
-//      }
-//    });
-//  }
-  
+
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> List<E> findEntitiesByProperties(
     Class<E> entityClass,
@@ -209,6 +184,21 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
 
     getHibernateTemplate().delete(screenResult);
     _logger.debug("deleted " + screenResult);
+  }
+  
+  public Well findWell(Integer plateNumber, String wellName)
+  {
+    return findEntityById(Well.class, plateNumber + ":" + wellName);
+  }
+  
+  public SilencingReagent findSilencingReagent(
+    Gene gene,
+    SilencingReagentType silencingReagentType,
+    String sequence)
+  {
+    return findEntityById(
+      SilencingReagent.class,
+      gene.toString() + ":" + silencingReagentType.toString() + ":" + sequence);
   }
   
   

@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.ui.AbstractController;
@@ -120,10 +121,21 @@ public class CompoundLibraryContentsImporterController extends AbstractControlle
   {
     try {
       if (_uploadedFile != null && _uploadedFile.getInputStream().available() > 0) {
-        _compoundLibraryContentsParser.parseLibraryContents(
-          _library,
-          new File(_uploadedFile.getName()), _uploadedFile.getInputStream());
-        _dao.persistEntity(_library);
+        _dao.doInTransaction(new DAOTransaction() {
+          public void runTransaction()
+          {
+            try {
+              _compoundLibraryContentsParser.parseLibraryContents(
+                _library,
+                new File(_uploadedFile.getName()),
+                _uploadedFile.getInputStream());
+              _dao.persistEntity(_library);
+            }
+            catch (IOException e) {
+              reportSystemError(e);
+            }
+          }
+        });
       }
       else {
         // TODO: connect this back to component "uploadRNAiLibraryContentsFile" when
@@ -147,3 +159,5 @@ public class CompoundLibraryContentsImporterController extends AbstractControlle
     }
   }
 }
+
+  

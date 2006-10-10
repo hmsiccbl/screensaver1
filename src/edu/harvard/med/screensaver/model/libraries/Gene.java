@@ -37,7 +37,7 @@ public class Gene extends AbstractEntity
 
   // instance fields
 
-  private Integer _geneId;
+  private String _geneId;
   private Integer _version;
   private Set<SilencingReagent> _silencingReagents = new HashSet<SilencingReagent>();
   private String _geneName;
@@ -97,21 +97,20 @@ public class Gene extends AbstractEntity
   // public methods
 
   @Override
-  public Integer getEntityId()
+  public String getEntityId()
   {
-    return getGeneId();
+    return getBusinessKey().toString();
   }
 
   /**
    * Get the id for the gene.
    *
    * @return the id for the gene
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="gene_id_seq"
+   * @hibernate.id generator-class="assigned"
    */
-  public Integer getGeneId()
+  public String getGeneId()
   {
-    return _geneId;
+    return getBusinessKey().toString();
   }
 
   /**
@@ -415,7 +414,8 @@ public class Gene extends AbstractEntity
    * @param geneId the new id for the gene
    * @motivation for hibernate
    */
-  private void setGeneId(Integer geneId) {
+  private void setGeneId(String geneId)
+  {
     _geneId = geneId;
   }
 
@@ -426,7 +426,8 @@ public class Gene extends AbstractEntity
    * @motivation for hibernate
    * @hibernate.version
    */
-  private Integer getVersion() {
+  private Integer getVersion()
+  {
     return _version;
   }
 
@@ -436,7 +437,8 @@ public class Gene extends AbstractEntity
    * @param version the new version for the gene
    * @motivation for hibernate
    */
-  private void setVersion(Integer version) {
+  private void setVersion(Integer version)
+  {
     _version = version;
   }
 

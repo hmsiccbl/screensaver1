@@ -36,7 +36,7 @@ public class SilencingReagent extends AbstractEntity
 
   // instance fields
 
-  private Integer _silencingReagentId;
+  private String _silencingReagentId;
   private Integer _version;
   private Gene _gene;
   private Set<Well> _wells = new HashSet<Well>();
@@ -87,21 +87,20 @@ public class SilencingReagent extends AbstractEntity
   // public methods
 
   @Override
-  public Integer getEntityId()
+  public String getEntityId()
   {
-    return getSilencingReagentId();
+    return getBusinessKey().toString();
   }
 
   /**
    * Get the id for the silencing reagent.
    *
    * @return the id for the silencing reagent
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="silencing_reagent_id_seq"
+   * @hibernate.id generator-class="assigned"
    */
-  public Integer getSilencingReagentId()
+  public String getSilencingReagentId()
   {
-    return _silencingReagentId;
+    return getBusinessKey().toString();
   }
 
   /**
@@ -404,7 +403,7 @@ public class SilencingReagent extends AbstractEntity
    * @param silencingReagentId the new id for the silencing reagent
    * @motivation for hibernate
    */
-  private void setSilencingReagentId(Integer silencingReagentId) {
+  private void setSilencingReagentId(String silencingReagentId) {
     _silencingReagentId = silencingReagentId;
   }
 

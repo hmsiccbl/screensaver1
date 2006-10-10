@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -106,12 +107,12 @@ public class SimpleDAOTest extends AbstractSpringTest
   public void testFindEntityById()
   {
     Compound compound = dao.defineEntity(Compound.class, "smilesZ");
-    Integer id = compound.getCompoundId();
+    Serializable id = compound.getCompoundId();
 
     Compound compound2 = dao.findEntityById(Compound.class, id);
 
     assertEquals(compound, compound2);
-    compound2 = dao.findEntityById(Compound.class, id + 1);
+    compound2 = dao.findEntityById(Compound.class, id + "'");
     assertEquals(null, compound2);
   }
   

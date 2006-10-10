@@ -79,14 +79,15 @@ public class Well extends AbstractEntity
    * @param plateNumber
    * @param wellName
    */
-  public Well(Library parentLibrary, Integer plateNumber, String wellName) {
+  public Well(Library parentLibrary, Integer plateNumber, String wellName)
+  {
     this(parentLibrary, plateNumber, wellName, WellType.EXPERIMENTAL);
   }
 
   @Override
-  public Integer getEntityId()
+  public String getEntityId()
   {
-    return getBusinessKey().toString().hashCode();
+    return getBusinessKey().toString();
   }
   
   /**
@@ -95,7 +96,8 @@ public class Well extends AbstractEntity
    * @return the well id for the well
    * @hibernate.id generator-class="assigned"
    */
-  public String getWellId() {
+  public String getWellId()
+  {
     return getBusinessKey().toString();
   }
 
@@ -104,7 +106,8 @@ public class Well extends AbstractEntity
    * 
    * @return the library the well is in.
    */
-  public Library getLibrary() {
+  public Library getLibrary()
+  {
     return getHbnLibrary();
   }
 
@@ -115,7 +118,8 @@ public class Well extends AbstractEntity
    * @param library the new library for the well
    * @throws NullPointerException when the library is null
    */
-  public void setLibrary(Library library) {
+  public void setLibrary(Library library)
+  {
     assert _wellName != null && _plateNumber != null : "properties forming business key have not been defined";
     if (_library != null) {
       _library.getHbnWells().remove(this);
@@ -129,7 +133,8 @@ public class Well extends AbstractEntity
    * 
    * @return an unmodifiable copy of the set of compounds
    */
-  public Set<Compound> getCompounds() {
+  public Set<Compound> getCompounds()
+  {
     return Collections.unmodifiableSet(getHbnCompounds());
   }
 
@@ -139,7 +144,8 @@ public class Well extends AbstractEntity
    * @param compound the compound to add
    * @return true iff the compound was not already in the well
    */
-  public boolean addCompound(Compound compound) {
+  public boolean addCompound(Compound compound)
+  {
     assert !(getHbnCompounds().contains(compound) ^ compound.getHbnWells()
       .contains(this)) : "asymmetric compound/well association encountered";
     if (getHbnCompounds().add(compound)) {
@@ -154,7 +160,8 @@ public class Well extends AbstractEntity
    * @param compound the compound to remove
    * @return true iff the compound was previously in the well
    */
-  public boolean removeCompound(Compound compound) {
+  public boolean removeCompound(Compound compound)
+  {
     assert !(getHbnCompounds().contains(compound) ^ compound.getHbnWells()
       .contains(this)) : "asymmetric compound/well association encountered";
     if (getHbnCompounds().remove(compound)) {
@@ -169,7 +176,8 @@ public class Well extends AbstractEntity
    * 
    * @return an unmodifiable copy of the set of silencing reagents
    */
-  public Set<SilencingReagent> getSilencingReagents() {
+  public Set<SilencingReagent> getSilencingReagents()
+  {
     return Collections.unmodifiableSet(getHbnSilencingReagents());
   }
 
@@ -179,7 +187,8 @@ public class Well extends AbstractEntity
    * @param silencingReagent the silencing reagent to add
    * @return true iff the silencing reagent was not already in the well
    */
-  public boolean addSilencingReagent(SilencingReagent silencingReagent) {
+  public boolean addSilencingReagent(SilencingReagent silencingReagent)
+  {
     assert !(getHbnSilencingReagents().contains(silencingReagent) ^
       silencingReagent.getHbnWells().contains(this)) :
         "asymmetric compound/well association encountered";
@@ -195,7 +204,8 @@ public class Well extends AbstractEntity
    * @param silencingReagent the silencing reagent to remove
    * @return true iff the compound was previously in the well
    */
-  public boolean removeSilencingReagent(SilencingReagent silencingReagent) {
+  public boolean removeSilencingReagent(SilencingReagent silencingReagent)
+  {
     assert ! (getHbnSilencingReagents().contains(silencingReagent) ^
       silencingReagent.getHbnWells().contains(this)) :
         "asymmetric compound/well association encountered";
@@ -211,7 +221,8 @@ public class Well extends AbstractEntity
    * @return the plate number for the well
    * @hibernate.property not-null="true"
    */
-  public Integer getPlateNumber() {
+  public Integer getPlateNumber()
+  {
     return _plateNumber;
   }
 
@@ -220,7 +231,8 @@ public class Well extends AbstractEntity
    * 
    * @param plateNumber the new plate number for the well
    */
-  public void setPlateNumber(Integer plateNumber) {
+  public void setPlateNumber(Integer plateNumber)
+  {
     _plateNumber = plateNumber;
   }
 
@@ -230,7 +242,8 @@ public class Well extends AbstractEntity
    * @return the well name for the well
    * @hibernate.property type="text" not-null="true"
    */
-  public String getWellName() {
+  public String getWellName()
+  {
     return _wellName;
   }
 
@@ -452,7 +465,7 @@ public class Well extends AbstractEntity
     public String toString()
     {
       assert _plateNumber != null && _wellName != null : "business key fields have not been defined";
-      return getPlateNumber() + getWellName();
+      return getPlateNumber() + ":" + getWellName();
     }
   }
 

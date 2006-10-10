@@ -19,8 +19,8 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
-import edu.harvard.med.screensaver.io.libraries.ParsedEntitiesMap;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
@@ -58,7 +58,6 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
   private PlateNumberParser _plateNumberParser;
   private WellNameParser _wellNameParser;
   private NCBIGeneInfoProvider _geneInfoProvider;
-  private ParsedEntitiesMap _parsedEntitiesMap;
   private SilencingReagentType _silencingReagentType = DEFAULT_SILENCING_REAGENT_TYPE;
   
   
@@ -104,15 +103,20 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
    * @return the library with the contents loaded
    */
   public Library parseLibraryContents(
-    Library library,
-    File file,
-    InputStream stream)
+    final Library library,
+    final File file,
+    final InputStream stream)
   {
-    initialize(library, file, stream);
-    HSSFWorkbook hssfWorkbook = _workbook.getWorkbook();
-    for (int i = 0; i < hssfWorkbook.getNumberOfSheets(); i++) {
-      loadLibraryContentsFromHSSFSheet(i, hssfWorkbook.getSheetAt(i));
-    }
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        initialize(library, file, stream);
+        HSSFWorkbook hssfWorkbook = _workbook.getWorkbook();
+        for (int i = 0; i < hssfWorkbook.getNumberOfSheets(); i++) {
+          loadLibraryContentsFromHSSFSheet(i, hssfWorkbook.getSheetAt(i));
+        }        
+      }
+    });
     return _library;
   }
 
@@ -209,7 +213,6 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
     _plateNumberParser = new PlateNumberParser(_errorManager);
     _wellNameParser = new WellNameParser(_errorManager);
     _geneInfoProvider = new NCBIGeneInfoProvider(_errorManager);
-    _parsedEntitiesMap = new ParsedEntitiesMap();
   }
   
   /**
@@ -232,8 +235,7 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
         columnHeaders,
         hssfSheet.getRow(i),
         i,
-        cellFactory,
-        _parsedEntitiesMap);
+        cellFactory);
       dataRowParser.parseDataRow();
     }
   }

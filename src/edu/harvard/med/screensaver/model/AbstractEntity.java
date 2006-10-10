@@ -141,7 +141,7 @@ public abstract class AbstractEntity implements Serializable
    * 
    * @return the entity id
    */
-  abstract public Integer getEntityId();
+  abstract public Serializable getEntityId();
 
   /**
    * Performs a shallow compare of this <code>AbstractEntity</code> with

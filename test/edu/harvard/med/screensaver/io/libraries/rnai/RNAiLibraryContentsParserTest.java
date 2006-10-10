@@ -55,7 +55,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
   {
     schemaUtil.truncateTablesOrCreateSchema();
   }
-
+  
   public void testColumnHeaderErrors()
   {
     Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 5003);

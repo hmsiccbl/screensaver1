@@ -11,14 +11,11 @@ package edu.harvard.med.screensaver.io.libraries.compound;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Compound;
-import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
 
 class SDRecordParser
@@ -32,11 +29,11 @@ class SDRecordParser
   // private instance data
   
   private BufferedReader _sdFileReader;
-  private SDFileCompoundLibraryContentsParser _libraryContentsParser;
+  private SDFileCompoundLibraryContentsParser _parser;
   private String _nextLine;
   private int _sdRecordNumber = 0;
   private SDRecordData _sdRecordData;
-  MolfileInterpreter _molfileInterpreter;
+  private MolfileInterpreter _molfileInterpreter;
   
   
   // package-private constructor and instance methods
@@ -52,7 +49,7 @@ class SDRecordParser
     SDFileCompoundLibraryContentsParser libraryContentsParser)
   {
     _sdFileReader = sdFileReader;
-    _libraryContentsParser = libraryContentsParser;
+    _parser = libraryContentsParser;
     prepareNextRecord();
   }
   
@@ -105,13 +102,15 @@ class SDRecordParser
    */
   private String readNextLine() {
     try {
-      return _sdFileReader.readLine();
+      String nextLine = _sdFileReader.readLine();
+      log.info("line = " + nextLine);
+      return nextLine; 
     }
     catch (IOException e) {
       log.error(e, e);
-      _libraryContentsParser.getErrorManager().addError(
+      _parser.getErrorManager().addError(
         "encountered an IOException reading SDFile: " + e.getMessage(),
-        _libraryContentsParser.getSdFile(),
+        _parser.getSdFile(),
         _sdRecordNumber);
       return null;
     }
@@ -139,9 +138,9 @@ class SDRecordParser
             recordData.setPlateNumber(Integer.parseInt(line));
           }
           catch (NumberFormatException e) {
-            _libraryContentsParser.getErrorManager().addError(
+            _parser.getErrorManager().addError(
               "Plate specified was not a number",
-              _libraryContentsParser.getSdFile(),
+              _parser.getSdFile(),
               _sdRecordNumber);
           }
         }
@@ -187,10 +186,10 @@ class SDRecordParser
       reportError("encountered an SD record without a Well specification");
       return null;
     }
-    Well well = getExistingWell(plateNumber, wellName);
+    Well well = _parser.getDAO().findWell(plateNumber, wellName);
     if (well == null) {
-      well = new Well(_libraryContentsParser.getLibrary(), plateNumber, wellName);
-      _libraryContentsParser.getParsedEntitiesMap().addWell(well);
+      well = new Well(_parser.getLibrary(), plateNumber, wellName);
+      _parser.getDAO().persistEntity(well);
     }
     well.setIccbNumber(_sdRecordData.getIccbNumber());
     well.setVendorIdentifier(_sdRecordData.getVendorIdentifier());
@@ -200,42 +199,10 @@ class SDRecordParser
   }
 
   private void reportError(String errorMessage) {
-    _libraryContentsParser.getErrors().add(new SDFileParseError(
+    _parser.getErrors().add(new SDFileParseError(
       errorMessage,
-      _libraryContentsParser.getSdFile(),
+      _parser.getSdFile(),
       _sdRecordNumber));
-  }
-  
-  /**
-   * Get an existing well from the database with the specified plate number and well name,
-   * and the library from the parent {@link SDFileCompoundLibraryContentsParser}. Return null
-   * if no such well exists in the database.
-   *  
-   * @param plateNumber the plate number
-   * @param wellName the well name
-   * @return the existing well from the database. Return null if no such well exists in
-   * the database
-   */
-  private Well getExistingWell(Integer plateNumber, String wellName)
-  {
-    Well well = _libraryContentsParser.getParsedEntitiesMap().getWell(plateNumber, wellName);
-    if (well != null) {
-      return well;
-    }
-    Library library = _libraryContentsParser.getLibrary();
-    if (library.getLibraryId() == null) {
-      return null;
-    }
-    DAO dao = _libraryContentsParser.getDAO();
-    Map<String,Object> propertiesMap = new HashMap<String,Object>();
-    propertiesMap.put("hbnLibrary", library);
-    propertiesMap.put("plateNumber", plateNumber);
-    propertiesMap.put("wellName", wellName);
-    well = dao.findEntityByProperties(Well.class, propertiesMap);
-    if (well != null) {
-      _libraryContentsParser.getParsedEntitiesMap().addWell(well);
-    }
-    return well;
   }
   
   /**
@@ -252,7 +219,7 @@ class SDRecordParser
     Compound compound = getExistingCompound(smiles);
     if (compound == null) {
       compound = new Compound(smiles);
-      _libraryContentsParser.getParsedEntitiesMap().addCompound(compound);
+      _parser.getDAO().persistEntity(compound);
     }
     if (isPrimaryCompound) {
       String compoundName = _sdRecordData.getCompoundName();
@@ -285,17 +252,9 @@ class SDRecordParser
    */
   private Compound getExistingCompound(String smiles)
   {
-    Compound compound = _libraryContentsParser.getParsedEntitiesMap().getCompound(smiles);
-    if (compound != null) {
-      return compound;
-    }
-    DAO dao = _libraryContentsParser.getDAO();
-    Map<String,Object> propertiesMap = new HashMap<String,Object>();
-    propertiesMap.put("hbnSmiles", smiles);
-    compound = dao.findEntityByProperties(Compound.class, propertiesMap);
-    if (compound != null) {
-      _libraryContentsParser.getParsedEntitiesMap().addCompound(compound);
-    }
+    DAO dao = _parser.getDAO();
+    Compound compound = new Compound(smiles);
+    compound = dao.findEntityById(Compound.class, compound.getEntityId());
     return compound;
   }
 }

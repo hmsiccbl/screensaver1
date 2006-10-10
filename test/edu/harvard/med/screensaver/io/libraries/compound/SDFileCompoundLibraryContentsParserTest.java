@@ -36,7 +36,7 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
   
   // instance fields
   
-  protected SDFileCompoundLibraryContentsParser sdfileCompoundLibraryContentsParser;
+  protected SDFileCompoundLibraryContentsParser compoundLibraryContentsParser;
   protected DAO dao;
   protected SchemaUtil schemaUtil;
   
@@ -54,7 +54,7 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
   public void testFoo()
   {
     Library library = new Library("COMP", "COMP", LibraryType.OTHER, 0, -1);
-    String filename = "biomol-timtec-111.sdf";
+    String filename = "biomol-timtec-3.sdf";
     File file = new File(TEST_INPUT_FILE_DIR, filename);
     InputStream stream = null;
     try {
@@ -63,9 +63,9 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
     catch (FileNotFoundException e) {
       fail("file not found: " + filename);
     }
-    library = sdfileCompoundLibraryContentsParser.parseLibraryContents(library, file, stream);
+    library = compoundLibraryContentsParser.parseLibraryContents(library, file, stream);
     
-    List<SDFileParseError> errors = sdfileCompoundLibraryContentsParser.getErrors();
+    List<SDFileParseError> errors = compoundLibraryContentsParser.getErrors();
     assertEquals("workbook has no errors", 0, errors.size());
     //ParseError error;
     dao.persistEntity(library);
