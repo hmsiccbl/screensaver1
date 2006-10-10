@@ -72,5 +72,13 @@ public class StringUtils {
     }
     return result;
   }
+  
+  public static String capitalize(String s)
+  {
+    if (s != null && s.length() > 0) {
+      return s.substring(0, 1).toUpperCase() + s.substring(1);
+    }
+    return s;
+  }
 
 }
