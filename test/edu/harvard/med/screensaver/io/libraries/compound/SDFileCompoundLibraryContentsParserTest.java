@@ -46,6 +46,7 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
   protected void onSetUp() throws Exception
   {
     schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.initializeDatabase();
   }
 
   // TODO: convert this into an actual test
@@ -54,7 +55,7 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
   public void testFoo()
   {
     Library library = new Library("COMP", "COMP", LibraryType.OTHER, 0, -1);
-    String filename = "biomol-timtec-3.sdf";
+    String filename = "biomol-timtec-111.sdf";
     File file = new File(TEST_INPUT_FILE_DIR, filename);
     InputStream stream = null;
     try {
