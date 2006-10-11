@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -219,4 +220,13 @@ public interface DAO
     Gene gene,
     SilencingReagentType silencingReagentType,
     String sequence);
+  
+  /**
+   * Find and return the library that contains the specified plate. return null if
+   * no such library contains the plate.
+   * @param plateNumber the plate number
+   * @return the library that contains the specified plate. return null if
+   * no such library contains the plate.
+   */
+  public Library findLibraryWithPlate(Integer plateNumber);
 }

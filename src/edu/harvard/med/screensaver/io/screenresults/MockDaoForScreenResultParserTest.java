@@ -124,7 +124,7 @@ public class MockDaoForScreenResultParserTest implements DAO
 
   public Well findWell(Integer plateNumber, String wellName)
   {
-    return null;
+    return new Well(_library, plateNumber, wellName);
   }
   
   public SilencingReagent findSilencingReagent(
@@ -133,5 +133,10 @@ public class MockDaoForScreenResultParserTest implements DAO
     String sequence)
   {
     return null;
+  }
+  
+  public Library findLibraryWithPlate(Integer plateNumber)
+  {
+    return _library;
   }
 }

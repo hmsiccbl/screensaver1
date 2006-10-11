@@ -945,32 +945,22 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     Well well = _dao.findWell(plateNumber, wellName);
     
     if (well == null) {
-      // TODO: reinstate exception
-      //throw new ExtantLibraryException("well entity has not been loaded for plate " + businessKey.get("plateNumber") + " and well " + businessKey.get("wellName"));
-      
-      // TODO: remove all of this code, to the end of the block; it's just a temporary way of creating dummy wells needed by this screen result; in the future, these wells will already be loaded when the library is loaded
+      Library library = _dao.findLibraryWithPlate(plateNumber);
+      if (library == null) {
+        throw new ExtantLibraryException(
+          "no library exists that contains plate " + plateNumber);
+      }
+      well = new Well(library, plateNumber, wellName);
+    }
+    else {
 
-      // create wells for the entire plate (linked to a dummy library)
-      Library library = (Library) _dao.findEntityByProperty(Library.class, "shortName", "ChemDiv1");
-      for (char row = 'A'; row <= 'P'; ++row) {
-        for (int col = 1; col <= 24; ++col) {
-          String newWellName = String.format("%c%02d", row, col);
-          _dao.defineEntity(Well.class, 
-                            library,
-                            plateNumber,
-                            newWellName);
-          
-        }
-      }
-      well = _dao.findWell(plateNumber, wellName);
-      if (well == null) {
-        throw new RuntimeException("Hibernate session should've contained the well: " + plateNumber + wellName);
-      }
+      // if we didnt find one well (well == null above), then the library probably
+      // has none, so no point in forcing the wells to load. -s
+      
+      // force Hibernate to load all well for this library now
+      Hibernate.initialize(well.getLibrary().getWells());
     }
 
-    // force Hibernate to load all well for this library now
-    Hibernate.initialize(well.getLibrary().getWells());
-    
     return well;
   }
 

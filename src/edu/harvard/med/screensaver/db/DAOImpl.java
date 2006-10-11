@@ -20,6 +20,7 @@ import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -201,6 +202,19 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
       gene.toString() + ":" + silencingReagentType.toString() + ":" + sequence);
   }
   
+  @SuppressWarnings("unchecked")
+  public Library findLibraryWithPlate(Integer plateNumber)
+  {
+    String hql =
+      "select library from Library library where " +
+      plateNumber + " between library.startPlate and library.endPlate";
+    List<Library> libraries = (List<Library>) getHibernateTemplate().find(hql);
+    if (libraries.size() == 0) {
+      return null;
+    }
+    return libraries.get(0); 
+  }
+  
   
   // private instance methods
 
@@ -277,5 +291,4 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
       throw new IllegalArgumentException(e);
     }
   }
-
 }
