@@ -103,7 +103,6 @@ class SDRecordParser
   private String readNextLine() {
     try {
       String nextLine = _sdFileReader.readLine();
-      log.info("line = " + nextLine);
       return nextLine; 
     }
     catch (IOException e) {
@@ -254,7 +253,7 @@ class SDRecordParser
   {
     DAO dao = _parser.getDAO();
     Compound compound = new Compound(smiles);
-    compound = dao.findEntityById(Compound.class, compound.getEntityId());
+    compound = dao.findEntityById(Compound.class, smiles);
     return compound;
   }
 }
