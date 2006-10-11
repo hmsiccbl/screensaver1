@@ -8,7 +8,6 @@
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.io.screenresults;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -933,24 +932,17 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     }
   }
 
-  
-  // TODO: this needs to be moved to our DAO; probably as a
-  // findEntityByBusinessKey()
   private Well findWell(int iRow) throws ExtantLibraryException
   {
-    Map<String,Object> businessKey = new HashMap<String,Object>();
-    businessKey.put("plateNumber",
-                    _plateNumberParser.parse(dataCell(iRow,
-                                                      DataColumn.STOCK_PLATE_ID,
-                                                      true)));
-    businessKey.put("wellName",
-                    _wellNameParser.parse(dataCell(iRow,
-                                                   DataColumn.WELL_NAME,
-                                                   true)));
-    String wellId = businessKey.get("plateNumber").toString() + businessKey.get("wellName").toString();
-    Well well = _dao.findEntityById(Well.class, wellId);
-    // force Hibernate to load all well for this library now
-    Hibernate.initialize(well.getLibrary().getWells()); 
+    Integer plateNumber = _plateNumberParser.parse(dataCell(
+      iRow,
+      DataColumn.STOCK_PLATE_ID,
+      true));
+    String wellName = _wellNameParser.parse(dataCell(
+      iRow,
+      DataColumn.WELL_NAME,
+      true));
+    Well well = _dao.findWell(plateNumber, wellName);
     
     if (well == null) {
       // TODO: reinstate exception
@@ -960,22 +952,25 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
       // create wells for the entire plate (linked to a dummy library)
       Library library = (Library) _dao.findEntityByProperty(Library.class, "shortName", "ChemDiv1");
-      Integer plateNumber = (Integer) businessKey.get("plateNumber");
       for (char row = 'A'; row <= 'P'; ++row) {
         for (int col = 1; col <= 24; ++col) {
-          String wellName = String.format("%c%02d", row, col);
+          String newWellName = String.format("%c%02d", row, col);
           _dao.defineEntity(Well.class, 
                             library,
                             plateNumber,
-                            wellName);
+                            newWellName);
           
-            }
+        }
       }
-      well = _dao.findEntityById(Well.class, wellId);
+      well = _dao.findWell(plateNumber, wellName);
       if (well == null) {
-        throw new RuntimeException("Hibernate session should've contained the well with wellId=" + wellId);
+        throw new RuntimeException("Hibernate session should've contained the well: " + plateNumber + wellName);
       }
     }
+
+    // force Hibernate to load all well for this library now
+    Hibernate.initialize(well.getLibrary().getWells());
+    
     return well;
   }
 
