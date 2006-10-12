@@ -12,9 +12,6 @@
 <f:subview id="compoundViewerSubview">
 
   <h:panelGrid columns="2" rendered="true">
-
-    <h:outputText value="being:" />
-    <h:outputText value="compound:" />
   
     <h:outputText value="smiles:" />
     <t:commandLink
@@ -24,12 +21,44 @@
       <f:param name="compoundId" value="#{compound.compoundId}" />
     </t:commandLink>
     
+    <h:outputText value="Compound Names:" />
+    <t:dataList
+      id="compoundNames"
+      var="compoundName"
+      value="#{compound.compoundNames}"
+      layout="grid"
+    >
+      <h:outputText value="#{compoundName}" />
+    </t:dataList>
+    
+    <h:outputText value="PubChem CID:" />
+    <h:outputText value="#{compound.pubchemCid}" />
+    
+    <h:outputText value="ChemBank ID:" />
+    <h:outputText value="#{compound.chembankId}" />
+    
     <h:outputText value="is salt:" />
     <h:outputText value="#{compound.salt}" />
 
-    <h:outputText value="being:" />
-    <h:outputText value="compound:" />
-
+    <h:outputText value="NSC Numbers:" />
+    <t:dataList
+      id="nscNumbers"
+      var="nscNumber"
+      value="#{compound.nscNumbers}"
+      layout="grid"
+    >
+      <h:outputText value="#{nscNumber}" />
+    </t:dataList>
+    
+    <h:outputText value="CAS Numbers:" />
+    <t:dataList
+      id="casNumbers"
+      var="casNumber"
+      value="#{compound.casNumbers}"
+      layout="grid"
+    >
+      <h:outputText value="#{casNumber}" />
+    </t:dataList>
   </h:panelGrid>
 
 </f:subview>
