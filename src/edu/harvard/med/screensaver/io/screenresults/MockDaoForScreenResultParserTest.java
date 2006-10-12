@@ -110,7 +110,6 @@ public class MockDaoForScreenResultParserTest implements DAO
 
   public List<ScreeningRoomUser> findAllLabHeads()
   {
-    // TODO Auto-generated method stub
     return null;
   }
 

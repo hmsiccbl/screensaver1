@@ -103,6 +103,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   }
   
   // TODO: jps: I suggest this as a valid minimal constructor; we should discuss... --ant
+  // @: sounds good to me! -s
   /**
    * Constructs an initialized ResultValueType object.
    * @param screenResult

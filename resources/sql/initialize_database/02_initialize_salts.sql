@@ -298,8 +298,6 @@ insert into compound (compound_id, version, is_salt, smiles) values ('[O-]', 1, 
 
 insert into compound (compound_id, version, is_salt, smiles) values ('O=C=O', 1, 't', 'O=C=O');
 
-insert into compound (compound_id, version, is_salt, smiles) values ('O=S(=O)=O', 1, 't', 'O=S(=O)=O');
-
 insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)/C=C/C(=O)O', 1, 't', 'OC(=O)/C=C/C(=O)O');
 
 insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)/C=C\C(=O)O', 1, 't', 'OC(=O)/C=C\C(=O)O');

@@ -223,15 +223,7 @@ class SDRecordParser
     if (isPrimaryCompound) {
       String compoundName = _sdRecordData.getCompoundName();
       if (compoundName != null) {
-
-        // IDEA: maybe it would be better to replace Compound.synonynoms and
-        // Compound.compoundName with Compound.compoundNames???
-        
-        // NOTE: definitely don't want to find compoundName among the synonyms!!
-
-        // TODO: find out what it is all about
-
-        compound.addSynonym(compoundName);
+        compound.addCompoundName(compoundName);
       }
       String casNumber = _sdRecordData.getCasNumber();
       if (casNumber != null) {

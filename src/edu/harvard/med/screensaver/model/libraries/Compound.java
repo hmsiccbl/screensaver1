@@ -41,10 +41,9 @@ public class Compound extends AbstractEntity
 	private String      _compoundId;
   private Integer     _version;
   private Set<Well>   _wells = new HashSet<Well>();
-	private String      _compoundName;
 	private String      _smiles;
   private boolean     _isSalt;
-  private Set<String> _synonyms = new HashSet<String>();
+  private Set<String> _compoundNames = new HashSet<String>();
   private Set<String> _casNumbers = new HashSet<String>();
   private Set<String> _nscNumbers = new HashSet<String>();
   private String      _pubchemCid;
@@ -137,27 +136,6 @@ public class Compound extends AbstractEntity
     }
     return false;
   }
-  
-  /**
-   * Get the compound name
-   * @return the compound name
-   * 
-   * @hibernate.property
-   *   type="text"
-   */
-  public String getCompoundName()
-  {
-    return _compoundName;
-  }
-
-  /**
-   * Set the compound name.
-   * @param compoundName the new name for the compound
-   */
-  public void setCompoundName(String compoundName)
-  {
-    _compoundName = compoundName;
-  }
 
   /**
    * Get the SMILES string for the compound.
@@ -198,45 +176,45 @@ public class Compound extends AbstractEntity
   }
 
   /**
-   * Get the set of synonyms for the compound.
-   * @return the set of synonyms for the compound
+   * Get the set of names for the compound.
+   * @return the set of names for the compound
    *
    * @hibernate.set
-   *   order-by="synonym"
-   *   table="compound_synonym"
+   *   order-by="compound_name"
+   *   table="compound_compound_name"
    *   cascade="delete"
    *   lazy="true"
    * @hibernate.collection-key
    *   column="compound_id"
-   *   foreign-key="fk_compound_synonym_to_compound"
+   *   foreign-key="fk_compound_compound_name_to_compound"
    * @hibernate.collection-element
    *   type="text"
-   *   column="synonym"
+   *   column="compound_name"
    *   not-null="true"
    */
-  public Set<String> getSynonyms()
+  public Set<String> getCompoundNames()
   {
-    return _synonyms;
+    return _compoundNames;
   }
 
   /**
-   * Add a synonym for the compound.
-   * @param synonym the synonym to add to the compound
-   * @return        true iff the compound did not already have the synonym
+   * Add a compound name for the compound.
+   * @param compoundName the compound name to add to the compound
+   * @return        true iff the compound did not already have the compound name
    */
-  public boolean addSynonym(String synonym)
+  public boolean addCompoundName(String compoundName)
   {
-    return _synonyms.add(synonym);
+    return _compoundNames.add(compoundName);
   }
 
   /**
-   * Remove a synonym from the compound.
-   * @param synonym the synonym to remove from the compound
-   * @return        true iff the compound previously had the synonym
+   * Remove a compound name from the compound.
+   * @param compoundName the compound name to remove from the compound
+   * @return        true iff the compound previously had the compound name
    */
-  public boolean removeSynonym(String synonym)
+  public boolean removeCompoundName(String compoundName)
   {
-    return _synonyms.remove(synonym);
+    return _compoundNames.remove(compoundName);
   }
 
   /**
@@ -460,13 +438,13 @@ public class Compound extends AbstractEntity
   }
 
   /**
-   * Set the set of synonyms for the compound.
-   * @param synonyms the new set of synonyms for the compound
+   * Set the set of compound names for the compound.
+   * @param compoundNames the new set of compound names for the compound
    * @motivation     for hibernate
    */
-  private void setSynonyms(Set<String> synonyms)
+  private void setCompoundNames(Set<String> compoundNames)
   {
-    _synonyms = synonyms;
+    _compoundNames = compoundNames;
   }
 
   /**

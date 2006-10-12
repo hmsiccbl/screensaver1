@@ -133,4 +133,3 @@ public class MolfileInterpreter
     return smilesGenerator.createSMILES(molecule);
   }
 }
-

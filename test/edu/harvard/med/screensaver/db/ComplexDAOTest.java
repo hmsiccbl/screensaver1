@@ -84,7 +84,7 @@ public class ComplexDAOTest extends AbstractSpringTest
         public void runTransaction()
         {
           Compound compound = dao.defineEntity(Compound.class, "compound P");
-          compound.setCompoundName("P");
+          compound.setChembankId("P");
         }
       });
 
@@ -98,8 +98,8 @@ public class ComplexDAOTest extends AbstractSpringTest
             "smiles",
             "compound P");
           assertNotNull("compound exists", compound);
-          assertEquals("compound name", "P", compound.getCompoundName());
-          compound.setCompoundName("P'");
+          assertEquals("chembank id", "P", compound.getChembankId());
+          compound.setChembankId("P'");
         }
       });
 
@@ -113,7 +113,7 @@ public class ComplexDAOTest extends AbstractSpringTest
             "smiles",
             "compound P");
           assertNotNull("compound exists", compound);
-          assertEquals("compound name modified", "P'", compound.getCompoundName());
+          assertEquals("chembank id modified", "P'", compound.getChembankId());
         }
       });
   }
@@ -135,7 +135,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           Compound compound = dao.defineEntity(
             Compound.class,
             "compound P");
-          compound.setCompoundName("P");
+          compound.setChembankId("P");
           Well well = dao.defineEntity(
             Well.class,
             library,
@@ -198,7 +198,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           Library library = dao.findEntityByProperty(Library.class, "libraryName", "library Q");
           Well well = library.getWells().iterator().next();
           Compound compound = dao.defineEntity(Compound.class, "compound P");
-          compound.setCompoundName("P");
+          compound.setChembankId("P");
           well.addCompound(compound);
         }
       });
