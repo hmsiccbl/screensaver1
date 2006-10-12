@@ -136,6 +136,7 @@ public class CompoundWellSearchResults extends WellSearchResults
   protected void setEntityToView(Well well)
   {
     _compoundViewerController.setCompound(getCompoundsForWell(well).iterator().next());
+    super.setEntityToView(well);
   }
 }
 

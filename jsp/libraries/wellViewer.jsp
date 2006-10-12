@@ -11,9 +11,9 @@
 
 <f:subview id="well">
 
-	<t:aliasBean alias="#{navigator}" value="#{searchResultsRegistry.searchResults}" >
-		<%@ include file="../searchResultsNavPanel.jspf"  %>
-	</t:aliasBean>
+  <t:aliasBean alias="#{navigator}" value="#{searchResultsRegistry.searchResults}" >
+    <%@ include file="../searchResultsNavPanel.jspf"  %>
+  </t:aliasBean>
 
   <h:form id="wellForm">
 
@@ -24,11 +24,51 @@
     <t:div />
 
     <h:panelGrid columns="2" styleClass="standardTable">
-      <h:outputText id="plate" value="#{wellViewer.well.plateNumber}" />
-      <h:outputText id="well" value="#{wellViewer.well.wellName}" />
-    </h:panelGrid>
+    
+      <h:outputText value="Library:" />
+      <t:commandLink
+        action="#{wellViewer.showLibrary}"
+        value="#{wellViewer.well.library.libraryName}"
+      />
+      
+      <h:outputText value="Plate:" />
+      <h:outputText value="#{wellViewer.well.plateNumber}" />
+      
+      <h:outputText value="Well:" />
+      <h:outputText value="#{wellViewer.well.wellName}" />
+            
+      <h:outputText value="ICCB Number:" />
+      <h:outputText value="#{wellViewer.well.iccbNumber}" />
+            
+      <h:outputText value="Vendor Identifier:" />
+      <h:outputText value="#{wellViewer.well.vendorIdentifier}" />
+      
+      <h:outputText value="Contents:" />
+      <t:panelGroup>
+        <t:dataList
+          id="geneList"
+          var="gene"
+          value="#{wellViewer.well.genes}"
+          layout="simple"
+        >
+          <t:aliasBean alias="#{controller}" value="#{wellViewer}">
+            <%@ include file="geneViewer.jspf" %>
+          </t:aliasBean>
+        </t:dataList>
+        <t:dataList
+          id="compoundList"
+          var="compound"
+          value="#{wellViewer.well.compounds}"
+          layout="simple"
+        >
+          <t:aliasBean alias="#{controller}" value="#{wellViewer}">
+            <%@ include file="compoundViewer.jspf" %>
+          </t:aliasBean>
+        </t:dataList>
+      </t:panelGroup>
 
-    <t:div />
+    </h:panelGrid>
+    
   </h:form>
 
 </f:subview>

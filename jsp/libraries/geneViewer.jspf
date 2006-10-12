@@ -9,17 +9,28 @@
 <%-- Tiles --%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
-<f:subview id="geneViewer">
+<f:subview id="geneViewerSubview">
 
-  <t:aliasBean alias="#{navigator}" value="#{searchResultsRegistry.searchResults}">
-    <%@ include file="../searchResultsNavPanel.jspf" %>
-  </t:aliasBean>
+  <h:panelGrid columns="2" rendered="true">
 
-  <t:aliasBean alias="#{gene}" value="#{geneViewer.gene}">
-    <t:aliasBean alias="#{controller}" value="#{geneViewer}">
-      <%@ include file="geneViewer.jspf" %>
-    </t:aliasBean>
-  </t:aliasBean>
+    <h:outputText value="Gene Name:" />
+    <t:commandLink
+      action="#{controller.showGene}"
+      value="#{gene.geneName}"
+    >
+      <f:param name="geneId" value="#{gene.geneId}" />
+    </t:commandLink>
+    
+    <h:outputText value="EntrezGene ID:" />
+    <h:outputText value="#{gene.entrezgeneId}" />
+    
+    <h:outputText value="EntrezGene Symbol:" />
+    <h:outputText value="#{gene.entrezgeneSymbol}" />
+       
+    <h:outputText value="Species Name:" />
+    <h:outputText value="#{gene.speciesName}" />
+    
+  </h:panelGrid>
 
 </f:subview>
 

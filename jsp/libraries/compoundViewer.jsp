@@ -11,14 +11,15 @@
 
 <f:subview id="compoundViewer">
 
-	<t:aliasBean alias="#{navigator}" value="#{searchResultsRegistry.searchResults}" >
-		<%@ include file="../searchResultsNavPanel.jspf"  %>
-	</t:aliasBean>
+  <t:aliasBean alias="#{navigator}" value="#{searchResultsRegistry.searchResults}" >
+    <%@ include file="../searchResultsNavPanel.jspf" %>
+  </t:aliasBean>
 
-  <h:panelGrid columns="2" rendered="true">
-    <h:outputText value="smiles:" />
-    <h:outputText value="#{compoundViewer.compound.smiles}" />
-  </h:panelGrid>
+  <t:aliasBean alias="#{compound}" value="#{compoundViewer.compound}">
+    <t:aliasBean alias="#{controller}" value="#{compoundViewer}">
+      <%@ include file="compoundViewer.jspf" %>
+    </t:aliasBean>
+  </t:aliasBean>
 
 </f:subview>
 

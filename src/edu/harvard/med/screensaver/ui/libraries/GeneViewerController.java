@@ -25,4 +25,9 @@ public class GeneViewerController extends AbstractController
   {
     this.gene = gene;
   }
+  
+  public String showGene()
+  {
+    return "showGene";
+  }
 }

@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
 
 import org.apache.log4j.Logger;
@@ -170,7 +171,6 @@ public class Well extends AbstractEntity
     return false;
   }
 
-
   /**
    * Get an unmodifiable copy of the set of silencing reagents.
    * 
@@ -181,6 +181,20 @@ public class Well extends AbstractEntity
     return Collections.unmodifiableSet(getHbnSilencingReagents());
   }
 
+  /**
+   * Get the set of genes that have silencing reagents contained in this well.
+   * @return the set of genes that have silencing reagents contained in this well
+   */
+  @DerivedEntityProperty
+  public Set<Gene> getGenes()
+  {
+    Set<Gene> genes = new HashSet<Gene>();
+    for (SilencingReagent silencingReagent : getSilencingReagents()) {
+      genes.add(silencingReagent.getGene());
+    }
+    return genes;
+  }
+  
   /**
    * Add the silencing reagent.
    * 

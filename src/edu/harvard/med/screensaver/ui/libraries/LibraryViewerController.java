@@ -102,6 +102,7 @@ public class LibraryViewerController extends AbstractController
   public void setWellViewer(WellViewerController wellViewerController)
   {
     _wellViewerController = wellViewerController;
+    _wellViewerController.setLibraryViewer(this);
   }
 
   public GeneViewerController getGeneViewer()

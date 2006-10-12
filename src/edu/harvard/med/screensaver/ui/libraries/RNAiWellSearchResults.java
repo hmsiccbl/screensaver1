@@ -140,7 +140,12 @@ public class RNAiWellSearchResults extends WellSearchResults
   @Override
   protected void setEntityToView(Well well)
   {
+    // NOTE the hidden bugg: scrolling through the genes for a well search
+    // results will only give the first gene in a well; others will be skipped.
+    // this should never be a problem since there should really only be a single
+    // gene in a well.
     _geneViewerController.setGene(getGenesForWell(well).iterator().next());
+    super.setEntityToView(well);
   }
 }
 

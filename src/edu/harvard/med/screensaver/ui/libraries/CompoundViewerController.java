@@ -14,15 +14,20 @@ import edu.harvard.med.screensaver.ui.AbstractController;
 
 public class CompoundViewerController extends AbstractController
 {
-  private Compound compound;
+  private Compound _compound;
 
   public Compound getCompound()
   {
-    return compound;
+    return _compound;
   }
 
   public void setCompound(Compound compound)
   {
-    this.compound = compound;
+    _compound = compound;
+  }
+  
+  public String showCompound()
+  {
+    return "showCompound";
   }
 }

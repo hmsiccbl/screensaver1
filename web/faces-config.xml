@@ -123,7 +123,6 @@
     </managed-property>
   </managed-bean>
   
-  
   <managed-bean>
     <description>Gene Viewer backing bean</description>
     <managed-bean-name>geneViewer</managed-bean-name>
@@ -196,6 +195,18 @@
     <managed-bean-name>wellViewer</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.WellViewerController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>searchResultsRegistry</property-name>
+      <value>#{searchResultsRegistry}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>geneViewer</property-name>
+      <value>#{geneViewer}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>compoundViewer</property-name>
+      <value>#{compoundViewer}</value>
+    </managed-property>
   </managed-bean>
   
   <managed-bean>
@@ -499,9 +510,14 @@
   <navigation-rule>
     <from-view-id>/libraries/wellViewer.jsp</from-view-id>
     <navigation-case>
-     <from-outcome>showSearchResultsSummary</from-outcome>
-     <to-view-id>/libraries/wellSearchResults</to-view-id>
-     <redirect/>
+      <from-outcome>showSearchResultsSummary</from-outcome>
+      <to-view-id>/libraries/wellSearchResults</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>done</from-outcome>
+      <to-view-id>/screenresults/screenResultViewer</to-view-id>
+      <redirect/>
     </navigation-case>
   </navigation-rule>
 
@@ -536,14 +552,6 @@
      <from-outcome>error</from-outcome>
      <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
      <redirect/>
-    </navigation-case>
-  </navigation-rule>
-  
-  <navigation-rule>
-    <from-view-id>/libraries/wellViewer.jsp</from-view-id>
-    <navigation-case>
-      <to-view-id>/screenresults/screenResultViewer</to-view-id>
-      <redirect/>
     </navigation-case>
   </navigation-rule>
 
@@ -601,4 +609,3 @@
 
   
 </faces-config>
-
