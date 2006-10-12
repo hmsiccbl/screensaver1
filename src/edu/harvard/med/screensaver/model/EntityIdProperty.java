@@ -15,7 +15,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotates an entity bean getter method as being unidirectional.
+ * Annotates an entity bean's property (on the getter method) as a property
+ * that defines, or participates in defining, the entity's ID.
+ * Entity ID properties must be immutable, and thus must be specified as
+ * constructor arguments and must have no corresponding non-Hibernate setter
+ * method.
  * 
  * @motivation Prevents automated unit tests from validating that a symmetric
  *             getter method exists on the other "side" of the relationship
@@ -25,6 +29,6 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface UnidirectionalRelationship {
+public @interface EntityIdProperty {
 }
 

@@ -13,10 +13,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.InitialCollectionSize;
+import edu.harvard.med.screensaver.model.EntityIdProperty;
+import edu.harvard.med.screensaver.model.ToManyRelationship;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -97,6 +98,7 @@ public class Gene extends AbstractEntity
   // public methods
 
   @Override
+  @EntityIdProperty
   public String getEntityId()
   {
     return getBusinessKey().toString();
@@ -108,6 +110,7 @@ public class Gene extends AbstractEntity
    * @return the id for the gene
    * @hibernate.id generator-class="assigned"
    */
+  @EntityIdProperty
   public String getGeneId()
   {
     return getBusinessKey().toString();
@@ -121,21 +124,6 @@ public class Gene extends AbstractEntity
   public Set<SilencingReagent> getSilencingReagents()
   {
     return Collections.unmodifiableSet(_silencingReagents);
-  }
-
-  /**
-   * Add the silencing reagent.
-   *
-   * @param silencingReagent the silencing reagent to add
-   * @return true iff the gene did not already have the silencing reagent
-   */
-  public boolean addSilencingReagent(SilencingReagent silencingReagent)
-  {
-    if (getHbnSilencingReagents().add(silencingReagent)) {
-      silencingReagent.setHbnGene(this);
-      return true;
-    }
-    return false;
   }
 
   /**
@@ -170,19 +158,10 @@ public class Gene extends AbstractEntity
    *   not-null="true"
    *   unique="true"
    */
+  @EntityIdProperty
   public Integer getEntrezgeneId()
   {
     return _entrezgeneId;
-  }
-
-  /**
-   * Set the EntrezGene ID.
-   *
-   * @param entrezgeneId the new EntrezGene ID
-   */
-  public void setEntrezgeneId(Integer entrezgeneId)
-  {
-    _entrezgeneId = entrezgeneId;
   }
 
   /**
@@ -314,7 +293,7 @@ public class Gene extends AbstractEntity
    *   column="genbank_accession_number"
    *   not-null="true"
    */
-  @InitialCollectionSize(1)
+  @ToManyRelationship(minCardinality=1)
   public Set<String> getGenbankAccessionNumbers()
   {
     return _genbankAccessionNumbers;
@@ -419,6 +398,16 @@ public class Gene extends AbstractEntity
     _geneId = geneId;
   }
 
+  /**
+   * Set the EntrezGene ID.
+   *
+   * @param entrezgeneId the new EntrezGene ID
+   */
+  private void setEntrezgeneId(Integer entrezgeneId)
+  {
+    _entrezgeneId = entrezgeneId;
+  }  
+  
   /**
    * Get the version for the gene.
    *

@@ -95,7 +95,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           // look up a compound and modify it
           Compound compound = dao.findEntityByProperty(
             Compound.class,
-            "hbnSmiles",
+            "smiles",
             "compound P");
           assertNotNull("compound exists", compound);
           assertEquals("compound name", "P", compound.getCompoundName());
@@ -110,7 +110,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           // look up a compound and modify it
           Compound compound = dao.findEntityByProperty(
             Compound.class,
-            "hbnSmiles",
+            "smiles",
             "compound P");
           assertNotNull("compound exists", compound);
           assertEquals("compound name modified", "P'", compound.getCompoundName());
@@ -158,7 +158,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           Well well = library.getWells().iterator().next();
           Compound compound = dao.findEntityByProperty(
             Compound.class,
-            "hbnSmiles",
+            "smiles",
             "compound P");
           assertEquals("library has well", "A01", well.getWellName());
           assertEquals("Well's Compound count", 1, well.getCompounds().size());

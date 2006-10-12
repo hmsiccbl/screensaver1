@@ -81,4 +81,11 @@ public class StringUtils {
     return s;
   }
 
+  public static String uncapitalize(String s)
+  {
+    if (s != null && s.length() > 0) {
+      return s.substring(0, 1).toLowerCase() + s.substring(1);
+    }
+    return s;
+  }
 }

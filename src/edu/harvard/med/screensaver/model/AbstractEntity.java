@@ -113,6 +113,12 @@ import org.apache.log4j.Logger;
  *     <code>getHbnFoo</code> and <code>setHbnFoo</code>.  
  *   </li>
  *   <li>
+ *      if a property defines, or particpates in, the business key, it should 
+ *      annotated with {@link EntityIdProperty}, should have a private 
+ *      setter method, and must be an argument in the non-default constructor.  
+ *      Note that a business key property will not need getHbn*() or setHbn*() methods.
+ *   </li>
+ *   <li>
  *     note that the combination of the previous two bullet items will dictate
  *     the following set of methods for a collection property <code>foos</code>
  *     that is also a relationship:

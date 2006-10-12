@@ -46,7 +46,7 @@ public class ScreenResultExporterTest extends AbstractSpringTest
     HSSFWorkbook workbook = exporter.build(originalScreenResult);
     File exportedFile = File.createTempFile("LegacyTestAllInOne", ".exported.xls");
     workbook.write(new FileOutputStream(exportedFile));
-    ScreenResult exportedScreenResult  = mockScreenResultParser.parse(ScreenResultParserTest.makeDummyScreen(2), 
+    ScreenResult exportedScreenResult  = mockScreenResultParser.parse(ScreenResultParserTest.makeDummyScreen(1), 
                                                                       exportedFile); // parse with "new" format
     if (mockScreenResultParser.getHasErrors()) {
       // okay, so I'm using our unit test to help with debugging...sue me!

@@ -10,18 +10,14 @@
 package edu.harvard.med.screensaver.model;
 
 import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.log4j.Logger;
+import edu.harvard.med.screensaver.util.StringUtils;
 
-import edu.harvard.med.screensaver.model.screens.NonCherryPickVisit;
-import edu.harvard.med.screensaver.model.screens.Visit;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import org.apache.log4j.Logger;
 
 /**
  * Test the entities as JavaBeans.
@@ -51,7 +47,11 @@ public class EntityBeansTest extends EntityBeansExercizor
             bean.getClass() + "." + propertyDescriptor.getDisplayName(),
             propertyDescriptor.getReadMethod());
           
-          if (! isHibernateIdProperty(beanInfo, propertyDescriptor)) {
+          if (setterMethodNotExpected(bean.getClass(), propertyDescriptor)) {
+            return;
+          }
+          
+          if (! isEntityIdProperty(bean.getClass(), propertyDescriptor)) {
             if (! Collection.class.isAssignableFrom(propertyDescriptor.getPropertyType())) {
               assertNotNull(
                             "property has setter: " +
@@ -71,36 +71,38 @@ public class EntityBeansTest extends EntityBeansExercizor
   public void testCollectionPropertiesStartOutEmpty()
   {
     exercizePropertyDescriptors(new PropertyDescriptorExercizor()
+    {
+      public void exercizePropertyDescriptor(
+        AbstractEntity bean,
+        final BeanInfo beanInfo,
+        final PropertyDescriptor propertyDescriptor)
       {
-        public void exercizePropertyDescriptor(
-          AbstractEntity bean,
-          BeanInfo beanInfo,
-          PropertyDescriptor propertyDescriptor)
-        {
-          Method getter = propertyDescriptor.getReadMethod();
-          // TODO: check if the getter returns a collection before
-          // invoking it
-          Object result = null;
-          try {
-            // note that result will be Boolean when the getter returns boolean
-            result = getter.invoke(bean);
+        testBean(bean, new BeanTester() {
+          public void testBean(AbstractEntity bean) 
+          {
+            Method getter = propertyDescriptor.getReadMethod();
+            // TODO: check if the getter returns a collection before invoking it
+            Object result = null;
+            try {
+              // note that result will be Boolean when the getter returns boolean
+              result = getter.invoke(bean);
+            }
+            catch (Exception e) {
+              e.printStackTrace();
+              fail("getter for collection property threw exception: " +
+                   bean.getClass() + "." + getter.getName() + ": " + e);
+            }
+            if (result instanceof Collection) {
+              assertEquals("getter for uninitialized property returns collection of expected initial size (usually 0): " +
+                           bean.getClass() + "." + getter.getName(),
+                           getExpectedInitialCollectionSize(beanInfo.getBeanDescriptor().getName(), 
+                                                            propertyDescriptor),
+                                                            ((Collection) result).size());
+            }
           }
-          catch (Exception e) {
-            e.printStackTrace();
-            fail(
-              "getter for collection property threw exception: " +
-              bean.getClass() + "." + getter.getName() + ": " + e);
-          }
-          if (result instanceof Collection) {
-            assertEquals(
-              "getter for uninitialized property returns collection of expected initial size (usually 0): " +
-              bean.getClass() + "." + getter.getName(),
-              getExpectedInitialCollectionSize(beanInfo.getBeanDescriptor().getName(), 
-                                               propertyDescriptor),
-              ((Collection) result).size());
-          }
-        }
-      });
+        });
+      }
+    });
   }
   
   /**
@@ -112,48 +114,71 @@ public class EntityBeansTest extends EntityBeansExercizor
   public void testGetterReturnsWhatSetterSet()
   {
     exercizePropertyDescriptors(new PropertyDescriptorExercizor()
+    {
+      public void exercizePropertyDescriptor(
+        AbstractEntity bean,
+        BeanInfo beanInfo,
+        final PropertyDescriptor propertyDescriptor)
       {
-        public void exercizePropertyDescriptor(
-          AbstractEntity bean,
-          BeanInfo beanInfo,
-          PropertyDescriptor propertyDescriptor)
-        {
-          if (isHibernateIdProperty(beanInfo, propertyDescriptor)) {
-            return;
-          }
-          
-          Method getter = propertyDescriptor.getReadMethod();
-          if (Collection.class.isAssignableFrom(getter.getReturnType())) {
-            return;
-          }
-          Method setter = propertyDescriptor.getWriteMethod();
-          Object testValue = getTestValueForType(getter.getReturnType());
-          try {
-            setter.invoke(bean, testValue);
-            if (AbstractEntity.class.isAssignableFrom(getter.getReturnType())) {
-              assertSame(
-                "getter returns what setter set for " +
-                bean.getClass() + "." + propertyDescriptor.getName(),
-                testValue,
-                getter.invoke(bean));
-            }
-            else {
-              assertEquals(
-                "getter returns what setter set for " +
-                bean.getClass() + "." + propertyDescriptor.getName(),
-                testValue,
-                getter.invoke(bean));
-            }
-          }
-          catch (Exception e) {
-            e.printStackTrace();
-            fail(
-              "getter or setter threw exception: " +
-              bean.getClass() + "." + propertyDescriptor.getName());
-          }
+        if (setterMethodNotExpected(bean.getClass(), propertyDescriptor)) {
+          return;
         }
 
-      });
+        final Method getter = propertyDescriptor.getReadMethod();
+        if (Collection.class.isAssignableFrom(getter.getReturnType())) {
+          return;
+        }
+        final Method setter = propertyDescriptor.getWriteMethod();
+        final Object testValue = getTestValueForType(getter.getReturnType());
+
+        // call the setter
+        testBean(bean, new BeanTester() 
+        {
+          public void testBean(AbstractEntity bean) 
+          {
+            try {
+              setter.invoke(bean, testValue);
+            }
+            catch (Exception e) {
+              e.printStackTrace();
+              fail(
+                   "setter threw exception: " +
+                   bean.getClass() + "." + propertyDescriptor.getName());
+            }
+          }
+        });
+
+        // call the getter
+        testBean(bean, new BeanTester() 
+        {
+          public void testBean(AbstractEntity bean) 
+          {
+            try {
+              // this only makes sense for non-persistent tests; testing equality, rather than sameness, is probably good enough
+//              if (AbstractEntity.class.isAssignableFrom(getter.getReturnType())) {
+//                assertSame("getter returns what setter set for " +
+//                           bean.getClass() + "." + propertyDescriptor.getName(),
+//                           testValue,
+//                           getter.invoke(bean));
+//              }
+//              else {
+                assertEquals("getter returns what setter set for " +
+                             bean.getClass() + "." + propertyDescriptor.getName(),
+                             testValue,
+                             getter.invoke(bean));
+//              }
+            }
+            catch (Exception e) {
+              e.printStackTrace();
+              fail(
+                   "getter threw exception: " +
+                   bean.getClass() + "." + propertyDescriptor.getName());
+            }
+
+          }
+        });
+      }
+    });
   }
   
   /**
@@ -177,7 +202,7 @@ public class EntityBeansTest extends EntityBeansExercizor
         {
           Method getter = propertyDescriptor.getReadMethod();
           if (Collection.class.isAssignableFrom(getter.getReturnType())) {
-            testCollectionProperty(bean, getter, propertyDescriptor);
+            doTestCollectionProperty(bean, getter, propertyDescriptor);
           }
         }
       });
@@ -193,15 +218,15 @@ public class EntityBeansTest extends EntityBeansExercizor
    * <li>add;remove;get returns empty set
    */
   @SuppressWarnings("unchecked")
-  private void testCollectionProperty(
+  protected void doTestCollectionProperty(
     AbstractEntity bean,
     Method getter,
-    PropertyDescriptor propertyDescriptor)
+    final PropertyDescriptor propertyDescriptor)
   {
     Class<? extends AbstractEntity> beanClass = bean.getClass();
     String beanClassName = beanClass.getSimpleName();
     String propertyName = propertyDescriptor.getName();
-    String fullPropName = beanClassName + "." + propertyName;
+    final String fullPropName = beanClassName + "." + propertyName;
     
     // collection property has pluralized name
     assertTrue(
@@ -213,95 +238,148 @@ public class EntityBeansTest extends EntityBeansExercizor
       EntityBeansTest.oddPluralToSingularPropertiesMap.containsKey(propertyName) ?
       EntityBeansTest.oddPluralToSingularPropertiesMap.get(propertyName) :
       propertyName.substring(0, propertyName.length() - 1);
-    String capitalizedSingularPropName =
-      singularPropName.substring(0, 1).toUpperCase() +
-      singularPropName.substring(1);
+    String capitalizedSingularPropName = StringUtils.capitalize(singularPropName);
     
-    // collection property has no getter
+    // collection property has no setter (should only have add and/or remove methods)
     assertNull(
       "collection property has no setter: " + fullPropName,
       propertyDescriptor.getWriteMethod());
-
-    // has boolean add methods with param of right type
-    String addMethodName = "add" + capitalizedSingularPropName;
-    Method addMethod = findAndCheckMethod(beanClass, addMethodName, true);
+    
+    RelatedProperty relatedProperty = new RelatedProperty(beanClass, propertyDescriptor);
+    // if related bean cannot exist independently, then
+    // this side should *not* have an add or remove method, since the related
+    // bean must be associated during instantation only.
+    if (relatedProperty.exists() && relatedProperty.hasForeignKeyConstraint()) {
+      // do nothing
+      log.info("testCollectionProperty(): skipping add/remove test for collection " + fullPropName + 
+               ": related property " + relatedProperty.getName() + 
+               " has foreign key constraint, and cannot be added/removed from this bean");
+    }
+    else {
+      // has boolean add methods with param of right type
+      String addMethodName = "add" + capitalizedSingularPropName;
+      final Method addMethod = findAndCheckMethod(beanClass, addMethodName, ExistenceRequirement.REQUIRED);
       
-    // has boolean remove methods with param of right type
-    String removeMethodName = "remove" + capitalizedSingularPropName;
-    Method removeMethod = findAndCheckMethod(beanClass, removeMethodName, false);
+      // has boolean remove methods with param of right type
+      String removeMethodName = "remove" + capitalizedSingularPropName;
+      final Method removeMethod = findAndCheckMethod(beanClass, removeMethodName, ExistenceRequirement.OPTIONAL);
     
-    Method getterMethod = propertyDescriptor.getReadMethod();
-    
-    Class propertyType = addMethod.getParameterTypes()[0];
-    Object testValue = getTestValueForType(propertyType);
-    
-    // add the test value
-    try {
-      Boolean result = (Boolean) addMethod.invoke(bean, testValue);
-      assertTrue(
-        "adding to empty collection prop returns true: " + fullPropName,
-        result.booleanValue());
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      fail("add method for prop threw exception: " + fullPropName);
-    }
-    
-    // call the checker to test it was added
-    try {
-      Collection result = (Collection) getterMethod.invoke(bean);
-      assertEquals(
-        "collection prop with one element added has size one greater than initial size: " + fullPropName,
-        getExpectedInitialCollectionSize(bean.getClass().getSimpleName(), propertyDescriptor) + 1,
-        result.size());
-      boolean isContained1 = false;
-      boolean isContained2 = false;
-      boolean isContained3 = false;
-
-      // TODO: isContained1 is false while others are true! At least for DerivativeScreenResult. Something to do with hashCode probably, since collection is a Set...
-      isContained1 = result.contains(testValue);
-      for (Object x : result) {
-        if (x.equals(testValue)) {
-          isContained2 = true;
+      final Method getterMethod = propertyDescriptor.getReadMethod();
+      
+      Class propertyType = addMethod.getParameterTypes()[0];
+      final Object testValue = getTestValueForType(propertyType);
+      
+      // add the test value
+      testBean(bean, new BeanTester()
+      {
+        public void testBean(AbstractEntity bean)
+        {
+          try {
+            Boolean result = (Boolean) addMethod.invoke(bean, testValue);
+            assertTrue("adding to empty collection prop returns true: " + fullPropName,
+                       result.booleanValue());
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            fail("add method for prop threw exception: " + fullPropName);
+          }
         }
+      });
+
+      
+      // call the getter to test it was added
+      testBean(bean, new BeanTester()
+      {
+        public void testBean(AbstractEntity bean)
+        {
+          try {
+            Collection result = (Collection) getterMethod.invoke(bean);
+            assertEquals("collection prop with one element added has size one greater than initial size: " + fullPropName,
+                         getExpectedInitialCollectionSize(bean.getClass().getSimpleName(), propertyDescriptor) + 1,
+                         result.size());
+        
+            // TODO: isContained1 is false while others are true! At least for DerivativeScreenResult. Something to do with hashCode probably, since collection is a Set...
+            boolean isContained1 = false;
+            boolean isContained2 = false;
+            boolean isContained3 = false;
+            isContained1 = result.contains(testValue);
+            for (Object x : result) {
+              if (x.equals(testValue)) {
+                isContained2 = true;
+              }
+            }
+            isContained3 = new ArrayList(result).contains(testValue);
+            assertTrue("collection prop with one element added has that element: " + fullPropName,
+                       isContained1 || isContained2 || isContained3);
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            fail("getter method for prop threw exception: " + fullPropName);
+          }
+        };
+      });
+    
+      if (removeMethod == null) {
+        return;
       }
-      isContained3 = new ArrayList(result).contains(testValue);
-      assertTrue(
-        "collection prop with one element added has that element: " + fullPropName,
-        isContained1 || isContained2 || isContained3);
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      fail("getter method for prop threw exception: " + fullPropName);
-    }
-    
-    if (removeMethod == null) {
-      return;
-    }
-    
-    // remove the test value from the collection
-    try {
-      Boolean result = (Boolean) removeMethod.invoke(bean, testValue);
-      assertTrue(
-        "removing previously added element returns true: " + fullPropName,
-        result.booleanValue());
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      fail("remove method for prop threw exception: " + fullPropName);
-    }
-    
-    // call the checker to test it was removed
-    try {
-      Collection result = (Collection) getterMethod.invoke(bean);
-      assertEquals(
-        "collection prop with element removed has original size: " + fullPropName,
-        result.size(),
-        getExpectedInitialCollectionSize(bean.getClass().getSimpleName(), propertyDescriptor));
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      fail("getter method for prop threw exception: " + fullPropName);
+      
+      // remove the test value from the collection
+      if (testValue instanceof AbstractEntity) {
+        // treat the testValue as an AbstractEntity, rather than just an Object;
+        // for persistence tests, this enables Hibernate to update the testValue 
+        // entity during flush (if just an Object, this doesn't occur)
+        testRelatedBeans(bean, (AbstractEntity) testValue, new RelatedBeansTester()
+        {
+          public void testBeanWithRelatedBean(AbstractEntity bean, 
+                                              AbstractEntity testValue)
+          {
+            try {
+              Boolean result = (Boolean) removeMethod.invoke(bean, testValue);
+              assertTrue("removing previously added element returns true: " + fullPropName,
+                         result.booleanValue());
+            }
+            catch (Exception e) {
+              e.printStackTrace();
+              fail("remove method for prop threw exception: " + fullPropName);
+            }
+          }
+        });
+      }
+      else {
+        testBean(bean, new BeanTester()
+        {
+          public void testBean(AbstractEntity bean)
+          {
+            try {
+              Boolean result = (Boolean) removeMethod.invoke(bean, testValue);
+              assertTrue("removing previously added element returns true: " + fullPropName,
+                         result.booleanValue());
+            }
+            catch (Exception e) {
+              e.printStackTrace();
+              fail("remove method for prop threw exception: " + fullPropName);
+            }
+          }
+        });
+      }
+
+      // call the getter to test it was removed
+      testBean(bean, new BeanTester()
+      {
+        public void testBean(AbstractEntity bean)
+        {
+          try {
+            Collection result = (Collection) getterMethod.invoke(bean);
+            assertEquals("collection prop with element removed has original size: " + fullPropName,
+                         result.size(),
+                         getExpectedInitialCollectionSize(bean.getClass().getSimpleName(), propertyDescriptor));
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            fail("getter method for prop threw exception: " + fullPropName);
+          }
+        }
+      });
     }
   }
 
@@ -328,298 +406,304 @@ public class EntityBeansTest extends EntityBeansExercizor
           // NOT also with AdministratorUser (although it does via its parent).
           if (getter.getDeclaringClass().equals(bean.getClass())) {
             if (AbstractEntity.class.isAssignableFrom(getter.getReturnType())) {
-              testBidirectionalityOfOneSideOfRelationship(
-                                                          bean,
-                                                          beanInfo,
-                                                          propertyDescriptor,
-                                                          getter);
+              doTestBidirectionalityOfOneSideOfRelationship(bean,
+                                                            beanInfo,
+                                                            propertyDescriptor,
+                                                            getter);
             }
             else if (Collection.class.isAssignableFrom(getter.getReturnType())) {
-              testBidirectionalityOfManySideOfRelationship(
-                                                           bean,
-                                                           beanInfo,
-                                                           propertyDescriptor,
-                                                           getter);
+              doTestBidirectionalityOfManySideOfRelationship(bean,
+                                                             beanInfo,
+                                                             propertyDescriptor,
+                                                             getter);
             }
           }
         }
       });
   }
   
-  private void testBidirectionalityOfOneSideOfRelationship(
+  protected void doTestBidirectionalityOfOneSideOfRelationship(
     AbstractEntity bean,
     BeanInfo beanInfo,
-    PropertyDescriptor propertyDescriptor,
+    final PropertyDescriptor propertyDescriptor,
     Method getter)
   {
+    final String propFullName = bean.getClass() + "." + propertyDescriptor.getName();
+    
     // do not test bidirectionality of relationships that are explicitly annotated as unidirectional
-    if (isUnidirectionalRelationship(beanInfo, propertyDescriptor)) {
+    if (isUnidirectionalRelationship(bean.getClass(), propertyDescriptor)) {
+      log.info("testBidirectionalityOfOneSideOfRelationship(): skipping " + 
+               propFullName + ": unidirectional");
       return;
     }
-    
-    String propFullName = bean.getClass() + "." + propertyDescriptor.getName();
-    
-    // get basic objects for the other side of the reln
-    Class relatedBeanClass = getter.getReturnType();
-    Object relatedBean = getTestValueForType(relatedBeanClass);
-    String relatedBeanClassName = relatedBeanClass.getSimpleName();
-    BeanInfo relatedBeanInfo = null;
-    try {
-      relatedBeanInfo = Introspector.getBeanInfo(relatedBeanClass);
-    }
-    catch (IntrospectionException e) {
-      e.printStackTrace();
-      fail("failed to introspect entity class: " + relatedBeanClass);
-    }
-    
-    String propertyName = propertyDescriptor.getName();
-    
-    // get the property name for the other side of the reln
-    String relatedPropertyName;
-    if (oddPropertyToRelatedPropertyMap.containsKey(propertyName)) {
-      relatedPropertyName =
-        oddPropertyToRelatedPropertyMap.get(propertyName);
-    }
-    else {
-      relatedPropertyName = bean.getClass().getSimpleName();
-      relatedPropertyName =
-        relatedPropertyName.substring(0, 1).toLowerCase() +
-        relatedPropertyName.substring(1);
-    }
-    String relatedPluralPropertyName;
-    if (oddPropertyToRelatedPluralPropertyMap.containsKey(propertyName)) {
-      relatedPluralPropertyName =
-        oddPropertyToRelatedPluralPropertyMap.get(propertyName);
-    }
-    else {
-      relatedPluralPropertyName =
-        oddSingularToPluralPropertiesMap.containsKey(relatedPropertyName) ?
-          oddSingularToPluralPropertiesMap.get(relatedPropertyName) :
-            relatedPropertyName + "s";
-    } 
-        
 
-    // HACK: cant put "screen" into the odd maps since it is ubiquitous
-    if (Visit.class.isAssignableFrom(bean.getClass()) &&
-      propertyName.equals("screen")) {
-      relatedPluralPropertyName = "visits";
+    final RelatedProperty relatedProperty = new RelatedProperty(bean.getClass(), propertyDescriptor);
+
+    assertNotNull("related bean " + relatedProperty.getBeanClass().getSimpleName() + 
+                  " has property with name " +
+                  relatedProperty.getExpectedName() + 
+                  " or " + relatedProperty.getExpectedPluralName() + 
+                  " for " + propFullName,
+                  relatedProperty.getPropertyDescriptor());
+    
+    if (hasForeignKeyConstraint(propertyDescriptor)) {
+      // no setter method on this side; this side's bean is associated in this bean's constructor (e.g. ScreenResult.screen)
+      log.debug("testBidirectionalityOfOneSideOfRelationship(): " + propFullName + 
+                " has foreign key constraint: assuming related bean is associated in this bean's constructor");
+      final AbstractEntity[] relatedBeanHolder = new AbstractEntity[1];
+      // assert this bean's getter method returns the related bean that was set via the constructor
+      testBean(bean, new BeanTester()
+      {
+        public void testBean(AbstractEntity bean)
+        {
+          try {
+            AbstractEntity relatedBean = (AbstractEntity) propertyDescriptor.getReadMethod().invoke(bean);
+            assertNotNull("this.getter() returns non-null related bean of type " + 
+                          relatedProperty.getBeanClass().getSimpleName(),
+                          relatedBean);
+            relatedBeanHolder[0] = relatedBean;
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            fail("this.getter() threw exception: " + propFullName);
+          }
+        }
+      });
+
+      // assert related bean property returns/contains this bean (depending upon otherSideIsMany)
+      // TODO: the rest of this block duplicates the getter-testing code below
+      testRelatedBeans(bean, relatedBeanHolder[0], new RelatedBeansTester()
+      {
+        public void testBeanWithRelatedBean(AbstractEntity bean,
+                                            AbstractEntity relatedBean)
+        {
+          try {
+            if (relatedProperty.otherSideIsMany()) {
+              assertTrue("related.getter() contains this bean",
+                         ((Collection) relatedProperty.invokeGetter(relatedBean)).contains(bean));
+            }
+            else {
+              assertEquals("related.getter() returns this bean",
+                           bean,
+                           relatedProperty.invokeGetter(relatedBean));
+            }
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            fail("related.getter() threw exception: " + propFullName);
+          }
+
+        }
+      });
     }
-    
-    // HACK: cant put "labHead" into the odd maps twice, buts it has
-    // related screensHeaded + labMembers
-    if (bean.getClass().equals(ScreeningRoomUser.class) &&
-      propertyName.equals("labHead")) {
-      relatedPluralPropertyName = "labMembers";
-    }
-    
-    // get the prop descr for the other side, and determine whether the
-    // other side is one or many
-    PropertyDescriptor relatedPropertyDescriptor = null;
-    boolean otherSideIsMany = false;
-    for (PropertyDescriptor descriptor : relatedBeanInfo.getPropertyDescriptors()) {
-      if (descriptor.getName().equals(relatedPropertyName)) {
-        relatedPropertyDescriptor = descriptor;
-        break;
-      }
-      if (descriptor.getName().equals(relatedPluralPropertyName)) {
-        relatedPropertyDescriptor = descriptor;
-        otherSideIsMany = true;
-        break;
-      }
-    }
-    
-    // HACK - difficulty because singular and plural property names
-    // are the same
-    if (relatedBeanClass.equals(NonCherryPickVisit.class) &&
-        (relatedPropertyName.equals("platesUsed") ||
-         relatedPropertyName.equals("equipmentUsed"))) {
-      otherSideIsMany = true;
-    }
-    
-    assertNotNull(
-      "related bean " + relatedBeanClassName + " has property with name " +
-      relatedPropertyName + " or " + relatedPluralPropertyName + " for " +
-      propFullName,
-      relatedPropertyDescriptor);
-    
-    // invoke the setter on this side
-    Method setter = propertyDescriptor.getWriteMethod();
-    try {
-      setter.invoke(bean, relatedBean);
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      fail("setter threw exception: " + propFullName);
-    }
-    
-    Method relatedGetter = relatedPropertyDescriptor.getReadMethod();
-    
-    if (otherSideIsMany) {
-      try {
-        Collection result = (Collection) relatedGetter.invoke(relatedBean);
-        assertEquals(
-          "related.getter() returns set of size 1 for " + propFullName,
-          1,
-          result.size());
-        assertSame(
-          "related.getter() returns this after this.setter(related) for " +
-          propFullName,
-          bean,
-          result.iterator().next());
-      }
-      catch (Exception e) {
-        e.printStackTrace();
-        fail("related getter threw exception: " + propFullName);
-      }
+    else if (relatedProperty.hasForeignKeyConstraint()) { 
+      // no setter method on this side; this bean would be associated with related bean in related bean's constructor (e.g. Screen.screenResult)
+      log.info("testBidirectionalityOfOneSideOfRelationship(): " + propFullName + 
+      " has foreign key constraint on related side: nothing to test from this side");
     }
     else {
-      try {
-        assertSame(
-          "related.getter() returns this after this.setter(related) for " +
-          propFullName,
-          bean,
-          relatedGetter.invoke(relatedBean));
-      }
-      catch (Exception e) {
-        e.printStackTrace();
-        fail("related getter threw exception: " + propFullName);
-      }
+      final AbstractEntity relatedBean = (AbstractEntity) getTestValueForType(relatedProperty.getBeanClass());
+
+      // invoke the setter on this side
+      testBean(bean, new BeanTester()
+      {
+        public void testBean(AbstractEntity bean)
+        {
+          log.debug("testBidirectionalityOfOneSideOfRelationship(): " + propFullName + 
+                    ": related bean will be added via setter on this bean");
+          Method setter = propertyDescriptor.getWriteMethod();
+          try {
+            setter.invoke(bean, relatedBean);
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            fail("setter threw exception: " + propFullName);
+          }
+        }
+      });
+
+      // invoke the getter on the other (related) side
+      testRelatedBeans(bean, relatedBean, new RelatedBeansTester()
+      {
+        public void testBeanWithRelatedBean(AbstractEntity bean,
+                                            AbstractEntity relatedBean)
+        {
+          if (relatedProperty.otherSideIsMany()) {
+            try {
+              Collection result = (Collection) relatedProperty.invokeGetter(relatedBean);
+              assertEquals("related.getter() returns set of size 1 for " + propFullName,
+                           1,
+                           result.size());
+              assertSame("related.getter() returns this after this.setter(related) for " +
+                         propFullName,
+                         bean,
+                         result.iterator().next());
+            }
+            catch (Exception e) {
+              e.printStackTrace();
+              fail("related getter threw exception: " + propFullName);
+            }
+          }
+          else {
+            try {
+              assertSame(
+                         "related.getter() returns this after this.setter(related) for " +
+                         propFullName,
+                         bean,
+                         relatedProperty.invokeGetter(relatedBean));
+            }
+            catch (Exception e) {
+              e.printStackTrace();
+              fail("related getter threw exception: " + propFullName);
+            }
+          }
+        }
+      });
     }
   }
 
-  private void testBidirectionalityOfManySideOfRelationship(
+  protected void doTestBidirectionalityOfManySideOfRelationship(
     AbstractEntity bean,
     BeanInfo beanInfo,
     PropertyDescriptor propertyDescriptor,
-    Method getter)
+    final Method getter)
   {
     // do not test bidirectionality of relationships that are explicitly annotated as unidirectional
-    if (isUnidirectionalRelationship(beanInfo, propertyDescriptor)) {
+    if (isUnidirectionalRelationship(bean.getClass(), propertyDescriptor)) {
       return;
     }
-    
+
+    final RelatedProperty relatedProperty = new RelatedProperty(bean.getClass(), propertyDescriptor);
+    // make sure this is actually a relationship!
+    if (!relatedProperty.exists()) {
+      return;
+    }
+
     // get basic objects related to the bean
     Class<? extends AbstractEntity> beanClass = bean.getClass();
     String propertyName = propertyDescriptor.getName();
-    String propFullName = beanClass.getSimpleName() + "." + propertyName;
+    final String propFullName = beanClass.getSimpleName() + "." + propertyName;
     
-    // get the add method for the property
-    String singularPropName =
-      oddPluralToSingularPropertiesMap.containsKey(propertyName) ?
-      oddPluralToSingularPropertiesMap.get(propertyName) :
-      propertyName.substring(0, propertyName.length() - 1);
-    String capitalizedSingularPropName =
-      singularPropName.substring(0, 1).toUpperCase() +
-      singularPropName.substring(1);
-    String addMethodName = "add" + capitalizedSingularPropName;
-    Method addMethod = findAndCheckMethod(beanClass, addMethodName, true);    
-    
-    // make sure this is actually a relationship!
-    Class relatedBeanClass = addMethod.getParameterTypes()[0];
-    if (! AbstractEntity.class.isAssignableFrom(relatedBeanClass)) {
-      return;
-    }
-    
-    // get basic objects for the other side of the reln
-    Object relatedBean = getTestValueForType(relatedBeanClass);
-    String relatedBeanClassName = relatedBeanClass.getSimpleName();
-    BeanInfo relatedBeanInfo = null;
-    try {
-      relatedBeanInfo = Introspector.getBeanInfo(relatedBeanClass);
-    }
-    catch (IntrospectionException e) {
-      e.printStackTrace();
-      fail("failed to introspect entity class: " + relatedBeanClass);
-    }
-    
-    // get the property name for the other side of the reln
-    String relatedPropertyName;
-    if (oddPropertyToRelatedPropertyMap.containsKey(propertyName)) {
-      relatedPropertyName =
-        oddPropertyToRelatedPropertyMap.get(propertyName);
-    }
-    else {
-      relatedPropertyName = beanClass.getSimpleName();
-      relatedPropertyName =
-        relatedPropertyName.substring(0, 1).toLowerCase() +
-        relatedPropertyName.substring(1);
-    }
-    String relatedPluralPropertyName;
-    if (oddPropertyToRelatedPluralPropertyMap.containsKey(propertyName)) {
-      relatedPluralPropertyName =
-        oddPropertyToRelatedPluralPropertyMap.get(propertyName);
-    }
-    else {
-      relatedPluralPropertyName =
-        oddSingularToPluralPropertiesMap.containsKey(relatedPropertyName) ?
-          oddSingularToPluralPropertiesMap.get(relatedPropertyName) :
-            relatedPropertyName + "s";
-    }
-    
-    // get the prop descr for the other side, and determine whether the
-    // other side is one or many
-    PropertyDescriptor relatedPropertyDescriptor = null;
-    boolean otherSideIsMany = false;
-    for (PropertyDescriptor descriptor : relatedBeanInfo.getPropertyDescriptors()) {
-      if (descriptor.getName().equals(relatedPropertyName)) {
-        relatedPropertyDescriptor = descriptor;
-        break;
-      }
-      if (descriptor.getName().equals(relatedPluralPropertyName)) {
-        relatedPropertyDescriptor = descriptor;
-        otherSideIsMany = true;
-        break;
-      }
-    }
+    final String singularPropName = oddPluralToSingularPropertiesMap.containsKey(propertyName) ? 
+      oddPluralToSingularPropertiesMap.get(propertyName) : 
+        propertyName.substring(0, propertyName.length() - 1);
+        
 
-    assertNotNull(
-      "related bean " + relatedBeanClassName + " has property with name " +
-      relatedPropertyName + " or " + relatedPluralPropertyName + " for " +
-      propFullName,
-      relatedPropertyDescriptor);
+    assertTrue("related bean " + relatedProperty.getBeanClass().getSimpleName() + 
+               " has property with name " +
+               relatedProperty.getExpectedName() + 
+               " or " + relatedProperty.getExpectedPluralName() + 
+               " for " + propFullName,
+               relatedProperty.exists());
     
-    // invoke the adder on this side
-    try {
-      addMethod.invoke(bean, relatedBean);
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      fail("adder threw exception: " + propFullName);
-    }
-    
-    Method relatedGetter = relatedPropertyDescriptor.getReadMethod();
-    
-    if (otherSideIsMany) {
-      try {
-        Collection result = (Collection) relatedGetter.invoke(relatedBean);
-        assertEquals(
-          "related.getter() returns set of size 1 for " + propFullName,
-          1,
-          result.size());
-        assertSame(
-          "related.getter() returns this after this.setter(related) for " +
-          propFullName,
-          bean,
-          result.iterator().next());
-      }
-      catch (Exception e) {
-        e.printStackTrace();
-        fail("related getter threw exception: " + propFullName);
-      }
+    AbstractEntity relatedBean = (AbstractEntity) getTestValueForType(relatedProperty.getBeanClass());
+
+    // test the add method for the property, but only if related entity can
+    // also exist independently
+    if (relatedProperty.hasForeignKeyConstraint()) {
+      // no adder method on this side; beans are associated in related bean's constructor
+
+      final AbstractEntity[] thisSideBeanHolder = new AbstractEntity[1];
+      // assert this bean's getter method returns the related bean that was set via the constructor
+      testBean(relatedBean, new BeanTester()
+      {
+        public void testBean(AbstractEntity relatedBean)
+        {
+          try {
+            AbstractEntity thisSideBean = (AbstractEntity) relatedProperty.invokeGetter(relatedBean);
+            assertNotNull("related.getter() returns non-null", thisSideBean);
+            thisSideBeanHolder[0] = thisSideBean;
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            fail("related bean's getter threw exception: " + propFullName);
+          }
+        }
+      });
+      
+      testRelatedBeans(thisSideBeanHolder[0], relatedBean, new RelatedBeansTester()
+      {
+        public void testBeanWithRelatedBean(AbstractEntity bean,
+                                            AbstractEntity relatedBean)
+        {
+          try {
+            assertTrue("related bean with foreign key constraint added itself to this bean " + 
+                       bean.getClass().getSimpleName(),
+                       ((Collection) getter.invoke(bean)).contains(relatedBean));
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            fail("this bean's collection getter threw exception: " + propFullName);
+          }
+        }
+      });
     }
     else {
-      try {
-        assertSame(
-          "related.getter() returns this after this.setter(related) for " +
-          propFullName,
-          bean,
-          relatedGetter.invoke(relatedBean));
-      }
-      catch (Exception e) {
-        e.printStackTrace();
-        fail("related getter threw exception: " + propFullName);
-      }
+      // invoke the adder on this side
+      testRelatedBeans(bean, relatedBean, new RelatedBeansTester()
+      {
+        public void testBeanWithRelatedBean(AbstractEntity bean,
+                                            AbstractEntity relatedBean)
+        {
+          try {
+            // find the addMethod
+            String addMethodName = "add" + StringUtils.capitalize(singularPropName);
+            Method addMethod = findAndCheckMethod(bean.getClass(), 
+                                                  addMethodName,
+                                                  ExistenceRequirement.REQUIRED);
+            addMethod.invoke(bean, relatedBean);
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            fail("adder threw exception: " + propFullName);
+          }
+        }
+      });
+
+      testRelatedBeans(bean, relatedBean, new RelatedBeansTester()
+      {
+        public void testBeanWithRelatedBean(AbstractEntity bean,
+                                            AbstractEntity relatedBean)
+        {
+          try {
+            if (relatedProperty.otherSideIsMany()) {
+              Collection result = (Collection) relatedProperty.invokeGetter(relatedBean);
+              assertEquals("related.getter() returns set of size 1 for " + propFullName,
+                           1,
+                           result.size());
+              assertSame("related.getter() returns this after this.setter(related) for " +
+                         propFullName,
+                         bean,
+                         result.iterator().next());
+            }
+            else {
+              assertSame("related.getter() returns this after this.setter(related) for " +
+                         propFullName,
+                         bean,
+                         relatedProperty.invokeGetter(relatedBean));
+            }
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            fail("related getter threw exception: " + propFullName);
+          }
+        }
+      });
     }
   }
+  
 
+  // protected methods
+
+  protected void testBean(AbstractEntity bean, BeanTester tester)
+  {
+    tester.testBean(bean);
+  }
+
+  protected void testRelatedBeans(AbstractEntity bean,
+                                  AbstractEntity relatedBean,
+                                  RelatedBeansTester tester)
+  {
+    tester.testBeanWithRelatedBean(bean, relatedBean);
+  }
 }

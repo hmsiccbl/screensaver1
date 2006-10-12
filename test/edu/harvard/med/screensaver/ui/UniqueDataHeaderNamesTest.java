@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -23,33 +26,44 @@ public class UniqueDataHeaderNamesTest extends AbstractSpringTest
 {
   
   protected ScreenResultParser screenResultParser;
+  protected DAO dao;
+  protected SchemaUtil schemaUtil;
 
   public void testClass()
   {
-    List<String> expectedUniqueNames = new ArrayList<String>();
-    expectedUniqueNames.add("Luminescence (1)");
-    expectedUniqueNames.add("Luminescence (2)");
-    expectedUniqueNames.add("Luminescence (3)");
-    expectedUniqueNames.add("Luminescence (4)");
-    expectedUniqueNames.add("FI (1)");
-    expectedUniqueNames.add("FI (2)");
-    expectedUniqueNames.add("FI (3)");
-    expectedUniqueNames.add("FI (4)");
-    expectedUniqueNames.add("AssayIndicator");
-    expectedUniqueNames.add("Cherry Pick");
+    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.initializeDatabase();
     
-    ScreenResult screenResult = screenResultParser.parseLegacy(null, 
-                                                               new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
-                                                                        "LegacyTestAllInOne.xls"), 
-                                                               /*ignored file paths=*/ true);
-    assertNotNull("pretest: screenResult parsed", screenResult);
-    UniqueDataHeaderNames uniqueDataHeaderNames = new UniqueDataHeaderNames(screenResult);
-    for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-      assertEquals(expectedUniqueNames.get(rvt.getOrdinal()),
-                   uniqueDataHeaderNames.get(rvt));
-    }
-    assertEquals(expectedUniqueNames,
-                 uniqueDataHeaderNames.asList());
-    
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        List<String> expectedUniqueNames = new ArrayList<String>();
+        expectedUniqueNames.add("Luminescence (1)");
+        expectedUniqueNames.add("Luminescence (2)");
+        expectedUniqueNames.add("Luminescence (3)");
+        expectedUniqueNames.add("Luminescence (4)");
+        expectedUniqueNames.add("FI (1)");
+        expectedUniqueNames.add("FI (2)");
+        expectedUniqueNames.add("FI (3)");
+        expectedUniqueNames.add("FI (4)");
+        expectedUniqueNames.add("AssayIndicator");
+        expectedUniqueNames.add("Cherry Pick");
+
+        ScreenResult screenResult = screenResultParser.parseLegacy(ScreenResultParserTest.makeDummyScreen(115), 
+                                                                   new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
+                                                                   "LegacyTestAllInOne.xls"), 
+                                                                   /*ignored file paths=*/ true);
+        assertNotNull("pretest: screenResult parsed", screenResult);
+        UniqueDataHeaderNames uniqueDataHeaderNames = new UniqueDataHeaderNames(screenResult);
+        for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+          assertEquals(expectedUniqueNames.get(rvt.getOrdinal()),
+                       uniqueDataHeaderNames.get(rvt));
+        }
+        assertEquals(expectedUniqueNames,
+                     uniqueDataHeaderNames.asList());
+
+      }
+    });
   }
 }

@@ -858,7 +858,7 @@ public class Screen extends AbstractEntity
    * @return the screen result
    * @hibernate.one-to-one
    *   class="edu.harvard.med.screensaver.model.screenresults.ScreenResult"
-   *   property-ref="hbnScreen"
+   *   property-ref="screen"
    *   cascade="save-update"
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
@@ -877,25 +877,7 @@ public class Screen extends AbstractEntity
     return getHbnScreenResult();
   }
   
-  /**
-   * Set the screen result.
-   * 
-   * @param screenResult
-   */
-  public void setScreenResult(ScreenResult screenResult)
-  {
-    // remove self from previous screen result
-    if (_screenResult != null) {
-      _screenResult.setHbnScreen(null);
-    }
-    _screenResult = screenResult;
-    // add self to new screen result
-    if (_screenResult != null) {
-      _screenResult.setHbnScreen(this);
-    }
-  }
-  
-  
+ 
   // protected methods
 
   /**

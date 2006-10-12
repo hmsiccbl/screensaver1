@@ -23,6 +23,9 @@ import org.apache.log4j.Logger;
 
 /**
  * Exercise the entities as JavaBeans.
+ * 
+ * Info-level log output is for special cases caused by JDK5 annotations in our model.
+ * Debug-level log output is for special cases that are language-related and for "here's what I'm doing at every step" output.
  */
 abstract class EntityBeansExercizor extends EntityClassesExercisor
 {
@@ -45,19 +48,26 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
         {
           for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
             String propertyName = propertyDescriptor.getName();
-            if (
-              propertyName.equals("class") ||
-              propertyName.startsWith("hbn")) {
+            String propFullName = bean.getClass().getSimpleName() + "." + propertyName;
+            if (propertyName.equals("class")) {
+              log.debug("skipping \"class\" property " + propFullName);
               continue;
             }
-            
+
+            if (propertyName.startsWith("hbn")) {
+              log.info("skipping Hibernate property " + propFullName);
+              continue;
+            }
+
             // skip what appears to be an entity's property, but that has been
             // explicitly annotated as a non-property
             if (propertyDescriptor.getReadMethod().isAnnotationPresent(DerivedEntityProperty.class)) {
-              log.debug("skipping derived property " + propertyDescriptor.getName());
+              log.info("skipping derived property " + propFullName);
               continue;
             }
             
+            log.debug("excercizing JavaBean entity property " + bean.getClass().getSimpleName() + "." + propertyName + 
+                      " with " + exercizor.getClass().getEnclosingMethod().getName());
             exercizor.exercizePropertyDescriptor(bean, beanInfo, propertyDescriptor);
           }
         }
@@ -73,6 +83,7 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
   {
     for (Class<AbstractEntity> entityClass : getEntityClasses()) {
       try {
+        log.debug("excercizing JavaBean entity " + entityClass.getSimpleName());
         exercizor.exercizeJavaBeanEntity(newInstance(entityClass),
                                          Introspector.getBeanInfo(entityClass));
       }
@@ -83,7 +94,7 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
     }
   }
 
-  protected static Map<String, String> oddPluralToSingularPropertiesMap =
+  static Map<String, String> oddPluralToSingularPropertiesMap =
     new HashMap<String, String>();
   static {
     oddPluralToSingularPropertiesMap.put("children", "child");
@@ -97,7 +108,7 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
     oddPluralToSingularPropertiesMap.put("screensCollaborated", "screenCollaborated");
     oddPluralToSingularPropertiesMap.put("platesUsed", "platesUsed");
   }
-  protected static Map<String, String> oddSingularToPluralPropertiesMap =
+  static Map<String, String> oddSingularToPluralPropertiesMap =
     new HashMap<String, String>();
   static {
     oddSingularToPluralPropertiesMap.put("child", "children");
@@ -112,7 +123,7 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
     oddSingularToPluralPropertiesMap.put("platesUsed", "platesUsed");
   }
   
-  protected static Map<String, String> oddPropertyToRelatedPropertyMap =
+  static Map<String, String> oddPropertyToRelatedPropertyMap =
     new HashMap<String, String>();
   static {
     oddPropertyToRelatedPropertyMap.put("cherryPick", "RNAiKnockdownConfirmation");
@@ -123,7 +134,7 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
     oddPropertyToRelatedPropertyMap.put("screensLed", "leadScreener");
     oddPropertyToRelatedPropertyMap.put("visitsPerformed", "performedBy");
   }
-  protected static Map<String, String> oddPropertyToRelatedPluralPropertyMap =
+  static Map<String, String> oddPropertyToRelatedPluralPropertyMap =
     new HashMap<String, String>();
   static {
     oddPropertyToRelatedPluralPropertyMap.put("derivedTypes", "typesDerivedFrom");
@@ -134,7 +145,6 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
     oddPropertyToRelatedPluralPropertyMap.put("leadScreener", "screensLed");
     oddPropertyToRelatedPluralPropertyMap.put("performedBy", "visitsPerformed");
   }
-  
 
   /**
    * Find the method with the given name, and unspecified arguments. If no such
@@ -150,45 +160,61 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
   protected Method findAndCheckMethod(
     Class<? extends AbstractEntity> beanClass,
     String methodName,
-    boolean isRequiredMethod)
+    ExistenceRequirement requirement)
   {
     String fullMethodName = beanClass.getName() + "." + methodName;
     Method foundMethod = null;
     // note: we're calling getMethods() instead of getDeclaredMethods() to allow
     // inherited methods to satisfy our isRequiredMethod constraint (e.g. for
     // AdministratorUser.addRole())
+    // TODO: getMethods() will only return public methods, is this okay?
     for (Method method : beanClass.getMethods()) {
       if (method.getName().equals(methodName)) {
         foundMethod = method;
         break;
       }
     }
-    if (! isRequiredMethod && foundMethod == null) {
+    
+    if (requirement != ExistenceRequirement.REQUIRED && foundMethod == null) {
+      log.debug("findAndCheckMethod(): non-required method was not found: " + fullMethodName);
       return null;
     }
-    assertNotNull(
-      "collection property missing method: " + fullMethodName,
-      foundMethod);
-    assertEquals(
-      "collection property method returns boolean: " + fullMethodName,
-      foundMethod.getReturnType(),
-      Boolean.TYPE);
+    assertTrue("collection property not allowed: " + fullMethodName, 
+               requirement != ExistenceRequirement.NOT_ALLOWED || foundMethod == null);
+    assertTrue("collection property missing method: " + fullMethodName,
+               requirement != ExistenceRequirement.REQUIRED || foundMethod != null);
+
+    assertEquals("collection property method returns boolean: " + fullMethodName,
+                 foundMethod.getReturnType(),
+                 Boolean.TYPE);
     return foundMethod;
   }
   
   /**
-   * Returns true iff the property corresponds to the entity's Hibernate ID.
+   * Returns true iff the property corresponds to the entity's ID. Such methods
+   * include: getEntityId(), getFooId() (for bean of type Foo), and any
+   * properties that may be used to define the ID (for cases where the entity ID
+   * is not an auto-generated database ID, but instead correspdonds to the
+   * entity's business key).
    * 
    * @param beanInfo the bean the property belongs to
    * @param propertyDescriptor the property
    * @return true iff property is "entityId" or the property that is named the
-   * same as the entity, but with an "Id" suffix; otherwise false
+   *         same as the entity, but with an "Id" suffix; otherwise false
    */
-  public boolean isHibernateIdProperty(
-    BeanInfo beanInfo, 
-    PropertyDescriptor propertyDescriptor)
+  @SuppressWarnings("unchecked")
+  public boolean isEntityIdProperty(Class<? extends AbstractEntity> beanClass,
+                                    PropertyDescriptor propertyDescriptor)
   {
+    Method getter = propertyDescriptor.getReadMethod();
+    if (getter.isAnnotationPresent(EntityIdProperty.class)) {
+      log.debug("isEntityIdProperty(): property participates in defining entity ID: " + propertyDescriptor.getName());
+      return true;
+    }
+
+    // legacy logic for finding the standard entity-ID related methods below...
     if (propertyDescriptor.getName().equals("entityId")) {
+      log.debug("isEntityIdProperty(): property participates in defining entity ID: " + propertyDescriptor.getName());
       return true;
     }
 
@@ -197,12 +223,13 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
     // has been inherited, as the property name will depend upon the class it
     // was declared in.
     String capitalizedPropertyName = propertyDescriptor.getName().substring(0, 1).toUpperCase() + propertyDescriptor.getName().substring(1);
-    Class clazz = beanInfo.getBeanDescriptor().getBeanClass();
-    while (!clazz.equals(AbstractEntity.class) && clazz != null) {
-      if (capitalizedPropertyName.endsWith(clazz.getSimpleName() + "Id")) {
+    while (!beanClass.equals(AbstractEntity.class) && beanClass != null) {
+      if (capitalizedPropertyName.endsWith(beanClass.getSimpleName() + "Id")) {
+        log.debug("isEntityIdProperty(): property participates in defining entity ID: " + propertyDescriptor.getName() + 
+                  " in " + beanClass.getSimpleName());
         return true;
       }
-      clazz = clazz.getSuperclass();
+      beanClass = (Class<? extends AbstractEntity>) beanClass.getSuperclass();
     }
     return false;
   }
@@ -213,31 +240,77 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
     String beanName,
     PropertyDescriptor propertyDescriptor)
   {
-    InitialCollectionSize initialCollectionSizeAnnot =
-      propertyDescriptor.getReadMethod().getAnnotation(InitialCollectionSize.class);
-    if (initialCollectionSizeAnnot != null) {
-      return initialCollectionSizeAnnot.value();
+    Method getter = propertyDescriptor.getReadMethod();
+    ToManyRelationship toManyRelationship = getter.getAnnotation(ToManyRelationship.class);
+    if (toManyRelationship != null) {
+      return toManyRelationship.minCardinality();
     }
     return 0;
   }
-
-  protected boolean isUnidirectionalRelationship(BeanInfo beanInfo, PropertyDescriptor propertyDescriptor)
+  
+  protected boolean isUnidirectionalRelationship(Class<? extends AbstractEntity> beanClass, 
+                                                 PropertyDescriptor propertyDescriptor)
   {
-    Method getter = propertyDescriptor.getReadMethod();
-    if (getter.isAnnotationPresent(UnidirectionalRelationship.class)) {
-      return true;
-    }
-    // the UnidirectionalRelationship may be on the hibernate version of the getter method
     try {
-      Method hbnGetter = beanInfo.getBeanDescriptor().getBeanClass().
-       getDeclaredMethod("getHbn" + StringUtils.capitalize(propertyDescriptor.getName()));
-      return hbnGetter.isAnnotationPresent(UnidirectionalRelationship.class);
+      return isUnidirectionalRelationshipMethod(propertyDescriptor.getReadMethod()) ||
+      isUnidirectionalRelationshipMethod(beanClass.
+                                         getDeclaredMethod("getHbn" + 
+                                                           StringUtils.capitalize(propertyDescriptor.getName())));
     }
-    catch (Exception e) {
+    catch (SecurityException e) {
+      throw e;
+    }
+    catch (NoSuchMethodException e) {
       return false;
     }
   }
 
-  
-}
+  protected boolean hasForeignKeyConstraint(PropertyDescriptor propertyDescriptor)
+  {
+    Method getter = propertyDescriptor.getReadMethod();
+    ToOneRelationship toOneRelationship = getter.getAnnotation(ToOneRelationship.class);
+    return toOneRelationship != null && !toOneRelationship.nullable();
+  }
 
+  protected boolean setterMethodNotExpected(Class<? extends AbstractEntity> beanClass, PropertyDescriptor propertyDescriptor)
+  {
+    String propFullName = beanClass.getSimpleName() + 
+    "." + propertyDescriptor.getName();
+
+    // no setter expected if property participates in defining the entity ID
+    if (isEntityIdProperty(beanClass, propertyDescriptor)) {
+      log.info("setter method not expected for property that participates in defining the entity ID: " + 
+               propFullName);
+      return true;
+    }
+
+    // no setter expected if property is for a *-to-one relationship and has a foreign key constraint
+    if (hasForeignKeyConstraint(propertyDescriptor)) {
+      log.info("setter method not expected for property that is a *-to-one relationship with a foreign key constraint: " + 
+               propFullName);
+      return true;
+    }
+    
+    // no setter expected if property is for a one-to-one relationship and related side has a foreign key constraint relationship
+    RelatedProperty relatedProperty = new RelatedProperty(beanClass, propertyDescriptor);
+    if (relatedProperty.exists() && relatedProperty.hasForeignKeyConstraint()) {
+      log.info("setter method not expected for property that is on the \"one\" side of a relationship with a foreign key constraint: " + 
+               propFullName);
+      return true;
+    }
+    return false;
+  }
+
+  // private methods
+  
+  private boolean isUnidirectionalRelationshipMethod(Method getter)
+  {
+    ToOneRelationship toOneRelationship = getter.getAnnotation(ToOneRelationship.class);
+    ToManyRelationship toManyRelationship = getter.getAnnotation(ToManyRelationship.class);
+    if ((toOneRelationship != null && toOneRelationship.unidirectional()) ||
+      (toManyRelationship != null && toManyRelationship.unidirectional())) {
+      return true;
+    }
+    return false;
+  }
+}

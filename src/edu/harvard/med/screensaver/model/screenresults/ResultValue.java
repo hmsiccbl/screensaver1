@@ -10,7 +10,7 @@
 package edu.harvard.med.screensaver.model.screenresults;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.UnidirectionalRelationship;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Well;
 
 /**
@@ -481,7 +481,7 @@ public class ResultValue extends AbstractEntity implements Comparable
    *   foreign-key="fk_result_value_to_well"
    *   cascade="save-update"
    */
-  @UnidirectionalRelationship
+  @ToOneRelationship(unidirectional=true)
   Well getHbnWell() {
     return _well;
   }

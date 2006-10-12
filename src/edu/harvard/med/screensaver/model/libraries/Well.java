@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.EntityIdProperty;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
 
@@ -235,6 +236,7 @@ public class Well extends AbstractEntity
    * @return the plate number for the well
    * @hibernate.property not-null="true"
    */
+  @EntityIdProperty
   public Integer getPlateNumber()
   {
     return _plateNumber;
@@ -245,7 +247,7 @@ public class Well extends AbstractEntity
    * 
    * @param plateNumber the new plate number for the well
    */
-  public void setPlateNumber(Integer plateNumber)
+  private void setPlateNumber(Integer plateNumber)
   {
     _plateNumber = plateNumber;
   }
@@ -256,6 +258,7 @@ public class Well extends AbstractEntity
    * @return the well name for the well
    * @hibernate.property type="text" not-null="true"
    */
+  @EntityIdProperty
   public String getWellName()
   {
     return _wellName;
@@ -266,7 +269,7 @@ public class Well extends AbstractEntity
    * 
    * @param wellName the new well name for the well
    */
-  public void setWellName(String wellName)
+  private void setWellName(String wellName)
   {
     _wellName = wellName;
   }

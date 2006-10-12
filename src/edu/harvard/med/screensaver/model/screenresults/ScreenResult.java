@@ -19,6 +19,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
@@ -298,42 +299,21 @@ public class ScreenResult extends AbstractEntity
    * Get the screen.
    *
    * @return the screen
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.Screen"
+   *   column="screen_id"
+   *   not-null="true"
+   *   foreign-key="fk_screen_result_to_screen"
+   *   cascade="save-update"
+   * @motivation for hibernate
    */
+  @ToOneRelationship(nullable=false)
   public Screen getScreen()
   {
     return _screen;
   }
 
-  /**
-   * Set the screen.
-   * 
-   * @param screen the new screen
-   * @throws NullPointerException when the screen is null
-   */
-  public void setScreen(Screen screen)
-  {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
-    screen.setHbnScreenResult(null);
-    _screen = screen;
-    _screen.setHbnScreenResult(this);
-  }
-
-  /**
-   * Set the screen.
-   *
-   * @param screen the new screen
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   * this method is public only because the bi-directional relationship
-   * is cross-package.
-   */
-  public void setHbnScreen(Screen screen)
-  {
-    _screen = screen;
-  }
-
-  
+ 
   // protected getters and setters
   
   /* (non-Javadoc)
@@ -397,6 +377,19 @@ public class ScreenResult extends AbstractEntity
   }
   
   /**
+   * Set the screen.
+   *
+   * @param screen the new screen
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   * this method is public only because the bi-directional relationship
+   * is cross-package.
+   */
+  private void setScreen(Screen screen)
+  {
+    _screen = screen;
+  }
+
+  /**
    * Set the sorted set of {@link ResultValueType}s that comprise this
    * <code>ScreenResult</code>.
    * 
@@ -409,20 +402,4 @@ public class ScreenResult extends AbstractEntity
     _resultValueTypes = resultValueTypes;
   }
 
-  /**
-   * Get the screen.
-   *
-   * @return the screen
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.Screen"
-   *   column="screen_id"
-   *   not-null="true"
-   *   foreign-key="fk_screen_result_to_screen"
-   *   cascade="save-update"
-   * @motivation for hibernate
-   */
-  private Screen getHbnScreen()
-  {
-    return _screen;
-  }
 }

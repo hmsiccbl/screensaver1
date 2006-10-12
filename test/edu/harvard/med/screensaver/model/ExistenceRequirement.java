@@ -9,14 +9,9 @@
 
 package edu.harvard.med.screensaver.model;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface InitialCollectionSize {
-  int value();
+public enum ExistenceRequirement {
+  REQUIRED,
+  OPTIONAL,
+  NOT_ALLOWED
 }
 

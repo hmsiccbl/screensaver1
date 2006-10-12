@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.EntityIdProperty;
 
 
 /**
@@ -76,6 +77,7 @@ public class Compound extends AbstractEntity
   // public methods
 
   @Override
+  @EntityIdProperty
   public String getEntityId()
   {
     return getBusinessKey().toString();
@@ -88,6 +90,7 @@ public class Compound extends AbstractEntity
 	 * @hibernate.id
    *   generator-class="assigned"
    */
+  @EntityIdProperty
 	public String getCompoundId()
   {
 		return getBusinessKey().toString();
@@ -159,25 +162,18 @@ public class Compound extends AbstractEntity
   /**
    * Get the SMILES string for the compound.
    * @return the SMILES string for the compound
+   * 
+   * @hibernate.property
+   *   type="text"
+   *   column="smiles"
+   *   not-null="true"
+   *   unique="true"
+   * @motivation for hibernate
    */
+  @EntityIdProperty
   public String getSmiles()
   {
-    return getHbnSmiles();
-  }
-
-  /**
-   * Set the SMILES string for the compound.
-   * @param smiles the new SMILES string for the compound
-   */
-  public void setSmiles(String smiles)
-  {
-    for (Well well : getHbnWells()) {
-      well.getHbnCompounds().remove(this);
-    }
-    setHbnSmiles(smiles);
-    for (Well well : getHbnWells()) {
-      well.getHbnCompounds().add(this);
-    }
+    return _smiles;
   }
 
   /**
@@ -445,6 +441,15 @@ public class Compound extends AbstractEntity
   }
 
   /**
+   * Set the SMILES string for the compound.
+   * @param smiles the new SMILES string for the compound
+   */
+  private void setSmiles(String smiles)
+  {
+    _smiles = smiles;
+  }
+
+  /**
    * Set the set of wells that contain this compound.
    * @param wells the new set of wells that contain this compound
    * @motivation  for hibernate
@@ -454,32 +459,6 @@ public class Compound extends AbstractEntity
     _wells = wells;
   }
 
-  /**
-   * Get the SMILES string for the compound.
-   * @return the SMILES string for the compound
-   * 
-   * @hibernate.property
-   *   type="text"
-   *   column="smiles"
-   *   not-null="true"
-   *   unique="true"
-   * @motivation for hibernate
-   */
-  private String getHbnSmiles()
-  {
-    return _smiles;
-  }
-
-  /**
-   * Set the SMILES string for the compound.
-   * @param smiles the new SMILES string for the compound
-   * @motivation for hibernate
-   */
-  private void setHbnSmiles(String smiles)
-  {
-    _smiles = smiles;
-  }
-  
   /**
    * Set the set of synonyms for the compound.
    * @param synonyms the new set of synonyms for the compound
