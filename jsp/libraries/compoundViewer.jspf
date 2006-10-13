@@ -31,6 +31,12 @@
       <h:outputText value="#{compoundName}" />
     </t:dataList>
     
+    <h:outputText value="Molecular Mass:" />
+    <h:outputText value="#{compound.molecularMass}" />
+    
+    <h:outputText value="Molecular Formula:" />
+    <h:outputText value="#{compound.molecularFormula}" escape="false" />
+    
     <h:outputText value="PubChem CID:" />
     <h:outputText value="#{compound.pubchemCid}" />
     

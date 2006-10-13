@@ -9,18 +9,25 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.io.StringReader;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.openscience.cdk.SetOfMolecules;
+import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.interfaces.IMolecule;
+import org.openscience.cdk.io.SMILESReader;
+import org.openscience.cdk.tools.MFAnalyser;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.EntityIdProperty;
 
 
 /**
  * A Hibernate entity bean representing a molecular compound.
- * 
- * TODO: consider replacing properties compoundName and synonyms with compoundNames
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -33,6 +40,7 @@ public class Compound extends AbstractEntity
   
   // static fields
 
+  private static Logger log = Logger.getLogger(Compound.class);
   private static final long serialVersionUID = 8777411947575574126L;
 
   
@@ -48,6 +56,9 @@ public class Compound extends AbstractEntity
   private Set<String> _nscNumbers = new HashSet<String>();
   private String      _pubchemCid;
   private String      _chembankId;
+  
+  /** used to compute molecular mass and molecular formula. */
+  private MFAnalyser _mfAnalyser;
   
   
   // public constructors
@@ -342,6 +353,41 @@ public class Compound extends AbstractEntity
   {
     _chembankId = chembankId;
   }
+  
+  /**
+   * Get the molecular mass of the compound, as computed by {@link MFAnalyser#getCanonicalMass()}.
+   * @return the molecular mass of the compound
+   */
+  @DerivedEntityProperty
+  public float getMolecularMass()
+  {
+    MFAnalyser mfAnalyser = getMFAnalyser();
+    try {
+      return mfAnalyser.getCanonicalMass();
+    }
+    catch (Exception e) {
+      log.error("encountered Exception computing molecular mass!", e);
+      return -1;
+    }
+  }
+  
+  /**
+   * Get the molecular formula for the compound, as computed by {@link
+   * MFAnalyser#getHTMLMolecularFormulaWithCharge()}.
+   * @return the molecular formular for the compound
+   */
+  @DerivedEntityProperty
+  public String getMolecularFormula()
+  {
+    MFAnalyser mfAnalyser = getMFAnalyser();
+    try {
+      return mfAnalyser.getHTMLMolecularFormulaWithCharge();
+    }
+    catch (Exception e) {
+      log.error("encountered Exception computing molecular mass!", e);
+      return null;
+    }
+  }
 
   
   // protected getters and setters
@@ -465,5 +511,24 @@ public class Compound extends AbstractEntity
   private void setNscNumbers(Set<String> nscNumber)
   {
     _nscNumbers = nscNumber;
+  }
+  
+  private MFAnalyser getMFAnalyser()
+  {
+    if (_mfAnalyser != null) {
+      return _mfAnalyser;
+    }
+    SetOfMolecules setOfMolecules = new SetOfMolecules();
+    SMILESReader smilesReader = new SMILESReader(new StringReader(_smiles));
+    try {
+      smilesReader.read(setOfMolecules);
+    }
+    catch (CDKException e) {
+      log.error("encountered Exception reading the SMILES!", e);
+      return null;
+    }
+    IMolecule molecule = setOfMolecules.getMolecule(0);
+    _mfAnalyser = new MFAnalyser(molecule);
+    return _mfAnalyser;
   }
 }
