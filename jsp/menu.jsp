@@ -34,9 +34,9 @@
       <t:panelNavigation2 id="navMenu" layout="table" itemClass="menuItem"
         openItemClass="menuItem" activeItemClass="menuItemActive"
         separatorClass="navSeparator">
-        <t:commandNavigation2 action="goQuery" value="#{\"Search\"}" accesskey="S" />
-        <t:commandNavigation2 action="#{librariesBrowser.goBrowseLibraries}" value="#{\"Browse Libraries\"}" accesskey="L" />
-        <t:commandNavigation2 action="#{screensBrowser.goBrowseScreens}" value="#{\"Browse Screens\"}" accesskey="S" />
+        <t:commandNavigation2 action="goQuery" value="#{\"Search\"}" rendered="#{menu.authenticatedUser}" accesskey="S"/>
+        <t:commandNavigation2 action="#{librariesBrowser.goBrowseLibraries}" value="#{\"Browse Libraries\"}" rendered="#{menu.authenticatedUser}" accesskey="L" />
+        <t:commandNavigation2 action="#{screensBrowser.goBrowseScreens}" value="#{\"Browse Screens\"}" rendered="#{menu.authenticatedUser}" accesskey="S" />
         <t:commandNavigation2 accesskey="" />
         <t:commandNavigation2 action="goHelp" value="#{\"Help\"}" accesskey="H" />
         <t:commandNavigation2 id="navPanelAdminNode" value="#{\"Admin >>\"}" accesskey="" visibleOnUserRole="readEverythingAdmin" >
@@ -53,7 +53,7 @@
     <t:htmlTag id="menuSectionSeparator2" value="hr" />
 
     <h:form id="quickFindWellForm">
-      <t:panelGrid columns="2">
+      <t:panelGrid columns="2" rendered="#{menu.authenticatedUser}">
         <t:outputLabel id="stockPlateNumberLabel" for="stockPlateNumber" value="Plate"
           styleClass="menuItem inputLabel" />
         <t:outputLabel id="wellNameLabel" for="wellName" value="Well"
