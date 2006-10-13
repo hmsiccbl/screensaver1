@@ -26,7 +26,9 @@ TODO:
 			<t:commandButton action="#{screenResultViewer.download}"
 				value="Download" rendered="#{!empty screenResultViewer.screenResult}" styleClass="command" />
 			<t:commandButton action="#{screenResultViewer.delete}" value="Delete"
-				styleClass="command" rendered="#{! screenResultViewer.readOnly && !empty screenResultViewer.screenResult}" />
+				onclick="javascript: return confirm('Delete this screen result permanently?');"
+				styleClass="command"
+				rendered="#{! screenResultViewer.readOnly && !empty screenResultViewer.screenResult}" />
 			<t:commandButton action="#{screenResultViewer.viewHeatMaps}"
 				value="View Heat Maps" rendered="#{!empty screenResultViewer.screenResult}" styleClass="command" />
 		</t:panelGroup>

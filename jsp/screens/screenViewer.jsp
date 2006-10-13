@@ -64,6 +64,7 @@ TODO:
 			<t:outputLabel for="labName" value="Lab Name" styleClass="inputLabel" />
 			<t:selectOneMenu id="labName" value="#{screenViewer.screen.labHead}"
 				converter="ScreeningRoomUserConverter"
+				onchange="javascript:submit()" immediate="true" valueChangeListener="#{screenViewer.update}"
 				displayValueOnly="#{screenViewer.readOnly}" styleClass="input">
 				<f:selectItems value="#{screenViewer.labNameSelectItems}" />
 			</t:selectOneMenu>

@@ -13,9 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.faces.application.FacesMessage;
-import javax.faces.context.FacesContext;
-import javax.faces.event.ActionEvent;
+import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.DAO;
@@ -46,6 +44,7 @@ public class ScreenViewerController extends AbstractController
   private String _usageMode; // "create" or "edit"
   private boolean _advancedMode;
   private ScreenResultViewerController _screenResultViewer;
+  private List<SelectItem> _leadScreenerSelectItems;
 
   /* Property getter/setter methods */
   
@@ -57,6 +56,7 @@ public class ScreenViewerController extends AbstractController
   public void setScreen(Screen screen) 
   {
     _screen = screen;
+    updateLeadScreenerSelectItems(screen.getLabHead());
   }
 
   /**
@@ -119,7 +119,7 @@ public class ScreenViewerController extends AbstractController
   public void setAdvancedMode(boolean advancedMode) 
   {
     _advancedMode = advancedMode;
-  }
+  } 
   
   public List<SelectItem> getScreenTypeSelectItems()
   {
@@ -140,11 +140,7 @@ public class ScreenViewerController extends AbstractController
 
   public List<SelectItem> getLeadScreenerSelectItems()
   {
-    List<SelectItem> leadScreenerSelectItems = new ArrayList<SelectItem>();
-    for (ScreeningRoomUser screener : _screen.getLabHead().getLabMembers()) {
-      leadScreenerSelectItems.add(new SelectItem(screener, screener.getFullName()));
-    }
-    return leadScreenerSelectItems;
+    return _leadScreenerSelectItems;
   }
 
   public List<SelectItem> getCollaboratorSelectItems()
@@ -208,19 +204,29 @@ public class ScreenViewerController extends AbstractController
   
   /* JSF Action event listeners */
 
+  public void update(ValueChangeEvent event) {
+    updateLeadScreenerSelectItems((ScreeningRoomUser) event.getNewValue());
+    getFacesContext().renderResponse();
+    log.debug("update event handled");
+  }
+  
+
+  // private methods
+  
   /**
-   * An action event listener to revert the user's edits.
+   * Updates the set of lead screeners that can be selected for this screen.
+   * Depends upon the lab head.
+   * 
+   * @motivation to update the list of lead screeners in the UI, in response to
+   *             a new lab head selection, but without updating the entity
+   *             before the user saves his edits
    */
-  public void revertEventHandler(ActionEvent event) {
-    log.debug("revert action event handled");
-    FacesContext.getCurrentInstance().addMessage("screenForm", new FacesMessage("\"Revert\" command not yet implemented!"));
+  private void updateLeadScreenerSelectItems(ScreeningRoomUser labHead) {
+    _leadScreenerSelectItems = new ArrayList<SelectItem>();
+    for (ScreeningRoomUser screener : labHead.getLabMembers()) {
+      _leadScreenerSelectItems.add(new SelectItem(screener, screener.getFullName()));
+    }
   }
-  
-  public void showAdvancedEventListener(ActionEvent event) {
-    _advancedMode = event.getComponent().getId().equals("showAdvanced");
-    log.debug("show advanced action invoked: advancedMode=" + _advancedMode);
-    FacesContext.getCurrentInstance().renderResponse();
-  }
-  
+
 
 }

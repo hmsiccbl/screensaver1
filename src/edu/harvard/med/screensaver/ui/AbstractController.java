@@ -423,10 +423,10 @@ public abstract class AbstractController implements ScreensaverConstants
   }
   
   /**
-   * Each JSF component maintains "local" state its value, which is in addition
-   * to the state that is maintained by the application's model. This local
-   * state is used during the JSF validation phase, and eventually is copied to
-   * the application's model state later during the JSF Update Model phase. This
+   * Each JSF component maintains "local" state, which is in addition to the
+   * state that is maintained by the application's model. This local state is
+   * used during the JSF validation phase, and eventually is copied to the
+   * application's model state later during the JSF Update Model phase. This
    * local state is used to repopulate the controls when a view is re-rendered
    * (after an initial visit). I believe this local state also corresponds to
    * more than just the value, and, where applicable, includes other rendering
