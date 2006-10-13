@@ -862,21 +862,16 @@ public class Screen extends AbstractEntity
    *   cascade="save-update"
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
-  public ScreenResult getHbnScreenResult()
+  public ScreenResult getScreenResult()
   {
     return _screenResult;
   }
 
-  public void setHbnScreenResult(ScreenResult screenResult)
+  public void setScreenResult(ScreenResult screenResult)
   {
     _screenResult = screenResult;
   }
 
-  public ScreenResult getScreenResult()
-  {
-    return getHbnScreenResult();
-  }
-  
  
   // protected methods
 

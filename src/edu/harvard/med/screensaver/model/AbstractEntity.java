@@ -31,17 +31,17 @@ import org.apache.log4j.Logger;
  * 
  * <ul>
  *   <li>
- *     all public constructors must initialize the business key.
+ *     All public constructors must initialize the business key.
  *   </li>
  *   <li>
- *     the public constructor(s) with the maximum number of arguments
+ *     The public constructor(s) with the maximum number of arguments
  *     must initialize all not-null properties.
  *   </li>
  *   <li>
  *     Hibernate requires a zero-parameter constructor.
  *   </li>
  *   <li>
- *     we try to put the properties in the same order in these differing
+ *     We try to put the properties in the same order in these differing
  *     contexts:
  *     <ul>
  *       <li>
@@ -59,23 +59,23 @@ import org.apache.log4j.Logger;
  *     </ul>
  *   </li>
  *   <li>
- *     the getter for the Hibernate id is public; the setter for the Hibernate
+ *     The getter for the Hibernate id is public; the setter for the Hibernate
  *     id is private.
  *   </li>
  *   <li>
- *     the Hibernate version is an Integer name <code>_version</code>. the
+ *     The Hibernate version is an Integer name <code>_version</code>. the
  *     Hibernate accessors to the version are private, and are named
  *     <code>getVersion</code> and <code>setVersion</code>
  *   </li>
  *   <li>
- *     in general, any method that is exclusively for Hibernate use is private
+ *     In general, any method that is exclusively for Hibernate use is private
  *   </li>
  *   <li>
- *     boolean properties are always not-null and primitive boolean type
+ *     Boolean properties are always not-null and primitive boolean type
  *     (Boolean.TYPE and not Boolean.class).
  *   </li>
  *   <li>
- *     collection properties (properties whose getter method returns a Collection)
+ *     Collection properties (properties whose getter method returns a Collection)
  *     have a public getter for the whole collection, e.g., <code>getBars</code>;
  *     have public methods <code>addBar</code> and <code>removeBar</code> that
  *     each take a <code>Bar</code> object, and behave in a similar fashion to
@@ -86,40 +86,93 @@ import org.apache.log4j.Logger;
  *     was not previously in the set, and whether it was previously in the set,
  *     respectively).
  *     <p>
- *     The add method is required. The remove method is not. Remove methods are
- *     absent when the other side of the relationship is not-null. In this case,
- *     to remove the related entity, you must call the setter on the inverse
- *     property of the related entity.
+ *     The add method is required unless the other side of the relationship is 
+ *     {many,one}-to-one and not-null (i.e., it has a foreign key constraint, 
+ *     more below), in which case it is not allowed. The remove method is always 
+ *     optional, but not allowed whenever the add method is not allowed.
  *     <p>
  *     A setter method for the Collection property only exists when needed
  *     by Hibernate, and is private. (Only needed when the property does not
  *     represent a relationship.)
  *   </li>
  *   <li>
- *     relationship properties shold maintain bidirectionality of the
- *     relationship. If, for performance reasons, a relationship is made
- *     unidirectional, the non-Hibernate getter method should be annotated 
- *     with the {@link UnidirectionalRelationship} annotation.
+ *     Relationship properties should maintain bidirectionality of the
+ *     relationship. If, for performance reasons, a unidirectional relationship is desired,
+ *     the getter method should be annotated with the {@link ToManyRelationship} or 
+ *     {@link ToOneRelationship} annotation, with the <code>unidirectional</code> flag 
+ *     set to true.
  *   <li>
- *     bidirectional relationships require that the entity Java objects on both 
- *     sides of the relationship be updated to reflect a new or deleted association 
- *     between the two entities.  
+ *     Bidirectional relationships require that the entity Java objects on both 
+ *     sides of the relationship be updated, at the same time, to reflect a new or 
+ *     deleted association between the two entities.  
  *     As Hibernate does not allow an entity's collections to be modified while it 
  *     is loading its state from the database (via its setter methods), we are 
- *     forced into having pairs of getter and setter methods for each relationship:
- *     "JavaBean" version of the property, which is named traditionally, e.g., <code>getFoo</code>
- *     and <code>setFoo</code>; and a Hibernate version of the property, which
- *     is named by prefixing the JavaBean property with "hbn", e.g.,
- *     <code>getHbnFoo</code> and <code>setHbnFoo</code>.  
+ *     forced into having <i>two pairs</i> of getter and setter methods for each relationship:
+ *     <ul>
+ *       <li>
+ *         A Hibernate version of the property, which is named by prefixing the 
+ *         JavaBean property with "hbn", e.g., <code>getHbnFoo</code> and 
+ *         <code>setHbnFoo</code>. The Hibernate pair should simply set and return 
+ *         the object's data member (an AbstractEntity or Collection<AbstractEntity>), 
+ *         without any side-effects to other data members or other, related entitys.  
+ *       </li>
+ *       <li>
+ *         A "JavaBean" version of the property, which is named traditionally, e.g., 
+ *         <code>getFoo</code> and <code>setFoo</code>. The JavaBean version's 
+ *         setter is responsible for both setting its own entity's 
+ *         relationship data member, as well as updating the related entity's 
+ *         relationship, via calls to the relatedEntity.setHbnFoo() method.  
+ *         Note that the JavaBean setter method must take special care if the 
+ *         related entity is also used to define "this" entity's business key 
+ *         or entity ID; in this case the entity must be removed from all 
+ *         applicable relationships, then update the business key or entity ID,
+ *         and finally reinstate then applicable relationships.  If the JavaBean 
+ *         getter method represents the "many" side of a relationship, it will 
+ *         return a collection, and the returned collection should always be 
+ *         immutable.
+ *       </li>
+ *     </ul>
  *   </li>
  *   <li>
- *      if a property defines, or particpates in, the business key, it should 
+ *      If a property defines, or particpates in, the entity's ID, it should be
  *      annotated with {@link EntityIdProperty}, should have a private 
- *      setter method, and must be an argument in the non-default constructor.  
- *      Note that a business key property will not need getHbn*() or setHbn*() methods.
+ *      setter method (for Hibernate), and must be an argument in the non-default 
+ *      constructor.  Note that a business key property will not need getHbn*() 
+ *      or setHbn*() methods, since relationship management logic is not needed, 
+ *      and Hibernate can always call the "normal" set and get methods for the 
+ *      property.
  *   </li>
  *   <li>
- *     note that the combination of the previous two bullet items will dictate
+ *      If a property defines a {Many,One}-to-One relationship, and is non-null
+ *      (i.e., it has a foreign key constraint), then the following must be 
+ *      observed for entity, E, and related entity, R:
+ *      <ul>
+ *        <li>
+ *          E must specify R as argument in its non-default constructors.  
+ *          The constructor(s) must update R's relationship with E, by calling 
+ *          the appropriate methods on R: for a Many-To-One relationship (E-to-R), 
+ *          call R.setHbnE(); for a One-to-One relationship, call R.getHbnEs().add().
+ *        </li>
+ *        <li>
+ *          E cannot have a setter method for its relationship property with R, 
+ *          since the relationship cannot be changed after instantation (without
+ *          deleting E, that is).
+ *        </li>
+ *        <li>
+ *          If E has a Many-to-One relationship with R, R cannot have an addE() or 
+ *          removeE() method, but must have an E-accesible getHbnEs().
+ *        </li>
+ *        <li>
+ *          If E has a One-to-One relationship with R, R should have an E-accessible 
+ *          setE() method (and no setHbnE() method).
+ *        </li>
+ *        <li>
+ *          E must have a private setR() method (for Hibernate).
+ *        </li>
+ *      </ul>
+ *   </li>
+ *   <li>
+ *     Note that the combination of the previous five bullet items will dictate
  *     the following set of methods for a collection property <code>foos</code>
  *     that is also a relationship:
  *     <p>

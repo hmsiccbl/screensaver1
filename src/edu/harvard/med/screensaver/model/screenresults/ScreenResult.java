@@ -83,7 +83,7 @@ public class ScreenResult extends AbstractEntity
     setShareable(isShareable);
     setReplicateCount(replicateCount);
     _screen = screen;
-    _screen.setHbnScreenResult(this);
+    _screen.setScreenResult(this);
   }
 
   /**
@@ -97,7 +97,7 @@ public class ScreenResult extends AbstractEntity
     setDateCreated(dateCreated); // must occur before _screen.setHbnScreenResult(), as dateCreated is part of our business key
     setScreen(screen);
     _screen = screen;
-    _screen.setHbnScreenResult(this);
+    _screen.setScreenResult(this);
   }
   
   /* (non-Javadoc)

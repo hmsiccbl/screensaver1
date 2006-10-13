@@ -180,7 +180,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   public void deleteScreenResult(ScreenResult screenResult)
   {
     // disassociate ScreenResult from Screen
-    screenResult.getScreen().setHbnScreenResult(null);
+    screenResult.getScreen().setScreenResult(null);
 
     getHibernateTemplate().delete(screenResult);
     _logger.debug("deleted " + screenResult);
