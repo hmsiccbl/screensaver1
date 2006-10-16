@@ -31,6 +31,7 @@ public class WellFinderController extends AbstractController
   private Pattern _wellNamePattern = Pattern.compile("^\\s*([A-Za-z]\\d\\d?)\\s*$");
   private String _plateNumber;
   private String _wellName;
+  private String _plateWellList;
   
   private DAO _dao;
   private WellViewerController _wellViewerController;
@@ -57,6 +58,16 @@ public class WellFinderController extends AbstractController
   public void setWellName(String wellName)
   {
     _wellName = wellName;
+  }
+
+  public String getPlateWellList()
+  {
+    return _plateWellList;
+  }
+
+  public void setPlateWellList(String plateWellList) 
+  {
+    _plateWellList = plateWellList;
   }
 
   public DAO getDao()
@@ -97,6 +108,12 @@ public class WellFinderController extends AbstractController
     }
     _wellViewerController.setWell(well);
     return "showWell";
+  }
+  
+  public String findWells()
+  {
+    // TODO
+    return "";
   }
   
   

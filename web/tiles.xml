@@ -154,12 +154,25 @@
     extends=".base">
     <put
       name="pageTitle"
-      value="Well Viewer"/>
+      value="Well Viewer"
+    />
     <put
       name="body"
-      value="/libraries/wellViewer.jsp" />
+      value="/libraries/wellViewer.jsp"
+    />
   </definition>
-   
+  
+  <definition
+    name="/libraries/wellFinder.tiles"
+    extends=".base">
+    <put
+      name="pageFinder"
+      value="Well Finder"/>
+    <put
+      name="body"
+      value="/libraries/wellFinder.jsp" />
+  </definition>
+
   <definition
     name="/libraries/geneViewer.tiles"
     extends=".base">

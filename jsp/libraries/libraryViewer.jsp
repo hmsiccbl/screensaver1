@@ -30,14 +30,8 @@
 
   <h:form id="viewLibraryContentsForm">
     <h:commandLink
-      value="view RNAi library contents"
-      action="#{libraryViewer.viewRNAiLibraryContents}"
-      rendered="#{libraryViewer.isRNAiLibrary}"
-    />
-    <h:commandLink
-      value="view compound library contents"
-      action="#{libraryViewer.viewCompoundLibraryContents}"
-      rendered="#{libraryViewer.isCompoundLibrary}"
+      value="view library contents"
+      action="#{libraryViewer.viewLibraryContents}"
     />
   </h:form>
   

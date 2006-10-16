@@ -34,7 +34,7 @@
       <t:panelNavigation2 id="navMenu" layout="table" itemClass="menuItem"
         openItemClass="menuItem" activeItemClass="menuItemActive"
         separatorClass="navSeparator">
-        <t:commandNavigation2 action="goQuery" value="#{\"Search\"}" rendered="#{menu.authenticatedUser}" accesskey="S"/>
+        <t:commandNavigation2 action="findWells" value="#{\"Find Wells\"}" rendered="#{menu.authenticatedUser}" accesskey="W"/>
         <t:commandNavigation2 action="#{librariesBrowser.goBrowseLibraries}" value="#{\"Browse Libraries\"}" rendered="#{menu.authenticatedUser}" accesskey="L" />
         <t:commandNavigation2 action="#{screensBrowser.goBrowseScreens}" value="#{\"Browse Screens\"}" rendered="#{menu.authenticatedUser}" accesskey="S" />
         <t:commandNavigation2 accesskey="" />
@@ -54,7 +54,7 @@
 
     <h:form id="quickFindWellForm">
       <t:panelGrid columns="2" rendered="#{menu.authenticatedUser}">
-        <t:outputLabel id="stockPlateNumberLabel" for="stockPlateNumber" value="Plate"
+        <t:outputLabel id="plateNumberLabel" for="plateNumber" value="Plate"
           styleClass="menuItem inputLabel" />
         <t:outputLabel id="wellNameLabel" for="wellName" value="Well"
           styleClass="menuItem inputLabel" />

@@ -205,28 +205,15 @@ public class LibraryViewerController extends AbstractController
     return "goImportCompoundLibraryContents";
   }
 
-  public String viewRNAiLibraryContents()
+  public String viewLibraryContents()
   {
     if (_searchResultsRegistry.getSearchResultsRegistrant(Library.class) != this) {
-      SearchResults<Well> searchResults = new RNAiWellSearchResults(
+      SearchResults<Well> searchResults = new WellSearchResults(
         new ArrayList<Well>(_library.getWells()),
         this,
         _wellViewerController,
+        _compoundViewerController,
         _geneViewerController);
-      _searchResultsRegistry.registerSearchResults(Well.class, this, searchResults);
-    }
-    _searchResultsRegistry.setCurrentSearchType(Well.class);
-    return "goWellSearchResults";
-  }
-  
-  public String viewCompoundLibraryContents()
-  {
-    if (_searchResultsRegistry.getSearchResultsRegistrant(Library.class) != this) {
-      SearchResults<Well> searchResults = new CompoundWellSearchResults(
-        new ArrayList<Well>(_library.getWells()),
-        this,
-        _wellViewerController,
-        _compoundViewerController);
       _searchResultsRegistry.registerSearchResults(Well.class, this, searchResults);
     }
     _searchResultsRegistry.setCurrentSearchType(Well.class);

@@ -9,12 +9,31 @@
 <%-- Tiles --%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
+
+	<%--
+    TODO: fix up this temporary hack with the panelGroup surrounding the searchResultsNavPanel.
+    the search results that the well viewer is in should
+    be set somewhere and passed to the WellViewerController. if the caller to "showWells" does
+    not set the search results with the reigstry, then the wrong search results nav bar is
+    displayed. correct solution is to fix this across the board by putting the "showWells" stuff
+    in a separate "controller", requiring the search results as arg. i will handle this later,
+    but for now, i will not render this if there are no search results, preventing page errors
+    from Find Wells
+    --%>
+    
 <f:subview id="well">
 
-  <t:aliasBean alias="#{navigator}" value="#{searchResultsRegistry.searchResults}" >
-    <%@ include file="../searchResultsNavPanel.jspf"  %>
-  </t:aliasBean>
-
+  <t:panelGroup
+    rendered="#{searchResultsRegistry.searchResults != null}"
+  >
+    <t:aliasBean
+      alias="#{navigator}"
+      value="#{searchResultsRegistry.searchResults}"
+     >
+      <%@ include file="../searchResultsNavPanel.jspf" %>
+    </t:aliasBean>
+  </t:panelGroup>
+  
   <h:form id="wellForm">
 
     <h:panelGroup rendered="#{wellViewer.displayDone}">

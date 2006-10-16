@@ -12,11 +12,14 @@ package edu.harvard.med.screensaver.ui.libraries;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.SearchResults;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.ui.SearchResults;
 
 
 /**
@@ -36,12 +39,15 @@ public class WellSearchResults extends SearchResults<Well>
   private static final String PLATE     = "Plate";
   private static final String WELL      = "Well";
   private static final String WELL_TYPE = "Well Type";
+  private static final String CONTENTS  = "Contents";
   
   
   // instance fields
   
   private LibraryViewerController _libraryViewerController;
   private WellViewerController _wellViewerController;
+  private CompoundViewerController _compoundViewerController;
+  private GeneViewerController _geneViewerController;
   
   
   // public constructor
@@ -53,11 +59,15 @@ public class WellSearchResults extends SearchResults<Well>
   public WellSearchResults(
     List<Well> unsortedResults,
     LibraryViewerController libraryViewerController,
-    WellViewerController wellViewerController)
+    WellViewerController wellViewerController,
+    CompoundViewerController compoundViewerController,
+    GeneViewerController geneViewerController)
   {
     super(unsortedResults);
     _libraryViewerController = libraryViewerController;
     _wellViewerController = wellViewerController;
+    _compoundViewerController = compoundViewerController;
+    _geneViewerController = geneViewerController;
   }
 
   
@@ -71,13 +81,17 @@ public class WellSearchResults extends SearchResults<Well>
     columnHeaders.add(PLATE);
     columnHeaders.add(WELL);
     columnHeaders.add(WELL_TYPE);
+    columnHeaders.add(CONTENTS);
     return columnHeaders;
   }
   
   @Override
   protected boolean isCommandLink(String columnName)
   {
-    return columnName.equals(LIBRARY) || columnName.equals(WELL);
+    return
+      columnName.equals(LIBRARY) ||
+      columnName.equals(WELL) ||
+      (columnName.equals(CONTENTS) && getContentsCount(getEntity()) == 1);
   }
   
   @Override
@@ -95,6 +109,9 @@ public class WellSearchResults extends SearchResults<Well>
     if (columnName.equals(WELL_TYPE)) {
       return well.getWellType();
     }
+    if (columnName.equals(CONTENTS)) {
+      return getContentsValue(well);
+    }
     return null;
   }
   
@@ -108,6 +125,16 @@ public class WellSearchResults extends SearchResults<Well>
     if (columnName.equals(WELL)) {
       _wellViewerController.setWell(well);
       return "showWell";
+    }
+    if (columnName.equals(CONTENTS)) {
+      if (getGeneCount(well) == 1) {
+        _geneViewerController.setGene(getGeneForWell(well));
+        return "showGene";
+      }
+      if (getCompoundCount(well) > 0) {
+        _compoundViewerController.setCompound(getCompoundWithLongestSmiles(well));
+        return "showCompound";
+      }
     }
     return null;
   }
@@ -143,12 +170,85 @@ public class WellSearchResults extends SearchResults<Well>
         }
       };
     }
+    if (columnName.equals(CONTENTS)) {
+      return new Comparator<Well>() {
+        public int compare(Well w1, Well w2) {
+          return getContentsValue(w1).compareTo(getContentsValue(w2));
+        }
+      };
+    }
     return null;
   }
 
   @Override
-  protected void setEntityToView(Well entity)
+  protected void setEntityToView(Well well)
   {
-    _wellViewerController.setWell(entity);
+    // NOTE the hidden bugg: scrolling through the compounds/genes for a well search
+    // results will only give the first gene in a well; others will be skipped.
+    // this should never be a problem since there should really only be a single
+    // gene in a well.
+    _geneViewerController.setGene(getGeneForWell(well));
+    _compoundViewerController.setCompound(getCompoundWithLongestSmiles(well));
+    _wellViewerController.setWell(well);
+  }
+
+  
+  // private instance methods
+  
+  private String getContentsValue(Well well)
+  {
+    int geneCount = getGeneCount(well);
+    if (geneCount == 1) {
+      return getGeneForWell(well).getGeneName();
+    }
+    if (geneCount > 1) {
+      return "multiple genes";
+    }
+    if (getCompoundCount(well) > 0) {
+      return getLongestCompoundSmiles(well);
+    }
+    return "empty well";
+  }
+  
+  private int getContentsCount(Well well)
+  {
+    return getGeneCount(well) + getCompoundCount(well);
+  }
+  
+  private int getCompoundCount(Well well)
+  {
+    return well.getCompounds().size();
+  }
+
+  private int getGeneCount(Well well)
+  {
+    return well.getGenes().size();
+  }
+  
+  private Compound getCompoundWithLongestSmiles(Well well)
+  {
+    Compound compoundWithLongestSmiles = null;
+    for (Compound compound : well.getCompounds()) {
+      if (
+        compoundWithLongestSmiles == null ||
+        compound.getSmiles().length() > compoundWithLongestSmiles.getSmiles().length()) {
+        compoundWithLongestSmiles = compound;
+      }
+    }
+    return compoundWithLongestSmiles;
+  }
+  
+  private String getLongestCompoundSmiles(Well well)
+  {
+    return getCompoundWithLongestSmiles(well).getSmiles();
+  }
+  
+  private Gene getGeneForWell(Well well)
+  {
+    Set<Gene> genes = well.getGenes();
+    if (genes.size() == 0) {
+      return null;
+    }
+    return genes.iterator().next();
   }
 }

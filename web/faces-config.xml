@@ -377,6 +377,11 @@
       <redirect/>
     </navigation-case>
     <navigation-case>
+      <from-outcome>findWells</from-outcome>
+      <to-view-id>/libraries/wellFinder</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>showWell</from-outcome>
       <to-view-id>/libraries/wellViewer</to-view-id>
       <redirect/>
