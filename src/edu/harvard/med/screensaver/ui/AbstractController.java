@@ -284,23 +284,7 @@ public abstract class AbstractController implements ScreensaverConstants
     Object[] messageArgs,
     String componentId)
   {
-    // TODO: this parameterized message strategy isn't working
-//  List<Object> messageParams = new ArrayList<Object>();
-//  Map requestMap = getFacesContext().getExternalContext().getRequestMap();
-//  for (Iterator iter = requestMap.keySet().iterator(); iter.hasNext();) {
-//    String paramName = (String) iter.next();
-//    log.debug("inspecting param " + paramName);
-//    if (paramName.startsWith(componentId + "MessageParam")) {
-//      log.debug("found param " + paramName);
-//      Object paramValue = (Object) requestMap.get(paramName);
-//      messageParams.add(paramValue);
-//    }
-//  }
-    String clientId = getClientId(findComponent(componentId));
-    FacesMessage msg = 
-      _messages.setFacesMessageForComponent(messageKey, 
-                                            messageArgs,
-                                            clientId);
+    FacesMessage msg = _messages.setFacesMessageForComponent(messageKey, messageArgs, componentId);
     if (msg == null) {
       log.error("no message exists for key '" + messageKey + "'");
     } 
@@ -357,8 +341,7 @@ public abstract class AbstractController implements ScreensaverConstants
   protected UIComponent findComponent(String componentId, String parentId)
   {
     UIComponent container = findComponent(parentId);
-    return doFindComponent(container,
-                           componentId);
+    return doFindComponent(container, componentId);
   }
   
   /**

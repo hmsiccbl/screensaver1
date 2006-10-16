@@ -137,18 +137,6 @@
       value="/searchResults.jsp" />
   </definition>
   
-  
-  <definition
-    name="/libraries/wellSearchResults2.tiles"
-    extends=".base">
-    <put
-      name="pageTitle"
-      value="Well Search Results 2"/>
-    <put
-      name="body"
-      value="/searchResults.jsp" />
-  </definition>
-  
   <definition
     name="/libraries/wellViewer.tiles"
     extends=".base">

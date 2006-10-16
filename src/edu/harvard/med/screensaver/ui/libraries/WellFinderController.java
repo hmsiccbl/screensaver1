@@ -27,7 +27,6 @@ import edu.harvard.med.screensaver.ui.SearchResultsRegistryController;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
- * TODO: Convert log.errors into errors that show up in the interface
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -41,7 +40,7 @@ public class WellFinderController extends AbstractController
   // private instance fields
   
   private Pattern _plateNumberPattern = Pattern.compile("^\\s*((PL)[-_]?)?(\\d+)\\s*$");
-  private Pattern _wellNamePattern = Pattern.compile("^\\s*([A-Za-z]\\d\\d?)\\s*$");
+  private Pattern _wellNamePattern = Pattern.compile("^\\s*([A-Ha-h]([0-9]|[01][0-9]|2[0-4]))\\s*$");
   private String _plateNumber;
   private String _wellName;
   private String _plateWellList;
@@ -159,10 +158,10 @@ public class WellFinderController extends AbstractController
   public String findWells()
   {
     List<Well> wells = lookupWellsFromPlateWellList();
-    if (wells.size() == 1) {
-      _wellViewerController.setWell(wells.get(0));
-      return "showWell";
-    }
+//    if (wells.size() == 1) {
+//      _wellViewerController.setWell(wells.get(0));
+//      return "showWell";
+//    }
     SearchResults<Well> searchResults = new WellSearchResults(
       wells,
       _libraryViewerController,
@@ -195,6 +194,9 @@ public class WellFinderController extends AbstractController
         Integer plateNumber = parsePlateNumber(tokens[0]);
         for (int i = 1; i < tokens.length; i ++) {
           String wellName = parseWellName(tokens[i]);
+          if (plateNumber == null || wellName == null) {
+            continue;
+          }
           Well well = findWell(plateNumber, wellName);
           if (well != null) {
             wells.add(well);
@@ -203,7 +205,7 @@ public class WellFinderController extends AbstractController
       }
     }
     catch (IOException e) {
-      log.error("trouble reading plate-well list", e);
+      showMessage("unexpectedErrorReadingPlateWellList", "searchResults");
     }
     return wells;
   }
@@ -221,7 +223,7 @@ public class WellFinderController extends AbstractController
   private Well findWell(Integer plateNumber, String wellName) {
     Well well = _dao.findWell(plateNumber, wellName);
     if (well == null) {
-      log.error("didnt find well in the database: " + plateNumber + wellName);      
+      showMessage("noSuchWell", new Object [] { plateNumber, wellName }, "searchResults");
     }
     return well;
   }
@@ -234,7 +236,7 @@ public class WellFinderController extends AbstractController
       return Integer.parseInt(plateNumber);
     }
     else {
-      log.error("plate number didn't match pattern: " + plateNumber);
+      showMessage("invalidPlateNumber", new Object [] { plateNumber });
       return null;
     }
   }
@@ -251,7 +253,7 @@ public class WellFinderController extends AbstractController
       return wellName;
     }
     else {
-      log.error("well name didn't match pattern: " + wellName);
+      showMessage("invalidWellName", new Object [] { wellName });
       return null;
     }
   }
