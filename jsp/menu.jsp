@@ -57,12 +57,17 @@
         <t:outputLabel id="stockPlateNumberLabel" for="stockPlateNumber" value="Plate"
           styleClass="menuItem inputLabel" />
         <t:outputLabel id="wellNameLabel" for="wellName" value="Well"
-          styleClass="menuItem inputLabel" />[
-        <t:inputText id="stockPlateNumber" value="#{query.stockPlateNumber}" size="5"
+          styleClass="menuItem inputLabel" />
+        <t:inputText id="plateNumber" value="#{wellFinder.plateNumber}" size="5"
           styleClass="input" />
-        <t:inputText id="wellName" value="#{query.wellName}" size="3" styleClass="input" />
+        <t:inputText id="wellName" value="#{wellFinder.wellName}" size="3" styleClass="input" />
       </t:panelGrid>
-      <t:commandButton id="quickFindSubmit" value="Go" styleClass="command"/>
+      <t:commandButton
+	    action="#{wellFinder.findWell}"
+        id="quickFindSubmit"
+        value="Go"
+        styleClass="command"
+      />
     </h:form>
   </t:panelGrid>
 </f:subview>

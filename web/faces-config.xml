@@ -290,10 +290,18 @@
   </managed-bean>
   
   <managed-bean>
-    <description>Query</description>
-    <managed-bean-name>query</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.QueryController</managed-bean-class>
+    <description>Well Finder backing bean</description>
+    <managed-bean-name>wellFinder</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.WellFinderController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>wellViewer</property-name>
+      <value>#{wellViewer}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>dao</property-name>
+      <value>#{dao}</value>
+    </managed-property>
   </managed-bean>
 
   <managed-bean>
@@ -301,10 +309,6 @@
     <managed-bean-name>menu</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.MenuController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>librariesBrowser</property-name>
-      <value>#{librariesBrowser}</value>
-    </managed-property>
   </managed-bean>
 
   <managed-bean>
@@ -390,11 +394,6 @@
     <navigation-case>
       <from-outcome>goBrowseScreens</from-outcome>
       <to-view-id>/screens/screensBrowser</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>goQuery</from-outcome>
-      <to-view-id>/query</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
