@@ -295,12 +295,32 @@
     <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.WellFinderController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
+      <property-name>searchResultsRegistry</property-name>
+      <value>#{searchResultsRegistry}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>libraryViewer</property-name>
+      <value>#{libraryViewer}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>geneViewer</property-name>
+      <value>#{geneViewer}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>compoundViewer</property-name>
+      <value>#{compoundViewer}</value>
+    </managed-property>
+    <managed-property>
       <property-name>wellViewer</property-name>
       <value>#{wellViewer}</value>
     </managed-property>
     <managed-property>
       <property-name>dao</property-name>
       <value>#{dao}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
     </managed-property>
   </managed-bean>
 

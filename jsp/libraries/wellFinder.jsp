@@ -50,13 +50,18 @@
       </t:panelGroup>
       
       <t:outputText value="Find Multiple Wells:" styleClass="sectionHeader" />
-      <t:panelGrid columns="2" styleClass="standardTable">
+      <t:panelGrid columns="2">
         <t:inputTextarea
           id="plateWellList"
           value="#{wellFinder.plateWellList}"
           styleClass="input"
+          cols="50"
+          rows="20"
         ></t:inputTextarea>
-        <t:outputText value="instructions placeholder" />
+        <t:outputLabel
+          value="Enter Plate/Well information over multiple lines. The first item on every line should be the plate number, and every subsequent item on the line should be a well name. Items can be separated by whitespace, commas, or semicolons. Plate numbers can be prefixed with \"PL\", \"PL-\", or \"PL_\". Try copying two columns, \"Plate\" and \"Well\", from a spreadsheet, and pasting them into the box."
+          for="plateWellList"
+        />
         <t:commandButton
 	      action="#{wellFinder.findWells}"
           id="findMultipleWellsSubmit"

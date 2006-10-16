@@ -9,6 +9,11 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,8 +22,16 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.SearchResults;
+import edu.harvard.med.screensaver.ui.SearchResultsRegistryController;
 import edu.harvard.med.screensaver.util.StringUtils;
 
+/**
+ * TODO: Convert log.errors into errors that show up in the interface
+ *
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ */
 public class WellFinderController extends AbstractController
 {
   
@@ -34,8 +47,11 @@ public class WellFinderController extends AbstractController
   private String _plateWellList;
   
   private DAO _dao;
+  private LibraryViewerController _libraryViewerController;
   private WellViewerController _wellViewerController;
-  private WellSearchResultsController _wellSearchResultsController;
+  private SearchResultsRegistryController _searchResultsRegistry;
+  private GeneViewerController _geneViewerController;
+  private CompoundViewerController _compoundViewerController;
   
   
   // public instance methods
@@ -80,14 +96,14 @@ public class WellFinderController extends AbstractController
     _dao = dao;
   }
 
-  public WellSearchResultsController getWellSearchResults()
+  public LibraryViewerController getLibraryViewer()
   {
-    return _wellSearchResultsController;
+    return _libraryViewerController;
   }
 
-  public void setWellSearchResults(WellSearchResultsController wellSearchResultsController)
+  public void setLibraryViewer(LibraryViewerController libraryViewer)
   {
-    _wellSearchResultsController = wellSearchResultsController;
+    _libraryViewerController = libraryViewer;
   }
 
   public WellViewerController getWellViewer()
@@ -98,6 +114,36 @@ public class WellFinderController extends AbstractController
   public void setWellViewer(WellViewerController wellViewerController)
   {
     _wellViewerController = wellViewerController;
+  }
+
+  public CompoundViewerController getCompoundViewer()
+  {
+    return _compoundViewerController;
+  }
+
+  public void setCompoundViewer(CompoundViewerController compoundViewer)
+  {
+    _compoundViewerController = compoundViewer;
+  }
+
+  public GeneViewerController getGeneViewer()
+  {
+    return _geneViewerController;
+  }
+
+  public void setGeneViewer(GeneViewerController geneViewer)
+  {
+    _geneViewerController = geneViewer;
+  }
+
+  public SearchResultsRegistryController getSearchResultsRegistry()
+  {
+    return _searchResultsRegistry;
+  }
+
+  public void setSearchResultsRegistry(SearchResultsRegistryController searchResultsRegistry)
+  {
+    _searchResultsRegistry = searchResultsRegistry;
   }
 
   public String findWell()
@@ -112,20 +158,67 @@ public class WellFinderController extends AbstractController
   
   public String findWells()
   {
-    // TODO
-    return "";
+    List<Well> wells = lookupWellsFromPlateWellList();
+    if (wells.size() == 1) {
+      _wellViewerController.setWell(wells.get(0));
+      return "showWell";
+    }
+    SearchResults<Well> searchResults = new WellSearchResults(
+      wells,
+      _libraryViewerController,
+      _wellViewerController,
+      _compoundViewerController,
+      _geneViewerController);
+    _searchResultsRegistry.registerSearchResults(Well.class, this, searchResults);
+    _searchResultsRegistry.setCurrentSearchType(Well.class);
+    return "goWellSearchResults";
   }
   
   
   // private instance methods
   
+  private List<Well> lookupWellsFromPlateWellList()
+  {
+    List<Well> wells = new ArrayList<Well>();
+    BufferedReader plateWellListReader = new BufferedReader(new StringReader(_plateWellList));
+    try {
+      for (
+        String line = plateWellListReader.readLine();
+        line != null;
+        line = plateWellListReader.readLine()) {
+        
+        String [] tokens = line.split("[\\s;,]+");
+        if (tokens.length == 0) {
+          continue;
+        }
+        
+        Integer plateNumber = parsePlateNumber(tokens[0]);
+        for (int i = 1; i < tokens.length; i ++) {
+          String wellName = parseWellName(tokens[i]);
+          Well well = findWell(plateNumber, wellName);
+          if (well != null) {
+            wells.add(well);
+          }
+        }
+      }
+    }
+    catch (IOException e) {
+      log.error("trouble reading plate-well list", e);
+    }
+    return wells;
+  }
+  
   private Well lookupWell()
   {
-    Integer plateNumber = parsePlateNumber();
-    String wellName = parseWellName();
+    Integer plateNumber = parsePlateNumber(_plateNumber);
+    String wellName = parseWellName(_wellName);
     if (plateNumber == null || wellName == null) {
       return null;
     }
+    return findWell(plateNumber, wellName);
+  }
+
+  private Well findWell(Integer plateNumber, String wellName) {
     Well well = _dao.findWell(plateNumber, wellName);
     if (well == null) {
       log.error("didnt find well in the database: " + plateNumber + wellName);      
@@ -133,24 +226,24 @@ public class WellFinderController extends AbstractController
     return well;
   }
   
-  private Integer parsePlateNumber()
+  private Integer parsePlateNumber(String plateNumber)
   {
-    Matcher matcher = _plateNumberPattern.matcher(_plateNumber);
+    Matcher matcher = _plateNumberPattern.matcher(plateNumber);
     if (matcher.matches()) {
-      String plateNumber = matcher.group(3);
+      plateNumber = matcher.group(3);
       return Integer.parseInt(plateNumber);
     }
     else {
-      log.error("plate number didn't match pattern: " + _plateNumber);
+      log.error("plate number didn't match pattern: " + plateNumber);
       return null;
     }
   }
   
-  private String parseWellName()
+  private String parseWellName(String wellName)
   {
-    Matcher matcher = _wellNamePattern.matcher(_wellName);
+    Matcher matcher = _wellNamePattern.matcher(wellName);
     if (matcher.matches()) {
-      String wellName = matcher.group(1);
+      wellName = matcher.group(1);
       if (wellName.length() == 2) {
         wellName = wellName.charAt(0) + "0" + wellName.charAt(1);
       }
@@ -158,7 +251,7 @@ public class WellFinderController extends AbstractController
       return wellName;
     }
     else {
-      log.error("well name didn't match pattern: " + _wellName);
+      log.error("well name didn't match pattern: " + wellName);
       return null;
     }
   }
