@@ -9,11 +9,23 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.ui.AbstractController;
 
 public class CompoundViewerController extends AbstractController
 {
+  
+  // private static stuff
+  
+  private static final String _screensaver0ImageRenderer =
+    "http://screensaver.med.harvard.edu/screenbank/compounds/render_molecule.png";
+  
+  
+  // instance stuff
+  
   private Compound _compound;
 
   public Compound getCompound()
@@ -24,6 +36,18 @@ public class CompoundViewerController extends AbstractController
   public void setCompound(Compound compound)
   {
     _compound = compound;
+  }
+  
+  public String getCompoundImageUrl()
+  {
+    String smiles = _compound.getSmiles();
+    try {
+      smiles = URLEncoder.encode(smiles, "UTF-8");
+    }
+    catch (UnsupportedEncodingException ex){
+      throw new RuntimeException("UTF-8 not supported", ex);
+    }
+    return _screensaver0ImageRenderer + "?smiles=" + smiles;
   }
   
   public String showCompound()

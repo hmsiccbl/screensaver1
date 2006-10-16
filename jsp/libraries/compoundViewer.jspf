@@ -8,12 +8,17 @@
 <%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%-- Tiles --%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
+<%-- JSTL --%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="jstl"%>
 
 <f:subview id="compoundViewerSubview">
 
   <h:panelGrid columns="2" rendered="true">
   
-    <h:outputText value="smiles:" />
+    <h:outputText value="Structure:" />
+    <t:graphicImage url="#{compoundViewer.compoundImageUrl}" style="float: right;"/>
+
+    <h:outputText value="Smiles:" />
     <t:commandLink
       action="#{controller.showCompound}"
       value="#{compound.smiles}"
@@ -21,8 +26,12 @@
       <f:param name="compoundId" value="#{compound.compoundId}" />
     </t:commandLink>
     
-    <h:outputText value="Compound Names:" />
+    <h:outputText
+      value="Compound Names:"
+      rendered="#{compound.numCompoundNames > 0}"
+    />
     <t:dataList
+      rendered="#{compound.numCompoundNames > 0}"
       id="compoundNames"
       var="compoundName"
       value="#{compound.compoundNames}"
@@ -37,17 +46,33 @@
     <h:outputText value="Molecular Formula:" />
     <h:outputText value="#{compound.molecularFormula}" escape="false" />
     
-    <h:outputText value="PubChem CID:" />
-    <h:outputText value="#{compound.pubchemCid}" />
+    <h:outputText
+      value="PubChem CID:"
+      rendered="#{compound.pubchemCid != null}"
+    />
+    <h:outputText
+      value="#{compound.pubchemCid}"
+      rendered="#{compound.pubchemCid != null}"
+    />
     
-    <h:outputText value="ChemBank ID:" />
-    <h:outputText value="#{compound.chembankId}" />
+    <h:outputText
+      value="ChemBank ID:"
+      rendered="#{compound.chembankId != null}"
+    />
+    <h:outputText
+      value="#{compound.chembankId}"
+      rendered="#{compound.chembankId != null}"
+    />
     
     <h:outputText value="is salt:" />
     <h:outputText value="#{compound.salt}" />
 
-    <h:outputText value="NSC Numbers:" />
+    <h:outputText
+      value="NSC Numbers:"
+      rendered="#{compound.numNscNumbers > 0}"
+    />
     <t:dataList
+      rendered="#{compound.numNscNumbers > 0}"
       id="nscNumbers"
       var="nscNumber"
       value="#{compound.nscNumbers}"
@@ -56,8 +81,12 @@
       <h:outputText value="#{nscNumber}" />
     </t:dataList>
     
-    <h:outputText value="CAS Numbers:" />
+    <h:outputText
+      rendered="#{compound.numCasNumbers > 0}"
+      value="CAS Numbers:"
+    />
     <t:dataList
+      rendered="#{compound.numCasNumbers > 0}"
       id="casNumbers"
       var="casNumber"
       value="#{compound.casNumbers}"

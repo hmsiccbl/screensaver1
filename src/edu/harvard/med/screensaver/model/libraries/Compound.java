@@ -186,6 +186,12 @@ public class Compound extends AbstractEntity
     _isSalt = isSalt;
   }
 
+  @DerivedEntityProperty
+  public int getNumCompoundNames()
+  {
+    return _compoundNames.size();
+  }
+  
   /**
    * Get the set of names for the compound.
    * @return the set of names for the compound
@@ -228,6 +234,12 @@ public class Compound extends AbstractEntity
     return _compoundNames.remove(compoundName);
   }
 
+  @DerivedEntityProperty
+  public int getNumCasNumbers()
+  {
+    return _casNumbers.size();
+  }
+  
   /**
    * Get the set of CAS numbers for the compound.
    * @return the set of CAS numbers for the compound
@@ -270,6 +282,12 @@ public class Compound extends AbstractEntity
     return _casNumbers.remove(casNumber);
   }
 
+  @DerivedEntityProperty
+  public int getNumNscNumbers()
+  {
+    return _nscNumbers.size();
+  }
+  
   /**
    * Get the set of NSC numbers for the compound.
    * @return the set of NSC numbers for the compound
