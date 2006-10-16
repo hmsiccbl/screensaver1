@@ -42,13 +42,40 @@ TODO:
 				displayValueOnly="#{screenViewer.readOnly}" size="80"
 				styleClass="input" />
 
-			<t:outputLabel for="dateCreatedEditable" value="Date Created"
+			<t:outputLabel for="dateCreatedEditable" value="Created"
 				styleClass="inputLabel" />
 			<t:inputDate id="dateCreatedEditable"
 				value="#{screenViewer.screen.dateCreated}" popupCalendar="true"
 				rendered="#{!screenViewer.readOnly}" styleClass="input" />
 			<t:outputText id="dateCreated"
 				value="#{screenViewer.screen.dateCreated}"
+				rendered="#{screenViewer.readOnly}" styleClass="dataText" />
+
+			<t:outputLabel for="dateOfApplicationEditable" value="Application Date"
+				styleClass="inputLabel" />
+			<t:inputDate id="dateOfApplicationEditable"
+				value="#{screenViewer.screen.dateOfApplication}" popupCalendar="true"
+				rendered="#{!screenViewer.readOnly}" styleClass="input" />
+			<t:outputText id="dateOfApplication"
+				value="#{screenViewer.screen.dateOfApplication}"
+				rendered="#{screenViewer.readOnly}" styleClass="dataText" />
+
+			<t:outputLabel for="dateDataMeetingScheduledEditable" value="Data Meeting Scheduled"
+				styleClass="inputLabel" />
+			<t:inputDate id="dateDataMeetingScheduledEditable"
+				value="#{screenViewer.screen.dataMeetingScheduled}" popupCalendar="true"
+				rendered="#{!screenViewer.readOnly}" styleClass="input" />
+			<t:outputText id="dateDataMeetingScheduled"
+				value="#{screenViewer.screen.dataMeetingScheduled}"
+				rendered="#{screenViewer.readOnly}" styleClass="dataText" />
+
+			<t:outputLabel for="dateDataMeetingCompletedEditable" value="Data Meeting Completed"
+				styleClass="inputLabel" />
+			<t:inputDate id="dateDataMeetingCompletedEditable"
+				value="#{screenViewer.screen.dataMeetingComplete}" popupCalendar="true"
+				rendered="#{!screenViewer.readOnly}" styleClass="input" />
+			<t:outputText id="dateDataMeetingCompleted"
+				value="#{screenViewer.screen.dataMeetingComplete}"
 				rendered="#{screenViewer.readOnly}" styleClass="dataText" />
 
 			<t:outputLabel for="screenType" value="Screen Type"
@@ -78,11 +105,10 @@ TODO:
 				<f:selectItems value="#{screenViewer.leadScreenerSelectItems}" />
 			</t:selectOneMenu>
 
-			<t:outputLabel for="collaboratorsForm:collaborators"
+			<t:outputLabel for="collaborators"
 				value="Collaborators" styleClass="inputLabel" />
-
 			<t:panelGrid columns="2" styleClass="nonSpacingPanel">
-				<t:selectManyListbox id="collaborators"
+				<t:selectManyListbox id="collaboratorsEditable"
 					value="#{screenViewer.screen.collaboratorsList}"
 					converter="ScreeningRoomUserConverter"
 					rendered="#{!screenViewer.readOnly}" size="8" styleClass="input">
@@ -107,7 +133,55 @@ TODO:
 				value="#{screenViewer.screen.publishableProtocol}"
 				readonly="#{screenViewer.readOnly}" styleClass="input" />
 
-			<t:outputLabel for="screenResults" value="Screen Results"
+			<t:outputLabel for="summary" value="Summary"
+				styleClass="inputLabel" />
+			<t:inputTextarea id="summary" rows="3" cols="80"
+				value="#{screenViewer.screen.summary}"
+				readonly="#{screenViewer.readOnly}" styleClass="input" />
+
+			<t:outputLabel for="comments" value="Comments"
+				styleClass="inputLabel" />
+			<t:inputTextarea id="comments" rows="3" cols="80"
+				value="#{screenViewer.screen.comments}"
+				readonly="#{screenViewer.readOnly}" styleClass="input" />
+
+			<t:outputLabel for="statusItems" value="Status Items"
+				styleClass="inputLabel" />
+			<h:panelGrid columns="1">
+				<t:dataTable id="statusItems" styleClass="standardTable"
+					rowClasses="row1,row2" columnClasses="column" var="statusItem"
+					value="#{screenViewer.statusItemsDataModel}"
+					preserveDataModel="false">
+					<h:column>
+						<f:facet name="header">
+							<h:outputText value="Date" />
+						</f:facet>
+						<t:inputText value="#{statusItem.statusDate}"
+							rendered="#{screenViewer.readOnly}" />
+						<t:inputDate id="statusDateEditable"
+							value="#{statusItem.statusDate}" popupCalendar="true"
+							rendered="#{!screenViewer.readOnly}" styleClass="input" />
+						<t:outputText id="statusDate" value="#{statusItem.statusDate}"
+							rendered="#{screenViewer.readOnly}" styleClass="dataText" />
+					</h:column>
+					<h:column>
+						<f:facet name="header">
+							<h:outputText value="Value" />
+						</f:facet>
+						<t:selectOneMenu value="#{statusItem.statusValue}"
+							readonly="#{screenViewer.readOnly}"
+							converter="StatusValueConverter">
+							<f:selectItems value="#{screenViewer.statusValueSelectItems}" />
+						</t:selectOneMenu>
+					</h:column>
+				</t:dataTable>
+				<h:panelGroup>
+					<t:commandButton value="Add" action="#{screenViewer.addStatusItem}"
+						styleClass="command" rendered="#{!screenViewer.readOnly}" />
+				</h:panelGroup>
+			</h:panelGrid>
+
+			<t:outputLabel value="Screen Results"
 				styleClass="inputLabel" />
 			<t:panelGroup>
 				<t:outputLabel value="<none>" styleClass="inputLabel"
@@ -130,11 +204,8 @@ TODO:
 					action="#{screenViewer.save}" styleClass="command"
 					rendered="#{!screenViewer.readOnly}" />
 			</t:panelGroup>
-
 		</t:panelGrid>
 	</h:form>
-
-
 </f:subview>
 
 

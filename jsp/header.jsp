@@ -13,5 +13,5 @@
 	<t:outputText styleClass="title" value="#{pageTitle}"
 		rendered="#{!empty pageTitle}" />
 
-	<h:messages id="allMessages" globalOnly="true" showDetail="true" styleClass="errorMessage" />
+	<h:messages id="allMessages" globalOnly="false" showDetail="true" styleClass="errorMessage" />
 </f:subview>

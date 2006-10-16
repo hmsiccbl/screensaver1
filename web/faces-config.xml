@@ -604,6 +604,10 @@
     <converter-class>edu.harvard.med.screensaver.ui.util.SortDirectionConverter</converter-class>
   </converter>
   
+  <converter>
+    <converter-id>StatusValueConverter</converter-id>
+    <converter-class>edu.harvard.med.screensaver.ui.util.StatusValueConverter</converter-class>
+  </converter>
   
   <!-- Validators -->
 

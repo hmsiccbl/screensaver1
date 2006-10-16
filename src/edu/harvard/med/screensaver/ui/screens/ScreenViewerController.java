@@ -11,14 +11,19 @@ package edu.harvard.med.screensaver.ui.screens;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.faces.event.ValueChangeEvent;
+import javax.faces.model.DataModel;
+import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.StatusItem;
+import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractController;
@@ -57,6 +62,7 @@ public class ScreenViewerController extends AbstractController
   {
     _screen = screen;
     updateLeadScreenerSelectItems(screen.getLabHead());
+    recreateView(false);
   }
 
   /**
@@ -153,7 +159,16 @@ public class ScreenViewerController extends AbstractController
     }
     return collaboratorSelectItems;
   }
+  
+  public DataModel getStatusItemsDataModel()
+  {
+    return new ListDataModel(new ArrayList<StatusItem>(_screen.getStatusItems()));
+  }
 
+  public List<SelectItem> getStatusValueSelectItems()
+  {
+    return JSFUtils.createUISelectItems(StatusValue.values());
+  }
   
   
   /* JSF Application methods */
@@ -188,6 +203,13 @@ public class ScreenViewerController extends AbstractController
     return "cancel";
   }
   
+  public String addStatusItem()
+  {
+    _dao.defineEntity(StatusItem.class, _screen, new Date(), StatusValue.ACCEPTED);
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  
   public String viewCollaborator()
   {
     //String collaboratorIdToView = getHttpServletRequest().getParameter(COLLABORATOR_ID_TO_VIEW_PARAM_NAME);
@@ -200,14 +222,14 @@ public class ScreenViewerController extends AbstractController
     _screenResultViewer.setScreenResult(_screen.getScreenResult());
     return VIEW_OR_EDIT_SCREEN_RESULT_ACTION;
   }
-    
+  
+
   
   /* JSF Action event listeners */
 
   public void update(ValueChangeEvent event) {
     updateLeadScreenerSelectItems((ScreeningRoomUser) event.getNewValue());
     getFacesContext().renderResponse();
-    log.debug("update event handled");
   }
   
 
