@@ -124,11 +124,12 @@ TODO:
 				</t:selectManyListbox>
 
 				<t:dataTable var="collaborator"
-					value="#{screenViewer.screen.collaborators}">
+					value="#{screenViewer.screen.collaborators}"
+					headerClass="tableHeader">
 					<h:column>
 						<t:commandLink action="#{screenViewer.viewCollaborator}"
 							value="#{collaborator.lastName}, #{collaborator.firstName}"
-							styleClass="dataText"/>
+							styleClass="dataText" />
 					</h:column>
 				</t:dataTable>
 			</t:panelGrid>
@@ -159,11 +160,12 @@ TODO:
 			<h:panelGrid columns="1">
 				<t:outputText value="<none>"
 					rendered="#{empty screenViewer.screen.statusItems}" />
-				<t:dataTable id="statusItems" styleClass="standardTable"
-					rowClasses="row1,row2" columnClasses="column" var="statusItem"
+				<t:dataTable id="statusItems" var="statusItem"
 					value="#{screenViewer.statusItemsDataModel}"
 					preserveDataModel="false"
-					rendered="#{!empty screenViewer.screen.statusItems}">
+					rendered="#{!empty screenViewer.screen.statusItems}"
+					styleClass="standardTable" rowClasses="row1,row2"
+					columnClasses="column" headerClass="tableHeader">
 					<h:column>
 						<f:facet name="header">
 							<h:outputText value="Date" />
@@ -178,7 +180,8 @@ TODO:
 						<f:facet name="header">
 							<h:outputText value="Status" />
 						</f:facet>
-						<h:outputText value="#{statusItem.statusValue}" styleClass="dataText" />
+						<h:outputText value="#{statusItem.statusValue}"
+							styleClass="dataText" />
 					</h:column>
 					<h:column>
 						<f:facet name="header">
@@ -207,11 +210,12 @@ TODO:
 			<h:panelGrid columns="1">
 				<t:outputText value="<none>"
 					rendered="#{empty screenViewer.screen.publications}" />
-				<t:dataTable id="publications" styleClass="standardTable"
-					rowClasses="row1,row2" columnClasses="column" var="publication"
+				<t:dataTable id="publications" var="publication"
 					value="#{screenViewer.publicationsDataModel}"
 					preserveDataModel="false"
-					rendered="#{!empty screenViewer.screen.publications}">
+					rendered="#{!empty screenViewer.screen.publications}"
+					styleClass="standardTable" rowClasses="row1,row2"
+					columnClasses="column" headerClass="tableHeader">
 					<h:column>
 						<f:facet name="header">
 							<h:outputText value="Year" />
@@ -275,11 +279,12 @@ TODO:
 			<h:panelGrid columns="1">
 				<t:outputText value="<none>"
 					rendered="#{empty screenViewer.screen.lettersOfSupport}" />
-				<t:dataTable id="lettersOfSupport" styleClass="standardTable"
-					rowClasses="row1,row2" columnClasses="column" var="letterOfSupport"
+				<t:dataTable id="lettersOfSupport" var="letterOfSupport"
 					value="#{screenViewer.lettersOfSupportDataModel}"
 					preserveDataModel="false"
-					rendered="#{!empty screenViewer.screen.lettersOfSupport}">
+					rendered="#{!empty screenViewer.screen.lettersOfSupport}"
+					styleClass="standardTable" rowClasses="row1,row2"
+					columnClasses="column" headerClass="tableHeader">
 					<h:column>
 						<f:facet name="header">
 							<h:outputText value="Written" />
@@ -287,7 +292,8 @@ TODO:
 						<t:inputDate id="statusDateEditable"
 							value="#{letterOfSupport.dateWritten}" popupCalendar="true"
 							rendered="#{!screenViewer.readOnly}" styleClass="input" />
-						<t:outputText id="statusDate" value="#{letterOfSupport.dateWritten}"
+						<t:outputText id="statusDate"
+							value="#{letterOfSupport.dateWritten}"
 							rendered="#{screenViewer.readOnly}" styleClass="dataText" />
 					</h:column>
 					<h:column>
@@ -319,11 +325,12 @@ TODO:
 			<h:panelGrid columns="1">
 				<t:outputText value="<none>"
 					rendered="#{empty screenViewer.screen.attachedFiles}" />
-				<t:dataTable id="attachedFiles" styleClass="standardTable"
-					rowClasses="row1,row2" columnClasses="column" var="attachedFile"
+				<t:dataTable id="attachedFiles" var="attachedFile"
 					value="#{screenViewer.attachedFilesDataModel}"
 					preserveDataModel="false"
-					rendered="#{!empty screenViewer.screen.attachedFiles}">
+					rendered="#{!empty screenViewer.screen.attachedFiles}"
+					styleClass="standardTable" rowClasses="row1,row2"
+					columnClasses="column" headerClass="tableHeader">
 					<h:column>
 						<f:facet name="header">
 							<h:outputText value="File Name" />
@@ -346,10 +353,10 @@ TODO:
 						</f:facet>
 						<t:commandButton value="Delete"
 							action="#{screenViewer.deleteAttachedFile}" styleClass="command"
-							rendered="#{!screenViewer.readOnly}"/>
+							rendered="#{!screenViewer.readOnly}" />
 						<t:commandButton value="View..."
 							action="#{screenViewer.viewAttachedFile}" styleClass="command"
-							rendered="#{!screenViewer.readOnly}"/>
+							rendered="#{!screenViewer.readOnly}" />
 					</h:column>
 				</t:dataTable>
 				<h:panelGroup>
@@ -364,11 +371,12 @@ TODO:
 			<h:panelGrid columns="1">
 				<t:outputText value="<none>"
 					rendered="#{empty screenViewer.screen.fundingSupports}" />
-				<t:dataTable id="fundingSupports" styleClass="standardTable"
-					rowClasses="row1,row2" columnClasses="column" var="fundingSupport"
+				<t:dataTable id="fundingSupports" var="fundingSupport"
 					value="#{screenViewer.fundingSupportsDataModel}"
 					preserveDataModel="false"
-					rendered="#{!empty screenViewer.screen.fundingSupports}">
+					rendered="#{!empty screenViewer.screen.fundingSupports}"
+					styleClass="standardTable" rowClasses="row1,row2"
+					columnClasses="column" headerClass="tableHeader">
 					<h:column>
 						<f:facet name="header">
 							<h:outputText value="Funding Support" />
@@ -405,12 +413,12 @@ TODO:
 			<h:panelGrid columns="1">
 				<t:outputText value="<none>"
 					rendered="#{empty screenViewer.screen.assayReadoutTypes}" />
-				<t:dataTable id="assayReadoutTypes" styleClass="standardTable"
-					rowClasses="row1,row2" columnClasses="column"
-					var="assayReadoutType"
+				<t:dataTable id="assayReadoutTypes" var="assayReadoutType"
 					value="#{screenViewer.assayReadoutTypesDataModel}"
 					preserveDataModel="false"
-					rendered="#{!empty screenViewer.screen.assayReadoutTypes}">
+					rendered="#{!empty screenViewer.screen.assayReadoutTypes}"
+					styleClass="standardTable" rowClasses="row1,row2"
+					columnClasses="column" headerClass="tableHeader">
 					<h:column>
 						<f:facet name="header">
 							<h:outputText value="Assay Readout Type" />
@@ -446,11 +454,12 @@ TODO:
 			<h:panelGrid columns="1">
 				<t:outputText value="<none>"
 					rendered="#{empty screenViewer.screen.abaseTestsets}" />
-				<t:dataTable id="AbaseTestsets" styleClass="standardTable"
-					rowClasses="row1,row2" columnClasses="column" var="abaseTestset"
+				<t:dataTable id="AbaseTestsets" var="abaseTestset"
 					value="#{screenViewer.abaseTestsetsDataModel}"
 					preserveDataModel="false"
-					rendered="#{!empty screenViewer.screen.abaseTestsets}">
+					rendered="#{!empty screenViewer.screen.abaseTestsets}"
+					styleClass="standardTable" rowClasses="row1,row2"
+					columnClasses="column" headerClass="tableHeader">
 					<h:column>
 						<f:facet name="header">
 							<h:outputText value="Date" />
@@ -458,7 +467,8 @@ TODO:
 						<t:inputDate id="abaseTestsetDateEditable"
 							value="#{abaseTestset.testsetDate}" popupCalendar="true"
 							rendered="#{!screenViewer.readOnly}" styleClass="input" />
-						<t:outputText id="abaseTestsetDate" value="#{abaseTestset.testsetDate}"
+						<t:outputText id="abaseTestsetDate"
+							value="#{abaseTestset.testsetDate}"
 							rendered="#{screenViewer.readOnly}" styleClass="dataText" />
 					</h:column>
 					<h:column>
@@ -498,10 +508,11 @@ TODO:
 			<h:panelGrid columns="1">
 				<t:outputText value="<none>"
 					rendered="#{empty screenViewer.screen.visits}" />
-				<t:dataTable id="visitItems" styleClass="standardTable"
-					rowClasses="row1,row2" columnClasses="column" var="visitItem"
+				<t:dataTable id="visitItems" var="visitItem"
 					value="#{screenViewer.visitsDataModel}" preserveDataModel="false"
-					rendered="#{!empty screenViewer.screen.visits}">
+					rendered="#{!empty screenViewer.screen.visits}"
+					styleClass="standardTable" rowClasses="row1,row2"
+					columnClasses="column" headerClass="tableHeader">
 					<h:column>
 						<f:facet name="header">
 							<h:outputText value="Visit Date" />
@@ -528,8 +539,7 @@ TODO:
 							<h:outputText value="Performed By" />
 						</f:facet>
 						<t:outputText id="visitItemFullName"
-							value="#{visitItem.performedBy.fullName}"
-							styleClass="dataText" />
+							value="#{visitItem.performedBy.fullName}" styleClass="dataText" />
 					</h:column>
 					<h:column>
 						<f:facet name="header">

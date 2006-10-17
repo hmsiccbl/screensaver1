@@ -88,12 +88,12 @@ hr {
 }
 
 .tableHeader {
+	font-weight: bold;
   background-color: #eeffff;
   padding-right: 4px;
 }
 
 .row1,.row2 {
-  font-family: monospace;
   font-size: small;
   border-top: none;
   border-bottom: none;
