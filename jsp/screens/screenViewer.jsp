@@ -9,6 +9,8 @@
 
 <%-- 
 TODO:
+- show more summary infor for extant screen result
+- abasetestset name should be prompted for prior to an add
 - make editable collaborators list follow the "add"/"delete" design we have for other sets
 - message user if duplicate keyword is added (other entity types as well?)
 - table sorting (fixed, but by business key, or something appropriate)
@@ -538,6 +540,14 @@ TODO:
 					columnClasses="column" headerClass="tableHeader">
 					<t:column>
 						<f:facet name="header">
+							<t:outputText value="Name" />
+						</f:facet>
+						<t:inputText value="#{abaseTestset.testsetName}"
+							displayValueOnly="#{screenViewer.readOnlyAdmin}"
+							styleClass="input" displayValueOnlyStyleClass="dataText" />
+					</t:column>
+					<t:column>
+						<f:facet name="header">
 							<t:outputText value="Date" />
 						</f:facet>
 						<t:inputDate id="abaseTestsetDateEditable"
@@ -546,14 +556,6 @@ TODO:
 						<t:outputText id="abaseTestsetDate"
 							value="#{abaseTestset.testsetDate}"
 							rendered="#{screenViewer.readOnlyAdmin}" styleClass="dataText" />
-					</t:column>
-					<t:column>
-						<f:facet name="header">
-							<t:outputText value="Name" />
-						</f:facet>
-						<t:inputText value="#{abaseTestset.testsetName}"
-							displayValueOnly="#{screenViewer.readOnlyAdmin}"
-							styleClass="input" displayValueOnlyStyleClass="dataText" />
 					</t:column>
 					<t:column>
 						<f:facet name="header">
@@ -643,14 +645,16 @@ TODO:
 			<t:outputLabel value="Screen Results"
 				styleClass="inputLabel" />
 			<t:panelGrid columns="1">
-				<t:outputLabel value="<none>" styleClass="inputLabel"
-					rendered="#{empty screenViewer.screen.screenResult}" />
-				<t:outputLabel value="Date created: " styleClass="inputLabel"
-					rendered="#{!empty screenViewer.screen.screenResult}" />
-				<t:outputText
-					value="#{screenViewer.screen.screenResult.dateCreated}"
-					styleClass="data"
-					rendered="#{!empty screenViewer.screen.screenResult}" />
+				<t:panelGroup>
+					<t:outputLabel value="<none>" styleClass="inputLabel"
+						rendered="#{empty screenViewer.screen.screenResult}" />
+					<t:outputLabel value="Date created: " styleClass="inputLabel"
+						rendered="#{!empty screenViewer.screen.screenResult}" />
+					<t:outputText
+						value="#{screenViewer.screen.screenResult.dateCreated}"
+						styleClass="data"
+						rendered="#{!empty screenViewer.screen.screenResult}" />
+				</t:panelGroup>
 				<t:commandButton
 					value="#{screenViewer.editable ? \"View/Edit/Load...\" : \"View...\"}"
 					action="#{screenViewer.viewScreenResult}" styleClass="command"

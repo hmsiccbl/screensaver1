@@ -143,6 +143,7 @@ public class Screen extends AbstractEntity
     _title = title;
     _leadScreener.getHbnScreensLed().add(this);
     _labHead.getHbnScreensHeaded().add(this);
+    _assayReadoutTypes.add(AssayReadoutType.UNSPECIFIED);
   }
 
 

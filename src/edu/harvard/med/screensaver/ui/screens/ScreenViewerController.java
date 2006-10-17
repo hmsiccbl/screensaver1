@@ -48,29 +48,24 @@ import org.springframework.dao.ConcurrencyFailureException;
 
 public class ScreenViewerController extends AbstractController
 {
-  private static final String COLLABORATOR_ID_PARAM_NAME = "collaboratorIdToView";
-  private static final String SCREEN_RESULT_ID_PARAM_NAME = "screenResultIdToView";
-  private static final String VISIT_ID_PARAM_NAME = "visitIdToView";
-  private static final String STATUS_ITEM_ID_PARAM_NAME = "statusItemId";
-  private static final String PUBLICATION_ID_PARAM_NAME = "publicationId";
-
   private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.SCREENS_ADMIN;
-
 
   private static Logger log = Logger.getLogger(ScreenViewerController.class);
   
+  
+  // instance data
+  
   private DAO _dao;
   private Screen _screen;
-  private String _usageMode; // "create" or "edit"
-  private boolean _advancedMode;
   private ScreenResultViewerController _screenResultViewer;
   private List<SelectItem> _leadScreenerSelectItems;
   private FundingSupport _newFundingSupport;
   private StatusValue _newStatusValue;
-  private AssayReadoutType _newAssayReadoutType;
+  private AssayReadoutType _newAssayReadoutType = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs)
   private String _newKeyword = "";
 
-  /* Property getter/setter methods */
+  
+  // public property getter & setter methods
   
   public void setDao(DAO dao) 
   {
@@ -172,27 +167,6 @@ public class ScreenViewerController extends AbstractController
            && isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
   }
 
-  public void setUsageMode(String usageMode) 
-  {
-    _usageMode = usageMode;
-  }
-  
-  public String getUsageMode() 
-  {
-    return _usageMode;
-  }
-  
-  
-  public boolean isAdvancedMode() 
-  {
-    return _advancedMode;
-  }
-
-  public void setAdvancedMode(boolean advancedMode) 
-  {
-    _advancedMode = advancedMode;
-  } 
-  
   public DataModel getCollaboratorsDataModel()
   {
     return new ListDataModel(new ArrayList<ScreeningRoomUser>(_screen.getCollaborators()));
@@ -308,11 +282,6 @@ public class ScreenViewerController extends AbstractController
    * A command to save the user's edits.
    */
   public String save() {
-    log.debug("ScreenViewerController.save()");
-    return create();
-  }
-  
-  public String create() {
     try {
       _dao.persistEntity(_screen);
     }
@@ -330,10 +299,6 @@ public class ScreenViewerController extends AbstractController
     return DONE_ACTION_RESULT;
   }
   
-  public String cancel() {
-    return "cancel";
-  }
-
   public String addStatusItem()
   {
     if (_newStatusValue != null) {
