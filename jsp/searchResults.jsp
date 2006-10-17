@@ -11,9 +11,6 @@
 
 <f:subview id="searchResults">
 
-  <t:outputText value="#{messages.queuedMessages}" />
-  <t:messages />
-  
   <%@include file="../searchResults.jspf"  %>
   
 </f:subview>
