@@ -530,7 +530,6 @@ TODO:
 						<t:outputText id="visitItemFullName"
 							value="#{visitItem.performedBy.fullName}"
 							styleClass="dataText" />
-						</t:selectOneListbox>
 					</h:column>
 					<h:column>
 						<f:facet name="header">
