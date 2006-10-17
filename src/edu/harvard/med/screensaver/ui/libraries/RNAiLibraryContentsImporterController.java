@@ -160,9 +160,7 @@ public class RNAiLibraryContentsImporterController extends AbstractController
         _dao.persistEntity(_library);
       }
       else {
-        // TODO: connect this back to component "uploadRNAiLibraryContentsFile" when
-        // messages connect to components again
-        showMessage("badUploadedFile");
+        showMessage("badUploadedFile", new Object [] { _uploadedFile.getName() });
         return REDISPLAY_PAGE_ACTION_RESULT;
       }
 
@@ -170,8 +168,7 @@ public class RNAiLibraryContentsImporterController extends AbstractController
         return ERROR_ACTION_RESULT;
       }
       else {
-        // TODO: check that this works when messages connect to components again
-        showMessage("uploadRNAiLibraryContentsFile", "libraryViewer");
+        showMessage("libraries.importedLibraryContents", "libraryViewer");
         return SUCCESS_ACTION_RESULT;
       }
     }

@@ -205,7 +205,7 @@ public class WellFinderController extends AbstractController
       }
     }
     catch (IOException e) {
-      showMessage("unexpectedErrorReadingPlateWellList", "searchResults");
+      showMessage("libraries.unexpectedErrorReadingPlateWellList", "searchResults");
     }
     return wells;
   }
@@ -223,7 +223,7 @@ public class WellFinderController extends AbstractController
   private Well findWell(Integer plateNumber, String wellName) {
     Well well = _dao.findWell(plateNumber, wellName);
     if (well == null) {
-      showMessage("noSuchWell", new Object [] { plateNumber, wellName }, "searchResults");
+      showMessage("libraries.noSuchWell", new Object [] { plateNumber, wellName }, "searchResults");
     }
     return well;
   }
@@ -236,7 +236,7 @@ public class WellFinderController extends AbstractController
       return Integer.parseInt(plateNumber);
     }
     else {
-      showMessage("invalidPlateNumber", new Object [] { plateNumber });
+      showMessage("libraries.invalidPlateNumber", new Object [] { plateNumber });
       return null;
     }
   }
@@ -253,7 +253,7 @@ public class WellFinderController extends AbstractController
       return wellName;
     }
     else {
-      showMessage("invalidWellName", new Object [] { wellName });
+      showMessage("libraries.invalidWellName", new Object [] { wellName });
       return null;
     }
   }

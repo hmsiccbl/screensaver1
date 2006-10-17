@@ -138,9 +138,7 @@ public class CompoundLibraryContentsImporterController extends AbstractControlle
         });
       }
       else {
-        // TODO: connect this back to component "uploadRNAiLibraryContentsFile" when
-        // messages connect to components again
-        showMessage("badUploadedFile");
+        showMessage("badUploadedFile", new Object [] { _uploadedFile.getName() });
         return REDISPLAY_PAGE_ACTION_RESULT;
       }
 
@@ -148,8 +146,7 @@ public class CompoundLibraryContentsImporterController extends AbstractControlle
         return ERROR_ACTION_RESULT;
       }
       else {
-        // TODO: check that this works when messages connect to components again
-        showMessage("uploadCompoundLibraryContentsFile", "libraryViewer");
+        showMessage("libraries.importedLibraryContents", "libraryViewer");
         return SUCCESS_ACTION_RESULT;
       }
     }
