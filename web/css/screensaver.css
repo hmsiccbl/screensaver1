@@ -75,6 +75,10 @@ hr {
   margin-right: 4px;
 }
 
+.inputLabel {
+  vertical-align: top;
+}
+
 .column,.keyColumn {
   vertical-align: top;
 }

@@ -9,10 +9,14 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
@@ -20,24 +24,35 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.model.screens.AbaseTestset;
+import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
+import edu.harvard.med.screensaver.model.screens.AttachedFile;
+import edu.harvard.med.screensaver.model.screens.FundingSupport;
+import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
+import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
+import edu.harvard.med.screensaver.model.screens.Visit;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewerController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.ConcurrencyFailureException;
 
 public class ScreenViewerController extends AbstractController
 {
-  private static final String COLLABORATOR_ID_TO_VIEW_PARAM_NAME = "collaboratorIdToView";
-  private static final String SCREEN_RESULT_ID_TO_VIEW_PARAM_NAME = "screenResultIdToView";
+  private static final String COLLABORATOR_ID_PARAM_NAME = "collaboratorIdToView";
+  private static final String SCREEN_RESULT_ID_PARAM_NAME = "screenResultIdToView";
+  private static final String VISIT_ID_PARAM_NAME = "visitIdToView";
+  private static final String STATUS_ITEM_ID_PARAM_NAME = "statusItemId";
+  private static final String PUBLICATION_ID_PARAM_NAME = "publicationId";
 
   private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.SCREENS_ADMIN;
 
@@ -49,6 +64,9 @@ public class ScreenViewerController extends AbstractController
   private String _usageMode; // "create" or "edit"
   private boolean _advancedMode;
   private ScreenResultViewerController _screenResultViewer;
+  private FundingSupport _newFundingSupport;
+  private StatusValue _newStatusValue;
+  private AssayReadoutType _newAssayReadoutType;
   private List<SelectItem> _leadScreenerSelectItems;
 
   /* Property getter/setter methods */
@@ -62,7 +80,7 @@ public class ScreenViewerController extends AbstractController
   {
     _screen = screen;
     updateLeadScreenerSelectItems(screen.getLabHead());
-    recreateView(false);
+    //recreateView(false);
   }
 
   /**
@@ -91,21 +109,41 @@ public class ScreenViewerController extends AbstractController
     _screenResultViewer = screenResultViewer;
   }
 
+  public AssayReadoutType getNewAssayReadoutType()
+  {
+    return _newAssayReadoutType;
+  }
+
+  public void setNewAssayReadoutType(AssayReadoutType newAssayReadoutTypeController)
+  {
+    _newAssayReadoutType = newAssayReadoutTypeController;
+  }
+
+  public FundingSupport getNewFundingSupport()
+  {
+    return _newFundingSupport;
+  }
+
+  public void setNewFundingSupport(FundingSupport newFundingSupportController)
+  {
+    _newFundingSupport = newFundingSupportController;
+  }
+
+  public StatusValue getNewStatusValue()
+  {
+    return _newStatusValue;
+  }
+
+  public void setNewStatusValue(StatusValue newStatusValueController)
+  {
+    _newStatusValue = newStatusValueController;
+  }
+
   public boolean isReadOnly() 
   {
     return !isUserInRole(EDITING_ROLE);
   }
 
-  public String getCollaboratorIdToViewParamName()
-  {
-    return COLLABORATOR_ID_TO_VIEW_PARAM_NAME;
-  }
-  
-  public String getScreenResultIdToViewParamName()
-  {
-    return SCREEN_RESULT_ID_TO_VIEW_PARAM_NAME;
-  }
-  
   public void setUsageMode(String usageMode) 
   {
     _usageMode = usageMode;
@@ -127,6 +165,51 @@ public class ScreenViewerController extends AbstractController
     _advancedMode = advancedMode;
   } 
   
+  public DataModel getCollaboratorsDataModel()
+  {
+    return new ListDataModel(new ArrayList<ScreeningRoomUser>(_screen.getCollaborators()));
+  }
+
+  public DataModel getStatusItemsDataModel()
+  {
+    return new ListDataModel(new ArrayList<StatusItem>(_screen.getStatusItems()));
+  }
+
+  public DataModel getVisitsDataModel()
+  {
+    return new ListDataModel(new ArrayList<Visit>(_screen.getVisits()));
+  }
+
+  public DataModel getPublicationsDataModel()
+  {
+    return new ListDataModel(new ArrayList<Publication>(_screen.getPublications()));
+  }
+
+  public DataModel getLettersOfSupportDataModel()
+  {
+    return new ListDataModel(new ArrayList<LetterOfSupport>(_screen.getLettersOfSupport()));
+  }
+
+  public DataModel getAttachedFilesDataModel()
+  {
+    return new ListDataModel(new ArrayList<AttachedFile>(_screen.getAttachedFiles()));
+  }
+
+  public DataModel getFundingSupportsDataModel()
+  {
+    return new ListDataModel(new ArrayList<FundingSupport>(_screen.getFundingSupports()));
+  }
+
+  public DataModel getAssayReadoutTypesDataModel()
+  {
+    return new ListDataModel(new ArrayList<AssayReadoutType>(_screen.getAssayReadoutTypes()));
+  }
+
+  public DataModel getAbaseTestsetsDataModel()
+  {
+    return new ListDataModel(new ArrayList<AbaseTestset>(_screen.getAbaseTestsets()));
+  }
+
   public List<SelectItem> getScreenTypeSelectItems()
   {
     return JSFUtils.createUISelectItems(ScreenType.values());
@@ -144,13 +227,9 @@ public class ScreenViewerController extends AbstractController
     return labHeadSelectItems;
   }
 
-  public List<SelectItem> getLeadScreenerSelectItems()
-  {
-    return _leadScreenerSelectItems;
-  }
-
   public List<SelectItem> getCollaboratorSelectItems()
   {
+    // TODO: move the logic for determing potential collaborators to Screen
     List<SelectItem> collaboratorSelectItems = new ArrayList<SelectItem>();
     List<ScreeningRoomUser> screeningRoomUsers = _dao.findAllEntitiesWithType(ScreeningRoomUser.class);
     Collections.sort(screeningRoomUsers, ScreensaverUserComparator.getInstance());
@@ -160,14 +239,33 @@ public class ScreenViewerController extends AbstractController
     return collaboratorSelectItems;
   }
   
-  public DataModel getStatusItemsDataModel()
+
+  public List<SelectItem> getLeadScreenerSelectItems()
   {
-    return new ListDataModel(new ArrayList<StatusItem>(_screen.getStatusItems()));
+    return _leadScreenerSelectItems;
   }
 
-  public List<SelectItem> getStatusValueSelectItems()
+  public List<SelectItem> getNewStatusValueSelectItems()
   {
-    return JSFUtils.createUISelectItems(StatusValue.values());
+    Set<StatusValue> candiateStatusValues = new HashSet<StatusValue>(Arrays.asList(StatusValue.values()));
+    for (StatusItem statusItem : _screen.getStatusItems()) {
+      candiateStatusValues.remove(statusItem.getStatusValue());
+    }
+    return JSFUtils.createUISelectItems(candiateStatusValues);
+  }
+
+  public List<SelectItem> getNewFundingSupportSelectItems()
+  {
+    Set<FundingSupport> candiateFundingSupports = new HashSet<FundingSupport>(Arrays.asList(FundingSupport.values()));
+    candiateFundingSupports.removeAll(_screen.getFundingSupports());
+    return JSFUtils.createUISelectItems(candiateFundingSupports);
+  }
+
+  public List<SelectItem> getNewAssayReadoutTypeSelectItems()
+  {
+    Set<AssayReadoutType> candiateAssayReadoutTypes = new HashSet<AssayReadoutType>(Arrays.asList(AssayReadoutType.values()));
+    candiateAssayReadoutTypes.removeAll(_screen.getAssayReadoutTypes());
+    return JSFUtils.createUISelectItems(candiateAssayReadoutTypes);
   }
   
   
@@ -202,17 +300,130 @@ public class ScreenViewerController extends AbstractController
   public String cancel() {
     return "cancel";
   }
-  
+
   public String addStatusItem()
   {
-    _dao.defineEntity(StatusItem.class, _screen, new Date(), StatusValue.ACCEPTED);
+    if (_newStatusValue != null) {
+      _dao.defineEntity(StatusItem.class,
+                        _screen,
+                        new Date(),
+                        _newStatusValue);
+      _newStatusValue = null;
+    }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
+  public String deleteStatusItem()
+  {
+    return deleteEntity(StatusItem.class);
+  }
+  
+  // TODO: save & go to visit viewer
+  public String addCherryPickVisitItem()
+  {
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  // TODO: save & go to visit viewer
+  public String addNonCherryPickVisitItem()
+  {
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String copyVisit()
+  {
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String viewVisit()
+  {
+    //String visitIdToView = (String) getRequestParameterMap().get(VISIT_ID_PARAM_NAME);
+    //_visitViewer.setVisitId(visitIdToView);
+    // TODO: implement when Visit Viewer is implemented
+    return VIEW_VISIT_ACTION_RESULT;
+  }  
+  
+  public String viewAttachedFile()
+  {
+    // TODO: implement when Visit Viewer is implemented
+    return VIEW_ATTACHED_FILE_ACTION_RESULT;
+  }  
+  
+  public String addPublication()
+  {
+    _dao.defineEntity(Publication.class, _screen, "<new>", "", "", "");
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String deletePublication()
+  {
+    return deleteEntity(Publication.class);
+  }
+  
+  public String addLetterOfSupport()
+  {
+    _dao.defineEntity(LetterOfSupport.class, _screen, new Date(), "");
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String deleteLetterOfSupport()
+  {
+    return deleteEntity(LetterOfSupport.class);
+  }
+  
+  public String addAttachedFile()
+  {
+    _dao.defineEntity(AttachedFile.class, _screen, "<new>", "");
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String deleteAttachedFile()
+  {
+    return deleteEntity(AttachedFile.class);
+  }
+  
+  public String addFundingSupport()
+  {
+    if (_newFundingSupport != null) {
+      _screen.addFundingSupport(_newFundingSupport);
+      _newFundingSupport = null;
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String deleteFundingSupport()
+  {
+    return deleteEntity(FundingSupport.class);
+  }
+  
+  public String addAssayReadoutType()
+  {
+    if (_newAssayReadoutType != null) {
+      _screen.addAssayReadoutType(_newAssayReadoutType);
+      _newAssayReadoutType = null;
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String deleteAssayReadoutTypes()
+  {
+    return deleteEntity(AssayReadoutType.class);
+  }
+  
+  public String addAbaseTestset()
+  {
+    _dao.defineEntity(AbaseTestset.class, _screen, "<new>");
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String deleteAbaseTestset()
+  {
+    return deleteEntity(AbaseTestset.class);
+  }
   
   public String viewCollaborator()
   {
-    //String collaboratorIdToView = getHttpServletRequest().getParameter(COLLABORATOR_ID_TO_VIEW_PARAM_NAME);
+    //String collaboratorIdToView = (String) getRequestParameterMap().get(COLLABORATOR_ID_PARAM_NAME);
     //_screeningRoomUserViewer.setScreensaverUserId(collaboratorIdToView);
     return VIEW_SCREENING_ROOM_USER_ACTION_RESULT;
   }
@@ -223,6 +434,10 @@ public class ScreenViewerController extends AbstractController
     return VIEW_OR_EDIT_SCREEN_RESULT_ACTION;
   }
   
+  public String viewBillingInformation()
+  {
+    return VIEW_BILLING_INFORMATION_ACTION_RESULT;
+  }
 
   
   /* JSF Action event listeners */
@@ -250,5 +465,24 @@ public class ScreenViewerController extends AbstractController
     }
   }
 
+  @SuppressWarnings("unchecked")
+  private <E> String deleteEntity(Class<E> clazz)
+  {
+    E entity = null;
+    try {
+      entity = (E) getHttpServletRequest().getAttribute(StringUtils.uncapitalize(clazz.getSimpleName()));
+      // TODO: This is not a great use of reflection, as it's only being used to compress code size; we also lose compile-time checking of the methods we're relying upon; remove at some point...
+      Method deleteMethod = Screen.class.getMethod("remove" + clazz.getSimpleName(), clazz);
+      boolean deleted = (Boolean) deleteMethod.invoke(_screen, entity);
+      if (!deleted) {
+        throw new IllegalStateException(entity + " appears to have already been deleted");
+      }
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    catch (Exception e) {
+      reportSystemError("error deleting " + entity + ": " + e.getMessage());
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+  }
 
 }

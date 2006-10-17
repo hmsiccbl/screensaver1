@@ -27,10 +27,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
+
 import org.apache.log4j.Logger;
 import org.hibernate.FlushMode;
 import org.hibernate.SessionFactory;
 import org.hibernate.classic.Session;
+import org.springframework.orm.hibernate3.HibernateTransactionManager;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
 import org.springframework.orm.hibernate3.SessionHolder;
 import org.springframework.orm.hibernate3.support.OpenSessionInViewFilter;
@@ -130,15 +134,22 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
     return sessionFactoryBeanName;
   }
 
+  protected String getTransactionManagerBeanName() {
+    return sessionFactoryBeanName;
+  }
+
   protected void doFilterInternal(
-    HttpServletRequest request, 
-    HttpServletResponse response, 
-    FilterChain filterChain)
+    final HttpServletRequest request, 
+    final HttpServletResponse response, 
+    final FilterChain filterChain)
   throws ServletException, IOException 
   {
     // we don't perform Hibernate session management unless:
-    // 1) this is a request for one of our application's JSF views (static resources do not require us to perform these steps)
-    // 2) a logged-in user is associated with the session (to avoid consuming Hibernate session & associated database resources unnecessarily)
+    // 1) this is a request for one of our application's JSF views 
+    //    (static resources do not require us to perform these steps)
+    // 2) a logged-in user is associated with the session (to avoid 
+    //    consuming Hibernate session & associated database resources 
+    //    unnecessarily)
     if (!isRequestForApplicationView(request) ||
       request.getRemoteUser() == null) {
       filterChain.doFilter(request, response);
@@ -149,34 +160,57 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
     String httpSessionId = httpSession.getId();
     log.info(">>>> Screensaver STARTING to process HTTP request for session " + 
              httpSessionId + " @ " + request.getRequestURI());
+
     SessionFactory sessionFactory = lookupSessionFactoryViaSpring();
     Session hibSession = getOrCreateHibernateSession(sessionFactory, httpSessionId);
     String hibSessionLogId = SessionFactoryUtils.toString(hibSession);
-    hibSession.setFlushMode(FlushMode.COMMIT); // not sure this is any better/worse then FlushMode.AUTO
+    // have Hibernate session only perform a flush operation at txn commit time,
+    // to prevent expensive flushes from occuring when we're doing queries; this
+    // does mean we have to be careful not to expect any save/update/persist
+    // calls to be reflected in HQL queries, within the same HTTP request
+    hibSession.setFlushMode(FlushMode.COMMIT); 
+
+    /*
+     * From AbstractPlatformTransactionManager: "Transaction synchronization is a
+     * generic mechanism for registering callbacks that get invoked at
+     * transaction completion time. This is mainly used internally by the data
+     * access support classes for JDBC, Hibernate, and JDO when running within a
+     * JTA transaction: They register resources that are opened within the
+     * transaction for closing at transaction completion time, allowing e.g. for
+     * reuse of the same Hibernate Session within the transaction. The same
+     * mechanism can also be leveraged for custom synchronization needs in an
+     * application."
+     */
     
-    // set the Hibernate session that Spring/Hibernate will use for this thread/request.
+    //  set the Hibernate session that Spring/Hibernate will use for this thread/request.    
     TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(hibSession));
 
+    DAO dao = lookupBeanViaSpring(DAO.class, "dao");
+    
     try {
-      filterChain.doFilter(request, response);
+      dao.doInTransaction(new DAOTransaction() {
+        public void runTransaction()
+        {
+          try {
+            filterChain.doFilter(request, response);
+          }
+          catch (Throwable e) {
+            e.printStackTrace();
+            throw new RuntimeException("caught exception while processing HTTP request in a transaction", e);
+          }
+        }
+      });
     }
     finally {
-      log.debug("Hibernate session " + hibSessionLogId + 
-                " for HTTP session " + httpSessionId +
-                " is " + (hibSession.isOpen() ? "open" : "closed") +
-                // call isDirty() apparently causes a flush side effect! causes all kinds of strange problems...
-                // ", " + (hibSession.isDirty() ? "dirty" : "clean") +
-                ", " + (hibSession.isConnected() ? "connected" : "disconnected"));
-      
-      // unset the Hibernate session that Spring/Hibernate was used for this thread/request.
+      // unset the Hibernate session that Spring/Hibernate used for this thread/request.
       TransactionSynchronizationManager.unbindResource(sessionFactory);
-      
+
       boolean closeHttpSession = 
         Boolean.TRUE.equals(httpSession.getAttribute(CLOSE_HTTP_AND_HIBERNATE_SESSIONS));
       boolean closeHibernateSession = 
         closeHttpSession || 
         Boolean.TRUE.equals(httpSession.getAttribute(CLOSE_HIBERNATE_SESSION));
-      
+
       if (closeHibernateSession) {
         SessionFactoryUtils.releaseSession(hibSession, sessionFactory);
         synchronized (this) {
@@ -184,7 +218,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
         }
         log.info("closed Hibernate session " + hibSessionLogId + 
                  " for HTTP session " + httpSessionId);
-        
+
         if (closeHttpSession) {
           httpSession.invalidate();
           log.info("closed HTTP session " + httpSessionId);
@@ -193,7 +227,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
       assert !hibSession.isOpen() : 
         "Hibernate session " + hibSessionLogId + 
         " was not closed for HTTP session " + httpSessionId;
-      
+
       log.info("<<<< Screensaver FINISHED processing HTTP request for session " + 
                httpSessionId + " @ " + request.getRequestURI());
     }
@@ -235,53 +269,28 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
 
   /**
    * Look up the SessionFactory that this filter should use.
-   * <p>Default implementation looks for a bean with the specified name
-   * in Spring's root application context.
+   * <p>
+   * Default implementation looks for a bean with the specified name in Spring's
+   * root application context.
+   * 
    * @return the SessionFactory to use
    * @see #getSessionFactoryBeanName
    */
-  protected SessionFactory lookupSessionFactoryViaSpring() {
+  protected SessionFactory lookupSessionFactoryViaSpring()
+  {
     if (logger.isDebugEnabled()) {
-      logger.debug("Using SessionFactory '" + getSessionFactoryBeanName() + "' for " + getClass().getName());
+      logger.debug("Using SessionFactory '" + getSessionFactoryBeanName()
+                   + "' for " + getClass().getName());
     }
-    WebApplicationContext wac =
-      WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
-    return (SessionFactory) wac.getBean(getSessionFactoryBeanName(), SessionFactory.class);
+    return (SessionFactory) lookupBeanViaSpring(SessionFactory.class,
+                                                getSessionFactoryBeanName());
   }
 
-//  /**
-//   * Get a Session for the SessionFactory that this filter uses.
-//   * Note that this just applies in single session mode!
-//   * <p>The default implementation delegates to SessionFactoryUtils'
-//   * getSession method and sets the Session's flushMode to NEVER.
-//   * <p>Can be overridden in subclasses for creating a Session with a custom
-//   * entity interceptor or JDBC exception translator.
-//   * @param sessionFactory the SessionFactory that this filter uses
-//   * @return the Session to use
-//   * @throws DataAccessResourceFailureException if the Session could not be created
-//   * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession(SessionFactory, boolean)
-//   * @see org.hibernate.FlushMode#NEVER
-//   */
-//  protected Session getSession(SessionFactory sessionFactory) throws DataAccessResourceFailureException {
-//    Session session = SessionFactoryUtils.getSession(sessionFactory, true);
-//    session.setFlushMode(FlushMode.NEVER);
-//    return session;
-//  }
-//
-//  /**
-//   * Close the given Session.
-//   * Note that this just applies in single session mode!
-//   * <p>The default implementation delegates to SessionFactoryUtils'
-//   * releaseSession method.
-//   * <p>Can be overridden in subclasses, e.g. for flushing the Session before
-//   * closing it. See class-level javadoc for a discussion of flush handling.
-//   * Note that you should also override getSession accordingly, to set
-//   * the flush mode to something else than NEVER.
-//   * @param session the Session used for filtering
-//   * @param sessionFactory the SessionFactory that this filter uses
-//   */
-//  protected void closeSession(Session session, SessionFactory sessionFactory) {
-//    SessionFactoryUtils.releaseSession(session, sessionFactory);
-//  }
+  @SuppressWarnings("unchecked")
+  private <C extends Object> C lookupBeanViaSpring(Class<C> clazz, String beanName) {
+    WebApplicationContext wac =
+      WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
+    return (C) wac.getBean(beanName, clazz);
+  }
 
 }

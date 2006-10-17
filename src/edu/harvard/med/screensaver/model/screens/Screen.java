@@ -304,6 +304,18 @@ public class Screen extends AbstractEntity
   }
 
   /**
+   * Remove the status item
+   *
+   * @param statusItem the status item to remove
+   * @return true iff the screen already had the status item
+   */
+  public boolean removeStatusItem(StatusItem statusItem)
+  {
+    // note: related entity will be deleted by Hibernate on flush
+    return getHbnStatusItems().remove(statusItem);
+  }
+
+  /**
    * Get an unmodifiable copy of the set of visits.
    *
    * @return the visits
@@ -326,6 +338,18 @@ public class Screen extends AbstractEntity
       return true;
     }
     return false;
+  }
+
+  /**
+   * Remove the visit.
+   *
+   * @param visit the visit to remove
+   * @return true iff the screen already had the visit
+   */
+  public boolean removeVisit(Visit visit)
+  {
+    // note: related entity will be deleted by Hibernate on flush
+    return getHbnVisits().remove(visit);
   }
 
   /**
@@ -354,6 +378,18 @@ public class Screen extends AbstractEntity
   }
 
   /**
+   * Remove the abase testset.
+   *
+   * @param abaseTestset the abase testset to remove
+   * @return true iff the screen already had the abase testset
+   */
+  public boolean removeAbaseTestset(AbaseTestset abaseTestset)
+  {
+    // note: related entity will be deleted by Hibernate on flush
+    return getHbnAbaseTestsets().remove(abaseTestset);
+  }
+
+  /**
    * Get an unmodifiable copy of the set of publications.
    *
    * @return the publications
@@ -379,6 +415,17 @@ public class Screen extends AbstractEntity
   }
 
   /**
+   * Remove the publication.
+   *
+   * @param publication the publication to remove
+   * @return true iff the screen already had the publication
+   */
+  public boolean removePublication(Publication publication) {
+    // note: related entity will be deleted by Hibernate on flush
+    return _publications.remove(publication);
+  }
+
+  /**
    * Get an unmodifiable copy of the set of letters of support.
    *
    * @return the letters of support
@@ -389,10 +436,10 @@ public class Screen extends AbstractEntity
   }
 
   /**
-   * Add the letters of suppor.
+   * Add a letter of support.
    *
-   * @param letterOfSupport the letters of suppor to add
-   * @return true iff the screen did not already have the letters of suppor
+   * @param letterOfSupport the letters of support to add
+   * @return true iff the screen did not already have the letters of support
    */
   public boolean addLetterOfSupport(LetterOfSupport letterOfSupport)
   {
@@ -401,6 +448,18 @@ public class Screen extends AbstractEntity
       return true;
     }
     return false;
+  }
+
+  /**
+   * Remove a letter of support.
+   *
+   * @param letterOfSupport the letter of support to remove
+   * @return true iff the screen already had the letter of support
+   */
+  public boolean removeLetterOfSupport(LetterOfSupport letterOfSupport)
+  {
+    // note: related entity will be deleted by Hibernate on flush
+    return getHbnLettersOfSupport().remove(letterOfSupport);
   }
 
   /**
@@ -447,6 +506,18 @@ public class Screen extends AbstractEntity
       return true;
     }
     return false;
+  }
+
+  /**
+   * Remove the attached file.
+   *
+   * @param attachedFile the attached file to remove
+   * @return true iff the screen already had the attached file
+   */
+  public boolean removeAttachedFile(AttachedFile attachedFile)
+  {
+    // note: related entity will be deleted by Hibernate on flush
+    return getHbnAttachedFiles().remove(attachedFile);
   }
 
   /**
@@ -640,7 +711,7 @@ public class Screen extends AbstractEntity
    * @hibernate.set
    *   order-by="funding_support"
    *   table="screen_funding_support"
-   *   cascade="delete"
+   *   cascade="delete-orphan"
    *   lazy="true"
    * @hibernate.collection-key
    *   column="screen_id"
@@ -674,6 +745,7 @@ public class Screen extends AbstractEntity
    */
   public boolean removeFundingSupport(FundingSupport fundingSupport)
   {
+    // note: related entity will be deleted by Hibernate on flush
     return _fundingSupports.remove(fundingSupport);
   }
 
@@ -772,7 +844,7 @@ public class Screen extends AbstractEntity
    * @hibernate.set
    *   order-by="assay_readout_type"
    *   table="screen_assay_readout_type"
-   *   cascade="delete"
+   *   cascade="delete-orphan"
    *   lazy="true"
    * @hibernate.collection-key
    *   column="screen_id"
@@ -806,6 +878,7 @@ public class Screen extends AbstractEntity
    */
   public boolean removeAssayReadoutType(AssayReadoutType assayReadoutType)
   {
+    // note: related entity will be deleted by Hibernate on flush
     return _assayReadoutTypes.remove(assayReadoutType);
   }
 
@@ -948,7 +1021,7 @@ public class Screen extends AbstractEntity
    *
    * @return the status items
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="all-delete-orphan"
    *   lazy="true"
    *   inverse="true"
    * @hibernate.collection-key
@@ -967,7 +1040,7 @@ public class Screen extends AbstractEntity
    *
    * @return the visits
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="all-delete-orphan"
    *   lazy="true"
    *   inverse="true"
    * @hibernate.collection-key
@@ -986,7 +1059,7 @@ public class Screen extends AbstractEntity
    *
    * @return the abase testsets
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="all-delete-orphan"
    *   lazy="true"
    *   inverse="true"
    * @hibernate.collection-key
@@ -1005,7 +1078,7 @@ public class Screen extends AbstractEntity
    *
    * @return the publications
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="all-delete-orphan"
    *   lazy="true"
    *   inverse="true"
    * @hibernate.collection-key
@@ -1024,7 +1097,7 @@ public class Screen extends AbstractEntity
    *
    * @return the letters of support
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="all-delete-orphan"
    *   lazy="true"
    *   inverse="true"
    * @hibernate.collection-key
@@ -1064,13 +1137,12 @@ public class Screen extends AbstractEntity
     _billingInformation = billingInformation;
   }
 
-
   /**
    * Get the attached files.
    *
    * @return the attached files
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="all-delete-orphan"
    *   lazy="true"
    *   inverse="true"
    * @hibernate.collection-key

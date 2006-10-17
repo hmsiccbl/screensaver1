@@ -147,6 +147,7 @@ public class ScreenResultImporterController extends AbstractController
             if (screenResult == null) {
               log.error("fatal error during import of ScreenResult for Screen " + screen);
               result[0] = ERROR_ACTION_RESULT;
+              
               return;
             }
             else if (_screenResultParser.getErrors().size() > 0) {
@@ -199,5 +200,5 @@ public class ScreenResultImporterController extends AbstractController
       }
     }
   }
-
+  
 }

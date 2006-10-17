@@ -104,6 +104,9 @@ public class EnumTypeConverter<E extends Enum<E>> implements Converter
     UIComponent uiComponent,
     String stringValue) throws ConverterException
   {
+    if (stringValue.length() == 0 || stringValue == null) {
+      return null;
+    }
     NormalizedString normalized = new NormalizedString(stringValue);
     if (!string2Enum.containsKey(normalized)) {
       throw new ConverterException("no matching object value for string '" + stringValue + "', normalized as '" + normalized + "'");
@@ -117,6 +120,9 @@ public class EnumTypeConverter<E extends Enum<E>> implements Converter
     Object objectValue) 
     throws ConverterException
   {
+    if (objectValue == null) {
+      return "";
+    }
     return objectValue.toString();
   }
 

@@ -38,20 +38,36 @@ public class ScreeningRoomUserConverter implements Converter
   {
     if (_dao == null) {
       FacesContext facesCtx = FacesContext.getCurrentInstance();
-      _dao = (DAO) facesCtx.getApplication().getVariableResolver().resolveVariable(facesCtx, "dao");
+      _dao = (DAO) facesCtx.getApplication()
+                           .getVariableResolver()
+                           .resolveVariable(facesCtx, "dao");
     }
     try {
-      return _dao.findEntityById(ScreeningRoomUser.class, Integer.parseInt(entityId));
-    } 
+      ScreeningRoomUser entity = _dao.findEntityById(ScreeningRoomUser.class,
+                                                     Integer.parseInt(entityId));
+      if (entity == null) {
+        throw new ConverterException("cannot find ScreeningRoomUser for id="
+                                     + entityId + " for component "
+                                     + arg1.getId());
+      }
+      return entity;
+    }
     catch (NumberFormatException e) {
       throw new ConverterException(e);
     }
   }
 
-  public String getAsString(FacesContext arg0, UIComponent arg1, Object screeningRoomUser)
-    throws ConverterException
+  public String getAsString(FacesContext arg0,
+                            UIComponent arg1,
+                            Object screeningRoomUser) throws ConverterException
   {
-    return ((ScreeningRoomUser) screeningRoomUser).getEntityId().toString();
+    if (!(screeningRoomUser instanceof ScreeningRoomUser)) {
+      throw new ConverterException("ScreeningRoomUser object expected: cannot convert object of type "
+                                   + screeningRoomUser.getClass()
+                                   + " to string for component " + arg1.getId());
+    }
+    return ((ScreeningRoomUser) screeningRoomUser).getEntityId()
+                                                  .toString();
   }
 
 }

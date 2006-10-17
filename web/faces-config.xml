@@ -639,8 +639,37 @@
     <converter-id>StatusValueConverter</converter-id>
     <converter-class>edu.harvard.med.screensaver.ui.util.StatusValueConverter</converter-class>
   </converter>
+
+  <converter>
+    <converter-id>VisitTypeConverter</converter-id>
+    <converter-class>edu.harvard.med.screensaver.ui.util.VisitTypeConverter</converter-class>
+  </converter>
+  
+  <converter>
+    <converter-id>AssayReadoutTypeConverter</converter-id>
+    <converter-class>edu.harvard.med.screensaver.ui.util.AssayReadoutTypeConverter</converter-class>
+  </converter>
+  
+  <converter>
+    <converter-id>FundingSupportConverter</converter-id>
+    <converter-class>edu.harvard.med.screensaver.ui.util.FundingSupportConverter</converter-class>
+  </converter>
   
   <!-- Validators -->
 
-  
+  <validator>
+   <validator-id>YearValidator</validator-id>
+   <validator-class>javax.faces.validator.LongRangeValidator</validator-class>
+   <property>
+    <property-name>maximum</property-name>
+    <property-class>java.lang.Long</property-class>
+    <default-value>2020</default-value>
+    </property>
+   <property>
+    <property-name>minimum</property-name>
+    <property-class>java.lang.Long</property-class>
+    <default-value>1970</default-value>
+    </property>
+  </validator>
+
 </faces-config>
