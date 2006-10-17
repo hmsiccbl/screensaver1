@@ -64,10 +64,11 @@ public class ScreenViewerController extends AbstractController
   private String _usageMode; // "create" or "edit"
   private boolean _advancedMode;
   private ScreenResultViewerController _screenResultViewer;
+  private List<SelectItem> _leadScreenerSelectItems;
   private FundingSupport _newFundingSupport;
   private StatusValue _newStatusValue;
   private AssayReadoutType _newAssayReadoutType;
-  private List<SelectItem> _leadScreenerSelectItems;
+  private String _newKeyword = "";
 
   /* Property getter/setter methods */
   
@@ -139,9 +140,36 @@ public class ScreenViewerController extends AbstractController
     _newStatusValue = newStatusValueController;
   }
 
+  public String getNewKeyword()
+  {
+    return _newKeyword;
+  }
+
+  public void setNewKeyword(String newKeyword)
+  {
+    _newKeyword = newKeyword;
+  }
+
   public boolean isReadOnly() 
   {
     return !isUserInRole(EDITING_ROLE);
+  }
+
+  public boolean isEditable() 
+  {
+    return !isReadOnly();
+  }
+
+  /**
+   * Get whether user can view administrative fields but cannot edit them.
+   * 
+   * @return <code>true</code> iff user can view administrative fields but
+   *         cannot edit them
+   */
+  public boolean isReadOnlyAdmin()
+  {
+    return !isUserInRole(EDITING_ROLE)
+           && isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
   }
 
   public void setUsageMode(String usageMode) 
@@ -208,6 +236,11 @@ public class ScreenViewerController extends AbstractController
   public DataModel getAbaseTestsetsDataModel()
   {
     return new ListDataModel(new ArrayList<AbaseTestset>(_screen.getAbaseTestsets()));
+  }
+
+  public DataModel getKeywordsDataModel()
+  {
+    return new ListDataModel(new ArrayList<String>(_screen.getKeywords()));
   }
 
   public List<SelectItem> getScreenTypeSelectItems()
@@ -421,6 +454,18 @@ public class ScreenViewerController extends AbstractController
     return deleteEntity(AbaseTestset.class);
   }
   
+  public String addKeyword()
+  {
+    _screen.addKeyword(_newKeyword);
+    _newKeyword = "";
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String deleteKeyword()
+  {
+    return deleteEntity(String.class, "Keyword");
+  }
+  
   public String viewCollaborator()
   {
     //String collaboratorIdToView = (String) getRequestParameterMap().get(COLLABORATOR_ID_PARAM_NAME);
@@ -468,11 +513,17 @@ public class ScreenViewerController extends AbstractController
   @SuppressWarnings("unchecked")
   private <E> String deleteEntity(Class<E> clazz)
   {
+    return deleteEntity(clazz, clazz.getSimpleName());
+  }
+
+  @SuppressWarnings("unchecked")
+  private <E> String deleteEntity(Class<E> clazz, String entityPropertyName)
+  {
     E entity = null;
     try {
-      entity = (E) getHttpServletRequest().getAttribute(StringUtils.uncapitalize(clazz.getSimpleName()));
+      entity = (E) getHttpServletRequest().getAttribute(StringUtils.uncapitalize(entityPropertyName));
       // TODO: This is not a great use of reflection, as it's only being used to compress code size; we also lose compile-time checking of the methods we're relying upon; remove at some point...
-      Method deleteMethod = Screen.class.getMethod("remove" + clazz.getSimpleName(), clazz);
+      Method deleteMethod = Screen.class.getMethod("remove" + entityPropertyName, clazz);
       boolean deleted = (Boolean) deleteMethod.invoke(_screen, entity);
       if (!deleted) {
         throw new IllegalStateException(entity + " appears to have already been deleted");
