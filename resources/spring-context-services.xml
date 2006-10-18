@@ -75,4 +75,11 @@
     <constructor-arg ref="dao"/>
   </bean>
 
+  <bean 
+    id="bulkCompoundLibraryLoader"
+    class="edu.harvard.med.screensaver.io.libraries.compound.BulkCompoundLibraryLoader"
+    singleton="true">
+    <constructor-arg ref="dao"/>
+    <constructor-arg ref="compoundLibraryContentsParser"/>
+  </bean>
 </beans>
