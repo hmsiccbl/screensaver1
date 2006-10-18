@@ -38,7 +38,7 @@
       layout="grid"
     >
       <h:outputLink
-        value="http://genome.ucsc.edu/cgi-bin/hgTracks?hgFind.matches=#{accessionNumber}">
+        value="http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi?val=#{accessionNumber}">
         <h:outputText value="#{accessionNumber}" />
       </h:outputLink>
     </t:dataList>
@@ -49,5 +49,3 @@
   </h:panelGrid>
 
 </f:subview>
-
-
