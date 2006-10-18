@@ -61,32 +61,34 @@
             
       <h:outputText value="Vendor Identifier:" />
       <h:outputText value="#{wellViewer.well.vendorIdentifier}" />
-      
-      <h:outputText value="Contents:" />
-      <t:panelGroup>
-        <t:dataList
-          id="geneList"
-          var="gene"
-          value="#{wellViewer.well.genes}"
-          layout="simple"
-        >
-          <t:aliasBean alias="#{controller}" value="#{wellViewer}">
-            <%@ include file="geneViewer.jspf" %>
-          </t:aliasBean>
-        </t:dataList>
-        <t:dataList
-          id="compoundList"
-          var="compound"
-          value="#{wellViewer.well.compounds}"
-          layout="simple"
-        >
-          <t:aliasBean alias="#{controller}" value="#{wellViewer}">
-            <%@ include file="compoundViewer.jspf" %>
-          </t:aliasBean>
-        </t:dataList>
-      </t:panelGroup>
 
     </h:panelGrid>
+      
+    <t:dataList
+      id="geneList"
+      var="gene"
+      value="#{wellViewer.well.genes}"
+      layout="simple"
+    >
+	  <t:outputText value="Gene:" />
+      <t:aliasBean alias="#{controller}" value="#{wellViewer}">
+        <%@ include file="geneViewer.jspf" %>
+      </t:aliasBean>
+    </t:dataList>
+    
+    <t:dataList
+      id="compoundList"
+      var="compound"
+      value="#{wellViewer.well.compounds}"
+      layout="simple"
+    >
+      <t:panelGrid columns="2">
+        <t:outputText value="Compound:" />
+        <t:aliasBean alias="#{controller}" value="#{wellViewer}">
+          <%@ include file="compoundViewer.jspf" %>
+        </t:aliasBean>
+      </t:panelGrid>
+    </t:dataList>
     
   </h:form>
 
