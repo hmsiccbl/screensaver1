@@ -124,6 +124,7 @@ public class WellSearchResults extends SearchResults<Well>
     }
     if (columnName.equals(WELL)) {
       _wellViewerController.setWell(well);
+      _compoundViewerController.setCompound(getCompoundWithLongestSmiles(well));
       return "showWell";
     }
     if (columnName.equals(CONTENTS)) {
@@ -204,8 +205,12 @@ public class WellSearchResults extends SearchResults<Well>
     if (geneCount > 1) {
       return "multiple genes";
     }
-    if (getCompoundCount(well) > 0) {
+    int compoundCount = getCompoundCount(well);
+    if (compoundCount == 1) {
       return getLongestCompoundSmiles(well);
+    }
+    if (compoundCount > 1) {
+      return "multiple compounds";
     }
     return "empty well";
   }
