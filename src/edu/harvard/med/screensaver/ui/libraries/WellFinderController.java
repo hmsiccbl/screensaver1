@@ -223,7 +223,7 @@ public class WellFinderController extends AbstractController
   private Well findWell(Integer plateNumber, String wellName) {
     Well well = _dao.findWell(plateNumber, wellName);
     if (well == null) {
-      showMessage("libraries.noSuchWell", new Object [] { plateNumber, wellName }, "searchResults");
+      showMessage("libraries.noSuchWell", new Object [] { plateNumber.toString(), wellName }, "searchResults");
     }
     return well;
   }
@@ -236,7 +236,7 @@ public class WellFinderController extends AbstractController
       return Integer.parseInt(plateNumber);
     }
     else {
-      showMessage("libraries.invalidPlateNumber", new Object [] { plateNumber });
+      showMessage("libraries.invalidPlateNumber", new Object [] { plateNumber.toString() });
       return null;
     }
   }
