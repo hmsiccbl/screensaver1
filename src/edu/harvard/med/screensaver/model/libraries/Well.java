@@ -54,6 +54,7 @@ public class Well extends AbstractEntity
   private Set<CherryPick> _cherryPicks = new HashSet<CherryPick>();
   private String _smiles;
   private String _molfile;
+  private String _genbankAccessionNumber;
 
 
   // public constructors and instance methods
@@ -380,7 +381,27 @@ public class Well extends AbstractEntity
     _molfile = molfile;
   }
   
+  /**
+   * Get the GenBank Accession number.
+   * 
+   * @return the GenBank Accession number
+   * @hibernate.property type="text"
+   */
+  public String getGenbankAccessionNumber()
+  {
+    return _genbankAccessionNumber;
+  }
 
+  /**
+   * Set the GenBank Accession number.
+   * 
+   * @param genbankAccessionNumber the GenBank Accession number
+   */
+  public void setGenbankAccessionNumber(String genbankAccessionNumber)
+  {
+    _genbankAccessionNumber = genbankAccessionNumber;
+  }
+  
   
   // public hibernate methods for cross-package relationships
   

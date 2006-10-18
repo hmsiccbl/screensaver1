@@ -125,8 +125,19 @@ public class DataRowParser
     if (well == null) {
       return;
     }
+    addGenbankAccessionNumberToWell(well);
     for (SilencingReagent silencingReagent : silencingReagents) {
       well.addSilencingReagent(silencingReagent);
+    }
+  }
+
+  private void addGenbankAccessionNumberToWell(Well well) {
+    String genbankAccessionNumber = _cellFactory.getCell(
+      _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.GENBANK_ACCESSION_NUMBER),
+      _rowIndex,
+      true).getString();
+    if (! genbankAccessionNumber.equals("")) {
+      well.setGenbankAccessionNumber(genbankAccessionNumber);
     }
   }
 
