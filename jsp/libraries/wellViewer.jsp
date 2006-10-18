@@ -70,10 +70,12 @@
       value="#{wellViewer.well.genes}"
       layout="simple"
     >
-	  <t:outputText value="Gene:" />
-      <t:aliasBean alias="#{controller}" value="#{wellViewer}">
-        <%@ include file="geneViewer.jspf" %>
-      </t:aliasBean>
+      <t:panelGrid columns="2" styleClass="standardTable">
+        <t:outputText value="Gene:" />
+        <t:aliasBean alias="#{controller}" value="#{wellViewer}">
+          <%@ include file="geneViewer.jspf" %>
+        </t:aliasBean>
+      </t:panelGrid>
     </t:dataList>
     
     <t:dataList
@@ -82,7 +84,7 @@
       value="#{wellViewer.well.compounds}"
       layout="simple"
     >
-      <t:panelGrid columns="2">
+      <t:panelGrid columns="2" styleClass="standardTable">
         <t:outputText value="Compound:" />
         <t:aliasBean alias="#{controller}" value="#{wellViewer}">
           <%@ include file="compoundViewer.jspf" %>
