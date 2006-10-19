@@ -11,9 +11,11 @@ package edu.harvard.med.screensaver.model.screens;
 
 import java.util.Date;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -49,11 +51,12 @@ public class LetterOfSupport extends AbstractEntity
    * @param screen the screen
    * @param dateWritten the date written
    * @param writtenBy the written by
+   * @throws DuplicateEntityException 
    */
   public LetterOfSupport(
     Screen screen,
     Date dateWritten,
-    String writtenBy)
+    String writtenBy) throws DuplicateEntityException
   {
     if (screen == null) {
       throw new NullPointerException();
@@ -61,7 +64,9 @@ public class LetterOfSupport extends AbstractEntity
     _screen = screen;
     _dateWritten = truncateDate(dateWritten);
     _writtenBy = writtenBy;
-    _screen.getHbnLettersOfSupport().add(this);
+    if (!_screen.getLettersOfSupport().add(this)) {
+      throw new DuplicateEntityException(_screen, this);
+    }
   }
 
 
@@ -89,25 +94,18 @@ public class LetterOfSupport extends AbstractEntity
    * Get the screen.
    *
    * @return the screen
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.Screen"
+   *   column="screen_id"
+   *   not-null="true"
+   *   foreign-key="fk_letter_of_support_to_screen"
+   *   cascade="save-update"
+   * @motivation for hibernate
    */
+  @ToOneRelationship(nullable=false)
   public Screen getScreen()
   {
     return _screen;
-  }
-
-  /**
-   * Set the screen.
-   *
-   * @param screen the new screen
-   */
-  public void setScreen(Screen screen)
-  {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
-    _screen.getHbnLettersOfSupport().remove(this);
-    _screen = screen;
-    _screen.getHbnLettersOfSupport().add(this);
   }
 
   /**
@@ -127,9 +125,9 @@ public class LetterOfSupport extends AbstractEntity
    */
   public void setDateWritten(Date dateWritten)
   {
-    _screen.getHbnLettersOfSupport().remove(this);
+    _screen.getLettersOfSupport().remove(this);
     _dateWritten = truncateDate(dateWritten);
-    _screen.getHbnLettersOfSupport().add(this);
+    _screen.getLettersOfSupport().add(this);
   }
 
   /**
@@ -149,9 +147,9 @@ public class LetterOfSupport extends AbstractEntity
    */
   public void setWrittenBy(String writtenBy)
   {
-    _screen.getHbnLettersOfSupport().remove(this);
+    _screen.getLettersOfSupport().remove(this);
     _writtenBy = writtenBy;
-    _screen.getHbnLettersOfSupport().add(this);
+    _screen.getLettersOfSupport().add(this);
   }
 
 
@@ -229,25 +227,6 @@ public class LetterOfSupport extends AbstractEntity
   }
 
 
-  // package methods
-
-  /**
-   * Set the screen.
-   * Throw a NullPointerException when the screen is null.
-   *
-   * @param screen the new screen
-   * @throws NullPointerException when the screen is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  void setHbnScreen(Screen screen)
-  {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
-    _screen = screen;
-  }
-
-
   // private constructor
 
   /**
@@ -259,6 +238,22 @@ public class LetterOfSupport extends AbstractEntity
 
 
   // private methods
+
+  /**
+   * Set the screen.
+   * Throw a NullPointerException when the screen is null.
+   *
+   * @param screen the new screen
+   * @throws NullPointerException when the screen is null
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  private void setScreen(Screen screen)
+  {
+    if (screen == null) {
+      throw new NullPointerException();
+    }
+    _screen = screen;
+  }
 
   /**
    * Set the id for the letter of support.
@@ -289,23 +284,6 @@ public class LetterOfSupport extends AbstractEntity
    */
   private void setVersion(Integer version) {
     _version = version;
-  }
-
-  /**
-   * Get the screen.
-   *
-   * @return the screen
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.Screen"
-   *   column="screen_id"
-   *   not-null="true"
-   *   foreign-key="fk_letter_of_support_to_screen"
-   *   cascade="save-update"
-   * @motivation for hibernate
-   */
-  private Screen getHbnScreen()
-  {
-    return _screen;
   }
 
   /**

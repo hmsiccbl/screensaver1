@@ -17,6 +17,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
 
 
 /**
@@ -72,7 +73,7 @@ public class BillingInformation extends AbstractEntity
     _screen = screen;
     _isFeeToBeChargedForScreening = isFeeToBeChargedForScreening;
     _isFeeFormOnFile = isFeeFormOnFile;
-    _screen.setHbnBillingInformation(this);
+    _screen.setBillingInformation(this);
   }
 
 
@@ -100,25 +101,17 @@ public class BillingInformation extends AbstractEntity
    * Get the screen.
    *
    * @return the screen
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.Screen"
+   *   column="screen_id"
+   *   not-null="true"
+   *   foreign-key="fk_billing_information_to_screen"
+   *   cascade="save-update"
    */
+  @ToOneRelationship(nullable=false)
   public Screen getScreen()
   {
     return _screen;
-  }
-
-  /**
-   * Set the screen.
-   *
-   * @param screen the new screen
-   */
-  public void setScreen(Screen screen)
-  {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
-    _screen.setHbnBillingInformation(null);
-    _screen = screen;
-    _screen.setHbnBillingInformation(this);
   }
 
   /**
@@ -354,17 +347,12 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Set the screen.
-   * Throw a NullPointerException when the screen is null.
    *
    * @param screen the new screen
-   * @throws NullPointerException when the screen is null
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
-  void setHbnScreen(Screen screen)
+  private void setScreen(Screen screen)
   {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
     _screen = screen;
   }
 
@@ -428,23 +416,6 @@ public class BillingInformation extends AbstractEntity
    */
   private void setVersion(Integer version) {
     _version = version;
-  }
-
-  /**
-   * Get the screen.
-   *
-   * @return the screen
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.Screen"
-   *   column="screen_id"
-   *   not-null="true"
-   *   foreign-key="fk_billing_information_to_screen"
-   *   cascade="save-update"
-   * @motivation for hibernate
-   */
-  private Screen getHbnScreen()
-  {
-    return _screen;
   }
 
   /**

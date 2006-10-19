@@ -17,14 +17,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.SearchResults;
 import edu.harvard.med.screensaver.ui.SearchResultsRegistryController;
 import edu.harvard.med.screensaver.util.StringUtils;
+
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -223,7 +223,7 @@ public class WellFinderController extends AbstractController
   private Well findWell(Integer plateNumber, String wellName) {
     Well well = _dao.findWell(plateNumber, wellName);
     if (well == null) {
-      showMessage("libraries.noSuchWell", new Object [] { plateNumber.toString(), wellName }, "searchResults");
+      showMessage("libraries.noSuchWell", "searchResults", plateNumber.toString(), wellName);
     }
     return well;
   }
@@ -236,7 +236,7 @@ public class WellFinderController extends AbstractController
       return Integer.parseInt(plateNumber);
     }
     else {
-      showMessage("libraries.invalidPlateNumber", new Object [] { plateNumber.toString() });
+      showMessage("libraries.invalidPlateNumber", plateNumber.toString());
       return null;
     }
   }
@@ -253,7 +253,7 @@ public class WellFinderController extends AbstractController
       return wellName;
     }
     else {
-      showMessage("libraries.invalidWellName", new Object [] { wellName });
+      showMessage("libraries.invalidWellName", wellName);
       return null;
     }
   }

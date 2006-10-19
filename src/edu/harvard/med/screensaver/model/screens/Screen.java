@@ -18,6 +18,7 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
@@ -280,245 +281,128 @@ public class Screen extends AbstractEntity
   }
 
   /**
-   * Get an unmodifiable copy of the set of status items.
+   * Get the status items.
    *
    * @return the status items
+   * @hibernate.set
+   *   cascade="all-delete-orphan"
+   *   lazy="true"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="screen_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.StatusItem"
+   * @motivation for hibernate and maintenance of bi-directional relationships
    */
   public Set<StatusItem> getStatusItems()
   {
-    return Collections.unmodifiableSet(_statusItems);
+    return _statusItems;
   }
 
   /**
-   * Add the status item.
-   *
-   * @param statusItem the status item to add
-   * @return true iff the screen did not already have the status item
-   */
-  public boolean addStatusItem(StatusItem statusItem)
-  {
-    if (getHbnStatusItems().add(statusItem)) {
-      statusItem.setHbnScreen(this);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Remove the status item
-   *
-   * @param statusItem the status item to remove
-   * @return true iff the screen already had the status item
-   */
-  public boolean removeStatusItem(StatusItem statusItem)
-  {
-    // note: related entity will be deleted by Hibernate on flush
-    return getHbnStatusItems().remove(statusItem);
-  }
-
-  /**
-   * Get an unmodifiable copy of the set of visits.
+   * Get the visits.
    *
    * @return the visits
+   * @hibernate.set
+   *   cascade="all-delete-orphan"
+   *   lazy="true"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="screen_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.Visit"
+   * @motivation for hibernate and maintenance of bi-directional relationships
    */
   public Set<Visit> getVisits()
   {
-    return Collections.unmodifiableSet(_visits);
+    return _visits;
   }
 
   /**
-   * Add the visit.
-   *
-   * @param visit the visit to add
-   * @return true iff the screen did not already have the visit
-   */
-  public boolean addVisit(Visit visit)
-  {
-    if (getHbnVisits().add(visit)) {
-      visit.setHbnScreen(this);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Remove the visit.
-   *
-   * @param visit the visit to remove
-   * @return true iff the screen already had the visit
-   */
-  public boolean removeVisit(Visit visit)
-  {
-    // note: related entity will be deleted by Hibernate on flush
-    return getHbnVisits().remove(visit);
-  }
-
-  /**
-   * Get an unmodifiable copy of the set of abase testsets.
+   * Get the set of abase testsets.
    *
    * @return the abase testsets
+   * @hibernate.set
+   *   cascade="all-delete-orphan"
+   *   lazy="true"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="screen_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.AbaseTestset"
+   * @motivation for hibernate and maintenance of bi-directional relationships
    */
   public Set<AbaseTestset> getAbaseTestsets()
   {
-    return Collections.unmodifiableSet(_abaseTestsets);
+    return _abaseTestsets;
   }
 
   /**
-   * Add the abase testset.
-   *
-   * @param abaseTestset the abase testset to add
-   * @return true iff the screen did not already have the abase testset
-   */
-  public boolean addAbaseTestset(AbaseTestset abaseTestset)
-  {
-    if (getHbnAbaseTestsets().add(abaseTestset)) {
-      abaseTestset.setHbnScreen(this);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Remove the abase testset.
-   *
-   * @param abaseTestset the abase testset to remove
-   * @return true iff the screen already had the abase testset
-   */
-  public boolean removeAbaseTestset(AbaseTestset abaseTestset)
-  {
-    // note: related entity will be deleted by Hibernate on flush
-    return getHbnAbaseTestsets().remove(abaseTestset);
-  }
-
-  /**
-   * Get an unmodifiable copy of the set of publications.
+   * Get the publications.
    *
    * @return the publications
+   * @hibernate.set
+   *   cascade="all-delete-orphan"
+   *   lazy="true"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="screen_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.Publication"
    */
   public Set<Publication> getPublications()
   {
-    return Collections.unmodifiableSet(_publications);
+    return _publications;
   }
 
   /**
-   * Add the publication.
-   *
-   * @param publication the publication to add
-   * @return true iff the screen did not already have the publication
-   */
-  public boolean addPublication(Publication publication)
-  {
-    if (getHbnPublications().add(publication)) {
-      publication.setHbnScreen(this);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Remove the publication.
-   *
-   * @param publication the publication to remove
-   * @return true iff the screen already had the publication
-   */
-  public boolean removePublication(Publication publication) {
-    // note: related entity will be deleted by Hibernate on flush
-    return _publications.remove(publication);
-  }
-
-  /**
-   * Get an unmodifiable copy of the set of letters of support.
+   * Get the letters of support.
    *
    * @return the letters of support
+   * @hibernate.set
+   *   cascade="all-delete-orphan"
+   *   lazy="true"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="screen_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.LetterOfSupport"
    */
   public Set<LetterOfSupport> getLettersOfSupport()
   {
-    return Collections.unmodifiableSet(_lettersOfSupport);
+    return _lettersOfSupport;
   }
 
   /**
-   * Add a letter of support.
+   * Get the attached files.
    *
-   * @param letterOfSupport the letters of support to add
-   * @return true iff the screen did not already have the letters of support
+   * @return the attached files
+   * @hibernate.set
+   *   cascade="all-delete-orphan"
+   *   lazy="true"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="screen_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.AttachedFile"
    */
-  public boolean addLetterOfSupport(LetterOfSupport letterOfSupport)
+  public Set<AttachedFile> getAttachedFiles()
   {
-    if (getHbnLettersOfSupport().add(letterOfSupport)) {
-      letterOfSupport.setHbnScreen(this);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Remove a letter of support.
-   *
-   * @param letterOfSupport the letter of support to remove
-   * @return true iff the screen already had the letter of support
-   */
-  public boolean removeLetterOfSupport(LetterOfSupport letterOfSupport)
-  {
-    // note: related entity will be deleted by Hibernate on flush
-    return getHbnLettersOfSupport().remove(letterOfSupport);
+    return _attachedFiles;
   }
 
   /**
    * Get the billing information.
    *
    * @return the billing information
+   * @hibernate.one-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.BillingInformation"
+   *   property-ref="screen"
+   *   cascade="save-update"
    */
   public BillingInformation getBillingInformation()
   {
     return _billingInformation;
-  }
-
-  /**
-   * Set the billing information.
-   *
-   * @param billingInformation the new billing information
-   */
-  public void setBillingInformation(BillingInformation billingInformation)
-  {
-    _billingInformation = billingInformation;
-    billingInformation.setHbnScreen(this);
-  }
-
-  /**
-   * Get an unmodifiable copy of the set of attached files.
-   *
-   * @return the attached files
-   */
-  public Set<AttachedFile> getAttachedFiles()
-  {
-    return Collections.unmodifiableSet(_attachedFiles);
-  }
-
-  /**
-   * Add the attached file.
-   *
-   * @param attachedFile the attached file to add
-   * @return true iff the screen did not already have the attached file
-   */
-  public boolean addAttachedFile(AttachedFile attachedFile)
-  {
-    if (getHbnAttachedFiles().add(attachedFile)) {
-      attachedFile.setHbnScreen(this);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Remove the attached file.
-   *
-   * @param attachedFile the attached file to remove
-   * @return true iff the screen already had the attached file
-   */
-  public boolean removeAttachedFile(AttachedFile attachedFile)
-  {
-    // note: related entity will be deleted by Hibernate on flush
-    return getHbnAttachedFiles().remove(attachedFile);
   }
 
   /**
@@ -855,6 +739,7 @@ public class Screen extends AbstractEntity
    *   column="assay_readout_type"
    *   not-null="true"
    */
+  @ToManyRelationship(minCardinality=1)
   public Set<AssayReadoutType> getAssayReadoutTypes()
   {
     return _assayReadoutTypes;
@@ -1016,145 +901,15 @@ public class Screen extends AbstractEntity
     return getScreenNumber();
   }
 
-
-  /**
-   * Get the status items.
-   *
-   * @return the status items
-   * @hibernate.set
-   *   cascade="all-delete-orphan"
-   *   lazy="true"
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="screen_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.StatusItem"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  Set<StatusItem> getHbnStatusItems()
-  {
-    return _statusItems;
-  }
-
-  /**
-   * Get the visits.
-   *
-   * @return the visits
-   * @hibernate.set
-   *   cascade="all-delete-orphan"
-   *   lazy="true"
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="screen_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.Visit"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  Set<Visit> getHbnVisits()
-  {
-    return _visits;
-  }
-
-  /**
-   * Get the abase testsets.
-   *
-   * @return the abase testsets
-   * @hibernate.set
-   *   cascade="all-delete-orphan"
-   *   lazy="true"
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="screen_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.AbaseTestset"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  Set<AbaseTestset> getHbnAbaseTestsets()
-  {
-    return _abaseTestsets;
-  }
-
-  /**
-   * Get the publications.
-   *
-   * @return the publications
-   * @hibernate.set
-   *   cascade="all-delete-orphan"
-   *   lazy="true"
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="screen_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.Publication"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  Set<Publication> getHbnPublications()
-  {
-    return _publications;
-  }
-
-  /**
-   * Get the letters of support.
-   *
-   * @return the letters of support
-   * @hibernate.set
-   *   cascade="all-delete-orphan"
-   *   lazy="true"
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="screen_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.LetterOfSupport"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  Set<LetterOfSupport> getHbnLettersOfSupport()
-  {
-    return _lettersOfSupport;
-  }
-
-  /**
-   * Get the billing information.
-   *
-   * @return the billing information
-   * @hibernate.one-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.BillingInformation"
-   *   property-ref="hbnScreen"
-   *   cascade="save-update"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  BillingInformation getHbnBillingInformation()
-  {
-    return _billingInformation;
-  }
-
   /**
    * Set the billing information.
    *
    * @param billingInformation the new billing information
    * @motivation for hibernate
    */
-  void setHbnBillingInformation(BillingInformation billingInformation)
+  void setBillingInformation(BillingInformation billingInformation)
   {
     _billingInformation = billingInformation;
-  }
-
-  /**
-   * Get the attached files.
-   *
-   * @return the attached files
-   * @hibernate.set
-   *   cascade="all-delete-orphan"
-   *   lazy="true"
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="screen_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.AttachedFile"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  Set<AttachedFile> getHbnAttachedFiles()
-  {
-    return _attachedFiles;
   }
 
 
@@ -1254,7 +1009,7 @@ public class Screen extends AbstractEntity
    * @param statusItems the new status items
    * @motivation for hibernate
    */
-  private void setHbnStatusItems(Set<StatusItem> statusItems)
+  private void setStatusItems(Set<StatusItem> statusItems)
   {
     _statusItems = statusItems;
   }
@@ -1265,7 +1020,7 @@ public class Screen extends AbstractEntity
    * @param visits the new visits
    * @motivation for hibernate
    */
-  private void setHbnVisits(Set<Visit> visits)
+  private void setVisits(Set<Visit> visits)
   {
     _visits = visits;
   }
@@ -1276,7 +1031,7 @@ public class Screen extends AbstractEntity
    * @param abaseTestsets the new abase testsets
    * @motivation for hibernate
    */
-  private void setHbnAbaseTestsets(Set<AbaseTestset> abaseTestsets)
+  private void setAbaseTestsets(Set<AbaseTestset> abaseTestsets)
   {
     _abaseTestsets = abaseTestsets;
   }
@@ -1287,7 +1042,7 @@ public class Screen extends AbstractEntity
    * @param publications the new publications
    * @motivation for hibernate
    */
-  private void setHbnPublications(Set<Publication> publications)
+  private void setPublications(Set<Publication> publications)
   {
     _publications = publications;
   }
@@ -1298,7 +1053,7 @@ public class Screen extends AbstractEntity
    * @param lettersOfSupport the new letters of support
    * @motivation for hibernate
    */
-  private void setHbnLettersOfSupport(Set<LetterOfSupport> lettersOfSupport)
+  private void setLettersOfSupport(Set<LetterOfSupport> lettersOfSupport)
   {
     _lettersOfSupport = lettersOfSupport;
   }
@@ -1309,7 +1064,7 @@ public class Screen extends AbstractEntity
    * @param attachedFiles the new attached files
    * @motivation for hibernate
    */
-  private void setHbnAttachedFiles(Set<AttachedFile> attachedFiles)
+  private void setAttachedFiles(Set<AttachedFile> attachedFiles)
   {
     _attachedFiles = attachedFiles;
   }

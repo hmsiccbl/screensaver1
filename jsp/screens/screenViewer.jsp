@@ -9,9 +9,8 @@
 
 <%-- 
 TODO:
-- show more summary infor for extant screen result
+- show more summary info fields for extant screen result
 - abasetestset name should be prompted for prior to an add
-- make editable collaborators list follow the "add"/"delete" design we have for other sets
 - message user if duplicate keyword is added (other entity types as well?)
 - table sorting (fixed, but by business key, or something appropriate)
 - validation messages (per component)
@@ -498,9 +497,9 @@ TODO:
 					</t:column>
 				</t:dataTable>
 				<t:panelGroup rendered="#{screenViewer.editable}">
-					<t:inputText value="#{screenViewer.newKeyword}" styleClass="input"
-						required="false" />
-					<t:commandButton value="Add Keyword"
+					<t:inputText id="newKeyword" value="#{screenViewer.newKeyword}"
+						styleClass="input" required="false" />
+					<t:commandButton id="addKeywordCommand" value="Add Keyword"
 						action="#{screenViewer.addKeyword}" immediate="false"
 						styleClass="command" />
 				</t:panelGroup>

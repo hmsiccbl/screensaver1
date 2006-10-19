@@ -14,6 +14,8 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
 
 
 /**
@@ -49,17 +51,20 @@ public class AbaseTestset extends AbstractEntity
    *
    * @param screen the screen
    * @param testsetName the testset name
+   * @throws DuplicateEntityException 
    */
   public AbaseTestset(
     Screen screen,
-    String testsetName)
+    String testsetName) throws DuplicateEntityException
   {
     if (screen == null) {
       throw new NullPointerException();
     }
     _screen = screen;
     _testsetName = testsetName;
-    _screen.getHbnAbaseTestsets().add(this);
+    if (!_screen.getAbaseTestsets().add(this)) {
+      throw new DuplicateEntityException(_screen, this);
+    }
   }
 
 
@@ -87,27 +92,19 @@ public class AbaseTestset extends AbstractEntity
    * Get the screen.
    *
    * @return the screen
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.Screen"
+   *   column="screen_id"
+   *   not-null="true"
+   *   foreign-key="fk_abase_testset_to_screen"
+   *   cascade="save-update"
    */
+  @ToOneRelationship(nullable=false)
   public Screen getScreen()
   {
     return _screen;
   }
-
-  /**
-   * Set the screen.
-   *
-   * @param screen the new screen
-   */
-  public void setScreen(Screen screen)
-  {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
-    _screen.getHbnAbaseTestsets().remove(this);
-    _screen = screen;
-    _screen.getHbnAbaseTestsets().add(this);
-  }
-
+  
   /**
    * Get the testset date.
    *
@@ -133,6 +130,11 @@ public class AbaseTestset extends AbstractEntity
    * Get the testset name.
    *
    * @return the testset name
+   * @hibernate.property
+   *   column="testset_name"
+   *   type="text"
+   *   not-null="true"
+   * @motivation for hibernate
    */
   public String getTestsetName()
   {
@@ -146,9 +148,7 @@ public class AbaseTestset extends AbstractEntity
    */
   public void setTestsetName(String testsetName)
   {
-    _screen.getHbnAbaseTestsets().remove(this);
     _testsetName = testsetName;
-    _screen.getHbnAbaseTestsets().add(this);
   }
 
   /**
@@ -236,25 +236,6 @@ public class AbaseTestset extends AbstractEntity
   }
 
 
-  // package methods
-
-  /**
-   * Set the screen.
-   * Throw a NullPointerException when the screen is null.
-   *
-   * @param screen the new screen
-   * @throws NullPointerException when the screen is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  void setHbnScreen(Screen screen)
-  {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
-    _screen = screen;
-  }
-
-
   // private constructor
 
   /**
@@ -266,6 +247,17 @@ public class AbaseTestset extends AbstractEntity
 
 
   // private methods
+
+  /**
+   * Set the screen.
+   * 
+   * @param screen the Screen
+   * @motivation for hibernate
+   */
+  private void setScreen(Screen screen)
+  {
+    _screen = screen;
+  }
 
   /**
    * Set the id for the abase testset.
@@ -298,46 +290,4 @@ public class AbaseTestset extends AbstractEntity
     _version = version;
   }
 
-  /**
-   * Get the screen.
-   *
-   * @return the screen
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.Screen"
-   *   column="screen_id"
-   *   not-null="true"
-   *   foreign-key="fk_abase_testset_to_screen"
-   *   cascade="save-update"
-   * @motivation for hibernate
-   */
-  private Screen getHbnScreen()
-  {
-    return _screen;
-  }
-  
-  /**
-   * Get the testset name.
-   *
-   * @return the testset name
-   * @hibernate.property
-   *   column="testset_name"
-   *   type="text"
-   *   not-null="true"
-   * @motivation for hibernate
-   */
-  private String getHbnTestsetName()
-  {
-    return _testsetName;
-  }
-
-  /**
-   * Set the testset name.
-   *
-   * @param testsetName the new testset name
-   * @motivation for hibernate
-   */
-  private void setHbnTestsetName(String testsetName)
-  {
-    _testsetName = testsetName;
-  }
 }

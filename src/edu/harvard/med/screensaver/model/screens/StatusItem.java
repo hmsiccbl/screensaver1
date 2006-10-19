@@ -14,6 +14,8 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
 
 
 /**
@@ -49,11 +51,12 @@ public class StatusItem extends AbstractEntity
    * @param screen the screen
    * @param statusDate the status date
    * @param statusValue the status value
+   * @throws DuplicateEntityException 
    */
   public StatusItem(
     Screen screen,
     Date statusDate,
-    StatusValue statusValue)
+    StatusValue statusValue) throws DuplicateEntityException
   {
     if (screen == null) {
       throw new NullPointerException();
@@ -61,7 +64,9 @@ public class StatusItem extends AbstractEntity
     _screen = screen;
     _statusDate = truncateDate(statusDate);
     _statusValue = statusValue;
-    _screen.getHbnStatusItems().add(this);
+    if (!_screen.getStatusItems().add(this)) {
+      throw new DuplicateEntityException(_screen, this);
+    }
   }
 
 
@@ -89,25 +94,17 @@ public class StatusItem extends AbstractEntity
    * Get the screen.
    *
    * @return the screen
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.Screen"
+   *   column="screen_id"
+   *   not-null="true"
+   *   foreign-key="fk_status_item_to_screen"
+   *   cascade="save-update"
    */
+  @ToOneRelationship(nullable=false)
   public Screen getScreen()
   {
     return _screen;
-  }
-
-  /**
-   * Set the screen.
-   *
-   * @param screen the new screen
-   */
-  public void setScreen(Screen screen)
-  {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
-    _screen.getHbnStatusItems().remove(this);
-    _screen = screen;
-    _screen.getHbnStatusItems().add(this);
   }
 
   /**
@@ -149,9 +146,9 @@ public class StatusItem extends AbstractEntity
    */
   public void setStatusValue(StatusValue statusValue)
   {
-    _screen.getHbnStatusItems().remove(this);
+    _screen.getStatusItems().remove(this);
     _statusValue = statusValue;
-    _screen.getHbnStatusItems().add(this);
+    _screen.getStatusItems().add(this);
   }
 
 
@@ -217,25 +214,6 @@ public class StatusItem extends AbstractEntity
   }
 
 
-  // package methods
-
-  /**
-   * Set the screen.
-   * Throw a NullPointerException when the screen is null.
-   *
-   * @param screen the new screen
-   * @throws NullPointerException when the screen is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  void setHbnScreen(Screen screen)
-  {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
-    _screen = screen;
-  }
-
-
   // private constructor
 
   /**
@@ -247,6 +225,17 @@ public class StatusItem extends AbstractEntity
 
 
   // private methods
+
+  /**
+   * Set the screen.
+   *
+   * @param screen the new screen
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  private void setScreen(Screen screen)
+  {
+    _screen = screen;
+  }
 
   /**
    * Set the id for the status item.
@@ -277,23 +266,6 @@ public class StatusItem extends AbstractEntity
    */
   private void setVersion(Integer version) {
     _version = version;
-  }
-
-  /**
-   * Get the screen.
-   *
-   * @return the screen
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.Screen"
-   *   column="screen_id"
-   *   not-null="true"
-   *   foreign-key="fk_status_item_to_screen"
-   *   cascade="save-update"
-   * @motivation for hibernate
-   */
-  private Screen getHbnScreen()
-  {
-    return _screen;
   }
 
   /**

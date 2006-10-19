@@ -160,7 +160,7 @@ public class RNAiLibraryContentsImporterController extends AbstractController
         _dao.persistEntity(_library);
       }
       else {
-        showMessage("badUploadedFile", new Object [] { _uploadedFile.getName() });
+        showMessage("badUploadedFile", _uploadedFile.getName());
         return REDISPLAY_PAGE_ACTION_RESULT;
       }
 

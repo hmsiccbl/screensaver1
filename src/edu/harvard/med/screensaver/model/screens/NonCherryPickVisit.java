@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 
@@ -58,6 +59,7 @@ public class NonCherryPickVisit extends Visit
    * @param visitDate the visit date
    * @param visitType the visit type
    * @param assayProtocolType the assay protocol type
+   * @throws DuplicateEntityException 
    */
   public NonCherryPickVisit(
     Screen screen,
@@ -65,7 +67,7 @@ public class NonCherryPickVisit extends Visit
     Date dateCreated,
     Date visitDate,
     VisitType visitType,
-    AssayProtocolType assayProtocolType)
+    AssayProtocolType assayProtocolType) throws DuplicateEntityException
   {
     super(screen, performedBy, dateCreated, visitDate, visitType);
     _assayProtocolType = assayProtocolType;

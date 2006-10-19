@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 
@@ -52,13 +53,14 @@ public class CherryPickVisit extends Visit
    * @param dateCreated the date created
    * @param visitDate the visit date
    * @param visitType the visit type
+   * @throws DuplicateEntityException 
    */
   public CherryPickVisit(
     Screen screen,
     ScreeningRoomUser performedBy,
     Date dateCreated,
     Date visitDate,
-    VisitType visitType)
+    VisitType visitType) throws DuplicateEntityException
   {
     super(screen, performedBy, dateCreated, visitDate, visitType);
   }

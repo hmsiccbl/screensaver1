@@ -10,9 +10,11 @@
 package edu.harvard.med.screensaver.model.screens;
 
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -52,13 +54,14 @@ public class Publication extends AbstractEntity
    * @param yearPublished the year published
    * @param authors the authors
    * @param title the title
+   * @throws DuplicateEntityException 
    */
   public Publication(
     Screen screen,
     String pubmedId,
     String yearPublished,
     String authors,
-    String title)
+    String title) throws DuplicateEntityException
   {
     if (screen == null) {
       throw new NullPointerException();
@@ -68,7 +71,9 @@ public class Publication extends AbstractEntity
     _yearPublished = yearPublished;
     _authors = authors;
     _title = title;
-    _screen.getHbnPublications().add(this);
+    if (!_screen.getPublications().add(this)) {
+      throw new DuplicateEntityException(_screen, this);
+    }
   }
 
 
@@ -96,25 +101,17 @@ public class Publication extends AbstractEntity
    * Get the screen.
    *
    * @return the screen
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.Screen"
+   *   column="screen_id"
+   *   not-null="true"
+   *   foreign-key="fk_publication_to_screen"
+   *   cascade="save-update"
    */
+  @ToOneRelationship(nullable=false)
   public Screen getScreen()
   {
     return _screen;
-  }
-
-  /**
-   * Set the screen.
-   *
-   * @param screen the new screen
-   */
-  public void setScreen(Screen screen)
-  {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
-    _screen.getHbnPublications().remove(this);
-    _screen = screen;
-    _screen.getHbnPublications().add(this);
   }
 
   /**
@@ -134,9 +131,9 @@ public class Publication extends AbstractEntity
    */
   public void setPubmedId(String pubmedId)
   {
-    _screen.getHbnPublications().remove(this);
+    _screen.getPublications().remove(this);
     _pubmedId = pubmedId;
-    _screen.getHbnPublications().add(this);
+    _screen.getPublications().add(this);
   }
 
   /**
@@ -218,25 +215,6 @@ public class Publication extends AbstractEntity
   }
 
 
-  // package methods
-
-  /**
-   * Set the screen.
-   * Throw a NullPointerException when the screen is null.
-   *
-   * @param screen the new screen
-   * @throws NullPointerException when the screen is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  void setHbnScreen(Screen screen)
-  {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
-    _screen = screen;
-  }
-
-
   // private constructor
 
   /**
@@ -248,6 +226,17 @@ public class Publication extends AbstractEntity
 
 
   // private methods
+
+  /**
+   * Set the screen.
+   *
+   * @param screen the new screen
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  private void setScreen(Screen screen)
+  {
+    _screen = screen;
+  }
 
   /**
    * Set the id for the publication.
@@ -280,23 +269,6 @@ public class Publication extends AbstractEntity
     _version = version;
   }
 
-  /**
-   * Get the screen.
-   *
-   * @return the screen
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.Screen"
-   *   column="screen_id"
-   *   not-null="true"
-   *   foreign-key="fk_publication_to_screen"
-   *   cascade="save-update"
-   * @motivation for hibernate
-   */
-  private Screen getHbnScreen()
-  {
-    return _screen;
-  }
-  
   /**
    * Get the pubmed id.
    *

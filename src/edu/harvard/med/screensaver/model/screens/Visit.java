@@ -11,10 +11,12 @@ package edu.harvard.med.screensaver.model.screens;
 
 import java.util.Date;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -60,13 +62,14 @@ abstract public class Visit extends AbstractEntity
    * @param dateCreated the date created
    * @param visitDate the visit date
    * @param visitType the visit type
+   * @throws DuplicateEntityException 
    */
   public Visit(
     Screen screen,
     ScreeningRoomUser performedBy,
     Date dateCreated,
     Date visitDate,
-    VisitType visitType)
+    VisitType visitType) throws DuplicateEntityException
   {
     if (screen == null || performedBy == null) {
       throw new NullPointerException();
@@ -76,8 +79,13 @@ abstract public class Visit extends AbstractEntity
     _dateCreated = truncateDate(dateCreated);
     _visitDate = truncateDate(visitDate);
     _visitType = visitType;
-    _screen.getHbnVisits().add(this);
-    _performedBy.getHbnVisitsPerformed().add(this);
+    if (!_screen.getVisits().add(this)) {
+      throw new DuplicateEntityException(_screen, this);
+    }
+    if (!_performedBy.getHbnVisitsPerformed().add(this)) {
+      _screen.getVisits().remove(this);
+      throw new DuplicateEntityException(_performedBy, this);
+    }
   }
 
 
@@ -105,27 +113,17 @@ abstract public class Visit extends AbstractEntity
    * Get the screen.
    *
    * @return the screen
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.Screen"
+   *   column="screen_id"
+   *   not-null="true"
+   *   foreign-key="fk_visit_to_screen"
+   *   cascade="save-update"
    */
+  @ToOneRelationship(nullable=false)
   public Screen getScreen()
   {
     return _screen;
-  }
-
-  /**
-   * Set the screen.
-   *
-   * @param screen the new screen
-   */
-  public void setScreen(Screen screen)
-  {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
-    _screen.getHbnVisits().remove(this);
-    _performedBy.getHbnVisitsPerformed().remove(this);
-    _screen = screen;
-    _screen.getHbnVisits().add(this);
-    _performedBy.getHbnVisitsPerformed().add(this);
   }
 
   /**
@@ -148,10 +146,10 @@ abstract public class Visit extends AbstractEntity
     if (performedBy == null) {
       throw new NullPointerException();
     }
-    _screen.getHbnVisits().remove(this);
+    _screen.getVisits().remove(this);
     _performedBy.getHbnVisitsPerformed().remove(this);
     _performedBy = performedBy;
-    _screen.getHbnVisits().add(this);
+    _screen.getVisits().add(this);
     _performedBy.getHbnVisitsPerformed().add(this);
   }
 
@@ -194,10 +192,10 @@ abstract public class Visit extends AbstractEntity
    */
   public void setVisitDate(Date visitDate)
   {
-    _screen.getHbnVisits().remove(this);
+    _screen.getVisits().remove(this);
     _performedBy.getHbnVisitsPerformed().remove(this);
     _visitDate = truncateDate(visitDate);
-    _screen.getHbnVisits().add(this);
+    _screen.getVisits().add(this);
     _performedBy.getHbnVisitsPerformed().add(this);
   }
 
@@ -371,7 +369,7 @@ abstract public class Visit extends AbstractEntity
   }
 
 
-  // package methods
+  // private methods
 
   /**
    * Set the screen.
@@ -381,7 +379,7 @@ abstract public class Visit extends AbstractEntity
    * @throws NullPointerException when the screen is null
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
-  void setHbnScreen(Screen screen)
+  private void setScreen(Screen screen)
   {
     if (screen == null) {
       throw new NullPointerException();
@@ -418,23 +416,6 @@ abstract public class Visit extends AbstractEntity
    */
   private void setVersion(Integer version) {
     _version = version;
-  }
-
-  /**
-   * Get the screen.
-   *
-   * @return the screen
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.Screen"
-   *   column="screen_id"
-   *   not-null="true"
-   *   foreign-key="fk_visit_to_screen"
-   *   cascade="save-update"
-   * @motivation for hibernate
-   */
-  private Screen getHbnScreen()
-  {
-    return _screen;
   }
 
   /**

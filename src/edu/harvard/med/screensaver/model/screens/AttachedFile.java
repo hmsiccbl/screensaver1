@@ -10,9 +10,11 @@
 package edu.harvard.med.screensaver.model.screens;
 
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -48,11 +50,12 @@ public class AttachedFile extends AbstractEntity
    * @param screen the screen
    * @param filename the filename
    * @param fileContents the file contents
+   * @throws DuplicateEntityException 
    */
   public AttachedFile(
     Screen screen,
     String filename,
-    String fileContents)
+    String fileContents) throws DuplicateEntityException
   {
     if (screen == null) {
       throw new NullPointerException();
@@ -60,7 +63,9 @@ public class AttachedFile extends AbstractEntity
     _screen = screen;
     _filename = filename;
     _fileContents = fileContents;
-    _screen.getHbnAttachedFiles().add(this);
+    if (!_screen.getAttachedFiles().add(this)) {
+      throw new DuplicateEntityException(_screen, this);
+    }
   }
 
 
@@ -88,25 +93,18 @@ public class AttachedFile extends AbstractEntity
    * Get the screen.
    *
    * @return the screen
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.Screen"
+   *   column="screen_id"
+   *   not-null="true"
+   *   foreign-key="fk_attached_file_to_screen"
+   *   cascade="save-update"
+   * @motivation for hibernate
    */
+  @ToOneRelationship(nullable=false)
   public Screen getScreen()
   {
     return _screen;
-  }
-
-  /**
-   * Set the screen.
-   *
-   * @param screen the new screen
-   */
-  public void setScreen(Screen screen)
-  {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
-    _screen.getHbnAttachedFiles().remove(this);
-    _screen = screen;
-    _screen.getHbnAttachedFiles().add(this);
   }
 
   /**
@@ -126,9 +124,9 @@ public class AttachedFile extends AbstractEntity
    */
   public void setFilename(String filename)
   {
-    _screen.getHbnAttachedFiles().remove(this);
+    _screen.getAttachedFiles().remove(this);
     _filename = filename;
-    _screen.getHbnAttachedFiles().add(this);
+    _screen.getAttachedFiles().add(this);
   }
 
   /**
@@ -228,7 +226,7 @@ public class AttachedFile extends AbstractEntity
    * @throws NullPointerException when the screen is null
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
-  void setHbnScreen(Screen screen)
+  private void setScreen(Screen screen)
   {
     if (screen == null) {
       throw new NullPointerException();
@@ -279,23 +277,6 @@ public class AttachedFile extends AbstractEntity
   private void setVersion(Integer version) {
     _version = version;
   }
-
-  /**
-   * Get the screen.
-   *
-   * @return the screen
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.Screen"
-   *   column="screen_id"
-   *   not-null="true"
-   *   foreign-key="fk_attached_file_to_screen"
-   *   cascade="save-update"
-   * @motivation for hibernate
-   */
-  private Screen getHbnScreen()
-  {
-    return _screen;
-  }  
 
   /**
    * Get the filename.

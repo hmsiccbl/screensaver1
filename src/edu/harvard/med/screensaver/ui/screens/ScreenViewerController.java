@@ -24,6 +24,7 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
@@ -338,7 +339,7 @@ public class ScreenViewerController extends AbstractController
     //String visitIdToView = (String) getRequestParameterMap().get(VISIT_ID_PARAM_NAME);
     //_visitViewer.setVisitId(visitIdToView);
     // TODO: implement when Visit Viewer is implemented
-    return VIEW_VISIT_ACTION_RESULT;
+    return VIEW_VISIT_ACTION_RESULT;  
   }  
   
   public String viewAttachedFile()
@@ -421,8 +422,12 @@ public class ScreenViewerController extends AbstractController
   
   public String addKeyword()
   {
-    _screen.addKeyword(_newKeyword);
-    _newKeyword = "";
+    if (!_screen.addKeyword(_newKeyword)) {
+      showMessage("screens.duplicateKeyword", "newKeyword", _newKeyword);
+    }
+    else {
+      _newKeyword = "";
+    }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   

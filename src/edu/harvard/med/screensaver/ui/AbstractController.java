@@ -87,7 +87,7 @@ public abstract class AbstractController implements ScreensaverConstants
    * 
    * @return messages the Messages
    */
-  protected Messages getMessages() 
+  public Messages getMessages() 
   {
     return _messages;
   }
@@ -252,7 +252,7 @@ public abstract class AbstractController implements ScreensaverConstants
    */
   protected FacesMessage showMessage(String messageKey)
   {
-    return showMessage(messageKey, null, null);
+    return showMessage(messageKey, (String) null);
   }
   
   /**
@@ -265,9 +265,10 @@ public abstract class AbstractController implements ScreensaverConstants
    *          string)
    * @return the FacesMessage that was set
    */
-  protected FacesMessage showMessage(String messageKey, Object[] messageArgs)
+  protected FacesMessage showMessage(String messageKey, 
+                                     Object... messageArgs)
   {
-    return showMessage(messageKey, messageArgs, null);
+    return showMessage(messageKey, null, messageArgs);
   }
   
   /**
@@ -284,10 +285,9 @@ public abstract class AbstractController implements ScreensaverConstants
    *          ":formId:subviewId:fieldId").
    * @return the FacesMessage that was set
    */
-  protected FacesMessage showMessage(
-    String messageKey,
-    Object[] messageArgs,
-    String componentId)
+  protected FacesMessage showMessage(String messageKey,
+                                     String componentId, 
+                                     Object... messageArgs)
   {
     FacesMessage msg = _messages.setFacesMessageForComponent(messageKey, messageArgs, componentId);
     if (msg == null) {
@@ -361,7 +361,7 @@ public abstract class AbstractController implements ScreensaverConstants
   protected void reportSystemError(String errorMessage)
   {
     showMessage("systemError",
-                new Object[] {errorMessage});
+                errorMessage);
     log.error(errorMessage);
   }
 
@@ -392,8 +392,7 @@ public abstract class AbstractController implements ScreensaverConstants
    */
   protected void reportApplicationError(String errorMessage)
   {
-    showMessage("systemError",
-                new Object[] {errorMessage});
+    showMessage("systemError", errorMessage);
   }
   
   protected void closeDatabaseSession()

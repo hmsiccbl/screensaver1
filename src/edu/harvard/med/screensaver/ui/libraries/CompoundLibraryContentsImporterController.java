@@ -138,7 +138,7 @@ public class CompoundLibraryContentsImporterController extends AbstractControlle
         });
       }
       else {
-        showMessage("badUploadedFile", new Object [] { _uploadedFile.getName() });
+        showMessage("badUploadedFile", _uploadedFile.getName());
         return REDISPLAY_PAGE_ACTION_RESULT;
       }
 

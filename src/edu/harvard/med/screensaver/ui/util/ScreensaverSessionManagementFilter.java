@@ -34,7 +34,6 @@ import org.apache.log4j.Logger;
 import org.hibernate.FlushMode;
 import org.hibernate.SessionFactory;
 import org.hibernate.classic.Session;
-import org.springframework.orm.hibernate3.HibernateTransactionManager;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
 import org.springframework.orm.hibernate3.SessionHolder;
 import org.springframework.orm.hibernate3.support.OpenSessionInViewFilter;

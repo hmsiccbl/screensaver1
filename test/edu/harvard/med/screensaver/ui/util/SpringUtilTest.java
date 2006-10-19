@@ -61,7 +61,7 @@ public class SpringUtilTest extends AbstractSpringTest
   /* JUnit test methods */
   
   @SuppressWarnings("unchecked")
-  public void testMessages() throws Exception {
+  public void testMessagesArgSubstitution() throws Exception {
     InputStream messagesStream = getClass().getClassLoader().getResourceAsStream("messages.properties");
     Properties messagesProperties = new Properties();
     messagesProperties.load(messagesStream);
@@ -76,9 +76,9 @@ public class SpringUtilTest extends AbstractSpringTest
       for (int i = 0; i < args.length; ++i) {
         expectedMessageText = expectedMessageText.replaceAll("\\Q{" + i + "}\\E",
                                                              args[i].toString());
-        assertEquals(expectedMessageText,
-                     facesMessage.getDetail());
       }
+      assertEquals(expectedMessageText,
+                   facesMessage.getSummary());
     }
   }
 }
