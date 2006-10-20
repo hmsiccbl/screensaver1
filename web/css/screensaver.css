@@ -1,153 +1,162 @@
 body {
-  font-family: helvetica, arial, sans-serif;
-  font-size: medium;
-  font-weight: normal;
-  color: #000000;
-  background-color: #ffffff;
+	font-family: helvetica, arial, sans-serif;
+	font-size: medium;
+	font-weight: normal;
+	color: #000000;
+	background-color: #ffffff;
 }
 
 h1,.title {
-  font-size: x-large;
-  font-weight: bold;
+	font-size: x-large;
+	font-weight: bold;
 }
 
 h2,.sectionHeader {
-  font-weight: bold;
-  font-variant: small-caps;
-  font-size: large;
+	font-weight: bold;
+	font-variant: small-caps;
+	font-size: large;
 }
 
 .footer {
-  color: graytext;
-  font-size: small;
+	color: graytext;
+	font-size: small;
 }
 
 .userName {
-  font-weight: bold;
-  font-style: italic;
+	font-weight: bold;
+	font-style: italic;
 }
 
 a,a:link,a:visited,a:active {
-  color: #000000;
-  background-color: inherit;
+	color: #000000;
+	background-color: inherit;
 }
 
 a:hover {
-  color: #ff0000;
-  background-color: inherit;
+	color: #ff0000;
+	background-color: inherit;
 }
 
 hr {
-  height: 1px;
-  border-style: dotted;
-  border-color: #000000;
-  border-width: 0px 0px 1px 0px;
+	height: 1px;
+	border-style: dotted;
+	border-color: #000000;
+	border-width: 0px 0px 1px 0px;
 }
 
 .errorMessage {
-  font-style: italic;
-  font-size: large;
-  color: black;
-  background-color: yellow;
-  border: 1px;
+	font-style: italic;
+	font-size: large;
+	color: black;
+	background-color: yellow;
+	border: 1px;
 }
 
 .spacer {
 	margin-left: 4px;
 	margin-right: 4px;
-}	
-
-.standardTable {
-  color: #000000;
-  padding: 2px;
-  border-style: solid;
-  border-width: 1px;
-  border-color: gray;
-  border-collapse: collapse;
 }
 
-.dataText, .input {
+.standardTable {
+	color: #000000;
+	padding: 2px;
+	border-style: solid;
+	border-width: 1px;
+	border-color: gray;
+	border-collapse: collapse;
+}
+
+.dataText,.input {
 	font-family: sans-serif;
 	font-size: small;
 }
 
 .command,.input,.inputLabel {
-  margin-right: 4px;
+	margin-right: 4px;
 }
 
 .inputLabel {
-  vertical-align: top;
+	vertical-align: top;
 }
 
 .column,.keyColumn {
-  vertical-align: top;
+	vertical-align: top;
 }
 
 .keyColumn {
-  font-weight: bold;
+	font-weight: bold;
 }
 
 .tableHeader {
 	font-weight: bold;
-  background-color: #eeffff;
-  padding-right: 4px;
+	background-color: #eeffff;
+	padding-right: 4px;
 }
 
 .row1,.row2 {
-  font-size: small;
-  border-top: none;
-  border-bottom: none;
+	font-size: small;
+	border-top: none;
+	border-bottom: none;
 }
 
 .row1 {
-  background-color: #ffffff;
+	background-color: #ffffff;
 }
 
 .row2 {
-  background-color: #eeeeee;
+	background-color: #eeeeee;
 }
 
 .scroller_activePage {
-  font-weight: bold;
+	font-weight: bold;
 }
 
 .menuColumn,.contentColumn {
-  vertical-align: top;
+	vertical-align: top;
 }
 
 .menuColumn {
-  background-color: blue;
-  color: white;
-  font-size: small;
+	background-color: blue;
+	color: white;
+	font-size: small;
 }
 
 .menuItem,.menuItemActive {
-  color: white;
+	color: white;
 }
 
 .menuItemActive {
-  font-weight: bold;
+	font-weight: bold;
 }
 
-a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited {
-  color: white;
-  text-decoration: none;
+a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited
+	{
+	color: white;
+	text-decoration: none;
 }
 
 a.menuItem:hover,a.menuItemActive:hover {
-  color: white;
-  text-decoration: underline;
+	color: white;
+	text-decoration: underline;
+}
+
+.entityLink,.labLink {
+	text-decoration: none;
+}
+
+.labLink {
+ 	color: gray;
 }
 
 .navSeparator {
-  line-height: 12px;
-  border-bottom: 1px solid white;
+	line-height: 12px;
+	border-bottom: 1px solid white;
 }
 
 .resultsNavPanelStatus {
 	font-weight: bold;
 	font-size: large;
-	margin-left : 4px;
+	margin-left: 4px;
 	margin-right: 4px;
 }
 

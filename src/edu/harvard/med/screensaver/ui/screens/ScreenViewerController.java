@@ -24,7 +24,6 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
@@ -41,7 +40,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewerController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
-import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
+import edu.harvard.med.screensaver.ui.util.ScreeningRoomUserByLabComparator;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
@@ -229,20 +228,35 @@ public class ScreenViewerController extends AbstractController
     List<ScreeningRoomUser> labHeads = _dao.findAllLabHeads();
     for (ScreeningRoomUser labHead : labHeads) {
       labHeadSelectItems.add(new SelectItem(labHead,
-                                            // requirements state that "lab name" is last name of the "lab head"
-                                            labHead.getLastName()));
+                                            labHead.getLabName()));
     }
     return labHeadSelectItems;
   }
 
+  /**
+   * Get a list of SelectItems for the screen's collaborators. Collaborators are
+   * grouped (and indented) by lab, and the (unindented) lab SelectItem maps to
+   * the lab head.
+   */
   public List<SelectItem> getCollaboratorSelectItems()
   {
     // TODO: move the logic for determing potential collaborators to Screen
     List<SelectItem> collaboratorSelectItems = new ArrayList<SelectItem>();
     List<ScreeningRoomUser> screeningRoomUsers = _dao.findAllEntitiesWithType(ScreeningRoomUser.class);
-    Collections.sort(screeningRoomUsers, ScreensaverUserComparator.getInstance());
+    Collections.sort(screeningRoomUsers,
+                     ScreeningRoomUserByLabComparator.getInstance());
+    ScreeningRoomUser lastLabHead = null;
+    String indent = "...";
     for (ScreeningRoomUser screener : screeningRoomUsers) {
-      collaboratorSelectItems.add(new SelectItem(screener, screener.getFullName()));
+      if (lastLabHead == null || !screener.getLabHead().equals(lastLabHead)) {
+        collaboratorSelectItems.add(new SelectItem(screener.getLabHead(),
+                                                   screener.getLabName()));
+        lastLabHead = screener.getLabHead();
+      } 
+      else {
+        collaboratorSelectItems.add(new SelectItem(screener,
+                                                   indent + screener.getFullName()));
+      }
     }
     return collaboratorSelectItems;
   }
@@ -441,6 +455,24 @@ public class ScreenViewerController extends AbstractController
     //String collaboratorIdToView = (String) getRequestParameterMap().get(COLLABORATOR_ID_PARAM_NAME);
     //_screeningRoomUserViewer.setScreensaverUserId(collaboratorIdToView);
     return VIEW_SCREENING_ROOM_USER_ACTION_RESULT;
+  }
+
+  public String viewCollaboratorLabHead()
+  {
+    // TODO: implement
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  public String viewLabHead()
+  {
+    // TODO: implement
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  public String viewLeadScreener()
+  {
+    // TODO: implement
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   public String viewScreenResult()
