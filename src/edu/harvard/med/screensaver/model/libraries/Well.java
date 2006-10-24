@@ -14,6 +14,8 @@ package edu.harvard.med.screensaver.model.libraries;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.EntityIdProperty;
@@ -37,6 +39,7 @@ public class Well extends AbstractEntity
 
   private static final Logger log = Logger.getLogger(Well.class);
   private static final long serialVersionUID = 2682270079212906959L;
+  private static Pattern _wellParsePattern = Pattern.compile("([A-Za-z])(\\d{1,2})");
 
 
   // instance fields
@@ -55,6 +58,8 @@ public class Well extends AbstractEntity
   private String _smiles;
   private String _molfile;
   private String _genbankAccessionNumber;
+  private char _rowLetter;
+  private int _column;
 
 
   // public constructors and instance methods
@@ -68,7 +73,7 @@ public class Well extends AbstractEntity
    */
   public Well(Library parentLibrary, Integer plateNumber, String wellName, WellType wellType) {
     _plateNumber = plateNumber;
-    _wellName = wellName;
+    setWellName(wellName);
     _wellType = wellType;
     // this call must occur after assignments of wellName and plateNumber (to
     // ensure hashCode() works)
@@ -273,6 +278,17 @@ public class Well extends AbstractEntity
   private void setWellName(String wellName)
   {
     _wellName = wellName;
+    Matcher matcher = _wellParsePattern.matcher(wellName);
+    if (matcher.matches()) {
+      _rowLetter = matcher.group(1).toUpperCase().charAt(0);
+      _column = Integer.parseInt(matcher.group(2)) - 1;
+      if (_column < 0 || _column > 23) {
+        throw new IllegalArgumentException("well column is illegal");
+      }
+    } 
+    else {
+      throw new IllegalArgumentException("well name is illegal");
+    }
   }
 
   /**
@@ -448,6 +464,44 @@ public class Well extends AbstractEntity
   public Set<CherryPick> getHbnCherryPicks()
   {
     return _cherryPicks;
+  }
+  
+  /**
+   * Get the <i>zero-based</i> row index of this well.
+   * @return the <i>zero-based</i> row index of this well
+   */
+  @DerivedEntityProperty
+  public int getRow()
+  {
+    return _rowLetter - 'A';
+  }
+  
+  @DerivedEntityProperty
+  /**
+   * Get the row letter of this well.
+   * @return the row letter of this well
+   */
+  public char getRowLetter()
+  {
+    return _rowLetter;
+  }
+
+  /**
+   * Get the <i>zero-based</i> column index of this well.
+   * @return the <i>zero-based</i> column index of this well
+   */
+  @DerivedEntityProperty
+  public int getColumn()
+  {
+    return _column;
+  }
+  
+  @DerivedEntityProperty
+  public boolean isEdgeWell()
+  {
+    // TODO: use plate size/layout to determine this dynamically
+    return _rowLetter == 'A' || _rowLetter == 'P' || 
+    _column == 0 || _column == 23;
   }
   
 

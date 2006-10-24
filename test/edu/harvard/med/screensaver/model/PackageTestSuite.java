@@ -32,5 +32,6 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(EntityBeansTest.class);
     addTestSuite(EntityBeansPersistenceTest.class);
     addTestSuite(HibernateClassesTest.class);
+    addTestSuite(WellTest.class);
   }
 }
