@@ -2,8 +2,12 @@
 
 <f:subview id="librariesBrowser">
 
-  <%@include file="../searchResults.jspf"%>
-  
+  <t:aliasBean
+    alias="#{searchResults}"
+    value="#{searchResultsRegistry.searchResults}">
+    <%@include file="../searchResults.jspf"%>
+  </t:aliasBean>
+
 </f:subview>
 
 

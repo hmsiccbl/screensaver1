@@ -37,7 +37,6 @@ public class WellViewerController extends AbstractController
   
   public WellViewerController()
   {
-    _well = null;
   }
   
   public Well getWell()

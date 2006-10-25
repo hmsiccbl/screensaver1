@@ -158,6 +158,21 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractCo
   }
   
   /**
+   * Return true whenever the cell values for the column with the specified name should
+   * be a semicolon-separated list of hyperlinks. In this situation, {@link
+   * #getCellValue()} returns an array of values, and {@link #cellAction()} is
+   * called with a <code>commandValue</code> parameter equal to the results of
+   * {@link #getCellValue(AbstractEntity, String)}.
+   * 
+   * @return true whenever the cell values for the current column should be a list
+   * of hyperlinks
+   */
+  public boolean getIsCommandLinkList()
+  {
+    return isCommandLinkList(getColumnName());
+  }
+  
+  /**
    * Get the value to be displayed for the current cell.
    * @return the value to be displayed for the current cell
    */
@@ -515,6 +530,19 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractCo
    * be a hyperlink.
    */
   abstract protected boolean isCommandLink(String columnName);
+  
+  /**
+   * Return true whenever the cell values for the column with the specified name should
+   * be a semicolon-separated list of hyperlinks. In this situation, {@link
+   * #getCellValue()} returns an array of values, and {@link #cellAction()} is
+   * called with a <code>commandValue</code> parameter equal to the results of
+   * {@link #getCellValue(AbstractEntity, String)}.
+   * 
+   * @param columnName the name of the column
+   * @return true whenever the cell values for the column with the specified name should
+   * be a list of hyperlinks.
+   */
+  abstract protected boolean isCommandLinkList(String columnName);
   
   /**
    * Get the value to be displayed for the current cell.

@@ -95,6 +95,12 @@ public class WellSearchResults extends SearchResults<Well>
   }
   
   @Override
+  protected boolean isCommandLinkList(String columnName)
+  {
+    return columnName.equals(CONTENTS) && getContentsCount(getEntity()) > 1;
+  }
+  
+  @Override
   protected Object getCellValue(Well well, String columnName)
   {
     if (columnName.equals(LIBRARY)) {
@@ -124,6 +130,8 @@ public class WellSearchResults extends SearchResults<Well>
     }
     if (columnName.equals(WELL)) {
       _wellViewerController.setWell(well);
+      // TODO: remove the following line when bug about wrong compound image
+      // being displayed is resolved
       _compoundViewerController.setCompound(getCompoundWithLongestSmiles(well));
       return "showWell";
     }
@@ -133,7 +141,15 @@ public class WellSearchResults extends SearchResults<Well>
         return "showGene";
       }
       if (getCompoundCount(well) > 0) {
-        _compoundViewerController.setCompound(getCompoundWithLongestSmiles(well));
+        String compoundId = (String) getFacesContext().getExternalContext().getRequestParameterMap().get("commandValue");
+        Compound compound = null;
+        for (Compound compound2 : well.getCompounds()) {
+          if (compound2.getCompoundId().equals(compoundId)) {
+            compound = compound2;
+            break;
+          }
+        }
+        _compoundViewerController.setCompound(compound);
         return "showCompound";
       }
     }
@@ -173,8 +189,15 @@ public class WellSearchResults extends SearchResults<Well>
     }
     if (columnName.equals(CONTENTS)) {
       return new Comparator<Well>() {
+        @SuppressWarnings("unchecked")
         public int compare(Well w1, Well w2) {
-          return getContentsValue(w1).compareTo(getContentsValue(w2));
+          Object o1 = getContentsValue(w1);
+          String s1 = (o1 instanceof String) ?
+            (String) o1 : ((List<String>) o1).get(0);
+          Object o2 = getContentsValue(w2);
+          String s2 = (o2 instanceof String) ?
+            (String) o2 : ((List<String>) o2).get(0);
+          return s1.compareTo(s2);
         }
       };
     }
@@ -196,7 +219,7 @@ public class WellSearchResults extends SearchResults<Well>
   
   // private instance methods
   
-  private String getContentsValue(Well well)
+  private Object getContentsValue(Well well)
   {
     int geneCount = getGeneCount(well);
     if (geneCount == 1) {
@@ -207,10 +230,14 @@ public class WellSearchResults extends SearchResults<Well>
     }
     int compoundCount = getCompoundCount(well);
     if (compoundCount == 1) {
-      return getLongestCompoundSmiles(well);
+      return well.getCompounds().iterator().next();
     }
     if (compoundCount > 1) {
-      return "multiple compounds";
+      List<String> smiles = new ArrayList<String>();
+      for (Compound compound : well.getCompounds()) {
+        smiles.add(compound.getSmiles());
+      }
+      return smiles;
     }
     return "empty well";
   }
@@ -242,12 +269,7 @@ public class WellSearchResults extends SearchResults<Well>
     }
     return compoundWithLongestSmiles;
   }
-  
-  private String getLongestCompoundSmiles(Well well)
-  {
-    return getCompoundWithLongestSmiles(well).getSmiles();
-  }
-  
+
   private Gene getGeneForWell(Well well)
   {
     Set<Gene> genes = well.getGenes();

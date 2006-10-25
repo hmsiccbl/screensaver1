@@ -81,6 +81,12 @@ public class LibrarySearchResults extends SearchResults<Library>
   }
   
   @Override
+  protected boolean isCommandLinkList(String columnName)
+  {
+    return false;
+  }
+  
+  @Override
   protected Object getCellValue(Library library, String columnName)
   {
     if (columnName.equals(SHORT_NAME)) {

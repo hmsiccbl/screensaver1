@@ -74,6 +74,12 @@ public class ScreenSearchResults extends SearchResults<Screen>
   }
   
   @Override
+  protected boolean isCommandLinkList(String columnName)
+  {
+    return false;
+  }
+  
+  @Override
   protected Object getCellValue(Screen screen, String columnName)
   {
     if (columnName.equals(SCREEN_NUMBER)) {
