@@ -9,19 +9,20 @@
 
 package edu.harvard.med.screensaver.ui.util;
 
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import java.util.EnumSet;
+
+import edu.harvard.med.screensaver.ui.screenresults.NormalizationType;
 
 /**
- * Converts a ScreeningRoomUser between its entity object and its entity ID (as a String object).
+ * Converts a NormalizationType between its enum instance and its string represention.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class ScreeningRoomUserConverter extends AbstractEntityConverter<ScreeningRoomUser>
+public class NormalizationTypeConverter extends EnumTypeConverter<NormalizationType>
 {
-  @Override
-  protected Class<ScreeningRoomUser> getEntityClass()
+  public NormalizationTypeConverter()
   {
-    return ScreeningRoomUser.class;
+    super(EnumSet.allOf(NormalizationType.class));
   }
 }

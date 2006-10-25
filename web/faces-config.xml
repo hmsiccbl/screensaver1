@@ -195,6 +195,10 @@
       <property-name>messages</property-name>
       <value>#{messages}</value>
     </managed-property>
+    <managed-property>
+      <property-name>dao</property-name>
+      <value>#{dao}</value>
+    </managed-property>
   </managed-bean>
   
   <managed-bean>
@@ -605,12 +609,6 @@
   </converter>
   
   <converter>
-    <description>Converter for UISelect{One/Many} components (SelectItem elements)</description>
-    <converter-id>PlateNumberSelectItemConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.ui.util.PlateNumberSelectItemConverter</converter-class>
-  </converter>
-
-  <converter>
     <converter-id>ScreenTypeConverter</converter-id>
     <converter-class>edu.harvard.med.screensaver.ui.util.ScreenTypeConverter</converter-class>
   </converter>
@@ -655,6 +653,21 @@
     <converter-class>edu.harvard.med.screensaver.ui.util.FundingSupportConverter</converter-class>
   </converter>
   
+  <converter>
+    <converter-id>ResultValueTypeConverter</converter-id>
+    <converter-class>edu.harvard.med.screensaver.ui.util.ResultValueTypeConverter</converter-class>
+  </converter>
+  
+  <converter>
+    <converter-id>NormalizationTypeConverter</converter-id>
+    <converter-class>edu.harvard.med.screensaver.ui.util.NormalizationTypeConverter</converter-class>
+  </converter>
+  
+  <converter>
+    <converter-id>IntegerConverter</converter-id>
+    <converter-class>edu.harvard.med.screensaver.ui.util.IntegerConverter</converter-class>
+  </converter>
+
   <!-- Validators -->
 
   <validator>

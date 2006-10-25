@@ -74,8 +74,8 @@ public class ScreenResultExporterTest extends AbstractSpringTest
     assertEquals("PL_00003", HSSFCellUtil.getCell(HSSFCellUtil.getRow(320,sheetPlate3),0).getStringCellValue());
 
     
-    List<ResultValueType> expectedRvts = originalScreenResult.generateResultValueTypesList();
-    List<ResultValueType> actualRvts = exportedScreenResult.generateResultValueTypesList();
+    List<ResultValueType> expectedRvts = originalScreenResult.getResultValueTypesList();
+    List<ResultValueType> actualRvts = exportedScreenResult.getResultValueTypesList();
     Iterator expectedIter = expectedRvts.iterator();
     Iterator actualIter = actualRvts.iterator(); 
     while (expectedIter.hasNext() && actualIter.hasNext()) {

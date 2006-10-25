@@ -12,9 +12,18 @@ package edu.harvard.med.screensaver.ui.screenresults;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.faces.model.DataModel;
+import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
+import edu.harvard.med.screensaver.analysis.heatmaps.ControlWellsFilter;
+import edu.harvard.med.screensaver.analysis.heatmaps.DefaultMultiColorGradient;
+import edu.harvard.med.screensaver.analysis.heatmaps.HeatMap;
+import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
@@ -26,6 +35,9 @@ public class HeatMapViewerController extends AbstractController
 
   // static data members
 
+  private static final HeatMapCell EMPTY_HEAT_MAP_CELL = new HeatMapCell();
+
+
   private static Logger log = Logger.getLogger(HeatMapViewerController.class);
   
   
@@ -33,69 +45,159 @@ public class HeatMapViewerController extends AbstractController
 
   private ScreenResult _screenResult;
   private Integer _dataHeaderIndex;
-  private List<String> _plateNumbers;
+  private Integer _resultValueTypeId;
+  private List<Integer> _plateNumbers;
+  private NormalizationType _normalizationType = NormalizationType.ZSCORE;
   private UniqueDataHeaderNames _uniqueDataHeaderNames;
-
+  private HeatMap _heatMap;
+  /**
+   * 
+   */
+  private DataModel _heatMapDataModel;
+  private DataModel _heatMapColumnDataModel;
   
+  private DAO _dao;
+
+
+
   // bean property methods
   
+  public void setDao(DAO dao)
+  {
+    _dao = dao;
+  }
+
   public void setScreenResult(ScreenResult screenResult)
   {
-    if (_screenResult != screenResult) {
-      resetView();
-    }
     _screenResult = screenResult;
+    selectAllPlates();
+    _uniqueDataHeaderNames = new UniqueDataHeaderNames(_screenResult);
+    List<SelectItem> dataHeaderSelectItems = getDataHeaderSelectItems();
+    _resultValueTypeId = dataHeaderSelectItems.size() > 0 ? (Integer) getDataHeaderSelectItems().get(0).getValue()
+                                                       : null;
   }
   
   public ScreenResult getScreenResult()
   {
+    // for quicker web testing
+    if (_screenResult == null) {
+      log.debug("using default screen result for screen 107");
+      Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 107);
+      setScreenResult(screen.getScreenResult());
+    }
     return _screenResult;
   }
   
-  public void setPlateNumbers(List<String> plateNumbers)
+  public Integer getResultValueTypeId()
   {
-    log.debug("setPlateNumbers() called");
+    return _resultValueTypeId;
+  }
+
+  public void setResultValueTypeId(Integer resultValueTypeId)
+  {
+    _resultValueTypeId = resultValueTypeId;
+  }
+
+  public void setPlateNumbers(List<Integer> plateNumbers)
+  {
     _plateNumbers = plateNumbers;
   }
   
-  public List<String> getPlateNumbers()
+  public List<Integer> getPlateNumbers()
   {
-    log.debug("getPlateNumbers() called");
-    if (_plateNumbers == null) {
-      selectAllPlates();
-    }
     return _plateNumbers;
   }
   
-  public void setDataHeaderIndex(Integer dataHeaderIndex)
-  {
-    _dataHeaderIndex = dataHeaderIndex;
-  }
-  
-  public Integer getDataHeaderIndex()
-  {
-    return _dataHeaderIndex;
-  }
-
   public List<SelectItem> getPlateSelectItems()
   {
-    return JSFUtils.createUISelectItems(_screenResult.generatePlateNumbers());
+    return JSFUtils.createUISelectItems(getScreenResult().getPlateNumbers());
   }
   
+  public NormalizationType getNormalizationType()
+  {
+    return _normalizationType;
+  }
+
+  public void setNormalizationType(NormalizationType normalizationType)
+  {
+    _normalizationType = normalizationType;
+  }
+
   public List<SelectItem> getDataHeaderSelectItems()
   {
-    if (_uniqueDataHeaderNames == null) {
-      _uniqueDataHeaderNames = new UniqueDataHeaderNames(_screenResult);
-      // TODO: only show the ResultValueTypes that have numeric data (and raw only?)
+    List<SelectItem> selectItems = new ArrayList<SelectItem>();
+    for (ResultValueType rvt : getScreenResult().getResultValueTypes()) {
+      if (rvt.getActivityIndicatorType()
+             .equals(ActivityIndicatorType.NUMERICAL)) {
+        selectItems.add(new SelectItem(rvt.getEntityId(),
+                                       _uniqueDataHeaderNames.get(rvt.getOrdinal())));
+      }
     }
-    return JSFUtils.createUISelectItemsWithIndexValues(_uniqueDataHeaderNames.asList());
+    return selectItems;
   }
   
+  public List<SelectItem> getNormalizationTypeSelectItems()
+  {
+    List<SelectItem> selectItems = new ArrayList<SelectItem>();
+    for (NormalizationType normalizationType : NormalizationType.values()) {
+      selectItems.add(new SelectItem(normalizationType,
+                                     normalizationType.getDescription()));
+    }
+    return selectItems;
+  }
+  
+  
+  public DataModel getHeatMapDataModel()
+  {
+    return _heatMapDataModel;
+  }
+  
+  public DataModel getHeatMapColumnDataModel()
+  {
+    return _heatMapColumnDataModel;
+  }
+  
+
+  @SuppressWarnings("unchecked")
+  public HeatMapCell getHeatMapCell()
+  {
+    if (_heatMapColumnDataModel.isRowAvailable()) {
+      Integer columnIndex = (Integer) _heatMapColumnDataModel.getRowData(); // getRowData() is really getColumnData()
+      List<HeatMapCell> row = (List<HeatMapCell>) _heatMapDataModel.getRowData();
+      return row.get(columnIndex);
+    }
+    return EMPTY_HEAT_MAP_CELL;
+  }
+
 
   // JSF application methods
 
   public String update()
   {
+    ResultValueType rvt = _dao.findEntityById(ResultValueType.class, _resultValueTypeId);
+    _heatMap = new HeatMap(rvt,
+                           _plateNumbers.get(0),
+                           new ControlWellsFilter(),
+                           _normalizationType.getFunction(),
+                           new DefaultMultiColorGradient());
+
+    List<List<HeatMapCell>> rows = new ArrayList<List<HeatMapCell>>();
+    for (int row = 0; row < _heatMap.getRowCount(); row++) {
+      List<HeatMapCell> rowData = new ArrayList<HeatMapCell>();
+      for (int column = 0; column < _heatMap.getColumnCount(); column++) {
+        rowData.add(new HeatMapCell(_heatMap.getNormalizedValue(row, column),
+                                    _heatMap.getColor(row, column)));
+      }
+      rows.add(rowData);
+    }
+    _heatMapDataModel = new ListDataModel(rows);
+    
+    List<Integer> columnIndexes = new ArrayList<Integer>();
+    for (int column = 0; column < _heatMap.getColumnCount(); column++) {
+      columnIndexes.add(column);
+    }
+    _heatMapColumnDataModel = new ListDataModel(columnIndexes);
+
     return REDISPLAY_PAGE_ACTION_RESULT; // redisplay
   }
   
@@ -114,19 +216,9 @@ public class HeatMapViewerController extends AbstractController
   
   // private methods
   
-  private void resetView()
-  {
-    _dataHeaderIndex = null;
-    _plateNumbers = null;
-    _uniqueDataHeaderNames = null;
-  }
-  
   private void selectAllPlates()
   {
-    _plateNumbers = new ArrayList<String>();
-    for (Integer plateNumber : _screenResult.generatePlateNumbers()) {
-      _plateNumbers.add(plateNumber.toString());
-    }
+    _plateNumbers = new ArrayList<Integer>(getScreenResult().getPlateNumbers());
   }
   
   

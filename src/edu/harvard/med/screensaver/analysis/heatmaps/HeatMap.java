@@ -12,7 +12,6 @@ package edu.harvard.med.screensaver.analysis.heatmaps;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 import edu.harvard.med.screensaver.analysis.Filter;
 import edu.harvard.med.screensaver.analysis.NormalizationFunction;
@@ -139,6 +138,16 @@ public class HeatMap
     return _statistics.getSkewness();
   }
 
+  public int getRowCount()
+  {
+    return _data.length;
+  }
+
+  public int getColumnCount()
+  {
+    return _data[0].length;
+  }
+  
 
   // private methods
 
@@ -175,6 +184,6 @@ public class HeatMap
     _scalableColorFunction.setLowerLimit(_statistics.getMin());
     _scalableColorFunction.setUpperLimit(_statistics.getMax());
   }
-  
+
 }
 

@@ -19,6 +19,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -271,7 +272,8 @@ public class ScreenResult extends AbstractEntity
     _replicateCount = replicateCount;
   }
 
-  public SortedSet<Integer> generatePlateNumbers()
+  @DerivedEntityProperty
+  public SortedSet<Integer> getPlateNumbers()
   {
     if (_plateNumbers == null) {
       _plateNumbers = new TreeSet<Integer>();
@@ -290,7 +292,8 @@ public class ScreenResult extends AbstractEntity
    * @motivation random access to ResultValueTypes by ordinal
    * @return an ordered list of ResultValueTypes
    */
-  public List<ResultValueType> generateResultValueTypesList()
+  @DerivedEntityProperty
+  public List<ResultValueType> getResultValueTypesList()
   {
     return new ArrayList<ResultValueType>(_resultValueTypes);
   }

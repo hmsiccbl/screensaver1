@@ -9,19 +9,21 @@
 
 package edu.harvard.med.screensaver.ui.util;
 
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 
 /**
- * Converts a ScreeningRoomUser between its entity object and its entity ID (as a String object).
+ * Converts a ResultValueType between its entity object and its entity ID (as a String object).
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class ScreeningRoomUserConverter extends AbstractEntityConverter<ScreeningRoomUser>
+public class ResultValueTypeConverter extends AbstractEntityConverter<ResultValueType>
 {
+  
   @Override
-  protected Class<ScreeningRoomUser> getEntityClass()
+  protected Class<ResultValueType> getEntityClass()
   {
-    return ScreeningRoomUser.class;
+    return ResultValueType.class;
   }
+
 }

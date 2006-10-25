@@ -1150,7 +1150,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         //_errors.addError("unparseable Exclude value '" + value + "'", cell)
         return null;
       }
-      return _screenResult.generateResultValueTypesList().get(rvtOrdinal);
+      return _screenResult.getResultValueTypesList().get(rvtOrdinal);
     }
     
     private List<ResultValueType> makeRawResultValueTypeList(ScreenResult screenResult) 

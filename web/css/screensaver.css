@@ -58,12 +58,20 @@ hr {
 }
 
 .standardTable {
-	color: #000000;
-	padding: 2px;
+	color: #00000;
 	border-style: solid;
 	border-width: 1px;
 	border-color: gray;
 	border-collapse: collapse;
+}
+
+.heatMapTable {
+	border-style: solid;
+	border-width: 1px;
+	border-color: gray;
+	border-collapse: collapse;
+	font-size: small;
+	text-align: center;
 }
 
 .dataText,.input {
@@ -87,7 +95,7 @@ hr {
 	font-weight: bold;
 }
 
-.tableHeader {
+.tableHeader,.tableFooter {
 	font-weight: bold;
 	background-color: #eeffff;
 	padding-right: 4px;

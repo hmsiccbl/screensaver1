@@ -150,7 +150,7 @@ public class JSFUtils
   {
     List<SelectItem> result = new ArrayList<SelectItem>();
     for (Object item : items) {
-      result.add(new SelectItem(item.toString(), 
+      result.add(new SelectItem(item,
                                 item.toString()));
     }
     return result;

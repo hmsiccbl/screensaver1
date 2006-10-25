@@ -285,7 +285,7 @@ public class ScreenResultViewerController extends AbstractController
 
   public List<SelectItem> getPlateSelectItems()
   {
-    return JSFUtils.createUISelectItems(_screenResult.generatePlateNumbers());
+    return JSFUtils.createUISelectItems(_screenResult.getPlateNumbers());
   }
   
   public List<SelectItem> getDataHeaderSelectItems()

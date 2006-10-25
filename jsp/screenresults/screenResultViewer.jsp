@@ -162,7 +162,7 @@ TODO:
         binding="#{screenResultViewer.plateNumberInput}"
         onchange="javascript:document.getElementById('screenResultViewer:navigationForm:updateButton2').click()"
         valueChangeListener="#{screenResultViewer.plateNumberListener}"
-        converter="PlateNumberSelectItemConverter" styleClass="input">
+        converter="IntegerConverter" styleClass="input">
         <f:selectItems value="#{screenResultViewer.plateSelectItems}" />
       </t:selectOneMenu>
       <t:commandButton id="prevPageCommand" action="#{screenResultViewer.prevPage}" value="Prev"
