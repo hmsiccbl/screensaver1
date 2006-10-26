@@ -1,2 +1,0 @@
-# usage: screenresultparser.sh <metadata file> [<wells to print #>] [--ignorefilepaths]
-./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultParser --metadatafile $1 --wellstoprint ${2:-10} $3 --legacy

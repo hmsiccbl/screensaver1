@@ -19,6 +19,7 @@ import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -496,7 +497,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen1 = ScreenResultParserTest.makeDummyScreen(1); 
+        Screen screen1 = ScreenResultParser.makeDummyScreen(1); 
         dao.persistEntity(screen1);
         new ScreenResult(screen1, new Date());
       }

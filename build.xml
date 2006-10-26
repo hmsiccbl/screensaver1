@@ -97,8 +97,11 @@
   >
     <include name="**/*.jar"/>
     <exclude name="**/unused/**"/>
-    <!-- javax.servlet.jar will be explicitly ignored by any servlet container that obeys the 2.3 Servlet specification (sec 9.7.2). -->
-    <exclude name="**/javax.servlet.jar"/>
+    <!-- javax.servlet.jar will be explicitly ignored by any servlet container
+    that obeys the 2.3 Servlet specification (sec 9.7.2). We should exclude
+    it, but command line apps currently have a (unwanted) dependency on it
+    right now. [-ant 10/26/06] -->
+    <!--exclude name="**/javax.servlet.jar"/-->
   </fileset>
 
   <fileset

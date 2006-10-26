@@ -48,6 +48,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   public void doInTransaction(DAOTransaction daoTransaction)
   {
     daoTransaction.runTransaction();
+    // TODO: we should be handling exception handling and rollback in an explicit manner
   }
   
   public <E extends AbstractEntity> E defineEntity(

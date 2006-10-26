@@ -50,7 +50,7 @@ public class UniqueDataHeaderNamesTest extends AbstractSpringTest
         expectedUniqueNames.add("AssayIndicator");
         expectedUniqueNames.add("Cherry Pick");
 
-        ScreenResult screenResult = screenResultParser.parseLegacy(ScreenResultParserTest.makeDummyScreen(115), 
+        ScreenResult screenResult = screenResultParser.parseLegacy(ScreenResultParser.makeDummyScreen(115), 
                                                                    new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
                                                                    "LegacyTestAllInOne.xls"), 
                                                                    /*ignored file paths=*/ true);
