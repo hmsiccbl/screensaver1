@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -31,12 +32,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * bootstrapping code, so that developers can forget the details of how to do
  * this (and don't have to cut and paste code between various main() methods).
  * Also provides a some help with:
- * <ul>
- * <li>command-line argument parsing (including special-case handling of
+ * ul
+ * licommand-line argument parsing (including special-case handling of
  * database connection options)
- * <li>obtaining Spring-managed beans.
- * <ul>.
- * <p>
+ * liobtaining Spring-managed beans.
+ * ul.
+ * p
  * Normally, a screensaver distribution will use the database connection
  * settings specified in "classpath:datasource.properties". However, if
  * {@link #processOptions(boolean, boolean)} is called with
@@ -48,46 +49,82 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class CommandLineApplication
 {
-  public static final String[] SPRING_CONFIG_FILES = {
-    "spring-context.xml",
-  };
+  private static final Logger log = Logger.getLogger(CommandLineApplication.class);
+  
+  private static final String SPRING_CONFIG = "spring-context.xml";
+  private static final String SPRING_CONFIG_SANS_DB = "spring-context-sans-db.xml";
+  
+  
+  // instanc data
   
   private ApplicationContext _appCtx;
   private Options _options;
   private CommandLine _cmdLine;
   private String[] _cmdLineArgs;
   private Map<String,Object> _option2DefaultValue = new HashMap<String,Object>();
+  private boolean _isDatabaseRequired;
   
-    
+  
+  // public methods
+  
   @SuppressWarnings("static-access")
   public CommandLineApplication(String[] cmdLineArgs)
   {
-    _appCtx = new ClassPathXmlApplicationContext(SPRING_CONFIG_FILES);
     _cmdLineArgs = cmdLineArgs;
     _options = new Options();
     _options.addOption(OptionBuilder.
-                       withArgName("help").
                        withLongOpt("help").
                        withDescription("print this help").
-                       create());
+                       create("h"));
   }
   
+
   public Object getSpringBean(String springBeanName)
   {
-    return _appCtx.getBean(springBeanName);
+    return getSpringApplicationContext().getBean(springBeanName);
   }
   
   @SuppressWarnings("unchecked")
   public <T> T getSpringBean(String springBeanName, Class<T> ofType)
   {
-    return (T) _appCtx.getBean(springBeanName);
+    return (T) getSpringApplicationContext().getBean(springBeanName);
   }
   
   public ApplicationContext getSpringApplicationContext()
   {
+    if (_appCtx == null) {
+      if (isDatabaseRequired()) {
+        _appCtx = new ClassPathXmlApplicationContext(SPRING_CONFIG);
+      }
+      else {
+        _appCtx = new ClassPathXmlApplicationContext(SPRING_CONFIG_SANS_DB);
+      }
+    }
     return _appCtx;
   }
   
+  public boolean isDatabaseRequired()
+  {
+    return _isDatabaseRequired;
+  }
+
+  /**
+   * Configures whether the application will be configured with database access.
+   * Affects which top-level Spring context configuration file is used to
+   * initialize the application, "spring-context.xml" or
+   * "spring-context-sans-db.xml".
+   * 
+   * @param isDatabaseRequired
+   */
+  public void setDatabaseRequired(boolean isDatabaseRequired)
+  {
+    if (_appCtx != null) {
+      throw new IllegalStateException("setDatabaseRequired() must be called before " +
+      "first call to getSpringBean() or getSpringApplicationContext()");
+    }
+    _isDatabaseRequired = isDatabaseRequired;
+  }
+
   public void addCommandLineOption(Option option)
   {
     _options.addOption(option);
@@ -110,23 +147,22 @@ public class CommandLineApplication
     return optionValue == null ? "" : optionValue.toString();
   }
   
-  private void verifyOptionsProcessed()
-  {
-    if (_cmdLine == null) {
-      throw new IllegalStateException("processOptions() not yet called or error occurred parsing command line options");
-    }
-  }
-
   @SuppressWarnings("unchecked")
-  public <T> T getCommandLineOptionValue(String optionName, Class<T> ofType) throws ParseException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
+  public <T> T getCommandLineOptionValue(String optionName, Class<T> ofType) 
+    throws ParseException, IllegalArgumentException, SecurityException, 
+           InstantiationException, IllegalAccessException, InvocationTargetException, 
+           NoSuchMethodException
   {
     verifyOptionsProcessed();
     if (!_cmdLine.hasOption(optionName) &&
       _option2DefaultValue.containsKey(optionName)) {
       return (T) _option2DefaultValue.get(optionName);
     }
-    Constructor cstr = ofType.getConstructor(String.class);
-    return (T) cstr.newInstance(getCommandLineOptionValue(optionName));
+    if (_cmdLine.hasOption(optionName)) {
+      Constructor cstr = ofType.getConstructor(String.class);
+      return (T) cstr.newInstance(getCommandLineOptionValue(optionName));
+    }
+    return null;
   }
   
   public boolean isCommandLineFlagSet(String optionName) throws ParseException
@@ -137,18 +173,19 @@ public class CommandLineApplication
   
   public void showHelp()
   {
-    new HelpFormatter().printHelp("<command>", _options);
+    new HelpFormatter().printHelp("command", _options, true);
   }
   
   /**
    * @param acceptDatabaseOptions
-   * @param showHelpOnError if <code>true</code> and method returns
-   *          <code>false</code>, calling code should not call
+   * @param showHelpOnError if codetrue/code and method returns
+   *          codefalse/code, calling code should not call
    *          {@link #getCommandLineOptionValue} or
    *          {@link #isCommandLineFlagSet(String)}.
    * @return
    * @throws ParseException
    */
+  @SuppressWarnings("unchecked")
   public boolean processOptions(
     boolean acceptDatabaseOptions,
     boolean showHelpOnError) throws ParseException
@@ -176,19 +213,49 @@ public class CommandLineApplication
     }
 
     if (acceptDatabaseOptions) {
-      BasicDataSource dataSource = getSpringBean("screensaverDataSource",
-                                                 BasicDataSource.class);
-      dataSource.setUsername(getCommandLineOptionValue("dbuser"));
-      dataSource.setPassword(getCommandLineOptionValue("dbpassword"));
-      dataSource.setUrl("jdbc:postgresql://" + getCommandLineOptionValue("dbhost") + (getCommandLineOptionValue("dbport").length() > 0
-        ? (":" + getCommandLineOptionValue("dbport")) : "") + "/" + getCommandLineOptionValue("dbname"));
+      // TODO: make constants for these property names
+      if (isCommandLineFlagSet("H")) {
+        System.setProperty("SCREENSAVER_PGSQL_SERVER", getCommandLineOptionValue("H"));
+      }
+      if (isCommandLineFlagSet("D") || isCommandLineFlagSet("T")) {
+        System.setProperty("SCREENSAVER_PGSQL_DB", 
+                           (isCommandLineFlagSet("D") ? getCommandLineOptionValue("D") : "localhost") +
+                           (isCommandLineFlagSet("T") ? ": " + getCommandLineOptionValue("T") : ""));
+      }
+      if (isCommandLineFlagSet("U")) {
+        System.setProperty("SCREENSAVER_PGSQL_USER", getCommandLineOptionValue("U"));
+      }
+      if (isCommandLineFlagSet("P")) {
+        System.setProperty("SCREENSAVER_PGSQL_PASSWORD", getCommandLineOptionValue("P"));
+      }
     }
-      
+    
+    StringBuilder s = new StringBuilder();
+    for (Option option : (Collection<Option>) _options.getOptions()) {
+      if (_cmdLine.hasOption(option.getOpt())) {
+        if (s.length() > 0) {
+          s.append(", ");
+        }
+        s.append(option.getLongOpt());
+        if (option.hasArg()) {
+          s.append("=").append(_cmdLine.getOptionValue(option.getOpt()));
+        }
+      }
+    }
+    log.info("command line options: " + s.toString());
+
     return true;
   }
-
+  
   
   // private methods
+
+  private void verifyOptionsProcessed()
+  {
+    if (_cmdLine == null) {
+      throw new IllegalStateException("processOptions() not yet called or error occurred parsing command line options");
+    }
+  }
 
   /**
    * Adds "dbhost", "dbport", "dbuser", "dbpassword", and "dbname" options to
@@ -199,34 +266,35 @@ public class CommandLineApplication
   private void addDatabaseOptions()
   {
     addCommandLineOption(OptionBuilder.
-                         withArgName("dbhost").
+                         hasArg().
+                         withArgName("host name").
                          withLongOpt("dbhost").
-                         hasArg().
                          withDescription("database host").
-                         create());
+                         create("H"));
     addCommandLineOption(OptionBuilder.
-                         withArgName("dbport").
+                         hasArg().
+                         withArgName("port").
                          withLongOpt("dbport").
-                         hasArg().
                          withDescription("database port").
-                         create());
+                         create("T"));
     addCommandLineOption(OptionBuilder.
-                         withArgName("dbuser").
+                         hasArg().
+                         withArgName("user name").
                          withLongOpt("dbuser").
-                         hasArg().
                          withDescription("database user name").
-                         create());
-    addCommandLineOption(OptionBuilder.withArgName("dbpassword").
-                         withLongOpt("dbpassword").
-                         hasArg().
-                         withDescription("database user's password").
-                         create());
+                         create("U"));
     addCommandLineOption(OptionBuilder.
-                         withArgName("dbname").
-                         withLongOpt("dbname").
                          hasArg().
+                         withArgName("password").
+                         withLongOpt("dbpassword").
+                         withDescription("database user's password").
+                         create("P"));
+    addCommandLineOption(OptionBuilder.
+                         hasArg().
+                         withArgName("database").
+                         withLongOpt("dbname").
                          withDescription("database name").
-                         create());
+                         create("D"));
   }
   
 }

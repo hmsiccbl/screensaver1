@@ -1,4 +1,6 @@
-// $HeadURL$
+// $HeadURL:
+// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/io/screenresults/ScreenResultParser.java
+// $
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
@@ -8,6 +10,7 @@
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.io.screenresults;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -105,24 +108,30 @@ import org.hibernate.Hibernate;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-// TODO: consider renaming "metadata" to "dataHeaders" (methods and variables), as this is more in keeping with the new file format
-// TODO: now that this class supports dual formats ("legacy" and "new"), we should separate behavior via polymorphism, having 2 subclasses that allow each format to handled appropriately
+// TODO: consider renaming "metadata" to "dataHeaders" (methods and variables),
+// as this is more in keeping with the new file format
+// TODO: now that this class supports dual formats ("legacy" and "new"), we
+// should separate behavior via polymorphism, having 2 subclasses that allow
+// each format to handled appropriately
 public class ScreenResultParser implements ScreenResultWorkbookSpecification
 {
-  
-  // static data members
 
-  private static final String IMPORT_OPTION = "import";
-  private static final String LEGACY_FORMAT_OPTION = "legacy-format";
-  private static final String IGNORE_FILE_PATHS_OPTION = "ignore-file-paths";
-  private static final String WELLS_OPTION = "wells";
-  private static final String SCREEN_OPTION = "screen";
-  private static final String INPUT_FILE_OPTION = "input-file";
+  // static data members
+  
+  private static final int SHORT_OPTION = 0;
+  private static final int LONG_OPTION = 1;
+
+  private static final String[] INPUT_FILE_OPTION = { "f", "input-file" };
+  private static final String[] SCREEN_OPTION = { "s", "screen" };
+  private static final String[] LEGACY_FORMAT_OPTION = { "l", "legacy-format" };
+  private static final String[] IMPORT_OPTION = { "i", "import" };
+  private static final String[] IGNORE_FILE_PATHS_OPTION = { "p", "ignore-file-paths" };
+  private static final String[] WELLS_OPTION = { "w", "wells" };
 
   private static final String ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION = "errors.xls";
 
   private static final Logger log = Logger.getLogger(ScreenResultParser.class);
-  
+
 
   // TODO: move these a messages (Spring) resource file
   private static final String NO_METADATA_META_SHEET_ERROR = "worksheet could not be found";
@@ -147,23 +156,23 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private static SortedMap<String,PartitionedValue> partitionedValueMap = new TreeMap<String,PartitionedValue>();
   private static SortedMap<String,AssayWellType> assayWellTypeMap = new TreeMap<String,AssayWellType>();
   static {
-    indicatorDirectionMap.put("<",IndicatorDirection.LOW_VALUES_INDICATE);
-    indicatorDirectionMap.put(">",IndicatorDirection.HIGH_VALUES_INDICATE);
-    
+    indicatorDirectionMap.put("<", IndicatorDirection.LOW_VALUES_INDICATE);
+    indicatorDirectionMap.put(">", IndicatorDirection.HIGH_VALUES_INDICATE);
+
     // TODO: add conditional code that disallows legacy values when parsing new format
-    activityIndicatorTypeMap.put("High values",ActivityIndicatorType.NUMERICAL); // legacy format
-    activityIndicatorTypeMap.put("Low values",ActivityIndicatorType.NUMERICAL); // legacy format
-    activityIndicatorTypeMap.put("Numeric",ActivityIndicatorType.NUMERICAL);
-    activityIndicatorTypeMap.put("Numerical",ActivityIndicatorType.NUMERICAL);
-    activityIndicatorTypeMap.put("A",ActivityIndicatorType.NUMERICAL); // legacy format
-    activityIndicatorTypeMap.put("B",ActivityIndicatorType.NUMERICAL); // legacy format
-    activityIndicatorTypeMap.put("Boolean",ActivityIndicatorType.BOOLEAN);
-    activityIndicatorTypeMap.put("C",ActivityIndicatorType.BOOLEAN);  // legacy format
-    activityIndicatorTypeMap.put("Scaled",ActivityIndicatorType.PARTITION);  // legacy format
-    activityIndicatorTypeMap.put("Partitioned",ActivityIndicatorType.PARTITION);
-    activityIndicatorTypeMap.put("Partition",ActivityIndicatorType.PARTITION);
-    activityIndicatorTypeMap.put("D",ActivityIndicatorType.PARTITION);  // legacy format
-    
+    activityIndicatorTypeMap.put("High values", ActivityIndicatorType.NUMERICAL); // legacy format
+    activityIndicatorTypeMap.put("Low values", ActivityIndicatorType.NUMERICAL); // legacy format
+    activityIndicatorTypeMap.put("Numeric", ActivityIndicatorType.NUMERICAL);
+    activityIndicatorTypeMap.put("Numerical", ActivityIndicatorType.NUMERICAL);
+    activityIndicatorTypeMap.put("A", ActivityIndicatorType.NUMERICAL); // legacy format
+    activityIndicatorTypeMap.put("B", ActivityIndicatorType.NUMERICAL); // legacy format
+    activityIndicatorTypeMap.put("Boolean", ActivityIndicatorType.BOOLEAN);
+    activityIndicatorTypeMap.put("C", ActivityIndicatorType.BOOLEAN); // legacy format
+    activityIndicatorTypeMap.put("Scaled", ActivityIndicatorType.PARTITION); // legacy format
+    activityIndicatorTypeMap.put("Partitioned", ActivityIndicatorType.PARTITION);
+    activityIndicatorTypeMap.put("Partition", ActivityIndicatorType.PARTITION);
+    activityIndicatorTypeMap.put("D", ActivityIndicatorType.PARTITION); // legacy format
+
     rawOrDerivedMap.put("", false);
     rawOrDerivedMap.put(RAW_VALUE, false);
     rawOrDerivedMap.put(DERIVED_VALUE, true);
@@ -171,7 +180,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     primaryOrFollowUpMap.put("", false);
     primaryOrFollowUpMap.put(PRIMARY_VALUE, false);
     primaryOrFollowUpMap.put(FOLLOWUP_VALUE, true);
-    
+
     booleanMap.put("", false);
     booleanMap.put("false", false);
     booleanMap.put("no", false);
@@ -181,14 +190,14 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     booleanMap.put("yes", true);
     booleanMap.put("y", true);
     booleanMap.put("1", true);
-    
+
     for (PartitionedValue pv : PartitionedValue.values()) {
-      partitionedValueMap.put(pv.getValue().toLowerCase(),
-                              pv);
-      partitionedValueMap.put(pv.getValue().toUpperCase(),
-                              pv);
+      partitionedValueMap.put(pv.getValue()
+                                .toLowerCase(), pv);
+      partitionedValueMap.put(pv.getValue()
+                                .toUpperCase(), pv);
     }
-    
+
     assayWellTypeMap.put("X", AssayWellType.EXPERIMENTAL);
     assayWellTypeMap.put("E", AssayWellType.EMPTY);
     assayWellTypeMap.put("P", AssayWellType.ASSAY_POSITIVE_CONTROL);
@@ -198,7 +207,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     assayWellTypeMap.put("B", AssayWellType.BUFFER);
     assert assayWellTypeMap.size() == AssayWellType.values().length : "assayWellTypeMap not initialized properly";
   }
-  
+
 
   // static methods
 
@@ -207,61 +216,66 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   {
     CommandLineApplication app = new CommandLineApplication(args);
     app.addCommandLineOption(OptionBuilder.hasArg()
-                                          .withArgName("screen number")
+                                          .withArgName("#")
                                           .isRequired()
                                           .withDescription("the screen number of the screen for which the screen result is being parsed")
-                                          .withLongOpt(SCREEN_OPTION)
-                                          .create());
+                                          .withLongOpt(SCREEN_OPTION[LONG_OPTION])
+                                          .create(SCREEN_OPTION[SHORT_OPTION]));
     app.addCommandLineOption(OptionBuilder.hasArg()
-                                          .withArgName("metadata file")
+                                          .withArgName("file")
                                           .isRequired()
                                           .withDescription("the file location of the Excel workbook file holding the Screen Result metadata")
-                                          .withLongOpt(INPUT_FILE_OPTION)
-                                          .create());
+                                          .withLongOpt(INPUT_FILE_OPTION[LONG_OPTION])
+                                          .create(INPUT_FILE_OPTION[SHORT_OPTION]));
     app.addCommandLineOption(OptionBuilder.hasArg()
-                                          .withArgName("wells to print")
+                                          .withArgName("#")
                                           .isRequired(false)
                                           .withDescription("the number of wells to print out")
-                                          .withLongOpt(WELLS_OPTION)
-                                          .create());
+                                          .withLongOpt(WELLS_OPTION[LONG_OPTION])
+                                          .create(WELLS_OPTION[SHORT_OPTION]));
     app.addCommandLineOption(OptionBuilder.withDescription("whether to ignore the file paths for the raw data workbook "
                                                            + "files (as specified in the metadata workbook); if option is "
                                                            + "provided all files will be expected to be found in the same directory; "
                                                            + "ignored unless 'legacy' option is specified")
-                                          .withLongOpt(IGNORE_FILE_PATHS_OPTION)
-                                          .create());
+                                          .withLongOpt(IGNORE_FILE_PATHS_OPTION[LONG_OPTION])
+                                          .create(IGNORE_FILE_PATHS_OPTION[SHORT_OPTION]));
     app.addCommandLineOption(OptionBuilder.withDescription("indicates that workbook uses the legacy format for Screen Results")
-                                          .withLongOpt(LEGACY_FORMAT_OPTION)
-                                          .create());
+                                          .withLongOpt(LEGACY_FORMAT_OPTION[LONG_OPTION])
+                                          .create(LEGACY_FORMAT_OPTION[SHORT_OPTION]));
     app.addCommandLineOption(OptionBuilder.withDescription("Import screen result into database if parsing is successful.  "
                                                            + "(By default, the parser only validates the input and then exits.)")
-                                          .withLongOpt(IMPORT_OPTION)
-                                          .create());
+                                          .withLongOpt(IMPORT_OPTION[LONG_OPTION])
+                                          .create(IMPORT_OPTION[SHORT_OPTION]));
     try {
-      if (!app.processOptions(/* acceptDatabaseOptions= */false, /* showHelpOnError= */true)) {
+      if (!app.processOptions(/* acceptDatabaseOptions= */true, 
+                              /* showHelpOnError= */true)) {
         return;
       }
-
-      final File inputFile = app.getCommandLineOptionValue(INPUT_FILE_OPTION, File.class);
-      final boolean parseLegacyFormat = app.isCommandLineFlagSet(LEGACY_FORMAT_OPTION);
-      cleanOutputDirectory(inputFile.getParentFile());
+      
+      app.setDatabaseRequired(app.isCommandLineFlagSet(IMPORT_OPTION[SHORT_OPTION]));
+      
+      final File inputFile = app.getCommandLineOptionValue(INPUT_FILE_OPTION[SHORT_OPTION],
+                                                           File.class);
+      final boolean parseLegacyFormat = app.isCommandLineFlagSet(LEGACY_FORMAT_OPTION[SHORT_OPTION]);
+      cleanOutputDirectory(inputFile.getAbsoluteFile().getParentFile());
 
       Screen screen = null;
       ScreenResultParser screenResultParser = null;
-      if (app.isCommandLineFlagSet(IMPORT_OPTION)) {
+      if (app.isCommandLineFlagSet(IMPORT_OPTION[SHORT_OPTION])) {
         // database-dependent screenResultParser
         screen = findScreenOrExit(app);
         screenResultParser = (ScreenResultParser) app.getSpringBean("screenResultParser");
       }
       else {
         // database-independent screenResultParser
-        int screenNumber = Integer.parseInt(app.getCommandLineOptionValue(SCREEN_OPTION));
+        int screenNumber = Integer.parseInt(app.getCommandLineOptionValue(SCREEN_OPTION[SHORT_OPTION]));
         screen = makeDummyScreen(screenNumber);
         screenResultParser = (ScreenResultParser) app.getSpringBean("mockScreenResultParser");
       }
 
-      final boolean ignoreFilePathOptions = app.isCommandLineFlagSet(IGNORE_FILE_PATHS_OPTION);
-      final Integer wellsToPrint = app.getCommandLineOptionValue(WELLS_OPTION, Integer.class);
+      final boolean ignoreFilePathOptions = app.isCommandLineFlagSet(IGNORE_FILE_PATHS_OPTION[SHORT_OPTION]);
+      final Integer wellsToPrint = app.getCommandLineOptionValue(WELLS_OPTION[SHORT_OPTION],
+                                                                 Integer.class);
       final Screen finalScreen = screen;
       final ScreenResultParser finalScreenResultParser = screenResultParser;
       final InputStream inputFileStream = new FileInputStream(inputFile);
@@ -294,7 +308,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       else {
         screenResultParser._dao.persistEntity(screen);
         System.err.println("Success!");
-      }        
+      }
     }
     catch (IOException e) {
       String errorMsg = "I/O error: " + e.getMessage();
@@ -334,7 +348,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   private static Screen findScreenOrExit(CommandLineApplication app) throws ParseException
   {
-    int screenNumber = Integer.parseInt(app.getCommandLineOptionValue(SCREEN_OPTION));
+    int screenNumber = Integer.parseInt(app.getCommandLineOptionValue(SCREEN_OPTION[SHORT_OPTION]));
     DAO dao = (DAO) app.getSpringBean("dao");
     Screen screen = dao.findEntityByProperty(Screen.class, 
                                               "hbnScreenNumber", 

@@ -13,6 +13,7 @@
     <property name="url" value="jdbc:postgresql://${SCREENSAVER_PGSQL_SERVER}/${SCREENSAVER_PGSQL_DB}"/>
     <property name="username" value="${SCREENSAVER_PGSQL_USER}"/>
     <property name="password" value="${SCREENSAVER_PGSQL_PASSWORD}"/>
+    <property name="minIdle" value="0"/>
   </bean>
   
   <bean

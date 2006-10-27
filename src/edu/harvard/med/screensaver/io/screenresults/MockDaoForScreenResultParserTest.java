@@ -9,21 +9,13 @@
 
 package edu.harvard.med.screensaver.io.screenresults;
 
-import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.NoOpDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 /**
  * Enable testing of ScreenResultParser (via ScreenResultParserTest), in mock
@@ -34,7 +26,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
  *             don't want special logic in ScreenResultParser to handle this
  * @author ant
  */
-public class MockDaoForScreenResultParserTest implements DAO
+public class MockDaoForScreenResultParserTest extends NoOpDAO
 {
   
   private static final String NAME_OF_PSEUDO_LIBRARY_FOR_IMPORT = "PseudoLibraryForScreenResultImport";
@@ -52,35 +44,6 @@ public class MockDaoForScreenResultParserTest implements DAO
   }
     
 
-  public void doInTransaction(DAOTransaction daoTransaction)
-  {
-  }
-  
-  public void flush() {}
-
-  public <E extends AbstractEntity> E defineEntity(Class<E> entityClass, Object... constructorArguments)
-  {
-    return null;
-  }
-
-  public void persistEntity(AbstractEntity entity)
-  {
-  }
-
-  public <E extends AbstractEntity> List<E> findAllEntitiesWithType(Class<E> entityClass)
-  {
-    return null;
-  }
-
-  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass, Serializable id)
-  {
-    return null;
-  }
-
-  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value)
-  {
-    return null;
-  }
 
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value)
@@ -93,45 +56,9 @@ public class MockDaoForScreenResultParserTest implements DAO
     return null;
   }
 
-  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass, String propertyName, Object propertyValue)
-  {
-    return null;
-  }
-
-  public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass, String propertyName, Object propertyValue)
-  {
-    return null;
-  }
-
-  public <E extends AbstractEntity> List<E> findEntitiesByPropertyPattern(Class<E> entityClass, String propertyName, String propertyPattern)
-  {
-    return null;
-  }
-
-  public List<ScreeningRoomUser> findAllLabHeads()
-  {
-    return null;
-  }
-
-  public void refreshEntity(AbstractEntity e)
-  {
-  }
-  
-  public void deleteScreenResult(ScreenResult screenResult)
-  {
-  }
-
   public Well findWell(Integer plateNumber, String wellName)
   {
     return new Well(_library, plateNumber, wellName);
-  }
-  
-  public SilencingReagent findSilencingReagent(
-    Gene gene,
-    SilencingReagentType silencingReagentType,
-    String sequence)
-  {
-    return null;
   }
   
   public Library findLibraryWithPlate(Integer plateNumber)

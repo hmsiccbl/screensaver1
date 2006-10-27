@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+  <bean id="dao"
+   class="edu.harvard.med.screensaver.db.NoOpDAO" />
+
+  <import resource="spring-context-logging.xml"/>
+  <import resource="spring-context-services.xml"/>
+  <import resource="spring-context-ui.xml"/>
+
+</beans>
