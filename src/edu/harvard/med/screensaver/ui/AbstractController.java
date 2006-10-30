@@ -121,13 +121,45 @@ public abstract class AbstractController implements ScreensaverConstants
    *         method.
    * @see #isUserInRole(ScreensaverUserRole)
    */
-  public boolean isReadOnly()
+  public boolean isReadOnly() 
   {
-    return true;
+    ScreensaverUserRole editableAdminRole = getEditableAdminRole();
+    if (editableAdminRole == null) {
+      return true;
+    }
+    return !isUserInRole(editableAdminRole);
   }
+
+  public boolean isEditable()
+  {
+    return !isReadOnly();
+  }
+
+  /**
+   * Get whether user can view administrative fields but cannot edit them.
+   * 
+   * @return <code>true</code> iff user can view administrative fields but
+   *         cannot edit them
+   */
+  public boolean isReadOnlyAdmin()
+  {
+    return !isUserInRole(getEditableAdminRole())
+           && isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+  }
+  
   
 
   // protected methods
+  
+  /**
+   * Controller subclasses for viewers should override this method and return
+   * the ScreensaverUserRole that is allowed to edit the data contents of the
+   * viewer.
+   */
+  protected ScreensaverUserRole getEditableAdminRole()
+  {
+    return null;
+  }
   
   protected FacesContext getFacesContext()
   {
@@ -483,6 +515,5 @@ public abstract class AbstractController implements ScreensaverConstants
     }
     return null;
   }
-
   
 }

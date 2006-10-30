@@ -16,11 +16,11 @@ import org.apache.commons.math.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math.util.ResizableDoubleArray;
 import org.apache.log4j.Logger;
 
-public class ZScoreNormalizationFunction implements NormalizationFunction<Double>
+public class ZScoreFunction implements AggregateFunction<Double>
 {
   // static members
 
-  private static Logger log = Logger.getLogger(ZScoreNormalizationFunction.class);
+  private static Logger log = Logger.getLogger(ZScoreFunction.class);
   private boolean _initialized = false;
   private double _stdDev = Double.NaN;
   private double _mean = Double.NaN;

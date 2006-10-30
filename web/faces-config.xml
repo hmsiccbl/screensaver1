@@ -659,8 +659,8 @@
   </converter>
   
   <converter>
-    <converter-id>NormalizationTypeConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.ui.util.NormalizationTypeConverter</converter-class>
+    <converter-id>ScoringTypeConverter</converter-id>
+    <converter-class>edu.harvard.med.screensaver.ui.util.ScoringTypeConverter</converter-class>
   </converter>
   
   <converter>

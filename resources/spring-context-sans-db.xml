@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<!-- A top-level, composite Spring context configuration file, intended for use with command-line 
+ applications that do not require database access (and that must be runnable when a database cannot 
+ be accessed).  Allows a full Spring configuration to be referenced via a single file.  Mutually 
+ exclusive with spring-context.xml. -->
+
 <beans>
 
   <bean id="dao"

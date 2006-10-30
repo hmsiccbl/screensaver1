@@ -1,0 +1,86 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java"%>
+
+<%-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
+<%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
+<%-- The core taglib contains all the logic, validation, controller, and other tags specific to JSF. --%>
+<%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
+<%-- The core taglib for JSTL; commented out until we really need it (we'll try to get by without and instead use pure JSF componentry --%>
+<%--@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" --%>
+<%-- The Apache Tomahawk JSF components --%>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%-- Tiles --%>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<f:subview id="heatMapViewer">
+
+	<t:panelGrid columns="3">
+
+		<t:outputLabel for="plateNumbers" value="Show plates: "
+			styleClass="inputLabel" />
+		<t:outputLabel for="dataHeader" value="For data header: "
+			styleClass="inputLabel" />
+		<t:outputLabel for="scoringType" value="Scoring Type: "
+			styleClass="inputLabel" />
+
+		<t:outputLabel for="plateNumber" value="Plate:" />
+		<t:selectOneMenu id="plateNumber" value="#{heatMapViewer.plateNumber}"
+			onchange="javascript:submit()" converter="IntegerConverter"
+			styleClass="input">
+			<f:selectItems value="#{heatMapViewer.plateSelectItems}" />
+		</t:selectOneMenu>
+
+		<t:selectOneMenu id="dataHeader"
+			value="#{heatMapViewer.resultValueTypeId}"
+			converter="IntegerConverter" styleClass="input">
+			<f:selectItems value="#{heatMapViewer.dataHeaderSelectItems}" />
+		</t:selectOneMenu>
+
+		<t:selectOneRadio id="scoringType" layout="pageDirection"
+			value="#{heatMapViewer.scoringType}" converter="ScoringTypeConverter"
+			styleClass="input">
+			<f:selectItems value="#{heatMapViewer.scoringTypeSelectItems}" />
+		</t:selectOneRadio>
+	</t:panelGrid>
+
+	<t:commandButton id="updateButton" value="View"
+		action="#{heatMapViewer.update}" styleClass="command" />
+
+	<%--t:dataTable id="heatMapsTable" value="#{heatMapViewer.plates}" var="plate" --%>
+
+	<t:dataTable id="heatMapTable"
+		value="#{heatMapViewer.heatMapDataModel}" var="plateRow"
+		rowIndexVar="plateRowIndex" renderedIfEmpty="false"
+		styleClass="heatMapTable" headerClass="tableHeader"
+		preserveDataModel="false" footerClass="tableFooter">
+		<t:column styleClass="keyColumn">
+			<f:facet name="header">
+				<t:outputText value="Row" />
+			</f:facet>
+			<t:outputText value="#{plateRowIndex + 1}" />
+		</t:column>
+		<t:columns value="#{heatMapViewer.heatMapColumnDataModel}"
+			var="columnIndex"
+			style="background-color: #{heatMapViewer.heatMapCell.hexColor}">
+			<f:facet name="header">
+				<t:outputText value="#{columnIndex + 1}" styleClass="keyColumn" />
+			</f:facet>
+			<f:facet name="footer">
+				<t:outputText value="#{columnIndex + 1}" styleClass="keyColumn" />
+			</f:facet>
+			<t:outputText value="#{heatMapViewer.heatMapCell.value}" />
+		</t:columns>
+		<t:column styleClass="keyColumn">
+			<f:facet name="header">
+				<t:outputText value="Row" />
+			</f:facet>
+			<t:outputText value="#{plateRowIndex + 1}" />
+		</t:column>
+	</t:dataTable>
+
+	<%--/t:dataTable--%>
+
+
+</f:subview>

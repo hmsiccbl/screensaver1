@@ -13,9 +13,9 @@ import java.util.Collection;
 
 import org.apache.log4j.Logger;
 
-public class IdentityNormalizationFunction implements NormalizationFunction<Double>
+public class IdentityFunction implements AggregateFunction<Double>
 {
-  private static Logger log = Logger.getLogger(IdentityNormalizationFunction.class);
+  private static Logger log = Logger.getLogger(IdentityFunction.class);
 
   public Double compute(Double value)
   {

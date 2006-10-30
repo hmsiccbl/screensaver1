@@ -15,6 +15,14 @@ h2,.sectionHeader {
 	font-weight: bold;
 	font-variant: small-caps;
 	font-size: large;
+	color: white;
+	background-color: blue;
+	text-decoration: none;
+	width: 100%;
+}
+
+.icon {
+	border: none
 }
 
 .footer {
@@ -58,7 +66,7 @@ hr {
 }
 
 .standardTable {
-	color: #00000;
+	color: #000000;
 	border-style: solid;
 	border-width: 1px;
 	border-color: gray;
@@ -137,8 +145,7 @@ hr {
 	font-weight: bold;
 }
 
-a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited
-	{
+a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited 	{
 	color: white;
 	text-decoration: none;
 }
@@ -153,7 +160,7 @@ a.menuItem:hover,a.menuItemActive:hover {
 }
 
 .labLink {
- 	color: gray;
+	color: gray;
 }
 
 .navSeparator {

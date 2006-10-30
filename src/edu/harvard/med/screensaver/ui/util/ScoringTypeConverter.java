@@ -11,18 +11,18 @@ package edu.harvard.med.screensaver.ui.util;
 
 import java.util.EnumSet;
 
-import edu.harvard.med.screensaver.ui.screenresults.NormalizationType;
+import edu.harvard.med.screensaver.ui.screenresults.ScoringType;
 
 /**
- * Converts a NormalizationType between its enum instance and its string represention.
+ * Converts a ScoringType between its enum instance and its string represention.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class NormalizationTypeConverter extends EnumTypeConverter<NormalizationType>
+public class ScoringTypeConverter extends EnumTypeConverter<ScoringType>
 {
-  public NormalizationTypeConverter()
+  public ScoringTypeConverter()
   {
-    super(EnumSet.allOf(NormalizationType.class));
+    super(EnumSet.allOf(ScoringType.class));
   }
 }

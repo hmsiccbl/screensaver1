@@ -18,8 +18,8 @@ import java.text.NumberFormat;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.analysis.ChainedFilter;
-import edu.harvard.med.screensaver.analysis.IdentityNormalizationFunction;
-import edu.harvard.med.screensaver.analysis.ZScoreNormalizationFunction;
+import edu.harvard.med.screensaver.analysis.IdentityFunction;
+import edu.harvard.med.screensaver.analysis.ZScoreFunction;
 import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultParserTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
@@ -56,14 +56,14 @@ public class HeatMapTest extends AbstractSpringTest
     HeatMap heatMap = new HeatMap(_screenResult.getResultValueTypes().first(),
                                   1,
                                   new NoOpFilter(),
-                                  new IdentityNormalizationFunction(),
+                                  new IdentityFunction(),
                                   new MultiGradientColorFunction(Color.BLACK,
                                                                  Color.WHITE));
     assertEquals("min", 1625.0, heatMap.getMin(), 0.01);
     assertEquals("max", 19247.0, heatMap.getMax(), 0.01);
     assertEquals("median", 9451.5, heatMap.getMedian());
-    assertEquals("A1 value", 8632.0, heatMap.getNormalizedValue(0, 0), 0.01);
-    assertEquals("P20 value", 19247.0, heatMap.getNormalizedValue(15, 19), 0.01);
+    assertEquals("A1 value", 8632.0, heatMap.getScoredValue(0, 0), 0.01);
+    assertEquals("P20 value", 19247.0, heatMap.getScoredValue(15, 19), 0.01);
 
     int interpolatedColorComponent = (int) (255 * ((8632.0 - 1625.0) / (19247.0 - 1625.0)));
     Color expectedA2Color = new Color(interpolatedColorComponent,
@@ -78,13 +78,13 @@ public class HeatMapTest extends AbstractSpringTest
     HeatMap heatMap = new HeatMap(_screenResult.getResultValueTypes().first(),
                                   1,
                                   new NoOpFilter(),
-                                  new ZScoreNormalizationFunction(),
+                                  new ZScoreFunction(),
                                   new MultiGradientColorFunction(Color.BLACK,
                                                                  Color.WHITE));
     assertEquals("min", -2.82, heatMap.getMin(), 0.01);
     assertEquals("max", 3.27, heatMap.getMax(), 0.01);
-    assertEquals("A1 z-score value", -0.4, heatMap.getNormalizedValue(0, 0), 0.01);
-    assertEquals("B2 z-score value",  0.89, heatMap.getNormalizedValue(1, 1), 0.01);
+    assertEquals("A1 z-score value", -0.4, heatMap.getScoredValue(0, 0), 0.01);
+    assertEquals("B2 z-score value",  0.89, heatMap.getScoredValue(1, 1), 0.01);
 
     int interpolatedColorComponent = (int) (255 * (-0.4 - -2.82) / (3.27 - -2.82));
     Color expectedA2Color = new Color(interpolatedColorComponent,
@@ -99,7 +99,7 @@ public class HeatMapTest extends AbstractSpringTest
                                   1,
                                   new ChainedFilter<ResultValue>(new ExcludedWellsFilter(), 
                                     new ChainedFilter<ResultValue>(new ControlWellsFilter())),
-                                  new IdentityNormalizationFunction(),
+                                  new IdentityFunction(),
                                   new MultiGradientColorFunction(Color.BLACK,
                                                                  Color.WHITE));
     assertEquals("max", 2156.0, heatMap.getMin(), 0.01);  
@@ -114,7 +114,7 @@ public class HeatMapTest extends AbstractSpringTest
                                   1,
                                   new ChainedFilter<ResultValue>(new ExcludedWellsFilter(),
                                                                  new ChainedFilter<ResultValue>(new ControlWellsFilter())),
-                                  new ZScoreNormalizationFunction(),
+                                  new ZScoreFunction(),
                                   new DefaultMultiColorGradient());
     File file = File.createTempFile("heatmap", ".html");
     PrintWriter writer = new PrintWriter(new FileWriter(file));
@@ -124,7 +124,7 @@ public class HeatMapTest extends AbstractSpringTest
     for (int row = 0; row < 16; row++) {
       writer.println("<tr>");
       for (int col = 0; col < 23; col++) {
-        double normalizedValue = heatMap.getNormalizedValue(row, col);
+        double normalizedValue = heatMap.getScoredValue(row, col);
         Color color = heatMap.getColor(row, col);
         writer.print("<td style=\"background-color: rgb(" + color.getRed()
                      + "," + color.getGreen() + "," + color.getBlue() + ")\">"

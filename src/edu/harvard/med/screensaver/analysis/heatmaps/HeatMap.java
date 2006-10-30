@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import edu.harvard.med.screensaver.analysis.Filter;
-import edu.harvard.med.screensaver.analysis.NormalizationFunction;
+import edu.harvard.med.screensaver.analysis.AggregateFunction;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 
@@ -27,7 +27,7 @@ import org.apache.log4j.Logger;
  * A heat map implementation for an array of ResultValues.
  * Scope-of-responsibility:
  * <ul>
- * <li>applies a normalization function to a filtered subset of the array
+ * <li>applies a scoring function to a filtered subset of the array
  * <li>calculates statistics for the filtered subset
  * <li>provides access to a particular value and that value's associated color,
  * given an array coordinate
@@ -49,9 +49,9 @@ public class HeatMap
   private int _plateNumber;
   private ResultValue[][] _data;
   private double[][] _rawValues;
-  private double[][] _normalizedValues;
+  private double[][] _scoredValues;
   private ScalableColorFunction _scalableColorFunction;
-  private NormalizationFunction<Double> _normalizationFunc;
+  private AggregateFunction<Double> _scoringFunc;
   private DescriptiveStatisticsImpl _statistics;
   private double _median;
 
@@ -59,28 +59,28 @@ public class HeatMap
   // public constructors and methods
   
   /**
-   * @param normalizationFilter a filter that determines which ResultValues to
-   *          exclude from normalization computations
-   * @param normalizationFunction the normalization function to be applied to
+   * @param scoringFilter a filter that determines which ResultValues to
+   *          exclude from scoring computations
+   * @param scoringFunc the scoring function to be applied to
    *          each ResultValue when calculating its heat map color
    * @param colorFunction maps a range of continuous values to colors
    */
   public HeatMap(ResultValueType rvt,
                  int plateNumber,
-                 Filter<ResultValue> normalizationFilter,
-                 NormalizationFunction<Double> normalizationFunc,
+                 Filter<ResultValue> scoringFilter,
+                 AggregateFunction<Double> scoringFunc,
                  ColorFunction colorFunction)
   {
     _resultValueType = rvt;
     _plateNumber = plateNumber;
     _scalableColorFunction = new ScalableColorFunction(colorFunction);
-    _normalizationFunc = normalizationFunc;
-    initialize(normalizationFilter, normalizationFunc);
+    _scoringFunc = scoringFunc;
+    initialize(scoringFilter, scoringFunc);
   }
 
   public Color getColor(int row, int column)
   {
-    return _scalableColorFunction.getColor(getNormalizedValue(row, column));
+    return _scalableColorFunction.getColor(getScoredValue(row, column));
   }
    
   public double getRawValue(int row, int column)
@@ -88,9 +88,9 @@ public class HeatMap
     return _rawValues[row][column];
   }
 
-  public double getNormalizedValue(int row, int column)
+  public double getScoredValue(int row, int column)
   {
-    return _normalizationFunc.compute(_rawValues[row][column]);
+    return _scoringFunc.compute(_rawValues[row][column]);
   }
 
   public ResultValue getResultValue(int row, int column)
@@ -151,33 +151,33 @@ public class HeatMap
 
   // private methods
 
-  private void initialize(Filter<ResultValue> normalizationFilter,
-                          NormalizationFunction<Double> normalizationFunc)
+  private void initialize(Filter<ResultValue> scoringFilter,
+                          AggregateFunction<Double> scoringFunc)
   {
     // TODO: get the plate extents from somewhere else!
     _data = new ResultValue['P' - 'A' + 1][24];
     _rawValues = new double[_data.length][_data[0].length];
-    Collection<Double> rawValuesToNormalizeOver = new ArrayList<Double>();
+    Collection<Double> rawValuesToAggregateOver = new ArrayList<Double>();
     ResizableDoubleArray doubleValues = new ResizableDoubleArray();
     for (ResultValue rv : _resultValueType.getResultValues()) {
       if (rv.getWell().getPlateNumber() == _plateNumber) {
         int row = rv.getWell().getRow();
         int col = rv.getWell().getColumn();
         _data[row][col] = rv;
-        if (!normalizationFilter.exclude(rv)) {
+        if (!scoringFilter.exclude(rv)) {
           double rawValue = Double.parseDouble(rv.getValue());
           _rawValues[row][col] = rawValue;
-          rawValuesToNormalizeOver.add(rawValue);
+          rawValuesToAggregateOver.add(rawValue);
           doubleValues.addElement(rawValue);
         }
       }
     }
     
-    normalizationFunc.initializeAggregates(rawValuesToNormalizeOver);
+    scoringFunc.initializeAggregates(rawValuesToAggregateOver);
 
     _statistics = new DescriptiveStatisticsImpl();
-    for (Double rawValue : rawValuesToNormalizeOver) {
-      _statistics.addValue(normalizationFunc.compute(rawValue));
+    for (Double rawValue : rawValuesToAggregateOver) {
+      _statistics.addValue(scoringFunc.compute(rawValue));
     }
     _median = new Median().evaluate(doubleValues.getElements());
 

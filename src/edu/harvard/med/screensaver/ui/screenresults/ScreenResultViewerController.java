@@ -79,9 +79,7 @@ public class ScreenResultViewerController extends AbstractController
   private ScreenResult _screenResult;
   private ScreenResultExporter _screenResultExporter;
   private int _firstRow;
-  private boolean _showMetadataTable = true;
-  private boolean _showRawDataTable = true;
-  private String _plateNumber;
+  private Integer _plateNumber;
   private String[] _selectedDataHeaderNames;
   private String _rowRangeText;
   private UIInput _firstDisplayedRowNumberInput;
@@ -116,6 +114,8 @@ public class ScreenResultViewerController extends AbstractController
 
   private HeatMapViewerController _heatMapViewer;
 
+  private Map<String,Boolean> _collapsablePanelsState;
+
   
 //  private Converter _rowToPlateConverter;
   
@@ -124,9 +124,14 @@ public class ScreenResultViewerController extends AbstractController
   
   public ScreenResultViewerController()
   {
+    _collapsablePanelsState = new HashMap<String,Boolean>();
+    _collapsablePanelsState.put("summary", true);
+    _collapsablePanelsState.put("dataHeadersTable", true);
+    _collapsablePanelsState.put("dataTable", true);
+    _collapsablePanelsState.put("heatMaps", true);
   }
-  
 
+  
   // bean property methods
 
   public DAO getDao()
@@ -174,26 +179,11 @@ public class ScreenResultViewerController extends AbstractController
   }
 
 
-  public boolean isShowMetadataTable()
+  public Map getCollapsablePanelsState()
   {
-    return _showMetadataTable;
+    return _collapsablePanelsState;
   }
-
-  public void setShowMetadataTable(boolean showMetadataTable)
-  {
-    _showMetadataTable = showMetadataTable;
-  }
-
-  public boolean isShowRawDataTable()
-  {
-    return _showRawDataTable;
-  }
-
-  public void setShowRawDataTable(boolean showRawDataTable)
-  {
-    _showRawDataTable = showRawDataTable;
-  }
-
+  
   public UIInput getFirstDisplayedRowNumberInput()
   {
     return _firstDisplayedRowNumberInput;
@@ -272,12 +262,12 @@ public class ScreenResultViewerController extends AbstractController
     _firstRow = firstDisplayedRowNumber - 1;
   }
 
-  public String getPlateNumber()
+  public Integer getPlateNumber()
   {
     return _plateNumber;
   }
 
-  public void setPlateNumber(String plateNumber)
+  public void setPlateNumber(Integer plateNumber)
   {
     log.debug("setPlateNumber(" + plateNumber + ")");
     _plateNumber = plateNumber;
@@ -356,12 +346,6 @@ public class ScreenResultViewerController extends AbstractController
     return null;
   }
 
-  @Override
-  public boolean isReadOnly()
-  {
-    return !isUserInRole(ScreensaverUserRole.SCREEN_RESULTS_ADMIN);
-  }
-
 
   // JSF application methods
   
@@ -401,6 +385,17 @@ public class ScreenResultViewerController extends AbstractController
   {
     return gotoPage(getPageIndex() - 1); 
   }
+  
+//  public String nextPlate()
+//  {
+//    
+//    return gotoPlate(_plateIndex + 1); 
+//  }
+//  
+//  public String prevPlate()
+//  {
+//    return gotoPlate(_plateIndex - 1); 
+//  }
   
   public String viewScreen()
   {
@@ -519,6 +514,14 @@ public class ScreenResultViewerController extends AbstractController
   }
   
   
+  // protected methods
+  
+  protected ScreensaverUserRole getEditableAdminRole()
+  {
+    return ScreensaverUserRole.SCREEN_RESULTS_ADMIN;
+  }
+
+  
   // private methods
   
   /**
@@ -531,8 +534,6 @@ public class ScreenResultViewerController extends AbstractController
   
   private void resetView()
   {
-    _showMetadataTable = true;
-    _showRawDataTable = true;
     _plateNumber2FirstRow = null;
     _dataHeaderColumnModel = null;
     _metadataModel = null;

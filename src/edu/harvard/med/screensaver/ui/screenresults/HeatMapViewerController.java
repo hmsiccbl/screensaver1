@@ -46,8 +46,8 @@ public class HeatMapViewerController extends AbstractController
   private ScreenResult _screenResult;
   private Integer _dataHeaderIndex;
   private Integer _resultValueTypeId;
-  private List<Integer> _plateNumbers;
-  private NormalizationType _normalizationType = NormalizationType.ZSCORE;
+  private Integer _plateNumber;
+  private ScoringType _scoringType = ScoringType.ZSCORE;
   private UniqueDataHeaderNames _uniqueDataHeaderNames;
   private HeatMap _heatMap;
   /**
@@ -70,7 +70,7 @@ public class HeatMapViewerController extends AbstractController
   public void setScreenResult(ScreenResult screenResult)
   {
     _screenResult = screenResult;
-    selectAllPlates();
+    _plateNumber = screenResult.getPlateNumbers().first();
     _uniqueDataHeaderNames = new UniqueDataHeaderNames(_screenResult);
     List<SelectItem> dataHeaderSelectItems = getDataHeaderSelectItems();
     _resultValueTypeId = dataHeaderSelectItems.size() > 0 ? (Integer) getDataHeaderSelectItems().get(0).getValue()
@@ -98,14 +98,14 @@ public class HeatMapViewerController extends AbstractController
     _resultValueTypeId = resultValueTypeId;
   }
 
-  public void setPlateNumbers(List<Integer> plateNumbers)
+  public void setPlateNumber(Integer plateNumber)
   {
-    _plateNumbers = plateNumbers;
+    _plateNumber = plateNumber;
   }
   
-  public List<Integer> getPlateNumbers()
+  public Integer getPlateNumber()
   {
-    return _plateNumbers;
+    return _plateNumber;
   }
   
   public List<SelectItem> getPlateSelectItems()
@@ -113,14 +113,14 @@ public class HeatMapViewerController extends AbstractController
     return JSFUtils.createUISelectItems(getScreenResult().getPlateNumbers());
   }
   
-  public NormalizationType getNormalizationType()
+  public ScoringType getScoringType()
   {
-    return _normalizationType;
+    return _scoringType;
   }
 
-  public void setNormalizationType(NormalizationType normalizationType)
+  public void setScoringType(ScoringType scoringType)
   {
-    _normalizationType = normalizationType;
+    _scoringType = scoringType;
   }
 
   public List<SelectItem> getDataHeaderSelectItems()
@@ -136,12 +136,12 @@ public class HeatMapViewerController extends AbstractController
     return selectItems;
   }
   
-  public List<SelectItem> getNormalizationTypeSelectItems()
+  public List<SelectItem> getScoringTypeSelectItems()
   {
     List<SelectItem> selectItems = new ArrayList<SelectItem>();
-    for (NormalizationType normalizationType : NormalizationType.values()) {
-      selectItems.add(new SelectItem(normalizationType,
-                                     normalizationType.getDescription()));
+    for (ScoringType scoringType : ScoringType.values()) {
+      selectItems.add(new SelectItem(scoringType,
+                                     scoringType.getDescription()));
     }
     return selectItems;
   }
@@ -176,16 +176,16 @@ public class HeatMapViewerController extends AbstractController
   {
     ResultValueType rvt = _dao.findEntityById(ResultValueType.class, _resultValueTypeId);
     _heatMap = new HeatMap(rvt,
-                           _plateNumbers.get(0),
+                           _plateNumber,
                            new ControlWellsFilter(),
-                           _normalizationType.getFunction(),
+                           _scoringType.getFunction(),
                            new DefaultMultiColorGradient());
 
     List<List<HeatMapCell>> rows = new ArrayList<List<HeatMapCell>>();
     for (int row = 0; row < _heatMap.getRowCount(); row++) {
       List<HeatMapCell> rowData = new ArrayList<HeatMapCell>();
       for (int column = 0; column < _heatMap.getColumnCount(); column++) {
-        rowData.add(new HeatMapCell(_heatMap.getNormalizedValue(row, column),
+        rowData.add(new HeatMapCell(_heatMap.getScoredValue(row, column),
                                     _heatMap.getColor(row, column)));
       }
       rows.add(rowData);
@@ -201,13 +201,6 @@ public class HeatMapViewerController extends AbstractController
     return REDISPLAY_PAGE_ACTION_RESULT; // redisplay
   }
   
-  public String showAllPlates()
-  {
-    log.debug("handling showAllPlates command");
-    selectAllPlates();
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-  
   public String done()
   {
     return DONE_ACTION_RESULT;
@@ -215,11 +208,6 @@ public class HeatMapViewerController extends AbstractController
 
   
   // private methods
-  
-  private void selectAllPlates()
-  {
-    _plateNumbers = new ArrayList<Integer>(getScreenResult().getPlateNumbers());
-  }
-  
+
   
 }

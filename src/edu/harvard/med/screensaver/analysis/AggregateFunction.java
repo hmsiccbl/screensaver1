@@ -12,9 +12,9 @@ package edu.harvard.med.screensaver.analysis;
 import java.util.Collection;
 
 
-public interface NormalizationFunction<T> extends Function<T>
+public interface AggregateFunction<T> extends Function<T>
 {
-  public abstract void initializeAggregates(Collection<T> valuesToNormalizeOver);
+  public abstract void initializeAggregates(Collection<T> valuesToAggregateOver);
 }
 
 

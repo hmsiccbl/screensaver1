@@ -9,21 +9,21 @@
 
 package edu.harvard.med.screensaver.ui.screenresults;
 
-import edu.harvard.med.screensaver.analysis.IdentityNormalizationFunction;
-import edu.harvard.med.screensaver.analysis.NormalizationFunction;
-import edu.harvard.med.screensaver.analysis.ZScoreNormalizationFunction;
+import edu.harvard.med.screensaver.analysis.IdentityFunction;
+import edu.harvard.med.screensaver.analysis.AggregateFunction;
+import edu.harvard.med.screensaver.analysis.ZScoreFunction;
 
-public enum NormalizationType {
-  NONE("None (raw values)", new IdentityNormalizationFunction()),
-  ZSCORE("Z-score", new ZScoreNormalizationFunction())
+public enum ScoringType {
+  NONE("None (raw values)", new IdentityFunction()),
+  ZSCORE("Z-score", new ZScoreFunction())
   ;
 
   
   private String _description;
-  private NormalizationFunction<Double> _function;
+  private AggregateFunction<Double> _function;
 
-  private NormalizationType(String description,
-                            NormalizationFunction<Double> function)
+  private ScoringType(String description,
+                      AggregateFunction<Double> function)
   {
     _description = description;
     _function = function;
@@ -34,7 +34,7 @@ public enum NormalizationType {
     return _description;
   }
 
-  public NormalizationFunction<Double> getFunction()
+  public AggregateFunction<Double> getFunction()
   {
     return _function;
   }

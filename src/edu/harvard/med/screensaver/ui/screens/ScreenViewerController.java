@@ -144,29 +144,7 @@ public class ScreenViewerController extends AbstractController
   {
     _newKeyword = newKeyword;
   }
-
-  public boolean isReadOnly() 
-  {
-    return !isUserInRole(EDITING_ROLE);
-  }
-
-  public boolean isEditable() 
-  {
-    return !isReadOnly();
-  }
-
-  /**
-   * Get whether user can view administrative fields but cannot edit them.
-   * 
-   * @return <code>true</code> iff user can view administrative fields but
-   *         cannot edit them
-   */
-  public boolean isReadOnlyAdmin()
-  {
-    return !isUserInRole(EDITING_ROLE)
-           && isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
-  }
-
+  
   public DataModel getCollaboratorsDataModel()
   {
     return new ListDataModel(new ArrayList<ScreeningRoomUser>(_screen.getCollaborators()));
@@ -494,6 +472,14 @@ public class ScreenViewerController extends AbstractController
     getFacesContext().renderResponse();
   }
   
+  
+  // protected methods
+
+  protected ScreensaverUserRole getEditableAdminRole()
+  {
+    return EDITING_ROLE;
+  }
+
 
   // private methods
   
