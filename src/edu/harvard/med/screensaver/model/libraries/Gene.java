@@ -108,7 +108,8 @@ public class Gene extends AbstractEntity
    * Get the id for the gene.
    *
    * @return the id for the gene
-   * @hibernate.id generator-class="assigned"
+   * @hibernate.id
+   *   generator-class="assigned"
    */
   @EntityIdProperty
   public String getGeneId()

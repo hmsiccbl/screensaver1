@@ -99,7 +99,8 @@ public class SilencingReagent extends AbstractEntity
    * Get the id for the silencing reagent.
    *
    * @return the id for the silencing reagent
-   * @hibernate.id generator-class="assigned"
+   * @hibernate.id
+   *   generator-class="assigned"
    */
   public String getSilencingReagentId()
   {

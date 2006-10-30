@@ -102,7 +102,8 @@ public class Well extends AbstractEntity
    * Get the well id for the well.
    * 
    * @return the well id for the well
-   * @hibernate.id generator-class="assigned"
+   * @hibernate.id
+   *   generator-class="assigned"
    */
   public String getWellId()
   {

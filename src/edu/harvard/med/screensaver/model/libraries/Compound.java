@@ -99,6 +99,7 @@ public class Compound extends AbstractEntity
    * 
 	 * @hibernate.id
    *   generator-class="assigned"
+   *   length="2047"
    */
   @EntityIdProperty
 	public String getCompoundId()
