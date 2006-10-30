@@ -14,7 +14,7 @@ import edu.harvard.med.screensaver.analysis.NormalizationFunction;
 import edu.harvard.med.screensaver.analysis.ZScoreNormalizationFunction;
 
 public enum NormalizationType {
-  RAW("Raw values", new IdentityNormalizationFunction()),
+  NONE("None (raw values)", new IdentityNormalizationFunction()),
   ZSCORE("Z-score", new ZScoreNormalizationFunction())
   ;
 

@@ -39,7 +39,7 @@
 
 			<t:outputLabel for="plateNumbers" value="Show plates: " styleClass="inputLabel" />
 			<t:outputLabel for="dataHeader" value="For data header: " styleClass="inputLabel" />
-			<t:outputLabel for="normalizationType" value="Normalization: " styleClass="inputLabel" />
+			<t:outputLabel for="computationType" value="Computation: " styleClass="inputLabel" />
 
 			<t:selectManyListbox id="plateNumbers"
 				value="#{heatMapViewer.plateNumbers}" converter="IntegerConverter"
@@ -55,7 +55,7 @@
 				<f:selectItems value="#{heatMapViewer.dataHeaderSelectItems}" />
 			</t:selectOneMenu>
 
-			<t:selectOneRadio id="normalizationType" layout="pageDirection"
+			<t:selectOneRadio id="computationType" layout="pageDirection"
 				value="#{heatMapViewer.normalizationType}"
 				converter="NormalizationTypeConverter" styleClass="input">
 				<f:selectItems value="#{heatMapViewer.normalizationTypeSelectItems}" />

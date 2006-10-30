@@ -39,7 +39,7 @@ public class HeatMapTest extends AbstractSpringTest
   @Override
   protected void onSetUp() throws Exception
   {
-    Screen screen = ScreenResultParserTest.makeDummyScreen(107);
+    Screen screen = ScreenResultParser.makeDummyScreen(107);
     _parser = new ScreenResultParser(new MockDaoForScreenResultParserTest());
     _screenResult = _parser.parse(screen,
                                   new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "107_heatmap.xls"));
