@@ -71,19 +71,18 @@ class SDRecordParser
     String molfile = _sdRecordData.getMolfile();
     if (molfile == null) {
       reportError("encountered an SD record with an empty MDL molfile specification");
-      prepareNextRecord();
-      return;
+      _molfileInterpreter = null;
     }
-    _molfileInterpreter = new MolfileInterpreter(molfile);
+    else {
+      _molfileInterpreter = new MolfileInterpreter(molfile);
+    }
     
     Well well = getWell();
-    if (well == null) {
-      prepareNextRecord();
-      return;
-    }
-    addSmilesToWell(_molfileInterpreter.getPrimaryCompoundSmiles(), well, true);
-    for (String secondaryCompoundSmiles : _molfileInterpreter.getSecondaryCompoundsSmiles()) {
-      addSmilesToWell(secondaryCompoundSmiles, well, false);
+    if (well != null && _molfileInterpreter != null) {
+      addSmilesToWell(_molfileInterpreter.getPrimaryCompoundSmiles(), well, true);
+      for (String secondaryCompoundSmiles : _molfileInterpreter.getSecondaryCompoundsSmiles()) {
+        addSmilesToWell(secondaryCompoundSmiles, well, false);
+      }
     }
     prepareNextRecord();
   }
@@ -117,15 +116,23 @@ class SDRecordParser
   
   private SDRecordData gatherSDRecordData()
   {
-    StringBuffer molfile = new StringBuffer();
+    // initialize things
     String line = _nextLine;
-    while (! line.equals("M  END")) {
-      molfile.append(line).append('\n');
-      line = readNextLine();
-    }
-    molfile.append(line);
     SDRecordData recordData = new SDRecordData();
-    recordData.setMolfile(new String(molfile));
+    
+    // read the molfile, unless it is missing
+    if (! line.startsWith(">")) {
+      StringBuffer molfileBuffer = new StringBuffer();
+      while (! line.equals("M  END")) {
+        molfileBuffer.append(line).append('\n');
+        line = readNextLine();
+      }
+      molfileBuffer.append(line);
+      String molfile = new String(molfileBuffer);
+      recordData.setMolfile(molfile);
+    }
+    
+    // read the "associated data" part of the SD record
     while (! line.equals("$$$$")) {
       
       if (line.matches("^>  <.*>(\\s+\\(.*\\))?")) {
@@ -166,6 +173,8 @@ class SDRecordParser
       
       line = readNextLine();
     }
+    
+    // return the accumulated data
     return recordData;
   }
   
@@ -192,8 +201,10 @@ class SDRecordParser
     }
     well.setIccbNumber(_sdRecordData.getIccbNumber());
     well.setVendorIdentifier(_sdRecordData.getVendorIdentifier());
-    well.setMolfile(_molfileInterpreter.getMolfile());
-    well.setSmiles(_molfileInterpreter.getSmiles());
+    if (_molfileInterpreter != null) {
+      well.setMolfile(_molfileInterpreter.getMolfile());
+      well.setSmiles(_molfileInterpreter.getSmiles());
+    }
     return well;
   }
 

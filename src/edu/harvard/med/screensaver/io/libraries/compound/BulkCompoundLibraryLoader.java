@@ -91,7 +91,7 @@ public class BulkCompoundLibraryLoader
             for (SDFileParseError error : _parser.getErrors()) {
               log.error(error.toString());
             }
-            throw new RuntimeException("SD File has parse errors: " + sdFile.getName());
+            //throw new RuntimeException("SD File has parse errors: " + sdFile.getName());
           }
           _dao.persistEntity(library);
           log.info("finished processing SD File: " + sdFile.getName());

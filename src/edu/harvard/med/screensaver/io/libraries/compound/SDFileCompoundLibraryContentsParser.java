@@ -77,8 +77,12 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
         SDRecordParser sdRecordParser = new SDRecordParser(
           _sdFileReader,
           SDFileCompoundLibraryContentsParser.this);
-        while (sdRecordParser.sdFileHasMoreRecords()) {
+        for (int i = 1; sdRecordParser.sdFileHasMoreRecords(); i++) {
           sdRecordParser.parseSDRecord();
+          if ((i % 100) == 0) {
+            log.info(
+              "loaded " + i + " records into library " + library.getLibraryName());
+          }
         }
       }
     });
