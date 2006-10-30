@@ -87,7 +87,9 @@
       <t:panelGrid columns="2" styleClass="standardTable">
         <t:outputText value="Compound:" />
         <t:aliasBean alias="#{controller}" value="#{wellViewer}">
-          <%@ include file="compoundViewer.jspf" %>
+          <t:aliasBean alias="#{compound}" value="#{compound}">
+            <%@ include file="compoundViewer.jspf" %>
+          </t:aliasBean>
         </t:aliasBean>
       </t:panelGrid>
     </t:dataList>

@@ -130,9 +130,6 @@ public class WellSearchResults extends SearchResults<Well>
     }
     if (columnName.equals(WELL)) {
       _wellViewerController.setWell(well);
-      // TODO: remove the following line when bug about wrong compound image
-      // being displayed is resolved
-      _compoundViewerController.setCompound(getCompoundWithLongestSmiles(well));
       return "showWell";
     }
     if (columnName.equals(CONTENTS)) {
@@ -141,7 +138,7 @@ public class WellSearchResults extends SearchResults<Well>
         return "showGene";
       }
       if (getCompoundCount(well) > 0) {
-        String compoundId = (String) getFacesContext().getExternalContext().getRequestParameterMap().get("commandValue");
+        String compoundId = (String) getRequestParameter("commandValue");
         Compound compound = null;
         for (Compound compound2 : well.getCompounds()) {
           if (compound2.getCompoundId().equals(compoundId)) {
@@ -230,7 +227,7 @@ public class WellSearchResults extends SearchResults<Well>
     }
     int compoundCount = getCompoundCount(well);
     if (compoundCount == 1) {
-      return well.getCompounds().iterator().next();
+      return well.getCompounds().iterator().next().getSmiles();
     }
     if (compoundCount > 1) {
       List<String> smiles = new ArrayList<String>();

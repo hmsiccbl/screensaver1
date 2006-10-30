@@ -112,7 +112,7 @@ public class WellViewerController extends AbstractController
   
   public String showCompound()
   {
-    String compoundId = (String) getFacesContext().getExternalContext().getRequestParameterMap().get("compoundId");
+    String compoundId = (String) getRequestParameter("compoundId");
     Compound compound = null;
     for (Compound compound2 : _well.getCompounds()) {
       if (compound2.getCompoundId().equals(compoundId)) {

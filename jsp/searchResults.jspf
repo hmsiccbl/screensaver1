@@ -51,7 +51,9 @@
           <h:commandLink
             action="#{searchResults.cellAction}"
             value="#{searchResults.cellValue}"
-            rendered="#{searchResults.isCommandLink}" />
+            rendered="#{searchResults.isCommandLink}">
+			<f:param name="commandValue" value="#{searchResults.cellValue}" />
+		</h:commandLink>
           <t:dataList
             id="commandLinkList"
             var="commandValue"

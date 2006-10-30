@@ -186,6 +186,11 @@ public abstract class AbstractController implements ScreensaverConstants
     return getExternalContext().getRequestParameterMap();
   }
   
+  protected Object getRequestParameter(String parameterName)
+  {
+    return getRequestParameterMap().get(parameterName);
+  }
+  
   protected HttpSession getHttpSession()
   {
     Object httpSession = getExternalContext().getSession(false);

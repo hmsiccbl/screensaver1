@@ -11,6 +11,10 @@ package edu.harvard.med.screensaver.ui.libraries;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.ui.AbstractController;
@@ -20,8 +24,27 @@ public class CompoundViewerController extends AbstractController
   
   // private static stuff
   
+  private static final Logger log = Logger.getLogger(CompoundViewerController.class);
   private static final String _screensaver0ImageRenderer =
     "http://screensaver.med.harvard.edu/screenbank/compounds/render_molecule.png";
+  
+  /**
+   * This map is a workaround for the JSF EL limitation of no parameters allowed to methods. 
+   */
+  private static final Map<String,String> _compoundImageUrl = new HashMap<String,String>() {
+    private static final long serialVersionUID = 1L;
+    public String get(Object key)
+    {
+      String smiles = (String) key;
+      try {
+        smiles = URLEncoder.encode(smiles, "UTF-8");
+      }
+      catch (UnsupportedEncodingException ex){
+        throw new RuntimeException("UTF-8 not supported", ex);
+      }
+      return _screensaver0ImageRenderer + "?smiles=" + smiles;
+    }
+  };
   
   
   // instance stuff
@@ -38,16 +61,9 @@ public class CompoundViewerController extends AbstractController
     _compound = compound;
   }
   
-  public String getCompoundImageUrl()
+  public Map<String,String> getCompoundImageUrl()
   {
-    String smiles = _compound.getSmiles();
-    try {
-      smiles = URLEncoder.encode(smiles, "UTF-8");
-    }
-    catch (UnsupportedEncodingException ex){
-      throw new RuntimeException("UTF-8 not supported", ex);
-    }
-    return _screensaver0ImageRenderer + "?smiles=" + smiles;
+    return _compoundImageUrl;
   }
   
   public String showCompound()

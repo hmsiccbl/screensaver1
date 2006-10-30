@@ -16,7 +16,8 @@
   <h:panelGrid columns="2" rendered="true">
   
     <h:outputText value="Structure:" />
-    <t:graphicImage url="#{compoundViewer.compoundImageUrl}" style="float: right;"/>
+    <t:graphicImage url="#{compoundViewer.compoundImageUrl[compound.smiles]}" style="float: right;">
+    </t:graphicImage>
 
     <h:outputText value="Smiles:" />
     <t:commandLink
