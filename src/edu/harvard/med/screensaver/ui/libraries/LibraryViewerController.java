@@ -31,6 +31,7 @@ public class LibraryViewerController extends AbstractController
   
   private DAO _dao;
   private Library _library;
+  private SearchResults<Library> _searchResults;
   private RNAiLibraryContentsImporterController _rnaiLibraryContentsImporter;
   private CompoundLibraryContentsImporterController _compoundLibraryContentsImporter;
   private SearchResultsRegistryController _searchResultsRegistry;
@@ -52,14 +53,19 @@ public class LibraryViewerController extends AbstractController
     _library = library;
   }
 
-  /**
-   * Return the library being managed by this controller.
-   * @motivation allows properties of the Library to be bound to UI components
-   * @return
-   */
   public Library getLibrary()
   {
     return _library;
+  }
+
+  public SearchResults<Library> getSearchResults()
+  {
+    return _searchResults;
+  }
+
+  public void setSearchResults(SearchResults<Library> searchResults)
+  {
+    _searchResults = searchResults;
   }
 
   public RNAiLibraryContentsImporterController getRnaiLibraryContentsImporter()

@@ -4,7 +4,7 @@
 
   <t:aliasBean
     alias="#{searchResults}"
-    value="#{searchResultsRegistry.searchResults}">
+    value="#{librariesBrowser.searchResults}">
     <%@include file="../searchResults.jspf"%>
   </t:aliasBean>
 

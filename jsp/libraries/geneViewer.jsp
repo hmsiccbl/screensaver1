@@ -11,7 +11,7 @@
 
 <f:subview id="geneViewer">
 
-  <t:aliasBean alias="#{navigator}" value="#{searchResultsRegistry.searchResults}">
+  <t:aliasBean alias="#{navigator}" value="#{geneViewer.searchResults}">
     <%@ include file="../searchResultsNavPanel.jspf" %>
   </t:aliasBean>
 

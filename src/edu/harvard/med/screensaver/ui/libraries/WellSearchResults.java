@@ -125,15 +125,18 @@ public class WellSearchResults extends SearchResults<Well>
   protected Object cellAction(Well well, String columnName)
   {
     if (columnName.equals(LIBRARY)) {
+      _libraryViewerController.setSearchResults(null);
       _libraryViewerController.setLibrary(well.getLibrary());
       return "showLibrary";
     }
     if (columnName.equals(WELL)) {
+      _wellViewerController.setSearchResults(this);
       _wellViewerController.setWell(well);
       return "showWell";
     }
     if (columnName.equals(CONTENTS)) {
       if (getGeneCount(well) == 1) {
+        _geneViewerController.setSearchResults(this);
         _geneViewerController.setGene(getGeneForWell(well));
         return "showGene";
       }
@@ -146,6 +149,7 @@ public class WellSearchResults extends SearchResults<Well>
             break;
           }
         }
+        _compoundViewerController.setSearchResults(this);
         _compoundViewerController.setCompound(compound);
         return "showCompound";
       }

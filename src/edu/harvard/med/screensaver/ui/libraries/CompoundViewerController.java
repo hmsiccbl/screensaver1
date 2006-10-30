@@ -17,7 +17,9 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.SearchResults;
 
 public class CompoundViewerController extends AbstractController
 {
@@ -50,6 +52,7 @@ public class CompoundViewerController extends AbstractController
   // instance stuff
   
   private Compound _compound;
+  private SearchResults<Well> _searchResults;
 
   public Compound getCompound()
   {
@@ -61,6 +64,16 @@ public class CompoundViewerController extends AbstractController
     _compound = compound;
   }
   
+  public SearchResults<Well> getSearchResults()
+  {
+    return _searchResults;
+  }
+
+  public void setSearchResults(SearchResults<Well> searchResults)
+  {
+    _searchResults = searchResults;
+  }
+
   public Map<String,String> getCompoundImageUrl()
   {
     return _compoundImageUrl;

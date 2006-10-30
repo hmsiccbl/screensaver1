@@ -110,6 +110,7 @@ public class LibrarySearchResults extends SearchResults<Library>
   @Override
   protected Object cellAction(Library library, String columnName)
   {
+    _libraryViewerController.setSearchResults(this);
     _libraryViewerController.setLibrary(library);
     return "showLibrary";
   }

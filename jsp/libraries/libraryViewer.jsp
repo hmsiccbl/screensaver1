@@ -11,9 +11,9 @@
 
 <f:subview id="libraryViewer">
 
-	<t:aliasBean alias="#{navigator}" value="#{searchResultsRegistry.searchResults}" >
-		<%@ include file="../searchResultsNavPanel.jspf"  %>
-	</t:aliasBean>
+  <t:aliasBean alias="#{navigator}" value="#{libraryViewer.searchResults}" >
+    <%@ include file="../searchResultsNavPanel.jspf"  %>
+  </t:aliasBean>
 
   <h:panelGrid columns="2" rendered="true">
     <h:outputText value="short name:" />

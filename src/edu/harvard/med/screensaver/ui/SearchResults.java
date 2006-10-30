@@ -462,7 +462,10 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractCo
   public SearchResultsViewMode getViewMode()
   {
     // HACK: is there a better way of determining the context in which this controller is being used???
-    if (getFacesContext().getViewRoot().getViewId().contains("Browser")) {
+    if (
+      getFacesContext().getViewRoot().getViewId().contains("Browser") ||
+      getFacesContext().getViewRoot().getViewId().contains("wellSearchResults")
+    ) {
       return SearchResultsViewMode.SUMMARY;
     }
     return SearchResultsViewMode.DETAIL;

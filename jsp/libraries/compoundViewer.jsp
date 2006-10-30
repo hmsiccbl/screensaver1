@@ -11,7 +11,7 @@
 
 <f:subview id="compoundViewer">
 
-  <t:aliasBean alias="#{navigator}" value="#{searchResultsRegistry.searchResults}" >
+  <t:aliasBean alias="#{navigator}" value="#{compoundViewer.searchResults}" >
     <%@ include file="../searchResultsNavPanel.jspf" %>
   </t:aliasBean>
 

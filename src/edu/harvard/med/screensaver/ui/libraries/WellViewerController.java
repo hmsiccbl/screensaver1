@@ -16,6 +16,7 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.SearchResults;
 import edu.harvard.med.screensaver.ui.SearchResultsRegistryController;
 
 public class WellViewerController extends AbstractController
@@ -27,6 +28,7 @@ public class WellViewerController extends AbstractController
   // private instance fields
   
   private Well _well;
+  private SearchResults<Well> _searchResults;
   private LibraryViewerController _libraryViewerController;
   private GeneViewerController _geneViewerController;
   private CompoundViewerController _compoundViewerController;
@@ -49,6 +51,16 @@ public class WellViewerController extends AbstractController
     _well = well;
   }
   
+  public SearchResults<Well> getSearchResults()
+  {
+    return _searchResults;
+  }
+
+  public void setSearchResults(SearchResults<Well> searchResults)
+  {
+    _searchResults = searchResults;
+  }
+
   public LibraryViewerController getLibraryViewer()
   {
     return _libraryViewerController;

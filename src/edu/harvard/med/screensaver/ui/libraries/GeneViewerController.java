@@ -10,22 +10,35 @@
 package edu.harvard.med.screensaver.ui.libraries;
 
 import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.SearchResults;
 
 public class GeneViewerController extends AbstractController
 {
-  private Gene gene;
-
+  private Gene _gene;
+  private SearchResults<Well> _searchResults;
+  
   public Gene getGene()
   {
-    return gene;
+    return _gene;
   }
 
   public void setGene(Gene gene)
   {
-    this.gene = gene;
+    this._gene = gene;
   }
   
+  public SearchResults<Well> getSearchResults()
+  {
+    return _searchResults;
+  }
+
+  public void setSearchResults(SearchResults<Well> searchResults)
+  {
+    _searchResults = searchResults;
+  }
+
   public String showGene()
   {
     return "showGene";

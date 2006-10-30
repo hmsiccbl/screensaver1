@@ -13,6 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screens.Screen;
 
 /**
  * Maintains a registry of the latest {@link SearchResults} for every type of {@link
@@ -130,5 +134,32 @@ public class SearchResultsRegistryController extends AbstractController
   public SearchResults<? extends AbstractEntity> getSearchResults()
   {
     return getSearchResults(getCurrentSearchType());
+  }
+  
+  /**
+   * Get the current library search results.
+   * @return the current library search results
+   */
+  public SearchResults<Library> getLibrarySearchResults()
+  {
+    return getSearchResults(Library.class);
+  }
+  
+  /**
+   * Get the current screen search results.
+   * @return the current screen search results
+   */
+  public SearchResults<Screen> getScreenSearchResults()
+  {
+    return getSearchResults(Screen.class);
+  }
+
+  /**
+   * Get the current well search results.
+   * @return the current well search results
+   */
+  public SearchResults<Well> getWellSearchResults()
+  {
+    return getSearchResults(Well.class);
   }
 }

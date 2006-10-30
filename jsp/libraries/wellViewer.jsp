@@ -23,16 +23,12 @@
     
 <f:subview id="well">
 
-  <t:panelGroup
-    rendered="#{searchResultsRegistry.searchResults != null}"
+  <t:aliasBean
+    alias="#{navigator}"
+    value="#{wellViewer.searchResults}"
   >
-    <t:aliasBean
-      alias="#{navigator}"
-      value="#{searchResultsRegistry.searchResults}"
-     >
-      <%@ include file="../searchResultsNavPanel.jspf" %>
-    </t:aliasBean>
-  </t:panelGroup>
+    <%@ include file="../searchResultsNavPanel.jspf" %>
+  </t:aliasBean>
   
   <h:form id="wellForm">
 
