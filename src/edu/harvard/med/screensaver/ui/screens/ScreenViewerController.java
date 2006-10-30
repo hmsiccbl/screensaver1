@@ -23,6 +23,9 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
+import org.apache.log4j.Logger;
+import org.springframework.dao.ConcurrencyFailureException;
+
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
@@ -38,13 +41,11 @@ import edu.harvard.med.screensaver.model.screens.Visit;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.SearchResults;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewerController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.ScreeningRoomUserByLabComparator;
 import edu.harvard.med.screensaver.util.StringUtils;
-
-import org.apache.log4j.Logger;
-import org.springframework.dao.ConcurrencyFailureException;
 
 public class ScreenViewerController extends AbstractController
 {
@@ -57,6 +58,7 @@ public class ScreenViewerController extends AbstractController
   
   private DAO _dao;
   private Screen _screen;
+  private SearchResults<Screen> _searchResults;
   private ScreenResultViewerController _screenResultViewer;
   private List<SelectItem> _leadScreenerSelectItems;
   private FundingSupport _newFundingSupport;
@@ -76,14 +78,8 @@ public class ScreenViewerController extends AbstractController
   {
     _screen = screen;
     updateLeadScreenerSelectItems(screen.getLabHead());
-    //recreateView(false);
   }
 
-  /**
-   * Return the library being managed by this controller.
-   * @motivation allows properties of the Library to be bound to UI components
-   * @return
-   */
   public Screen getScreen() 
   {
     if (_screen == null) {
@@ -94,6 +90,16 @@ public class ScreenViewerController extends AbstractController
     return _screen;
   }
   
+  public SearchResults<Screen> getSearchResults()
+  {
+    return _searchResults;
+  }
+
+  public void setSearchResults(SearchResults<Screen> searchResults)
+  {
+    _searchResults = searchResults;
+  }
+
   public ScreenResultViewerController getScreenResultViewer()
   {
     return _screenResultViewer;

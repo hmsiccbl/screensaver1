@@ -13,11 +13,9 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
-import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.SearchResults;
-import edu.harvard.med.screensaver.ui.SearchResultsRegistryController;
 
 public class WellViewerController extends AbstractController
 {
@@ -32,7 +30,6 @@ public class WellViewerController extends AbstractController
   private LibraryViewerController _libraryViewerController;
   private GeneViewerController _geneViewerController;
   private CompoundViewerController _compoundViewerController;
-  private SearchResultsRegistryController _searchResultsRegistry;
   
   
   // public instance methods
@@ -70,16 +67,6 @@ public class WellViewerController extends AbstractController
   {
     _libraryViewerController = libraryViewerController;
   }
-
-  public SearchResultsRegistryController getSearchResultsRegistry()
-  {
-    return _searchResultsRegistry;
-  }
-
-  public void setSearchResultsRegistry(SearchResultsRegistryController searchResultsRegistry)
-  {
-    _searchResultsRegistry = searchResultsRegistry;
-  }
   
   public GeneViewerController getGeneViewer()
   {
@@ -104,7 +91,7 @@ public class WellViewerController extends AbstractController
   public String showLibrary()
   {
     _libraryViewerController.setLibrary(_well.getLibrary());
-    _searchResultsRegistry.setCurrentSearchType(Library.class);
+    _libraryViewerController.setSearchResults(null);
     return "showLibrary";
   }
   
@@ -118,6 +105,7 @@ public class WellViewerController extends AbstractController
         break;
       }
     }
+    _geneViewerController.setSearchResults(_searchResults);
     _geneViewerController.setGene(gene);
     return "showGene";
   }
@@ -133,6 +121,7 @@ public class WellViewerController extends AbstractController
       }
     }
     _compoundViewerController.setCompound(compound);
+    _compoundViewerController.setSearchResults(_searchResults);
     return "showCompound";
   }
   

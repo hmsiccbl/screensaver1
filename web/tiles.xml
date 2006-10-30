@@ -134,7 +134,7 @@
       value="Well Search Results"/>
     <put
       name="body"
-      value="/searchResults.jsp" />
+      value="/libraries/wellSearchResults.jsp" />
   </definition>
   
   <definition

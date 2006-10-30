@@ -17,7 +17,6 @@ import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.SearchResults;
-import edu.harvard.med.screensaver.ui.SearchResultsRegistryController;
 
 /**
  * TODO: add comments
@@ -35,7 +34,6 @@ public class ScreensBrowserController extends AbstractController
   // private instance fields
   
   private DAO _dao;
-  private SearchResultsRegistryController _searchResultsRegistry;
   private ScreenViewerController _screenViewerController;
   private SearchResults<Screen> _searchResults;
   
@@ -50,16 +48,6 @@ public class ScreensBrowserController extends AbstractController
   public void setDao(DAO dao)
   {
     _dao = dao;
-  }
-
-  public SearchResultsRegistryController getSearchResultsRegistry()
-  {
-    return _searchResultsRegistry;
-  }
-
-  public void setSearchResultsRegistry(SearchResultsRegistryController searchResultsRegistry)
-  {
-    _searchResultsRegistry = searchResultsRegistry;
   }
   
   public ScreenViewerController getScreenViewer()
@@ -84,12 +72,10 @@ public class ScreensBrowserController extends AbstractController
 
   public String goBrowseScreens()
   {
-    if (_searchResultsRegistry.getSearchResultsRegistrant(Screen.class) != this) {
+    if (_searchResults == null) {
       List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
       _searchResults = new ScreenSearchResults(screens, _screenViewerController);
-      _searchResultsRegistry.registerSearchResults(Screen.class, this, _searchResults);
     }
-    _searchResultsRegistry.setCurrentSearchType(Screen.class);
     return "goBrowseScreens";
   }
 }

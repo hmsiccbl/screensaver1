@@ -98,6 +98,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
   protected Object cellAction(Screen screen, String columnName)
   {
     _screenViewerController.setScreen(screen);
+    _screenViewerController.setSearchResults(this);
     return "showScreen";
   }
   

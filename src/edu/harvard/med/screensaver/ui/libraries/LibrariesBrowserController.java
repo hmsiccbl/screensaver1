@@ -17,7 +17,6 @@ import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.SearchResults;
-import edu.harvard.med.screensaver.ui.SearchResultsRegistryController;
 
 /**
  * TODO: add comments
@@ -35,7 +34,6 @@ public class LibrariesBrowserController extends AbstractController
   // private instance fields
   
   private DAO _dao;
-  private SearchResultsRegistryController _searchResultsRegistry;
   private LibraryViewerController _libraryViewerController;
   private SearchResults<Library> _searchResults;
   
@@ -50,16 +48,6 @@ public class LibrariesBrowserController extends AbstractController
   public void setDao(DAO dao)
   {
     _dao = dao;
-  }
-
-  public SearchResultsRegistryController getSearchResultsRegistry()
-  {
-    return _searchResultsRegistry;
-  }
-
-  public void setSearchResultsRegistry(SearchResultsRegistryController searchResultsRegistry)
-  {
-    _searchResultsRegistry = searchResultsRegistry;
   }
   
   public LibraryViewerController getLibraryViewer()
@@ -84,12 +72,10 @@ public class LibrariesBrowserController extends AbstractController
 
   public String goBrowseLibraries()
   {
-    if (_searchResultsRegistry.getSearchResultsRegistrant(Library.class) != this) {
+    if (_searchResults == null) {
       List<Library> libraries = _dao.findAllEntitiesWithType(Library.class);
       _searchResults = new LibrarySearchResults(libraries, _libraryViewerController);
-      _searchResultsRegistry.registerSearchResults(Library.class, this, _searchResults);
     }
-    _searchResultsRegistry.setCurrentSearchType(Library.class);
     return "goBrowseLibraries";
   }
 }

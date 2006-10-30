@@ -23,7 +23,6 @@ import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.SearchResults;
-import edu.harvard.med.screensaver.ui.SearchResultsRegistryController;
 
 public class LibraryViewerController extends AbstractController
 {
@@ -34,10 +33,10 @@ public class LibraryViewerController extends AbstractController
   private SearchResults<Library> _searchResults;
   private RNAiLibraryContentsImporterController _rnaiLibraryContentsImporter;
   private CompoundLibraryContentsImporterController _compoundLibraryContentsImporter;
-  private SearchResultsRegistryController _searchResultsRegistry;
   private WellViewerController _wellViewerController;
   private GeneViewerController _geneViewerController;
   private CompoundViewerController _compoundViewerController;
+  private WellSearchResultsController _wellSearchResultsController;
   private String _usageMode; // "create" or "edit"
   private boolean _advancedMode;
   
@@ -89,16 +88,6 @@ public class LibraryViewerController extends AbstractController
   {
     _compoundLibraryContentsImporter = compoundLibraryContentsImporter;
   }
-
-  public SearchResultsRegistryController getSearchResultsRegistry()
-  {
-    return _searchResultsRegistry;
-  }
-
-  public void setSearchResultsRegistry(SearchResultsRegistryController searchResultsRegistry)
-  {
-    _searchResultsRegistry = searchResultsRegistry;
-  }
   
   public WellViewerController getWellViewer()
   {
@@ -129,6 +118,16 @@ public class LibraryViewerController extends AbstractController
   public void setCompoundViewer(CompoundViewerController compoundViewerController)
   {
     _compoundViewerController = compoundViewerController;
+  }
+
+  public WellSearchResultsController getWellSearchResults()
+  {
+    return _wellSearchResultsController;
+  }
+
+  public void setWellSearchResults(WellSearchResultsController wellSearchResultsController)
+  {
+    _wellSearchResultsController = wellSearchResultsController;
   }
 
   public void setUsageMode(String usageMode)
@@ -213,16 +212,13 @@ public class LibraryViewerController extends AbstractController
 
   public String viewLibraryContents()
   {
-    if (_searchResultsRegistry.getSearchResultsRegistrant(Library.class) != this) {
-      SearchResults<Well> searchResults = new WellSearchResults(
-        new ArrayList<Well>(_library.getWells()),
-        this,
-        _wellViewerController,
-        _compoundViewerController,
-        _geneViewerController);
-      _searchResultsRegistry.registerSearchResults(Well.class, this, searchResults);
-    }
-    _searchResultsRegistry.setCurrentSearchType(Well.class);
+    SearchResults<Well> searchResults = new WellSearchResults(
+      new ArrayList<Well>(_library.getWells()),
+      this,
+      _wellViewerController,
+      _compoundViewerController,
+      _geneViewerController);
+    _wellSearchResultsController.setSearchResults(searchResults);
     return "goWellSearchResults";
   }
   

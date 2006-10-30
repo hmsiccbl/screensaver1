@@ -15,7 +15,7 @@
 
   <t:aliasBean
     alias="#{searchResults}"
-    value="#{searchResultsRegistry.searchResults}">
+    value="#{wellSearchResults.searchResults}">
     <%@include file="../searchResults.jspf"%>
   </t:aliasBean>
 

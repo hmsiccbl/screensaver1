@@ -17,14 +17,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.SearchResults;
-import edu.harvard.med.screensaver.ui.SearchResultsRegistryController;
 import edu.harvard.med.screensaver.util.StringUtils;
-
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -48,9 +47,9 @@ public class WellFinderController extends AbstractController
   private DAO _dao;
   private LibraryViewerController _libraryViewerController;
   private WellViewerController _wellViewerController;
-  private SearchResultsRegistryController _searchResultsRegistry;
   private GeneViewerController _geneViewerController;
   private CompoundViewerController _compoundViewerController;
+  private WellSearchResultsController _wellSearchResultsController;
   
   
   // public instance methods
@@ -135,14 +134,14 @@ public class WellFinderController extends AbstractController
     _geneViewerController = geneViewer;
   }
 
-  public SearchResultsRegistryController getSearchResultsRegistry()
+  public WellSearchResultsController getWellSearchResults()
   {
-    return _searchResultsRegistry;
+    return _wellSearchResultsController;
   }
 
-  public void setSearchResultsRegistry(SearchResultsRegistryController searchResultsRegistry)
+  public void setWellSearchResults(WellSearchResultsController wellSearchResultsController)
   {
-    _searchResultsRegistry = searchResultsRegistry;
+    _wellSearchResultsController = wellSearchResultsController;
   }
 
   public String findWell()
@@ -158,18 +157,13 @@ public class WellFinderController extends AbstractController
   public String findWells()
   {
     List<Well> wells = lookupWellsFromPlateWellList();
-//    if (wells.size() == 1) {
-//      _wellViewerController.setWell(wells.get(0));
-//      return "showWell";
-//    }
     SearchResults<Well> searchResults = new WellSearchResults(
       wells,
       _libraryViewerController,
       _wellViewerController,
       _compoundViewerController,
       _geneViewerController);
-    _searchResultsRegistry.registerSearchResults(Well.class, this, searchResults);
-    _searchResultsRegistry.setCurrentSearchType(Well.class);
+    _wellSearchResultsController.setSearchResults(searchResults);
     return "goWellSearchResults";
   }
   

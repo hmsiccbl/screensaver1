@@ -46,13 +46,6 @@
     <managed-bean-scope>request</managed-bean-scope>
   </managed-bean>
    
-   <managed-bean>
-    <description>Search Results Registry backing bean</description>
-    <managed-bean-name>searchResultsRegistry</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.SearchResultsRegistryController</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-  </managed-bean>
-  
   <managed-bean>
     <description>Library Viewer backing bean</description>
     <managed-bean-name>libraryViewer</managed-bean-name>
@@ -75,10 +68,6 @@
       <value>#{compoundLibraryContentsImporter}</value>
     </managed-property>
     <managed-property>
-      <property-name>searchResultsRegistry</property-name>
-      <value>#{searchResultsRegistry}</value>
-    </managed-property>
-    <managed-property>
       <property-name>wellViewer</property-name>
       <value>#{wellViewer}</value>
     </managed-property>
@@ -90,6 +79,10 @@
       <property-name>compoundViewer</property-name>
       <value>#{compoundViewer}</value>
     </managed-property>
+    <managed-property>
+      <property-name>wellSearchResults</property-name>
+      <value>#{wellSearchResults}</value>
+    </managed-property>
   </managed-bean>
   
   <managed-bean>
@@ -100,10 +93,6 @@
     <managed-property>
       <property-name>dao</property-name>
       <value>#{dao}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>searchResultsRegistry</property-name>
-      <value>#{searchResultsRegistry}</value>
     </managed-property>
     <managed-property>
       <property-name>libraryViewer</property-name>
@@ -131,6 +120,13 @@
   </managed-bean>
   
   <managed-bean>
+    <description>Well Search Results backing bean</description>
+    <managed-bean-name>wellSearchResults</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.WellSearchResultsController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
     <description>Gene Viewer backing bean</description>
     <managed-bean-name>geneViewer</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.GeneViewerController</managed-bean-class>
@@ -152,10 +148,6 @@
     <managed-property>
       <property-name>dao</property-name>
       <value>#{dao}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>searchResultsRegistry</property-name>
-      <value>#{searchResultsRegistry}</value>
     </managed-property>
     <managed-property>
       <property-name>screenViewer</property-name>
@@ -206,10 +198,6 @@
     <managed-bean-name>wellViewer</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.WellViewerController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>searchResultsRegistry</property-name>
-      <value>#{searchResultsRegistry}</value>
-    </managed-property>
     <managed-property>
       <property-name>geneViewer</property-name>
       <value>#{geneViewer}</value>
@@ -306,10 +294,6 @@
     <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.WellFinderController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
-      <property-name>searchResultsRegistry</property-name>
-      <value>#{searchResultsRegistry}</value>
-    </managed-property>
-    <managed-property>
       <property-name>libraryViewer</property-name>
       <value>#{libraryViewer}</value>
     </managed-property>
@@ -332,6 +316,10 @@
     <managed-property>
       <property-name>messages</property-name>
       <value>#{messages}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>wellSearchResults</property-name>
+      <value>#{wellSearchResults}</value>
     </managed-property>
   </managed-bean>
 

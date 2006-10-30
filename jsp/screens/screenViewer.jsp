@@ -22,7 +22,7 @@ TODO:
 
 <f:subview id="screenViewer">
 
-	<t:aliasBean alias="#{navigator}" value="#{searchResultsRegistry.screenSearchResults}">
+	<t:aliasBean alias="#{navigator}" value="#{screenViewer.searchResults}">
 		<%@ include file="../searchResultsNavPanel.jspf"%>
 	</t:aliasBean>
 
