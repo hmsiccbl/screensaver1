@@ -39,6 +39,9 @@ public enum ScoringType {
     return _function;
   }
 
-  
+  public String toString()
+  {
+    return _description;
+  }
 }
 

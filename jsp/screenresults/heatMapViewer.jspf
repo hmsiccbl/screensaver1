@@ -16,71 +16,79 @@
 
 <f:subview id="heatMapViewer">
 
-	<t:panelGrid columns="3">
+	<t:panelGrid columns="3" style="vertical-align: top">
+		<t:panelGrid>
+			<t:outputLabel for="dataHeaders" value="Data headers:"
+				styleClass="inputLabel" />
+			<t:selectManyListbox id="dataHeaders"
+				value="#{heatMapViewer.dataHeaders.value}" required="true"
+				styleClass="input">
+				<f:selectItems value="#{heatMapViewer.dataHeaders.selectItems}" />
+			</t:selectManyListbox>
+		</t:panelGrid>
 
-		<t:outputLabel for="plateNumbers" value="Show plates: "
-			styleClass="inputLabel" />
-		<t:outputLabel for="dataHeader" value="For data header: "
-			styleClass="inputLabel" />
-		<t:outputLabel for="scoringType" value="Scoring Type: "
-			styleClass="inputLabel" />
+		<t:panelGrid>
+			<t:outputLabel for="plateNumber" value="Plate:"
+				styleClass="inputLabel" />
+			<t:selectOneMenu id="plateNumber"
+				value="#{heatMapViewer.plateNumber.value}" required="true"
+				onchange="javascript:document.getElementById('updateButton').click()"
+				styleClass="input">
+				<f:selectItems value="#{heatMapViewer.plateNumber.selectItems}" />
+			</t:selectOneMenu>
+		</t:panelGrid>
 
-		<t:outputLabel for="plateNumber" value="Plate:" />
-		<t:selectOneMenu id="plateNumber" value="#{heatMapViewer.plateNumber}"
-			onchange="javascript:submit()" converter="IntegerConverter"
-			styleClass="input">
-			<f:selectItems value="#{heatMapViewer.plateSelectItems}" />
-		</t:selectOneMenu>
-
-		<t:selectOneMenu id="dataHeader"
-			value="#{heatMapViewer.resultValueTypeId}"
-			converter="IntegerConverter" styleClass="input">
-			<f:selectItems value="#{heatMapViewer.dataHeaderSelectItems}" />
-		</t:selectOneMenu>
-
-		<t:selectOneRadio id="scoringType" layout="pageDirection"
-			value="#{heatMapViewer.scoringType}" converter="ScoringTypeConverter"
-			styleClass="input">
-			<f:selectItems value="#{heatMapViewer.scoringTypeSelectItems}" />
-		</t:selectOneRadio>
+		<t:panelGrid>
+			<t:outputLabel for="scoringType" value="Scoring:"
+				styleClass="inputLabel" />
+			<t:selectOneRadio id="scoringType" layout="pageDirection"
+				value="#{heatMapViewer.scoringType.value}" required="true"
+				styleClass="input">
+				<f:selectItems value="#{heatMapViewer.scoringType.selectItems}" />
+			</t:selectOneRadio>
+		</t:panelGrid>
 	</t:panelGrid>
 
-	<t:commandButton id="updateButton" value="View"
+	<t:commandButton id="updateButton" forceId="true" value="View"
 		action="#{heatMapViewer.update}" styleClass="command" />
 
-	<%--t:dataTable id="heatMapsTable" value="#{heatMapViewer.plates}" var="plate" --%>
-
-	<t:dataTable id="heatMapTable"
-		value="#{heatMapViewer.heatMapDataModel}" var="plateRow"
-		rowIndexVar="plateRowIndex" renderedIfEmpty="false"
-		styleClass="heatMapTable" headerClass="tableHeader"
-		preserveDataModel="false" footerClass="tableFooter">
-		<t:column styleClass="keyColumn">
-			<f:facet name="header">
-				<t:outputText value="Row" />
-			</f:facet>
-			<t:outputText value="#{plateRowIndex + 1}" />
-		</t:column>
-		<t:columns value="#{heatMapViewer.heatMapColumnDataModel}"
-			var="columnIndex"
-			style="background-color: #{heatMapViewer.heatMapCell.hexColor}">
-			<f:facet name="header">
-				<t:outputText value="#{columnIndex + 1}" styleClass="keyColumn" />
-			</f:facet>
-			<f:facet name="footer">
-				<t:outputText value="#{columnIndex + 1}" styleClass="keyColumn" />
-			</f:facet>
-			<t:outputText value="#{heatMapViewer.heatMapCell.value}" />
-		</t:columns>
-		<t:column styleClass="keyColumn">
-			<f:facet name="header">
-				<t:outputText value="Row" />
-			</f:facet>
-			<t:outputText value="#{plateRowIndex + 1}" />
+	<t:dataTable id="heatMapsTable"
+		value="#{heatMapViewer.heatMapDataModelsDataModel}"
+		var="heatMapDataModel" rowIndexVar="heatMapIndex">
+		<t:column>
+			<t:outputText
+				value="#{heatMapViewer.screenResult.resultValueTypesList[heatMapIndex].name}" />
+			<t:dataTable id="heatMapTable" value="#{heatMapDataModel}"
+				var="plateRow" rowIndexVar="plateRowIndex" renderedIfEmpty="false"
+				styleClass="heatMapTable" headerClass="tableHeader"
+				preserveDataModel="false" footerClass="tableFooter">
+				<t:column styleClass="keyColumn">
+					<f:facet name="header">
+						<t:outputText value="Row" />
+					</f:facet>
+					<t:outputText value="#{plateRowIndex + 1}" />
+				</t:column>
+				<t:columns
+					value="#{heatMapViewer.heatMapColumnDataModels[heatMapIndex]}"
+					var="columnIndex"
+					style="background-color: #{heatMapViewer.heatMapCell.hexColor}">
+					<f:facet name="header">
+						<t:outputText value="#{columnIndex + 1}" styleClass="keyColumn" />
+					</f:facet>
+					<f:facet name="footer">
+						<t:outputText value="#{columnIndex + 1}" styleClass="keyColumn" />
+					</f:facet>
+					<t:outputText value="#{heatMapViewer.heatMapCell.value}" />
+				</t:columns>
+				<t:column styleClass="keyColumn">
+					<f:facet name="header">
+						<t:outputText value="Row" />
+					</f:facet>
+					<t:outputText value="#{plateRowIndex + 1}" />
+				</t:column>
+			</t:dataTable>
 		</t:column>
 	</t:dataTable>
-
-	<%--/t:dataTable--%>
 
 
 </f:subview>

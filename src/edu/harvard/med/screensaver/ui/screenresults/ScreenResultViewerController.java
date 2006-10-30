@@ -165,6 +165,7 @@ public class ScreenResultViewerController extends AbstractController
       resetView();
     }
     _screenResult = screenResult;
+    _heatMapViewer.setScreenResult(_screenResult);
   }
   
   public ScreenResultExporter getScreenResultExporter()
@@ -436,12 +437,6 @@ public class ScreenResultViewerController extends AbstractController
     _dao.deleteScreenResult(_screenResult);
     _screenResult = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-  
-  public String viewHeatMaps()
-  {
-    _heatMapViewer.setScreenResult(_screenResult);
-    return "viewHeatMaps";
   }
   
   public String showWell()

@@ -56,9 +56,14 @@ public class UniqueDataHeaderNamesTest extends AbstractSpringTest
                                                                    /*ignored file paths=*/ true);
         assertNotNull("pretest: screenResult parsed", screenResult);
         UniqueDataHeaderNames uniqueDataHeaderNames = new UniqueDataHeaderNames(screenResult);
+        int i = 0;
         for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-          assertEquals(expectedUniqueNames.get(rvt.getOrdinal()),
+          assertEquals("lookup name", 
+                       expectedUniqueNames.get(rvt.getOrdinal()),
                        uniqueDataHeaderNames.get(rvt));
+          assertEquals("lookup ResultValueType", 
+                       uniqueDataHeaderNames.get(rvt),
+                       expectedUniqueNames.get(i++));
         }
         assertEquals(expectedUniqueNames,
                      uniqueDataHeaderNames.asList());

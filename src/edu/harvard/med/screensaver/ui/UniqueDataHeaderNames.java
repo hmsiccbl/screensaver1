@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,11 +23,13 @@ public class UniqueDataHeaderNames
 {
   private ScreenResult _screenResult;
   private Map<ResultValueType,String> _uniqueDataHeaderNamesMap;
+  private Map<String,ResultValueType> _uniqueDataHeaderName2ResultValueType;
 
   public UniqueDataHeaderNames(ScreenResult screenResult)
   {
     _screenResult = screenResult;
     _uniqueDataHeaderNamesMap = new LinkedHashMap<ResultValueType,String>();
+    _uniqueDataHeaderName2ResultValueType = new HashMap<String,ResultValueType>();
     List<String> names = new ArrayList<String>();
     for (ResultValueType rvt : screenResult.getResultValueTypes()) {
       names.add(rvt.getName());
@@ -39,6 +42,7 @@ public class UniqueDataHeaderNames
         name += " (" + Collections.frequency(names2, name) + ")";
       }
       _uniqueDataHeaderNamesMap.put(rvt, name);
+      _uniqueDataHeaderName2ResultValueType.put(name, rvt);
     }
   }
 
@@ -50,6 +54,11 @@ public class UniqueDataHeaderNames
   public String get(Integer ordinal)
   {
     return _uniqueDataHeaderNamesMap.get(_screenResult.getResultValueTypesList().get(ordinal));
+  }
+  
+  public ResultValueType get(String uniqueDataHeaderName)
+  {
+    return _uniqueDataHeaderName2ResultValueType.get(uniqueDataHeaderName);
   }
 
   public List<String> asList()
