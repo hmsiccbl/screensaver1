@@ -56,6 +56,7 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
   public static void main(String[] args)
   {
     CommandLineApplication app = new CommandLineApplication(args);
+    app.setDatabaseRequired(true);
     app.addCommandLineOption(OptionBuilder.
                              withArgName("create").
                              withLongOpt("create").
