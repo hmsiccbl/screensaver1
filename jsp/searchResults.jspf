@@ -76,6 +76,37 @@
         </t:columns>
       </t:dataTable>
     </h:form>
+    
+    <h:panelGrid
+      style="margin: 0px; border: 1px solid grey; padding: 1px;"
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      columns="4"
+      width="100%"
+      rendered="#{searchResults.isDownloadable}"
+    >
+      <h:form
+        id="searchResultsDownloadForm"
+      >
+        <h:panelGroup style="float: right">
+          <h:outputText value="download search results to " />
+          <h:commandButton
+            id="downloadSearchResults"
+            value="downloadSearchResults"
+            action="#{searchResults.downloadSearchResults}"
+            style="display: none"
+          />
+          <h:selectOneMenu
+            id="downloadFormat"
+            value="#{searchResults.downloadFormat}"
+            onchange="this.previousSibling.click();"
+          >
+            <f:selectItems value="#{searchResults.downloadFormatSelections}" />
+          </h:selectOneMenu>
+        </h:panelGroup>
+      </h:form>
+    </h:panelGrid>
 
   </h:panelGrid>
 </f:subview>

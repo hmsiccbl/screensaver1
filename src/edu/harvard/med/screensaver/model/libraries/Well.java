@@ -11,18 +11,19 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.EntityIdProperty;
-import edu.harvard.med.screensaver.model.DerivedEntityProperty;
-import edu.harvard.med.screensaver.model.screens.CherryPick;
-
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import edu.harvard.med.screensaver.model.EntityIdProperty;
+import edu.harvard.med.screensaver.model.screens.CherryPick;
 
 
 /**
@@ -145,6 +146,28 @@ public class Well extends AbstractEntity
   public Set<Compound> getCompounds()
   {
     return Collections.unmodifiableSet(getHbnCompounds());
+  }
+
+  /**
+   * Get the primary compound: the compound that is most likely the one being tested for
+   * bioactivity. Normally, we expect a single potentially bioactive
+   * compound, plus salts and other solvents, in a compound well. (But be careful, because
+   * sometimes the experimental compound is also a salt!) As an approximation, take the
+   * compound with the longest smiles.
+   * @return the primary compound
+   */
+  @DerivedEntityProperty
+  public Compound getPrimaryCompound()
+  {
+    Compound compoundWithLongestSmiles = null;
+    for (Compound compound : getHbnCompounds()) {
+      if (
+        compoundWithLongestSmiles == null ||
+        compound.getSmiles().length() > compoundWithLongestSmiles.getSmiles().length()) {
+        compoundWithLongestSmiles = compound;
+      }
+    }
+    return compoundWithLongestSmiles; 
   }
 
   /**
@@ -504,6 +527,81 @@ public class Well extends AbstractEntity
     return _rowLetter == 'A' || _rowLetter == 'P' || 
     _column == 0 || _column == 23;
   }
+  
+  /**
+   * Write the well contents out as an SD file record to the print writer.
+   * @param sdFilePrintWriter the SD file print writer
+   */
+  public void writeToSDFile(PrintWriter sdFilePrintWriter)
+  {
+    if (_molfile == null) {
+      return;
+    }
+    sdFilePrintWriter.println(_molfile);
+    sdFilePrintWriter.println(">  <Library>");
+    sdFilePrintWriter.println(getLibrary().getLibraryName());
+    sdFilePrintWriter.println();
+    sdFilePrintWriter.println(">  <Plate>");
+    sdFilePrintWriter.println(getPlateNumber());
+    sdFilePrintWriter.println();
+    sdFilePrintWriter.println(">  <Well>");
+    sdFilePrintWriter.println(getWellName());
+    sdFilePrintWriter.println();
+    sdFilePrintWriter.println(">  <Plate_Well>");
+    sdFilePrintWriter.println(getPlateNumber() + getWellName());
+    sdFilePrintWriter.println();
+    sdFilePrintWriter.println(">  <Well_Type>");
+    sdFilePrintWriter.println(getWellType());
+    sdFilePrintWriter.println();
+    sdFilePrintWriter.println(">  <Smiles>");
+    sdFilePrintWriter.println(getSmiles());
+    sdFilePrintWriter.println();
+    if (getIccbNumber() != null) {
+      sdFilePrintWriter.println(">  <ICCB_Number>");
+      sdFilePrintWriter.println(getIccbNumber());
+      sdFilePrintWriter.println();
+    }
+    if (getVendorIdentifier() != null) {
+      sdFilePrintWriter.println(">  <Vendor_Identifier>");
+      if (getLibrary().getVendor() != null) {
+        sdFilePrintWriter.println(getLibrary().getVendor() + " " + getVendorIdentifier());
+      }
+      else {
+        sdFilePrintWriter.println(getVendorIdentifier());
+      }
+      sdFilePrintWriter.println();
+    }
+    Compound compound = getPrimaryCompound();
+    if (compound != null) {
+      for (String compoundName : compound.getCompoundNames()) {
+        sdFilePrintWriter.println(">  <Compound_Name>");
+        sdFilePrintWriter.println(compoundName);
+        sdFilePrintWriter.println();
+      }
+      for (String casNumber : compound.getCasNumbers()) {
+        sdFilePrintWriter.println(">  <CAS_Number>");
+        sdFilePrintWriter.println(casNumber);
+        sdFilePrintWriter.println();
+      }
+      for (String nscNumber : compound.getNscNumbers()) {
+        sdFilePrintWriter.println(">  <NSC_Number>");
+        sdFilePrintWriter.println(nscNumber);
+        sdFilePrintWriter.println();
+      }
+      if (compound.getPubchemCid() != null) {
+        sdFilePrintWriter.println(">  <PubChem_CID>");
+        sdFilePrintWriter.println(compound.getPubchemCid());
+        sdFilePrintWriter.println();        
+      }
+      if (compound.getChembankId() != null) {
+        sdFilePrintWriter.println(">  <ChemBank_ID>");
+        sdFilePrintWriter.println(compound.getChembankId());
+        sdFilePrintWriter.println();        
+      }
+    }
+    sdFilePrintWriter.println("$$$$");
+  }
+
   
 
   // protected getters and setters

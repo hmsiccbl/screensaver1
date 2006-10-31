@@ -9,6 +9,10 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,10 +26,13 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+
+import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -45,14 +52,19 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractCo
   // public static final data
   
   private static final Logger log = Logger.getLogger(SearchResults.class);
-  public static final int [] PAGESIZES = { 10, 20, 50, 100 };
-  public static final int DEFAULT_PAGESIZE = PAGESIZES[0];
+  
+  private static final int [] PAGESIZES = { 10, 20, 50, 100 };
+  private static final int DEFAULT_PAGESIZE = PAGESIZES[0];
+  
+  private static final String SD_FILE = "SDFile";
+  private static final String EXCEL_FILE = "Excel Spreadsheet";
+  private static final String [] DOWNLOAD_FORMATS = { "", EXCEL_FILE, SD_FILE };
   
 
   // private instance data
   
   private List<E> _unsortedResults;
-  private List<E> _currentSort;
+  protected List<E> _currentSort;
   private String _currentSortColumnName;
   private SortDirection  _currentSortDirection = SortDirection.ASCENDING;
   private Map<String,List<E>> _forwardSorts = new HashMap<String,List<E>>();
@@ -61,6 +73,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractCo
   private int _currentPageIndex = 0;
   private int _currentEntityIndex = 0;
   private int _itemsPerPage = DEFAULT_PAGESIZE;
+  private String _downloadFormat = "";
   
   private UIData _dataTable;
   private DataModel _dataModel;
@@ -509,8 +522,79 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractCo
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
+  /**
+   * Return true whenever the search results are downloadable. For the time being, the only
+   * downloadable search results are {@link
+   * edu.harvard.med.screensaver.ui.libraries.WellSearchResults}.
+   * 
+   * @return true whenever the search results are downloadable
+   */
+  public boolean getIsDownloadable()
+  {
+    return false;
+  }
+  
+  public String getDownloadFormat()
+  {
+    return _downloadFormat;
+  }
 
-  // abstract public and protected instance methods
+
+  public void setDownloadFormat(String downloadFormat)
+  {
+    _downloadFormat = downloadFormat;
+  }
+
+  public List<SelectItem> getDownloadFormatSelections()
+  {
+    List<String> selections = new ArrayList<String>();
+    for (String i : DOWNLOAD_FORMATS) {
+      selections.add(i);
+    }
+    return JSFUtils.createUISelectItems(selections);
+  }
+  
+  public String downloadSearchResults()
+  {
+    File searchResultsFile = null;
+    PrintWriter searchResultsPrintWriter = null;
+    FileOutputStream searchResultsFileOutputStream = null;
+    try {
+      searchResultsFile = File.createTempFile("searchResults.", ".sdf");
+      if (_downloadFormat.equals(SD_FILE)) {
+        searchResultsPrintWriter = new PrintWriter(searchResultsFile);
+        writeSDFileSearchResults(searchResultsPrintWriter);
+        searchResultsPrintWriter.close();
+      }
+      else {
+        HSSFWorkbook searchResultsWorkbook = new HSSFWorkbook();
+        writeExcelFileSearchResults(searchResultsWorkbook);
+        searchResultsFileOutputStream = new FileOutputStream(searchResultsFile);
+        searchResultsWorkbook.write(searchResultsFileOutputStream);
+        searchResultsFileOutputStream.close();
+      }
+      JSFUtils.handleUserFileDownloadRequest(
+        getFacesContext(),
+        searchResultsFile,
+        _downloadFormat.equals(SD_FILE) ? "chemical/x-mdl-sdfile" : Workbook.MIME_TYPE);
+    }
+    catch (IOException e)
+    {
+      showMessage("systemError");
+      log.error(e.getMessage());
+    }
+    finally {
+      IOUtils.closeQuietly(searchResultsPrintWriter);
+      IOUtils.closeQuietly(searchResultsFileOutputStream);
+      if (searchResultsFile != null && searchResultsFile.exists()) {
+        searchResultsFile.delete();
+      }
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+
+  // abstract public and private methods
 
   /**
    * Return the string action to show the summary view
@@ -595,6 +679,30 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractCo
     return (E) getDataModel().getRowData();
   }
   
+  /**
+   * Write the search results as an SD File to the print writer. Subclasses need to
+   * override this method to implement writing to SD File.
+   * @param searchResultsPrintWriter the print writer to write the search results to
+   */
+  protected void writeSDFileSearchResults(PrintWriter searchResultsPrintWriter)
+  {
+    throw new UnsupportedOperationException(
+      "This SearchResults (" + this + ") does not know how to write itself as an SD File.");
+  }
+  
+  /**
+   * Write the search results as an Excel File to the HSSFWorkbook. Subclasses need to
+   * override this method to implement writing to Excel File.
+   * @param searchResultsWorkbook the workbook to write the search results to
+   */
+  protected void writeExcelFileSearchResults(HSSFWorkbook searchResultsWorkbook)
+  {
+    throw new UnsupportedOperationException(
+      "This SearchResults (" + this + ") does not know how to write itself as an Excel File.");    
+  }
+
+
+  
   
   // private instance methods
   
@@ -656,6 +764,4 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractCo
     _currentSortDirection = sortDirection;
     _dataModel = new ListDataModel(_currentSort);
   }
-
-  
 }
