@@ -158,7 +158,6 @@ public class HeatMap
     _data = new ResultValue['P' - 'A' + 1][24];
     _rawValues = new double[_data.length][_data[0].length];
     Collection<Double> aggregationValues = new ArrayList<Double>();
-    ResizableDoubleArray medianValues = new ResizableDoubleArray();
     for (ResultValue rv : _resultValueType.getResultValues()) {
       if (rv.getWell().getPlateNumber() == _plateNumber) {
         int row = rv.getWell().getRow();
@@ -168,7 +167,6 @@ public class HeatMap
         _rawValues[row][col] = rawValue;
         if (!scoringFilter.exclude(rv)) {
           aggregationValues.add(rawValue);
-          medianValues.addElement(rawValue);
         }
       }
     }
@@ -176,9 +174,13 @@ public class HeatMap
     scoringFunc.initializeAggregates(aggregationValues);
 
     _statistics = new DescriptiveStatisticsImpl();
+    ResizableDoubleArray medianValues = new ResizableDoubleArray();
     for (Double rawValue : aggregationValues) {
-      _statistics.addValue(scoringFunc.compute(rawValue));
+      double scoredValue = scoringFunc.compute(rawValue);
+      _statistics.addValue(scoredValue);
+      medianValues.addElement(scoredValue);
     }
+
     _median = new Median().evaluate(medianValues.getElements());
 
     _scalableColorFunction.setLowerLimit(_statistics.getMin());
