@@ -9,6 +9,11 @@
 
 package edu.harvard.med.screensaver.analysis;
 
+import java.util.Arrays;
+import java.util.List;
+
+import edu.harvard.med.screensaver.analysis.heatmaps.NoOpFilter;
+
 import org.apache.log4j.Logger;
 
 public class ChainedFilter<T> implements Filter<T>
@@ -28,7 +33,22 @@ public class ChainedFilter<T> implements Filter<T>
   
   public ChainedFilter(Filter<T>... filters)
   {
-    // TODO
+    this(Arrays.asList(filters));
+  }
+
+  @SuppressWarnings("unchecked")
+  public ChainedFilter(List<Filter<T>> filters)
+  {
+    if (filters.size() == 0) {
+      _filter = null;
+      _next = null;
+    }
+    else {
+      _filter = filters.get(0);
+      if (filters.size() > 1) {
+        _next = new ChainedFilter(filters.subList(1, filters.size()));
+      }
+    }
   }
 
   public ChainedFilter(Filter<T> filter)
@@ -45,6 +65,9 @@ public class ChainedFilter<T> implements Filter<T>
 
   public boolean exclude(T element)
   {
+    if (_filter == null) {
+      return false;
+    }
     if (_filter.exclude(element)) {
       return true;
     }

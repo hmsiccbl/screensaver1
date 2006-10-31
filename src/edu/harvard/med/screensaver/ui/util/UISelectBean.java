@@ -71,11 +71,17 @@ public abstract class UISelectBean<T>
   
   protected String getKey(T t)
   {
+    if (t == null) {
+      return "";
+    }
     return Integer.toString(t.hashCode());
   }
   
   protected String getLabel(T t)
   {
+    if (t == null) { 
+      return "<none>";
+    }
     return t.toString();
   }
 

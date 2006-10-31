@@ -25,5 +25,11 @@ public class ControlWellsFilter implements Filter<ResultValue>
     rv.getAssayWellType().equals(AssayWellType.ASSAY_POSITIVE_CONTROL) ||
     rv.getAssayWellType().equals(AssayWellType.LIBRARY_CONTROL);
   }
+  
+  public String toString() 
+  {
+    return "Control wells";
+  }
+
 }
 

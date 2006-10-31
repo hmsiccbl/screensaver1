@@ -26,12 +26,6 @@ public class HeatMapCell
 
   private static Logger log = Logger.getLogger(HeatMapCell.class);
 
-  private static NumberFormat _valueFormat = NumberFormat.getInstance();
-  static { 
-    _valueFormat.setMaximumFractionDigits(3);
-    _valueFormat.setMinimumFractionDigits(3); 
-  }
-
   // instance data members
   
   private String _value;
@@ -40,9 +34,15 @@ public class HeatMapCell
   
   // public constructors and methods
 
-  public HeatMapCell(double value, Color color)
+  public HeatMapCell(double value, Color color, NumberFormat format)
   {
-    _value = _valueFormat.format(value);
+    if (format != null) {
+      _value = format.format(value);
+    }
+    else {
+      _value = "";
+    }
+    
     _hexColor = String.format("#%02x%02x%02x", 
                               color.getRed(),
                               color.getGreen(),

@@ -22,5 +22,10 @@ public class EdgeWellsFilter implements Filter<ResultValue>
   {
     return rv.getWell().isEdgeWell();
   }
+  
+  public String toString() 
+  {
+    return "Edge wells";
+  }
 }
 

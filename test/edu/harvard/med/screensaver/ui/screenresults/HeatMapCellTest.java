@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.ui.screenresults;
 
 import java.awt.Color;
+import java.text.NumberFormat;
 
 import junit.framework.TestCase;
 
@@ -24,7 +25,8 @@ public class HeatMapCellTest extends TestCase
   public void testHeatMapCell()
   {
     HeatMapCell cell = new HeatMapCell(1.0,
-                                       new Color(128, 0, 196));
+                                       new Color(128, 0, 196),
+                                       NumberFormat.getInstance());
     assertEquals("value", "1.000", cell.getValue());
     assertEquals("hex color", "#8000C4".toLowerCase(), cell.getHexColor());
   }

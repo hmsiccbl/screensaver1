@@ -9,17 +9,24 @@
 
 package edu.harvard.med.screensaver.ui.screenresults;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import edu.harvard.med.screensaver.analysis.ChainedFilter;
+import edu.harvard.med.screensaver.analysis.Filter;
 import edu.harvard.med.screensaver.analysis.heatmaps.ControlWellsFilter;
 import edu.harvard.med.screensaver.analysis.heatmaps.DefaultMultiColorGradient;
+import edu.harvard.med.screensaver.analysis.heatmaps.EdgeWellsFilter;
 import edu.harvard.med.screensaver.analysis.heatmaps.HeatMap;
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -29,12 +36,34 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 import org.apache.log4j.Logger;
 
+@SuppressWarnings("serial")
 public class HeatMapViewerController extends AbstractController
 {
 
   // static data members
 
   private static final HeatMapCell EMPTY_HEAT_MAP_CELL = new HeatMapCell();
+  private static final Collection<NumberFormat> NUMBER_FORMATS = new ArrayList<NumberFormat>();
+  static {
+    NUMBER_FORMATS.add(null);
+    DecimalFormat nf1 = new HackedDecimalFormat("0.0##E00;-0.0##E00");
+    NUMBER_FORMATS.add(nf1);
+    DecimalFormat nf1m = new HackedDecimalFormat("0.0##E00;(0.0##E00)");
+    NUMBER_FORMATS.add(nf1m);
+    DecimalFormat nf2 = new HackedDecimalFormat("#,##0.0##;-#,##0.0##");
+    NUMBER_FORMATS.add(nf2);
+    DecimalFormat nf2m = new HackedDecimalFormat("#,##0.0##;(#,##0.0##)");
+    NUMBER_FORMATS.add(nf2m);
+    DecimalFormat nf3 = new HackedDecimalFormat("0;-0");
+    NUMBER_FORMATS.add(nf3);
+    DecimalFormat nf3m = new HackedDecimalFormat("0;(0)");
+    NUMBER_FORMATS.add(nf3m);
+  }
+  private static final Collection<Filter<ResultValue>> EXCLUDED_WELL_FILTERS = new ArrayList<Filter<ResultValue>>();
+  static {
+    EXCLUDED_WELL_FILTERS.add(new ControlWellsFilter());
+    EXCLUDED_WELL_FILTERS.add(new EdgeWellsFilter());
+  }
 
   private static Logger log = Logger.getLogger(HeatMapViewerController.class);
   
@@ -45,9 +74,12 @@ public class HeatMapViewerController extends AbstractController
   private UISelectManyBean<ResultValueType> _dataHeaders;
   private UISelectOneBean<Integer> _plateNumber;
   private UISelectOneBean<ScoringType> _scoringType;
+  private UISelectOneBean<NumberFormat> _numericFormat;
+  private UISelectManyBean<Filter<ResultValue>> _excludedWellFilters;
   private ListDataModel _heatMapDataModelsDataModel;
   private List<DataModel> _heatMapColumnDataModels;
   private DAO _dao;
+  private ArrayList<HeatMap> _heatMaps;
 
   
   // bean property methods
@@ -61,9 +93,14 @@ public class HeatMapViewerController extends AbstractController
   {
     _screenResult = screenResult;
     _dataHeaders = new UISelectManyBean<ResultValueType>(_screenResult.getResultValueTypes()) {
-      protected String getLabel(ResultValueType t) { return t.getName(); } };
+      protected String getLabel(ResultValueType t) { return t.getName(); } 
+    };
     _plateNumber = new UISelectOneBean<Integer>(_screenResult.getPlateNumbers());
     _scoringType = new UISelectOneBean<ScoringType>(Arrays.asList(ScoringType.values()));
+    _numericFormat = new UISelectOneBean<NumberFormat>(NUMBER_FORMATS) {
+      protected String getLabel(NumberFormat t) { return t == null ? "<none>" : t.format(9999.333) + " / " + t.format(-9999.333); } 
+    };
+    _excludedWellFilters = new UISelectManyBean<Filter<ResultValue>>(EXCLUDED_WELL_FILTERS);
   }
   
   public ScreenResult getScreenResult()
@@ -92,6 +129,16 @@ public class HeatMapViewerController extends AbstractController
     return _scoringType;
   }
 
+  public UISelectOneBean<NumberFormat> getNumericFormat()
+  {
+    return _numericFormat;
+  }
+
+  public UISelectManyBean<Filter<ResultValue>> getExcludedWellTypes()
+  {
+    return _excludedWellFilters;
+  }
+  
   public DataModel getHeatMapDataModelsDataModel()
   {
     return _heatMapDataModelsDataModel;
@@ -102,6 +149,10 @@ public class HeatMapViewerController extends AbstractController
     return _heatMapColumnDataModels;
   }
   
+  public List<HeatMap> getHeatMaps()
+  {
+    return _heatMaps;
+  }
 
   @SuppressWarnings("unchecked")
   public HeatMapCell getHeatMapCell()
@@ -127,29 +178,33 @@ public class HeatMapViewerController extends AbstractController
     }
     List<DataModel> heatMapDataModels = new ArrayList<DataModel>();
     _heatMapColumnDataModels = new ArrayList<DataModel>();
+    _heatMaps = new ArrayList<HeatMap>();
     for (ResultValueType rvt : _dataHeaders.getSelections()) {
-      HeatMap _heatMap = new HeatMap(rvt,
+      HeatMap heatMap = new HeatMap(rvt,
                                      _plateNumber.getSelection(),
-                                     new ControlWellsFilter(),
+                                     new ChainedFilter<ResultValue>(_excludedWellFilters.getSelections()),
                                      _scoringType.getSelection().getFunction(),
                                      new DefaultMultiColorGradient());
 
+      NumberFormat format = _numericFormat.getSelection();
       List<List<HeatMapCell>> rows = new ArrayList<List<HeatMapCell>>();
-      for (int row = 0; row < _heatMap.getRowCount(); row++) {
+      for (int row = 0; row < heatMap.getRowCount(); row++) {
         List<HeatMapCell> rowData = new ArrayList<HeatMapCell>();
-        for (int column = 0; column < _heatMap.getColumnCount(); column++) {
-          rowData.add(new HeatMapCell(_heatMap.getScoredValue(row, column),
-                                      _heatMap.getColor(row, column)));
+        for (int column = 0; column < heatMap.getColumnCount(); column++) {
+          rowData.add(new HeatMapCell(heatMap.getScoredValue(row, column),
+                                      heatMap.getColor(row, column),
+                                      format));
         }
         rows.add(rowData);
       }
       heatMapDataModels.add(new ListDataModel(rows));
       
       List<Integer> columnIndexes = new ArrayList<Integer>();
-      for (int column = 0; column < _heatMap.getColumnCount(); column++) {
+      for (int column = 0; column < heatMap.getColumnCount(); column++) {
         columnIndexes.add(column);
       }
       _heatMapColumnDataModels.add(new ListDataModel(columnIndexes));
+      _heatMaps.add(heatMap);
     }
     _heatMapDataModelsDataModel = new ListDataModel(heatMapDataModels);
 

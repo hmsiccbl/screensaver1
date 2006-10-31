@@ -13,20 +13,17 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<%-- 
+TODO:
+- color legend
+- numeric format should be configurable per data header/heat map
+
+--%>
+
 
 <f:subview id="heatMapViewer">
 
-	<t:panelGrid columns="3" style="vertical-align: top">
-		<t:panelGrid>
-			<t:outputLabel for="dataHeaders" value="Data headers:"
-				styleClass="inputLabel" />
-			<t:selectManyListbox id="dataHeaders"
-				value="#{heatMapViewer.dataHeaders.value}" required="true"
-				styleClass="input">
-				<f:selectItems value="#{heatMapViewer.dataHeaders.selectItems}" />
-			</t:selectManyListbox>
-		</t:panelGrid>
-
+	<t:panelGrid columns="5" columnClasses="column">
 		<t:panelGrid>
 			<t:outputLabel for="plateNumber" value="Plate:"
 				styleClass="inputLabel" />
@@ -39,6 +36,16 @@
 		</t:panelGrid>
 
 		<t:panelGrid>
+			<t:outputLabel for="dataHeaders" value="Data headers:"
+				styleClass="inputLabel" />
+			<t:selectManyListbox id="dataHeaders"
+				value="#{heatMapViewer.dataHeaders.value}" required="true"
+				styleClass="input">
+				<f:selectItems value="#{heatMapViewer.dataHeaders.selectItems}" />
+			</t:selectManyListbox>
+		</t:panelGrid>
+
+		<t:panelGrid>
 			<t:outputLabel for="scoringType" value="Scoring:"
 				styleClass="inputLabel" />
 			<t:selectOneRadio id="scoringType" layout="pageDirection"
@@ -47,6 +54,27 @@
 				<f:selectItems value="#{heatMapViewer.scoringType.selectItems}" />
 			</t:selectOneRadio>
 		</t:panelGrid>
+		
+		<t:panelGrid>
+			<t:outputLabel for="excludedWellTypes" value="Excluded wells:"
+				styleClass="inputLabel" />
+			<t:selectManyCheckbox id="excludedWellTypes" layout="pageDirection"
+				value="#{heatMapViewer.excludedWellTypes.value}"
+				styleClass="input">
+				<f:selectItems value="#{heatMapViewer.excludedWellTypes.selectItems}" />
+			</t:selectManyCheckbox>
+		</t:panelGrid>
+
+		<t:panelGrid>
+			<t:outputLabel for="numberFormat" value="Numeric Format:"
+				styleClass="inputLabel" />
+			<t:selectOneMenu id="numericFormat" 
+				value="#{heatMapViewer.numericFormat.value}" 
+				styleClass="input">
+				<f:selectItems value="#{heatMapViewer.numericFormat.selectItems}" />
+			</t:selectOneMenu>
+		</t:panelGrid>
+		
 	</t:panelGrid>
 
 	<t:commandButton id="updateButton" forceId="true" value="View"
@@ -87,6 +115,18 @@
 					<t:outputText value="#{plateRowIndex + 1}" />
 				</t:column>
 			</t:dataTable>
+		</t:column>
+		<t:column>
+			<t:panelGrid>
+				<t:outputText value="N: #{heatMapViewer.heatMaps[heatMapIndex].count}"/>
+				<t:outputText value="Min: #{heatMapViewer.heatMaps[heatMapIndex].min}"/>
+				<t:outputText value="Max: #{heatMapViewer.heatMaps[heatMapIndex].max}"/>
+				<t:outputText value="Mean: #{heatMapViewer.heatMaps[heatMapIndex].mean}"/>
+				<t:outputText value="Median: #{heatMapViewer.heatMaps[heatMapIndex].median}"/>
+				<t:outputText value="Var: #{heatMapViewer.heatMaps[heatMapIndex].variance}"/>
+				<t:outputText value="Stdev: #{heatMapViewer.heatMaps[heatMapIndex].standardDeviation}"/>
+				<t:outputText value="Skewness: #{heatMapViewer.heatMaps[heatMapIndex].skewness}"/>
+			</t:panelGrid>
 		</t:column>
 	</t:dataTable>
 

@@ -157,29 +157,29 @@ public class HeatMap
     // TODO: get the plate extents from somewhere else!
     _data = new ResultValue['P' - 'A' + 1][24];
     _rawValues = new double[_data.length][_data[0].length];
-    Collection<Double> rawValuesToAggregateOver = new ArrayList<Double>();
-    ResizableDoubleArray doubleValues = new ResizableDoubleArray();
+    Collection<Double> aggregationValues = new ArrayList<Double>();
+    ResizableDoubleArray medianValues = new ResizableDoubleArray();
     for (ResultValue rv : _resultValueType.getResultValues()) {
       if (rv.getWell().getPlateNumber() == _plateNumber) {
         int row = rv.getWell().getRow();
         int col = rv.getWell().getColumn();
         _data[row][col] = rv;
+        double rawValue = Double.parseDouble(rv.getValue());
+        _rawValues[row][col] = rawValue;
         if (!scoringFilter.exclude(rv)) {
-          double rawValue = Double.parseDouble(rv.getValue());
-          _rawValues[row][col] = rawValue;
-          rawValuesToAggregateOver.add(rawValue);
-          doubleValues.addElement(rawValue);
+          aggregationValues.add(rawValue);
+          medianValues.addElement(rawValue);
         }
       }
     }
     
-    scoringFunc.initializeAggregates(rawValuesToAggregateOver);
+    scoringFunc.initializeAggregates(aggregationValues);
 
     _statistics = new DescriptiveStatisticsImpl();
-    for (Double rawValue : rawValuesToAggregateOver) {
+    for (Double rawValue : aggregationValues) {
       _statistics.addValue(scoringFunc.compute(rawValue));
     }
-    _median = new Median().evaluate(doubleValues.getElements());
+    _median = new Median().evaluate(medianValues.getElements());
 
     _scalableColorFunction.setLowerLimit(_statistics.getMin());
     _scalableColorFunction.setUpperLimit(_statistics.getMax());
