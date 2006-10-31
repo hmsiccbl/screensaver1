@@ -65,8 +65,8 @@ public class HeatMap
    *          each ResultValue when calculating its heat map color
    * @param colorFunction maps a range of continuous values to colors
    */
-  public HeatMap(ResultValueType rvt,
-                 int plateNumber,
+  public HeatMap(int plateNumber,
+                 ResultValueType rvt,
                  Filter<ResultValue> scoringFilter,
                  AggregateFunction<Double> scoringFunc,
                  ColorFunction colorFunction)

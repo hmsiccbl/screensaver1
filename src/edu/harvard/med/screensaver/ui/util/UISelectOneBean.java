@@ -31,6 +31,10 @@ public class UISelectOneBean<T> extends UISelectBean<T>
   public UISelectOneBean(Collection<T> objects)
   {
     super(objects);
+    // set default selection
+    if (objects.size() > 0) {
+      setValue(getKey(objects.iterator().next()));
+    }
   }
 
   
