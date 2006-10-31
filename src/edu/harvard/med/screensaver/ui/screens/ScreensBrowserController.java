@@ -16,7 +16,8 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.AbstractController;
-import edu.harvard.med.screensaver.ui.SearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 
 /**
  * TODO: add comments

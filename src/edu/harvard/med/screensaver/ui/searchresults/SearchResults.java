@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui;
+package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,6 +32,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.ui.AbstractController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 
@@ -525,7 +526,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractCo
   /**
    * Return true whenever the search results are downloadable. For the time being, the only
    * downloadable search results are {@link
-   * edu.harvard.med.screensaver.ui.libraries.WellSearchResults}.
+   * edu.harvard.med.screensaver.ui.searchresults.WellSearchResults}.
    * 
    * @return true whenever the search results are downloadable
    */

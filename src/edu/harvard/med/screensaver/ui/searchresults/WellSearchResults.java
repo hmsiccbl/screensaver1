@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.libraries;
+package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -25,7 +25,10 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.SearchResults;
+import edu.harvard.med.screensaver.ui.libraries.CompoundViewerController;
+import edu.harvard.med.screensaver.ui.libraries.GeneViewerController;
+import edu.harvard.med.screensaver.ui.libraries.LibraryViewerController;
+import edu.harvard.med.screensaver.ui.libraries.WellViewerController;
 
 
 /**

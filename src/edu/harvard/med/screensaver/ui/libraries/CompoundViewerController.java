@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractController;
-import edu.harvard.med.screensaver.ui.SearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 
 public class CompoundViewerController extends AbstractController
 {

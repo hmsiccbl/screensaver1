@@ -15,7 +15,7 @@ import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractController;
-import edu.harvard.med.screensaver.ui.SearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 
 public class WellViewerController extends AbstractController
 {

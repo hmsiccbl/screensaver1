@@ -11,7 +11,7 @@ package edu.harvard.med.screensaver.ui.util;
 
 import java.util.EnumSet;
 
-import edu.harvard.med.screensaver.ui.SortDirection;
+import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 
 public class SortDirectionConverter extends EnumTypeConverter<SortDirection>
 {

@@ -22,7 +22,8 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractController;
-import edu.harvard.med.screensaver.ui.SearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 public class LibraryViewerController extends AbstractController
 {
