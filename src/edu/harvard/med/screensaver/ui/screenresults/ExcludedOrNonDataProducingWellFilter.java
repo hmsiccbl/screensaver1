@@ -7,26 +7,30 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.analysis.heatmaps;
+package edu.harvard.med.screensaver.ui.screenresults;
 
 import edu.harvard.med.screensaver.analysis.Filter;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 
 import org.apache.log4j.Logger;
 
-public class ControlWellsFilter implements Filter<ResultValue>
+public class ExcludedOrNonDataProducingWellFilter implements Filter<ResultValue>
 {
-  private static Logger log = Logger.getLogger(ControlWellsFilter.class);
+  // static members
+
+  private static Logger log = Logger.getLogger(ExcludedOrNonDataProducingWellFilter.class);
 
   public boolean exclude(ResultValue rv)
   {
-    return rv.isControl();
+    return rv.isExclude() || !rv.isDataProducer();
   }
-  
-  public String toString() 
-  {
-    return "Control wells";
-  }
+
+
+  // instance data members
+
+  // public constructors and methods
+
+  // private methods
 
 }
 

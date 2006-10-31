@@ -16,15 +16,15 @@
 <%-- 
 TODO:
 - color legend
+- scaling: min/max from controls (absolute, avg), plate samples, experiment samples
+- place matching color next to max, min, median
+- label well name next to max, min, median
 --%>
 
 
 <f:subview id="heatMapViewer">
 
 	<t:panelGroup>
-		<t:commandButton id="updateButton" value="Update" forceId="true"
-			style="visibility: hidden" action="#{heatMapViewer.update}"
-			styleClass="command" />
 		<t:outputLabel for="plateNumber" value="Plate:"
 			styleClass="inputLabel" />
 		<t:selectOneMenu id="plateNumber"
@@ -33,9 +33,11 @@ TODO:
 			styleClass="input">
 			<f:selectItems value="#{heatMapViewer.plateNumber.selectItems}" />
 		</t:selectOneMenu>
-
 		<t:commandButton id="addHeatMap" value="Add"
 			action="#{heatMapViewer.addHeatMap}" styleClass="command" />
+		<t:commandButton id="updateButton" value="Update" forceId="true"
+			style="visibility: hidden" action="#{heatMapViewer.update}"
+			styleClass="command" />
 	</t:panelGroup>
 	
 	<t:div/>
@@ -45,9 +47,9 @@ TODO:
 		rowIndexVar="heatMapIndex" styleClass="heatMapsTable">
 		<t:column>
 			<t:panelGrid>
-				<t:outputLabel for="dataHeaders" value="Data headers:"
+				<t:outputLabel for="dataHeader" value="Data header:"
 					styleClass="inputLabel" />
-				<t:selectOneMenu id="dataHeaders"
+				<t:selectOneMenu id="dataHeader"
 					value="#{heatMapConfig.dataHeaders.value}" required="true"
 					styleClass="input">
 					<f:selectItems value="#{heatMapConfig.dataHeaders.selectItems}" />
@@ -96,25 +98,28 @@ TODO:
 					<f:facet name="header">
 						<t:outputText value="Row" />
 					</f:facet>
-					<t:outputText value="#{plateRowIndex + 1}" />
+					<t:outputText value="#{heatMapViewer.heatMapRowLabels[plateRowIndex]}" />
 				</t:column>
 				<t:columns
 					value="#{heatMapViewer.heatMapColumnDataModels[heatMapIndex]}"
 					var="columnIndex"
-					style="background-color: #{heatMapViewer.heatMapCell.hexColor}">
+					style="#{heatMapViewer.heatMapCell.style}">
 					<f:facet name="header">
 						<t:outputText value="#{columnIndex + 1}" styleClass="keyColumn" />
 					</f:facet>
 					<f:facet name="footer">
 						<t:outputText value="#{columnIndex + 1}" styleClass="keyColumn" />
 					</f:facet>
-					<t:outputText value="#{heatMapViewer.heatMapCell.value}" />
+					<h:commandLink id="viewWellLink" action="#{heatMapViewer.viewWell}"
+						immediate="true" styleClass="heatMapValue">
+						<t:outputText value="#{heatMapViewer.heatMapCell.value}" escape="false"/>
+					</h:commandLink>
 				</t:columns>
 				<t:column styleClass="keyColumn">
 					<f:facet name="header">
 						<t:outputText value="Row" />
 					</f:facet>
-					<t:outputText value="#{plateRowIndex + 1}" />
+					<t:outputText value="#{heatMapViewer.heatMapRowLabels[plateRowIndex]}" />
 				</t:column>
 			</t:dataTable>
 		</t:column>

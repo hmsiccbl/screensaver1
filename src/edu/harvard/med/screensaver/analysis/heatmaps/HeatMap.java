@@ -147,8 +147,8 @@ public class HeatMap
   {
     return _data[0].length;
   }
+ 
   
-
   // private methods
 
   private void initialize(Filter<ResultValue> scoringFilter,

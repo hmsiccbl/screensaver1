@@ -86,6 +86,11 @@ hr {
 	text-align: center;
 }
 
+a.heatMapValue:link,a.heatMapValue:visited 	{
+	text-decoration: none;
+	color: black;
+}
+
 .dataText,.input {
 	font-family: sans-serif;
 	font-size: small;

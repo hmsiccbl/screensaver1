@@ -184,6 +184,10 @@
     <managed-bean-class>edu.harvard.med.screensaver.ui.screenresults.HeatMapViewerController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
+      <property-name>wellViewer</property-name>
+      <value>#{wellViewer}</value>
+    </managed-property>
+    <managed-property>
       <property-name>messages</property-name>
       <value>#{messages}</value>
     </managed-property>

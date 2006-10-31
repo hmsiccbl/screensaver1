@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.model.screenresults;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Well;
 
@@ -284,7 +285,7 @@ public class ResultValue extends AbstractEntity implements Comparable
   {
     return _exclude;
   }
-
+  
   /**
    * Set whether this <code>ResultValue</code> is to be excluded in any
    * subsequent analyses.
@@ -296,6 +297,39 @@ public class ResultValue extends AbstractEntity implements Comparable
   {
     _exclude = exclude;
   }
+  
+  @DerivedEntityProperty
+  public boolean isExperimental()
+  {
+    return getAssayWellType().equals(AssayWellType.EXPERIMENTAL);
+  }
+  
+  @DerivedEntityProperty
+  public boolean isControl()
+  {
+    return getAssayWellType().equals(AssayWellType.ASSAY_NEGATIVE_CONTROL) ||
+    getAssayWellType().equals(AssayWellType.ASSAY_POSITIVE_CONTROL) ||
+    getAssayWellType().equals(AssayWellType.LIBRARY_CONTROL);
+  }
+  
+  @DerivedEntityProperty
+  public boolean isDataProducer()
+  {
+    return isExperimental() || isControl();
+  }
+  
+  @DerivedEntityProperty
+  public boolean isEmpty()
+  {
+    return getAssayWellType().equals(AssayWellType.EMPTY);
+  }
+  
+  @DerivedEntityProperty
+  public boolean isEdge()
+  {
+    return getWell().isEdgeWell();
+  }
+  
 
   // Comparable interface methods
   
