@@ -24,7 +24,8 @@ public class HeatMapCellTest extends TestCase
 
   public void testHeatMapCell()
   {
-    HeatMapCell cell = new HeatMapCell(1.0,
+    HeatMapCell cell = new HeatMapCell(null,
+                                       1.0,
                                        new Color(128, 0, 196),
                                        NumberFormat.getInstance());
     assertEquals("value", "1.000", cell.getValue());
