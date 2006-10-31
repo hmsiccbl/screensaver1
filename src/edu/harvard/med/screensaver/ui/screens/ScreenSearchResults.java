@@ -58,6 +58,19 @@ public class ScreenSearchResults extends SearchResults<Screen>
   // implementations of the SearchResults abstract methods
   
   @Override
+  public String showSummaryView()
+  {
+    // NOTE: if there were more ways to get to a screen search results, then this method would
+    // need to be more intelligent
+    
+    // TODO: may want to initialize the screens browser here as well, eg,
+    // "return _screensBrowser.goBrowseScreens();", but i would like to wait until control is
+    // factored out
+    
+    return "goBrowseScreens";
+  }
+  
+  @Override
   protected List<String> getColumnHeaders()
   {
     List<String> columnHeaders = new ArrayList<String>();

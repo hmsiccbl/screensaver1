@@ -72,7 +72,20 @@ public class WellSearchResults extends SearchResults<Well>
 
   
   // implementations of the SearchResults abstract methods
-
+  
+  @Override
+  public String showSummaryView()
+  {
+    // NOTE: if there were more ways to get to a well search results, then this method would
+    // need to be more intelligent
+    
+    // TODO: may want to initialize the screens browser here as well, eg,
+    // "return _libraryViewer.viewLibraryContents();", but i would like to wait until control is
+    // factored out
+    
+    return "goWellSearchResults";
+  }
+  
   @Override
   protected List<String> getColumnHeaders()
   {

@@ -61,6 +61,19 @@ public class LibrarySearchResults extends SearchResults<Library>
 
   
   // implementations of the SearchResults abstract methods
+
+  @Override
+  public String showSummaryView()
+  {
+    // NOTE: if there were more ways to get to a library search results, then this method would
+    // need to be more intelligent
+    
+    // TODO: may want to initialize the screens browser here as well, eg,
+    // "return _librariesBrowser.goBrowseLibraries();", but i would like to wait until control is
+    // factored out
+    
+    return "goBrowseLibraries";
+  }
   
   @Override
   protected List<String> getColumnHeaders()

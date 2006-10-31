@@ -482,11 +482,6 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractCo
     return getViewMode().equals(SearchResultsViewMode.SUMMARY);
   }
   
-  public String showSummaryView()
-  {
-    return SHOW_SEARCH_RESULTS_SUMMARY_ACTION;
-  }
-  
   /**
    * Update the number of items displayed per page, based on the user selecting a new value
    * in the selection input for items per page.
@@ -515,7 +510,13 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractCo
   }
 
 
-  // abstract protected instance methods
+  // abstract public and protected instance methods
+
+  /**
+   * Return the string action to show the summary view
+   * @return the summary view page
+   */
+  abstract public String showSummaryView();
   
   /**
    * Create and return a list of the column header values.

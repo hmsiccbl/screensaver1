@@ -31,6 +31,7 @@ public class LibraryViewerController extends AbstractController
   private DAO _dao;
   private Library _library;
   private SearchResults<Library> _searchResults;
+  private SearchResults<Well> _wellSearchResults;
   private RNAiLibraryContentsImporterController _rnaiLibraryContentsImporter;
   private CompoundLibraryContentsImporterController _compoundLibraryContentsImporter;
   private WellViewerController _wellViewerController;
@@ -212,13 +213,15 @@ public class LibraryViewerController extends AbstractController
 
   public String viewLibraryContents()
   {
-    SearchResults<Well> searchResults = new WellSearchResults(
-      new ArrayList<Well>(_library.getWells()),
-      this,
-      _wellViewerController,
-      _compoundViewerController,
-      _geneViewerController);
-    _wellSearchResultsController.setSearchResults(searchResults);
+    if (_wellSearchResults == null) {
+      _wellSearchResults = new WellSearchResults(
+        new ArrayList<Well>(_library.getWells()),
+        this,
+        _wellViewerController,
+        _compoundViewerController,
+        _geneViewerController);
+    }
+    _wellSearchResultsController.setSearchResults(_wellSearchResults);
     return "goWellSearchResults";
   }
   
