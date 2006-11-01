@@ -90,8 +90,6 @@ public class HeatMapViewer extends AbstractBackingBean
   private List<DataModel> _heatMapColumnDataModels;
   private List<String> _heatMapRowLabels;
   private WellViewer _wellViewer;
-  private int _plateNumberIndex;
-  private List<Integer> _plateNumbers;
 
   
   // bean property methods
@@ -111,7 +109,6 @@ public class HeatMapViewer extends AbstractBackingBean
     _screenResult = screenResult;
     if (_screenResult != null) {
       _plateNumber = new UISelectOneBean<Integer>(_screenResult.getPlateNumbers());
-      _plateNumbers = new ArrayList<Integer>(_screenResult.getPlateNumbers());
       _heatMaps = new ArrayList<HeatMap>();
       _heatMapConfigurations = new ArrayList<HeatMapConfiguration>();
       addHeatMap();
@@ -245,8 +242,6 @@ public class HeatMapViewer extends AbstractBackingBean
       _heatMapStatistics.add(new ListDataModel(heatMapStatistics));
     }
     
-    _plateNumberIndex = _plateNumber.getSelectionIndex();
-
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
@@ -293,14 +288,12 @@ public class HeatMapViewer extends AbstractBackingBean
   
   public String nextPlate()
   {
-    return gotoPlate(Math.min(_plateNumbers.size() - 1,
-                              _plateNumberIndex + 1));
+    return gotoPlate(_plateNumber.getSelectionIndex() + 1);
   }
 
   public String previousPlate()
   {
-    return gotoPlate(Math.max(0,
-                              _plateNumberIndex - 1));
+    return gotoPlate(_plateNumber.getSelectionIndex() - 1);
   }
   
 
@@ -308,9 +301,10 @@ public class HeatMapViewer extends AbstractBackingBean
 
   private String gotoPlate(int plateIndex)
   {
-    _plateNumberIndex = plateIndex;
-    // TODO: shouldn't have to "know" that hashCode is used as the key
-    _plateNumber.setValue("" + _plateNumbers.get(_plateNumberIndex).hashCode());
+    plateIndex = Math.max(0,
+                          Math.min(_plateNumber.getSelectItems().size() - 1,
+                                   plateIndex));
+    _plateNumber.setSelectionIndex(plateIndex);
     return update();
   }
   

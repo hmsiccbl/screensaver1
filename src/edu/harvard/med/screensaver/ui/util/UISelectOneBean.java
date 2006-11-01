@@ -42,7 +42,8 @@ public class UISelectOneBean<T> extends UISelectBean<T>
 
   
   /**
-   * called by JSF UISelect component
+   * Get the selected item's key. Called by JSF UISelect component. Naming of
+   * this method corresponds to the JSF UISelect component's "value" attribute.
    */
   public void setValue(String selectionKey)
   {
@@ -61,13 +62,19 @@ public class UISelectOneBean<T> extends UISelectBean<T>
   }
   
   /**
-   * called by JSF UISelect component
+   * Returns selection key. Called by JSF UISelect component. Naming of this
+   * method corresponds to the JSF UISelect component's "value" attribute.
    */
   public String getValue()
   {
     return _selectionKey;
   }
 
+  public void setSelection(T t)
+  {
+    setValue(getKey(t));
+  }
+  
   /**
    * called by controller 
    * @param selections
@@ -77,11 +84,11 @@ public class UISelectOneBean<T> extends UISelectBean<T>
     return _selection;
   }
   
-//  public void setSelectionIndex(int index)
-//  {
-//    _selectionIndex = index;
-//    // TODO
-//  }
+  public void setSelectionIndex(int index)
+  {
+    _selectionIndex = index;
+    setSelection(_key2Obj.get(getSelectItems().get(index).getValue()));
+  }
   
   public int getSelectionIndex()
   {
