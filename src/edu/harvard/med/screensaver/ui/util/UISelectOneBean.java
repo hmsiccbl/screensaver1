@@ -11,6 +11,8 @@ package edu.harvard.med.screensaver.ui.util;
 
 import java.util.Collection;
 
+import javax.faces.model.SelectItem;
+
 import org.apache.log4j.Logger;
 
 public class UISelectOneBean<T> extends UISelectBean<T>
@@ -24,6 +26,7 @@ public class UISelectOneBean<T> extends UISelectBean<T>
   
   private T _selection;
   private String _selectionKey;
+  private int _selectionIndex;
 
   
   // public constructors and methods
@@ -45,6 +48,16 @@ public class UISelectOneBean<T> extends UISelectBean<T>
   {
     _selectionKey = selectionKey;
     _selection = _key2Obj.get(selectionKey);
+    
+    // TODO: linear search! yuck!
+    int i = 0;
+    for (SelectItem selectItem : getSelectItems()) {
+      if (selectItem.getValue().equals(selectionKey)) {
+        _selectionIndex = i;
+        break;
+      }
+      ++i;
+    }
   }
   
   /**
@@ -62,6 +75,17 @@ public class UISelectOneBean<T> extends UISelectBean<T>
   public T getSelection()
   {
     return _selection;
+  }
+  
+//  public void setSelectionIndex(int index)
+//  {
+//    _selectionIndex = index;
+//    // TODO
+//  }
+  
+  public int getSelectionIndex()
+  {
+    return _selectionIndex;
   }
 
 }

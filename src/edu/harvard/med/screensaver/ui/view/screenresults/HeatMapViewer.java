@@ -29,7 +29,6 @@ import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
@@ -91,6 +90,8 @@ public class HeatMapViewer extends AbstractBackingBean
   private List<DataModel> _heatMapColumnDataModels;
   private List<String> _heatMapRowLabels;
   private WellViewer _wellViewer;
+  private int _plateNumberIndex;
+  private List<Integer> _plateNumbers;
 
   
   // bean property methods
@@ -108,20 +109,17 @@ public class HeatMapViewer extends AbstractBackingBean
   public void setScreenResult(ScreenResult screenResult)
   {
     _screenResult = screenResult;
-    _plateNumber = new UISelectOneBean<Integer>(_screenResult.getPlateNumbers());
-    _heatMaps = new ArrayList<HeatMap>();
-    _heatMapConfigurations = new ArrayList<HeatMapConfiguration>();
-    addHeatMap();
+    if (_screenResult != null) {
+      _plateNumber = new UISelectOneBean<Integer>(_screenResult.getPlateNumbers());
+      _plateNumbers = new ArrayList<Integer>(_screenResult.getPlateNumbers());
+      _heatMaps = new ArrayList<HeatMap>();
+      _heatMapConfigurations = new ArrayList<HeatMapConfiguration>();
+      addHeatMap();
+    }
   }
   
   public ScreenResult getScreenResult()
   {
-    // for quicker web testing
-    if (_screenResult == null) {
-      log.debug("using default screen result for screen 107");
-      Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 107);
-      setScreenResult(screen.getScreenResult());
-    }
     return _screenResult;
   }
   
@@ -246,8 +244,10 @@ public class HeatMapViewer extends AbstractBackingBean
                                                    format));
       _heatMapStatistics.add(new ListDataModel(heatMapStatistics));
     }
+    
+    _plateNumberIndex = _plateNumber.getSelectionIndex();
 
-    return REDISPLAY_PAGE_ACTION_RESULT; // redisplay
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   // TODO: set initial values to previous HeatMapConfig
@@ -291,13 +291,27 @@ public class HeatMapViewer extends AbstractBackingBean
     return "showWell";
   }
   
-  public String done()
+  public String nextPlate()
   {
-    return DONE_ACTION_RESULT;
+    return gotoPlate(Math.min(_plateNumbers.size() - 1,
+                              _plateNumberIndex + 1));
   }
 
+  public String previousPlate()
+  {
+    return gotoPlate(Math.max(0,
+                              _plateNumberIndex - 1));
+  }
   
+
   // private methods
 
+  private String gotoPlate(int plateIndex)
+  {
+    _plateNumberIndex = plateIndex;
+    // TODO: shouldn't have to "know" that hashCode is used as the key
+    _plateNumber.setValue("" + _plateNumbers.get(_plateNumberIndex).hashCode());
+    return update();
+  }
   
 }

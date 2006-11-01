@@ -33,13 +33,19 @@ TODO:
 			styleClass="input">
 			<f:selectItems value="#{heatMapViewer.plateNumber.selectItems}" />
 		</t:selectOneMenu>
-		<t:commandButton id="addHeatMap" value="Add"
-			action="#{heatMapViewer.addHeatMap}" styleClass="command" />
+		<t:commandButton id="previousPlateButton" 
+			image="/images/arrow-previous.gif" action="#{heatMapViewer.previousPlate}"
+			styleClass="command" />
+		<t:commandButton id="nextPlateButton" 
+			image="/images/arrow-next.gif" action="#{heatMapViewer.nextPlate}"
+			styleClass="command" />
+	<t:commandButton id="addHeatMap" value="Add Heat Map"
+		action="#{heatMapViewer.addHeatMap}" styleClass="command" />
 		<t:commandButton id="updateButton" value="Update" forceId="true"
 			style="visibility: hidden" action="#{heatMapViewer.update}"
 			styleClass="command" />
 	</t:panelGroup>
-	
+
 	<t:div/>
 
 	<t:dataTable id="heatMapsTable"

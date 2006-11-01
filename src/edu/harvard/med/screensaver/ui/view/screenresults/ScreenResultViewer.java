@@ -42,6 +42,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
@@ -157,6 +158,12 @@ public class ScreenResultViewer extends AbstractBackingBean
 
   public ScreenResult getScreenResult()
   {
+    // HACK: for quicker web testing
+    if (_screenResult == null) {
+      log.debug("using default screen result for screen 107");
+      Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 107);
+      setScreenResult(screen.getScreenResult());
+    }
     return _screenResult;
   }
   

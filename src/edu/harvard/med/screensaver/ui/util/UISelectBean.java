@@ -41,7 +41,7 @@ public abstract class UISelectBean<T>
 
   // instance data members
 
-  private List<SelectItem> _selectItems;
+  List<SelectItem> _selectItems;
   protected Map<String,T> _key2Obj;
 
   
