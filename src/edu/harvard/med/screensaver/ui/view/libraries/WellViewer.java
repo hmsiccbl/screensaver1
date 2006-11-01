@@ -7,34 +7,34 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.libraries;
+package edu.harvard.med.screensaver.ui.view.libraries;
 
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 
-public class WellViewerController extends AbstractController
+public class WellViewer extends AbstractBackingBean
 {
   
-  private static final Logger log = Logger.getLogger(WellViewerController.class);
+  private static final Logger log = Logger.getLogger(WellViewer.class);
   
   
   // private instance fields
   
   private Well _well;
   private SearchResults<Well> _searchResults;
-  private LibraryViewerController _libraryViewerController;
-  private GeneViewerController _geneViewerController;
-  private CompoundViewerController _compoundViewerController;
+  private LibraryViewer _libraryViewerController;
+  private GeneViewer _geneViewerController;
+  private CompoundViewer _compoundViewerController;
   
   
   // public instance methods
   
-  public WellViewerController()
+  public WellViewer()
   {
   }
   
@@ -58,32 +58,32 @@ public class WellViewerController extends AbstractController
     _searchResults = searchResults;
   }
 
-  public LibraryViewerController getLibraryViewer()
+  public LibraryViewer getLibraryViewer()
   {
     return _libraryViewerController;
   }
 
-  public void setLibraryViewer(LibraryViewerController libraryViewerController)
+  public void setLibraryViewer(LibraryViewer libraryViewerController)
   {
     _libraryViewerController = libraryViewerController;
   }
   
-  public GeneViewerController getGeneViewer()
+  public GeneViewer getGeneViewer()
   {
     return _geneViewerController;
   }
 
-  public void setGeneViewer(GeneViewerController geneViewerController)
+  public void setGeneViewer(GeneViewer geneViewerController)
   {
     _geneViewerController = geneViewerController;
   }
 
-  public CompoundViewerController getCompoundViewer()
+  public CompoundViewer getCompoundViewer()
   {
     return _compoundViewerController;
   }
 
-  public void setCompoundViewer(CompoundViewerController compoundViewerController)
+  public void setCompoundViewer(CompoundViewer compoundViewerController)
   {
     _compoundViewerController = compoundViewerController;
   }

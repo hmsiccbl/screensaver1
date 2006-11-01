@@ -7,20 +7,20 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui;
+package edu.harvard.med.screensaver.ui.view;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import javax.servlet.ServletException;
 
-import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 
 /**
  * 
  * @author adapted from code found at http://wiki.apache.org/myfaces/Handling_Server_Errors
  */
-public class ExceptionReporterController extends AbstractController
+public class ExceptionReporter extends AbstractBackingBean
 {
     public String getInfoMessage() 
     {

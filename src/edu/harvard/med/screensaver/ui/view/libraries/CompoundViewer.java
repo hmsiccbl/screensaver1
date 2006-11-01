@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.libraries;
+package edu.harvard.med.screensaver.ui.view.libraries;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -18,15 +18,15 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 
-public class CompoundViewerController extends AbstractController
+public class CompoundViewer extends AbstractBackingBean
 {
   
   // private static stuff
   
-  private static final Logger log = Logger.getLogger(CompoundViewerController.class);
+  private static final Logger log = Logger.getLogger(CompoundViewer.class);
   private static final String _screensaver0ImageRenderer =
     "http://screensaver.med.harvard.edu/screenbank/compounds/render_molecule.png";
   

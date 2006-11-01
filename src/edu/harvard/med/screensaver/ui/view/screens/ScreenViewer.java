@@ -1,5 +1,5 @@
-// $HeadURL: svn+ssh://js163@orchestra/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/libraries/ScreenViewerController.java $
-// $Id: ScreenViewerController.java 449 2006-08-09 22:53:09Z js163 $
+// $HeadURL: svn+ssh://js163@orchestra/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/libraries/ScreenViewer.java $
+// $Id: ScreenViewer.java 449 2006-08-09 22:53:09Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.screens;
+package edu.harvard.med.screensaver.ui.view.screens;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -40,18 +40,18 @@ import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.screens.Visit;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.AbstractController;
-import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewerController;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.ScreeningRoomUserByLabComparator;
+import edu.harvard.med.screensaver.ui.view.screenresults.ScreenResultViewer;
 import edu.harvard.med.screensaver.util.StringUtils;
 
-public class ScreenViewerController extends AbstractController
+public class ScreenViewer extends AbstractBackingBean
 {
   private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.SCREENS_ADMIN;
 
-  private static Logger log = Logger.getLogger(ScreenViewerController.class);
+  private static Logger log = Logger.getLogger(ScreenViewer.class);
   
   
   // instance data
@@ -59,7 +59,7 @@ public class ScreenViewerController extends AbstractController
   private DAO _dao;
   private Screen _screen;
   private SearchResults<Screen> _searchResults;
-  private ScreenResultViewerController _screenResultViewer;
+  private ScreenResultViewer _screenResultViewer;
   private List<SelectItem> _leadScreenerSelectItems;
   private FundingSupport _newFundingSupport;
   private StatusValue _newStatusValue;
@@ -100,13 +100,13 @@ public class ScreenViewerController extends AbstractController
     _searchResults = searchResults;
   }
 
-  public ScreenResultViewerController getScreenResultViewer()
+  public ScreenResultViewer getScreenResultViewer()
   {
     return _screenResultViewer;
   }
 
   public void setScreenResultViewer(
-    ScreenResultViewerController screenResultViewer)
+    ScreenResultViewer screenResultViewer)
   {
     _screenResultViewer = screenResultViewer;
   }

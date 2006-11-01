@@ -7,16 +7,17 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui;
+package edu.harvard.med.screensaver.ui.view;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 
-public class HibernateSessionTest extends AbstractController
+public class HibernateSessionTest extends AbstractBackingBean
 {
   // static members
 

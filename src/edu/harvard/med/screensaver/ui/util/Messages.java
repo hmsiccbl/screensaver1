@@ -23,7 +23,7 @@ import javax.faces.event.PhaseListener;
 import org.apache.log4j.Logger;
 import org.springframework.context.MessageSource;
 
-import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.util.Pair;
 
 /**
@@ -42,7 +42,7 @@ import edu.harvard.med.screensaver.util.Pair;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class Messages extends AbstractController implements PhaseListener
+public class Messages extends AbstractBackingBean implements PhaseListener
 {
   
   // private static fields

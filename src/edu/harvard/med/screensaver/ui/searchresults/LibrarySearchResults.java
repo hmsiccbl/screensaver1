@@ -14,7 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.ui.libraries.LibraryViewerController;
+import edu.harvard.med.screensaver.ui.view.libraries.LibraryViewer;
 
 import org.apache.log4j.Logger;
 
@@ -41,7 +41,7 @@ public class LibrarySearchResults extends SearchResults<Library>
   
   // instance fields
   
-  private LibraryViewerController _libraryViewerController;
+  private LibraryViewer _libraryViewerController;
   
   
   // public contructor
@@ -53,7 +53,7 @@ public class LibrarySearchResults extends SearchResults<Library>
    */
   public LibrarySearchResults(
     List<Library> unsortedResults,
-    LibraryViewerController libraryViewerController)
+    LibraryViewer libraryViewerController)
   {
     super(unsortedResults);
     _libraryViewerController = libraryViewerController;

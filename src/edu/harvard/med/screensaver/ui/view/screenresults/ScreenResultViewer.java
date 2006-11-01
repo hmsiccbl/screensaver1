@@ -1,6 +1,6 @@
 
-// $HeadURL$
-// $Id$
+// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/screenresults/ScreenResultViewer.java $
+// $Id: ScreenResultViewer.java 706 2006-10-31 17:33:20Z ant4 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -8,7 +8,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.screenresults;
+package edu.harvard.med.screensaver.ui.view.screenresults;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,7 +43,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
@@ -58,12 +58,12 @@ import edu.harvard.med.screensaver.ui.util.JSFUtils;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 // TODO: this class needs to be broken up! it's too big! (maybe)
-public class ScreenResultViewerController extends AbstractController
+public class ScreenResultViewer extends AbstractBackingBean
 {
 
   // static data members
   
-  private static Logger log = Logger.getLogger(ScreenResultViewerController.class);
+  private static Logger log = Logger.getLogger(ScreenResultViewer.class);
   
   private static final int DEFAULT_ITEMS_PER_PAGE = 10;
 
@@ -113,7 +113,7 @@ public class ScreenResultViewerController extends AbstractController
 
   private DataModel _metadataModel;
 
-  private HeatMapViewerController _heatMapViewer;
+  private HeatMapViewer _heatMapViewer;
 
   private Map<String,Boolean> _collapsablePanelsState;
 
@@ -123,7 +123,7 @@ public class ScreenResultViewerController extends AbstractController
 
   // public methods
   
-  public ScreenResultViewerController()
+  public ScreenResultViewer()
   {
     _collapsablePanelsState = new HashMap<String,Boolean>();
     _collapsablePanelsState.put("summary", true);
@@ -145,12 +145,12 @@ public class ScreenResultViewerController extends AbstractController
     _dao = dao;
   }
 
-  public HeatMapViewerController getHeatMapViewer()
+  public HeatMapViewer getHeatMapViewer()
   {
     return _heatMapViewer;
   }
 
-  public void setHeatMapViewer(HeatMapViewerController heatMapViewer)
+  public void setHeatMapViewer(HeatMapViewer heatMapViewer)
   {
     _heatMapViewer = heatMapViewer;
   }
@@ -664,7 +664,7 @@ public class ScreenResultViewerController extends AbstractController
   
   /**
    * MetadataRow bean, used to provide ScreenResult metadata to JSF components
-   * @see ScreenResultViewerController#getMetadataCellValue()
+   * @see ScreenResultViewer#getMetadataCellValue()
    * @author ant
    */
   public static class MetadataRow
@@ -721,7 +721,7 @@ public class ScreenResultViewerController extends AbstractController
   
   /**
    * RawDataRow bean, used to provide ScreenResult data to JSF components
-   * @see ScreenResultViewerController#getRawDataCellValue()
+   * @see ScreenResultViewer#getRawDataCellValue()
    * @author ant
    */
   public static class RawDataRow

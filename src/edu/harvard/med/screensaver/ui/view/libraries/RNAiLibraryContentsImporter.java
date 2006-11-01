@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.libraries;
+package edu.harvard.med.screensaver.ui.view.libraries;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
-import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 /**
@@ -33,16 +33,16 @@ import edu.harvard.med.screensaver.ui.util.JSFUtils;
  * 
  * @author s
  */
-public class RNAiLibraryContentsImporterController extends AbstractController
+public class RNAiLibraryContentsImporter extends AbstractBackingBean
 {
   
-  private static Logger log = Logger.getLogger(RNAiLibraryContentsImporterController.class);
+  private static Logger log = Logger.getLogger(RNAiLibraryContentsImporter.class);
 
   // instance data
 
   private DAO _dao;
   private RNAiLibraryContentsParser _rnaiLibraryContentsParser;
-  private LibraryViewerController _libraryViewer;
+  private LibraryViewer _libraryViewer;
   private UploadedFile _uploadedFile;
   private Library _library;
   private SilencingReagentType _silencingReagentType =
@@ -71,12 +71,12 @@ public class RNAiLibraryContentsImporterController extends AbstractController
     _rnaiLibraryContentsParser = rnaiLibraryContentsParser;
   }
 
-  public LibraryViewerController getLibraryViewer()
+  public LibraryViewer getLibraryViewer()
   {
     return _libraryViewer;
   }
 
-  public void setLibraryViewer(LibraryViewerController libraryViewer)
+  public void setLibraryViewer(LibraryViewer libraryViewer)
   {
     _libraryViewer = libraryViewer;
     _library = _libraryViewer.getLibrary();

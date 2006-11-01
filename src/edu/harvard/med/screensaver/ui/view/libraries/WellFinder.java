@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.libraries;
+package edu.harvard.med.screensaver.ui.view.libraries;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,9 +21,8 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
@@ -31,10 +30,10 @@ import edu.harvard.med.screensaver.util.StringUtils;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class WellFinderController extends AbstractController
+public class WellFinder extends AbstractBackingBean
 {
   
-  private static final Logger log = Logger.getLogger(WellFinderController.class);
+  private static final Logger log = Logger.getLogger(WellFinder.class);
   
   
   // private instance fields
@@ -46,11 +45,11 @@ public class WellFinderController extends AbstractController
   private String _plateWellList;
   
   private DAO _dao;
-  private LibraryViewerController _libraryViewerController;
-  private WellViewerController _wellViewerController;
-  private GeneViewerController _geneViewerController;
-  private CompoundViewerController _compoundViewerController;
-  private WellSearchResultsController _wellSearchResultsController;
+  private LibraryViewer _libraryViewerController;
+  private WellViewer _wellViewerController;
+  private GeneViewer _geneViewerController;
+  private CompoundViewer _compoundViewerController;
+  private WellSearchResults _wellSearchResultsView;
   
   
   // public instance methods
@@ -95,54 +94,54 @@ public class WellFinderController extends AbstractController
     _dao = dao;
   }
 
-  public LibraryViewerController getLibraryViewer()
+  public LibraryViewer getLibraryViewer()
   {
     return _libraryViewerController;
   }
 
-  public void setLibraryViewer(LibraryViewerController libraryViewer)
+  public void setLibraryViewer(LibraryViewer libraryViewer)
   {
     _libraryViewerController = libraryViewer;
   }
 
-  public WellViewerController getWellViewer()
+  public WellViewer getWellViewer()
   {
     return _wellViewerController;
   }
 
-  public void setWellViewer(WellViewerController wellViewerController)
+  public void setWellViewer(WellViewer wellViewerController)
   {
     _wellViewerController = wellViewerController;
   }
 
-  public CompoundViewerController getCompoundViewer()
+  public CompoundViewer getCompoundViewer()
   {
     return _compoundViewerController;
   }
 
-  public void setCompoundViewer(CompoundViewerController compoundViewer)
+  public void setCompoundViewer(CompoundViewer compoundViewer)
   {
     _compoundViewerController = compoundViewer;
   }
 
-  public GeneViewerController getGeneViewer()
+  public GeneViewer getGeneViewer()
   {
     return _geneViewerController;
   }
 
-  public void setGeneViewer(GeneViewerController geneViewer)
+  public void setGeneViewer(GeneViewer geneViewer)
   {
     _geneViewerController = geneViewer;
   }
 
-  public WellSearchResultsController getWellSearchResults()
+  public WellSearchResults getWellSearchResults()
   {
-    return _wellSearchResultsController;
+    return _wellSearchResultsView;
   }
 
-  public void setWellSearchResults(WellSearchResultsController wellSearchResultsController)
+  public void setWellSearchResults(WellSearchResults wellSearchResultsController)
   {
-    _wellSearchResultsController = wellSearchResultsController;
+    _wellSearchResultsView = wellSearchResultsController;
   }
 
   public String findWell()
@@ -158,13 +157,14 @@ public class WellFinderController extends AbstractController
   public String findWells()
   {
     List<Well> wells = lookupWellsFromPlateWellList();
-    SearchResults<Well> searchResults = new WellSearchResults(
-      wells,
-      _libraryViewerController,
-      _wellViewerController,
-      _compoundViewerController,
-      _geneViewerController);
-    _wellSearchResultsController.setSearchResults(searchResults);
+    SearchResults<Well> searchResults =
+      new edu.harvard.med.screensaver.ui.searchresults.WellSearchResults(
+        wells,
+        _libraryViewerController,
+        _wellViewerController,
+        _compoundViewerController,
+        _geneViewerController);
+    _wellSearchResultsView.setSearchResults(searchResults);
     return "goWellSearchResults";
   }
   

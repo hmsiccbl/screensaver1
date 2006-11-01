@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui;
+package edu.harvard.med.screensaver.ui.view;
 
 import java.security.Principal;
 import java.util.ArrayList;
@@ -20,8 +20,9 @@ import javax.faces.model.ListDataModel;
 import javax.servlet.http.Cookie;
 
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 
-public class EnvironmentController extends AbstractController
+public class Environment extends AbstractBackingBean
 {
   private String _db;
   private String _user;

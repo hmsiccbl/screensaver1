@@ -32,7 +32,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 
@@ -47,7 +47,7 @@ import edu.harvard.med.screensaver.ui.util.JSFUtils;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-abstract public class SearchResults<E extends AbstractEntity> extends AbstractController
+abstract public class SearchResults<E extends AbstractEntity> extends AbstractBackingBean
 {
   
   // public static final data

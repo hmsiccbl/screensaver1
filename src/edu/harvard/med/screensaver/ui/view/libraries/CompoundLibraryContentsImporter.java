@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.libraries;
+package edu.harvard.med.screensaver.ui.view.libraries;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,23 +22,23 @@ import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 
 /**
  * The JSF backing bean for the compoundLibraryContentsImporter subview.
  * 
  * @author s
  */
-public class CompoundLibraryContentsImporterController extends AbstractController
+public class CompoundLibraryContentsImporter extends AbstractBackingBean
 {
   
-  private static Logger log = Logger.getLogger(CompoundLibraryContentsImporterController.class);
+  private static Logger log = Logger.getLogger(CompoundLibraryContentsImporter.class);
 
   // instance data
 
   private DAO _dao;
   private SDFileCompoundLibraryContentsParser _compoundLibraryContentsParser;
-  private LibraryViewerController _libraryViewer;
+  private LibraryViewer _libraryViewer;
   private UploadedFile _uploadedFile;
   private Library _library;
   
@@ -66,12 +66,12 @@ public class CompoundLibraryContentsImporterController extends AbstractControlle
     _compoundLibraryContentsParser = compoundLibraryContentsParser;
   }
 
-  public LibraryViewerController getLibraryViewer()
+  public LibraryViewer getLibraryViewer()
   {
     return _libraryViewer;
   }
 
-  public void setLibraryViewer(LibraryViewerController libraryViewer)
+  public void setLibraryViewer(LibraryViewer libraryViewer)
   {
     _libraryViewer = libraryViewer;
     _library = _libraryViewer.getLibrary();

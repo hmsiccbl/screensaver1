@@ -7,13 +7,13 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.libraries;
+package edu.harvard.med.screensaver.ui.view.libraries;
 
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 
-public class WellSearchResultsController extends AbstractController
+public class CopyOfWellSearchResults extends AbstractBackingBean
 {
   private SearchResults<Well> _searchResults;
   

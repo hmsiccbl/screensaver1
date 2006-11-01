@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui;
+package edu.harvard.med.screensaver.ui.view;
 
 import java.security.Principal;
 
@@ -16,12 +16,14 @@ import javax.faces.event.ActionEvent;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.navmenu.htmlnavmenu.HtmlCommandNavigationItem;
 
-public class MenuController extends AbstractController
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+
+public class Menu extends AbstractBackingBean
 {
   
   // static data members
   
-  private static Logger log = Logger.getLogger(MenuController.class);
+  private static Logger log = Logger.getLogger(Menu.class);
   
  
   // bean property methods
@@ -46,7 +48,7 @@ public class MenuController extends AbstractController
   /**
    * Logs out the user of the current session and redirects to the login page.
    */
-  // TODO: should we move this to a more session-centric class? (maybe LoginController and then rename?)
+  // TODO: should we move this to a more session-centric class? (maybe Login and then rename?)
   public String logout()
   {
     log.info("logout for session "  + getHttpSession().getId());

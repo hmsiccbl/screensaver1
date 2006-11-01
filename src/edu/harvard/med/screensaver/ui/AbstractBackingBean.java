@@ -43,12 +43,12 @@ import org.apache.log4j.Logger;
  * 
  * @author ant
  */
-public abstract class AbstractController implements ScreensaverConstants
+public abstract class AbstractBackingBean implements ScreensaverConstants
 {
   
   // static data members
   
-  private static Logger log = Logger.getLogger(AbstractController.class);
+  private static Logger log = Logger.getLogger(AbstractBackingBean.class);
 
   
   // private data members
@@ -240,7 +240,7 @@ public abstract class AbstractController implements ScreensaverConstants
    */
   protected Object getBean(String beanName)
   {
-    log.warn("you are using AbstractController.getBean() to acquire bean " + beanName + "; please reconsider your use of this method!  Use injection!");
+    log.warn("you are using AbstractBackingBean.getBean() to acquire bean " + beanName + "; please reconsider your use of this method!  Use injection!");
     return getFacesContext().getApplication().getVariableResolver().resolveVariable(getFacesContext(), 
                                                                                     beanName);
   }

@@ -41,7 +41,7 @@
     </description>
     <managed-bean-name>exceptionReporter</managed-bean-name>
     <managed-bean-class>
-      edu.harvard.med.screensaver.ui.ExceptionReporterController
+      edu.harvard.med.screensaver.ui.view.ExceptionReporter
     </managed-bean-class>            
     <managed-bean-scope>request</managed-bean-scope>
   </managed-bean>
@@ -49,7 +49,7 @@
   <managed-bean>
     <description>Library Viewer backing bean</description>
     <managed-bean-name>libraryViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.LibraryViewerController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.LibraryViewer</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>dao</property-name>
@@ -88,7 +88,7 @@
   <managed-bean>
     <description>Libraries Browser backing bean</description>
     <managed-bean-name>librariesBrowser</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.LibrariesBrowserController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.LibrariesBrowser</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>dao</property-name>
@@ -103,7 +103,7 @@
   <managed-bean>
     <description>Screen Viewer backing bean</description>
     <managed-bean-name>screenViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.screens.ScreenViewerController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.screens.ScreenViewer</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>dao</property-name>
@@ -122,28 +122,28 @@
   <managed-bean>
     <description>Well Search Results backing bean</description>
     <managed-bean-name>wellSearchResults</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.WellSearchResultsController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.WellSearchResults</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
   </managed-bean>
   
   <managed-bean>
     <description>Gene Viewer backing bean</description>
     <managed-bean-name>geneViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.GeneViewerController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.GeneViewer</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
   </managed-bean>
     
   <managed-bean>
     <description>Compound Viewer backing bean</description>
     <managed-bean-name>compoundViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.CompoundViewerController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.CompoundViewer</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
   </managed-bean>
   
   <managed-bean>
     <description>Screens Browser backing bean</description>
     <managed-bean-name>screensBrowser</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.screens.ScreensBrowserController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.screens.ScreensBrowser</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>dao</property-name>
@@ -158,7 +158,7 @@
   <managed-bean>
     <description>Screen Result Viewer backing bean</description>
     <managed-bean-name>screenResultViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewerController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.screenresults.ScreenResultViewer</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>screenResultExporter</property-name>
@@ -181,7 +181,7 @@
   <managed-bean>
     <description>Heat Map Viewer backing bean</description>
     <managed-bean-name>heatMapViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.screenresults.HeatMapViewerController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.screenresults.HeatMapViewer</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>wellViewer</property-name>
@@ -200,7 +200,7 @@
   <managed-bean>
     <description>Well viewer backing bean</description>
     <managed-bean-name>wellViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.WellViewerController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.WellViewer</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>geneViewer</property-name>
@@ -215,7 +215,7 @@
   <managed-bean>
     <description>Screen Result Importer backing bean</description>
     <managed-bean-name>screenResultImporter</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporterController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.screenresults.ScreenResultImporter</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>screenViewer</property-name>
@@ -242,7 +242,7 @@
   <managed-bean>
     <description>RNAi Library Contents Importer backing bean</description>
     <managed-bean-name>rnaiLibraryContentsImporter</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporterController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.RNAiLibraryContentsImporter</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>rnaiLibraryContentsParser</property-name>
@@ -261,7 +261,7 @@
   <managed-bean>
     <description>Compound Library Contents Importer backing bean</description>
     <managed-bean-name>compoundLibraryContentsImporter</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.CompoundLibraryContentsImporterController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.CompoundLibraryContentsImporter</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>compoundLibraryContentsParser</property-name>
@@ -280,7 +280,7 @@
   <managed-bean>
     <description>Schema Manager</description>
     <managed-bean-name>schemaManager</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.SchemaManagerController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.SchemaManager</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
 	<managed-property>
       <property-name>schemaUtil</property-name>
@@ -295,7 +295,7 @@
   <managed-bean>
     <description>Well Finder backing bean</description>
     <managed-bean-name>wellFinder</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.WellFinderController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.WellFinder</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>libraryViewer</property-name>
@@ -330,14 +330,14 @@
   <managed-bean>
     <description>Menu navigation panel</description>
     <managed-bean-name>menu</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.MenuController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.Menu</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
   </managed-bean>
 
   <managed-bean>
     <description>Login form backing bean</description>
     <managed-bean-name>login</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.LoginController</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.Login</managed-bean-class>
     <managed-bean-scope>request</managed-bean-scope>
     <managed-property>
       <property-name>messages</property-name>
@@ -348,7 +348,7 @@
   <managed-bean>
     <description>Hibernate Session Test</description>
     <managed-bean-name>hibernateSessionTest</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.HibernateSessionTest</managed-bean-class>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.HibernateSessionTest</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>dao</property-name>

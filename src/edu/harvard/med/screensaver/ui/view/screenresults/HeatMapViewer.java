@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.screenresults;
+package edu.harvard.med.screensaver.ui.view.screenresults;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -30,15 +30,15 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.ui.AbstractController;
-import edu.harvard.med.screensaver.ui.libraries.WellViewerController;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
+import edu.harvard.med.screensaver.ui.view.libraries.WellViewer;
 
 import org.apache.log4j.Logger;
 
 @SuppressWarnings("serial")
-public class HeatMapViewerController extends AbstractController
+public class HeatMapViewer extends AbstractBackingBean
 {
 
   // static data members
@@ -75,7 +75,7 @@ public class HeatMapViewerController extends AbstractController
   }
 
 
-  private static Logger log = Logger.getLogger(HeatMapViewerController.class);
+  private static Logger log = Logger.getLogger(HeatMapViewer.class);
   
   
   // instance data members
@@ -90,7 +90,7 @@ public class HeatMapViewerController extends AbstractController
   private List<DataModel> _heatMapStatistics;
   private List<DataModel> _heatMapColumnDataModels;
   private List<String> _heatMapRowLabels;
-  private WellViewerController _wellViewer;
+  private WellViewer _wellViewer;
 
   
   // bean property methods
@@ -100,7 +100,7 @@ public class HeatMapViewerController extends AbstractController
     _dao = dao;
   }
 
-  public void setWellViewer(WellViewerController wellViewerController)
+  public void setWellViewer(WellViewer wellViewerController)
   {
     _wellViewer = wellViewerController;
   }

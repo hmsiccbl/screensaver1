@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.screenresults;
+package edu.harvard.med.screensaver.ui.view.screenresults;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,9 +23,9 @@ import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.ui.AbstractController;
-import edu.harvard.med.screensaver.ui.screens.ScreenViewerController;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.view.screens.ScreenViewer;
 
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
@@ -36,21 +36,21 @@ import org.apache.myfaces.custom.fileupload.UploadedFile;
  * 
  * @author ant
  */
-public class ScreenResultImporterController extends AbstractController
+public class ScreenResultImporter extends AbstractBackingBean
 {
 
   // static data
   
   private static final String ERRORS_XLS_FILE_EXTENSION = ".errors.xls";
-  private static final Logger log = Logger.getLogger(ScreenResultImporterController.class);
+  private static final Logger log = Logger.getLogger(ScreenResultImporter.class);
 
   
   // instance data
 
   private DAO _dao;
-  private ScreenViewerController _screenViewer;
+  private ScreenViewer _screenViewer;
   private ScreenResultParser _screenResultParser;
-  private ScreenResultViewerController _screenResultViewer;
+  private ScreenResultViewer _screenResultViewer;
   private UploadedFile _uploadedFile;
 
 
@@ -66,22 +66,22 @@ public class ScreenResultImporterController extends AbstractController
     _screenResultParser = screenResultParser;
   }
 
-  public ScreenResultViewerController getScreenResultViewer()
+  public ScreenResultViewer getScreenResultViewer()
   {
     return _screenResultViewer;
   }
 
-  public void setScreenResultViewer(ScreenResultViewerController screenResultViewer)
+  public void setScreenResultViewer(ScreenResultViewer screenResultViewer)
   {
     _screenResultViewer = screenResultViewer;
   }
 
-  public ScreenViewerController getScreenViewer()
+  public ScreenViewer getScreenViewer()
   {
     return _screenViewer;
   }
 
-  public void setScreenViewer(ScreenViewerController screenViewer)
+  public void setScreenViewer(ScreenViewer screenViewer)
   {
     _screenViewer = screenViewer;
   }

@@ -25,10 +25,10 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.libraries.CompoundViewerController;
-import edu.harvard.med.screensaver.ui.libraries.GeneViewerController;
-import edu.harvard.med.screensaver.ui.libraries.LibraryViewerController;
-import edu.harvard.med.screensaver.ui.libraries.WellViewerController;
+import edu.harvard.med.screensaver.ui.view.libraries.CompoundViewer;
+import edu.harvard.med.screensaver.ui.view.libraries.GeneViewer;
+import edu.harvard.med.screensaver.ui.view.libraries.LibraryViewer;
+import edu.harvard.med.screensaver.ui.view.libraries.WellViewer;
 
 
 /**
@@ -53,10 +53,10 @@ public class WellSearchResults extends SearchResults<Well>
   
   // instance fields
   
-  private LibraryViewerController _libraryViewerController;
-  private WellViewerController _wellViewerController;
-  private CompoundViewerController _compoundViewerController;
-  private GeneViewerController _geneViewerController;
+  private LibraryViewer _libraryViewerController;
+  private WellViewer _wellViewerController;
+  private CompoundViewer _compoundViewerController;
+  private GeneViewer _geneViewerController;
   
   
   // public constructor
@@ -67,10 +67,10 @@ public class WellSearchResults extends SearchResults<Well>
    */
   public WellSearchResults(
     List<Well> unsortedResults,
-    LibraryViewerController libraryViewerController,
-    WellViewerController wellViewerController,
-    CompoundViewerController compoundViewerController,
-    GeneViewerController geneViewerController)
+    LibraryViewer libraryViewerController,
+    WellViewer wellViewerController,
+    CompoundViewer compoundViewerController,
+    GeneViewer geneViewerController)
   {
     super(unsortedResults);
     _libraryViewerController = libraryViewerController;

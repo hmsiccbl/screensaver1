@@ -7,9 +7,11 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui;
+package edu.harvard.med.screensaver.ui.view;
 
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 
 /**
  * JSF backing bean for login view. Properties are not needed for userID and
@@ -19,10 +21,10 @@ import org.apache.log4j.Logger;
  * 
  * @author ant
  */
-public class LoginController extends AbstractController
+public class Login extends AbstractBackingBean
 {
   
-  public static Logger log = Logger.getLogger(LoginController.class);
+  public static Logger log = Logger.getLogger(Login.class);
   
   private static final String AUTHENTICATION_ID_DESCRIPTION = "User ID";
   

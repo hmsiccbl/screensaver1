@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.screens;
+package edu.harvard.med.screensaver.ui.view.screens;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,18 +19,18 @@ import javax.faces.model.SelectItem;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.VisitType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
 import org.apache.log4j.Logger;
 
-public class VisitController extends AbstractController
+public class VisitViewer extends AbstractBackingBean
 {
   // static members
 
   private static Logger log = Logger
-    .getLogger(VisitController.class);
+    .getLogger(VisitViewer.class);
 
 
   // instance data members

@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/libraries/LibraryViewer.java $
+// $Id: LibraryViewer.java 711 2006-10-31 23:40:24Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.libraries;
+package edu.harvard.med.screensaver.ui.view.libraries;
 
 import java.util.ArrayList;
 
@@ -21,24 +21,23 @@ import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.AbstractController;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
-public class LibraryViewerController extends AbstractController
+public class LibraryViewer extends AbstractBackingBean
 {
-  private static Logger log = Logger.getLogger(LibraryViewerController.class);
+  private static Logger log = Logger.getLogger(LibraryViewer.class);
   
   private DAO _dao;
   private Library _library;
   private SearchResults<Library> _searchResults;
   private SearchResults<Well> _wellSearchResults;
-  private RNAiLibraryContentsImporterController _rnaiLibraryContentsImporter;
-  private CompoundLibraryContentsImporterController _compoundLibraryContentsImporter;
-  private WellViewerController _wellViewerController;
-  private GeneViewerController _geneViewerController;
-  private CompoundViewerController _compoundViewerController;
-  private WellSearchResultsController _wellSearchResultsController;
+  private RNAiLibraryContentsImporter _rnaiLibraryContentsImporter;
+  private CompoundLibraryContentsImporter _compoundLibraryContentsImporter;
+  private WellViewer _wellViewerController;
+  private GeneViewer _geneViewerController;
+  private CompoundViewer _compoundViewer;
+  private WellSearchResults _wellSearchResultsView;
   private String _usageMode; // "create" or "edit"
   private boolean _advancedMode;
   
@@ -69,67 +68,67 @@ public class LibraryViewerController extends AbstractController
     _searchResults = searchResults;
   }
 
-  public RNAiLibraryContentsImporterController getRnaiLibraryContentsImporter()
+  public RNAiLibraryContentsImporter getRnaiLibraryContentsImporter()
   {
     return _rnaiLibraryContentsImporter;
   }
 
   public void setRnaiLibraryContentsImporter(
-    RNAiLibraryContentsImporterController rnaiLibraryContentsImporter)
+    RNAiLibraryContentsImporter rnaiLibraryContentsImporter)
   {
     _rnaiLibraryContentsImporter = rnaiLibraryContentsImporter;
   }
 
-  public CompoundLibraryContentsImporterController getCompoundLibraryContentsImporter()
+  public CompoundLibraryContentsImporter getCompoundLibraryContentsImporter()
   {
     return _compoundLibraryContentsImporter;
   }
 
   public void setCompoundLibraryContentsImporter(
-    CompoundLibraryContentsImporterController compoundLibraryContentsImporter)
+    CompoundLibraryContentsImporter compoundLibraryContentsImporter)
   {
     _compoundLibraryContentsImporter = compoundLibraryContentsImporter;
   }
   
-  public WellViewerController getWellViewer()
+  public WellViewer getWellViewer()
   {
     return _wellViewerController;
   }
 
-  public void setWellViewer(WellViewerController wellViewerController)
+  public void setWellViewer(WellViewer wellViewerController)
   {
     _wellViewerController = wellViewerController;
     _wellViewerController.setLibraryViewer(this);
   }
 
-  public GeneViewerController getGeneViewer()
+  public GeneViewer getGeneViewer()
   {
     return _geneViewerController;
   }
 
-  public void setGeneViewer(GeneViewerController geneViewerController)
+  public void setGeneViewer(GeneViewer geneViewerController)
   {
     _geneViewerController = geneViewerController;
   }
 
-  public CompoundViewerController getCompoundViewer()
+  public CompoundViewer getCompoundViewer()
   {
-    return _compoundViewerController;
+    return _compoundViewer;
   }
 
-  public void setCompoundViewer(CompoundViewerController compoundViewerController)
+  public void setCompoundViewer(CompoundViewer compoundViewer)
   {
-    _compoundViewerController = compoundViewerController;
+    _compoundViewer = compoundViewer;
   }
 
-  public WellSearchResultsController getWellSearchResults()
+  public WellSearchResults getWellSearchResults()
   {
-    return _wellSearchResultsController;
+    return _wellSearchResultsView;
   }
 
-  public void setWellSearchResults(WellSearchResultsController wellSearchResultsController)
+  public void setWellSearchResults(WellSearchResults wellSearchResultsController)
   {
-    _wellSearchResultsController = wellSearchResultsController;
+    _wellSearchResultsView = wellSearchResultsController;
   }
 
   public void setUsageMode(String usageMode)
@@ -215,14 +214,14 @@ public class LibraryViewerController extends AbstractController
   public String viewLibraryContents()
   {
     if (_wellSearchResults == null) {
-      _wellSearchResults = new WellSearchResults(
+      _wellSearchResults = new edu.harvard.med.screensaver.ui.searchresults.WellSearchResults(
         new ArrayList<Well>(_library.getWells()),
         this,
         _wellViewerController,
-        _compoundViewerController,
+        _compoundViewer,
         _geneViewerController);
     }
-    _wellSearchResultsController.setSearchResults(_wellSearchResults);
+    _wellSearchResultsView.setSearchResults(_wellSearchResults);
     return "goWellSearchResults";
   }
   
