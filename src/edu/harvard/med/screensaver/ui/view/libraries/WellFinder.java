@@ -151,6 +151,7 @@ public class WellFinder extends AbstractBackingBean
       return ERROR_ACTION_RESULT;
     }
     _wellViewerController.setWell(well);
+    _wellViewerController.setSearchResults(null);
     return "showWell";
   }
   

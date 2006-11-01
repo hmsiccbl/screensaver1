@@ -213,14 +213,12 @@ public class LibraryViewer extends AbstractBackingBean
 
   public String viewLibraryContents()
   {
-    if (_wellSearchResults == null) {
-      _wellSearchResults = new edu.harvard.med.screensaver.ui.searchresults.WellSearchResults(
-        new ArrayList<Well>(_library.getWells()),
-        this,
-        _wellViewerController,
-        _compoundViewer,
-        _geneViewerController);
-    }
+    _wellSearchResults = new edu.harvard.med.screensaver.ui.searchresults.WellSearchResults(
+      new ArrayList<Well>(_library.getWells()),
+      this,
+      _wellViewerController,
+      _compoundViewer,
+      _geneViewerController);
     _wellSearchResultsView.setSearchResults(_wellSearchResults);
     return "goWellSearchResults";
   }

@@ -103,19 +103,6 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
   {
     return new ListDataModel(_compoundLibraryContentsParser.getErrors());
   }
-
-
-  // JSF application methods
-  
-  public String update()
-  {
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-  
-  public String done()
-  {
-    return DONE_ACTION_RESULT;
-  }
   
   public String submit()
   {
