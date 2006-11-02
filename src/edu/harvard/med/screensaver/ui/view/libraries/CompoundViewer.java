@@ -17,9 +17,9 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
+import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 public class CompoundViewer extends AbstractBackingBean
 {
@@ -49,11 +49,25 @@ public class CompoundViewer extends AbstractBackingBean
   };
   
   
-  // instance stuff
+  // private instance fields
   
+  private LibrariesController _librariesController;
   private Compound _compound;
-  private SearchResults<Well> _searchResults;
+  private WellSearchResults _wellSearchResults;
 
+  
+  // public getters and setters
+  
+  public LibrariesController getLibrariesController()
+  {
+    return _librariesController;
+  }
+  
+  public void setLibrariesController(LibrariesController librariesController)
+  {
+    _librariesController = librariesController;
+  }
+  
   public Compound getCompound()
   {
     return _compound;
@@ -64,14 +78,14 @@ public class CompoundViewer extends AbstractBackingBean
     _compound = compound;
   }
   
-  public SearchResults<Well> getSearchResults()
+  public WellSearchResults getWellSearchResults()
   {
-    return _searchResults;
+    return _wellSearchResults;
   }
 
-  public void setSearchResults(SearchResults<Well> searchResults)
+  public void setWellSearchResults(WellSearchResults wellSearchResults)
   {
-    _searchResults = searchResults;
+    _wellSearchResults = wellSearchResults;
   }
 
   public Map<String,String> getCompoundImageUrl()
@@ -79,8 +93,8 @@ public class CompoundViewer extends AbstractBackingBean
     return _compoundImageUrl;
   }
   
-  public String showCompound()
+  public String viewCompound()
   {
-    return "showCompound";
+    return _librariesController.viewCompound(_compound, _wellSearchResults);
   }
 }

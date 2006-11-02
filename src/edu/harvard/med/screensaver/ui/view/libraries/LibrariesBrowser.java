@@ -9,15 +9,10 @@
 
 package edu.harvard.med.screensaver.ui.view.libraries;
 
-import java.util.List;
-
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 
 /**
  * TODO: add comments
@@ -33,50 +28,19 @@ public class LibrariesBrowser extends AbstractBackingBean
   
   
   // private instance fields
-  
-  private DAO _dao;
-  private LibraryViewer _libraryViewerController;
-  private SearchResults<Library> _searchResults;
+
+  private LibrarySearchResults _librarySearchResults;
   
   
   // public instance methods
-  
-  public DAO getDao()
+
+  public LibrarySearchResults getLibrarySearchResults()
   {
-    return _dao;
-  }
-  
-  public void setDao(DAO dao)
-  {
-    _dao = dao;
-  }
-  
-  public LibraryViewer getLibraryViewer()
-  {
-    return _libraryViewerController;
+    return _librarySearchResults;
   }
 
-  public void setLibraryViewer(LibraryViewer viewerController)
+  public void setLibrarySearchResults(LibrarySearchResults librarySearchResults)
   {
-    _libraryViewerController = viewerController;
-  }
-
-  public SearchResults<Library> getSearchResults()
-  {
-    return _searchResults;
-  }
-
-  public void setSearchResults(SearchResults<Library> searchResults)
-  {
-    _searchResults = searchResults;
-  }
-
-  public String goBrowseLibraries()
-  {
-    if (_searchResults == null) {
-      List<Library> libraries = _dao.findAllEntitiesWithType(Library.class);
-      _searchResults = new LibrarySearchResults(libraries, _libraryViewerController);
-    }
-    return "goBrowseLibraries";
+    _librarySearchResults = librarySearchResults;
   }
 }

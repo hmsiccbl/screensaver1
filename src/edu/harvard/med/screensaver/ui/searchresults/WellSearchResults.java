@@ -25,10 +25,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.view.libraries.CompoundViewer;
-import edu.harvard.med.screensaver.ui.view.libraries.GeneViewer;
-import edu.harvard.med.screensaver.ui.view.libraries.LibraryViewer;
-import edu.harvard.med.screensaver.ui.view.libraries.WellViewer;
+import edu.harvard.med.screensaver.ui.control.LibrariesController;
 
 
 /**
@@ -53,30 +50,21 @@ public class WellSearchResults extends SearchResults<Well>
   
   // instance fields
   
-  private LibraryViewer _libraryViewerController;
-  private WellViewer _wellViewerController;
-  private CompoundViewer _compoundViewerController;
-  private GeneViewer _geneViewerController;
+  private LibrariesController _librariesController;
   
   
   // public constructor
   
   /**
-   * Construct a new <code>WellSearchResults</code> object.
+   * Construct a new <code>WellSearchResultsViewer</code> object.
    * @param wells the list of wells
    */
   public WellSearchResults(
     List<Well> unsortedResults,
-    LibraryViewer libraryViewerController,
-    WellViewer wellViewerController,
-    CompoundViewer compoundViewerController,
-    GeneViewer geneViewerController)
+    LibrariesController librariesController)
   {
     super(unsortedResults);
-    _libraryViewerController = libraryViewerController;
-    _wellViewerController = wellViewerController;
-    _compoundViewerController = compoundViewerController;
-    _geneViewerController = geneViewerController;
+    _librariesController = librariesController;
   }
 
   
@@ -95,12 +83,7 @@ public class WellSearchResults extends SearchResults<Well>
   {
     // NOTE: if there were more ways to get to a well search results, then this method would
     // need to be more intelligent
-    
-    // TODO: may want to initialize the screens browser here as well, eg,
-    // "return _libraryViewer.viewLibraryContents();", but i would like to wait until control is
-    // factored out
-    
-    return "goWellSearchResults";
+    return _librariesController.viewWellSearchResults(this);
   }
   
   @Override
@@ -155,20 +138,14 @@ public class WellSearchResults extends SearchResults<Well>
   protected Object cellAction(Well well, String columnName)
   {
     if (columnName.equals(LIBRARY)) {
-      _libraryViewerController.setSearchResults(null);
-      _libraryViewerController.setLibrary(well.getLibrary());
-      return "showLibrary";
+      return _librariesController.viewLibrary(well.getLibrary(), null);
     }
     if (columnName.equals(WELL)) {
-      _wellViewerController.setSearchResults(this);
-      _wellViewerController.setWell(well);
-      return "showWell";
+      return _librariesController.viewWell(well, this);
     }
     if (columnName.equals(CONTENTS)) {
       if (getGeneCount(well) == 1) {
-        _geneViewerController.setSearchResults(this);
-        _geneViewerController.setGene(getGeneForWell(well));
-        return "showGene";
+        return _librariesController.viewGene(well.getGene(), this);
       }
       if (getCompoundCount(well) > 0) {
         String compoundId = (String) getRequestParameter("commandValue");
@@ -179,9 +156,7 @@ public class WellSearchResults extends SearchResults<Well>
             break;
           }
         }
-        _compoundViewerController.setSearchResults(this);
-        _compoundViewerController.setCompound(compound);
-        return "showCompound";
+        return _librariesController.viewCompound(compound, this);
       }
     }
     return null;
@@ -238,13 +213,9 @@ public class WellSearchResults extends SearchResults<Well>
   @Override
   protected void setEntityToView(Well well)
   {
-    // NOTE the hidden bugg: scrolling through the compounds/genes for a well search
-    // results will only give the first gene in a well; others will be skipped.
-    // this should never be a problem since there should really only be a single
-    // gene in a well.
-    _geneViewerController.setGene(getGeneForWell(well));
-    _compoundViewerController.setCompound(well.getPrimaryCompound());
-    _wellViewerController.setWell(well);
+    _librariesController.viewWell(well, this);
+    _librariesController.viewGene(well.getGene(), this);
+    _librariesController.viewCompound(well.getPrimaryCompound(), this);
   }
 
   @Override
@@ -356,7 +327,7 @@ public class WellSearchResults extends SearchResults<Well>
   {
     int geneCount = getGeneCount(well);
     if (geneCount == 1) {
-      return getGeneForWell(well).getGeneName();
+      return well.getGene().getGeneName();
     }
     if (geneCount > 1) {
       return "multiple genes";
@@ -388,14 +359,5 @@ public class WellSearchResults extends SearchResults<Well>
   private int getGeneCount(Well well)
   {
     return well.getGenes().size();
-  }
-
-  private Gene getGeneForWell(Well well)
-  {
-    Set<Gene> genes = well.getGenes();
-    if (genes.size() == 0) {
-      return null;
-    }
-    return genes.iterator().next();
   }
 }

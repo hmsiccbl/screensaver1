@@ -20,7 +20,7 @@ import javax.faces.model.SelectItem;
 import org.apache.log4j.Logger;
 
 /**
- * @motviation Guaranteed type consistency between set/get methods and
+ * @motivation Guaranteed type consistency between set/get methods and
  *             getSelectItems() method.
  * @motivation JSF converters appear to serialize the objects in from its
  *             associated SeletItems. This is bad if the object is not

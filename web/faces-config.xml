@@ -23,16 +23,37 @@
   </application>
   
   
-  <!-- Phase Listeners -->
+  <!-- === === Phase Listeners === === -->
   
   <lifecycle>
     <phase-listener>edu.harvard.med.screensaver.ui.util.Messages</phase-listener>
   </lifecycle>
 
 
-  <!-- Managed beans -->
+  <!-- === === Managed beans === === -->
   
   <!-- TODO: Is it possible to configure managed-bean superclass so that common properties are not repeated in each bean definition?  Or must we use Spring to manage our JSF managed-beans in order have such a feature? -->
+  
+
+  <!-- === top-level backing beans === -->
+  
+  <managed-bean>
+    <description>Menu navigation panel</description>
+    <managed-bean-name>menu</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.Menu</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Login form backing bean</description>
+    <managed-bean-name>login</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.Login</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
+    </managed-property>
+  </managed-bean>
   
   <managed-bean>
     <description>
@@ -40,32 +61,63 @@
       a custom manner.
     </description>
     <managed-bean-name>exceptionReporter</managed-bean-name>
-    <managed-bean-class>
-      edu.harvard.med.screensaver.ui.view.ExceptionReporter
-    </managed-bean-class>            
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.ExceptionReporter</managed-bean-class>            
     <managed-bean-scope>request</managed-bean-scope>
   </managed-bean>
-   
+
   <managed-bean>
-    <description>Library Viewer backing bean</description>
-    <managed-bean-name>libraryViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.LibraryViewer</managed-bean-class>
+    <description>Schema Manager</description>
+    <managed-bean-name>schemaManager</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.SchemaManager</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+	<managed-property>
+      <property-name>schemaUtil</property-name>
+      <value>#{schemaUtil}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>screenDBDataImporter</property-name>
+      <value>#{screenDBDataImporter}</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Hibernate Session Test</description>
+    <managed-bean-name>hibernateSessionTest</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.HibernateSessionTest</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>dao</property-name>
       <value>#{dao}</value>
     </managed-property>
     <managed-property>
-      <property-name>messages</property-name>
-      <value>#{messages}</value>
+      <property-name>hibernateTemplate</property-name>
+      <value>#{hibernateTemplate}</value>
+    </managed-property>
+  </managed-bean>
+
+
+  <!-- === libraries backing beans === -->
+   
+  <managed-bean>
+    <description>Libraries Controller Bean</description>
+    <managed-bean-name>librariesController</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.control.LibrariesController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>dao</property-name>
+      <value>#{dao}</value>
     </managed-property>
     <managed-property>
-      <property-name>rnaiLibraryContentsImporter</property-name>
-      <value>#{rnaiLibraryContentsImporter}</value>
+      <property-name>librariesBrowser</property-name>
+      <value>#{librariesBrowser}</value>
     </managed-property>
     <managed-property>
-      <property-name>compoundLibraryContentsImporter</property-name>
-      <value>#{compoundLibraryContentsImporter}</value>
+      <property-name>libraryViewer</property-name>
+      <value>#{libraryViewer}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>wellSearchResultsViewer</property-name>
+      <value>#{wellSearchResultsViewer}</value>
     </managed-property>
     <managed-property>
       <property-name>wellViewer</property-name>
@@ -80,28 +132,107 @@
       <value>#{compoundViewer}</value>
     </managed-property>
     <managed-property>
-      <property-name>wellSearchResults</property-name>
-      <value>#{wellSearchResults}</value>
+      <property-name>compoundLibraryContentsImporter</property-name>
+      <value>#{compoundLibraryContentsImporter}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>rnaiLibraryContentsImporter</property-name>
+      <value>#{rnaiLibraryContentsImporter}</value>
     </managed-property>
   </managed-bean>
-  
+
   <managed-bean>
-    <description>Libraries Browser backing bean</description>
-    <managed-bean-name>librariesBrowser</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.LibrariesBrowser</managed-bean-class>
+    <description>Well Finder</description>
+    <managed-bean-name>wellFinder</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.WellFinder</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>dao</property-name>
       <value>#{dao}</value>
     </managed-property>
     <managed-property>
-      <property-name>libraryViewer</property-name>
-      <value>#{libraryViewer}</value>
+      <property-name>librariesController</property-name>
+      <value>#{librariesController}</value>
     </managed-property>
   </managed-bean>
 
   <managed-bean>
-    <description>Screen Viewer backing bean</description>
+    <description>Libraries Browser</description>
+    <managed-bean-name>librariesBrowser</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.LibrariesBrowser</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Library Viewer</description>
+    <managed-bean-name>libraryViewer</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.LibraryViewer</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Well Search Results Viewer</description>
+    <managed-bean-name>wellSearchResultsViewer</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.WellSearchResultsViewer</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Well Viewer</description>
+    <managed-bean-name>wellViewer</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.WellViewer</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Gene Viewer</description>
+    <managed-bean-name>geneViewer</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.GeneViewer</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Compound Viewer</description>
+    <managed-bean-name>compoundViewer</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.CompoundViewer</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Compound Library Contents Importer</description>
+    <managed-bean-name>compoundLibraryContentsImporter</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.CompoundLibraryContentsImporter</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>compoundLibraryContentsParser</property-name>
+      <value>#{compoundLibraryContentsParser}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>dao</property-name>
+      <value>#{dao}</value>
+    </managed-property>
+  </managed-bean>
+   
+  <managed-bean>
+    <description>RNAi Library Contents Importer backing bean</description>
+    <managed-bean-name>rnaiLibraryContentsImporter</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.RNAiLibraryContentsImporter</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>rnaiLibraryContentsParser</property-name>
+      <value>#{rnaiLibraryContentsParser}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>dao</property-name>
+      <value>#{dao}</value>
+    </managed-property>
+  </managed-bean>
+  
+
+  <!-- === screens and screen results backing beans === -->
+
+  <managed-bean>
+    <description>Screen Viewer</description>
     <managed-bean-name>screenViewer</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.view.screens.ScreenViewer</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
@@ -120,28 +251,7 @@
   </managed-bean>
   
   <managed-bean>
-    <description>Well Search Results backing bean</description>
-    <managed-bean-name>wellSearchResults</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.WellSearchResults</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-  </managed-bean>
-  
-  <managed-bean>
-    <description>Gene Viewer backing bean</description>
-    <managed-bean-name>geneViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.GeneViewer</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-  </managed-bean>
-    
-  <managed-bean>
-    <description>Compound Viewer backing bean</description>
-    <managed-bean-name>compoundViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.CompoundViewer</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-  </managed-bean>
-  
-  <managed-bean>
-    <description>Screens Browser backing bean</description>
+    <description>Screens Browser</description>
     <managed-bean-name>screensBrowser</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.view.screens.ScreensBrowser</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
@@ -156,7 +266,7 @@
   </managed-bean>  
   
   <managed-bean>
-    <description>Screen Result Viewer backing bean</description>
+    <description>Screen Result Viewer</description>
     <managed-bean-name>screenResultViewer</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.view.screenresults.ScreenResultViewer</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
@@ -179,7 +289,7 @@
   </managed-bean>
   
   <managed-bean>
-    <description>Heat Map Viewer backing bean</description>
+    <description>Heat Map Viewer</description>
     <managed-bean-name>heatMapViewer</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.view.screenresults.HeatMapViewer</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
@@ -196,24 +306,9 @@
       <value>#{dao}</value>
     </managed-property>
   </managed-bean>
-  
+
   <managed-bean>
-    <description>Well viewer backing bean</description>
-    <managed-bean-name>wellViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.WellViewer</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>geneViewer</property-name>
-      <value>#{geneViewer}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>compoundViewer</property-name>
-      <value>#{compoundViewer}</value>
-    </managed-property>
-  </managed-bean>
-  
-  <managed-bean>
-    <description>Screen Result Importer backing bean</description>
+    <description>Screen Result Importer</description>
     <managed-bean-name>screenResultImporter</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.view.screenresults.ScreenResultImporter</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
@@ -238,128 +333,9 @@
       <value>#{messages}</value>
     </managed-property>
   </managed-bean>
-    
-  <managed-bean>
-    <description>RNAi Library Contents Importer backing bean</description>
-    <managed-bean-name>rnaiLibraryContentsImporter</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.RNAiLibraryContentsImporter</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>rnaiLibraryContentsParser</property-name>
-      <value>#{rnaiLibraryContentsParser}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>messages</property-name>
-      <value>#{messages}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
-    </managed-property>
-  </managed-bean>
-
-  <managed-bean>
-    <description>Compound Library Contents Importer backing bean</description>
-    <managed-bean-name>compoundLibraryContentsImporter</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.CompoundLibraryContentsImporter</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>compoundLibraryContentsParser</property-name>
-      <value>#{compoundLibraryContentsParser}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>messages</property-name>
-      <value>#{messages}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
-    </managed-property>
-  </managed-bean>
-
-  <managed-bean>
-    <description>Schema Manager</description>
-    <managed-bean-name>schemaManager</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.view.SchemaManager</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-	<managed-property>
-      <property-name>schemaUtil</property-name>
-      <value>#{schemaUtil}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>screenDBDataImporter</property-name>
-      <value>#{screenDBDataImporter}</value>
-    </managed-property>
-  </managed-bean>
-  
-  <managed-bean>
-    <description>Well Finder backing bean</description>
-    <managed-bean-name>wellFinder</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.view.libraries.WellFinder</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>libraryViewer</property-name>
-      <value>#{libraryViewer}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>geneViewer</property-name>
-      <value>#{geneViewer}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>compoundViewer</property-name>
-      <value>#{compoundViewer}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>wellViewer</property-name>
-      <value>#{wellViewer}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>messages</property-name>
-      <value>#{messages}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>wellSearchResults</property-name>
-      <value>#{wellSearchResults}</value>
-    </managed-property>
-  </managed-bean>
-
-  <managed-bean>
-    <description>Menu navigation panel</description>
-    <managed-bean-name>menu</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.view.Menu</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-  </managed-bean>
-
-  <managed-bean>
-    <description>Login form backing bean</description>
-    <managed-bean-name>login</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.view.Login</managed-bean-class>
-    <managed-bean-scope>request</managed-bean-scope>
-    <managed-property>
-      <property-name>messages</property-name>
-      <value>#{messages}</value>
-    </managed-property>
-  </managed-bean>
-
-  <managed-bean>
-    <description>Hibernate Session Test</description>
-    <managed-bean-name>hibernateSessionTest</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.view.HibernateSessionTest</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>hibernateTemplate</property-name>
-      <value>#{hibernateTemplate}</value>
-    </managed-property>
-    
-  </managed-bean>
+ 
+ 
+ 
 
   
   <!-- Navigation rules -->
@@ -378,65 +354,12 @@
   <!-- define navigation rules that are applicable from *all* views (e.g. those that contain a navigation panel) -->
   <navigation-rule>
     <from-view-id>*</from-view-id>
+
+    <!-- === top-level wildcard navigation rules === -->
     <navigation-case>
       <from-outcome>logout</from-outcome>
       <!-- maybe we want a "you have been logged out" page; for now we send to the query page, which will force a login -->
       <to-view-id>/main</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>goBrowseLibraries</from-outcome>
-      <to-view-id>/libraries/librariesBrowser</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>goWellSearchResults</from-outcome>
-      <to-view-id>/libraries/wellSearchResults</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>showLibrary</from-outcome>
-      <to-view-id>/libraries/libraryViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>findWells</from-outcome>
-      <to-view-id>/libraries/wellFinder</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>showWell</from-outcome>
-      <to-view-id>/libraries/wellViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>showGene</from-outcome>
-      <to-view-id>/libraries/geneViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>showCompound</from-outcome>
-      <to-view-id>/libraries/compoundViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>goBrowseScreens</from-outcome>
-      <to-view-id>/screens/screensBrowser</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>goImportScreenResult</from-outcome>
-      <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>goImportRNAiLibraryContents</from-outcome>
-      <to-view-id>/libraries/admin/rnaiLibraryContentsImporter</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>goImportCompoundLibraryContents</from-outcome>
-      <to-view-id>/libraries/admin/compoundLibraryContentsImporter</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
@@ -449,8 +372,69 @@
       <to-view-id>/dev/schemaManager</to-view-id>
       <redirect/>
     </navigation-case>
+    
+    <!-- === libraries wildcard navigation rules === -->
+    <navigation-case>
+      <from-outcome>findWells</from-outcome>
+      <to-view-id>/libraries/wellFinder</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>browseLibraries</from-outcome>
+      <to-view-id>/libraries/librariesBrowser</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewLibrary</from-outcome>
+      <to-view-id>/libraries/libraryViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewWellSearchResults</from-outcome>
+      <to-view-id>/libraries/wellSearchResults</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewWell</from-outcome>
+      <to-view-id>/libraries/wellViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewGene</from-outcome>
+      <to-view-id>/libraries/geneViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewCompound</from-outcome>
+      <to-view-id>/libraries/compoundViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>importCompoundLibraryContents</from-outcome>
+      <to-view-id>/libraries/admin/compoundLibraryContentsImporter</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>importRNAiLibraryContents</from-outcome>
+      <to-view-id>/libraries/admin/rnaiLibraryContentsImporter</to-view-id>
+      <redirect/>
+    </navigation-case>
+    
+    <!-- === screens and screenresults wildcard navigation rules === -->    
+    <navigation-case>
+      <from-outcome>goBrowseScreens</from-outcome>
+      <to-view-id>/screens/screensBrowser</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>goImportScreenResult</from-outcome>
+      <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
+      <redirect/>
+    </navigation-case>
   </navigation-rule>
 
+  <!-- === non-wildcard navigation rules follow. goal is to get rid of all of these === -->
+  
   <!-- TODO: rename screenResultImporter to screenResultImportErrorViewer -->
   <navigation-rule>
     <from-view-id>/screenresults/admin/screenResultImporter.jsp</from-view-id>
@@ -526,38 +510,6 @@
   </navigation-rule>
 
   <navigation-rule>
-    <from-view-id>/libraries/libraryViewer.jsp</from-view-id>
-    <navigation-case>
-     <from-outcome>showSearchResultsSummary</from-outcome>
-     <to-view-id>/libraries/librariesBrowser</to-view-id>
-     <redirect/>
-    </navigation-case>
-  </navigation-rule>
-
-  <navigation-rule>
-    <from-view-id>/libraries/wellViewer.jsp</from-view-id>
-    <navigation-case>
-      <from-outcome>showSearchResultsSummary</from-outcome>
-      <to-view-id>/libraries/wellSearchResults</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>done</from-outcome>
-      <to-view-id>/screenresults/screenResultViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-  </navigation-rule>
-
-  <navigation-rule>
-    <from-view-id>/libraries/geneViewer.jsp</from-view-id>
-    <navigation-case>
-     <from-outcome>showSearchResultsSummary</from-outcome>
-     <to-view-id>/libraries/genesBrowser</to-view-id>
-     <redirect/>
-    </navigation-case>
-  </navigation-rule>
-
-  <navigation-rule>
     <from-view-id>/screenresults/screenResultViewer.jsp</from-view-id>
     <navigation-case>
       <from-outcome>viewHeatMaps</from-outcome>
@@ -592,7 +544,7 @@
   </navigation-rule>
   
 
-  <!-- Converters -->
+  <!-- === === Converters === === -->
 
   <converter>
     <description>Converter for LibraryType enum to/from string representation</description>
@@ -660,7 +612,8 @@
     <converter-class>edu.harvard.med.screensaver.ui.util.IntegerConverter</converter-class>
   </converter>
 
-  <!-- Validators -->
+
+  <!-- === === Validators === === -->
 
   <validator>
    <validator-id>YearValidator</validator-id>

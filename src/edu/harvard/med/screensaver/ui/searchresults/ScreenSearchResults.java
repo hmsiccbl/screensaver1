@@ -64,7 +64,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
     // need to be more intelligent
     
     // TODO: may want to initialize the screens browser here as well, eg,
-    // "return _screensBrowser.goBrowseScreens();", but i would like to wait until control is
+    // "return _screensController.browseScreens();", but i would like to wait until control is
     // factored out
     
     return "goBrowseScreens";

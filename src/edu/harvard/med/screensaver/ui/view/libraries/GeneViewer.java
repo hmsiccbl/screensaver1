@@ -10,15 +10,20 @@
 package edu.harvard.med.screensaver.ui.view.libraries;
 
 import edu.harvard.med.screensaver.model.libraries.Gene;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 public class GeneViewer extends AbstractBackingBean
 {
-  private Gene _gene;
-  private SearchResults<Well> _searchResults;
   
+  // private instance fields
+  
+  private Gene _gene;
+  private WellSearchResults _wellSearchResults;
+
+  
+  // public instance methods
+
   public Gene getGene()
   {
     return _gene;
@@ -26,21 +31,16 @@ public class GeneViewer extends AbstractBackingBean
 
   public void setGene(Gene gene)
   {
-    this._gene = gene;
-  }
-  
-  public SearchResults<Well> getSearchResults()
-  {
-    return _searchResults;
+    _gene = gene;
   }
 
-  public void setSearchResults(SearchResults<Well> searchResults)
+  public WellSearchResults getWellSearchResults()
   {
-    _searchResults = searchResults;
+    return _wellSearchResults;
   }
 
-  public String showGene()
+  public void setWellSearchResults(WellSearchResults wellSearchResults)
   {
-    return "showGene";
+    _wellSearchResults = wellSearchResults;
   }
 }

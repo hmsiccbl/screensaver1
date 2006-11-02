@@ -34,15 +34,11 @@
       <t:panelNavigation2 id="navMenu" layout="table" itemClass="menuItem"
         openItemClass="menuItem" activeItemClass="menuItemActive"
         separatorClass="navSeparator">
-        <t:commandNavigation2 action="findWells" value="#{\"Find Wells\"}" rendered="#{menu.authenticatedUser}" accesskey="W"/>
-        <t:commandNavigation2 action="#{librariesBrowser.goBrowseLibraries}" value="#{\"Browse Libraries\"}" rendered="#{menu.authenticatedUser}" accesskey="L" />
+        <t:commandNavigation2 action="#{librariesController.findWells}" value="#{\"Find Wells\"}" rendered="#{menu.authenticatedUser}" accesskey="W"/>
+        <t:commandNavigation2 action="#{librariesController.browseLibraries}" value="#{\"Browse Libraries\"}" rendered="#{menu.authenticatedUser}" accesskey="L" />
         <t:commandNavigation2 action="#{screensBrowser.goBrowseScreens}" value="#{\"Browse Screens\"}" rendered="#{menu.authenticatedUser}" accesskey="S" />
         <t:commandNavigation2 accesskey="" />
         <t:commandNavigation2 action="goHelp" value="#{\"Help\"}" accesskey="H" />
-        <t:commandNavigation2 id="navPanelAdminNode" value="#{\"Admin >>\"}" accesskey="" visibleOnUserRole="readEverythingAdmin" >
-          <t:commandNavigation2 action="goEditUser" value="#{\"Edit Users\"}" accesskey="usersAdmin" />
-          <t:commandNavigation2 action="goEditLibraries" value="#{\"Edit Libraries\"}" accesskey="librariesAdmin" />
-        </t:commandNavigation2>
         <t:commandNavigation2 id="navPanelDeveloperNode" value="#{\"Developer >>\"}" accesskey="" visibleOnUserRole="developer" >
 		  <t:commandNavigation2 action="goEnvironmentInfo" value="#{\"Env Info\"}" />
           <t:commandNavigation2 action="goSchemaManager" value="#{\"Schema Manager\"}" />
@@ -54,17 +50,34 @@
 
     <h:form id="quickFindWellForm">
       <t:panelGrid columns="2" rendered="#{menu.authenticatedUser}">
-        <t:outputLabel id="plateNumberLabel" for="plateNumber" value="Plate"
-          styleClass="menuItem inputLabel" />
-        <t:outputLabel id="wellNameLabel" for="wellName" value="Well"
-          styleClass="menuItem inputLabel" />
-        <t:inputText id="plateNumber" value="#{wellFinder.plateNumber}" size="5"
-          styleClass="input" />
-        <t:inputText id="wellName" value="#{wellFinder.wellName}" size="3" styleClass="input" />
+        <t:outputLabel
+          id="plateNumberLabel"
+          for="plateNumber"
+          value="Plate"
+          styleClass="menuItem inputLabel"
+        />
+        <t:outputLabel
+          id="wellNameLabel"
+          for="wellName"
+          value="Well"
+          styleClass="menuItem inputLabel"
+        />
+        <t:inputText
+          id="plateNumber"
+          value="#{wellFinder.plateNumber}"
+          size="5"
+          styleClass="input"
+        />
+        <t:inputText
+          id="wellName"
+          value="#{wellFinder.wellName}"
+          size="3"
+          styleClass="input"
+        />
       </t:panelGrid>
       <t:commandButton
 	    action="#{wellFinder.findWell}"
-        id="quickFindSubmit"
+        id="quickFindWellSubmit"
         value="Go"
         styleClass="command"
       />

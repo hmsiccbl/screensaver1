@@ -15,7 +15,8 @@ import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
+import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 public class WellViewer extends AbstractBackingBean
 {
@@ -25,19 +26,23 @@ public class WellViewer extends AbstractBackingBean
   
   // private instance fields
   
+  private LibrariesController _librariesController;
   private Well _well;
-  private SearchResults<Well> _searchResults;
-  private LibraryViewer _libraryViewerController;
-  private GeneViewer _geneViewerController;
-  private CompoundViewer _compoundViewerController;
+  private WellSearchResults _wellSearchResults;
   
   
   // public instance methods
   
-  public WellViewer()
+  public LibrariesController getLibrariesController()
   {
+    return _librariesController;
   }
-  
+
+  public void setLibrariesController(LibrariesController librariesController)
+  {
+    _librariesController = librariesController;
+  }
+
   public Well getWell()
   {
     return _well;
@@ -48,54 +53,22 @@ public class WellViewer extends AbstractBackingBean
     _well = well;
   }
   
-  public SearchResults<Well> getSearchResults()
+  public WellSearchResults getWellSearchResults()
   {
-    return _searchResults;
+    return _wellSearchResults;
   }
 
-  public void setSearchResults(SearchResults<Well> searchResults)
+  public void setWellSearchResults(WellSearchResults searchResults)
   {
-    _searchResults = searchResults;
+    _wellSearchResults = searchResults;
   }
 
-  public LibraryViewer getLibraryViewer()
+  public String viewLibrary()
   {
-    return _libraryViewerController;
-  }
-
-  public void setLibraryViewer(LibraryViewer libraryViewerController)
-  {
-    _libraryViewerController = libraryViewerController;
+    return _librariesController.viewLibrary(_well.getLibrary(), null);
   }
   
-  public GeneViewer getGeneViewer()
-  {
-    return _geneViewerController;
-  }
-
-  public void setGeneViewer(GeneViewer geneViewerController)
-  {
-    _geneViewerController = geneViewerController;
-  }
-
-  public CompoundViewer getCompoundViewer()
-  {
-    return _compoundViewerController;
-  }
-
-  public void setCompoundViewer(CompoundViewer compoundViewerController)
-  {
-    _compoundViewerController = compoundViewerController;
-  }
-
-  public String showLibrary()
-  {
-    _libraryViewerController.setLibrary(_well.getLibrary());
-    _libraryViewerController.setSearchResults(null);
-    return "showLibrary";
-  }
-  
-  public String showGene()
+  public String viewGene()
   {
     String geneId = (String) getFacesContext().getExternalContext().getRequestParameterMap().get("geneId");
     Gene gene = null;
@@ -105,12 +78,10 @@ public class WellViewer extends AbstractBackingBean
         break;
       }
     }
-    _geneViewerController.setSearchResults(_searchResults);
-    _geneViewerController.setGene(gene);
-    return "showGene";
+    return _librariesController.viewGene(gene, _wellSearchResults);
   }
   
-  public String showCompound()
+  public String viewCompound()
   {
     String compoundId = (String) getRequestParameter("compoundId");
     Compound compound = null;
@@ -120,21 +91,6 @@ public class WellViewer extends AbstractBackingBean
         break;
       }
     }
-    _compoundViewerController.setCompound(compound);
-    _compoundViewerController.setSearchResults(_searchResults);
-    return "showCompound";
-  }
-  
-  
-  // NOTE: I turned off the Done button for the time being. Sorry! -s
-  
-  public boolean getDisplayDone()
-  {
-    return false;
-  }
-  
-  public String done()
-  {
-    return DONE_ACTION_RESULT;
+    return _librariesController.viewCompound(compound, _wellSearchResults);
   }
 }

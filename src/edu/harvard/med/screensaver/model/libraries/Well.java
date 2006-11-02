@@ -227,6 +227,23 @@ public class Well extends AbstractEntity
   }
   
   /**
+   * Get the gene that has silencing reagents contained in this well.
+   * @return the gene that have silencing reagents contained in this well
+   */
+  @DerivedEntityProperty
+  public Gene getGene()
+  {
+    Set<Gene> genes = getGenes();
+    if (genes.size() > 1) {
+      throw new IndexOutOfBoundsException();
+    }
+    if (genes.size() == 0) {
+      return null;
+    }
+    return genes.iterator().next();
+  }
+  
+  /**
    * Add the silencing reagent.
    * 
    * @param silencingReagent the silencing reagent to add

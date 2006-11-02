@@ -42,7 +42,6 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
 
   private DAO _dao;
   private RNAiLibraryContentsParser _rnaiLibraryContentsParser;
-  private LibraryViewer _libraryViewer;
   private UploadedFile _uploadedFile;
   private Library _library;
   private SilencingReagentType _silencingReagentType =
@@ -69,19 +68,6 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
   public void setRnaiLibraryContentsParser(RNAiLibraryContentsParser rnaiLibraryContentsParser)
   {
     _rnaiLibraryContentsParser = rnaiLibraryContentsParser;
-  }
-
-  public LibraryViewer getLibraryViewer()
-  {
-    return _libraryViewer;
-  }
-
-  public void setLibraryViewer(LibraryViewer libraryViewer)
-  {
-    _libraryViewer = libraryViewer;
-    _library = _libraryViewer.getLibrary();
-    _uploadedFile = null;
-    _rnaiLibraryContentsParser.clearErrors();
   }
 
   public void setUploadedFile(UploadedFile uploadedFile)
@@ -138,16 +124,6 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
 
 
   // JSF application methods
-  
-  public String update()
-  {
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-  
-  public String done()
-  {
-    return DONE_ACTION_RESULT;
-  }
   
   public String submit()
   {

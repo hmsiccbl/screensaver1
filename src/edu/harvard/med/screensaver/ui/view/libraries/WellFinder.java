@@ -22,7 +22,8 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
+import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
@@ -33,27 +34,46 @@ import edu.harvard.med.screensaver.util.StringUtils;
 public class WellFinder extends AbstractBackingBean
 {
   
+  // private static final fields
+  
   private static final Logger log = Logger.getLogger(WellFinder.class);
+  private static final Pattern _plateNumberPattern =
+    Pattern.compile("^\\s*((PL)[-_]?)?(\\d+)\\s*$");
+  private static final Pattern _wellNamePattern =
+    Pattern.compile("^\\s*([A-Ha-h]([0-9]|[01][0-9]|2[0-4]))\\s*$");
   
   
   // private instance fields
   
-  private Pattern _plateNumberPattern = Pattern.compile("^\\s*((PL)[-_]?)?(\\d+)\\s*$");
-  private Pattern _wellNamePattern = Pattern.compile("^\\s*([A-Ha-h]([0-9]|[01][0-9]|2[0-4]))\\s*$");
+  private DAO _dao;
+  private LibrariesController _librariesController;
   private String _plateNumber;
   private String _wellName;
   private String _plateWellList;
   
-  private DAO _dao;
-  private LibraryViewer _libraryViewerController;
-  private WellViewer _wellViewerController;
-  private GeneViewer _geneViewerController;
-  private CompoundViewer _compoundViewerController;
-  private WellSearchResults _wellSearchResultsView;
-  
   
   // public instance methods
+
+  public DAO getDao()
+  {
+    return _dao;
+  }
+
+  public void setDao(DAO dao)
+  {
+    _dao = dao;
+  }
   
+  public LibrariesController getLibrariesController()
+  {
+    return _librariesController;
+  }
+  
+  public void setLibrariesController(LibrariesController librariesController)
+  {
+    _librariesController = librariesController;
+  }
+
   public String getPlateNumber()
   {
     return _plateNumber;
@@ -84,89 +104,23 @@ public class WellFinder extends AbstractBackingBean
     _plateWellList = plateWellList;
   }
 
-  public DAO getDao()
-  {
-    return _dao;
-  }
-
-  public void setDao(DAO dao)
-  {
-    _dao = dao;
-  }
-
-  public LibraryViewer getLibraryViewer()
-  {
-    return _libraryViewerController;
-  }
-
-  public void setLibraryViewer(LibraryViewer libraryViewer)
-  {
-    _libraryViewerController = libraryViewer;
-  }
-
-  public WellViewer getWellViewer()
-  {
-    return _wellViewerController;
-  }
-
-  public void setWellViewer(WellViewer wellViewerController)
-  {
-    _wellViewerController = wellViewerController;
-  }
-
-  public CompoundViewer getCompoundViewer()
-  {
-    return _compoundViewerController;
-  }
-
-  public void setCompoundViewer(CompoundViewer compoundViewer)
-  {
-    _compoundViewerController = compoundViewer;
-  }
-
-  public GeneViewer getGeneViewer()
-  {
-    return _geneViewerController;
-  }
-
-  public void setGeneViewer(GeneViewer geneViewer)
-  {
-    _geneViewerController = geneViewer;
-  }
-
-  public WellSearchResults getWellSearchResults()
-  {
-    return _wellSearchResultsView;
-  }
-
-  public void setWellSearchResults(WellSearchResults wellSearchResultsController)
-  {
-    _wellSearchResultsView = wellSearchResultsController;
-  }
-
   public String findWell()
   {
     Well well = lookupWell();
     if (well == null) {
       return ERROR_ACTION_RESULT;
     }
-    _wellViewerController.setWell(well);
-    _wellViewerController.setSearchResults(null);
-    return "showWell";
+    return _librariesController.viewWell(well, null);
   }
   
   public String findWells()
   {
     List<Well> wells = lookupWellsFromPlateWellList();
-    SearchResults<Well> searchResults =
+    WellSearchResults searchResults =
       new edu.harvard.med.screensaver.ui.searchresults.WellSearchResults(
         wells,
-        _libraryViewerController,
-        _wellViewerController,
-        _compoundViewerController,
-        _geneViewerController);
-    _wellSearchResultsView.setSearchResults(searchResults);
-    return "goWellSearchResults";
+        _librariesController);
+    return _librariesController.viewWellSearchResults(searchResults);
   }
   
   

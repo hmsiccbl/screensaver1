@@ -38,7 +38,6 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
 
   private DAO _dao;
   private SDFileCompoundLibraryContentsParser _compoundLibraryContentsParser;
-  private LibraryViewer _libraryViewer;
   private UploadedFile _uploadedFile;
   private Library _library;
   
@@ -64,19 +63,6 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
     SDFileCompoundLibraryContentsParser compoundLibraryContentsParser)
   {
     _compoundLibraryContentsParser = compoundLibraryContentsParser;
-  }
-
-  public LibraryViewer getLibraryViewer()
-  {
-    return _libraryViewer;
-  }
-
-  public void setLibraryViewer(LibraryViewer libraryViewer)
-  {
-    _libraryViewer = libraryViewer;
-    _library = _libraryViewer.getLibrary();
-    _uploadedFile = null;
-    _compoundLibraryContentsParser.clearErrors();
   }
 
   public void setUploadedFile(UploadedFile uploadedFile)

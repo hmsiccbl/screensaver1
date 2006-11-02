@@ -13,10 +13,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.ui.view.libraries.LibraryViewer;
-
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.ui.control.LibrariesController;
 
 
 /**
@@ -41,7 +41,7 @@ public class LibrarySearchResults extends SearchResults<Library>
   
   // instance fields
   
-  private LibraryViewer _libraryViewerController;
+  private LibrariesController _librariesController;
   
   
   // public contructor
@@ -53,10 +53,10 @@ public class LibrarySearchResults extends SearchResults<Library>
    */
   public LibrarySearchResults(
     List<Library> unsortedResults,
-    LibraryViewer libraryViewerController)
+    LibrariesController librariesController)
   {
     super(unsortedResults);
-    _libraryViewerController = libraryViewerController;
+    _librariesController = librariesController;
   }
 
   
@@ -67,12 +67,7 @@ public class LibrarySearchResults extends SearchResults<Library>
   {
     // NOTE: if there were more ways to get to a library search results, then this method would
     // need to be more intelligent
-    
-    // TODO: may want to initialize the screens browser here as well, eg,
-    // "return _librariesBrowser.goBrowseLibraries();", but i would like to wait until control is
-    // factored out
-    
-    return "goBrowseLibraries";
+    return _librariesController.browseLibraries();
   }
   
   @Override
@@ -123,9 +118,7 @@ public class LibrarySearchResults extends SearchResults<Library>
   @Override
   protected Object cellAction(Library library, String columnName)
   {
-    _libraryViewerController.setSearchResults(this);
-    _libraryViewerController.setLibrary(library);
-    return "showLibrary";
+    return _librariesController.viewLibrary(library, this);
   }
   
   @Override
@@ -171,8 +164,8 @@ public class LibrarySearchResults extends SearchResults<Library>
 
 
   @Override
-  protected void setEntityToView(Library entity)
+  protected void setEntityToView(Library library)
   {
-    _libraryViewerController.setLibrary(entity);
+    _librariesController.viewLibrary(library, this);
   }
 }
