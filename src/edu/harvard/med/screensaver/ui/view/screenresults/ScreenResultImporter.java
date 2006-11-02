@@ -18,7 +18,6 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -120,6 +119,7 @@ public class ScreenResultImporter extends AbstractBackingBean
     return DONE_ACTION_RESULT;
   }
   
+  // TODO: this method contains real business logic that should be moved to a non-ui package class; it also needs a unit test
   public String doImport()
   {
     boolean parseSuccessful = false;

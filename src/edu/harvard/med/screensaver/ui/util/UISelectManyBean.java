@@ -56,7 +56,7 @@ public class UISelectManyBean<T> extends UISelectBean<T>
   {
     return _selectionKeys;
   }
-
+  
   /**
    * called by controller 
    * @param selections
@@ -65,6 +65,11 @@ public class UISelectManyBean<T> extends UISelectBean<T>
   {
     return _selections;
   }
+
+  // implement as required:
+  // TODO: setSelections()
+  // TODO: setSelectionIndexes()
+  // TODO: getSelectionIndexes()
 
 }
 
