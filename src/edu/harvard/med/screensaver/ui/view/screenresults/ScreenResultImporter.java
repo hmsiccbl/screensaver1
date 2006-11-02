@@ -122,54 +122,52 @@ public class ScreenResultImporter extends AbstractBackingBean
   
   public String doImport()
   {
-    final String[] result = new String[1];
-      _dao.doInTransaction(new DAOTransaction() {
-        public void runTransaction() 
-        {
-          try {
-            Screen screen = _screenViewer.getScreen();
-            if (screen == null) {
-              throw new IllegalStateException("screen viewer has not been initialized with a Screen");
-            }
+    boolean parseSuccessful = false;
+    Screen screen = _screenViewer.getScreen();
+    if (screen == null) {
+      throw new IllegalStateException("screen viewer has not been initialized with a Screen");
+    }
+    ScreenResult existingScreenResult = screen.getScreenResult();
+    try {
+      log.info("starting import of ScreenResult for Screen " + screen);
 
-            if (screen.getScreenResult() != null) {
-              _dao.deleteScreenResult(screen.getScreenResult());
-            }
+      ScreenResult screenResult = null;
+      if (_uploadedFile.getInputStream().available() > 0) {
+        screenResult = _screenResultParser.parse(screen, new File(_uploadedFile.getName()), _uploadedFile.getInputStream());
+      }
 
-            log.info("starting import of ScreenResult for Screen " + screen);
-
-            ScreenResult screenResult = null;
-            if (_uploadedFile.getInputStream().available() > 0) {
-              screenResult = _screenResultParser.parse(screen, new File(_uploadedFile.getName()), _uploadedFile.getInputStream());
-            }
-
-            // TODO: if an error occurs, we probably want to rollback the deletion of the original screenResult
-            if (screenResult == null) {
-              log.error("fatal error during import of ScreenResult for Screen " + screen);
-              result[0] = ERROR_ACTION_RESULT;
-              
-              return;
-            }
-            else if (_screenResultParser.getErrors().size() > 0) {
-              log.error("parse error during import of ScreenResult for Screen " + screen);
-              result[0] =  ERROR_ACTION_RESULT;
-              return;
-            }
-            else {
-              _screenResultViewer.setScreenResult(screenResult);
-              log.info("successfully imported " + screenResult + " for Screen " + screen);
-              result[0] = SUCCESS_ACTION_RESULT;
-              return;
-            }
-          }
-          catch (Exception e) {
-            reportSystemError(e);
-            result[0] = REDISPLAY_PAGE_ACTION_RESULT;
-            return;
-          }
-        }
-      });
-      return result[0];
+      if (screenResult == null) {
+        // this is an unexpected, system error, so we log at "error" level
+        log.error("fatal error during import of ScreenResult for Screen " + screen);
+      }
+      else if (_screenResultParser.getErrors().size() > 0) {
+        // these are data-related "user" errors, so we log at "info" level
+        log.info("parse errors encountered during import of ScreenResult for Screen " + screen);
+      }
+      else {
+        _screenResultViewer.setScreenResult(screenResult);
+        log.info("successfully imported " + screenResult + " for Screen " + screen);
+        parseSuccessful = true;
+      }
+      if (parseSuccessful) {
+        return SUCCESS_ACTION_RESULT;
+      }
+      else {
+        return ERROR_ACTION_RESULT;
+      }
+    }
+    catch (Exception e) {
+      reportSystemError(e);
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    finally {
+      if (!parseSuccessful) {
+        screen.setScreenResult(existingScreenResult);
+      } 
+      else if (existingScreenResult != null) {
+        _dao.deleteEntity(existingScreenResult);
+      }
+    }
   }
   
   

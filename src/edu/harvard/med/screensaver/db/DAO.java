@@ -72,6 +72,14 @@ public interface DAO
    * @param entity the Entity to persist
    */
   public void persistEntity(AbstractEntity entity);
+  
+  /**
+   * Delete the entity in the database. Caller must ensure that entity is not
+   * participating in any relationships with other entities.
+   * 
+   * @param entity
+   */
+  public void deleteEntity(AbstractEntity entity);
 
   /**
    * Retrieve and return a list of Entities of the specified type.

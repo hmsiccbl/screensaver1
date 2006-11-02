@@ -65,6 +65,11 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   {
     getHibernateTemplate().saveOrUpdate(entity);
   }
+  
+  public void deleteEntity(AbstractEntity entity)
+  {
+    getHibernateTemplate().delete(entity);
+  }
 
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> List<E> findAllEntitiesWithType(

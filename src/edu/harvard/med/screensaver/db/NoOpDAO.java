@@ -119,4 +119,9 @@ public class NoOpDAO implements DAO
   public void persistEntity(AbstractEntity entityController)
   {
   }
+  
+  public void deleteEntity(AbstractEntity entity)
+  {
+  }
+  
 }
