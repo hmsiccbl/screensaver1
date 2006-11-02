@@ -14,8 +14,9 @@ public interface ScreensaverConstants
   // static data members
   
   public String APPLICATION_NAME = "Screensaver";
-  public String APPLICATION_VERSION = "1.0";
+  public String APPLICATION_VERSION = "1.00a";
   public String APPLICATION_TITLE = APPLICATION_NAME + " " + APPLICATION_VERSION;
+  public String APPLICATION_SVN_REVISION = "$Revision: 720 $";
 
   
   // JSF Action Results 

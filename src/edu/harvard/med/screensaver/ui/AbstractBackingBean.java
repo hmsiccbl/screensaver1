@@ -11,6 +11,8 @@ package edu.harvard.med.screensaver.ui;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.faces.application.Application;
 import javax.faces.application.FacesMessage;
@@ -80,6 +82,19 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   public String getApplicationTitle()
   {
     return APPLICATION_TITLE;
+  }
+  
+  public String getApplicationBuildNumber()
+  {
+    Pattern pattern = Pattern.compile(".* (\\d+).*");
+    Matcher matcher = pattern.matcher(APPLICATION_SVN_REVISION);
+    if (matcher.matches()) {
+      return matcher.group(1);
+    }
+    else {
+      log.error("could not determine build number from '" + APPLICATION_SVN_REVISION + "'");
+      return "<unknown build number>";
+    }
   }
   
   /**

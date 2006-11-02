@@ -11,15 +11,31 @@
 
 <f:subview id="env">
 
-  <t:outputText value="Database Connection Settings" styleClass="sectionHeader" />
-  <h:panelGrid id="dbConfigPanel" columns="1">
-    <h:outputText value="Host=#{envInfo.host}" />
-    <h:outputText value="Database=#{envInfo.db}" />
-    <h:outputText value="User=#{envInfo.user}" />
-    <h:outputText value="URL=#{envInfo.url}" />
-  </h:panelGrid>
+	<t:outputText value="Application Metadata" styleClass="sectionHeader" />
+	<h:panelGrid id="metadata" columns="2" styleClass="standardTable"
+		rowClasses="row1,row2">
+		<t:outputText value="Name" />
+		<t:outputText value="#{envInfo.applicationName}" />
+		<t:outputText value="Version" />
+		<t:outputText value="#{envInfo.applicationVersion}" />
+		<t:outputText value="Build" />
+		<t:outputText value="#{envInfo.applicationBuildNumber}" />
+	</h:panelGrid>
 
-  <t:outputText value="User Security" styleClass="sectionHeader" />
+	<t:outputText value="Database Connection Settings" styleClass="sectionHeader" />
+	<h:panelGrid id="dbConfigPanel" columns="2" styleClass="standardTable"
+		rowClasses="row1,row2">
+		<h:outputText value="Host" />
+		<h:outputText value="#{envInfo.host}" />
+		<h:outputText value="Database" />
+		<h:outputText value="#{envInfo.db}" />
+		<h:outputText value="User" />
+		<h:outputText value="#{envInfo.user}" />
+		<h:outputText value="URL" />
+		<h:outputText value="#{envInfo.url}" />
+	</h:panelGrid>
+
+	<t:outputText value="User Security" styleClass="sectionHeader" />
   <t:dataTable id="userSecurityTable" value="#{envInfo.userSecurityTableModel}" var="row"
     styleClass="standardTable" rowClasses="row1,row2">
     <t:column>
