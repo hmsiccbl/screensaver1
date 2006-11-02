@@ -32,12 +32,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * bootstrapping code, so that developers can forget the details of how to do
  * this (and don't have to cut and paste code between various main() methods).
  * Also provides a some help with:
- * ul
- * licommand-line argument parsing (including special-case handling of
+ * <ul>
+ * <li>command-line argument parsing (including special-case handling of
  * database connection options)
- * liobtaining Spring-managed beans.
- * ul.
- * p
+ * <li>obtaining Spring-managed beans.
+ * <ul>.
+ * <p>
  * Normally, a screensaver distribution will use the database connection
  * settings specified in "classpath:datasource.properties". However, if
  * {@link #processOptions(boolean, boolean)} is called with
