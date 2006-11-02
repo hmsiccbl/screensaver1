@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.view.screens;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -301,7 +300,8 @@ public class ScreenViewer extends AbstractBackingBean
   
   public String deleteStatusItem()
   {
-    return deleteEntity(StatusItem.class);
+    _screen.getStatusItems().remove(getSelectedEntityOfType(StatusItem.class));
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   // TODO: save & go to visit viewer
@@ -343,7 +343,8 @@ public class ScreenViewer extends AbstractBackingBean
   
   public String deletePublication()
   {
-    return deleteEntity(Publication.class);
+    _screen.getPublications().remove(getSelectedEntityOfType(Publication.class));
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   public String addLetterOfSupport()
@@ -354,7 +355,8 @@ public class ScreenViewer extends AbstractBackingBean
   
   public String deleteLetterOfSupport()
   {
-    return deleteEntity(LetterOfSupport.class);
+    _screen.getLettersOfSupport().remove(getSelectedEntityOfType(LetterOfSupport.class));
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   public String addAttachedFile()
@@ -365,7 +367,8 @@ public class ScreenViewer extends AbstractBackingBean
   
   public String deleteAttachedFile()
   {
-    return deleteEntity(AttachedFile.class);
+    _screen.getAttachedFiles().remove(getSelectedEntityOfType(AttachedFile.class));
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   public String addFundingSupport()
@@ -379,7 +382,8 @@ public class ScreenViewer extends AbstractBackingBean
   
   public String deleteFundingSupport()
   {
-    return deleteEntity(FundingSupport.class);
+    _screen.getFundingSupports().remove(getSelectedEntityOfType(FundingSupport.class));
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   public String addAssayReadoutType()
@@ -393,7 +397,8 @@ public class ScreenViewer extends AbstractBackingBean
   
   public String deleteAssayReadoutType()
   {
-    return deleteEntity(AssayReadoutType.class);
+    _screen.getAssayReadoutTypes().remove(getSelectedEntityOfType(AssayReadoutType.class));
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   public String addAbaseTestset()
@@ -404,7 +409,8 @@ public class ScreenViewer extends AbstractBackingBean
   
   public String deleteAbaseTestset()
   {
-    return deleteEntity(AbaseTestset.class);
+    _screen.getAbaseTestsets().remove(getSelectedEntityOfType(AbaseTestset.class));
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   public String addKeyword()
@@ -420,7 +426,8 @@ public class ScreenViewer extends AbstractBackingBean
   
   public String deleteKeyword()
   {
-    return deleteEntity(String.class, "Keyword");
+    _screen.getKeywords().remove(getHttpServletRequest().getAttribute("keyword"));
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   public String viewCollaborator()
@@ -501,29 +508,9 @@ public class ScreenViewer extends AbstractBackingBean
   }
 
   @SuppressWarnings("unchecked")
-  private <E> String deleteEntity(Class<E> clazz)
+  private <E> E getSelectedEntityOfType(Class<E> entityClass)
   {
-    return deleteEntity(clazz, clazz.getSimpleName());
-  }
-
-  @SuppressWarnings("unchecked")
-  private <E> String deleteEntity(Class<E> clazz, String entityPropertyName)
-  {
-    E entity = null;
-    try {
-      entity = (E) getHttpServletRequest().getAttribute(StringUtils.uncapitalize(entityPropertyName));
-      // TODO: This is not a great use of reflection, as it's only being used to compress code size; we also lose compile-time checking of the methods we're relying upon; remove at some point...
-      Method deleteMethod = Screen.class.getMethod("remove" + entityPropertyName, clazz);
-      boolean deleted = (Boolean) deleteMethod.invoke(_screen, entity);
-      if (!deleted) {
-        throw new IllegalStateException(entity + " appears to have already been deleted");
-      }
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    catch (Exception e) {
-      reportSystemError("error deleting " + entity + ": " + e.getMessage());
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
+    return (E) getHttpServletRequest().getAttribute(StringUtils.uncapitalize(entityClass.getSimpleName()));
   }
 
 }

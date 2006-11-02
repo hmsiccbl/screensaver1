@@ -16,15 +16,14 @@ TODO:
 - validation messages (per component)
 - save button needs to be more accessible (multiple locations)
 - provide file upload for attached file
-- consider forcing a resort after a sort column value is edited
-- fix/test import errors cause screenResultImporter to open, showing errors table
+- sort subtables
 --%>
 
 <f:subview id="screenViewer">
 
-	<%--t:aliasBean alias="#{navigator}" value="#{screenViewer.searchResults}">
+	<t:aliasBean alias="#{navigator}" value="#{screenViewer.searchResults}">
 		<%@ include file="../searchResultsNavPanel.jspf"%>
-	</t:aliasBean--%>
+	</t:aliasBean>
 
 	<h:form id="screenForm">
 
