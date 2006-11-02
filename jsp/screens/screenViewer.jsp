@@ -22,9 +22,9 @@ TODO:
 
 <f:subview id="screenViewer">
 
-	<t:aliasBean alias="#{navigator}" value="#{screenViewer.searchResults}">
+	<%--t:aliasBean alias="#{navigator}" value="#{screenViewer.searchResults}">
 		<%@ include file="../searchResultsNavPanel.jspf"%>
-	</t:aliasBean>
+	</t:aliasBean--%>
 
 	<h:form id="screenForm">
 
@@ -102,7 +102,7 @@ TODO:
 				<f:selectItems value="#{screenViewer.screenTypeSelectItems}" />
 			</t:selectOneMenu>
 
-			<%-- "lab name" == last name of "lead head", but former is required for UI, latter is for internal design --%>
+			<%-- "lab name" == last name of "lab head", but former is required for UI, latter is for internal design --%>
 			<t:outputLabel for="labNameEditable" value="Lab Name"
 				styleClass="inputLabel" />
 			<%-- TODO: Would like to use immediate="true", but seems to be causing problems 
@@ -120,12 +120,11 @@ TODO:
 				</h:outputLink>
 				<t:outputText value=")" styleClass="dataText" />
 				<t:selectOneMenu id="labNameEditable"
-					value="#{screenViewer.screen.labHead}"
-					converter="ScreeningRoomUserConverter"
-					onchange="javascript:submit()" immediate="false"
+					value="#{screenViewer.labName.value}"
+					onchange="javascript:submit()" immediate="true"
 					valueChangeListener="#{screenViewer.update}"
 					rendered="#{screenViewer.editable}" styleClass="input">
-					<f:selectItems value="#{screenViewer.labNameSelectItems}" />
+					<f:selectItems value="#{screenViewer.labName.selectItems}" />
 				</t:selectOneMenu>
 			</h:panelGroup>
 
@@ -145,10 +144,9 @@ TODO:
 				</h:outputLink>
 				<t:outputText value=")" styleClass="dataText" />
 				<t:selectOneMenu id="leadScreenerEditable"
-					value="#{screenViewer.screen.leadScreener}"
-					converter="ScreeningRoomUserConverter"
+					value="#{screenViewer.leadScreener.value}"
 					rendered="#{screenViewer.editable}" styleClass="input">
-					<f:selectItems value="#{screenViewer.leadScreenerSelectItems}" />
+					<f:selectItems value="#{screenViewer.leadScreener.selectItems}" />
 				</t:selectOneMenu>
 			</h:panelGroup>
 
@@ -169,10 +167,9 @@ TODO:
 				</t:dataTable>
 
 				<t:selectManyListbox id="collaboratorsEditable"
-					value="#{screenViewer.screen.collaboratorsList}"
-					converter="ScreeningRoomUserConverter"
+					value="#{screenViewer.collaborators.value}"
 					rendered="#{screenViewer.editable}" size="5" styleClass="input">
-					<f:selectItems value="#{screenViewer.collaboratorSelectItems}" />
+					<f:selectItems value="#{screenViewer.collaborators.selectItems}" />
 				</t:selectManyListbox>
 
 			</t:panelGrid>

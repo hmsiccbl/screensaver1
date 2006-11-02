@@ -36,6 +36,11 @@ public class UISelectManyBean<T> extends UISelectBean<T>
     _selections = new ArrayList<T>();
   }
 
+  public UISelectManyBean(Collection<T> objects, Collection<T> defaultSelections)
+  {
+    this(objects);
+    setSelections(defaultSelections);
+  }
   
   /**
    * called by JSF UISelect component
@@ -57,6 +62,15 @@ public class UISelectManyBean<T> extends UISelectBean<T>
     return _selectionKeys;
   }
   
+  public void setSelections(Collection<T> selections)
+  {
+    List<String> selectionKeys = new ArrayList<String>();
+    for (T t : selections) {
+      selectionKeys.add(getKey(t));
+    }
+    setValue(selectionKeys);
+  }
+  
   /**
    * called by controller 
    * @param selections
@@ -66,8 +80,6 @@ public class UISelectManyBean<T> extends UISelectBean<T>
     return _selections;
   }
 
-  // implement as required:
-  // TODO: setSelections()
   // TODO: setSelectionIndexes()
   // TODO: getSelectionIndexes()
 

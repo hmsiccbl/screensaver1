@@ -12,7 +12,6 @@ package edu.harvard.med.screensaver.ui.view.screens;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -22,9 +21,6 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
-
-import org.apache.log4j.Logger;
-import org.springframework.dao.ConcurrencyFailureException;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
@@ -43,9 +39,13 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
-import edu.harvard.med.screensaver.ui.util.ScreeningRoomUserByLabComparator;
+import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
+import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.view.screenresults.ScreenResultViewer;
 import edu.harvard.med.screensaver.util.StringUtils;
+
+import org.apache.log4j.Logger;
+import org.springframework.dao.ConcurrencyFailureException;
 
 public class ScreenViewer extends AbstractBackingBean
 {
@@ -60,11 +60,14 @@ public class ScreenViewer extends AbstractBackingBean
   private Screen _screen;
   private SearchResults<Screen> _searchResults;
   private ScreenResultViewer _screenResultViewer;
-  private List<SelectItem> _leadScreenerSelectItems;
+  private UISelectOneBean<ScreeningRoomUser> _leadScreener;
+  private UISelectOneBean<ScreeningRoomUser> _labName;
+  private UISelectManyBean<ScreeningRoomUser> _collaborators;
   private FundingSupport _newFundingSupport;
   private StatusValue _newStatusValue;
   private AssayReadoutType _newAssayReadoutType = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs)
   private String _newKeyword = "";
+
 
   
   // public property getter & setter methods
@@ -77,13 +80,20 @@ public class ScreenViewer extends AbstractBackingBean
   public void setScreen(Screen screen) 
   {
     _screen = screen;
-    updateLeadScreenerSelectItems(screen.getLabHead());
+    _labName = new UISelectOneBean<ScreeningRoomUser>(_dao.findAllLabHeads(), _screen.getLabHead()) { 
+      protected String getLabel(ScreeningRoomUser t) { return t.getLabName(); } 
+    };
+    _collaborators = new UISelectManyBean<ScreeningRoomUser>(_dao.findAllEntitiesWithType(ScreeningRoomUser.class),
+                                                            _screen.getCollaborators()) {
+      protected String getLabel(ScreeningRoomUser t) { return t.getFullName(); }
+    };
+    updateLeadScreenerSelectItems();
   }
 
   public Screen getScreen() 
   {
     if (_screen == null) {
-      Screen defaultScreen = _dao.findEntityById(Screen.class, 92);
+      Screen defaultScreen = _dao.findEntityById(Screen.class, 107);
       log.warn("no screen defined: defaulting to screen " + defaultScreen.getScreenNumber());
       setScreen(defaultScreen);
     }
@@ -206,15 +216,9 @@ public class ScreenViewer extends AbstractBackingBean
     return JSFUtils.createUISelectItems(ScreenType.values());
   }
 
-  public List<SelectItem> getLabNameSelectItems()
+  public UISelectOneBean<ScreeningRoomUser> getLabName()
   {
-    List<SelectItem> labHeadSelectItems = new ArrayList<SelectItem>();
-    List<ScreeningRoomUser> labHeads = _dao.findAllLabHeads();
-    for (ScreeningRoomUser labHead : labHeads) {
-      labHeadSelectItems.add(new SelectItem(labHead,
-                                            labHead.getLabName()));
-    }
-    return labHeadSelectItems;
+    return _labName;
   }
 
   /**
@@ -222,33 +226,15 @@ public class ScreenViewer extends AbstractBackingBean
    * grouped (and indented) by lab, and the (unindented) lab SelectItem maps to
    * the lab head.
    */
-  public List<SelectItem> getCollaboratorSelectItems()
+  public UISelectManyBean<ScreeningRoomUser> getCollaborators()
   {
-    // TODO: move the logic for determing potential collaborators to Screen
-    List<SelectItem> collaboratorSelectItems = new ArrayList<SelectItem>();
-    List<ScreeningRoomUser> screeningRoomUsers = _dao.findAllEntitiesWithType(ScreeningRoomUser.class);
-    Collections.sort(screeningRoomUsers,
-                     ScreeningRoomUserByLabComparator.getInstance());
-    ScreeningRoomUser lastLabHead = null;
-    String indent = "...";
-    for (ScreeningRoomUser screener : screeningRoomUsers) {
-      if (lastLabHead == null || !screener.getLabHead().equals(lastLabHead)) {
-        collaboratorSelectItems.add(new SelectItem(screener.getLabHead(),
-                                                   screener.getLabName()));
-        lastLabHead = screener.getLabHead();
-      } 
-      else {
-        collaboratorSelectItems.add(new SelectItem(screener,
-                                                   indent + screener.getFullName()));
-      }
-    }
-    return collaboratorSelectItems;
+    return _collaborators;
   }
   
 
-  public List<SelectItem> getLeadScreenerSelectItems()
+  public UISelectOneBean getLeadScreener()
   {
-    return _leadScreenerSelectItems;
+    return _leadScreener;
   }
 
   public List<SelectItem> getNewStatusValueSelectItems()
@@ -282,6 +268,9 @@ public class ScreenViewer extends AbstractBackingBean
    */
   public String save() {
     try {
+      _screen.setLabHead(_labName.getSelection());
+      _screen.setLeadScreener(_leadScreener.getSelection());
+      _screen.setCollaboratorsList(_collaborators.getSelections());
       _dao.persistEntity(_screen);
     }
     catch (ConcurrencyFailureException e) {
@@ -402,7 +391,7 @@ public class ScreenViewer extends AbstractBackingBean
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
-  public String deleteAssayReadoutTypes()
+  public String deleteAssayReadoutType()
   {
     return deleteEntity(AssayReadoutType.class);
   }
@@ -474,7 +463,11 @@ public class ScreenViewer extends AbstractBackingBean
   /* JSF Action event listeners */
 
   public void update(ValueChangeEvent event) {
-    updateLeadScreenerSelectItems((ScreeningRoomUser) event.getNewValue());
+    // despite the Tomahawk taglib docs, this event listener is called *before*
+    // the *end* of the apply request values phase, preventing the
+    // _labName.value property from being updated already
+    _labName.setValue((String) event.getNewValue());
+    updateLeadScreenerSelectItems();
     getFacesContext().renderResponse();
   }
   
@@ -497,11 +490,14 @@ public class ScreenViewer extends AbstractBackingBean
    *             a new lab head selection, but without updating the entity
    *             before the user saves his edits
    */
-  private void updateLeadScreenerSelectItems(ScreeningRoomUser labHead) {
-    _leadScreenerSelectItems = new ArrayList<SelectItem>();
-    for (ScreeningRoomUser screener : labHead.getLabMembers()) {
-      _leadScreenerSelectItems.add(new SelectItem(screener, screener.getFullName()));
-    }
+  private void updateLeadScreenerSelectItems() {
+    ScreeningRoomUser labHead = _labName.getSelection();
+    ArrayList<ScreeningRoomUser> leadScreenerCandidates = new ArrayList<ScreeningRoomUser>();
+    leadScreenerCandidates.add(labHead);
+    leadScreenerCandidates.addAll(labHead.getLabMembers());
+    _leadScreener = new UISelectOneBean<ScreeningRoomUser>(leadScreenerCandidates, _screen.getLeadScreener()) {
+      protected String getLabel(ScreeningRoomUser t) { return t.getFullName(); } 
+    };
   }
 
   @SuppressWarnings("unchecked")

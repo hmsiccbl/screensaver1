@@ -40,6 +40,11 @@ public class UISelectOneBean<T> extends UISelectBean<T>
     }
   }
 
+  public UISelectOneBean(Collection<T> objects, T defaultSelection)
+  {
+    this(objects);
+    setSelection(defaultSelection);
+  }
   
   /**
    * Get the selected item's key. Called by JSF UISelect component. Naming of
