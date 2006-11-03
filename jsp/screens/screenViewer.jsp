@@ -689,7 +689,7 @@ TODO:
 
 		</t:panelGrid>
 		<t:panelGroup id="commandPanel">
-			<t:commandButton id="save" value="Save" action="#{screenViewer.save}"
+			<t:commandButton id="save" value="Save" action="#{screenViewer.saveScreen}"
 				styleClass="command" rendered="#{screenViewer.editable}" />
 		</t:panelGroup>
 	</h:form>

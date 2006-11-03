@@ -217,24 +217,24 @@
   </managed-bean>
   
 
-  <!-- === screens and screen results backing beans === -->
+  <!-- === screens backing beans === -->
 
   <managed-bean>
-    <description>Screen Viewer</description>
-    <managed-bean-name>screenViewer</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.screens.ScreenViewer</managed-bean-class>
+    <description>Screens Controller Bean</description>
+    <managed-bean-name>screensController</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.control.ScreensController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>dao</property-name>
       <value>#{dao}</value>
     </managed-property>
     <managed-property>
-      <property-name>messages</property-name>
-      <value>#{messages}</value>
+      <property-name>screensBrowser</property-name>
+      <value>#{screensBrowser}</value>
     </managed-property>
     <managed-property>
-      <property-name>screenResultViewer</property-name>
-      <value>#{screenResultViewer}</value>
+      <property-name>screenViewer</property-name>
+      <value>#{screenViewer}</value>
     </managed-property>
   </managed-bean>
   
@@ -242,6 +242,23 @@
     <description>Screens Browser</description>
     <managed-bean-name>screensBrowser</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.screens.ScreensBrowser</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Screen Viewer</description>
+    <managed-bean-name>screenViewer</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.screens.ScreenViewer</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+  
+
+  <!-- === screen results backing beans === -->
+  
+  <managed-bean>
+    <description>Screen Results Controller Bean</description>
+    <managed-bean-name>screenResultsController</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.control.ScreenResultsController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>dao</property-name>
@@ -251,7 +268,7 @@
       <property-name>screenViewer</property-name>
       <value>#{screenViewer}</value>
     </managed-property>
-  </managed-bean>  
+  </managed-bean>
   
   <managed-bean>
     <description>Screen Result Viewer</description>
@@ -408,12 +425,19 @@
       <redirect/>
     </navigation-case>
     
-    <!-- === screens and screenresults wildcard navigation rules === -->    
+    <!-- === screens wildcard navigation rules === -->    
     <navigation-case>
-      <from-outcome>goBrowseScreens</from-outcome>
+      <from-outcome>browseScreens</from-outcome>
       <to-view-id>/screens/screensBrowser</to-view-id>
       <redirect/>
     </navigation-case>
+    <navigation-case>
+      <from-outcome>viewScreen</from-outcome>
+      <to-view-id>/screens/screenViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+
+    <!-- === screenresults wildcard navigation rules === -->    
     <navigation-case>
       <from-outcome>goImportScreenResult</from-outcome>
       <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
@@ -437,33 +461,6 @@
       <from-outcome>error</from-outcome>
       <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
       <redirect/>
-    </navigation-case>
-  </navigation-rule>
-  
-  <navigation-rule>
-    <from-view-id>/screens/screensBrowser.jsp</from-view-id>
-    <navigation-case>
-      <from-outcome>showScreen</from-outcome>
-      <to-view-id>/screens/screenViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-  </navigation-rule>
-
-  <navigation-rule>
-    <from-view-id>/screens/screenViewer.jsp</from-view-id>
-    <navigation-case>
-      <from-outcome>showScreeningRoomUser</from-outcome>
-      <to-view-id>/users/screeningRoomUserViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-     <from-outcome>showSearchResultsSummary</from-outcome>
-     <to-view-id>/screens/screensBrowser</to-view-id>
-     <redirect/>
-    </navigation-case>
-    <navigation-case>
-     <from-outcome>viewScreenResult</from-outcome>
-     <to-view-id>/screenresults/screenResultViewer.jsp</to-view-id>
     </navigation-case>
   </navigation-rule>
 
