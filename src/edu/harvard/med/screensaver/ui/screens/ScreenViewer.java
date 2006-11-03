@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.ui.screens;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,7 +20,8 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
-import edu.harvard.med.screensaver.db.DAO;
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
@@ -36,15 +36,14 @@ import edu.harvard.med.screensaver.model.screens.Visit;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
+import edu.harvard.med.screensaver.ui.control.ScreenResultsController;
+import edu.harvard.med.screensaver.ui.control.ScreensController;
+import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
 import edu.harvard.med.screensaver.util.StringUtils;
-
-import org.apache.log4j.Logger;
-import org.springframework.dao.ConcurrencyFailureException;
 
 public class ScreenViewer extends AbstractBackingBean
 {
@@ -54,11 +53,13 @@ public class ScreenViewer extends AbstractBackingBean
   
   
   // instance data
+
+  private ScreensController _screensController;
+  private ScreenResultsController _screenResultsController;
   
-  private DAO _dao;
   private Screen _screen;
-  private SearchResults<Screen> _searchResults;
-  private ScreenResultViewer _screenResultViewer;
+  private ScreenSearchResults _screenSearchResults;
+
   private UISelectOneBean<ScreeningRoomUser> _leadScreener;
   private UISelectOneBean<ScreeningRoomUser> _labName;
   private UISelectManyBean<ScreeningRoomUser> _collaborators;
@@ -70,54 +71,65 @@ public class ScreenViewer extends AbstractBackingBean
 
   
   // public property getter & setter methods
-  
-  public void setDao(DAO dao) 
+
+  public ScreensController getScreensController()
   {
-    _dao = dao;
-   }
+    return _screensController;
+  }
   
+  public void setScreensController(ScreensController screensController)
+  {
+    _screensController = screensController;
+  }
+  
+  public ScreenResultsController getScreenResultsController()
+  {
+    return _screenResultsController;
+  }
+  
+  public void setScreenResultsController(ScreenResultsController screenResultsController)
+  {
+    _screenResultsController = screenResultsController;
+  }
+  
+  public Screen getScreen() 
+  {
+    return _screen;
+  }
+
   public void setScreen(Screen screen) 
   {
     _screen = screen;
-    _labName = new UISelectOneBean<ScreeningRoomUser>(_dao.findAllLabHeads(), _screen.getLabHead()) { 
+  }
+  
+  public void setCandidateLabHeads(List<ScreeningRoomUser> labHeads)
+  {
+    _labName = new UISelectOneBean<ScreeningRoomUser>(labHeads, _screen.getLabHead()) { 
       protected String getLabel(ScreeningRoomUser t) { return t.getLabName(); } 
-    };
-    _collaborators = new UISelectManyBean<ScreeningRoomUser>(_dao.findAllEntitiesWithType(ScreeningRoomUser.class),
-                                                            _screen.getCollaborators()) {
-      protected String getLabel(ScreeningRoomUser t) { return t.getFullName(); }
     };
     updateLeadScreenerSelectItems();
   }
 
-  public Screen getScreen() 
+  public void setCandidateCollaborators(List<ScreeningRoomUser> screeningRoomUsers)
   {
-    if (_screen == null) {
-      Screen defaultScreen = _dao.findEntityById(Screen.class, 107);
-      log.warn("no screen defined: defaulting to screen " + defaultScreen.getScreenNumber());
-      setScreen(defaultScreen);
-    }
-    return _screen;
+    _collaborators =
+      new UISelectManyBean<ScreeningRoomUser>(screeningRoomUsers, _screen.getCollaborators())
+      {
+        protected String getLabel(ScreeningRoomUser t)
+        {
+          return t.getFullName();
+        }
+      };
   }
   
-  public SearchResults<Screen> getSearchResults()
+  public ScreenSearchResults getScreenSearchResults()
   {
-    return _searchResults;
+    return _screenSearchResults;
   }
 
-  public void setSearchResults(SearchResults<Screen> searchResults)
+  public void setScreenSearchResults(ScreenSearchResults searchResults)
   {
-    _searchResults = searchResults;
-  }
-
-  public ScreenResultViewer getScreenResultViewer()
-  {
-    return _screenResultViewer;
-  }
-
-  public void setScreenResultViewer(
-    ScreenResultViewer screenResultViewer)
-  {
-    _screenResultViewer = screenResultViewer;
+    _screenSearchResults = searchResults;
   }
 
   public AssayReadoutType getNewAssayReadoutType()
@@ -265,43 +277,24 @@ public class ScreenViewer extends AbstractBackingBean
   /**
    * A command to save the user's edits.
    */
-  public String save() {
-    try {
-      _screen.setLabHead(_labName.getSelection());
-      _screen.setLeadScreener(_leadScreener.getSelection());
-      _screen.setCollaboratorsList(_collaborators.getSelections());
-      _dao.persistEntity(_screen);
-    }
-    catch (ConcurrencyFailureException e) {
-      // TODO: handle this exception in a way that works with Hibernate
-      //_dao.refreshEntity(_screen);
-      //recreateView(false);
-      showMessage("concurrentModificationConflict");
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    catch (Throwable e) {
-      reportSystemError(e);
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    return DONE_ACTION_RESULT;
+  @UIControllerMethod
+  public String saveScreen() {
+    _screen.setLabHead(_labName.getSelection());
+    _screen.setLeadScreener(_leadScreener.getSelection());
+    _screen.setCollaboratorsList(_collaborators.getSelections());
+    return _screensController.saveScreen(_screen);
   }
   
+  @UIControllerMethod
   public String addStatusItem()
   {
-    if (_newStatusValue != null) {
-      _dao.defineEntity(StatusItem.class,
-                        _screen,
-                        new Date(),
-                        _newStatusValue);
-      _newStatusValue = null;
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.addStatusItem(_screen, _newStatusValue);
   }
   
+  @UIControllerMethod
   public String deleteStatusItem()
   {
-    _screen.getStatusItems().remove(getSelectedEntityOfType(StatusItem.class));
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.deleteStatusItem(_screen, getSelectedEntityOfType(StatusItem.class));
   }
   
   // TODO: save & go to visit viewer
@@ -335,99 +328,102 @@ public class ScreenViewer extends AbstractBackingBean
     return VIEW_ATTACHED_FILE_ACTION_RESULT;
   }  
   
+  @UIControllerMethod
   public String addPublication()
   {
-    _dao.defineEntity(Publication.class, _screen, "<new>", "", "", "");
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.addPublication(_screen);
   }
   
+  @UIControllerMethod
   public String deletePublication()
   {
-    _screen.getPublications().remove(getSelectedEntityOfType(Publication.class));
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.deletePublication(
+      _screen,
+      getSelectedEntityOfType(Publication.class));
   }
   
+  @UIControllerMethod
   public String addLetterOfSupport()
   {
-    _dao.defineEntity(LetterOfSupport.class, _screen, new Date(), "");
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.addLetterOfSupport(_screen);
   }
   
+  @UIControllerMethod
   public String deleteLetterOfSupport()
   {
-    _screen.getLettersOfSupport().remove(getSelectedEntityOfType(LetterOfSupport.class));
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.deleteLetterOfSupport(
+      _screen,
+      getSelectedEntityOfType(LetterOfSupport.class));
   }
   
+  @UIControllerMethod
   public String addAttachedFile()
   {
-    _dao.defineEntity(AttachedFile.class, _screen, "<new>", "");
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.addAttachedFile(_screen);
   }
   
+  @UIControllerMethod
   public String deleteAttachedFile()
   {
-    _screen.getAttachedFiles().remove(getSelectedEntityOfType(AttachedFile.class));
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.deleteAttachedFile(
+      _screen,
+      getSelectedEntityOfType(AttachedFile.class));
   }
   
+  @UIControllerMethod
   public String addFundingSupport()
   {
-    if (_newFundingSupport != null) {
-      _screen.addFundingSupport(_newFundingSupport);
-      _newFundingSupport = null;
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.addFundingSupport(_screen, _newFundingSupport);
   }
   
+  @UIControllerMethod
   public String deleteFundingSupport()
   {
-    _screen.getFundingSupports().remove(getSelectedEntityOfType(FundingSupport.class));
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.deleteFundingSupport(
+      _screen,
+      getSelectedEntityOfType(FundingSupport.class));
   }
   
+  @UIControllerMethod
   public String addAssayReadoutType()
   {
-    if (_newAssayReadoutType != null) {
-      _screen.addAssayReadoutType(_newAssayReadoutType);
-      _newAssayReadoutType = null;
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.addAssayReadoutType(_screen, _newAssayReadoutType);
   }
   
+  @UIControllerMethod
   public String deleteAssayReadoutType()
   {
-    _screen.getAssayReadoutTypes().remove(getSelectedEntityOfType(AssayReadoutType.class));
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.deleteAssayReadoutType(
+      _screen,
+      getSelectedEntityOfType(AssayReadoutType.class));
   }
   
+  @UIControllerMethod
   public String addAbaseTestset()
   {
-    _dao.defineEntity(AbaseTestset.class, _screen, "<new>");
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.addAbaseTestset(_screen);
   }
   
+  @UIControllerMethod
   public String deleteAbaseTestset()
   {
-    _screen.getAbaseTestsets().remove(getSelectedEntityOfType(AbaseTestset.class));
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.deleteAbaseTestset(
+      _screen,
+      getSelectedEntityOfType(AbaseTestset.class));
   }
   
+  @UIControllerMethod
   public String addKeyword()
   {
-    if (!_screen.addKeyword(_newKeyword)) {
-      showMessage("screens.duplicateKeyword", "newKeyword", _newKeyword);
-    }
-    else {
-      _newKeyword = "";
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.addKeyword(_screen, _newKeyword);
   }
   
+  @UIControllerMethod
   public String deleteKeyword()
   {
-    _screen.getKeywords().remove(getHttpServletRequest().getAttribute("keyword"));
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.deleteKeyword(
+      _screen,
+      (String) getHttpServletRequest().getAttribute("keyword"));
   }
   
   public String viewCollaborator()
@@ -457,8 +453,7 @@ public class ScreenViewer extends AbstractBackingBean
 
   public String viewScreenResult()
   {
-    _screenResultViewer.setScreenResult(_screen.getScreenResult());
-    return VIEW_OR_EDIT_SCREEN_RESULT_ACTION;
+    return _screenResultsController.viewScreenResult(_screen.getScreenResult());
   }
   
   public String viewBillingInformation()

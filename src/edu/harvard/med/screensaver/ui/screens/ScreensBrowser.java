@@ -9,15 +9,12 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
-import java.util.List;
-
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.control.ScreensController;
+import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 
 /**
  * TODO: add comments
@@ -34,49 +31,35 @@ public class ScreensBrowser extends AbstractBackingBean
   
   // private instance fields
   
-  private DAO _dao;
-  private ScreenViewer _screenViewerController;
-  private SearchResults<Screen> _searchResults;
+  private ScreensController _screensController;
+  private ScreenSearchResults _screenSearchResults;
   
   
   // public instance methods
-  
-  public DAO getDao()
+
+  public ScreensController getScreensController()
   {
-    return _dao;
-  }
-  
-  public void setDao(DAO dao)
-  {
-    _dao = dao;
+    return _screensController;
   }
   
-  public ScreenViewer getScreenViewer()
+  public void setScreensController(ScreensController screensController)
   {
-    return _screenViewerController;
+    _screensController = screensController;
   }
 
-  public void setScreenViewer(ScreenViewer viewerController)
+  public ScreenSearchResults getScreenSearchResults()
   {
-    _screenViewerController = viewerController;
+    return _screenSearchResults;
   }
 
-  public SearchResults<Screen> getSearchResults()
+  public void setScreenSearchResults(ScreenSearchResults searchResults)
   {
-    return _searchResults;
+    _screenSearchResults = searchResults;
   }
 
-  public void setSearchResults(SearchResults<Screen> searchResults)
+  @UIControllerMethod
+  public String browseScreens()
   {
-    _searchResults = searchResults;
-  }
-
-  public String goBrowseScreens()
-  {
-    if (_searchResults == null) {
-      List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
-      _searchResults = new ScreenSearchResults(screens, _screenViewerController);
-    }
-    return "goBrowseScreens";
+    return _screensController.browseScreens();
   }
 }

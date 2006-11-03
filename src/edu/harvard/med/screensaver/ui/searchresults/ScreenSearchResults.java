@@ -14,7 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
+import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
 
@@ -36,7 +36,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
   
   // instance fields
   
-  private ScreenViewer _screenViewerController;
+  private ScreensController _screensController;
   
   
   // public constructor
@@ -46,12 +46,10 @@ public class ScreenSearchResults extends SearchResults<Screen>
    * @param unsortedResults the unsorted list of the results, as they are returned from the
    * database
    */
-  public ScreenSearchResults(
-    List<Screen> unsortedResults,
-    ScreenViewer screenViewerController)
+  public ScreenSearchResults(List<Screen> unsortedResults, ScreensController screensController)
   {
     super(unsortedResults);
-    _screenViewerController = screenViewerController;
+    _screensController = screensController;
   }
 
 
@@ -110,9 +108,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
   @Override
   protected Object cellAction(Screen screen, String columnName)
   {
-    _screenViewerController.setScreen(screen);
-    _screenViewerController.setSearchResults(this);
-    return "showScreen";
+    return _screensController.viewScreen(screen, this);
   }
   
   @Override
@@ -145,8 +141,8 @@ public class ScreenSearchResults extends SearchResults<Screen>
 
 
   @Override
-  protected void setEntityToView(Screen entity)
+  protected void setEntityToView(Screen screen)
   {
-    _screenViewerController.setScreen(entity);
+    _screensController.viewScreen(screen, this);
   }
 }
