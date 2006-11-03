@@ -1,0 +1,96 @@
+// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/libraries/LibraryViewer.java $
+// $Id: LibraryViewer.java 711 2006-10-31 23:40:24Z js163 $
+//
+// Copyright 2006 by the President and Fellows of Harvard College.
+// 
+// Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+// at Harvard Medical School. This software is distributed under the terms of
+// the GNU General Public License.
+
+package edu.harvard.med.screensaver.ui.view.libraries;
+
+import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
+
+public class LibraryViewer extends AbstractBackingBean
+{
+  private static Logger log = Logger.getLogger(LibraryViewer.class);
+  
+  
+  // private instance methods
+  
+  private Library _library;
+  private LibrarySearchResults _librarySearchResults;
+  private LibrariesController _librariesController;
+  
+
+  // public getters and setters
+  
+  public void setLibrary(Library library)
+  {
+    _library = library;
+  }
+
+  public Library getLibrary()
+  {
+    return _library;
+  }
+
+  public LibrarySearchResults getLibrarySearchResults()
+  {
+    return _librarySearchResults;
+  }
+
+  public void setLibrarySearchResults(LibrarySearchResults librarySearchResults)
+  {
+    _librarySearchResults = librarySearchResults;
+  }
+
+  public LibrariesController getLibrariesController()
+  {
+    return _librariesController;
+  }
+  
+  public void setLibrariesController(LibrariesController librariesController)
+  {
+    _librariesController = librariesController;
+  }
+  
+  public boolean getIsRNAiLibrary()
+  {
+    return _library != null && _library.getLibraryType().equals(LibraryType.RNAI);
+  }
+
+  public boolean getIsCompoundLibrary()
+  {
+    return _library != null && ! _library.getLibraryType().equals(LibraryType.RNAI);
+  }
+  
+  public int getLibrarySize()
+  {
+    if (_library == null) {
+      return 0;
+    }
+    return _library.getWells().size();
+  }
+
+  public String goImportCompoundLibraryContents()
+  {
+    return _librariesController.importCompoundLibraryContents(_library);
+  }
+
+  public String importRNAiLibraryContents()
+  {
+    return _librariesController.importRNAiLibraryContents(_library);
+  }
+  
+  public String viewLibraryContents()
+  {
+    return _librariesController.viewLibraryContents(_library);
+  }
+}
