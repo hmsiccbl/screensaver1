@@ -7,11 +7,10 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.view;
+package edu.harvard.med.screensaver.ui;
 
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter;
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 
 public class SchemaManager extends AbstractBackingBean
 {

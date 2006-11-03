@@ -7,23 +7,24 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.view.screenresults;
-
-import edu.harvard.med.screensaver.analysis.Filter;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+package edu.harvard.med.screensaver.ui.control;
 
 import org.apache.log4j.Logger;
 
-public class ExcludedOrNonDataProducingWellFilter implements Filter<ResultValue>
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+
+/**
+ * An abstract superclass for the UIController classes.
+ *
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ */
+public abstract class AbstractUIController extends AbstractBackingBean
 {
   // static members
 
-  private static Logger log = Logger.getLogger(ExcludedOrNonDataProducingWellFilter.class);
-
-  public boolean exclude(ResultValue rv)
-  {
-    return rv.isExclude() || !rv.isDataProducer();
-  }
+  private static Logger log = Logger
+    .getLogger(AbstractUIController.class);
 
 
   // instance data members

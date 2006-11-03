@@ -16,7 +16,7 @@ import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.ui.view.screenresults.HeatMapCell;
+import edu.harvard.med.screensaver.ui.screenresults.HeatMapCell;
 
 public class HeatMapCellTest extends TestCase
 {

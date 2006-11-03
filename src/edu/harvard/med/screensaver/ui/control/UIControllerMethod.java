@@ -9,18 +9,20 @@
 
 package edu.harvard.med.screensaver.ui.control;
 
-import org.apache.log4j.Logger;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
+ * Annotates a method as a UI controller method.
  * 
- *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @motivation this property serves only a documentation purpose
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class ScreensController extends AbstractUIController
-{
-  private static Logger log = Logger.getLogger(ScreensController.class);
-
-  
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface UIControllerMethod {
 }
 

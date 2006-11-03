@@ -19,17 +19,16 @@ import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.libraries.CompoundLibraryContentsImporter;
+import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
+import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
+import edu.harvard.med.screensaver.ui.libraries.LibrariesBrowser;
+import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
+import edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporter;
+import edu.harvard.med.screensaver.ui.libraries.WellSearchResultsViewer;
+import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
-import edu.harvard.med.screensaver.ui.view.libraries.CompoundLibraryContentsImporter;
-import edu.harvard.med.screensaver.ui.view.libraries.CompoundViewer;
-import edu.harvard.med.screensaver.ui.view.libraries.GeneViewer;
-import edu.harvard.med.screensaver.ui.view.libraries.LibrariesBrowser;
-import edu.harvard.med.screensaver.ui.view.libraries.LibraryViewer;
-import edu.harvard.med.screensaver.ui.view.libraries.RNAiLibraryContentsImporter;
-import edu.harvard.med.screensaver.ui.view.libraries.WellSearchResultsViewer;
-import edu.harvard.med.screensaver.ui.view.libraries.WellViewer;
 
 /**
  * 
@@ -37,7 +36,7 @@ import edu.harvard.med.screensaver.ui.view.libraries.WellViewer;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class LibrariesController extends AbstractBackingBean
+public class LibrariesController extends AbstractUIController
 {
   private static Logger log = Logger.getLogger(LibrariesController.class);
 
@@ -155,6 +154,13 @@ public class LibrariesController extends AbstractBackingBean
 
   // controller methods
   
+  @UIControllerMethod
+  public String findWells()
+  {
+    return "findWells";
+  }
+  
+  @UIControllerMethod
   public String browseLibraries()
   {
     if (getLibrariesBrowser().getLibrarySearchResults() == null) {
@@ -164,6 +170,7 @@ public class LibrariesController extends AbstractBackingBean
     return "browseLibraries";
   }
   
+  @UIControllerMethod
   public String viewLibrary(Library library, LibrarySearchResults librarySearchResults)
   {
     _libraryViewer.setLibrarySearchResults(librarySearchResults);
@@ -171,6 +178,7 @@ public class LibrariesController extends AbstractBackingBean
     return "viewLibrary";
   }
   
+  @UIControllerMethod
   public String viewLibraryContents(Library library)
   {
     WellSearchResults wellSearchResults = new WellSearchResults(
@@ -179,12 +187,14 @@ public class LibrariesController extends AbstractBackingBean
     return viewWellSearchResults(wellSearchResults);
   }
   
+  @UIControllerMethod
   public String viewWellSearchResults(WellSearchResults wellSearchResults)
   {
     _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
     return "viewWellSearchResults";
   }
   
+  @UIControllerMethod
   public String viewWell(Well well, WellSearchResults wellSearchResults)
   {
     _wellViewer.setWellSearchResults(wellSearchResults);
@@ -192,6 +202,7 @@ public class LibrariesController extends AbstractBackingBean
     return "viewWell";
   }
 
+  @UIControllerMethod
   public String viewGene(Gene gene, WellSearchResults wellSearchResults)
   {
     _geneViewer.setWellSearchResults(wellSearchResults);
@@ -199,6 +210,7 @@ public class LibrariesController extends AbstractBackingBean
     return "viewGene";
   }
 
+  @UIControllerMethod
   public String viewCompound(
     Compound compound,
     edu.harvard.med.screensaver.ui.searchresults.WellSearchResults wellSearchResults)
@@ -208,6 +220,7 @@ public class LibrariesController extends AbstractBackingBean
     return "viewCompound";
   }
 
+  @UIControllerMethod
   public String importCompoundLibraryContents(Library library)
   {
     _compoundLibraryContentsImporter.setLibrary(library);
@@ -216,6 +229,7 @@ public class LibrariesController extends AbstractBackingBean
     return "importCompoundLibraryContents";
   }
 
+  @UIControllerMethod
   public String importRNAiLibraryContents(Library library)
   {
     _rnaiLibraryContentsImporter.setLibrary(library);

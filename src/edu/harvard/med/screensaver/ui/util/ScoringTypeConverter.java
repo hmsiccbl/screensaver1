@@ -11,7 +11,7 @@ package edu.harvard.med.screensaver.ui.util;
 
 import java.util.EnumSet;
 
-import edu.harvard.med.screensaver.ui.view.screenresults.ScoringType;
+import edu.harvard.med.screensaver.ui.screenresults.ScoringType;
 
 /**
  * Converts a ScoringType between its enum instance and its string represention.

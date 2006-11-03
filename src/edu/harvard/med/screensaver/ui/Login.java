@@ -7,11 +7,10 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.view;
+package edu.harvard.med.screensaver.ui;
 
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 
 /**
  * JSF backing bean for login view. Properties are not needed for userID and

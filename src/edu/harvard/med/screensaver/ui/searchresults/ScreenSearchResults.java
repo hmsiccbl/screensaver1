@@ -14,8 +14,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
-import edu.harvard.med.screensaver.ui.view.screens.ScreenViewer;
 
 
 /**
