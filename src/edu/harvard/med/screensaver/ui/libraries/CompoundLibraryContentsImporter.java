@@ -9,20 +9,16 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.io.File;
-import java.io.IOException;
-
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 
-import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 
 /**
  * The JSF backing bean for the compoundLibraryContentsImporter subview.
@@ -36,35 +32,23 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
 
   // instance data
 
-  private DAO _dao;
-  private SDFileCompoundLibraryContentsParser _compoundLibraryContentsParser;
+  private LibrariesController _librariesController;
   private UploadedFile _uploadedFile;
   private Library _library;
   
 
   // backing bean property getter and setter methods
 
-  public DAO getDao()
+  public LibrariesController getLibrariesController()
   {
-    return _dao;
+    return _librariesController;
   }
-
-  public void setDao(DAO dao)
+  
+  public void setLibrariesController(LibrariesController librariesController)
   {
-    _dao = dao;
+    _librariesController = librariesController;
   }
-
-  public SDFileCompoundLibraryContentsParser getCompoundLibraryContentsParser()
-  {
-    return _compoundLibraryContentsParser;
-  }
-
-  public void setCompoundLibraryContentsParser(
-    SDFileCompoundLibraryContentsParser compoundLibraryContentsParser)
-  {
-    _compoundLibraryContentsParser = compoundLibraryContentsParser;
-  }
-
+  
   public void setUploadedFile(UploadedFile uploadedFile)
   {
     _uploadedFile = uploadedFile;
@@ -87,46 +71,18 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
 
   public DataModel getImportErrors()
   {
-    return new ListDataModel(_compoundLibraryContentsParser.getErrors());
+    return new ListDataModel(_librariesController.getCompoundLibraryContentsParser().getErrors());
   }
-  
-  public String submit()
-  {
-    try {
-      if (_uploadedFile != null && _uploadedFile.getInputStream().available() > 0) {
-        _dao.doInTransaction(new DAOTransaction() {
-          public void runTransaction()
-          {
-            try {
-              _compoundLibraryContentsParser.parseLibraryContents(
-                _library,
-                new File(_uploadedFile.getName()),
-                _uploadedFile.getInputStream());
-              _dao.persistEntity(_library);
-            }
-            catch (IOException e) {
-              reportSystemError(e);
-            }
-          }
-        });
-      }
-      else {
-        showMessage("badUploadedFile", _uploadedFile.getName());
-        return REDISPLAY_PAGE_ACTION_RESULT;
-      }
 
-      if (_compoundLibraryContentsParser.getHasErrors()) {
-        return ERROR_ACTION_RESULT;
-      }
-      else {
-        showMessage("libraries.importedLibraryContents", "libraryViewer");
-        return SUCCESS_ACTION_RESULT;
-      }
-    }
-    catch (IOException e) {
-      reportSystemError(e);
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
+  /**
+   * Parse the compound library contents from the file, and go to the appropriate next page
+   * depending on the result.
+   * @return the control code for the appropriate next page
+   */
+  @UIControllerMethod
+  public String importCompoundLibraryContents()
+  {
+    return _librariesController.importCompoundLibraryContents(_library, _uploadedFile);
   }
 }
 

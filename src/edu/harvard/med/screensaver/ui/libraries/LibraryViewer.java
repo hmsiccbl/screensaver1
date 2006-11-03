@@ -15,6 +15,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 
 public class LibraryViewer extends AbstractBackingBean
@@ -79,16 +80,19 @@ public class LibraryViewer extends AbstractBackingBean
     return _library.getWells().size();
   }
 
-  public String goImportCompoundLibraryContents()
+  @UIControllerMethod
+  public String importCompoundLibraryContents()
   {
     return _librariesController.importCompoundLibraryContents(_library);
   }
 
+  @UIControllerMethod
   public String importRNAiLibraryContents()
   {
     return _librariesController.importRNAiLibraryContents(_library);
   }
   
+  @UIControllerMethod
   public String viewLibraryContents()
   {
     return _librariesController.viewLibraryContents(_library);

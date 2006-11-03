@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 public class CompoundViewer extends AbstractBackingBean
@@ -93,6 +94,7 @@ public class CompoundViewer extends AbstractBackingBean
     return _compoundImageUrl;
   }
   
+  @UIControllerMethod
   public String viewCompound()
   {
     return _librariesController.viewCompound(_compound, _wellSearchResults);
