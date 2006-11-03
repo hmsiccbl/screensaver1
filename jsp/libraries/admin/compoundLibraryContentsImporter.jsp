@@ -9,7 +9,7 @@
     <%@include file="compoundLibraryContentsUploader.jspf"%>
   </h:panelGroup>
 
-  <h:form id="errorsTableForm" rendered="#{compoundLibraryContentsImporter.compoundLibraryContentsParser.hasErrors}">
+  <h:form id="errorsTableForm" rendered="#{compoundLibraryContentsImporter.hasErrors}">
 
     <h:outputText value="Import Errors for #{compoundLibraryContentsImporter.uploadedFile.name}"
       styleClass="sectionHeader" />

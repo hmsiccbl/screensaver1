@@ -108,6 +108,10 @@
       <value>#{dao}</value>
     </managed-property>
     <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
+    </managed-property>
+    <managed-property>
       <property-name>wellFinder</property-name>
       <value>#{wellFinder}</value>
     </managed-property>
@@ -220,13 +224,17 @@
   <!-- === screens backing beans === -->
 
   <managed-bean>
-    <description>Screens Controller Bean</description>
+    <description>Screens Controller</description>
     <managed-bean-name>screensController</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.control.ScreensController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>dao</property-name>
       <value>#{dao}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
     </managed-property>
     <managed-property>
       <property-name>screensBrowser</property-name>
@@ -263,6 +271,10 @@
     <managed-property>
       <property-name>dao</property-name>
       <value>#{dao}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>messages</property-name>
+      <value>#{messages}</value>
     </managed-property>
     <managed-property>
       <property-name>screenViewer</property-name>

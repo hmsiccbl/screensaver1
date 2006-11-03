@@ -105,6 +105,11 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
     return JSFUtils.createUISelectItems(selections);
   }
 
+  public boolean getHasErrors()
+  {
+    return _librariesController.getRnaiLibraryContentsParser().getHasErrors();
+  }
+  
   public DataModel getImportErrors()
   {
     return new ListDataModel(_librariesController.getRnaiLibraryContentsParser().getErrors());

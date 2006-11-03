@@ -14,7 +14,7 @@
       />
       <h:selectOneMenu
         id="silencingReagentType"
-        value="#{rnaiLibraryContentsImporter.rnaiLibraryContentsParser.silencingReagentType}"
+        value="#{librariesController.rnaiLibraryContentsParser.silencingReagentType}"
         converter="SilencingReagentTypeConverter"
         styleClass="input"
       >

@@ -69,6 +69,11 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
     _library = library;
   }
 
+  public boolean getHasErrors()
+  {
+    return _librariesController.getCompoundLibraryContentsParser().getHasErrors();
+  }
+  
   public DataModel getImportErrors()
   {
     return new ListDataModel(_librariesController.getCompoundLibraryContentsParser().getErrors());

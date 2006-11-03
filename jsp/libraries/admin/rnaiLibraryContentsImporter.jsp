@@ -9,7 +9,7 @@
     <%@include file="rnaiLibraryContentsUploader.jspf"%>
   </h:panelGroup>
 
-  <h:form id="errorsTableForm" rendered="#{rnaiLibraryContentsImporter.rnaiLibraryContentsParser.hasErrors}">
+  <h:form id="errorsTableForm" rendered="#{rnaiLibraryContentsImporter.hasErrors}">
 
     <h:outputText value="Import Errors for #{rnaiLibraryContentsImporter.uploadedFile.name}"
       styleClass="sectionHeader" />

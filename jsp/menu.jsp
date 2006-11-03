@@ -36,7 +36,7 @@
         separatorClass="navSeparator">
         <t:commandNavigation2 action="#{librariesController.findWells}" value="#{\"Find Wells\"}" rendered="#{menu.authenticatedUser}" accesskey="W"/>
         <t:commandNavigation2 action="#{librariesController.browseLibraries}" value="#{\"Browse Libraries\"}" rendered="#{menu.authenticatedUser}" accesskey="L" />
-        <t:commandNavigation2 action="#{screensBrowser.goBrowseScreens}" value="#{\"Browse Screens\"}" rendered="#{menu.authenticatedUser}" accesskey="S" />
+        <t:commandNavigation2 action="#{screensBrowser.browseScreens}" value="#{\"Browse Screens\"}" rendered="#{menu.authenticatedUser}" accesskey="S" />
         <t:commandNavigation2 accesskey="" />
         <t:commandNavigation2 action="goHelp" value="#{\"Help\"}" accesskey="H" />
         <t:commandNavigation2 id="navPanelDeveloperNode" value="#{\"Developer >>\"}" accesskey="" visibleOnUserRole="developer" >

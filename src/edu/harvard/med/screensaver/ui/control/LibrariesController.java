@@ -195,6 +195,7 @@ public class LibrariesController extends AbstractUIController
     RNAiLibraryContentsImporter rnaiLibraryContentsImporter)
   {
     _rnaiLibraryContentsImporter = rnaiLibraryContentsImporter;
+    _rnaiLibraryContentsImporter.setLibrariesController(this);
   }
   
   public RNAiLibraryContentsParser getRnaiLibraryContentsParser()
