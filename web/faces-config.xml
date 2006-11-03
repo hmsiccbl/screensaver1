@@ -108,6 +108,10 @@
       <value>#{dao}</value>
     </managed-property>
     <managed-property>
+      <property-name>wellFinder</property-name>
+      <value>#{wellFinder}</value>
+    </managed-property>
+    <managed-property>
       <property-name>librariesBrowser</property-name>
       <value>#{librariesBrowser}</value>
     </managed-property>
@@ -136,8 +140,16 @@
       <value>#{compoundLibraryContentsImporter}</value>
     </managed-property>
     <managed-property>
+      <property-name>compoundLibraryContentsParser</property-name>
+      <value>#{compoundLibraryContentsParser}</value>
+    </managed-property>
+    <managed-property>
       <property-name>rnaiLibraryContentsImporter</property-name>
       <value>#{rnaiLibraryContentsImporter}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>rnaiLibraryContentsParser</property-name>
+      <value>#{rnaiLibraryContentsParser}</value>
     </managed-property>
   </managed-bean>
 
@@ -146,14 +158,6 @@
     <managed-bean-name>wellFinder</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.WellFinder</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>librariesController</property-name>
-      <value>#{librariesController}</value>
-    </managed-property>
   </managed-bean>
 
   <managed-bean>
@@ -203,14 +207,6 @@
     <managed-bean-name>compoundLibraryContentsImporter</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.CompoundLibraryContentsImporter</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>compoundLibraryContentsParser</property-name>
-      <value>#{compoundLibraryContentsParser}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
-    </managed-property>
   </managed-bean>
    
   <managed-bean>
@@ -218,14 +214,6 @@
     <managed-bean-name>rnaiLibraryContentsImporter</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporter</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>rnaiLibraryContentsParser</property-name>
-      <value>#{rnaiLibraryContentsParser}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
-    </managed-property>
   </managed-bean>
   
 
@@ -449,36 +437,6 @@
       <from-outcome>error</from-outcome>
       <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
       <redirect/>
-    </navigation-case>
-  </navigation-rule>
-
-  <navigation-rule>
-    <from-view-id>/libraries/admin/rnaiLibraryContentsImporter.jsp</from-view-id>
-    <navigation-case>
-      <from-action>#{rnaiLibraryContentsImporter.submit}</from-action>
-      <from-outcome>success</from-outcome>
-      <to-view-id>/libraries/libraryViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-action>#{rnaiLibraryContentsImporter.submit}</from-action>
-      <from-outcome>error</from-outcome>
-      <to-view-id>/libraries/admin/rnaiLibraryContentsImporter</to-view-id>
-    </navigation-case>
-  </navigation-rule>
-
-  <navigation-rule>
-    <from-view-id>/libraries/admin/compoundLibraryContentsImporter.jsp</from-view-id>
-    <navigation-case>
-      <from-action>#{compoundLibraryContentsImporter.submit}</from-action>
-      <from-outcome>success</from-outcome>
-      <to-view-id>/libraries/libraryViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-action>#{compoundLibraryContentsImporter.submit}</from-action>
-      <from-outcome>error</from-outcome>
-      <to-view-id>/libraries/admin/compoundLibraryContentsImporter</to-view-id>
     </navigation-case>
   </navigation-rule>
   

@@ -25,7 +25,7 @@
       <t:commandButton
         id="import"
         value="Import"
-        action="#{compoundLibraryContentsImporter.submit}"
+        action="#{compoundLibraryContentsImporter.importCompoundLibraryContents}"
         styleClass="command"
       />
 

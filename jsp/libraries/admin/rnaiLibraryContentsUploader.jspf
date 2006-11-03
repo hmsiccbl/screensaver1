@@ -40,7 +40,7 @@
       <t:commandButton
         id="import"
         value="Import"
-        action="#{rnaiLibraryContentsImporter.submit}"
+        action="#{rnaiLibraryContentsImporter.importRNAiLibraryContents}"
         styleClass="command"
       />
 
