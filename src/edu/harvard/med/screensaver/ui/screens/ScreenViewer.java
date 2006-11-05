@@ -89,7 +89,11 @@ public class ScreenViewer extends AbstractBackingBean
   
   public void setScreenResultsController(ScreenResultsController screenResultsController)
   {
+    if (_screenResultsController == screenResultsController) {
+      return;
+    }
     _screenResultsController = screenResultsController;
+    _screenResultsController.setScreenViewer(this);
   }
   
   public Screen getScreen() 

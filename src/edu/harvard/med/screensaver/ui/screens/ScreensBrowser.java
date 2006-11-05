@@ -13,7 +13,6 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
-import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 
 /**
@@ -55,11 +54,5 @@ public class ScreensBrowser extends AbstractBackingBean
   public void setScreenSearchResults(ScreenSearchResults searchResults)
   {
     _screenSearchResults = searchResults;
-  }
-
-  @UIControllerMethod
-  public String browseScreens()
-  {
-    return _screensController.browseScreens();
   }
 }

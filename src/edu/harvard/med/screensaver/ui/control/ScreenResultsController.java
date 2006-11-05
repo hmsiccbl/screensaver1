@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui.control;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
@@ -31,13 +32,24 @@ public class ScreenResultsController extends AbstractUIController
   
   
   // private instance fields
-  
+
+  private DAO _dao;
   private ScreenViewer _screenViewer;
   private ScreenResultViewer _screenResultViewer;
   
   
   // public getters and setters
 
+  public DAO getDao()
+  {
+    return _dao;
+  }
+  
+  public void setDao(DAO dao)
+  {
+    _dao = dao;
+  }
+  
   public ScreenViewer getScreenViewer()
   {
     return _screenViewer;
@@ -45,6 +57,9 @@ public class ScreenResultsController extends AbstractUIController
   
   public void setScreenViewer(ScreenViewer screenViewer)
   {
+    if (_screenViewer == screenViewer) {
+      return;
+    }
     _screenViewer = screenViewer;
     _screenViewer.setScreenResultsController(this);
   }
@@ -65,7 +80,7 @@ public class ScreenResultsController extends AbstractUIController
   public String viewScreenResult(ScreenResult screenResult)
   {
     _screenResultViewer.setScreenResult(screenResult);
-    return "viewScreenResult"; 
+    return VIEW_SCREEN_RESULT; 
   }
 }
 

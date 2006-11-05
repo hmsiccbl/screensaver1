@@ -1,11 +1,11 @@
 <%-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
-<%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
+<%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
 <%-- The core taglib contains all the logic, validation, controller, and other tags specific to JSF. --%>
-<%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
+<%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
 <%-- The Apache Tomahawk JSF components --%>
-<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t" %>
 <%-- Tiles --%>
-<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 
 <%-- 
 TODO:
@@ -21,7 +21,7 @@ TODO:
 
 <f:subview id="screenViewer">
 
-	<t:aliasBean alias="#{navigator}" value="#{screenViewer.searchResults}">
+	<t:aliasBean alias="#{navigator}" value="#{screenViewer.screenSearchResults}">
 		<%@ include file="../searchResultsNavPanel.jspf"%>
 	</t:aliasBean>
 
@@ -694,5 +694,3 @@ TODO:
 		</t:panelGroup>
 	</h:form>
 </f:subview>
-
-

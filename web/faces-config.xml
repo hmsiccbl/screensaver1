@@ -258,6 +258,10 @@
     <managed-bean-name>screenViewer</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.screens.ScreenViewer</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>screenResultsController</property-name>
+      <value>#{screenResultsController}</value>
+    </managed-property>
   </managed-bean>
   
 
@@ -277,8 +281,8 @@
       <value>#{messages}</value>
     </managed-property>
     <managed-property>
-      <property-name>screenViewer</property-name>
-      <value>#{screenViewer}</value>
+      <property-name>screenResultViewer</property-name>
+      <value>#{screenResultViewer}</value>
     </managed-property>
   </managed-bean>
   
@@ -451,10 +455,16 @@
 
     <!-- === screenresults wildcard navigation rules === -->    
     <navigation-case>
+      <from-outcome>viewScreenResult</from-outcome>
+      <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>goImportScreenResult</from-outcome>
       <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
       <redirect/>
     </navigation-case>
+
   </navigation-rule>
 
   <!-- === non-wildcard navigation rules follow. goal is to get rid of all of these === -->
