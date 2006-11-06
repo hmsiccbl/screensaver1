@@ -45,10 +45,9 @@ public class HeatMapViewer extends AbstractBackingBean
   private static final HeatMapCell EMPTY_HEAT_MAP_CELL = new HeatMapCell();
   private static final List<NumberFormat> NUMBER_FORMATS = new ArrayList<NumberFormat>();
   static {
-    NUMBER_FORMATS.add(null);
-    DecimalFormat nf1 = new HackedDecimalFormat("0.0##E00;-0.0##E00");
+    DecimalFormat nf1 = new HackedDecimalFormat("0.0##E0;-0.0##E0");
     NUMBER_FORMATS.add(nf1);
-    DecimalFormat nf1m = new HackedDecimalFormat("0.0##E00;(0.0##E00)");
+    DecimalFormat nf1m = new HackedDecimalFormat("0.0##E0;(0.0##E0)");
     NUMBER_FORMATS.add(nf1m);
     DecimalFormat nf2 = new HackedDecimalFormat("#,##0.0##;-#,##0.0##");
     NUMBER_FORMATS.add(nf2);
@@ -66,12 +65,14 @@ public class HeatMapViewer extends AbstractBackingBean
   }
   private static final int PLATE_ROWS = 26;
   private static final String[] HEAT_MAP_ROW_LABELS = new String[PLATE_ROWS];
-  private static final Filter<ResultValue> IMPLICIT_FILTER = new ExcludedOrNonDataProducingWellFilter();
   static {
     for (int i = 0; i < HEAT_MAP_ROW_LABELS.length; i++) {
       HEAT_MAP_ROW_LABELS[i] = Character.toString((char) ('A' + i));
     }
   }
+  private static final Filter<ResultValue> IMPLICIT_FILTER = new ExcludedOrNonDataProducingWellFilter();
+  private static final Double SAMPLE_NUMBER = new Double(-1234.567);
+  private static final NumberFormat DECIMAL_FORMAT = new DecimalFormat("0.0##");
 
 
   private static Logger log = Logger.getLogger(HeatMapViewer.class);
@@ -83,6 +84,7 @@ public class HeatMapViewer extends AbstractBackingBean
   private UISelectOneBean<Integer> _plateNumber;
   private DAO _dao;
   private ArrayList<HeatMap> _heatMaps;
+  private boolean _showValues;
   private List<HeatMapConfiguration> _heatMapConfigurations;
   private DataModel _heatMapConfigurationsDataModel;
   private List<DataModel> _heatMapDataModels;
@@ -125,6 +127,14 @@ public class HeatMapViewer extends AbstractBackingBean
     return _plateNumber;
   }
   
+  public boolean isShowValues() {
+    return _showValues;
+  }
+
+  public void setShowValues(boolean showValues) {
+    _showValues = showValues;
+  }
+
   public String[] getHeatMapRowLabels()
   {
     return HEAT_MAP_ROW_LABELS;
@@ -200,6 +210,7 @@ public class HeatMapViewer extends AbstractBackingBean
           rowData.add(new HeatMapCell(heatMap.getResultValue(row, column),
                                       heatMap.getScoredValue(row, column),
                                       heatMap.getColor(row, column),
+                                      isShowValues(),
                                       format));
         }
         rows.add(rowData);
@@ -238,7 +249,7 @@ public class HeatMapViewer extends AbstractBackingBean
                                                    format));
       heatMapStatistics.add(new FormattedStatistic("Skewness",
                                                    heatMap.getSkewness(),
-                                                   format));
+                                                   DECIMAL_FORMAT));
       _heatMapStatistics.add(new ListDataModel(heatMapStatistics));
     }
     
@@ -254,7 +265,7 @@ public class HeatMapViewer extends AbstractBackingBean
     });
     heatMapConfiguration.setScoringType(new UISelectOneBean<ScoringType>(Arrays.asList(ScoringType.values())));
     heatMapConfiguration.setNumericFormat(new UISelectOneBean<NumberFormat>(NUMBER_FORMATS) {
-      protected String getLabel(NumberFormat t) { return t == null ? "<none>" : t.format(9999.333) + " / " + t.format(-9999.333); } 
+      protected String getLabel(NumberFormat t) { return t.format(SAMPLE_NUMBER); } 
     });
     heatMapConfiguration.setExcludedWellFilters(new UISelectManyBean<Filter<ResultValue>>(EXCLUDED_WELL_FILTERS));
     _heatMapConfigurations.add(heatMapConfiguration);
@@ -262,7 +273,8 @@ public class HeatMapViewer extends AbstractBackingBean
 
     // set default values
     heatMapConfiguration.getDataHeaders().setValue(Integer.toString(_screenResult.getResultValueTypesList().get(0).hashCode()));
-    heatMapConfiguration.getExcludedWellFilters().setValue(Arrays.asList(new String[] { (String) heatMapConfiguration.getExcludedWellFilters().getSelectItems().get(0).getValue() }));
+    heatMapConfiguration.getExcludedWellFilters().setValue(Arrays.asList(new String[] { 
+      (String) heatMapConfiguration.getExcludedWellFilters().getSelectItems().get(0).getValue() }));
     
     return update();
   }

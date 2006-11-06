@@ -14,7 +14,7 @@ import edu.harvard.med.screensaver.analysis.AggregateFunction;
 import edu.harvard.med.screensaver.analysis.ZScoreFunction;
 
 public enum ScoringType {
-  NONE("None (raw values)", new IdentityFunction()),
+  NONE("Raw values", new IdentityFunction()),
   ZSCORE("Z-score", new ZScoreFunction())
   ;
 

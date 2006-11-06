@@ -12,8 +12,6 @@ package edu.harvard.med.screensaver.analysis;
 import java.util.Arrays;
 import java.util.List;
 
-import edu.harvard.med.screensaver.analysis.heatmaps.NoOpFilter;
-
 import org.apache.log4j.Logger;
 
 public class ChainedFilter<T> implements Filter<T>

@@ -27,30 +27,42 @@ TODO:
 	<t:panelGroup>
 		<t:outputLabel for="plateNumber" value="Plate:"
 			styleClass="inputLabel" />
+
 		<t:selectOneMenu id="plateNumber"
 			value="#{heatMapViewer.plateNumber.value}" required="true"
 			onchange="javascript:document.getElementById('updateButton').click()"
 			styleClass="input">
 			<f:selectItems value="#{heatMapViewer.plateNumber.selectItems}" />
 		</t:selectOneMenu>
-		<t:commandButton id="previousPlateButton" 
-			image="/images/arrow-previous.gif" action="#{heatMapViewer.previousPlate}"
-			styleClass="command" />
-		<t:commandButton id="nextPlateButton" 
-			image="/images/arrow-next.gif" action="#{heatMapViewer.nextPlate}"
-			styleClass="command" />
-	<t:commandButton id="addHeatMap" value="Add Heat Map"
-		action="#{heatMapViewer.addHeatMap}" styleClass="command" />
+
+		<t:commandButton id="previousPlateButton"
+			image="/images/arrow-previous.gif"
+			action="#{heatMapViewer.previousPlate}" styleClass="command" />
+
+		<t:commandButton id="nextPlateButton" image="/images/arrow-next.gif"
+			action="#{heatMapViewer.nextPlate}" styleClass="command" />
+
+		<t:outputLabel for="showValues" value="Show values"
+			styleClass="inputLabel" />
+		<t:selectBooleanCheckbox id="showValues"
+			value="#{heatMapViewer.showValues}" 
+			onchange="javascript:document.getElementById('updateButton').click()"
+			styleClass="input" />
+
+		<t:commandButton id="addHeatMap" value="Add Heat Map"
+			action="#{heatMapViewer.addHeatMap}" styleClass="command" />
+
 		<t:commandButton id="updateButton" value="Update" forceId="true"
 			style="visibility: hidden" action="#{heatMapViewer.update}"
 			styleClass="command" />
 	</t:panelGroup>
 
-	<t:div/>
+	<t:div />
 
 	<t:dataTable id="heatMapsTable"
-		value="#{heatMapViewer.heatMapConfigurationsDataModel}" var="heatMapConfig"
-		rowIndexVar="heatMapIndex" styleClass="heatMapsTable">
+		value="#{heatMapViewer.heatMapConfigurationsDataModel}"
+		var="heatMapConfig" rowIndexVar="heatMapIndex"
+		styleClass="heatMapsTable">
 		<t:column>
 			<t:panelGrid>
 				<t:outputLabel for="dataHeader" value="Data header:"
@@ -69,7 +81,7 @@ TODO:
 					<f:selectItems value="#{heatMapConfig.scoringType.selectItems}" />
 				</t:selectOneMenu>
 
-				<t:outputLabel for="excludedWellFilters" value="Excluded wells:"
+				<t:outputLabel for="excludedWellFilters" value="Exclude:"
 					styleClass="inputLabel" />
 				<t:selectManyCheckbox id="excludedWellFilters"
 					layout="pageDirection"
@@ -104,12 +116,12 @@ TODO:
 					<f:facet name="header">
 						<t:outputText value="Row" />
 					</f:facet>
-					<t:outputText value="#{heatMapViewer.heatMapRowLabels[plateRowIndex]}" />
+					<t:outputText
+						value="#{heatMapViewer.heatMapRowLabels[plateRowIndex]}" />
 				</t:column>
 				<t:columns
 					value="#{heatMapViewer.heatMapColumnDataModels[heatMapIndex]}"
-					var="columnIndex"
-					style="#{heatMapViewer.heatMapCell.style}">
+					var="columnIndex" styleClass="heatMapCell" style="#{heatMapViewer.heatMapCell.style}">
 					<f:facet name="header">
 						<t:outputText value="#{columnIndex + 1}" styleClass="keyColumn" />
 					</f:facet>
@@ -117,22 +129,24 @@ TODO:
 						<t:outputText value="#{columnIndex + 1}" styleClass="keyColumn" />
 					</f:facet>
 					<h:commandLink id="viewWellLink" action="#{heatMapViewer.viewWell}"
-						immediate="true" styleClass="heatMapValue">
-						<t:outputText value="#{heatMapViewer.heatMapCell.value}" escape="false"/>
+						immediate="true" styleClass="heatMapValue"
+						title="#{heatMapViewer.heatMapCell.popupText}">
+						<t:outputText value="#{heatMapViewer.heatMapCell.cellText}"
+							escape="false" />
 					</h:commandLink>
 				</t:columns>
 				<t:column styleClass="keyColumn">
 					<f:facet name="header">
 						<t:outputText value="Row" />
 					</f:facet>
-					<t:outputText value="#{heatMapViewer.heatMapRowLabels[plateRowIndex]}" />
+					<t:outputText
+						value="#{heatMapViewer.heatMapRowLabels[plateRowIndex]}" />
 				</t:column>
 			</t:dataTable>
 		</t:column>
 
 		<t:column style="vertical-align: center">
-			<t:dataTable
-				id="statisticsTable"
+			<t:dataTable id="statisticsTable"
 				value="#{heatMapViewer.heatMapStatisticsDataModels[heatMapIndex]}"
 				var="statistic" styleClass="standardTable" style="border: none">
 				<t:column>

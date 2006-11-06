@@ -127,7 +127,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   public ScreenResultViewer()
   {
     _collapsablePanelsState = new HashMap<String,Boolean>();
-    _collapsablePanelsState.put("summary", true);
+    _collapsablePanelsState.put("summary", false);
     _collapsablePanelsState.put("dataHeadersTable", true);
     _collapsablePanelsState.put("dataTable", true);
     _collapsablePanelsState.put("heatMaps", true);

@@ -86,6 +86,11 @@ hr {
 	text-align: center;
 }
 
+.heatMapCell {
+	width: 100px;
+	min-width: 40px;
+}
+
 a.heatMapValue:link,a.heatMapValue:visited 	{
 	text-decoration: none;
 	color: black;

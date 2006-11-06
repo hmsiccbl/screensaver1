@@ -28,14 +28,18 @@ public class HeatMapCell
 {
   // static members
 
+  private static final String INVISIBLE_HYPERLINK_VALUE = "&nbsp;&nbsp;&nbsp;&nbsp;";
+
   private static Logger log = Logger.getLogger(HeatMapCell.class);
 
   // instance data members
   
-  private String _value;
-  private String _hexColor;
+  private String _cellText;
   private ResultValue _resultValue;
-  private boolean _hiddenValues;
+  private boolean _containsValue;
+  private String _popupText;
+  private String _style;
+  private Well _well;
 
   
   // public constructors and methods
@@ -43,58 +47,71 @@ public class HeatMapCell
   public HeatMapCell(ResultValue resultValue,
                      double scoredValue,
                      Color color,
+                     boolean showValues,
                      NumberFormat format)
   {
     _resultValue = resultValue;
-    if (format != null) {
-      _value = format.format(scoredValue);
-    }
-    else {
-      _value = "&nbsp;&nbsp;&nbsp;";
-    }
-
-    _hexColor = String.format("#%02x%02x%02x",
-                              color.getRed(),
-                              color.getGreen(),
-                              color.getBlue());
+    _well = resultValue == null ? null : resultValue.getWell();
+    _containsValue = resultValue != null && !resultValue.isEmpty();
+    String formattedValue = _containsValue ? format.format(scoredValue) : "<empty>";
+    _cellText = showValues ? formattedValue : INVISIBLE_HYPERLINK_VALUE;
+    _popupText = _resultValue == null ? "" :
+      _resultValue.getWell().getWellName() + ": " + formattedValue;
+    
+    updateStyle(resultValue, color);
   }
 
   public HeatMapCell()
   {
-    _value = "";
-    _hexColor = "#000000";
+    _cellText = "";
+    _popupText = "";
   }
 
-  public String getHexColor()
+  public String getCellText()
   {
-    return _hexColor;
+    return _cellText;
   }
-
-  public String getValue()
+  
+  public String getPopupText()
   {
-    return _value;
+    return _popupText;
   }
   
   public String getStyle()
   {
-
-    if (_resultValue != null &&
-      !_resultValue.isExclude()) {
-      if (_resultValue.isExperimental()) {
-        return "background-color: " + _hexColor;
-      }
-      else if (_resultValue.isControl()) {
-        return "background-color: " + _hexColor + "; border-style: double";
-      }
-    }
-
-    // non-data-producing well
-    return "background-color: + #000000";
+    return _style;
   }
   
   public Well getWell()
   {
-    return _resultValue.getWell();
+    return _well;
   }
+  
+  
+  // protected methods
+  
+  protected void updateStyle(ResultValue resultValue, Color color)
+  {
+    String hexColor = String.format("#%02x%02x%02x",
+      color.getRed(),
+      color.getGreen(),
+      color.getBlue());
+
+    if (resultValue != null &&
+      !resultValue.isExclude()) {
+      if (resultValue.isExperimental()) {
+        _style = "background-color: " + hexColor;
+        return;
+      }
+      else if (_resultValue.isControl()) {
+        _style = "background-color: " + hexColor + "; border-style: double";
+        return;
+      }
+    }
+
+    // non-data-producing well
+    _style = "background-color: transparent";
+  }
+  
 }
 
