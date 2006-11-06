@@ -14,8 +14,6 @@ import java.text.NumberFormat;
 
 import junit.framework.TestCase;
 
-import edu.harvard.med.screensaver.ui.view.screenresults.HeatMapCell;
-
 import org.apache.log4j.Logger;
 
 public class HeatMapCellTest extends TestCase
@@ -29,8 +27,9 @@ public class HeatMapCellTest extends TestCase
     HeatMapCell cell = new HeatMapCell(null, // TODO: fixme
                                        1.0,
                                        new Color(128, 0, 196),
+                                       true,
                                        NumberFormat.getInstance());
-    assertEquals("value", "1.000", cell.getValue());
+    assertEquals("value", "1.000", cell.getCellText());
     assertEquals("style", "background-color: #8000c4", cell.getStyle());
   }
 

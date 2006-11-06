@@ -36,7 +36,7 @@
         </f:facet>
         <h:outputText value="#{row.cell.formattedRowAndColumn}" />
       </t:column>
-      <t:column styleClass="column">
+      <t:column styleClass="column">	
         <f:facet name="header">
           <h:outputText value="Error" />
         </f:facet>
@@ -71,6 +71,11 @@
   </h:form>
   
   <h:form id="commandForm">
+    <h:commandButton id="cancel"
+      action="#{screenResultImporter.cancel}"
+      immediate="true"
+      value="Cancel"
+      styleClass="command" />
     <h:commandButton id="downloadCommand"
       actionListener="#{screenResultImporter.downloadErrorAnnotatedWorkbookListener}"
       value="View Error-Annotated Workbook"

@@ -9,17 +9,25 @@
 
 package edu.harvard.med.screensaver.ui.control;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer;
+import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
-import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
+import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
+import edu.harvard.med.screensaver.ui.util.Messages;
+
+import org.apache.log4j.Logger;
 
 /**
+ * Controller bean for views managed by the screenresults package. When
+ * navigating between views <i>within</i> the screenresults package, the "last"
+ * screen and screenSearchResults are remembered by this controller, allowing the
+ * views to be unencumbered with passing around these objects.
  * 
- *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
@@ -29,67 +37,111 @@ public class ScreenResultsController extends AbstractUIController
   // private static final fields
   
   private static final Logger log = Logger.getLogger(ScreenResultsController.class);
-  private static String IMPORT_SCREEN_RESULT = "importScreenResult";
+  private static String VIEW_SCREEN_RESULT_IMPORT_ERRORS = "viewScreenResultImportErrors";
   private static String VIEW_SCREEN_RESULT = "viewScreenResult";
   
   
   // private instance fields
 
   private DAO _dao;
-  private ScreenViewer _screenViewer;
+  private Messages _messages;
+  private ScreensController _screensController;
+  private LibrariesController _librariesController;
   private ScreenResultViewer _screenResultViewer;
+  private HeatMapViewer _heatMapViewer;
+  private ScreenResultImporter _screenResultImporter;
+  private ScreenResultExporter _screenResultExporter;
+
+  private Screen _lastScreen;
+  private ScreenSearchResults _lastScreenSearchResults;
   
   
   // public getters and setters
 
-  public DAO getDao()
-  {
-    return _dao;
-  }
-  
   public void setDao(DAO dao)
   {
     _dao = dao;
   }
   
-  public ScreenViewer getScreenViewer()
+  public void setMessages(Messages messages)
   {
-    return _screenViewer;
+    _messages = messages;
   }
   
-  public void setScreenViewer(ScreenViewer screenViewer)
+  public void setScreensController(ScreensController screensController)
   {
-    if (_screenViewer == screenViewer) {
-      return;
-    }
-    _screenViewer = screenViewer;
-    _screenViewer.setScreenResultsController(this);
+    _screensController = screensController;
   }
   
-  public ScreenResultViewer getScreenResultViewer()
+  public void setLibrariesController(LibrariesController librariesController)
   {
-    return _screenResultViewer;
+    _librariesController = librariesController;
   }
   
   public void setScreenResultViewer(ScreenResultViewer screenResultViewer)
   {
     _screenResultViewer = screenResultViewer;
+    _screenResultViewer.setScreenResultsController(this);
   }
   
+  public void setHeatMapViewer(HeatMapViewer heatMapViewer) 
+  {
+    _heatMapViewer = heatMapViewer;
+  }
+
+  public void setScreenResultImporter(ScreenResultImporter screenResultImporter) 
+  {
+    _screenResultImporter = screenResultImporter;
+    _screenResultImporter.setScreenResultsController(this);
+  }
+
+  public void setScreenResultExporter(ScreenResultExporter screenResultExporter) 
+  {
+    _screenResultExporter = screenResultExporter;
+  }
+
   
   // public control methods
-  
-  public String importScreenResult(Screen screen)
+ 
+  /**
+   * Call this method when navigating from a Screen to a ScreenResult
+   */
+  @UIControllerMethod
+  public String viewScreenResult(Screen screen, ScreenSearchResults screenSearchResults)
   {
-    // TODO: pass the ScreenResultImporter the screen when control is worked out and
-    // SRI no longer has references to ScreenViewer etc.
-    return IMPORT_SCREEN_RESULT;
+    _lastScreen = screen;
+    _lastScreenSearchResults = screenSearchResults;
+    
+    ScreenResult screenResult = screen.getScreenResult();
+    
+    _screenResultImporter.setDao(_dao);
+    _screenResultImporter.setScreen(screen);
+    _screenResultImporter.setScreenResultParser(new ScreenResultParser(_dao));
+    
+    return viewScreenResult(screenResult);
   }
   
+  /**
+   * Call this method when navigating to a ScreenResult from a JSF view within the screenresults package
+   */
+  @UIControllerMethod
   public String viewScreenResult(ScreenResult screenResult)
   {
     _screenResultViewer.setScreenResult(screenResult);
+    _screenResultViewer.setDao(_dao);
+    _screenResultViewer.setScreenResultExporter(_screenResultExporter);
+    _screenResultViewer.setLibrariesController(_librariesController);
+
+    _heatMapViewer.setScreenResult(screenResult);
+    _heatMapViewer.setLibrariesController(_librariesController);
+    
     return VIEW_SCREEN_RESULT; 
+  }
+  
+  @UIControllerMethod
+  public String viewLastScreen()
+  {
+    return _screensController.viewScreen(_lastScreen, _lastScreenSearchResults);
   }
 }
 

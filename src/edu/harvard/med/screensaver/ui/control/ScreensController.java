@@ -51,6 +51,7 @@ public class ScreensController extends AbstractUIController
   private DAO _dao;
   private ScreensBrowser _screensBrowser;
   private ScreenViewer _screenViewer;
+  private ScreenResultsController _screenResultsController;
   
 
   // public getters and setters
@@ -65,6 +66,14 @@ public class ScreensController extends AbstractUIController
     _dao = dao;
   }
   
+  public void setScreenResultsController(ScreenResultsController screenResultsController)
+  {
+    _screenResultsController = screenResultsController;
+    // HACK: JSF beans cannot have cyclical references in faces-config.xml!
+    _screenResultsController.setScreensController(this);
+    
+  }
+
   public ScreensBrowser getScreensBrowser()
   {
     return _screensBrowser;
@@ -103,6 +112,7 @@ public class ScreensController extends AbstractUIController
   @UIControllerMethod
   public String viewScreen(Screen screen, ScreenSearchResults screenSearchResults)
   {
+    _screenViewer.setScreenResultsController(_screenResultsController);
     _screenViewer.setScreen(screen);
     _screenViewer.setCandidateLabHeads(_dao.findAllLabHeads());
     _screenViewer.setCandidateCollaborators(_dao.findAllEntitiesWithType(ScreeningRoomUser.class));

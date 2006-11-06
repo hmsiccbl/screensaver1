@@ -20,9 +20,6 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
-import org.apache.log4j.Logger;
-
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
@@ -46,6 +43,8 @@ import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.util.StringUtils;
 
+import org.apache.log4j.Logger;
+
 public class ScreenViewer extends AbstractBackingBean
 {
   private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.SCREENS_ADMIN;
@@ -57,10 +56,7 @@ public class ScreenViewer extends AbstractBackingBean
 
   private ScreensController _screensController;
   private ScreenResultsController _screenResultsController;
-  
   private Screen _screen;
-  private ScreenSearchResults _screenSearchResults;
-
   private UISelectOneBean<ScreeningRoomUser> _leadScreener;
   private UISelectOneBean<ScreeningRoomUser> _labName;
   private UISelectManyBean<ScreeningRoomUser> _collaborators;
@@ -69,32 +65,20 @@ public class ScreenViewer extends AbstractBackingBean
   private AssayReadoutType _newAssayReadoutType = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs)
   private String _newKeyword = "";
 
+  private ScreenSearchResults _screenSearchResults;
+
 
   
   // public property getter & setter methods
 
-  public ScreensController getScreensController()
-  {
-    return _screensController;
-  }
-  
   public void setScreensController(ScreensController screensController)
   {
     _screensController = screensController;
   }
   
-  public ScreenResultsController getScreenResultsController()
-  {
-    return _screenResultsController;
-  }
-  
   public void setScreenResultsController(ScreenResultsController screenResultsController)
   {
-    if (_screenResultsController == screenResultsController) {
-      return;
-    }
     _screenResultsController = screenResultsController;
-    _screenResultsController.setScreenViewer(this);
   }
   
   public Screen getScreen() 
@@ -458,13 +442,7 @@ public class ScreenViewer extends AbstractBackingBean
 
   public String viewScreenResult()
   {
-    ScreenResult screenResult = _screen.getScreenResult();
-    if (screenResult == null) {
-     return _screenResultsController.importScreenResult(_screen); 
-    }
-    else {
-      return _screenResultsController.viewScreenResult(screenResult);
-    }
+    return _screenResultsController.viewScreenResult(_screen, _screenSearchResults);
   }
   
   public String viewBillingInformation()
@@ -518,5 +496,4 @@ public class ScreenViewer extends AbstractBackingBean
   {
     return (E) getHttpServletRequest().getAttribute(StringUtils.uncapitalize(entityClass.getSimpleName()));
   }
-
 }

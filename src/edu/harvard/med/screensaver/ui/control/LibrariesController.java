@@ -285,6 +285,10 @@ public class LibrariesController extends AbstractUIController
   }
   
   @UIControllerMethod
+  /**
+   * @param wellSearchResults <code>null</code> if well was not found within
+   *          the context of a search result
+   */
   public String viewWell(Well well, WellSearchResults wellSearchResults)
   {
     _wellViewer.setWellSearchResults(wellSearchResults);

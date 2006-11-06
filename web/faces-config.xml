@@ -237,6 +237,10 @@
       <value>#{messages}</value>
     </managed-property>
     <managed-property>
+      <property-name>screenResultsController</property-name>
+      <value>#{screenResultsController}</value>
+    </managed-property>
+    <managed-property>
       <property-name>screensBrowser</property-name>
       <value>#{screensBrowser}</value>
     </managed-property>
@@ -258,17 +262,13 @@
     <managed-bean-name>screenViewer</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.screens.ScreenViewer</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>screenResultsController</property-name>
-      <value>#{screenResultsController}</value>
-    </managed-property>
   </managed-bean>
   
 
   <!-- === screen results backing beans === -->
   
   <managed-bean>
-    <description>Screen Results Controller Bean</description>
+    <description>Screen Results Controller</description>
     <managed-bean-name>screenResultsController</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.control.ScreenResultsController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
@@ -280,9 +280,31 @@
       <property-name>messages</property-name>
       <value>#{messages}</value>
     </managed-property>
+    <!-- JSF does not allow cycles; instead, we set this is ScreensController.setScreenResultsController()
+    <managed-property>
+      <property-name>screensController</property-name>
+      <value>#{screensController}</value>
+    </managed-property>
+    -->
+    <managed-property>
+      <property-name>librariesController</property-name>
+      <value>#{librariesController}</value>
+    </managed-property>
     <managed-property>
       <property-name>screenResultViewer</property-name>
       <value>#{screenResultViewer}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>heatMapViewer</property-name>
+      <value>#{heatMapViewer}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>screenResultImporter</property-name>
+      <value>#{screenResultImporter}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>screenResultExporter</property-name>
+      <value>#{screenResultExporter}</value>
     </managed-property>
   </managed-bean>
   
@@ -291,22 +313,6 @@
     <managed-bean-name>screenResultViewer</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>screenResultExporter</property-name>
-      <value>#{screenResultExporter}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>heatMapViewer</property-name>
-      <value>#{heatMapViewer}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>messages</property-name>
-      <value>#{messages}</value>
-    </managed-property>
   </managed-bean>
   
   <managed-bean>
@@ -314,18 +320,6 @@
     <managed-bean-name>heatMapViewer</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>wellViewer</property-name>
-      <value>#{wellViewer}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>messages</property-name>
-      <value>#{messages}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
-    </managed-property>
   </managed-bean>
 
   <managed-bean>
@@ -333,31 +327,15 @@
     <managed-bean-name>screenResultImporter</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>screenViewer</property-name>
-      <value>#{screenViewer}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>screenResultViewer</property-name>
-      <value>#{screenResultViewer}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>screenResultParser</property-name>
-      <value>#{screenResultParser}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>messages</property-name>
-      <value>#{messages}</value>
-    </managed-property>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Screen Result Exporter</description>
+    <managed-bean-name>screenResultExporter</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
   </managed-bean>
  
- 
- 
-
   
   <!-- Navigation rules -->
   
@@ -455,7 +433,7 @@
 
     <!-- === screenresults wildcard navigation rules === --> 
     <navigation-case>
-      <from-outcome>importScreenResult</from-outcome>
+      <from-outcome>viewScreenResultImportErrors</from-outcome>
       <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
       <redirect/>
     </navigation-case>   
@@ -464,68 +442,7 @@
       <to-view-id>/screenresults/screenResultViewer</to-view-id>
       <redirect/>
     </navigation-case>
-    
-    <!-- TODO: delete this rule when certain it is not needed any more -->
-    <navigation-case>
-      <from-outcome>goImportScreenResult</from-outcome>
-      <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
-      <redirect/>
-    </navigation-case>
 
-  </navigation-rule>
-  
-
-  <!-- === non-wildcard navigation rules follow. goal is to get rid of all of these === -->
-  
-  <!-- TODO: rename screenResultImporter to screenResultImportErrorViewer -->
-  <navigation-rule>
-    <from-view-id>/screenresults/admin/screenResultImporter.jsp</from-view-id>
-    <navigation-case>
-      <from-action>#{screenResultImporter.submit}</from-action>
-      <from-outcome>success</from-outcome>
-      <to-view-id>/screenresults/screenResultViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-action>#{screenResultImporter.submit}</from-action>
-      <from-outcome>error</from-outcome>
-      <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
-      <redirect/>
-    </navigation-case>
-  </navigation-rule>
-
-  <navigation-rule>
-    <from-view-id>/screenresults/screenResultViewer.jsp</from-view-id>
-    <navigation-case>
-      <from-outcome>viewHeatMaps</from-outcome>
-      <to-view-id>/screenresults/heatMapViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>viewScreen</from-outcome>
-      <to-view-id>/screens/screenViewer</to-view-id>
-    </navigation-case>
-    <navigation-case>
-     <from-action>#{screenResultImporter.doImport}</from-action>
-     <from-outcome>success</from-outcome>
-     <to-view-id>/screenresults/screenResultViewer</to-view-id>
-     <redirect/>
-    </navigation-case>
-    <navigation-case>
-     <from-action>#{screenResultImporter.doImport}</from-action>
-     <from-outcome>error</from-outcome>
-     <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
-     <redirect/>
-    </navigation-case>
-  </navigation-rule>
-
-  <navigation-rule>
-    <from-view-id>/screenresults/heatMapViewer.jsp</from-view-id>
-    <navigation-case>
-      <from-outcome>done</from-outcome>
-      <to-view-id>/screenresults/screenResultViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
   </navigation-rule>
   
 

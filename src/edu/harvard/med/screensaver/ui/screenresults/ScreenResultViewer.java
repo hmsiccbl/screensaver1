@@ -30,11 +30,6 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
@@ -42,11 +37,17 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
+import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.control.ScreenResultsController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 
 /**
@@ -77,6 +78,8 @@ public class ScreenResultViewer extends AbstractBackingBean
 
   // instance data members
 
+  private ScreenResultsController _screenResultsController;
+  private LibrariesController _librariesController;
   private DAO _dao;
   private ScreenResult _screenResult;
   private ScreenResultExporter _screenResultExporter;
@@ -103,23 +106,12 @@ public class ScreenResultViewer extends AbstractBackingBean
    * @motivation optimization
    */
   private Map<Integer,Integer> _plateNumber2FirstRow;
-  
   private UniqueDataHeaderNames _uniqueDataHeaderNames;
-
   private DataModel _rawDataModel;
-
   private DataModel _rawDataColumnModel;
-
   private DataModel _dataHeaderColumnModel;
-
   private DataModel _metadataModel;
-
-  private HeatMapViewer _heatMapViewer;
-
   private Map<String,Boolean> _collapsablePanelsState;
-
-  
-//  private Converter _rowToPlateConverter;
   
 
   // public methods
@@ -136,57 +128,36 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   // bean property methods
 
-  public DAO getDao()
-  {
-    return _dao;
-  }
-
   public void setDao(DAO dao)
   {
     _dao = dao;
   }
 
-  public HeatMapViewer getHeatMapViewer()
+  public void setScreenResultsController(ScreenResultsController screenResultsController)
   {
-    return _heatMapViewer;
+    _screenResultsController = screenResultsController;
   }
 
-  public void setHeatMapViewer(HeatMapViewer heatMapViewer)
+  public void setLibrariesController(LibrariesController librariesController) 
   {
-    _heatMapViewer = heatMapViewer;
+    _librariesController = librariesController;
   }
 
+  public void setScreenResult(ScreenResult screenResult) 
+  {
+    _screenResult = screenResult;
+    resetView();
+  }
+  
   public ScreenResult getScreenResult()
   {
-    // HACK: for quicker web testing
-    if (_screenResult == null) {
-      log.debug("using default screen result for screen 107");
-      Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 107);
-      setScreenResult(screen.getScreenResult());
-    }
     return _screenResult;
   }
-  
-  public void setScreenResult(ScreenResult screenResult)
-  {
-    if (_screenResult != screenResult) {
-      resetView();
-    }
-    _screenResult = screenResult;
-    _heatMapViewer.setScreenResult(_screenResult);
-  }
-  
-  public ScreenResultExporter getScreenResultExporter()
-  {
-    return _screenResultExporter;
-  }
-
 
   public void setScreenResultExporter(ScreenResultExporter screenResultExporter)
   {
     _screenResultExporter = screenResultExporter;
   }
-
 
   public Map getCollapsablePanelsState()
   {
@@ -408,7 +379,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   public String viewScreen()
   {
-    return VIEW_SCREEN_ACTION;
+    return _screenResultsController.viewLastScreen();
   }
   
   public String download()
@@ -449,9 +420,9 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   public String showWell()
   { 
-    Object wellId = (Object) getFacesContext().getExternalContext().getRequestParameterMap().get("wellIdParam");
-    log.debug("action event on well " + wellId);
-    return "showWell";
+    Integer wellId = (Integer) getFacesContext().getExternalContext().getRequestParameterMap().get("wellIdParam");
+    Well well = _dao.findEntityById(Well.class, wellId);
+    return _librariesController.viewWell(well, null);
   }
   
   public String update()
@@ -464,12 +435,6 @@ public class ScreenResultViewer extends AbstractBackingBean
   {
     selectAllDataHeaders();
     return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-  
-  public String done()
-  {
-    log.debug("done action received");
-    return DONE_ACTION_RESULT;
   }
   
   
@@ -760,5 +725,6 @@ public class ScreenResultViewer extends AbstractBackingBean
       _resultValues.put(_uniqueNames.get(rvt), rv);
     }
   }
+
 
 }

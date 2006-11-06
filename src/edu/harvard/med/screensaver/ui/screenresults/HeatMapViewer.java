@@ -30,7 +30,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.libraries.WellViewer;
+import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
@@ -91,7 +91,7 @@ public class HeatMapViewer extends AbstractBackingBean
   private List<DataModel> _heatMapStatistics;
   private List<DataModel> _heatMapColumnDataModels;
   private List<String> _heatMapRowLabels;
-  private WellViewer _wellViewer;
+  private LibrariesController _librariesController;
 
   
   // bean property methods
@@ -101,9 +101,8 @@ public class HeatMapViewer extends AbstractBackingBean
     _dao = dao;
   }
 
-  public void setWellViewer(WellViewer wellViewerController)
-  {
-    _wellViewer = wellViewerController;
+  public void setLibrariesController(LibrariesController librariesController) {
+    _librariesController = librariesController;
   }
 
   public void setScreenResult(ScreenResult screenResult)
@@ -294,8 +293,7 @@ public class HeatMapViewer extends AbstractBackingBean
   public String viewWell()
   {
     HeatMapCell heatMapCell = getHeatMapCell();
-    _wellViewer.setWell(heatMapCell.getWell());
-    return "showWell";
+    return _librariesController.viewWell(heatMapCell.getWell(), null);
   }
   
   public String nextPlate()

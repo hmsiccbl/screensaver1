@@ -180,7 +180,6 @@ TODO:
 							<t:outputText value="Well" />
 						</f:facet>
 						<t:commandLink action="#{screenResultViewer.showWell}">
-							<%-- TODO: f:param name="wellIdParam" value="#{row.well.wellId} "/ --%>
 							<f:param name="wellIdParam" value="#{row.well.wellName} " />
 							<t:outputText value="#{row.well.wellName}" />
 						</t:commandLink>
