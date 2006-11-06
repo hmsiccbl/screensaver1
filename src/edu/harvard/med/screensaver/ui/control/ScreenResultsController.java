@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 
@@ -28,6 +29,7 @@ public class ScreenResultsController extends AbstractUIController
   // private static final fields
   
   private static final Logger log = Logger.getLogger(ScreenResultsController.class);
+  private static String IMPORT_SCREEN_RESULT = "importScreenResult";
   private static String VIEW_SCREEN_RESULT = "viewScreenResult";
   
   
@@ -76,6 +78,13 @@ public class ScreenResultsController extends AbstractUIController
   
   
   // public control methods
+  
+  public String importScreenResult(Screen screen)
+  {
+    // TODO: pass the ScreenResultImporter the screen when control is worked out and
+    // SRI no longer has references to ScreenViewer etc.
+    return IMPORT_SCREEN_RESULT;
+  }
   
   public String viewScreenResult(ScreenResult screenResult)
   {

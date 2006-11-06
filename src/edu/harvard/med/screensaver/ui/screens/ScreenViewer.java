@@ -22,6 +22,7 @@ import javax.faces.model.SelectItem;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
@@ -457,7 +458,13 @@ public class ScreenViewer extends AbstractBackingBean
 
   public String viewScreenResult()
   {
-    return _screenResultsController.viewScreenResult(_screen.getScreenResult());
+    ScreenResult screenResult = _screen.getScreenResult();
+    if (screenResult == null) {
+     return _screenResultsController.importScreenResult(_screen); 
+    }
+    else {
+      return _screenResultsController.viewScreenResult(screenResult);
+    }
   }
   
   public String viewBillingInformation()

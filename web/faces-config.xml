@@ -453,12 +453,19 @@
       <redirect/>
     </navigation-case>
 
-    <!-- === screenresults wildcard navigation rules === -->    
+    <!-- === screenresults wildcard navigation rules === --> 
     <navigation-case>
-      <from-outcome>viewScreenResult</from-outcome>
+      <from-outcome>importScreenResult</from-outcome>
       <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
       <redirect/>
+    </navigation-case>   
+    <navigation-case>
+      <from-outcome>viewScreenResult</from-outcome>
+      <to-view-id>/screenresults/screenResultViewer</to-view-id>
+      <redirect/>
     </navigation-case>
+    
+    <!-- TODO: delete this rule when certain it is not needed any more -->
     <navigation-case>
       <from-outcome>goImportScreenResult</from-outcome>
       <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
@@ -466,6 +473,7 @@
     </navigation-case>
 
   </navigation-rule>
+  
 
   <!-- === non-wildcard navigation rules follow. goal is to get rid of all of these === -->
   
