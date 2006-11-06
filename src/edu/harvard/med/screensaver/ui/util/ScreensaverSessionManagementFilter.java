@@ -163,6 +163,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
     SessionFactory sessionFactory = lookupSessionFactoryViaSpring();
     Session hibSession = getOrCreateHibernateSession(sessionFactory, httpSessionId);
     String hibSessionLogId = SessionFactoryUtils.toString(hibSession);
+    
     // have Hibernate session only perform a flush operation at txn commit time,
     // to prevent expensive flushes from occuring when we're doing queries; this
     // does mean we have to be careful not to expect any save/update/persist

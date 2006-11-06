@@ -52,18 +52,18 @@
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter"
     singleton="true">
   </bean>
-  
+
   <bean 
-    id="rnaiLibraryContentsParser"
-    class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser"
+    id="compoundLibraryContentsParser"
+    class="edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser"
     singleton="false"
   >
     <constructor-arg ref="dao"/>
   </bean>
-  
+
   <bean 
-    id="compoundLibraryContentsParser"
-    class="edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser"
+    id="rnaiLibraryContentsParser"
+    class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser"
     singleton="false"
   >
     <constructor-arg ref="dao"/>
@@ -83,4 +83,13 @@
     <constructor-arg ref="dao"/>
     <constructor-arg ref="compoundLibraryContentsParser"/>
   </bean>
+  
+  <bean 
+    id="bulkRNAiLibraryLoader"
+    class="edu.harvard.med.screensaver.io.libraries.rnai.BulkRNAiLibraryLoader"
+    singleton="true">
+    <constructor-arg ref="dao"/>
+    <constructor-arg ref="rnaiLibraryContentsParser"/>
+  </bean>
+  
 </beans>

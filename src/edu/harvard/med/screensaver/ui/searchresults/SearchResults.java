@@ -561,7 +561,9 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
     PrintWriter searchResultsPrintWriter = null;
     FileOutputStream searchResultsFileOutputStream = null;
     try {
-      searchResultsFile = File.createTempFile("searchResults.", ".sdf");
+      searchResultsFile = File.createTempFile(
+        "searchResults.",
+        _downloadFormat.equals(SD_FILE) ? ".sdf" : ".xls");
       if (_downloadFormat.equals(SD_FILE)) {
         searchResultsPrintWriter = new PrintWriter(searchResultsFile);
         writeSDFileSearchResults(searchResultsPrintWriter);

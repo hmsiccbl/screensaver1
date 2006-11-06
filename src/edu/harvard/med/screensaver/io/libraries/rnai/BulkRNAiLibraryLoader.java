@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.io.libraries.compound;
+package edu.harvard.med.screensaver.io.libraries.rnai;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,30 +21,31 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.model.libraries.Library;
 
 /**
- * A bulk loader for the compound libraries that we have SD files for.
+ * A bulk loader for the RNAi libraries.
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class BulkCompoundLibraryLoader
+public class BulkRNAiLibraryLoader
 {
   
   // static members
 
-  private static final Logger log = Logger.getLogger(BulkCompoundLibraryLoader.class);
-  private static final File _compoundLibraryDir = new File("/usr/local/compound-libraries");
-  private static final Pattern _pattern = Pattern.compile("^(.*?)(_\\d+)?\\.sdf$");
+  private static final Logger log = Logger.getLogger(BulkRNAiLibraryLoader.class);
+  private static final File _rnaiLibraryDir = new File("/usr/local/rnai-libraries");
+  private static final Pattern _pattern = Pattern.compile("^Dharmacon_([^_]*?)(_\\w+)\\.xls$");
   
   public static void main(String[] args)
   {
     ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { 
       "spring-context.xml",
     });
-    BulkCompoundLibraryLoader libraryLoader =
-      (BulkCompoundLibraryLoader) context.getBean("bulkCompoundLibraryLoader");
+    BulkRNAiLibraryLoader libraryLoader =
+      (BulkRNAiLibraryLoader) context.getBean("bulkRNAiLibraryLoader");
     libraryLoader.bulkLoadLibraries();
   }
 
@@ -52,13 +53,12 @@ public class BulkCompoundLibraryLoader
   // instance data members
   
   private DAO _dao;
-  private SDFileCompoundLibraryContentsParser _parser;
+  private RNAiLibraryContentsParser _parser;
+  
   
   // public constructors and methods
 
-  public BulkCompoundLibraryLoader(
-    DAO dao,
-    SDFileCompoundLibraryContentsParser parser)
+  public BulkRNAiLibraryLoader(DAO dao, RNAiLibraryContentsParser parser)
   {
     _dao = dao;
     _parser = parser;
@@ -70,41 +70,40 @@ public class BulkCompoundLibraryLoader
   public void bulkLoadLibraries()
   {
     
-    File [] sdFiles = _compoundLibraryDir.listFiles(new FilenameFilter() {
+    File [] rnaiFiles = _rnaiLibraryDir.listFiles(new FilenameFilter() {
       public boolean accept(File dir, String filename) {
-        return filename.endsWith(".sdf");
+        return filename.endsWith(".xls");
       }
     });
-    for (final File sdFile : sdFiles) {
+    for (final File rnaiFile : rnaiFiles) {
       _dao.doInTransaction(new DAOTransaction() {
         public void runTransaction()
         {
-          log.info("processing SD File: " + sdFile.getName());
-          Library library = getLibraryForSDFile(sdFile);
+          log.info("processing RNAi File: " + rnaiFile.getName());
+          Library library = getLibraryForRNAiFile(rnaiFile);
           try {
-            _parser.parseLibraryContents(library, sdFile, new FileInputStream(sdFile));
+            _parser.parseLibraryContents(library, rnaiFile, new FileInputStream(rnaiFile));
           }
           catch (FileNotFoundException e) {
             throw new InternalError("braindamage: " + e.getMessage());
           }
           if (_parser.getHasErrors()) {
-            for (SDFileParseError error : _parser.getErrors()) {
+            for (ParseError error : _parser.getErrors()) {
               log.error(error.toString());
             }
-            //throw new RuntimeException("SD File has parse errors: " + sdFile.getName());
           }
           _dao.persistEntity(library);
-          log.info("finished processing SD File: " + sdFile.getName());
+          log.info("finished processing RNAi File: " + rnaiFile.getName());
         }
       });
     }
   }
 
-  private Library getLibraryForSDFile(File sdFile) {
+  private Library getLibraryForRNAiFile(File sdFile) {
     String filename = sdFile.getName();
     Matcher matcher = _pattern.matcher(filename);
     if (! matcher.matches()) {
-      throw new RuntimeException("sd file didnt match pattern: " + filename);
+      throw new RuntimeException("RNAi file didnt match pattern: " + filename);
     }
     String libraryName = matcher.group(1);
     Library library = _dao.findEntityByProperty(

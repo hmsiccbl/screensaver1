@@ -82,9 +82,11 @@ public class JSFUtils
   {
     HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
     response.setContentType(mimeType);
-    // TODO: not working!!!
-    response.setHeader("Content-Location",
-                       contentLocation);
+    
+    // NOTE: the second line does the trick with the filename. leaving the first line in for
+    // posterity
+    response.setHeader("Content-Location", contentLocation);
+    response.setHeader( "Content-disposition", "attachment; filename=\"" + contentLocation + "\"");
     OutputStream out = response.getOutputStream();
     IOUtils.copy(dataInputStream, out);
     out.close();
