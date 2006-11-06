@@ -786,7 +786,6 @@ public class Library extends AbstractEntity
    *   cascade="save-update"
    *   inverse="true"
    *   lazy="true"
-   *   batch-size="11520"
    * @hibernate.collection-key
    *   column="library_id"
    * @hibernate.collection-one-to-many
