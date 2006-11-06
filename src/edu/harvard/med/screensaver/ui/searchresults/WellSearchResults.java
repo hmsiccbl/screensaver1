@@ -229,38 +229,127 @@ public class WellSearchResults extends SearchResults<Well>
   @Override
   protected void writeExcelFileSearchResults(HSSFWorkbook searchResultsWorkbook)
   {
+    HSSFCellStyle style = createHeaderStyle(searchResultsWorkbook);
+    HSSFSheet rnaiSheet = createRNAiSheet(searchResultsWorkbook, style);
+    searchResultsWorkbook.setSheetName(0, "Genes");
+    HSSFSheet compoundSheet = createCompoundSheet(searchResultsWorkbook, style);
+    searchResultsWorkbook.setSheetName(1, "Compounds");
+    int rnaiSheetRow = 1;
+    int compoundSheetRow = 1;
+    for (Well well : _currentSort) {
+      if (writeWellToRNAiSheet(well, rnaiSheet, rnaiSheetRow)) {
+        rnaiSheetRow ++;
+      }
+      if (writeWellToCompoundSheet(well, compoundSheet, compoundSheetRow)) {
+        compoundSheetRow ++;
+      }
+    }
+    if (rnaiSheetRow == 1) {
+      searchResultsWorkbook.removeSheetAt(0);
+    }
+    if (compoundSheetRow == 1) {
+      searchResultsWorkbook.removeSheetAt(1);
+    }
+  }
+  
+  
+  // private instance methods
+
+  private HSSFCellStyle createHeaderStyle(HSSFWorkbook searchResultsWorkbook) {
     HSSFCellStyle style = searchResultsWorkbook.createCellStyle();
     HSSFFont font = searchResultsWorkbook.createFont();
     font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
     font.setUnderline(HSSFFont.U_SINGLE);
     style.setFont(font);
-    HSSFSheet sheet = searchResultsWorkbook.createSheet();
-    HSSFRow headerRow = sheet.createRow(0);
-    headerRow.createCell((short) 0).setCellValue("Library");
-    headerRow.createCell((short) 1).setCellValue("Plate");
-    headerRow.createCell((short) 2).setCellValue("Well");
-    headerRow.createCell((short) 3).setCellValue("Well Type");
-    headerRow.createCell((short) 4).setCellValue("Vendor Identifier");
-    headerRow.createCell((short) 5).setCellValue("ICCB Number");
-    headerRow.createCell((short) 6).setCellValue("Smiles");
-    headerRow.createCell((short) 7).setCellValue("Compound Names");
-    headerRow.createCell((short) 8).setCellValue("CAS Numbers");
-    headerRow.createCell((short) 9).setCellValue("NSC Numbers");
-    headerRow.createCell((short) 10).setCellValue("PubChem CID");
-    headerRow.createCell((short) 11).setCellValue("ChemBank ID");
-    headerRow.createCell((short) 12).setCellValue("EntrezGene ID");
-    headerRow.createCell((short) 13).setCellValue("GenBank Accession Number");
-    for (short i = 0; i < 14; i ++) {
-      headerRow.getCell(i).setCellStyle(style);      
-    }
-    for (int i = 0; i < _currentSort.size(); i ++) {
-      Well well = _currentSort.get(i);
-      writeWellToExcelFileSearchResults(well, sheet, i + 1);
-    }
+    return style;
   }
-  
-  private void writeWellToExcelFileSearchResults(Well well, HSSFSheet sheet, int rowNumber)
+
+  // TODO: factor out a generic createSheet(String[]) method
+  private HSSFSheet createRNAiSheet(HSSFWorkbook searchResultsWorkbook, HSSFCellStyle style) {
+    HSSFSheet rnaiSheet = searchResultsWorkbook.createSheet();
+    HSSFRow rnaiHeaderRow = rnaiSheet.createRow(0);
+    rnaiHeaderRow.createCell((short) 0).setCellValue("Library");
+    rnaiHeaderRow.createCell((short) 1).setCellValue("Plate");
+    rnaiHeaderRow.createCell((short) 2).setCellValue("Well");
+    rnaiHeaderRow.createCell((short) 3).setCellValue("Well Type");
+    rnaiHeaderRow.createCell((short) 4).setCellValue("Vendor Identifier");
+    rnaiHeaderRow.createCell((short) 5).setCellValue("ICCB Number");
+    rnaiHeaderRow.createCell((short) 6).setCellValue("EntrezGene ID");
+    rnaiHeaderRow.createCell((short) 7).setCellValue("GenBank Accession Number");
+    for (short i = 0; i < 8; i ++) {
+      rnaiHeaderRow.getCell(i).setCellStyle(style);      
+    }
+    return rnaiSheet;
+  }
+
+  private HSSFSheet createCompoundSheet(HSSFWorkbook searchResultsWorkbook, HSSFCellStyle style) {
+    HSSFSheet compoundSheet = searchResultsWorkbook.createSheet();
+    HSSFRow compoundHeaderRow = compoundSheet.createRow(0);
+    compoundHeaderRow.createCell((short) 0).setCellValue("Library");
+    compoundHeaderRow.createCell((short) 1).setCellValue("Plate");
+    compoundHeaderRow.createCell((short) 2).setCellValue("Well");
+    compoundHeaderRow.createCell((short) 3).setCellValue("Well Type");
+    compoundHeaderRow.createCell((short) 4).setCellValue("Vendor Identifier");
+    compoundHeaderRow.createCell((short) 5).setCellValue("ICCB Number");
+    compoundHeaderRow.createCell((short) 6).setCellValue("Smiles");
+    compoundHeaderRow.createCell((short) 7).setCellValue("Compound Names");
+    compoundHeaderRow.createCell((short) 8).setCellValue("CAS Numbers");
+    compoundHeaderRow.createCell((short) 9).setCellValue("NSC Numbers");
+    compoundHeaderRow.createCell((short) 10).setCellValue("PubChem CID");
+    compoundHeaderRow.createCell((short) 11).setCellValue("ChemBank ID");
+    for (short i = 0; i < 12; i ++) {
+      compoundHeaderRow.getCell(i).setCellStyle(style);      
+    }
+    return compoundSheet;
+  }
+
+  private boolean writeWellToRNAiSheet(Well well, HSSFSheet sheet, int rowNumber)
   {
+    Gene gene = well.getGene();
+    if (gene == null) {
+      return false;
+    }
+    HSSFRow row = createRow(well, sheet, rowNumber);
+    row.createCell((short) 6).setCellValue(gene.getEntrezgeneId());
+    Set<String> genbankAccessionNumbers = gene.getGenbankAccessionNumbers();
+    if (genbankAccessionNumbers.size() > 0) {
+      row.createCell((short) 7).setCellValue(listStrings(genbankAccessionNumbers));
+    }
+    return true;
+  }
+
+  private boolean writeWellToCompoundSheet(Well well, HSSFSheet sheet, int rowNumber)
+  {
+    Compound compound = well.getPrimaryCompound();
+    if (compound == null) {
+      return false;
+    }
+    HSSFRow row = createRow(well, sheet, rowNumber);
+    if (well.getSmiles() != null) {
+      row.createCell((short) 6).setCellValue(well.getSmiles());
+    }
+    Set<String> compoundNames = compound.getCompoundNames();
+    if (compoundNames.size() > 0) {
+      row.createCell((short) 7).setCellValue(listStrings(compoundNames));
+    }
+    Set<String> casNumbers = compound.getCasNumbers();
+    if (casNumbers.size() > 0) {
+      row.createCell((short) 8).setCellValue(listStrings(casNumbers));
+    }
+    Set<String> nscNumbers = compound.getNscNumbers();
+    if (nscNumbers.size() > 0) {
+      row.createCell((short) 9).setCellValue(listStrings(nscNumbers));
+    }
+    if (compound.getPubchemCid() != null) {
+      row.createCell((short) 10).setCellValue(compound.getPubchemCid());
+    }
+    if (compound.getChembankId() != null) {
+      row.createCell((short) 11).setCellValue(compound.getChembankId());
+    }
+    return true;
+  }
+
+  private HSSFRow createRow(Well well, HSSFSheet sheet, int rowNumber) {
     HSSFRow row = sheet.createRow(rowNumber);
     row.createCell((short) 0).setCellValue(well.getLibrary().getLibraryName());
     row.createCell((short) 1).setCellValue(well.getPlateNumber());
@@ -272,39 +361,7 @@ public class WellSearchResults extends SearchResults<Well>
     if (well.getIccbNumber() != null) {
       row.createCell((short) 5).setCellValue(well.getIccbNumber());
     }
-    if (well.getSmiles() != null) {
-      row.createCell((short) 6).setCellValue(well.getSmiles());
-    }
-    Compound compound = well.getPrimaryCompound();
-    if (compound != null) {
-      Set<String> compoundNames = compound.getCompoundNames();
-      if (compoundNames.size() > 0) {
-        row.createCell((short) 7).setCellValue(listStrings(compoundNames));
-      }
-      Set<String> casNumbers = compound.getCasNumbers();
-      if (casNumbers.size() > 0) {
-        row.createCell((short) 8).setCellValue(listStrings(casNumbers));
-      }
-      Set<String> nscNumbers = compound.getNscNumbers();
-      if (nscNumbers.size() > 0) {
-        row.createCell((short) 9).setCellValue(listStrings(nscNumbers));
-      }
-      if (compound.getPubchemCid() != null) {
-        row.createCell((short) 10).setCellValue(compound.getPubchemCid());
-      }
-      if (compound.getChembankId() != null) {
-        row.createCell((short) 11).setCellValue(compound.getChembankId());
-      }
-    }
-    Set<Gene> genes = well.getGenes();
-    if (genes.size() > 0) {
-      Gene gene = genes.iterator().next();
-      row.createCell((short) 12).setCellValue(gene.getEntrezgeneId());
-      Set<String> genbankAccessionNumbers = gene.getGenbankAccessionNumbers();
-      if (genbankAccessionNumbers.size() > 0) {
-        row.createCell((short) 13).setCellValue(listStrings(genbankAccessionNumbers));
-      }
-    }
+    return row;
   }
   
   /**
@@ -319,9 +376,6 @@ public class WellSearchResults extends SearchResults<Well>
     stringBuffer.setLength(stringBuffer.length() - 2);
     return stringBuffer.toString();
   }
-  
-  
-  // private instance methods
   
   private Object getContentsValue(Well well)
   {
