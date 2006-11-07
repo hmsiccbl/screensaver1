@@ -177,6 +177,32 @@ public class HeatMapViewer extends AbstractBackingBean
     }
     return EMPTY_HEAT_MAP_CELL;
   }
+  
+  public String getHeatMapTitle()
+  {
+    int heatMapIndex = _heatMapConfigurationsDataModel.getRowIndex();
+    HeatMapConfiguration heatMapConfiguration = _heatMapConfigurations.get(heatMapIndex);
+    StringBuilder title = new StringBuilder();
+    title.append(heatMapConfiguration.getDataHeaders().getSelection().getName());
+    title.append(": ");
+    title.append(heatMapConfiguration.getScoringType().getSelection().toString());
+    List<Filter<ResultValue>> filterSelections = heatMapConfiguration.getExcludedWellFilters().getSelections();
+    if (filterSelections != null && filterSelections.size() > 0) {
+      title.append(" (exclude ");
+      boolean first = true;
+      for (Filter filter : filterSelections) {
+        if (first) {
+          first = false;
+        } 
+        else {
+          title.append(", ");
+        }
+        title.append(filter.toString().toLowerCase());
+      }
+      title.append(")");
+    }
+    return title.toString();
+  }
 
 
   // JSF application methods

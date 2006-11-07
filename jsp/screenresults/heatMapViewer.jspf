@@ -107,6 +107,7 @@ TODO:
 		</t:column>
 
 		<t:column>
+			<t:outputText value="#{heatMapViewer.heatMapTitle}"/>
 			<t:dataTable id="heatMapTable"
 				value="#{heatMapViewer.heatMapDataModels[heatMapIndex]}"
 				var="plateRow" rowIndexVar="plateRowIndex" renderedIfEmpty="false"
