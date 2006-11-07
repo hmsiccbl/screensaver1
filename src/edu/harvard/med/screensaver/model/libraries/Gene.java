@@ -157,7 +157,6 @@ public class Gene extends AbstractEntity
    * @return the EntrezGene ID
    * @hibernate.property
    *   not-null="true"
-   *   unique="true"
    */
   @EntityIdProperty
   public Integer getEntrezgeneId()
