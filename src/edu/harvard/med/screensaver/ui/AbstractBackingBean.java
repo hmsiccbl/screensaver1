@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.security.Principal;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -147,6 +148,21 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
            && isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
   }
   
+  public String getUserPrincipalName()
+  {
+    Principal principal = getExternalContext().getUserPrincipal();
+    if (principal == null) {
+      return "";
+    }
+    return principal.getName();
+  }
+
+  public boolean isAuthenticatedUser()
+  {
+    Boolean pendingSessionCloseRequest = (Boolean)
+      getHttpSession().getAttribute(ScreensaverSessionManagementFilter.CLOSE_HTTP_AND_HIBERNATE_SESSIONS);
+    return getExternalContext().getUserPrincipal() != null && (pendingSessionCloseRequest == null || pendingSessionCloseRequest.equals(Boolean.FALSE));
+  }
   
 
   // protected methods

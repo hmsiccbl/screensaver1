@@ -9,9 +9,9 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import java.security.Principal;
 
 import javax.faces.event.ActionEvent;
+
 
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.navmenu.htmlnavmenu.HtmlCommandNavigationItem;
@@ -27,23 +27,6 @@ public class Menu extends AbstractBackingBean
  
   // bean property methods
   
-  public String getUserPrincipalName()
-  {
-    Principal principal = getExternalContext().getUserPrincipal();
-    if (principal == null) {
-      return "";
-    }
-    return principal.getName();
-  }
-  
-  public boolean isAuthenticatedUser()
-  {
-    return getExternalContext().getUserPrincipal() != null;
-  }
-  
-
-  // JSF application methods
-
   /**
    * Logs out the user of the current session and redirects to the login page.
    */

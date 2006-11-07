@@ -17,7 +17,7 @@
   <!-- Configure a handler for exceptions thrown during server-side processing -->
   <error-page>
     <error-code>500</error-code>
-    <location>/reportException.jsp</location>
+    <location>/reportException.jsf</location>
   </error-page>
 
   <!-- Configure a handler for unauthorized access -->
@@ -314,7 +314,7 @@
     <web-resource-collection>
       <web-resource-name>Error Messages</web-resource-name>
       <description>Pages that display error messages, which should displayable to everyone, including unauthenticated users.</description>
-      <url-pattern>/reportException.jsp</url-pattern>
+      <url-pattern>/reportException.jsf</url-pattern>
       <url-pattern>/unauthorizedAccess.jsp</url-pattern>
     </web-resource-collection>
     

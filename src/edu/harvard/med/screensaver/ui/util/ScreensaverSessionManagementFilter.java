@@ -155,7 +155,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
       return;
     }
 
-    HttpSession httpSession = request.getSession();
+    final HttpSession httpSession = request.getSession();
     String httpSessionId = httpSession.getId();
     log.info(">>>> Screensaver STARTING to process HTTP request for session " + 
              httpSessionId + " @ " + request.getRequestURI());
@@ -195,6 +195,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
           }
           catch (Throwable e) {
+            httpSession.setAttribute(CLOSE_HTTP_AND_HIBERNATE_SESSIONS, Boolean.TRUE);
             e.printStackTrace();
             throw new RuntimeException("caught exception while processing HTTP request in a transaction", e);
           }

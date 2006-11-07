@@ -79,6 +79,7 @@
 	    action="#{wellFinder.findWell}"
         id="quickFindWellSubmit"
         value="Go"
+        rendered="#{menu.authenticatedUser}"
         styleClass="command"
       />
     </h:form>

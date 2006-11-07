@@ -12,6 +12,7 @@
 <tiles-definitions>
 
 
+
   <!-- The base definition, defining common attributes for our "concrete" definitions, below -->
   
   <definition
@@ -35,6 +36,17 @@
 
   <!-- top-level tiles -->
   
+  <definition
+    name="/reportException.tiles"
+    extends=".base">
+    <put 
+      name="pageTitle"
+      value="Screensaver Error!"/>
+    <put
+      name="body"
+      value="/reportException.jsp" />
+  </definition>
+
   <definition
     name="/login.tiles"
     extends=".base">

@@ -55,8 +55,7 @@ hr {
 .errorMessage {
 	font-style: italic;
 	font-size: large;
-	color: black;
-	background-color: yellow;
+	color: red;
 	border: 1px;
 }
 
@@ -194,3 +193,18 @@ a.menuItem:hover,a.menuItemActive:hover {
 	margin: 0px;
 	border: 0px;
 }
+
+.stackTraceException {
+	font-size: medium;
+	font-weight: bold;
+}
+
+.stackTraceDetail {
+	font-size: x-small;
+}
+
+.highlightedStackTraceDetail {
+	font-size: x-small;
+	font-weight: bold;
+}
+
