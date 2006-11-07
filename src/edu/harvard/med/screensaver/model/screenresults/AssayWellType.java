@@ -24,13 +24,13 @@ public enum AssayWellType implements VocabularyTerm
 
   // the vocabulary
   
-  EXPERIMENTAL("experimental"),
-  EMPTY("empty"),
-  LIBRARY_CONTROL("library control"),
-  ASSAY_POSITIVE_CONTROL("assay positive control"),
-  ASSAY_NEGATIVE_CONTROL("assay negative control"),
-  BUFFER("buffer"),
-  OTHER("other"),
+  EXPERIMENTAL("experimental", "X"),
+  EMPTY("empty", "E"),
+  LIBRARY_CONTROL("library control", "C"),
+  ASSAY_POSITIVE_CONTROL("assay positive control", "P"),
+  ASSAY_NEGATIVE_CONTROL("assay negative control", "N"),
+  BUFFER("buffer", "B"),
+  OTHER("other", "O"),
   ;
  
   // static inner class
@@ -50,14 +50,16 @@ public enum AssayWellType implements VocabularyTerm
   // private instance field and constructor
 
   private String _value;
+  private String _abbreviation;
 
   /**
    * Constructs a <code>WellType</code> vocabulary term.
    * @param value The value of the term.
    */
-  private AssayWellType(String value)
+  private AssayWellType(String value, String abbreviation)
   {
     _value = value;
+    _abbreviation = abbreviation;
   }
 
 
@@ -70,6 +72,11 @@ public enum AssayWellType implements VocabularyTerm
   public String getValue()
   {
     return _value;
+  }
+  
+  public String getAbbreviation()
+  {
+    return _abbreviation;
   }
 
   /* (non-Javadoc)

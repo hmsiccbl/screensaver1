@@ -40,8 +40,9 @@ public class ScreenResultExporterTest extends AbstractSpringTest
    */
   public void testScreenResultExporter() throws Exception
   {
-    ScreenResult originalScreenResult  = mockScreenResultParser.parseLegacy(ScreenResultParser.makeDummyScreen(1), 
-                                                                            new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "LegacyTestAllInOne.xls"), false);
+    ScreenResult originalScreenResult = 
+      mockScreenResultParser.parseLegacy(ScreenResultParser.makeDummyScreen(1), 
+        new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "LegacyTestAllInOne.xls"), false);
     ScreenResultExporter exporter = new ScreenResultExporter();
     HSSFWorkbook workbook = exporter.build(originalScreenResult);
     File exportedFile = File.createTempFile("LegacyTestAllInOne", ".exported.xls");
@@ -55,23 +56,42 @@ public class ScreenResultExporterTest extends AbstractSpringTest
     assertFalse("parse errors on exported screen result", mockScreenResultParser.getHasErrors());
     exportedFile.deleteOnExit(); // delete only after confirmation of no errors, to allow developers to inspect file if parse errors encountered
     
-    assertEquals("one data worksheet per assay plate: PL_00001", "PL_00001", workbook.getSheetName(2));
+    
+    // test screen info sheet 
+    // TODO: make comprehensive
+    assertEquals("screen number", 
+                 1,
+                 (int)
+                 HSSFCellUtil.getCell(HSSFCellUtil.getRow(0, workbook.getSheetAt(0)), 1).getNumericCellValue());
+    assertEquals("screen title", 
+                 "Dummy screen",
+                 HSSFCellUtil.getCell(HSSFCellUtil.getRow(1, workbook.getSheetAt(0)), 1).getStringCellValue());
+    assertEquals("collaborators", 
+                 "Chris Collaborator, Cindy Collaborator",
+                 HSSFCellUtil.getCell(HSSFCellUtil.getRow(5, workbook.getSheetAt(0)), 1).getStringCellValue());
+    assertEquals("email", 
+                 "joe_screener_1@hms.harvard.edu",
+                 HSSFCellUtil.getCell(HSSFCellUtil.getRow(8, workbook.getSheetAt(0)), 1).getStringCellValue());
+    
+    // test data sheets
+    
+    assertEquals("one data worksheet per assay plate: PL-00001", "PL-00001", workbook.getSheetName(2));
     HSSFSheet sheetPlate1 = workbook.getSheetAt(2);
     assertEquals(320, sheetPlate1.getLastRowNum());
-    assertEquals("PL_00001", HSSFCellUtil.getCell(HSSFCellUtil.getRow(1,sheetPlate1),0).getStringCellValue());
-    assertEquals("PL_00001", HSSFCellUtil.getCell(HSSFCellUtil.getRow(320,sheetPlate1),0).getStringCellValue());
+    assertEquals("PL-00001", HSSFCellUtil.getCell(HSSFCellUtil.getRow(1,sheetPlate1),0).getStringCellValue());
+    assertEquals("PL-00001", HSSFCellUtil.getCell(HSSFCellUtil.getRow(320,sheetPlate1),0).getStringCellValue());
 
-    assertEquals("one data worksheet per assay plate: PL_00002", "PL_00002", workbook.getSheetName(3));
+    assertEquals("one data worksheet per assay plate: PL-00002", "PL-00002", workbook.getSheetName(3));
     HSSFSheet sheetPlate2 = workbook.getSheetAt(3);
     assertEquals(320, sheetPlate2.getLastRowNum());
-    assertEquals("PL_00002", HSSFCellUtil.getCell(HSSFCellUtil.getRow(1,sheetPlate2),0).getStringCellValue());
-    assertEquals("PL_00002", HSSFCellUtil.getCell(HSSFCellUtil.getRow(320,sheetPlate2),0).getStringCellValue());
+    assertEquals("PL-00002", HSSFCellUtil.getCell(HSSFCellUtil.getRow(1,sheetPlate2),0).getStringCellValue());
+    assertEquals("PL-00002", HSSFCellUtil.getCell(HSSFCellUtil.getRow(320,sheetPlate2),0).getStringCellValue());
 
-    assertEquals("one data worksheet per assay plate: PL_00003", "PL_00003", workbook.getSheetName(4));
+    assertEquals("one data worksheet per assay plate: PL-00003", "PL-00003", workbook.getSheetName(4));
     HSSFSheet sheetPlate3 = workbook.getSheetAt(4);
     assertEquals(320, sheetPlate3.getLastRowNum());
-    assertEquals("PL_00003", HSSFCellUtil.getCell(HSSFCellUtil.getRow(1,sheetPlate3),0).getStringCellValue());
-    assertEquals("PL_00003", HSSFCellUtil.getCell(HSSFCellUtil.getRow(320,sheetPlate3),0).getStringCellValue());
+    assertEquals("PL-00003", HSSFCellUtil.getCell(HSSFCellUtil.getRow(1,sheetPlate3),0).getStringCellValue());
+    assertEquals("PL-00003", HSSFCellUtil.getCell(HSSFCellUtil.getRow(320,sheetPlate3),0).getStringCellValue());
 
     
     List<ResultValueType> expectedRvts = originalScreenResult.getResultValueTypesList();

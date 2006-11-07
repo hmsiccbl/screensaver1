@@ -198,13 +198,13 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                 .toUpperCase(), pv);
     }
 
-    assayWellTypeMap.put("X", AssayWellType.EXPERIMENTAL);
-    assayWellTypeMap.put("E", AssayWellType.EMPTY);
-    assayWellTypeMap.put("P", AssayWellType.ASSAY_POSITIVE_CONTROL);
-    assayWellTypeMap.put("N", AssayWellType.ASSAY_NEGATIVE_CONTROL);
-    assayWellTypeMap.put("O", AssayWellType.OTHER);
-    assayWellTypeMap.put("C", AssayWellType.LIBRARY_CONTROL);
-    assayWellTypeMap.put("B", AssayWellType.BUFFER);
+    assayWellTypeMap.put(AssayWellType.EXPERIMENTAL.getAbbreviation(), AssayWellType.EXPERIMENTAL);
+    assayWellTypeMap.put(AssayWellType.EMPTY.getAbbreviation(), AssayWellType.EMPTY);
+    assayWellTypeMap.put(AssayWellType.ASSAY_POSITIVE_CONTROL.getAbbreviation(), AssayWellType.ASSAY_POSITIVE_CONTROL);
+    assayWellTypeMap.put(AssayWellType.ASSAY_NEGATIVE_CONTROL.getAbbreviation(), AssayWellType.ASSAY_NEGATIVE_CONTROL);
+    assayWellTypeMap.put(AssayWellType.OTHER.getAbbreviation(), AssayWellType.OTHER);
+    assayWellTypeMap.put(AssayWellType.LIBRARY_CONTROL.getAbbreviation(), AssayWellType.LIBRARY_CONTROL);
+    assayWellTypeMap.put(AssayWellType.BUFFER.getAbbreviation(), AssayWellType.BUFFER);
     assert assayWellTypeMap.size() == AssayWellType.values().length : "assayWellTypeMap not initialized properly";
   }
 
@@ -330,7 +330,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     ScreeningRoomUser labHead = new ScreeningRoomUser(new Date(),
                                                       "Joe",
                                                       "Screener",
-                                                      "joe_screener_" + screenNumber + "@hms.harvard.edu",
+                                                      "joe_screener_"
+                                                        + screenNumber
+                                                        + "@hms.harvard.edu",
                                                       "",
                                                       "",
                                                       "",
@@ -338,12 +340,42 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                                       "",
                                                       ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
                                                       true);
-    return new Screen(labHead,
-                      labHead,
-                      screenNumber,
-                      new Date(),
-                      ScreenType.SMALL_MOLECULE,
-                      "Dummy screen");
+    ScreeningRoomUser collaborator1 = new ScreeningRoomUser(new Date(),
+                                                            "Cindy",
+                                                            "Collaborator",
+                                                            "cindy_collaborator_"
+                                                              + screenNumber
+                                                              + "@hms.harvard.edu",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            ScreeningRoomUserClassification.OTHER,
+                                                            true);
+    ScreeningRoomUser collaborator2 = new ScreeningRoomUser(new Date(),
+                                                            "Chris",
+                                                            "Collaborator",
+                                                            "chrisp_collaborator_"
+                                                              + screenNumber
+                                                              + "@hms.harvard.edu",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            ScreeningRoomUserClassification.OTHER,
+                                                            true);
+    Screen screen = new Screen(labHead,
+                               labHead,
+                               screenNumber,
+                               new Date(),
+                               ScreenType.SMALL_MOLECULE,
+                               "Dummy screen");
+
+    screen.addCollaborator(collaborator1);
+    screen.addCollaborator(collaborator2);
+    return screen;
   }
 
   private static Screen findScreenOrExit(CommandLineApplication app) throws ParseException

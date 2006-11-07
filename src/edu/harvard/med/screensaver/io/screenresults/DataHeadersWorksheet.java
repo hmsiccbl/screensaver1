@@ -18,6 +18,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -26,14 +27,19 @@ import org.apache.poi.hssf.usermodel.contrib.HSSFCellUtil;
 public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
 {
 
+  private static short ROW_HEADER_COLUMN_WIDTH = (short) (40 * 256);
+
   public HSSFSheet build(HSSFWorkbook workbook, ScreenResult screenResult)
   {
     HSSFSheet sheet = workbook.createSheet(DATA_HEADERS_SHEET_NAME);
-    writeDataHeaderRowNames(sheet,
+    sheet.setColumnWidth((short) 0, ROW_HEADER_COLUMN_WIDTH);
+    writeDataHeaderRowNames(workbook, 
+                            sheet,
                             screenResult);
     writeDataHeaders(workbook,
                      sheet, 
                      screenResult);
+    sheet.setColumnWidth((short) 0, ROW_HEADER_COLUMN_WIDTH);
     return sheet;
   }
 
@@ -98,13 +104,17 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
     return "" + (char) (rvt.getOrdinal() + DATA_SHEET__FIRST_DATA_HEADER_COLUMN_LABEL);
   }
 
-  private void writeDataHeaderRowNames(HSSFSheet sheet, ScreenResult screenResult)
+  private void writeDataHeaderRowNames(HSSFWorkbook workbook, HSSFSheet sheet, ScreenResult screenResult)
   {
+    HSSFCellStyle style = workbook.createCellStyle();
+    style.setWrapText(true);
+
     for (MetadataRow metadataRow : MetadataRow.values()) {
       if (metadataRow.isUsed(false)) {
         HSSFRow row = HSSFCellUtil.getRow(metadataRow.getRowIndex(),
                                           sheet);
         HSSFCell cell = HSSFCellUtil.getCell(row, METADATA_ROW_NAMES_COLUMN_INDEX);
+        cell.setCellStyle(style);
         cell.setCellValue(metadataRow.getDisplayText());
       }
     }

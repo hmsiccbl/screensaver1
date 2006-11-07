@@ -239,6 +239,22 @@ public class Screen extends AbstractEntity
     Collections.sort(collaboratorsList, ScreensaverUserComparator.getInstance());
     return Collections.unmodifiableList(collaboratorsList);
   }
+  
+  public String getCollaboratorsString()
+  {
+    StringBuilder collaborators = new StringBuilder();
+    boolean first = true;
+    for (ScreeningRoomUser collaborator : getCollaboratorsList()) {
+      if (first) {
+        first = false;
+      }
+      else {
+        collaborators.append(", ");
+      }
+      collaborators.append(collaborator.getFirstName()).append(" ").append(collaborator.getLastName());
+    }
+    return collaborators.toString();
+  }
 
   /**
    * @motivation JSF EL binding

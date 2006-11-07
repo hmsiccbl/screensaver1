@@ -24,6 +24,9 @@ import org.apache.poi.hssf.usermodel.contrib.HSSFCellUtil;
 
 public class DataWorksheet implements ScreenResultWorkbookSpecification
 {
+
+  private static short ROW_HEADER_COLUMN_WIDTH = (short) (14 * 256);
+
   public HSSFSheet build(HSSFWorkbook workbook, ScreenResult screenResult, Integer plateNumber)
   {
     HSSFSheet sheet = workbook.createSheet(makePlateNumberString(plateNumber));
@@ -33,6 +36,7 @@ public class DataWorksheet implements ScreenResultWorkbookSpecification
               sheet, 
               screenResult,
               plateNumber);
+    sheet.setColumnWidth((short) 0, ROW_HEADER_COLUMN_WIDTH);
     return sheet;
   }
 
@@ -97,11 +101,7 @@ public class DataWorksheet implements ScreenResultWorkbookSpecification
   {
     HSSFCellUtil.getCell(row, 0).setCellValue(makePlateNumberString(rv.getWell().getPlateNumber()));
     HSSFCellUtil.getCell(row, 1).setCellValue(rv.getWell().getWellName());
-    
-    // TODO: must handle 'P' (positive control), 'N' (negative control), and 'O'
-    // (other) types, which are NOT available from stock-plate Well.
-
-    //HSSFCellUtil.getCell(row, 2).setCellValue(rv.getWell().getType());
+    HSSFCellUtil.getCell(row, 2).setCellValue(rv.getAssayWellType().getAbbreviation());
   }
 
   private String makePlateNumberString(Integer plateNumber)

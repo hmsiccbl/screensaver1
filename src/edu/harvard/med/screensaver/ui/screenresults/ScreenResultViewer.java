@@ -406,7 +406,7 @@ public class ScreenResultViewer extends AbstractBackingBean
     FileOutputStream out = null;
     try {
       HSSFWorkbook workbook = _screenResultExporter.build(getScreenResult());
-      exportedWorkbookFile = File.createTempFile("workbook-export.",
+      exportedWorkbookFile = File.createTempFile("screenResult" + _screen.getScreenNumber() + ".",
                                                  ".xls");
       out = new FileOutputStream(exportedWorkbookFile);
       workbook.write(out);

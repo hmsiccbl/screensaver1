@@ -225,6 +225,7 @@ public class ResultValue extends AbstractEntity implements Comparable
    * {@link ResultValueType#isDerived()()}, and
    * {@link ResultValueType#getActivityIndicatorType()}, as follows:
    * <ul>
+   * <li> Well type is non-data-producer: returns <code>null</code>
    * <li> Not Derived (Raw): returns Double
    * <li> Not an Activity Indicator: returns String
    * <li> ActivityIndicatorType.BOOLEAN: returns Boolean
@@ -238,6 +239,10 @@ public class ResultValue extends AbstractEntity implements Comparable
    */
   public Object generateTypedValue()
   {
+    if (!isDataProducer()) {
+      return null;
+    }
+    
     if (!getResultValueType().isDerived()) {
       return Double.valueOf(_value);
     }
@@ -315,9 +320,15 @@ public class ResultValue extends AbstractEntity implements Comparable
   @DerivedEntityProperty
   public boolean isDataProducer()
   {
-    return isExperimental() || isControl();
+    // TODO: I'm assuming wells of type "other" can contain data values --ant
+    return isExperimental() || isControl() || isOther();
   }
   
+  public boolean isOther()
+  {
+    return getAssayWellType().equals(AssayWellType.OTHER);
+  }
+
   @DerivedEntityProperty
   public boolean isEmpty()
   {
