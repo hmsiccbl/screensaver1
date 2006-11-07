@@ -150,7 +150,7 @@ TODO:
 			<t:dataTable id="legend"
 				value="#{heatMapViewer.colorLegendDataModel}" var="step"
 				style="height: 100%">
-				<t:column style="#{step.first}">
+				<t:column style="#{step.first}; text-align: right">
 					<t:div style="min-width: 20px; min-height: 6px">
 						<t:outputText value="#{step.second}" style="font-size: xx-small"/>
 					</t:div>
