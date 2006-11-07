@@ -165,7 +165,7 @@ TODO:
 				<t:column>
 					<t:outputText value="#{statistic.name}" />
 				</t:column>
-				<t:column>
+				<t:column style="text-align: right">
 					<t:outputText value="#{statistic.value}" />
 				</t:column>
 			</t:dataTable>
