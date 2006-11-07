@@ -9,18 +9,20 @@
 <%-- Tiles --%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
-<!-- 
+<%-- 
 TODO:
-- encapsulate "expandable/collapsable section header" into a custom UI component (or better yet, find a component that does what we want)
-- show parent screen's number (linked), and some basic info, like title, perhaps
-- move screen attributes out of data table and into independent UI components (like ScreenViewer)
-- fix View Screen button
 - link screen number field
 - make 'isShareable' property read-only, or add a "Save" button (or make update into an immediate submit)
 - sectionHeader style is needing to be applied to 3 elements; should figure out what's going on w/css
- -->
+ --%>
 
 <f:subview id="screenResultViewer">
+
+  <%-- Note: we are sharing screenViewer's screenSearchResults, as ScreenResultViewer 
+       and ScreenViewer are synchronized w.r.t. the current Screen. --%>
+	<t:aliasBean alias="#{navigator}" value="#{screenViewer.screenSearchResults}">
+		<%@ include file="../searchResultsNavPanel.jspf"%>
+	</t:aliasBean>
 
   <h:form id="commandForm" >
 
@@ -48,23 +50,27 @@ TODO:
 		<t:outputText value="No screen result loaded." styleClass="sectionHeader"/>
 	</t:panelGroup>
 	
-	<h:form id="dataForm" rendered="#{!empty screenResultViewer.screenResult}">
+	<h:form id="dataForm">
 
-    <t:panelGrid columns="1">
-      <t:outputLabel for="dataHeadersList" value="Show selected data headers:" />
-      <t:selectManyListbox id="dataHeadersList"
-        value="#{screenResultViewer.selectedDataHeaderNames}"
-        valueChangeListener="#{screenResultViewer.selectedDataHeadersListener}" styleClass="input">
-        <f:selectItems id="dataHeaders" value="#{screenResultViewer.dataHeaderSelectItems}" />
-      </t:selectManyListbox>
-      <t:panelGroup>
-        <t:commandButton id="updateButton1" value="Update" action="#{screenResultViewer.update}"
-          styleClass="command" />
-        <t:commandButton id="allDataHeadersButton" value="All"
-          action="#{screenResultViewer.showAllDataHeaders}" styleClass="command" />
-      </t:panelGroup>
-    </t:panelGrid>
-
+		<t:panelGrid columns="1"
+			rendered="#{!empty screenResultViewer.screenResult}">
+			<t:outputLabel for="dataHeadersList"
+				value="Show selected data headers:" />
+			<t:selectManyListbox id="dataHeadersList"
+				value="#{screenResultViewer.selectedDataHeaderNames}"
+				valueChangeListener="#{screenResultViewer.selectedDataHeadersListener}"
+				styleClass="input">
+				<f:selectItems id="dataHeaders"
+					value="#{screenResultViewer.dataHeaderSelectItems}" />
+			</t:selectManyListbox>
+			<t:panelGroup>
+				<t:commandButton id="updateButton1" value="Update"
+					action="#{screenResultViewer.update}" styleClass="command" />
+				<t:commandButton id="allDataHeadersButton" value="All"
+					action="#{screenResultViewer.showAllDataHeaders}"
+					styleClass="command" />
+			</t:panelGroup>
+		</t:panelGrid>
 
 		<t:panelGrid columns="1">
 			<t:collapsiblePanel id="summaryPanel"
@@ -85,40 +91,46 @@ TODO:
 					<t:outputLabel for="screenNumber" value="Screen Number"
 						styleClass="keyColumn" />
 					<t:outputText id="screenNumber"
-						value="#{screenResultViewer.screenResult.screen.screenNumber}"
+						value="#{screenResultViewer.screen.screenNumber}"
 						styleClass="dataText" />
 
 					<t:outputLabel for="screenTitle" value="Screen Title"
 						styleClass="keyColumn" />
 					<t:outputText id="screenTitle"
-						value="#{screenResultViewer.screenResult.screen.title}"
-						styleClass="dataText" />
+						value="#{screenResultViewer.screen.title}" styleClass="dataText" />
 
 					<t:outputLabel for="screenResultDateCreated"
-						value="Screen Result Created" styleClass="keyColumn" />
+						value="Screen Result Created" styleClass="keyColumn"
+						rendered="#{!empty screenResultViewer.screenResult}" />
 					<t:outputText id="screenResultDateCreated"
 						value="#{screenResultViewer.screenResult.dateCreated}"
-						styleClass="dataText" />
+						styleClass="dataText"
+						rendered="#{!empty screenResultViewer.screenResult}" />
 
 					<t:outputLabel for="screenResultReplicateCount" value="Replicates"
-						styleClass="keyColumn" />
+						styleClass="keyColumn"
+						rendered="#{!empty screenResultViewer.screenResult}" />
 					<t:outputText id="screenResultReplicateCount"
 						value="#{screenResultViewer.screenResult.replicateCount}"
-						styleClass="dataText" />
+						styleClass="dataText"
+						rendered="#{!empty screenResultViewer.screenResult}" />
 
 					<t:outputLabel for="screenResultDateCreated" value="Shareable"
-						styleClass="keyColumn" />
+						styleClass="keyColumn"
+						rendered="#{!empty screenResultViewer.screenResult}" />
 					<t:selectBooleanCheckbox id="screenResultIsShareable"
 						value="#{screenResultViewer.screenResult.shareable}"
 						rendered="#{screenResultViewer.readOnlyAdmin || screenResultViewer.editable}"
 						displayValueOnly="#{screenResultViewer.readOnly}"
-						displayValueOnlyStyleClass="dataText" />
+						displayValueOnlyStyleClass="dataText"
+						rendered="#{!empty screenResultViewer.screenResult}" />
 				</t:panelGrid>
 			</t:collapsiblePanel>
 
 			<t:collapsiblePanel id="dataHeadersPanel"
 				value="#{screenResultViewer.collapsablePanelsState['datHeadersTable']}"
-				title="Data Headers" var="state" titleVar="title">
+				title="Data Headers" var="state" titleVar="title"
+				rendered="#{!empty screenResultViewer.screenResult}">
 				<f:facet name="header">
 					<t:div styleClass="sectionHeader">
 						<t:headerLink immediate="true" styleClass="sectionHeader">
@@ -152,7 +164,8 @@ TODO:
 
 			<t:collapsiblePanel id="dataTablePanel"
 				value="#{screenResultViewer.collapsablePanelsState['dataTable']}"
-				title="Data" var="state" titleVar="title">
+				title="Data" var="state" titleVar="title"
+				rendered="#{!empty screenResultViewer.screenResult}">
 				<f:facet name="header">
 					<t:div styleClass="sectionHeader">
 						<t:headerLink immediate="true" styleClass="sectionHeader">
@@ -225,18 +238,19 @@ TODO:
 
 			<t:collapsiblePanel id="heatMapsPanel"
 				value="#{screenResultViewer.collapsablePanelsState['heatMaps']}"
-				title="Heat Maps" var="state" titleVar="title">
+				title="Heat Maps" var="state" titleVar="title"
+				rendered="#{!empty screenResultViewer.screenResult}">
 				<f:facet name="header">
 					<t:div styleClass="sectionHeader">
 						<t:headerLink immediate="true" styleClass="sectionHeader">
 							<h:graphicImage
 								value="#{state ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 								styleClass="icon" />
-							<h:outputText value="#{title}" styleClass="sectionHeader"/>
+							<h:outputText value="#{title}" styleClass="sectionHeader" />
 						</t:headerLink>
 					</t:div>
 				</f:facet>
-				<%@ include file="heatMapViewer.jspf" %>
+				<%@ include file="heatMapViewer.jspf"%>
 			</t:collapsiblePanel>
 
 		</t:panelGrid>

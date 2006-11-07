@@ -98,7 +98,7 @@ public class ScreenResultImporter extends AbstractBackingBean
   
   public String cancel()
   {
-    return _screenResultsController.viewLastScreen();
+    return _screenResultsController.viewLastScreenResult();
   }
   
   // TODO: this method contains real business logic that should be moved to a non-ui package class; it also needs a unit test
@@ -125,7 +125,7 @@ public class ScreenResultImporter extends AbstractBackingBean
       else {
         log.info("successfully imported " + screenResult + " for Screen " + _screen);
         parseSuccessful = true;
-        return _screenResultsController.viewScreenResult(_screen.getScreenResult());
+        return _screenResultsController.viewLastScreenResult();
       }
       return REDISPLAY_PAGE_ACTION_RESULT;
     }

@@ -37,11 +37,14 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.control.ScreenResultsController;
+import edu.harvard.med.screensaver.ui.control.ScreensController;
+import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -79,9 +82,11 @@ public class ScreenResultViewer extends AbstractBackingBean
   // instance data members
 
   private ScreenResultsController _screenResultsController;
+  private ScreensController _screensController;
   private LibrariesController _librariesController;
   private DAO _dao;
-  private ScreenResult _screenResult;
+  private Screen _screen;
+  private ScreenSearchResults _screenSearchResults;
   private ScreenResultExporter _screenResultExporter;
   private int _firstRow;
   private Integer _plateNumber;
@@ -112,7 +117,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   private DataModel _dataHeaderColumnModel;
   private DataModel _metadataModel;
   private Map<String,Boolean> _collapsablePanelsState;
-  
+
 
   // public methods
   
@@ -138,20 +143,33 @@ public class ScreenResultViewer extends AbstractBackingBean
     _screenResultsController = screenResultsController;
   }
 
+  public void setScreensController(ScreensController screensController) {
+    _screensController = screensController;
+  }
+  
   public void setLibrariesController(LibrariesController librariesController) 
   {
     _librariesController = librariesController;
   }
 
-  public void setScreenResult(ScreenResult screenResult) 
+  public void setScreenSearchResults(ScreenSearchResults screenSearchResults) {
+    _screenSearchResults = screenSearchResults;
+  }
+
+  public void setScreen(Screen screen) 
   {
-    _screenResult = screenResult;
+    _screen = screen;
     resetView();
+  }
+  
+  public Screen getScreen()
+  {
+    return _screen;
   }
   
   public ScreenResult getScreenResult()
   {
-    return _screenResult;
+    return _screen.getScreenResult();
   }
 
   public void setScreenResultExporter(ScreenResultExporter screenResultExporter)
@@ -255,7 +273,7 @@ public class ScreenResultViewer extends AbstractBackingBean
 
   public List<SelectItem> getPlateSelectItems()
   {
-    return JSFUtils.createUISelectItems(_screenResult.getPlateNumbers());
+    return JSFUtils.createUISelectItems(getScreenResult().getPlateNumbers());
   }
   
   public List<SelectItem> getDataHeaderSelectItems()
@@ -287,7 +305,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   public UniqueDataHeaderNames getUniqueDataHeaderNames()
   {
     if (_uniqueDataHeaderNames == null) {
-      _uniqueDataHeaderNames = new UniqueDataHeaderNames(_screenResult);
+      _uniqueDataHeaderNames = new UniqueDataHeaderNames(getScreenResult());
     }
     return _uniqueDataHeaderNames;
   }
@@ -336,7 +354,7 @@ public class ScreenResultViewer extends AbstractBackingBean
       // firstRow is a 1-based index
       int firstRow = (pageIndex * getDataTable().getRows()) + 1;
       if (firstRow > 0 &&
-        firstRow <= _screenResult.getResultValueTypes().first().getResultValues().size()) {
+        firstRow <= getScreenResult().getResultValueTypes().first().getResultValues().size()) {
         // update the row field
         setFirstDisplayedRowNumber(firstRow);
         // scroll the data table to the new row
@@ -379,7 +397,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   public String viewScreen()
   {
-    return _screenResultsController.viewLastScreen();
+    return _screensController.viewScreen(_screen, _screenSearchResults);
   }
   
   public String download()
@@ -387,7 +405,7 @@ public class ScreenResultViewer extends AbstractBackingBean
     File exportedWorkbookFile = null;
     FileOutputStream out = null;
     try {
-      HSSFWorkbook workbook = _screenResultExporter.build(_screenResult);
+      HSSFWorkbook workbook = _screenResultExporter.build(getScreenResult());
       exportedWorkbookFile = File.createTempFile("workbook-export.",
                                                  ".xls");
       out = new FileOutputStream(exportedWorkbookFile);
@@ -413,8 +431,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   public String delete()
   {
-    _dao.deleteScreenResult(_screenResult);
-    _screenResult = null;
+    _dao.deleteScreenResult(getScreenResult());
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
@@ -553,7 +570,6 @@ public class ScreenResultViewer extends AbstractBackingBean
   private void lazyBuildMetadataModel()
   {
     if (_metadataModel == null) {
-      assert _screenResult != null : "screenResult property not initialized";
       String[] properties = null;
       try {
         properties = new String[] {
@@ -583,7 +599,7 @@ public class ScreenResultViewer extends AbstractBackingBean
       List<MetadataRow> tableData = new ArrayList<MetadataRow>();
       for (String property : properties) {
         try {
-          tableData.add(new MetadataRow(_screenResult.getResultValueTypes(),
+          tableData.add(new MetadataRow(getScreenResult().getResultValueTypes(),
                                         getUniqueDataHeaderNames(),
                                         property));
         }
@@ -598,20 +614,20 @@ public class ScreenResultViewer extends AbstractBackingBean
 
   private void lazyBuildRawData()
   {
-    if (_rawDataModel == null && _screenResult != null) {
+    if (_rawDataModel == null && getScreenResult() != null) {
       // to build our table data structure, we will iterate the
       // ResultValueTypes'
       // ResultValues in parallel (kind of messy!)
       Map<ResultValueType,Iterator> rvtIterators = new HashMap<ResultValueType,Iterator>();
-      for (ResultValueType rvt : _screenResult.getResultValueTypes()) {
+      for (ResultValueType rvt : getScreenResult().getResultValueTypes()) {
         rvtIterators.put(rvt, rvt.getResultValues()
                                  .iterator());
       }
       List<RawDataRow> tableData = new ArrayList<RawDataRow>();
-      for (ResultValue majorResultValue : _screenResult.getResultValueTypes()
+      for (ResultValue majorResultValue : getScreenResult().getResultValueTypes()
                                                        .first()
                                                        .getResultValues()) {
-        RawDataRow dataRow = new RawDataRow(_screenResult.getResultValueTypes(),
+        RawDataRow dataRow = new RawDataRow(getScreenResult().getResultValueTypes(),
                                             getUniqueDataHeaderNames(),
                                             majorResultValue.getWell());
         for (Map.Entry<ResultValueType,Iterator> entry : rvtIterators.entrySet()) {
@@ -698,7 +714,6 @@ public class ScreenResultViewer extends AbstractBackingBean
    */
   public static class RawDataRow
   {
-    private ScreenResult _screenResult;
     private Well _well;
     private Map<String,ResultValue> _resultValues;
     private UniqueDataHeaderNames _uniqueNames;
@@ -725,6 +740,5 @@ public class ScreenResultViewer extends AbstractBackingBean
       _resultValues.put(_uniqueNames.get(rvt), rv);
     }
   }
-
 
 }

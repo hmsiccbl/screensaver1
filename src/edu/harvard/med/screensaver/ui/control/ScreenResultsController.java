@@ -54,7 +54,7 @@ public class ScreenResultsController extends AbstractUIController
 
   private Screen _lastScreen;
   private ScreenSearchResults _lastScreenSearchResults;
-  
+
   
   // public getters and setters
 
@@ -118,19 +118,12 @@ public class ScreenResultsController extends AbstractUIController
     _screenResultImporter.setScreen(screen);
     _screenResultImporter.setScreenResultParser(new ScreenResultParser(_dao));
     
-    return viewScreenResult(screenResult);
-  }
-  
-  /**
-   * Call this method when navigating to a ScreenResult from a JSF view within the screenresults package
-   */
-  @UIControllerMethod
-  public String viewScreenResult(ScreenResult screenResult)
-  {
-    _screenResultViewer.setScreenResult(screenResult);
+    _screenResultViewer.setScreen(screen);
     _screenResultViewer.setDao(_dao);
     _screenResultViewer.setScreenResultExporter(_screenResultExporter);
+    _screenResultViewer.setScreensController(_screensController);
     _screenResultViewer.setLibrariesController(_librariesController);
+    _screenResultViewer.setScreenSearchResults(screenSearchResults);
 
     _heatMapViewer.setScreenResult(screenResult);
     _heatMapViewer.setLibrariesController(_librariesController);
@@ -138,10 +131,9 @@ public class ScreenResultsController extends AbstractUIController
     return VIEW_SCREEN_RESULT; 
   }
   
-  @UIControllerMethod
-  public String viewLastScreen()
+  public String viewLastScreenResult()
   {
-    return _screensController.viewScreen(_lastScreen, _lastScreenSearchResults);
+    return viewScreenResult(_lastScreen, _lastScreenSearchResults);
   }
 }
 

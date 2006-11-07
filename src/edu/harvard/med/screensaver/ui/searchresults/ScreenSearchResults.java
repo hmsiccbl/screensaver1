@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.ui.control.ScreenResultsController;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
@@ -37,6 +38,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
   // instance fields
   
   private ScreensController _screensController;
+  private ScreenResultsController _screenResultsController;
   
   
   // public constructor
@@ -46,10 +48,11 @@ public class ScreenSearchResults extends SearchResults<Screen>
    * @param unsortedResults the unsorted list of the results, as they are returned from the
    * database
    */
-  public ScreenSearchResults(List<Screen> unsortedResults, ScreensController screensController)
+  public ScreenSearchResults(List<Screen> unsortedResults, ScreensController screensController, ScreenResultsController screenResultsController)
   {
     super(unsortedResults);
     _screensController = screensController;
+    _screenResultsController = screenResultsController;
   }
 
 
@@ -139,5 +142,6 @@ public class ScreenSearchResults extends SearchResults<Screen>
   protected void setEntityToView(Screen screen)
   {
     _screensController.viewScreen(screen, this);
+    _screenResultsController.viewScreenResult(screen, this);
   }
 }
