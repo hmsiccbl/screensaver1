@@ -134,7 +134,6 @@ public class Gene extends AbstractEntity
    * @hibernate.property
    *   type="text"
    *   not-null="true"
-   *   unique="true"
    */
   public String getGeneName()
   {
