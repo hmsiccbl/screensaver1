@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.screenresults;
 
+import java.awt.Color;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.analysis.ChainedFilter;
 import edu.harvard.med.screensaver.analysis.Filter;
+import edu.harvard.med.screensaver.analysis.heatmaps.ColorFunction;
 import edu.harvard.med.screensaver.analysis.heatmaps.ControlWellsFilter;
 import edu.harvard.med.screensaver.analysis.heatmaps.DefaultMultiColorGradient;
 import edu.harvard.med.screensaver.analysis.heatmaps.EdgeWellsFilter;
@@ -33,6 +35,7 @@ import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 
@@ -73,6 +76,7 @@ public class HeatMapViewer extends AbstractBackingBean
   private static final Filter<ResultValue> IMPLICIT_FILTER = new ExcludedOrNonDataProducingWellFilter();
   private static final Double SAMPLE_NUMBER = new Double(-1234.567);
   private static final NumberFormat DECIMAL_FORMAT = new DecimalFormat("0.0##");
+  private static final int COLOR_LEGEND_GRADIENT_STEPS = 10;
 
 
   private static Logger log = Logger.getLogger(HeatMapViewer.class);
@@ -147,6 +151,28 @@ public class HeatMapViewer extends AbstractBackingBean
   public List<DataModel> getHeatMapColumnDataModels()
   {
     return _heatMapColumnDataModels;
+  }
+  
+  public DataModel getColorLegendDataModel()
+  {
+    int heatMapIndex = _heatMapConfigurationsDataModel.getRowIndex();
+    HeatMapConfiguration heatMapConfig = _heatMapConfigurations.get(heatMapIndex);
+    ColorFunction colorFn = _heatMaps.get(heatMapIndex).getColorFunction();
+    NumberFormat format = heatMapConfig.getNumericFormat().getSelection();
+    double min = _heatMaps.get(heatMapIndex).getMin();
+    double max = _heatMaps.get(heatMapIndex).getMax();
+    double range = max - min;
+    List<Pair<String,String>> steps = new ArrayList<Pair<String,String>>(COLOR_LEGEND_GRADIENT_STEPS);
+    for (int i = 0; i <= COLOR_LEGEND_GRADIENT_STEPS; ++i) {
+      double stepValue = min + range * ((double) i / (double) COLOR_LEGEND_GRADIENT_STEPS);
+      Color color = colorFn.getColor(stepValue);
+      String cssStyle = String.format("background-color: #%02x%02x%02x",
+                                      color.getRed(),
+                                      color.getGreen(),
+                                      color.getBlue());
+      steps.add(new Pair<String,String>(cssStyle, format.format(stepValue)));
+    }
+    return new ListDataModel(steps);
   }
   
   public List<HeatMap> getHeatMaps()

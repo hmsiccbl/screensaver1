@@ -82,6 +82,15 @@ public class HeatMap
   {
     return _scalableColorFunction.getColor(getScoredValue(row, column));
   }
+
+  /**
+   * @motivation for rendering color legends
+   * @return
+   */
+  public ColorFunction getColorFunction()
+  {
+    return _scalableColorFunction;
+  }
    
   public double getRawValue(int row, int column)
   {
