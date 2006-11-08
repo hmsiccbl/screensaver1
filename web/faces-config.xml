@@ -48,7 +48,11 @@
     <description>Login form backing bean</description>
     <managed-bean-name>login</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.Login</managed-bean-class>
-    <managed-bean-scope>request</managed-bean-scope>
+    <managed-bean-scope>session</managed-bean-scope>
+    <managed-property>
+      <property-name>dao</property-name>
+      <value>#{dao}</value>
+    </managed-property>
     <managed-property>
       <property-name>messages</property-name>
       <value>#{messages}</value>

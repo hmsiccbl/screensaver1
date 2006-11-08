@@ -21,16 +21,22 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
  */
 public class ScreensaverUserPrincipal implements Principal
 {
-  private String _name;
+  private ScreensaverUser _screensaverUser;
   
   public ScreensaverUserPrincipal(ScreensaverUser user)
   {
-    _name = user.getEmail();
+    _screensaverUser = user;
+  }
+  
+  public ScreensaverUser getScreensaverUser()
+  {
+    return _screensaverUser;
   }
   
   public String getName()
   {
-    return _name;
+    // return a unique, non-null identifier, which happens to be "email" for our ScreensaverUser entity
+    return _screensaverUser.getEmail();
   }
   
   @Override
@@ -39,19 +45,19 @@ public class ScreensaverUserPrincipal implements Principal
     if (!(other instanceof ScreensaverUserPrincipal)) {
       return false;
     }
-    return _name.equals(((ScreensaverUserPrincipal) other)._name);
+    return getName().equals(((ScreensaverUserPrincipal) other).getName());
   }
   
   @Override
   public int hashCode()
   {
-    return _name.hashCode();
+    return getName().hashCode();
   }
   
   @Override
   public String toString()
   {
-    return _name;
+    return getName();
   }
 
 }

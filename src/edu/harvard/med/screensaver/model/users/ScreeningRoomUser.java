@@ -414,7 +414,7 @@ public class ScreeningRoomUser extends ScreensaverUser
   @DerivedEntityProperty
   public String getLabName() 
   {
-    StringBuilder labName = new StringBuilder(getLabHead().getFullName());
+    StringBuilder labName = new StringBuilder(getLabHead().getFullNameLastFirst());
     String labAffiliation = getLabAffiliationName();
     if (labAffiliation.length() > 0) {
       labName.append(" - ").append(labAffiliation);

@@ -106,7 +106,7 @@ public class ScreenViewer extends AbstractBackingBean
       {
         protected String getLabel(ScreeningRoomUser t)
         {
-          return t.getFullName();
+          return t.getFullNameLastFirst();
         }
       };
   }
@@ -487,7 +487,7 @@ public class ScreenViewer extends AbstractBackingBean
     leadScreenerCandidates.add(labHead);
     leadScreenerCandidates.addAll(labHead.getLabMembers());
     _leadScreener = new UISelectOneBean<ScreeningRoomUser>(leadScreenerCandidates, _screen.getLeadScreener()) {
-      protected String getLabel(ScreeningRoomUser t) { return t.getFullName(); } 
+      protected String getLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); } 
     };
   }
 

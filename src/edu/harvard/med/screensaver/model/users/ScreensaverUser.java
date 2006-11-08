@@ -238,9 +238,30 @@ public class ScreensaverUser extends AbstractEntity
    * @return the full name
    */
   @DerivedEntityProperty
-  public String getFullName()
+  public String getFullNameLastFirst()
   {
-    return _lastName + ", " + _firstName;
+    return getFullName(true);
+  }
+  
+  public String getFullNameFirstLast()
+  {
+    return getFullName(false);
+  }
+
+  /**
+   * Get the full name.
+   * @param lastFirst true if desired format is "Last, First", false if desiried format is "First Last"
+   * @return the full name
+   */
+  @DerivedEntityProperty
+  public String getFullName(boolean lastFirst)
+  {
+    if (lastFirst) {
+      return _lastName + ", " + _firstName;
+    }
+    else {
+      return _firstName + " " + _lastName;
+    }
   }
 
   /**

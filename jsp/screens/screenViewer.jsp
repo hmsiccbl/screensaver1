@@ -131,7 +131,7 @@ TODO:
 				styleClass="inputLabel" />
 			<h:panelGroup>
 				<t:commandLink id="leadScreener"
-					value="#{screenViewer.screen.leadScreener.fullName}"
+					value="#{screenViewer.screen.leadScreener.fullNameLastFirst}"
 					action="#{screenViewer.viewLeadScreener}" styleClass="dataText entityLink"
 					style="margin-right: 4px" />
 				<t:outputText value=" (" styleClass="dataText" />
@@ -157,7 +157,7 @@ TODO:
 					headerClass="tableHeader">
 					<t:column>
 						<t:commandLink action="#{screenViewer.viewCollaborator}"
-							value="#{collaborator.fullName}" styleClass="dataText entityLink" />
+							value="#{collaborator.fullNameLastFirst}" styleClass="dataText entityLink" />
 						<t:outputText value=" (" styleClass="dataText" />
 						<t:commandLink action="#{screenViewer.viewCollaboratorLabHead}"
 							value="#{collaborator.labName}" styleClass="dataText labLink" />
@@ -636,7 +636,7 @@ TODO:
 							<t:outputText value="Performed By" />
 						</f:facet>
 						<t:outputText id="visitItemFullName"
-							value="#{visitItem.performedBy.fullName}" styleClass="dataText" />
+							value="#{visitItem.performedBy.fullNameLastFirst}" styleClass="dataText" />
 					</t:column>
 					<t:column>
 						<f:facet name="header">

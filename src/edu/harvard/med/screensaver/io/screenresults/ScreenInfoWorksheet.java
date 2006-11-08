@@ -38,8 +38,8 @@ public class ScreenInfoWorksheet implements ScreenResultWorkbookSpecification
     row2Value.put(ScreenInfoRow.ID, screen.getScreenNumber());
     row2Value.put(ScreenInfoRow.TITLE, screen.getTitle());
     row2Value.put(ScreenInfoRow.SUMMARY, screen.getSummary());
-    row2Value.put(ScreenInfoRow.PI_LAB, screen.getLabHead().getFullName());
-    row2Value.put(ScreenInfoRow.LEAD_SCREENER, screen.getLeadScreener().getFullName());
+    row2Value.put(ScreenInfoRow.PI_LAB, screen.getLabHead().getFullNameLastFirst());
+    row2Value.put(ScreenInfoRow.LEAD_SCREENER, screen.getLeadScreener().getFullNameLastFirst());
     row2Value.put(ScreenInfoRow.COLLABORATORS, screen.getCollaboratorsString());
     // note: we're only showing the first publication PubmedId
     if (screen.getPublications().size() > 0) {

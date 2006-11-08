@@ -95,7 +95,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
       return screen.getScreenNumber();
     }
     if (columnName.equals(LEAD_SCREENER)) {
-      return screen.getLeadScreener().getFullName();
+      return screen.getLeadScreener().getFullNameLastFirst();
     }
     if (columnName.equals(TITLE)) {
       return screen.getTitle();

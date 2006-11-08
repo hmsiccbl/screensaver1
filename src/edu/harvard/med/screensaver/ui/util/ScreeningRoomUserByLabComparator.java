@@ -26,7 +26,7 @@ public class ScreeningRoomUserByLabComparator implements Comparator<ScreeningRoo
   {
     int result = o1.getLabName().compareTo(o2.getLabName());
     if (result == 0) {
-      return o1.getFullName().compareTo(o2.getFullName());
+      return o1.getFullNameLastFirst().compareTo(o2.getFullNameLastFirst());
     }
     return result;
   }

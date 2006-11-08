@@ -156,7 +156,8 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
     }
     return principal.getName();
   }
-
+  
+  // TODO: consider moving to the Login Bean
   public boolean isAuthenticatedUser()
   {
     Boolean pendingSessionCloseRequest = (Boolean)

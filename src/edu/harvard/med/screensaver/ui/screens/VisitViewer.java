@@ -53,7 +53,7 @@ public class VisitViewer extends AbstractBackingBean
     performedByCandidates.addAll(_screen.getLabHead().getLabMembers());
     performedByCandidates.addAll(_screen.getCollaborators());
     for (ScreeningRoomUser performedBy : performedByCandidates) {
-      visitPerformedBySelectItems.add(new SelectItem(performedBy, performedBy.getFullName()));
+      visitPerformedBySelectItems.add(new SelectItem(performedBy, performedBy.getFullNameLastFirst()));
     }
     return visitPerformedBySelectItems;
   }

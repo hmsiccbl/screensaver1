@@ -9,6 +9,11 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.security.Principal;
+
+import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+
 import org.apache.log4j.Logger;
 
 
@@ -23,13 +28,45 @@ import org.apache.log4j.Logger;
 public class Login extends AbstractBackingBean
 {
   
+  private static final String SCREENSAVER_USER_SESSION_ATTRIBUTE = "screensaverUser";
+
   public static Logger log = Logger.getLogger(Login.class);
   
   private static final String AUTHENTICATION_ID_DESCRIPTION = "User ID";
   
+  private DAO _dao;
+  
+  public DAO getDao()
+  {
+    return _dao;
+  }
+
+  public void setDao(DAO dao)
+  {
+    _dao = dao;
+  }
+
   public String getAuthenticationIdDescription()
   {
     return AUTHENTICATION_ID_DESCRIPTION;
+  }
+
+  public ScreensaverUser getScreensaverUser()
+  {
+    Principal principal = getExternalContext().getUserPrincipal();
+    if (principal == null) {
+      return null;
+    }
+    String eCommonsIdOrLoginId = principal.getName();
+    ScreensaverUser user = (ScreensaverUser) getHttpSession().getAttribute(SCREENSAVER_USER_SESSION_ATTRIBUTE);
+    if (user == null) {
+      user = _dao.findEntityByProperty(ScreensaverUser.class, "ECommonsId", eCommonsIdOrLoginId);
+      if (user == null) {
+        user = _dao.findEntityByProperty(ScreensaverUser.class, "loginId", eCommonsIdOrLoginId);
+      }
+    }
+    getHttpSession().setAttribute(SCREENSAVER_USER_SESSION_ATTRIBUTE, user);
+    return user;
   }
 
 

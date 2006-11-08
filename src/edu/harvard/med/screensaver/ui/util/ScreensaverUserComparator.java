@@ -24,7 +24,7 @@ public class ScreensaverUserComparator implements Comparator<ScreensaverUser>
   
   public int compare(ScreensaverUser o1, ScreensaverUser o2)
   {
-    return o1.getFullName().compareTo(o2.getFullName());
+    return o1.getFullNameLastFirst().compareTo(o2.getFullNameLastFirst());
   }
 }
 

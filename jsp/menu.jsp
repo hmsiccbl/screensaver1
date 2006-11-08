@@ -19,8 +19,9 @@
 		<%-- TODO: this layout won't work well for long user names... --%>
 		<t:panelGroup rendered="#{menu.authenticatedUser}">
 			<h:form id="userForm">
-				<t:outputText value="User " styleClass="label"/>
-				<t:commandLink id="userName" action="goMyAccount" value="#{menu.userPrincipalName}" styleClass="menuItem userName"/>
+				<%--t:outputText value="User " styleClass="label"/--%>
+				<t:commandLink id="userName" action="goMyAccount"
+					value="#{login.screensaverUser.fullNameFirstLast}" styleClass="menuItem userName" />
 				<t:outputText value="|" styleClass="spacer"/>
 				<t:commandLink id="account" action="goMyAccount" value="#{\"Edit\"}" styleClass="menuItem"/>
 				<t:outputText value="|" styleClass="spacer"/>

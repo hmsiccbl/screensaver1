@@ -111,7 +111,9 @@ public class ScreenResultImporter extends AbstractBackingBean
 
       ScreenResult screenResult = null;
       if (_uploadedFile.getInputStream().available() > 0) {
-        screenResult = _screenResultParser.parse(_screen, new File(_uploadedFile.getName()), _uploadedFile.getInputStream());
+        screenResult = _screenResultParser.parse(_screen, 
+                                                 new File("screen_result_" + _screen.getScreenNumber()),
+                                                 _uploadedFile.getInputStream());
       }
 
       if (screenResult == null) {

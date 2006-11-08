@@ -676,7 +676,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    * Get the entity in the current cell.
    * @return the entity in the current cell
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked")  
   protected E getEntity()
   {
     return (E) getDataModel().getRowData();
