@@ -66,14 +66,12 @@ public class AdministratorUser extends ScreensaverUser
   }
 
 
-  // public methods
+  // private methods
 
   /**
-   * Construct an uninitialized <code>ScreeningRoomUser</code> object.
+   * Construct an uninitialized <code>AdministratorUser</code> object.
    *
    * @motivation for hibernate
    */
   private AdministratorUser() {}
-
-  
 }
