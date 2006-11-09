@@ -229,10 +229,11 @@ public class DataRowParser
     }
     
     // entrezgeneSymbol
-    String entrezgeneSymbol = _cellFactory.getCell(
+    Cell entrezgeneSymbolCell = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.ENTREZGENE_SYMBOL),
       _rowIndex,
-      true).getString();
+      true);
+    String entrezgeneSymbol = entrezgeneSymbolCell.getAsString();
     if (entrezgeneSymbol.equals("")) {
       return null;
     }
