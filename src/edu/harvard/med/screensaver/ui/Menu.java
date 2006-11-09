@@ -23,39 +23,7 @@ public class Menu extends AbstractBackingBean
   // static data members
   
   private static Logger log = Logger.getLogger(Menu.class);
-  
- 
-  // bean property methods
-  
-  /**
-   * Logs out the user of the current session and redirects to the login page.
-   */
-  // TODO: should we move this to a more session-centric class? (maybe Login and then rename?)
-  public String goMyScreens()
-  {
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
 
-  public String goMyAccount()
-  {
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  public String goHelp()
-  {
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  public String goEditUser()
-  {
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  public String goEditLibraries()
-  {
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-  
 
   // JSF event listener methods
   
