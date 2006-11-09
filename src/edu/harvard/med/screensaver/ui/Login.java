@@ -72,6 +72,13 @@ public class Login extends AbstractBackingBean
 
   // JSF application methods
   
+  public String logout()
+  {
+    log.info("logout for session "  + getHttpSession().getId());
+    closeHttpAndDatabaseSessions();
+    return LOGOUT_ACTION_RESULT;
+  }
+
   public String forgotIdOrPassword()
   {
     // TODO: implement!

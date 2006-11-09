@@ -31,13 +31,6 @@ public class Menu extends AbstractBackingBean
    * Logs out the user of the current session and redirects to the login page.
    */
   // TODO: should we move this to a more session-centric class? (maybe Login and then rename?)
-  public String logout()
-  {
-    log.info("logout for session "  + getHttpSession().getId());
-    closeHttpAndDatabaseSessions();
-    return LOGOUT_ACTION_RESULT;
-  }
-
   public String goMyScreens()
   {
     return REDISPLAY_PAGE_ACTION_RESULT;

@@ -25,7 +25,7 @@
 				<t:outputText value="|" styleClass="spacer"/>
 				<t:commandLink id="account" action="goMyAccount" value="#{\"Edit\"}" styleClass="menuItem"/>
 				<t:outputText value="|" styleClass="spacer"/>
-				<t:commandLink id="logout" action="#{menu.logout}" value="#{\"Logout\"}" styleClass="menuItem"/>
+				<t:commandLink id="logout" action="#{login.logout}" value="#{\"Logout\"}" styleClass="menuItem"/>
 			</h:form>
 		</t:panelGroup>
   
