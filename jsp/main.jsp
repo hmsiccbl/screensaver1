@@ -12,5 +12,11 @@
 <f:subview id="main">
   <t:outputText value="Welcome #{login.screensaverUser.fullNameFirstLast}!" styleClass="title"/>
   <t:div/>
-  <t:outputText value="Please use the navigation menu, to the left, to start using #{menu.applicationName}"/>
+  <f:verbatim escape="false">
+    <p>
+      Thanks for trying out this early version of Screensaver1! To get started, try clicking some of
+      the items in the left menu bar. Or, for a detailed description of what you can do, click on
+      the "Instructions" link.
+    </p>
+  </f:verbatim>
 </f:subview>
