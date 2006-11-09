@@ -33,9 +33,16 @@
   <!-- === === Managed beans === === -->
   
   <!-- TODO: Is it possible to configure managed-bean superclass so that common properties are not repeated in each bean definition?  Or must we use Spring to manage our JSF managed-beans in order have such a feature? -->
-  
+
 
   <!-- === top-level backing beans === -->
+  
+  <managed-bean>
+    <description>Main Controller</description>
+    <managed-bean-name>mainController</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.control.MainController</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
   
   <managed-bean>
     <description>Menu navigation panel</description>
@@ -223,8 +230,8 @@
     <managed-bean-class>edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporter</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
   </managed-bean>
-  
 
+  
   <!-- === screens backing beans === -->
 
   <managed-bean>
@@ -359,6 +366,11 @@
     <from-view-id>*</from-view-id>
 
     <!-- === top-level wildcard navigation rules === -->
+    <navigation-case>
+      <from-outcome>viewHelp</from-outcome>
+      <to-view-id>/helpViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
     <navigation-case>
       <from-outcome>logout</from-outcome>
       <!-- maybe we want a "you have been logged out" page; for now we send to the query page, which will force a login -->

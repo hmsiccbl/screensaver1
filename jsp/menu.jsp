@@ -39,9 +39,9 @@
         <t:commandNavigation2 action="#{librariesController.browseLibraries}" value="#{\"Browse Libraries\"}" rendered="#{menu.authenticatedUser}" accesskey="L" />
         <t:commandNavigation2 action="#{screensController.browseScreens}" value="#{\"Browse Screens\"}" rendered="#{menu.authenticatedUser}" accesskey="S" />
         <t:commandNavigation2 accesskey="" />
-        <t:commandNavigation2 action="goHelp" value="#{\"Help\"}" accesskey="H" />
-        <t:commandNavigation2 id="navPanelDeveloperNode" value="#{\"Developer >>\"}" accesskey="" visibleOnUserRole="developer" >
-		  <t:commandNavigation2 action="goEnvironmentInfo" value="#{\"Env Info\"}" />
+        <t:commandNavigation2 action="#{mainController.viewHelp}" value="Instructions" accesskey="H" />
+        <t:commandNavigation2 id="navPanelDeveloperNode" value="Developer >>" accesskey="" visibleOnUserRole="developer" >
+		  <t:commandNavigation2 action="goEnvironmentInfo" value="Env Info" />
           <t:commandNavigation2 action="goSchemaManager" value="#{\"Schema Manager\"}" />
         </t:commandNavigation2>
       </t:panelNavigation2>

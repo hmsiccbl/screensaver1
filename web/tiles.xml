@@ -81,14 +81,14 @@
   </definition>
   
   <definition
-    name="/query.tiles"
+    name="/helpViewer.tiles"
     extends=".base">
     <put
       name="pageTitle"
-      value="Search"/>
+      value="Instructions"/>
     <put
       name="body"
-      value="/query.jsp" />
+      value="/helpViewer.jsp" />
   </definition>
 
 

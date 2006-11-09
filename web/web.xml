@@ -209,7 +209,7 @@
     <filter-name>ScreensaverSessionManagementFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
-
+  
 
   <!-- Tiles configuration -->
 
@@ -331,7 +331,7 @@
       <url-pattern>/main.jsf</url-pattern>
       <url-pattern>/login.jsf</url-pattern>
       <url-pattern>/login-error.jsf</url-pattern>
-      <url-pattern>/query.jsf</url-pattern>
+      <url-pattern>/helpViewer.jsf</url-pattern>
       <url-pattern>/libraries/*</url-pattern>
       <url-pattern>/screenresults/*</url-pattern>
       <url-pattern>/screens/*</url-pattern>
