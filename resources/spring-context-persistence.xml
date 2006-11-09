@@ -87,7 +87,7 @@
   <!-- The beans that are to be wrapped by transactional proxies -->
 
   <bean
-    id="dao"
+    id="transactionalDao"
     class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
     <property
       name="transactionManager"
@@ -125,7 +125,7 @@
     <property
       name="transactionManager"
       ref="txnManager" />
-    <property name="transactionAttributeSource">
+    <property name="transactionAttributeSource">/
       <bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource" />
     </property>
   </bean>
@@ -133,6 +133,67 @@
   -->
   
   <!-- end of transactional support configuration -->
+  
+  <!-- Restricted Access DAO proxy configuration -->
+  
+  <bean id="dataAccessPolicy"
+    class="edu.harvard.med.screensaver.db.DataAccessPolicy"/>
+  
+  <bean id="restrictedAccessCollectionDaoMethodInterceptor"
+    class="edu.harvard.med.screensaver.db.RestrictedAccessCollectionDaoMethodInterceptor">
+    <property name="dataAccessPolicy" ref="dataAccessPolicy"/>
+  </bean>
+ 
+  <bean id="restrictedAccessEntityDaoMethodInterceptor"
+    class="edu.harvard.med.screensaver.db.RestrictedAccessEntityDaoMethodInterceptor">
+    <property name="dataAccessPolicy" ref="dataAccessPolicy"/>
+  </bean>
+ 
+  <bean id="restrictedAccessCollectionDaoAdvisor"
+   class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+   <property name="advice">
+    <ref local="restrictedAccessCollectionDaoMethodInterceptor" />
+   </property>
+   <property name="perl5" value="true"/>
+   <property name="patterns">
+    <list>
+     <value>.*DAO.findEntitiesBy.*</value>
+     <value>.*DAO.findAll.*</value>
+    </list>
+   </property>
+  </bean>
+  
+  <bean id="restrictedAccessEntityDaoAdvisor"
+   class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+   <property name="advice">
+    <ref local="restrictedAccessEntityDaoMethodInterceptor" />
+   </property>
+   <property name="perl5" value="true"/>
+   <property name="patterns">
+    <list>
+     <value>.*DAO.delete.*</value>
+     <value>.*DAO.find(?!All|EntitiesBy).*</value>
+    </list>
+   </property>
+  </bean>
+  
+  <bean id="restrictedAccessDaoProxy"
+    class="org.springframework.aop.framework.ProxyFactoryBean">
+    <property name="proxyInterfaces" value="edu.harvard.med.screensaver.db.DAO"/>
+    <property name="target" ref="transactionalDao"/>
+    <property name="interceptorNames">
+      <list>
+        <value>restrictedAccessCollectionDaoAdvisor</value>
+        <value>restrictedAccessEntityDaoAdvisor</value>
+      </list>
+    </property>
+  </bean>
+
+  <alias alias="dao" name="restrictedAccessDaoProxy"/>
+  
+  <!-- end of Restricted Access DAO proxy configuration -->
+  
+  
   
   
   <bean

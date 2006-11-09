@@ -17,6 +17,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
+import edu.harvard.med.screensaver.model.libraries.Compound;
+
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
@@ -286,6 +288,21 @@ public abstract class AbstractEntity implements Serializable
   public String toString()
   {
     return getClass().getSimpleName() + "(" + getBusinessKey().toString() + ")";
+  }
+  
+  /**
+   * To enable visitor to visit a particular subclass, override this method and
+   * insert <code>visitor.acceptVisitor(this);</code>
+   * 
+   * @param visitor
+   * @return
+   * @motivation to keep most of our AbstractEntity subclasses clean, as we
+   *             currently only have the DataAccessPolicy visitor, which does
+   *             not actually need to visit every subclass.
+   */
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return null;
   }
 
   

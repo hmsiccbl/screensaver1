@@ -665,18 +665,18 @@ TODO:
 			<t:panelGrid columns="1">
 				<t:panelGroup>
 					<t:outputLabel value="<none>" styleClass="inputLabel"
-						rendered="#{empty screenViewer.screen.screenResult}" />
+						rendered="#{empty screenViewer.screenResult}" />
 					<t:outputLabel value="Date created: " styleClass="inputLabel"
-						rendered="#{!empty screenViewer.screen.screenResult}" />
+						rendered="#{!empty screenViewer.screenResult}" />
 					<t:outputText
-						value="#{screenViewer.screen.screenResult.dateCreated}"
+						value="#{screenViewer.screenResult.dateCreated}"
 						styleClass="data"
-						rendered="#{!empty screenViewer.screen.screenResult}" />
+						rendered="#{!empty screenViewer.screenResult}" />
 				</t:panelGroup>
 				<t:commandButton
 					value="#{screenViewer.editable ? \"View/Edit/Load...\" : \"View...\"}"
 					action="#{screenViewer.viewScreenResult}" styleClass="command"
-					rendered="#{!empty screenViewer.screen.screenResult || screenViewer.editable}" />
+					rendered="#{!empty screenViewer.screenResult || screenViewer.editable}" />
 			</t:panelGrid>
 
 			<t:outputLabel value="Billing Information" styleClass="inputLabel"

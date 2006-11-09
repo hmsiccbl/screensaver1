@@ -19,6 +19,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -101,6 +102,11 @@ public class ScreenResult extends AbstractEntity
     _screen.setScreenResult(this);
   }
   
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
    */

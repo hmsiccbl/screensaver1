@@ -25,9 +25,13 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 
+// TODO: use JDK5 annotations to define AOP advice for data access policy.
 /**
  * A Data Access Object for the beans in the
- * {@link edu.harvard.med.screensaver.model data model}.
+ * {@link edu.harvard.med.screensaver.model data model}. <i>WARNING: If you add
+ * methods to this interface, you may need to update PointcutAdivsors in
+ * spring-context-persistence.xml, if the method name is not properly handled by
+ * the existing regexps.</i>.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>

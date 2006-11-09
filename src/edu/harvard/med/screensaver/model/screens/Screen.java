@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -149,6 +150,11 @@ public class Screen extends AbstractEntity
 
 
   // public methods
+
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
 
   @Override
   public Integer getEntityId()
@@ -846,7 +852,7 @@ public class Screen extends AbstractEntity
   {
     _screenResult = screenResult;
   }
-
+  
  
   // protected methods
 

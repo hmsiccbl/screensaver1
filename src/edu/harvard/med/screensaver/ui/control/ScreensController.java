@@ -113,6 +113,7 @@ public class ScreensController extends AbstractUIController
   public String viewScreen(Screen screen, ScreenSearchResults screenSearchResults)
   {
     _screenViewer.setScreenResultsController(_screenResultsController);
+    _screenViewer.setDao(_dao);
     _screenViewer.setScreen(screen);
     _screenViewer.setCandidateLabHeads(_dao.findAllLabHeads());
     _screenViewer.setCandidateCollaborators(_dao.findAllEntitiesWithType(ScreeningRoomUser.class));

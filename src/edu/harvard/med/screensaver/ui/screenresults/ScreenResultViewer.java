@@ -167,9 +167,14 @@ public class ScreenResultViewer extends AbstractBackingBean
     return _screen;
   }
   
+
   public ScreenResult getScreenResult()
   {
-    return _screen.getScreenResult();
+    // TODO: HACK: data-access-permissions aware 
+    if (_screen.getScreenResult() != null) {
+      return _dao.findEntityById(ScreenResult.class, _screen.getScreenResult().getEntityId());
+    }
+    return null;
   }
 
   public void setScreenResultExporter(ScreenResultExporter screenResultExporter)

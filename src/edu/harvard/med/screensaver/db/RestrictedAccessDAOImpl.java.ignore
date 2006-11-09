@@ -1,0 +1,175 @@
+// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml $
+// $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
+//
+// Copyright 2006 by the President and Fellows of Harvard College.
+// 
+// Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+// at Harvard Medical School. This software is distributed under the terms of
+// the GNU General Public License.
+
+package edu.harvard.med.screensaver.db;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+
+import org.apache.log4j.Logger;
+
+/**
+ * DAO that restricts access to particular data records, based upon a user's
+ * access rights within a pluggable permissions policy.
+ * 
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ */
+public class RestrictedAccessDAOImpl implements DAO
+{
+  // static members
+
+  private static Logger log = Logger.getLogger(RestrictedAccessDAOImpl.class);
+
+  // instance data members
+
+  private DAO _baseDao;
+  private ScreensaverUser _user;
+  private ScreensaverDataAccessPolicy _policy;
+  
+
+  // public constructors and methods
+  
+  public void setBaseDao(DAO baseDao)
+  {
+    _baseDao = baseDao;
+  }
+
+  public void setUser(ScreensaverUser user)
+  {
+    _user = user;
+  }
+
+  public <E extends AbstractEntity> E defineEntity(Class<E> entityClass,
+                                                   Object... constructorArguments)
+  {
+    return _baseDao.defineEntity(entityClass, constructorArguments);
+  }
+
+  public void deleteEntity(AbstractEntity entity)
+  {
+    if (_policy.allowAccess(entity)) {
+      _baseDao.deleteEntity(entity);
+    }
+    else {
+      throw new DataAccessViolationException(_user, entity, _policy);
+    }
+  }
+
+  public void deleteScreenResult(ScreenResult screenResult)
+  {
+  // TODO Auto-generated method stub
+
+  }
+
+  public void doInTransaction(DAOTransaction daoTransaction)
+  {
+  // TODO Auto-generated method stub
+
+  }
+
+  public <E extends AbstractEntity> List<E> findAllEntitiesWithType(Class<E> entityClass)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public List<ScreeningRoomUser> findAllLabHeads()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass,
+                                                                     Map<String,Object> name2Value)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass,
+                                                                   String propertyName,
+                                                                   Object propertyValue)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> List<E> findEntitiesByPropertyPattern(Class<E> entityClass,
+                                                                          String propertyName,
+                                                                          String propertyPattern)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass,
+                                                     Serializable id)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass,
+                                                             Map<String,Object> name2Value)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass,
+                                                           String propertyName,
+                                                           Object propertyValue)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public Library findLibraryWithPlate(Integer plateNumber)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public SilencingReagent findSilencingReagent(Gene gene,
+                                               SilencingReagentType silencingReagentType,
+                                               String sequence)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public Well findWell(Integer plateNumber, String wellName)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public void persistEntity(AbstractEntity entity)
+  {
+  // TODO Auto-generated method stub
+
+  }
+
+
+  // private methods
+
+}
+

@@ -20,6 +20,8 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
+import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
@@ -56,6 +58,7 @@ public class ScreenViewer extends AbstractBackingBean
 
   private ScreensController _screensController;
   private ScreenResultsController _screenResultsController;
+  private DAO _dao;
   private Screen _screen;
   private UISelectOneBean<ScreeningRoomUser> _leadScreener;
   private UISelectOneBean<ScreeningRoomUser> _labName;
@@ -81,6 +84,11 @@ public class ScreenViewer extends AbstractBackingBean
     _screenResultsController = screenResultsController;
   }
   
+  public void setDao(DAO dao)
+  {
+    _dao = dao;
+  }
+
   public Screen getScreen() 
   {
     return _screen;
@@ -91,6 +99,15 @@ public class ScreenViewer extends AbstractBackingBean
     _screen = screen;
   }
   
+  public ScreenResult getScreenResult()
+  {
+    // TODO: HACK: data-access-permissions aware
+    if (_screen.getScreenResult() != null) {
+      return _dao.findEntityById(ScreenResult.class, _screen.getScreenResult().getEntityId());
+    }
+    return null;
+  }
+
   public void setCandidateLabHeads(List<ScreeningRoomUser> labHeads)
   {
     _labName = new UISelectOneBean<ScreeningRoomUser>(labHeads, _screen.getLabHead()) { 
