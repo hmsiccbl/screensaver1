@@ -144,8 +144,15 @@
           </li>
           <li>
             If you are a <i>screener</i>, the Screen Viewer page will display some basic information about
-            the screen. If you are an <i>administrator</i>, it will display more information, and if you
-            are a <i>screens administrator</i>, it will allow you to edit the information about a screen.
+            the screen.
+          </li>
+          <li>
+            If you are an <i>administrator</i>, it will display administrative information about
+            the screen that is not viewable by normal users;
+          </li>
+          <li>
+            If you are a <i>screens administrator</i>, it will allow you to edit the information
+            about a screen.
             (Keep in mind that any changes you make to the screen will not be permanent! You will want
             to change the information as it appears in ScreenDB instead. The
             information about the libraries, screens, and screeners will be reloaded from ScreenDB
@@ -153,11 +160,19 @@
           </li>
           <li>
             You can also view the screen results from the Screen Viewer page if they are currently
-            loaded into the Screensaver database, and if you have permissions to view them, by
-            clicking on the "View Screen Results" button towards the bottom of the Screen Viewer
-            page. <i>Screeners</i> can only see some of the screen results, but <i>administrators</i>
-            can see them all.
-            <i>Screen results administrators</i> can also load or reload screen results into the database.
+            loaded into the Screensaver database;
+          </li>
+          <li>
+            You will only be able to view screen results you have permission to see. If you are a
+            <i>screener</i>, this should include all your own screens, plus the screens you
+            collaborated on;
+          </li>
+          <li>
+            <i>Administrators</i> can see all the screen results;
+          </li>
+          <li>
+            <i>Screen results administrators</i> can also load or reload screen results into the
+            database.
           </li>
         </ul>
       </li>
