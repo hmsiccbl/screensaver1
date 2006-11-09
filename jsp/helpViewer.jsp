@@ -120,7 +120,7 @@
             Search Results as described above in the section on Finding Wells;
           </li>
           <li>
-            If you are a libraries adminstrator, you can import library contents from the
+            If you are a <i>libraries adminstrator</i>, you can import library contents from the
             Library Viewer page as well.
           </li>
         </ul>
@@ -130,8 +130,8 @@
         <br/>
         Click on the "Browse Screens" link in the left menu page to get to the Screens Browser,
         which contains a "search results" of all the screens you are allowed to see. If you are
-        an administrator, this will be the complete set of screens. If you are a screener, then it
-        will be a smaller set of screens.
+        an <i>administrator</i>, this will be the complete set of screens. If you are a
+        <i>screener</i>, then it will be a smaller set of screens.
         From there, you can:
         <ul>
           <li>
@@ -143,20 +143,21 @@
             Screen Viewer page;
           </li>
           <li>
-            If you are a screener, the Screen Viewer page will display some basic information about
-            the screen. If you are an administrator, it will display more information, and if you
-            are a screens administrator, it will allow you to edit the information about a screen.
-            Keep in mind that any changes you make to the screen will not be permanent! You will want
-            to change the information as it appears in ScreenDB instead. Keep in mind that the
+            If you are a <i>screener</i>, the Screen Viewer page will display some basic information about
+            the screen. If you are an <i>administrator</i>, it will display more information, and if you
+            are a <i>screens administrator</i>, it will allow you to edit the information about a screen.
+            (Keep in mind that any changes you make to the screen will not be permanent! You will want
+            to change the information as it appears in ScreenDB instead. The
             information about the libraries, screens, and screeners will be reloaded from ScreenDB
-            into Screensaver periodically;
+            into Screensaver periodically);
           </li>
           <li>
             You can also view the screen results from the Screen Viewer page if they are currently
             loaded into the Screensaver database, and if you have permissions to view them, by
             clicking on the "View Screen Results" button towards the bottom of the Screen Viewer
-            page. Screeners can only see some of the screen results, but screeners can see them all.
-            Screen results administrators can also load or reload screen results into the database.
+            page. <i>Screeners</i> can only see some of the screen results, but <i>administrators</i>
+            can see them all.
+            <i>Screen results administrators</i> can also load or reload screen results into the database.
           </li>
         </ul>
       </li>
@@ -167,9 +168,46 @@
         Viewer page. From there, you can:
         <ul>
           <li>
-            TODO: finish this section
+            Download the screen results to an Excel file by clicking the "Download" button;
+          </li>
+          <li>
+            Go back to the Screen Viewer page by clicking the "View Screen" button;
+          </li>
+          <li>
+            If you are a <i>screen results administrator</i>, you will see controls for deleting the
+            screen results, and reloading them from a file;
+          </li>
+          <li>
+            Show or hide some or all of the data headers for the screen results: use control-clicks
+            (apple-clicks on Mac) to select the data headers you want to see in the list below the
+            "Show selected data headers:" label;
+          </li>
+          <li>
+            Open and close the four major sections of the Screen Results Viewer page (Summary; Data
+            Headers; Data; and Heat Maps) by clicking on
+            the triangles next to the section headers;
+          </li>
+          <li>
+            Be sure to check out the Heat Map Viewer - it's pretty awesome!
+          </li>
+          <li>
+            Be sure to try the "Add Heat Map" button to view two heat maps for different data headers
+            side by side;
+          </li>
+          <li>
+            You can exclude control wells and edge wells from Z-score normalization calculations and
+            color scaling by checking the "Control wells" and "Edge wells" checkboxes to the left
+            of the heat map.
           </li>
         </ul>
+      </li>
+      <li>
+        <b>Give us feedback!</b>
+        <br/>
+        We want to know what you think!
+        For now, you can give us feedback by sending email to
+        <a href="mailto:andrew_tolopko@hms.harvard.edu">andrew_tolopko@hms.harvard.edu</a> and
+        <a href="mailto:john_sullivan@hms.harvard.edu">john_sullivan@hms.harvard.edu</a>.
       </li>
     </ul>
   </f:verbatim>
