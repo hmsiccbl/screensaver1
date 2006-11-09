@@ -202,6 +202,26 @@
 
   <!-- an alias for deploy-local target -->
   <target name="deploy" depends="deploy-local"/>
+  
+  <target name="deploy-jsp">
+    <description>External target top deploy just the JSP files, for quick testing of JSP edits during development cycle.</description>
+    <antcall target="copy-jsp">
+      <param name="exploded.war.dir" location="${deploy.dir}"/>
+    </antcall>
+  </target> 
+   
+  <target name="copy-jsp">
+    <description>Internal target to copy JSP pages to directory specified by 'exploded.war.dir'</description>
+    <!-- if we were to copy jsp files below WEB-INF we have to map each of them in our web.xml file, 
+    to allow them to be accessed -->
+    <copy 
+      todir="${exploded.war.dir}" 
+      overwrite="true"
+      verbose="${verbose}"
+    >
+      <fileset dir="jsp" includes="**/*"/>
+    </copy>
+  </target>
 
   <target 
     name="war"
@@ -242,14 +262,7 @@
       tofile="${metainf.dir}/MANIFEST.MF" 
       verbose="${verbose}"/>
 
-    <!-- if we were to copy jsp files below WEB-INF we have to map each of them in our web.xml file, 
-    to allow them to be accessed -->
-    <copy 
-      todir="${exploded.war.dir}" 
-      verbose="${verbose}"
-    >
-      <fileset dir="jsp" includes="**/*"/>
-    </copy>
+    <antcall target="copy-jsp"/>
 
     <copy 
       todir="${webinf.dir}" 
