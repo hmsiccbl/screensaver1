@@ -12,19 +12,25 @@
 <f:subview id="menu">
   <t:panelGrid columns="1">
 
+    <%--
+      HACK: there remain some difficulties in determining / predicting the order of initialization
+      of the JSF managed-beads as enumerated in the faces-config.xml file. a current workaround is
+      to reference the managed-beads that need to get initialized first in a null context here.
+	--%>
+	<h:outputText value="#{librariesController}" rendered="#{empty librariesController && false}" />
+	
     <t:commandLink id="menuTitle" action="goMain" value="#{menu.applicationTitle}" styleClass="menuItem title"/>
 
     <t:htmlTag id="menuSectionSeparator0" value="hr" rendered="#{menu.authenticatedUser}"/>
 
-		<%-- TODO: this layout won't work well for long user names... --%>
 		<t:panelGroup rendered="#{menu.authenticatedUser}">
 			<h:form id="userForm">
 				<%--t:outputText value="User " styleClass="label"/--%>
 				<t:commandLink id="userName" action="goMyAccount"
 					value="#{login.screensaverUser.fullNameFirstLast}" styleClass="menuItem userName" />
-				<t:outputText value="|" styleClass="spacer"/>
-				<t:commandLink id="account" action="goMyAccount" value="#{\"Edit\"}" styleClass="menuItem"/>
-				<t:outputText value="|" styleClass="spacer"/>
+                <t:div />
+				<t:commandLink id="account" action="goMyAccount" value="#{\"Edit\"}" styleClass="menuItem" />
+				<t:outputText value="|" styleClass="spacer" />
 				<t:commandLink id="logout" action="#{login.logout}" value="#{\"Logout\"}" styleClass="menuItem"/>
 			</h:form>
 		</t:panelGroup>
