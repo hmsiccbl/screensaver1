@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 
@@ -146,6 +147,11 @@ public class ScreensaverUser extends AbstractEntity
 
 
   // public methods
+
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
 
   @Override
   public Integer getEntityId()

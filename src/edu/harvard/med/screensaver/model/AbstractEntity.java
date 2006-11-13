@@ -302,6 +302,9 @@ public abstract class AbstractEntity implements Serializable
    */
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
+    if (log.isDebugEnabled()) {
+      log.debug("concrete entity class " + this.getClass().getSimpleName() + " not instrumented for visitor pattern!");
+    }
     return null;
   }
 

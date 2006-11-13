@@ -61,8 +61,28 @@ public class DataAccessPolicy implements AbstractEntityVisitor
   private static Logger log = Logger.getLogger(DataAccessPolicy.class);
   
   
+  // instance data
+
+  private ScreensaverUser _screensaverUser;
+  
+  
   // public methods
 
+  public ScreensaverUser getScreensaverUser()
+  {
+    // handle usage within a web context
+    if (_screensaverUser == null) {
+      return getCurrentScreensaverUser();
+    }
+    // handle usage within a testing context
+    return _screensaverUser;
+  }
+  
+  public void setScreensaverUser(ScreensaverUser user)
+  {
+    _screensaverUser = user;
+  }
+  
   public boolean visit(AbaseTestset entity)
   {
     return true;
@@ -182,6 +202,10 @@ public class DataAccessPolicy implements AbstractEntityVisitor
   public boolean visit(Screen screen)
   {
     ScreensaverUser user = getScreensaverUser();
+    if (user == null) {
+      // non-web context, allow all permissions
+      return true;
+    }
     if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
       return true;
     }
@@ -199,6 +223,10 @@ public class DataAccessPolicy implements AbstractEntityVisitor
   public boolean visit(ScreenResult screenResult)
   {
     ScreensaverUser user = getScreensaverUser();
+    if (user == null) {
+      // non-web context, allow all permissions
+      return true;
+    }
     if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
       return true;
     }
@@ -241,6 +269,10 @@ public class DataAccessPolicy implements AbstractEntityVisitor
   public boolean visit(ScreensaverUser screensaverUser)
   {
     ScreensaverUser loggedInUser = getScreensaverUser();
+    if (loggedInUser == null) {
+      // non-web context, allow all permissions
+      return true;
+    }
     if (loggedInUser.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
       return true;
     }
@@ -269,6 +301,10 @@ public class DataAccessPolicy implements AbstractEntityVisitor
   public boolean visit(Visit visit)
   {
     ScreensaverUser user = getScreensaverUser();
+    if (user == null) {
+      // non-web context, allow all permissions
+      return true;
+    }
     if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
       return true;
     }
@@ -293,15 +329,17 @@ public class DataAccessPolicy implements AbstractEntityVisitor
   // private methods
   
   // TODO: Major HACK alert! We need a better way of getting at the logged-in user.  Some form of injection...
-  private ScreensaverUser getScreensaverUser()
+  private ScreensaverUser getCurrentScreensaverUser()
   {
     FacesContext facesContext = FacesContext.getCurrentInstance();
+    if (facesContext == null) {
+      log.warn("no current screensaver user, since not executing within a web context; all data access permissions granted");
+      return null;
+    }
     Login login = (Login) facesContext.getApplication().getVariableResolver().resolveVariable(facesContext, "login");
     ScreensaverUser user = login.getScreensaverUser();
     return user;
   }
-
-  
 
 }
 

@@ -177,7 +177,7 @@
    </property>
   </bean>
   
-  <bean id="restrictedAccessDaoProxy"
+  <bean id="restrictedAccessDao"
     class="org.springframework.aop.framework.ProxyFactoryBean">
     <property name="proxyInterfaces" value="edu.harvard.med.screensaver.db.DAO"/>
     <property name="target" ref="transactionalDao"/>
@@ -189,7 +189,7 @@
     </property>
   </bean>
 
-  <alias alias="dao" name="restrictedAccessDaoProxy"/>
+  <alias alias="dao" name="restrictedAccessDao"/>
   
   <!-- end of Restricted Access DAO proxy configuration -->
   
