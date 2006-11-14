@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.commons.lang.time.DateUtils;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.NonCherryPickVisit;
 import edu.harvard.med.screensaver.model.screens.Visit;
 
@@ -52,6 +53,7 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
   private int     _stringTestValueIndex = Integer.parseInt("antz", STRING_TEST_VALUE_RADIX);
   private long    _dateMilliseconds = 0;
   private int     _vocabularyTermCounter = 0;
+  private int     _wellNameTestValueIndex = 0;
   
   @SuppressWarnings("unchecked")
   protected Object getTestValueForType(Class type)
@@ -95,6 +97,15 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
       "can't create test values for type: " + type.getName());
   }
   
+  private Object getTestValueForWellName()
+  {
+    String wellName = String.format("%c%02d",
+                                    'A' + (_wellNameTestValueIndex / 24),
+                                    (_wellNameTestValueIndex % 24) + 1);
+    ++_wellNameTestValueIndex;
+    return wellName;
+  }
+
   protected static interface EntityClassExercizor
   {
     void exercizeEntityClass(Class<AbstractEntity> entityClass);
@@ -167,8 +178,7 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
       return newInstance(concreteStandin);
     }
     Constructor constructor = getMaxArgConstructor(entityClass);
-    Class [] parameterTypes = constructor.getParameterTypes();
-    Object[] arguments = getArgumentsForParameterTypes(parameterTypes);
+    Object[] arguments = getArgumentsForConstructor(constructor);
     try {
       return (AbstractEntity) constructor.newInstance(arguments);
     }
@@ -178,12 +188,24 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
     }
     return null;
   }
+  
+  private Object[] getArgumentsForConstructor(Constructor constructor)
+  {
+    Class[] parameterTypes = constructor.getParameterTypes();
+    Object[] arguments = getArgumentsForParameterTypes(parameterTypes);
+    if (constructor.getDeclaringClass().equals(Well.class)) {
+      arguments[2] = getTestValueForWellName();
+    }
+    return arguments;
+  }
 
   private Object[] getArgumentsForParameterTypes(Class[] parameterTypes) {
+    
     Object [] arguments = new Object[parameterTypes.length];
     for (int i = 0; i < arguments.length; i++) {
       arguments[i] = getTestValueForType(parameterTypes[i]);
     }
+    
     return arguments;
   }
 

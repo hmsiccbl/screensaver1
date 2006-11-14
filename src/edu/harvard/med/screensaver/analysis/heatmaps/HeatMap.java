@@ -15,6 +15,7 @@ import java.util.Collection;
 
 import edu.harvard.med.screensaver.analysis.Filter;
 import edu.harvard.med.screensaver.analysis.AggregateFunction;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 
@@ -163,8 +164,7 @@ public class HeatMap
   private void initialize(Filter<ResultValue> scoringFilter,
                           AggregateFunction<Double> scoringFunc)
   {
-    // TODO: get the plate extents from somewhere else!
-    _data = new ResultValue['P' - 'A' + 1][24];
+    _data = new ResultValue[Well.PLATE_ROWS][Well.PLATE_COLUMNS];
     _rawValues = new double[_data.length][_data[0].length];
     Collection<Double> aggregationValues = new ArrayList<Double>();
     for (ResultValue rv : _resultValueType.getResultValues()) {

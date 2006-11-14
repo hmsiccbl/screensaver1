@@ -20,7 +20,7 @@ public class ControlWellsFilter implements Filter<ResultValue>
 
   public boolean exclude(ResultValue rv)
   {
-    return rv.isControl();
+    return rv.isControlWell();
   }
   
   public String toString() 

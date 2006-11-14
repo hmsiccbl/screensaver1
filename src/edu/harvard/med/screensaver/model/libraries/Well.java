@@ -42,7 +42,15 @@ public class Well extends AbstractEntity
   private static final long serialVersionUID = 2682270079212906959L;
   private static Pattern _wellParsePattern = Pattern.compile("([A-Za-z])(\\d{1,2})");
 
-
+  // constants for well names
+  // note that these can be hardcoded for now, since we only support 384 well plates
+  public static int MIN_WELL_COLUMN = 1;
+  public static int MAX_WELL_COLUMN = 24;
+  public static char MIN_WELL_ROW = 'A';
+  public static char MAX_WELL_ROW = 'P';
+  public static int PLATE_ROWS = (MAX_WELL_ROW - MIN_WELL_ROW) + 1;
+  public static int PLATE_COLUMNS = (MAX_WELL_COLUMN - MIN_WELL_COLUMN) + 1;
+  
   // instance fields
 
   private String _wellId;

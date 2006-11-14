@@ -140,7 +140,7 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     }
     
     schemaUtil.truncateTablesOrCreateSchema();
-    
+
     // create a user
     _validUser = dao.defineEntity(ScreensaverUser.class, "Iam", "Authorized", "iam_authorized@unittest.com");
     _validUser.setLoginId(TEST_VALID_SCREENSAVER_USER_LOGIN);
@@ -181,7 +181,7 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     }
     catch (LoginException e) {
       e.printStackTrace();
-      fail("login failed due to exception " + e.getMessage());
+      fail("login failed due to exception: " + e.getMessage());
     }
   }
 

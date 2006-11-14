@@ -52,7 +52,7 @@ public class HeatMapCell
   {
     _resultValue = resultValue;
     _well = resultValue == null ? null : resultValue.getWell();
-    _containsValue = resultValue != null && !resultValue.isEmpty();
+    _containsValue = resultValue != null && !resultValue.isEmptyWell();
     String formattedValue = _containsValue ? format.format(scoredValue) : "<empty>";
     _cellText = showValues ? formattedValue : INVISIBLE_HYPERLINK_VALUE;
     _popupText = _resultValue == null ? "" :
@@ -99,11 +99,11 @@ public class HeatMapCell
 
     if (resultValue != null &&
       !resultValue.isExclude()) {
-      if (resultValue.isExperimental()) {
+      if (resultValue.isExperimentalWell()) {
         _style = "background-color: " + hexColor;
         return;
       }
-      else if (_resultValue.isControl()) {
+      else if (_resultValue.isControlWell()) {
         _style = "background-color: " + hexColor + "; border-style: double";
         return;
       }

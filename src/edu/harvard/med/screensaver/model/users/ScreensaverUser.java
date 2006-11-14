@@ -240,7 +240,7 @@ public class ScreensaverUser extends AbstractEntity
   }
   
   /**
-   * Get the full name (last, first).
+   * Get the full name ("last, first').
    * @return the full name
    */
   @DerivedEntityProperty
@@ -249,6 +249,11 @@ public class ScreensaverUser extends AbstractEntity
     return getFullName(true);
   }
   
+  /**
+   * Get the full name ("first, last").
+   * @return the full name
+   */
+  @DerivedEntityProperty
   public String getFullNameFirstLast()
   {
     return getFullName(false);

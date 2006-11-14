@@ -22,7 +22,7 @@ public class ExcludedOrNonDataProducingWellFilter implements Filter<ResultValue>
 
   public boolean exclude(ResultValue rv)
   {
-    return rv.isExclude() || !rv.isDataProducer();
+    return rv.isExclude() || !rv.isDataProducerWell();
   }
 
 

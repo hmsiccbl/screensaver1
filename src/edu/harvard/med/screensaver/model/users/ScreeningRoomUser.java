@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Visit;
 
@@ -93,7 +94,6 @@ public class ScreeningRoomUser extends ScreensaverUser
     setECommonsId(eCommonsId);
     setHarvardId(harvardId);
     setUserClassification(userClassification);
-    addLabMember(this);
   }
 
 
@@ -185,7 +185,7 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Add the screens for which this user was a collaborato.
+   * Add the screens for which this user was a collaborator.
    *
    * @param screenCollaborated the screens for which this user was a collaborato to add
    * @return true iff the screening room user did not already have the screens for which this user was a collaborato
@@ -199,7 +199,7 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Remove the screens for which this user was a collaborato.
+   * Remove the screens for which this user was a collaborator.
    *
    * @param screenCollaborated the screens for which this user was a collaborato to remove
    * @return true iff the screening room user previously had the screens for which this user was a collaborato
@@ -265,9 +265,17 @@ public class ScreeningRoomUser extends ScreensaverUser
     _labHead.getHbnLabMembers().add(this);
   }
 
+  @DerivedEntityProperty
+  public boolean isLabHead()
+  {
+    return getLabHead() == null;
+  }
+
   /**
-   * Get an unmodifiable copy of the set of lab members.
-   *
+   * Get an unmodifiable copy of the set of lab members. If this
+   * ScreeningRoomUser is also the lab head, the result will <i>not</i> contain
+   * this ScreeningRoomUser (i.e., the lab head is not considered a lab member).
+   * 
    * @return the lab members
    */
   public Set<ScreeningRoomUser> getLabMembers()

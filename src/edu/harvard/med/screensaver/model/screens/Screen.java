@@ -246,6 +246,11 @@ public class Screen extends AbstractEntity
     return Collections.unmodifiableList(collaboratorsList);
   }
   
+  /**
+   * Get a comma-delimited list of the Screen's collaborators, identified by
+   * their full name ("first, last" format).
+   */
+  @DerivedEntityProperty
   public String getCollaboratorsString()
   {
     StringBuilder collaborators = new StringBuilder();
@@ -257,7 +262,7 @@ public class Screen extends AbstractEntity
       else {
         collaborators.append(", ");
       }
-      collaborators.append(collaborator.getFirstName()).append(" ").append(collaborator.getLastName());
+      collaborators.append(collaborator.getFullNameFirstLast());
     }
     return collaborators.toString();
   }

@@ -33,13 +33,13 @@ public class WellTest extends TestCase
   {
     // TODO: should test based upon some fixed plate size (size shouldn't be
     // determined here)
-    for (char row = 'a'; row <= 'p'; ++row) {
-      for (int col = 0; col < 24; ++col) {
+    for (char row = Character.toLowerCase(Well.MIN_WELL_ROW); row <= Character.toLowerCase(Well.MAX_WELL_ROW); ++row) {
+      for (int col = 0; col < Well.PLATE_COLUMNS; ++col) {
         doTestWellName(row, col);
       }
     }
-    for (char row = 'A'; row <= 'P'; ++row) {
-      for (int col = 0; col < 24; ++col) {
+    for (char row = Well.MIN_WELL_ROW; row <= Well.MAX_WELL_ROW; ++row) {
+      for (int col = 0; col < Well.PLATE_COLUMNS; ++col) {
         doTestWellName(row, col);
       }
     }
@@ -47,13 +47,13 @@ public class WellTest extends TestCase
   
   public void testWellEdge()
   {
-    for (char row = 'a'; row <= 'p'; ++row) {
-      for (int col = 0; col < 24; ++col) {
+    for (char row = Character.toLowerCase(Well.MIN_WELL_ROW); row <= Character.toLowerCase(Well.MAX_WELL_ROW); ++row) {
+      for (int col = 0; col < Well.PLATE_COLUMNS; ++col) {
         doTestWellEdge(row, col, row == 'a' || row == 'p' || col == 0 || col == 23);
       }
     }
-    for (char row = 'A'; row <= 'P'; ++row) {
-      for (int col = 0; col < 24; ++col) {
+    for (char row = Well.MIN_WELL_ROW; row <= Well.MAX_WELL_ROW; ++row) {
+      for (int col = 0; col < Well.PLATE_COLUMNS; ++col) {
         doTestWellEdge(row, col, row == 'A' || row == 'P' || col == 0 || col == 23);
       }
     }

@@ -239,7 +239,7 @@ public class ResultValue extends AbstractEntity implements Comparable
    */
   public Object generateTypedValue()
   {
-    if (!isDataProducer()) {
+    if (!isDataProducerWell()) {
       return null;
     }
     
@@ -304,13 +304,13 @@ public class ResultValue extends AbstractEntity implements Comparable
   }
   
   @DerivedEntityProperty
-  public boolean isExperimental()
+  public boolean isExperimentalWell()
   {
     return getAssayWellType().equals(AssayWellType.EXPERIMENTAL);
   }
   
   @DerivedEntityProperty
-  public boolean isControl()
+  public boolean isControlWell()
   {
     return getAssayWellType().equals(AssayWellType.ASSAY_NEGATIVE_CONTROL) ||
     getAssayWellType().equals(AssayWellType.ASSAY_POSITIVE_CONTROL) ||
@@ -318,25 +318,26 @@ public class ResultValue extends AbstractEntity implements Comparable
   }
   
   @DerivedEntityProperty
-  public boolean isDataProducer()
+  public boolean isDataProducerWell()
   {
     // TODO: I'm assuming wells of type "other" can contain data values --ant
-    return isExperimental() || isControl() || isOther();
+    return isExperimentalWell() || isControlWell() || isOtherWell();
   }
   
-  public boolean isOther()
+  @DerivedEntityProperty
+  public boolean isOtherWell()
   {
     return getAssayWellType().equals(AssayWellType.OTHER);
   }
 
   @DerivedEntityProperty
-  public boolean isEmpty()
+  public boolean isEmptyWell()
   {
     return getAssayWellType().equals(AssayWellType.EMPTY);
   }
   
   @DerivedEntityProperty
-  public boolean isEdge()
+  public boolean isEdgeWell()
   {
     return getWell().isEdgeWell();
   }

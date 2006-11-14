@@ -57,6 +57,7 @@
     <managed-bean-class>edu.harvard.med.screensaver.ui.Login</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
+      <!-- Inject the transactionalDao bean, rather than the dao bean (aliased to the restrictedAccessDao bean), in order to avoid infinite recursion from Login.getScreensaverUser() -->
       <property-name>dao</property-name>
       <value>#{transactionalDao}</value>
     </managed-property>
