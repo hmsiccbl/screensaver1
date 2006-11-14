@@ -29,7 +29,7 @@ public class CompoundViewer extends AbstractBackingBean
   
   private static final Logger log = Logger.getLogger(CompoundViewer.class);
   private static final String _screensaver0ImageRenderer =
-    "http://screensaver.med.harvard.edu/screenbank/compounds/render_molecule.png";
+    "http://screensaver1:insecure@screensaver.med.harvard.edu/screenbank/compounds-screensaver1/render_molecule.png";
   
   /**
    * This map is a workaround for the JSF EL limitation of no parameters allowed to methods. 
