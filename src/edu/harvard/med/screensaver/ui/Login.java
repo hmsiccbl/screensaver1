@@ -51,6 +51,19 @@ public class Login extends AbstractBackingBean
     return AUTHENTICATION_ID_DESCRIPTION;
   }
 
+  /**
+   * Returns the ScreensaverUser that is logged in to the current HTTP session.
+   * 
+   * @motivation <code>getExternalContext().getUserPrincipal()</code> does not
+   *             return the ScreensaverUserPrincipal object that we provided to
+   *             Tomcat during our JAAS authentication process (in
+   *             {@link ScreensaverLoginModule#commit}, and so we cannot get at
+   *             the ScreensaverUser object that would have available via the
+   *             ScreensaverUserPrincipal object. So we have to requery the
+   *             database to find the ScreensaverUser given only the user's
+   *             login ID.
+   * @return the ScreensaverUser that is logged in to the current HTTP session
+   */
   public ScreensaverUser getScreensaverUser()
   {
     Principal principal = getExternalContext().getUserPrincipal();

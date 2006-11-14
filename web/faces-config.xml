@@ -58,7 +58,7 @@
     <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
       <property-name>dao</property-name>
-      <value>#{dao}</value>
+      <value>#{transactionalDao}</value>
     </managed-property>
     <managed-property>
       <property-name>messages</property-name>
