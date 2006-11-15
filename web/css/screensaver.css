@@ -106,14 +106,19 @@ a.heatMapValue:link,a.heatMapValue:visited 	{
 
 .inputLabel {
 	vertical-align: top;
+	font-family: sans-serif;
 }
 
-.column,.keyColumn {
+.column,.keyColumn,.numericColumn {
 	vertical-align: top;
 }
 
 .keyColumn {
 	font-weight: bold;
+}
+
+.numericColumn {
+	text-align: right
 }
 
 .tableHeader,.tableFooter {

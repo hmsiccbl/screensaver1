@@ -34,6 +34,7 @@ import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -88,11 +89,18 @@ public class ScreenResultViewer extends AbstractBackingBean
   private Screen _screen;
   private ScreenSearchResults _screenSearchResults;
   private ScreenResultExporter _screenResultExporter;
+  /**
+   * For internal tracking of first data row displayed in data table.
+   */
   private int _firstRow;
+  /**
+   * For rowNumber UIInput component. 1-based value.
+   */
+  private int _rowNumber;
   private Integer _plateNumber;
   private String[] _selectedDataHeaderNames;
   private String _rowRangeText;
-  private UIInput _firstDisplayedRowNumberInput;
+  private UIInput _rowNumberInput;
   private UIInput _plateNumberInput;
   private UIData _dataTable;
 
@@ -187,14 +195,24 @@ public class ScreenResultViewer extends AbstractBackingBean
     return _collapsablePanelsState;
   }
   
-  public UIInput getFirstDisplayedRowNumberInput()
+  public UIInput getRowNumberInput()
   {
-    return _firstDisplayedRowNumberInput;
+    return _rowNumberInput;
   }
 
-  public void setFirstDisplayedRowNumberInput(UIInput firstDisplayedRowNumberInput)
+  public void setRowNumberInput(UIInput rowNumberInput)
   {
-    _firstDisplayedRowNumberInput = firstDisplayedRowNumberInput;
+    _rowNumberInput = rowNumberInput;
+  }
+
+  public int getRowNumber()
+  {
+    return _rowNumber;
+  }
+
+  public void setRowNumber(int rowNumber)
+  {
+    _rowNumber = rowNumber;
   }
 
   public UIInput getPlateNumberInput()
@@ -239,7 +257,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   }
   
   /**
-   * @motivation for firstDisplayedRow validator maximum
+   * @motivation for rowNumber validator maximum
    */
   public int getRawDataSize()
   {
@@ -251,20 +269,6 @@ public class ScreenResultViewer extends AbstractBackingBean
     return "of " + getRawDataSize();
   }
   
-  public int getFirstDisplayedRowNumber()
-  {
-    return _firstRow + 1;
-  }
-  
-  /**
-   * 
-   * @param firstDisplayedRowNumber 1-based index
-   */
-  public void setFirstDisplayedRowNumber(int firstDisplayedRowNumber)
-  {
-    _firstRow = firstDisplayedRowNumber - 1;
-  }
-
   public Integer getPlateNumber()
   {
     return _plateNumber;
@@ -357,19 +361,16 @@ public class ScreenResultViewer extends AbstractBackingBean
   {
     try {
       // firstRow is a 1-based index
-      int firstRow = (pageIndex * getDataTable().getRows()) + 1;
-      if (firstRow > 0 &&
-        firstRow <= getScreenResult().getResultValueTypes().first().getResultValues().size()) {
-        // update the row field
-        setFirstDisplayedRowNumber(firstRow);
+      _firstRow = (pageIndex * getDataTable().getRows());
+      if (_firstRow > 0 &&
+        _firstRow <= getScreenResult().getResultValueTypes().first().getResultValues().size()) {
         // scroll the data table to the new row
-        getDataTable().setFirst(getFirstDisplayedRowNumber() - 1);
+        getDataTable().setFirst(_firstRow);
 
         // update the plate selection list to the current plate
         if (getRawData() != EMPTY_RAW_DATA_MODEL) {
-         String plateNumber = ((List<RawDataRow>) getRawData().getWrappedData()).
-           get(getFirstDisplayedRowNumber() - 1).getWell().getPlateNumber().toString();
-         _plateNumberInput.setValue(plateNumber);
+         _plateNumber = ((List<RawDataRow>) getRawData().getWrappedData()).get(_firstRow).getPlateNumber();
+         _rowNumber = _firstRow + 1;
         }
       }
       return REDISPLAY_PAGE_ACTION_RESULT;
@@ -468,33 +469,34 @@ public class ScreenResultViewer extends AbstractBackingBean
     ((UISelectBoolean) event.getComponent()).setValue(event.getNewValue());
   }
 
-  public void firstDisplayedRowNumberListener(ValueChangeEvent event)
+  public void rowNumberListener(ValueChangeEvent event)
   {
-    log.debug("firstDisplayedRowNumberListener called: " + event.getNewValue());
-    int newFirstDisplayRowIndex = Integer.parseInt(event.getNewValue().toString()) - 1;
+    log.debug("rowNumberListener called: " + event.getNewValue());
+    _firstRow = Integer.parseInt(event.getNewValue().toString()) - 1;
     // ensure value is within valid range, and in particular that we never show
     // less than the table's configured row count (unless it's more than the
     // total number of rows)
-    newFirstDisplayRowIndex = Math.max(0,
-                                        Math.min(newFirstDisplayRowIndex,
-                                                 getRawDataSize() - _dataTable.getRows()));
+    _firstRow = Math.max(0,
+                         Math.min(_firstRow,
+                                  getRawDataSize() - _dataTable.getRows()));
     // scroll the data table to the new row
-    getDataTable().setFirst(newFirstDisplayRowIndex);
+    getDataTable().setFirst(_firstRow);
     // update the plate selection list to the current plate
     @SuppressWarnings("unchecked")
-    RawDataRow dataRow = ((List<RawDataRow>) getRawData().getWrappedData()).get(newFirstDisplayRowIndex);
-    Integer plateNumber = dataRow.getWell().getPlateNumber();
-    _plateNumberInput.setValue(plateNumber.toString());
+    RawDataRow dataRow = ((List<RawDataRow>) getRawData().getWrappedData()).get(_firstRow);
+    Integer plateNumber = dataRow.getPlateNumber();
+    _plateNumberInput.setValue(plateNumber);
+    _rowNumberInput.setValue(_firstRow + 1);
   }
   
   public void plateNumberListener(ValueChangeEvent event)
   {
     log.debug("new plate number: '" + event.getNewValue() + "'");
-    int newFirstRowNumberForPlateNumber = findFirstRowNumberForPlateNumber(Integer.parseInt(event.getNewValue().toString()));
+    _firstRow = findFirstRowNumberForPlateNumber(Integer.parseInt(event.getNewValue().toString()));
     // scroll the data table to the new row
-    getDataTable().setFirst(newFirstRowNumberForPlateNumber - 1);
+    getDataTable().setFirst(_firstRow);
     // update the row field
-    _firstDisplayedRowNumberInput.setValue(newFirstRowNumberForPlateNumber);
+    _rowNumberInput.setValue(_firstRow + 1);
   }
   
   public void selectedDataHeadersListener(ValueChangeEvent event)
@@ -528,14 +530,15 @@ public class ScreenResultViewer extends AbstractBackingBean
     _dataHeaderColumnModel = null;
     _metadataModel = null;
     _rawDataModel = null;
-    setFirstDisplayedRowNumber(1);
+    _firstRow = 0;
+    _rowNumber = 1;
     _plateNumber = null;
     _selectedDataHeaderNames = null;
     _uniqueDataHeaderNames = null;
 
     // clear the bound UI components, so that they get recreated next time this view is used
     _dataTable = null;
-    _firstDisplayedRowNumberInput = null;
+    _rowNumberInput = null;
     _plateNumberInput = null;
 
     // _rowToPlateConverter = null;    
@@ -543,7 +546,7 @@ public class ScreenResultViewer extends AbstractBackingBean
 
   private int getPageIndex()
   {
-    return getDataTable().getFirst() / getDataTable().getRows();
+    return /*getDataTable().getFirst()*/_firstRow / getDataTable().getRows();
   }
 
   private int findFirstRowNumberForPlateNumber(int selectedPlateNumber)
@@ -554,7 +557,7 @@ public class ScreenResultViewer extends AbstractBackingBean
       log.error("invalid plate number: " + selectedPlateNumber);
       return getDataTable().getFirst();
     }
-    return _plateNumber2FirstRow.get(selectedPlateNumber) + 1;
+    return _plateNumber2FirstRow.get(selectedPlateNumber);
   }
 
   private void lazyBuildPlateNumber2FirstRow()
@@ -564,7 +567,7 @@ public class ScreenResultViewer extends AbstractBackingBean
       DataModel rawData = getRawData();
       for (int i = 0; i < rawData.getRowCount(); ++i) {
         rawData.setRowIndex(i);
-        Integer plateNumber = ((RawDataRow) rawData.getRowData()).getWell().getPlateNumber();
+        Integer plateNumber = ((RawDataRow) rawData.getRowData()).getPlateNumber();
         if (!_plateNumber2FirstRow.containsKey(plateNumber)) {
           _plateNumber2FirstRow.put(plateNumber, i);
         }
@@ -634,7 +637,9 @@ public class ScreenResultViewer extends AbstractBackingBean
                                                        .getResultValues()) {
         RawDataRow dataRow = new RawDataRow(getScreenResult().getResultValueTypes(),
                                             getUniqueDataHeaderNames(),
-                                            majorResultValue.getWell());
+                                            majorResultValue.getWell().getPlateNumber(),
+                                            majorResultValue.getWell().getWellName(),
+                                            majorResultValue.getAssayWellType());
         for (Map.Entry<ResultValueType,Iterator> entry : rvtIterators.entrySet()) {
           Iterator rvtIterator = entry.getValue();
           dataRow.addResultValue(entry.getKey(),
@@ -719,20 +724,44 @@ public class ScreenResultViewer extends AbstractBackingBean
    */
   public static class RawDataRow
   {
-    private Well _well;
+    private Integer _plateNumber;
+    private String _wellName;
+    private AssayWellType _assayWellType;
     private Map<String,ResultValue> _resultValues;
     private UniqueDataHeaderNames _uniqueNames;
+    private StringBuilder _excludes = new StringBuilder();
     
-    public RawDataRow(SortedSet<ResultValueType> rvts, UniqueDataHeaderNames uniqueNames, Well well)
+    public RawDataRow(SortedSet<ResultValueType> rvts,
+                      UniqueDataHeaderNames uniqueNames,
+                      Integer plateNumber,
+                      String wellName,
+                      AssayWellType assayWellType)
     {
       _resultValues = new HashMap<String,ResultValue>();
       _uniqueNames = uniqueNames;
-      _well = well;
+      _plateNumber = plateNumber;
+      _wellName = wellName;
+      _assayWellType = assayWellType;
+    }
+    
+    public Integer getPlateNumber()
+    {
+      return _plateNumber;
     }
 
-    public Well getWell()
+    public String getWellName()
     {
-      return _well;
+      return _wellName;
+    }
+    
+    public String getAssayWellType()
+    {
+      return _assayWellType.toString();
+    }
+    
+    public String getExcludes()
+    {
+      return _excludes.toString();
     }
 
     public Map<String,ResultValue> getResultValues()
@@ -743,6 +772,12 @@ public class ScreenResultViewer extends AbstractBackingBean
     public void addResultValue(ResultValueType rvt, ResultValue rv)
     {
       _resultValues.put(_uniqueNames.get(rvt), rv);
+      if (rv.isExclude()) {
+        if (_excludes.length() > 0) {
+          _excludes.append(", ");
+        }
+        _excludes.append(_uniqueNames.get(rvt));
+      }
     }
   }
 

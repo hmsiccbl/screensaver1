@@ -56,7 +56,7 @@ TODO:
 		<t:panelGrid columns="1"
 			rendered="#{!empty screenResultViewer.screenResult}">
 			<t:outputLabel for="dataHeadersList"
-				value="Show selected data headers:" />
+				value="Show selected data headers:" styleClass="inputLabel"/>
 			<t:selectManyListbox id="dataHeadersList"
 				value="#{screenResultViewer.selectedDataHeaderNames}"
 				valueChangeListener="#{screenResultViewer.selectedDataHeadersListener}"
@@ -90,7 +90,7 @@ TODO:
 
 				<t:panelGrid columns="2" styleClass="standardTable">
 					<t:outputLabel for="screenNumber" value="Screen Number"
-						styleClass="keyColumn" />
+						styleClass="keyColumn " />
 					<t:outputText id="screenNumber"
 						value="#{screenResultViewer.screen.screenNumber}"
 						styleClass="dataText" />
@@ -121,8 +121,7 @@ TODO:
 						rendered="#{!empty screenResultViewer.screenResult}" />
 					<t:selectBooleanCheckbox id="screenResultIsShareable"
 						value="#{screenResultViewer.screenResult.shareable}"
-						rendered="#{screenResultViewer.readOnlyAdmin || screenResultViewer.editable}"
-						displayValueOnly="#{screenResultViewer.readOnly}"
+						displayValueOnly="true"
 						displayValueOnlyStyleClass="dataText"
 						rendered="#{!empty screenResultViewer.screenResult}" />
 				</t:panelGrid>
@@ -180,34 +179,46 @@ TODO:
 
 				<t:dataTable id="rawDataTable"
 					binding="#{screenResultViewer.dataTable}"
-					value="#{screenResultViewer.rawData}" var="row" rows="10"
+					value="#{screenResultViewer.rawData}" var="row" rows="24"
 					styleClass="standardTable" headerClass="tableHeader"
 					rowClasses="row1,row2">
 					<t:column styleClass="keyColumn">
 						<f:facet name="header">
 							<t:outputText value="Plate" />
 						</f:facet>
-						<t:outputText value="#{row.well.plateNumber}" />
+						<t:outputText value="#{row.plateNumber}" />
 					</t:column>
 					<t:column styleClass="keyColumn">
 						<f:facet name="header">
 							<t:outputText value="Well" />
 						</f:facet>
 						<t:commandLink action="#{screenResultViewer.showWell}">
-							<f:param name="wellIdParam" value="#{row.well.wellName} " />
-							<t:outputText value="#{row.well.wellName}" />
+							<f:param name="wellIdParam" value="#{row.wellName} " />
+							<t:outputText value="#{row.wellName}" />
 						</t:commandLink>
 					</t:column>
+					<t:column styleClass="column">
+						<f:facet name="header">
+							<t:outputText value="Type" />
+						</f:facet>
+						<t:outputText value="#{row.assayWellType}" />
+					</t:column>
+					<t:column styleClass="column">
+						<f:facet name="header">
+							<t:outputText value="Excluded" />
+						</f:facet>
+						<t:outputText value="#{row.excludes}" />
+					</t:column>
 					<t:columns value="#{screenResultViewer.dataHeaderColumnModel}"
-						var="columnName" styleClass="column">
+						var="columnName" styleClass="numericColumn" >
 						<f:facet name="header">
 							<t:outputText value="#{columnName}" />
 						</f:facet>
-						<t:outputText value="#{screenResultViewer.rawDataCellValue}" />
+						<t:outputText value="#{screenResultViewer.rawDataCellValue}"/>
 					</t:columns>
 				</t:dataTable>
 
-				<t:outputLabel for="plateNumber" value="Plate:" />
+				<t:outputLabel for="plateNumber" value="Plate:" styleClass="inputLabel"/>
 				<t:selectOneMenu id="plateNumber"
 					value="#{screenResultViewer.plateNumber}"
 					binding="#{screenResultViewer.plateNumberInput}"
@@ -223,18 +234,18 @@ TODO:
 					action="#{screenResultViewer.nextPage}" value="Next"
 					image="/images/arrow-next.gif" styleClass="command" />
 				<t:outputLabel id="rowLabel" value="Row"
-					for="firstDisplayedRowNumber" />
-				<t:inputText id="firstDisplayedRowNumber"
-					value="#{screenResultViewer.firstDisplayedRowNumber}"
-					binding="#{screenResultViewer.firstDisplayedRowNumberInput}"
-					valueChangeListener="#{screenResultViewer.firstDisplayedRowNumberListener}"
+					for="rowNumber" styleClass="inputLabel"/>
+				<t:inputText id="rowNumber"
+					value="#{screenResultViewer.rowNumber}"
+					binding="#{screenResultViewer.rowNumberInput}"
+					valueChangeListener="#{screenResultViewer.rowNumberListener}"
 					size="6" styleClass="input">
 					<f:validateLongRange minimum="1"
 						maximum="#{screenResultViewer.rawDataSize}" />
 				</t:inputText>
 				<t:outputLabel id="rowRange"
-					value="#{screenResultViewer.rowRangeText}"
-					for="firstDisplayedRowNumber" />
+					value="#{screenResultViewer.rowRangeText}" for="rowNumber"
+					styleClass="inputLabel" />
 			</t:collapsiblePanel>
 
 			<t:collapsiblePanel id="heatMapsPanel"

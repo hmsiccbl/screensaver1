@@ -14,9 +14,10 @@
   <t:div/>
   <f:verbatim escape="false">
     <p>
-      Thanks for trying out this early version of Screensaver1! To get started, try clicking some of
-      the items in the left menu bar. Or, for a detailed description of what you can do, click on
-      the "Instructions" link.
+      Thanks for trying out this early version of Screensaver1! 
+    <p>
+      To get started, try clicking some of the items in the left menu bar. 
+      Or, for a detailed description of what you can do, click on the "Instructions" link.
     </p>
   </f:verbatim>
 </f:subview>
