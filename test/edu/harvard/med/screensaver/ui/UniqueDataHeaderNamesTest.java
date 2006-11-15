@@ -9,66 +9,50 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
-import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
 
 public class UniqueDataHeaderNamesTest extends AbstractSpringTest
 {
-  
-  protected ScreenResultParser screenResultParser;
-  protected DAO dao;
-  protected SchemaUtil schemaUtil;
 
   public void testClass()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
-    schemaUtil.initializeDatabase();
-    
-    dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        List<String> expectedUniqueNames = new ArrayList<String>();
-        expectedUniqueNames.add("Luminescence (1)");
-        expectedUniqueNames.add("Luminescence (2)");
-        expectedUniqueNames.add("Luminescence (3)");
-        expectedUniqueNames.add("Luminescence (4)");
-        expectedUniqueNames.add("FI (1)");
-        expectedUniqueNames.add("FI (2)");
-        expectedUniqueNames.add("FI (3)");
-        expectedUniqueNames.add("FI (4)");
-        expectedUniqueNames.add("AssayIndicator");
-        expectedUniqueNames.add("Cherry Pick");
+    List<String> expectedUniqueNames = new ArrayList<String>();
+    expectedUniqueNames.add("Luminescence (1)");
+    expectedUniqueNames.add("Luminescence (2)");
+    expectedUniqueNames.add("FI (1)");
+    expectedUniqueNames.add("FI (2)");
+    expectedUniqueNames.add("Assay Indicator");
 
-        ScreenResult screenResult = screenResultParser.parseLegacy(ScreenResultParser.makeDummyScreen(115), 
-                                                                   new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
-                                                                   "LegacyTestAllInOne.xls"), 
-                                                                   /*ignored file paths=*/ true);
-        assertNotNull("pretest: screenResult parsed", screenResult);
-        UniqueDataHeaderNames uniqueDataHeaderNames = new UniqueDataHeaderNames(screenResult);
-        int i = 0;
-        for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-          assertEquals("lookup name", 
-                       expectedUniqueNames.get(rvt.getOrdinal()),
-                       uniqueDataHeaderNames.get(rvt));
-          assertEquals("lookup ResultValueType", 
-                       uniqueDataHeaderNames.get(rvt),
-                       expectedUniqueNames.get(i++));
-        }
-        assertEquals(expectedUniqueNames,
-                     uniqueDataHeaderNames.asList());
+    Screen screen = ScreenResultParser.makeDummyScreen(115);
+    ScreenResult screenResult = new ScreenResult(screen, new Date());
+    new ResultValueType(screenResult, "Luminescence");
+    new ResultValueType(screenResult, "Luminescence");
+    new ResultValueType(screenResult, "FI");
+    new ResultValueType(screenResult, "FI");
+    new ResultValueType(screenResult, "Assay Indicator");
+    new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
 
-      }
-    });
+    UniqueDataHeaderNames uniqueDataHeaderNames = new UniqueDataHeaderNames(screenResult);
+    int i = 0;
+    for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+      assertEquals("lookup name", 
+                   expectedUniqueNames.get(rvt.getOrdinal()),
+                   uniqueDataHeaderNames.get(rvt));
+      assertEquals("lookup ResultValueType", 
+                   uniqueDataHeaderNames.get(rvt),
+                   expectedUniqueNames.get(i++));
+    }
+    assertEquals(expectedUniqueNames,
+                 uniqueDataHeaderNames.asList());
   }
 }
