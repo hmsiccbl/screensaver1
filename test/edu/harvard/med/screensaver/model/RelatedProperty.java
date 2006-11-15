@@ -180,6 +180,11 @@ public class RelatedProperty
   {
     return _relatedPropertyDescriptor == null ? "<none>" : _relatedPropertyDescriptor.getDisplayName();
   }
+  
+  public String getFullName()
+  {
+    return _relatedPropertyDescriptor == null ? "<none>" : _relatedBeanClass.getSimpleName() + "." + _relatedPropertyDescriptor.getDisplayName();
+  }
 
   public boolean otherSideIsMany()
   {

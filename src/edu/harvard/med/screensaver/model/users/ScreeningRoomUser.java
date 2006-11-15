@@ -265,8 +265,10 @@ public class ScreeningRoomUser extends ScreensaverUser
     _labHead.getHbnLabMembers().add(this);
   }
 
+  // note: cannot name this method "isLabHead", as this is ambiguous with "getLabHead", 
+  // w.r.t. to JavaBean property names (causing a unit test to fail)
   @DerivedEntityProperty
-  public boolean isLabHead()
+  public boolean isHeadOfLab()
   {
     return getLabHead() == null;
   }

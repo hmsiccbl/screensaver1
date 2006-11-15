@@ -1035,7 +1035,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   private boolean isActiveSheetRawDataSheet()
   {
-    String stockPlateColumnName = dataCell(RAWDATA_HEADER_ROW_INDEX, DataColumn.STOCK_PLATE_ID).getAsString();
+    String stockPlateColumnName = dataCell(RAWDATA_HEADER_ROW_INDEX, DataColumn.STOCK_PLATE_ID).getAsString(false);
     if (_parseLegacyFormat) {
       return stockPlateColumnName.equals(LEGACY__DATA_SHEET__STOCK_PLATE_COLUMN_NAME);
     }

@@ -281,7 +281,7 @@ public class DataAccessPolicy implements AbstractEntityVisitor
     }
     if (loggedInUser instanceof ScreeningRoomUser) {
       ScreeningRoomUser loggedInScreener = (ScreeningRoomUser) loggedInUser;
-      if (loggedInScreener.isLabHead()) {
+      if (loggedInScreener.isHeadOfLab()) {
         if (loggedInScreener.getLabMembers().contains(screensaverUser)) {
           // lab head can view her lab members
           return true;

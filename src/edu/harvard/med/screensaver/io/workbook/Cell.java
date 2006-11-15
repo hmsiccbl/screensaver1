@@ -482,7 +482,7 @@ public class Cell
     errorStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
     errorStyle.setFillForegroundColor(HSSFColor.RED.index);
     cell.setCellStyle(errorStyle);
-    String annotatedCellValue = getAsString();
+    String annotatedCellValue = getAsString(false);
     if (annotatedCellValue != null && annotatedCellValue.startsWith("ERROR: ")) {
       annotatedCellValue += "; ";
     }
@@ -496,9 +496,12 @@ public class Cell
   
   /**
    * Returns the value of the cell as a String, regardless of the cell's type.
+   * If withValidation is true, parse errors will be added as necessary.
    * 
    * @param withValidation if <code>true</code>, performs "is required"
-   *          validation and annotates cell with error as necessary
+   *          validation and annotates cell with error as necessary; set to
+   *          false, if you need to query the value of the cell, without
+   *          generating a validation error.
    * @return a String representation of the cell's contents, regardless of the
    *         cell's actual type; if cell type is "error" then the String "<error
    *         cell>" is returned; if cell is undefined, empty string is returned
@@ -509,6 +512,9 @@ public class Cell
       int cellType = getCell().getCellType();
       switch (cellType) {
       case HSSFCell.CELL_TYPE_BLANK:
+        if (withValidation) {
+          return getString();
+        }
         return "";
       case HSSFCell.CELL_TYPE_BOOLEAN:
         if (withValidation) {
@@ -543,11 +549,16 @@ public class Cell
   }
   
   /**
+   * Return the value of the cell as a String. If cell value is required,
+   * validation will be performed.
+   * 
+   * @return the value of the cell as a String, regardless of the cell type in
+   *         the worksheet.
    * @see #getAsString(boolean)
    */
   public String getAsString()
   {
-    return getAsString(false);
+    return getAsString(_required);
   }
 
 

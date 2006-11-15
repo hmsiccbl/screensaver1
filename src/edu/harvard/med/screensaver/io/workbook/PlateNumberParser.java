@@ -36,7 +36,7 @@ public class PlateNumberParser implements CellValueParser<Integer>
   {
     Matcher matcher = plateNumberPattern.matcher(cell.getAsString());
     if (!matcher.matches()) {
-      _errors.addError("unparseable plate number '" + cell.getAsString() + "'",
+      _errors.addError("unparseable plate number '" + cell.getAsString(false) + "'",
                        cell);
       return -1;
     }

@@ -483,14 +483,14 @@ public class EntityBeansTest extends EntityBeansExercizor
                          ((Collection) relatedProperty.invokeGetter(relatedBean)).contains(bean));
             }
             else {
-              assertEquals("related.getter() returns this bean",
+              assertEquals("related getter, " + relatedProperty.getFullName() + ", returns this bean",
                            bean,
                            relatedProperty.invokeGetter(relatedBean));
             }
           }
           catch (Exception e) {
             e.printStackTrace();
-            fail("related.getter() threw exception: " + propFullName);
+            fail("related getter, " + relatedProperty.getFullName() + ", threw exception: " + propFullName);
           }
 
         }
@@ -531,10 +531,10 @@ public class EntityBeansTest extends EntityBeansExercizor
           if (relatedProperty.otherSideIsMany()) {
             try {
               Collection result = (Collection) relatedProperty.invokeGetter(relatedBean);
-              assertEquals("related.getter() returns set of size 1 for " + propFullName,
+              assertEquals("related getter, " + relatedProperty.getFullName() + ", returns set of size 1 for " + propFullName,
                            1,
                            result.size());
-              assertSame("related.getter() returns this after this.setter(related) for " +
+              assertSame("related getter, " + relatedProperty.getFullName() + ", returns this after this.setter(related) for " +
                          propFullName,
                          bean,
                          result.iterator().next());
@@ -547,7 +547,7 @@ public class EntityBeansTest extends EntityBeansExercizor
           else {
             try {
               assertSame(
-                         "related.getter() returns this after this.setter(related) for " +
+                         "related getter, " + relatedProperty.getFullName() + ", returns this after this.setter(related) for " +
                          propFullName,
                          bean,
                          relatedProperty.invokeGetter(relatedBean));
@@ -611,12 +611,12 @@ public class EntityBeansTest extends EntityBeansExercizor
         {
           try {
             AbstractEntity thisSideBean = (AbstractEntity) relatedProperty.invokeGetter(relatedBean);
-            assertNotNull("related.getter() returns non-null", thisSideBean);
+            assertNotNull("related getter, " + relatedProperty.getFullName() + ", returns non-null", thisSideBean);
             thisSideBeanHolder[0] = thisSideBean;
           }
           catch (Exception e) {
             e.printStackTrace();
-            fail("related bean's getter threw exception: " + propFullName);
+            fail("related bean's getter," + relatedProperty.getFullName() + ", threw exception: " + propFullName);
           }
         }
       });
@@ -668,16 +668,16 @@ public class EntityBeansTest extends EntityBeansExercizor
           try {
             if (relatedProperty.otherSideIsMany()) {
               Collection result = (Collection) relatedProperty.invokeGetter(relatedBean);
-              assertEquals("related.getter() returns set of size 1 for " + propFullName,
+              assertEquals("related getter, " + relatedProperty.getFullName() + ", returns set of size 1 for " + propFullName,
                            1,
                            result.size());
-              assertSame("related.getter() returns this after this.setter(related) for " +
+              assertSame("related getter, " + relatedProperty.getFullName() + ", returns this after this.setter(related) for " +
                          propFullName,
                          bean,
                          result.iterator().next());
             }
             else {
-              assertSame("related.getter() returns this after this.setter(related) for " +
+              assertSame("related getter, " + relatedProperty.getFullName() + ", returns this after this.setter(related) for " +
                          propFullName,
                          bean,
                          relatedProperty.invokeGetter(relatedBean));
@@ -685,7 +685,7 @@ public class EntityBeansTest extends EntityBeansExercizor
           }
           catch (Exception e) {
             e.printStackTrace();
-            fail("related getter threw exception: " + propFullName);
+            fail("related getter, " + relatedProperty.getFullName() + ", threw exception: " + propFullName);
           }
         }
       });
