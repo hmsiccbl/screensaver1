@@ -10,44 +10,37 @@
 package edu.harvard.med.screensaver.ui.screenresults;
 
 import java.awt.Color;
-import java.io.File;
 import java.text.NumberFormat;
-import java.util.Iterator;
+import java.util.Date;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
-import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
 
 import org.apache.log4j.Logger;
 
 public class HeatMapCellTest extends AbstractSpringTest
 {
-  // static members
-
   private static Logger log = Logger.getLogger(HeatMapCellTest.class);
   
   protected ScreenResultParser screenResultParser;
 
   public void testHeatMapCell()
   {
-    // we need to obtain a ResultValue to pass into our HeatMapCell; the easiest
-    // way to do this is simply to parse a ScreenResult data file! Messy, but it
-    // works, and it's "just test code", afterall.
-    ScreenResult screenResult = 
-      screenResultParser.parse(ScreenResultParser.makeDummyScreen(115),
-                               new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "NewFormatTest.xls"));
-    ResultValue anyNonControlWellResultValue = null;
-    for (Iterator iter = screenResult.getResultValueTypesList().get(0).getResultValues().iterator(); iter.hasNext();) {
-      anyNonControlWellResultValue = (ResultValue) iter.next();
-      if (!anyNonControlWellResultValue.isControlWell()) {
-        break;
-      }
-    }
-    assert anyNonControlWellResultValue != null : "could not find a non-control result value in test data";
-
-    HeatMapCell cell = new HeatMapCell(anyNonControlWellResultValue,
+    Screen screen = ScreenResultParser.makeDummyScreen(115);
+    ScreenResult screenResult = new ScreenResult(screen, new Date());
+    ResultValueType rvt = new ResultValueType(screenResult, "rvt1");
+    Library library = new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
+    Well well = new Well(library, 1, "A01" );
+    ResultValue rv = new ResultValue(rvt, well, "1.0");
+    
+    HeatMapCell cell = new HeatMapCell(rv,
                                        1.0,
                                        new Color(128, 0, 196),
                                        true,
