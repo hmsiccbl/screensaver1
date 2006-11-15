@@ -156,6 +156,7 @@ public class Gene extends AbstractEntity
    * @return the EntrezGene ID
    * @hibernate.property
    *   not-null="true"
+   *   unique="true"
    */
   @EntityIdProperty
   public Integer getEntrezgeneId()
@@ -170,7 +171,6 @@ public class Gene extends AbstractEntity
    * @hibernate.property
    *   type="text"
    *   not-null="true"
-   *   unique="true"
    */
   public String getEntrezgeneSymbol()
   {
