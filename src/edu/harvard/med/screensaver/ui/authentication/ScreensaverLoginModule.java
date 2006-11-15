@@ -173,6 +173,9 @@ public class ScreensaverLoginModule implements LoginModule
     _callbackHandler = callbackHandler;
     _sharedState = sharedState;
     _options = options;
+    _authenticationResult = null;
+    _isAuthenticated = false;
+    _commitSucceeded = false;
   }
   
   /**

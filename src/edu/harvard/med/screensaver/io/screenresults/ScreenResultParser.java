@@ -340,32 +340,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                                       "",
                                                       ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
                                                       true);
-    ScreeningRoomUser collaborator1 = new ScreeningRoomUser(new Date(),
-                                                            "Cindy",
-                                                            "Collaborator",
-                                                            "cindy_collaborator_"
-                                                              + screenNumber
-                                                              + "@hms.harvard.edu",
-                                                            "",
-                                                            "",
-                                                            "",
-                                                            "",
-                                                            "",
-                                                            ScreeningRoomUserClassification.OTHER,
-                                                            true);
-    ScreeningRoomUser collaborator2 = new ScreeningRoomUser(new Date(),
-                                                            "Chris",
-                                                            "Collaborator",
-                                                            "chrisp_collaborator_"
-                                                              + screenNumber
-                                                              + "@hms.harvard.edu",
-                                                            "",
-                                                            "",
-                                                            "",
-                                                            "",
-                                                            "",
-                                                            ScreeningRoomUserClassification.OTHER,
-                                                            true);
     Screen screen = new Screen(labHead,
                                labHead,
                                screenNumber,
@@ -373,8 +347,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                ScreenType.SMALL_MOLECULE,
                                "Dummy screen");
 
-    screen.addCollaborator(collaborator1);
-    screen.addCollaborator(collaborator2);
     return screen;
   }
 

@@ -53,6 +53,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
   
   protected void onSetUp() throws Exception
   {
+    super.onSetUp();
     schemaUtil.truncateTablesOrCreateSchema();
   }
   

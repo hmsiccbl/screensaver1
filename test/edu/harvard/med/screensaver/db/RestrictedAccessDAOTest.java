@@ -57,6 +57,16 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
     schemaUtil.truncateTablesOrCreateSchema();
   }
   
+  @Override
+  protected void onTearDown() throws Exception
+  {
+    // must clear the "current" user, so that subsequent tests are not affected
+    // by data access permissions; note that
+    // DataAccessPolicy.setScreensaverUser() is only used for testing purposes,
+    // so this special cleanup not as impure as it might otherwise seem
+    dataAccessPolicy.setScreensaverUser(null);
+  }
+  
   public void testScreensaverUserAccountPermissions()
   {
     final ScreeningRoomUser[] users = new ScreeningRoomUser[4];

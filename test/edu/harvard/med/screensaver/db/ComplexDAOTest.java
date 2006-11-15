@@ -72,6 +72,7 @@ public class ComplexDAOTest extends AbstractSpringTest
   @Override
   protected void onSetUp() throws Exception
   {
+    super.onSetUp();
     schemaUtil.truncateTablesOrCreateSchema();
   }
 
@@ -323,7 +324,9 @@ public class ComplexDAOTest extends AbstractSpringTest
               Well.class,
               library,
               ( iWell / 2 ) + 1,
-              "well" + iWell);
+              String.format("%c%02d", 
+                            Well.MIN_WELL_ROW + ((iWell / Well.PLATE_ROWS) + 1), 
+                            (iWell % Well.PLATE_COLUMNS) + 1));
             for (int iResultValue = 0; iResultValue < rvt.length; ++iResultValue) {
               ResultValue rv = new ResultValue(rvt[iResultValue],
                                                wells[iWell],
@@ -475,9 +478,6 @@ public class ComplexDAOTest extends AbstractSpringTest
       });
   }
   
-  /**
-   * Assumes that only test screendb data has been loaded!
-   */
   public void testFindLabHeads()
   {
     schemaUtil.initializeDatabase();
@@ -498,8 +498,8 @@ public class ComplexDAOTest extends AbstractSpringTest
       public void runTransaction()
       {
         Screen screen1 = ScreenResultParser.makeDummyScreen(1); 
-        dao.persistEntity(screen1);
         new ScreenResult(screen1, new Date());
+        dao.persistEntity(screen1);
       }
     });
 

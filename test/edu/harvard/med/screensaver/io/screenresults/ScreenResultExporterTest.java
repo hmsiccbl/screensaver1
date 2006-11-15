@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.io.screenresults;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
@@ -19,6 +20,8 @@ import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -43,6 +46,9 @@ public class ScreenResultExporterTest extends AbstractSpringTest
     ScreenResult originalScreenResult = 
       mockScreenResultParser.parseLegacy(ScreenResultParser.makeDummyScreen(1), 
         new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "LegacyTestAllInOne.xls"), false);
+    addDummyCollaboratorsToScreen(originalScreenResult);
+    
+    
     ScreenResultExporter exporter = new ScreenResultExporter();
     HSSFWorkbook workbook = exporter.build(originalScreenResult);
     File exportedFile = File.createTempFile("LegacyTestAllInOne", ".exported.xls");
@@ -115,5 +121,39 @@ public class ScreenResultExporterTest extends AbstractSpringTest
         ++i;
       }
     }
+  }
+
+
+  private void addDummyCollaboratorsToScreen(ScreenResult screenResult)
+  {
+    ScreeningRoomUser collaborator1 = new ScreeningRoomUser(new Date(),
+                                                            "Cindy",
+                                                            "Collaborator",
+                                                            "cindy_collaborator_"
+                                                            + screenResult.getScreen().getScreenNumber()
+                                                            + "@hms.harvard.edu",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            ScreeningRoomUserClassification.OTHER,
+                                                            true);
+    ScreeningRoomUser collaborator2 = new ScreeningRoomUser(new Date(),
+                                                            "Chris",
+                                                            "Collaborator",
+                                                            "chris_collaborator_"
+                                                            + screenResult.getScreen().getScreenNumber()
+                                                            + "@hms.harvard.edu",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            ScreeningRoomUserClassification.OTHER,
+                                                            true);
+
+    screenResult.getScreen().addCollaborator(collaborator1);
+    screenResult.getScreen().addCollaborator(collaborator2);
   }
 }

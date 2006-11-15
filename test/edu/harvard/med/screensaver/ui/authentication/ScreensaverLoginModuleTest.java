@@ -133,12 +133,6 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     };
     screensaverLoginModule.setAuthenticationClient(_mockECommonsAuthenticationClient);
     
-    if (!getName().startsWith("testLogin")) {
-      log.debug("skipping expensive database initialization for test " + getName());
-      // optimization to avoid all of the expensive initialization, below, for tests in this class that don't need it
-      return;
-    }
-    
     schemaUtil.truncateTablesOrCreateSchema();
 
     // create a user
