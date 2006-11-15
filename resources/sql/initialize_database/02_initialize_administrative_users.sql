@@ -40,6 +40,7 @@ insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_ro
 insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password, ecommons_id) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Rushir', 'Shaw', 'rushir_shaw@hms.harvard.edu', 'rshah', '2c8183d975d6b27271a2b16cd044d663fa09c523', null);
 insert into administrator_user (screensaver_user_id) values (currval('screensaver_user_id_seq'));
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'readEverythingAdmin';
+insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'medicinalChemistUser';
 
 insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password, ecommons_id) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Brian', 'Kraybill', 'Brian_Kraybill@hms.harvard.edu', 'bkraybill', '50e2145a33841e9155e951615ffb2623bef78dd0', null);
 insert into administrator_user (screensaver_user_id) values (currval('screensaver_user_id_seq'));
@@ -104,6 +105,5 @@ insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_ro
 insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password, ecommons_id) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Laura', 'Selfors', 'l.selfors@comcast.net', 'lselfors', '3257f52ce4d35c835fd7d6333c5afef67fb52243', 'ls67');
 insert into administrator_user (screensaver_user_id) values (currval('screensaver_user_id_seq'));
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'readEverythingAdmin';
-insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'librariesAdmin';
 
 commit;
