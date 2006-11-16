@@ -15,10 +15,11 @@
   </welcome-file-list>
 
   <!-- Configure a handler for exceptions thrown during server-side processing -->
-  <error-page>
+  <!-- For now, we're handling all exceptions ourselves in ScreensaverSessionManagementFilter, and not allowing them propagate to the Servlet container -->
+  <!-- error-page>
     <error-code>500</error-code>
     <location>/reportException.jsf</location>
-  </error-page>
+  </error-page-->
 
   <!-- Configure a handler for unauthorized access -->
   <!-- error-page>

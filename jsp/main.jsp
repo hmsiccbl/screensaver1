@@ -18,6 +18,13 @@
     <p>
       To get started, try clicking some of the items in the left menu bar. 
       Or, for a detailed description of what you can do, click on the "Instructions" link.
+    <p>
+      Please note that this is a <i>preview</i> release of Screensaver1, intended to elicit 
+      your feedback.  In particular, the data being presented is not permanent, 
+      and any changes you may make will be discarded in the future.  You may encounter 
+      buttons and links that are non-functional, and may even encounter unexpected system errors.
+      Your input will directly influence the order in which functionality is added, improved, 
+      and fixed!
     </p>
   </f:verbatim>
 </f:subview>

@@ -12,41 +12,41 @@
 
 <f:subview id="reportError">
 
-	<t:panelGrid>
-		<t:outputText value="An unexpected error has occurred."
-			styleClass="errorMessage" />
-		<t:outputText
-			value="You have been automatically logged out and must log back in now to resume using #{exceptionReporter.applicationName}."
-			styleClass="errorMessage" />
-		<t:outputText
-			value="We apologize for this most unfortunate occurrence."
-			styleClass="errorMessage" />
-		<t:outputText
-			value="Rest assured, the developers have been notified and are hard at work trying to fix the problem right now! (well, soon anyway)."
-			styleClass="errorMessage" />
-		<h:outputLink value="/screensaver/main.jsf">
-			<t:outputText value="Login Again"
+	<h:form id="reportErrorForm">
+		<t:panelGrid>
+			<t:outputText
+				value="A serious error has occurred, which was not your fault."
+				styleClass="errorMessage" />
+			<t:outputText
+				value="You have been automatically logged out and must log in again to resume using Screensaver."
+				styleClass="errorMessage" />
+			<t:outputText value="Rest assured, the developers will be notified!"
+				styleClass="errorMessage" />
+			<h:commandButton id="loginAgain"
+				action="#{exceptionReporter.loginAgain}" value="Login Again"
 				style="font-size: large; font-weight: bold" />
-		</h:outputLink>
-	</t:panelGrid>
+		</t:panelGrid>
 
-	<t:panelGrid visibleOnUserRole="developer">
-		<t:dataList value="#{exceptionReporter.throwablesDataModel}"
-			var="throwableInfo" layout="unorderedList">
-			<%--t:collapsiblePanel value="true">
+		<t:panelGrid visibleOnUserRole="developer">
+			<t:dataList id="exceptionTable"
+				value="#{exceptionReporter.throwablesDataModel}" var="throwableInfo"
+				layout="unorderedList">
+				<%--t:collapsiblePanel value="true">
 				<f:facet name="header"--%>
-					<t:outputText value="#{throwableInfo.nameAndMessage}"
-						styleClass="stackTraceException" />
+				<t:outputText value="#{throwableInfo.nameAndMessage}"
+					styleClass="stackTraceException" />
 				<%--/f:facet--%>
-			<t:dataTable value="#{throwableInfo.stackTraceDataModel}" var="item"
-				styleClass="standardTable">
-				<t:column>
-					<t:outputText value="#{item.second}"
-						styleClass="#{item.first ? \"highlightedStackTraceDetail\" : \"stackTraceDetail\"}" />
-				</t:column>
-			</t:dataTable>
-			<%--/t:collapsiblePanel--%>
-		</t:dataList>
-	</t:panelGrid>
+				<t:dataTable id="stackTraceTable"
+					value="#{throwableInfo.stackTraceDataModel}" var="item"
+					styleClass="standardTable">
+					<t:column>
+						<t:outputText id="stackTraceDetail" value="#{item.second}"
+							styleClass="#{item.first ? \"highlightedStackTraceDetail\" : \"stackTraceDetail\"}" />
+					</t:column>
+				</t:dataTable>
+				<%--/t:collapsiblePanel--%>
+			</t:dataList>
+		</t:panelGrid>
+	</h:form>
 
 </f:subview>

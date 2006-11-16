@@ -17,6 +17,7 @@ TODO:
 - save button needs to be more accessible (multiple locations)
 - provide file upload for attached file
 - sort subtables
+- show isShareable' property, and make editable
 --%>
 
 <f:subview id="screenViewer">

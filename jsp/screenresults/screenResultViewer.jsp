@@ -11,9 +11,7 @@
 
 <%-- 
 TODO:
-- add well type, exclude columns to data table
 - link screen number field
-- make 'isShareable' property read-only, or add a "Save" button (or make update into an immediate submit)
 - sectionHeader style is needing to be applied to 3 elements; should figure out what's going on w/css
 --%>
 

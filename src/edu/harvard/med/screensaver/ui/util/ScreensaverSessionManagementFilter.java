@@ -78,17 +78,22 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * 
  * @see OpenSessionInViewInterceptor
  */
+// TODO: this filter has taken on too many roles: txn mgmt, HTTP session mgmt, and error handling.  We should break up responsibilities into individual filters (or, minimally, rename this class)
 public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
 
   
   // static data members
   
+
   private static Logger log = Logger.getLogger(ScreensaverSessionManagementFilter.class);
 
   public static final String DEFAULT_SESSION_FACTORY_BEAN_NAME = "sessionFactory";
   public static final String CLOSE_HTTP_AND_HIBERNATE_SESSIONS = "closeHttpAndHibernateSessions";
   public static final String CLOSE_HIBERNATE_SESSION = "closeHibernateSession";
+  public static final String SYSTEM_ERROR_ENCOUNTERED = "systemErrorEncountered";
 
+  private static final String REPORT_EXCEPTION_URL = "/screensaver/reportException.jsf";
+  private static final String LOGIN_URL = "/screensaver/login.jsf";
 
   // instance data members
   
@@ -154,11 +159,27 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
       return;
     }
-
+    
     final HttpSession httpSession = request.getSession();
     String httpSessionId = httpSession.getId();
     log.info(">>>> Screensaver STARTING to process HTTP request for session " + 
              httpSessionId + " @ " + request.getRequestURI());
+    
+    // if we previously encountered a system error, the user's session is toast;
+    // redirect user to error page so that they are forced to re-login
+    // (this is a temporary measure until we resolve how best to handle Hibernate exceptions)
+    if (Boolean.TRUE.equals(httpSession.getAttribute(SYSTEM_ERROR_ENCOUNTERED))) {
+      if (request.getRequestURI().contains(REPORT_EXCEPTION_URL)) {
+        filterChain.doFilter(request, response);
+        return;
+      }
+      else {
+        // still logged in, and attempted to access a page other than the error page!  send back to the error page!
+        log.debug("user attempted to access a page (" + request.getRequestURI() + ") after a system error; redirecting to error page");
+        response.sendRedirect(REPORT_EXCEPTION_URL);
+        return;
+      }
+    }
 
     SessionFactory sessionFactory = lookupSessionFactoryViaSpring();
     Session hibSession = getOrCreateHibernateSession(sessionFactory, httpSessionId);
@@ -189,15 +210,19 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
     
     try {
       dao.doInTransaction(new DAOTransaction() {
-        public void runTransaction()
+        public void runTransaction() 
         {
           try {
             filterChain.doFilter(request, response);
           }
           catch (Throwable e) {
-            httpSession.setAttribute(CLOSE_HTTP_AND_HIBERNATE_SESSIONS, Boolean.TRUE);
+            log.error("caught exception while processing HTTP request for '" + request.getRequestURI() + "' in a transaction: " + e);
             e.printStackTrace();
-            throw new RuntimeException("caught exception while processing HTTP request in a transaction", e);
+            // don't invalidate session yet, so that our error page, which is a JSF page and requires 
+            // JSF backing beans that are stored in our HTTP session, can still operate
+            httpSession.setAttribute(SYSTEM_ERROR_ENCOUNTERED, Boolean.TRUE);
+            httpSession.setAttribute(CLOSE_HIBERNATE_SESSION, Boolean.TRUE);
+            httpSession.setAttribute("javax.servlet.error.exception", e);
           }
         }
       });
@@ -211,7 +236,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
       boolean closeHibernateSession = 
         closeHttpSession || 
         Boolean.TRUE.equals(httpSession.getAttribute(CLOSE_HIBERNATE_SESSION));
-
+        
       if (closeHibernateSession) {
         SessionFactoryUtils.releaseSession(hibSession, sessionFactory);
         synchronized (this) {
@@ -219,18 +244,22 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
         }
         log.info("closed Hibernate session " + hibSessionLogId + 
                  " for HTTP session " + httpSessionId);
-
-        if (closeHttpSession) {
-          httpSession.invalidate();
-          log.info("closed HTTP session " + httpSessionId);
-        }
+        assert !hibSession.isOpen() : 
+          "Hibernate session " + hibSessionLogId + 
+          " was not closed for HTTP session " + httpSessionId;
       }
-      assert !hibSession.isOpen() : 
-        "Hibernate session " + hibSessionLogId + 
-        " was not closed for HTTP session " + httpSessionId;
+      
+      if (Boolean.TRUE.equals(httpSession.getAttribute(SYSTEM_ERROR_ENCOUNTERED))) {
+        response.sendRedirect(REPORT_EXCEPTION_URL);
+      }
+      else if (closeHttpSession) {
+        httpSession.invalidate();
+        log.info("closed HTTP session " + httpSessionId);
+      }
 
       log.info("<<<< Screensaver FINISHED processing HTTP request for session " + 
                httpSessionId + " @ " + request.getRequestURI());
+      
     }
   }
   
