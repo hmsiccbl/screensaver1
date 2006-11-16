@@ -48,11 +48,12 @@ extends PropertyPlaceholderConfigurer
   protected void convertProperties(Properties properties)
   {
     if (properties.getProperty("SCREENSAVER_PGSQL_SERVER") == null) {
-      
+      log.info("Found SCREENSAVER_PGSQL_SERVER env var: assuming we are running on orchestra");
       // we have null values for the required datasource properties, so assume we are on
       // orchestra, and apply orchestra-specific method for obtaining them
       
       String catalinaBase = System.getenv("CATALINA_BASE");
+      log.info("CATALINA_BASE env var=" + catalinaBase);
       if (! catalinaBase.matches("/www/[^/]+/tomcat")) {
         log.warn("We (admittedly not so cleverly) assumed that since the property " +
           "\"SCREENSAVER_PGSQL_SERVER\" was not set, either in database.properties, or " +
