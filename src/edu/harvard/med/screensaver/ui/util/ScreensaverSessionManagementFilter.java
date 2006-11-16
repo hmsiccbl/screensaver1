@@ -218,6 +218,9 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
           catch (Throwable e) {
             log.error("caught exception while processing HTTP request for '" + request.getRequestURI() + "' in a transaction: " + e);
             e.printStackTrace();
+            if (e instanceof ServletException) {
+              ((ServletException) e).getRootCause().printStackTrace();
+            }
             // don't invalidate session yet, so that our error page, which is a JSF page and requires 
             // JSF backing beans that are stored in our HTTP session, can still operate
             httpSession.setAttribute(SYSTEM_ERROR_ENCOUNTERED, Boolean.TRUE);

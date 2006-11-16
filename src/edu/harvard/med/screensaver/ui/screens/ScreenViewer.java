@@ -501,11 +501,13 @@ public class ScreenViewer extends AbstractBackingBean
   private void updateLeadScreenerSelectItems() {
     ScreeningRoomUser labHead = _labName.getSelection();
     ArrayList<ScreeningRoomUser> leadScreenerCandidates = new ArrayList<ScreeningRoomUser>();
-    leadScreenerCandidates.add(labHead);
-    leadScreenerCandidates.addAll(labHead.getLabMembers());
-    _leadScreener = new UISelectOneBean<ScreeningRoomUser>(leadScreenerCandidates, _screen.getLeadScreener()) {
-      protected String getLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); } 
-    };
+    if (labHead != null) {
+      leadScreenerCandidates.add(labHead);
+      leadScreenerCandidates.addAll(labHead.getLabMembers());
+      _leadScreener = new UISelectOneBean<ScreeningRoomUser>(leadScreenerCandidates, _screen.getLeadScreener()) {
+        protected String getLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); } 
+      };
+    }
   }
 
   @SuppressWarnings("unchecked")
