@@ -25,5 +25,5 @@ fi
 
 . ss-db-params $1
 SQL_FILE=/tmp/ss-recreate-schema.sql
-ssh trumpet "cat ~/ss/sql/{drop_schema,create_schema,initialize_users}.sql > $SQL_FILE"
+ssh trumpet "cat ~/ss/resources/sql/{drop_schema.sql,create_schema.sql,initialize_database/*.sql} > $SQL_FILE"
 echo $PASSWD | ssh trumpet "psql -f $SQL_FILE -U $USER -d $DB -h $HOST -W" || exit 1
