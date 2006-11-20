@@ -58,7 +58,7 @@ public class LibrariesController extends AbstractUIController
   private static final Pattern _plateNumberPattern =
     Pattern.compile("^\\s*((PL)[-_]?)?(\\d+)\\s*$");
   private static final Pattern _wellNamePattern =
-    Pattern.compile("^\\s*([A-Ha-h]([0-9]|[01][0-9]|2[0-4]))\\s*$");
+    Pattern.compile("^\\s*([A-Pa-p]([0-9]|[01][0-9]|2[0-4]))\\s*$");
 
 
   // instance variables
