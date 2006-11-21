@@ -347,7 +347,7 @@ public class ScreenResult extends AbstractEntity
    * @motivation for Hibernate
    * @return an {@link java.util.SortedSet} of all {@link ResultValueType}s for
    *         this <code>ScreenResult</code>
-   * @hibernate.set cascade="all" inverse="true" sort="natural"
+   * @hibernate.set cascade="all" lazy="true" inverse="true" sort="natural" 
    * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
    * @hibernate.collection-key column="screen_result_id"
    */

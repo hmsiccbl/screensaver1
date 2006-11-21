@@ -9,7 +9,9 @@
 
 package edu.harvard.med.screensaver.model.screenresults;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -47,7 +49,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   private Integer                    _resultValueTypeId;
   private Integer                    _version;
   private ScreenResult               _screenResult;
-  private SortedSet<ResultValue>     _resultValues = new TreeSet<ResultValue>();
+  private List<ResultValue>          _resultValues = new ArrayList<ResultValue>();
   private String                     _name;
   private String                     _description;
   private Integer                    _ordinal;
@@ -172,34 +174,24 @@ public class ResultValueType extends AbstractEntity implements Comparable
   }
 
   /**
-   * Get a set of all {@link ResultValue}s for this
-   * <code>ResultValueType</code>.
+   * Get the set of {@link ResultValue}s that were generated for this
+   * <code>ResultValueType</code>. Hibernate XDoclet configuration is
+   * overridden by hand-coded Hibernate mapping in
+   * ./hibernate-properties-ResultValueType.xml. Necessary since XDoclet does
+   * not support lazy="extra".
    * 
-   * @return an unmodifiable {@link java.util.SortedSet} of the
-   *         {@link ResultValue}s generated for this
-   *         <code>ResultValueType</code>.
+   * @motivation for Hibernate and bi-directional association management
+   * @return the {@link java.util.SortedSet} of {@link ResultValue}s generated
+   *         for this <code>ResultValueType</code>
+   * @overridden.hibernate.list cascade="all" lazy="extra" inverse="true"
+   * @overridden.hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValue"
+   * @overridden.hibernate.collection-key column="result_value_type_id"
+   * @overridden.hibernate.collection-index column="index"
    */
-  public SortedSet<ResultValue> getResultValues() {
-    return Collections.unmodifiableSortedSet(_resultValues);
+  public List<ResultValue> getResultValues() {
+    return _resultValues;
   }
-  
-  /**
-   * Add the result value to the result value type.
-   * 
-   * @param resultValue the result value to add to the result value type
-   * @return true iff the result value was not already in the result value type
-   */
-  public boolean addResultValue(ResultValue resultValue) {
-    assert !(_resultValues.contains(resultValue) ^
-      resultValue.getResultValueType().equals(this)) :
-      "asymmetric result value type / result value association encountered";
-    if (_resultValues.add(resultValue)) {
-      resultValue.setHbnResultValueType(this);
-      return true;
-    }
-    return false;
-  }
-  
+
   /**
    * Get the ordinal position of this <code>ResultValueType</code> within its
    * parent {@link ScreenResult}.
@@ -679,21 +671,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
   }
 
   /**
-   * Get the set of {@link ResultValue}s that were generated for this
-   * <code>ResultValueType</code>.
-   * 
-   * @motivation for Hibernate and bi-directional association management
-   * @return the {@link java.util.SortedSet} of {@link ResultValue}s generated
-   *         for this <code>ResultValueType</code>
-   * @hibernate.set cascade="all" inverse="true" sort="natural"
-   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValue"
-   * @hibernate.collection-key column="result_value_type_id"
-   */
-  SortedSet<ResultValue> getHbnResultValues() {
-    return _resultValues;
-  }
-
-  /**
    * A business key class for the <code>ResultValueType</code>.
    */
   private class BusinessKey
@@ -802,7 +779,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    *          generated for this <code>ResultValueType</code>.
    * @motivation for Hibernate
    */
-  private void setHbnResultValues(SortedSet<ResultValue> resultValues) {
+  private void setResultValues(List<ResultValue> resultValues) {
     _resultValues = resultValues;
   }
 

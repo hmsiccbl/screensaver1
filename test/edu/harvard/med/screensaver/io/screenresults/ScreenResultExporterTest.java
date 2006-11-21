@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -108,8 +109,8 @@ public class ScreenResultExporterTest extends AbstractSpringTest
       ResultValueType expectedRvt = (ResultValueType) expectedIter.next();
       ResultValueType actualRvt = (ResultValueType) actualIter.next();
       assertTrue(expectedRvt.isEquivalent(actualRvt));
-      SortedSet<ResultValue> expectedResultValues = expectedRvt.getResultValues();
-      SortedSet<ResultValue> actualResultValues = actualRvt.getResultValues();
+      SortedSet<ResultValue> expectedResultValues = new TreeSet<ResultValue>(expectedRvt.getResultValues());
+      SortedSet<ResultValue> actualResultValues = new TreeSet<ResultValue>(actualRvt.getResultValues());
       Iterator expectedIter2 = expectedResultValues.iterator();
       Iterator actualIter2 = actualResultValues.iterator(); 
       int i = 0;

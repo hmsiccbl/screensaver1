@@ -9,6 +9,9 @@
 
 package edu.harvard.med.screensaver.model.screenresults;
 
+import java.util.Collections;
+import java.util.SortedSet;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
@@ -35,6 +38,7 @@ public class ResultValue extends AbstractEntity implements Comparable
   
   private Integer         _resultValueId;
   private Integer         _version;
+  private Integer         _index;
   private ResultValueType _resultValueType;
   private Well            _well;
   private String          _value;
@@ -78,14 +82,25 @@ public class ResultValue extends AbstractEntity implements Comparable
    */
   public ResultValue(ResultValueType resultValueType, Well well, AssayWellType assayWellType, String value, boolean exclude)
   {
-    _businessKey = new BusinessKey(well, resultValueType);
-    _well = well; // HACK: to allow setResultValueType() to suceeed; ideally, we want to set both resultValueType and Well before adding to relationships' collections
+    // use synchronized block, in case multiple threads are creating
+    // ResultValues for the same ResultValueType concurrently; almost certainly
+    // not worth the performance loss, but better to be safe than optimized, for
+    // now
+    int index = 0;
+    synchronized (resultValueType) {
+      // ordering is thus determined by ResultValue instantiation order, so
+      // caller should instantiate in the desired order (ascending plates, ascending row, ascending column)
+      index = resultValueType.getResultValues().size();
+      setIndex(index);
+    }
+    _businessKey = new BusinessKey(index, resultValueType);
     setResultValueType(resultValueType);
     setWell(well);
     setAssayWellType(assayWellType);
     setValue(value);
     setExclude(exclude);
-  }
+    _resultValueType.getResultValues().add(this);
+  } 
 
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
@@ -118,30 +133,17 @@ public class ResultValue extends AbstractEntity implements Comparable
    * Get the parent {@link ResultValueType}.
    * 
    * @return the parent {@link ResultValueType}
+   * @motivation for Hibernate
+   * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
+   *                        column="result_value_type_id" not-null="true"
+   *                        foreign-key="fk_result_value_to_result_value_type"
+   *                        cascade="save-update"
    */
+  @ToOneRelationship(nullable=false)
   public ResultValueType getResultValueType() {
     return _resultValueType;
   }
   
-  /**
-   * Add this <code>ResultValue</code> to the specified
-   * {@link ResultValueType}, removing from the existing
-   * {@link ResultValueType} parent, if necessary.
-   * 
-   * @param resultValueType the new parent {@link ResultValueType}
-   */
-  public void setResultValueType(ResultValueType resultValueType) {
-    if (_resultValueType == resultValueType) {
-      return;
-    }
-    if (_resultValueType != null) {
-      _resultValueType.getHbnResultValues().remove(this);
-    }
-    _businessKey.setResultValueType(resultValueType);
-    _resultValueType = resultValueType;
-    _resultValueType.getHbnResultValues().add(this);
-  }
-
   /**
    * Get the {@link edu.harvard.med.screensaver.model.libraries.Well} (of the
    * library stock plate) that was replicated and used to generate this
@@ -150,29 +152,13 @@ public class ResultValue extends AbstractEntity implements Comparable
    * @return the {@link edu.harvard.med.screensaver.model.libraries.Well} (of
    *         the library stock plate) that was replicated and used to generate
    *         this <code>ResultValue</code>
+   * @hibernate.many-to-one column="well_id" not-null="true"
+   *   foreign-key="fk_result_value_to_well"
+   *   cascade="save-update"
    */
+  @ToOneRelationship(unidirectional=true, nullable=false)
   public Well getWell() {
-    return getHbnWell();
-  }
-
-  /**
-   * Set the {@link edu.harvard.med.screensaver.model.libraries.Well} (of the
-   * library stock plate) that was replicated and used to generate this
-   * <code>ResultValue</code>.
-   * 
-   * @param well the {@link edu.harvard.med.screensaver.model.libraries.Well}
-   *          (of the library stock plate) that was replicated and used to
-   *          generate this <code>ResultValue</code>
-   */
-  public void setWell(Well well) {
-    if (_resultValueType != null) {
-      _resultValueType.getHbnResultValues().remove(this);
-    }
-    _businessKey.setWell(well);
-    if (_resultValueType != null) {
-      _resultValueType.getHbnResultValues().add(this);
-    }
-    _well = well;
+    return _well;
   }
 
   /**
@@ -373,9 +359,8 @@ public class ResultValue extends AbstractEntity implements Comparable
    *          generate this <code>ResultValue</code>
    * @motivation for hibernate
    */
-  public void setHbnWell(Well well) {
+  private void setWell(Well well) {
     _well = well;
-    _businessKey.setWell(_well);
   }
 
   
@@ -387,9 +372,8 @@ public class ResultValue extends AbstractEntity implements Comparable
    * @param resultValueType the parent {@link ResultValueType}
    * @motivation for Hibernate
    */
-  void setHbnResultValueType(ResultValueType resultValueType) {
+  private void setResultValueType(ResultValueType resultValueType) {
     _resultValueType = resultValueType;
-    _businessKey.setResultValueType(_resultValueType);
   }
 
   /**
@@ -398,26 +382,21 @@ public class ResultValue extends AbstractEntity implements Comparable
   private class BusinessKey implements Comparable
   {
     
-    private String _wellPlateNumber;
-    private String _wellName;
+    private Integer _index;
     private ResultValueType _resultValueType;
 
     public BusinessKey() {}
 
-    public BusinessKey(Well well,
+    public BusinessKey(Integer index,
                        ResultValueType resultValueType)
     {
-      setWell(well);
+      _index = index;
       _resultValueType = resultValueType;
     }
-
-    public void setWell(Well well)
+    
+    public void setIndex(Integer index)
     {
-      // HACK: keep well properties as part of business key, to handle null Well case during delete of ScreenResult
-      if (well != null) {
-        _wellPlateNumber = well.getPlateNumber().toString();
-        _wellName = well.getWellName();
-      }
+      _index = index;
     }
 
     public void setResultValueType(ResultValueType resultValueType)
@@ -433,8 +412,7 @@ public class ResultValue extends AbstractEntity implements Comparable
       }
       BusinessKey that = (BusinessKey) object;
       return 
-        _wellName.equals(that._wellName) &&
-        _wellPlateNumber.equals(that._wellPlateNumber) &&
+        _index.equals(that._index) &&
         _resultValueType.equals(that._resultValueType);
     }
 
@@ -442,26 +420,22 @@ public class ResultValue extends AbstractEntity implements Comparable
     public int hashCode()
     {
       return 
-        _wellName.hashCode() +
-        _wellPlateNumber.hashCode() +
+        _index + 
         _resultValueType.hashCode();
     }
 
     @Override
     public String toString()
     {
-      return _wellPlateNumber + _wellName + ":" + _resultValueType;
+      return _resultValueType + ":" + _index;
     }
     
     public int compareTo(Object o)
     {
       BusinessKey that = (BusinessKey) o;
-      int result = _wellPlateNumber.compareTo(that._wellPlateNumber);
+      int result = _index.compareTo(that._index);
       if (result == 0) {
-        result = _wellName.compareTo(that._wellName);
-        if (result == 0) {
-          result = _resultValueType.getOrdinal().compareTo(that._resultValueType.getOrdinal());
-        }
+        result = _resultValueType.getOrdinal().compareTo(that._resultValueType.getOrdinal());
       }
       return result;
     }    
@@ -502,33 +476,24 @@ public class ResultValue extends AbstractEntity implements Comparable
   }
 
   /**
-   * Get the parent {@link ResultValueType}.
+   * Get the zero-based index of this ResultValue within its parent
+   * ResultValueType's collection of ResultValues.
    * 
-   * @return the parent {@link ResultValueType}
-   * @motivation for Hibernate
-   * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
-   *                        column="result_value_type_id" not-null="true"
-   *                        foreign-key="fk_result_value_to_result_value_type"
-   *                        cascade="save-update"
+   * @hibernate.property type="integer" not-null="true"
+   * @return the index
    */
-  private ResultValueType getHbnResultValueType() {
-    return _resultValueType;
+  private Integer getIndex()
+  {
+    return _index;
   }
-  
+
   /**
-   * Get the {@link edu.harvard.med.screensaver.model.libraries.Well} (of the
-   * library stock plate) that was replicated and used to generate this
-   * <code>ResultValue</code>.
-   * 
-   * @return the {@link edu.harvard.med.screensaver.model.libraries.Well} (of
-   *         the library stock plate) that was replicated and used to generate
-   *         this <code>ResultValue</code>
-   * @hibernate.many-to-one column="well_id" not-null="true"
-   *   foreign-key="fk_result_value_to_well"
-   *   cascade="save-update"
+   * Set the zero-based index of this ResultValue within its parent
+   * ResultValueType's collection of ResultValues.
+   * @param index the index
    */
-  @ToOneRelationship(unidirectional=true)
-  Well getHbnWell() {
-    return _well;
+  private void setIndex(Integer index)
+  {
+    _index = index;
   }
 }

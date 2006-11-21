@@ -307,8 +307,10 @@
       classname="xdoclet.modules.hibernate.HibernateDocletTask"
       classpathref="build.library.path"
     />
+    <!-- note: mergedir *must* be same as destdir, due XDoclet bug -->
     <hibernatedoclet
       destdir="resources"
+      mergedir="resources"
       excludedtags="@version,@author,@todo"
       verbose="${verbose}"
     >
@@ -574,9 +576,6 @@
     description="Clean out generated files." 
     depends="clean-persistence,clean-war,clean-distro"
   >
-    <delete includeemptydirs="true">
-      <fileset dir="resources" includes="edu/**" />
-    </delete>
   </target>
 
 
