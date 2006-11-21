@@ -68,7 +68,7 @@
 
   <!-- Transactional support -->
 
-  <!-- Configuration for explicity, declarative transactions in Spring (uses AOP), 
+  <!-- Configuration for explicit, declarative transactions in Spring (uses AOP), 
   where every bean needing transactional capabilities explicitly has a proxy defined for it -->
   <!-- Common practice is to specify a parent TransactionProxyFactoryBean, with default config, and set child beans' "parent" attribute to this parent bean. -->
   <!-- (Can also use the more AOP-generic and more flexible, but more verbose, approach of specifying ProxyFactoryBean and a TransactionInterceptor beans -->

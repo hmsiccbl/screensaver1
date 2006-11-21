@@ -628,8 +628,7 @@ public class ScreenResultViewer extends AbstractBackingBean
       // ResultValues in parallel (kind of messy!)
       Map<ResultValueType,Iterator> rvtIterators = new HashMap<ResultValueType,Iterator>();
       for (ResultValueType rvt : getScreenResult().getResultValueTypes()) {
-        rvtIterators.put(rvt, rvt.getResultValues()
-                                 .iterator());
+        rvtIterators.put(rvt, rvt.getResultValues().iterator());
       }
       List<RawDataRow> tableData = new ArrayList<RawDataRow>();
       for (ResultValue majorResultValue : getScreenResult().getResultValueTypes()
