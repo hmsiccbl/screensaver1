@@ -175,10 +175,18 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
   /**
    * Get the set of {@link ResultValue}s that were generated for this
-   * <code>ResultValueType</code>. Hibernate XDoclet configuration is
-   * overridden by hand-coded Hibernate mapping in
-   * ./hibernate-properties-ResultValueType.xml. Necessary since XDoclet does
-   * not support lazy="extra".
+   * <code>ResultValueType</code>.
+   * <p>
+   * WARNING: calling iterator() on the returned List will cause Hibernate to
+   * load all ResultValues. If you want to take advantage of extra-lazy loading,
+   * be sure to call only size() and get(i) on the returned List.
+   * <p>
+   * WARNING: removing an element from this list is not supported; doing so
+   * breaks ScreenResult.plateNumbers semantics.
+   * <p>
+   * Hibernate XDoclet configuration is overridden by hand-coded Hibernate
+   * mapping in ./hibernate-properties-ResultValueType.xml. Necessary since
+   * XDoclet does not support lazy="extra".
    * 
    * @motivation for Hibernate and bi-directional association management
    * @return the {@link java.util.SortedSet} of {@link ResultValue}s generated

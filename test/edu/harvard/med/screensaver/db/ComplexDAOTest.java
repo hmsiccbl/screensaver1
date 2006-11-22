@@ -11,6 +11,7 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +34,8 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
+import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
 
 /**
@@ -480,10 +483,82 @@ public class ComplexDAOTest extends AbstractSpringTest
   
   public void testFindLabHeads()
   {
-    schemaUtil.initializeDatabase();
-    
-    List<ScreeningRoomUser> labHeads = dao.findAllLabHeads();
-    assertEquals(172, labHeads.size());
+    final Collection<ScreeningRoomUser> expectedLabHeads = 
+      new TreeSet<ScreeningRoomUser>(ScreensaverUserComparator.getInstance());
+    dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        ScreeningRoomUser user1 = dao.defineEntity(ScreeningRoomUser.class,
+                                                   new Date(),
+                                                   "first1",
+                                                   "last1",
+                                                   "email1@hms.harvard.edu",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   ScreeningRoomUserClassification.ICCB_FELLOW,
+                                                   false);
+        ScreeningRoomUser user2 = dao.defineEntity(ScreeningRoomUser.class,
+                                                   new Date(),
+                                                   "first2",
+                                                   "last2",
+                                                   "email2@hms.harvard.edu",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   ScreeningRoomUserClassification.ICCB_FELLOW,
+                                                   false);
+        ScreeningRoomUser user3 = dao.defineEntity(ScreeningRoomUser.class,
+                                                   new Date(),
+                                                   "first3",
+                                                   "last3",
+                                                   "email3@hms.harvard.edu",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   ScreeningRoomUserClassification.ICCB_FELLOW,
+                                                   false);
+        ScreeningRoomUser user4 = dao.defineEntity(ScreeningRoomUser.class,
+                                                   new Date(),
+                                                   "first4",
+                                                   "last4",
+                                                   "email4@hms.harvard.edu",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   ScreeningRoomUserClassification.ICCB_FELLOW,
+                                                   false);
+        ScreeningRoomUser user5 = dao.defineEntity(ScreeningRoomUser.class,
+                                                   new Date(),
+                                                   "first5",
+                                                   "last5",
+                                                   "email5@hms.harvard.edu",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   ScreeningRoomUserClassification.ICCB_FELLOW,
+                                                   false);
+        user2.setLabHead(user1);
+        user3.setLabHead(user1);
+        user5.setLabHead(user4);
+        expectedLabHeads.add(user1);
+        expectedLabHeads.add(user4);
+      }
+    });
+
+
+    List<ScreeningRoomUser> actualLabHeads = dao.findAllLabHeads();
+    assertTrue(expectedLabHeads.containsAll(actualLabHeads) && actualLabHeads.containsAll(expectedLabHeads));
   }
   
   // TODO: this test needs to be updated to include an *imported* screen result,
@@ -526,5 +601,43 @@ public class ComplexDAOTest extends AbstractSpringTest
         assertNull("screenResult1 was deleted from database", screenResult1);
       }
     });
+  }
+  
+  /**
+   * ScreenResult plateNubers collection is updated when a ResultValue is added
+   * to a ScreenResult's ResultValueType.
+   */
+  public void testScreenResultPlateNumbers()
+  {
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = ScreenResultParser.makeDummyScreen(1); 
+        ScreenResult screenResult = new ScreenResult(screen, new Date());
+        ResultValueType rvt = new ResultValueType(screenResult, "Raw Value");
+        Library library = new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
+        for (int i = 1; i <= 10; ++i) {
+          int plateNumber = i;
+          Well well = new Well(library, plateNumber, "A01");
+          /*ResultValue resultValue =*/ new ResultValue(rvt, well, Integer.toString(i));
+//          dao.persistEntity(resultValue); // really necessary?
+        }
+        dao.persistEntity(screen);
+      }
+    });
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        SortedSet<Integer> expectedPlateNumbers = new TreeSet<Integer>();
+        for (int i = 1; i <= 10; ++i) {
+          expectedPlateNumbers.add(i);
+        }
+        assertEquals("plate numbers", expectedPlateNumbers, screen.getScreenResult().getPlateNumbers());
+      }
+    });
+    
   }
 }

@@ -9,9 +9,6 @@
 
 package edu.harvard.med.screensaver.model.screenresults;
 
-import java.util.Collections;
-import java.util.SortedSet;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
@@ -100,6 +97,7 @@ public class ResultValue extends AbstractEntity implements Comparable
     setValue(value);
     setExclude(exclude);
     _resultValueType.getResultValues().add(this);
+    _resultValueType.getScreenResult().getPlateNumbers().add(well.getPlateNumber());
   } 
 
   /* (non-Javadoc)

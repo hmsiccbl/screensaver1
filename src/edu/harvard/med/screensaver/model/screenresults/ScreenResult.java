@@ -59,11 +59,15 @@ public class ScreenResult extends AbstractEntity
   private boolean                    _isShareable;
   private Integer                    _replicateCount;
   private SortedSet<ResultValueType> _resultValueTypes = new TreeSet<ResultValueType>();
-  
-
-  // transient (derived) instance data
-  
-  transient private TreeSet<Integer> _plateNumbers;
+  /**
+   * @motivation optimization, to avoid loading inspecting all ResultValues when
+   *             determining the set of plate numbers associated with this
+   *             ScreenResult. Note that our data model does not represent
+   *             Plates as first-order entities, as an optimization; a plate
+   *             number is therefore stored along with each Well, but we have no
+   *             normalized Plate table.
+   */
+  private SortedSet<Integer>         _plateNumbers = new TreeSet<Integer>();
 
   
   // public constructors and instance methods
@@ -278,18 +282,27 @@ public class ScreenResult extends AbstractEntity
     _replicateCount = replicateCount;
   }
 
-  @DerivedEntityProperty
+  /**
+   * Get the set of plate numbers associated with this ScreenResult (via ResultValue Wells).
+   * @hibernate.set table="screen_result_plate_numbers" lazy="true" sort="natural"
+   * @hibernate.collection-key column="screen_result_id"
+   * @hibernate.collection-element type="integer" column="plate_number"
+   * @return
+   */
   public SortedSet<Integer> getPlateNumbers()
   {
-    if (_plateNumbers == null) {
-      _plateNumbers = new TreeSet<Integer>();
-      if (getResultValueTypes().size() > 0) {
-        for (ResultValue rv : getResultValueTypes().first().getResultValues()) {
-          _plateNumbers.add(rv.getWell().getPlateNumber());
-        }
-      }
-    }
     return _plateNumbers;
+  }
+  
+  /**
+   * Add a plate number that is associated with this ScreenResult (via ResultValue Wells).
+   * 
+   * @param plateNumber
+   * @return
+   */
+  public boolean addPlateNumber(Integer plateNumber)
+  {
+    return _plateNumbers.add(plateNumber);
   }
   
   /**
@@ -410,5 +423,18 @@ public class ScreenResult extends AbstractEntity
   private void setHbnResultValueTypes(SortedSet<ResultValueType> resultValueTypes) {
     _resultValueTypes = resultValueTypes;
   }
+
+  /**
+   * Set the set of plate numbers associated with this ScreenResult (via
+   * ResultValue Wells).
+   * 
+   * @param plateNumbers the set of plate numbers
+   * @motivation for Hibernate
+   */
+  private void setPlateNumbers(SortedSet<Integer> plateNumbers)
+  {
+    _plateNumbers = plateNumbers;
+  }
+  
 
 }

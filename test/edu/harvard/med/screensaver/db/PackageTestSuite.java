@@ -31,6 +31,7 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(ComplexDAOTest.class);
     addTestSuite(UserTest.class);
     addTestSuite(RestrictedAccessDAOTest.class);
+    addTestSuite(ScreenResultLazyInitTest.class);
   }
 
 }

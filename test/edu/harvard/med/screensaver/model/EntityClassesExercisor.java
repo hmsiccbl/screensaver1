@@ -22,12 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.time.DateUtils;
-
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.NonCherryPickVisit;
 import edu.harvard.med.screensaver.model.screens.Visit;
+
+import org.apache.commons.lang.time.DateUtils;
 
 /**
  * Exercise the entity classes.
@@ -193,6 +193,7 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
   {
     Class[] parameterTypes = constructor.getParameterTypes();
     Object[] arguments = getArgumentsForParameterTypes(parameterTypes);
+    // HACK: special cases
     if (constructor.getDeclaringClass().equals(Well.class)) {
       arguments[2] = getTestValueForWellName();
     }
