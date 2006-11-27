@@ -362,6 +362,7 @@ public class Gene extends AbstractEntity
    * @hibernate.set
    *   cascade="save-update"
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="gene_id"
    * @hibernate.collection-one-to-many

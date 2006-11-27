@@ -360,6 +360,7 @@ public class SilencingReagent extends AbstractEntity
    *   inverse="true"
    *   table="well_silencing_reagent_link"
    *   cascade="all"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="silencing_reagent_id"
    * @hibernate.collection-many-to-many

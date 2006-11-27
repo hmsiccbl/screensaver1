@@ -431,11 +431,17 @@ public class Compound extends AbstractEntity
    *             can maintain the bi-directional association between
    *             {@link Well} and {@link Compound}).
    * @return the set of wells that contain this compound
-   * @hibernate.set inverse="true" table="well_compound_link" cascade="all"
-   * @hibernate.collection-key column="compound_id"
-   * @hibernate.collection-many-to-many column="well_id"
-   *                                    class="edu.harvard.med.screensaver.model.libraries.Well"
-   *                                    foreign-key="fk_well_compound_link_to_compound"
+   * @hibernate.set
+   *   inverse="true"
+   *   table="well_compound_link"
+   *   cascade="all"
+   *   lazy="true"
+   * @hibernate.collection-key
+   *   column="compound_id"
+   * @hibernate.collection-many-to-many
+   *   column="well_id"
+   *   class="edu.harvard.med.screensaver.model.libraries.Well"
+   *   foreign-key="fk_well_compound_link_to_compound"
    */
   Set<Well> getHbnWells()
   {
