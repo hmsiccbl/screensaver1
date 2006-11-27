@@ -9,29 +9,11 @@
     <%@ include file="../searchResultsNavPanel.jspf" %>
   </t:aliasBean>
   
+  <t:aliasBean alias="#{well}" value="#{wellViewer.well}">
+    <%@ include file="wellViewer.jspf" %>
+  </t:aliasBean>
+  
   <h:form id="wellForm">
-
-    <h:panelGrid columns="2" styleClass="standardTable">
-    
-      <h:outputText value="Library:" />
-      <t:commandLink
-        action="#{wellViewer.viewLibrary}"
-        value="#{wellViewer.well.library.libraryName}"
-      />
-      
-      <h:outputText value="Plate:" />
-      <h:outputText value="#{wellViewer.well.plateNumber}" />
-      
-      <h:outputText value="Well:" />
-      <h:outputText value="#{wellViewer.well.wellName}" />
-            
-      <h:outputText value="ICCB Number:" />
-      <h:outputText value="#{wellViewer.well.iccbNumber}" />
-            
-      <h:outputText value="Vendor Identifier:" />
-      <h:outputText value="#{wellViewer.well.fullVendorIdentifier}" />
-
-    </h:panelGrid>
       
     <t:dataList
       id="geneList"

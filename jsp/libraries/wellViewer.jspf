@@ -1,0 +1,37 @@
+<%@ taglib uri="http://java.sun.com/jsf/html"        prefix="h"     %>
+<%@ taglib uri="http://java.sun.com/jsf/core"        prefix="f"     %>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk"  prefix="t"     %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+    
+<f:subview id="wellViewerPart">
+  <h:form id="wellViewerPartForm">
+    <h:panelGrid columns="2">
+    
+      <h:outputText value="Library:" />
+      <t:commandLink
+        action="#{librariesController.viewLibrary}"
+        value="#{well.library.libraryName}"
+      >
+        <f:param name="libraryId" value="#{well.library.libraryId}" />
+      </t:commandLink>
+      
+      <h:outputText value="Plate:" />
+      <h:outputText value="#{well.plateNumber}" />
+      
+      <h:outputText value="Well:" />
+      <t:commandLink
+        action="#{librariesController.viewWell}"
+        value="#{well.wellName}"
+      >
+        <f:param name="wellId" value="#{well.wellId}" />
+      </t:commandLink>
+            
+      <h:outputText value="ICCB Number:" />
+      <h:outputText value="#{well.iccbNumber}" />
+            
+      <h:outputText value="Vendor Identifier:" />
+      <h:outputText value="#{well.fullVendorIdentifier}" />
+
+    </h:panelGrid>
+  </h:form>
+</f:subview>

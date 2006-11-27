@@ -261,6 +261,15 @@ public class LibrariesController extends AbstractUIController
   }
   
   @UIControllerMethod
+  public String viewLibrary()
+  {
+    String libraryIdAsString = (String) getRequestParameter("libraryId");
+    Integer libraryId = Integer.parseInt(libraryIdAsString);
+    Library library = _dao.findEntityById(Library.class, libraryId);
+    return viewLibrary(library, null);
+  }
+  
+  @UIControllerMethod
   public String viewLibrary(Library library, LibrarySearchResults librarySearchResults)
   {
     _libraryViewer.setLibrarySearchResults(librarySearchResults);
@@ -282,6 +291,14 @@ public class LibrariesController extends AbstractUIController
   {
     _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
     return "viewWellSearchResults";
+  }
+  
+  @UIControllerMethod
+  public String viewWell()
+  {
+    String wellId = (String) getRequestParameter("wellId");
+    Well well = _dao.findEntityById(Well.class, wellId);
+    return viewWell(well, null);
   }
   
   @UIControllerMethod

@@ -107,6 +107,12 @@ public class Compound extends AbstractEntity
 		return getBusinessKey().toString();
 	}
   
+  @DerivedEntityProperty
+  public int getNumWells()
+  {
+    return _wells.size();
+  }
+  
   /**
   * Get an unmodifiable copy of the set of wells that contain this compound.
   * 
@@ -432,6 +438,7 @@ public class Compound extends AbstractEntity
    *             {@link Well} and {@link Compound}).
    * @return the set of wells that contain this compound
    * @hibernate.set
+   *   order-by="well_id"
    *   inverse="true"
    *   table="well_compound_link"
    *   cascade="all"
