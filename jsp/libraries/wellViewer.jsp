@@ -29,7 +29,7 @@
       <h:outputText value="#{wellViewer.well.iccbNumber}" />
             
       <h:outputText value="Vendor Identifier:" />
-      <h:outputText value="#{wellViewer.well.vendorIdentifier}" />
+      <h:outputText value="#{wellViewer.well.fullVendorIdentifier}" />
 
     </h:panelGrid>
       

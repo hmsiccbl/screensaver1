@@ -16,6 +16,8 @@
     <h:outputText value="#{libraryViewer.library.libraryName}" />
     <h:outputText value="library type:" />
     <h:outputText value="#{libraryViewer.library.libraryType}" />
+    <h:outputText value="vendor:" />
+    <h:outputText value="#{libraryViewer.library.vendor}" />
     <h:outputText value="description:" />
     <h:outputText value="#{libraryViewer.library.description}" />
     <h:outputText value="number of wells:" />

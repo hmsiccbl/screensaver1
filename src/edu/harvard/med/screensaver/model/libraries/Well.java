@@ -371,6 +371,19 @@ public class Well extends AbstractEntity
   {
     return _vendorIdentifier;
   }
+  
+  @DerivedEntityProperty
+  public String getFullVendorIdentifier()
+  {
+    String vendor = _library.getVendor();
+    if (vendor == null) {
+      return _vendorIdentifier;
+    }
+    if (_vendorIdentifier == null) {
+      return vendor;
+    }
+    return vendor + " " + _vendorIdentifier;
+  }
 
   /**
    * Set the vendor identifier for the well.
@@ -586,14 +599,9 @@ public class Well extends AbstractEntity
       sdFilePrintWriter.println(getIccbNumber());
       sdFilePrintWriter.println();
     }
-    if (getVendorIdentifier() != null) {
+    if (getFullVendorIdentifier() != null) {
       sdFilePrintWriter.println(">  <Vendor_Identifier>");
-      if (getLibrary().getVendor() != null) {
-        sdFilePrintWriter.println(getLibrary().getVendor() + " " + getVendorIdentifier());
-      }
-      else {
-        sdFilePrintWriter.println(getVendorIdentifier());
-      }
+      sdFilePrintWriter.println(getFullVendorIdentifier());
       sdFilePrintWriter.println();
     }
     Compound compound = getPrimaryCompound();
