@@ -14,22 +14,11 @@
       <%@ include file="compoundViewer.jspf" %>
     </t:aliasBean>
   </t:aliasBean>
-
-  <t:dataList
-    id="wellList"
-    var="well"
-    value="#{compoundViewer.compound.wells}"
-    layout="simple"
-    rendered="#{compoundViewer.compound.numWells <= 2}"
-  >
-    <%@ include file="wellViewer.jspf" %>
-  </t:dataList>
   
   <t:dataTable
     id="wellTable"
     var="well"
     value="#{compoundViewer.compound.wells}"
-    rendered="#{compoundViewer.compound.numWells > 2}"
     headerClass="alignLeft"
     border="1"
   >
