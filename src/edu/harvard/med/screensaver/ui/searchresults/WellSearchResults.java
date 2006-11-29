@@ -275,7 +275,9 @@ public class WellSearchResults extends SearchResults<Well>
     rnaiHeaderRow.createCell((short) 4).setCellValue("Vendor Identifier");
     rnaiHeaderRow.createCell((short) 5).setCellValue("ICCB Number");
     rnaiHeaderRow.createCell((short) 6).setCellValue("EntrezGene ID");
-    rnaiHeaderRow.createCell((short) 7).setCellValue("GenBank Accession Number");
+    rnaiHeaderRow.createCell((short) 7).setCellValue("EntrezGene Symbol");
+    rnaiHeaderRow.createCell((short) 8).setCellValue("GenBank Accession Number");
+    rnaiHeaderRow.createCell((short) 9).setCellValue("Gene Name");
     for (short i = 0; i < 8; i ++) {
       rnaiHeaderRow.getCell(i).setCellStyle(style);      
     }
@@ -311,10 +313,12 @@ public class WellSearchResults extends SearchResults<Well>
     }
     HSSFRow row = createRow(well, sheet, rowNumber);
     row.createCell((short) 6).setCellValue(gene.getEntrezgeneId());
+    row.createCell((short) 7).setCellValue(gene.getEntrezgeneSymbol());
     Set<String> genbankAccessionNumbers = gene.getGenbankAccessionNumbers();
     if (genbankAccessionNumbers.size() > 0) {
-      row.createCell((short) 7).setCellValue(listStrings(genbankAccessionNumbers));
+      row.createCell((short) 8).setCellValue(listStrings(genbankAccessionNumbers));
     }
+    row.createCell((short) 9).setCellValue(gene.getGeneName());
     return true;
   }
 
