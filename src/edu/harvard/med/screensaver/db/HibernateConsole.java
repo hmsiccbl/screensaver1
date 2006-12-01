@@ -37,6 +37,7 @@ public class HibernateConsole
     BufferedReader br = null;
     try {
       CommandLineApplication app = new CommandLineApplication(args);
+      app.setDatabaseRequired(true);
       if (!app.processOptions(true, true)) {
         System.exit(1);
       }
