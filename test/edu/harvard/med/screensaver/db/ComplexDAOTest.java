@@ -13,7 +13,9 @@ package edu.harvard.med.screensaver.db;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -26,7 +28,9 @@ import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -36,6 +40,8 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -47,6 +53,8 @@ import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
  */
 public class ComplexDAOTest extends AbstractSpringTest
 {
+  
+  private static final Logger log = Logger.getLogger(ComplexDAOTest.class);
   
   // public static methods
   
@@ -331,10 +339,10 @@ public class ComplexDAOTest extends AbstractSpringTest
                             Well.MIN_WELL_ROW + ((iWell / Well.PLATE_ROWS) + 1), 
                             (iWell % Well.PLATE_COLUMNS) + 1));
             for (int iResultValue = 0; iResultValue < rvt.length; ++iResultValue) {
-              ResultValue rv = new ResultValue(rvt[iResultValue],
-                                               wells[iWell],
-                                               "value " + iWell + "," + iResultValue);
-              rv.setExclude(iWell % 2 == 1);
+              rvt[iResultValue].addResultValue(wells[iWell], 
+                                               AssayWellType.EXPERIMENTAL, 
+                                               "value " + iWell + "," + iResultValue, 
+                                               iWell % 2 == 1);
             }
           }
 
@@ -361,6 +369,10 @@ public class ComplexDAOTest extends AbstractSpringTest
             "libraryName",
             "library with results");
           Set<Well> wells = library.getWells();
+          Set<WellKey> wellKeys = new HashSet<WellKey>();
+          for (Well well : wells) {
+            wellKeys.add(well.getWellKey());
+          }
           ScreenResult screenResult =
             dao.findAllEntitiesWithType(ScreenResult.class).get(0);
           assertEquals(replicates,screenResult.getReplicateCount().intValue());
@@ -384,19 +396,15 @@ public class ComplexDAOTest extends AbstractSpringTest
               "human",
               rvt.getAssayPhenotype());
             
-            int iWell = 0;
-            for (ResultValue rv : rvt.getResultValues()) {
-              assertEquals(rvt, rv.getResultValueType());
-              assertTrue(wells.contains(rv.getWell()));
+            Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
+            for (WellKey wellKey : resultValues.keySet()) {
+              assertTrue(wellKeys.contains(wellKey));
               // note that our naming scheme is testing the ordering of the
               // ResultValueType and ResultValue entities (within their parent
               // sets)
-              assertEquals(
-                "value " + iWell + "," + iResultValue,
-                rv.getValue());
-              assertEquals(iWell % 2 == 1,
-                           rv.isExclude());
-              iWell++;
+              ResultValue rv = resultValues.get(wellKey);
+              assertEquals("value " + wellKey.getColumn() + "," + iResultValue, rv.getValue());
+              assertEquals(wellKey.getColumn() % 2 == 1, rv.isExclude());
             }
             iResultValue++;
           }
@@ -604,11 +612,13 @@ public class ComplexDAOTest extends AbstractSpringTest
   }
   
   /**
-   * ScreenResult plateNubers collection is updated when a ResultValue is added
-   * to a ScreenResult's ResultValueType.
+   * ScreenResult.plateNumbers and ScreenResult.wells collections should be
+   * updated when a ResultValue is added to a ScreenResult's ResultValueType.
    */
   public void testScreenResultPlateNumbers()
   {
+    final SortedSet<Integer> expectedPlateNumbers = new TreeSet<Integer>();
+    final SortedSet<Well> expectedWells = new TreeSet<Well>();
     dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -619,9 +629,10 @@ public class ComplexDAOTest extends AbstractSpringTest
         Library library = new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
         for (int i = 1; i <= 10; ++i) {
           int plateNumber = i;
+          expectedPlateNumbers.add(i);
           Well well = new Well(library, plateNumber, "A01");
-          /*ResultValue resultValue =*/ new ResultValue(rvt, well, Integer.toString(i));
-//          dao.persistEntity(resultValue); // really necessary?
+          expectedWells.add(well);
+          rvt.addResultValue(well, Integer.toString(i));
         }
         dao.persistEntity(screen);
       }
@@ -631,13 +642,74 @@ public class ComplexDAOTest extends AbstractSpringTest
       public void runTransaction()
       {
         Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
-        SortedSet<Integer> expectedPlateNumbers = new TreeSet<Integer>();
-        for (int i = 1; i <= 10; ++i) {
-          expectedPlateNumbers.add(i);
-        }
         assertEquals("plate numbers", expectedPlateNumbers, screen.getScreenResult().getPlateNumbers());
+        assertEquals("wells", expectedWells, screen.getScreenResult().getWells());
       }
     });
     
   }
+  
+  public void testFindSortedResultValueTableByRange()
+  {
+    final Screen screen = ScreenResultParser.makeDummyScreen(1); 
+    ScreenResult screenResult = new ScreenResult(screen, new Date());
+    ResultValueType rvt1 = new ResultValueType(screenResult, "Raw Value");
+    ResultValueType rvt2 = new ResultValueType(screenResult, "Derived Value");
+    rvt2.setActivityIndicator(true);
+    rvt2.setActivityIndicatorType(ActivityIndicatorType.PARTITION);
+    rvt2.setDerived(true);
+    rvt2.setHowDerived("even wells are 'S', otherwise 'W'");
+    rvt2.addTypeDerivedFrom(rvt1);
+    Library library = new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
+    for (int iPlate = 1; iPlate <= 10; ++iPlate) {
+      int plateNumber = iPlate;
+      for (int iWell = 1; iWell <= 10; ++iWell) {
+        Well well = new Well(library, plateNumber, "A" + iWell);
+        rvt1.addResultValue(well, Integer.toString(iWell));
+        rvt2.addResultValue(well, iWell % 2 == 0 ? "S" : "W");
+      }
+    }
+    dao.persistEntity(screen);
+
+    Map<WellKey,List<ResultValue>> result = dao.findSortedResultValueTableByRange(new ResultValueType[] { rvt1, rvt2 }, 1, 10, 80);
+    for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
+      log.debug(entry.getKey() + " => " + entry.getValue());
+    }
+    assertEquals("result size", 80, result.size());
+    int iWell = 10;
+    for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
+      assertEquals("sorted result values for " + entry.getKey() + " at sort index " + iWell, 
+                   iWell < 50 ? "S" : "W", 
+                   entry.getValue().get(1).getValue());
+      assertEquals("associated result value for " + entry.getKey(), 
+                   Integer.toString(entry.getKey().getColumn() + 1), 
+                   entry.getValue().get(0).getValue());
+      ++iWell;
+    }
+  }
+  
+  public void testFindResultValuesByPlate()
+  {
+    final Screen screen = ScreenResultParser.makeDummyScreen(1); 
+    ScreenResult screenResult = new ScreenResult(screen, new Date());
+    ResultValueType rvt = new ResultValueType(screenResult, "Raw Value");
+    Library library = new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
+    for (int iPlate = 1; iPlate <= 3; ++iPlate) {
+      int plateNumber = iPlate;
+      for (int iWell = 0; iWell < 10; ++iWell) {
+        Well well = new Well(library, plateNumber, "A" + (iWell + 1));
+        rvt.addResultValue(well, Integer.toString(iWell));
+      }
+    }
+    dao.persistEntity(screen);
+
+    Map<WellKey,ResultValue> resultValues = dao.findResultValuesByPlate(2, rvt);
+    assertEquals("result values size", 10, resultValues.size());
+    for (int iWell = 0; iWell < 10; ++iWell) {
+      ResultValue rv = resultValues.get(new WellKey(2, 0, iWell));
+      assertEquals("rv.value", Integer.toString(iWell), rv.getValue());
+    }
+  }
+
 }
+

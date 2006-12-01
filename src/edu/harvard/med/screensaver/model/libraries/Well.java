@@ -33,7 +33,7 @@ import edu.harvard.med.screensaver.model.screens.CherryPick;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @hibernate.class lazy="false"
  */
-public class Well extends AbstractEntity
+public class Well extends AbstractEntity implements Comparable
 {
   
   // static fields
@@ -50,6 +50,7 @@ public class Well extends AbstractEntity
   public static char MAX_WELL_ROW = 'P';
   public static int PLATE_ROWS = (MAX_WELL_ROW - MIN_WELL_ROW) + 1;
   public static int PLATE_COLUMNS = (MAX_WELL_COLUMN - MIN_WELL_COLUMN) + 1;
+  public static int PLATE_NUMBER_LEN = 5;
   
   // instance fields
 
@@ -332,12 +333,18 @@ public class Well extends AbstractEntity
       _rowLetter = matcher.group(1).toUpperCase().charAt(0);
       _column = Integer.parseInt(matcher.group(2)) - 1;
       if (_column < 0 || _column > 23) {
-        throw new IllegalArgumentException("well column is illegal");
+        throw new IllegalArgumentException("well column '" + _column + "' is illegal in well name '" + wellName + "'");
       }
     } 
     else {
-      throw new IllegalArgumentException("well name is illegal");
+      throw new IllegalArgumentException("well name is illegal: '" + wellName + "'");
     }
+  }
+  
+  @DerivedEntityProperty
+  public WellKey getWellKey()
+  {
+    return new WellKey(_plateNumber, getRow(), getColumn());
   }
 
   /**
@@ -365,7 +372,7 @@ public class Well extends AbstractEntity
    * Get the vendor identifier for the well.
    * 
    * @return the vendor identifier for the well
-   * @hibernate.property type="text"
+   * @hibernate.property type="text" not-null="false"
    */
   public String getVendorIdentifier()
   {
@@ -643,7 +650,7 @@ public class Well extends AbstractEntity
   {
     return new BusinessKey();
   }
-
+  
   /**
    * A business key class for the well.
    */
@@ -801,7 +808,7 @@ public class Well extends AbstractEntity
   {
     _version = version;
   }
-
+  
   /**
    * Get the library the well is in.
    * 
@@ -850,5 +857,11 @@ public class Well extends AbstractEntity
   private void setHbnCherryPicks(Set<CherryPick> cherryPicks)
   {
     _cherryPicks = cherryPicks;
+  }
+
+  public int compareTo(Object o)
+  {
+    assert o instanceof Well : "input to compareTo() must be a Well";
+    return getWellKey().compareTo(((Well) o).getWellKey());
   }
 }

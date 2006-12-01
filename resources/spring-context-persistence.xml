@@ -172,7 +172,7 @@
    <property name="patterns">
     <list>
      <value>.*DAO.delete.*</value>
-     <value>.*DAO.find(?!All|EntitiesBy).*</value>
+     <value>.*DAO.find(?!All|EntitiesBy|.*ResultValue).*</value>
     </list>
    </property>
   </bean>

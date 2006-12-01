@@ -14,6 +14,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -52,7 +53,8 @@ public class EntityBeansTest extends EntityBeansExercizor
           }
           
           if (! isEntityIdProperty(bean.getClass(), propertyDescriptor)) {
-            if (! Collection.class.isAssignableFrom(propertyDescriptor.getPropertyType())) {
+            if (! (Collection.class.isAssignableFrom(propertyDescriptor.getPropertyType()) ||
+              Map.class.isAssignableFrom(propertyDescriptor.getPropertyType()))) {
               assertNotNull(
                             "property has setter: " +
                             bean.getClass() + "." + propertyDescriptor.getDisplayName(),
@@ -125,7 +127,8 @@ public class EntityBeansTest extends EntityBeansExercizor
         }
 
         final Method getter = propertyDescriptor.getReadMethod();
-        if (Collection.class.isAssignableFrom(getter.getReturnType())) {
+        if (Collection.class.isAssignableFrom(getter.getReturnType()) || 
+          Map.class.isAssignableFrom(getter.getReturnType())) {
           return;
         }
         final Method setter = propertyDescriptor.getWriteMethod();

@@ -449,7 +449,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     });
   }
 
-  public void testHuman1()
+  public void IGNORE_testHuman1()
   {
     dao.doInTransaction(new DAOTransaction()
     {

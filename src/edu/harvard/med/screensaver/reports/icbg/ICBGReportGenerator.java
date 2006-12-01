@@ -14,15 +14,9 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
-
-import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultParserTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
@@ -32,6 +26,11 @@ import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+
+import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 
 /**
@@ -384,20 +383,27 @@ public class ICBGReportGenerator
     }
     
     boolean printedBioactivityRow = false;
-    Iterator<ResultValue> scaledOrBooleanRVs = (scaledOrBooleanRVT == null) ? null :
-      scaledOrBooleanRVT.getResultValues().iterator();
-    Iterator<ResultValue> numericalRVs = (numericalRVT == null) ? null :
-      numericalRVT.getResultValues().iterator();
-    while ((scaledOrBooleanRVs != null && scaledOrBooleanRVs.hasNext()) ||
-           (numericalRVs != null && numericalRVs.hasNext())) {
-      ResultValue scaledOrBooleanRV = (scaledOrBooleanRVs == null) ? null :
-        scaledOrBooleanRVs.next();
-      ResultValue numericalRV = (numericalRVs == null) ? null :
-        numericalRVs.next();
-      if (printBioactivityRow(assayInfo, scaledOrBooleanRV, numericalRV)) {
-        printedBioactivityRow = true;
-      }
-    }
+    // TODO: update & reinstate to use new Map<WellKey,ResultValue> data
+    // structure returned by getResultValues(). Since above comment indicates
+    // this code will need to be heavily rewritten before next reuse, I'm just
+    // commenting this out for error-free compilation. Aw, heck, I'll be good
+    // and throw a run-time exception just in case someone actually runs this
+    // code, expecting it to work.
+    if (true) throw new RuntimeException("this method needs to be rewritten! -@");
+    //    Iterator<ResultValue> scaledOrBooleanRVs = (scaledOrBooleanRVT == null) ? null :
+//      scaledOrBooleanRVT.getResultValues().iterator();
+//    Iterator<ResultValue> numericalRVs = (numericalRVT == null) ? null :
+//      numericalRVT.getResultValues().iterator();
+//    while ((scaledOrBooleanRVs != null && scaledOrBooleanRVs.hasNext()) ||
+//           (numericalRVs != null && numericalRVs.hasNext())) {
+//      ResultValue scaledOrBooleanRV = (scaledOrBooleanRVs == null) ? null :
+//        scaledOrBooleanRVs.next();
+//      ResultValue numericalRV = (numericalRVs == null) ? null :
+//        numericalRVs.next();
+//      if (printBioactivityRow(assayInfo, scaledOrBooleanRVT, scaledOrBooleanRV, numericalRVT, numericalRV)) {
+//        printedBioactivityRow = true;
+//      }
+//    }
     return printedBioactivityRow;
   }
   
@@ -440,16 +446,19 @@ public class ICBGReportGenerator
   
   private boolean printBioactivityRow(
     AssayInfo assayInfo,
+    ResultValueType scaledOrBooleanRVT,
     ResultValue scaledOrBooleanRV,
+    ResultValueType numericalRVT,
     ResultValue numericalRV)
   {
     Well well = null;
-    if (scaledOrBooleanRV != null) {
-      well = scaledOrBooleanRV.getWell();
-    }
-    else if (numericalRV != null) {
-      well = numericalRV.getWell();
-    }
+    // TODO: update & reinstate
+//    if (scaledOrBooleanRV != null) {
+//      well = scaledOrBooleanRV.getWell();
+//    }
+//    else if (numericalRV != null) {
+//      well = numericalRV.getWell();
+//    }
     String lq = _mapper.getLQForWell(well);
     if (lq == null) { return false; }
     String assayName = assayInfo.getAssayName();
@@ -466,10 +475,10 @@ public class ICBGReportGenerator
     row.createCell((short) 4).setCellValue(assayName);
     if (numericalRV != null) {
       row.createCell((short) 5).setCellValue(numericalRV.getValue());
-      row.createCell((short) 6).setCellValue(numericalRV.getResultValueType().getDescription());
+      row.createCell((short) 6).setCellValue(numericalRVT.getDescription());
     }
     if (scaledOrBooleanRV != null) {
-      if (scaledOrBooleanRV.getResultValueType().getActivityIndicatorType().equals(ActivityIndicatorType.BOOLEAN)) {
+      if (scaledOrBooleanRVT.getActivityIndicatorType().equals(ActivityIndicatorType.BOOLEAN)) {
         if (scaledOrBooleanRV.getValue().equals("true")) {
           row.createCell((short) 7).setCellValue("A");
         }
@@ -477,7 +486,7 @@ public class ICBGReportGenerator
           row.createCell((short) 7).setCellValue("I");          
         }
       }
-      else if (scaledOrBooleanRV.getResultValueType().getActivityIndicatorType().equals(ActivityIndicatorType.PARTITION)) {
+      else if (scaledOrBooleanRVT.getActivityIndicatorType().equals(ActivityIndicatorType.PARTITION)) {
         if (scaledOrBooleanRV.getValue().toUpperCase().equals("S") ||
             scaledOrBooleanRV.getValue().toUpperCase().equals("M")) {
           row.createCell((short) 7).setCellValue("A");

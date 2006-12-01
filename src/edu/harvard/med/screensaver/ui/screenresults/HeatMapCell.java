@@ -12,7 +12,7 @@ package edu.harvard.med.screensaver.ui.screenresults;
 import java.awt.Color;
 import java.text.NumberFormat;
 
-import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 
 import org.apache.log4j.Logger;
@@ -39,24 +39,25 @@ public class HeatMapCell
   private boolean _containsValue;
   private String _popupText;
   private String _style;
-  private Well _well;
+  private WellKey _wellKey;
 
   
   // public constructors and methods
 
   public HeatMapCell(ResultValue resultValue,
+                     WellKey wellKey,
                      double scoredValue,
                      Color color,
                      boolean showValues,
                      NumberFormat format)
   {
     _resultValue = resultValue;
-    _well = resultValue == null ? null : resultValue.getWell();
+    _wellKey = wellKey;
     _containsValue = resultValue != null && !resultValue.isEmptyWell();
     String formattedValue = _containsValue ? format.format(scoredValue) : "<empty>";
     _cellText = showValues ? formattedValue : INVISIBLE_HYPERLINK_VALUE;
     _popupText = _resultValue == null ? "" :
-      _resultValue.getWell().getWellName() + ": " + formattedValue;
+      _wellKey.getWellName() + ": " + formattedValue;
     
     updateStyle(resultValue, color);
   }
@@ -82,9 +83,9 @@ public class HeatMapCell
     return _style;
   }
   
-  public Well getWell()
+  public WellKey getWellKey()
   {
-    return _well;
+    return _wellKey;
   }
   
   
@@ -112,6 +113,6 @@ public class HeatMapCell
     // non-data-producing well
     _style = "background-color: transparent";
   }
-  
+
 }
 

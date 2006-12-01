@@ -21,6 +21,7 @@ import java.util.TreeSet;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -59,6 +60,7 @@ public class ScreenResult extends AbstractEntity
   private boolean                    _isShareable;
   private Integer                    _replicateCount;
   private SortedSet<ResultValueType> _resultValueTypes = new TreeSet<ResultValueType>();
+  private SortedSet<Well>            _wells = new TreeSet<Well>();
   /**
    * @motivation optimization, to avoid loading inspecting all ResultValues when
    *             determining the set of plate numbers associated with this
@@ -68,6 +70,8 @@ public class ScreenResult extends AbstractEntity
    *             normalized Plate table.
    */
   private SortedSet<Integer>         _plateNumbers = new TreeSet<Integer>();
+
+
 
   
   // public constructors and instance methods
@@ -294,8 +298,9 @@ public class ScreenResult extends AbstractEntity
     return _plateNumbers;
   }
   
+  // TODO: get rid of this method (figure out how to bypass its requirement in unit tests)
   /**
-   * Add a plate number that is associated with this ScreenResult (via ResultValue Wells).
+   * Add a plate number that is associated with this ScreenResult.
    * 
    * @param plateNumber
    * @return
@@ -303,6 +308,34 @@ public class ScreenResult extends AbstractEntity
   public boolean addPlateNumber(Integer plateNumber)
   {
     return _plateNumbers.add(plateNumber);
+  }
+  /**
+   * Add a well that is associated with this ScreenResult.
+   * 
+   * @param well the well to add
+   * @return true iff the well was added successfully
+   */
+  public boolean addWell(Well well)
+  {
+    _plateNumbers.add(well.getPlateNumber());
+    return _wells.add(well);
+  }
+  
+  /**
+   * Get the set of wells associated with this ScreenResult. <i>Do not modify
+   * the returned collection.</i> To add a well, call {@link #addWell}.
+   * 
+   * @return the set of wells associated with this ScreenResult
+   * @hibernate.set table="screen_result_well_link" lazy="true"
+   *                cascade="save-update" sort="natural"
+   * @hibernate.collection-key column="screen_result_id"
+   * @hibernate.collection-many-to-many class="edu.harvard.med.screensaver.model.libraries.Well"
+   *                                    column="well_id"
+   */
+  @ToManyRelationship(unidirectional=true)
+  public SortedSet<Well> getWells()
+  {
+    return _wells;
   }
   
   /**
@@ -436,5 +469,15 @@ public class ScreenResult extends AbstractEntity
     _plateNumbers = plateNumbers;
   }
   
+  /**
+   * Set the set of wells associated with this ScreenResult.
+   * 
+   * @param well the set of wells
+   * @motivation for Hibernate
+   */
+  private void setWells(SortedSet<Well> wells)
+  {
+    _wells = wells;
+  }
 
 }

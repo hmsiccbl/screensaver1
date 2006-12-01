@@ -60,6 +60,14 @@ public class UniqueDataHeaderNames
   {
     return _uniqueDataHeaderName2ResultValueType.get(uniqueDataHeaderName);
   }
+  
+  public List<String> get(List<ResultValueType> rvts) {
+    List<String> uniqueDataHeaderNames = new ArrayList<String>(rvts.size());
+    for (ResultValueType rvt : rvts) {
+      uniqueDataHeaderNames.add(_uniqueDataHeaderNamesMap.get(rvt));
+    }
+    return uniqueDataHeaderNames;
+  }
 
   public List<String> asList()
   {

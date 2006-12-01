@@ -39,13 +39,11 @@ import edu.harvard.med.screensaver.io.workbook.PlateNumberParser;
 import edu.harvard.med.screensaver.io.workbook.WellNameParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
-import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -58,7 +56,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.hibernate.Hibernate;
 
 /**
  * Parses data from a workbook files (a.k.a. Excel spreadsheets) necessary for
@@ -146,6 +143,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private static final String METADATA_NO_RAWDATA_FILES_SPECIFIED_ERROR = "raw data workbook files not specified";
   private static final String UNKNOWN_ERROR = "unknown error";
   private static final String NO_DATA_SHEETS_FOUND_ERROR = "no data worksheets were found; no result data was imported";
+  private static final String NO_SUCH_WELL = "library well does not exist";
 
 
   private static SortedMap<String,IndicatorDirection> indicatorDirectionMap = new TreeMap<String,IndicatorDirection>();
@@ -971,31 +969,29 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         log.info("parsing sheet " + workbook.getWorkbookFile().getName() + ":" + workbook.getWorkbook().getSheetName(iSheet));
         for (int iRow = RAWDATA_FIRST_DATA_ROW_INDEX; iRow <= sheet.getLastRowNum(); ++iRow) {
           Well well = findWell(iRow);
-          AssayWellType assayWellType = _assayWellTypeParser.parse(dataCell(iRow, DataColumn.ASSAY_WELL_TYPE));
-          
-          List<ResultValueType> wellExcludes = new ExcludeParser(screenResult).parseList(dataCell(iRow, DataColumn.EXCLUDE));
-          
-          int iDataHeader = 0;
-          for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-            Cell cell = dataCell(iRow, iDataHeader);
-            Object value = !rvt.isActivityIndicator()
-            ? cell.getAsString()
+          if (well != null) {
+            AssayWellType assayWellType = _assayWellTypeParser.parse(dataCell(iRow, DataColumn.ASSAY_WELL_TYPE));
+
+            List<ResultValueType> wellExcludes = new ExcludeParser(screenResult).parseList(dataCell(iRow, DataColumn.EXCLUDE));
+
+            int iDataHeader = 0;
+            for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+              Cell cell = dataCell(iRow, iDataHeader);
+              Object value = !rvt.isActivityIndicator()
+              ? cell.getAsString()
               : rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN
               ? _booleanParser.parse(cell)
-                : rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL
-                ? cell.getDouble()
-                  : rvt.getActivityIndicatorType() == ActivityIndicatorType.PARTITION
-                  ? _partitionedValueParser.parse(cell) 
-                    : cell.getString();
-                  if (value == null) {
-                    value = "";
-                  }
-                  new ResultValue(rvt, 
-                                  well, 
-                                  assayWellType,
-                                  value.toString(),
-                                  (wellExcludes != null && wellExcludes.contains(rvt)));
-                  ++iDataHeader;
+              : rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL
+              ? cell.getDouble()
+              : rvt.getActivityIndicatorType() == ActivityIndicatorType.PARTITION
+              ? _partitionedValueParser.parse(cell) 
+              : cell.getString();
+              if (value == null) {
+                value = "";
+              }
+              rvt.addResultValue(well, assayWellType, value.toString(), (wellExcludes != null && wellExcludes.contains(rvt)));
+              ++iDataHeader;
+            }
           }
         }
       }
@@ -1018,31 +1014,22 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   private Well findWell(int iRow) throws ExtantLibraryException
   {
-    Integer plateNumber = _plateNumberParser.parse(dataCell(
-      iRow,
-      DataColumn.STOCK_PLATE_ID,
-      true));
-    String wellName = _wellNameParser.parse(dataCell(
-      iRow,
-      DataColumn.WELL_NAME,
-      true));
+    Integer plateNumber = _plateNumberParser.parse(dataCell(iRow,
+                                                            DataColumn.STOCK_PLATE_ID,
+                                                            true));
+    Cell wellNameCell = dataCell(iRow,
+                                 DataColumn.WELL_NAME,
+                                 true);
+    String wellName = _wellNameParser.parse(wellNameCell);
     Well well = _dao.findWell(plateNumber, wellName);
-    
-    if (well == null) {
-      Library library = _dao.findLibraryWithPlate(plateNumber);
-      if (library == null) {
-        throw new ExtantLibraryException(
-          "no library exists that contains plate " + plateNumber);
-      }
-      well = new Well(library, plateNumber, wellName);
+
+    if (well != null) {
+      // optimization: ask Hibernate to load all well for this library now
+      well.getLibrary().getWells().iterator();
     }
     else {
-
-      // if we didnt find one well (well == null above), then the library probably
-      // has none, so no point in forcing the wells to load. -s
-      
-      // force Hibernate to load all well for this library now
-      Hibernate.initialize(well.getLibrary().getWells());
+      _errors.addError(NO_SUCH_WELL + ": " + plateNumber + ":" + wellName,
+                       wellNameCell);
     }
 
     return well;

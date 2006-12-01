@@ -9,13 +9,15 @@
 
 package edu.harvard.med.screensaver.model.screenresults;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 
 
@@ -49,7 +51,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   private Integer                    _resultValueTypeId;
   private Integer                    _version;
   private ScreenResult               _screenResult;
-  private List<ResultValue>          _resultValues = new ArrayList<ResultValue>();
+  private Map<WellKey,ResultValue>   _resultValues = new HashMap<WellKey,ResultValue>();
   private String                     _name;
   private String                     _description;
   private Integer                    _ordinal;
@@ -173,13 +175,15 @@ public class ResultValueType extends AbstractEntity implements Comparable
     _screenResult.getHbnResultValueTypes().add(this);
   }
 
+  // TODO: make this method private (for Hibernate use only), and add methods: getResultValue(int), addResultValue(ResultValue), and removeRemoveValue(ResultValue); will have to update automated model unit tests to accommodate this non-conforming method set
   /**
    * Get the set of {@link ResultValue}s that were generated for this
-   * <code>ResultValueType</code>.
+   * <code>ResultValueType</code>. <i>Do not modify the returned map.</i> To
+   * add a result value, call {@link #addResultValue}.
    * <p>
-   * WARNING: calling iterator() on the returned List will cause Hibernate to
-   * load all ResultValues. If you want to take advantage of extra-lazy loading,
-   * be sure to call only size() and get(i) on the returned List.
+   * WARNING: obtaining an iterator() on the returned Map will cause Hibernate
+   * to load all ResultValues. If you want to take advantage of extra-lazy
+   * loading, be sure to call only size() and get(Well) on the returned Map.
    * <p>
    * WARNING: removing an element from this list is not supported; doing so
    * breaks ScreenResult.plateNumbers semantics.
@@ -189,15 +193,23 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * XDoclet does not support lazy="extra".
    * 
    * @motivation for Hibernate and bi-directional association management
-   * @return the {@link java.util.SortedSet} of {@link ResultValue}s generated
-   *         for this <code>ResultValueType</code>
-   * @overridden.hibernate.list cascade="all" lazy="extra" inverse="true"
-   * @overridden.hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValue"
-   * @overridden.hibernate.collection-key column="result_value_type_id"
-   * @overridden.hibernate.collection-index column="index"
+   * @return the {@link java.util.Map} of {@link ResultValue}s generated
+   *         for this <code>ResultValueType</code>, keyed on WellKeys.
    */
-  public List<ResultValue> getResultValues() {
+  public Map<WellKey,ResultValue> getResultValues() {
     return _resultValues;
+  }
+  
+  public boolean addResultValue(Well well, AssayWellType assayWellType, String value, boolean exclude)
+  {
+    getScreenResult().addWell(well);
+    _resultValues.put(well.getWellKey(), new ResultValue(assayWellType, value, exclude));
+    return true; // TODO: be conditional
+  }
+
+  public boolean addResultValue(Well well, String value)
+  {
+    return addResultValue(well, AssayWellType.EXPERIMENTAL, value, false);
   }
 
   /**
@@ -787,7 +799,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    *          generated for this <code>ResultValueType</code>.
    * @motivation for Hibernate
    */
-  private void setResultValues(List<ResultValue> resultValues) {
+  private void setResultValues(Map<WellKey,ResultValue> resultValues) {
     _resultValues = resultValues;
   }
 

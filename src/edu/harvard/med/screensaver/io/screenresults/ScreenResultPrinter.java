@@ -11,7 +11,7 @@ package edu.harvard.med.screensaver.io.screenresults;
 
 import java.io.PrintWriter;
 
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
@@ -66,11 +66,12 @@ public class ScreenResultPrinter
       printer.println("\tResult Values: (" + nResultValues + ")");
       int n = 0;
       boolean ellipsesOnce = false;
-      for (ResultValue rv : rvt.getResultValues()) {
+      
+      for (WellKey wellKey : rvt.getResultValues().keySet()) {
         if (maxResultValuesToPrint != null) {
           if (n < maxResultValuesToPrint / 2 || n >= nResultValues - maxResultValuesToPrint / 2) {
-            printer.println("\t\t" + rv.getWell().getPlateNumber() + ":" + rv.getWell().getWellName() + 
-                            "\t" + rv.getValue());
+            printer.println("\t\t" + wellKey + 
+                            "\t" + rvt.getResultValues().get(wellKey).getValue());
           } 
           else if (!ellipsesOnce) {
             printer.println("\t\t...");

@@ -51,7 +51,6 @@ public class ScreenResultsController extends AbstractUIController
   private HeatMapViewer _heatMapViewer;
   private ScreenResultImporter _screenResultImporter;
   private ScreenResultExporter _screenResultExporter;
-
   private Screen _lastScreen;
   private ScreenSearchResults _lastScreenSearchResults;
 
@@ -115,16 +114,19 @@ public class ScreenResultsController extends AbstractUIController
     ScreenResult screenResult = screen.getScreenResult();
     
     _screenResultImporter.setDao(_dao);
+    _screenResultImporter.setMessages(_messages);
     _screenResultImporter.setScreen(screen);
     _screenResultImporter.setScreenResultParser(new ScreenResultParser(_dao));
     
     _screenResultViewer.setScreen(screen);
     _screenResultViewer.setDao(_dao);
+    _screenResultImporter.setMessages(_messages);
     _screenResultViewer.setScreenResultExporter(_screenResultExporter);
     _screenResultViewer.setScreensController(_screensController);
     _screenResultViewer.setLibrariesController(_librariesController);
     _screenResultViewer.setScreenSearchResults(screenSearchResults);
 
+    _heatMapViewer.setDao(_dao);
     _heatMapViewer.setScreenResult(screenResult);
     _heatMapViewer.setLibrariesController(_librariesController);
     
@@ -134,6 +136,11 @@ public class ScreenResultsController extends AbstractUIController
   public String viewLastScreenResult()
   {
     return viewScreenResult(_lastScreen, _lastScreenSearchResults);
+  }
+  
+  public String viewScreenResultImportErrors()
+  {
+    return VIEW_SCREEN_RESULT_IMPORT_ERRORS;
   }
 }
 

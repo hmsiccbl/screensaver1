@@ -20,7 +20,8 @@ public class EdgeWellsFilter implements Filter<ResultValue>
 
   public boolean exclude(ResultValue rv)
   {
-    return rv.getWell().isEdgeWell();
+    // TODO:
+    return false;//rv.getWell().isEdgeWell();
   }
   
   public String toString() 

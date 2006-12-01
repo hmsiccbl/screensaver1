@@ -13,16 +13,19 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.springframework.transaction.annotation.Transactional;
 
 
 // TODO: use JDK5 annotations to define AOP advice for data access policy.
@@ -85,6 +88,13 @@ public interface DAO
    */
   public void deleteEntity(AbstractEntity entity);
 
+  /**
+   * Commit all pending changes to the database. Useful if issuing an HQL query
+   * for data that has been created within the same Hibernate session (e.g.
+   * within the same HTTP request).
+   */
+  public void flush();
+  
   /**
    * Retrieve and return a list of Entities of the specified type.
    * 
@@ -241,4 +251,12 @@ public interface DAO
    * no such library contains the plate.
    */
   public Library findLibraryWithPlate(Integer plateNumber);
+  
+  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(ResultValueType[] rvts,
+                                                                     int sortBy,
+                                                                     int fromIndex,
+                                                                     int rowsToFetch);
+  
+  public Map<WellKey,ResultValue> findResultValuesByPlate(Integer plateNumber, ResultValueType rvt);
+
 }

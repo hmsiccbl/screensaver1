@@ -19,6 +19,9 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
@@ -40,6 +43,10 @@ public class NoOpDAO implements DAO
   }
 
   public void deleteScreenResult(ScreenResult screenResultController)
+  {
+  }
+
+  public void flush()
   {
   }
 
@@ -122,6 +129,19 @@ public class NoOpDAO implements DAO
   
   public void deleteEntity(AbstractEntity entity)
   {
+  }
+
+  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(ResultValueType[] rvts,
+                                                                          int sortBy,
+                                                                          int fromIndex,
+                                                                          int toIndex)
+  {
+    return null;
+  }
+  
+  public Map<WellKey,ResultValue> findResultValuesByPlate(Integer plateNumber, ResultValueType rvt)
+  {
+    return null;
   }
   
 }

@@ -14,13 +14,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
 
 import javax.faces.component.UIData;
 import javax.faces.component.UIInput;
@@ -28,12 +25,12 @@ import javax.faces.component.UISelectBoolean;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
-import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -47,6 +44,7 @@ import edu.harvard.med.screensaver.ui.control.ScreenResultsController;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.IOUtils;
@@ -72,11 +70,8 @@ public class ScreenResultViewer extends AbstractBackingBean
   private static Logger log = Logger.getLogger(ScreenResultViewer.class);
   
   private static final int DEFAULT_ITEMS_PER_PAGE = 10;
-
   private static final int RAWDATA_TABLE_FIXED_COLUMN_COUNT = 2;
-
   private static final int METADATA_TABLE_FIXED_COLUMN_COUNT = 1;
-  
   private static final DataModel EMPTY_METADATA_MODEL = new ListDataModel(new ArrayList<MetadataRow>());
   private static final DataModel EMPTY_RAW_DATA_MODEL = new ListDataModel(new ArrayList<RawDataRow>());
 
@@ -92,18 +87,16 @@ public class ScreenResultViewer extends AbstractBackingBean
   /**
    * For internal tracking of first data row displayed in data table.
    */
-  private int _firstRow;
+  private int _firstResultValueIndex;
   /**
    * For rowNumber UIInput component. 1-based value.
    */
   private int _rowNumber;
   private Integer _plateNumber;
-  private String[] _selectedDataHeaderNames;
+  private UISelectManyBean<ResultValueType> _selectedResultValueTypes;
   private String _rowRangeText;
   private UIInput _rowNumberInput;
-  private UIInput _plateNumberInput;
   private UIData _dataTable;
-
   /**
    * Flag indicating whether the tables on this page need to have their columns
    * dynamically updated to reflect a new ScreenResult.
@@ -112,14 +105,10 @@ public class ScreenResultViewer extends AbstractBackingBean
    *             updated when a new ScreenResult is to be viewed
    */
   private boolean _needViewLayoutUpdate;
-
-  /**
-   * Remembers the first row where a given plate number appears.
-   * 
-   * @motivation optimization
-   */
-  private Map<Integer,Integer> _plateNumber2FirstRow;
   private UniqueDataHeaderNames _uniqueDataHeaderNames;
+  /**
+   * Data model for the raw data, <i>containing only the set of rows being displayed in the current view</i>.
+   */
   private DataModel _rawDataModel;
   private DataModel _rawDataColumnModel;
   private DataModel _dataHeaderColumnModel;
@@ -215,16 +204,6 @@ public class ScreenResultViewer extends AbstractBackingBean
     _rowNumber = rowNumber;
   }
 
-  public UIInput getPlateNumberInput()
-  {
-    return _plateNumberInput;
-  }
-
-  public void setPlateNumberInput(UIInput plateNumberInput)
-  {
-    _plateNumberInput = plateNumberInput;
-  }
-
   public UIData getDataTable()
   {
     return _dataTable;
@@ -261,7 +240,12 @@ public class ScreenResultViewer extends AbstractBackingBean
    */
   public int getRawDataSize()
   {
-    return getRawData().getRowCount();
+    try {
+      return getScreenResult().getResultValueTypes().first().getResultValues().size();
+    }
+    catch (Exception e) {
+      return 0;
+    }
   }
 
   public String getRowRangeText()
@@ -269,44 +253,26 @@ public class ScreenResultViewer extends AbstractBackingBean
     return "of " + getRawDataSize();
   }
   
-  public Integer getPlateNumber()
+  public UISelectManyBean<ResultValueType> getSelectedResultValueTypes()
   {
-    return _plateNumber;
-  }
-
-  public void setPlateNumber(Integer plateNumber)
-  {
-    log.debug("setPlateNumber(" + plateNumber + ")");
-    _plateNumber = plateNumber;
-  }
-
-  public List<SelectItem> getPlateSelectItems()
-  {
-    return JSFUtils.createUISelectItems(getScreenResult().getPlateNumbers());
-  }
-  
-  public List<SelectItem> getDataHeaderSelectItems()
-  {
-    return JSFUtils.createUISelectItems(getUniqueDataHeaderNames().asList());
-  }
-  
-  public String[] getSelectedDataHeaderNames()
-  {
-    if (_selectedDataHeaderNames == null) {
-      selectAllDataHeaders();
+    if (_selectedResultValueTypes == null) {
+      _selectedResultValueTypes = new UISelectManyBean<ResultValueType>(getScreenResult().getResultValueTypes())
+      {
+        @Override
+        protected String getLabel(ResultValueType rvt)
+        {
+          return getUniqueDataHeaderNames().get(rvt);
+        }
+      };
+      selectAllResultValueTypes();
     }
-    return _selectedDataHeaderNames;
+    return _selectedResultValueTypes;
   }
 
-  public void setSelectedDataHeaderNames(String[] selectedDataHeaderNames)
-  {
-    _selectedDataHeaderNames = selectedDataHeaderNames;
-  }
-  
   public DataModel getDataHeaderColumnModel()
   {
     if (_dataHeaderColumnModel == null) {
-      _dataHeaderColumnModel = new ListDataModel(Arrays.asList(getSelectedDataHeaderNames()));
+      _dataHeaderColumnModel = new ListDataModel(getUniqueDataHeaderNames().get(getSelectedResultValueTypes().getSelections()));
     }
     return _dataHeaderColumnModel;
   }
@@ -335,51 +301,29 @@ public class ScreenResultViewer extends AbstractBackingBean
     return null;
   }
 
-  /**
-   * @motivation for "Columns" JSF data table component
-   * @return
-   */
-  public Object getRawDataCellValue()
-  {
-    DataModel dataModel = getRawData();
-    DataModel columnModel = getDataHeaderColumnModel();
-    if (columnModel.isRowAvailable()) {
-      String columnName = (String) columnModel.getRowData(); // getRowData() is really getColumnData()
-      assert columnName != null : "columnName is null";
-      RawDataRow row = (RawDataRow) dataModel.getRowData();
-      assert row != null : "row is null";
-      return row.getResultValues().get(columnName).getValue();
-    }
-    return null;
-  }
-
 
   // JSF application methods
   
-  @SuppressWarnings("unchecked")
   public String gotoPage(int pageIndex)
   {
     try {
-      // firstRow is a 1-based index
-      _firstRow = (pageIndex * getDataTable().getRows());
-      if (_firstRow > 0 &&
-        _firstRow <= getScreenResult().getResultValueTypes().first().getResultValues().size()) {
-        // scroll the data table to the new row
-        getDataTable().setFirst(_firstRow);
-
+      int tmpFirstResultValueIndex = (pageIndex * getDataTable().getRows());
+      if (tmpFirstResultValueIndex >= 0 &&
+        tmpFirstResultValueIndex < getScreenResult().getResultValueTypes().first().getResultValues().size()) {
         // update the plate selection list to the current plate
         if (getRawData() != EMPTY_RAW_DATA_MODEL) {
-         _plateNumber = ((List<RawDataRow>) getRawData().getWrappedData()).get(_firstRow).getPlateNumber();
-         _rowNumber = _firstRow + 1;
+          _firstResultValueIndex = tmpFirstResultValueIndex;
+         _rowNumber = _firstResultValueIndex + 1;
         }
       }
+      rebuildDataTable();
       return REDISPLAY_PAGE_ACTION_RESULT;
     } 
     catch (Exception e) {
       return ERROR_ACTION_RESULT;
     }
   }
-  
+
   public String nextPage()
   {
     return gotoPage(getPageIndex() + 1); 
@@ -389,17 +333,6 @@ public class ScreenResultViewer extends AbstractBackingBean
   {
     return gotoPage(getPageIndex() - 1); 
   }
-  
-//  public String nextPlate()
-//  {
-//    
-//    return gotoPlate(_plateIndex + 1); 
-//  }
-//  
-//  public String prevPlate()
-//  {
-//    return gotoPlate(_plateIndex - 1); 
-//  }
   
   public String viewScreen()
   {
@@ -456,7 +389,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   public String showAllDataHeaders()
   {
-    selectAllDataHeaders();
+    selectAllResultValueTypes();
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
@@ -472,37 +405,20 @@ public class ScreenResultViewer extends AbstractBackingBean
   public void rowNumberListener(ValueChangeEvent event)
   {
     log.debug("rowNumberListener called: " + event.getNewValue());
-    _firstRow = Integer.parseInt(event.getNewValue().toString()) - 1;
+    _firstResultValueIndex = Integer.parseInt(event.getNewValue().toString()) - 1;
     // ensure value is within valid range, and in particular that we never show
     // less than the table's configured row count (unless it's more than the
     // total number of rows)
-    _firstRow = Math.max(0,
-                         Math.min(_firstRow,
-                                  getRawDataSize() - _dataTable.getRows()));
-    // scroll the data table to the new row
-    getDataTable().setFirst(_firstRow);
-    // update the plate selection list to the current plate
-    @SuppressWarnings("unchecked")
-    RawDataRow dataRow = ((List<RawDataRow>) getRawData().getWrappedData()).get(_firstRow);
-    Integer plateNumber = dataRow.getPlateNumber();
-    _plateNumberInput.setValue(plateNumber);
-    _rowNumberInput.setValue(_firstRow + 1);
+    _firstResultValueIndex = Math.max(0,
+                                      Math.min(_firstResultValueIndex,
+                                               getRawDataSize() - _dataTable.getRows()));
+    _rowNumberInput.setValue(_firstResultValueIndex + 1);
   }
   
-  public void plateNumberListener(ValueChangeEvent event)
-  {
-    log.debug("new plate number: '" + event.getNewValue() + "'");
-    _firstRow = findFirstRowNumberForPlateNumber(Integer.parseInt(event.getNewValue().toString()));
-    // scroll the data table to the new row
-    getDataTable().setFirst(_firstRow);
-    // update the row field
-    _rowNumberInput.setValue(_firstRow + 1);
-  }
-  
-  public void selectedDataHeadersListener(ValueChangeEvent event)
+  public void selectedResultValueTypesListener(ValueChangeEvent event)
   {
     log.debug("data headers selection changed: '" + event.getNewValue() + "'");
-    _dataHeaderColumnModel = null; // cause to be reinitialized for new set of selected data headers
+    rebuildDataTable();
   }
   
   
@@ -526,53 +442,31 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   private void resetView()
   {
-    _plateNumber2FirstRow = null;
     _dataHeaderColumnModel = null;
     _metadataModel = null;
     _rawDataModel = null;
-    _firstRow = 0;
+    _firstResultValueIndex = 0;
     _rowNumber = 1;
-    _plateNumber = null;
-    _selectedDataHeaderNames = null;
+    _selectedResultValueTypes = null;
     _uniqueDataHeaderNames = null;
 
     // clear the bound UI components, so that they get recreated next time this view is used
     _dataTable = null;
     _rowNumberInput = null;
-    _plateNumberInput = null;
 
     // _rowToPlateConverter = null;    
   }
 
+  private void rebuildDataTable()
+  {
+    // clear state of our data table, forcing lazy initialization when needed
+    _dataHeaderColumnModel = null;
+    _rawDataModel = null;
+  }
+
   private int getPageIndex()
   {
-    return /*getDataTable().getFirst()*/_firstRow / getDataTable().getRows();
-  }
-
-  private int findFirstRowNumberForPlateNumber(int selectedPlateNumber)
-  {
-    lazyBuildPlateNumber2FirstRow();
-    
-    if (!_plateNumber2FirstRow.containsKey(selectedPlateNumber)) {
-      log.error("invalid plate number: " + selectedPlateNumber);
-      return getDataTable().getFirst();
-    }
-    return _plateNumber2FirstRow.get(selectedPlateNumber);
-  }
-
-  private void lazyBuildPlateNumber2FirstRow()
-  {
-    if (_plateNumber2FirstRow == null) {
-      _plateNumber2FirstRow = new HashMap<Integer,Integer>();
-      DataModel rawData = getRawData();
-      for (int i = 0; i < rawData.getRowCount(); ++i) {
-        rawData.setRowIndex(i);
-        Integer plateNumber = ((RawDataRow) rawData.getRowData()).getPlateNumber();
-        if (!_plateNumber2FirstRow.containsKey(plateNumber)) {
-          _plateNumber2FirstRow.put(plateNumber, i);
-        }
-      }
-    }
+    return _firstResultValueIndex / getDataTable().getRows();
   }
 
   private void lazyBuildMetadataModel()
@@ -620,40 +514,35 @@ public class ScreenResultViewer extends AbstractBackingBean
     }
   }
 
+  @SuppressWarnings("unchecked")
   private void lazyBuildRawData()
   {
-    if (_rawDataModel == null && getScreenResult() != null) {
-      // to build our table data structure, we will iterate the
-      // ResultValueTypes'
-      // ResultValues in parallel (kind of messy!)
-      Map<ResultValueType,Iterator> rvtIterators = new HashMap<ResultValueType,Iterator>();
-      for (ResultValueType rvt : getScreenResult().getResultValueTypes()) {
-        rvtIterators.put(rvt, rvt.getResultValues().iterator());
-      }
+    if (getScreenResult() != null && _rawDataModel == null) {
+      Map<WellKey,List<ResultValue>> rvData = 
+        _dao.findSortedResultValueTableByRange((ResultValueType[]) _selectedResultValueTypes.getSelections().toArray(new ResultValueType[_selectedResultValueTypes.getSelections().size()]),
+                                               0,
+                                               _firstResultValueIndex,
+                                               getDataTable().getRows());
+      
       List<RawDataRow> tableData = new ArrayList<RawDataRow>();
-      for (ResultValue majorResultValue : getScreenResult().getResultValueTypes()
-                                                       .first()
-                                                       .getResultValues()) {
-        RawDataRow dataRow = new RawDataRow(getScreenResult().getResultValueTypes(),
-                                            getUniqueDataHeaderNames(),
-                                            majorResultValue.getWell().getPlateNumber(),
-                                            majorResultValue.getWell().getWellName(),
-                                            majorResultValue.getAssayWellType());
-        for (Map.Entry<ResultValueType,Iterator> entry : rvtIterators.entrySet()) {
-          Iterator rvtIterator = entry.getValue();
-          dataRow.addResultValue(entry.getKey(),
-                                 (ResultValue) rvtIterator.next());
-        }
+      for (Map.Entry<WellKey,List<ResultValue>> entry : rvData.entrySet()) {
+        WellKey wellKey = entry.getKey();
+        RawDataRow dataRow = new RawDataRow(wellKey.getPlateNumber(),
+                                            wellKey.getWellName(),
+                                            entry.getValue().get(0).getAssayWellType(),
+                                            getUniqueDataHeaderNames().get(getSelectedResultValueTypes().getSelections()),
+                                            entry.getValue());
         tableData.add(dataRow);
       }
       _rawDataModel = new ListDataModel(tableData);
     }
   }
   
-  private void selectAllDataHeaders()
+  @SuppressWarnings("unchecked")
+  private void selectAllResultValueTypes()
   {
-    _selectedDataHeaderNames = getUniqueDataHeaderNames().asArray();
-    _dataHeaderColumnModel = null; // cause to be reinitialized for new set of selected data headers
+    getSelectedResultValueTypes().setSelections(getScreenResult().getResultValueTypes());
+    rebuildDataTable();
   }
 
 
@@ -726,18 +615,26 @@ public class ScreenResultViewer extends AbstractBackingBean
     private Integer _plateNumber;
     private String _wellName;
     private AssayWellType _assayWellType;
-    private Map<String,ResultValue> _resultValues;
-    private UniqueDataHeaderNames _uniqueNames;
+    private Map<String,String> _resultValues;
     private StringBuilder _excludes = new StringBuilder();
     
-    public RawDataRow(SortedSet<ResultValueType> rvts,
-                      UniqueDataHeaderNames uniqueNames,
-                      Integer plateNumber,
+    public RawDataRow(Integer plateNumber,
                       String wellName,
-                      AssayWellType assayWellType)
+                      AssayWellType assayWellType,
+                      List<String> columnName,
+                      List<ResultValue> resultValues)
     {
-      _resultValues = new HashMap<String,ResultValue>();
-      _uniqueNames = uniqueNames;
+      _resultValues = new HashMap<String,String>();
+      for (int i = 0; i < resultValues.size(); ++i) {
+        ResultValue rv = resultValues.get(i);
+        _resultValues.put(columnName.get(i), rv.getValue());
+        if (rv != null && rv.isExclude()) {
+          if (_excludes.length() > 0) {
+            _excludes.append(", ");
+          }
+          _excludes.append(columnName.get(i));
+        }
+      }
       _plateNumber = plateNumber;
       _wellName = wellName;
       _assayWellType = assayWellType;
@@ -763,21 +660,11 @@ public class ScreenResultViewer extends AbstractBackingBean
       return _excludes.toString();
     }
 
-    public Map<String,ResultValue> getResultValues()
+    public Map<String,String> getValues()
     {
       return _resultValues;
     }
 
-    public void addResultValue(ResultValueType rvt, ResultValue rv)
-    {
-      _resultValues.put(_uniqueNames.get(rvt), rv);
-      if (rv.isExclude()) {
-        if (_excludes.length() > 0) {
-          _excludes.append(", ");
-        }
-        _excludes.append(_uniqueNames.get(rvt));
-      }
-    }
   }
 
 }

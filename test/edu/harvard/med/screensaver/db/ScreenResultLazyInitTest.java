@@ -10,13 +10,17 @@
 package edu.harvard.med.screensaver.db;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -90,8 +94,8 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
         Library library = new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
         for (int i = 1; i < 10; ++i) {
           Well well = new Well(library, i, "A01");
-          ResultValue resultValue = new ResultValue(rvt, well, Integer.toString(i));
-          dao.persistEntity(resultValue);
+          dao.persistEntity(well);
+          rvt.addResultValue(well, Integer.toString(i));
         }
         dao.persistEntity(screen);
       }
@@ -113,17 +117,18 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
                       entityKey.getEntityName().endsWith("ResultValue"));
         }
         
-        int n = session.getStatistics().getEntityKeys().size();
-        List<ResultValue> resultValues = rvt.getResultValues();
+        Set<Well> wells = rvt.getScreenResult().getWells();
+        Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
         log.debug("resultValue count=" + resultValues.size());
-        ++n; // to account for the single library that will be loaded when the first result value is loaded
-//      for (ResultValue rv : resultValues) { // can't do this, as the implicit iterator() call will load the full resultValues collection at once!
-        for (int i = 0; i < resultValues.size(); ++i) {
-          ResultValue rv = resultValues.get(i);
-          n += 2;
+        Iterator iter = wells.iterator();
+        int n = session.getStatistics().getEntityKeys().size();
+        log.debug("entity key count (pre-iteration)=" + n);
+        while (iter.hasNext()) {
+          Well well = (Well) iter.next();
+          ResultValue rv = resultValues.get(well.getWellKey());
           rv.getValue();
           log.debug("entity key count=" + session.getStatistics().getEntityKeys().size());
-          assertEquals("single resultValue (and well) loaded",
+          assertEquals("Hibernate session cache did not grow in size",
                        n,
                        session.getStatistics().getEntityKeys().size());
         }

@@ -12,12 +12,13 @@ package edu.harvard.med.screensaver.io.screenresults;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Map;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -109,18 +110,18 @@ public class ScreenResultExporterTest extends AbstractSpringTest
       ResultValueType expectedRvt = (ResultValueType) expectedIter.next();
       ResultValueType actualRvt = (ResultValueType) actualIter.next();
       assertTrue(expectedRvt.isEquivalent(actualRvt));
-      SortedSet<ResultValue> expectedResultValues = new TreeSet<ResultValue>(expectedRvt.getResultValues());
-      SortedSet<ResultValue> actualResultValues = new TreeSet<ResultValue>(actualRvt.getResultValues());
-      Iterator expectedIter2 = expectedResultValues.iterator();
-      Iterator actualIter2 = actualResultValues.iterator(); 
+      Map<WellKey,ResultValue> expectedResultValues = new HashMap<WellKey,ResultValue>(expectedRvt.getResultValues());
+      Map<WellKey,ResultValue> actualResultValues = new HashMap<WellKey,ResultValue>(actualRvt.getResultValues());
       int i = 0;
-      while (expectedIter2.hasNext() && actualIter2.hasNext()) {
-        ResultValue expectedRv = (ResultValue) expectedIter2.next();
-        ResultValue actualRv = (ResultValue) actualIter2.next();
-        assertTrue("RVT " + expectedRvt.getName() + " result value " + i,
-                   expectedRv.isEquivalent(actualRv));
+      for (WellKey wellKey : expectedResultValues.keySet()) {
+        ResultValue expectedRv = (ResultValue) expectedResultValues.get(wellKey);
+        ResultValue actualRv = (ResultValue) actualResultValues.get(wellKey);
+        assertNotNull("result value exists", actualRv);
+        assertEquals("RVT " + expectedRvt.getName() + " result value " + i, expectedRv, actualRv);
+        actualResultValues.remove(wellKey);
         ++i;
       }
+      assertEquals("no extra result values", 0, actualResultValues.size());
     }
   }
 

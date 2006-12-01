@@ -12,12 +12,13 @@ package edu.harvard.med.screensaver.analysis.heatmaps;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
-import edu.harvard.med.screensaver.analysis.Filter;
 import edu.harvard.med.screensaver.analysis.AggregateFunction;
+import edu.harvard.med.screensaver.analysis.Filter;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatisticsImpl;
 import org.apache.commons.math.stat.descriptive.rank.Median;
@@ -37,6 +38,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
+// TODO: cache converted numeric values
 public class HeatMap
 {
   // static members
@@ -46,11 +48,8 @@ public class HeatMap
 
   // instance data members
   
-  private ResultValueType _resultValueType;
+  private Map<WellKey,ResultValue> _resultValues;
   private int _plateNumber;
-  private ResultValue[][] _data;
-  private double[][] _rawValues;
-  private double[][] _scoredValues;
   private ScalableColorFunction _scalableColorFunction;
   private AggregateFunction<Double> _scoringFunc;
   private DescriptiveStatisticsImpl _statistics;
@@ -67,12 +66,12 @@ public class HeatMap
    * @param colorFunction maps a range of continuous values to colors
    */
   public HeatMap(int plateNumber,
-                 ResultValueType rvt,
+                 Map<WellKey,ResultValue> resultValues,
                  Filter<ResultValue> scoringFilter,
                  AggregateFunction<Double> scoringFunc,
                  ColorFunction colorFunction)
   {
-    _resultValueType = rvt;
+    _resultValues = resultValues;
     _plateNumber = plateNumber;
     _scalableColorFunction = new ScalableColorFunction(colorFunction);
     _scoringFunc = scoringFunc;
@@ -93,21 +92,34 @@ public class HeatMap
     return _scalableColorFunction;
   }
    
-  public double getRawValue(int row, int column)
+  public WellKey getWellKey(int row, int column)
   {
-    return _rawValues[row][column];
-  }
-
-  public double getScoredValue(int row, int column)
-  {
-    return _scoringFunc.compute(_rawValues[row][column]);
+    return new WellKey(_plateNumber, row, column);
   }
 
   public ResultValue getResultValue(int row, int column)
   {
-    return _data[row][column];
+    return _resultValues.get(new WellKey(_plateNumber, row, column));
   }
   
+  public double getRawValue(int row, int column)
+  {
+    ResultValue rv = getResultValue(row, column);
+    if (rv == null) {
+      return Double.NaN;
+    }
+    return Double.parseDouble(rv.getValue());
+  }
+
+  public double getScoredValue(int row, int column)
+  {
+    ResultValue rv = getResultValue(row, column);
+    if (rv == null) {
+      return Double.NaN;
+    }
+    return _scoringFunc.compute(getRawValue(row, column));
+  }
+
   public int getCount()
   {
     return (int) _statistics.getN();
@@ -150,12 +162,12 @@ public class HeatMap
 
   public int getRowCount()
   {
-    return _data.length;
+    return (Well.MAX_WELL_ROW - Well.MIN_WELL_ROW) + 1;
   }
 
   public int getColumnCount()
   {
-    return _data[0].length;
+    return Well.MAX_WELL_COLUMN;
   }
  
   
@@ -164,18 +176,13 @@ public class HeatMap
   private void initialize(Filter<ResultValue> scoringFilter,
                           AggregateFunction<Double> scoringFunc)
   {
-    _data = new ResultValue[Well.PLATE_ROWS][Well.PLATE_COLUMNS];
-    _rawValues = new double[_data.length][_data[0].length];
+
     Collection<Double> aggregationValues = new ArrayList<Double>();
-    for (ResultValue rv : _resultValueType.getResultValues()) {
-      if (rv.getWell().getPlateNumber() == _plateNumber) {
-        int row = rv.getWell().getRow();
-        int col = rv.getWell().getColumn();
-        _data[row][col] = rv;
-        double rawValue = Double.parseDouble(rv.getValue());
-        _rawValues[row][col] = rawValue;
-        if (!scoringFilter.exclude(rv)) {
-          aggregationValues.add(rawValue);
+    for (WellKey wellKey : _resultValues.keySet()) {
+      if (wellKey.getPlateNumber() == _plateNumber) {
+        ResultValue rv = getResultValue(wellKey.getRow(), wellKey.getColumn());
+        if (rv != null && !scoringFilter.exclude(rv)) {
+          aggregationValues.add(getRawValue(wellKey.getRow(), wellKey.getColumn()));
         }
       }
     }
@@ -195,6 +202,6 @@ public class HeatMap
     _scalableColorFunction.setLowerLimit(_statistics.getMin());
     _scalableColorFunction.setUpperLimit(_statistics.getMax());
   }
-
+  
 }
 

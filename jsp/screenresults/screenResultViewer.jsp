@@ -56,11 +56,11 @@ TODO:
 			<t:outputLabel for="dataHeadersList"
 				value="Show selected data headers:" styleClass="inputLabel"/>
 			<t:selectManyListbox id="dataHeadersList"
-				value="#{screenResultViewer.selectedDataHeaderNames}"
-				valueChangeListener="#{screenResultViewer.selectedDataHeadersListener}"
+				value="#{screenResultViewer.selectedResultValueTypes.value}"
+				valueChangeListener="#{screenResultViewer.selectedResultValueTypesListener}"
 				styleClass="input">
 				<f:selectItems id="dataHeaders"
-					value="#{screenResultViewer.dataHeaderSelectItems}" />
+					value="#{screenResultViewer.selectedResultValueTypes.selectItems}" />
 			</t:selectManyListbox>
 			<t:panelGroup>
 				<t:commandButton id="updateButton1" value="Update"
@@ -126,7 +126,7 @@ TODO:
 			</t:collapsiblePanel>
 
 			<t:collapsiblePanel id="dataHeadersPanel"
-				value="#{screenResultViewer.collapsablePanelsState['datHeadersTable']}"
+				value="#{screenResultViewer.collapsablePanelsState['dataHeadersTable']}"
 				title="Data Headers" var="state" titleVar="title"
 				rendered="#{!empty screenResultViewer.screenResult}">
 				<f:facet name="header">
@@ -208,23 +208,14 @@ TODO:
 						<t:outputText value="#{row.excludes}" />
 					</t:column>
 					<t:columns value="#{screenResultViewer.dataHeaderColumnModel}"
-						var="columnName" styleClass="numericColumn" >
+						var="columnName" styleClass="numericColumn">
 						<f:facet name="header">
 							<t:outputText value="#{columnName}" />
 						</f:facet>
-						<t:outputText value="#{screenResultViewer.rawDataCellValue}"/>
+						<t:outputText value="#{row.values[columnName]}" />
 					</t:columns>
 				</t:dataTable>
 
-				<t:outputLabel for="plateNumber" value="Plate:" styleClass="inputLabel"/>
-				<t:selectOneMenu id="plateNumber"
-					value="#{screenResultViewer.plateNumber}"
-					binding="#{screenResultViewer.plateNumberInput}"
-					onchange="javascript:submit()"
-					valueChangeListener="#{screenResultViewer.plateNumberListener}"
-					converter="IntegerConverter" styleClass="input">
-					<f:selectItems value="#{screenResultViewer.plateSelectItems}" />
-				</t:selectOneMenu>
 				<t:commandButton id="prevPageCommand"
 					action="#{screenResultViewer.prevPage}" value="Prev"
 					image="/images/arrow-previous.gif" styleClass="command" />

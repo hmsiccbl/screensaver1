@@ -19,16 +19,19 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
@@ -100,6 +103,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    * types and values). This is the most comprehensive test of low-level parsing
    * functionality.
    */
+  @SuppressWarnings("unchecked")
   public void testParseLegacyScreenResult() throws Exception
   {
     Calendar expectedDate = Calendar.getInstance();
@@ -226,16 +230,19 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
         // compare result values
         assertEquals(15, rvt.getResultValues().size());
+
+        ListIterator<Well> first3WellsIter = new ArrayList<Well>(screenResult.getWells()).subList(0, 3).listIterator();
+        Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
         int iWell = 0;
-        for (ResultValue rv : rvt.getResultValues()) {
-          assertEquals("rvt " + iRvt + " well #" + iWell + " plate name",
+        while (first3WellsIter.hasNext()) {
+          WellKey wellKey = first3WellsIter.next().getWellKey();
+          ResultValue rv = resultValues.get(wellKey);
+          assertEquals("rvt " + iRvt + " well " + iWell + " plate name",
                        expectedInitialPlateNumbers[iWell],
-                       rv.getWell()
-                         .getPlateNumber());
+                       new Integer(wellKey.getPlateNumber()));
           assertEquals("rvt " + iRvt + " well #" + iWell + " well name",
                        expectedInitialWellNames[iWell],
-                       rv.getWell()
-                         .getWellName());
+                       wellKey.getWellName());
           if (iRvt == 4) {
             assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
                          expectedInitialResultValues[iWell][iRvt].toString(),
@@ -261,20 +268,19 @@ public class ScreenResultParserTest extends AbstractSpringTest
             break;
           }
         }
-        List<ResultValue> listOfResultValues = new ArrayList<ResultValue>(rvt.getResultValues());
-        int startIndex = rvt.getResultValues()
-                            .size() - 3;
+        Map<WellKey,ResultValue> mapOfResultValues = rvt.getResultValues();
+        int startIndex = rvt.getResultValues().size() - 3;
+        ListIterator<Well> last3WellsIter = new ArrayList<Well>(screenResult.getWells()).listIterator(startIndex);
         iWell = 0;
-        for (Iterator<ResultValue> iter = listOfResultValues.listIterator(startIndex); iter.hasNext();) {
-          ResultValue rv = iter.next();
+        while(last3WellsIter.hasNext()) {
+          Well well = last3WellsIter.next();
+          ResultValue rv = mapOfResultValues.get(well.getWellKey());
           assertEquals("rvt " + iRvt + " well #" + (iWell + startIndex) + " plate name",
                        expectedFinalPlateNumbers[iWell],
-                       rv.getWell()
-                         .getPlateNumber());
+                       well.getPlateNumber());
           assertEquals("rvt " + iRvt + " well #" + (iWell + startIndex) + " well name",
                        expectedFinalWellNames[iWell],
-                       rv.getWell()
-                         .getWellName());
+                       well.getWellName());
           assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
                        expectedFinalAssayWellTypes[iWell],
                        rv.getAssayWellType());
@@ -321,8 +327,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
     // in case some have ResultValues that represent only a subset of all the
     // plate/wells.
     for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-      for (ResultValue value : rvt.getResultValues()) {
-        actualPlateNumbersSet.add(value.getWell().getPlateNumber());
+      for (WellKey wellKey: rvt.getResultValues().keySet()) {
+        actualPlateNumbersSet.add(wellKey.getPlateNumber());
       }
     }
     assertEquals(expectedPlateNumbersSet,
@@ -507,15 +513,15 @@ public class ScreenResultParserTest extends AbstractSpringTest
         // compare result values
         assertEquals(6, rvt.getResultValues().size());
         int iWell = 0;
-        for (ResultValue rv : rvt.getResultValues()) {
+        Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
+        for (WellKey wellKey : new TreeSet<WellKey>(resultValues.keySet())) {
+          ResultValue rv = resultValues.get(wellKey);
           assertEquals("rvt " + iRvt + " well #" + iWell + " plate name",
                        expectedInitialPlateNumbers[iWell],
-                       rv.getWell()
-                         .getPlateNumber());
+                       new Integer(wellKey.getPlateNumber()));
           assertEquals("rvt " + iRvt + " well #" + iWell + " well name",
                        expectedInitialWellNames[iWell],
-                       rv.getWell()
-                         .getWellName());
+                       wellKey.getWellName());
           assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
                        expectedInitialAssayWellTypes[iWell],
                        rv.getAssayWellType());

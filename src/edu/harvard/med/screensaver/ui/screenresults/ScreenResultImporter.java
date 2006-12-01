@@ -123,10 +123,12 @@ public class ScreenResultImporter extends AbstractBackingBean
       else if (_screenResultParser.getErrors().size() > 0) {
         // these are data-related "user" errors, so we log at "info" level
         log.info("parse errors encountered during import of ScreenResult for Screen " + _screen);
+        return _screenResultsController.viewScreenResultImportErrors();
       }
       else {
         log.info("successfully imported " + screenResult + " for Screen " + _screen);
         parseSuccessful = true;
+        _dao.flush();
         return _screenResultsController.viewLastScreenResult();
       }
       return REDISPLAY_PAGE_ACTION_RESULT;

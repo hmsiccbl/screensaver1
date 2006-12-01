@@ -12,11 +12,13 @@ package edu.harvard.med.screensaver.db;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.log4j.Logger;
-import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -24,8 +26,20 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.util.StringUtils;
+
+import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
+import org.springframework.orm.hibernate3.HibernateCallback;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 
 /**
@@ -69,6 +83,11 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   public void deleteEntity(AbstractEntity entity)
   {
     getHibernateTemplate().delete(entity);
+  }
+  
+  public void flush()
+  {
+    getHibernateTemplate().flush();
   }
 
   @SuppressWarnings("unchecked")
@@ -220,6 +239,98 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     return libraries.get(0); 
   }
   
+  /*
+    select index(rv), rv.value, rv.assayWellType, rv.exclude from ResultValueType rvt join rvt.resultValues rv where rvt.id=? and substring(index(rv),1,5) = ?
+   */
+  public Map<WellKey,ResultValue> findResultValuesByPlate(Integer plateNumber, ResultValueType rvt)
+  {
+    String hql = "select index(rv), elements(rv) " +
+        "from ResultValueType rvt join rvt.resultValues rv " +
+        "where rvt.id=? and substring(index(rv),1," + Well.PLATE_NUMBER_LEN + ") = ?";
+    String paddedPlateNumber = String.format("%0" + Well.PLATE_NUMBER_LEN + "d", plateNumber);
+    List hqlResult = getHibernateTemplate().find(hql.toString(), new Object[] { rvt.getEntityId(), paddedPlateNumber });
+    Map<WellKey,ResultValue> result = new HashMap<WellKey,ResultValue>(hqlResult.size());
+    for (Iterator iter = hqlResult.iterator(); iter.hasNext();) {
+      Object[] row = (Object[]) iter.next();
+      result.put((WellKey) row[0],
+                 (ResultValue) row[1]);
+    }
+    return result;
+  }
+                                                          
+
+  /*
+  For example, sorting on 2nd RVT:
+    select index(rv2), rv1.assayWellType, rv1.value, rv2.value, rv3.value
+    from ResultValueType rvt1 join rvt1.resultValues rv1,
+         ResultValueType rvt2 join rvt2.resultValues rv2,
+         ResultValueType rvt3 join rvt3.resultValues rv3,
+    where
+          rvt1.id=? and
+          rvt2.id=? and
+          rvt3.id=? and
+          index(rv1)=index(rv2) and
+          index(rv3)=index(rv2)
+    order by rv2.value
+   */
+  @SuppressWarnings("unchecked")
+  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(final ResultValueType[] rvts,
+                                                                          int sortBy,
+                                                                          final int fromIndex,
+                                                                          final int rowsToFetch)
+  {
+    final StringBuilder hql = new StringBuilder();
+    List<String> selectFields = new ArrayList<String>();
+    List<String> fromClauses = new ArrayList<String>();
+    List<String> whereClauses = new ArrayList<String>();
+    final List<Integer> args = new ArrayList<Integer>();
+    selectFields.add("index(rv" + sortBy + ")");
+    for (int i = 0; i < rvts.length; i++) {
+      ResultValueType rvt = rvts[i];
+      selectFields.add("elements(rv" + i + ")");
+      fromClauses.add(ResultValueType.class.getSimpleName() + " rvt" + i + " join rvt" + i + ".resultValues rv" + i);
+      whereClauses.add("rvt" + i + ".id=?");
+      if (i != sortBy) {
+        whereClauses.add("index(rv" + i + ")=index(rv" + sortBy + ")");
+      }
+      args.add(rvt.getEntityId());
+    }
+    hql.append("select ").append(StringUtils.makeListString(selectFields, ", "));
+    hql.append(" from ").append(StringUtils.makeListString(fromClauses, ", "));
+    hql.append(" where ").append(StringUtils.makeListString(whereClauses, " and "));
+    hql.append(" order by rv").append(sortBy).append(".value");
+    if (_logger.isDebugEnabled()) {
+      _logger.debug("findResultValuesByPlate executing HQL: " + hql);
+    }
+    Map<WellKey,List<ResultValue>> mapResult = (Map<WellKey,List<ResultValue>>)
+    getHibernateTemplate().execute(new HibernateCallback() 
+    {
+      public Object doInHibernate(Session session) throws HibernateException, SQLException
+      {
+        String hqlStr = hql.toString();
+        Query query = session.createQuery(hqlStr);
+        for (int i = 0; i < args.size(); ++i) {
+          query.setInteger(i, args.get(i));
+        }
+        Map<WellKey,List<ResultValue>> mapResult = new LinkedHashMap<WellKey,List<ResultValue>>();
+        ScrollableResults scrollableResults = query.scroll();
+        if (scrollableResults.setRowNumber(fromIndex) && rowsToFetch > 0) {
+          int rowCount = 0;
+          do {
+            Object[] valuesArray = scrollableResults.get();
+            List<ResultValue> values = new ArrayList<ResultValue>(rvts.length);
+            for (int i = 1; i < valuesArray.length; i++) {
+              values.add((ResultValue)valuesArray[i]);
+            }
+            mapResult.put(new WellKey(valuesArray[0].toString()), values);
+          } while (scrollableResults.next() && ++rowCount < rowsToFetch);
+        }
+        return mapResult;
+      }
+    });
+    return mapResult;
+  }
+
   
   // private instance methods
 

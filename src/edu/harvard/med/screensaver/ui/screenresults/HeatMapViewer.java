@@ -15,7 +15,9 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
@@ -28,6 +30,8 @@ import edu.harvard.med.screensaver.analysis.heatmaps.DefaultMultiColorGradient;
 import edu.harvard.med.screensaver.analysis.heatmaps.EdgeWellsFilter;
 import edu.harvard.med.screensaver.analysis.heatmaps.HeatMap;
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -240,10 +244,12 @@ public class HeatMapViewer extends AbstractBackingBean
     _heatMapColumnDataModels = new ArrayList<DataModel>();
     _heatMaps = new ArrayList<HeatMap>();
     _heatMapStatistics = new ArrayList<DataModel>();
-    for (HeatMapConfiguration heatMapConfig : _heatMapConfigurations) {
-      HeatMap heatMap = new HeatMap(_plateNumber.getSelection(),
-                                    heatMapConfig.getDataHeaders()
-                                                 .getSelection(),
+      for (HeatMapConfiguration heatMapConfig : _heatMapConfigurations) {
+        Map<WellKey,ResultValue> resultValues = 
+          _dao.findResultValuesByPlate(_plateNumber.getSelection(), 
+                                       heatMapConfig.getDataHeaders().getSelection());
+        HeatMap heatMap = new HeatMap(_plateNumber.getSelection(),
+                                    resultValues,
                                     new ChainedFilter<ResultValue>(IMPLICIT_FILTER,
                                                                    new ChainedFilter<ResultValue>(heatMapConfig.getExcludedWellFilters()
                                                                                                                .getSelections())),
@@ -259,6 +265,7 @@ public class HeatMapViewer extends AbstractBackingBean
         List<HeatMapCell> rowData = new ArrayList<HeatMapCell>();
         for (int column = 0; column < heatMap.getColumnCount(); column++) {
           rowData.add(new HeatMapCell(heatMap.getResultValue(row, column),
+                                      heatMap.getWellKey(row, column),
                                       heatMap.getScoredValue(row, column),
                                       heatMap.getColor(row, column),
                                       isShowValues(),
@@ -345,7 +352,11 @@ public class HeatMapViewer extends AbstractBackingBean
   public String viewWell()
   {
     HeatMapCell heatMapCell = getHeatMapCell();
-    return _librariesController.viewWell(heatMapCell.getWell(), null);
+    Map<String, Object> wellProps = new HashMap<String,Object>();
+    wellProps.put("plateNumber", heatMapCell.getWellKey().getPlateNumber());
+    wellProps.put("name", heatMapCell.getWellKey().getWellName());
+    Well well = _dao.findEntityByProperties(Well.class, wellProps);
+    return _librariesController.viewWell(well, null);
   }
   
   public String nextPlate()
