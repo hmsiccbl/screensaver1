@@ -24,6 +24,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 
 import org.apache.log4j.Logger;
 
@@ -131,8 +132,9 @@ public class NoOpDAO implements DAO
   {
   }
 
-  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(ResultValueType[] rvts,
+  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(List<ResultValueType> selectedRvts,
                                                                           int sortBy,
+                                                                          SortDirection sortDirection,
                                                                           int fromIndex,
                                                                           int toIndex)
   {

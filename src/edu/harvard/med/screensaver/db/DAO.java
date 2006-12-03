@@ -24,6 +24,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -252,10 +253,14 @@ public interface DAO
    */
   public Library findLibraryWithPlate(Integer plateNumber);
   
-  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(ResultValueType[] rvts,
-                                                                     int sortBy,
-                                                                     int fromIndex,
-                                                                     int rowsToFetch);
+  public static int SORT_BY_PLATE_WELL = -3;
+  public static int SORT_BY_WELL_PLATE = -2;
+  public static int SORT_BY_ASSAY_WELL_TYPE = -1;
+  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(List<ResultValueType> rvts,
+                                                                          int sortBy,
+                                                                          SortDirection sortDirection,
+                                                                          int fromIndex,
+                                                                          int rowsToFetch);
   
   public Map<WellKey,ResultValue> findResultValuesByPlate(Integer plateNumber, ResultValueType rvt);
 

@@ -12,6 +12,7 @@
 package edu.harvard.med.screensaver.db;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 
 import org.apache.log4j.Logger;
 
@@ -134,8 +136,9 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
   {
 
     Map<WellKey,List<ResultValue>> result = 
-      dao.findSortedResultValueTableByRange(new ResultValueType[] { rvt }, 
+      dao.findSortedResultValueTableByRange(Arrays.asList(rvt),
                                             0, 
+                                            SortDirection.ASCENDING,
                                             0, 
                                             1);
     assertEquals(1, result.size());
@@ -144,8 +147,9 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
   public void testOnlyLastResultValue()
   {
     Map<WellKey,List<ResultValue>> result = 
-      dao.findSortedResultValueTableByRange(new ResultValueType[] { rvt }, 
+      dao.findSortedResultValueTableByRange(Arrays.asList(rvt), 
                                             0, 
+                                            SortDirection.ASCENDING,
                                             expectedFullResultSize - 1,
                                             1);
     assertEquals(1, result.size());
@@ -154,8 +158,9 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
   public void testFullResultValueSet()
   {
     Map<WellKey,List<ResultValue>> result = 
-      dao.findSortedResultValueTableByRange(new ResultValueType[] { rvt }, 
+      dao.findSortedResultValueTableByRange(Arrays.asList(rvt), 
                                             0, 
+                                            SortDirection.ASCENDING,
                                             0,
                                             expectedFullResultSize);
     assertEquals(expectedFullResultSize, result.size());

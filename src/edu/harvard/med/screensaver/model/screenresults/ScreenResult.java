@@ -298,6 +298,15 @@ public class ScreenResult extends AbstractEntity
     return _plateNumbers;
   }
   
+  /**
+   * @motivation JSF EL 1.1 does not provide a size/length operator for collections.
+   */
+  @DerivedEntityProperty
+  public int getPlateNumberCount()
+  {
+    return _plateNumbers.size();
+  }
+  
   // TODO: get rid of this method (figure out how to bypass its requirement in unit tests)
   /**
    * Add a plate number that is associated with this ScreenResult.
@@ -336,6 +345,15 @@ public class ScreenResult extends AbstractEntity
   public SortedSet<Well> getWells()
   {
     return _wells;
+  }
+  
+  /**
+   * @motivation JSF EL 1.1 does not provide a size/length operator for collections.
+   */
+  @DerivedEntityProperty
+  public int getWellCount()
+  {
+    return _wells.size();
   }
   
   /**

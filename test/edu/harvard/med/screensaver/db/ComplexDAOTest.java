@@ -11,6 +11,7 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -39,6 +40,7 @@ import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
+import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
 import org.apache.log4j.Logger;
@@ -665,13 +667,20 @@ public class ComplexDAOTest extends AbstractSpringTest
       int plateNumber = iPlate;
       for (int iWell = 1; iWell <= 10; ++iWell) {
         Well well = new Well(library, plateNumber, "A" + iWell);
-        rvt1.addResultValue(well, Integer.toString(iWell));
-        rvt2.addResultValue(well, iWell % 2 == 0 ? "S" : "W");
+        AssayWellType assayWellType = iPlate == 10 ? AssayWellType.LIBRARY_CONTROL : AssayWellType.EXPERIMENTAL;
+        rvt1.addResultValue(well, assayWellType, Integer.toString(iWell), false);
+        rvt2.addResultValue(well, assayWellType, iWell % 2 == 0 ? "S" : "W", false);
       }
     }
     dao.persistEntity(screen);
 
-    Map<WellKey,List<ResultValue>> result = dao.findSortedResultValueTableByRange(new ResultValueType[] { rvt1, rvt2 }, 1, 10, 80);
+    // test sort by 2nd RVT, ascending
+    Map<WellKey,List<ResultValue>> result = 
+      dao.findSortedResultValueTableByRange(Arrays.asList(rvt1, rvt2), 
+                                            1, 
+                                            SortDirection.ASCENDING, 
+                                            10, 
+                                            80);
     for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
       log.debug(entry.getKey() + " => " + entry.getValue());
     }
@@ -686,6 +695,45 @@ public class ComplexDAOTest extends AbstractSpringTest
                    entry.getValue().get(0).getValue());
       ++iWell;
     }
+    
+    // test sort by wellname, plate number ascending
+    result = 
+      dao.findSortedResultValueTableByRange(Arrays.asList(rvt1, rvt2),
+                                            DAO.SORT_BY_WELL_PLATE,
+                                            SortDirection.ASCENDING, 
+                                            0, 
+                                            100);
+    iWell = 0;
+    for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
+      int expectedWellColumn = (iWell / 10);
+      assertEquals("sort by well, plate ascending: well", 
+                   expectedWellColumn,
+                   entry.getKey().getColumn());
+      int expectedPlateNumber = (iWell % 10) + 1;
+      assertEquals("sort by well, plate ascending: plate", 
+                   expectedPlateNumber,
+                   entry.getKey().getPlateNumber());
+      ++iWell;
+    }
+    
+    // test sort by assayWellType descending
+    result = 
+      dao.findSortedResultValueTableByRange(Arrays.asList(rvt1, rvt2),
+                                            DAO.SORT_BY_ASSAY_WELL_TYPE, 
+                                            SortDirection.DESCENDING, 
+                                            0, 
+                                            11);
+    for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
+      log.debug(entry.getKey() + " " + entry.getValue().get(0).getAssayWellType());
+    }
+    iWell = 0;
+    for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
+      assertEquals("sort by assayWellType", 
+                   iWell < 10 ? AssayWellType.LIBRARY_CONTROL : AssayWellType.EXPERIMENTAL,
+                   entry.getValue().get(0).getAssayWellType());
+      ++iWell;
+    }
+    
   }
   
   public void testFindResultValuesByPlate()

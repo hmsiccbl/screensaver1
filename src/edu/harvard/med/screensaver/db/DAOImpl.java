@@ -31,6 +31,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
@@ -258,10 +259,10 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     return result;
   }
                                                           
-
+  
   /*
   For example, sorting on 2nd RVT:
-    select index(rv2), rv1.assayWellType, rv1.value, rv2.value, rv3.value
+    select index(rv2), elements(rv1.value), elements(rv2.value), elements(rv3.value)
     from ResultValueType rvt1 join rvt1.resultValues rv1,
          ResultValueType rvt2 join rvt2.resultValues rv2,
          ResultValueType rvt3 join rvt3.resultValues rv3,
@@ -274,51 +275,30 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     order by rv2.value
    */
   @SuppressWarnings("unchecked")
-  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(final ResultValueType[] rvts,
-                                                                          int sortBy,
+  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(final List<ResultValueType> selectedRvts,
+                                                                          final int sortBy,
+                                                                          final SortDirection sortDirection,
                                                                           final int fromIndex,
                                                                           final int rowsToFetch)
   {
-    final StringBuilder hql = new StringBuilder();
-    List<String> selectFields = new ArrayList<String>();
-    List<String> fromClauses = new ArrayList<String>();
-    List<String> whereClauses = new ArrayList<String>();
-    final List<Integer> args = new ArrayList<Integer>();
-    selectFields.add("index(rv" + sortBy + ")");
-    for (int i = 0; i < rvts.length; i++) {
-      ResultValueType rvt = rvts[i];
-      selectFields.add("elements(rv" + i + ")");
-      fromClauses.add(ResultValueType.class.getSimpleName() + " rvt" + i + " join rvt" + i + ".resultValues rv" + i);
-      whereClauses.add("rvt" + i + ".id=?");
-      if (i != sortBy) {
-        whereClauses.add("index(rv" + i + ")=index(rv" + sortBy + ")");
-      }
-      args.add(rvt.getEntityId());
-    }
-    hql.append("select ").append(StringUtils.makeListString(selectFields, ", "));
-    hql.append(" from ").append(StringUtils.makeListString(fromClauses, ", "));
-    hql.append(" where ").append(StringUtils.makeListString(whereClauses, " and "));
-    hql.append(" order by rv").append(sortBy).append(".value");
-    if (_logger.isDebugEnabled()) {
-      _logger.debug("findResultValuesByPlate executing HQL: " + hql);
-    }
     Map<WellKey,List<ResultValue>> mapResult = (Map<WellKey,List<ResultValue>>)
     getHibernateTemplate().execute(new HibernateCallback() 
     {
       public Object doInHibernate(Session session) throws HibernateException, SQLException
       {
-        String hqlStr = hql.toString();
-        Query query = session.createQuery(hqlStr);
-        for (int i = 0; i < args.size(); ++i) {
-          query.setInteger(i, args.get(i));
-        }
+        Query query = buildQueryForSortedResultValueTypeTableByRange(session,
+                                                                     selectedRvts,
+                                                                     sortBy,
+                                                                     sortDirection,
+                                                                     fromIndex,
+                                                                     rowsToFetch);
         Map<WellKey,List<ResultValue>> mapResult = new LinkedHashMap<WellKey,List<ResultValue>>();
         ScrollableResults scrollableResults = query.scroll();
         if (scrollableResults.setRowNumber(fromIndex) && rowsToFetch > 0) {
           int rowCount = 0;
           do {
             Object[] valuesArray = scrollableResults.get();
-            List<ResultValue> values = new ArrayList<ResultValue>(rvts.length);
+            List<ResultValue> values = new ArrayList<ResultValue>(selectedRvts.size());
             for (int i = 1; i < valuesArray.length; i++) {
               values.add((ResultValue)valuesArray[i]);
             }
@@ -407,4 +387,66 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
       throw new IllegalArgumentException(e);
     }
   }
+  
+  private Query buildQueryForSortedResultValueTypeTableByRange(Session session,
+                                                               List<ResultValueType> selectedRvts,
+                                                               int sortBy,
+                                                               SortDirection sortDirection,
+                                                               int fromIndex,
+                                                               int rowsToFetch)
+  {
+    assert selectedRvts.size() > 0;
+    assert sortBy < selectedRvts.size();
+
+    StringBuilder hql = new StringBuilder();
+    List<String> selectFields = new ArrayList<String>();
+    List<String> fromClauses = new ArrayList<String>();
+    List<String> whereClauses = new ArrayList<String>();
+    List<String> orderByClauses = new ArrayList<String>();
+    List<Integer> args = new ArrayList<Integer>();
+    
+    String sortByRvAlias = "rv" + Math.max(0, sortBy);
+    selectFields.add("index(" + sortByRvAlias + ")");
+    for (int i = 0; i < selectedRvts.size(); i++) {
+      ResultValueType rvt = selectedRvts.get(i);
+      
+      selectFields.add("elements(rv" + i + ")");
+      fromClauses.add(ResultValueType.class.getSimpleName() + " rvt" + i + " join rvt" + i + ".resultValues rv" + i);
+      whereClauses.add("rvt" + i + ".id=?");
+      if (i != sortBy) {
+        // TODO: harmless bug: we generate a reflexive equality clause if sortBy is for a fixed column (i.e., negative sortBy value)
+        whereClauses.add("index(rv" + i + ")=index(" + sortByRvAlias + ")");
+      }
+      args.add(rvt.getEntityId());
+    }
+    hql.append("select ").append(StringUtils.makeListString(selectFields, ", "));
+    hql.append(" from ").append(StringUtils.makeListString(fromClauses, ", "));
+    hql.append(" where ").append(StringUtils.makeListString(whereClauses, " and "));
+    String sortDirStr = sortDirection.equals(SortDirection.ASCENDING)? " asc" : " desc";
+    if (sortBy >= 0) {
+      orderByClauses.add(sortByRvAlias + ".value" + sortDirStr);
+    }
+    else if (sortBy == SORT_BY_PLATE_WELL) {
+      orderByClauses.add("index(" + sortByRvAlias + ")" + sortDirStr);
+    }
+    else if (sortBy == SORT_BY_WELL_PLATE) {
+      orderByClauses.add("substring(index(" + sortByRvAlias + "),7,3)" + sortDirStr);
+      orderByClauses.add("substring(index(" + sortByRvAlias + "),1,5)");
+    }
+    else if (sortBy == SORT_BY_ASSAY_WELL_TYPE) {
+      orderByClauses.add(sortByRvAlias + ".assayWellType" + sortDirStr);
+    }
+    hql.append(" order by ").append(StringUtils.makeListString(orderByClauses, ", "));
+    
+    if (_logger.isDebugEnabled()) {
+      _logger.debug("findResultValuesByPlate executing HQL: " + hql.toString());
+    }
+
+    Query query = session.createQuery(hql.toString());
+    for (int i = 0; i < args.size(); ++i) {
+      query.setInteger(i, args.get(i));
+    }
+    return query;
+  }
+  
 }

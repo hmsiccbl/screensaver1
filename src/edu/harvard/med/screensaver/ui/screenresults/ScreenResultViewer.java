@@ -1,4 +1,3 @@
-
 // $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/screenresults/ScreenResultViewer.java $
 // $Id: ScreenResultViewer.java 706 2006-10-31 17:33:20Z ant4 $
 //
@@ -14,6 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +43,9 @@ import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.control.ScreenResultsController;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.util.TableSortManager;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -69,12 +71,11 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   private static Logger log = Logger.getLogger(ScreenResultViewer.class);
   
-  private static final int DEFAULT_ITEMS_PER_PAGE = 10;
-  private static final int RAWDATA_TABLE_FIXED_COLUMN_COUNT = 2;
-  private static final int METADATA_TABLE_FIXED_COLUMN_COUNT = 1;
   private static final DataModel EMPTY_METADATA_MODEL = new ListDataModel(new ArrayList<MetadataRow>());
-  private static final DataModel EMPTY_RAW_DATA_MODEL = new ListDataModel(new ArrayList<RawDataRow>());
+  private static final DataModel EMPTY_RAW_DATA_MODEL = new ListDataModel(new ArrayList<Map<String,String>>());
+  private static final List<String> DATA_TABLE_FIXED_COLUMN_HEADERS = Arrays.asList("Plate", "Well", "Type", "Excluded");
 
+  
   // instance data members
 
   private ScreenResultsController _screenResultsController;
@@ -88,32 +89,20 @@ public class ScreenResultViewer extends AbstractBackingBean
    * For internal tracking of first data row displayed in data table.
    */
   private int _firstResultValueIndex;
-  /**
-   * For rowNumber UIInput component. 1-based value.
-   */
-  private int _rowNumber;
-  private Integer _plateNumber;
   private UISelectManyBean<ResultValueType> _selectedResultValueTypes;
   private String _rowRangeText;
   private UIInput _rowNumberInput;
   private UIData _dataTable;
-  /**
-   * Flag indicating whether the tables on this page need to have their columns
-   * dynamically updated to reflect a new ScreenResult.
-   * 
-   * @motivation the table structure in the JSF view is reused and must be
-   *             updated when a new ScreenResult is to be viewed
-   */
-  private boolean _needViewLayoutUpdate;
   private UniqueDataHeaderNames _uniqueDataHeaderNames;
   /**
    * Data model for the raw data, <i>containing only the set of rows being displayed in the current view</i>.
    */
   private DataModel _rawDataModel;
   private DataModel _rawDataColumnModel;
-  private DataModel _dataHeaderColumnModel;
+  private DataModel _dataHeadersColumnModel;
   private DataModel _metadataModel;
   private Map<String,Boolean> _collapsablePanelsState;
+  private TableSortManager _sortManager;
 
 
   // public methods
@@ -126,9 +115,6 @@ public class ScreenResultViewer extends AbstractBackingBean
     _collapsablePanelsState.put("dataTable", true);
     _collapsablePanelsState.put("heatMaps", true);
   }
-
-  
-  // bean property methods
 
   public void setDao(DAO dao)
   {
@@ -196,12 +182,12 @@ public class ScreenResultViewer extends AbstractBackingBean
 
   public int getRowNumber()
   {
-    return _rowNumber;
+    return _firstResultValueIndex + 1;
   }
 
   public void setRowNumber(int rowNumber)
   {
-    _rowNumber = rowNumber;
+    _firstResultValueIndex = rowNumber - 1;
   }
 
   public UIData getDataTable()
@@ -250,7 +236,7 @@ public class ScreenResultViewer extends AbstractBackingBean
 
   public String getRowRangeText()
   {
-    return "of " + getRawDataSize();
+    return getRowNumber() + ".." + (getRowNumber() + _dataTable.getRows() - 1) + " of " + getRawDataSize();
   }
   
   public UISelectManyBean<ResultValueType> getSelectedResultValueTypes()
@@ -269,12 +255,17 @@ public class ScreenResultViewer extends AbstractBackingBean
     return _selectedResultValueTypes;
   }
 
-  public DataModel getDataHeaderColumnModel()
+  public DataModel getDataHeadersColumnModel()
   {
-    if (_dataHeaderColumnModel == null) {
-      _dataHeaderColumnModel = new ListDataModel(getUniqueDataHeaderNames().get(getSelectedResultValueTypes().getSelections()));
+    if (_dataHeadersColumnModel == null) {
+      _dataHeadersColumnModel = new ListDataModel(getSelectedDataHeaderNames());
     }
-    return _dataHeaderColumnModel;
+    return _dataHeadersColumnModel;
+  }
+
+  private List<String> getSelectedDataHeaderNames()
+  {
+    return getUniqueDataHeaderNames().get(getSelectedResultValueTypes().getSelections());
   }
 
   public UniqueDataHeaderNames getUniqueDataHeaderNames()
@@ -292,7 +283,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   public Object getMetadataCellValue()
   {
     DataModel dataModel = getMetadata();
-    DataModel columnModel = getDataHeaderColumnModel();
+    DataModel columnModel = getDataHeadersColumnModel();
     if (columnModel.isRowAvailable()) {
       String columnName = (String) columnModel.getRowData();  // getRowData() is really getColumnData()
       MetadataRow row = (MetadataRow) dataModel.getRowData();
@@ -304,6 +295,24 @@ public class ScreenResultViewer extends AbstractBackingBean
 
   // JSF application methods
   
+  public TableSortManager getSortManager()
+  {
+    if (_sortManager == null) {
+      List<String> columnHeaders = new ArrayList<String>(DATA_TABLE_FIXED_COLUMN_HEADERS);
+      columnHeaders.addAll(getUniqueDataHeaderNames().asList());
+      _sortManager = new TableSortManager(columnHeaders) {
+        @Override
+        protected void doSort(String sortColumnName, SortDirection sortDirection)
+        {
+          // we cannot efficiently determine the new row index, so we set back to 0 on a sort
+          _firstResultValueIndex = 0;
+          rebuildDataTable();
+        }
+      };
+    }
+    return _sortManager;
+  }
+
   public String gotoPage(int pageIndex)
   {
     try {
@@ -313,7 +322,6 @@ public class ScreenResultViewer extends AbstractBackingBean
         // update the plate selection list to the current plate
         if (getRawData() != EMPTY_RAW_DATA_MODEL) {
           _firstResultValueIndex = tmpFirstResultValueIndex;
-         _rowNumber = _firstResultValueIndex + 1;
         }
       }
       rebuildDataTable();
@@ -323,7 +331,23 @@ public class ScreenResultViewer extends AbstractBackingBean
       return ERROR_ACTION_RESULT;
     }
   }
+  
+  public String firstPage()
+  {
+    return gotoPage(0);
+  }
 
+  public String lastPage()
+  {
+    int rowsPerPage = getDataTable().getRows();
+    if (rowsPerPage > 0) {
+      return gotoPage(Math.max(0, getRawDataSize()) / getDataTable().getRows());
+    }
+    else {
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+  }
+  
   public String nextPage()
   {
     return gotoPage(getPageIndex() + 1); 
@@ -384,7 +408,8 @@ public class ScreenResultViewer extends AbstractBackingBean
   public String update()
   {
     log.debug("update action received");
-    return REDISPLAY_PAGE_ACTION_RESULT; // redisplay
+    rebuildDataTable();
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   public String showAllDataHeaders()
@@ -413,11 +438,6 @@ public class ScreenResultViewer extends AbstractBackingBean
                                       Math.min(_firstResultValueIndex,
                                                getRawDataSize() - _dataTable.getRows()));
     _rowNumberInput.setValue(_firstResultValueIndex + 1);
-  }
-  
-  public void selectedResultValueTypesListener(ValueChangeEvent event)
-  {
-    log.debug("data headers selection changed: '" + event.getNewValue() + "'");
     rebuildDataTable();
   }
   
@@ -442,13 +462,13 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   private void resetView()
   {
-    _dataHeaderColumnModel = null;
+    _dataHeadersColumnModel = null;
     _metadataModel = null;
     _rawDataModel = null;
     _firstResultValueIndex = 0;
-    _rowNumber = 1;
     _selectedResultValueTypes = null;
     _uniqueDataHeaderNames = null;
+    _sortManager = null;
 
     // clear the bound UI components, so that they get recreated next time this view is used
     _dataTable = null;
@@ -460,8 +480,22 @@ public class ScreenResultViewer extends AbstractBackingBean
   private void rebuildDataTable()
   {
     // clear state of our data table, forcing lazy initialization when needed
-    _dataHeaderColumnModel = null;
+    _dataHeadersColumnModel = null;
     _rawDataModel = null;
+
+    // enforce minimum of 1 selected data header (data table query will break otherwise)
+    if (getSelectedDataHeaderNames().size() == 0) {
+      _selectedResultValueTypes.setSelections(Arrays.asList(getScreenResult().getResultValueTypes().first()));
+    }
+
+    updateSortManagerWithSelectedDataHeaders();
+  }
+
+  private void updateSortManagerWithSelectedDataHeaders()
+  {
+    List<String> columnHeaders = new ArrayList<String>(DATA_TABLE_FIXED_COLUMN_HEADERS);
+    columnHeaders.addAll(getSelectedDataHeaderNames());
+    getSortManager().setColumnNames(columnHeaders);
   }
 
   private int getPageIndex()
@@ -518,26 +552,62 @@ public class ScreenResultViewer extends AbstractBackingBean
   private void lazyBuildRawData()
   {
     if (getScreenResult() != null && _rawDataModel == null) {
+      int sortByArg;
+      switch (getSortManager().getCurrentSortColumnIndex())
+      {
+      case 0: sortByArg = DAO.SORT_BY_PLATE_WELL; break;
+      case 1: sortByArg = DAO.SORT_BY_WELL_PLATE; break;
+      case 2: sortByArg = DAO.SORT_BY_ASSAY_WELL_TYPE; break;
+      case 3: sortByArg = DAO.SORT_BY_PLATE_WELL; break; // error!
+      default:
+          sortByArg = getSortManager().getCurrentSortColumnIndex() - 4;
+      }
       Map<WellKey,List<ResultValue>> rvData = 
-        _dao.findSortedResultValueTableByRange((ResultValueType[]) _selectedResultValueTypes.getSelections().toArray(new ResultValueType[_selectedResultValueTypes.getSelections().size()]),
-                                               0,
+        _dao.findSortedResultValueTableByRange(_selectedResultValueTypes.getSelections(),
+                                               sortByArg,
+                                               getSortManager().getCurrentSortDirection(),
                                                _firstResultValueIndex,
                                                getDataTable().getRows());
       
-      List<RawDataRow> tableData = new ArrayList<RawDataRow>();
+      List<Map<String,String>> tableData = new ArrayList<Map<String,String>>();
       for (Map.Entry<WellKey,List<ResultValue>> entry : rvData.entrySet()) {
         WellKey wellKey = entry.getKey();
-        RawDataRow dataRow = new RawDataRow(wellKey.getPlateNumber(),
-                                            wellKey.getWellName(),
-                                            entry.getValue().get(0).getAssayWellType(),
-                                            getUniqueDataHeaderNames().get(getSelectedResultValueTypes().getSelections()),
-                                            entry.getValue());
-        tableData.add(dataRow);
+        tableData.add(buildRow(wellKey,
+                               entry.getValue().get(0).getAssayWellType(),
+                               entry.getValue()));
       }
       _rawDataModel = new ListDataModel(tableData);
     }
   }
   
+  
+  private Map<String,String> buildRow(WellKey wellKey,
+                                      AssayWellType assayWellType,
+                                      List<ResultValue> resultValues)
+  {
+    List<String> columnNames = getSortManager().getColumnNames();
+    StringBuilder excludes = new StringBuilder();
+    for (int i = 0; i < resultValues.size(); ++i) {
+      ResultValue rv = resultValues.get(i);
+      if (rv != null && rv.isExclude()) {
+        if (excludes.length() > 0) {
+          excludes.append(", ");
+        }
+        excludes.append(columnNames.get(i));
+      }
+    }
+    int i = 0;
+    HashMap<String,String> cellValues = new HashMap<String,String>();
+    cellValues.put(columnNames.get(i++), Integer.toString(wellKey.getPlateNumber()));
+    cellValues.put(columnNames.get(i++), wellKey.getWellName());
+    cellValues.put(columnNames.get(i++), assayWellType.toString());
+    cellValues.put(columnNames.get(i++), excludes.toString());
+    for (ResultValue rv : resultValues) {
+      cellValues.put(columnNames.get(i++), rv.getValue());
+    }
+    return cellValues;
+  }
+    
   @SuppressWarnings("unchecked")
   private void selectAllResultValueTypes()
   {
@@ -602,69 +672,6 @@ public class ScreenResultViewer extends AbstractBackingBean
     {
       return _rvtPropertyValues;
     }
-  }
-
-  
-  /**
-   * RawDataRow bean, used to provide ScreenResult data to JSF components
-   * @see ScreenResultViewer#getRawDataCellValue()
-   * @author ant
-   */
-  public static class RawDataRow
-  {
-    private Integer _plateNumber;
-    private String _wellName;
-    private AssayWellType _assayWellType;
-    private Map<String,String> _resultValues;
-    private StringBuilder _excludes = new StringBuilder();
-    
-    public RawDataRow(Integer plateNumber,
-                      String wellName,
-                      AssayWellType assayWellType,
-                      List<String> columnName,
-                      List<ResultValue> resultValues)
-    {
-      _resultValues = new HashMap<String,String>();
-      for (int i = 0; i < resultValues.size(); ++i) {
-        ResultValue rv = resultValues.get(i);
-        _resultValues.put(columnName.get(i), rv.getValue());
-        if (rv != null && rv.isExclude()) {
-          if (_excludes.length() > 0) {
-            _excludes.append(", ");
-          }
-          _excludes.append(columnName.get(i));
-        }
-      }
-      _plateNumber = plateNumber;
-      _wellName = wellName;
-      _assayWellType = assayWellType;
-    }
-    
-    public Integer getPlateNumber()
-    {
-      return _plateNumber;
-    }
-
-    public String getWellName()
-    {
-      return _wellName;
-    }
-    
-    public String getAssayWellType()
-    {
-      return _assayWellType.toString();
-    }
-    
-    public String getExcludes()
-    {
-      return _excludes.toString();
-    }
-
-    public Map<String,String> getValues()
-    {
-      return _resultValues;
-    }
-
   }
 
 }
