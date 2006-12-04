@@ -18,12 +18,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.EntityIdProperty;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -66,7 +66,7 @@ public class Well extends AbstractEntity implements Comparable
   private WellType _wellType = WellType.EXPERIMENTAL;
   private Set<CherryPick> _cherryPicks = new HashSet<CherryPick>();
   private String _smiles;
-  private String _molfile;
+  private Set<String> _molfile = new HashSet<String>();
   private String _genbankAccessionNumber;
   private char _rowLetter;
   private int _column;
@@ -449,11 +449,13 @@ public class Well extends AbstractEntity implements Comparable
    * Get the molfile for the well.
    * 
    * @return the molfile for the well
-   * @hibernate.property type="text"
    */
   public String getMolfile()
   {
-    return _molfile;
+    if (_molfile.isEmpty()) {
+      return null;
+    }
+    return _molfile.iterator().next();
   }
 
   /**
@@ -462,6 +464,26 @@ public class Well extends AbstractEntity implements Comparable
    * @param molfile The new molfile for the well
    */
   public void setMolfile(String molfile)
+  {
+    _molfile.clear();
+    _molfile.add(molfile);
+  }
+
+  /**
+   * @motivation Although molfile is just a simple property, we force it to be
+   *             in a separate table in order to avoid loading its potentially
+   *             large value and consuming memory unless it is explicitly
+   *             requested by the application.
+   * @hibernate.set class="java.lang.String" lazy="true" table="well_molfile"
+   * @hibernate.collection-key column="well_id"
+   * @hibernate.collection-element column="molfile" type="text"
+   */
+  private Set<String> getHbnMolfile()
+  {
+    return _molfile;
+  }
+  
+  private void setHbnMolfile(Set<String> molfile)
   {
     _molfile = molfile;
   }

@@ -12,11 +12,11 @@ package edu.harvard.med.screensaver.io.libraries.compound;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
-
-import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+
+import org.apache.log4j.Logger;
 
 class SDRecordParser
 {
@@ -52,7 +52,7 @@ class SDRecordParser
     _parser = libraryContentsParser;
     prepareNextRecord();
   }
-  
+
   /**
    * @return
    */
@@ -194,10 +194,11 @@ class SDRecordParser
       reportError("encountered an SD record without a Well specification");
       return null;
     }
-    Well well = _parser.getDAO().findWell(plateNumber, wellName);
+    WellKey wellKey = new WellKey(plateNumber, wellName);
+    Well well = _parser.getWell(wellKey);
     if (well == null) {
-      well = new Well(_parser.getLibrary(), plateNumber, wellName);
-      _parser.getDAO().persistEntity(well);
+      reportError("internal error: well " + wellKey + " was not created);");
+      return null;
     }
     well.setIccbNumber(_sdRecordData.getIccbNumber());
     well.setVendorIdentifier(_sdRecordData.getVendorIdentifier());
@@ -226,9 +227,10 @@ class SDRecordParser
    */
   private void addSmilesToWell(String smiles, Well well, boolean isPrimaryCompound)
   {
-    Compound compound = getExistingCompound(smiles);
+    Compound compound = _parser.getExistingCompound(smiles);
     if (compound == null) {
       compound = new Compound(smiles);
+      _parser.cacheCompound(compound);
       _parser.getDAO().persistEntity(compound);
     }
     if (isPrimaryCompound) {
@@ -242,21 +244,5 @@ class SDRecordParser
       }
     }
     well.addCompound(compound);
-  }
-  
-  /**
-   * Get an existing compound from the database with the specified SMILES. Return null
-   * if no such compound exists in the database.
-   *  
-   * @param smiles the SMILES string for the compound
-   * @return the existing compound from the database. Return null if no such compound exists in
-   * the database
-   */
-  private Compound getExistingCompound(String smiles)
-  {
-    DAO dao = _parser.getDAO();
-    Compound compound = new Compound(smiles);
-    compound = dao.findEntityById(Compound.class, smiles);
-    return compound;
   }
 }

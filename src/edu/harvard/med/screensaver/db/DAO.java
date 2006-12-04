@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.db;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -263,5 +264,9 @@ public interface DAO
                                                                           int rowsToFetch);
   
   public Map<WellKey,ResultValue> findResultValuesByPlate(Integer plateNumber, ResultValueType rvt);
+
+  public Set<Well> findWellsForPlate(int plate);
+  
+  public void createWellsForLibrary(Library library);
 
 }

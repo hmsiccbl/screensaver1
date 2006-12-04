@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.db;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -145,5 +146,14 @@ public class NoOpDAO implements DAO
   {
     return null;
   }
-  
+
+  public Set<Well> findWellsForPlate(int plate)
+  {
+    return null;
+  }
+
+  public void createWellsForLibrary(Library library)
+  {
+  }
+
 }

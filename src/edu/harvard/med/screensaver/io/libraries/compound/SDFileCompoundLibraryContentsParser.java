@@ -14,18 +14,34 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
-
-import org.apache.log4j.Logger;
+import java.util.Map;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
+import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+
+import org.apache.log4j.Logger;
 
 
 /**
- * Parses the contents (either partial or complete) of an compound library
- * from an SDFile into the entity model.
+ * Parses the contents (either partial or complete) of an compound library from
+ * an SDFile into the entity model.
+ * <p>
+ * All wells for each plate of the library will be created, even if the wells
+ * are not defined in the SDFile.
+ * <p>
+ * For performance reasons, uses a local cache for compounds. Doing so avoids
+ * the issuing of database queries to check for the existence of compounds that
+ * may already exist in the database. The compound cache is a Map that needs to
+ * provided to this class by the instantiating object via setCompoundCache(),
+ * and is optional. The memory requirement or compound cache can be high, and so
+ * if sufficient memory is not available, the caller may opt to not provide a
+ * compound cache, in which case this class will revert to making database
+ * queries.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -44,6 +60,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
   private File _sdFile;
   private BufferedReader _sdFileReader;
   private SDFileParseErrorManager _errorManager;
+  private Map<String,Compound> _compoundCache;
 
   
   // public constructor and instance methods
@@ -56,7 +73,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
   {
     _dao = dao;
   }
-  
+
   /**
    * Load library contents (either partial or complete) from an input
    * stream of an Excel spreadsheet into a library.
@@ -104,7 +121,12 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
     _errorManager = null;
   }
   
-    
+  public void setCompoundCache(Map<String,Compound> compoundCache)
+  {
+    _compoundCache = compoundCache;
+  }
+
+  
   // package getters, for the SDRecordParser
 
   /**
@@ -143,6 +165,48 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
     return _errorManager;
   }
 
+  /**
+   * Get the specified well. Return null if no such well exists in the database.
+   * 
+   * @param key the key that identifies the well
+   * @return the existing well. Return null if no such well exists
+   */
+  Well getWell(WellKey key)
+  {
+    return _dao.findWell(key.getPlateNumber(), key.getWellName());
+  }
+
+  /**
+   * Get an existing compound with the specified SMILES from a local cache (if
+   * one exists), otherwise directly from the database. If a cache exists, the
+   * database will never queried. Return null if no such compound exists.
+   * 
+   * @param smiles the SMILES string for the compound
+   * @return the existing compound. Return null if no such compound exists.
+   */
+  Compound getExistingCompound(String smiles)
+  {
+    if (_compoundCache != null) {
+      return _compoundCache.get(smiles);
+    }
+    else {
+      return _dao.findEntityById(Compound.class, smiles);
+    }
+  }
+
+  /**
+   * Add the specified compound to the local cache (if it exists). Compounds
+   * added to the cache will be accessible via {@link #getExistingCompound}.
+   * 
+   * @param compound the compound to be added to the local cache
+   */
+  public void cacheCompound(Compound compound)
+  {
+    if (_compoundCache != null) {
+      _compoundCache.put(compound.getSmiles(), compound);
+    }
+  }
+  
   
   // private instance methods
   
@@ -159,5 +223,9 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
     _sdFile = file;
     _sdFileReader = new BufferedReader(new InputStreamReader(stream));
     _errorManager = new SDFileParseErrorManager();
+    // note: has the beneficial side-effect of loading all of the library's
+    // wells in the Hibernate session, which avoids the need to make database
+    // queries when checking for existence of wells
+    _dao.createWellsForLibrary(library);
   }
 }

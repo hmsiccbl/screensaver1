@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -310,7 +312,41 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     });
     return mapResult;
   }
+  
+  @SuppressWarnings("unchecked")
+  public Set<Well> findWellsForPlate(int plate)
+  {
+    return new TreeSet<Well>(getHibernateTemplate().find("from Well where plateNumber = ?", plate));
+  }
 
+  public void createWellsForLibrary(Library library)
+  {
+    for (int iPlate = library.getStartPlate(); iPlate <= library.getEndPlate(); ++iPlate) {
+      Map<WellKey,Well> _extantWells = new HashMap<WellKey,Well>();
+      for (Well well : findWellsForPlate(iPlate)) {
+        _extantWells.put(well.getWellKey(), well);
+      };
+      _logger.info("creating wells for library " + library.getLibraryName() + ", plate " + iPlate);
+      int wellsCreated = 0;
+      for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
+        for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
+          WellKey wellKey = new WellKey(iPlate, iRow, iCol);
+          if (!_extantWells.containsKey(wellKey)) {
+            Well well = 
+              new Well(library,
+                       new Integer(iPlate),
+                       wellKey.getWellName());
+            persistEntity(well);
+            _extantWells.put(wellKey, well);
+            ++wellsCreated;
+          }
+        }
+      }
+      _logger.info("created " + wellsCreated + " wells for library " + 
+                   library.getLibraryName() + ", plate " + iPlate);
+      
+    }
+  }
   
   // private instance methods
 

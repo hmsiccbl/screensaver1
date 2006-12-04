@@ -13,15 +13,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
+
+import org.apache.log4j.Logger;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * A bulk loader for the compound libraries that we have SD files for.
@@ -53,6 +58,7 @@ public class BulkCompoundLibraryLoader
   
   private DAO _dao;
   private SDFileCompoundLibraryContentsParser _parser;
+
   
   // public constructors and methods
 
@@ -75,10 +81,17 @@ public class BulkCompoundLibraryLoader
         return filename.endsWith(".sdf");
       }
     });
+
     for (final File sdFile : sdFiles) {
       _dao.doInTransaction(new DAOTransaction() {
         public void runTransaction()
         {
+          log.info("preloading extant compounds");
+          List<Compound> compounds = _dao.findAllEntitiesWithType(Compound.class);
+          Map<String,Compound> compoundCache = buildCompoundCache(compounds);
+          log.info("preloaded " + compounds.size() + " compounds");
+          _parser.setCompoundCache(compoundCache);
+          
           log.info("processing SD File: " + sdFile.getName());
           Library library = getLibraryForSDFile(sdFile);
           try {
@@ -94,6 +107,7 @@ public class BulkCompoundLibraryLoader
             //throw new RuntimeException("SD File has parse errors: " + sdFile.getName());
           }
           _dao.persistEntity(library);
+          
           log.info("finished processing SD File: " + sdFile.getName());
         }
       });
@@ -121,6 +135,15 @@ public class BulkCompoundLibraryLoader
       throw new RuntimeException("library not found with name: " + libraryName);
     }
     return library;
+  }
+  
+  private Map<String,Compound> buildCompoundCache(Collection<Compound> compounds)
+  {
+    Map<String,Compound> cache = new HashMap<String,Compound>();
+    for (Compound compound : compounds) {
+      cache.put(compound.getSmiles(), compound);
+    }
+    return cache;
   }
 }
 

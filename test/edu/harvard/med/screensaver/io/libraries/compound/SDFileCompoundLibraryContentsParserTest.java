@@ -46,7 +46,7 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
   protected void onSetUp() throws Exception
   {
     schemaUtil.truncateTablesOrCreateSchema();
-    schemaUtil.initializeDatabase();
+    //schemaUtil.initializeDatabase();
   }
 
   // TODO: convert this into an actual test
@@ -54,7 +54,7 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
   // reasonable SDFile.)
   public void testFoo()
   {
-    Library library = new Library("COMP", "COMP", LibraryType.OTHER, 0, -1);
+    Library library = new Library("COMP", "COMP", LibraryType.OTHER, 1534, 1534);
     String filename = "biomol-timtec-111.sdf";
     File file = new File(TEST_INPUT_FILE_DIR, filename);
     InputStream stream = null;
@@ -67,6 +67,9 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
     library = compoundLibraryContentsParser.parseLibraryContents(library, file, stream);
     
     List<SDFileParseError> errors = compoundLibraryContentsParser.getErrors();
+    if (errors.size() > 0) {
+      log.debug(errors);
+    }
     assertEquals("workbook has no errors", 0, errors.size());
     //ParseError error;
     dao.persistEntity(library);

@@ -51,6 +51,11 @@ public class WellKey implements Comparable
     _column = column;
   }
   
+  public WellKey(int plateNumber, String wellName)
+  {
+    this(plateNumber + ":" + wellName);
+  }
+  
   public WellKey(String key)
   {
     setKey(key);
