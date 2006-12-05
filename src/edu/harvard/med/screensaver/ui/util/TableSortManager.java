@@ -146,6 +146,7 @@ public abstract class TableSortManager
    */
   public void setColumnNames(List<String> columnNames)
   {
+    _columnNames = columnNames;
     _columnModel = new ListDataModel(columnNames);
     if (!columnNames.contains(_currentSortColumnName)) {
       _currentSortColumnName = columnNames.get(0);
