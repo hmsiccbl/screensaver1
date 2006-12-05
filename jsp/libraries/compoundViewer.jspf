@@ -29,8 +29,14 @@
       var="compoundName"
       value="#{compound.compoundNames}"
       layout="grid"
+      rowIndexVar="rowIndex"
+      rowCountVar="rowCount"
     >
       <h:outputText value="#{compoundName}" />
+      <h:outputText
+        value=";"
+        rendered="#{rowIndex < rowCount - 1}"
+      />
     </t:dataList>
     
     <h:outputText value="Molecular Mass:" />
@@ -38,16 +44,27 @@
     
     <h:outputText value="Molecular Formula:" />
     <h:outputText value="#{compound.molecularFormula}" escape="false" />
-    
+
     <h:outputText
-      value="PubChem CID:"
-      rendered="#{compound.pubchemCid != null}"
+      value="PubChem CIDs:"
+      rendered="#{compound.numPubchemCids > 0}"
     />
-    <h:outputText
-      value="#{compound.pubchemCid}"
-      rendered="#{compound.pubchemCid != null}"
-    />
-    
+    <t:dataList
+      rendered="#{compound.numPubchemCids > 0}"
+      id="pubchemCids"
+      var="pubchemCid"
+      value="#{compound.pubchemCids}"
+      layout="grid"
+      rowIndexVar="rowIndex"
+      rowCountVar="rowCount"
+    >
+      <h:outputText value="#{pubchemCid}" />
+      <h:outputText
+        value=";"
+        rendered="#{rowIndex < rowCount - 1}"
+      />
+    </t:dataList>    
+
     <h:outputText
       value="ChemBank ID:"
       rendered="#{compound.chembankId != null}"
@@ -70,8 +87,14 @@
       var="nscNumber"
       value="#{compound.nscNumbers}"
       layout="grid"
+      rowIndexVar="rowIndex"
+      rowCountVar="rowCount"
     >
       <h:outputText value="#{nscNumber}" />
+      <h:outputText
+        value=";"
+        rendered="#{rowIndex < rowCount - 1}"
+      />
     </t:dataList>
     
     <h:outputText
@@ -84,8 +107,14 @@
       var="casNumber"
       value="#{compound.casNumbers}"
       layout="grid"
+      rowIndexVar="rowIndex"
+      rowCountVar="rowCount"
     >
       <h:outputText value="#{casNumber}" />
+      <h:outputText
+        value=";"
+        rendered="#{rowIndex < rowCount - 1}"
+      />
     </t:dataList>
   </h:panelGrid>
 

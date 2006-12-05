@@ -344,8 +344,9 @@ public class WellSearchResults extends SearchResults<Well>
     if (nscNumbers.size() > 0) {
       row.createCell((short) 9).setCellValue(listStrings(nscNumbers));
     }
-    if (compound.getPubchemCid() != null) {
-      row.createCell((short) 10).setCellValue(compound.getPubchemCid());
+    Set<String> pubchemCids = compound.getPubchemCids();
+    if (pubchemCids.size() > 0) {
+      row.createCell((short) 10).setCellValue(listStrings(pubchemCids));
     }
     if (compound.getChembankId() != null) {
       row.createCell((short) 11).setCellValue(compound.getChembankId());

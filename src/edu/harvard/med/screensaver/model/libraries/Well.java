@@ -650,9 +650,9 @@ public class Well extends AbstractEntity implements Comparable
         sdFilePrintWriter.println(nscNumber);
         sdFilePrintWriter.println();
       }
-      if (compound.getPubchemCid() != null) {
+      for (String pubchemCid : compound.getPubchemCids()) {
         sdFilePrintWriter.println(">  <PubChem_CID>");
-        sdFilePrintWriter.println(compound.getPubchemCid());
+        sdFilePrintWriter.println(pubchemCid);
         sdFilePrintWriter.println();        
       }
       if (compound.getChembankId() != null) {

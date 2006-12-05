@@ -54,7 +54,7 @@ public class Compound extends AbstractEntity
   private Set<String> _compoundNames = new HashSet<String>();
   private Set<String> _casNumbers = new HashSet<String>();
   private Set<String> _nscNumbers = new HashSet<String>();
-  private String      _pubchemCid;
+  private Set<String> _pubchemCids = new HashSet<String>();
   private String      _chembankId;
   
   /** used to compute molecular mass and molecular formula. */
@@ -337,25 +337,52 @@ public class Compound extends AbstractEntity
     return _nscNumbers.remove(nscNumber);
   }
 
-  /**
-   * Get the PubChem CID for the compound.
-   * @return the PubChem CID for the compound
-   *  
-   * @hibernate.property
-   *   type="text"
-   */
-  public String getPubchemCid()
+  @DerivedEntityProperty
+  public int getNumPubchemCids()
   {
-    return _pubchemCid;
+    return _pubchemCids.size();
+  }
+  
+  /**
+   * Get the set of PubChem CIDs for the compound.
+   * @return the set of PubChem CIDs for the compound
+   * 
+   * @hibernate.set
+   *   order-by="pubchem_cid"
+   *   table="compound_pubchem_cid"
+   *   cascade="delete"
+   *   lazy="true"
+   * @hibernate.collection-key
+   *   column="compound_id"
+   *   foreign-key="fk_compound_pubchem_cid_to_compound"
+   * @hibernate.collection-element
+   *   type="text"
+   *   column="pubchem_cid"
+   *   not-null="true"
+   */
+  public Set<String> getPubchemCids()
+  {
+    return _pubchemCids;
   }
 
   /**
-   * Set the PubChem CID for the compound.
-   * @param pubchemCid the new PubChem CID for the compound
+   * Add a PubChem CID to the compound.
+   * @param pubchemCid the PubChem CID to add to the compound
+   * @return true iff the compound did not already have the PubChem CID
    */
-  public void setPubchemCid(String pubchemCid)
+  public boolean addPubchemCid(String pubchemCid)
   {
-    _pubchemCid = pubchemCid;
+    return _pubchemCids.add(pubchemCid);
+  }
+  
+  /**
+   * Remove a PubChem CID from the compound.
+   * @param pubchemCid the PubChem CID to remove from the compound
+   * @return true iff the compound previously had the PubChem CID
+   */
+  public boolean removePubchemCid(String pubchemCid)
+  {
+    return _pubchemCids.remove(pubchemCid);
   }
 
   /**
@@ -527,22 +554,32 @@ public class Compound extends AbstractEntity
 
   /**
    * Set the set of CAS numbers for the compound.
-   * @param casNumber the new set of CAS numbers for the compound
-   * @motivation      for hibernate
+   * @param casNumbers the new set of CAS numbers for the compound
+   * @motivation for hibernate
    */
-  private void setCasNumbers(Set<String> casNumber)
+  private void setCasNumbers(Set<String> casNumbers)
   {
-    _casNumbers = casNumber;
+    _casNumbers = casNumbers;
   }
 
   /**
    * Set the set of NSC numbers for the compound.
-   * @param nscNumber the new set of NSC numbers for the compound
-   * @motivation      for hibernate
+   * @param nscNumbers the new set of NSC numbers for the compound
+   * @motivation for hibernate
    */
-  private void setNscNumbers(Set<String> nscNumber)
+  private void setNscNumbers(Set<String> nscNumbers)
   {
-    _nscNumbers = nscNumber;
+    _nscNumbers = nscNumbers;
+  }
+
+  /**
+   * Set the set of PubChem CIDs for the compound.
+   * @param pubchemCids the new set of PubChem CIDs for the compound
+   * @motivation for hibernate
+   */
+  private void setPubchemCids(Set<String> pubchemCids)
+  {
+    _pubchemCids = pubchemCids;
   }
   
   private MFAnalyser getMFAnalyser()
