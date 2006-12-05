@@ -55,6 +55,21 @@ public class Environment extends AbstractBackingBean
     }
   }
   
+  public DataModel getJvmModel()
+  {
+    List<Row> data = new ArrayList<Row>();
+    data.add(new Row("Max Memory",
+                     String.format("%.2fMB",
+                                   Runtime.getRuntime().maxMemory() / (1024*1024.0))));
+    data.add(new Row("Total Memory",
+                     String.format("%.2fMB",
+                                   Runtime.getRuntime().totalMemory() / (1024*1024.0))));
+    data.add(new Row("Free Memory",
+                     String.format("%.2fMB",
+                                   Runtime.getRuntime().freeMemory() / (1024*1024.0))));
+    return new ListDataModel(data);
+  }
+
   public DataModel getRequestParamsModel()
   {
     List<Row> data = new ArrayList<Row>();
@@ -191,6 +206,12 @@ public class Environment extends AbstractBackingBean
   public String throwAnException() throws Exception
   {
     throw new Exception("You asked for it!");
+  }
+  
+  public String runGC()
+  {
+    Runtime.getRuntime().gc();
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
 }

@@ -1,4 +1,4 @@
-<%-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
+-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
 <%-- The core taglib contains all the logic, validation, controller, and other tags specific to JSF. --%>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
@@ -32,6 +32,22 @@
 		<h:outputText value="URL" />
 		<h:outputText value="#{envInfo.url}" />
 	</h:panelGrid>
+
+	<t:outputText value="JVM" styleClass="sectionHeader" />
+  <t:dataTable id="jvmTable" value="#{envInfo.jvmModel}" var="row"
+    styleClass="standardTable" rowClasses="row1,row2">
+    <t:column>
+      <f:facet name="header">Name</f:facet>
+      <t:outputText value="#{row.name}"></t:outputText>
+    </t:column>
+    <t:column>
+      <f:facet name="header">Value</f:facet>
+      <t:outputText value="#{row.value}"></t:outputText>
+    </t:column>
+  </t:dataTable>
+	<h:form>
+		<t:commandButton value="Run GC" action="#{envInfo.runGC}" />
+	</h:form>
 
 	<t:outputText value="User Security" styleClass="sectionHeader" />
   <t:dataTable id="userSecurityTable" value="#{envInfo.userSecurityTableModel}" var="row"
