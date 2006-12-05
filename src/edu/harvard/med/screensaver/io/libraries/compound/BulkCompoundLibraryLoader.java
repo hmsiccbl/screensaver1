@@ -86,11 +86,11 @@ public class BulkCompoundLibraryLoader
       _dao.doInTransaction(new DAOTransaction() {
         public void runTransaction()
         {
-          log.info("preloading extant compounds");
-          List<Compound> compounds = _dao.findAllEntitiesWithType(Compound.class);
-          Map<String,Compound> compoundCache = buildCompoundCache(compounds);
-          log.info("preloaded " + compounds.size() + " compounds");
-          _parser.setCompoundCache(compoundCache);
+//          log.info("preloading extant compounds");
+//          List<Compound> compounds = _dao.findAllEntitiesWithType(Compound.class);
+//          Map<String,Compound> compoundCache = buildCompoundCache(compounds);
+//          log.info("preloaded " + compounds.size() + " compounds");
+//          _parser.setCompoundCache(compoundCache);
           
           log.info("processing SD File: " + sdFile.getName());
           Library library = getLibraryForSDFile(sdFile);
