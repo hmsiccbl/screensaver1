@@ -1,0 +1,12 @@
+  <map name="resultValues" lazy="extra" cascade="all">
+   <key column="result_value_type_id"/>
+   <composite-map-key class="edu.harvard.med.screensaver.model.libraries.WellKey">
+    <key-property name="key"/>
+   </composite-map-key>
+   <composite-element class="edu.harvard.med.screensaver.model.screenresults.ResultValue">
+    <property name="value" type="string"/>
+    <property name="numericValue" type="double"/>
+    <property name="exclude" type="boolean"/>
+    <property name="assayWellType" type="edu.harvard.med.screensaver.model.screenresults.AssayWellType$UserType"/>
+   </composite-element>
+  </map>
