@@ -13,11 +13,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
@@ -31,6 +26,11 @@ import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
+
+import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 
 /**
@@ -213,8 +213,13 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
     _plateNumberParser = new PlateNumberParser(_errorManager);
     _wellNameParser = new WellNameParser(_errorManager);
     _geneInfoProvider = new NCBIGeneInfoProvider(_errorManager);
+    // note: has the beneficial side-effect of loading all of the library's
+    // wells in the Hibernate session, which avoids the need to make database
+    // queries when checking for existence of wells
+    _dao.createWellsForLibrary(library);
   }
   
+
   /**
    * Load library contents from a single worksheet.
    * @param sheetIndex the index of the worksheet to load library contents from

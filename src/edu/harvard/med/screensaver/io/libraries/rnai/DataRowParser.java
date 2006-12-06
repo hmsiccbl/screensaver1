@@ -175,8 +175,8 @@ public class DataRowParser
     }
     Well well = _parser.getDAO().findWell(plateNumber, wellName);
     if (well == null) {
-      well = new Well(_parser.getLibrary(), plateNumber, wellName);
-      _parser.getDAO().persistEntity(well);
+      log.error("well does not exist, but should");
+      return null;
     }
     if (isControl) {
       well.setWellType(WellType.LIBRARY_CONTROL);
