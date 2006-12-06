@@ -59,7 +59,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
   
   public void testColumnHeaderErrors()
   {
-    Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 5003);
+    Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 50001);
     String filename = "column header errors.xls";
     File file = new File(TEST_INPUT_FILE_DIR, filename);
     InputStream stream = null;
@@ -260,7 +260,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
 
   public void testCleanData()
   {
-    Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 5003);
+    Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 50001);
     String filename = "clean data.xls";
     File file = new File(TEST_INPUT_FILE_DIR, filename);
     InputStream stream = null;
@@ -271,28 +271,33 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
       fail("file not found: " + filename);
     }
     library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+
     List<ParseError> errors = rnaiLibraryContentsParser.getErrors();
     assertEquals("workbook has no errors", 0, errors.size());
-    assertEquals("library has 5 wells", 5, library.getWells().size());
+    assertEquals("library has all wells for all plates", 
+                 384, 
+                 library.getWells().size());
 
     Well a05 = null, a07 = null, a09 = null, a11 = null, a15 = null;
     for (Well well: library.getWells()) {
       String wellName = well.getWellName();
       log.info("well name " + wellName);
-      if (wellName.equals("A05")) {
-        a05 = well;
-      }
-      else if (wellName.equals("A07")) {
-        a07 = well;
-      }
-      else if (wellName.equals("A09")) {
-        a09 = well;
-      }
-      else if (wellName.equals("A11")) {
-        a11 = well;
-      }
-      else if (wellName.equals("A15")) {
-        a15 = well;
+      if (well.getPlateNumber() == 50001) {
+        if (wellName.equals("A05")) {
+          a05 = well;
+        }
+        else if (wellName.equals("A07")) {
+          a07 = well;
+        }
+        else if (wellName.equals("A09")) {
+          a09 = well;
+        }
+        else if (wellName.equals("A11")) {
+          a11 = well;
+        }
+        else if (wellName.equals("A15")) {
+          a15 = well;
+        }
       }
     }
       
@@ -356,7 +361,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 5003);
+        Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 50001);
         dao.persistEntity(library);
   
         // parse the first spreadsheet
@@ -372,7 +377,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
         library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
         List<ParseError> errors = rnaiLibraryContentsParser.getErrors();
         assertEquals("workbook has no errors", 0, errors.size());
-        assertEquals("library has 5 wells", 5, library.getWells().size());
+        assertEquals("library has all wells", 384, library.getWells().size());
   
         // persist the new well/sr/genes, so the next
         dao.persistEntity(library);
@@ -390,7 +395,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
         library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
         errors = rnaiLibraryContentsParser.getErrors();
         assertEquals("workbook has no errors", 0, errors.size());
-        assertEquals("library has 7 wells", 7, library.getWells().size());
+        assertEquals("library has all wells", 384, library.getWells().size());
   
         // test the overlaps
         Well a05 = null, a07 = null, a09 = null, a11 = null, a13 = null, a15 = null, a17 = null;

@@ -26,7 +26,7 @@ import org.apache.poi.hssf.util.HSSFColor;
  * worksheet. Instantiate new Cells via a Cell.Factory, which you must first
  * instantiate with a set of arguments that will be common to a set of related
  * <code>Cell</code>s. The Cell returned by the factory may be the instance
- * returned by a previous {@link Factory#getCell()} call, so if you need the
+ * returned by a previous {@link Factory#getHSSFCell()} call, so if you need the
  * Cell to have a longer lifetime, clone it.
  * 
  * @motivation explicitly associates sheet name with a cell, since you cannot
@@ -289,7 +289,7 @@ public class Cell
   public Double getDouble() 
   {
     try {
-      HSSFCell cell = getCell();
+      HSSFCell cell = getHSSFCell();
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
         if (_required) {
           _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
@@ -330,7 +330,7 @@ public class Cell
   public Integer getInteger()
   {
     try {
-      HSSFCell cell = getCell();
+      HSSFCell cell = getHSSFCell();
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
         if (_required) {
           _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
@@ -371,7 +371,7 @@ public class Cell
   public Boolean getBoolean()
   {
     try {
-      HSSFCell cell = getCell();
+      HSSFCell cell = getHSSFCell();
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
         if (_required) {
           _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
@@ -409,7 +409,7 @@ public class Cell
   public Date getDate()
   {
     try {
-      HSSFCell cell = getCell();
+      HSSFCell cell = getHSSFCell();
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
         if (_required) {
           _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
@@ -447,7 +447,7 @@ public class Cell
   public String getString()
   {
     try {
-      HSSFCell cell = getCell();
+      HSSFCell cell = getHSSFCell();
       if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
         if (_required) {
           _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
@@ -509,7 +509,7 @@ public class Cell
   public String getAsString(boolean withValidation)
   {
     try {
-      int cellType = getCell().getCellType();
+      int cellType = getHSSFCell().getCellType();
       switch (cellType) {
       case HSSFCell.CELL_TYPE_BLANK:
         if (withValidation) {
@@ -521,14 +521,14 @@ public class Cell
           return getBoolean().toString();
         } 
         else {
-          return Boolean.toString(getCell().getBooleanCellValue());
+          return Boolean.toString(getHSSFCell().getBooleanCellValue());
         }
       case HSSFCell.CELL_TYPE_NUMERIC: 
         if (withValidation) {
           return getDouble().toString();
         } 
         else {
-          return Double.toString(getCell().getNumericCellValue());
+          return Double.toString(getHSSFCell().getNumericCellValue());
         }
       case HSSFCell.CELL_TYPE_ERROR:
         return "<error cell>";
@@ -539,7 +539,7 @@ public class Cell
           return getString();
         } 
         else {
-          return getCell().getStringCellValue();
+          return getHSSFCell().getStringCellValue();
         }
       }
     } 
@@ -559,6 +559,59 @@ public class Cell
   public String getAsString()
   {
     return getAsString(_required);
+  }
+  
+  public int getType()
+  {
+    try {
+      return getHSSFCell().getCellType();
+    }
+    catch (CellOutOfRangeException e) {
+      return HSSFCell.CELL_TYPE_BLANK;
+    }
+  }
+
+  /**
+   * Determine if cell contains a numeric value, taking into account formula
+   * type cells.
+   * 
+   * @param cell the cell to inspect
+   * @return true iff cell is of type HSSFCell.CELL_TYPE_NUMERIC, or
+   *         HSSFCell.CELL_TYPE_FORMULA and formula evaluates to a numeric type.
+   */
+  public boolean isNumeric()
+  {
+    if (getType() == HSSFCell.CELL_TYPE_NUMERIC) {
+      return true;
+    }
+    // HSSF does not allow us to determine the cell type for the *value* (result) of a formula cell;
+    // it could be numeric, but who can say? we perform trial and error (or more
+    // accurately, "trial and exception") to figure it out
+    if (getType() == HSSFCell.CELL_TYPE_FORMULA) {
+      try {
+        getHSSFCell().getNumericCellValue();
+        // if no exception is thrown, then cell's formula evaluates to a numeric value
+        return true;
+      }
+      catch (CellOutOfRangeException e) {
+        // let caller handle this problem when it actually tries to read the cell
+        return false; 
+      }
+      catch (NumberFormatException e) {
+        return false;
+      }
+    }
+    return false;
+  }
+  
+  public boolean isEmpty()
+  {
+    try {
+      return getHSSFCell().getCellType() == HSSFCell.CELL_TYPE_BLANK;
+    }
+    catch (CellOutOfRangeException e) {
+      return true;
+    }
   }
 
 
@@ -589,7 +642,7 @@ public class Cell
    * @throws CellOutOfRangeException if the specified cell has not been
    *           initialized with a value in the worksheet
    */
-  private HSSFCell getCell()
+  protected HSSFCell getHSSFCell()
     throws CellOutOfRangeException
   {
     HSSFRow row = getSheet().getRow(getRow());
@@ -626,5 +679,4 @@ public class Cell
                     _row,
                     _required);
   }
-
 }

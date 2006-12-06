@@ -108,7 +108,7 @@ public class HeatMap
     if (rv == null) {
       return Double.NaN;
     }
-    return Double.parseDouble(rv.getValue());
+    return rv.getNumericValue();
   }
 
   public double getScoredValue(int row, int column)

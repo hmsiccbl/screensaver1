@@ -39,6 +39,7 @@ import edu.harvard.med.screensaver.io.workbook.PlateNumberParser;
 import edu.harvard.med.screensaver.io.workbook.WellNameParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
+import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
@@ -977,19 +978,53 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
             int iDataHeader = 0;
             for (ResultValueType rvt : screenResult.getResultValueTypes()) {
               Cell cell = dataCell(iRow, iDataHeader);
-              Object value = !rvt.isActivityIndicator()
-              ? cell.getAsString()
-              : rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN
-              ? _booleanParser.parse(cell)
-              : rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL
-              ? cell.getDouble()
-              : rvt.getActivityIndicatorType() == ActivityIndicatorType.PARTITION
-              ? _partitionedValueParser.parse(cell) 
-              : cell.getString();
-              if (value == null) {
-                value = "";
+              try {
+                if (rvt.isActivityIndicator()) {
+                  if (rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN) {
+                    rvt.addResultValue(well,
+                                       assayWellType,
+                                       _booleanParser.parse(cell).toString(),
+                                       (wellExcludes != null && wellExcludes.contains(rvt)),
+                                       false);
+                  }
+                  else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.PARTITION) {
+                    rvt.addResultValue(well,
+                                       assayWellType,
+                                       _partitionedValueParser.parse(cell).toString(),
+                                       (wellExcludes != null && wellExcludes.contains(rvt)),
+                                       false);
+                  }
+                  else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL) {
+                    rvt.addResultValue(well,
+                                       assayWellType,
+                                       cell.getDouble(),
+                                       (wellExcludes != null && wellExcludes.contains(rvt)));
+                  }
+                }
+                else {
+                  // TODO: avoid the subtle bug of implicitly flagging a
+                  // ResultValueType as non-numeric if an initial set of values are blank, but are
+                  // then followed by (valid) numeric data
+                  if ((!rvt.isNumericalnessDetermined() && cell.isNumeric()) || 
+                    rvt.isNumericalnessDetermined() && rvt.isNumeric()) {
+                    rvt.addResultValue(well,
+                                       assayWellType,
+                                       cell.getDouble(),
+                                       (wellExcludes != null && wellExcludes.contains(rvt)));
+                  }
+                  else {
+                    rvt.addResultValue(well,
+                                       assayWellType,
+                                       cell.getString(),
+                                       (wellExcludes != null && wellExcludes.contains(rvt)),
+                                       false);
+                  }
+                }
               }
-              rvt.addResultValue(well, assayWellType, value.toString(), (wellExcludes != null && wellExcludes.contains(rvt)));
+              catch (IllegalArgumentException e) {
+                // inconsistency in numeric or string types in RVT's result values
+                _errors.addError(e.getMessage(), cell);
+              }
               ++iDataHeader;
             }
           }
@@ -1012,7 +1047,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     }
   }
 
-  private Well findWell(int iRow) throws ExtantLibraryException
+  private Well findWell(int iRow)
   {
     Integer plateNumber = _plateNumberParser.parse(dataCell(iRow,
                                                             DataColumn.STOCK_PLATE_ID,
@@ -1028,8 +1063,24 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       well.getLibrary().getWells().iterator();
     }
     else {
-      _errors.addError(NO_SUCH_WELL + ": " + plateNumber + ":" + wellName,
-                       wellNameCell);
+      // HACK
+      // TODO: Our "contract" is that all wells are created for all plates of a library by the time it is imported,
+      // so this should not be necessary.  But us developers are not always working with a full database (i.e., 
+      // with library contents imported), so this allows us to work in that environment.  This should be removed,
+      // ideally.  Removal will require re-running unit tests, at a minimum. --@
+      if ("hack".equals("hack")) {
+        List<Library> libraries = _dao.findAllEntitiesWithType(Library.class);
+        for (Library library : libraries) {
+          if (plateNumber >= library.getStartPlate() && plateNumber <= library.getEndPlate()) {
+            log.debug("creating missing wells for library " + library.getLibraryName());
+            _dao.createWellsForLibrary(library);
+          }
+        }
+      }
+      else {
+        _errors.addError(NO_SUCH_WELL + ": " + plateNumber + ":" + wellName,
+                         wellNameCell);
+      }
     }
 
     return well;

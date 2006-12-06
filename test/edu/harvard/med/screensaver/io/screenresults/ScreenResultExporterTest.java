@@ -47,7 +47,9 @@ public class ScreenResultExporterTest extends AbstractSpringTest
   {
     ScreenResult originalScreenResult = 
       mockScreenResultParser.parseLegacy(ScreenResultParser.makeDummyScreen(1), 
-        new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "LegacyTestAllInOne.xls"), false);
+                                         new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
+                                                  "LegacyTestAllInOne.xls"),
+                                         false);
     addDummyCollaboratorsToScreen(originalScreenResult);
     
     
@@ -85,21 +87,21 @@ public class ScreenResultExporterTest extends AbstractSpringTest
     
     assertEquals("one data worksheet per assay plate: PL-00001", "PL-00001", workbook.getSheetName(2));
     HSSFSheet sheetPlate1 = workbook.getSheetAt(2);
-    assertEquals(320, sheetPlate1.getLastRowNum());
+    assertEquals(384, sheetPlate1.getLastRowNum());
     assertEquals("PL-00001", HSSFCellUtil.getCell(HSSFCellUtil.getRow(1,sheetPlate1),0).getStringCellValue());
-    assertEquals("PL-00001", HSSFCellUtil.getCell(HSSFCellUtil.getRow(320,sheetPlate1),0).getStringCellValue());
+    assertEquals("PL-00001", HSSFCellUtil.getCell(HSSFCellUtil.getRow(384,sheetPlate1),0).getStringCellValue());
 
     assertEquals("one data worksheet per assay plate: PL-00002", "PL-00002", workbook.getSheetName(3));
     HSSFSheet sheetPlate2 = workbook.getSheetAt(3);
-    assertEquals(320, sheetPlate2.getLastRowNum());
+    assertEquals(384, sheetPlate2.getLastRowNum());
     assertEquals("PL-00002", HSSFCellUtil.getCell(HSSFCellUtil.getRow(1,sheetPlate2),0).getStringCellValue());
-    assertEquals("PL-00002", HSSFCellUtil.getCell(HSSFCellUtil.getRow(320,sheetPlate2),0).getStringCellValue());
+    assertEquals("PL-00002", HSSFCellUtil.getCell(HSSFCellUtil.getRow(384,sheetPlate2),0).getStringCellValue());
 
     assertEquals("one data worksheet per assay plate: PL-00003", "PL-00003", workbook.getSheetName(4));
     HSSFSheet sheetPlate3 = workbook.getSheetAt(4);
-    assertEquals(320, sheetPlate3.getLastRowNum());
+    assertEquals(384, sheetPlate3.getLastRowNum());
     assertEquals("PL-00003", HSSFCellUtil.getCell(HSSFCellUtil.getRow(1,sheetPlate3),0).getStringCellValue());
-    assertEquals("PL-00003", HSSFCellUtil.getCell(HSSFCellUtil.getRow(320,sheetPlate3),0).getStringCellValue());
+    assertEquals("PL-00003", HSSFCellUtil.getCell(HSSFCellUtil.getRow(384,sheetPlate3),0).getStringCellValue());
 
     
     List<ResultValueType> expectedRvts = originalScreenResult.getResultValueTypesList();
@@ -121,7 +123,6 @@ public class ScreenResultExporterTest extends AbstractSpringTest
         actualResultValues.remove(wellKey);
         ++i;
       }
-      assertEquals("no extra result values", 0, actualResultValues.size());
     }
   }
 

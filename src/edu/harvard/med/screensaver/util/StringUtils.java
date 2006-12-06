@@ -59,7 +59,7 @@ public class StringUtils {
 
 
 	@SuppressWarnings("unchecked")
-  public static List wrapStrings(List elements, String left, String right)
+  public static List wrapStrings(Collection elements, String left, String right)
   {
     StringBuffer buf = new StringBuffer();
     List result = new ArrayList(elements.size());

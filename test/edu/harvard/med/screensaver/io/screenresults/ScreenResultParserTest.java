@@ -29,6 +29,7 @@ import java.util.TreeSet;
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
+import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -98,6 +99,35 @@ public class ScreenResultParserTest extends AbstractSpringTest
     }
   }
   
+  public void testReadFormulaCellValue() throws Exception
+  {
+    InputStream xlsInStream = 
+      ScreenResultParserTest.class.getResourceAsStream("formula_value.xls");
+    POIFSFileSystem fs = new POIFSFileSystem(xlsInStream);
+    HSSFWorkbook wb = new HSSFWorkbook(fs);
+    HSSFSheet sheet = wb.getSheetAt(0);
+    HSSFRow row = sheet.getRow(0);
+    HSSFCell hssfCell = row.getCell((short) 2);
+    assertEquals("HSSF cell type",
+                 HSSFCell.CELL_TYPE_FORMULA,
+                 hssfCell.getCellType());
+    double hssfNumericValue = hssfCell.getNumericCellValue();
+    assertEquals("HSSF numeric value", 2.0, hssfNumericValue, 0.001);
+    String hssfFormula = hssfCell.getCellFormula();
+    assertEquals("HSSF formula", "A1+B1", hssfFormula);
+
+    ParseErrorManager errors = new ParseErrorManager();
+    Workbook workbook = new Workbook(new File(TEST_INPUT_FILE_DIR, 
+                                              "formula_value.xls"), errors);
+    Cell.Factory cellFactory = new Cell.Factory(workbook, 0, errors);
+    Cell cell = cellFactory.getCell((short) 2, (short) 0, false);
+    assertNotNull(cell);
+    assertEquals("parser numeric value",
+                 hssfNumericValue,
+                 cell.getDouble(),
+                 0.001);
+  }
+
   /**
    * Tests legacy file format, as well as testing most parsing cases (field
    * types and values). This is the most comprehensive test of low-level parsing
@@ -131,6 +161,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt1.setReplicateOrdinal(1);
     rvt1.setTimePoint("0:10");
     rvt1.setAssayPhenotype("Human");
+    rvt1.setNumeric(true);
 
     ResultValueType rvt2 = new ResultValueType(expectedScreenResult, "FI");
     rvt2.setDescription("Fold Induction");
@@ -142,6 +173,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt2.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
     rvt2.setIndicatorDirection(IndicatorDirection.LOW_VALUES_INDICATE);
     rvt2.setIndicatorCutoff(1.5);
+    rvt2.setNumeric(true);
 
     ResultValueType rvt3 = new ResultValueType(expectedScreenResult,
                                                "Absorbance");
@@ -151,6 +183,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt3.setFollowUpData(true);
     rvt3.setAssayPhenotype("Mouse");
     rvt3.setComments("Generated during return visit");
+    rvt3.setNumeric(true);
 
     ResultValueType rvt4 = new ResultValueType(expectedScreenResult, "FI");
     rvt4.setDescription("Fold Induction");
@@ -162,6 +195,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt4.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
     rvt4.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);
     rvt4.setIndicatorCutoff(1.4);
+    rvt4.setNumeric(true);
 
     ResultValueType rvt5 = new ResultValueType(expectedScreenResult,"Cherry Pick");
     rvt5.setDescription("Cherry Pick");
@@ -173,6 +207,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt5.setActivityIndicator(true);
     rvt5.setActivityIndicatorType(ActivityIndicatorType.BOOLEAN);
     rvt5.setComments("Use this to determine cherry picks");
+    rvt5.setNumeric(false);
     
     expectedResultValueTypes.put(0, rvt1);
     expectedResultValueTypes.put(1, rvt2);
@@ -250,8 +285,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
           }
           else {
             assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
-                         ((Double) expectedInitialResultValues[iWell][iRvt]).doubleValue(),
-                         Double.parseDouble(rv.getValue()),
+                         (Double) expectedInitialResultValues[iWell][iRvt],
+                         rv.getNumericValue(),
                          0.0001);
           }
           assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
@@ -291,8 +326,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
           } 
           else {
             assertEquals("rvt " + iRvt + " well #" + (iWell + startIndex) + " result value",
-                         ((Double) expectedFinalResultValues[iWell][iRvt]).doubleValue(),
-                         Double.parseDouble(rv.getValue()),
+                         (Double) expectedFinalResultValues[iWell][iRvt],
+                         rv.getNumericValue(),
                          0.0001);
           }
           assertEquals("rvt " + iRvt + " well #" + (iWell + startIndex) + " excluded",
@@ -466,6 +501,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt0.setActivityIndicator(false);
     rvt0.setAssayPhenotype("Human");
     rvt0.setComments("None");
+    rvt0.setNumeric(true);
 
     ResultValueType rvt1 = new ResultValueType(expectedScreenResult,
                                                "FI");
@@ -477,6 +513,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt1.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
     rvt1.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);
     rvt1.setIndicatorCutoff(1070000.0);
+    rvt1.setNumeric(true);
 
     expectedResultValueTypes.put(0, rvt0);
     expectedResultValueTypes.put(1, rvt1);
@@ -526,8 +563,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
                        expectedInitialAssayWellTypes[iWell],
                        rv.getAssayWellType());
           assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
-                       ((Double) expectedInitialResultValues[iWell][iRvt]).doubleValue(),
-                       Double.parseDouble(rv.getValue()),
+                       (Double) expectedInitialResultValues[iWell][iRvt],
+                       rv.getNumericValue(),
                        0.001);
           ++iWell;
         }

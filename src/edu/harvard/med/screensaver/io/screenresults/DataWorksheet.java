@@ -10,9 +10,9 @@
 package edu.harvard.med.screensaver.io.screenresults;
 
 import java.util.Iterator;
-import java.util.Map;
 
 import edu.harvard.med.screensaver.io.workbook.Cell;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -61,51 +61,58 @@ public class DataWorksheet implements ScreenResultWorkbookSpecification
     ScreenResult screenResult,
     Integer plateNumber)
   {
-    for (Iterator iter = screenResult.getResultValueTypes()
-                                     .iterator(); iter.hasNext();) {
-      ResultValueType rvt = (ResultValueType) iter.next();
-      int rowIndex = RAWDATA_FIRST_DATA_ROW_INDEX;
-      Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
-      for (Iterator iter2 = resultValues.keySet().iterator(); iter2.hasNext();) {
-        WellKey wellKey = (WellKey) iter2.next();
-        ResultValue rv = resultValues.get(wellKey);
-        if (plateNumber.equals(wellKey.getPlateNumber())) {
-          HSSFRow row = HSSFCellUtil.getRow(rowIndex++, sheet);
-          if (rvt.getOrdinal() == 0) {
-            writeWell(row, wellKey, rv.getAssayWellType());
+    int rowIndex = RAWDATA_FIRST_DATA_ROW_INDEX;
+    for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
+      for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
+        WellKey wellKey = new WellKey(plateNumber, iRow, iCol);
+        // TODO: assayWellType should default to Well's assayWellType
+        AssayWellType assayWellType = AssayWellType.EXPERIMENTAL;
+        StringBuilder excludeBuf = new StringBuilder();
+        HSSFRow row = HSSFCellUtil.getRow(rowIndex, sheet);
+        for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+          ResultValue rv = rvt.getResultValues().get(wellKey);
+          if (rv != null) {
+            assayWellType = rv.getAssayWellType(); // overwrites, but should be same for all resultValues of a well
+            addExclude(excludeBuf, row, rvt, rv);
+            HSSFCell cell = 
+              HSSFCellUtil.getCell(row,
+                                   rvt.getOrdinal() + 
+                                   RAWDATA_FIRST_DATA_HEADER_COLUMN_INDEX);
+            Object typedValue = ResultValue.getTypedValue(rv, rvt);
+            Cell.setTypedCellValue(workbook, cell, typedValue);
           }
-          addExclude(row, rvt, rv);
-          HSSFCell cell = HSSFCellUtil.getCell(row,
-                                               rvt.getOrdinal() + RAWDATA_FIRST_DATA_HEADER_COLUMN_INDEX);
-          Object typedValue = ResultValue.getTypedValue(rv, rvt);
-          Cell.setTypedCellValue(workbook, cell, typedValue);
         }
+        writeWell(row, 
+                  wellKey,
+                  assayWellType);
+        if (excludeBuf.length() > 0) {
+          HSSFCell excludeCell = HSSFCellUtil.getCell(row, 3);        
+          excludeCell.setCellValue(excludeBuf.toString());
+        }
+        ++rowIndex;
       }
     }
   }
 
-  private void addExclude(HSSFRow row, ResultValueType rvt, ResultValue rv)
+  private void addExclude(StringBuilder buf, HSSFRow row, ResultValueType rvt, ResultValue rv)
   {
     if (!rv.isExclude()) {
       return;
     }
-    HSSFCell cell = HSSFCellUtil.getCell(row, 3);
-    String value = cell.getStringCellValue();
-    if (value == null) {
-      value = "";
+    if (buf.length() > 0) {
+      buf.append(",");
     }
-    if (value.length() > 0) {
-      value += ",";
-    }
-    value += new Character((char) (rvt.getOrdinal().intValue() + 'E'));
-    cell.setCellValue(value);
+    // TODO: replace literal 'E' with constant
+    buf.append(new Character((char) (rvt.getOrdinal().intValue() + 'E')));
   }
 
   private void writeWell(HSSFRow row, WellKey wellKey, AssayWellType assayWellType)
   {
     HSSFCellUtil.getCell(row, 0).setCellValue(makePlateNumberString(wellKey.getPlateNumber()));
     HSSFCellUtil.getCell(row, 1).setCellValue(wellKey.getWellName());
-    HSSFCellUtil.getCell(row, 2).setCellValue(assayWellType.getAbbreviation());
+    if (assayWellType != null) {
+      HSSFCellUtil.getCell(row, 2).setCellValue(assayWellType.getAbbreviation());
+    }
   }
 
   private String makePlateNumberString(Integer plateNumber)

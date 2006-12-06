@@ -73,10 +73,10 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
         assertNotNull(screenResult);
         ResultValueType rvt0 = screenResult.getResultValueTypesList().get(0);
         ResultValue rv = rvt0.getResultValues().get(new WellKey(1,0,0));
-        assertEquals(rv.getValue(), "1071894.0");
+        assertEquals("1071894.0", rv.getValue());
         // this tests how Hibernate will make use of WellKey, initializing with a concatenated key string
         rv = rvt0.getResultValues().get(new WellKey("00001:A01"));
-        assertEquals(rv.getValue(), "1071894.0");
+        assertEquals("1071894.0", rv.getValue());
       }
     });
     

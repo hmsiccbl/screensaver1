@@ -16,6 +16,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
@@ -70,6 +71,9 @@ public class ResultValueType extends AbstractEntity implements Comparable
   private String                     _assayPhenotype;
   private boolean                    _isCherryPick;
   private String                     _comments;
+  private boolean                    _isNumeric;
+  
+  private boolean                    _isNumericalnessDetermined = false;
 
   
   // public constructors and instance methods
@@ -199,17 +203,147 @@ public class ResultValueType extends AbstractEntity implements Comparable
   public Map<WellKey,ResultValue> getResultValues() {
     return _resultValues;
   }
-  
-  public boolean addResultValue(Well well, AssayWellType assayWellType, String value, boolean exclude)
+
+  /**
+   *
+   * @return true, iff this ResultValueType contains numeric ResultValues.
+   * @hibernate.property type="boolean" not-null="true"
+   */
+  public boolean isNumeric()
   {
-    getScreenResult().addWell(well);
-    _resultValues.put(well.getWellKey(), new ResultValue(assayWellType, value, exclude));
-    return true; // TODO: be conditional
+    return _isNumeric;
+  }
+  
+  @DerivedEntityProperty
+  public boolean isNumericalnessDetermined()
+  {
+    return _isNumericalnessDetermined;
   }
 
-  public boolean addResultValue(Well well, String value)
+  /**
+   * Add a ResultValue to the ResultValueType.
+   * 
+   * @param well the well of the new ResultValue
+   * @param assayWellType the AssayWellType of the new ResultValue
+   * @param value the value of the new ResultValue
+   * @param exclude the exclude flag of the new ResultValue
+   * @param isNumeric true, iff ths new ResultValue's value is a number
+   * @return true, iff a ResultValue did not already exist for the given well (within the parent ResultValue)
+   */
+  public boolean addResultValue(Well well,
+                                AssayWellType assayWellType,
+                                String value,
+                                boolean exclude,
+                                boolean isNumeric)
   {
-    return addResultValue(well, AssayWellType.EXPERIMENTAL, value, false);
+    if (_resultValues.containsKey(well.getWellKey())) {
+      return false;
+    }
+    if (_resultValues.size() == 0) {
+      setNumeric(isNumeric);
+    }
+    else if (isNumeric() != isNumeric) {
+      throw new IllegalArgumentException("cannot add a " + (isNumeric ? "" : "non-") + 
+                                         "numeric value to a " + (isNumeric ? "non-" : "") + 
+                                         "numeric ResultValueType");
+    }
+    getScreenResult().addWell(well);
+    _resultValues.put(well.getWellKey(), 
+                      new ResultValue(assayWellType, value, exclude, isNumeric));
+    return true;
+  }
+
+  /**
+   * Add a numeric ResultValue to the ResultValueType. If the numeric value is
+   * originally available as a String, call
+   * {@link #addResultValue(Well, AssayWellType, String, boolean, boolean)}
+   * instead, to preserve the full precision of the value (with isNumeric param
+   * set to true).
+   * 
+   * @param well the well of the new ResultValue
+   * @param assayWellType the AssayWellType of the new ResultValue
+   * @param value the numeric value of the new ResultValue
+   * @param exclude the exclude flag of the new ResultValue
+   * @return true, iff a ResultValue did not already exist for the given well
+   *         (within the parent ResultValue)
+   */
+  public boolean addResultValue(Well well,
+                                AssayWellType assayWellType,
+                                Double numericValue,
+                                boolean exclude)
+  {
+    if (_resultValues.containsKey(well.getWellKey())) {
+      return false;
+    }
+    if (_resultValues.size() == 0) {
+      setNumeric(true);
+    }
+    else if (!isNumeric()) {
+      throw new IllegalArgumentException("cannot add a numeric value to a non-numeric ResultValueType");
+    }
+    getScreenResult().addWell(well);
+    _resultValues.put(well.getWellKey(), 
+                      new ResultValue(assayWellType, 
+                                      numericValue,
+                                      exclude));
+    return true;
+  }
+
+  /**
+   * Add a experimental type, non-excluded ResultValue to the ResultValueType.
+   * 
+   * @param well the well of the new ResultValue
+   * @param value the value of the new ResultValue
+   * @return true, iff the ResultValue was added
+   */
+  public boolean addResultValue(Well well, 
+                                String value)
+  {
+    return addResultValue(well, 
+                          AssayWellType.EXPERIMENTAL, 
+                          value, 
+                          false, 
+                          false);
+  }
+
+  /**
+   * Add a numeric, experimental type, non-excluded ResultValue to the
+   * ResultValueType. 
+   * 
+   * @param well the well of the new ResultValue
+   * @param value the value of the new ResultValue
+   * @param isNumeric true, iff ths new ResultValue's value is a number
+   * @return true, iff the ResultValue was added
+   */
+  public boolean addResultValue(Well well, 
+                                String value, 
+                                boolean isNumeric)
+  {
+    return addResultValue(well, 
+                          AssayWellType.EXPERIMENTAL, 
+                          value, 
+                          false, 
+                          isNumeric);
+  }
+
+  /**
+   * Add an experimental type, non-excluded ResultValue to the ResultValueType.
+   * If the numeric value is originally available as a String, call
+   * {@link #addResultValue(Well, String, boolean)} instead, to preserve the
+   * full precision of the value (with isNumeric param set to true).
+   * 
+   * @param well the well of the new ResultValue
+   * @param value the value of the new ResultValue
+   * @param isNumeric true, iff ths new ResultValue's value is a number
+   * @return true, iff the ResultValue was added
+   */
+  public boolean addResultValue(Well well, 
+                                Double value)
+  {
+    return addResultValue(well, 
+                          AssayWellType.EXPERIMENTAL, 
+                          value, 
+                          false);
   }
 
   /**
@@ -875,5 +1009,12 @@ public class ResultValueType extends AbstractEntity implements Comparable
    */
   private void setHbnDerivedTypes(SortedSet<ResultValueType> derivedTypes) {
     _derivedTypes = derivedTypes;
+  }
+  
+  // should be private, cuz we only want this class or Hibernate to call, but breaks our naive units tests
+  public void setNumeric(boolean isNumeric)
+  {
+    _isNumeric = isNumeric;
+    _isNumericalnessDetermined = true;
   }
 }

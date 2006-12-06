@@ -47,8 +47,8 @@ public class WellKey implements Comparable
   public WellKey(int plateNumber, int row, int column)
   {
     _plateNumber = plateNumber;
-    _row = row;
-    _column = column;
+    setRow(row);
+    setColumn(column);
   }
   
   public WellKey(int plateNumber, String wellName)
@@ -71,8 +71,8 @@ public class WellKey implements Comparable
     Matcher matcher = keyPattern.matcher(key);
     if (matcher.matches()) {
       _plateNumber = Integer.parseInt(matcher.group(1));
-      _row = matcher.group(2).charAt(0) - 'A';
-      _column = Integer.parseInt(matcher.group(3)) - 1;
+      setRow(matcher.group(2).charAt(0) - 'A');
+      setColumn(Integer.parseInt(matcher.group(3)) - 1);
 //      if (log.isDebugEnabled()) {
 //        log.debug("decomposed key " + key + " to " + this);
 //      }
@@ -89,6 +89,9 @@ public class WellKey implements Comparable
 
   public void setColumn(int column)
   {
+    if (column >= Well.PLATE_COLUMNS) {
+      throw new IllegalArgumentException("column " + column + " is not < " + Well.PLATE_COLUMNS);
+    }
     _column = column;
   }
 
@@ -109,6 +112,9 @@ public class WellKey implements Comparable
 
   public void setRow(int row)
   {
+    if (row >= Well.PLATE_ROWS) {
+      throw new IllegalArgumentException("row " + row + " is not < " + Well.PLATE_ROWS);
+    }
     _row = row;
   }
   

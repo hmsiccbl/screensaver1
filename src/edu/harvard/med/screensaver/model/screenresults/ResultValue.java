@@ -11,11 +11,19 @@ package edu.harvard.med.screensaver.model.screenresults;
 
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 
+import org.apache.log4j.Logger;
+
 /**
  * A <code>ResultValue</code> holds the actual value of a screen result data
- * point (in a text field) for a given {@link ScreenResult},
- * {@link ResultValueType}, and
- * {@link edu.harvard.med.screensaver.model.libraries.Well}.
+ * point for a given {@link ScreenResult}, {@link ResultValueType}, and
+ * {@link edu.harvard.med.screensaver.model.libraries.Well}. The value is
+ * always stored as a string, and this is considered the canonical version of
+ * the value. However, for ResultValues that are deemed "numeric" the value is
+ * redundantly stored as a numeric type, to allow for efficient sorting of
+ * numeric values in the database. Client code must always set the value as
+ * string, but may get the numeric value. Note that the ResultValueType contains
+ * an "isNumeric" property that indicates whether its member ResultValues are
+ * numeric.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -24,11 +32,12 @@ public class ResultValue
 {
 
   private static final long serialVersionUID = -4066041317098744417L;
-
+  private static final Logger log = Logger.getLogger(ResultValue.class);
   
   // properties instance data
   
   private String          _value;
+  private Double          _numericValue;
   private AssayWellType   _assayWellType;
   /**
    * Note that we maintain an "exclude" flag on a per-ResultValue basis. It is
@@ -51,21 +60,87 @@ public class ResultValue
    */
   ResultValue(String value)
   {
-    this(AssayWellType.EXPERIMENTAL, value, false);
+    this(AssayWellType.EXPERIMENTAL, value, false, false);
+  }
+  
+  /**
+   * Constructs a numeric ResultValue object, using a String to specify the
+   * numeric value. This constructor should be used if the value is originally
+   * made available as a String, as this preserves the full precision of the
+   * value (rather than forcing all numeric values to be converted to Doubles
+   * before constructing a numeric ResultValue).
+   * 
+   * @param value
+   * @param isNumeric
+   */
+  ResultValue(String value, boolean isNumeric)
+  {
+    this(AssayWellType.EXPERIMENTAL, value, false, isNumeric);
+  }
+  
+  /**
+   * Constructs a numeric ResultValue object, using a Double to specify the
+   * numeric value. If the value is originally made available as a String, use
+   * {@link #ResultValue(String, boolean)}, as this will presever the full
+   * precision of the value (it will be parsed into a Double, as well, and
+   * stored redundantly as a String and a Double).
+   * 
+   * @param value
+   */
+  ResultValue(Double value)
+  {
+    this(AssayWellType.EXPERIMENTAL, value.toString(), false, true);
+    _numericValue = value;
   }
 
   /**
-   * Constructs an initialized <code>ResultValue</code> object.  <p>
-   * Wanring: to add a ResultValue to the model, call {@link ResultValueType#addResultValue}.
-   * @param resultValueType
-   * @param assayWellType
-   * @param value
-   * @param exclude
+   * Constructs an initialized <code>ResultValue</code> object.
+   * <p>
+   * Warning: to add a ResultValue to the model, call
+   * {@link ResultValueType#addResultValue}. This constructor is package
+   * protected so that ResultValueType can use it, otherwise it would be
+   * private.
+   * 
+   * @param assayWellType the AssayWellType of the new ResultValue
+   * @param value the value of the new ResultValue
+   * @param exclude the exclude flag of the new ResultValue
+   * @param isNumeric true, iff ths new ResultValue's value is a number
    */
-  public ResultValue(AssayWellType assayWellType, String value, boolean exclude)
+  ResultValue(AssayWellType assayWellType,
+              Double value,
+              boolean exclude)
+  {
+    setAssayWellType(assayWellType);
+    if (value != null) {
+      setValue(value.toString());
+    }
+    setNumericValue(value);
+    setExclude(exclude);
+  } 
+
+  /**
+   * Constructs an initialized <code>ResultValue</code> object.
+   * <p>
+   * Warning: to add a ResultValue to the model, call
+   * {@link ResultValueType#addResultValue}. This constructor is package
+   * protected so that ResultValueType can use it, otherwise it would be
+   * private.
+   * 
+   * @param assayWellType the AssayWellType of the new ResultValue
+   * @param value the value of the new ResultValue
+   * @param exclude the exclude flag of the new ResultValue
+   * @param isNumeric true, iff ths new ResultValue's value is a number
+   */
+  ResultValue(AssayWellType assayWellType,
+              String value,
+              boolean exclude,
+              boolean isNumeric)
   {
     setAssayWellType(assayWellType);
     setValue(value);
+    if (isNumeric && value != null) {
+      setNumericValue(Double.parseDouble(value));
+    }
     setExclude(exclude);
   } 
 
@@ -73,8 +148,6 @@ public class ResultValue
    * Get the assay well's type.
    * 
    * @return the assay well's type
-   * @hibernate.property type="edu.harvard.med.screensaver.model.screenresults.AssayWellType$UserType"
-   *                     not-null="true"
    */
   public AssayWellType getAssayWellType()
   {
@@ -82,69 +155,35 @@ public class ResultValue
   }
   
   /**
-   * Set the assay well's type. <i>Note: This is implemented as a denormalized
-   * attribute. If you call this method, you must also call it for every
-   * ResultValue that has the same Well (within the same parent screen result).</i>
-   * Technically, we should have an AssayWell entity, which groups all the
-   * ResultValues for a given stock plate well (within the parent screen
-   * result). But it's creates a lot of new bidirectional relationships!
+   * Get the string value of this <code>ResultValue</code>.
    * 
-   * @param assayWellType the new type of the assay well
-   */
-  public void setAssayWellType(AssayWellType assayWellType)
-  {
-    if (assayWellType == null) {
-      throw new NullPointerException("assayWellType must be non-null");
-    }
-    // TODO: consider updating all related ResultValues (i.e., for the same well
-    // within this ScreenResult); would require parallel
-    // {get,set}HbnAssayWellType methods.
-    _assayWellType = assayWellType;
-  }
-
-  /**
-   * Get the actual value of this <code>ResultValue</code>.
-   * 
-   * @return a {@link java.lang.String} representing the actual value of this
+   * @return a {@link java.lang.String} representing the string value of this
    *         <code>ResultValue</code>
-   * @hibernate.property type="text" not-null="true"
    */
   public String getValue() {
     return _value;
   }
   
   /**
-   * Set the actual value of this <code>ResultValue</code>.
+   * Get the numeric value of this <code>ResultValue</code>.
    * 
-   * @param value the value to set
+   * @return a {@link java.lang.Double} representing the numeric value of this
+   *         <code>ResultValue</code>
    */
-  public void setValue(String value) {
-    _value = value;
+  public Double getNumericValue() {
+    return _numericValue;
   }
-
+  
   /**
    * Get whether this <code>ResultValue</code> is to be excluded in any
    * subsequent analyses.
    * 
    * @return <code>true</code> iff this <code>ResultValue</code> is to be
    *         excluded in any subsequent analysis
-   * @hibernate.property type="boolean" not-null="true"
    */
   public boolean isExclude()
   {
     return _exclude;
-  }
-  
-  /**
-   * Set whether this <code>ResultValue</code> is to be excluded in any
-   * subsequent analyses.
-   * 
-   * @param exclude set to <code>true</code> iff this <code>ResultValue</code>
-   *          is to be excluded in any subsequent analysis
-   */
-  public void setExclude(boolean exclude)
-  {
-    _exclude = exclude;
   }
   
   @DerivedEntityProperty
@@ -180,22 +219,15 @@ public class ResultValue
     return getAssayWellType().equals(AssayWellType.EMPTY);
   }
   
-
-  // @DerivedEntityProperty
-  // public boolean isEdgeWell()
-  // {
-  // return getWell().isEdgeWell();
-  // }
-
-
   public boolean equals(Object o)
   {
     if (!(o instanceof ResultValue)) {
       return false;
     }
     ResultValue other = (ResultValue) o;
-    return 
-      _value.equals(other._value) && 
+    return
+    ((_value == null && other._value == null) ||
+      (_value != null && other._value != null && _value.equals(other._value))) && 
       _assayWellType.equals(other._assayWellType) && 
       _exclude == other._exclude;
   }
@@ -227,8 +259,8 @@ public class ResultValue
       return null;
     }
     
-    if (!rvt.isDerived()) {
-      return Double.valueOf(rv.getValue());
+    if (rvt.isNumeric()) {
+      return rv.getNumericValue();
     }
       
     if (rvt.isActivityIndicator()) {
@@ -237,7 +269,14 @@ public class ResultValue
         return Boolean.valueOf(rv.getValue());
       }
       else if (activityIndicatorType.equals(ActivityIndicatorType.NUMERICAL)) {
-        return Double.valueOf(rv.getValue());
+        if (rvt.isNumeric()) {
+          // should already have been handled above, but we include this case for completeness
+          return rv.getNumericValue();
+        }
+        else {
+          log.warn("expected ResultValue to have numeric value, since parent ResultValueType is numerical");
+          return rv.getValue();
+        }
       }
       else if (activityIndicatorType.equals(ActivityIndicatorType.PARTITION)) {
         for (PartitionedValue pv: PartitionedValue.values()) {
@@ -250,7 +289,7 @@ public class ResultValue
       }
       assert false : "unhandled ActivityIndicatorType in ResultValue.generateTypedValue()";
     }
-    return rv.getValue().toString();
+    return rv.getValue();
   }
 
 
@@ -262,4 +301,58 @@ public class ResultValue
    */
   private ResultValue() {}
   
+  /**
+   * Set the assay well's type. <i>Note: This is implemented as a denormalized
+   * attribute. If you call this method, you must also call it for every
+   * ResultValue that has the same Well (within the same parent screen result).</i>
+   * Technically, we should have an AssayWell entity, which groups all the
+   * ResultValues for a given stock plate well (within the parent screen
+   * result). But it's creates a lot of new bidirectional relationships!
+   * 
+   * @param assayWellType the new type of the assay well
+   * @motivation for hibernate
+   */
+  private void setAssayWellType(AssayWellType assayWellType)
+  {
+    if (assayWellType == null) {
+      throw new NullPointerException("assayWellType must be non-null");
+    }
+    // TODO: consider updating all related ResultValues (i.e., for the same well
+    // within this ScreenResult); would require parallel
+    // {get,set}HbnAssayWellType methods.
+    _assayWellType = assayWellType;
+  }
+
+  /**
+   * Set the actual value of this <code>ResultValue</code>.
+   * 
+   * @param value the value to set
+   * @motivation for hibernate
+   */
+  private void setValue(String value) {
+    _value = value;
+  }
+
+  /**
+   * Set the actual value of this <code>ResultValue</code>.
+   * 
+   * @param value the value to set
+   * @motivation for hibernate
+   */
+  private void setNumericValue(Double value) {
+    _numericValue = value;
+  }
+
+  /**
+   * Set whether this <code>ResultValue</code> is to be excluded in any
+   * subsequent analyses.
+   * 
+   * @param exclude set to <code>true</code> iff this <code>ResultValue</code>
+   *          is to be excluded in any subsequent analysis
+   * @motivation for hibernate
+   */
+  private void setExclude(boolean exclude)
+  {
+    _exclude = exclude;
+  }
 }
