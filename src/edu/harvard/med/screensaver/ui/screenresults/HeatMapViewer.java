@@ -318,7 +318,7 @@ public class HeatMapViewer extends AbstractBackingBean
   public String addHeatMap()
   {
     HeatMapConfiguration heatMapConfiguration = new HeatMapConfiguration();
-    heatMapConfiguration.setDataHeaders(new UISelectOneBean<ResultValueType>(_screenResult.getResultValueTypes()) {
+    heatMapConfiguration.setDataHeaders(new UISelectOneBean<ResultValueType>(_screenResult.getNumericResultValueTypes()) {
       protected String getLabel(ResultValueType t) { return t.getName(); } 
     });
     heatMapConfiguration.setScoringType(new UISelectOneBean<ScoringType>(Arrays.asList(ScoringType.values())));

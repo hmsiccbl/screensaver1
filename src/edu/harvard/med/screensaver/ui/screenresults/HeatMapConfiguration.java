@@ -41,9 +41,9 @@ public class HeatMapConfiguration
     return _dataHeaders;
   }
 
-  public void setDataHeaders(UISelectOneBean<ResultValueType> dataHeadersController)
+  public void setDataHeaders(UISelectOneBean<ResultValueType> dataHeaders)
   {
-    _dataHeaders = dataHeadersController;
+    _dataHeaders = dataHeaders;
   }
 
   public UISelectManyBean<Filter<ResultValue>> getExcludedWellFilters()

@@ -18,6 +18,7 @@
       to reference the managed-beads that need to get initialized first in a null context here.
 	--%>
 	<h:outputText value="#{librariesController}" rendered="#{empty librariesController && false}" />
+	<h:outputText value="#{screenssController}" rendered="#{empty screensController && false}" />
 	
     <t:commandLink id="menuTitle" action="goMain" value="#{menu.applicationTitle}" styleClass="menuItem title"/>
 
@@ -93,6 +94,19 @@
         styleClass="command"
       />
     </h:form>
+    
+    <h:form id="quickFindScreenForm">
+			<t:panelGrid columns="1" rendered="#{menu.authenticatedUser}">
+				<t:outputLabel id="screenNumberLabel" for="screenNumber"
+					value="Screen #" styleClass="menuItem inputLabel" />
+				<t:inputText id="screenNumber" value="#{screenFinder.screenNumber}"
+					size="5" styleClass="input" validator="IntegerConverter"/>
+				<t:commandButton action="#{screenFinder.findScreen}"
+					id="quickFindScreenSubmit" value="Go"
+					rendered="#{menu.authenticatedUser}" styleClass="command" />
+			</t:panelGrid>
+		</h:form>
+    
   </t:panelGrid>
 </f:subview>
 

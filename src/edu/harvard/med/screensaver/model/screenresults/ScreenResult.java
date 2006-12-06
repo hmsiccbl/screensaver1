@@ -369,6 +369,22 @@ public class ScreenResult extends AbstractEntity
   }
   
   /**
+   * Return the subset of ResultValueTypes that contain numeric ResultValue data.
+   * @return the subset of ResultValueTypes that contain numeric ResultValue data
+   */
+  @DerivedEntityProperty
+  public List<ResultValueType> getNumericResultValueTypes()
+  {
+    List<ResultValueType> numericResultValueTypes = new ArrayList<ResultValueType>();
+    for (ResultValueType rvt : getResultValueTypes()) {
+      if (rvt.isNumericalnessDetermined() && rvt.isNumeric()) {
+        numericResultValueTypes.add(rvt);
+      }
+    }
+    return numericResultValueTypes;
+  }
+
+  /**
    * Get the screen.
    *
    * @return the screen

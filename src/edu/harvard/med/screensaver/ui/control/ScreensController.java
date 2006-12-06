@@ -26,6 +26,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.ui.screens.ScreenFinder;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreensBrowser;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
@@ -51,6 +52,7 @@ public class ScreensController extends AbstractUIController
   private DAO _dao;
   private ScreensBrowser _screensBrowser;
   private ScreenViewer _screenViewer;
+  private ScreenFinder _screenFinder;
   private ScreenResultsController _screenResultsController;
   
 
@@ -98,6 +100,17 @@ public class ScreensController extends AbstractUIController
   
   
   // public controller methods
+
+  public ScreenFinder getScreenFinder()
+  {
+    return _screenFinder;
+  }
+
+  public void setScreenFinder(ScreenFinder screenFinder)
+  {
+    _screenFinder = screenFinder;
+    _screenFinder.setScreensController(this);
+  }
 
   @UIControllerMethod
   public String browseScreens()
@@ -263,6 +276,18 @@ public class ScreensController extends AbstractUIController
   {
     screen.getKeywords().remove(keyword);
     return VIEW_SCREEN;
+  }
+
+  public String findScreen(Integer screenNumber)
+  {
+    if (screenNumber != null) {
+      Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+      if (screen != null) {
+        return viewScreen(screen, null);
+      }
+    }
+    // TODO: add message to indicate failure
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 }
 

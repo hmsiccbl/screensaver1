@@ -260,6 +260,10 @@
       <property-name>screenViewer</property-name>
       <value>#{screenViewer}</value>
     </managed-property>
+    <managed-property>
+      <property-name>screenFinder</property-name>
+      <value>#{screenFinder}</value>
+    </managed-property>
   </managed-bean>
   
   <managed-bean>
@@ -276,6 +280,13 @@
     <managed-bean-scope>session</managed-bean-scope>
   </managed-bean>
   
+  <managed-bean>
+    <description>Screen Finder</description>
+    <managed-bean-name>screenFinder</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.screens.ScreenFinder</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+
 
   <!-- === screen results backing beans === -->
   
