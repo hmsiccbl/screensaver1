@@ -341,7 +341,13 @@ public class ScreenResultViewer extends AbstractBackingBean
   {
     int rowsPerPage = getDataTable().getRows();
     if (rowsPerPage > 0) {
-      return gotoPage(Math.max(0, getRawDataSize()) / getDataTable().getRows());
+      int newPage = Math.max(0, getRawDataSize() / rowsPerPage);
+      // handle case where total rows is evenly divided by rowsPerPage, in which
+      // case "last page" would have 0 rows
+      if (newPage * rowsPerPage == getRawDataSize()) {
+        --newPage;
+      }
+      return gotoPage(newPage);
     }
     else {
       return REDISPLAY_PAGE_ACTION_RESULT;
@@ -558,7 +564,7 @@ public class ScreenResultViewer extends AbstractBackingBean
       case 0: sortByArg = DAO.SORT_BY_PLATE_WELL; break;
       case 1: sortByArg = DAO.SORT_BY_WELL_PLATE; break;
       case 2: sortByArg = DAO.SORT_BY_ASSAY_WELL_TYPE; break;
-      case 3: sortByArg = DAO.SORT_BY_PLATE_WELL; break; // error!
+      case 3: sortByArg = DAO.SORT_BY_PLATE_WELL; break; // error! can't sort by "excluded" col currently
       default:
           sortByArg = getSortManager().getCurrentSortColumnIndex() - 4;
       }
