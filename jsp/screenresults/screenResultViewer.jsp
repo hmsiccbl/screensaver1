@@ -82,6 +82,20 @@ TODO:
 					<t:outputText id="screenTitle"
 						value="#{screenResultViewer.screen.title}" styleClass="dataText" />
 
+					<t:outputLabel for="screenLabName" value="Lab Name"
+						styleClass="keyColumn" />
+					<t:commandLink id="screenLabName"
+						value="#{screenViewer.screen.labHead.labName}"
+						action="#{screenViewer.viewLabHead}"
+						styleClass="dataText entityLink" style="margin-right: 4px" />
+
+					<t:outputLabel for="screenLeadScreener" value="Lead Screener"
+						styleClass="keyColumn" />
+					<t:commandLink id="screenLeadScreener"
+						value="#{screenViewer.screen.leadScreener.fullNameLastFirst}"
+						action="#{screenViewer.viewLeadScreener}"
+						styleClass="dataText entityLink" style="margin-right: 4px" />
+
 					<t:outputLabel for="screenResultDateCreated"
 						value="Screen Result Created" styleClass="keyColumn"
 						rendered="#{!empty screenResultViewer.screenResult}" />
@@ -90,7 +104,7 @@ TODO:
 						styleClass="dataText"
 						rendered="#{!empty screenResultViewer.screenResult}" />
 
-					<t:outputLabel for="screenResultDateCreated" value="Shareable"
+					<t:outputLabel for="screenResultIsShareable" value="Shareable"
 						styleClass="keyColumn"
 						rendered="#{!empty screenResultViewer.screenResult}" />
 					<t:selectBooleanCheckbox id="screenResultIsShareable"
