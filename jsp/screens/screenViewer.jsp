@@ -46,6 +46,24 @@ TODO:
 				displayValueOnly="#{screenViewer.readOnly}" size="80"
 				styleClass="input" displayValueOnlyStyleClass="dataText" />
 
+			<t:outputLabel value="Screen Results" styleClass="inputLabel" />
+			<t:panelGrid columns="1">
+				<t:panelGroup>
+					<t:outputLabel value="<none>" styleClass="inputLabel"
+						rendered="#{empty screenViewer.screenResult}" />
+					<t:outputLabel value="Date created: " styleClass="inputLabel"
+						rendered="#{!empty screenViewer.screenResult}" />
+					<t:outputText
+						value="#{screenViewer.screenResult.dateCreated}"
+						styleClass="data"
+						rendered="#{!empty screenViewer.screenResult}" />
+				</t:panelGroup>
+				<t:commandButton
+					value="#{screenViewer.editable ? \"View/Edit/Load...\" : \"View...\"}"
+					action="#{screenViewer.viewScreenResult}" styleClass="command"
+					rendered="#{!empty screenViewer.screenResult || screenViewer.editable}" />
+			</t:panelGrid>
+
 			<t:outputLabel for="dateCreatedEditable" value="Created"
 				rendered="#{screenViewer.readOnlyAdmin || screenViewer.editable}"
 				styleClass="inputLabel" />
@@ -153,9 +171,11 @@ TODO:
 			<t:outputLabel for="collaborators" value="Collaborators"
 				styleClass="inputLabel" />
 			<t:panelGrid columns="2" styleClass="nonSpacingPanel" columnClasses="column">
+				<t:outputText value="<none>" rendered="#{empty screenViewer.screen.collaborators}"/>
 				<t:dataTable var="collaborator"
 					value="#{screenViewer.screen.collaborators}"
-					headerClass="tableHeader">
+					headerClass="tableHeader"
+					rendered="#{!empty screenViewer.screen.collaborators}" >
 					<t:column>
 						<t:commandLink action="#{screenViewer.viewCollaborator}"
 							value="#{collaborator.fullNameLastFirst}" styleClass="dataText entityLink" />
@@ -527,6 +547,67 @@ TODO:
 				</t:panelGroup>
 			</t:panelGrid>
 
+			<t:outputLabel for="visitItems" value="Visits"
+				styleClass="inputLabel" />
+			<t:panelGrid columns="1">
+				<t:outputText value="<none>"
+					rendered="#{empty screenViewer.screen.visits}" />
+				<t:dataTable id="visitItems" var="visitItem"
+					value="#{screenViewer.visitsDataModel}" preserveDataModel="false"
+					rendered="#{!empty screenViewer.screen.visits}"
+					styleClass="standardTable" rowClasses="row1,row2"
+					columnClasses="column" headerClass="tableHeader">
+					<t:column>
+						<f:facet name="header">
+							<t:outputText value="Visit Date" />
+						</f:facet>
+						<t:outputText id="visitDate" value="#{visitItem.visitDate}"
+							styleClass="dataText" />
+					</t:column>
+					<t:column>
+						<f:facet name="header">
+							<t:outputText value="Created" />
+						</f:facet>
+						<t:outputText id="createdDate" value="#{visitItem.dateCreated}"
+							styleClass="dataText" />
+					</t:column>
+					<t:column>
+						<f:facet name="header">
+							<t:outputText value="Type" />
+						</f:facet>
+						<t:outputText id="createdDate" value="#{visitItem.visitType}"
+							styleClass="dataText" />
+					</t:column>
+					<t:column>
+						<f:facet name="header">
+							<t:outputText value="Performed By" />
+						</f:facet>
+						<t:outputText id="visitItemFullName"
+							value="#{visitItem.performedBy.fullNameLastFirst}" styleClass="dataText" />
+					</t:column>
+					<t:column>
+						<f:facet name="header">
+							<%--t:outputText value="Action" /--%>
+						</f:facet>
+						<t:commandButton id="viewVisit" action="#{screenViewer.viewVisit}"
+							value="#{screenViewer.editable ? \"View/Edit...\" : \"View...\"}"
+							styleClass="command" />
+						<t:commandButton id="copyVisit" action="#{screenViewer.copyVisit}"
+							rendered="#{screenViewer.editable}" value="#{\"Copy...\"}"
+							styleClass="command" alt="Copy to another screen" />
+					</t:column>
+				</t:dataTable>
+				<t:panelGroup>
+					<t:commandButton value="Add Cherry Pick Visit..."
+						action="#{screenViewer.addCherryPickVisitItem}" immediate="false"
+						styleClass="command" rendered="#{screenViewer.editable}" />
+					<t:commandButton value="Add Non-Cherry Pick Visit..."
+						action="#{screenViewer.addNonCherryPickVisitItem}"
+						immediate="false" styleClass="command"
+						rendered="#{screenViewer.editable}" />
+				</t:panelGroup>
+			</t:panelGrid>
+
 			<t:outputLabel for="abaseStudyId" value="Abase Study ID"
 				rendered="#{screenViewer.readOnlyAdmin || screenViewer.editable}"
 				styleClass="inputLabel" />
@@ -599,85 +680,6 @@ TODO:
 						action="#{screenViewer.addAbaseTestset}" immediate="false"
 						styleClass="command" />
 				</t:panelGroup>
-			</t:panelGrid>
-
-			<t:outputLabel for="visitItems" value="Visits"
-				styleClass="inputLabel" />
-			<t:panelGrid columns="1">
-				<t:outputText value="<none>"
-					rendered="#{empty screenViewer.screen.visits}" />
-				<t:dataTable id="visitItems" var="visitItem"
-					value="#{screenViewer.visitsDataModel}" preserveDataModel="false"
-					rendered="#{!empty screenViewer.screen.visits}"
-					styleClass="standardTable" rowClasses="row1,row2"
-					columnClasses="column" headerClass="tableHeader">
-					<t:column>
-						<f:facet name="header">
-							<t:outputText value="Visit Date" />
-						</f:facet>
-						<t:outputText id="visitDate" value="#{visitItem.visitDate}"
-							styleClass="dataText" />
-					</t:column>
-					<t:column>
-						<f:facet name="header">
-							<t:outputText value="Created" />
-						</f:facet>
-						<t:outputText id="createdDate" value="#{visitItem.dateCreated}"
-							styleClass="dataText" />
-					</t:column>
-					<t:column>
-						<f:facet name="header">
-							<t:outputText value="Type" />
-						</f:facet>
-						<t:outputText id="createdDate" value="#{visitItem.visitType}"
-							styleClass="dataText" />
-					</t:column>
-					<t:column>
-						<f:facet name="header">
-							<t:outputText value="Performed By" />
-						</f:facet>
-						<t:outputText id="visitItemFullName"
-							value="#{visitItem.performedBy.fullNameLastFirst}" styleClass="dataText" />
-					</t:column>
-					<t:column>
-						<f:facet name="header">
-							<%--t:outputText value="Action" /--%>
-						</f:facet>
-						<t:commandButton id="viewVisit" action="#{screenViewer.viewVisit}"
-							value="#{screenViewer.editable ? \"View/Edit...\" : \"View...\"}"
-							styleClass="command" />
-						<t:commandButton id="copyVisit" action="#{screenViewer.copyVisit}"
-							rendered="#{screenViewer.editable}" value="#{\"Copy...\"}"
-							styleClass="command" alt="Copy to another screen" />
-					</t:column>
-				</t:dataTable>
-				<t:panelGroup>
-					<t:commandButton value="Add Cherry Pick Visit..."
-						action="#{screenViewer.addCherryPickVisitItem}" immediate="false"
-						styleClass="command" rendered="#{screenViewer.editable}" />
-					<t:commandButton value="Add Non-Cherry Pick Visit..."
-						action="#{screenViewer.addNonCherryPickVisitItem}"
-						immediate="false" styleClass="command"
-						rendered="#{screenViewer.editable}" />
-				</t:panelGroup>
-			</t:panelGrid>
-
-			<t:outputLabel value="Screen Results" styleClass="inputLabel" />
-			<t:panelGrid columns="1">
-				<t:panelGroup>
-					<t:outputLabel value="<none>" styleClass="inputLabel"
-						rendered="#{empty screenViewer.screenResult}" />
-					<t:outputLabel value="Date created: " styleClass="inputLabel"
-						rendered="#{!empty screenViewer.screenResult}" />
-					<t:outputText
-						value="#{screenViewer.screenResult.dateCreated}"
-						styleClass="data"
-						rendered="#{!empty screenViewer.screenResult}" />
-				</t:panelGroup>
-				<t:commandButton
-					value="#{screenViewer.editable ? \"View/Edit/Load...\" : \"View...\"}"
-					action="#{screenViewer.viewScreenResult}" styleClass="command"
-					rendered="#{!empty screenViewer.screenResult || screenViewer.editable}" />
 			</t:panelGrid>
 
 			<t:outputLabel value="Billing Information" styleClass="inputLabel"
