@@ -162,8 +162,8 @@ TODO:
 					</t:div>
 				</f:facet>
 
-				<t:dataTable id="metadataTable"
-					value="#{screenResultViewer.metadata}" var="row"
+				<t:dataTable id="dataHeadersTable"
+					value="#{screenResultViewer.dataHeaders}" var="row"
 					styleClass="standardTable" headerClass="tableHeader"
 					rowClasses="row1,row2">
 					<t:column styleClass="keyColumn">
@@ -177,7 +177,7 @@ TODO:
 						<f:facet name="header">
 							<t:outputText value="#{columnName}" />
 						</f:facet>
-						<t:outputText value="#{screenResultViewer.metadataCellValue}" />
+						<t:outputText value="#{screenResultViewer.dataHeadersCellValue}" />
 					</t:columns>
 				</t:dataTable>
 			</t:collapsiblePanel>

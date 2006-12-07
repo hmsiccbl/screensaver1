@@ -25,6 +25,7 @@ import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 
 /**
  * A <code>ScreenResult</code> represents the data produced by machine-reading
@@ -70,6 +71,8 @@ public class ScreenResult extends AbstractEntity
    *             normalized Plate table.
    */
   private SortedSet<Integer>         _plateNumbers = new TreeSet<Integer>();
+
+  private transient UniqueDataHeaderNames _uniqueDataHeaderNames;
 
 
 
@@ -209,6 +212,15 @@ public class ScreenResult extends AbstractEntity
   public SortedSet<ResultValueType> getResultValueTypes()
   {
     return Collections.unmodifiableSortedSet(_resultValueTypes);
+  }
+  
+  @DerivedEntityProperty
+  public UniqueDataHeaderNames getUniqueDataHeaderNames()
+  {
+    if (_uniqueDataHeaderNames == null) {
+      _uniqueDataHeaderNames = new UniqueDataHeaderNames(this);
+    }
+    return _uniqueDataHeaderNames;
   }
   
   /**

@@ -71,9 +71,40 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   private static Logger log = Logger.getLogger(ScreenResultViewer.class);
   
-  private static final DataModel EMPTY_METADATA_MODEL = new ListDataModel(new ArrayList<MetadataRow>());
+  private static final DataModel EMPTY_DATAHEADERS_MODEL = new ListDataModel(new ArrayList<DataHeaderRow>());
   private static final DataModel EMPTY_RAW_DATA_MODEL = new ListDataModel(new ArrayList<Map<String,String>>());
   private static final List<String> DATA_TABLE_FIXED_COLUMN_HEADERS = Arrays.asList("Plate", "Well", "Type", "Excluded");
+  private static final DataHeaderRowDefinition[] DATA_HEADER_ATTRIBUTES = new DataHeaderRowDefinition[] {
+    new DataHeaderRowDefinition("description", "Description"),
+    new DataHeaderRowDefinition("replicateOrdinal", "Replicate Number"),
+    new DataHeaderRowDefinition("assayReadoutType", "Assay Readout Type"),
+    new DataHeaderRowDefinition("timePoint", "Time Point"),
+    new DataHeaderRowDefinition("derived", "Derived"),
+    new DataHeaderRowDefinition("howDerived", "How Derived"),
+    new DataHeaderRowDefinition("typesDerivedFrom", "Types Derived From") 
+    { 
+      @Override
+      public String formatValue(ResultValueType rvt)
+      {
+        StringBuilder typesDerivedFromText = new StringBuilder();
+        for (ResultValueType derivedFromRvt : rvt.getTypesDerivedFrom()) {
+          if (typesDerivedFromText.length() > 0) {
+            typesDerivedFromText.append(", ");
+          }
+          typesDerivedFromText.append(derivedFromRvt.getUniqueName());
+        }
+        return typesDerivedFromText.toString();
+      }
+    },
+    new DataHeaderRowDefinition("activityIndicator", "Activity Indicator"),
+    new DataHeaderRowDefinition("activityIndicatorType", "Activity Indicator Type"),
+    new DataHeaderRowDefinition("indicatorDirection", "Indicator Direction"),
+    new DataHeaderRowDefinition("indicatorCutoff", "Indicator Cutoff"),
+    new DataHeaderRowDefinition("followUpData", "Follow Up Data"),
+    new DataHeaderRowDefinition("assayPhenotype", "Assay Phenotype"),
+    new DataHeaderRowDefinition("cherryPick", "Cherry Pick"),
+    new DataHeaderRowDefinition("comments", "Comments")
+  };
 
   
   // instance data members
@@ -100,7 +131,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   private DataModel _rawDataModel;
   private DataModel _rawDataColumnModel;
   private DataModel _dataHeadersColumnModel;
-  private DataModel _metadataModel;
+  private DataModel _dataHeadersModel;
   private Map<String,Boolean> _collapsablePanelsState;
   private TableSortManager _sortManager;
 
@@ -200,13 +231,13 @@ public class ScreenResultViewer extends AbstractBackingBean
     _dataTable = dataUIComponent;
   }
   
-  public DataModel getMetadata()
+  public DataModel getDataHeaders()
   {
-    lazyBuildMetadataModel();
-    if (_metadataModel == null) {
-      return EMPTY_METADATA_MODEL;
+    lazyBuildDataHeadersModel();
+    if (_dataHeadersModel == null) {
+      return EMPTY_DATAHEADERS_MODEL;
     }
-    return _metadataModel;
+    return _dataHeadersModel;
   }
 
   /**
@@ -280,13 +311,13 @@ public class ScreenResultViewer extends AbstractBackingBean
    * @motivation for "Columns" JSF data table component
    * @return
    */
-  public Object getMetadataCellValue()
+  public Object getDataHeadersCellValue()
   {
-    DataModel dataModel = getMetadata();
+    DataModel dataModel = getDataHeaders();
     DataModel columnModel = getDataHeadersColumnModel();
     if (columnModel.isRowAvailable()) {
       String columnName = (String) columnModel.getRowData();  // getRowData() is really getColumnData()
-      MetadataRow row = (MetadataRow) dataModel.getRowData();
+      DataHeaderRow row = (DataHeaderRow) dataModel.getRowData();
       return row.getDataHeaderSinglePropertyValues().get(columnName);
     }
     return null;
@@ -469,7 +500,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   private void resetView()
   {
     _dataHeadersColumnModel = null;
-    _metadataModel = null;
+    _dataHeadersModel = null;
     _rawDataModel = null;
     _firstResultValueIndex = 0;
     _selectedResultValueTypes = null;
@@ -509,48 +540,23 @@ public class ScreenResultViewer extends AbstractBackingBean
     return _firstResultValueIndex / getDataTable().getRows();
   }
 
-  private void lazyBuildMetadataModel()
+  private void lazyBuildDataHeadersModel()
   {
-    if (_metadataModel == null) {
-      String[] properties = null;
-      try {
-        properties = new String[] {
-          "name",
-          "description",
-          "ordinal",
-          "replicateOrdinal",
-          "assayReadoutType",
-          "timePoint",
-          "derived",
-          "howDerived",
-          "typesDerivedFrom",
-          "activityIndicator",
-          "activityIndicatorType",
-          "indicatorDirection",
-          "indicatorCutoff",
-          "followUpData",
-          "assayPhenotype",
-          "cherryPick",
-          "comments"
-        };
-      } catch (Exception e) {
-        e.printStackTrace();
-        log.error("property not valid for ResultValueType");
-      }
-      
-      List<MetadataRow> tableData = new ArrayList<MetadataRow>();
-      for (String property : properties) {
+    if (_dataHeadersModel == null) {
+      List<DataHeaderRow> tableData = new ArrayList<DataHeaderRow>();
+      for (DataHeaderRowDefinition dataHeaderAttribute : DATA_HEADER_ATTRIBUTES) {
         try {
-          tableData.add(new MetadataRow(getScreenResult().getResultValueTypes(),
-                                        getUniqueDataHeaderNames(),
-                                        property));
+          tableData.add(new DataHeaderRow(getScreenResult().getResultValueTypes(),
+                                          getUniqueDataHeaderNames(),
+                                          dataHeaderAttribute));
         }
         catch (Exception e) {
           e.printStackTrace();
-          log.error("could not obtain value for property ResultValueType." + property);
+          log.error("could not obtain value for property ResultValueType." + 
+                    dataHeaderAttribute.getPropertyName());
         }
       }
-      _metadataModel = new ListDataModel(tableData);
+      _dataHeadersModel = new ListDataModel(tableData);
     }
   }
 
@@ -624,54 +630,86 @@ public class ScreenResultViewer extends AbstractBackingBean
 
   // inner classes
   
+  public static class DataHeaderRowDefinition
+  {
+    private String _propertyName;
+    private String _displayName;
+
+    public DataHeaderRowDefinition(String propertyName, 
+                            String displayName)
+    {
+      _propertyName = propertyName;
+      _displayName = displayName;
+    }
+
+    public String getDisplayName()
+    {
+      return _displayName;
+    }
+
+    public String getPropertyName()
+    {
+      return _propertyName;
+    }
+    
+    /**
+     * Override to format value in a custom way.
+     * @param rvt
+     * @return
+     */
+    public String formatValue(ResultValueType rvt)
+    {
+      try {
+        return BeanUtils.getProperty(rvt, _propertyName);
+      }
+      catch (Exception e) {
+        log.error(e.getMessage());
+        return "<error>";
+      }
+    }
+  }
+  
   /**
-   * MetadataRow bean, used to provide ScreenResult metadata to JSF components
-   * @see ScreenResultViewer#getMetadataCellValue()
+   * DataHeaderRow bean, used to provide ScreenResult data headers to JSF components
+   * @see ScreenResultViewer#getDataHeadersCellValue()
    * @author ant
    */
-  public static class MetadataRow
+  public static class DataHeaderRow
   {
-    private String _rowLabel;
+    private DataHeaderRowDefinition _dataHeaderRowDefinition;
     /**
      * Array containing the value of the same property for each ResultValueType
      */
     private Map<String,String> _rvtPropertyValues;    
 
     /**
-     * Constructs a MetadataRow object.
-     * @param rvts The {@link ResultValueType}s that contain the data for this row
-     * @param uniqueNames 
-     * @param property a bean property of the {@link ResultValueType}, which defines the type of metadata to be displayed by this row
-     * @throws Exception if the specified property cannot be determined for a ResultValueType
+     * Constructs a DataHeaderRow object.
+     * 
+     * @param rvts The {@link ResultValueType}s that contain the data for this
+     *          row
+     * @param uniqueNames
+     * @param property a bean property of the {@link ResultValueType}, which
+     *          defines the type of data header to be displayed by this row
+     * @throws Exception if the specified property cannot be determined for a
+     *           ResultValueType
      */
-    public MetadataRow(Collection<ResultValueType> rvts, UniqueDataHeaderNames uniqueNames, String propertyName) throws Exception
+    public DataHeaderRow(Collection<ResultValueType> rvts, 
+                         UniqueDataHeaderNames uniqueNames, 
+                         DataHeaderRowDefinition dataHeaderRowDefinition)
+
+      throws Exception
     {
-      _rowLabel = edu.harvard.med.screensaver.util.BeanUtils.formatPropertyName(propertyName);
+      _dataHeaderRowDefinition = dataHeaderRowDefinition;
       _rvtPropertyValues = new HashMap<String,String>();
       for (ResultValueType rvt : rvts) {
-        String value = BeanUtils.getProperty(rvt, propertyName);
-        // HACK: handle special cases, where we must format the property value of the ResultValueType
-        // TODO: how can we do this properly/generally?
-        if (propertyName.equals("name")) {
-          value = uniqueNames.get(rvt);
-        }
-        else if (propertyName.equals("typesDerivedFrom")) {
-          StringBuilder typesDerivedFromText = new StringBuilder();
-          for (ResultValueType derivedFromRvt : rvt.getTypesDerivedFrom()) {
-            if (typesDerivedFromText.length() > 0) {
-              typesDerivedFromText.append(", ");
-            }
-            typesDerivedFromText.append(uniqueNames.get(derivedFromRvt));
-          }
-          value = typesDerivedFromText.toString();
-        }
-        _rvtPropertyValues.put(uniqueNames.get(rvt), value);
+        _rvtPropertyValues.put(uniqueNames.get(rvt), 
+                               dataHeaderRowDefinition.formatValue(rvt));
       }
     }
 
     public String getRowLabel()
     {
-      return _rowLabel;
+      return _dataHeaderRowDefinition.getDisplayName();
     }
     
     public Map getDataHeaderSinglePropertyValues()

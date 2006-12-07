@@ -737,6 +737,12 @@ public class ResultValueType extends AbstractEntity implements Comparable
     return _name;
   }
 
+  @DerivedEntityProperty
+  public String getUniqueName()
+  {
+    return getScreenResult().getUniqueDataHeaderNames().get(this);
+  }
+
   /**
    * Set the name of this <code>ResultValueType</code>.
    * @param name the name of this <code>ResultValueType</code>
