@@ -156,4 +156,8 @@ public class NoOpDAO implements DAO
   {
   }
 
+  public List<Library> findLibrariesDisplayedInLibrariesBrowser()
+  {
+    return null;
+  }
 }

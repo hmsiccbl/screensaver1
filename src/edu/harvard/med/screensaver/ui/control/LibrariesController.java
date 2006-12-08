@@ -254,8 +254,9 @@ public class LibrariesController extends AbstractUIController
   public String browseLibraries()
   {
     if (getLibrariesBrowser().getLibrarySearchResults() == null) {
-        List<Library> libraries = _dao.findAllEntitiesWithType(Library.class);
-        _librariesBrowser.setLibrarySearchResults(new LibrarySearchResults(libraries, this));
+      //List<Library> libraries = _dao.findAllEntitiesWithType(Library.class);
+      List<Library> libraries = _dao.findLibrariesDisplayedInLibrariesBrowser();
+      _librariesBrowser.setLibrarySearchResults(new LibrarySearchResults(libraries, this));
     }
     return "browseLibraries";
   }

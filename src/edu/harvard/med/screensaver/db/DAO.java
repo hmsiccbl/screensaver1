@@ -269,4 +269,10 @@ public interface DAO
   
   public void createWellsForLibrary(Library library);
 
+  
+  /**
+   * Libraries Browser should not display DOS or Annotation libraries.
+   * @return
+   */
+  public List<Library> findLibrariesDisplayedInLibrariesBrowser();
 }
