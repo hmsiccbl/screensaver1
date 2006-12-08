@@ -16,6 +16,7 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 /**
  * Enable testing of ScreenResultParser (via ScreenResultParserTest), in mock
@@ -38,6 +39,7 @@ public class MockDaoForScreenResultParserTest extends NoOpDAO
     _library = 
       new Library(NAME_OF_PSEUDO_LIBRARY_FOR_IMPORT,
                   NAME_OF_PSEUDO_LIBRARY_FOR_IMPORT,
+                  ScreenType.OTHER,
                   LibraryType.OTHER,
                   1,
                   9999);

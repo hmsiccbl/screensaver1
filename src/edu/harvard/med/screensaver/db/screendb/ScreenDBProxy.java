@@ -18,6 +18,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -26,8 +28,6 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -138,13 +138,23 @@ public class ScreenDBProxy
       while (resultSet.next()) {
         String libraryName = resultSet.getString("name");
         String shortName = resultSet.getString("short_name");
-        LibraryType libraryType = libraryTypeUserType.getTermForValue(
-          resultSet.getString("library_type"));
+        ScreenType screenType;
+        LibraryType libraryType;
+        String rawLibraryType = resultSet.getString("library_type");
+        if (rawLibraryType.equals("RNAi")) {
+          screenType = ScreenType.RNAI;
+          libraryType = LibraryType.SIRNA;
+        }
+        else {
+          screenType = ScreenType.SMALL_MOLECULE;
+          libraryType = libraryTypeUserType.getTermForValue(rawLibraryType);
+        }
         Integer startPlate = resultSet.getInt("start_plate");
         Integer endPlate = resultSet.getInt("end_plate");
         Library library = new Library(
           libraryName,
           shortName,
+          screenType,
           libraryType,
           startPlate,
           endPlate);

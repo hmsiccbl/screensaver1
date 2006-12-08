@@ -22,6 +22,7 @@ import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 
 public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
@@ -54,7 +55,7 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
   // reasonable SDFile.)
   public void testFoo()
   {
-    Library library = new Library("COMP", "COMP", LibraryType.OTHER, 1534, 1534);
+    Library library = new Library("COMP", "COMP", ScreenType.OTHER, LibraryType.OTHER, 1534, 1534);
     String filename = "biomol-timtec-111.sdf";
     File file = new File(TEST_INPUT_FILE_DIR, filename);
     InputStream stream = null;

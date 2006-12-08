@@ -20,6 +20,7 @@ import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 public class UniqueDataHeaderNamesTest extends AbstractSpringTest
 {
@@ -40,7 +41,7 @@ public class UniqueDataHeaderNamesTest extends AbstractSpringTest
     new ResultValueType(screenResult, "FI");
     new ResultValueType(screenResult, "FI");
     new ResultValueType(screenResult, "Assay Indicator");
-    new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
+    new Library("library 1", "lib1", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 1);
 
     UniqueDataHeaderNames uniqueDataHeaderNames = new UniqueDataHeaderNames(screenResult);
     int i = 0;

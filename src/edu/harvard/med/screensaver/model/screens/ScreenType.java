@@ -24,7 +24,8 @@ public enum ScreenType implements VocabularyTerm
   // the vocabulary
   
   SMALL_MOLECULE("Small Molecule"),
-  RNAI("RNAi")
+  RNAI("RNAi"),
+  OTHER("Other") // for mock libraries and screens, etc
   ;
 
  

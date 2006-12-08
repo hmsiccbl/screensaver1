@@ -30,6 +30,7 @@ import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 
 public class RNAiLibraryContentsParserTest extends AbstractSpringTest
@@ -59,7 +60,13 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
   
   public void testColumnHeaderErrors()
   {
-    Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 50001);
+    Library library = new Library(
+      "Human1",
+      "Human1",
+      ScreenType.SMALL_MOLECULE,
+      LibraryType.SIRNA,
+      50001,
+      50001);
     String filename = "column header errors.xls";
     File file = new File(TEST_INPUT_FILE_DIR, filename);
     InputStream stream = null;
@@ -128,7 +135,13 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
 
   public void testDataRowErrors()
   {
-    Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 5003);
+    Library library = new Library(
+      "Human1",
+      "Human1",
+      ScreenType.SMALL_MOLECULE,
+      LibraryType.SIRNA,
+      50001,
+      5003);
     String filename = "data row errors.xls";
     File file = new File(TEST_INPUT_FILE_DIR, filename);
     InputStream stream = null;
@@ -260,7 +273,13 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
 
   public void testCleanData()
   {
-    Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 50001);
+    Library library = new Library(
+      "Human1",
+      "Human1",
+      ScreenType.SMALL_MOLECULE,
+      LibraryType.SIRNA,
+      50001,
+      50001);
     String filename = "clean data.xls";
     File file = new File(TEST_INPUT_FILE_DIR, filename);
     InputStream stream = null;
@@ -361,7 +380,13 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 50001);
+        Library library = new Library(
+          "Human1",
+          "Human1",
+          ScreenType.SMALL_MOLECULE,
+          LibraryType.SIRNA,
+          50001,
+          50001);
         dao.persistEntity(library);
   
         // parse the first spreadsheet
@@ -460,7 +485,13 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Library library = new Library("Human1", "Human1", LibraryType.RNAI, 50001, 5003);
+        Library library = new Library(
+          "Human1",
+          "Human1",
+          ScreenType.SMALL_MOLECULE,
+          LibraryType.SIRNA,
+          50001,
+          5003);
         String filename = "Human1.xls";
         File file = new File(TEST_INPUT_FILE_DIR, filename);
         InputStream stream = null;

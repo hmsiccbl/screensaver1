@@ -15,6 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.engine.EntityKey;
+import org.springframework.orm.hibernate3.HibernateTemplate;
+
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -25,11 +30,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
-
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.engine.EntityKey;
-import org.springframework.orm.hibernate3.HibernateTemplate;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 public class ScreenResultLazyInitTest extends AbstractSpringTest
 {
@@ -91,7 +92,13 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
         Screen screen = ScreenResultParser.makeDummyScreen(107);
         ScreenResult screenResult = new ScreenResult(screen, new Date());
         ResultValueType rvt = new ResultValueType(screenResult, "Luminescence");
-        Library library = new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
+        Library library = new Library(
+          "library 1",
+          "lib1",
+          ScreenType.SMALL_MOLECULE,
+          LibraryType.COMMERCIAL,
+          1,
+          1);
         for (int i = 1; i < 10; ++i) {
           Well well = new Well(library, i, "A01");
           dao.persistEntity(well);

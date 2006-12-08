@@ -130,7 +130,13 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
         users[3].addLabMember(users[2]);
 
         // define the library and wells needed to import NewFormatTest.xls
-        Library library = new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
+        Library library = new Library(
+          "library 1",
+          "lib1",
+          ScreenType.SMALL_MOLECULE,
+          LibraryType.COMMERCIAL,
+          1,
+          1);
         new Well(library, 1, "A01");
         new Well(library, 1, "A02");
         new Well(library, 1, "A03");

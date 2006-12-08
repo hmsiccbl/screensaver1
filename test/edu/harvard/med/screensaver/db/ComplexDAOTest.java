@@ -21,6 +21,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
@@ -38,12 +40,11 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -629,7 +630,13 @@ public class ComplexDAOTest extends AbstractSpringTest
         Screen screen = ScreenResultParser.makeDummyScreen(1); 
         ScreenResult screenResult = new ScreenResult(screen, new Date());
         ResultValueType rvt = new ResultValueType(screenResult, "Raw Value");
-        Library library = new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
+        Library library = new Library(
+          "library 1",
+          "lib1",
+          ScreenType.SMALL_MOLECULE,
+          LibraryType.COMMERCIAL,
+          1,
+          1);
         for (int i = 1; i <= 10; ++i) {
           int plateNumber = i;
           expectedPlateNumbers.add(i);
@@ -663,7 +670,13 @@ public class ComplexDAOTest extends AbstractSpringTest
     rvt2.setDerived(true);
     rvt2.setHowDerived("even wells are 'S', otherwise 'W'");
     rvt2.addTypeDerivedFrom(rvt1);
-    Library library = new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
+    Library library = new Library(
+      "library 1",
+      "lib1",
+      ScreenType.SMALL_MOLECULE,
+      LibraryType.COMMERCIAL,
+      1,
+      1);
     for (int iPlate = 1; iPlate <= 10; ++iPlate) {
       int plateNumber = iPlate;
       for (int iWell = 1; iWell <= 10; ++iWell) {
@@ -742,7 +755,13 @@ public class ComplexDAOTest extends AbstractSpringTest
     final Screen screen = ScreenResultParser.makeDummyScreen(1); 
     ScreenResult screenResult = new ScreenResult(screen, new Date());
     ResultValueType rvt = new ResultValueType(screenResult, "Raw Value");
-    Library library = new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
+    Library library = new Library(
+      "library 1",
+      "lib1",
+      ScreenType.SMALL_MOLECULE,
+      LibraryType.COMMERCIAL,
+      1,
+      1);
     for (int iPlate = 1; iPlate <= 3; ++iPlate) {
       int plateNumber = iPlate;
       for (int iWell = 0; iWell < 10; ++iWell) {

@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
@@ -29,9 +31,8 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -94,7 +95,13 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
         final Screen screen = ScreenResultParser.makeDummyScreen(1); 
         ScreenResult screenResult = new ScreenResult(screen, new Date());
         ResultValueType rvt = new ResultValueType(screenResult, "rvt");
-        Library library = new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
+        Library library = new Library(
+          "library 1",
+          "lib1",
+          ScreenType.SMALL_MOLECULE,
+          LibraryType.COMMERCIAL,
+          1,
+          1);
         for (int iPlate = 1; iPlate <= plates; ++iPlate) {
           int plateNumber = iPlate;
           for (int iWell = 1; iWell <= Well.MAX_WELL_COLUMN; ++iWell) {

@@ -27,6 +27,7 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 
 /**
@@ -87,6 +88,7 @@ public class ICCBLPlateWellToINBioLQMapper
     Library library = new Library(
       "fake library",
       "fake lib",
+      ScreenType.SMALL_MOLECULE,
       LibraryType.NATURAL_PRODUCTS,
       0,
       1);

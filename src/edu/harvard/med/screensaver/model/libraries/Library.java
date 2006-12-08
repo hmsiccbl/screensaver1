@@ -14,9 +14,10 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
-
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 
 /**
@@ -45,6 +46,7 @@ public class Library extends AbstractEntity
   private String _shortName;
   private String _description;
   private String _vendor;
+  private ScreenType _screenType;
   private LibraryType _libraryType;
   private Integer _startPlate;
   private Integer _endPlate;
@@ -77,6 +79,7 @@ public class Library extends AbstractEntity
    *
    * @param libraryName the library name
    * @param shortName the short name
+   * @param screenType the screen type (RNAi or Small Molecule)
    * @param libraryType the library type
    * @param startPlate the start plate
    * @param endPlate the end plate
@@ -84,12 +87,14 @@ public class Library extends AbstractEntity
   public Library(
     String libraryName,
     String shortName,
+    ScreenType screenType,
     LibraryType libraryType,
     Integer startPlate,
     Integer endPlate)
   {
     _libraryName = libraryName;
     _shortName = shortName;
+    _screenType = screenType;
     _libraryType = libraryType;
     _startPlate = startPlate;
     _endPlate = endPlate;
@@ -258,6 +263,29 @@ public class Library extends AbstractEntity
     _vendor = vendor;
   }
 
+  /**
+   * Get the screen type.
+   *
+   * @return the screen type
+   * @hibernate.property
+   *   type="edu.harvard.med.screensaver.model.screens.ScreenType$UserType"
+   *   not-null="true"
+   */
+  public ScreenType getScreenType()
+  {
+    return _screenType;
+  }
+
+  /**
+   * Set the screen type.
+   *
+   * @param screenType the new screen type
+   */
+  public void setScreenType(ScreenType screenType)
+  {
+    _screenType = screenType;
+  }
+  
   /**
    * Get the library type.
    *

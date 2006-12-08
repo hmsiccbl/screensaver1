@@ -13,6 +13,8 @@ import java.awt.Color;
 import java.text.NumberFormat;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -21,8 +23,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
-
-import org.apache.log4j.Logger;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 public class HeatMapCellTest extends AbstractSpringTest
 {
@@ -35,7 +36,7 @@ public class HeatMapCellTest extends AbstractSpringTest
     Screen screen = ScreenResultParser.makeDummyScreen(115);
     ScreenResult screenResult = new ScreenResult(screen, new Date());
     ResultValueType rvt = new ResultValueType(screenResult, "rvt1");
-    Library library = new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
+    Library library = new Library("library 1", "lib1", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 1);
     Well well = new Well(library, 1, "A01" );
     rvt.addResultValue(well, "1.0");
     

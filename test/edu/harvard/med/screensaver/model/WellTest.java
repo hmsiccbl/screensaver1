@@ -9,13 +9,14 @@
 
 package edu.harvard.med.screensaver.model;
 
-import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.libraries.Well;
-
 import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 public class WellTest extends TestCase
 {
@@ -25,7 +26,7 @@ public class WellTest extends TestCase
   @Override
   protected void setUp() throws Exception
   {
-    _library = new Library("testLibrary", "testLibrary", LibraryType.COMMERCIAL, 1, 1);
+    _library = new Library("testLibrary", "testLibrary", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 1);
     
   }
   

@@ -34,6 +34,7 @@ public class LibrarySearchResults extends SearchResults<Library>
 
   private static final String SHORT_NAME   = "Short Name";
   private static final String LIBRARY_NAME = "Library Name";
+  private static final String SCREEN_TYPE  = "Screen Type";
   private static final String LIBRARY_TYPE = "Library Type";
   private static final String START_PLATE  = "Start Plate";
   private static final String END_PLATE    = "End Plate";
@@ -76,6 +77,7 @@ public class LibrarySearchResults extends SearchResults<Library>
     List<String> columnHeaders = new ArrayList<String>();
     columnHeaders.add(SHORT_NAME);
     columnHeaders.add(LIBRARY_NAME);
+    columnHeaders.add(SCREEN_TYPE);
     columnHeaders.add(LIBRARY_TYPE);
     columnHeaders.add(START_PLATE);
     columnHeaders.add(END_PLATE);
@@ -102,6 +104,9 @@ public class LibrarySearchResults extends SearchResults<Library>
     }
     if (columnName.equals(LIBRARY_NAME)) {
       return library.getLibraryName();
+    }
+    if (columnName.equals(SCREEN_TYPE)) {
+      return library.getScreenType();
     }
     if (columnName.equals(LIBRARY_TYPE)) {
       return library.getLibraryType();
@@ -135,6 +140,13 @@ public class LibrarySearchResults extends SearchResults<Library>
       return new Comparator<Library>() {
         public int compare(Library l1, Library l2) {
           return l1.getLibraryName().compareTo(l2.getLibraryName());
+        }
+      };
+    }
+    if (columnName.equals(SCREEN_TYPE)) {
+      return new Comparator<Library>() {
+        public int compare(Library l1, Library l2) {
+          return l1.getScreenType().getValue().compareTo(l2.getScreenType().getValue());
         }
       };
     }

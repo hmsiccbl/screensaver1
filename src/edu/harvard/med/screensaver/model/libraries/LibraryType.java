@@ -30,7 +30,7 @@ public enum LibraryType implements VocabularyTerm
   KNOWN_BIOACTIVES("Known Bioactives"),
   NCI("NCI"),
   NATURAL_PRODUCTS("Natural Products"),
-  RNAI("RNAi"),
+  SIRNA("siRNA"),
   OTHER("Other")
   ;
 

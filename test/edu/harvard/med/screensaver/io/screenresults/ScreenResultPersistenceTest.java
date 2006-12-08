@@ -24,6 +24,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 /**
  */
@@ -51,7 +52,13 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
       public void runTransaction() {
         File workbookFile = new File(TEST_INPUT_FILE_DIR, "NewFormatTest.xls");
         Screen screen = ScreenResultParser.makeDummyScreen(115);
-        Library library = new Library("library 1", "lib1", LibraryType.COMMERCIAL, 1, 1);
+        Library library = new Library(
+          "library 1",
+          "lib1",
+          ScreenType.SMALL_MOLECULE,
+          LibraryType.COMMERCIAL,
+          1,
+          1);
         new Well(library, 1, "A01");
         new Well(library, 1, "A02");
         new Well(library, 1, "A03");

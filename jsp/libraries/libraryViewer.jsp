@@ -14,6 +14,8 @@
     <h:outputText value="#{libraryViewer.library.shortName}" />
     <h:outputText value="library name:" />
     <h:outputText value="#{libraryViewer.library.libraryName}" />
+    <h:outputText value="screen type:" />
+    <h:outputText value="#{libraryViewer.library.screenType}" />
     <h:outputText value="library type:" />
     <h:outputText value="#{libraryViewer.library.libraryType}" />
     <h:outputText value="vendor:" />

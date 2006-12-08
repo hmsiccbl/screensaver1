@@ -12,7 +12,7 @@ package edu.harvard.med.screensaver.ui.libraries;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
@@ -64,12 +64,12 @@ public class LibraryViewer extends AbstractBackingBean
   
   public boolean getIsRNAiLibrary()
   {
-    return _library != null && _library.getLibraryType().equals(LibraryType.RNAI);
+    return _library != null && _library.getScreenType().equals(ScreenType.RNAI);
   }
 
   public boolean getIsCompoundLibrary()
   {
-    return _library != null && ! _library.getLibraryType().equals(LibraryType.RNAI);
+    return _library != null && _library.getScreenType().equals(ScreenType.SMALL_MOLECULE);
   }
   
   public int getLibrarySize()
