@@ -55,10 +55,18 @@ public class LibrariesController extends AbstractUIController
   // private static final fields
   
   private static final Logger log = Logger.getLogger(LibrariesController.class);
-  private static final Pattern _plateNumberPattern =
-    Pattern.compile("^\\s*((PL)[-_]?)?(\\d+)\\s*$");
-  private static final Pattern _wellNamePattern =
-    Pattern.compile("^\\s*([A-Pa-p]([0-9]|[01][0-9]|2[0-4]))\\s*$");
+  private static final Pattern _plateWellHeaderLinePattern = Pattern.compile(
+    "^\\s*plate\\s+well\\s*$",
+    Pattern.CASE_INSENSITIVE);
+  private static final Pattern _plateWellPattern = Pattern.compile(
+    "^\\s*(((PL)[-_]?)?(\\d+))([A-P]([0-9]|[01][0-9]|2[0-4]))\\s*$",
+    Pattern.CASE_INSENSITIVE);
+  private static final Pattern _plateNumberPattern = Pattern.compile(
+    "^\\s*((PL)[-_]?)?(\\d+)\\s*$",
+    Pattern.CASE_INSENSITIVE);
+  private static final Pattern _wellNamePattern = Pattern.compile(
+    "^\\s*([A-P]([0-9]|[01][0-9]|2[0-4]))\\s*$",
+    Pattern.CASE_INSENSITIVE);
 
 
   // instance variables
@@ -245,6 +253,9 @@ public class LibrariesController extends AbstractUIController
   public String findWells(String plateWellList)
   {
     List<Well> wells = lookupWellsFromPlateWellList(plateWellList);
+    if (wells.size() == 1) {
+      return viewWell(wells.get(0), null);
+    }
     WellSearchResults searchResults =
       new edu.harvard.med.screensaver.ui.searchresults.WellSearchResults(wells, this);
     return viewWellSearchResults(searchResults);
@@ -478,7 +489,17 @@ public class LibrariesController extends AbstractUIController
         String line = plateWellListReader.readLine();
         line != null;
         line = plateWellListReader.readLine()) {
+
+        // skip lines that say "Plate Well"
+        Matcher matcher = _plateWellHeaderLinePattern.matcher(line);
+        if (matcher.matches()) {
+          continue;
+        }
         
+        // separate initial plate and well with a space if necessary
+        line = splitInitialPlateWell(line);
+        
+        // split the line into tokens; should be one plate, then one or more wells
         String [] tokens = line.split("[\\s;,]+");
         if (tokens.length == 0) {
           continue;
@@ -517,6 +538,23 @@ public class LibrariesController extends AbstractUIController
       showMessage("libraries.noSuchWell", "searchResults", plateNumber.toString(), wellName);
     }
     return well;
+  }
+  
+  /**
+   * Insert a space between the first plate number and well name if there is no
+   * space there already.
+   * @param line the line to patch up
+   * @return the patched up line
+   */
+  private String splitInitialPlateWell(String line)
+  {
+    Matcher matcher = _plateWellPattern.matcher(line);
+    if (matcher.matches()) {
+      int spliceIndex = matcher.group(1).length();
+      line = line.substring(0, spliceIndex) + " " + line.substring(spliceIndex);
+      log.info("modified line is [[" + line + "]]");
+    }
+    return line;
   }
   
   /**
