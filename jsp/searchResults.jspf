@@ -20,7 +20,7 @@
         binding="#{searchResults.dataTable}"
         value="#{searchResults.dataModel}"
         var="row"
-        rows="#{searchResults.itemsPerPage.selection}"
+        rows="#{searchResults.numItemsPerPage}"
         rendered="true"
         styleClass="standardTable"
         headerClass="tableHeader"

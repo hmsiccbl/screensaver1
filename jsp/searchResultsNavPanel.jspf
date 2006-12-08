@@ -59,10 +59,10 @@
 					action="#{navigator.updateItemsPerPage}"
 					style="display: none" />
 				<h:selectOneMenu id="itemsPerPage"
-					value="#{navigator.itemsPerPage.value}"
+					value="#{navigator.itemsPerPageSelector.value}"
 					onchange="this.previousSibling.click();">
 					<f:selectItems
-						value="#{navigator.itemsPerPage.selectItems}" />
+						value="#{navigator.itemsPerPageSelector.selectItems}" />
 				</h:selectOneMenu>
 				<h:outputText value=" per page" />
 			</h:panelGroup>
