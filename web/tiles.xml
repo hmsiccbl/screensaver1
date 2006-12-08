@@ -166,7 +166,7 @@
     name="/libraries/wellFinder.tiles"
     extends=".base">
     <put
-      name="pageFinder"
+      name="pageTitle"
       value="Well Finder"/>
     <put
       name="body"
