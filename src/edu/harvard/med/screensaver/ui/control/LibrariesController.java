@@ -549,13 +549,10 @@ public class LibrariesController extends AbstractUIController
   private String splitInitialPlateWell(String line)
   {
     Matcher matcher = _plateWellPattern.matcher(line);
-    log.info("splitting line [" + line + "]");
     if (matcher.matches()) {
-      log.info("got a split");
       int spliceIndex = matcher.group(1).length();
       line = line.substring(0, spliceIndex) + " " + line.substring(spliceIndex);
     }
-    log.info("post split line is [" + line + "]");
     return line;
   }
   
