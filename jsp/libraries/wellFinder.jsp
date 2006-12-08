@@ -56,6 +56,16 @@
                 The first well on the line does not need a separator from the plate number.
               </span>
             </li>
+            <li>
+              <span style="font-size: smaller;">
+                Plate numbers can be prefixed with "PL", "PL-", or "PL_".
+              </span>
+            </li>
+            <li>
+              <span style="font-size: smaller;">
+                Case (uppercase or lowercase) never matters.
+              </span>
+            </li>
           </ul>
         </f:verbatim>
         <t:commandButton
