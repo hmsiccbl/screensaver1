@@ -59,10 +59,10 @@ public class LibrariesController extends AbstractUIController
     "^\\s*plate\\s+well\\s*$",
     Pattern.CASE_INSENSITIVE);
   private static final Pattern _plateWellPattern = Pattern.compile(
-    "^\\s*(((PL)[-_]?)?(\\d+))([A-P]([0-9]|[01][0-9]|2[0-4]))\\s*$",
+    "^\\s*((PL[-_]?)?(\\d+))[A-P]([0-9]|[01][0-9]|2[0-4]).*",
     Pattern.CASE_INSENSITIVE);
   private static final Pattern _plateNumberPattern = Pattern.compile(
-    "^\\s*((PL)[-_]?)?(\\d+)\\s*$",
+    "^\\s*(PL[-_]?)?(\\d+)\\s*$",
     Pattern.CASE_INSENSITIVE);
   private static final Pattern _wellNamePattern = Pattern.compile(
     "^\\s*([A-P]([0-9]|[01][0-9]|2[0-4]))\\s*$",
@@ -549,11 +549,13 @@ public class LibrariesController extends AbstractUIController
   private String splitInitialPlateWell(String line)
   {
     Matcher matcher = _plateWellPattern.matcher(line);
+    log.info("splitting line [" + line + "]");
     if (matcher.matches()) {
+      log.info("got a split");
       int spliceIndex = matcher.group(1).length();
       line = line.substring(0, spliceIndex) + " " + line.substring(spliceIndex);
-      log.info("modified line is [[" + line + "]]");
     }
+    log.info("post split line is [" + line + "]");
     return line;
   }
   
@@ -566,7 +568,7 @@ public class LibrariesController extends AbstractUIController
   {
     Matcher matcher = _plateNumberPattern.matcher(plateNumber);
     if (matcher.matches()) {
-      plateNumber = matcher.group(3);
+      plateNumber = matcher.group(2);
       return Integer.parseInt(plateNumber);
     }
     else {

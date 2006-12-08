@@ -32,6 +32,8 @@
                 <li><pre class="example">pl50a06</pre></li>
                 <li><pre class="example">PL-50A06</pre></li>
                 <li><pre class="example">PL_50A06</pre></li>
+                <li><pre class="example">50a6 a7 a8</pre></li>
+                <li><pre class="example">50a6,a7,a8</pre></li>
                 <li><pre class="example">50 a6 a7 a8 b6 b7 b8
 51 a6 a7 a8 b6 b7 b8</pre></li>
                 <li><pre class="example">Plate   Well
