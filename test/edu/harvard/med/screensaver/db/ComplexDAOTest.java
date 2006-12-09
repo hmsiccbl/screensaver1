@@ -318,8 +318,7 @@ public class ComplexDAOTest extends AbstractSpringTest
               false,
               false,
               false,
-              "human",
-              false);
+              "human");
             rvt[i].setAssayReadoutType(i % 2 == 0 ? AssayReadoutType.PHOTOMETRY: AssayReadoutType.FLUORESCENCE_INTENSITY);
             rvt[i].setActivityIndicatorType(i % 2 == 0 ? ActivityIndicatorType.BOOLEAN: ActivityIndicatorType.PARTITION);
             rvt[i].setIndicatorDirection(i % 2 == 0 ? IndicatorDirection.LOW_VALUES_INDICATE : IndicatorDirection.HIGH_VALUES_INDICATE);
@@ -435,8 +434,7 @@ public class ComplexDAOTest extends AbstractSpringTest
               false,
               false,
               false,
-              "human",
-              false);
+              "human");
             derivedRvtSet1.add(rvt);
             if (i % 2 == 0) {
               derivedRvtSet2.add(rvt);
@@ -449,8 +447,7 @@ public class ComplexDAOTest extends AbstractSpringTest
             false,
             false,
             false,
-            "human",
-            false);
+            "human");
           for (ResultValueType resultValueType : derivedRvtSet1) {
             derivedRvt1.addTypeDerivedFrom(resultValueType);
           }
@@ -462,8 +459,7 @@ public class ComplexDAOTest extends AbstractSpringTest
             false,
             false,
             false,
-            "human",
-            false);
+            "human");
           for (ResultValueType resultValueType : derivedRvtSet2) {
             derivedRvt2.addTypeDerivedFrom(resultValueType);
           }

@@ -69,7 +69,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
   private Double                     _indicatorCutoff;
   private boolean                    _isFollowUpData;
   private String                     _assayPhenotype;
-  private boolean                    _isCherryPick;
   private String                     _comments;
   private boolean                    _isNumeric;
   
@@ -87,7 +86,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @param isActivityIndicator
    * @param isFollowupData
    * @param assayPhenotype
-   * @param isCherryPick
    */
   public ResultValueType(
     ScreenResult screenResult,
@@ -96,9 +94,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
     boolean isDerived,
     boolean isActivityIndicator,
     boolean isFollowupData,
-    String assayPhenotype,
-    boolean isCherryPick
-    )
+    String assayPhenotype)
   {
     setScreenResult(screenResult);
     setName(name);
@@ -107,11 +103,8 @@ public class ResultValueType extends AbstractEntity implements Comparable
     setActivityIndicator(isActivityIndicator);
     setFollowUpData(isFollowupData);
     setAssayPhenotype(assayPhenotype);
-    setCherryPick(isCherryPick);
   }
   
-  // TODO: jps: I suggest this as a valid minimal constructor; we should discuss... --ant
-  // @: sounds good to me! -s
   /**
    * Constructs an initialized ResultValueType object.
    * @param screenResult
@@ -452,7 +445,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @param assayReadoutType the Assay Readout Type to set
    */
   public void setAssayReadoutType(AssayReadoutType assayReadoutType) {
-    // TODO: verify that assayReadoutType is in Screen's assayReadoutTypes set.
     _assayReadoutType = assayReadoutType;
   }
 
@@ -678,31 +670,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
   public void setActivityIndicator(boolean isActivityIndicator) {
     _isActivityIndicator = isActivityIndicator;
   }
-
-  /**
-   * Get whether the {@link ResultValue}s of this <code>ResultValueType</code>
-   * constitute the criteria for making cherry picks.
-   * 
-   * @return <code>true</code> iff the {@link ResultValue}s of this
-   *         <code>ResultValueType</code> constitute the criteria for making
-   *         cherry picks.
-   * @hibernate.property type="boolean" not-null="true"
-   */
-  public boolean isCherryPick() {
-    return _isCherryPick;
-  }
-
-  /**
-   * Set whether the {@link ResultValue}s of this <code>ResultValueType</code>
-   * constitute the criteria for making cherry picks.
-   * 
-   * @param isCherryPick set to <code>true</code> iff the {@link ResultValue}s
-   *          of this <code>ResultValueType</code> constitute the criteria for
-   *          making cherry picks.
-   */
-  public void setCherryPick(boolean isCherryPick) {
-    _isCherryPick = isCherryPick;
-   }
 
   /**
    * Get whether this <code>ResultValueType</code> contains follow up data

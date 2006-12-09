@@ -17,17 +17,10 @@ public interface ScreenResultWorkbookSpecification
   public static final String FIRST_DATE_SCREENED = "First Date Screened";
   public static final String SCREEN_ID_LABEL = "ID";
   public static final String SCREEN_INFO_SHEET_NAME = "Screen Info";
-  public static final String LEGACY__METADATA_META_SHEET_NAME = "meta";
   public static final String DATA_HEADERS_SHEET_NAME = "Data Headers";
   public static final String DATA_SHEET_NAME = "Data";
-  public static final Object LEGACY__DATA_SHEET__STOCK_PLATE_COLUMN_NAME = "Stock_ID";
   public static final Object DATA_SHEET__STOCK_PLATE_COLUMN_NAME = "Stock Plate ID";
 
-  public static final int LEGACY__DATA_HEADERS_SHEET_INDEX = 0;
-
-  public static final String DATA_HEADER_COLUMN_TYPE = "data"; // for legacy format
-  public static final short LEGACY__METADATA_FILENAMES_CELL_COLUMN_INDEX = 1;
-  public static final int LEGACY__METADATA_FILENAMES_CELL_ROW_INDEX = 0; // legacy format only
   public static final int METADATA_FIRST_DATA_HEADER_COLUMN_INDEX = 1;
   public static final char DATA_SHEET__FIRST_DATA_HEADER_COLUMN_LABEL = 'E';
   public static final int METADATA_ROW_NAMES_COLUMN_INDEX = 0;
@@ -39,41 +32,41 @@ public interface ScreenResultWorkbookSpecification
   public static final int SCREENINFO_VALUE_COLUMN_INDEX = 1;
   public static final int SCREENINFO_FIRST_DATA_ROW_INDEX = 0;
 
+  public static final String NUMERICAL_INDICATOR_DIRECTION_HIGH_VALUES_INDICATE = ">";
+  public static final String NUMERICAL_INDICATOR_DIRECTION_LOW_VALUES_INDICATE = "<";
+
   /**
    * The data rows of the "Data Headers" worksheet. Order of enum values is
    * significant, as we use the ordinal() method.
    */
   public enum MetadataRow { 
-    COLUMN_IN_DATA_WORKSHEET("\"Data\" Worksheet Column", 0, 1),
-    COLUMN_TYPE("Type", null, 2), // for legacy format 
-    NAME("Name", 1, 3),
-    DESCRIPTION("Description", 2, 4),
-    REPLICATE("Replicate Number", 3, 5),
-    TIME_POINT("Time point", 4, 6),
-    RAW_OR_DERIVED("Raw or Derived?", 5, 7),
-    HOW_DERIVED("If derived, how?", 6, 8),
-    COLUMNS_DERIVED_FROM("If derived, from which columns?", 7, 9),
-    IS_ASSAY_ACTIVITY_INDICATOR("Is it an Assay Activity Indicator? (yes/no)", 8, 10),
-    ACTIVITY_INDICATOR_TYPE("Assay Activity Indicator Type (numerical, partitioned (S/M/W), boolean)", 9, 11),
-    NUMERICAL_INDICATOR_DIRECTION("Assay Activity Indicator Numeric Cutoff Direction (< or >)", 10, 12),
-    NUMERICAL_INDICATOR_CUTOFF("Assay Activity Indicator Numeric Cutoff Value", 11, 13),
-    PRIMARY_OR_FOLLOWUP("Primary or Follow Up?", 12, 14),
-    ASSAY_PHENOTYPE("Which Assay Phenotype does it belong to?", 13, 15),
-    IS_CHERRY_PICK("Is it a cherry pick? (yes/no)", null, 16),
-    COMMENTS("Comments", 14, 17),
+    COLUMN_IN_DATA_WORKSHEET("\"Data\" Worksheet Column", 0),
+    NAME("Name", 1),
+    DESCRIPTION("Description", 2),
+    REPLICATE("Replicate Number", 3),
+    TIME_POINT("Time point", 4),
+    ASSAY_READOUT_TYPE("Assay readout type", 5),
+    RAW_OR_DERIVED("Raw or Derived?", 6),
+    HOW_DERIVED("If derived, how?", 7),
+    COLUMNS_DERIVED_FROM("If derived, from which columns?", 8),
+    IS_ASSAY_ACTIVITY_INDICATOR("Is it an Assay Activity Indicator? (yes/no)", 9),
+    ACTIVITY_INDICATOR_TYPE("Assay Activity Indicator Type (numerical, partitioned (S/M/W), boolean)", 10),
+    NUMERICAL_INDICATOR_DIRECTION("Assay Activity Indicator Numeric Cutoff Direction (< or >)", 11),
+    NUMERICAL_INDICATOR_CUTOFF("Assay Activity Indicator Numeric Cutoff Value", 12),
+    PRIMARY_OR_FOLLOWUP("Primary or Follow Up?", 13),
+    ASSAY_PHENOTYPE("Which Assay Phenotype does it belong to?", 14),
+    COMMENTS("Comments", 15),
     ;
+    
     
     private String _displayText;
     private Integer _rowIndex;
-    private Integer _legacyRowIndex;
     
     private MetadataRow(String displayText,
-                        Integer rowIndex,
-                        Integer legacyRowIndex)
+                        Integer rowIndex)
     {
       _displayText = displayText;
       _rowIndex = rowIndex;
-      _legacyRowIndex = legacyRowIndex;
     }
     
     public String getDisplayText()
@@ -81,25 +74,9 @@ public interface ScreenResultWorkbookSpecification
       return _displayText;
     }
     
-    public boolean isUsed(boolean legacyFormat)
-    {
-      if (legacyFormat && _legacyRowIndex != null) {
-        return true;
-      }
-      if (!legacyFormat && _rowIndex != null) {
-        return true;
-      }
-      return false;
-    }
-    
     public Integer getRowIndex()
     {
-      return getRowIndex(false);
-    }
-    
-    public Integer getRowIndex(boolean legacyFormat)
-    {
-      return legacyFormat ? _legacyRowIndex : _rowIndex;
+      return _rowIndex;
     }
   };
   

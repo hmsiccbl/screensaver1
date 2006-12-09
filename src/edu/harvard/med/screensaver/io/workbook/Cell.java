@@ -571,6 +571,7 @@ public class Cell
     }
   }
 
+
   /**
    * Determine if cell contains a numeric value, taking into account formula
    * type cells.
@@ -591,6 +592,39 @@ public class Cell
       try {
         getHSSFCell().getNumericCellValue();
         // if no exception is thrown, then cell's formula evaluates to a numeric value
+        return true;
+      }
+      catch (CellOutOfRangeException e) {
+        // let caller handle this problem when it actually tries to read the cell
+        return false; 
+      }
+      catch (NumberFormatException e) {
+        return false;
+      }
+    }
+    return false;
+  }
+  
+  /**
+   * Determine if cell contains a boolean value, taking into account formula
+   * type cells.
+   * 
+   * @param cell the cell to inspect
+   * @return true iff cell is of type HSSFCell.CELL_TYPE_BOOLEAN, or
+   *         HSSFCell.CELL_TYPE_FORMULA and formula evaluates to a boolean type.
+   */
+  public boolean isBoolean()
+  {
+    if (getType() == HSSFCell.CELL_TYPE_BOOLEAN) {
+      return true;
+    }
+    // HSSF does not allow us to determine the cell type for the *value* (result) of a formula cell;
+    // it could be numeric, but who can say? we perform trial and error (or more
+    // accurately, "trial and exception") to figure it out
+    if (getType() == HSSFCell.CELL_TYPE_FORMULA) {
+      try {
+        getHSSFCell().getBooleanCellValue();
+        // if no exception is thrown, then cell's formula evaluates to a boolean value
         return true;
       }
       catch (CellOutOfRangeException e) {

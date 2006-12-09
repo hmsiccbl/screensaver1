@@ -58,7 +58,6 @@ public class ScreenResultPrinter
       printer.println("\tindicator cutoff=" + rvt.getIndicatorCutoff());
       printer.println("\tindicator direction=" + rvt.getIndicatorDirection());
       printer.println("\tisFollowupData=" + rvt.isFollowUpData());
-      printer.println("\tcherry pick=" + rvt.isCherryPick());
       
       printer.println("\tcomments="+rvt.getComments());
 

@@ -46,18 +46,16 @@ public class ScreenResultExporterTest extends AbstractSpringTest
   public void testScreenResultExporter() throws Exception
   {
     ScreenResult originalScreenResult = 
-      mockScreenResultParser.parseLegacy(ScreenResultParser.makeDummyScreen(1), 
+      mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(115), 
                                          new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
-                                                  "LegacyTestAllInOne.xls"),
-                                         false);
+                                                  "NewFormatTest.xls"));
     addDummyCollaboratorsToScreen(originalScreenResult);
-    
     
     ScreenResultExporter exporter = new ScreenResultExporter();
     HSSFWorkbook workbook = exporter.build(originalScreenResult);
-    File exportedFile = File.createTempFile("LegacyTestAllInOne", ".exported.xls");
+    File exportedFile = File.createTempFile("NewFormatTest", ".exported.xls");
     workbook.write(new FileOutputStream(exportedFile));
-    ScreenResult exportedScreenResult  = mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(1), 
+    ScreenResult exportedScreenResult  = mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(115), 
                                                                       exportedFile); // parse with "new" format
     if (mockScreenResultParser.getHasErrors()) {
       // okay, so I'm using our unit test to help with debugging...sue me!
@@ -70,7 +68,7 @@ public class ScreenResultExporterTest extends AbstractSpringTest
     // test screen info sheet 
     // TODO: make comprehensive
     assertEquals("screen number", 
-                 1,
+                 115,
                  (int)
                  HSSFCellUtil.getCell(HSSFCellUtil.getRow(0, workbook.getSheetAt(0)), 1).getNumericCellValue());
     assertEquals("screen title", 
@@ -80,7 +78,7 @@ public class ScreenResultExporterTest extends AbstractSpringTest
                  "Chris Collaborator, Cindy Collaborator",
                  HSSFCellUtil.getCell(HSSFCellUtil.getRow(5, workbook.getSheetAt(0)), 1).getStringCellValue());
     assertEquals("email", 
-                 "joe_screener_1@hms.harvard.edu",
+                 "joe_screener_115@hms.harvard.edu",
                  HSSFCellUtil.getCell(HSSFCellUtil.getRow(8, workbook.getSheetAt(0)), 1).getStringCellValue());
     
     // test data sheets

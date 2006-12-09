@@ -12,12 +12,8 @@ package edu.harvard.med.screensaver.ui.control;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.springframework.dao.ConcurrencyFailureException;
-
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
-import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
@@ -30,6 +26,9 @@ import edu.harvard.med.screensaver.ui.screens.ScreenFinder;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreensBrowser;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
+
+import org.apache.log4j.Logger;
+import org.springframework.dao.ConcurrencyFailureException;
 
 /**
  * 
@@ -225,23 +224,6 @@ public class ScreensController extends AbstractUIController
   public String deleteFundingSupport(Screen screen, FundingSupport fundingSupport)
   {
     screen.getFundingSupports().remove(fundingSupport);
-    return VIEW_SCREEN;
-  }
-  
-  @UIControllerMethod
-  public String addAssayReadoutType(Screen screen, AssayReadoutType assayReadoutType)
-  {
-    if (assayReadoutType != null) {
-      screen.addAssayReadoutType(assayReadoutType);
-      _screenViewer.setNewAssayReadoutType(null);
-    }
-    return VIEW_SCREEN;
-  }
-  
-  @UIControllerMethod
-  public String deleteAssayReadoutType(Screen screen, AssayReadoutType assayReadoutType)
-  {
-    screen.getAssayReadoutTypes().remove(assayReadoutType);
     return VIEW_SCREEN;
   }
   

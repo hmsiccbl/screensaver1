@@ -12,15 +12,12 @@ package edu.harvard.med.screensaver.io.screenresults;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -31,7 +28,6 @@ import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
@@ -39,6 +35,7 @@ import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -48,7 +45,6 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.usermodel.contrib.HSSFCellUtil;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 /**
@@ -79,10 +75,21 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testReadExcelSpreadsheet() throws Exception 
   {
     // TODO: for sheet names (at least) underscores appear to converted to dashes by HSSF
-    String[] expectedSheetNames = new String[] { "PL-0500", "PL-0501", "PL-0502", "PL-0503" };
-    String[] expectedHeaderRowValues = new String[] { "Stock ID", "Row", "Type", "Exclude", "Intensity_A", "Intensity_B", "Positive" };
+    String[] expectedSheetNames = new String[] { "Screen Info", "Data Headers", "PL_00001", "PL_00003", "PL_00002" };
+    String[] expectedHeaderRowValues = new String[] { 
+      "Stock Plate ID", 
+      "Well", 
+      "Type", 
+      "Exclude", 
+      "Luminescence", 
+      "Luminescence", 
+      "FI_A", 
+      "FI_B", 
+      "AssayIndicator1", 
+      "AssayIndicator2", 
+      "AssayIndicator3" };
 
-    InputStream xlsInStream = ScreenResultParserTest.class.getResourceAsStream("324_500-503.xls");
+    InputStream xlsInStream = ScreenResultParserTest.class.getResourceAsStream("NewFormatTest.xls");
     POIFSFileSystem fs = new POIFSFileSystem(xlsInStream);
     HSSFWorkbook wb = new HSSFWorkbook(fs);
     int nSheets = wb.getNumberOfSheets();
@@ -92,14 +99,16 @@ public class ScreenResultParserTest extends AbstractSpringTest
       assertEquals("worksheet " + i + " name", expectedSheetNames[i], sheetName);
       HSSFSheet sheet = wb.getSheetAt(i);
       HSSFRow row = sheet.getRow(0);
-      for (short iCell = 0; iCell < row.getPhysicalNumberOfCells(); ++iCell) {
-        HSSFCell cell = row.getCell(iCell);
-        assertEquals(expectedHeaderRowValues[iCell], cell.getStringCellValue());
+      if (i >= 2) {
+        for (short iCell = 0; iCell < row.getPhysicalNumberOfCells(); ++iCell) {
+          HSSFCell cell = row.getCell(iCell);
+          assertEquals(expectedHeaderRowValues[iCell], cell.getStringCellValue());
+        }
       }
     }
   }
   
-  public void testReadFormulaCellValue() throws Exception
+  public void testReadNumericFormulaCellValue() throws Exception
   {
     InputStream xlsInStream = 
       ScreenResultParserTest.class.getResourceAsStream("formula_value.xls");
@@ -107,13 +116,13 @@ public class ScreenResultParserTest extends AbstractSpringTest
     HSSFWorkbook wb = new HSSFWorkbook(fs);
     HSSFSheet sheet = wb.getSheetAt(0);
     HSSFRow row = sheet.getRow(0);
-    HSSFCell hssfCell = row.getCell((short) 2);
+    HSSFCell hssfNumericFormulaCell = row.getCell((short) 2);
     assertEquals("HSSF cell type",
                  HSSFCell.CELL_TYPE_FORMULA,
-                 hssfCell.getCellType());
-    double hssfNumericValue = hssfCell.getNumericCellValue();
+                 hssfNumericFormulaCell.getCellType());
+    double hssfNumericValue = hssfNumericFormulaCell.getNumericCellValue();
     assertEquals("HSSF numeric value", 2.0, hssfNumericValue, 0.001);
-    String hssfFormula = hssfCell.getCellFormula();
+    String hssfFormula = hssfNumericFormulaCell.getCellFormula();
     assertEquals("HSSF formula", "A1+B1", hssfFormula);
 
     ParseErrorManager errors = new ParseErrorManager();
@@ -122,262 +131,50 @@ public class ScreenResultParserTest extends AbstractSpringTest
     Cell.Factory cellFactory = new Cell.Factory(workbook, 0, errors);
     Cell cell = cellFactory.getCell((short) 2, (short) 0, false);
     assertNotNull(cell);
-    assertEquals("parser numeric value",
+    assertEquals("parse numeric value",
                  hssfNumericValue,
                  cell.getDouble(),
                  0.001);
   }
 
-  /**
-   * Tests legacy file format, as well as testing most parsing cases (field
-   * types and values). This is the most comprehensive test of low-level parsing
-   * functionality.
-   */
-  @SuppressWarnings("unchecked")
-  public void testParseLegacyScreenResult() throws Exception
+  // Note: this test cannot pass because the POI/HSSF library is crappy and does
+  // not allow you to read a boolean-typed formula cell value!
+  public void testReadBooleanFormulaCellValue() throws Exception
   {
-    Calendar expectedDate = Calendar.getInstance();
-    expectedDate.set(2003, 3 - 1, 5, 0, 0, 0);
-    expectedDate.set(Calendar.MILLISECOND, 0);
-
-    ScreenResult screenResult = mockScreenResultParser.parseLegacy(ScreenResultParser.makeDummyScreen(258),
-                                                                   new File(TEST_INPUT_FILE_DIR, 
-                                                                            "LegacyTestMetaData.xls"), 
-                                                                   true);
-    assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
-
-    ScreenResult expectedScreenResult = makeScreenResult(expectedDate.getTime());
-    assertEquals("date",
-                 expectedScreenResult.getDateCreated(),
-                 screenResult.getDateCreated());
-    assertEquals("replicate count", 2, screenResult.getReplicateCount()
-                                                   .intValue());
-
-    Map<Integer,ResultValueType> expectedResultValueTypes = new HashMap<Integer,ResultValueType>();
-
-    ResultValueType rvt1 = new ResultValueType(expectedScreenResult,
-                                               "Absorbance");
-    rvt1.setDescription("Absorbance");
-    rvt1.setReplicateOrdinal(1);
-    rvt1.setTimePoint("0:10");
-    rvt1.setAssayPhenotype("Human");
-    rvt1.setNumeric(true);
-
-    ResultValueType rvt2 = new ResultValueType(expectedScreenResult, "FI");
-    rvt2.setDescription("Fold Induction");
-    rvt2.setReplicateOrdinal(1);
-    rvt2.setDerived(true);
-    rvt2.setHowDerived("Divide compound well by plate median");
-    rvt2.addTypeDerivedFrom(rvt1);
-    rvt2.setActivityIndicator(true);
-    rvt2.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
-    rvt2.setIndicatorDirection(IndicatorDirection.LOW_VALUES_INDICATE);
-    rvt2.setIndicatorCutoff(1.5);
-    rvt2.setNumeric(true);
-
-    ResultValueType rvt3 = new ResultValueType(expectedScreenResult,
-                                               "Absorbance");
-    rvt3.setDescription("Absorbance");
-    rvt3.setReplicateOrdinal(2);
-    rvt3.setTimePoint("0:15");
-    rvt3.setFollowUpData(true);
-    rvt3.setAssayPhenotype("Mouse");
-    rvt3.setComments("Generated during return visit");
-    rvt3.setNumeric(true);
-
-    ResultValueType rvt4 = new ResultValueType(expectedScreenResult, "FI");
-    rvt4.setDescription("Fold Induction");
-    rvt4.setReplicateOrdinal(2);
-    rvt4.setDerived(true);
-    rvt4.setHowDerived("Divide compound well by plate median");
-    rvt4.addTypeDerivedFrom(rvt3);
-    rvt4.setActivityIndicator(true);
-    rvt4.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
-    rvt4.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);
-    rvt4.setIndicatorCutoff(1.4);
-    rvt4.setNumeric(true);
-
-    ResultValueType rvt5 = new ResultValueType(expectedScreenResult,"Cherry Pick");
-    rvt5.setDescription("Cherry Pick");
-    rvt5.setCherryPick(true);
-    rvt5.setDerived(true);
-    rvt5.setHowDerived("Manual selection");
-    rvt5.addTypeDerivedFrom(rvt1);
-    rvt5.addTypeDerivedFrom(rvt3);
-    rvt5.setActivityIndicator(true);
-    rvt5.setActivityIndicatorType(ActivityIndicatorType.BOOLEAN);
-    rvt5.setComments("Use this to determine cherry picks");
-    rvt5.setNumeric(false);
+    InputStream xlsInStream = 
+      ScreenResultParserTest.class.getResourceAsStream("formula_value.xls");
+    POIFSFileSystem fs = new POIFSFileSystem(xlsInStream);
+    HSSFWorkbook wb = new HSSFWorkbook(fs);
+    HSSFSheet sheet = wb.getSheetAt(0);
+    HSSFRow row = sheet.getRow(0);
+    HSSFCell hssfBooleanFormulaCell = row.getCell((short) 3);
+    assertEquals("HSSF cell type",
+                 HSSFCell.CELL_TYPE_FORMULA,
+                 hssfBooleanFormulaCell.getCellType());
+    boolean hssfBooleanValue = hssfBooleanFormulaCell.getBooleanCellValue();
+    assertEquals("HSSF numeric value", true, hssfBooleanValue);
+    String hssfFormula = hssfBooleanFormulaCell.getCellFormula();
+    assertEquals("HSSF formula", "C1=2", hssfFormula);
     
-    expectedResultValueTypes.put(0, rvt1);
-    expectedResultValueTypes.put(1, rvt2);
-    expectedResultValueTypes.put(2, rvt3);
-    expectedResultValueTypes.put(3, rvt4);
-    expectedResultValueTypes.put(4, rvt5);
-
-    Integer[] expectedInitialPlateNumbers = { 686, 686, 686 };
-
-    String[] expectedInitialWellNames = { "A03", "A04", "A05" };
-
-    Object[][] expectedInitialResultValues = {
-      {1.05300000,  2.27922078, 0.88100000,  2.12801932, false},
-      {0.53100000,  1.14935065,  0.49600000,  1.19806763, true},
-      {0.56800000,  1.22943723,  0.45000000,  1.08695652, false}};
+    ParseErrorManager errors = new ParseErrorManager();
+    Workbook workbook = new Workbook(new File(TEST_INPUT_FILE_DIR, 
+                                              "formula_value.xls"), errors);
+    Cell.Factory cellFactory = new Cell.Factory(workbook, 0, errors);
+    Cell cell = cellFactory.getCell((short) 3, (short) 0, false);
+    assertNotNull(cell);
+    assertEquals("parse boolean value",
+                 hssfBooleanValue,
+                 cell.getBoolean().booleanValue());
     
-    AssayWellType[] expectedInitialAssayWellTypes = {
-      AssayWellType.EXPERIMENTAL,
-      AssayWellType.ASSAY_POSITIVE_CONTROL,
-      AssayWellType.EXPERIMENTAL};
-      
-    Object[][] expectedInitialExcludeValues = {
-      {false, false, false, false, false},
-      {false, false, false, false, false},
-      {true, false, true, false, false}};
-
-    Integer[] expectedFinalPlateNumbers = { 842, 842, 842 };
-
-    String[] expectedFinalWellNames = { "P20", "P21", "P22" };
-
-    Object[][] expectedFinalResultValues = {
-      {0.29600000,  1.07832423,  0.28600000,  1.00000000, false},
-      {0.30100000,  1.09653916,  0.29200000,  1.02097902, true},
-      {0.28000000,  1.02003643,  0.29900000,  1.04545455, false}};
-    
-    AssayWellType[] expectedFinalAssayWellTypes = {
-      AssayWellType.EXPERIMENTAL,
-      AssayWellType.OTHER,
-      AssayWellType.EXPERIMENTAL};
-
-    Object[][] expectedFinalExcludeValues = {
-      {false, false, false, false, false},
-      {false, false, false, false, false},
-      {false, false, false, false, false}};
-    
-
-    SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
-    int iRvt = 0;
-    for (ResultValueType rvt : resultValueTypes) {
-      ResultValueType expectedRvt = expectedResultValueTypes.get(iRvt);
-      if (expectedRvt != null) {
-        setDefaultValues(expectedRvt);
-        setDefaultValues(rvt);
-        assertTrue("ResultValueType " + iRvt, expectedRvt.isEquivalent(rvt));
-
-        // compare result values
-        assertEquals(15, rvt.getResultValues().size());
-
-        ListIterator<Well> first3WellsIter = new ArrayList<Well>(screenResult.getWells()).subList(0, 3).listIterator();
-        Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
-        int iWell = 0;
-        while (first3WellsIter.hasNext()) {
-          WellKey wellKey = first3WellsIter.next().getWellKey();
-          ResultValue rv = resultValues.get(wellKey);
-          assertEquals("rvt " + iRvt + " well " + iWell + " plate name",
-                       expectedInitialPlateNumbers[iWell],
-                       new Integer(wellKey.getPlateNumber()));
-          assertEquals("rvt " + iRvt + " well #" + iWell + " well name",
-                       expectedInitialWellNames[iWell],
-                       wellKey.getWellName());
-          if (iRvt == 4) {
-            assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
-                         expectedInitialResultValues[iWell][iRvt].toString(),
-                         rv.getValue().toString());
-          }
-          else {
-            assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
-                         (Double) expectedInitialResultValues[iWell][iRvt],
-                         rv.getNumericValue(),
-                         0.0001);
-          }
-          assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
-                       expectedInitialAssayWellTypes[iWell],
-                       rv.getAssayWellType());
-          assertEquals("rvt " + iRvt + " well #" + (iWell) + " excluded",
-            expectedInitialExcludeValues[iWell][iRvt],
-            rv.isExclude());
-
-          ++iWell;
-          if (iWell == expectedInitialResultValues.length) {
-            // done testing the initial rows of data, now jump to testing the
-            // final rows of data
-            break;
-          }
-        }
-        Map<WellKey,ResultValue> mapOfResultValues = rvt.getResultValues();
-        int startIndex = rvt.getResultValues().size() - 3;
-        ListIterator<Well> last3WellsIter = new ArrayList<Well>(screenResult.getWells()).listIterator(startIndex);
-        iWell = 0;
-        while(last3WellsIter.hasNext()) {
-          Well well = last3WellsIter.next();
-          ResultValue rv = mapOfResultValues.get(well.getWellKey());
-          assertEquals("rvt " + iRvt + " well #" + (iWell + startIndex) + " plate name",
-                       expectedFinalPlateNumbers[iWell],
-                       well.getPlateNumber());
-          assertEquals("rvt " + iRvt + " well #" + (iWell + startIndex) + " well name",
-                       expectedFinalWellNames[iWell],
-                       well.getWellName());
-          assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
-                       expectedFinalAssayWellTypes[iWell],
-                       rv.getAssayWellType());
-          if (iRvt == 4) {
-            assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
-                         expectedFinalResultValues[iWell][iRvt].toString(),
-                         rv.getValue().toString());
-          } 
-          else {
-            assertEquals("rvt " + iRvt + " well #" + (iWell + startIndex) + " result value",
-                         (Double) expectedFinalResultValues[iWell][iRvt],
-                         rv.getNumericValue(),
-                         0.0001);
-          }
-          assertEquals("rvt " + iRvt + " well #" + (iWell + startIndex) + " excluded",
-            expectedFinalExcludeValues[iWell][iRvt],
-            rv.isExclude());
-            
-          ++iWell;
-          if (iWell == expectedFinalResultValues.length) {
-            break;
-          }
-        }
-      }
-      ++iRvt;
-    }
   }
   
-  /**
-   * Test that ScreenResultParser can handle raw data from multiple workbooks,
-   * where each workbook also uses multiple worksheets.
-   */
-  public void testParseLegacyMultiWorkbookMultiWorksheet()
-  {
-    ScreenResult screenResult = mockScreenResultParser.parseLegacy(ScreenResultParser.makeDummyScreen(464), 
-                                                                   new File(TEST_INPUT_FILE_DIR, 
-                                                                            "464MetaData.xls"), 
-                                                                   true);
-    assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
-    Integer[] expectedPlateNumbers = { 1409, 1410, 1369, 1370, 1371, 1453, 1454 };
-    Set<Integer> expectedPlateNumbersSet = new HashSet<Integer>(Arrays.asList(expectedPlateNumbers));
-    Set<Integer> actualPlateNumbersSet = new HashSet<Integer>();
-    // note: must generate actualPlateNumbersSet from *all* ResultValueTypes,
-    // in case some have ResultValues that represent only a subset of all the
-    // plate/wells.
-    for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-      for (WellKey wellKey: rvt.getResultValues().keySet()) {
-        actualPlateNumbersSet.add(wellKey.getPlateNumber());
-      }
-    }
-    assertEquals(expectedPlateNumbersSet,
-                 actualPlateNumbersSet);
-  }
-  
-
   /**
    * Tests that screen result errors are saved to a new set of workbooks.
    * @throws IOException 
    */
   public void testSaveScreenResultErrors() throws IOException
   {
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, "metadata_with_errors.xls");
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, "NewFormatErrorsTest.xls");
     mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(115), workbookFile);
     String extension = "errors.xls";
     Map<Workbook,File> workbook2File =
@@ -388,35 +185,25 @@ public class ScreenResultParserTest extends AbstractSpringTest
       if (workbook.getWorkbookFile().equals(workbookFile))
       {
         // test metadata workbook
-        assertEquals(4,
+        assertEquals(5,
                      workbook.getWorkbook().getNumberOfSheets());
-        HSSFSheet sheet0 = workbook.getWorkbook().getSheetAt(0);
-        HSSFSheet sheet1 = workbook.getWorkbook().getSheetAt(1);
-        HSSFSheet sheet3 = workbook.getWorkbook().getSheetAt(3);
-        assertEquals("ERROR: value required",
-                     HSSFCellUtil.getCell(sheet0.getRow(8),'F' - 'A').getStringCellValue());
-        assertEquals("ERROR: value required; unparseable value \"\" (expected one of [E])",
-                     HSSFCellUtil.getCell(sheet0.getRow(9),'F' - 'A').getStringCellValue());
-        assertEquals("ERROR: unparseable value \"maybe\" (expected one of [, 0, 1, false, n, no, true, y, yes])",
-                     HSSFCellUtil.getCell(sheet0.getRow(16),'F' - 'A').getStringCellValue());
-        assertEquals("ERROR: invalid cell type (expected a date)",
-                     HSSFCellUtil.getCell(sheet1.getRow(7),'B' - 'A').getStringCellValue());
-        assertEquals("Parse Errors",
-                     workbook.getWorkbook().getSheetName(3));
-        assertTrue(HSSFCellUtil.getCell(sheet3.getRow(0),'A' - 'A').getStringCellValue().
-                   matches("could not read workbook '.*': test[/\\\\]edu[/\\\\]harvard[/\\\\]med[/\\\\]screensaver[/\\\\]io[/\\\\]screenresults[/\\\\]nonextant\\.xls \\(.*\\)"));
+//        HSSFSheet sheet0 = workbook.getWorkbook().getSheetAt(0);
+//        HSSFSheet sheet1 = workbook.getWorkbook().getSheetAt(1);
+//        HSSFSheet sheet3 = workbook.getWorkbook().getSheetAt(3);
         
-      }
-      else if (workbook.getWorkbookFile().getName().equals("rawdata_with_errors.xls")) {
-        // test raw data workbook
-        assertEquals(1,
-                     workbook.getWorkbook().getNumberOfSheets());
-        HSSFSheet sheet0 = workbook.getWorkbook().getSheetAt(0);
-        assertEquals("ERROR: unparseable plate number 'PLL-0001'",
-                     HSSFCellUtil.getCell(sheet0.getRow(3),'A' - 'A').getStringCellValue());
-      } 
-      else {
-        fail("workbook " + workbook.getWorkbookFile() + " contained errors, but should not have");
+        // TODO: implement asserts
+//        assertEquals("ERROR: value required",
+//                     HSSFCellUtil.getCell(sheet0.getRow(8),'F' - 'A').getStringCellValue());
+//        assertEquals("ERROR: value required; unparseable value \"\" (expected one of [E])",
+//                     HSSFCellUtil.getCell(sheet0.getRow(9),'F' - 'A').getStringCellValue());
+//        assertEquals("ERROR: unparseable value \"maybe\" (expected one of [, 0, 1, false, n, no, true, y, yes])",
+//                     HSSFCellUtil.getCell(sheet0.getRow(16),'F' - 'A').getStringCellValue());
+//        assertEquals("ERROR: invalid cell type (expected a date)",
+//                     HSSFCellUtil.getCell(sheet1.getRow(7),'B' - 'A').getStringCellValue());
+//        assertEquals("Parse Errors",
+//                     workbook.getWorkbook().getSheetName(3));
+//        assertEquals("ERROR: unparseable plate number 'PLL-0001'",
+//                     HSSFCellUtil.getCell(sheet0.getRow(3),'A' - 'A').getStringCellValue());
       }
     }
   }
@@ -430,7 +217,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testRecycledCellUsage() 
   {
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, "metadata_with_errors.xls");
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, "NewFormatErrorsTest.xls");
     mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(115), workbookFile);
     Set<Cell> cellsWithErrors = new HashSet<Cell>();
     List<ParseError> errors = mockScreenResultParser.getErrors();
@@ -441,19 +228,14 @@ public class ScreenResultParserTest extends AbstractSpringTest
     }
   }
   
-  /*
-   * In fact, Spring provides us with the same parser instance for each test
-   * (singleton="true"), but good to have an explicit test for parser reuse in
-   * case this assumption changes.
-   */
   public void testParserReuse() throws Exception
   {
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, "metadata_with_errors.xls");
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, "NewFormatErrorsTest.xls");
     Screen screen = ScreenResultParser.makeDummyScreen(115);
-    ScreenResult result1 = mockScreenResultParser.parseLegacy(screen, workbookFile, true);
+    ScreenResult result1 = mockScreenResultParser.parse(screen, workbookFile);
     List<ParseError> errors1 = mockScreenResultParser.getErrors();
     assertNotNull("1st parse returns a result", result1);
-    ScreenResult result2 = mockScreenResultParser.parseLegacy(screen, workbookFile, true);
+    ScreenResult result2 = mockScreenResultParser.parse(screen, workbookFile);
     List<ParseError> errors2 = mockScreenResultParser.getErrors();
     assertNotNull("2nd parse returns a result", result2);
     assertNotSame("parses returned different ScreenResult objects", result1, result2);
@@ -466,7 +248,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     System.gc();
 
     // now test reading yet another spreadsheet, for which we can test the parsed result
-    testParseLegacyScreenResult();
+    testParseScreenResult();
    }
   
   /**
@@ -475,7 +257,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    * 
    * @throws Exception
    */
-  public void testParseNewScreenResult() throws Exception
+  public void testParseScreenResult() throws Exception
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, "NewFormatTest.xls");
     ScreenResult screenResult = mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(115), 
@@ -489,84 +271,169 @@ public class ScreenResultParserTest extends AbstractSpringTest
     assertEquals("date",
                  expectedScreenResult.getDateCreated(),
                  screenResult.getDateCreated());
-    assertEquals("replicate count", 1, screenResult.getReplicateCount()
-                                                   .intValue());
+    assertEquals("replicate count", 2, screenResult.getReplicateCount().intValue());
 
     Map<Integer,ResultValueType> expectedResultValueTypes = new HashMap<Integer,ResultValueType>();
 
-    ResultValueType rvt0 = new ResultValueType(expectedScreenResult,
-                                               "Luminescence");
-    rvt0.setDescription("Luminescence");
-    rvt0.setReplicateOrdinal(1);
-    rvt0.setActivityIndicator(false);
-    rvt0.setAssayPhenotype("Human");
-    rvt0.setComments("None");
-    rvt0.setNumeric(true);
-
-    ResultValueType rvt1 = new ResultValueType(expectedScreenResult,
-                                               "FI");
-    rvt1.setDescription("Fold Induction");
-    rvt1.setDerived(true);
-    rvt1.setHowDerived("Divide compound well by plate median");
-    rvt1.addTypeDerivedFrom(rvt0);
-    rvt1.setActivityIndicator(true);
-    rvt1.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
-    rvt1.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);
-    rvt1.setIndicatorCutoff(1070000.0);
-    rvt1.setNumeric(true);
-
-    expectedResultValueTypes.put(0, rvt0);
-    expectedResultValueTypes.put(1, rvt1);
-
-    Integer[] expectedInitialPlateNumbers = {1, 1, 1, 2, 2, 2};
-
-    String[] expectedInitialWellNames = {"A01", "A02", "A03", "A01", "A02", "A03"};
-
-    AssayWellType[] expectedInitialAssayWellTypes = {
-      AssayWellType.EXPERIMENTAL,
-      AssayWellType.OTHER,
-      AssayWellType.EXPERIMENTAL,
-      AssayWellType.EXPERIMENTAL,
-      AssayWellType.ASSAY_POSITIVE_CONTROL,
-      AssayWellType.EXPERIMENTAL};
-
-    Object[][] expectedInitialResultValues = {
-      {1071894.0, 0.9691},
-      {1071894.0, 0.9543},
-      {1174576.0, 1.0},
-      {1089391.0, 1.041},
-      {1030000.0, 1.0049},
-      {1020000.0, 1.0}};
+    ResultValueType rvt;
     
+    rvt = new ResultValueType(expectedScreenResult, "Luminescence");
+    rvt.setDescription("Desc1");
+    rvt.setReplicateOrdinal(1);
+    rvt.setTimePoint("0:10");
+    rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
+    rvt.setActivityIndicator(false);
+    rvt.setAssayPhenotype("Phenotype1");
+    rvt.setComments("None");
+    rvt.setNumeric(true);
+    expectedResultValueTypes.put(0, rvt);
+
+    rvt = new ResultValueType(expectedScreenResult, "Luminescence");
+    rvt.setDescription("Desc2");
+    rvt.setReplicateOrdinal(2);
+    rvt.setTimePoint("0:10");
+    rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
+    rvt.setActivityIndicator(false);
+    rvt.setAssayPhenotype("Phenotype1");
+    rvt.setFollowUpData(true);
+    rvt.setComments("None");
+    rvt.setNumeric(true);
+    expectedResultValueTypes.put(1, rvt);
+
+    rvt = new ResultValueType(expectedScreenResult, "FI");
+    rvt.setDescription("Fold Induction");
+    rvt.setReplicateOrdinal(1);
+    rvt.setDerived(true);
+    rvt.setHowDerived("Divide compound well by plate median");
+    rvt.addTypeDerivedFrom(expectedResultValueTypes.get(0));
+    rvt.setAssayPhenotype("Phenotype1");
+    rvt.setNumeric(true);
+    expectedResultValueTypes.put(2, rvt);
+
+    rvt = new ResultValueType(expectedScreenResult, "FI");
+    rvt.setDescription("Fold Induction");
+    rvt.setReplicateOrdinal(2);
+    rvt.setDerived(true);
+    rvt.setHowDerived("Divide compound well by plate median");
+    rvt.addTypeDerivedFrom(expectedResultValueTypes.get(1));
+    rvt.setAssayPhenotype("Phenotype1");
+    rvt.setFollowUpData(true);
+    rvt.setNumeric(true);
+    expectedResultValueTypes.put(3, rvt);
+
+    rvt = new ResultValueType(expectedScreenResult, "AssayIndicator1");
+    rvt.setDerived(true);
+    rvt.setHowDerived("Average");
+    rvt.addTypeDerivedFrom(expectedResultValueTypes.get(2));
+    rvt.addTypeDerivedFrom(expectedResultValueTypes.get(3));
+    rvt.setActivityIndicator(true);
+    rvt.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
+    rvt.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);
+    rvt.setIndicatorCutoff(1.5);
+    rvt.setAssayPhenotype("Phenotype1");
+    rvt.setNumeric(true);
+    expectedResultValueTypes.put(4, rvt);
+
+    rvt = new ResultValueType(expectedScreenResult, "AssayIndicator2");
+    rvt.setDerived(true);
+    rvt.setHowDerived("W<=1.6, M<=1.7, S<=1.8");
+    rvt.addTypeDerivedFrom(expectedResultValueTypes.get(4));
+    rvt.setActivityIndicator(true);
+    rvt.setActivityIndicatorType(ActivityIndicatorType.PARTITION);
+    rvt.setAssayPhenotype("Phenotype1");
+    rvt.setNumeric(false);
+    expectedResultValueTypes.put(5, rvt);
+
+    rvt = new ResultValueType(expectedScreenResult, "AssayIndicator3");
+    rvt.setDerived(true);
+    rvt.setHowDerived("AssayIndicator2 is S");
+    rvt.addTypeDerivedFrom(expectedResultValueTypes.get(5));
+    rvt.setActivityIndicator(true);
+    rvt.setActivityIndicatorType(ActivityIndicatorType.BOOLEAN);
+    rvt.setAssayPhenotype("Phenotype1");
+    rvt.setNumeric(false);
+    expectedResultValueTypes.put(6, rvt);
+
+    Integer[] expectedPlateNumbers = {1, 1, 1, 1, 1, 1, 1, 1};
+
+    String[] expectedWellNames = {"A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08"};
+
+    AssayWellType[] expectedAssayWellTypes = {
+      AssayWellType.ASSAY_POSITIVE_CONTROL,
+      AssayWellType.EXPERIMENTAL,
+      AssayWellType.EXPERIMENTAL,
+      AssayWellType.ASSAY_NEGATIVE_CONTROL,
+      AssayWellType.LIBRARY_CONTROL,
+      AssayWellType.BUFFER,
+      AssayWellType.OTHER,
+      AssayWellType.EMPTY};
+
+    boolean[][] expectedExcludeValues = {
+      {false, false, false, false, false, false, false},
+      {false, false, false, false, false, false, false},
+      {false, true,  false, true,  false, false, false},
+      {false, false, false, false, false, false, false},
+      {false, false, false, false, false, false, false},
+      {false, false, false, false, false, false, false},
+      {true,  true,  true,  true,  true,  true,  true},
+      {false, false, false, false, false, false, false}};
+
+    Object[][] expectedValues = {
+          { 1071894., 1196906., 0.98, 1.11, 1.045, "", "false" },
+          { 1174576., 1469296., null, 5.8, 5.800, "S", "true" },
+          { 1294182., 1280934., 1.18, 1.19, 1.185, "", "false" },
+          { 1158888., 1458878., 1.06, 1.35, 1.205, "W", "false" },
+          { 1385142., 1383446., 1.26, 1.28, 1.270, "W", "false" },
+          { null, null, null, null, null, "", "false" },
+          { 1666646., 1154436., 1.52, 1.07, 1.295, "W", "false" },
+          { null, null, null, null, null, "", "false" } };
+
     SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
     int iRvt = 0;
-    for (ResultValueType rvt : resultValueTypes) {
+    for (ResultValueType actualRvt : resultValueTypes) {
       ResultValueType expectedRvt = expectedResultValueTypes.get(iRvt);
       if (expectedRvt != null) {
         setDefaultValues(expectedRvt);
-        setDefaultValues(rvt);
-        assertTrue("ResultValueType " + iRvt, expectedRvt.isEquivalent(rvt));
+        setDefaultValues(actualRvt);
+        assertTrue("ResultValueType " + iRvt, expectedRvt.isEquivalent(actualRvt));
 
-        // compare result values
-        assertEquals(6, rvt.getResultValues().size());
+        // compare result valuesb
+        assertEquals(960, actualRvt.getResultValues().size());
         int iWell = 0;
-        Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
+        Map<WellKey,ResultValue> resultValues = actualRvt.getResultValues();
         for (WellKey wellKey : new TreeSet<WellKey>(resultValues.keySet())) {
           ResultValue rv = resultValues.get(wellKey);
           assertEquals("rvt " + iRvt + " well #" + iWell + " plate name",
-                       expectedInitialPlateNumbers[iWell],
+                       expectedPlateNumbers[iWell],
                        new Integer(wellKey.getPlateNumber()));
           assertEquals("rvt " + iRvt + " well #" + iWell + " well name",
-                       expectedInitialWellNames[iWell],
+                       expectedWellNames[iWell],
                        wellKey.getWellName());
           assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
-                       expectedInitialAssayWellTypes[iWell],
+                       expectedAssayWellTypes[iWell],
                        rv.getAssayWellType());
-          assertEquals("rvt " + iRvt + " well #" + iWell + " result value",
-                       (Double) expectedInitialResultValues[iWell][iRvt],
-                       rv.getNumericValue(),
-                       0.001);
+          assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
+                       expectedExcludeValues[iWell][iRvt],
+                       rv.isExclude());
+          if (expectedValues[iWell][iRvt] == null) {
+            assertNull("rvt " + iRvt + " well #" + iWell + " result value is null",
+                       rv.getValue());
+          }
+          else {
+            if (expectedRvt.isNumeric()) {
+              assertEquals("rvt " + iRvt + " well #" + iWell + " result value (numeric)",
+                           (Double) expectedValues[iWell][iRvt],
+                           rv.getNumericValue(),
+                           0.001);
+            }
+            else {
+              assertEquals("rvt " + iRvt + " well #" + iWell + " result value (non-numeric)",
+                           expectedValues[iWell][iRvt].toString(),
+                           rv.getValue());
+            }
+          }
           ++iWell;
+          if (iWell == expectedPlateNumbers.length) { break; }
         }
       }
       ++iRvt;
@@ -616,8 +483,23 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
   private static Screen makeScreen(Date date)
   {
-    ScreeningRoomUser screener = new ScreeningRoomUser(date, "first", "last", "first_last@hms.harvard.edu", "", "", "", "", "", ScreeningRoomUserClassification.ICCBL_NSRB_STAFF, false);
-    Screen screen = new Screen(screener, screener, 1, date, ScreenType.SMALL_MOLECULE, "test screen");
+    ScreeningRoomUser screener = new ScreeningRoomUser(date,
+                                                       "first",
+                                                       "last",
+                                                       "first_last@hms.harvard.edu",
+                                                       "",
+                                                       "",
+                                                       "",
+                                                       "",
+                                                       "",
+                                                       ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
+                                                       false);
+    Screen screen = new Screen(screener,
+                               screener,
+                               1,
+                               date,
+                               ScreenType.SMALL_MOLECULE,
+                               "test screen");
     return screen;
   }
 

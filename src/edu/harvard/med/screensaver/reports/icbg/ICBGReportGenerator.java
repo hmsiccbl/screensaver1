@@ -414,7 +414,7 @@ public class ICBGReportGenerator
     SortedSet<ResultValueType> resultValueTypes =
       screenResult.getResultValueTypes();
     for (ResultValueType rvt : resultValueTypes) {
-      if (rvt.isCherryPick() || ! rvt.isActivityIndicator()) {
+      if (! rvt.isActivityIndicator()) {
         continue;
       }
       ActivityIndicatorType indicatorType = rvt.getActivityIndicatorType();
@@ -433,7 +433,7 @@ public class ICBGReportGenerator
     SortedSet<ResultValueType> resultValueTypes =
       screenResult.getResultValueTypes();
     for (ResultValueType rvt : resultValueTypes) {
-      if (rvt.isCherryPick() || ! rvt.isActivityIndicator()) {
+      if (! rvt.isActivityIndicator()) {
         continue;
       }
       ActivityIndicatorType indicatorType = rvt.getActivityIndicatorType();

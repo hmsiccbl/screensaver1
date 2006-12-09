@@ -14,6 +14,7 @@ import java.util.Map;
 
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
@@ -60,11 +61,17 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
         columnValues.put(MetadataRow.HOW_DERIVED, rvt.getHowDerived());
         columnValues.put(MetadataRow.COLUMNS_DERIVED_FROM, makeColumnsDerivedFromList(rvt));
       }
+      else {
+        columnValues.put(MetadataRow.ASSAY_READOUT_TYPE, rvt.getAssayReadoutType().getValue().toLowerCase());
+      }
       columnValues.put(MetadataRow.IS_ASSAY_ACTIVITY_INDICATOR, makeYesOrNoString(rvt.isActivityIndicator()));
       if (rvt.isActivityIndicator()) {
         columnValues.put(MetadataRow.ACTIVITY_INDICATOR_TYPE, rvt.getActivityIndicatorType().getValue().toLowerCase());
         if (rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL) {
-          columnValues.put(MetadataRow.NUMERICAL_INDICATOR_DIRECTION, rvt.getIndicatorDirection().getValue().toLowerCase());
+          columnValues.put(MetadataRow.NUMERICAL_INDICATOR_DIRECTION, 
+                           rvt.getIndicatorDirection().equals(IndicatorDirection.HIGH_VALUES_INDICATE) 
+                           ?  ScreenResultParser.NUMERICAL_INDICATOR_DIRECTION_HIGH_VALUES_INDICATE : 
+                             ScreenResultParser.NUMERICAL_INDICATOR_DIRECTION_LOW_VALUES_INDICATE);
           columnValues.put(MetadataRow.NUMERICAL_INDICATOR_CUTOFF, rvt.getIndicatorCutoff());
         }
       }
@@ -110,13 +117,11 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
     style.setWrapText(true);
 
     for (MetadataRow metadataRow : MetadataRow.values()) {
-      if (metadataRow.isUsed(false)) {
-        HSSFRow row = HSSFCellUtil.getRow(metadataRow.getRowIndex(),
-                                          sheet);
-        HSSFCell cell = HSSFCellUtil.getCell(row, METADATA_ROW_NAMES_COLUMN_INDEX);
-        cell.setCellStyle(style);
-        cell.setCellValue(metadataRow.getDisplayText());
-      }
+      HSSFRow row = HSSFCellUtil.getRow(metadataRow.getRowIndex(),
+                                        sheet);
+      HSSFCell cell = HSSFCellUtil.getCell(row, METADATA_ROW_NAMES_COLUMN_INDEX);
+      cell.setCellStyle(style);
+      cell.setCellValue(metadataRow.getDisplayText());
     }
     
   }

@@ -391,20 +391,6 @@ public class ScreenViewer extends AbstractBackingBean
   }
   
   @UIControllerMethod
-  public String addAssayReadoutType()
-  {
-    return _screensController.addAssayReadoutType(_screen, _newAssayReadoutType);
-  }
-  
-  @UIControllerMethod
-  public String deleteAssayReadoutType()
-  {
-    return _screensController.deleteAssayReadoutType(
-      _screen,
-      getSelectedEntityOfType(AssayReadoutType.class));
-  }
-  
-  @UIControllerMethod
   public String addAbaseTestset()
   {
     return _screensController.addAbaseTestset(_screen);

@@ -19,7 +19,7 @@ import java.util.Set;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
-import edu.harvard.med.screensaver.model.ToManyRelationship;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
@@ -69,7 +69,6 @@ public class Screen extends AbstractEntity
   private String _comments;
   private String _abaseStudyId;
   private String _abaseProtocolId;
-  private Set<AssayReadoutType> _assayReadoutTypes = new HashSet<AssayReadoutType>();
   private String _publishableProtocol;
   private Date _dateOfApplication;
   private ScreenResult _screenResult;
@@ -145,7 +144,6 @@ public class Screen extends AbstractEntity
     _title = title;
     _leadScreener.getHbnScreensLed().add(this);
     _labHead.getHbnScreensHeaded().add(this);
-    _assayReadoutTypes.add(AssayReadoutType.UNSPECIFIED);
   }
 
 
@@ -753,46 +751,17 @@ public class Screen extends AbstractEntity
    * Get the assay readout types.
    *
    * @return the assay readout types
-   * @hibernate.set
-   *   order-by="assay_readout_type"
-   *   table="screen_assay_readout_type"
-   *   cascade="delete-orphan"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="screen_id"
-   *   foreign-key="fk_screen_assay_readout_type_to_screen"
-   * @hibernate.collection-element
-   *   type="edu.harvard.med.screensaver.model.screens.AssayReadoutType$UserType"
-   *   column="assay_readout_type"
-   *   not-null="true"
    */
-  @ToManyRelationship(minCardinality=1)
+  @DerivedEntityProperty
   public Set<AssayReadoutType> getAssayReadoutTypes()
   {
-    return _assayReadoutTypes;
-  }
-
-  /**
-   * Add the assay readout type.
-   *
-   * @param assayReadoutType the assay readout type to add
-   * @return true iff the screen did not already have the assay readout type
-   */
-  public boolean addAssayReadoutType(AssayReadoutType assayReadoutType)
-  {
-    return _assayReadoutTypes.add(assayReadoutType);
-  }
-
-  /**
-   * Remove the assay readout type.
-   *
-   * @param assayReadoutType the assay readout type to remove
-   * @return true iff the screen previously had the assay readout type
-   */
-  public boolean removeAssayReadoutType(AssayReadoutType assayReadoutType)
-  {
-    // note: related entity will be deleted by Hibernate on flush
-    return _assayReadoutTypes.remove(assayReadoutType);
+    Set<AssayReadoutType> assayReadoutTypes = new HashSet<AssayReadoutType>();
+    if (getScreenResult() != null) {
+      for (ResultValueType rvt : getScreenResult().getResultValueTypes()) {
+        assayReadoutTypes.add(rvt.getAssayReadoutType());
+      }
+    }
+    return assayReadoutTypes;
   }
 
   /**
@@ -1117,18 +1086,6 @@ public class Screen extends AbstractEntity
   {
     _fundingSupports = fundingSupports;
   }
-
-  /**
-   * Set the assay readout types.
-   *
-   * @param assayReadoutTypes the new assay readout types
-   * @motivation for hibernate
-   */
-  private void setAssayReadoutTypes(Set<AssayReadoutType> assayReadoutTypes)
-  {
-    _assayReadoutTypes = assayReadoutTypes;
-  }
-  
 
   /**
    * Get the screen number.

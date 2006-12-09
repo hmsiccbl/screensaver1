@@ -490,27 +490,7 @@ TODO:
 						<t:outputText value="#{assayReadoutType.value}"
 							styleClass="dataText" />
 					</t:column>
-					<t:column>
-						<f:facet name="header">
-							<%--t:outputText value="Action" /--%>
-						</f:facet>
-						<t:commandButton value="Delete" image="/images/delete.png"
-							action="#{screenViewer.deleteAssayReadoutType}"
-							styleClass="command" rendered="#{screenViewer.editable}" />
-					</t:column>
 				</t:dataTable>
-				<t:panelGroup>
-					<t:selectOneMenu value="#{screenViewer.newAssayReadoutType}"
-						required="false" rendered="#{screenViewer.editable}"
-						styleClass="input" converter="AssayReadoutTypeConverter">
-						<f:selectItems
-							value="#{screenViewer.newAssayReadoutTypeSelectItems}" />
-					</t:selectOneMenu>
-					<t:commandButton value="Add Assay Readout Type"
-						action="#{screenViewer.addAssayReadoutType}" immediate="false"
-						disabled="#{empty screenViewer.newAssayReadoutTypeSelectItems}"
-						styleClass="command" rendered="#{screenViewer.editable}" />
-				</t:panelGroup>
 			</t:panelGrid>
 
 			<t:outputLabel for="keywords" value="Keywords"
