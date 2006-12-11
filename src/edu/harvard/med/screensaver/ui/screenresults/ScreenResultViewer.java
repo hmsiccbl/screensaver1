@@ -435,10 +435,14 @@ public class ScreenResultViewer extends AbstractBackingBean
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
-  public String showWell()
+  public String viewWell()
   { 
-    Integer wellId = (Integer) getFacesContext().getExternalContext().getRequestParameterMap().get("wellIdParam");
-    Well well = _dao.findEntityById(Well.class, wellId);
+    assert DATA_TABLE_FIXED_COLUMN_HEADERS.get(0).equals("Plate");
+    assert DATA_TABLE_FIXED_COLUMN_HEADERS.get(1).equals("Well");
+    
+    Integer plateNumber = Integer.valueOf((String) ((Map) _rawDataModel.getRowData()).get(DATA_TABLE_FIXED_COLUMN_HEADERS.get(0)));
+    String wellName = (String) ((Map) _rawDataModel.getRowData()).get(DATA_TABLE_FIXED_COLUMN_HEADERS.get(1));
+    Well well = _dao.findWell(plateNumber, wellName);
     return _librariesController.viewWell(well, null);
   }
   

@@ -233,7 +233,11 @@ TODO:
 								<t:outputText value="#{columnName}" />
 							</t:commandLink>
 						</f:facet>
-						<t:outputText value="#{row[columnName]}" />
+						<t:outputText value="#{row[columnName]}" rendered="#{columnName != \"Well\"}"/>
+						<t:commandLink action="#{screenResultViewer.viewWell}"
+							rendered="#{columnName == \"Well\"}">
+							<t:outputText value="#{row[columnName]}" />
+						</t:commandLink>
 					</t:columns>
 				</t:dataTable>
 

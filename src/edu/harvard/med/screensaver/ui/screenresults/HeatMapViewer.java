@@ -15,7 +15,6 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -352,10 +351,8 @@ public class HeatMapViewer extends AbstractBackingBean
   public String viewWell()
   {
     HeatMapCell heatMapCell = getHeatMapCell();
-    Map<String, Object> wellProps = new HashMap<String,Object>();
-    wellProps.put("plateNumber", heatMapCell.getWellKey().getPlateNumber());
-    wellProps.put("name", heatMapCell.getWellKey().getWellName());
-    Well well = _dao.findEntityByProperties(Well.class, wellProps);
+    Well well = _dao.findWell(heatMapCell.getWellKey().getPlateNumber(),
+                              heatMapCell.getWellKey().getWellName());
     return _librariesController.viewWell(well, null);
   }
   

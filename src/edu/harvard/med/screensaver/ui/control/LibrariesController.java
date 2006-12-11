@@ -320,9 +320,17 @@ public class LibrariesController extends AbstractUIController
    */
   public String viewWell(Well well, WellSearchResults wellSearchResults)
   {
-    _wellViewer.setWellSearchResults(wellSearchResults);
-    _wellViewer.setWell(well);
-    return "viewWell";
+    // TODO: we should consider replicating this null-condition handling in our
+    // other view*() methods (and in all controllers)
+    if (well == null) {
+      this.showMessage("libraries.noSuchWell", well.getPlateNumber(), well.getWellName());
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    else {
+      _wellViewer.setWellSearchResults(wellSearchResults);
+      _wellViewer.setWell(well);
+      return "viewWell";
+    }
   }
 
   @UIControllerMethod
