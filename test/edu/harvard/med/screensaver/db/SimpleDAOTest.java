@@ -23,6 +23,7 @@ import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 
 /**
@@ -161,14 +162,19 @@ public class SimpleDAOTest extends AbstractSpringTest
     Map<String,Object> name2Value = new HashMap<String,Object>();
     name2Value.put("plateNumber", new Integer(1));
     name2Value.put("wellName", "A01");
-    
-    Library library = dao.defineEntity(Library.class, "ln1", "sn1", LibraryType.NATURAL_PRODUCTS, 1, 50);
+
+    Library library = dao.defineEntity(Library.class,
+                                       "ln1",
+                                       "sn1",
+                                       ScreenType.SMALL_MOLECULE,
+                                       LibraryType.NATURAL_PRODUCTS,
+                                       1,
+                                       50);
     Well expectedWell = dao.defineEntity(Well.class,
                                          library,
                                          name2Value.get("plateNumber"),
                                          name2Value.get("wellName"));
-    Well actualWell = dao.findEntityByProperties(Well.class,
-                                                 name2Value);
+    Well actualWell = dao.findEntityByProperties(Well.class, name2Value);
     assertTrue(actualWell.isEquivalent(expectedWell));
   }
 
@@ -186,11 +192,11 @@ public class SimpleDAOTest extends AbstractSpringTest
   
   public void testFindEntitiesByProperty2()
   {
-    dao.defineEntity(Library.class, "ln1", "sn1", LibraryType.NATURAL_PRODUCTS, 1, 50);
-    dao.defineEntity(Library.class, "ln2", "sn2", LibraryType.NATURAL_PRODUCTS, 51, 100);
-    dao.defineEntity(Library.class, "ln3", "sn3", LibraryType.DISCRETE, 101, 150);
-    dao.defineEntity(Library.class, "ln4", "sn4", LibraryType.NATURAL_PRODUCTS, 151, 200);
-    dao.defineEntity(Library.class, "ln5", "sn5", LibraryType.DISCRETE, 201, 250);
+    dao.defineEntity(Library.class, "ln1", "sn1", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 1, 50);
+    dao.defineEntity(Library.class, "ln2", "sn2", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 51, 100);
+    dao.defineEntity(Library.class, "ln3", "sn3", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 101, 150);
+    dao.defineEntity(Library.class, "ln4", "sn4", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 151, 200);
+    dao.defineEntity(Library.class, "ln5", "sn5", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 201, 250);
     
     assertEquals(3, dao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.NATURAL_PRODUCTS).size());
     assertEquals(2, dao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.DISCRETE).size());
@@ -210,11 +216,11 @@ public class SimpleDAOTest extends AbstractSpringTest
   
   public void testFindEntitiesByPropertyPattern()
   {
-    dao.defineEntity(Library.class, "npln1", "sn1", LibraryType.NATURAL_PRODUCTS, 1, 50);
-    dao.defineEntity(Library.class, "npln2", "sn2", LibraryType.NATURAL_PRODUCTS, 51, 100);
-    dao.defineEntity(Library.class, "ln3", "sn3", LibraryType.DISCRETE, 101, 150);
-    dao.defineEntity(Library.class, "npln4", "sn4", LibraryType.NATURAL_PRODUCTS, 151, 200);
-    dao.defineEntity(Library.class, "ln5", "sn5", LibraryType.DISCRETE, 201, 250);
+    dao.defineEntity(Library.class, "npln1", "sn1", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 1, 50);
+    dao.defineEntity(Library.class, "npln2", "sn2", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 51, 100);
+    dao.defineEntity(Library.class, "ln3", "sn3", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 101, 150);
+    dao.defineEntity(Library.class, "npln4", "sn4", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 151, 200);
+    dao.defineEntity(Library.class, "ln5", "sn5", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 201, 250);
     
     assertEquals(3, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "npln*").size());
     assertEquals(2, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "ln*").size());
