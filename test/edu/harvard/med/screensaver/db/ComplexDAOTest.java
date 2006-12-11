@@ -141,10 +141,10 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         public void runTransaction()
         {
-          Library library = dao.defineEntity(
-            Library.class,
+          Library library = new Library(
             "library Q",
             "Q",
+            ScreenType.SMALL_MOLECULE,
             LibraryType.KNOWN_BIOACTIVES,
             1,
             2);
@@ -196,13 +196,14 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         public void runTransaction()
         {
-          Library library = dao.defineEntity(
-            Library.class,
+          Library library = new Library(
             "library Q",
             "Q",
+            ScreenType.SMALL_MOLECULE,
             LibraryType.KNOWN_BIOACTIVES,
             1,
             2);
+          dao.persistEntity(library);
           dao.defineEntity(Well.class, library, 27, "A01");
         }
       });
@@ -264,13 +265,14 @@ public class ComplexDAOTest extends AbstractSpringTest
         {
           public void runTransaction()
           {
-            Library library = dao.defineEntity(
-              Library.class,
+            Library library = new Library(
               "library Q",
               "Q",
+              ScreenType.SMALL_MOLECULE,
               LibraryType.KNOWN_BIOACTIVES,
               1,
               2);
+            dao.persistEntity(library);
             dao.defineEntity(Well.class, library, 27, "A01");
             dao.defineEntity(Well.class, library, 27, "A02");
             dao.defineEntity(Well.class, library, 27, "A03");
@@ -324,13 +326,14 @@ public class ComplexDAOTest extends AbstractSpringTest
             rvt[i].setIndicatorDirection(i % 2 == 0 ? IndicatorDirection.LOW_VALUES_INDICATE : IndicatorDirection.HIGH_VALUES_INDICATE);
           }
           
-          Library library = dao.defineEntity(
-            Library.class,
+          Library library = new Library(
             "library with results", 
             "lwr", 
+            ScreenType.SMALL_MOLECULE,
             LibraryType.COMMERCIAL,
             1, 
             1);
+          dao.persistEntity(library);
           Well[] wells = new Well[3];
           for (int iWell = 0; iWell < wells.length; ++iWell) {
             wells[iWell] = dao.defineEntity(
@@ -556,14 +559,26 @@ public class ComplexDAOTest extends AbstractSpringTest
                                                    "",
                                                    ScreeningRoomUserClassification.ICCB_FELLOW,
                                                    false);
+        ScreeningRoomUser user6 = dao.defineEntity(ScreeningRoomUser.class,
+                                                   new Date(),
+                                                   "first6",
+                                                   "last6",
+                                                   "email6@hms.harvard.edu",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   ScreeningRoomUserClassification.ICCB_FELLOW,
+                                                   false);
         user2.setLabHead(user1);
         user3.setLabHead(user1);
         user5.setLabHead(user4);
         expectedLabHeads.add(user1);
         expectedLabHeads.add(user4);
+        expectedLabHeads.add(user6);
       }
     });
-
 
     List<ScreeningRoomUser> actualLabHeads = dao.findAllLabHeads();
     assertTrue(expectedLabHeads.containsAll(actualLabHeads) && actualLabHeads.containsAll(expectedLabHeads));

@@ -60,8 +60,8 @@ public class ScreenViewer extends AbstractBackingBean
   private ScreenResultsController _screenResultsController;
   private DAO _dao;
   private Screen _screen;
-  private UISelectOneBean<ScreeningRoomUser> _leadScreener;
   private UISelectOneBean<ScreeningRoomUser> _labName;
+  private UISelectOneBean<ScreeningRoomUser> _leadScreener;
   private UISelectManyBean<ScreeningRoomUser> _collaborators;
   private FundingSupport _newFundingSupport;
   private StatusValue _newStatusValue;
@@ -490,10 +490,10 @@ public class ScreenViewer extends AbstractBackingBean
     if (labHead != null) {
       leadScreenerCandidates.add(labHead);
       leadScreenerCandidates.addAll(labHead.getLabMembers());
-      _leadScreener = new UISelectOneBean<ScreeningRoomUser>(leadScreenerCandidates, _screen.getLeadScreener()) {
-        protected String getLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); } 
-      };
     }
+    _leadScreener = new UISelectOneBean<ScreeningRoomUser>(leadScreenerCandidates, _screen.getLeadScreener()) {
+      protected String getLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); } 
+    };
   }
 
   @SuppressWarnings("unchecked")

@@ -201,7 +201,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   @SuppressWarnings("unchecked")
   public List<ScreeningRoomUser> findAllLabHeads()
   {
-    String hql = "select distinct labHead from ScreeningRoomUser u join u.hbnLabHead labHead";
+    String hql = "select distinct lh from ScreeningRoomUser lh left outer join lh.hbnLabHead where lh.hbnLabHead is null";
     return (List<ScreeningRoomUser>) getHibernateTemplate().find(hql);
   }
   
