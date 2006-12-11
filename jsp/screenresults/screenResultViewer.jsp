@@ -97,10 +97,18 @@ TODO:
 						styleClass="dataText entityLink" style="margin-right: 4px" />
 
 					<t:outputLabel for="screenResultDateCreated"
-						value="Screen Result Created" styleClass="keyColumn"
+						value="First data deposition" styleClass="keyColumn"
 						rendered="#{!empty screenResultViewer.screenResult}" />
 					<t:outputText id="screenResultDateCreated"
 						value="#{screenResultViewer.screenResult.dateCreated}"
+						styleClass="dataText"
+						rendered="#{!empty screenResultViewer.screenResult}" />
+
+					<t:outputLabel for="screenResultLastImported" value="Last Imported"
+						styleClass="keyColumn"
+						rendered="#{!empty screenResultViewer.screenResult}" />
+					<t:outputText id="screenResultLastImported"
+						value="#{screenResultViewer.screenResult.dateLastImported}"
 						styleClass="dataText"
 						rendered="#{!empty screenResultViewer.screenResult}" />
 

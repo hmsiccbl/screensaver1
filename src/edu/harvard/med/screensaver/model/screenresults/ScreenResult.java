@@ -58,6 +58,7 @@ public class ScreenResult extends AbstractEntity
   private Integer                    _version;
   private Screen                     _screen;
   private Date                       _dateCreated;
+  private Date                       _dateLastImported;
   private boolean                    _isShareable;
   private Integer                    _replicateCount;
   private SortedSet<ResultValueType> _resultValueTypes = new TreeSet<ResultValueType>();
@@ -92,11 +93,9 @@ public class ScreenResult extends AbstractEntity
     boolean isShareable,
     Integer replicateCount)
   {
-    setDateCreated(dateCreated); // must occur before _screen.setHbnScreenResult(), as dateCreated is part of our business key
+    this(screen, dateCreated);
     setShareable(isShareable);
     setReplicateCount(replicateCount);
-    _screen = screen;
-    _screen.setScreenResult(this);
   }
 
   /**
@@ -108,8 +107,8 @@ public class ScreenResult extends AbstractEntity
   public ScreenResult(Screen screen, Date dateCreated)
   {
     setDateCreated(dateCreated); // must occur before _screen.setHbnScreenResult(), as dateCreated is part of our business key
+    setDateLastImported(new Date());
     setScreen(screen);
-    _screen = screen;
     _screen.setScreenResult(this);
   }
   
@@ -150,10 +149,11 @@ public class ScreenResult extends AbstractEntity
   }
 
   /**
-   * Get the date this <code>ScreenResult</code> was generated in the lab.
+   * Get the date that this <code>ScreenResult</code>'s data was initially
+   * created.
    * 
    * @return returns a {@link java.util.Date} representing the date this
-   *         <code>ScreenResult</code> was created
+   *         <code>ScreenResult</code> was initially created
    * @hibernate.property type="date" not-null="true"
    */
   public Date getDateCreated()
@@ -162,14 +162,39 @@ public class ScreenResult extends AbstractEntity
   }
   
   /**
-   * Set the date this <code>ScreenResult</code> was generated in the lab.
+   * Set the date this <code>ScreenResult</code> was initially created.
    * 
-   * @param dateCreated the date this <code>ScreenResult</code> was generated
-   *          in the lab
+   * @param dateCreated the date this <code>ScreenResult</code> was initially
+   *          created.
    */
   public void setDateCreated(Date dateCreated)
   {
     _dateCreated = truncateDate(dateCreated);
+  }
+
+  /**
+   * Get the date this <code>ScreenResult</code> was last imported into
+   * Screensaver.
+   * 
+   * @return returns a {@link java.util.Date} representing the date this
+   *         <code>ScreenResult</code> was last imported into Screensaver.
+   * @hibernate.property type="date" not-null="true"
+   */
+  public Date getDateLastImported()
+  {
+    return _dateLastImported;
+  }
+  
+  /**
+   * Set the date this <code>ScreenResult</code> was last imported into
+   * Screensaver.
+   * 
+   * @param dateImported the date this <code>ScreenResult</code> was last
+   *          imported into Screensaver.
+   */
+  public void setDateLastImported(Date dateImported)
+  {
+    _dateLastImported = truncateDate(dateImported);
   }
 
   /**

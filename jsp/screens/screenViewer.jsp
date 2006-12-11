@@ -51,7 +51,7 @@ TODO:
 				<t:panelGroup>
 					<t:outputLabel value="<none>" styleClass="inputLabel"
 						rendered="#{empty screenViewer.screenResult}" />
-					<t:outputLabel value="Date created: " styleClass="inputLabel"
+					<t:outputLabel value="First data deposition:" styleClass="inputLabel"
 						rendered="#{!empty screenViewer.screenResult}" />
 					<t:outputText
 						value="#{screenViewer.screenResult.dateCreated}"
