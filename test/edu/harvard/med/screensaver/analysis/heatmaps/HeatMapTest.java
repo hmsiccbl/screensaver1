@@ -42,7 +42,7 @@ public class HeatMapTest extends AbstractSpringTest
     Screen screen = ScreenResultParser.makeDummyScreen(107);
     _parser = new ScreenResultParser(new MockDaoForScreenResultParserTest());
     _screenResult = _parser.parse(screen,
-                                  new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "107_heatmap.xls"));
+                                  new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "ScreenResultHeatmapTest107.xls"));
     if (_parser.getHasErrors()) {
       System.err.println("Parser errors:\n" + _parser.getErrors());
       fail("could not parse screen results");
