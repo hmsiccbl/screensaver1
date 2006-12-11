@@ -53,6 +53,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
 {
 
   public static final File TEST_INPUT_FILE_DIR = new File("test/edu/harvard/med/screensaver/io/screenresults");
+  public static final String SCREEN_RESULT_115_TEST_WORKBOOK_FILE = "ScreenResultTest115.xls";
+  public static final String SCREEN_RESULT_116_TEST_WORKBOOK_FILE = "ScreenResultTest116.xls";
+  public static final String ERRORS_TEST_WORKBOOK_FILE = "NewFormatErrorsTest.xls";
+  public static final String FORMULA_VALUE_TEST_WORKBOOK_FILE = "formula_value.xls";
   
   protected ScreenResultParser mockScreenResultParser;
 
@@ -89,7 +93,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
       "AssayIndicator2", 
       "AssayIndicator3" };
 
-    InputStream xlsInStream = ScreenResultParserTest.class.getResourceAsStream("NewFormatTest.xls");
+    InputStream xlsInStream = ScreenResultParserTest.class.getResourceAsStream(SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
     POIFSFileSystem fs = new POIFSFileSystem(xlsInStream);
     HSSFWorkbook wb = new HSSFWorkbook(fs);
     int nSheets = wb.getNumberOfSheets();
@@ -111,7 +115,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testReadNumericFormulaCellValue() throws Exception
   {
     InputStream xlsInStream = 
-      ScreenResultParserTest.class.getResourceAsStream("formula_value.xls");
+      ScreenResultParserTest.class.getResourceAsStream(FORMULA_VALUE_TEST_WORKBOOK_FILE);
     POIFSFileSystem fs = new POIFSFileSystem(xlsInStream);
     HSSFWorkbook wb = new HSSFWorkbook(fs);
     HSSFSheet sheet = wb.getSheetAt(0);
@@ -127,7 +131,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
     ParseErrorManager errors = new ParseErrorManager();
     Workbook workbook = new Workbook(new File(TEST_INPUT_FILE_DIR, 
-                                              "formula_value.xls"), errors);
+                                              FORMULA_VALUE_TEST_WORKBOOK_FILE), errors);
     Cell.Factory cellFactory = new Cell.Factory(workbook, 0, errors);
     Cell cell = cellFactory.getCell((short) 2, (short) 0, false);
     assertNotNull(cell);
@@ -142,7 +146,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testReadBooleanFormulaCellValue() throws Exception
   {
     InputStream xlsInStream = 
-      ScreenResultParserTest.class.getResourceAsStream("formula_value.xls");
+      ScreenResultParserTest.class.getResourceAsStream(FORMULA_VALUE_TEST_WORKBOOK_FILE);
     POIFSFileSystem fs = new POIFSFileSystem(xlsInStream);
     HSSFWorkbook wb = new HSSFWorkbook(fs);
     HSSFSheet sheet = wb.getSheetAt(0);
@@ -158,7 +162,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     
     ParseErrorManager errors = new ParseErrorManager();
     Workbook workbook = new Workbook(new File(TEST_INPUT_FILE_DIR, 
-                                              "formula_value.xls"), errors);
+                                              FORMULA_VALUE_TEST_WORKBOOK_FILE), errors);
     Cell.Factory cellFactory = new Cell.Factory(workbook, 0, errors);
     Cell cell = cellFactory.getCell((short) 3, (short) 0, false);
     assertNotNull(cell);
@@ -174,7 +178,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testSaveScreenResultErrors() throws IOException
   {
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, "NewFormatErrorsTest.xls");
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
     mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(115), workbookFile);
     String extension = "errors.xls";
     Map<Workbook,File> workbook2File =
@@ -217,7 +221,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testRecycledCellUsage() 
   {
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, "NewFormatErrorsTest.xls");
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
     mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(115), workbookFile);
     Set<Cell> cellsWithErrors = new HashSet<Cell>();
     List<ParseError> errors = mockScreenResultParser.getErrors();
@@ -230,7 +234,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   
   public void testParserReuse() throws Exception
   {
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, "NewFormatErrorsTest.xls");
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
     Screen screen = ScreenResultParser.makeDummyScreen(115);
     ScreenResult result1 = mockScreenResultParser.parse(screen, workbookFile);
     List<ParseError> errors1 = mockScreenResultParser.getErrors();
@@ -259,7 +263,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testParseScreenResult() throws Exception
   {
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, "NewFormatTest.xls");
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
     ScreenResult screenResult = mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(115), 
                                                              workbookFile);
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
@@ -443,7 +447,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testIllegalScreenNumber()
   {
     Screen screen = ScreenResultParser.makeDummyScreen(999);
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, "NewFormatTest.xls");
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
     mockScreenResultParser.parse(screen,
                                  workbookFile);
     assertEquals("screen result data file is for screen number 115, expected 999",

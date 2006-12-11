@@ -129,7 +129,7 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
         users[3].addLabMember(users[1]);
         users[3].addLabMember(users[2]);
 
-        // define the library and wells needed to import NewFormatTest.xls
+        // define the library and wells needed to import ScreenResultTest115.xls
         Library library = new Library(
           "library 1",
           "lib1",
@@ -146,7 +146,8 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
         dao.persistEntity(library);
 
         Screen screen115 = ScreenResultParser.makeDummyScreen(115);
-        screenResultParser.parse(screen115, new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "NewFormatTest.xls"));
+        screenResultParser.parse(screen115, new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
+                                                     ScreenResultParserTest.SCREEN_RESULT_115_TEST_WORKBOOK_FILE));
         assertFalse("screenresult import successful", screenResultParser.getHasErrors());
         if (screenResultParser.getHasErrors()) {
           log.debug(screenResultParser.getErrors());
@@ -155,7 +156,8 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
         screen115.addCollaborator(users[1]);
         
         Screen screen116 = ScreenResultParser.makeDummyScreen(116);
-        screenResultParser.parse(screen116, new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "NewFormatTest2.xls"));
+        screenResultParser.parse(screen116, new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
+                                                     ScreenResultParserTest.SCREEN_RESULT_116_TEST_WORKBOOK_FILE));
         screen116.getScreenResult().setShareable(true);
         assertEquals("screenresult import successful", 0, screenResultParser.getErrors().size());
         screen116.setLeadScreener(users[4]);

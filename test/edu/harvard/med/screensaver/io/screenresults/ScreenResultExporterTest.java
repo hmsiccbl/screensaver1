@@ -48,12 +48,12 @@ public class ScreenResultExporterTest extends AbstractSpringTest
     ScreenResult originalScreenResult = 
       mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(115), 
                                          new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
-                                                  "NewFormatTest.xls"));
+                                                  ScreenResultParserTest.SCREEN_RESULT_115_TEST_WORKBOOK_FILE));
     addDummyCollaboratorsToScreen(originalScreenResult);
     
     ScreenResultExporter exporter = new ScreenResultExporter();
     HSSFWorkbook workbook = exporter.build(originalScreenResult);
-    File exportedFile = File.createTempFile("NewFormatTest", ".exported.xls");
+    File exportedFile = File.createTempFile(ScreenResultParserTest.SCREEN_RESULT_115_TEST_WORKBOOK_FILE, ".exported.xls");
     workbook.write(new FileOutputStream(exportedFile));
     ScreenResult exportedScreenResult  = mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(115), 
                                                                       exportedFile); // parse with "new" format
