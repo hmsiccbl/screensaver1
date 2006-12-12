@@ -24,17 +24,20 @@ public class StringUtils {
   public static String makeListString(Collection items, String delimiter)
   {
     boolean isFirst = true;
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
     for (Iterator iter = items.iterator(); iter.hasNext();) {
-      String item = iter.next()
-                        .toString();
+      Object item = iter.next();
+      String s = "<null>";
+      if (item != null) {
+        s = item.toString();
+      }
       if (isFirst) {
         isFirst = false;
       }
       else {
         buf.append(delimiter);
       }
-      buf.append(item);
+      buf.append(s);
     }
     return buf.toString();
   }
