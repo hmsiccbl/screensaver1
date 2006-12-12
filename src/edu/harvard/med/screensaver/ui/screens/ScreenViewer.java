@@ -67,7 +67,7 @@ public class ScreenViewer extends AbstractBackingBean
   private StatusValue _newStatusValue;
   private AssayReadoutType _newAssayReadoutType = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs)
   private String _newKeyword = "";
-
+  private boolean _isReadOnlyMode = true;
   private ScreenSearchResults _screenSearchResults;
 
 
@@ -99,6 +99,40 @@ public class ScreenViewer extends AbstractBackingBean
     _screen = screen;
   }
   
+  public boolean isReadOnlyMode()
+  {
+    return _isReadOnlyMode;
+  }
+  
+  public boolean isPotentiallyEditable()
+  {
+    // note: we *cannot* substitute this call with super.isEditable(), since
+    // super.isEditable() polymorphically calls our very own isReadOnly()
+    // method!
+    return !super.isReadOnly();
+  }
+
+  @Override
+  public boolean isEditable()
+  {
+    return !_isReadOnlyMode && !super.isReadOnly();
+  }
+  
+  @Override
+  public boolean isReadOnly()
+  {
+    // note: we *cannot* substitute this call with super.isEditable(), since
+    // super.isEditable() polymorphically calls our very own isReadOnly()
+    // method!
+    return _isReadOnlyMode || super.isReadOnly();
+  }
+  
+  @Override
+  public boolean isReadOnlyAdmin()
+  {
+    return _isReadOnlyMode || super.isReadOnlyAdmin();
+  }
+
   public ScreenResult getScreenResult()
   {
     // TODO: HACK: data-access-permissions aware
@@ -280,6 +314,17 @@ public class ScreenViewer extends AbstractBackingBean
   
   /* JSF Application methods */
 
+  public String toggleReadOnlyMode()
+  {
+    // note: we *cannot* substitute this call with super.isEditable(), since
+    // super.isEditable() polymorphically calls our very own isReadOnly()
+    // method!
+    if (!super.isReadOnly()) {
+      _isReadOnlyMode ^= true;
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
   /**
    * A command to save the user's edits.
    */

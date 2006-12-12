@@ -1,4 +1,4 @@
-<%-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
+		<%-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
 <%-- The core taglib contains all the logic, validation, controller, and other tags specific to JSF. --%>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
@@ -11,130 +11,115 @@
 
 <%-- 
 TODO:
-- link screen number field
 - sectionHeader style is needing to be applied to 3 elements; should figure out what's going on w/css
 --%>
 
 <f:subview id="screenResultViewer">
 
-  <%-- Note: we are sharing screenViewer's screenSearchResults, as ScreenResultViewer 
-       and ScreenViewer are synchronized w.r.t. the current Screen. --%>
 	<t:aliasBean alias="#{navigator}" value="#{screenViewer.screenSearchResults}">
 		<%@ include file="../searchResultsNavPanel.jspf"%>
 	</t:aliasBean>
-
-  <h:form id="commandForm" >
-
-		<t:panelGroup>
-			<t:commandButton action="#{screenResultViewer.download}"
-				value="Download"
-				rendered="#{!empty screenResultViewer.screenResult}"
-				styleClass="command" />
-			<t:commandButton action="#{screenResultViewer.delete}" value="Delete"
-				onclick="javascript: return confirm('Delete this screen result permanently?');"
-				styleClass="command"
-				rendered="#{! screenResultViewer.readOnly && !empty screenResultViewer.screenResult}" />
-		</t:panelGroup>
-
-	</h:form>
 
 	<t:panelGroup rendered="#{!screenResultViewer.readOnly}">
 		<%--@ include file="admin/cherryPickUploader.jspf" --%>
 	</t:panelGroup>
 
-	<t:panelGroup rendered="#{!screenResultViewer.readOnly && empty screenResultViewer.screenResult}">
-		<%@include file="admin/screenResultUploader.jspf"%>
-	</t:panelGroup>
-
-	<t:panelGroup rendered="#{!screenResultViewer.readOnly && empty screenResultViewer.screenResult}">
-		<t:outputText value="No screen result loaded." styleClass="sectionHeader"/>
-	</t:panelGroup>
-	
 	<h:form id="dataForm">
-
 		<t:panelGrid columns="1">
-			<t:collapsiblePanel id="summaryPanel"
-				value="#{screenResultViewer.collapsablePanelsState['summary']}"
-				title="Summary" var="state" titleVar="title">
+			<t:collapsiblePanel id="screenPanel"
+				value="#{screenResultViewer.collapsablePanelsState['screenSummary']}"
+				title="Screen Summary" var="state" titleVar="title">
 				<f:facet name="header">
 					<t:div styleClass="sectionHeader">
 						<t:headerLink immediate="true" styleClass="sectionHeader">
 							<h:graphicImage
 								value="#{state ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 								styleClass="icon" />
-							<h:outputText value="#{title}" styleClass="sectionHeader" />
+							<h:outputText value="Screen Summary" styleClass="sectionHeader"
+								rendered="#{state}" />
+							<h:outputText value="Screen Details" styleClass="sectionHeader"
+								rendered="#{!state}" />
 						</t:headerLink>
 					</t:div>
 				</f:facet>
 
-				<t:panelGrid columns="2" styleClass="standardTable">
-					<t:outputLabel for="screenNumber" value="Screen Number"
-						styleClass="keyColumn " />
-
-					<t:commandLink action="#{screenResultViewer.viewScreen}">
-						<t:outputText id="screenNumber"
-							value="#{screenResultViewer.screen.screenNumber}"
+				<f:facet name="closedContent">
+					<t:panelGroup>
+						<t:outputText value="#{screenResultViewer.screen.screenNumber}: \"#{screenResultViewer.screen.title}\", Lab: "
 							styleClass="dataText" />
-					</t:commandLink>
+						<t:commandLink
+							value="#{screenViewer.screen.labHead.labName}"
+							action="#{screenViewer.viewLabHead}"
+							styleClass="dataText entityLink"/>
+						<t:outputText value=", Screener: " styleClass="dataText" />
+						<t:commandLink
+							value="#{screenViewer.screen.leadScreener.fullNameLastFirst}"
+							action="#{screenViewer.viewLeadScreener}"
+							styleClass="dataText entityLink"/>
+					</t:panelGroup>
+				</f:facet>
 
-					<t:outputLabel for="screenTitle" value="Screen Title"
-						styleClass="keyColumn" />
-					<t:outputText id="screenTitle"
-						value="#{screenResultViewer.screen.title}" styleClass="dataText" />
+				<%@ include file="../screens/screenViewer.jspf"%>
+			</t:collapsiblePanel>
 
-					<t:outputLabel for="screenLabName" value="Lab Name"
-						styleClass="keyColumn" />
-					<t:commandLink id="screenLabName"
-						value="#{screenViewer.screen.labHead.labName}"
-						action="#{screenViewer.viewLabHead}"
-						styleClass="dataText entityLink" style="margin-right: 4px" />
+			<t:panelGroup rendered="#{empty screenResultViewer.screenResult}">
+				<t:outputText value="Screen result not available" styleClass="sectionHeader"/>
+			</t:panelGroup>
+			<t:panelGroup rendered="#{!screenResultViewer.readOnly && empty screenResultViewer.screenResult}">
+				<%@include file="admin/screenResultUploader.jspf"%>
+			</t:panelGroup>
+`
 
-					<t:outputLabel for="screenLeadScreener" value="Lead Screener"
-						styleClass="keyColumn" />
-					<t:commandLink id="screenLeadScreener"
-						value="#{screenViewer.screen.leadScreener.fullNameLastFirst}"
-						action="#{screenViewer.viewLeadScreener}"
-						styleClass="dataText entityLink" style="margin-right: 4px" />
+			<t:collapsiblePanel id="screenResultPanel"
+				value="#{screenResultViewer.collapsablePanelsState['screenResultSummary']}"
+				title="Screen Result Summary" var="state" titleVar="title"
+				rendered="#{!empty screenResultViewer.screenResult}">
+				<f:facet name="header">
+					<t:div styleClass="sectionHeader">
+						<t:headerLink immediate="true" styleClass="sectionHeader">
+							<h:graphicImage
+								value="#{state ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+								styleClass="icon" />
+							<h:outputText value="Screen Result Summary"
+								styleClass="sectionHeader" />
+						</t:headerLink>
+					</t:div>
+				</f:facet>
 
+				<t:panelGrid columns="2">
 					<t:outputLabel for="screenResultDateCreated"
-						value="First data deposition" styleClass="keyColumn"
-						rendered="#{!empty screenResultViewer.screenResult}" />
+						value="First data deposition" styleClass="keyColumn" />
 					<t:outputText id="screenResultDateCreated"
 						value="#{screenResultViewer.screenResult.dateCreated}"
-						styleClass="dataText"
-						rendered="#{!empty screenResultViewer.screenResult}" />
+						styleClass="dataText" />
 
 					<t:outputLabel for="screenResultLastImported" value="Last Imported"
-						styleClass="keyColumn"
-						rendered="#{!empty screenResultViewer.screenResult}" />
+						styleClass="keyColumn" />
 					<t:outputText id="screenResultLastImported"
 						value="#{screenResultViewer.screenResult.dateLastImported}"
-						styleClass="dataText"
-						rendered="#{!empty screenResultViewer.screenResult}" />
+						styleClass="dataText" />
 
 					<t:outputLabel for="screenResultIsShareable" value="Shareable"
-						styleClass="keyColumn"
-						rendered="#{!empty screenResultViewer.screenResult}" />
-					<t:selectBooleanCheckbox id="screenResultIsShareable"
-						value="#{screenResultViewer.screenResult.shareable}"
-						displayValueOnly="true" displayValueOnlyStyleClass="dataText"
-						rendered="#{!empty screenResultViewer.screenResult}" />
-
+						styleClass="keyColumn" />
+					<h:form id="screenResultIsShareableForm">
+						<%-- TODO: make cancel action undo click; the following is not working: onclick="javascript:if (confirm('Make screen result #{screenResultViewer.screenResult.shareable ? \"unshared\" : \"shared\"}?')) submit(); else this.value=#{screenResultViewer.screenResult.shareable};" --%>
+						<t:selectBooleanCheckbox id="screenResultIsShareable"
+							value="#{screenResultViewer.screenResult.shareable}"
+							displayValueOnly="#{screenResultViewer.readOnly}"
+							displayValueOnlyStyleClass="dataText"/>
+					</h:form>
+					
 					<t:outputLabel for="platesCount" value="Plates"
-						styleClass="keyColumn"
-						rendered="#{!empty screenResultViewer.screenResult}" />
+						styleClass="keyColumn" />
 					<t:outputText id="screenResultPlateCount"
 						value="#{screenResultViewer.screenResult.plateNumberCount}"
-						styleClass="dataText"
-						rendered="#{!empty screenResultViewer.screenResult}" />
+						styleClass="dataText" />
 
 					<t:outputLabel for="screenResultReplicateCount" value="Replicates"
-						styleClass="keyColumn"
-						rendered="#{!empty screenResultViewer.screenResult}" />
+						styleClass="keyColumn" />
 					<t:outputText id="screenResultReplicateCount"
 						value="#{screenResultViewer.screenResult.replicateCount}"
-						styleClass="dataText"
-						rendered="#{!empty screenResultViewer.screenResult}" />
+						styleClass="dataText" />
 
 					<%-- Disabling until we can obtain this value efficiently
 					<t:outputLabel for="wellsCount" value="Wells"
@@ -145,12 +130,27 @@ TODO:
 						styleClass="dataText"
 						rendered="#{!empty screenResultViewer.screenResult}" />
 					--%>
-
 				</t:panelGrid>
 			</t:collapsiblePanel>
 
+			<h:form id="commandForm" >
+
+				<t:panelGroup>
+					<t:commandButton action="#{screenResultViewer.download}"
+						value="Download"
+						rendered="#{!empty screenResultViewer.screenResult}"
+						styleClass="command" />
+					<t:commandButton action="#{screenResultViewer.delete}"
+						value="Delete"
+						onclick="javascript: return confirm('Delete this screen result permanently?');"
+						styleClass="command"
+						rendered="#{!screenResultViewer.readOnly && !empty screenResultViewer.screenResult}" />
+				</t:panelGroup>
+
+			</h:form>
+
 			<t:panelGrid columns="1"
-				rendered="#{!empty screenResultViewer.screenResult}">
+				rendered="#{!empty screenResultViewer.screenResult && !(screenResultViewer.collapsablePanelsState['dataHeadersTable'] && screenResultViewer.collapsablePanelsState['dataTable'])}">
 				<t:outputLabel for="dataHeadersList"
 					value="Show selected data headers:" styleClass="inputLabel" />
 				<t:selectManyListbox id="dataHeadersList"
@@ -158,7 +158,7 @@ TODO:
 					styleClass="input">
 					<f:selectItems id="dataHeaders"
 						value="#{screenResultViewer.selectedResultValueTypes.selectItems}" />
-					<f:validateLength minimum="1"/>
+					<f:validateLength minimum="1" />
 				</t:selectManyListbox>
 				<t:panelGroup>
 					<t:commandButton id="updateButton1" value="Update"

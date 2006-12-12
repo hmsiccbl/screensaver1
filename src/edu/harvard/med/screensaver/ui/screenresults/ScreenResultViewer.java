@@ -141,7 +141,8 @@ public class ScreenResultViewer extends AbstractBackingBean
   public ScreenResultViewer()
   {
     _collapsablePanelsState = new HashMap<String,Boolean>();
-    _collapsablePanelsState.put("summary", false);
+    _collapsablePanelsState.put("screenSummary", false);
+    _collapsablePanelsState.put("screenResultSummary", false);
     _collapsablePanelsState.put("dataHeadersTable", true);
     _collapsablePanelsState.put("dataTable", true);
     _collapsablePanelsState.put("heatMaps", true);
@@ -181,7 +182,6 @@ public class ScreenResultViewer extends AbstractBackingBean
     return _screen;
   }
   
-
   public ScreenResult getScreenResult()
   {
     // TODO: HACK: data-access-permissions aware 
@@ -322,7 +322,7 @@ public class ScreenResultViewer extends AbstractBackingBean
     }
     return null;
   }
-
+  
 
   // JSF application methods
   

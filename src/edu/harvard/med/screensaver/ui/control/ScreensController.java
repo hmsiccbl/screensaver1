@@ -130,7 +130,8 @@ public class ScreensController extends AbstractUIController
     _screenViewer.setCandidateLabHeads(_dao.findAllLabHeads());
     _screenViewer.setCandidateCollaborators(_dao.findAllEntitiesWithType(ScreeningRoomUser.class));
     _screenViewer.setScreenSearchResults(screenSearchResults);
-    return VIEW_SCREEN;
+//  return VIEW_SCREEN;
+    return _screenResultsController.viewScreenResult(screen, screenSearchResults);
   }
 
   @UIControllerMethod

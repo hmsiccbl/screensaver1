@@ -455,7 +455,7 @@
     </navigation-case>
     <navigation-case>
       <from-outcome>viewScreen</from-outcome>
-      <to-view-id>/screens/screenViewer</to-view-id>
+      <to-view-id>/screenresults/screenResultViewer</to-view-id>
       <redirect/>
     </navigation-case>
 

@@ -23,6 +23,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 
@@ -758,10 +759,26 @@ public class Screen extends AbstractEntity
     Set<AssayReadoutType> assayReadoutTypes = new HashSet<AssayReadoutType>();
     if (getScreenResult() != null) {
       for (ResultValueType rvt : getScreenResult().getResultValueTypes()) {
-        assayReadoutTypes.add(rvt.getAssayReadoutType());
+        if (rvt.getAssayReadoutType() != null) {
+          assayReadoutTypes.add(rvt.getAssayReadoutType());
+        }
       }
     }
     return assayReadoutTypes;
+  }
+
+  /**
+   * Get the assay readout types, as a formatted, comma-delimited string
+   *
+   * @return the assay readout types, as a formatted, comma-delimited string
+   */
+  @DerivedEntityProperty
+  public String getAssayReadoutTypesString()
+  {
+    if (getScreenResult() != null) {
+      return StringUtils.makeListString(getAssayReadoutTypes(), ", ");
+    }
+    return "";
   }
 
   /**
