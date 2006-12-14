@@ -139,7 +139,7 @@ public class ScreensController extends AbstractUIController
   {
     if (_screensBrowser.getScreenSearchResults() == null) {
       List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
-      _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens, this));
+      _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens, this, _dao));
     }
     return BROWSE_SCREENS;
   }

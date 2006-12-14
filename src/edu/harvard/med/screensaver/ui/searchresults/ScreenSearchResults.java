@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
@@ -30,14 +32,15 @@ public class ScreenSearchResults extends SearchResults<Screen>
   // private static final fields
   
   private static final String SCREEN_NUMBER = "Screen Number";
-  private static final String LEAD_SCREENER = "Lead Screener";
+  private static final String LAB_HEAD = "Lab Head";
   private static final String TITLE = "Title";
+  private static final String SCREEN_RESULT = "Screen Result";
   
   
   // instance fields
   
   private ScreensController _screensController;
-  
+  private DAO _dao;
   
   // public constructor
   
@@ -45,11 +48,13 @@ public class ScreenSearchResults extends SearchResults<Screen>
    * Construct a new <code>ScreenSearchResult</code> object.
    * @param unsortedResults the unsorted list of the results, as they are returned from the
    * database
+   * @param dao 
    */
-  public ScreenSearchResults(List<Screen> unsortedResults, ScreensController screensController)
+  public ScreenSearchResults(List<Screen> unsortedResults, ScreensController screensController, DAO dao)
   {
     super(unsortedResults);
     _screensController = screensController;
+    _dao = dao;
   }
 
 
@@ -68,8 +73,9 @@ public class ScreenSearchResults extends SearchResults<Screen>
   {
     List<String> columnHeaders = new ArrayList<String>();
     columnHeaders.add(SCREEN_NUMBER);
-    columnHeaders.add(LEAD_SCREENER);
+    columnHeaders.add(LAB_HEAD);
     columnHeaders.add(TITLE);
+    columnHeaders.add(SCREEN_RESULT);
     return columnHeaders;
   }
 
@@ -91,11 +97,20 @@ public class ScreenSearchResults extends SearchResults<Screen>
     if (columnName.equals(SCREEN_NUMBER)) {
       return screen.getScreenNumber();
     }
-    if (columnName.equals(LEAD_SCREENER)) {
+    if (columnName.equals(LAB_HEAD)) {
       return screen.getLeadScreener().getFullNameLastFirst();
     }
     if (columnName.equals(TITLE)) {
       return screen.getTitle();
+    }
+    if (columnName.equals(SCREEN_RESULT)) {
+      // HACK: be data-access-permissions aware, until we can do this behind the scenes
+      if (screen.getScreenResult() != null) {
+        if (_dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId()) != null) {
+          return "available";
+        }
+      }
+      return null;
     }
     return null;
   }
@@ -116,11 +131,11 @@ public class ScreenSearchResults extends SearchResults<Screen>
         }
       };
     }
-    if (columnName.equals(LEAD_SCREENER)) {
+    if (columnName.equals(LAB_HEAD)) {
       return new Comparator<Screen>() {
         public int compare(Screen s1, Screen s2) {
-          return ScreensaverUserComparator.getInstance().compare(s1.getLeadScreener(), 
-                                                                 s2.getLeadScreener());
+          return ScreensaverUserComparator.getInstance().compare(s1.getLabHead(), 
+                                                                 s2.getLabHead());
         }
       };
     }
@@ -128,6 +143,29 @@ public class ScreenSearchResults extends SearchResults<Screen>
       return new Comparator<Screen>() {
         public int compare(Screen s1, Screen s2) {
           return s1.getTitle().compareTo(s2.getTitle());
+        }
+      };
+    }
+    if (columnName.equals(SCREEN_RESULT)) {
+      return new Comparator<Screen>() {
+        public int compare(Screen s1, Screen s2) {
+          // HACK: be data-access-permissions aware, until we can do this behind the scenes
+          ScreenResult sr1 = null;
+          if (s1.getScreenResult() != null) {
+            sr1 = _dao.findEntityById(ScreenResult.class, s1.getScreenResult().getEntityId());
+          }
+          ScreenResult sr2 = null;
+          if (s2.getScreenResult() != null) {
+            sr2 = _dao.findEntityById(ScreenResult.class, s2.getScreenResult().getEntityId());
+          }
+          // note: we want "available" screen results to appear first when sorting ascending
+          if (sr1 == null && sr2 != null) {
+            return 1;
+          }
+          if (sr1 != null && sr2 == null) {
+            return -1;
+          }
+          return s1.getScreenNumber().compareTo(s2.getScreenNumber());
         }
       };
     }
