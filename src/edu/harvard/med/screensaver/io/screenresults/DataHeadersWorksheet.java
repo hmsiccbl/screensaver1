@@ -46,40 +46,40 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
 
   private void writeDataHeaders(HSSFWorkbook workbook, HSSFSheet sheet, ScreenResult screenResult)
   {
-    Map<MetadataRow,Object> columnValues = new HashMap<MetadataRow,Object>();
+    Map<DataHeaderRow,Object> columnValues = new HashMap<DataHeaderRow,Object>();
     for (ResultValueType rvt : screenResult.getResultValueTypes()) {
       columnValues.clear();
-      columnValues.put(MetadataRow.COLUMN_IN_DATA_WORKSHEET, makeDataWorksheetColumnLabelForDataHeader(rvt));
-      columnValues.put(MetadataRow.NAME, rvt.getName());
-      columnValues.put(MetadataRow.DESCRIPTION, rvt.getDescription());
+      columnValues.put(DataHeaderRow.COLUMN_IN_DATA_WORKSHEET, makeDataWorksheetColumnLabelForDataHeader(rvt));
+      columnValues.put(DataHeaderRow.NAME, rvt.getName());
+      columnValues.put(DataHeaderRow.DESCRIPTION, rvt.getDescription());
       if (rvt.getReplicateOrdinal() != null) {
-        columnValues.put(MetadataRow.REPLICATE, rvt.getReplicateOrdinal());
+        columnValues.put(DataHeaderRow.REPLICATE, rvt.getReplicateOrdinal());
       }
-      columnValues.put(MetadataRow.TIME_POINT, rvt.getTimePoint());
-      columnValues.put(MetadataRow.RAW_OR_DERIVED, rvt.isDerived() ? DERIVED_VALUE : RAW_VALUE);
+      columnValues.put(DataHeaderRow.TIME_POINT, rvt.getTimePoint());
+      columnValues.put(DataHeaderRow.RAW_OR_DERIVED, rvt.isDerived() ? DERIVED_VALUE : RAW_VALUE);
       if (rvt.isDerived()) {
-        columnValues.put(MetadataRow.HOW_DERIVED, rvt.getHowDerived());
-        columnValues.put(MetadataRow.COLUMNS_DERIVED_FROM, makeColumnsDerivedFromList(rvt));
+        columnValues.put(DataHeaderRow.HOW_DERIVED, rvt.getHowDerived());
+        columnValues.put(DataHeaderRow.COLUMNS_DERIVED_FROM, makeColumnsDerivedFromList(rvt));
       }
       else {
-        columnValues.put(MetadataRow.ASSAY_READOUT_TYPE, rvt.getAssayReadoutType().getValue().toLowerCase());
+        columnValues.put(DataHeaderRow.ASSAY_READOUT_TYPE, rvt.getAssayReadoutType().getValue().toLowerCase());
       }
-      columnValues.put(MetadataRow.IS_ASSAY_ACTIVITY_INDICATOR, makeYesOrNoString(rvt.isActivityIndicator()));
+      columnValues.put(DataHeaderRow.IS_ASSAY_ACTIVITY_INDICATOR, makeYesOrNoString(rvt.isActivityIndicator()));
       if (rvt.isActivityIndicator()) {
-        columnValues.put(MetadataRow.ACTIVITY_INDICATOR_TYPE, rvt.getActivityIndicatorType().getValue().toLowerCase());
+        columnValues.put(DataHeaderRow.ACTIVITY_INDICATOR_TYPE, rvt.getActivityIndicatorType().getValue().toLowerCase());
         if (rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL) {
-          columnValues.put(MetadataRow.NUMERICAL_INDICATOR_DIRECTION, 
+          columnValues.put(DataHeaderRow.NUMERICAL_INDICATOR_DIRECTION, 
                            rvt.getIndicatorDirection().equals(IndicatorDirection.HIGH_VALUES_INDICATE) 
                            ?  ScreenResultParser.NUMERICAL_INDICATOR_DIRECTION_HIGH_VALUES_INDICATE : 
                              ScreenResultParser.NUMERICAL_INDICATOR_DIRECTION_LOW_VALUES_INDICATE);
-          columnValues.put(MetadataRow.NUMERICAL_INDICATOR_CUTOFF, rvt.getIndicatorCutoff());
+          columnValues.put(DataHeaderRow.NUMERICAL_INDICATOR_CUTOFF, rvt.getIndicatorCutoff());
         }
       }
-      columnValues.put(MetadataRow.PRIMARY_OR_FOLLOWUP, (rvt.isFollowUpData() ? FOLLOWUP_VALUE : PRIMARY_VALUE).toLowerCase());
-      columnValues.put(MetadataRow.ASSAY_PHENOTYPE, rvt.getAssayPhenotype());
-      columnValues.put(MetadataRow.COMMENTS, rvt.getComments());
+      columnValues.put(DataHeaderRow.PRIMARY_OR_FOLLOWUP, (rvt.isFollowUpData() ? FOLLOWUP_VALUE : PRIMARY_VALUE).toLowerCase());
+      columnValues.put(DataHeaderRow.ASSAY_PHENOTYPE, rvt.getAssayPhenotype());
+      columnValues.put(DataHeaderRow.COMMENTS, rvt.getComments());
       
-      for (MetadataRow metadataRow : columnValues.keySet()) {
+      for (DataHeaderRow metadataRow : columnValues.keySet()) {
         Object value = columnValues.get(metadataRow);
         HSSFRow row = HSSFCellUtil.getRow(metadataRow.getRowIndex(), sheet);
         Cell.setTypedCellValue(workbook,
@@ -116,7 +116,7 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
     HSSFCellStyle style = workbook.createCellStyle();
     style.setWrapText(true);
 
-    for (MetadataRow metadataRow : MetadataRow.values()) {
+    for (DataHeaderRow metadataRow : DataHeaderRow.values()) {
       HSSFRow row = HSSFCellUtil.getRow(metadataRow.getRowIndex(),
                                         sheet);
       HSSFCell cell = HSSFCellUtil.getCell(row, METADATA_ROW_NAMES_COLUMN_INDEX);

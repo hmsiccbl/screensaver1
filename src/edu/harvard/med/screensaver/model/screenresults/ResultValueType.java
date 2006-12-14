@@ -71,8 +71,8 @@ public class ResultValueType extends AbstractEntity implements Comparable
   private String                     _assayPhenotype;
   private String                     _comments;
   private boolean                    _isNumeric;
-  
   private boolean                    _isNumericalnessDetermined = false;
+  private Integer                    _hits;
 
   
   // public constructors and instance methods
@@ -240,15 +240,12 @@ public class ResultValueType extends AbstractEntity implements Comparable
                                          "numeric value to a " + (isNumeric ? "non-" : "") + 
                                          "numeric ResultValueType");
     }
-    getScreenResult().addWell(well);
-    if (getOrdinal() == 0) { // yuck! due to denormalization...
-      if (assayWellType.equals(AssayWellType.EXPERIMENTAL)) {
-        getScreenResult().incrementExperimentalWellCount();
-      }
-    }
-    _resultValues.put(well.getWellKey(), 
-                      new ResultValue(assayWellType, value, exclude, isNumeric));
-    return true;
+    ResultValue rv = new ResultValue(assayWellType,
+                                     value,
+                                     exclude,
+                                     isNumeric);
+    rv.setHit(isHit(rv));
+    return addResultValue(rv, well);
   }
 
   /**
@@ -279,17 +276,28 @@ public class ResultValueType extends AbstractEntity implements Comparable
     else if (!isNumeric()) {
       throw new IllegalArgumentException("cannot add a numeric value to a non-numeric ResultValueType");
     }
-    getScreenResult().addWell(well);
+    ResultValue rv = new ResultValue(assayWellType,
+                                     numericValue,
+                                     exclude);
+    rv.setHit(isHit(rv));
+    return addResultValue(rv, well);
+  }
+  
+  private boolean addResultValue(ResultValue rv, Well well)
+  {
     if (getOrdinal() == 0) { // yuck! due to denormalization...
-      if (assayWellType.equals(AssayWellType.EXPERIMENTAL)) {
+      if (rv.isExperimentalWell()) {
         getScreenResult().incrementExperimentalWellCount();
       }
     }
-    _resultValues.put(well.getWellKey(), 
-                      new ResultValue(assayWellType, 
-                                      numericValue,
-                                      exclude));
-    return true;
+
+    if (rv.isHit()) {
+      incrementHits();
+    }
+
+    getScreenResult().addWell(well);
+    
+    return _resultValues.put(well.getWellKey(), rv) != null;
   }
 
   /**
@@ -347,6 +355,49 @@ public class ResultValueType extends AbstractEntity implements Comparable
                           AssayWellType.EXPERIMENTAL, 
                           value, 
                           false);
+  }
+
+  /**
+   * Determine whether a result value is to be considered a hit, using its value
+   * and this ResultValueType's definition of what constitutes a hit. Only
+   * applicable for ResultValueTypes that are assay activity indicators.
+   * 
+   * @param rv
+   * @return true iff ResultValueType is an assay activity indicator, result
+   *         value is for an experimental well, result value is not excluded,
+   *         and the value of the result value meets the assay indicator type's
+   *         criteria.
+   */
+  private boolean isHit(ResultValue rv)
+  {
+    boolean isHit = false;
+    if (isActivityIndicator() && rv.isExperimentalWell() && !rv.isExclude()) {
+      if (rv.getNumericValue() != null) {
+        if (getActivityIndicatorType().equals(ActivityIndicatorType.BOOLEAN)) {
+          if (Boolean.parseBoolean(rv.getValue())) {
+            isHit = true;
+          }
+        }
+        else if (getActivityIndicatorType().equals(ActivityIndicatorType.NUMERICAL)) {
+          if (getIndicatorDirection().equals(IndicatorDirection.HIGH_VALUES_INDICATE)) {
+            if (rv.getNumericValue() >= getIndicatorCutoff()) {
+              isHit = true;
+            }
+          }
+          else {
+            if (rv.getNumericValue() <= getIndicatorCutoff()) {
+              isHit = true;
+            }
+          }
+        }
+        else if (getActivityIndicatorType().equals(ActivityIndicatorType.PARTITION)) {
+          if (rv.getValue() != null) {
+            isHit = true;
+          }
+        }
+      }
+    }
+    return isHit;
   }
 
   /**
@@ -782,9 +833,31 @@ public class ResultValueType extends AbstractEntity implements Comparable
     _isDerived = isDerived;
   }
 
+  /**
+   * Get the number of ResultValues that are hits, if this is an
+   * ActivityIndicator ResultValueType.
+   * 
+   * @return the number of ResultValues that are hits, if this is an
+   *         ActivityIndicator ResultValueType; otherwise null
+   * @hibernate.property type="integer"
+   */
+  public Integer getHits()
+  {
+    return _hits;
+  }
+  
+  @DerivedEntityProperty
+  public Double getHitRatio()
+  {
+    if (_hits != null) {
+      return _hits / (double) getScreenResult().getExperimentalWellCount();
+    }
+    return null;
+  }
+
   
   // Comparable interface methods
-
+  
   /**
    * Defines natural ordering of <code>ResultValueType</code> objects, based
    * upon their ordinal field value. Note that natural ordering is only defined
@@ -999,5 +1072,25 @@ public class ResultValueType extends AbstractEntity implements Comparable
   {
     _isNumeric = isNumeric;
     _isNumericalnessDetermined = true;
+  }
+
+  // should be private, cuz we only want this class or Hibernate to call, but breaks our naive units tests
+  /**
+   * @motivation for Hibernate
+   * @param hits
+   */
+  public void setHits(Integer hits)
+  {
+    _hits = hits;
+  }
+  
+  private void incrementHits()
+  {
+    if (_hits == null) {
+      _hits = new Integer(1);
+    }
+    else {
+      ++_hits;
+    }
   }
 }

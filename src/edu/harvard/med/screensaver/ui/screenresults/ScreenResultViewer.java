@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.ui.screenresults;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -100,8 +101,19 @@ public class ScreenResultViewer extends AbstractBackingBean
     new DataHeaderRowDefinition("indicatorCutoff", "Indicator Cutoff"),
     new DataHeaderRowDefinition("followUpData", "Follow Up Data"),
     new DataHeaderRowDefinition("assayPhenotype", "Assay Phenotype"),
-    new DataHeaderRowDefinition("cherryPick", "Cherry Pick"),
-    new DataHeaderRowDefinition("comments", "Comments")
+    new DataHeaderRowDefinition("comments", "Comments"),
+    new DataHeaderRowDefinition("hits", "Hits"),
+    new DataHeaderRowDefinition("hitRatio", "Hit %")
+    {
+      @Override
+      public String formatValue(ResultValueType rvt)
+      {
+        if (rvt.getHitRatio() == null) {
+          return "";
+        }
+        return NumberFormat.getPercentInstance().format(rvt.getHitRatio());
+      }
+    }
   };
 
   

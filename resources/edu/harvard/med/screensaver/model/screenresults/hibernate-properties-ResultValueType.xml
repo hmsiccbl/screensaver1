@@ -8,5 +8,6 @@
     <property name="numericValue" type="double"/>
     <property name="exclude" type="boolean"/>
     <property name="assayWellType" type="edu.harvard.med.screensaver.model.screenresults.AssayWellType$UserType"/>
+    <property name="hit" type="boolean"/>
    </composite-element>
   </map>

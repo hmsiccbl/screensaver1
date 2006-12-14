@@ -119,7 +119,7 @@ public class ScreenResultImporter extends AbstractBackingBean
         // this is an unexpected, system error, so we log at "error" level
         log.error("fatal error during import of ScreenResult for Screen " + _screen);
       }
-      else if (_screenResultParser.getErrors().size() > 0) {
+      if (_screenResultParser.getErrors().size() > 0) {
         // these are data-related "user" errors, so we log at "info" level
         log.info("parse errors encountered during import of ScreenResult for Screen " + _screen);
         return _screensController.viewScreenResultImportErrors();
@@ -130,7 +130,6 @@ public class ScreenResultImporter extends AbstractBackingBean
         _dao.flush();
         return _screensController.viewLastScreen();
       }
-      return REDISPLAY_PAGE_ACTION_RESULT;
     }
     catch (Exception e) {
       reportSystemError(e);

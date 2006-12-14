@@ -65,18 +65,11 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
  * Parses data from a workbook files (a.k.a. Excel spreadsheets) necessary for
  * instantiating a
  * {@link edu.harvard.med.screensaver.model.screenresults.ScreenResult}.
- * ScreenResult data consists of both metadata and raw data. The parser will
- * accept an all-in-one import file, where the metadata and raw data are in the
- * same workbook, but also will accept the metadata and raw data in separate
- * workbooks. For this latter case, the raw data can be in multiple workbooks
- * and the workbook file names must be specified as comma-delimited list in cell
- * B1 of the first sheet of the metadata workbook. In the former case, the names
- * of the worksheets containing the raw data must be listed in this cell
- * instead. By convention, each worksheet contains the raw data for a single
- * plate, but the parser is indifferent to how data may be arranged across
- * worksheets.
+ * ScreenResult data consists of both "data headers" and "raw" data. By
+ * convention, each worksheet contains the raw data for a single plate, but the
+ * parser is indifferent to how data may be arranged across worksheets.
  * <p>
- * The metadata is used to instantiate
+ * The data header info is used to instantiate
  * {@link edu.harvard.med.screensaver.model.screenresults.ResultValueType}
  * objects, while the raw data is used to instantiate each of the
  * <code>ResultValueType</code>s'
@@ -104,8 +97,6 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-// TODO: consider renaming "metadata" to "dataHeaders" (methods and variables),
-// as this is more in keeping with the new file format
 public class ScreenResultParser implements ScreenResultWorkbookSpecification
 {
 
@@ -126,16 +117,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
 
   // TODO: move these a messages (Spring) resource file
-  private static final String NO_METADATA_META_SHEET_ERROR = "worksheet could not be found";
   private static final String NO_CREATED_DATE_FOUND_ERROR = "\"First Date Screened\" value not found";
   private static final String NO_SCREEN_ID_FOUND_ERROR = "no screen ID found";
-  private static final String UNEXPECTED_DATA_HEADER_TYPE_ERROR = "unexpected data header type";
-  private static final String REFERENCED_UNDEFINED_DATA_HEADER_ERROR = "referenced undefined data header";
-  private static final String UNRECOGNIZED_INDICATOR_DIRECTION_ERROR = "unrecognized \"indicator direction\" value";
-  private static final String METADATA_DATA_HEADER_COLUMNS_NOT_FOUND_ERROR = "data header columns not found";
   private static final String DATA_HEADER_SHEET_NOT_FOUND_ERROR = "\"Data Headers\" sheet not found";
-  private static final String METADATA_UNEXPECTED_COLUMN_TYPE_ERROR = "expected column type of \"data\"";
-  private static final String METADATA_NO_RAWDATA_FILES_SPECIFIED_ERROR = "raw data workbook files not specified";
   private static final String UNKNOWN_ERROR = "unknown error";
   private static final String NO_DATA_SHEETS_FOUND_ERROR = "no data worksheets were found; no result data was imported";
   private static final String NO_SUCH_WELL = "library well does not exist";
@@ -515,7 +499,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     try {
       Workbook workbook = new Workbook(workbookFile, workbookInputStream, _errors);
       log.info("parsing " + workbookFile.getAbsolutePath());
-      MetadataParseResult metadataParseResult = parseMetadata(screen,
+      DataHeadersParseResult metadataParseResult = parseDataHeaders(screen,
                                                               workbook, 
                                                               ignoreFilePaths);
       log.info("parsing data sheets");
@@ -572,7 +556,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    *           not be initialized or does not appear to be a valid metadata
    *           definition
    */
-  private HSSFSheet initializeMetadataSheet(Workbook metadataWorkbook)
+  private HSSFSheet initializeDataHeadersSheet(Workbook metadataWorkbook)
     throws UnrecoverableScreenResultParseException
   {
     // find the "Data Headers" sheet
@@ -605,7 +589,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    */
   private int findDataHeaderColumnCount(HSSFSheet metadataSheet) throws UnrecoverableScreenResultParseException
   {
-    HSSFRow row = metadataSheet.getRow(MetadataRow.COLUMN_IN_DATA_WORKSHEET.getRowIndex());
+    HSSFRow row = metadataSheet.getRow(DataHeaderRow.COLUMN_IN_DATA_WORKSHEET.getRowIndex());
     short n = 0;
     while (row.getCell(n) != null && row.getCell(n).getCellType() != HSSFCell.CELL_TYPE_BLANK) { ++n; }
     return n - 1;
@@ -623,16 +607,16 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   }
 
 
-  private Cell metadataCell(MetadataRow row, int dataHeader, boolean isRequired) 
+  private Cell dataHeadersCell(DataHeaderRow row, int dataHeader, boolean isRequired) 
   {
     return _metadataCellParserFactory.getCell((short) (METADATA_FIRST_DATA_HEADER_COLUMN_INDEX + dataHeader),
                                               row.getRowIndex(),
                                               isRequired);
   }
   
-  private Cell metadataCell(MetadataRow row, int dataHeader)
+  private Cell dataHeadersCell(DataHeaderRow row, int dataHeader)
   {
-    return metadataCell(row, dataHeader, /*required=*/false);
+    return dataHeadersCell(row, dataHeader, /*required=*/false);
   }
   
   private Cell dataCell(int row, DataColumn column)
@@ -652,7 +636,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   }
                                         
   
-  private static class MetadataParseResult
+  private static class DataHeadersParseResult
   {
     private ScreenResult _screenResult;
     private ArrayList<Workbook> _rawDataWorkbooks;
@@ -680,58 +664,58 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   
   /**
    * Parse the workbook containing the ScreenResult metadata
-   * @param metadataWorkbook
+   * @param workbook
    * @param ignoreFilePaths
    * @throws UnrecoverableScreenResultParseException 
    */
-  private MetadataParseResult parseMetadata(
+  private DataHeadersParseResult parseDataHeaders(
     Screen screen,
-    Workbook metadataWorkbook, 
+    Workbook workbook, 
     boolean ignoreFilePaths) 
     throws UnrecoverableScreenResultParseException 
   {
-    MetadataParseResult metadataParseResult = new MetadataParseResult();
-    HSSFSheet metadataSheet = initializeMetadataSheet(metadataWorkbook);
-    ParsedScreenInfo parsedScreenInfo = parseScreenInfo(metadataWorkbook, screen);
+    DataHeadersParseResult dataHeadersParseResult = new DataHeadersParseResult();
+    HSSFSheet dataHeadersSheet = initializeDataHeadersSheet(workbook);
+    ParsedScreenInfo parsedScreenInfo = parseScreenInfo(workbook, screen);
     
-    metadataParseResult.setScreenResult(new ScreenResult(screen, parsedScreenInfo.getDateCreated()));
-    int dataHeaderCount = findDataHeaderColumnCount(metadataSheet);
+    dataHeadersParseResult.setScreenResult(new ScreenResult(screen, parsedScreenInfo.getDateCreated()));
+    int dataHeaderCount = findDataHeaderColumnCount(dataHeadersSheet);
     for (int iDataHeader = 0; iDataHeader < dataHeaderCount; ++iDataHeader) {
       recordDataHeaderColumn(iDataHeader);
       ResultValueType rvt = 
-        new ResultValueType(metadataParseResult.getScreenResult(),
-                            metadataCell(MetadataRow.NAME, iDataHeader, true).getString(),
-                            metadataCell(MetadataRow.REPLICATE, iDataHeader).getInteger(),
-                            _rawOrDerivedParser.parse(metadataCell(MetadataRow.RAW_OR_DERIVED, iDataHeader)),
-                            _booleanParser.parse(metadataCell(MetadataRow.IS_ASSAY_ACTIVITY_INDICATOR, iDataHeader)),
-                            _primaryOrFollowUpParser.parse(metadataCell(MetadataRow.PRIMARY_OR_FOLLOWUP, iDataHeader)),
-                            metadataCell(MetadataRow.ASSAY_PHENOTYPE, iDataHeader).getString());
-      _dataTableColumnLabel2RvtMap.put(metadataCell(MetadataRow.COLUMN_IN_DATA_WORKSHEET, iDataHeader, true).getAsString(), rvt);
-      rvt.setDescription(metadataCell(MetadataRow.DESCRIPTION, iDataHeader).getString());
-      rvt.setTimePoint(metadataCell(MetadataRow.TIME_POINT, iDataHeader).getString());
+        new ResultValueType(dataHeadersParseResult.getScreenResult(),
+                            dataHeadersCell(DataHeaderRow.NAME, iDataHeader, true).getString(),
+                            dataHeadersCell(DataHeaderRow.REPLICATE, iDataHeader).getInteger(),
+                            _rawOrDerivedParser.parse(dataHeadersCell(DataHeaderRow.RAW_OR_DERIVED, iDataHeader)),
+                            _booleanParser.parse(dataHeadersCell(DataHeaderRow.IS_ASSAY_ACTIVITY_INDICATOR, iDataHeader)),
+                            _primaryOrFollowUpParser.parse(dataHeadersCell(DataHeaderRow.PRIMARY_OR_FOLLOWUP, iDataHeader)),
+                            dataHeadersCell(DataHeaderRow.ASSAY_PHENOTYPE, iDataHeader).getString());
+      _dataTableColumnLabel2RvtMap.put(dataHeadersCell(DataHeaderRow.COLUMN_IN_DATA_WORKSHEET, iDataHeader, true).getAsString(), rvt);
+      rvt.setDescription(dataHeadersCell(DataHeaderRow.DESCRIPTION, iDataHeader).getString());
+      rvt.setTimePoint(dataHeadersCell(DataHeaderRow.TIME_POINT, iDataHeader).getString());
       if (rvt.isDerived()) {
-        for (ResultValueType resultValueType : _columnsDerivedFromParser.parseList(metadataCell(MetadataRow.COLUMNS_DERIVED_FROM, iDataHeader, true))) {
+        for (ResultValueType resultValueType : _columnsDerivedFromParser.parseList(dataHeadersCell(DataHeaderRow.COLUMNS_DERIVED_FROM, iDataHeader, true))) {
           if (resultValueType != null) { // can be null if unparseable value is encountered in list
             rvt.addTypeDerivedFrom(resultValueType);
           }
         }
-        rvt.setHowDerived(metadataCell(MetadataRow.HOW_DERIVED, iDataHeader, true).getString());
+        rvt.setHowDerived(dataHeadersCell(DataHeaderRow.HOW_DERIVED, iDataHeader, true).getString());
         // TODO: should warn if these values *are* defined and !isDerivedFrom()
       }
       else {
-        rvt.setAssayReadoutType(_assayReadoutTypeParser.parse(metadataCell(MetadataRow.ASSAY_READOUT_TYPE, iDataHeader)));
+        rvt.setAssayReadoutType(_assayReadoutTypeParser.parse(dataHeadersCell(DataHeaderRow.ASSAY_READOUT_TYPE, iDataHeader, true)));
       }
       if (rvt.isActivityIndicator()) {
-        rvt.setActivityIndicatorType(_activityIndicatorTypeParser.parse(metadataCell(MetadataRow.ACTIVITY_INDICATOR_TYPE, iDataHeader, true)));
+        rvt.setActivityIndicatorType(_activityIndicatorTypeParser.parse(dataHeadersCell(DataHeaderRow.ACTIVITY_INDICATOR_TYPE, iDataHeader, true)));
         if (rvt.getActivityIndicatorType().equals(ActivityIndicatorType.NUMERICAL)) {
-          rvt.setIndicatorDirection(_indicatorDirectionParser.parse(metadataCell(MetadataRow.NUMERICAL_INDICATOR_DIRECTION, iDataHeader)));
-          rvt.setIndicatorCutoff(metadataCell(MetadataRow.NUMERICAL_INDICATOR_CUTOFF, iDataHeader).getDouble());
+          rvt.setIndicatorDirection(_indicatorDirectionParser.parse(dataHeadersCell(DataHeaderRow.NUMERICAL_INDICATOR_DIRECTION, iDataHeader, true)));
+          rvt.setIndicatorCutoff(dataHeadersCell(DataHeaderRow.NUMERICAL_INDICATOR_CUTOFF, iDataHeader, true).getDouble());
         }
         // TODO: should warn if these values *are* defined and !isActivityIndicator()
       }
-      rvt.setComments(metadataCell(MetadataRow.COMMENTS, iDataHeader).getString());
+      rvt.setComments(dataHeadersCell(DataHeaderRow.COMMENTS, iDataHeader).getString());
     }
-    return metadataParseResult;
+    return dataHeadersParseResult;
   }
 
   private String columnIndexToLabel(int columnIndex)
@@ -740,18 +724,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     return "" + (char) ('A' + columnIndex);
   }
 
-  private File makeRawDataFileInMetadataFileDirectory(File rawDataWorkbookFile, File metadataWorkbookFile)
-  {
-    rawDataWorkbookFile = new File(metadataWorkbookFile.getParent(),
-                                   rawDataWorkbookFile.getName());
-    return rawDataWorkbookFile;
-  }
-
   private void recordDataHeaderColumn(int iDataHeader)
   {
     assert _dataHeaderIndex2DataHeaderColumn != null :
       "uninitialized _dataHeaderIndex2DataHeaderColumn";
-    String forColumnInRawDataWorksheet = metadataCell(MetadataRow.COLUMN_IN_DATA_WORKSHEET, iDataHeader, true).getString();
+    String forColumnInRawDataWorksheet = dataHeadersCell(DataHeaderRow.COLUMN_IN_DATA_WORKSHEET, iDataHeader, true).getString();
     if (forColumnInRawDataWorksheet != null) {
       _dataHeaderIndex2DataHeaderColumn.put(iDataHeader,
                                             new Short((short) (forColumnInRawDataWorksheet.charAt(0) - 'A')));
@@ -931,14 +908,14 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * 
    * @throws UnrecoverableScreenResultParseException if a screen ID is not found
    */
-  private ParsedScreenInfo parseScreenInfo(Workbook metadataWorkbook, Screen screen) 
+  private ParsedScreenInfo parseScreenInfo(Workbook workbook, Screen screen) 
     throws UnrecoverableScreenResultParseException
   {
     ParsedScreenInfo parsedScreenInfo = new ParsedScreenInfo();
     int screenInfoSheetIndex;
-    screenInfoSheetIndex = metadataWorkbook.findSheetIndex(SCREEN_INFO_SHEET_NAME);
-    HSSFSheet screenInfoSheet = metadataWorkbook.getWorkbook().getSheetAt(screenInfoSheetIndex);
-    Cell.Factory factory = new Cell.Factory(metadataWorkbook,
+    screenInfoSheetIndex = workbook.findSheetIndex(SCREEN_INFO_SHEET_NAME);
+    HSSFSheet screenInfoSheet = workbook.getWorkbook().getSheetAt(screenInfoSheetIndex);
+    Cell.Factory factory = new Cell.Factory(workbook,
                                             screenInfoSheetIndex,
                                             _errors);
     if (screenInfoSheet != null) {

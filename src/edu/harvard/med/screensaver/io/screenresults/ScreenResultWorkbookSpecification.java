@@ -39,7 +39,7 @@ public interface ScreenResultWorkbookSpecification
    * The data rows of the "Data Headers" worksheet. Order of enum values is
    * significant, as we use the ordinal() method.
    */
-  public enum MetadataRow { 
+  public enum DataHeaderRow { 
     COLUMN_IN_DATA_WORKSHEET("\"Data\" Worksheet Column", 0),
     NAME("Name", 1),
     DESCRIPTION("Description", 2),
@@ -62,7 +62,7 @@ public interface ScreenResultWorkbookSpecification
     private String _displayText;
     private Integer _rowIndex;
     
-    private MetadataRow(String displayText,
+    private DataHeaderRow(String displayText,
                         Integer rowIndex)
     {
       _displayText = displayText;
@@ -80,7 +80,7 @@ public interface ScreenResultWorkbookSpecification
     }
   };
   
-  public static final int METADATA_ROW_COUNT = MetadataRow.values().length;
+  public static final int METADATA_ROW_COUNT = DataHeaderRow.values().length;
   public static final String FILENAMES_LIST_DELIMITER = "\\s*,\\s*";
 
   /**

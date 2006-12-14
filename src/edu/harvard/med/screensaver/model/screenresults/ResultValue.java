@@ -47,7 +47,7 @@ public class ResultValue
    * ResultValues to be excluded.
    */
   private boolean _exclude;
-
+  private boolean _isHit;
   
 
   // public constructors and instance methods
@@ -158,7 +158,7 @@ public class ResultValue
    * Get the string value of this <code>ResultValue</code>.
    * 
    * @return a {@link java.lang.String} representing the string value of this
-   *         <code>ResultValue</code>
+   *         <code>ResultValue</code>; may return null.
    */
   public String getValue() {
     return _value;
@@ -168,7 +168,7 @@ public class ResultValue
    * Get the numeric value of this <code>ResultValue</code>.
    * 
    * @return a {@link java.lang.Double} representing the numeric value of this
-   *         <code>ResultValue</code>
+   *         <code>ResultValue</code>; may return null.
    */
   public Double getNumericValue() {
     return _numericValue;
@@ -184,6 +184,11 @@ public class ResultValue
   public boolean isExclude()
   {
     return _exclude;
+  }
+  
+  public boolean isHit()
+  {
+    return _isHit;
   }
   
   @DerivedEntityProperty
@@ -292,6 +297,21 @@ public class ResultValue
     return rv.getValue();
   }
 
+  
+  // package-protected methods
+  
+  /**
+   * Set whether this <code>ResultValue</code> is a hit.
+   * 
+   * @param isHit set to <code>true</code> iff this <code>ResultValue</code>
+   *          is a hit
+   * @motivation for hibernate and ResultValueType
+   */
+  void setHit(boolean isHit)
+  {
+    _isHit = isHit;
+  }
+
 
   // private constructors and instance methods
 
@@ -355,4 +375,5 @@ public class ResultValue
   {
     _exclude = exclude;
   }
+
 }

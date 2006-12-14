@@ -627,13 +627,17 @@ public class ComplexDAOTest extends AbstractSpringTest
   }
   
   /**
-   * ScreenResult.plateNumbers and ScreenResult.wells collections should be
-   * updated when a ResultValue is added to a ScreenResult's ResultValueType.
+   * A ScreenResult's plateNumbers, wells, experimentWellCount, and hits
+   * properties should be updated when a ResultValue is added to a
+   * ScreenResult's ResultValueType.
    */
-  public void testScreenResultPlateNumbers()
+  public void testScreenResultUpdates()
   {
     final SortedSet<Integer> expectedPlateNumbers = new TreeSet<Integer>();
     final SortedSet<Well> expectedWells = new TreeSet<Well>();
+    final int[] expectedExperimentalWellCount = new int[1];
+    final int[] expectedHits = new int[1];
+    final double indicatorCutoff = 5.0;
     dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -641,6 +645,10 @@ public class ComplexDAOTest extends AbstractSpringTest
         Screen screen = ScreenResultParser.makeDummyScreen(1); 
         ScreenResult screenResult = new ScreenResult(screen, new Date());
         ResultValueType rvt = new ResultValueType(screenResult, "Raw Value");
+        rvt.setActivityIndicator(true);
+        rvt.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
+        rvt.setIndicatorCutoff(indicatorCutoff);
+        rvt.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);
         Library library = new Library(
           "library 1",
           "lib1",
@@ -653,7 +661,16 @@ public class ComplexDAOTest extends AbstractSpringTest
           expectedPlateNumbers.add(i);
           Well well = new Well(library, plateNumber, "A01");
           expectedWells.add(well);
-          rvt.addResultValue(well, Integer.toString(i));
+          AssayWellType assayWellType = i % 2 == 0 ? AssayWellType.EXPERIMENTAL : AssayWellType.ASSAY_POSITIVE_CONTROL;
+          boolean exclude = i % 4 == 0;
+          rvt.addResultValue(well, assayWellType, (double) i, false);
+          if (assayWellType.equals(AssayWellType.EXPERIMENTAL)) {
+            expectedExperimentalWellCount[0]++;
+            if (!exclude && i >= indicatorCutoff) {
+              ++expectedHits[0];
+            }
+          }
+
         }
         dao.persistEntity(screen);
       }
@@ -665,9 +682,9 @@ public class ComplexDAOTest extends AbstractSpringTest
         Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
         assertEquals("plate numbers", expectedPlateNumbers, screen.getScreenResult().getPlateNumbers());
         assertEquals("wells", expectedWells, screen.getScreenResult().getWells());
+        assertEquals("experimental well count", expectedExperimentalWellCount[0], screen.getScreenResult().getExperimentalWellCount());
       }
     });
-    
   }
   
   public void testFindSortedResultValueTableByRange()
