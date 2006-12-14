@@ -33,7 +33,9 @@ class SDRecordParser
   private String _nextLine;
   private int _sdRecordNumber = 0;
   private SDRecordData _sdRecordData;
-  private MolfileInterpreter _molfileInterpreter;
+  private MolfileToSmiles _molfileToSmiles;
+  private OpenBabelClient _openBabelClient = new OpenBabelClient();
+  private PubchemCidListProvider _pubchemCidListProvider = new PubchemCidListProvider();
   
   
   // package-private constructor and instance methods
@@ -71,16 +73,16 @@ class SDRecordParser
     String molfile = _sdRecordData.getMolfile();
     if (molfile == null) {
       reportError("encountered an SD record with an empty MDL molfile specification");
-      _molfileInterpreter = null;
+      _molfileToSmiles = null;
     }
     else {
-      _molfileInterpreter = new MolfileInterpreter(molfile);
+      _molfileToSmiles = new MolfileToSmiles(molfile);
     }
     
     Well well = getWell();
-    if (well != null && _molfileInterpreter != null) {
-      addSmilesToWell(_molfileInterpreter.getPrimaryCompoundSmiles(), well, true);
-      for (String secondaryCompoundSmiles : _molfileInterpreter.getSecondaryCompoundsSmiles()) {
+    if (well != null && _molfileToSmiles != null) {
+      addSmilesToWell(_molfileToSmiles.getPrimaryCompoundSmiles(), well, true);
+      for (String secondaryCompoundSmiles : _molfileToSmiles.getSecondaryCompoundsSmiles()) {
         addSmilesToWell(secondaryCompoundSmiles, well, false);
       }
     }
@@ -202,9 +204,9 @@ class SDRecordParser
     }
     well.setIccbNumber(_sdRecordData.getIccbNumber());
     well.setVendorIdentifier(_sdRecordData.getVendorIdentifier());
-    if (_molfileInterpreter != null) {
-      well.setMolfile(_molfileInterpreter.getMolfile());
-      well.setSmiles(_molfileInterpreter.getSmiles());
+    if (_molfileToSmiles != null) {
+      well.setMolfile(_molfileToSmiles.getMolfile());
+      well.setSmiles(_molfileToSmiles.getSmiles());
     }
     return well;
   }
@@ -229,7 +231,7 @@ class SDRecordParser
   {
     Compound compound = _parser.getExistingCompound(smiles);
     if (compound == null) {
-      compound = new Compound(smiles);
+      compound = createCompoundFromSmiles(smiles);
       _parser.cacheCompound(compound);
       _parser.getDAO().persistEntity(compound);
     }
@@ -244,5 +246,21 @@ class SDRecordParser
       }
     }
     well.addCompound(compound);
+  }
+
+  /**
+   * Create a compound from a SMILES string, filling in the InChI and the PubChem CIDs.
+   * @param smiles
+   * @return
+   */
+  private Compound createCompoundFromSmiles(String smiles)
+  {
+    Compound compound = new Compound(smiles);
+    String inchi = _openBabelClient.convertSmilesToInchi(smiles);
+    compound.setInchi(inchi);
+    for (String pubchemCid : _pubchemCidListProvider.getPubchemCidListForInchi(inchi)) {
+      compound.addPubchemCid(pubchemCid);
+    }
+    return compound;
   }
 }

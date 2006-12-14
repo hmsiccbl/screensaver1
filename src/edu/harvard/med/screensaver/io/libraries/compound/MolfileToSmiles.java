@@ -9,17 +9,12 @@
 
 package edu.harvard.med.screensaver.io.libraries.compound;
 
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.openscience.cdk.DefaultChemObjectBuilder;
-import org.openscience.cdk.Molecule;
-import org.openscience.cdk.io.MDLReader;
-import org.openscience.cdk.smiles.SmilesGenerator;
 
 /**
  * An interpreter of the MDL molfile records embedded in the SD file records. Performs
@@ -39,12 +34,12 @@ import org.openscience.cdk.smiles.SmilesGenerator;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class MolfileInterpreter
+public class MolfileToSmiles extends OpenBabelClient
 {
   
   // static members
 
-  private static Logger log = Logger.getLogger(MolfileInterpreter.class);
+  private static Logger log = Logger.getLogger(MolfileToSmiles.class);
 
 
   // instance data members
@@ -57,7 +52,7 @@ public class MolfileInterpreter
   
   // public constructors and methods
   
-  public MolfileInterpreter(String molfile)
+  public MolfileToSmiles(String molfile)
   {
     _molfile = molfile;
     initialize();
@@ -88,8 +83,7 @@ public class MolfileInterpreter
   
   private void initialize()
   {
-    Molecule molecule = getMoleculeFromMolfile();
-    _smiles = getSmilesForMolecule(molecule);
+    _smiles = convertMolfileToSmiles(_molfile);
     
     String [] componentsSmiles = _smiles.split("\\.");
     Arrays.sort(componentsSmiles, new Comparator<String>() {
@@ -101,35 +95,5 @@ public class MolfileInterpreter
     _primaryCompoundSmiles = componentsSmiles[0];
     _secondaryCompoundsSmiles.addAll(Arrays.asList(componentsSmiles));
     _secondaryCompoundsSmiles.remove(0);
-  }
-
-  /**
-   * Get the molecule from the molfile. Return it.
-   * @return
-   */
-  private Molecule getMoleculeFromMolfile()
-  {
-    try {
-      MDLReader mdlReader = new MDLReader(new StringReader(_molfile));
-      Molecule molecule = new Molecule();
-      mdlReader.read(molecule);
-      return molecule;
-    }
-    catch (Exception e) {
-      log.error("encountered Exception reading the MDL!", e);
-    }
-    return null;
-  }
-
-  /**
-   * Get the SMILES string for the given molecule.
-   *  
-   * @param molecule the molecule to get the SMILES string for
-   * @return the SMILES string
-   */
-  private String getSmilesForMolecule(Molecule molecule) {
-    SmilesGenerator smilesGenerator =
-      new SmilesGenerator(DefaultChemObjectBuilder.getInstance());
-    return smilesGenerator.createSMILES(molecule);
   }
 }
