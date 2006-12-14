@@ -49,7 +49,8 @@ public class Compound extends AbstractEntity
 	private String      _compoundId;
   private Integer     _version;
   private Set<Well>   _wells = new HashSet<Well>();
-	private String      _smiles;
+  private String      _smiles;
+  private String      _inchi;
   private boolean     _isSalt;
   private Set<String> _compoundNames = new HashSet<String>();
   private Set<String> _casNumbers = new HashSet<String>();
@@ -172,6 +173,30 @@ public class Compound extends AbstractEntity
     return _smiles;
   }
 
+  /**
+   * Get the InChI string for the compound.
+   * @return the InChI string for the compound
+   * 
+   * @hibernate.property
+   *   type="text"
+   *   column="inchi"
+   *   unique="true"
+   * @motivation for hibernate
+   */
+  public String getInchi()
+  {
+    return _inchi;
+  }
+
+  /**
+   * Set the InChI string for the compound.
+   * @param inchi the new InChI string for the compound
+   */
+  public void setInchi(String inchi)
+  {
+    _inchi = inchi;
+  }
+  
   /**
    * Get the saltiness of the compound.
    * @return true iff the compound is a salt
