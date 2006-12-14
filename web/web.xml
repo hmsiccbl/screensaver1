@@ -334,8 +334,8 @@
       <url-pattern>/login-error.jsf</url-pattern>
       <url-pattern>/helpViewer.jsf</url-pattern>
       <url-pattern>/libraries/*</url-pattern>
-      <url-pattern>/screenresults/*</url-pattern>
       <url-pattern>/screens/*</url-pattern>
+      <url-pattern>/screens/screenresults/*</url-pattern>
     </web-resource-collection>
 
     <auth-constraint>
@@ -369,7 +369,7 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>screenResultsAdmin</web-resource-name>
-      <url-pattern>/screenResults/admin/*</url-pattern>
+      <url-pattern>/screens/screenresults/admin/*</url-pattern>
     </web-resource-collection>
 
     <auth-constraint>

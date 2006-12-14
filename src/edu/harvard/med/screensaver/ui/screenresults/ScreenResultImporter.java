@@ -23,7 +23,7 @@ import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.control.ScreenResultsController;
+import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 import org.apache.log4j.Logger;
@@ -49,7 +49,7 @@ public class ScreenResultImporter extends AbstractBackingBean
   private DAO _dao;
   private Screen _screen;
   private ScreenResultParser _screenResultParser;
-  private ScreenResultsController _screenResultsController;
+  private ScreensController _screensController;
   private UploadedFile _uploadedFile;
 
 
@@ -68,8 +68,8 @@ public class ScreenResultImporter extends AbstractBackingBean
     return _screenResultParser;
   }
 
-  public void setScreenResultsController(ScreenResultsController screenResultsController) {
-    _screenResultsController = screenResultsController;
+  public void setScreensController(ScreensController screensController) {
+    _screensController = screensController;
   }
 
   public void setScreen(Screen screen)
@@ -89,7 +89,6 @@ public class ScreenResultImporter extends AbstractBackingBean
 
   public DataModel getImportErrors()
   {
-    // TODO: ultimately, we'll want to retrieve these errors from the database
     return new ListDataModel(_screenResultParser.getErrors());
   }
 
@@ -98,7 +97,7 @@ public class ScreenResultImporter extends AbstractBackingBean
   
   public String cancel()
   {
-    return _screenResultsController.viewLastScreenResult();
+    return _screensController.viewLastScreen();
   }
   
   // TODO: this method contains real business logic that should be moved to a non-ui package class; it also needs a unit test
@@ -123,13 +122,13 @@ public class ScreenResultImporter extends AbstractBackingBean
       else if (_screenResultParser.getErrors().size() > 0) {
         // these are data-related "user" errors, so we log at "info" level
         log.info("parse errors encountered during import of ScreenResult for Screen " + _screen);
-        return _screenResultsController.viewScreenResultImportErrors();
+        return _screensController.viewScreenResultImportErrors();
       }
       else {
         log.info("successfully imported " + screenResult + " for Screen " + _screen);
         parseSuccessful = true;
         _dao.flush();
-        return _screenResultsController.viewLastScreenResult();
+        return _screensController.viewLastScreen();
       }
       return REDISPLAY_PAGE_ACTION_RESULT;
     }

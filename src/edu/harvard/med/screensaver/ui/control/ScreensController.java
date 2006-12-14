@@ -13,6 +13,9 @@ import java.util.Date;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
@@ -22,6 +25,9 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer;
+import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
+import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenFinder;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreensBrowser;
@@ -44,15 +50,23 @@ public class ScreensController extends AbstractUIController
   private static final Logger log = Logger.getLogger(ScreensController.class);
   private static final String BROWSE_SCREENS = "browseScreens";
   private static final String VIEW_SCREEN = "viewScreen";
+  private static String VIEW_SCREEN_RESULT_IMPORT_ERRORS = "viewScreenResultImportErrors";
+  private static String VIEW_SCREEN_RESULT = "viewScreenResult";
 
   
   // private instance fields
   
   private DAO _dao;
+  private LibrariesController _librariesController;
   private ScreensBrowser _screensBrowser;
   private ScreenViewer _screenViewer;
+  private ScreenResultViewer _screenResultViewer;
   private ScreenFinder _screenFinder;
-  private ScreenResultsController _screenResultsController;
+  private HeatMapViewer _heatMapViewer;
+  private ScreenResultImporter _screenResultImporter;
+  private ScreenResultExporter _screenResultExporter;
+  private Screen _lastScreen;
+  private ScreenSearchResults _lastScreenSearchResults;
   
 
   // public getters and setters
@@ -67,14 +81,11 @@ public class ScreensController extends AbstractUIController
     _dao = dao;
   }
   
-  public void setScreenResultsController(ScreenResultsController screenResultsController)
+  public void setLibrariesController(LibrariesController librariesController)
   {
-    _screenResultsController = screenResultsController;
-    // HACK: JSF beans cannot have cyclical references in faces-config.xml!
-    _screenResultsController.setScreensController(this);
-    
+    _librariesController = librariesController;
   }
-
+  
   public ScreensBrowser getScreensBrowser()
   {
     return _screensBrowser;
@@ -86,23 +97,16 @@ public class ScreensController extends AbstractUIController
     _screensBrowser.setScreensController(this);
   }
   
-  public ScreenViewer getScreenViewer()
-  {
-    return _screenViewer;
-  }
-  
   public void setScreenViewer(ScreenViewer screenViewer)
   {
     _screenViewer = screenViewer;
     _screenViewer.setScreensController(this);
   }
   
-  
-  // public controller methods
-
-  public ScreenFinder getScreenFinder()
+  public void setScreenResultViewer(ScreenResultViewer screenResultViewer)
   {
-    return _screenFinder;
+    _screenResultViewer = screenResultViewer;
+    _screenResultViewer.setScreensController(this);
   }
 
   public void setScreenFinder(ScreenFinder screenFinder)
@@ -111,12 +115,31 @@ public class ScreensController extends AbstractUIController
     _screenFinder.setScreensController(this);
   }
 
+  public void setHeatMapViewer(HeatMapViewer heatMapViewer) 
+  {
+    _heatMapViewer = heatMapViewer;
+  }
+
+  public void setScreenResultImporter(ScreenResultImporter screenResultImporter) 
+  {
+    _screenResultImporter = screenResultImporter;
+    _screenResultImporter.setScreensController(this);
+  }
+
+  public void setScreenResultExporter(ScreenResultExporter screenResultExporter) 
+  {
+    _screenResultExporter = screenResultExporter;
+  }
+
+  
+  // public controller methods
+
   @UIControllerMethod
   public String browseScreens()
   {
     if (_screensBrowser.getScreenSearchResults() == null) {
       List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
-      _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens, this, _screenResultsController));
+      _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens, this));
     }
     return BROWSE_SCREENS;
   }
@@ -124,14 +147,15 @@ public class ScreensController extends AbstractUIController
   @UIControllerMethod
   public String viewScreen(Screen screen, ScreenSearchResults screenSearchResults)
   {
-    _screenViewer.setScreenResultsController(_screenResultsController);
     _screenViewer.setDao(_dao);
     _screenViewer.setScreen(screen);
     _screenViewer.setCandidateLabHeads(_dao.findAllLabHeads());
     _screenViewer.setCandidateCollaborators(_dao.findAllEntitiesWithType(ScreeningRoomUser.class));
     _screenViewer.setScreenSearchResults(screenSearchResults);
-//  return VIEW_SCREEN;
-    return _screenResultsController.viewScreenResult(screen, screenSearchResults);
+
+    initializeScreenResultBackingBeans(screen, screenSearchResults);
+
+    return VIEW_SCREEN;
   }
 
   @UIControllerMethod
@@ -148,7 +172,28 @@ public class ScreensController extends AbstractUIController
     }
     return VIEW_SCREEN;
   }
+
+  public String deleteScreenResult(ScreenResult screenResult)
+  {
+    _dao.deleteScreenResult(screenResult);
+    return viewLastScreen();
+  }
+
   
+  // public control methods
+ 
+  @UIControllerMethod
+  public String viewLastScreen()
+  {
+    return viewScreen(_lastScreen, _lastScreenSearchResults);
+  }
+    
+  @UIControllerMethod
+  public String viewScreenResultImportErrors()
+  {
+    return VIEW_SCREEN_RESULT_IMPORT_ERRORS;
+  }
+
   @UIControllerMethod
   public String addStatusItem(Screen screen, StatusValue statusValue)
   {
@@ -271,6 +316,38 @@ public class ScreensController extends AbstractUIController
     }
     // TODO: add message to indicate failure
     return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+
+  // private methods
+  
+  private void initializeScreenResultBackingBeans(Screen screen, ScreenSearchResults screenSearchResults)
+  {
+    _lastScreen = screen;
+    _lastScreenSearchResults = screenSearchResults;
+    
+    // TODO: HACK: makes screenResult access data-access-permissions aware 
+    ScreenResult screenResult = null;
+    if (screen.getScreenResult() != null) {
+      screenResult = _dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
+    }
+
+    _screenResultImporter.setDao(_dao);
+    _screenResultImporter.setMessages(getMessages());
+    _screenResultImporter.setScreen(screen);
+    _screenResultImporter.setScreenResultParser(new ScreenResultParser(_dao));
+
+    _screenResultViewer.setScreen(screen);
+    _screenResultViewer.setScreenResult(screenResult);
+    _screenResultViewer.setDao(_dao);
+    _screenResultViewer.setMessages(getMessages());
+    _screenResultViewer.setScreenResultExporter(_screenResultExporter);
+    _screenResultViewer.setLibrariesController(_librariesController);
+    _screenResultViewer.setScreenSearchResults(screenSearchResults);
+
+    _heatMapViewer.setDao(_dao);
+    _heatMapViewer.setScreenResult(screenResult);
+    _heatMapViewer.setLibrariesController(_librariesController);
   }
 }
 

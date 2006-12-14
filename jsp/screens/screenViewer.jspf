@@ -21,16 +21,22 @@ TODO:
 
 <f:subview id="screenViewer">
 
-	<h:form id="screenForm">
+	<%--h:form id="screenForm"--%>
 
 		<t:panelGroup id="commandPanel">
-			<t:commandButton id="save" value="Save" action="#{screenViewer.saveScreen}"
-				styleClass="command" rendered="#{screenViewer.editable}" />
+			<h:commandButton value="Edit"
+				rendered="#{screenViewer.potentiallyEditable && !screenViewer.editable}"
+				action="#{screenViewer.setEditableMode}" styleClass="command" />
+			<t:commandButton id="save" value="Save"
+				action="#{screenViewer.saveScreen}" styleClass="command"
+				rendered="#{screenViewer.editable}" />
 			<h:commandButton
-				value="#{screenViewer.readOnlyMode ? \"Edit\" : \"Cancel\"}"
-				rendered="#{true || screenViewer.potentiallyEditable}"
-				action="#{screenViewer.toggleReadOnlyMode}" 
-				styleClass="command"/>
+				value="Cancel"
+				rendered="#{screenViewer.editable}"
+				actionListener="#{screenViewer.cancelEditListener}"
+				action="#{screenViewer.cancelEdit}"
+				immediate="true"
+				styleClass="command" />
 		</t:panelGroup>
 
 		<t:panelGrid id="labelsAndDataColumns" columns="2"
@@ -608,5 +614,5 @@ TODO:
 				rendered="#{screenViewer.editable}" enabledOnUserRole="billingAdmin" />
 
 		</t:panelGrid>
-	</h:form>
+	<%--/h:form--%>
 </f:subview>

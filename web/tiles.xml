@@ -11,8 +11,6 @@
 
 <tiles-definitions>
 
-
-
   <!-- The base definition, defining common attributes for our "concrete" definitions, below -->
   
   <definition
@@ -196,42 +194,6 @@
   </definition>
     
   
-  <!-- screenresults tiles -->
-  
-  <definition
-    name="/screenresults/admin/screenResultImporter.tiles"
-    extends=".base">
-    <put
-      name="pageTitle"
-      value="Screen Result Importer and Error Viewer"/>
-    <put
-      name="body"
-      value="/screenresults/admin/screenResultImporter.jsp" />
-  </definition>
-
-  <definition
-    name="/screenresults/heatMapViewer.tiles"
-    extends=".base">
-    <put
-      name="pageTitle"
-      value="Screen Result Heat Map Viewer"/>
-    <put
-      name="body"
-      value="/screenresults/heatMapViewer.jsp" />
-  </definition>
-
-  <definition
-    name="/screenresults/screenResultViewer.tiles"
-    extends=".base">
-    <put
-      name="pageTitle"
-      value="Screen Result Viewer"/>
-    <put
-      name="body"
-      value="/screenresults/screenResultViewer.jsp" />
-  </definition>
-
-
   <!-- screens tiles -->
   
   <definition
@@ -246,16 +208,27 @@
   </definition>
   
   <definition
-    name="/screens/screenViewer.tiles"
+    name="/screens/screenAndResultViewer.tiles"
     extends=".base">
     <put
       name="pageTitle"
       value="Screen Viewer"/>
     <put
       name="body"
-      value="/screens/screenViewer.jsp" />
+      value="/screens/screenAndResultViewer.jsp" />
   </definition>
   
+  <definition
+    name="/screens/screenresults/admin/screenResultImporter.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="Screen Result Importer and Error Viewer"/>
+    <put
+      name="body"
+      value="/screens/screenresults/admin/screenResultImporter.jsp" />
+  </definition>
+
   
   <!-- dev tiles -->
 
@@ -264,7 +237,7 @@
     extends=".base">
     <put
       name="pageTitle"
-      value="Screen Result Environment"/>
+      value="Environment"/>
     <put
       name="body"
       value="/dev/env.jsp" />
@@ -291,7 +264,5 @@
       name="body"
       value="/dev/hibernateSessionTest.jsp" />
   </definition>
-  
-  
   
 </tiles-definitions>

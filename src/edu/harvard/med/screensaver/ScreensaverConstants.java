@@ -29,7 +29,6 @@ public interface ScreensaverConstants
   public static final String LOGOUT_ACTION_RESULT = "logout";
   public static final String VIEW_SCREENING_ROOM_USER_ACTION_RESULT = "viewScreeningRoomUser";
   public static final String SHOW_SEARCH_RESULTS_SUMMARY_ACTION = "showSearchResultsSummary";
-  public static final String VIEW_OR_EDIT_SCREEN_RESULT_ACTION = "viewScreenResult";
   public static final String VIEW_SCREEN_ACTION = "viewScreen";
   public static final String VIEW_VISIT_ACTION_RESULT = "viewVisit";
   public static final String VIEW_BILLING_INFORMATION_ACTION_RESULT = "viewBillingInformation";

@@ -1,4 +1,4 @@
-		<%-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
+<%-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
 <%-- The core taglib contains all the logic, validation, controller, and other tags specific to JSF. --%>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
@@ -14,14 +14,14 @@ TODO:
 - sectionHeader style is needing to be applied to 3 elements; should figure out what's going on w/css
 --%>
 
-<f:subview id="screenResultViewer">
+<f:subview id="screenAndResultViewer">
 
 	<t:aliasBean alias="#{navigator}" value="#{screenViewer.screenSearchResults}">
 		<%@ include file="../searchResultsNavPanel.jspf"%>
 	</t:aliasBean>
 
 	<t:panelGroup rendered="#{!screenResultViewer.readOnly}">
-		<%--@ include file="admin/cherryPickUploader.jspf" --%>
+		<%--@ include file="screenresults/admin/cherryPickUploader.jspf" --%>
 	</t:panelGroup>
 
 	<h:form id="dataForm">
@@ -44,31 +44,26 @@ TODO:
 				</f:facet>
 
 				<f:facet name="closedContent">
-					<t:panelGroup>
-						<t:outputText value="#{screenResultViewer.screen.screenNumber}: \"#{screenResultViewer.screen.title}\", Lab: "
+					<t:panelGrid columns="2">
+						<t:outputText value="#{screenResultViewer.screen.screenNumber}: \"#{screenResultViewer.screen.title}\""
 							styleClass="dataText" />
+						<t:div>
+						<t:outputText value="Lab: " styleClass="inputLabel"/>
 						<t:commandLink
 							value="#{screenViewer.screen.labHead.labName}"
 							action="#{screenViewer.viewLabHead}"
 							styleClass="dataText entityLink"/>
-						<t:outputText value=", Screener: " styleClass="dataText" />
+						<t:outputText value="&nbsp;&nbsp;Screener: " styleClass="inputLabel" escape="false"/>
 						<t:commandLink
 							value="#{screenViewer.screen.leadScreener.fullNameLastFirst}"
 							action="#{screenViewer.viewLeadScreener}"
 							styleClass="dataText entityLink"/>
-					</t:panelGroup>
+						</t:div>
+					</t:panelGrid>
 				</f:facet>
 
 				<%@ include file="../screens/screenViewer.jspf"%>
 			</t:collapsiblePanel>
-
-			<t:panelGroup rendered="#{empty screenResultViewer.screenResult}">
-				<t:outputText value="Screen result not available" styleClass="sectionHeader"/>
-			</t:panelGroup>
-			<t:panelGroup rendered="#{!screenResultViewer.readOnly && empty screenResultViewer.screenResult}">
-				<%@include file="admin/screenResultUploader.jspf"%>
-			</t:panelGroup>
-`
 
 			<t:collapsiblePanel id="screenResultPanel"
 				value="#{screenResultViewer.collapsablePanelsState['screenResultSummary']}"
@@ -101,13 +96,14 @@ TODO:
 
 					<t:outputLabel for="screenResultIsShareable" value="Shareable"
 						styleClass="keyColumn" />
-					<h:form id="screenResultIsShareableForm">
-						<%-- TODO: make cancel action undo click; the following is not working: onclick="javascript:if (confirm('Make screen result #{screenResultViewer.screenResult.shareable ? \"unshared\" : \"shared\"}?')) submit(); else this.value=#{screenResultViewer.screenResult.shareable};" --%>
+					<%--h:form id="screenResultIsShareableForm"--%> 
+						<%-- TODO: make cancel response undo click; the following is not working: onclick="javascript:if (confirm('Make screen result #{screenResultViewer.screenResult.shareable ? \"unshared\" : \"shared\"}?')) submit(); else this.value=#{screenResultViewer.screenResult.shareable};" --%>
 						<t:selectBooleanCheckbox id="screenResultIsShareable"
 							value="#{screenResultViewer.screenResult.shareable}"
 							displayValueOnly="#{screenResultViewer.readOnly}"
-							displayValueOnlyStyleClass="dataText"/>
-					</h:form>
+							displayValueOnlyStyleClass="dataText"
+							onclick="javascript:submit()" />
+					<%--/h:form--%>
 					
 					<t:outputLabel for="platesCount" value="Plates"
 						styleClass="keyColumn" />
@@ -133,7 +129,7 @@ TODO:
 				</t:panelGrid>
 			</t:collapsiblePanel>
 
-			<h:form id="commandForm" >
+			<%--h:form id="commandForm" --%>
 
 				<t:panelGroup>
 					<t:commandButton action="#{screenResultViewer.download}"
@@ -147,7 +143,7 @@ TODO:
 						rendered="#{!screenResultViewer.readOnly && !empty screenResultViewer.screenResult}" />
 				</t:panelGroup>
 
-			</h:form>
+			<%--/h:form--%>
 
 			<t:panelGrid columns="1"
 				rendered="#{!empty screenResultViewer.screenResult && !(screenResultViewer.collapsablePanelsState['dataHeadersTable'] && screenResultViewer.collapsablePanelsState['dataTable'])}">
@@ -281,10 +277,18 @@ TODO:
 						</t:headerLink>
 					</t:div>
 				</f:facet>
-				<%@ include file="heatMapViewer.jspf"%>
+				<%@ include file="screenresults/heatMapViewer.jspf"%>
 			</t:collapsiblePanel>
 
 		</t:panelGrid>
 	</h:form>
+
+	<%-- Warning: screenResultUploader.jspf must be included outside of h:form elements --%> 
+	<t:panelGroup rendered="#{empty screenResultViewer.screenResult}">
+		<t:outputText value="Screen result not available" styleClass="sectionHeader"/>
+	</t:panelGroup>
+	<t:panelGroup rendered="#{!screenResultViewer.readOnly && empty screenResultViewer.screenResult}">
+		<%@include file="screenresults/admin/screenResultUploader.jspf"%>
+	</t:panelGroup>
 
 </f:subview>

@@ -40,7 +40,6 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
-import edu.harvard.med.screensaver.ui.control.ScreenResultsController;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
@@ -63,7 +62,6 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-// TODO: this class needs to be broken up! it's too big! (maybe)
 public class ScreenResultViewer extends AbstractBackingBean
 {
 
@@ -109,7 +107,6 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   // instance data members
 
-  private ScreenResultsController _screenResultsController;
   private ScreensController _screensController;
   private LibrariesController _librariesController;
   private DAO _dao;
@@ -134,6 +131,13 @@ public class ScreenResultViewer extends AbstractBackingBean
   private DataModel _dataHeadersModel;
   private Map<String,Boolean> _collapsablePanelsState;
   private TableSortManager _sortManager;
+  /**
+   * HACK: we maintain a screenResult reference, distinct from
+   * screen.getScreenResult(), since data access permissions may dictate that
+   * screenResult is not accessible, even though screen.getScreenResult() will
+   * give it to us w/o respecting data access permisisions
+   */
+  private ScreenResult _screenResult;
 
 
   // public methods
@@ -153,15 +157,11 @@ public class ScreenResultViewer extends AbstractBackingBean
     _dao = dao;
   }
 
-  public void setScreenResultsController(ScreenResultsController screenResultsController)
+  public void setScreensController(ScreensController screensController) 
   {
-    _screenResultsController = screenResultsController;
-  }
-
-  public void setScreensController(ScreensController screensController) {
     _screensController = screensController;
   }
-  
+
   public void setLibrariesController(LibrariesController librariesController) 
   {
     _librariesController = librariesController;
@@ -182,13 +182,15 @@ public class ScreenResultViewer extends AbstractBackingBean
     return _screen;
   }
   
+  // TODO: HACK: to make screenResult be data-access-permissions aware 
+  public void setScreenResult(ScreenResult screenResult)
+  {
+    _screenResult = screenResult;
+  }
+
   public ScreenResult getScreenResult()
   {
-    // TODO: HACK: data-access-permissions aware 
-    if (_screen.getScreenResult() != null) {
-      return _dao.findEntityById(ScreenResult.class, _screen.getScreenResult().getEntityId());
-    }
-    return null;
+    return _screenResult;
   }
 
   public void setScreenResultExporter(ScreenResultExporter screenResultExporter)
@@ -395,11 +397,6 @@ public class ScreenResultViewer extends AbstractBackingBean
     return gotoPage(getPageIndex() - 1); 
   }
   
-  public String viewScreen()
-  {
-    return _screensController.viewScreen(_screen, _screenSearchResults);
-  }
-  
   public String download()
   {
     File exportedWorkbookFile = null;
@@ -431,8 +428,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   public String delete()
   {
-    _dao.deleteScreenResult(getScreenResult());
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.deleteScreenResult(getScreenResult());
   }
   
   public String viewWell()
@@ -721,5 +717,4 @@ public class ScreenResultViewer extends AbstractBackingBean
       return _rvtPropertyValues;
     }
   }
-
 }

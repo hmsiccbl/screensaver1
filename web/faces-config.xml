@@ -249,8 +249,8 @@
       <value>#{messages}</value>
     </managed-property>
     <managed-property>
-      <property-name>screenResultsController</property-name>
-      <value>#{screenResultsController}</value>
+      <property-name>librariesController</property-name>
+      <value>#{librariesController}</value>
     </managed-property>
     <managed-property>
       <property-name>screensBrowser</property-name>
@@ -261,8 +261,24 @@
       <value>#{screenViewer}</value>
     </managed-property>
     <managed-property>
+      <property-name>screenResultViewer</property-name>
+      <value>#{screenResultViewer}</value>
+    </managed-property>
+    <managed-property>
       <property-name>screenFinder</property-name>
       <value>#{screenFinder}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>heatMapViewer</property-name>
+      <value>#{heatMapViewer}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>screenResultImporter</property-name>
+      <value>#{screenResultImporter}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>screenResultExporter</property-name>
+      <value>#{screenResultExporter}</value>
     </managed-property>
   </managed-bean>
   
@@ -281,6 +297,13 @@
   </managed-bean>
   
   <managed-bean>
+    <description>Screen Result Viewer</description>
+    <managed-bean-name>screenResultViewer</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
     <description>Screen Finder</description>
     <managed-bean-name>screenFinder</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.screens.ScreenFinder</managed-bean-class>
@@ -289,47 +312,6 @@
 
 
   <!-- === screen results backing beans === -->
-  
-  <managed-bean>
-    <description>Screen Results Controller</description>
-    <managed-bean-name>screenResultsController</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.control.ScreenResultsController</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>messages</property-name>
-      <value>#{messages}</value>
-    </managed-property>
-    <!-- JSF does not allow cycles; instead, we set this is ScreensController.setScreenResultsController()
-    <managed-property>
-      <property-name>screensController</property-name>
-      <value>#{screensController}</value>
-    </managed-property>
-    -->
-    <managed-property>
-      <property-name>librariesController</property-name>
-      <value>#{librariesController}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>screenResultViewer</property-name>
-      <value>#{screenResultViewer}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>heatMapViewer</property-name>
-      <value>#{heatMapViewer}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>screenResultImporter</property-name>
-      <value>#{screenResultImporter}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>screenResultExporter</property-name>
-      <value>#{screenResultExporter}</value>
-    </managed-property>
-  </managed-bean>
   
   <managed-bean>
     <description>Screen Result Viewer</description>
@@ -455,21 +437,16 @@
     </navigation-case>
     <navigation-case>
       <from-outcome>viewScreen</from-outcome>
-      <to-view-id>/screenresults/screenResultViewer</to-view-id>
+      <to-view-id>/screens/screenAndResultViewer</to-view-id>
       <redirect/>
     </navigation-case>
 
     <!-- === screenresults wildcard navigation rules === --> 
     <navigation-case>
       <from-outcome>viewScreenResultImportErrors</from-outcome>
-      <to-view-id>/screenresults/admin/screenResultImporter</to-view-id>
+      <to-view-id>/screens/screenresults/admin/screenResultImporter</to-view-id>
       <redirect/>
     </navigation-case>   
-    <navigation-case>
-      <from-outcome>viewScreenResult</from-outcome>
-      <to-view-id>/screenresults/screenResultViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
 
   </navigation-rule>
   

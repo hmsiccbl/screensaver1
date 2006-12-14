@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
@@ -36,7 +37,6 @@ import edu.harvard.med.screensaver.model.screens.Visit;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.control.ScreenResultsController;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
@@ -57,7 +57,6 @@ public class ScreenViewer extends AbstractBackingBean
   // instance data
 
   private ScreensController _screensController;
-  private ScreenResultsController _screenResultsController;
   private DAO _dao;
   private Screen _screen;
   private UISelectOneBean<ScreeningRoomUser> _labName;
@@ -77,11 +76,6 @@ public class ScreenViewer extends AbstractBackingBean
   public void setScreensController(ScreensController screensController)
   {
     _screensController = screensController;
-  }
-  
-  public void setScreenResultsController(ScreenResultsController screenResultsController)
-  {
-    _screenResultsController = screenResultsController;
   }
   
   public void setDao(DAO dao)
@@ -314,13 +308,13 @@ public class ScreenViewer extends AbstractBackingBean
   
   /* JSF Application methods */
 
-  public String toggleReadOnlyMode()
+  public String setEditableMode()
   {
     // note: we *cannot* substitute this call with super.isEditable(), since
     // super.isEditable() polymorphically calls our very own isReadOnly()
     // method!
     if (!super.isReadOnly()) {
-      _isReadOnlyMode ^= true;
+      _isReadOnlyMode = false;
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -333,7 +327,18 @@ public class ScreenViewer extends AbstractBackingBean
     _screen.setLabHead(_labName.getSelection());
     _screen.setLeadScreener(_leadScreener.getSelection());
     _screen.setCollaboratorsList(_collaborators.getSelections());
+    _isReadOnlyMode = true;
     return _screensController.saveScreen(_screen);
+  }
+  
+  public void cancelEditListener(ActionEvent event) {
+    _isReadOnlyMode = false;
+    getFacesContext().renderResponse(); // skip update model JSF lifecycle phase
+  }
+  
+  @UIControllerMethod
+  public String cancelEdit() {
+    return VIEW_SCREEN_ACTION; // this should cause redirect and recreate JSF component tree, thus discarding local (edited) values
   }
   
   @UIControllerMethod
@@ -488,11 +493,6 @@ public class ScreenViewer extends AbstractBackingBean
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  public String viewScreenResult()
-  {
-    return _screenResultsController.viewScreenResult(_screen, _screenSearchResults);
-  }
-  
   public String viewBillingInformation()
   {
     return VIEW_BILLING_INFORMATION_ACTION_RESULT;
