@@ -19,6 +19,9 @@
       <f:param name="compoundId" value="#{compound.compoundId}" />
     </t:commandLink>
     
+    <h:outputText value="InChI:" />
+    <h:outputText value="#{compound.inchi}" />
+    
     <h:outputText
       value="Compound Names:"
       rendered="#{compound.numCompoundNames > 0}"
@@ -58,12 +61,16 @@
       rowIndexVar="rowIndex"
       rowCountVar="rowCount"
     >
-      <h:outputText value="#{pubchemCid}" />
+      <h:outputLink
+        value="http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid=#{pubchemCid}"
+      >
+        <h:outputText value="#{pubchemCid}" />
+      </h:outputLink>
       <h:outputText
         value=";"
         rendered="#{rowIndex < rowCount - 1}"
       />
-    </t:dataList>    
+    </t:dataList>
 
     <h:outputText
       value="ChemBank ID:"
