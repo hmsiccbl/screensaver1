@@ -117,15 +117,12 @@ TODO:
 						value="#{screenResultViewer.screenResult.replicateCount}"
 						styleClass="dataText" />
 
-					<%-- Disabling until we can obtain this value efficiently
-					<t:outputLabel for="wellsCount" value="Wells"
-						styleClass="keyColumn"
-						rendered="#{!empty screenResultViewer.screenResult}" />
-					<t:outputText id="screenResultWellCount"
-						value="#{screenResultViewer.screenResult.wellCount}"
-						styleClass="dataText"
-						rendered="#{!empty screenResultViewer.screenResult}" />
-					--%>
+					<t:outputLabel for="screenResultExperimentalWellsCount"
+						value="Experimental Wells" styleClass="keyColumn" />
+					<t:outputText id="screenResultExperimentWellCount"
+						value="#{screenResultViewer.screenResult.experimentalWellCount}"
+						styleClass="dataText"/>
+
 				</t:panelGrid>
 			</t:collapsiblePanel>
 

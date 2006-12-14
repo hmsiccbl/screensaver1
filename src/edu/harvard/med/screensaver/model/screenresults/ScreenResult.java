@@ -76,6 +76,9 @@ public class ScreenResult extends AbstractEntity
   private transient UniqueDataHeaderNames _uniqueDataHeaderNames;
 
 
+  private int _experimentalWellCount;
+
+
 
   
   // public constructors and instance methods
@@ -394,6 +397,17 @@ public class ScreenResult extends AbstractEntity
   }
   
   /**
+   * Get the number of experimental wells that have data in this Screen Result
+   * @motivation optimization
+   * @return the number of experimental wells that have data in this Screen Result
+   * @hibernate.property type="integer" not-null="true"
+   */
+  public int getExperimentalWellCount()
+  {
+    return _experimentalWellCount;
+  }
+
+  /**
    * Return a list of ResultValueTypes
    * 
    * @motivation random access to ResultValueTypes by ordinal
@@ -454,7 +468,16 @@ public class ScreenResult extends AbstractEntity
     return screenNumber + ":" + DateFormat.getDateInstance().format(getDateCreated());
   }
   
-  
+  /**
+   * @motivation for Hibernate
+   * @param experimentalWellCount
+   */
+  private void setExperimentalWellCount(int experimentalWellCount)
+  {
+    _experimentalWellCount = experimentalWellCount;
+  }
+
+ 
   // package instance methods
   
   /**
@@ -472,6 +495,11 @@ public class ScreenResult extends AbstractEntity
     return _resultValueTypes;
   }
 
+  void incrementExperimentalWellCount()
+  {
+    ++_experimentalWellCount;
+  }
+  
 
   // private getters and setters
   

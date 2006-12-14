@@ -275,6 +275,11 @@ public class ResultValueType extends AbstractEntity implements Comparable
       throw new IllegalArgumentException("cannot add a numeric value to a non-numeric ResultValueType");
     }
     getScreenResult().addWell(well);
+    if (getOrdinal() == 0) { // yuck! due to denormalization...
+      if (assayWellType.equals(AssayWellType.EXPERIMENTAL)) {
+        getScreenResult().incrementExperimentalWellCount();
+      }
+    }
     _resultValues.put(well.getWellKey(), 
                       new ResultValue(assayWellType, 
                                       numericValue,
