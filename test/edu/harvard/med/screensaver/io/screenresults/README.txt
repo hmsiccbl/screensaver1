@@ -19,6 +19,12 @@ Workbooks used by unit tests:
    ScreenResultHeatmapTest107.xls 
       [screen result for screen 107, for heatmap-related unit tests]
 
+   ScreenResultTest999.xls
+      [screen result for screen 999, provides our test compound screening
+       user, 'cscreener' with a screen result that allows her to have 
+       "deposited data", which in turn allows her to view others' shared 
+       screen results]
+
    formula_value.xls
       [non-screen result workbook, used to test our POI/HSSF's quirky parsing 
        of formula values]
