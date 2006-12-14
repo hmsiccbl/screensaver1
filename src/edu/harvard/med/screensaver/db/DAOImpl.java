@@ -362,8 +362,8 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   @SuppressWarnings("unchecked")
   public List<Library> findLibrariesDisplayedInLibrariesBrowser()
   {
-    //return new TreeSet<Well>(getHibernateTemplate().find("from Well where plateNumber = ?", plate)); 
-    return new ArrayList<Library>(getHibernateTemplate().find("from Library where libraryType not in ('Annotation', 'DOS')")); 
+    return new ArrayList<Library>(getHibernateTemplate().find(
+      "from Library where libraryType not in ('Annotation', 'DOS', 'NCI', 'Discrete')")); 
   }
   
   
