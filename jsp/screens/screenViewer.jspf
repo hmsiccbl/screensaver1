@@ -24,13 +24,13 @@ TODO:
 	<h:form id="screenForm">
 
 		<t:panelGroup id="commandPanel">
+			<t:commandButton id="save" value="Save" action="#{screenViewer.saveScreen}"
+				styleClass="command" rendered="#{screenViewer.editable}" />
 			<h:commandButton
-				value="#{screenViewer.readOnlyMode ? \"Edit\" : \"View\"}"
+				value="#{screenViewer.readOnlyMode ? \"Edit\" : \"Cancel\"}"
 				rendered="#{true || screenViewer.potentiallyEditable}"
 				action="#{screenViewer.toggleReadOnlyMode}" 
 				styleClass="command"/>
-			<t:commandButton id="save" value="Save" action="#{screenViewer.saveScreen}"
-				styleClass="command" rendered="#{screenViewer.editable}" />
 		</t:panelGroup>
 
 		<t:panelGrid id="labelsAndDataColumns" columns="2"
