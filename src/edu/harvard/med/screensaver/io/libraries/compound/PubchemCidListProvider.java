@@ -23,6 +23,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
@@ -40,6 +41,7 @@ public class PubchemCidListProvider
   private static final String ESEARCH_URL = EUTILS_ROOT + "/esearch.fcgi";
   private static final String EFETCH_URL = EUTILS_ROOT + "/efetch.fcgi";
   private static final int NUM_RETRIES = 3;
+  private static final int CONNECT_TIMEOUT = 2000; // in millisecs
 
   
   // static methods
@@ -113,21 +115,26 @@ public class PubchemCidListProvider
       return pubchemCids;
     }
     
-    Document esearchDocument = getDocumentFromInputStream(esearchContent);
-    String queryKey = esearchDocument.getElementsByTagName("QueryKey").item(0).getTextContent();
-    String webEnv = esearchDocument.getElementsByTagName("WebEnv").item(0).getTextContent();
+    //dumpInputStreamToStdout(esearchContent);
+    //if (true) return pubchemCids;
     
-    InputStream efetchContent = getEfetchContent(queryKey, webEnv, inchi);
-    if (efetchContent == null) {
-      return pubchemCids;
-    }
+    //Document esearchDocument = getDocumentFromInputStream(esearchContent);
+    //String queryKey = esearchDocument.getElementsByTagName("QueryKey").item(0).getTextContent();
+    //String webEnv = esearchDocument.getElementsByTagName("WebEnv").item(0).getTextContent();
+    
+    //InputStream efetchContent = getEfetchContent(queryKey, webEnv, inchi);
+    //if (efetchContent == null) {
+    //  return pubchemCids;
+    //}
     
     //dumpInputStreamToStdout(efetchContent);
     //if (true) return pubchemCids;
     
-    Document efetchDocument = getDocumentFromInputStream(efetchContent);
+    //Document efetchDocument = getDocumentFromInputStream(efetchContent);
+    Document efetchDocument = getDocumentFromInputStream(esearchContent);
     NodeList efetchIds = efetchDocument.getElementsByTagName("Id");
     for (int i = 0; i < efetchIds.getLength(); i ++) {
+      debugNode(efetchIds, i);
       String efetchId = efetchIds.item(i).getTextContent();
       pubchemCids.add(efetchId);
     }
@@ -135,18 +142,32 @@ public class PubchemCidListProvider
     return pubchemCids;
   }
 
+
+  private void debugNode(NodeList efetchIds, int i) {
+    Node node = efetchIds.item(i);
+    String buff = node.getNodeName();
+    while ((node = node.getParentNode()) != null) {
+      buff = node.getNodeName() + ":" + buff;
+    }
+    log.info("Id path = " + buff);
+  }
+
   private InputStream getEsearchContent(String inchi)
   throws PubChemConnectionException
   {
     try {
       URL url = new URL(
-        ESEARCH_URL + "?db=pccompound&usehistory=y&tool=screensaver&email=" +
+        ESEARCH_URL + "?db=pccompound&usehistory=n&tool=screensaver" +
+        "&rettype=uilist&mode=xml" +
+        "&email=" +
         URLEncoder.encode("{john_sullivan,andrew_tolopko}@hms.harvard.edu", "UTF-8") +
         "&term=\"" +
         URLEncoder.encode(inchi, "UTF-8") +
         "\"[inchi]"
         );
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setConnectTimeout(CONNECT_TIMEOUT);
+      connection.setReadTimeout(CONNECT_TIMEOUT);
       connection.connect();
       return connection.getInputStream();
     }
@@ -179,6 +200,8 @@ public class PubchemCidListProvider
         "?db=pccompound&rettype=uilist&mode=xml&query_key=" + queryKey +
         "&WebEnv=" + webEnv);
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setConnectTimeout(CONNECT_TIMEOUT);
+      connection.setReadTimeout(CONNECT_TIMEOUT);
       connection.connect();
       return connection.getInputStream();
     }
