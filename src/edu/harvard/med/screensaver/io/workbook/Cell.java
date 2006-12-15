@@ -46,7 +46,7 @@ public class Cell
 
   private static final String INVALID_CELL_TYPE_ERROR = "invalid cell type";
   private static final String CELL_VALUE_REQUIRED_ERROR = "value required";
-  private static final Pattern DECIMAL_PRECISION_PATTERN = Pattern.compile(".*\\.([0#]*)");
+  private static final Pattern DECIMAL_PRECISION_PATTERN = Pattern.compile(".*\\.([0#]*)(%?)");
   private static final String GENERAL_FORMAT = "GENERAL";
 
 
@@ -497,7 +497,11 @@ public class Cell
         Matcher matcher = DECIMAL_PRECISION_PATTERN.matcher(formatStr);
         if (matcher.matches()) {
           String decimalFormat = matcher.group(1);
-          return decimalFormat.length();
+          int decimalPrecision = decimalFormat.length();
+          if (matcher.group(2) != null && matcher.group(2).length() > 0) { // is a percentage
+            decimalPrecision += 2;
+          }
+          return decimalPrecision;
         }
       }
       return 0;
