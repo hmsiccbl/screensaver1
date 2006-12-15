@@ -1,498 +1,389 @@
 begin;
 
-insert into compound (compound_id, version, is_salt, smiles) values ('Br', 1, 't', 'Br');
-insert into compound_compound_name (compound_id, compound_name) values ('Br', 'Hydrobromide');
-insert into compound_compound_name (compound_id, compound_name) values ('Br', ' bromide');
 
-insert into compound (compound_id, version, is_salt, smiles) values ('[Br-]', 1, 't', '[Br-]');
-insert into compound_compound_name (compound_id, compound_name) values ('[Br-]', 'Hydrobromide');
-insert into compound_compound_name (compound_id, compound_name) values ('[Br-]', ' bromide');
+INSERT INTO compound VALUES ('Br', 2, 'Br', 'InChI=1/BrH/h1H', true, NULL);
+INSERT INTO compound VALUES ('[Br-]', 2, '[Br-]', 'InChI=1/BrH/h1H/p-1', true, NULL);
+INSERT INTO compound VALUES ('BrBr', 2, 'BrBr', 'InChI=1/Br2/c1-2', true, NULL);
+INSERT INTO compound VALUES ('BrI', 2, 'BrI', 'InChI=1/BrI/c1-2', true, NULL);
+INSERT INTO compound VALUES ('Br[BrH]Br', 2, 'Br[BrH]Br', 'InChI=1/Br3H/c1-3-2/h3H', true, NULL);
+INSERT INTO compound VALUES ('Br[Cu]Br', 2, 'Br[Cu]Br', 'InChI=1/2BrH.Cu/h2*1H;/q;;+2/p-2', true, NULL);
+INSERT INTO compound VALUES ('Br[Fe](Br)(Br)Br', 2, 'Br[Fe](Br)(Br)Br', 'InChI=1/4BrH.Fe/h4*1H;/q;;;;+4/p-4', true, NULL);
+INSERT INTO compound VALUES ('Br[IH]I', 2, 'Br[IH]I', 'InChI=1/BrHI2/c1-3-2/h3H', true, NULL);
+INSERT INTO compound VALUES ('Br[Mg]Br', 2, 'Br[Mg]Br', 'InChI=1/2BrH.Mg/h2*1H;/q;;+2/p-2', true, NULL);
+INSERT INTO compound VALUES ('Br[Zn](Br)Br', 2, 'Br[Zn](Br)Br', 'InChI=1/3BrH.Zn/h3*1H;/q;;;+3/p-3', true, NULL);
+INSERT INTO compound VALUES ('C', 2, 'C', 'InChI=1/CH4/h1H4', true, NULL);
+INSERT INTO compound VALUES ('C1CNCCN1', 2, 'C1CNCCN1', 'InChI=1/C4H10N2/c1-2-6-4-3-5-1/h5-6H,1-4H2', true, NULL);
+INSERT INTO compound VALUES ('C=C', 2, 'C=C', 'InChI=1/C2H4/c1-2/h1-2H2', true, NULL);
+INSERT INTO compound VALUES ('C=COC=C', 2, 'C=COC=C', 'InChI=1/C4H6O/c1-3-5-4-2/h3-4H,1-2H2', true, NULL);
+INSERT INTO compound VALUES ('C=O', 2, 'C=O', 'InChI=1/CH2O/c1-2/h1H2', true, NULL);
+INSERT INTO compound VALUES ('CC', 2, 'CC', 'InChI=1/C2H6/c1-2/h1-2H3', true, NULL);
+INSERT INTO compound VALUES ('CC(=O)NCC(=O)O', 2, 'CC(=O)NCC(=O)O', 'InChI=1/C4H7NO3/c1-3(6)5-2-4(7)8/h2H2,1H3,(H,5,6)(H,7,8)', true, NULL);
+INSERT INTO compound VALUES ('CC(=O)[O-]', 2, 'CC(=O)[O-]', 'InChI=1/C2H4O2/c1-2(3)4/h1H3,(H,3,4)/p-1', true, NULL);
+INSERT INTO compound VALUES ('CC(=O)O', 2, 'CC(=O)O', 'InChI=1/C2H4O2/c1-2(3)4/h1H3,(H,3,4)', true, NULL);
+INSERT INTO compound VALUES ('CC(C(=O)O)S(=O)(=O)O', 2, 'CC(C(=O)O)S(=O)(=O)O', 'InChI=1/C3H6O5S/c1-2(3(4)5)9(6,7)8/h2H,1H3,(H,4,5)(H,6,7,8)', true, NULL);
+INSERT INTO compound VALUES ('CC(C)O', 2, 'CC(C)O', 'InChI=1/C3H8O/c1-3(2)4/h3-4H,1-2H3', true, NULL);
+INSERT INTO compound VALUES ('CC(O)C(=O)O', 2, 'CC(O)C(=O)O', 'InChI=1/C3H6O3/c1-2(4)3(5)6/h2,4H,1H3,(H,5,6)', true, NULL);
+INSERT INTO compound VALUES ('CCC', 2, 'CCC', 'InChI=1/C3H8/c1-3-2/h3H2,1-2H3', true, NULL);
+INSERT INTO compound VALUES ('CCCCCCCCCCCCCCCCCC(=O)O', 2, 'CCCCCCCCCCCCCCCCCC(=O)O', 'InChI=1/C18H36O2/c1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-16-17-18(19)20/h2-17H2,1H3,(H,19,20)', true, NULL);
+INSERT INTO compound VALUES ('CCCCCCCCCCCCOS(=O)(=O)O', 2, 'CCCCCCCCCCCCOS(=O)(=O)O', 'InChI=1/C12H26O4S/c1-2-3-4-5-6-7-8-9-10-11-12-16-17(13,14)15/h2-12H2,1H3,(H,13,14,15)', true, NULL);
+INSERT INTO compound VALUES ('CCN', 2, 'CCN', 'InChI=1/C2H7N/c1-2-3/h2-3H2,1H3', true, NULL);
+INSERT INTO compound VALUES ('CCN(CC)CC', 2, 'CCN(CC)CC', 'InChI=1/C6H15N/c1-4-7(5-2)6-3/h4-6H2,1-3H3', true, NULL);
+INSERT INTO compound VALUES ('CCO', 2, 'CCO', 'InChI=1/C2H6O/c1-2-3/h3H,2H2,1H3', true, NULL);
+INSERT INTO compound VALUES ('CCOS(=O)(=O)O', 2, 'CCOS(=O)(=O)O', 'InChI=1/C2H6O4S/c1-2-6-7(3,4)5/h2H2,1H3,(H,3,4,5)', true, NULL);
+INSERT INTO compound VALUES ('CCS(=O)(=O)O', 2, 'CCS(=O)(=O)O', 'InChI=1/C2H6O3S/c1-2-6(3,4)5/h2H2,1H3,(H,3,4,5)', true, NULL);
+INSERT INTO compound VALUES ('O=S(=O)=O', 2, 'O=S(=O)=O', 'InChI=1/O3S/c1-4(2)3', true, NULL);
+INSERT INTO compound VALUES ('CC[NH+](CC)CC', 2, 'CC[NH+](CC)CC', 'InChI=1/C6H15N/c1-4-7(5-2)6-3/h4-6H2,1-3H3/p+1', true, NULL);
+INSERT INTO compound VALUES ('CI', 2, 'CI', 'InChI=1/CH3I/c1-2/h1H3', true, NULL);
+INSERT INTO compound VALUES ('CN', 2, 'CN', 'InChI=1/CH5N/c1-2/h2H2,1H3', true, NULL);
+INSERT INTO compound VALUES ('CNC', 2, 'CNC', 'InChI=1/C2H7N/c1-3-2/h3H,1-2H3', true, NULL);
+INSERT INTO compound VALUES ('CO', 2, 'CO', 'InChI=1/CH4O/c1-2/h2H,1H3', true, NULL);
+INSERT INTO compound VALUES ('COC=C', 2, 'COC=C', 'InChI=1/C3H6O/c1-3-4-2/h3H,1H2,2H3', true, NULL);
+INSERT INTO compound VALUES ('COS(=O)(=O)O', 2, 'COS(=O)(=O)O', 'InChI=1/CH4O4S/c1-5-6(2,3)4/h1H3,(H,2,3,4)', true, NULL);
+INSERT INTO compound VALUES ('COS(=O)(=O)[O-]', 2, 'COS(=O)(=O)[O-]', 'InChI=1/CH4O4S/c1-5-6(2,3)4/h1H3,(H,2,3,4)/p-1', true, NULL);
+INSERT INTO compound VALUES ('CO[N+](=O)[O-]', 2, 'CO[N+](=O)[O-]', 'InChI=1/CH3NO3/c1-5-2(3)4/h1H3', true, NULL);
+INSERT INTO compound VALUES ('CS(=O)(=O)O', 2, 'CS(=O)(=O)O', 'InChI=1/CH4O3S/c1-5(2,3)4/h1H3,(H,2,3,4)', true, NULL);
+INSERT INTO compound VALUES ('CS(=O)(=O)[O-]', 2, 'CS(=O)(=O)[O-]', 'InChI=1/CH4O3S/c1-5(2,3)4/h1H3,(H,2,3,4)/p-1', true, NULL);
+INSERT INTO compound VALUES ('CS(=O)(=O)c1ccccc1', 2, 'CS(=O)(=O)c1ccccc1', 'InChI=1/C7H8O2S/c1-10(8,9)7-5-3-2-4-6-7/h2-6H,1H3', true, NULL);
+INSERT INTO compound VALUES ('CSC', 2, 'CSC', 'InChI=1/C2H6S/c1-3-2/h1-2H3', true, NULL);
+INSERT INTO compound VALUES ('C[Au](C)(Cl)Cl', 2, 'C[Au](C)(Cl)Cl', 'InChI=1/2CH3.Au.2ClH/h2*1H3;;2*1H/q;;+2;;/p-2', true, NULL);
+INSERT INTO compound VALUES ('C[N+](C)(C)C', 2, 'C[N+](C)(C)C', 'InChI=1/C4H12N/c1-5(2,3)4/h1-4H3/q+1', true, NULL);
+INSERT INTO compound VALUES ('C[N+]1(CCCCC[N+]2(C)CCCC2)CCCC1', 2, 'C[N+]1(CCCCC[N+]2(C)CCCC2)CCCC1', 'InChI=1/C15H32N2/c1-16(12-6-7-13-16)10-4-3-5-11-17(2)14-8-9-15-17/h3-15H2,1-2H3/q+2', true, NULL);
+INSERT INTO compound VALUES ('Cc1ccc(cc1)S(=O)(=O)[O-]', 2, 'Cc1ccc(cc1)S(=O)(=O)[O-]', 'InChI=1/C7H8O3S/c1-6-2-4-7(5-3-6)11(8,9)10/h2-5H,1H3,(H,8,9,10)/p-1', true, NULL);
+INSERT INTO compound VALUES ('Cc1ccc(cc1)S(=O)(=O)O', 2, 'Cc1ccc(cc1)S(=O)(=O)O', 'InChI=1/C7H8O3S/c1-6-2-4-7(5-3-6)11(8,9)10/h2-5H,1H3,(H,8,9,10)', true, NULL);
+INSERT INTO compound VALUES ('ClC(Cl)(Cl)Cl', 2, 'ClC(Cl)(Cl)Cl', 'InChI=1/CCl4/c2-1(3,4)5', true, NULL);
+INSERT INTO compound VALUES ('ClC(Cl)Cl', 2, 'ClC(Cl)Cl', 'InChI=1/CHCl3/c2-1(3)4/h1H', true, NULL);
+INSERT INTO compound VALUES ('ClC=C', 2, 'ClC=C', 'InChI=1/C2H3Cl/c1-2-3/h2H,1H2', true, NULL);
+INSERT INTO compound VALUES ('Cl[Cu](Cl)(Cl)Cl', 2, 'Cl[Cu](Cl)(Cl)Cl', 'InChI=1/4ClH.Cu/h4*1H;/q;;;;+4/p-4', true, NULL);
+INSERT INTO compound VALUES ('Cl[Cu]Cl', 2, 'Cl[Cu]Cl', 'InChI=1/2ClH.Cu/h2*1H;/q;;+2/p-2', true, NULL);
+INSERT INTO compound VALUES ('Cl[Fe](Cl)(Cl)(Br)Br', 2, 'Cl[Fe](Cl)(Cl)(Br)Br', 'InChI=1/2BrH.3ClH.Fe/h5*1H;/q;;;;;+5/p-5', true, NULL);
+INSERT INTO compound VALUES ('Cl[Fe](Cl)(Cl)Br', 2, 'Cl[Fe](Cl)(Cl)Br', 'InChI=1/BrH.3ClH.Fe/h4*1H;/q;;;;+4/p-4', true, NULL);
+INSERT INTO compound VALUES ('Cl[Fe](Cl)(Cl)Cl', 2, 'Cl[Fe](Cl)(Cl)Cl', 'InChI=1/4ClH.Fe/h4*1H;/q;;;;+4/p-4', true, NULL);
+INSERT INTO compound VALUES ('Cl[H]Cl', 2, 'Cl[H]Cl', 'InChI=1/Cl2H/c1-3-2', true, NULL);
+INSERT INTO compound VALUES ('Cl[Hg]', 2, 'Cl[Hg]', 'InChI=1/ClH.Hg/h1H;/q;+1/p-1', true, NULL);
+INSERT INTO compound VALUES ('Cl[Hg](Cl)Cl', 2, 'Cl[Hg](Cl)Cl', 'InChI=1/3ClH.Hg/h3*1H;/q;;;+3/p-3', true, NULL);
+INSERT INTO compound VALUES ('Cl[Hg]Cl', 2, 'Cl[Hg]Cl', 'InChI=1/2ClH.Hg/h2*1H;/q;;+2/p-2', true, NULL);
+INSERT INTO compound VALUES ('Cl[IH]Cl', 2, 'Cl[IH]Cl', 'InChI=1/Cl2HI/c1-3-2/h3H', true, NULL);
+INSERT INTO compound VALUES ('Cl[Pd](Cl)(Cl)Cl', 2, 'Cl[Pd](Cl)(Cl)Cl', 'InChI=1/4ClH.Pd/h4*1H;/q;;;;+4/p-4', true, NULL);
+INSERT INTO compound VALUES ('Cl[Pt](Cl)(Cl)(Cl)(Cl)Cl', 2, 'Cl[Pt](Cl)(Cl)(Cl)(Cl)Cl', 'InChI=1/6ClH.Pt/h6*1H;/q;;;;;;+6/p-6', true, NULL);
+INSERT INTO compound VALUES ('[Cl-][Pt]([Cl-])([Cl-])([Cl-])([Cl-])[Cl-]', 2, '[Cl-][Pt]([Cl-])([Cl-])([Cl-])([Cl-])[Cl-]', 'InChI=1/6ClH.Pt/h6*1H;/p-6', true, NULL);
+INSERT INTO compound VALUES ('Cl[Pt](Cl)(Cl)C#[O+]', 2, 'Cl[Pt](Cl)(Cl)C#[O+]', 'InChI=1/CO.3ClH.Pt/c1-2;;;;/h;3*1H;/q+1;;;;+3/p-3', true, NULL);
+INSERT INTO compound VALUES ('Cl[Pt](Cl)(Cl)Cl', 2, 'Cl[Pt](Cl)(Cl)Cl', 'InChI=1/4ClH.Pt/h4*1H;/q;;;;+4/p-4', true, NULL);
+INSERT INTO compound VALUES ('Cl[Sb](Cl)Cl', 2, 'Cl[Sb](Cl)Cl', 'InChI=1/3ClH.Sb/h3*1H;/q;;;+3/p-3', true, NULL);
+INSERT INTO compound VALUES ('Cl[Zn](Cl)(Cl)Cl', 2, 'Cl[Zn](Cl)(Cl)Cl', 'InChI=1/4ClH.Zn/h4*1H;/q;;;;+4/p-4', true, NULL);
+INSERT INTO compound VALUES ('[Cl-][Zn+2]([Cl-])[Cl-]', 2, '[Cl-][Zn+2]([Cl-])[Cl-]', 'InChI=1/3ClH.Zn/h3*1H;/q;;;+2/p-3', true, NULL);
+INSERT INTO compound VALUES ('Cl[Zn](Cl)Cl', 2, 'Cl[Zn](Cl)Cl', 'InChI=1/3ClH.Zn/h3*1H;/q;;;+3/p-3', true, NULL);
+INSERT INTO compound VALUES ('Cl[Zn]Cl', 2, 'Cl[Zn]Cl', 'InChI=1/2ClH.Zn/h2*1H;/q;;+2/p-2', true, NULL);
+INSERT INTO compound VALUES ('FB(F)(F)F', 2, 'FB(F)(F)F', 'InChI=1/BF4/c2-1(3,4)5', true, NULL);
+INSERT INTO compound VALUES ('[F-][B+3]([F-])([F-])[F-]', 2, '[F-][B+3]([F-])([F-])[F-]', 'InChI=1/BF4/c2-1(3,4)5/q-1', true, NULL);
+INSERT INTO compound VALUES ('F[B-](F)(F)F', 2, 'F[B-](F)(F)F', 'InChI=1/BF4/c2-1(3,4)5/q-1', true, NULL);
+INSERT INTO compound VALUES ('FP(F)(F)(F)(F)F', 2, 'FP(F)(F)(F)(F)F', 'InChI=1/F6P/c1-7(2,3,4,5)6', true, NULL);
+INSERT INTO compound VALUES ('[F-][P+5]([F-])([F-])([F-])([F-])[F-]', 2, '[F-][P+5]([F-])([F-])([F-])([F-])[F-]', 'InChI=1/F6P/c1-7(2,3,4,5)6/q-1', true, NULL);
+INSERT INTO compound VALUES ('F[As](F)(F)(F)(F)F', 2, 'F[As](F)(F)(F)(F)F', 'InChI=1/AsF6/c2-1(3,4,5,6)7', true, NULL);
+INSERT INTO compound VALUES ('[F-][As+5]([F-])([F-])([F-])([F-])[F-]', 2, '[F-][As+5]([F-])([F-])([F-])([F-])[F-]', 'InChI=1/AsF6/c2-1(3,4,5,6)7/q-1', true, NULL);
+INSERT INTO compound VALUES ('F[H]F', 2, 'F[H]F', 'InChI=1/F2H/c1-3-2', true, NULL);
+INSERT INTO compound VALUES ('F[Sb](F)(F)(F)(F)F', 2, 'F[Sb](F)(F)(F)(F)F', 'InChI=1/6FH.Sb/h6*1H;/q;;;;;;+6/p-6', true, NULL);
+INSERT INTO compound VALUES ('F[Si](F)(F)(F)(F)F', 2, 'F[Si](F)(F)(F)(F)F', 'InChI=1/F6Si/c1-7(2,3,4,5)6', true, NULL);
+INSERT INTO compound VALUES ('[F-][Si]([F-])([F-])([F-])([F-])[F-]', 2, '[F-][Si]([F-])([F-])([F-])([F-])[F-]', 'InChI=1/F6Si/c1-7(2,3,4,5)6/q-6', true, NULL);
+INSERT INTO compound VALUES ('HCl', 2, 'HCl', '', true, NULL);
+INSERT INTO compound VALUES ('[Hcl-]', 2, '[Hcl-]', '', true, NULL);
+INSERT INTO compound VALUES ('Cl', 2, 'Cl', 'InChI=1/ClH/h1H', true, NULL);
+INSERT INTO compound VALUES ('[Cl-]', 2, '[Cl-]', 'InChI=1/ClH/h1H/p-1', true, NULL);
+INSERT INTO compound VALUES ('I', 2, 'I', 'InChI=1/HI/h1H', true, NULL);
+INSERT INTO compound VALUES ('[I-]', 2, '[I-]', 'InChI=1/HI/h1H/p-1', true, NULL);
+INSERT INTO compound VALUES ('II', 2, 'II', 'InChI=1/I2/c1-2', true, NULL);
+INSERT INTO compound VALUES ('I[IH]I', 2, 'I[IH]I', 'InChI=1/HI3/c1-3-2/h3H', true, NULL);
+INSERT INTO compound VALUES ('K', 2, 'K', '', true, NULL);
+INSERT INTO compound VALUES ('[K+]', 2, '[K+]', 'InChI=1/K/q+1', true, NULL);
+INSERT INTO compound VALUES ('[KH]', 2, '[KH]', 'InChI=1/K.H', true, NULL);
+INSERT INTO compound VALUES ('[K]', 2, '[K]', 'InChI=1/K.H', true, NULL);
+INSERT INTO compound VALUES ('N', 2, 'N', 'InChI=1/H3N/h1H3', true, NULL);
+INSERT INTO compound VALUES ('N=[N+]=[N-]', 2, 'N=[N+]=[N-]', 'InChI=1/HN3/c1-3-2/h1H', true, NULL);
+INSERT INTO compound VALUES ('[N-]=[N+]=[N-]', 2, '[N-]=[N+]=[N-]', 'InChI=1/N3/c1-3-2/q-1', true, NULL);
+INSERT INTO compound VALUES ('NC(CO)(CO)CO', 2, 'NC(CO)(CO)CO', 'InChI=1/C4H11NO3/c5-4(1-6,2-7)3-8/h6-8H,1-3,5H2', true, NULL);
+INSERT INTO compound VALUES ('NC1CCCCC1', 2, 'NC1CCCCC1', 'InChI=1/C6H13N/c7-6-4-2-1-3-5-6/h6H,1-5,7H2', true, NULL);
+INSERT INTO compound VALUES ('NCCN', 2, 'NCCN', 'InChI=1/C2H8N2/c3-1-2-4/h1-4H2', true, NULL);
+INSERT INTO compound VALUES ('NCCO', 2, 'NCCO', 'InChI=1/C2H7NO/c3-1-2-4/h4H,1-3H2', true, NULL);
+INSERT INTO compound VALUES ('NN', 2, 'NN', 'InChI=1/H4N2/c1-2/h1-2H2', true, NULL);
+INSERT INTO compound VALUES ('NO', 2, 'NO', 'InChI=1/H3NO/c1-2/h2H,1H2', true, NULL);
+INSERT INTO compound VALUES ('Na', 2, 'Na', '', true, NULL);
+INSERT INTO compound VALUES ('[Na+]', 2, '[Na+]', 'InChI=1/Na/q+1', true, NULL);
+INSERT INTO compound VALUES ('[NaH]', 2, '[NaH]', 'InChI=1/Na.H', true, NULL);
+INSERT INTO compound VALUES ('[Na]', 2, '[Na]', 'InChI=1/Na.H', true, NULL);
+INSERT INTO compound VALUES ('O', 2, 'O', 'InChI=1/H2O/h1H2', true, NULL);
+INSERT INTO compound VALUES ('[O-]', 2, '[O-]', 'InChI=1/H2O/h1H2/p-1', true, NULL);
+INSERT INTO compound VALUES ('O=C=O', 2, 'O=C=O', 'InChI=1/CO2/c2-1-3', true, NULL);
+INSERT INTO compound VALUES ('OC(=O)/C=C/C(=O)O', 2, 'OC(=O)/C=C/C(=O)O', 'InChI=1/C4H4O4/c5-3(6)1-2-4(7)8/h1-2H,(H,5,6)(H,7,8)/b2-1-', true, NULL);
+INSERT INTO compound VALUES ('OC(=O)/C=CC(=O)O', 2, 'OC(=O)/C=CC(=O)O', 'InChI=1/C4H4O4/c5-3(6)1-2-4(7)8/h1-2H,(H,5,6)(H,7,8)', true, NULL);
+INSERT INTO compound VALUES ('OC(=O)C(=O)O', 2, 'OC(=O)C(=O)O', 'InChI=1/C2H2O4/c3-1(4)2(5)6/h(H,3,4)(H,5,6)', true, NULL);
+INSERT INTO compound VALUES ('OC(=O)C(F)(F)F', 2, 'OC(=O)C(F)(F)F', 'InChI=1/C2HF3O2/c3-2(4,5)1(6)7/h(H,6,7)', true, NULL);
+INSERT INTO compound VALUES ('OC(=O)C=CC(=O)O', 2, 'OC(=O)C=CC(=O)O', 'InChI=1/C4H4O4/c5-3(6)1-2-4(7)8/h1-2H,(H,5,6)(H,7,8)', true, NULL);
+INSERT INTO compound VALUES ('OC(=O)CC(O)(CC(=O)O)C(=O)O', 2, 'OC(=O)CC(O)(CC(=O)O)C(=O)O', 'InChI=1/C6H8O7/c7-3(8)1-6(13,5(11)12)2-4(9)10/h13H,1-2H2,(H,7,8)(H,9,10)(H,11,12)', true, NULL);
+INSERT INTO compound VALUES ('OC(=O)CCC(=O)O', 2, 'OC(=O)CCC(=O)O', 'InChI=1/C4H6O4/c5-3(6)1-2-4(7)8/h1-2H2,(H,5,6)(H,7,8)', true, NULL);
+INSERT INTO compound VALUES ('OC(=O)CCl', 2, 'OC(=O)CCl', 'InChI=1/C2H3ClO2/c3-1-2(4)5/h1H2,(H,4,5)', true, NULL);
+INSERT INTO compound VALUES ('OC(=O)CP(=O)(O)O', 2, 'OC(=O)CP(=O)(O)O', 'InChI=1/C2H5O5P/c3-2(4)1-8(5,6)7/h1H2,(H,3,4)(H2,5,6,7)', true, NULL);
+INSERT INTO compound VALUES ('OC(=O)CS(=O)(=O)O', 2, 'OC(=O)CS(=O)(=O)O', 'InChI=1/C2H4O5S/c3-2(4)1-8(5,6)7/h1H2,(H,3,4)(H,5,6,7)', true, NULL);
+INSERT INTO compound VALUES ('OC(=O)O', 2, 'OC(=O)O', 'InChI=1/CH2O3/c2-1(3)4/h(H2,2,3,4)', true, NULL);
+INSERT INTO compound VALUES ('OC(=O)c1cc(ccc1O)S(=O)(=O)O', 2, 'OC(=O)c1cc(ccc1O)S(=O)(=O)O', 'InChI=1/C7H6O6S/c8-6-2-1-4(14(11,12)13)3-5(6)7(9)10/h1-3,8H,(H,9,10)(H,11,12,13)', true, NULL);
+INSERT INTO compound VALUES ('OC(=O)c1ccccc1', 2, 'OC(=O)c1ccccc1', 'InChI=1/C7H6O2/c8-7(9)6-4-2-1-3-5-6/h1-5H,(H,8,9)', true, NULL);
+INSERT INTO compound VALUES ('OC(=O)c1ccccc1O', 2, 'OC(=O)c1ccccc1O', 'InChI=1/C7H6O3/c8-6-4-2-1-3-5(6)7(9)10/h1-4,8H,(H,9,10)', true, NULL);
+INSERT INTO compound VALUES ('OC(C(O)C(=O)O)C(=O)O', 2, 'OC(C(O)C(=O)O)C(=O)O', 'InChI=1/C4H6O6/c5-1(3(7)8)2(6)4(9)10/h1-2,5-6H,(H,7,8)(H,9,10)', true, NULL);
+INSERT INTO compound VALUES ('OC(C(O)C(=O)[O-])C(=O)O', 2, 'OC(C(O)C(=O)[O-])C(=O)O', 'InChI=1/C4H6O6/c5-1(3(7)8)2(6)4(9)10/h1-2,5-6H,(H,7,8)(H,9,10)/p-1', true, NULL);
+INSERT INTO compound VALUES ('OC=O', 2, 'OC=O', 'InChI=1/CH2O2/c2-1-3/h1H,(H,2,3)', true, NULL);
+INSERT INTO compound VALUES ('OCC(=O)O', 2, 'OCC(=O)O', 'InChI=1/C2H4O3/c3-1-2(4)5/h3H,1H2,(H,4,5)', true, NULL);
+INSERT INTO compound VALUES ('OCCO', 2, 'OCCO', 'InChI=1/C2H6O2/c3-1-2-4/h3-4H,1-2H2', true, NULL);
+INSERT INTO compound VALUES ('OCCOS(=O)=O', 2, 'OCCOS(=O)=O', 'InChI=1/C2H6O4S/c3-1-2-6-7(4)5/h3,7H,1-2H2', true, NULL);
+INSERT INTO compound VALUES ('OCCS(=O)(=O)O', 2, 'OCCS(=O)(=O)O', 'InChI=1/C2H6O4S/c3-1-2-7(4,5)6/h3H,1-2H2,(H,4,5,6)', true, NULL);
+INSERT INTO compound VALUES ('OCO', 2, 'OCO', 'InChI=1/CH4O2/c2-1-3/h2-3H,1H2', true, NULL);
+INSERT INTO compound VALUES ('OCl(=O)(=O)=O', 2, 'OCl(=O)(=O)=O', 'InChI=1/ClHO4/c2-1(3,4)5/h(H,2,3,4,5)', true, NULL);
+INSERT INTO compound VALUES ('OI(=O)=O', 2, 'OI(=O)=O', 'InChI=1/HIO3/c2-1(3)4/h(H,2,3,4)', true, NULL);
+INSERT INTO compound VALUES ('ON(O)O', 2, 'ON(O)O', 'InChI=1/H3NO3/c2-1(3)4/h2-4H', true, NULL);
+INSERT INTO compound VALUES ('ON=O', 2, 'ON=O', 'InChI=1/HNO2/c2-1-3/h(H,2,3)', true, NULL);
+INSERT INTO compound VALUES ('OO', 2, 'OO', 'InChI=1/H2O2/c1-2/h1-2H', true, NULL);
+INSERT INTO compound VALUES ('OP(=O)([O-])[O-]', 2, 'OP(=O)([O-])[O-]', 'InChI=1/H3O4P/c1-5(2,3)4/h(H3,1,2,3,4)/p-2', true, NULL);
+INSERT INTO compound VALUES ('OP(=O)(O)O', 2, 'OP(=O)(O)O', 'InChI=1/H3O4P/c1-5(2,3)4/h(H3,1,2,3,4)', true, NULL);
+INSERT INTO compound VALUES ('OP(=O)=O', 2, 'OP(=O)=O', 'InChI=1/H2O3P/c1-4(2)3/h4H,(H,1,2,3)', true, NULL);
+INSERT INTO compound VALUES ('OS(=O)(=O)C(F)(F)F', 2, 'OS(=O)(=O)C(F)(F)F', 'InChI=1/CHF3O3S/c2-1(3,4)8(5,6)7/h(H,5,6,7)', true, NULL);
+INSERT INTO compound VALUES ('OS(=O)(=O)CCS(=O)(=O)O', 2, 'OS(=O)(=O)CCS(=O)(=O)O', 'InChI=1/C2H6O6S2/c3-9(4,5)1-2-10(6,7)8/h1-2H2,(H,3,4,5)(H,6,7,8)', true, NULL);
+INSERT INTO compound VALUES ('OS(=O)(=O)F', 2, 'OS(=O)(=O)F', 'InChI=1/FHO3S/c1-5(2,3)4/h(H,2,3,4)', true, NULL);
+INSERT INTO compound VALUES ('OS(=O)(=O)O', 2, 'OS(=O)(=O)O', 'InChI=1/H2O4S/c1-5(2,3)4/h(H2,1,2,3,4)', true, NULL);
+INSERT INTO compound VALUES ('[O-]S(=O)(=O)[O-]', 2, '[O-]S(=O)(=O)[O-]', 'InChI=1/H2O4S/c1-5(2,3)4/h(H2,1,2,3,4)/p-2', true, NULL);
+INSERT INTO compound VALUES ('OS(=O)(=O)[O-]', 2, 'OS(=O)(=O)[O-]', 'InChI=1/H2O4S/c1-5(2,3)4/h(H2,1,2,3,4)/p-1', true, NULL);
+INSERT INTO compound VALUES ('OS(=O)(=O)c1ccccc1', 2, 'OS(=O)(=O)c1ccccc1', 'InChI=1/C6H6O3S/c7-10(8,9)6-4-2-1-3-5-6/h1-5H,(H,7,8,9)', true, NULL);
+INSERT INTO compound VALUES ('OS(=O)O', 2, 'OS(=O)O', 'InChI=1/H2O3S/c1-4(2)3/h(H2,1,2,3)', true, NULL);
+INSERT INTO compound VALUES ('O[C@@H]([C@@H](O)C(=O)O)C(=O)O', 2, 'O[C@@H]([C@@H](O)C(=O)O)C(=O)O', 'InChI=1/C4H6O6/c5-1(3(7)8)2(6)4(9)10/h1-2,5-6H,(H,7,8)(H,9,10)/t1-,2+', true, NULL);
+INSERT INTO compound VALUES ('O[Cr](=O)(=O)O', 2, 'O[Cr](=O)(=O)O', 'InChI=1/Cr.2H2O.2O/h;2*1H2;;/q+2;;;;/p-2', true, NULL);
+INSERT INTO compound VALUES ('O[N+](=O)[O-]', 2, 'O[N+](=O)[O-]', 'InChI=1/HNO3/c2-1(3)4/h(H,2,3,4)', true, NULL);
+INSERT INTO compound VALUES ('Oc1c(cc(cc1N(=O)=O)[N+](=O)[O-])[N+](=O)[O-]', 2, 'Oc1c(cc(cc1N(=O)=O)[N+](=O)[O-])[N+](=O)[O-]', 'InChI=1/C6H3N3O7/c10-6-4(8(13)14)1-3(7(11)12)2-5(6)9(15)16/h1-2,10H', true, NULL);
+INSERT INTO compound VALUES ('PP', 2, 'PP', 'InChI=1/H4P2/c1-2/h1-2H2', true, NULL);
+INSERT INTO compound VALUES ('SC#N', 2, 'SC#N', 'InChI=1/CHNS/c2-1-3/h3H', true, NULL);
+INSERT INTO compound VALUES ('[3H][4H]', 2, '[3H][4H]', 'InChI=1/H2/h1H/i1+2', true, NULL);
+INSERT INTO compound VALUES ('[4HH]', 2, '[4HH]', 'InChI=1/H2/h1H', true, NULL);
+INSERT INTO compound VALUES ('[BH4]', 2, '[BH4]', 'InChI=1/BH4/h1H4', true, NULL);
+INSERT INTO compound VALUES ('[Br-][Pt+2]([Br-])([Br-])[Br-]', 2, '[Br-][Pt+2]([Br-])([Br-])[Br-]', 'InChI=1/4BrH.Pt/h4*1H;/q;;;;+2/p-4', true, NULL);
+INSERT INTO compound VALUES ('[Ca+2]', 2, '[Ca+2]', 'InChI=1/Ca/q+2', true, NULL);
+INSERT INTO compound VALUES ('[CaH2]', 2, '[CaH2]', 'InChI=1/Ca.2H', true, NULL);
+INSERT INTO compound VALUES ('[Cl-][Au+3]([Cl-])([Cl-])[Cl-]', 2, '[Cl-][Au+3]([Cl-])([Cl-])[Cl-]', 'InChI=1/Au.4ClH/h;4*1H/q+3;;;;/p-4', true, NULL);
+INSERT INTO compound VALUES ('Cl[Au](Cl)(Cl)Cl ', 2, 'Cl[Au](Cl)(Cl)Cl ', 'InChI=1/Au.4ClH/h;4*1H/q+4;;;;/p-4', true, NULL);
+INSERT INTO compound VALUES ('[Cl-][Pd+2]([Cl-])([Cl-])[Cl-]', 2, '[Cl-][Pd+2]([Cl-])([Cl-])[Cl-]', 'InChI=1/4ClH.Pd/h4*1H;/q;;;;+2/p-4', true, NULL);
+INSERT INTO compound VALUES ('[Cl-][Pt+2]([Cl-])([Cl-])[Cl-]', 2, '[Cl-][Pt+2]([Cl-])([Cl-])[Cl-]', 'InChI=1/4ClH.Pt/h4*1H;/q;;;;+2/p-4', true, NULL);
+INSERT INTO compound VALUES ('[Cl-][Sb+3]([Cl-])([Cl-])([Cl-])([Cl-])[Cl-]', 2, '[Cl-][Sb+3]([Cl-])([Cl-])([Cl-])([Cl-])[Cl-]', 'InChI=1/6ClH.Sb/h6*1H;/q;;;;;;+3/p-6', true, NULL);
+INSERT INTO compound VALUES ('Cl[Sb](Cl)(Cl)(Cl)(Cl)Cl', 2, 'Cl[Sb](Cl)(Cl)(Cl)(Cl)Cl', 'InChI=1/6ClH.Sb/h6*1H;/q;;;;;;+6/p-6', true, NULL);
+INSERT INTO compound VALUES ('[H-89]', 2, '[H-89]', '', true, NULL);
+INSERT INTO compound VALUES ('[K]Br', 2, '[K]Br', 'InChI=1/BrH.K/h1H;/q;+1/p-1', true, NULL);
+INSERT INTO compound VALUES ('[Li+]', 2, '[Li+]', 'InChI=1/Li/q+1', true, NULL);
+INSERT INTO compound VALUES ('[LiH]', 2, '[LiH]', 'InChI=1/Li.H', true, NULL);
+INSERT INTO compound VALUES ('[Li]', 2, '[Li]', 'InChI=1/Li.H', true, NULL);
+INSERT INTO compound VALUES ('[Mg+2]', 2, '[Mg+2]', 'InChI=1/Mg/q+2', true, NULL);
+INSERT INTO compound VALUES ('[NH4+]', 2, '[NH4+]', 'InChI=1/H3N/h1H3/p+1', true, NULL);
+INSERT INTO compound VALUES ('[O-][N+](=O)[O-]', 2, '[O-][N+](=O)[O-]', 'InChI=1/NO3/c2-1(3)4/q-1', true, NULL);
+INSERT INTO compound VALUES ('[Se-]C#N', 2, '[Se-]C#N', 'InChI=1/CHNSe/c2-1-3/h3H/p-1', true, NULL);
+INSERT INTO compound VALUES ('[Y+16]', 2, '[Y+16]', '', true, NULL);
+INSERT INTO compound VALUES ('c1ccccc1', 2, 'c1ccccc1', 'InChI=1/C6H6/c1-2-4-6-5-3-1/h1-6H', true, NULL);
+INSERT INTO compound VALUES ('c1ccncc1', 2, 'c1ccncc1', 'InChI=1/C5H5N/c1-2-4-6-5-3-1/h1-5H', true, NULL);
+INSERT INTO compound VALUES ('C1CCNCC1', 2, 'C1CCNCC1', 'InChI=1/C5H11N/c1-2-4-6-5-3-1/h6H,1-5H2', true, NULL);
+INSERT INTO compound VALUES ('n1ccncc1', 2, 'n1ccncc1', 'InChI=1/C4H4N2/c1-2-6-4-3-5-1/h1-4H', true, NULL);
+INSERT INTO compound VALUES ('N1CCNCC1', 2, 'N1CCNCC1', 'InChI=1/C4H10N2/c1-2-6-4-3-5-1/h5-6H,1-4H2', true, NULL);
+INSERT INTO compound VALUES ('Fc1ccccc1', 2, 'Fc1ccccc1', 'InChI=1/C6H5F/c7-6-4-2-1-3-5-6/h1-5H', true, NULL);
+INSERT INTO compound VALUES ('COc1ccccc1', 2, 'COc1ccccc1', 'InChI=1/C7H8O/c1-8-7-5-3-2-4-6-7/h2-6H,1H3', true, NULL);
+
+
+INSERT INTO compound_compound_name VALUES ('Br', 'Hydrobromide');
+INSERT INTO compound_compound_name VALUES ('Br', ' bromide');
+INSERT INTO compound_compound_name VALUES ('[Br-]', 'Hydrobromide');
+INSERT INTO compound_compound_name VALUES ('[Br-]', ' bromide');
+INSERT INTO compound_compound_name VALUES ('BrBr', 'dibromide');
+INSERT INTO compound_compound_name VALUES ('BrI', 'iodine bromide');
+INSERT INTO compound_compound_name VALUES ('Br[BrH]Br', 'tribromide');
+INSERT INTO compound_compound_name VALUES ('C', 'carbon');
+INSERT INTO compound_compound_name VALUES ('C=C', 'ethylene');
+INSERT INTO compound_compound_name VALUES ('C=O', 'carbon monoxide');
+INSERT INTO compound_compound_name VALUES ('CC(=O)NCC(=O)O', 'diaceturate');
+INSERT INTO compound_compound_name VALUES ('CC(=O)[O-]', 'acetate');
+INSERT INTO compound_compound_name VALUES ('CC(=O)O', 'acetate');
+INSERT INTO compound_compound_name VALUES ('CC(C(=O)O)S(=O)(=O)O', 'sulfopropanoic acid');
+INSERT INTO compound_compound_name VALUES ('CC(C)O', 'isopropyl alcohol');
+INSERT INTO compound_compound_name VALUES ('CC(O)C(=O)O', 'lactate');
+INSERT INTO compound_compound_name VALUES ('CCN', 'acetonitrile');
+INSERT INTO compound_compound_name VALUES ('CCN(CC)CC', 'triethyl ammonium');
+INSERT INTO compound_compound_name VALUES ('CCOS(=O)(=O)O', 'ethyl sulfate');
+INSERT INTO compound_compound_name VALUES ('CCS(=O)(=O)O', 'diethanesulfonate');
+INSERT INTO compound_compound_name VALUES ('O=S(=O)=O', 'sulfonate');
+INSERT INTO compound_compound_name VALUES ('CC[NH+](CC)CC', 'triethylamine');
+INSERT INTO compound_compound_name VALUES ('CI', 'methiodide');
+INSERT INTO compound_compound_name VALUES ('CNC', 'dimethylamine');
+INSERT INTO compound_compound_name VALUES ('CO', 'methoxide');
+INSERT INTO compound_compound_name VALUES ('COS(=O)(=O)O', 'methyl sulfate');
+INSERT INTO compound_compound_name VALUES ('COS(=O)(=O)[O-]', 'methyl sulfate');
+INSERT INTO compound_compound_name VALUES ('CO[N+](=O)[O-]', 'methyl nitrate');
+INSERT INTO compound_compound_name VALUES ('CS(=O)(=O)O', 'methanosulfate');
+INSERT INTO compound_compound_name VALUES ('CS(=O)(=O)[O-]', 'methanosulfate');
+INSERT INTO compound_compound_name VALUES ('C[N+](C)(C)C', 'tetramethylammonium');
+INSERT INTO compound_compound_name VALUES ('Cc1ccc(cc1)S(=O)(=O)[O-]', 'tosylate');
+INSERT INTO compound_compound_name VALUES ('Cc1ccc(cc1)S(=O)(=O)O', 'tosylate');
+INSERT INTO compound_compound_name VALUES ('Cl[Fe](Cl)(Cl)Cl', 'tetrachloroferrate');
+INSERT INTO compound_compound_name VALUES ('Cl[H]Cl', 'hydrogen dichloride');
+INSERT INTO compound_compound_name VALUES ('Cl[Pt](Cl)(Cl)C#[O+]', 'trichlorocarbonylplatinate');
+INSERT INTO compound_compound_name VALUES ('Cl[Pt](Cl)(Cl)Cl', 'tertachloroplatinate');
+INSERT INTO compound_compound_name VALUES ('Cl[Sb](Cl)Cl', 'antimony(III) chloride');
+INSERT INTO compound_compound_name VALUES ('Cl[Zn](Cl)(Cl)Cl', 'tetrachlorozincate');
+INSERT INTO compound_compound_name VALUES ('[Cl-][Zn+2]([Cl-])[Cl-]', 'tetrachlorozincate');
+INSERT INTO compound_compound_name VALUES ('Cl[Zn]Cl', 'zinc chloride');
+INSERT INTO compound_compound_name VALUES ('FB(F)(F)F', 'tetrafluoroborate');
+INSERT INTO compound_compound_name VALUES ('FB(F)(F)F', ' boron tetrafluoride');
+INSERT INTO compound_compound_name VALUES ('[F-][B+3]([F-])([F-])[F-]', 'tetrafluoroborate');
+INSERT INTO compound_compound_name VALUES ('[F-][B+3]([F-])([F-])[F-]', ' boron tetrafluoride');
+INSERT INTO compound_compound_name VALUES ('F[B-](F)(F)F', 'tetrafluoroborate');
+INSERT INTO compound_compound_name VALUES ('F[B-](F)(F)F', ' boron tetrafluoride');
+INSERT INTO compound_compound_name VALUES ('FP(F)(F)(F)(F)F', 'hexafluorophosphate');
+INSERT INTO compound_compound_name VALUES ('[F-][P+5]([F-])([F-])([F-])([F-])[F-]', 'hexafluorophosphate');
+INSERT INTO compound_compound_name VALUES ('F[As](F)(F)(F)(F)F', 'hexafluoroarsenate');
+INSERT INTO compound_compound_name VALUES ('[F-][As+5]([F-])([F-])([F-])([F-])[F-]', 'hexafluoroarsenate');
+INSERT INTO compound_compound_name VALUES ('F[Si](F)(F)(F)(F)F', 'hexafluorosilicate');
+INSERT INTO compound_compound_name VALUES ('[F-][Si]([F-])([F-])([F-])([F-])[F-]', 'hexafluorosilicate');
+INSERT INTO compound_compound_name VALUES ('HCl', 'Hydrochloride');
+INSERT INTO compound_compound_name VALUES ('HCl', ' HCl');
+INSERT INTO compound_compound_name VALUES ('[Hcl-]', 'Hydrochloride');
+INSERT INTO compound_compound_name VALUES ('[Hcl-]', ' HCl');
+INSERT INTO compound_compound_name VALUES ('Cl', 'Hydrochloride');
+INSERT INTO compound_compound_name VALUES ('Cl', ' HCl');
+INSERT INTO compound_compound_name VALUES ('[Cl-]', 'Hydrochloride');
+INSERT INTO compound_compound_name VALUES ('[Cl-]', ' HCl');
+INSERT INTO compound_compound_name VALUES ('I', 'iodide');
+INSERT INTO compound_compound_name VALUES ('[I-]', 'iodide');
+INSERT INTO compound_compound_name VALUES ('II', 'diiodide');
+INSERT INTO compound_compound_name VALUES ('I[IH]I', 'triiodide');
+INSERT INTO compound_compound_name VALUES ('K', 'potassium');
+INSERT INTO compound_compound_name VALUES ('[K+]', 'potassium');
+INSERT INTO compound_compound_name VALUES ('[KH]', 'potassium');
+INSERT INTO compound_compound_name VALUES ('[K]', 'potassium');
+INSERT INTO compound_compound_name VALUES ('NC1CCCCC1', 'cyclohexylamine');
+INSERT INTO compound_compound_name VALUES ('NCCN', 'ethylenediamine');
+INSERT INTO compound_compound_name VALUES ('NCCN', ' EDA');
+INSERT INTO compound_compound_name VALUES ('Na', 'sodium');
+INSERT INTO compound_compound_name VALUES ('[Na+]', 'sodium');
+INSERT INTO compound_compound_name VALUES ('[NaH]', 'sodium');
+INSERT INTO compound_compound_name VALUES ('[Na]', 'sodium');
+INSERT INTO compound_compound_name VALUES ('OC(=O)C(=O)O', 'oxalate');
+INSERT INTO compound_compound_name VALUES ('OC(=O)C(F)(F)F', 'trifluoroacetate');
+INSERT INTO compound_compound_name VALUES ('OC(=O)C=CC(=O)O', 'maleate');
+INSERT INTO compound_compound_name VALUES ('OC(=O)CC(O)(CC(=O)O)C(=O)O', 'citrate');
+INSERT INTO compound_compound_name VALUES ('OC(=O)CCl', 'chloroacetic acid');
+INSERT INTO compound_compound_name VALUES ('OC(=O)CP(=O)(O)O', 'phosphonoacetic acid');
+INSERT INTO compound_compound_name VALUES ('OC(=O)CS(=O)(=O)O', 'sulfuric acid');
+INSERT INTO compound_compound_name VALUES ('OC(=O)c1cc(ccc1O)S(=O)(=O)O', 'sulfosalicylate');
+INSERT INTO compound_compound_name VALUES ('OC(=O)c1ccccc1', 'benzoate');
+INSERT INTO compound_compound_name VALUES ('OC(=O)c1ccccc1O', 'salicylate');
+INSERT INTO compound_compound_name VALUES ('OC(C(O)C(=O)O)C(=O)O', 'tartrate');
+INSERT INTO compound_compound_name VALUES ('OC(C(O)C(=O)[O-])C(=O)O', 'tartrate');
+INSERT INTO compound_compound_name VALUES ('OC=O', 'formic acid');
+INSERT INTO compound_compound_name VALUES ('OCCS(=O)(=O)O', 'isethionate');
+INSERT INTO compound_compound_name VALUES ('OCl(=O)(=O)=O', 'perchlorate');
+INSERT INTO compound_compound_name VALUES ('OI(=O)=O', 'iodic acid');
+INSERT INTO compound_compound_name VALUES ('ON(O)O', 'nitrate');
+INSERT INTO compound_compound_name VALUES ('ON=O', 'nitrite');
+INSERT INTO compound_compound_name VALUES ('OO', 'peroxide');
+INSERT INTO compound_compound_name VALUES ('OP(=O)([O-])[O-]', 'phosphate');
+INSERT INTO compound_compound_name VALUES ('OP(=O)(O)O', 'phosphate');
+INSERT INTO compound_compound_name VALUES ('OP(=O)=O', 'phosphonate');
+INSERT INTO compound_compound_name VALUES ('OS(=O)(=O)C(F)(F)F', 'trifluoromethanesulfonic acid');
+INSERT INTO compound_compound_name VALUES ('OS(=O)(=O)CCS(=O)(=O)O', 'edisylate');
+INSERT INTO compound_compound_name VALUES ('OS(=O)(=O)F', 'fluorosulfate');
+INSERT INTO compound_compound_name VALUES ('OS(=O)(=O)O', 'sulfate');
+INSERT INTO compound_compound_name VALUES ('[O-]S(=O)(=O)[O-]', 'sulfate');
+INSERT INTO compound_compound_name VALUES ('OS(=O)(=O)[O-]', 'sulfate');
+INSERT INTO compound_compound_name VALUES ('O[Cr](=O)(=O)O', 'chromic acid');
+INSERT INTO compound_compound_name VALUES ('O[N+](=O)[O-]', 'nitrate');
+INSERT INTO compound_compound_name VALUES ('Oc1c(cc(cc1N(=O)=O)[N+](=O)[O-])[N+](=O)[O-]', 'picrate');
+INSERT INTO compound_compound_name VALUES ('SC#N', 'thiocyanate');
+INSERT INTO compound_compound_name VALUES ('[BH4]', 'borohydride');
+INSERT INTO compound_compound_name VALUES ('[Ca+2]', 'calcium');
+INSERT INTO compound_compound_name VALUES ('[CaH2]', 'calcium');
+INSERT INTO compound_compound_name VALUES ('[Cl-][Sb+3]([Cl-])([Cl-])([Cl-])([Cl-])[Cl-]', 'hexachloroantimonate');
+INSERT INTO compound_compound_name VALUES ('Cl[Sb](Cl)(Cl)(Cl)(Cl)Cl', 'hexachloroantimonate');
+INSERT INTO compound_compound_name VALUES ('[Li+]', 'lithium');
+INSERT INTO compound_compound_name VALUES ('[LiH]', 'lithium');
+INSERT INTO compound_compound_name VALUES ('[Li]', 'lithium');
+INSERT INTO compound_compound_name VALUES ('[Mg+2]', 'magnesium');
+INSERT INTO compound_compound_name VALUES ('[NH4+]', 'ammonium');
+INSERT INTO compound_compound_name VALUES ('[Se-]C#N', 'selenocyanate');
+INSERT INTO compound_compound_name VALUES ('c1ccccc1', 'benzene');
+INSERT INTO compound_compound_name VALUES ('c1ccncc1', 'pyridine');
+INSERT INTO compound_compound_name VALUES ('C1CCNCC1', 'piperidine');
+INSERT INTO compound_compound_name VALUES ('n1ccncc1', 'pyrazine');
+INSERT INTO compound_compound_name VALUES ('N1CCNCC1', 'piperazine');
+INSERT INTO compound_compound_name VALUES ('Fc1ccccc1', 'fluorobenzene');
+INSERT INTO compound_compound_name VALUES ('COc1ccccc1', 'anisole');
+INSERT INTO compound_compound_name VALUES ('COc1ccccc1', 'methoxybenzene');
+
+
+INSERT INTO compound_pubchem_cid VALUES ('Br', '260');
+INSERT INTO compound_pubchem_cid VALUES ('BrBr', '24408');
+INSERT INTO compound_pubchem_cid VALUES ('BrI', '82238');
+INSERT INTO compound_pubchem_cid VALUES ('C', '297');
+INSERT INTO compound_pubchem_cid VALUES ('C1CNCCN1', '4837');
+INSERT INTO compound_pubchem_cid VALUES ('C=C', '6325');
+INSERT INTO compound_pubchem_cid VALUES ('C=COC=C', '8024');
+INSERT INTO compound_pubchem_cid VALUES ('C=O', '712');
+INSERT INTO compound_pubchem_cid VALUES ('CC', '6324');
+INSERT INTO compound_pubchem_cid VALUES ('CC(C)O', '3776');
+INSERT INTO compound_pubchem_cid VALUES ('CCC', '6334');
+INSERT INTO compound_pubchem_cid VALUES ('CCN', '6341');
+INSERT INTO compound_pubchem_cid VALUES ('CCN(CC)CC', '8471');
+INSERT INTO compound_pubchem_cid VALUES ('CCO', '702');
+INSERT INTO compound_pubchem_cid VALUES ('O=S(=O)=O', '24682');
+INSERT INTO compound_pubchem_cid VALUES ('CI', '6328');
+INSERT INTO compound_pubchem_cid VALUES ('CN', '6329');
+INSERT INTO compound_pubchem_cid VALUES ('CNC', '674');
+INSERT INTO compound_pubchem_cid VALUES ('CO', '887');
+INSERT INTO compound_pubchem_cid VALUES ('COC=C', '7861');
+INSERT INTO compound_pubchem_cid VALUES ('CO[N+](=O)[O-]', '11724');
+INSERT INTO compound_pubchem_cid VALUES ('CS(=O)(=O)c1ccccc1', '18369');
+INSERT INTO compound_pubchem_cid VALUES ('CSC', '1068');
+INSERT INTO compound_pubchem_cid VALUES ('C[N+](C)(C)C', '6380');
+INSERT INTO compound_pubchem_cid VALUES ('C[N+]1(CCCCC[N+]2(C)CCCC2)CCCC1', '5850');
+INSERT INTO compound_pubchem_cid VALUES ('ClC(Cl)(Cl)Cl', '5943');
+INSERT INTO compound_pubchem_cid VALUES ('ClC(Cl)Cl', '6212');
+INSERT INTO compound_pubchem_cid VALUES ('ClC=C', '6338');
+INSERT INTO compound_pubchem_cid VALUES ('[F-][B+3]([F-])([F-])[F-]', '26255');
+INSERT INTO compound_pubchem_cid VALUES ('F[B-](F)(F)F', '26255');
+INSERT INTO compound_pubchem_cid VALUES ('[F-][P+5]([F-])([F-])([F-])([F-])[F-]', '9886');
+INSERT INTO compound_pubchem_cid VALUES ('[F-][As+5]([F-])([F-])([F-])([F-])[F-]', '23515');
+INSERT INTO compound_pubchem_cid VALUES ('Cl', '313');
+INSERT INTO compound_pubchem_cid VALUES ('I', '24841');
+INSERT INTO compound_pubchem_cid VALUES ('II', '807');
+INSERT INTO compound_pubchem_cid VALUES ('[K+]', '813');
+INSERT INTO compound_pubchem_cid VALUES ('N', '222');
+INSERT INTO compound_pubchem_cid VALUES ('N=[N+]=[N-]', '24530');
+INSERT INTO compound_pubchem_cid VALUES ('[N-]=[N+]=[N-]', '33558');
+INSERT INTO compound_pubchem_cid VALUES ('NC(CO)(CO)CO', '6503');
+INSERT INTO compound_pubchem_cid VALUES ('NC1CCCCC1', '7965');
+INSERT INTO compound_pubchem_cid VALUES ('NCCN', '3301');
+INSERT INTO compound_pubchem_cid VALUES ('NCCO', '700');
+INSERT INTO compound_pubchem_cid VALUES ('NN', '9321');
+INSERT INTO compound_pubchem_cid VALUES ('NO', '787');
+INSERT INTO compound_pubchem_cid VALUES ('[Na+]', '923');
+INSERT INTO compound_pubchem_cid VALUES ('O', '962');
+INSERT INTO compound_pubchem_cid VALUES ('O=C=O', '280');
+INSERT INTO compound_pubchem_cid VALUES ('OCCO', '174');
+INSERT INTO compound_pubchem_cid VALUES ('OCO', '79015');
+INSERT INTO compound_pubchem_cid VALUES ('ON(O)O', '457944');
+INSERT INTO compound_pubchem_cid VALUES ('OO', '784');
+INSERT INTO compound_pubchem_cid VALUES ('Oc1c(cc(cc1N(=O)=O)[N+](=O)[O-])[N+](=O)[O-]', '6954');
+INSERT INTO compound_pubchem_cid VALUES ('PP', '139283');
+INSERT INTO compound_pubchem_cid VALUES ('SC#N', '781');
+INSERT INTO compound_pubchem_cid VALUES ('[3H][4H]', '119434');
+INSERT INTO compound_pubchem_cid VALUES ('[4HH]', '783');
+INSERT INTO compound_pubchem_cid VALUES ('[Ca+2]', '271');
+INSERT INTO compound_pubchem_cid VALUES ('[Li+]', '28486');
+INSERT INTO compound_pubchem_cid VALUES ('[Mg+2]', '888');
+INSERT INTO compound_pubchem_cid VALUES ('[O-][N+](=O)[O-]', '943');
+INSERT INTO compound_pubchem_cid VALUES ('c1ccccc1', '241');
+INSERT INTO compound_pubchem_cid VALUES ('c1ccncc1', '1049');
+INSERT INTO compound_pubchem_cid VALUES ('C1CCNCC1', '8082');
+INSERT INTO compound_pubchem_cid VALUES ('n1ccncc1', '9261');
+INSERT INTO compound_pubchem_cid VALUES ('N1CCNCC1', '4837');
+INSERT INTO compound_pubchem_cid VALUES ('Fc1ccccc1', '10008');
+INSERT INTO compound_pubchem_cid VALUES ('COc1ccccc1', '7519');
 
-insert into compound (compound_id, version, is_salt, smiles) values ('BrBr', 1, 't', 'BrBr');
-insert into compound_compound_name (compound_id, compound_name) values ('BrBr', 'dibromide');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('BrI', 1, 't', 'BrI');
-insert into compound_compound_name (compound_id, compound_name) values ('BrI', 'iodine bromide');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Br[BrH]Br', 1, 't', 'Br[BrH]Br');
-insert into compound_compound_name (compound_id, compound_name) values ('Br[BrH]Br', 'tribromide');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Br[Cu]Br', 1, 't', 'Br[Cu]Br');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Br[Fe](Br)(Br)Br', 1, 't', 'Br[Fe](Br)(Br)Br');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Br[IH]I', 1, 't', 'Br[IH]I');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Br[Mg]Br', 1, 't', 'Br[Mg]Br');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Br[Zn](Br)Br', 1, 't', 'Br[Zn](Br)Br');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('C', 1, 't', 'C');
-insert into compound_compound_name (compound_id, compound_name) values ('C', 'carbon');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('C1CNCCN1', 1, 't', 'C1CNCCN1');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('C=C', 1, 't', 'C=C');
-insert into compound_compound_name (compound_id, compound_name) values ('C=C', 'ethylene');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('C=COC=C', 1, 't', 'C=COC=C');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('C=O', 1, 't', 'C=O');
-insert into compound_compound_name (compound_id, compound_name) values ('C=O', 'carbon monoxide');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CC', 1, 't', 'CC');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CC(=O)NCC(=O)O', 1, 't', 'CC(=O)NCC(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('CC(=O)NCC(=O)O', 'diaceturate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CC(=O)[O-]', 1, 't', 'CC(=O)[O-]');
-insert into compound_compound_name (compound_id, compound_name) values ('CC(=O)[O-]', 'acetate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CC(=O)O', 1, 't', 'CC(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('CC(=O)O', 'acetate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CC(C(=O)O)S(=O)(=O)O', 1, 't', 'CC(C(=O)O)S(=O)(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('CC(C(=O)O)S(=O)(=O)O', 'sulfopropanoic acid');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CC(C)O', 1, 't', 'CC(C)O');
-insert into compound_compound_name (compound_id, compound_name) values ('CC(C)O', 'isopropyl alcohol');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CC(O)C(=O)O', 1, 't', 'CC(O)C(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('CC(O)C(=O)O', 'lactate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CCC', 1, 't', 'CCC');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CCCCCCCCCCCCCCCCCC(=O)O', 1, 't', 'CCCCCCCCCCCCCCCCCC(=O)O');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CCCCCCCCCCCCOS(=O)(=O)O', 1, 't', 'CCCCCCCCCCCCOS(=O)(=O)O');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CCN', 1, 't', 'CCN');
-insert into compound_compound_name (compound_id, compound_name) values ('CCN', 'acetonitrile');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CCN(CC)CC', 1, 't', 'CCN(CC)CC');
-insert into compound_compound_name (compound_id, compound_name) values ('CCN(CC)CC', 'triethyl ammonium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CCO', 1, 't', 'CCO');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CCOS(=O)(=O)O', 1, 't', 'CCOS(=O)(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('CCOS(=O)(=O)O', 'ethyl sulfate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CCS(=O)(=O)O', 1, 't', 'CCS(=O)(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('CCS(=O)(=O)O', 'diethanesulfonate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('O=S(=O)=O', 1, 't', 'O=S(=O)=O');
-insert into compound_compound_name (compound_id, compound_name) values ('O=S(=O)=O', 'sulfonate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CC[NH+](CC)CC', 1, 't', 'CC[NH+](CC)CC');
-insert into compound_compound_name (compound_id, compound_name) values ('CC[NH+](CC)CC', 'triethylamine');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CI', 1, 't', 'CI');
-insert into compound_compound_name (compound_id, compound_name) values ('CI', 'methiodide');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CN', 1, 't', 'CN');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CNC', 1, 't', 'CNC');
-insert into compound_compound_name (compound_id, compound_name) values ('CNC', 'dimethylamine');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CO', 1, 't', 'CO');
-insert into compound_compound_name (compound_id, compound_name) values ('CO', 'methoxide');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('COC=C', 1, 't', 'COC=C');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('COS(=O)(=O)O', 1, 't', 'COS(=O)(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('COS(=O)(=O)O', 'methyl sulfate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('COS(=O)(=O)[O-]', 1, 't', 'COS(=O)(=O)[O-]');
-insert into compound_compound_name (compound_id, compound_name) values ('COS(=O)(=O)[O-]', 'methyl sulfate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CO[N+](=O)[O-]', 1, 't', 'CO[N+](=O)[O-]');
-insert into compound_compound_name (compound_id, compound_name) values ('CO[N+](=O)[O-]', 'methyl nitrate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CS(=O)(=O)O', 1, 't', 'CS(=O)(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('CS(=O)(=O)O', 'methanosulfate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CS(=O)(=O)[O-]', 1, 't', 'CS(=O)(=O)[O-]');
-insert into compound_compound_name (compound_id, compound_name) values ('CS(=O)(=O)[O-]', 'methanosulfate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CS(=O)(=O)c1ccccc1', 1, 't', 'CS(=O)(=O)c1ccccc1');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('CSC', 1, 't', 'CSC');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('C[Au](C)(Cl)Cl', 1, 't', 'C[Au](C)(Cl)Cl');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('C[N+](C)(C)C', 1, 't', 'C[N+](C)(C)C');
-insert into compound_compound_name (compound_id, compound_name) values ('C[N+](C)(C)C', 'tetramethylammonium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('C[N+]1(CCCCC[N+]2(C)CCCC2)CCCC1', 1, 't', 'C[N+]1(CCCCC[N+]2(C)CCCC2)CCCC1');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cc1ccc(cc1)S(=O)(=O)[O-]', 1, 't', 'Cc1ccc(cc1)S(=O)(=O)[O-]');
-insert into compound_compound_name (compound_id, compound_name) values ('Cc1ccc(cc1)S(=O)(=O)[O-]', 'tosylate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cc1ccc(cc1)S(=O)(=O)O', 1, 't', 'Cc1ccc(cc1)S(=O)(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('Cc1ccc(cc1)S(=O)(=O)O', 'tosylate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('ClC(Cl)(Cl)Cl', 1, 't', 'ClC(Cl)(Cl)Cl');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('ClC(Cl)Cl', 1, 't', 'ClC(Cl)Cl');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('ClC=C', 1, 't', 'ClC=C');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Cu](Cl)(Cl)Cl', 1, 't', 'Cl[Cu](Cl)(Cl)Cl');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Cu]Cl', 1, 't', 'Cl[Cu]Cl');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Fe](Cl)(Cl)(Br)Br', 1, 't', 'Cl[Fe](Cl)(Cl)(Br)Br');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Fe](Cl)(Cl)Br', 1, 't', 'Cl[Fe](Cl)(Cl)Br');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Fe](Cl)(Cl)Cl', 1, 't', 'Cl[Fe](Cl)(Cl)Cl');
-insert into compound_compound_name (compound_id, compound_name) values ('Cl[Fe](Cl)(Cl)Cl', 'tetrachloroferrate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[H]Cl', 1, 't', 'Cl[H]Cl');
-insert into compound_compound_name (compound_id, compound_name) values ('Cl[H]Cl', 'hydrogen dichloride');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Hg]', 1, 't', 'Cl[Hg]');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Hg](Cl)Cl', 1, 't', 'Cl[Hg](Cl)Cl');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Hg]Cl', 1, 't', 'Cl[Hg]Cl');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[IH]Cl', 1, 't', 'Cl[IH]Cl');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Pd](Cl)(Cl)Cl', 1, 't', 'Cl[Pd](Cl)(Cl)Cl');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Pt](Cl)(Cl)(Cl)(Cl)Cl', 1, 't', 'Cl[Pt](Cl)(Cl)(Cl)(Cl)Cl');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Cl-][Pt]([Cl-])([Cl-])([Cl-])([Cl-])[Cl-]', 1, 't', '[Cl-][Pt]([Cl-])([Cl-])([Cl-])([Cl-])[Cl-]');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Pt](Cl)(Cl)C#[O+]', 1, 't', 'Cl[Pt](Cl)(Cl)C#[O+]');
-insert into compound_compound_name (compound_id, compound_name) values ('Cl[Pt](Cl)(Cl)C#[O+]', 'trichlorocarbonylplatinate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Pt](Cl)(Cl)Cl', 1, 't', 'Cl[Pt](Cl)(Cl)Cl');
-insert into compound_compound_name (compound_id, compound_name) values ('Cl[Pt](Cl)(Cl)Cl', 'tertachloroplatinate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Sb](Cl)Cl', 1, 't', 'Cl[Sb](Cl)Cl');
-insert into compound_compound_name (compound_id, compound_name) values ('Cl[Sb](Cl)Cl', 'antimony(III) chloride');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Zn](Cl)(Cl)Cl', 1, 't', 'Cl[Zn](Cl)(Cl)Cl');
-insert into compound_compound_name (compound_id, compound_name) values ('Cl[Zn](Cl)(Cl)Cl', 'tetrachlorozincate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Cl-][Zn+2]([Cl-])[Cl-]', 1, 't', '[Cl-][Zn+2]([Cl-])[Cl-]');
-insert into compound_compound_name (compound_id, compound_name) values ('[Cl-][Zn+2]([Cl-])[Cl-]', 'tetrachlorozincate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Zn](Cl)Cl', 1, 't', 'Cl[Zn](Cl)Cl');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Zn]Cl', 1, 't', 'Cl[Zn]Cl');
-insert into compound_compound_name (compound_id, compound_name) values ('Cl[Zn]Cl', 'zinc chloride');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('FB(F)(F)F', 1, 't', 'FB(F)(F)F');
-insert into compound_compound_name (compound_id, compound_name) values ('FB(F)(F)F', 'tetrafluoroborate');
-insert into compound_compound_name (compound_id, compound_name) values ('FB(F)(F)F', ' boron tetrafluoride');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[F-][B+3]([F-])([F-])[F-]', 1, 't', '[F-][B+3]([F-])([F-])[F-]');
-insert into compound_compound_name (compound_id, compound_name) values ('[F-][B+3]([F-])([F-])[F-]', 'tetrafluoroborate');
-insert into compound_compound_name (compound_id, compound_name) values ('[F-][B+3]([F-])([F-])[F-]', ' boron tetrafluoride');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('F[B-](F)(F)F', 1, 't', 'F[B-](F)(F)F');
-insert into compound_compound_name (compound_id, compound_name) values ('F[B-](F)(F)F', 'tetrafluoroborate');
-insert into compound_compound_name (compound_id, compound_name) values ('F[B-](F)(F)F', ' boron tetrafluoride');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('FP(F)(F)(F)(F)F', 1, 't', 'FP(F)(F)(F)(F)F');
-insert into compound_compound_name (compound_id, compound_name) values ('FP(F)(F)(F)(F)F', 'hexafluorophosphate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[F-][P+5]([F-])([F-])([F-])([F-])[F-]', 1, 't', '[F-][P+5]([F-])([F-])([F-])([F-])[F-]');
-insert into compound_compound_name (compound_id, compound_name) values ('[F-][P+5]([F-])([F-])([F-])([F-])[F-]', 'hexafluorophosphate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('F[As](F)(F)(F)(F)F', 1, 't', 'F[As](F)(F)(F)(F)F');
-insert into compound_compound_name (compound_id, compound_name) values ('F[As](F)(F)(F)(F)F', 'hexafluoroarsenate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[F-][As+5]([F-])([F-])([F-])([F-])[F-]', 1, 't', '[F-][As+5]([F-])([F-])([F-])([F-])[F-]');
-insert into compound_compound_name (compound_id, compound_name) values ('[F-][As+5]([F-])([F-])([F-])([F-])[F-]', 'hexafluoroarsenate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('F[H]F', 1, 't', 'F[H]F');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('F[Sb](F)(F)(F)(F)F', 1, 't', 'F[Sb](F)(F)(F)(F)F');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('F[Si](F)(F)(F)(F)F', 1, 't', 'F[Si](F)(F)(F)(F)F');
-insert into compound_compound_name (compound_id, compound_name) values ('F[Si](F)(F)(F)(F)F', 'hexafluorosilicate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[F-][Si]([F-])([F-])([F-])([F-])[F-]', 1, 't', '[F-][Si]([F-])([F-])([F-])([F-])[F-]');
-insert into compound_compound_name (compound_id, compound_name) values ('[F-][Si]([F-])([F-])([F-])([F-])[F-]', 'hexafluorosilicate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('HCl', 1, 't', 'HCl');
-insert into compound_compound_name (compound_id, compound_name) values ('HCl', 'Hydrochloride');
-insert into compound_compound_name (compound_id, compound_name) values ('HCl', ' HCl');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Hcl-]', 1, 't', '[Hcl-]');
-insert into compound_compound_name (compound_id, compound_name) values ('[Hcl-]', 'Hydrochloride');
-insert into compound_compound_name (compound_id, compound_name) values ('[Hcl-]', ' HCl');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl', 1, 't', 'Cl');
-insert into compound_compound_name (compound_id, compound_name) values ('Cl', 'Hydrochloride');
-insert into compound_compound_name (compound_id, compound_name) values ('Cl', ' HCl');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Cl-]', 1, 't', '[Cl-]');
-insert into compound_compound_name (compound_id, compound_name) values ('[Cl-]', 'Hydrochloride');
-insert into compound_compound_name (compound_id, compound_name) values ('[Cl-]', ' HCl');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('I', 1, 't', 'I');
-insert into compound_compound_name (compound_id, compound_name) values ('I', 'iodide');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[I-]', 1, 't', '[I-]');
-insert into compound_compound_name (compound_id, compound_name) values ('[I-]', 'iodide');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('II', 1, 't', 'II');
-insert into compound_compound_name (compound_id, compound_name) values ('II', 'diiodide');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('I[IH]I', 1, 't', 'I[IH]I');
-insert into compound_compound_name (compound_id, compound_name) values ('I[IH]I', 'triiodide');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('K', 1, 't', 'K');
-insert into compound_compound_name (compound_id, compound_name) values ('K', 'potassium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[K+]', 1, 't', '[K+]');
-insert into compound_compound_name (compound_id, compound_name) values ('[K+]', 'potassium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[KH]', 1, 't', '[KH]');
-insert into compound_compound_name (compound_id, compound_name) values ('[KH]', 'potassium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[K]', 1, 't', '[K]');
-insert into compound_compound_name (compound_id, compound_name) values ('[K]', 'potassium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('N', 1, 't', 'N');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('N=[N+]=[N-]', 1, 't', 'N=[N+]=[N-]');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[N-]=[N+]=[N-]', 1, 't', '[N-]=[N+]=[N-]');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('NC(CO)(CO)CO', 1, 't', 'NC(CO)(CO)CO');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('NC1CCCCC1', 1, 't', 'NC1CCCCC1');
-insert into compound_compound_name (compound_id, compound_name) values ('NC1CCCCC1', 'cyclohexylamine');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('NCCN', 1, 't', 'NCCN');
-insert into compound_compound_name (compound_id, compound_name) values ('NCCN', 'ethylenediamine');
-insert into compound_compound_name (compound_id, compound_name) values ('NCCN', ' EDA');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('NCCO', 1, 't', 'NCCO');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('NN', 1, 't', 'NN');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('NO', 1, 't', 'NO');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Na', 1, 't', 'Na');
-insert into compound_compound_name (compound_id, compound_name) values ('Na', 'sodium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Na+]', 1, 't', '[Na+]');
-insert into compound_compound_name (compound_id, compound_name) values ('[Na+]', 'sodium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[NaH]', 1, 't', '[NaH]');
-insert into compound_compound_name (compound_id, compound_name) values ('[NaH]', 'sodium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Na]', 1, 't', '[Na]');
-insert into compound_compound_name (compound_id, compound_name) values ('[Na]', 'sodium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('O', 1, 't', 'O');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[O-]', 1, 't', '[O-]');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('O=C=O', 1, 't', 'O=C=O');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)/C=C/C(=O)O', 1, 't', 'OC(=O)/C=C/C(=O)O');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)/C=C\C(=O)O', 1, 't', 'OC(=O)/C=C\C(=O)O');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)C(=O)O', 1, 't', 'OC(=O)C(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('OC(=O)C(=O)O', 'oxalate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)C(F)(F)F', 1, 't', 'OC(=O)C(F)(F)F');
-insert into compound_compound_name (compound_id, compound_name) values ('OC(=O)C(F)(F)F', 'trifluoroacetate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)C=CC(=O)O', 1, 't', 'OC(=O)C=CC(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('OC(=O)C=CC(=O)O', 'maleate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)CC(O)(CC(=O)O)C(=O)O', 1, 't', 'OC(=O)CC(O)(CC(=O)O)C(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('OC(=O)CC(O)(CC(=O)O)C(=O)O', 'citrate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)CCC(=O)O', 1, 't', 'OC(=O)CCC(=O)O');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)CCl', 1, 't', 'OC(=O)CCl');
-insert into compound_compound_name (compound_id, compound_name) values ('OC(=O)CCl', 'chloroacetic acid');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)CP(=O)(O)O', 1, 't', 'OC(=O)CP(=O)(O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('OC(=O)CP(=O)(O)O', 'phosphonoacetic acid');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)CS(=O)(=O)O', 1, 't', 'OC(=O)CS(=O)(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('OC(=O)CS(=O)(=O)O', 'sulfuric acid');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)O', 1, 't', 'OC(=O)O');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)c1cc(ccc1O)S(=O)(=O)O', 1, 't', 'OC(=O)c1cc(ccc1O)S(=O)(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('OC(=O)c1cc(ccc1O)S(=O)(=O)O', 'sulfosalicylate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)c1ccccc1', 1, 't', 'OC(=O)c1ccccc1');
-insert into compound_compound_name (compound_id, compound_name) values ('OC(=O)c1ccccc1', 'benzoate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(=O)c1ccccc1O', 1, 't', 'OC(=O)c1ccccc1O');
-insert into compound_compound_name (compound_id, compound_name) values ('OC(=O)c1ccccc1O', 'salicylate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(C(O)C(=O)O)C(=O)O', 1, 't', 'OC(C(O)C(=O)O)C(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('OC(C(O)C(=O)O)C(=O)O', 'tartrate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC(C(O)C(=O)[O-])C(=O)O', 1, 't', 'OC(C(O)C(=O)[O-])C(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('OC(C(O)C(=O)[O-])C(=O)O', 'tartrate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OC=O', 1, 't', 'OC=O');
-insert into compound_compound_name (compound_id, compound_name) values ('OC=O', 'formic acid');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OCC(=O)O', 1, 't', 'OCC(=O)O');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OCCO', 1, 't', 'OCCO');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OCCOS(=O)=O', 1, 't', 'OCCOS(=O)=O');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OCCS(=O)(=O)O', 1, 't', 'OCCS(=O)(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('OCCS(=O)(=O)O', 'isethionate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OCO', 1, 't', 'OCO');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OCl(=O)(=O)=O', 1, 't', 'OCl(=O)(=O)=O');
-insert into compound_compound_name (compound_id, compound_name) values ('OCl(=O)(=O)=O', 'perchlorate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OI(=O)=O', 1, 't', 'OI(=O)=O');
-insert into compound_compound_name (compound_id, compound_name) values ('OI(=O)=O', 'iodic acid');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('ON(O)O', 1, 't', 'ON(O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('ON(O)O', 'nitrate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('ON=O', 1, 't', 'ON=O');
-insert into compound_compound_name (compound_id, compound_name) values ('ON=O', 'nitrite');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OO', 1, 't', 'OO');
-insert into compound_compound_name (compound_id, compound_name) values ('OO', 'peroxide');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OP(=O)([O-])[O-]', 1, 't', 'OP(=O)([O-])[O-]');
-insert into compound_compound_name (compound_id, compound_name) values ('OP(=O)([O-])[O-]', 'phosphate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OP(=O)(O)O', 1, 't', 'OP(=O)(O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('OP(=O)(O)O', 'phosphate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OP(=O)=O', 1, 't', 'OP(=O)=O');
-insert into compound_compound_name (compound_id, compound_name) values ('OP(=O)=O', 'phosphonate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OS(=O)(=O)C(F)(F)F', 1, 't', 'OS(=O)(=O)C(F)(F)F');
-insert into compound_compound_name (compound_id, compound_name) values ('OS(=O)(=O)C(F)(F)F', 'trifluoromethanesulfonic acid');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OS(=O)(=O)CCS(=O)(=O)O', 1, 't', 'OS(=O)(=O)CCS(=O)(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('OS(=O)(=O)CCS(=O)(=O)O', 'edisylate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OS(=O)(=O)F', 1, 't', 'OS(=O)(=O)F');
-insert into compound_compound_name (compound_id, compound_name) values ('OS(=O)(=O)F', 'fluorosulfate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OS(=O)(=O)O', 1, 't', 'OS(=O)(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('OS(=O)(=O)O', 'sulfate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[O-]S(=O)(=O)[O-]', 1, 't', '[O-]S(=O)(=O)[O-]');
-insert into compound_compound_name (compound_id, compound_name) values ('[O-]S(=O)(=O)[O-]', 'sulfate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OS(=O)(=O)[O-]', 1, 't', 'OS(=O)(=O)[O-]');
-insert into compound_compound_name (compound_id, compound_name) values ('OS(=O)(=O)[O-]', 'sulfate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OS(=O)(=O)c1ccccc1', 1, 't', 'OS(=O)(=O)c1ccccc1');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('OS(=O)O', 1, 't', 'OS(=O)O');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('O[C@@H]([C@@H](O)C(=O)O)C(=O)O', 1, 't', 'O[C@@H]([C@@H](O)C(=O)O)C(=O)O');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('O[Cr](=O)(=O)O', 1, 't', 'O[Cr](=O)(=O)O');
-insert into compound_compound_name (compound_id, compound_name) values ('O[Cr](=O)(=O)O', 'chromic acid');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('O[N+](=O)[O-]', 1, 't', 'O[N+](=O)[O-]');
-insert into compound_compound_name (compound_id, compound_name) values ('O[N+](=O)[O-]', 'nitrate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Oc1c(cc(cc1N(=O)=O)[N+](=O)[O-])[N+](=O)[O-]', 1, 't', 'Oc1c(cc(cc1N(=O)=O)[N+](=O)[O-])[N+](=O)[O-]');
-insert into compound_compound_name (compound_id, compound_name) values ('Oc1c(cc(cc1N(=O)=O)[N+](=O)[O-])[N+](=O)[O-]', 'picrate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('PP', 1, 't', 'PP');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('SC#N', 1, 't', 'SC#N');
-insert into compound_compound_name (compound_id, compound_name) values ('SC#N', 'thiocyanate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[3H][4H]', 1, 't', '[3H][4H]');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[4HH]', 1, 't', '[4HH]');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[BH4]', 1, 't', '[BH4]');
-insert into compound_compound_name (compound_id, compound_name) values ('[BH4]', 'borohydride');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Br-][Pt+2]([Br-])([Br-])[Br-]', 1, 't', '[Br-][Pt+2]([Br-])([Br-])[Br-]');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Ca+2]', 1, 't', '[Ca+2]');
-insert into compound_compound_name (compound_id, compound_name) values ('[Ca+2]', 'calcium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[CaH2]', 1, 't', '[CaH2]');
-insert into compound_compound_name (compound_id, compound_name) values ('[CaH2]', 'calcium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Cl-][Au+3]([Cl-])([Cl-])[Cl-]', 1, 't', '[Cl-][Au+3]([Cl-])([Cl-])[Cl-]');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Au](Cl)(Cl)Cl ', 1, 't', 'Cl[Au](Cl)(Cl)Cl ');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Cl-][Pd+2]([Cl-])([Cl-])[Cl-]', 1, 't', '[Cl-][Pd+2]([Cl-])([Cl-])[Cl-]');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Cl-][Pt+2]([Cl-])([Cl-])[Cl-]', 1, 't', '[Cl-][Pt+2]([Cl-])([Cl-])[Cl-]');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Cl-][Sb+3]([Cl-])([Cl-])([Cl-])([Cl-])[Cl-]', 1, 't', '[Cl-][Sb+3]([Cl-])([Cl-])([Cl-])([Cl-])[Cl-]');
-insert into compound_compound_name (compound_id, compound_name) values ('[Cl-][Sb+3]([Cl-])([Cl-])([Cl-])([Cl-])[Cl-]', 'hexachloroantimonate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Cl[Sb](Cl)(Cl)(Cl)(Cl)Cl', 1, 't', 'Cl[Sb](Cl)(Cl)(Cl)(Cl)Cl');
-insert into compound_compound_name (compound_id, compound_name) values ('Cl[Sb](Cl)(Cl)(Cl)(Cl)Cl', 'hexachloroantimonate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[H-89]', 1, 't', '[H-89]');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[K]Br', 1, 't', '[K]Br');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Li+]', 1, 't', '[Li+]');
-insert into compound_compound_name (compound_id, compound_name) values ('[Li+]', 'lithium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[LiH]', 1, 't', '[LiH]');
-insert into compound_compound_name (compound_id, compound_name) values ('[LiH]', 'lithium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Li]', 1, 't', '[Li]');
-insert into compound_compound_name (compound_id, compound_name) values ('[Li]', 'lithium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Mg+2]', 1, 't', '[Mg+2]');
-insert into compound_compound_name (compound_id, compound_name) values ('[Mg+2]', 'magnesium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[NH4+]', 1, 't', '[NH4+]');
-insert into compound_compound_name (compound_id, compound_name) values ('[NH4+]', 'ammonium');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[O-][N+](=O)[O-]', 1, 't', '[O-][N+](=O)[O-]');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Se-]C#N', 1, 't', '[Se-]C#N');
-insert into compound_compound_name (compound_id, compound_name) values ('[Se-]C#N', 'selenocyanate');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('[Y+16]', 1, 't', '[Y+16]');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('c1ccccc1', 1, 't', 'c1ccccc1');
-insert into compound_compound_name (compound_id, compound_name) values ('c1ccccc1', 'benzene');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('c1ccncc1', 1, 't', 'c1ccncc1');
-insert into compound_compound_name (compound_id, compound_name) values ('c1ccncc1', 'pyridine');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('C1CCNCC1', 1, 't', 'C1CCNCC1');
-insert into compound_compound_name (compound_id, compound_name) values ('C1CCNCC1', 'piperidine');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('n1ccncc1', 1, 't', 'n1ccncc1');
-insert into compound_compound_name (compound_id, compound_name) values ('n1ccncc1', 'pyrazine');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('N1CCNCC1', 1, 't', 'N1CCNCC1');
-insert into compound_compound_name (compound_id, compound_name) values ('N1CCNCC1', 'piperazine');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('Fc1ccccc1', 1, 't', 'Fc1ccccc1');
-insert into compound_compound_name (compound_id, compound_name) values ('Fc1ccccc1', 'fluorobenzene');
-
-insert into compound (compound_id, version, is_salt, smiles) values ('COc1ccccc1', 1, 't', 'COc1ccccc1');
-insert into compound_compound_name (compound_id, compound_name) values ('COc1ccccc1', 'anisole');
-insert into compound_compound_name (compound_id, compound_name) values ('COc1ccccc1', 'methoxybenzene');
 
 commit;
