@@ -90,11 +90,11 @@ public class OpenBabelClient
       log.info("error waiting for Open Babel to complete", e);
     }
     
-    if (outputFormat.equals("smi")) {
+    if (outputFormat.equals("smi") && _output.indexOf('\t') != -1) {
       // open babel SMILES output is postfixed "\tStructure\d+\n"
       _output = _output.substring(0, _output.indexOf('\t'));
     }
-    else if (outputFormat.equals("inchi")) {
+    else if (outputFormat.equals("inchi") && _output.indexOf('\n') != -1) {
       // trim useless \n
       _output = _output.substring(0, _output.indexOf('\n'));
     }
