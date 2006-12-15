@@ -151,7 +151,7 @@ public class PubchemCidListProvider
       return connection.getInputStream();
     }
     catch (Exception e) {
-      log.error(
+      log.warn(
         "couldnt get eSearch content from NCBI for inchi " + inchi + ": " +
         e.getMessage());
       throw new PubChemConnectionException();
@@ -165,7 +165,7 @@ public class PubchemCidListProvider
       return _documentBuilder.parse(epostContent);
     }
     catch (Exception e) {
-      log.error("unable to get content from NCBI: " + e.getMessage());
+      log.warn("unable to get content from NCBI: " + e.getMessage());
       throw new PubChemConnectionException();
     }
   }
@@ -183,13 +183,14 @@ public class PubchemCidListProvider
       return connection.getInputStream();
     }
     catch (Exception e) {
-      log.error(
+      log.warn(
         "couldnt get esummary content from NCBI for inchi " + inchi + ": " +
         e.getMessage());
       throw new PubChemConnectionException();
     }
   }
 
+  // debugging helper method:
   private void dumpInputStreamToStdout(InputStream inputStream) {
     try {
       for (int ch = inputStream.read(); ch != -1; ch = inputStream.read()) {
