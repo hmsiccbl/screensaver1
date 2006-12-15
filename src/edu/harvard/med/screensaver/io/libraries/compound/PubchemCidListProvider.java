@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.io.libraries.compound;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -23,7 +22,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
@@ -39,7 +37,6 @@ public class PubchemCidListProvider
   private static final Logger log = Logger.getLogger(PubchemCidListProvider.class);
   private static final String EUTILS_ROOT = "http://www.ncbi.nlm.nih.gov/entrez/eutils";
   private static final String ESEARCH_URL = EUTILS_ROOT + "/esearch.fcgi";
-  private static final String EFETCH_URL = EUTILS_ROOT + "/efetch.fcgi";
   private static final int NUM_RETRIES = 3;
   private static final int CONNECT_TIMEOUT = 2000; // in millisecs
 
@@ -54,9 +51,9 @@ public class PubchemCidListProvider
       "CC",
       "CCC",
       "CC(=O)C",
-      //"O=C1CCCC=2OC(=O)C(=CC1=2)NC(=O)c3ccccc3",
-      //"COc1ccc(cc1)N3N=C(C(=O)Oc2ccccc2)c4ccccc4(C3(=O))",
-      //"CON=CNC(=O)c1cc(ccc1(OCC(F)(F)F))OCC(F)(F)F",
+      "O=C1CCCC=2OC(=O)C(=CC1=2)NC(=O)c3ccccc3",
+      "COc1ccc(cc1)N3N=C(C(=O)Oc2ccccc2)c4ccccc4(C3(=O))",
+      "CON=CNC(=O)c1cc(ccc1(OCC(F)(F)F))OCC(F)(F)F",
     }) {
       log.info("SMILES = " + smiles);
       String inchi = openBabelClient.convertSmilesToInchi(smiles);
@@ -77,7 +74,7 @@ public class PubchemCidListProvider
   };
   
   
-  // public constructor
+  // public constructor and instance method
   
   public PubchemCidListProvider()
   {
@@ -89,9 +86,6 @@ public class PubchemCidListProvider
       log.error("unable to initialize the XML document builder", e);
     }
   }
-  
-  
-  // public instance methods
 
   public List<String> getPubchemCidListForInchi(String inchi)
   {
@@ -106,6 +100,8 @@ public class PubchemCidListProvider
     throw new NullPointerException();
   }
 
+  
+  // private instance methods
 
   private List<String> getPubChemCidListForInchi0(String inchi)
   throws PubChemConnectionException {
@@ -115,41 +111,13 @@ public class PubchemCidListProvider
       return pubchemCids;
     }
     
-    //dumpInputStreamToStdout(esearchContent);
-    //if (true) return pubchemCids;
-    
-    //Document esearchDocument = getDocumentFromInputStream(esearchContent);
-    //String queryKey = esearchDocument.getElementsByTagName("QueryKey").item(0).getTextContent();
-    //String webEnv = esearchDocument.getElementsByTagName("WebEnv").item(0).getTextContent();
-    
-    //InputStream efetchContent = getEfetchContent(queryKey, webEnv, inchi);
-    //if (efetchContent == null) {
-    //  return pubchemCids;
-    //}
-    
-    //dumpInputStreamToStdout(efetchContent);
-    //if (true) return pubchemCids;
-    
-    //Document efetchDocument = getDocumentFromInputStream(efetchContent);
     Document efetchDocument = getDocumentFromInputStream(esearchContent);
     NodeList efetchIds = efetchDocument.getElementsByTagName("Id");
     for (int i = 0; i < efetchIds.getLength(); i ++) {
-      debugNode(efetchIds, i);
       String efetchId = efetchIds.item(i).getTextContent();
       pubchemCids.add(efetchId);
     }
-    
     return pubchemCids;
-  }
-
-
-  private void debugNode(NodeList efetchIds, int i) {
-    Node node = efetchIds.item(i);
-    String buff = node.getNodeName();
-    while ((node = node.getParentNode()) != null) {
-      buff = node.getNodeName() + ":" + buff;
-    }
-    log.info("Id path = " + buff);
   }
 
   private InputStream getEsearchContent(String inchi)
@@ -188,40 +156,6 @@ public class PubchemCidListProvider
     catch (Exception e) {
       log.warn("unable to get content from NCBI: " + e.getMessage());
       throw new PubChemConnectionException();
-    }
-  }
-
-  private InputStream getEfetchContent(String queryKey, String webEnv, String inchi)
-  throws PubChemConnectionException
-  {
-    try {
-      URL url = new URL(
-        EFETCH_URL +
-        "?db=pccompound&rettype=uilist&mode=xml&query_key=" + queryKey +
-        "&WebEnv=" + webEnv);
-      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-      connection.setConnectTimeout(CONNECT_TIMEOUT);
-      connection.setReadTimeout(CONNECT_TIMEOUT);
-      connection.connect();
-      return connection.getInputStream();
-    }
-    catch (Exception e) {
-      log.warn(
-        "couldnt get esummary content from NCBI for inchi " + inchi + ": " +
-        e.getMessage());
-      throw new PubChemConnectionException();
-    }
-  }
-
-  // debugging helper method:
-  private void dumpInputStreamToStdout(InputStream inputStream) {
-    try {
-      for (int ch = inputStream.read(); ch != -1; ch = inputStream.read()) {
-        System.out.print((char) ch);
-      }
-    }
-    catch (IOException e) {
-      e.printStackTrace();
     }
   }
 }
