@@ -180,7 +180,6 @@ public class Compound extends AbstractEntity
    * @hibernate.property
    *   type="text"
    *   column="inchi"
-   *   unique="true"
    * @motivation for hibernate
    */
   public String getInchi()
