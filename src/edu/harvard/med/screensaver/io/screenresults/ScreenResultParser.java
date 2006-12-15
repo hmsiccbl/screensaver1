@@ -778,20 +778,19 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                     rvt.addResultValue(well,
                                        assayWellType,
                                        value,
-                                       (wellExcludes != null && wellExcludes.contains(rvt)),
-                                       false);
+                                       (wellExcludes != null && wellExcludes.contains(rvt)));
                   }
                   else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.PARTITION) {
                     rvt.addResultValue(well,
                                        assayWellType,
                                        _partitionedValueParser.parse(cell).toString(),
-                                       (wellExcludes != null && wellExcludes.contains(rvt)),
-                                       false);
+                                       (wellExcludes != null && wellExcludes.contains(rvt)));
                   }
                   else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL) {
                     rvt.addResultValue(well,
                                        assayWellType,
                                        cell.getDouble(),
+                                       cell.getDoublePrecision(),
                                        (wellExcludes != null && wellExcludes.contains(rvt)));
                   }
                 }
@@ -804,14 +803,14 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                     rvt.addResultValue(well,
                                        assayWellType,
                                        cell.getDouble(),
+                                       cell.getDoublePrecision(),
                                        (wellExcludes != null && wellExcludes.contains(rvt)));
                   }
                   else {
                     rvt.addResultValue(well,
                                        assayWellType,
                                        cell.getString(),
-                                       (wellExcludes != null && wellExcludes.contains(rvt)),
-                                       false);
+                                       (wellExcludes != null && wellExcludes.contains(rvt)));
                   }
                 }
               }

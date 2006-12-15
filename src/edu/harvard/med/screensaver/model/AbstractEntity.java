@@ -356,6 +356,9 @@ public abstract class AbstractEntity implements Serializable
     if (method.getName().startsWith("getHbn")) {
       return false;
     }
+    if (method.getAnnotation(DerivedEntityProperty.class) != null) {
+      return false;
+    }
 
     return 
       !(Collection.class.isAssignableFrom(property.getPropertyType()) ||

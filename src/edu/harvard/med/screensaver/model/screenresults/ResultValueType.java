@@ -220,30 +220,25 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @param assayWellType the AssayWellType of the new ResultValue
    * @param value the value of the new ResultValue
    * @param exclude the exclude flag of the new ResultValue
-   * @param isNumeric true, iff ths new ResultValue's value is a number
    * @return true, iff a ResultValue did not already exist for the given well (within the parent ResultValue)
    */
   public boolean addResultValue(Well well,
                                 AssayWellType assayWellType,
                                 String value,
-                                boolean exclude,
-                                boolean isNumeric)
+                                boolean exclude)
   {
     if (_resultValues.containsKey(well.getWellKey())) {
       return false;
     }
     if (_resultValues.size() == 0) {
-      setNumeric(isNumeric);
+      setNumeric(false);
     }
-    else if (isNumeric() != isNumeric) {
-      throw new IllegalArgumentException("cannot add a " + (isNumeric ? "" : "non-") + 
-                                         "numeric value to a " + (isNumeric ? "non-" : "") + 
-                                         "numeric ResultValueType");
+    else if (isNumeric() != false) {
+      throw new IllegalArgumentException("cannot add a non-numeric value to a numeric ResultValueType");
     }
     ResultValue rv = new ResultValue(assayWellType,
                                      value,
-                                     exclude,
-                                     isNumeric);
+                                     exclude);
     rv.setHit(isHit(rv));
     return addResultValue(rv, well);
   }
@@ -258,6 +253,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @param well the well of the new ResultValue
    * @param assayWellType the AssayWellType of the new ResultValue
    * @param value the numeric value of the new ResultValue
+   * @param decimalPrecision the number of digits to appear after the decimal point, when value is displayed
    * @param exclude the exclude flag of the new ResultValue
    * @return true, iff a ResultValue did not already exist for the given well
    *         (within the parent ResultValue)
@@ -265,6 +261,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   public boolean addResultValue(Well well,
                                 AssayWellType assayWellType,
                                 Double numericValue,
+                                int decimalPrecision,
                                 boolean exclude)
   {
     if (_resultValues.containsKey(well.getWellKey())) {
@@ -278,11 +275,51 @@ public class ResultValueType extends AbstractEntity implements Comparable
     }
     ResultValue rv = new ResultValue(assayWellType,
                                      numericValue,
+                                     decimalPrecision,
                                      exclude);
     rv.setHit(isHit(rv));
     return addResultValue(rv, well);
   }
   
+  /**
+   * Add a non-numeric, experimental type, non-excluded ResultValue to the
+   * ResultValueType. 
+   * 
+   * @param well the well of the new ResultValue
+   * @param value the value of the new ResultValue
+   * @return true, iff the ResultValue was added
+   */
+  public boolean addResultValue(Well well, 
+                                String value)
+  {
+    return addResultValue(well, 
+                          AssayWellType.EXPERIMENTAL, 
+                          value, 
+                          false);
+  }
+
+  /**
+   * Add an experimental type, non-excluded ResultValue to the ResultValueType.
+   * If the numeric value is originally available as a String, call
+   * {@link #addResultValue(Well, String, boolean)} instead, to preserve the
+   * full precision of the value (with isNumeric param set to true).
+   * 
+   * @param well the well of the new ResultValue
+   * @param value the value of the new ResultValue
+   * @param decimalPrecision the number of digits to appear after the decimal point, when displayed
+   * @return true, iff the ResultValue was added
+   */
+  public boolean addResultValue(Well well, 
+                                Double value,
+                                int decimalPrecision)
+  {
+    return addResultValue(well, 
+                          AssayWellType.EXPERIMENTAL, 
+                          value,
+                          decimalPrecision,
+                          false);
+  }
+
   private boolean addResultValue(ResultValue rv, Well well)
   {
     if (getOrdinal() == 0) { // yuck! due to denormalization...
@@ -301,63 +338,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
   }
 
   /**
-   * Add a experimental type, non-excluded ResultValue to the ResultValueType.
-   * 
-   * @param well the well of the new ResultValue
-   * @param value the value of the new ResultValue
-   * @return true, iff the ResultValue was added
-   */
-  public boolean addResultValue(Well well, 
-                                String value)
-  {
-    return addResultValue(well, 
-                          AssayWellType.EXPERIMENTAL, 
-                          value, 
-                          false, 
-                          false);
-  }
-
-  /**
-   * Add a numeric, experimental type, non-excluded ResultValue to the
-   * ResultValueType. 
-   * 
-   * @param well the well of the new ResultValue
-   * @param value the value of the new ResultValue
-   * @param isNumeric true, iff ths new ResultValue's value is a number
-   * @return true, iff the ResultValue was added
-   */
-  public boolean addResultValue(Well well, 
-                                String value, 
-                                boolean isNumeric)
-  {
-    return addResultValue(well, 
-                          AssayWellType.EXPERIMENTAL, 
-                          value, 
-                          false, 
-                          isNumeric);
-  }
-
-  /**
-   * Add an experimental type, non-excluded ResultValue to the ResultValueType.
-   * If the numeric value is originally available as a String, call
-   * {@link #addResultValue(Well, String, boolean)} instead, to preserve the
-   * full precision of the value (with isNumeric param set to true).
-   * 
-   * @param well the well of the new ResultValue
-   * @param value the value of the new ResultValue
-   * @param isNumeric true, iff ths new ResultValue's value is a number
-   * @return true, iff the ResultValue was added
-   */
-  public boolean addResultValue(Well well, 
-                                Double value)
-  {
-    return addResultValue(well, 
-                          AssayWellType.EXPERIMENTAL, 
-                          value, 
-                          false);
-  }
-
-  /**
    * Determine whether a result value is to be considered a hit, using its value
    * and this ResultValueType's definition of what constitutes a hit. Only
    * applicable for ResultValueTypes that are assay activity indicators.
@@ -372,13 +352,13 @@ public class ResultValueType extends AbstractEntity implements Comparable
   {
     boolean isHit = false;
     if (isActivityIndicator() && rv.isExperimentalWell() && !rv.isExclude()) {
-      if (rv.getNumericValue() != null) {
-        if (getActivityIndicatorType().equals(ActivityIndicatorType.BOOLEAN)) {
-          if (Boolean.parseBoolean(rv.getValue())) {
-            isHit = true;
-          }
+      if (getActivityIndicatorType().equals(ActivityIndicatorType.BOOLEAN)) {
+        if (Boolean.parseBoolean(rv.getValue())) {
+          isHit = true;
         }
-        else if (getActivityIndicatorType().equals(ActivityIndicatorType.NUMERICAL)) {
+      }
+      else if (getActivityIndicatorType().equals(ActivityIndicatorType.NUMERICAL)) {
+        if (rv.getNumericValue() != null) {
           if (getIndicatorDirection().equals(IndicatorDirection.HIGH_VALUES_INDICATE)) {
             if (rv.getNumericValue() >= getIndicatorCutoff()) {
               isHit = true;
@@ -390,9 +370,13 @@ public class ResultValueType extends AbstractEntity implements Comparable
             }
           }
         }
-        else if (getActivityIndicatorType().equals(ActivityIndicatorType.PARTITION)) {
-          if (rv.getValue() != null) {
+      }
+      else if (getActivityIndicatorType().equals(ActivityIndicatorType.PARTITION)) {
+        String partitionValue = rv.getValue();
+        for (PartitionedValue pvType : PartitionedValue.values()) {
+          if (!pvType.equals(PartitionedValue.NONE) && pvType.getValue().equals(partitionValue)) {
             isHit = true;
+            break;
           }
         }
       }

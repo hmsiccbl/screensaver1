@@ -11,10 +11,13 @@ package edu.harvard.med.screensaver.io.workbook;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -43,6 +46,8 @@ public class Cell
 
   private static final String INVALID_CELL_TYPE_ERROR = "invalid cell type";
   private static final String CELL_VALUE_REQUIRED_ERROR = "value required";
+  private static final Pattern DECIMAL_PRECISION_PATTERN = Pattern.compile(".*\\.([0#]*)");
+  private static final String GENERAL_FORMAT = "GENERAL";
 
 
   // instance data members
@@ -471,7 +476,36 @@ public class Cell
       }
       return null;
     }
-  }  
+  }
+
+  /**
+   * Get the number of digits requested to appear after the decimal point, based
+   * upon the cell's style.
+   * 
+   * @return the number of digits requested to appear after the decimal point; 0 if the 
+   */
+  public int getDoublePrecision()
+  {
+    try {
+      HSSFCell cell = getHSSFCell();
+      HSSFDataFormat dataFormat = _workbook.getWorkbook().createDataFormat();
+      String formatStr = dataFormat.getFormat(cell.getCellStyle().getDataFormat());
+      if (formatStr != null) {
+        if (formatStr.equals(GENERAL_FORMAT)) {
+          return -1;
+        }
+        Matcher matcher = DECIMAL_PRECISION_PATTERN.matcher(formatStr);
+        if (matcher.matches()) {
+          String decimalFormat = matcher.group(1);
+          return decimalFormat.length();
+        }
+      }
+      return 0;
+    }
+    catch (CellOutOfRangeException e) {
+      return 0;
+    }
+  }
   
   public void annotateWithError(ParseError error)
   {

@@ -347,8 +347,7 @@ public class ComplexDAOTest extends AbstractSpringTest
               rvt[iResultValue].addResultValue(wells[iWell], 
                                                AssayWellType.EXPERIMENTAL, 
                                                "value " + iWell + "," + iResultValue, 
-                                               iWell % 2 == 1,
-                                               false);
+                                               iWell % 2 == 1);
             }
           }
 
@@ -663,7 +662,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           expectedWells.add(well);
           AssayWellType assayWellType = i % 2 == 0 ? AssayWellType.EXPERIMENTAL : AssayWellType.ASSAY_POSITIVE_CONTROL;
           boolean exclude = i % 4 == 0;
-          rvt.addResultValue(well, assayWellType, (double) i, false);
+          rvt.addResultValue(well, assayWellType, (double) i, 3, false);
           if (assayWellType.equals(AssayWellType.EXPERIMENTAL)) {
             expectedExperimentalWellCount[0]++;
             if (!exclude && i >= indicatorCutoff) {
@@ -710,8 +709,8 @@ public class ComplexDAOTest extends AbstractSpringTest
       for (int iWell = 1; iWell <= 10; ++iWell) {
         Well well = new Well(library, plateNumber, "A" + iWell);
         AssayWellType assayWellType = iPlate == 10 ? AssayWellType.LIBRARY_CONTROL : AssayWellType.EXPERIMENTAL;
-        rvt1.addResultValue(well, assayWellType, Integer.toString(iWell), false, false);
-        rvt2.addResultValue(well, assayWellType, iWell % 2 == 0 ? "S" : "W", false, false);
+        rvt1.addResultValue(well, assayWellType, (double) iWell, 0, false);
+        rvt2.addResultValue(well, assayWellType, iWell % 2 == 0 ? "S" : "W", false);
       }
     }
     dao.persistEntity(screen);

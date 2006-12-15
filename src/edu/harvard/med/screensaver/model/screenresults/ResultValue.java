@@ -33,11 +33,19 @@ public class ResultValue
 
   private static final long serialVersionUID = -4066041317098744417L;
   private static final Logger log = Logger.getLogger(ResultValue.class);
+  private static final int DEFAULT_DECIMAL_PRECISION = 3;
+  private static final String[] FORMAT_STRINGS = new String[10];
+  static {
+    for (int i = 0; i < FORMAT_STRINGS.length; i++) {
+      FORMAT_STRINGS[i] = "%1." + i + "f";
+    }
+  }
   
   // properties instance data
   
   private String          _value;
   private Double          _numericValue;
+  private Integer         _numericDecimalPrecision;
   private AssayWellType   _assayWellType;
   /**
    * Note that we maintain an "exclude" flag on a per-ResultValue basis. It is
@@ -60,37 +68,19 @@ public class ResultValue
    */
   ResultValue(String value)
   {
-    this(AssayWellType.EXPERIMENTAL, value, false, false);
-  }
-  
-  /**
-   * Constructs a numeric ResultValue object, using a String to specify the
-   * numeric value. This constructor should be used if the value is originally
-   * made available as a String, as this preserves the full precision of the
-   * value (rather than forcing all numeric values to be converted to Doubles
-   * before constructing a numeric ResultValue).
-   * 
-   * @param value
-   * @param isNumeric
-   */
-  ResultValue(String value, boolean isNumeric)
-  {
-    this(AssayWellType.EXPERIMENTAL, value, false, isNumeric);
+    this(AssayWellType.EXPERIMENTAL, value, false);
   }
   
   /**
    * Constructs a numeric ResultValue object, using a Double to specify the
-   * numeric value. If the value is originally made available as a String, use
-   * {@link #ResultValue(String, boolean)}, as this will presever the full
-   * precision of the value (it will be parsed into a Double, as well, and
-   * stored redundantly as a String and a Double).
+   * numeric value.
    * 
    * @param value
+   * @param decimalPrecision the number of digits to appear after the decimal point, when displayed
    */
-  ResultValue(Double value)
+  ResultValue(Double value, int decimalPrecision)
   {
-    this(AssayWellType.EXPERIMENTAL, value.toString(), false, true);
-    _numericValue = value;
+    this(AssayWellType.EXPERIMENTAL, value, decimalPrecision, false);
   }
 
   /**
@@ -103,20 +93,20 @@ public class ResultValue
    * 
    * @param assayWellType the AssayWellType of the new ResultValue
    * @param value the value of the new ResultValue
+   * @param decimalPrecision the number of digits to appear after the decimal point, when displayed
    * @param exclude the exclude flag of the new ResultValue
-   * @param isNumeric true, iff ths new ResultValue's value is a number
    */
   ResultValue(AssayWellType assayWellType,
               Double value,
+              int decimalPrecision,
               boolean exclude)
   {
     setAssayWellType(assayWellType);
-    if (value != null) {
-      setValue(value.toString());
-    }
     setNumericValue(value);
+    setNumericDecimalPrecision(decimalPrecision);
+    setValue(formatNumericValue(decimalPrecision));
     setExclude(exclude);
-  } 
+  }
 
   /**
    * Constructs an initialized <code>ResultValue</code> object.
@@ -133,14 +123,10 @@ public class ResultValue
    */
   ResultValue(AssayWellType assayWellType,
               String value,
-              boolean exclude,
-              boolean isNumeric)
+              boolean exclude)
   {
     setAssayWellType(assayWellType);
     setValue(value);
-    if (isNumeric && value != null) {
-      setNumericValue(Double.parseDouble(value));
-    }
     setExclude(exclude);
   } 
 
@@ -174,6 +160,42 @@ public class ResultValue
     return _numericValue;
   }
   
+  /**
+   * Get the default decimal precision for this ResultValue's numeric value
+   * 
+   * @return the number of digits to be displayed after the decimal point, when
+   *         value is displayed; null if ResultValue is not numeric.
+   */
+  public Integer getNumericDecimalPrecision()
+  {
+    return _numericDecimalPrecision;
+  }
+
+  /**
+   * Formats the numeric value of this ResultValue.
+   * 
+   * @param decimalPrecision if &lt; 0, uses "general" formatting (%g), with precision 9, as
+   *          described in {@link java.util.Formatter}
+   * @return formatted numeric value
+   */
+  public String formatNumericValue(int decimalPrecision)
+  {
+    String strValue = null;
+    if (_numericValue != null) {
+      if (decimalPrecision < 0) {
+        strValue = String.format("%g", _numericValue);
+      }
+      else if (decimalPrecision <  FORMAT_STRINGS.length) {
+        // optimization: use precomputed format strings, rather than creating all those string objects
+        strValue = String.format(FORMAT_STRINGS[decimalPrecision], _numericValue);
+      }
+      else {
+        strValue = String.format("%1." + decimalPrecision + "f", _numericValue);
+      }
+    }
+    return strValue;
+  } 
+
   /**
    * Get whether this <code>ResultValue</code> is to be excluded in any
    * subsequent analyses.
@@ -361,6 +383,16 @@ public class ResultValue
    */
   private void setNumericValue(Double value) {
     _numericValue = value;
+  }
+
+  /**
+   * 
+   * @param numericDecimalPrecision
+   * @motivation for hibernate
+   */
+  private void setNumericDecimalPrecision(Integer numericDecimalPrecision)
+  {
+    _numericDecimalPrecision = numericDecimalPrecision;
   }
 
   /**

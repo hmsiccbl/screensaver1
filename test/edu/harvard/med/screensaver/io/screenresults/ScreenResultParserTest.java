@@ -42,6 +42,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -112,8 +113,11 @@ public class ScreenResultParserTest extends AbstractSpringTest
     }
   }
   
-  public void testReadNumericFormulaCellValue() throws Exception
+  public void testParseNumericFormulaCellValue() throws Exception
   {
+    // TODO: warning! getResourceAsStream() is looking in .eclipse.classes,
+    // while our Workbook object is given a file in test/. Make sure the file is
+    // the same in both places!
     InputStream xlsInStream = 
       ScreenResultParserTest.class.getResourceAsStream(FORMULA_VALUE_TEST_WORKBOOK_FILE);
     POIFSFileSystem fs = new POIFSFileSystem(xlsInStream);
@@ -125,9 +129,12 @@ public class ScreenResultParserTest extends AbstractSpringTest
                  HSSFCell.CELL_TYPE_FORMULA,
                  hssfNumericFormulaCell.getCellType());
     double hssfNumericValue = hssfNumericFormulaCell.getNumericCellValue();
-    assertEquals("HSSF numeric value", 2.0, hssfNumericValue, 0.001);
+    assertEquals("HSSF numeric value", 2.133, hssfNumericValue, 0.0001);
     String hssfFormula = hssfNumericFormulaCell.getCellFormula();
     assertEquals("HSSF formula", "A1+B1", hssfFormula);
+    HSSFDataFormat dataFormat = wb.createDataFormat();
+    String format = dataFormat.getFormat(hssfNumericFormulaCell.getCellStyle().getDataFormat());
+    assertEquals("HSSF numeric data format precision", "0.0000", format);
 
     ParseErrorManager errors = new ParseErrorManager();
     Workbook workbook = new Workbook(new File(TEST_INPUT_FILE_DIR, 
@@ -135,10 +142,11 @@ public class ScreenResultParserTest extends AbstractSpringTest
     Cell.Factory cellFactory = new Cell.Factory(workbook, 0, errors);
     Cell cell = cellFactory.getCell((short) 2, (short) 0, false);
     assertNotNull(cell);
+    Double parsedNumericValue = cell.getDouble();
     assertEquals("parse numeric value",
                  hssfNumericValue,
-                 cell.getDouble(),
-                 0.001);
+                 parsedNumericValue.doubleValue(),
+                 0.0001);
   }
 
   // Note: this test cannot pass because the POI/HSSF library is crappy and does
@@ -336,6 +344,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setIndicatorCutoff(1.5);
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setNumeric(true);
+    rvt.setHits(3 + 19 + 40);
     expectedResultValueTypes.put(4, rvt);
 
     rvt = new ResultValueType(expectedScreenResult, "AssayIndicator2");
@@ -346,6 +355,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setActivityIndicatorType(ActivityIndicatorType.PARTITION);
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setNumeric(false);
+    rvt.setHits(38 + 84 + 88 - 3 /*non experimental or excluded wells*/);
     expectedResultValueTypes.put(5, rvt);
 
     rvt = new ResultValueType(expectedScreenResult, "AssayIndicator3");
@@ -356,6 +366,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setActivityIndicatorType(ActivityIndicatorType.BOOLEAN);
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setNumeric(false);
+    rvt.setHits(1 + 0 + 11);
     expectedResultValueTypes.put(6, rvt);
 
     Integer[] expectedPlateNumbers = {1, 1, 1, 1, 1, 1, 1, 1};
@@ -425,10 +436,14 @@ public class ScreenResultParserTest extends AbstractSpringTest
           }
           else {
             if (expectedRvt.isNumeric()) {
+              double expectedNumericValue = (Double) expectedValues[iWell][iRvt];
               assertEquals("rvt " + iRvt + " well #" + iWell + " result value (numeric)",
-                           (Double) expectedValues[iWell][iRvt],
+                           expectedNumericValue,
                            rv.getNumericValue(),
                            0.001);
+              assertEquals("rvt " + iRvt + " well #" + iWell + " result value (numeric formatted as string)",
+                           expectedValues[iWell][iRvt] == null ? "" : String.format("%g", expectedNumericValue),
+                           rv.getValue());
             }
             else {
               assertEquals("rvt " + iRvt + " well #" + iWell + " result value (non-numeric)",
