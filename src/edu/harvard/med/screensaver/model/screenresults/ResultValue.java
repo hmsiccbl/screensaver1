@@ -103,7 +103,9 @@ public class ResultValue
   {
     setAssayWellType(assayWellType);
     setNumericValue(value);
-    setNumericDecimalPrecision(decimalPrecision);
+    if (decimalPrecision >= 0) {
+      setNumericDecimalPrecision(decimalPrecision);
+    } // else null
     setValue(formatNumericValue(decimalPrecision));
     setExclude(exclude);
   }
@@ -161,10 +163,11 @@ public class ResultValue
   }
   
   /**
-   * Get the default decimal precision for this ResultValue's numeric value
+   * Get the default decimal precision for this ResultValue's numeric value.
    * 
    * @return the number of digits to be displayed after the decimal point, when
-   *         value is displayed; null if ResultValue is not numeric.
+   *         value is displayed; null if ResultValue is not numeric or not
+   *         defined
    */
   public Integer getNumericDecimalPrecision()
   {
