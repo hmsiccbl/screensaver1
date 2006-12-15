@@ -217,6 +217,29 @@ public class Cell
     }
   }
 
+  public static String columnIndexToLabel(int columnIndex)
+  {
+    String columnLabel = "";
+    if (columnIndex >= 26) {
+      columnLabel += (char) ('A' + (columnIndex / 26) - 1);
+    }
+    columnLabel += (char) ('A' + (columnIndex % 26));
+    return columnLabel;
+  }
+
+  public static int columnLabelToIndex(String columnLabel)
+  {
+    int columnIndex= 1;
+    columnLabel = columnLabel.toUpperCase();
+    if (columnLabel.length() == 2) {
+      columnIndex = 26 * (columnLabel.charAt(0) - 'A' + 1) + (columnLabel.charAt(1) - 'A');
+    }
+    else if (columnLabel.length() == 1) {
+      columnIndex = columnLabel.charAt(0) - 'A';
+    }
+    return columnIndex;
+  }
+
   
   // public methods
   
@@ -258,13 +281,7 @@ public class Cell
 
     _formattedRowAndColumnBuilder.setLength(0);
     _formattedRowAndColumnBuilder.append('(');
-    if (_column < (int) 'Z') {
-      _formattedRowAndColumnBuilder.append(Character.toString((char) (_column + 'A')));
-    }
-    else {
-      _formattedRowAndColumnBuilder.append(Character.toString((char) ((_column / 256) + 'A')));
-      _formattedRowAndColumnBuilder.append(Character.toString((char) ((_column % 256) + 'A')));
-    }
+    _formattedRowAndColumnBuilder.append(columnIndexToLabel(_column));
     _formattedRowAndColumnBuilder.append(',');
     _formattedRowAndColumnBuilder.append(Integer.toString(_row + 1));
     _formattedRowAndColumnBuilder.append(')');
@@ -278,8 +295,8 @@ public class Cell
    * @return a <code>String</code>
    */
   public String toString() {
-    return _workbook.getWorkbookFile().getName() + ":" + getSheetName() + 
-      ":" + getFormattedRowAndColumn();
+    return /*_workbook.getWorkbookFile().getName() + ":" +*/ 
+    getSheetName() + ":" + getFormattedRowAndColumn();
   }
   
   /**

@@ -718,12 +718,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     return dataHeadersParseResult;
   }
 
-  private String columnIndexToLabel(int columnIndex)
-  {
-    // TODO work for > 26 columns
-    return "" + (char) ('A' + columnIndex);
-  }
-
   private void recordDataHeaderColumn(int iDataHeader)
   {
     assert _dataHeaderIndex2DataHeaderColumn != null :
@@ -731,7 +725,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     String forColumnInRawDataWorksheet = dataHeadersCell(DataHeaderRow.COLUMN_IN_DATA_WORKSHEET, iDataHeader, true).getString();
     if (forColumnInRawDataWorksheet != null) {
       _dataHeaderIndex2DataHeaderColumn.put(iDataHeader,
-                                            new Short((short) (forColumnInRawDataWorksheet.charAt(0) - 'A')));
+                                            (short) Cell.columnLabelToIndex(forColumnInRawDataWorksheet));
     }
   }
 

@@ -41,6 +41,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -53,9 +54,12 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 public class ScreenResultParserTest extends AbstractSpringTest
 {
 
+  private static final Logger log = Logger.getLogger(ScreenResultParserTest.class);
+  
   public static final File TEST_INPUT_FILE_DIR = new File("test/edu/harvard/med/screensaver/io/screenresults");
   public static final String SCREEN_RESULT_115_TEST_WORKBOOK_FILE = "ScreenResultTest115.xls";
   public static final String SCREEN_RESULT_116_TEST_WORKBOOK_FILE = "ScreenResultTest116.xls";
+  public static final String SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE = "ScreenResultTest115_30DataHeaders.xls";
   public static final String ERRORS_TEST_WORKBOOK_FILE = "NewFormatErrorsTest.xls";
   public static final String FORMULA_VALUE_TEST_WORKBOOK_FILE = "formula_value.xls";
   
@@ -469,6 +473,28 @@ public class ScreenResultParserTest extends AbstractSpringTest
                  mockScreenResultParser.getErrors().get(0).getMessage());
   }
     
+  public void testMultiCharColumnLabels()
+  {
+    Screen screen = ScreenResultParser.makeDummyScreen(115);
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE);
+    ScreenResult result = mockScreenResultParser.parse(screen,workbookFile);
+    if (mockScreenResultParser.getHasErrors()) {
+      log.debug("parse errors: " + mockScreenResultParser.getErrors());
+    }
+    assertFalse("screen result had no errors", mockScreenResultParser.getHasErrors());
+    List<ResultValueType> resultValueTypes = result.getResultValueTypesList();
+    assertEquals("ResultValueType count", 30, resultValueTypes.size());
+    for (int i = 0; i < 30 - 1; ++i) {
+      ResultValueType rvt = resultValueTypes.get(i);
+      assertEquals("is derived from next", resultValueTypes.get(i+1), rvt.getDerivedTypes().first());
+      Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
+      assertEquals(rvt.getName() + " result value 0", 1000.0 + i, resultValues.get(new WellKey(1, "A01")).getNumericValue());
+      assertEquals(rvt.getName() + " result value 1", 2000.0 + i, resultValues.get(new WellKey(1, "A02")).getNumericValue());
+      assertEquals(rvt.getName() + " result value 2", 3000.0 + i, resultValues.get(new WellKey(1, "A03")).getNumericValue());
+    }
+    assertTrue("last is not derived from any", resultValueTypes.get(30 - 1).getDerivedTypes().isEmpty());
+  }
+
   private void setDefaultValues(ResultValueType rvt) 
   {
     if (rvt.getAssayPhenotype() == null) {
@@ -490,6 +516,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
       rvt.setTimePoint("");
     }
   }
+  
   
   // testing  utility methods 
   
