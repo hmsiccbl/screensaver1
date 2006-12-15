@@ -399,6 +399,7 @@
     depends="deploy"
   >
     <exec executable="${appserver.start.cmd}">
+      <env key="JAVA_OPTS" value="-Xmx800M"/>
       <arg line="${appserver.start.cmd.options}"/>
     </exec>
 
