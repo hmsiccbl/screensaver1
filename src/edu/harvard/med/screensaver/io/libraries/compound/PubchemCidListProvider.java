@@ -48,12 +48,12 @@ public class PubchemCidListProvider
     OpenBabelClient openBabelClient = new OpenBabelClient();
     PubchemCidListProvider pubchemCidListProvider = new PubchemCidListProvider();
     for (String smiles : new String [] {
-      "CC",
-      "CCC",
-      "CC(=O)C",
-      "O=C1CCCC=2OC(=O)C(=CC1=2)NC(=O)c3ccccc3",
-      "COc1ccc(cc1)N3N=C(C(=O)Oc2ccccc2)c4ccccc4(C3(=O))",
-      "CON=CNC(=O)c1cc(ccc1(OCC(F)(F)F))OCC(F)(F)F",
+      "CC",                                                 // cid    6324
+      "CCC",                                                // cid    6334
+      "CC(=O)C",                                            // cid     180
+      "O=C1CCCC=2OC(=O)C(=CC1=2)NC(=O)c3ccccc3",            // cid 3822112
+      "COc1ccc(cc1)N3N=C(C(=O)Oc2ccccc2)c4ccccc4(C3(=O))",  // cid 3595539 
+      "CON=CNC(=O)c1cc(ccc1(OCC(F)(F)F))OCC(F)(F)F",        // cid 
     }) {
       log.info("SMILES = " + smiles);
       String inchi = openBabelClient.convertSmilesToInchi(smiles);
