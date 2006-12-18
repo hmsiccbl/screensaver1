@@ -500,11 +500,16 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       Workbook workbook = new Workbook(workbookFile, workbookInputStream, _errors);
       log.info("parsing " + workbookFile.getAbsolutePath());
       DataHeadersParseResult metadataParseResult = parseDataHeaders(screen,
-                                                              workbook, 
-                                                              ignoreFilePaths);
-      log.info("parsing data sheets");
-      parseData(workbook,
-                metadataParseResult.getScreenResult());
+                                                                    workbook, 
+                                                                    ignoreFilePaths);
+      if (_errors.getHasErrors()) {
+        log.info("errors found in data headers, will not attempt to parse data sheets");
+      }
+      else {
+        log.info("parsing data sheets");
+        parseData(workbook,
+                  metadataParseResult.getScreenResult());
+      }
       _screenResult = metadataParseResult.getScreenResult();
     }
     catch (UnrecoverableScreenResultParseException e) {
