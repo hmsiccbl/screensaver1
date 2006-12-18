@@ -489,7 +489,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     hql.append(" order by ").append(StringUtils.makeListString(orderByClauses, ", "));
     
     if (_logger.isDebugEnabled()) {
-      _logger.debug("findResultValuesByPlate executing HQL: " + hql.toString());
+      _logger.debug("buildQueryForSortedResultValueTypeTableByRange() executing HQL: " + hql.toString());
     }
 
     Query query = session.createQuery(hql.toString());
@@ -509,6 +509,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
       ResultValueType rvt = selectedRvts.get(i);
       
       StringBuilder hql = new StringBuilder();
+      // TODO: see if we can produce an equivalent HQL query that does not need to use the result_value_type table at all, as result_value_type_result_values.result_value_type_id can be used directly (at least, if we were doing this directly with sql)
       hql.append("select indices(rv), elements(rv) from ResultValueType rvt join rvt.resultValues rv where rvt.id = " + 
                  rvt.getEntityId() + " and index(rv) in (" + wellKeysList + ")");
       Query query = session.createQuery(hql.toString());

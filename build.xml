@@ -138,6 +138,8 @@
   <uptodate property="hbm_xml.uptodate" targetfile="${hibernate.cfg.xml}" >
     <srcfiles refid="model.src.fileset"/>
     <srcfiles refid="test.model.src.fileset"/>
+    <srcfiles dir="resources" includes="**/hibernate-properties-*.xml"/>
+    <srcfiles dir="resources" includes="**/*.replace.properties"/>
   </uptodate>
 
   <uptodate property="distro.uptodate" targetfile="${distro.file.tgz}">
@@ -312,6 +314,7 @@
       destdir="resources"
       mergedir="resources"
       excludedtags="@version,@author,@todo"
+      force="true"
       verbose="${verbose}"
     >
       <fileset refid="model.src.fileset"/>
@@ -328,6 +331,14 @@
       <!-- TODO: make 'hibernate.cfg.xml' property match this destinationFile attribute value -->
       <hibernate version="3.0" destinationFile="{0}.hbm.xml"/>
     </hibernatedoclet>
+    <replace 
+      file="resources/edu/harvard/med/screensaver/model/screenresults/ResultValueType.hbm.xml" 
+      propertyFile="resources/edu/harvard/med/screensaver/model/screenresults/ResultValueType.replace.properties">
+      <replacefilter 
+        token="&lt;/class&gt;" 
+        property="ResultValueType.indexes"/>
+    </replace>
+    
   </target>
 
 
