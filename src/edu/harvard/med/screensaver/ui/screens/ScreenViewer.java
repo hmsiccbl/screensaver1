@@ -121,12 +121,6 @@ public class ScreenViewer extends AbstractBackingBean
     return _isReadOnlyMode || super.isReadOnly();
   }
   
-  @Override
-  public boolean isReadOnlyAdmin()
-  {
-    return _isReadOnlyMode || super.isReadOnlyAdmin();
-  }
-
   public ScreenResult getScreenResult()
   {
     // TODO: HACK: data-access-permissions aware
