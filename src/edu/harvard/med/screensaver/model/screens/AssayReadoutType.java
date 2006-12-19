@@ -23,7 +23,7 @@ public enum AssayReadoutType implements VocabularyTerm
 
   // the vocabulary
   
-  PHOTOMETRY("Photometry"),
+  PHOTOMETRY("Photometry"), // aka absorbance
   LUMINESCENCE("Luminescence"),
   FLUORESCENCE_INTENSITY("Fluorescence Intensity"),
   FP("FP"),

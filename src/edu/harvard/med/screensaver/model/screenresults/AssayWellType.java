@@ -25,14 +25,16 @@ public enum AssayWellType implements VocabularyTerm
   // the vocabulary
   
   EXPERIMENTAL("experimental", "X"),
-  EMPTY("empty", "E"),
+  EMPTY("empty", "E"), 
   LIBRARY_CONTROL("library control", "C"),
   ASSAY_POSITIVE_CONTROL("assay positive control", "P"),
-  ASSAY_NEGATIVE_CONTROL("assay negative control", "N"),
-  BUFFER("buffer", "B"),
+  ASSAY_CONTROL("assay control", "N"), // aka "assay negative control", but stakeholders prefer simply "assay control"
+  BUFFER("buffer", "B"), // RNAi only
+  DMSO("DMSO", "D"), // small compound only
   OTHER("other", "O"),
   ;
  
+  
   // static inner class
 
   /**

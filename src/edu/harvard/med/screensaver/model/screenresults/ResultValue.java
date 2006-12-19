@@ -225,7 +225,7 @@ public class ResultValue
   @DerivedEntityProperty
   public boolean isControlWell()
   {
-    return getAssayWellType().equals(AssayWellType.ASSAY_NEGATIVE_CONTROL) ||
+    return getAssayWellType().equals(AssayWellType.ASSAY_CONTROL) ||
     getAssayWellType().equals(AssayWellType.ASSAY_POSITIVE_CONTROL) ||
     getAssayWellType().equals(AssayWellType.LIBRARY_CONTROL);
   }

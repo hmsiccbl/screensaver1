@@ -381,7 +381,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
       AssayWellType.ASSAY_POSITIVE_CONTROL,
       AssayWellType.EXPERIMENTAL,
       AssayWellType.EXPERIMENTAL,
-      AssayWellType.ASSAY_NEGATIVE_CONTROL,
+      AssayWellType.ASSAY_CONTROL,
       AssayWellType.LIBRARY_CONTROL,
       AssayWellType.BUFFER,
       AssayWellType.OTHER,
