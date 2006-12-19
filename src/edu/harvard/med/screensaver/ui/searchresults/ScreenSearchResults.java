@@ -35,6 +35,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
   private static final String LAB_HEAD = "Lab Head";
   private static final String TITLE = "Title";
   private static final String SCREEN_RESULT = "Screen Result";
+  private static final String LEAD_SCREENER = "Lead Screener";
   
   
   // instance fields
@@ -74,6 +75,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
     List<String> columnHeaders = new ArrayList<String>();
     columnHeaders.add(SCREEN_NUMBER);
     columnHeaders.add(LAB_HEAD);
+    columnHeaders.add(LEAD_SCREENER);
     columnHeaders.add(TITLE);
     columnHeaders.add(SCREEN_RESULT);
     return columnHeaders;
@@ -98,6 +100,9 @@ public class ScreenSearchResults extends SearchResults<Screen>
       return screen.getScreenNumber();
     }
     if (columnName.equals(LAB_HEAD)) {
+      return screen.getLabHead().getFullNameLastFirst();
+    }
+    if (columnName.equals(LEAD_SCREENER)) {
       return screen.getLeadScreener().getFullNameLastFirst();
     }
     if (columnName.equals(TITLE)) {
@@ -136,6 +141,14 @@ public class ScreenSearchResults extends SearchResults<Screen>
         public int compare(Screen s1, Screen s2) {
           return ScreensaverUserComparator.getInstance().compare(s1.getLabHead(), 
                                                                  s2.getLabHead());
+        }
+      };
+    }
+    if (columnName.equals(LEAD_SCREENER)) {
+      return new Comparator<Screen>() {
+        public int compare(Screen s1, Screen s2) {
+          return ScreensaverUserComparator.getInstance().compare(s1.getLeadScreener(), 
+                                                                 s2.getLeadScreener());
         }
       };
     }
