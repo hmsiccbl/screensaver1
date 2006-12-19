@@ -25,6 +25,9 @@
       >
         <f:param name="wellId" value="#{well.wellId}" />
       </t:commandLink>
+
+      <h:outputText value="Well Type:" />
+      <h:outputText value="#{well.wellType}" />
             
       <h:outputText value="ICCB Number:" />
       <h:outputText value="#{well.iccbNumber}" />
