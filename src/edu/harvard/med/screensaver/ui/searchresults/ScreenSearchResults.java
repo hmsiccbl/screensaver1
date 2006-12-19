@@ -33,9 +33,9 @@ public class ScreenSearchResults extends SearchResults<Screen>
   
   private static final String SCREEN_NUMBER = "Screen Number";
   private static final String LAB_HEAD = "Lab Head";
+  private static final String LEAD_SCREENER = "Lead Screener";
   private static final String TITLE = "Title";
   private static final String SCREEN_RESULT = "Screen Result";
-  private static final String LEAD_SCREENER = "Lead Screener";
   
   
   // instance fields
