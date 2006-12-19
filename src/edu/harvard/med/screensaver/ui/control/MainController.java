@@ -35,5 +35,10 @@ public class MainController extends AbstractUIController
   {
     return "viewHelp";
   }
+  
+  public String viewDownloads()
+  {
+    return "viewDownloads";
+  }
 }
 

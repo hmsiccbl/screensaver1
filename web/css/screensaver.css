@@ -19,6 +19,18 @@ h2,.sectionHeader {
 	background-color: blue;
 	text-decoration: none;
 	width: 100%;
+	padding: 2px 2px 2px 2px;
+}
+
+h3,.subsectionHeader {
+	font-weight: bold;
+	font-variant: small-caps;
+	font-size: medium;
+	color: white;
+	background-color: blue;
+	text-decoration: none;
+	width: 100%;
+	padding: 2px 2px 2px 2px;
 }
 
 .icon {

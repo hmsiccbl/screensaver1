@@ -366,6 +366,11 @@
       <redirect/>
     </navigation-case>
     <navigation-case>
+      <from-outcome>viewDownloads</from-outcome>
+      <to-view-id>/downloadsViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>logout</from-outcome>
       <!-- maybe we want a "you have been logged out" page; for now we send to the query page, which will force a login -->
       <to-view-id>/main</to-view-id>

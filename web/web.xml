@@ -305,6 +305,7 @@
       <description>Images, stylesheets, etc.  Access via HTTP GET and HEAD methods only.</description>
       <url-pattern>/css/*</url-pattern>
       <url-pattern>/images/*</url-pattern>
+      <url-pattern>/downloads/*</url-pattern>
       <!-- resources provided by Apache MyFaces and by Apache Tomahawk components -->
       <url-pattern>/faces/*</url-pattern>
 
@@ -332,6 +333,7 @@
       <url-pattern>/main.jsf</url-pattern>
       <url-pattern>/login.jsf</url-pattern>
       <url-pattern>/login-error.jsf</url-pattern>
+      <url-pattern>/downloadsViewer.jsf</url-pattern>
       <url-pattern>/helpViewer.jsf</url-pattern>
       <url-pattern>/libraries/*</url-pattern>
       <url-pattern>/screens/*</url-pattern>

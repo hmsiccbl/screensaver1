@@ -89,6 +89,17 @@
       value="/helpViewer.jsp" />
   </definition>
 
+  <definition
+    name="/downloadsViewer.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="Data Downloads"/>
+    <put
+      name="body"
+      value="/downloadsViewer.jsp" />
+  </definition>
+
 
   <!-- libraries tiles -->
   

@@ -281,18 +281,25 @@
       </fileset>
     </copy>
 
-    <copy 
+    <copy
       todir="${exploded.war.dir}/css"
       verbose="${verbose}"
     >
       <fileset dir="web/css"/>
     </copy>
 
-    <copy 
+    <copy
       todir="${exploded.war.dir}/images"
       verbose="${verbose}"
     >
       <fileset dir="web/images"/>
+    </copy>
+
+    <copy
+      todir="${exploded.war.dir}/downloads"
+      verbose="${verbose}"
+    >
+      <fileset dir="web/downloads"/>
     </copy>
 
   </target>
