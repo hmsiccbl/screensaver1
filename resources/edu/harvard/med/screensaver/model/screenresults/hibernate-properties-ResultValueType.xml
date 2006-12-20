@@ -8,7 +8,7 @@
     <property name="numericValue" type="double"/>
     <property name="numericDecimalPrecision" type="integer"/>
     <property name="exclude" type="boolean"/>
-    <property name="assayWellType" type="edu.harvard.med.screensaver.model.screenresults.AssayWellType$UserType"/>
+    <property name="assayWellType" type="edu.harvard.med.screensaver.model.screenresults.AssayWellType$UserType" not-null="true"/>
     <property name="hit" type="boolean"/>
    </composite-element>
   </map>
