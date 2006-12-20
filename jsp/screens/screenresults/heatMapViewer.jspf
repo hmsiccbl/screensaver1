@@ -53,7 +53,7 @@ TODO:
 			action="#{heatMapViewer.addHeatMap}" styleClass="command" />
 
 		<t:commandButton id="updateButton" value="Update" forceId="true"
-			style="visibility: hidden" action="#{heatMapViewer.update}"
+			styleClass="hiddenCommand" action="#{heatMapViewer.update}"
 			styleClass="command" />
 	</t:panelGroup>
 

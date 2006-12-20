@@ -96,14 +96,16 @@ TODO:
 
 					<t:outputLabel for="screenResultIsShareable" value="Shareable"
 						styleClass="keyColumn" />
-					<%--h:form id="screenResultIsShareableForm"--%> 
-						<%-- TODO: make cancel response undo click; the following is not working: onclick="javascript:if (confirm('Make screen result #{screenResultViewer.screenResult.shareable ? \"unshared\" : \"shared\"}?')) submit(); else this.value=#{screenResultViewer.screenResult.shareable};" --%>
+					<t:div>
 						<t:selectBooleanCheckbox id="screenResultIsShareable"
 							value="#{screenResultViewer.screenResult.shareable}"
 							displayValueOnly="#{screenResultViewer.readOnly}"
 							displayValueOnlyStyleClass="dataText"
-							onclick="javascript:submit()" />
-					<%--/h:form--%>
+							onclick="javascript:document.getElementById('saveScreenResultButton').click()" />
+						<t:commandButton id="saveScreenResultButton" forceId="true"
+						action="#{screenResultViewer.saveScreenResult}"
+						styleClass="hiddenCommand" />
+					</t:div>
 					
 					<t:outputLabel for="platesCount" value="Plates"
 						styleClass="keyColumn" />
@@ -253,8 +255,8 @@ TODO:
 					binding="#{screenResultViewer.rowNumberInput}"
 					valueChangeListener="#{screenResultViewer.rowNumberListener}"
 					size="6" styleClass="input">
-					<f:validateLongRange minimum="1"
-						maximum="#{screenResultViewer.rawDataSize}" />
+					<%--f:validateLongRange minimum="1"
+						maximum="#{screenResultViewer.rawDataSize}" /--%>
 				</t:inputText>
 				<t:commandButton id="updateDataTableRowsButton" forceId="true" value="Go"
 					action="#{screenResultViewer.updateDataTableRows}"

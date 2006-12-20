@@ -350,9 +350,6 @@ public class ScreenResultViewer extends AbstractBackingBean
     return null;
   }
   
-
-  // JSF application methods
-  
   public TableSortManager getSortManager()
   {
     if (_sortManager == null) {
@@ -398,6 +395,9 @@ public class ScreenResultViewer extends AbstractBackingBean
     return _hitsForDataHeader;
   }
 
+
+  // JSF application methods
+  
   public String gotoPage(int pageIndex)
   {
     try {
@@ -454,15 +454,18 @@ public class ScreenResultViewer extends AbstractBackingBean
     File exportedWorkbookFile = null;
     FileOutputStream out = null;
     try {
-      HSSFWorkbook workbook = _screenResultExporter.build(getScreenResult());
-      exportedWorkbookFile = File.createTempFile("screenResult" + _screen.getScreenNumber() + ".",
-                                                 ".xls");
-      out = new FileOutputStream(exportedWorkbookFile);
-      workbook.write(out);
-      out.close();
-      JSFUtils.handleUserFileDownloadRequest(getFacesContext(),
-                                             exportedWorkbookFile,
-                                             Workbook.MIME_TYPE);
+      if (_screenResult != null) {
+        _dao.persistEntity(_screenResult);
+        HSSFWorkbook workbook = _screenResultExporter.build(_screenResult);
+        exportedWorkbookFile = File.createTempFile("screenResult" + _screen.getScreenNumber() + ".",
+        ".xls");
+        out = new FileOutputStream(exportedWorkbookFile);
+        workbook.write(out);
+        out.close();
+        JSFUtils.handleUserFileDownloadRequest(getFacesContext(),
+                                               exportedWorkbookFile,
+                                               Workbook.MIME_TYPE);
+      }
     }
     catch (IOException e)
     {
@@ -492,6 +495,12 @@ public class ScreenResultViewer extends AbstractBackingBean
     String wellName = (String) ((Map) _rawDataModel.getRowData()).get(DATA_TABLE_FIXED_COLUMN_HEADERS.get(1));
     Well well = _dao.findWell(plateNumber, wellName);
     return _librariesController.viewWell(well, null);
+  }
+  
+  public String saveScreenResult()
+  {
+    // note: saving the parent screen will save its screenResult
+    return _screensController.saveScreen(getScreen());
   }
   
   public String updateDataHeaders()

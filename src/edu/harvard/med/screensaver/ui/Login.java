@@ -88,7 +88,7 @@ public class Login extends AbstractBackingBean
   public String logout()
   {
     log.info("logout for session "  + getHttpSession().getId());
-    closeHttpAndDatabaseSessions();
+    closeHttpSession();
     return LOGOUT_ACTION_RESULT;
   }
 

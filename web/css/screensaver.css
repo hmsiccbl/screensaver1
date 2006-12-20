@@ -116,6 +116,10 @@ a.heatMapValue:link,a.heatMapValue:visited 	{
 	margin-right: 4px;
 }
 
+.hiddenCommand {
+	visibility: hidden;
+}
+
 .inputLabel {
 	vertical-align: top;
 	font-family: sans-serif;

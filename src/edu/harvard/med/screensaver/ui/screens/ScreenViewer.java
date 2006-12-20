@@ -42,7 +42,9 @@ import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
+import edu.harvard.med.screensaver.ui.util.UISelectManyEntityBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
+import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
@@ -59,9 +61,9 @@ public class ScreenViewer extends AbstractBackingBean
   private ScreensController _screensController;
   private DAO _dao;
   private Screen _screen;
-  private UISelectOneBean<ScreeningRoomUser> _labName;
-  private UISelectOneBean<ScreeningRoomUser> _leadScreener;
-  private UISelectManyBean<ScreeningRoomUser> _collaborators;
+  private UISelectOneEntityBean<ScreeningRoomUser> _labName;
+  private UISelectOneEntityBean<ScreeningRoomUser> _leadScreener;
+  private UISelectManyEntityBean<ScreeningRoomUser> _collaborators;
   private FundingSupport _newFundingSupport;
   private StatusValue _newStatusValue;
   private AssayReadoutType _newAssayReadoutType = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs)
@@ -132,7 +134,7 @@ public class ScreenViewer extends AbstractBackingBean
 
   public void setCandidateLabHeads(List<ScreeningRoomUser> labHeads)
   {
-    _labName = new UISelectOneBean<ScreeningRoomUser>(labHeads, _screen.getLabHead()) { 
+    _labName = new UISelectOneEntityBean<ScreeningRoomUser>(labHeads, _screen.getLabHead(), _dao) { 
       protected String getLabel(ScreeningRoomUser t) { return t.getLabName(); } 
     };
     updateLeadScreenerSelectItems();
@@ -141,7 +143,7 @@ public class ScreenViewer extends AbstractBackingBean
   public void setCandidateCollaborators(List<ScreeningRoomUser> screeningRoomUsers)
   {
     _collaborators =
-      new UISelectManyBean<ScreeningRoomUser>(screeningRoomUsers, _screen.getCollaborators())
+      new UISelectManyEntityBean<ScreeningRoomUser>(screeningRoomUsers, _screen.getCollaborators(), _dao)
       {
         protected String getLabel(ScreeningRoomUser t)
         {
@@ -318,6 +320,8 @@ public class ScreenViewer extends AbstractBackingBean
    */
   @UIControllerMethod
   public String saveScreen() {
+    _dao.persistEntity(_screen); // re-attach to Hibernate session
+    
     _screen.setLabHead(_labName.getSelection());
     _screen.setLeadScreener(_leadScreener.getSelection());
     _screen.setCollaboratorsList(_collaborators.getSelections());
@@ -528,9 +532,10 @@ public class ScreenViewer extends AbstractBackingBean
     ArrayList<ScreeningRoomUser> leadScreenerCandidates = new ArrayList<ScreeningRoomUser>();
     if (labHead != null) {
       leadScreenerCandidates.add(labHead);
+      _dao.persistEntity(labHead); // re-attach to Hibernate session
       leadScreenerCandidates.addAll(labHead.getLabMembers());
     }
-    _leadScreener = new UISelectOneBean<ScreeningRoomUser>(leadScreenerCandidates, _screen.getLeadScreener()) {
+    _leadScreener = new UISelectOneEntityBean<ScreeningRoomUser>(leadScreenerCandidates, _screen.getLeadScreener(), _dao) {
       protected String getLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); } 
     };
   }

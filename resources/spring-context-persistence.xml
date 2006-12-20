@@ -62,7 +62,7 @@
     <property
       name="sessionFactory"
       ref="hibernateSessionFactory" />
-    <!-- property name="flushModeName" value="FLUSH_COMMIT" /-->
+    <property name="flushModeName" value="FLUSH_COMMIT" />
   </bean>
   
 

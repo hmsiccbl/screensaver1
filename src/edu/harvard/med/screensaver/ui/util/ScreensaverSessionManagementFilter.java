@@ -17,9 +17,6 @@
 package edu.harvard.med.screensaver.ui.util;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -31,14 +28,9 @@ import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 
 import org.apache.log4j.Logger;
-import org.hibernate.FlushMode;
 import org.hibernate.SessionFactory;
-import org.hibernate.classic.Session;
-import org.springframework.orm.hibernate3.SessionFactoryUtils;
-import org.springframework.orm.hibernate3.SessionHolder;
 import org.springframework.orm.hibernate3.support.OpenSessionInViewFilter;
 import org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -88,8 +80,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
   private static Logger log = Logger.getLogger(ScreensaverSessionManagementFilter.class);
 
   public static final String DEFAULT_SESSION_FACTORY_BEAN_NAME = "sessionFactory";
-  public static final String CLOSE_HTTP_AND_HIBERNATE_SESSIONS = "closeHttpAndHibernateSessions";
-  public static final String CLOSE_HIBERNATE_SESSION = "closeHibernateSession";
+  public static final String CLOSE_HTTP_SESSION = "closeHttpSession";
   public static final String SYSTEM_ERROR_ENCOUNTERED = "systemErrorEncountered";
 
   private static final String REPORT_EXCEPTION_URL = "/screensaver/reportException.jsf";
@@ -99,7 +90,6 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
   
   private String sessionFactoryBeanName = DEFAULT_SESSION_FACTORY_BEAN_NAME;
 
-  private Map<String,Session> _httpSession2HibernateSession;
 
 
   // methods
@@ -107,18 +97,12 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
   @Override
   protected void initFilterBean() throws ServletException
   {
-    _httpSession2HibernateSession = new HashMap<String,Session>();
   }
   
   @Override
   public void destroy()
   {
     log.info("destroying filter");
-    for (Iterator iter = _httpSession2HibernateSession.values().iterator(); iter.hasNext();) {
-      Session hibSession = (Session) iter.next();
-      log.info("closing Hibernate session " + SessionFactoryUtils.toString(hibSession));
-      hibSession.close();
-    }
   }
 
   /**
@@ -164,6 +148,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
     String httpSessionId = httpSession.getId();
     log.info(">>>> Screensaver STARTING to process HTTP request for session " + 
              httpSessionId + " @ " + request.getRequestURI());
+
     
     // if we previously encountered a system error, the user's session is toast;
     // redirect user to error page so that they are forced to re-login
@@ -181,31 +166,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
       }
     }
 
-    SessionFactory sessionFactory = lookupSessionFactoryViaSpring();
-    Session hibSession = getOrCreateHibernateSession(sessionFactory, httpSessionId);
-    String hibSessionLogId = SessionFactoryUtils.toString(hibSession);
     
-    // have Hibernate session only perform a flush operation at txn commit time,
-    // to prevent expensive flushes from occuring when we're doing queries; this
-    // does mean we have to be careful not to expect any save/update/persist
-    // calls to be reflected in HQL queries, within the same HTTP request
-    hibSession.setFlushMode(FlushMode.COMMIT); 
-
-    /*
-     * From AbstractPlatformTransactionManager: "Transaction synchronization is a
-     * generic mechanism for registering callbacks that get invoked at
-     * transaction completion time. This is mainly used internally by the data
-     * access support classes for JDBC, Hibernate, and JDO when running within a
-     * JTA transaction: They register resources that are opened within the
-     * transaction for closing at transaction completion time, allowing e.g. for
-     * reuse of the same Hibernate Session within the transaction. The same
-     * mechanism can also be leveraged for custom synchronization needs in an
-     * application."
-     */
-    
-    //  set the Hibernate session that Spring/Hibernate will use for this thread/request.    
-    TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(hibSession));
-
     DAO dao = lookupBeanViaSpring(DAO.class, "dao");
     
     try {
@@ -215,43 +176,41 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
           try {
             filterChain.doFilter(request, response);
           }
-          catch (Throwable e) {
-            log.error("caught exception while processing HTTP request for '" + request.getRequestURI() + "' in a transaction: " + e);
+          catch (IOException e) {
+            // note: if an I/O exception occurs, we should still try to complete
+            // our txn, since inability to communicate our response back to the
+            // client is not grounds for aborting the operation the user
+            // initiated
             e.printStackTrace();
-            if (e instanceof ServletException) {
-              ((ServletException) e).getRootCause().printStackTrace();
-            }
-            // don't invalidate session yet, so that our error page, which is a JSF page and requires 
-            // JSF backing beans that are stored in our HTTP session, can still operate
-            httpSession.setAttribute(SYSTEM_ERROR_ENCOUNTERED, Boolean.TRUE);
-            httpSession.setAttribute(CLOSE_HIBERNATE_SESSION, Boolean.TRUE);
-            httpSession.setAttribute("javax.servlet.error.exception", e);
+            log.error("caught I/O exception during invocation of servlet filter chain");
+          }
+          catch (ServletException e) {
+            // TODO: create our own exception type here
+            throw new RuntimeException(e);
+            
+            // TODO: rollback txn
           }
         }
       });
     }
-    finally {
-      // unset the Hibernate session that Spring/Hibernate used for this thread/request.
-      TransactionSynchronizationManager.unbindResource(sessionFactory);
-
-      boolean closeHttpSession = 
-        Boolean.TRUE.equals(httpSession.getAttribute(CLOSE_HTTP_AND_HIBERNATE_SESSIONS));
-      boolean closeHibernateSession = 
-        closeHttpSession || 
-        Boolean.TRUE.equals(httpSession.getAttribute(CLOSE_HIBERNATE_SESSION));
-        
-      if (closeHibernateSession) {
-        SessionFactoryUtils.releaseSession(hibSession, sessionFactory);
-        synchronized (this) {
-          _httpSession2HibernateSession.remove(httpSessionId);
-        }
-        log.info("closed Hibernate session " + hibSessionLogId + 
-                 " for HTTP session " + httpSessionId);
-        assert !hibSession.isOpen() : 
-          "Hibernate session " + hibSessionLogId + 
-          " was not closed for HTTP session " + httpSessionId;
+    catch (Throwable e) {
+      log.error("caught exception while processing HTTP request for '" + request.getRequestURI() + "' in transaction: " + e);
+      if (e instanceof ServletException) {
+        ((ServletException) e).getRootCause().printStackTrace();
       }
-      
+      else {
+        e.printStackTrace();
+      }
+
+      // don't invalidate session yet, so that our error page, which is a JSF page and requires 
+      // JSF backing beans that are stored in our HTTP session, can still operate
+      httpSession.setAttribute(SYSTEM_ERROR_ENCOUNTERED, Boolean.TRUE);
+      httpSession.setAttribute("javax.servlet.error.exception", e);
+    }
+    finally {
+      boolean closeHttpSession = 
+        Boolean.TRUE.equals(httpSession.getAttribute(CLOSE_HTTP_SESSION));
+        
       if (Boolean.TRUE.equals(httpSession.getAttribute(SYSTEM_ERROR_ENCOUNTERED))) {
         response.sendRedirect(REPORT_EXCEPTION_URL);
       }
@@ -278,26 +237,6 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
   private boolean isRequestForApplicationView(HttpServletRequest request)
   {
     return request.getRequestURI().endsWith(".jsf") || request.getRequestURI().endsWith(".jsp");
-  }
-
-  protected Session getOrCreateHibernateSession(SessionFactory sessionFactory, String httpSessionId)
-  {
-    synchronized (_httpSession2HibernateSession) {
-      Session hibSession = _httpSession2HibernateSession.get(httpSessionId);
-      if (hibSession == null) {
-        hibSession = sessionFactory.openSession();
-        _httpSession2HibernateSession.put(httpSessionId, hibSession);
-      log.info("created Hibernate session " + SessionFactoryUtils.toString(hibSession) + 
-               " for HTTP session " + httpSessionId);
-      log.debug("new session flush mode is " + hibSession.getFlushMode());
-      }
-      else {
-        log.debug("using existing Hibernate session " + 
-                  SessionFactoryUtils.toString(hibSession) + 
-                  " for HTTP session " + httpSessionId);
-      }
-      return hibSession;
-    }
   }
 
   /**

@@ -161,7 +161,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   public boolean isAuthenticatedUser()
   {
     Boolean pendingSessionCloseRequest = (Boolean)
-      getHttpSession().getAttribute(ScreensaverSessionManagementFilter.CLOSE_HTTP_AND_HIBERNATE_SESSIONS);
+      getHttpSession().getAttribute(ScreensaverSessionManagementFilter.CLOSE_HTTP_SESSION);
     return getExternalContext().getUserPrincipal() != null && (pendingSessionCloseRequest == null || pendingSessionCloseRequest.equals(Boolean.FALSE));
   }
   
@@ -449,17 +449,10 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
     showMessage("systemError", errorMessage);
   }
   
-  protected void closeDatabaseSession()
+  protected void closeHttpSession()
   {
-    log.debug("requesting release of Hibernate session");
-    getHttpSession().setAttribute(ScreensaverSessionManagementFilter.CLOSE_HIBERNATE_SESSION,
-                                  Boolean.TRUE);
-  }
-  
-  protected void closeHttpAndDatabaseSessions()
-  {
-    log.debug("requesting release of HTTP and Hibernate sessions");
-    getHttpSession().setAttribute(ScreensaverSessionManagementFilter.CLOSE_HTTP_AND_HIBERNATE_SESSIONS,
+    log.debug("requesting close of HTTP session");
+    getHttpSession().setAttribute(ScreensaverSessionManagementFilter.CLOSE_HTTP_SESSION,
                                   Boolean.TRUE);
   }
   

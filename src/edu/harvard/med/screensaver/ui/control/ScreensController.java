@@ -15,6 +15,7 @@ import java.util.List;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
@@ -34,7 +35,7 @@ import edu.harvard.med.screensaver.ui.screens.ScreensBrowser;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 
 import org.apache.log4j.Logger;
-import org.springframework.dao.ConcurrencyFailureException;
+import org.hibernate.Hibernate;
 
 /**
  * 
@@ -147,6 +148,23 @@ public class ScreensController extends AbstractUIController
   @UIControllerMethod
   public String viewScreen(Screen screen, ScreenSearchResults screenSearchResults)
   {
+    _dao.persistEntity(screen);
+    Hibernate.initialize(screen.getAbaseTestsets());
+    Hibernate.initialize(screen.getAssayReadoutTypes());
+    Hibernate.initialize(screen.getHbnCollaborators());
+    Hibernate.initialize(screen.getAttachedFiles());
+    Hibernate.initialize(screen.getBillingInformation());
+    Hibernate.initialize(screen.getFundingSupports());
+    Hibernate.initialize(screen.getKeywords());
+    Hibernate.initialize(screen.getLettersOfSupport());
+    Hibernate.initialize(screen.getPublications());
+    Hibernate.initialize(screen.getStatusItems());
+    Hibernate.initialize(screen.getVisits());
+    Hibernate.initialize(screen.getLabHead());
+    Hibernate.initialize(screen.getLabHead().getLabMembers());
+    Hibernate.initialize(screen.getLeadScreener());
+    Hibernate.initialize(screen.getScreenResult());
+
     _screenViewer.setDao(_dao);
     _screenViewer.setScreen(screen);
     _screenViewer.setCandidateLabHeads(_dao.findAllLabHeads());
@@ -164,9 +182,6 @@ public class ScreensController extends AbstractUIController
     try {
       _dao.persistEntity(screen);
     }
-    catch (ConcurrencyFailureException e) {
-      showMessage("concurrentModificationConflict");
-    }
     catch (Throwable e) {
       reportSystemError(e);
     }
@@ -175,7 +190,10 @@ public class ScreensController extends AbstractUIController
 
   public String deleteScreenResult(ScreenResult screenResult)
   {
-    _dao.deleteScreenResult(screenResult);
+    if (screenResult != null) {
+      _dao.persistEntity(screenResult); // really, we just want to reattach to Hibernate session
+      _dao.deleteScreenResult(screenResult);
+    }
     return viewLastScreen();
   }
 
@@ -321,6 +339,22 @@ public class ScreensController extends AbstractUIController
 
   // private methods
   
+  private ScreenResult inflateScreenResult(int entityId)
+  {
+    ScreenResult screenResult = _dao.findEntityById(ScreenResult.class, entityId);
+    if (screenResult != null) {
+      Hibernate.initialize(screenResult.getPlateNumbers());
+      Hibernate.initialize(screenResult.getResultValueTypes());
+      Hibernate.initialize(screenResult.getWells());
+      for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+        rvt.getDerivedTypes();
+        //rvt.getResultValues(); // major performance hit!  screenResultViewer expressly designed to not use this
+        rvt.getTypesDerivedFrom();
+      }
+    }
+    return screenResult;
+  }
+  
   private void initializeScreenResultBackingBeans(Screen screen, ScreenSearchResults screenSearchResults)
   {
     _lastScreen = screen;
@@ -329,7 +363,7 @@ public class ScreensController extends AbstractUIController
     // TODO: HACK: makes screenResult access data-access-permissions aware 
     ScreenResult screenResult = null;
     if (screen.getScreenResult() != null) {
-      screenResult = _dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
+      screenResult = inflateScreenResult(screen.getScreenResult().getEntityId());
     }
 
     _screenResultImporter.setDao(_dao);

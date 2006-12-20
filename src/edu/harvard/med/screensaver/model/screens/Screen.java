@@ -272,7 +272,10 @@ public class Screen extends AbstractEntity
    */
   public void setCollaboratorsList(List<ScreeningRoomUser> collaborators)
   {
-    getHbnCollaborators().clear();
+    List<ScreeningRoomUser> collaboratorsToRemove = new ArrayList<ScreeningRoomUser>(getHbnCollaborators());
+    for (ScreeningRoomUser collaborator : collaboratorsToRemove) {
+      removeCollaborator(collaborator);
+    }
     for (ScreeningRoomUser collaborator : collaborators) {
       addCollaborator(collaborator);
     }

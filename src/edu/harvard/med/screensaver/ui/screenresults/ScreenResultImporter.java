@@ -103,6 +103,8 @@ public class ScreenResultImporter extends AbstractBackingBean
   // TODO: this method contains real business logic that should be moved to a non-ui package class; it also needs a unit test
   public String doImport()
   {
+    _dao.persistEntity(_screen); // re-attach to Hibernate session
+
     boolean parseSuccessful = false;
     ScreenResult existingScreenResult = _screen.getScreenResult();
     try {
@@ -165,6 +167,7 @@ public class ScreenResultImporter extends AbstractBackingBean
                                              Workbook.MIME_TYPE);
     }
     catch (IOException e) {
+      e.printStackTrace();
       reportSystemError(e);
     }
     finally {

@@ -14,12 +14,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.hibernate.Hibernate;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -284,6 +286,10 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String viewLibrary(Library library, LibrarySearchResults librarySearchResults)
   {
+    _dao.persistEntity(library); // re-attach to Hibernate session
+    library.getWells().iterator(); // force initialization
+    library.getCopies().iterator(); // force initialization
+    
     _libraryViewer.setLibrarySearchResults(librarySearchResults);
     _libraryViewer.setLibrary(library);
     return "viewLibrary";
@@ -292,6 +298,13 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String viewLibraryContents(Library library)
   {
+    _dao.persistEntity(library); // re-attach to Hibernate session
+    for (Well well : library.getWells()) {
+      // force initialization of persistent collections needed by search result viewer
+      well.getGenes().size();
+      well.getCompounds().size();
+    }
+
     WellSearchResults wellSearchResults = new WellSearchResults(
         new ArrayList<Well>(library.getWells()),
         this);
@@ -327,6 +340,10 @@ public class LibrariesController extends AbstractUIController
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     else {
+      _dao.persistEntity(well); // re-attach to Hibernate session
+      well.getGenes(); // force initialization of genes and silencing reagents
+      well.getCompounds().iterator(); // force initialization
+      
       _wellViewer.setWellSearchResults(wellSearchResults);
       _wellViewer.setWell(well);
       return "viewWell";
@@ -336,6 +353,9 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String viewGene(Gene gene, WellSearchResults wellSearchResults)
   {
+    _dao.persistEntity(gene); // re-attach to Hibernate session
+    Hibernate.initialize(gene.getGenbankAccessionNumbers());
+    
     _geneViewer.setWellSearchResults(wellSearchResults);
     _geneViewer.setGene(gene);
     return "viewGene";
@@ -346,6 +366,12 @@ public class LibrariesController extends AbstractUIController
     Compound compound,
     edu.harvard.med.screensaver.ui.searchresults.WellSearchResults wellSearchResults)
   {
+    _dao.persistEntity(compound); // re-attach to Hibernate session
+    Hibernate.initialize(compound.getCompoundNames());
+    Hibernate.initialize(compound.getPubchemCids());
+    Hibernate.initialize(compound.getCasNumbers());
+    Hibernate.initialize(compound.getNscNumbers());
+    
     _compoundViewer.setWellSearchResults(wellSearchResults);
     _compoundViewer.setCompound(compound);
     return "viewCompound";
@@ -359,6 +385,8 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String importCompoundLibraryContents(Library library)
   {
+    _dao.persistEntity(library); // re-attach to Hibernate session
+
     _compoundLibraryContentsImporter.setLibrary(library);
     _compoundLibraryContentsImporter.setUploadedFile(null);
     _compoundLibraryContentsParser.clearErrors();
@@ -544,6 +572,11 @@ public class LibrariesController extends AbstractUIController
     Well well = _dao.findWell(plateNumber, wellName);
     if (well == null) {
       showMessage("libraries.noSuchWell", "searchResults", plateNumber.toString(), wellName);
+    }
+    else {
+      // force initialization of persistent collections needed by search result viewer
+      well.getGenes().size();
+      well.getCompounds().size();
     }
     return well;
   }
