@@ -282,7 +282,8 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
                                                                           final int sortBy,
                                                                           final SortDirection sortDirection,
                                                                           final int fromIndex,
-                                                                          final int rowsToFetch)
+                                                                          final int rowsToFetch,
+                                                                          final ResultValueType hitsOnlyRvt)
   {
     Map<WellKey,List<ResultValue>> mapResult = (Map<WellKey,List<ResultValue>>)
     getHibernateTemplate().execute(new HibernateCallback() 
@@ -292,7 +293,8 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
         Query query = buildQueryForSortedResultValueTypeTableByRange(session,
                                                                      selectedRvts,
                                                                      sortBy,
-                                                                     sortDirection);
+                                                                     sortDirection,
+                                                                     hitsOnlyRvt);
         Map<WellKey,List<ResultValue>> mapResult = new LinkedHashMap<WellKey,List<ResultValue>>();
         ScrollableResults scrollableResults = query.scroll();
         if (scrollableResults.setRowNumber(fromIndex) && rowsToFetch > 0) {
@@ -300,9 +302,6 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
           do {
             Object[] valuesArray = scrollableResults.get();
             List<ResultValue> values = new ArrayList<ResultValue>(selectedRvts.size());
-//            for (int i = 1; i < valuesArray.length; i++) {
-//              values.add((ResultValue)valuesArray[i]);
-//            }
             mapResult.put(new WellKey(valuesArray[0].toString()), values);
           } while (scrollableResults.next() && ++rowCount < rowsToFetch);
           
@@ -446,10 +445,12 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   private Query buildQueryForSortedResultValueTypeTableByRange(Session session,
                                                                List<ResultValueType> selectedRvts,
                                                                int sortBy,
-                                                               SortDirection sortDirection)
+                                                               SortDirection sortDirection,
+                                                               ResultValueType hitsOnlyRvt)
   {
     assert selectedRvts.size() > 0;
     assert sortBy < selectedRvts.size();
+    assert hitsOnlyRvt == null || selectedRvts.contains(hitsOnlyRvt);
 
     StringBuilder hql = new StringBuilder();
     List<String> selectFields = new ArrayList<String>();
@@ -461,12 +462,19 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     // TODO: can simplify this code now that we no longer require iteration to generate our HQL string
     String sortByRvAlias = "rv";
     selectFields.add("index(" + sortByRvAlias + ")");
-    hql.append("select ").append(StringUtils.makeListString(selectFields, ", "));
     fromClauses.add("ResultValueType rvt join rvt.resultValues rv");
-    hql.append(" from ").append(StringUtils.makeListString(fromClauses, ", "));
     whereClauses.add("rvt.id=?");
     args.add(selectedRvts.get(Math.max(0, sortBy)).getEntityId());
-    hql.append(" where ").append(StringUtils.makeListString(whereClauses, " and "));
+
+    if (hitsOnlyRvt != null) {
+      // TODO: this makes the query quite slow, as it has to join all ResultValues for 2 ResultValueTypes
+      fromClauses.add("ResultValueType hitsOnlyRvt join hitsOnlyRvt.resultValues hitsOnlyRv");
+      whereClauses.add("hitsOnlyRv.hit = true");
+      whereClauses.add("index(hitsOnlyRv) = index(rv)");
+      whereClauses.add("hitsOnlyRvt.id=?");
+      args.add(hitsOnlyRvt.getEntityId());
+    }
+    
     String sortDirStr = sortDirection.equals(SortDirection.ASCENDING)? " asc" : " desc";
     if (sortBy >= 0) {
       if (selectedRvts.get(sortBy).isNumeric()) {
@@ -486,6 +494,10 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     else if (sortBy == SORT_BY_ASSAY_WELL_TYPE) {
       orderByClauses.add(sortByRvAlias + ".assayWellType" + sortDirStr);
     }
+
+    hql.append("select ").append(StringUtils.makeListString(selectFields, ", "));
+    hql.append(" from ").append(StringUtils.makeListString(fromClauses, ", "));
+    hql.append(" where ").append(StringUtils.makeListString(whereClauses, " and "));
     hql.append(" order by ").append(StringUtils.makeListString(orderByClauses, ", "));
     
     if (_logger.isDebugEnabled()) {

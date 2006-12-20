@@ -721,7 +721,8 @@ public class ComplexDAOTest extends AbstractSpringTest
                                             1, 
                                             SortDirection.ASCENDING, 
                                             10, 
-                                            80);
+                                            80,
+                                            null);
     for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
       log.debug(entry.getKey() + " => " + entry.getValue());
     }
@@ -743,7 +744,8 @@ public class ComplexDAOTest extends AbstractSpringTest
                                             DAO.SORT_BY_WELL_PLATE,
                                             SortDirection.ASCENDING, 
                                             0, 
-                                            100);
+                                            100,
+                                            null);
     iWell = 0;
     for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
       int expectedWellColumn = (iWell / 10);
@@ -763,7 +765,8 @@ public class ComplexDAOTest extends AbstractSpringTest
                                             DAO.SORT_BY_ASSAY_WELL_TYPE, 
                                             SortDirection.DESCENDING, 
                                             0, 
-                                            11);
+                                            11,
+                                            null);
     for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
       log.debug(entry.getKey() + " " + entry.getValue().get(0).getAssayWellType());
     }

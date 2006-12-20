@@ -151,11 +151,10 @@ TODO:
 					styleClass="input">
 					<f:selectItems id="dataHeaders"
 						value="#{screenResultViewer.selectedResultValueTypes.selectItems}" />
-					<f:validateLength minimum="1" />
 				</t:selectManyListbox>
 				<t:panelGroup>
-					<t:commandButton id="updateButton1" value="Update"
-						action="#{screenResultViewer.update}" styleClass="command" />
+					<t:commandButton id="updateDataHeadersButton" forceId="true" value="Update"
+						action="#{screenResultViewer.updateDataHeaders}" styleClass="command" />
 					<t:commandButton id="allDataHeadersButton" value="All"
 						action="#{screenResultViewer.showAllDataHeaders}"
 						styleClass="command" />
@@ -257,7 +256,26 @@ TODO:
 					<f:validateLongRange minimum="1"
 						maximum="#{screenResultViewer.rawDataSize}" />
 				</t:inputText>
-				<t:commandButton id="gotoRow" value="Go" styleClass="command" />
+				<t:commandButton id="updateDataTableRowsButton" forceId="true" value="Go"
+					action="#{screenResultViewer.updateDataTableRows}"
+					styleClass="command" />
+
+				<t:panelGroup id="showHitsOnlyCommandPanel"
+					rendered="#{!empty screenResultViewer.hitsForDataHeader.selectItems}">
+					<t:selectBooleanCheckbox id="showHitsOnly"
+						value="#{screenResultViewer.showHitsOnly}" immediate="true"
+						onchange="javascript:document.getElementById('updateDataTableRowsButton').click()"/>
+					<t:outputLabel value="Show only hits for" for="showHitsOnly"
+						styleClass="inputLabel" />
+					<t:selectOneMenu id="hitsForDataHeaderList"
+						value="#{screenResultViewer.hitsForDataHeader.value}"
+						onchange="javascript:document.getElementById('updateDataTableRowsButton').click()"
+						immediate="true" styleClass="input">
+						<f:selectItems id="hitsForDataHeader"
+							value="#{screenResultViewer.hitsForDataHeader.selectItems}" />
+					</t:selectOneMenu>
+				</t:panelGroup>
+
 			</t:collapsiblePanel>
 
 			<t:collapsiblePanel id="heatMapsPanel"

@@ -147,7 +147,8 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
                                             0, 
                                             SortDirection.ASCENDING,
                                             0, 
-                                            1);
+                                            1,
+                                            null);
     assertEquals(1, result.size());
   }
 
@@ -158,7 +159,8 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
                                             0, 
                                             SortDirection.ASCENDING,
                                             expectedFullResultSize - 1,
-                                            1);
+                                            1,
+                                            null);
     assertEquals(1, result.size());
   }
 
@@ -169,7 +171,8 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
                                             0, 
                                             SortDirection.ASCENDING,
                                             0,
-                                            expectedFullResultSize);
+                                            expectedFullResultSize,
+                                            null);
     assertEquals(expectedFullResultSize, result.size());
   }
 

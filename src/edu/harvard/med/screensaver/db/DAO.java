@@ -261,7 +261,8 @@ public interface DAO
                                                                           int sortBy,
                                                                           SortDirection sortDirection,
                                                                           int fromIndex,
-                                                                          int rowsToFetch);
+                                                                          int rowsToFetch,
+                                                                          ResultValueType hitsOnlyRvt);
   
   public Map<WellKey,ResultValue> findResultValuesByPlate(Integer plateNumber, ResultValueType rvt);
 

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +48,7 @@ import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.TableSortManager;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
+import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.IOUtils;
@@ -130,7 +132,6 @@ public class ScreenResultViewer extends AbstractBackingBean
    */
   private int _firstResultValueIndex;
   private UISelectManyBean<ResultValueType> _selectedResultValueTypes;
-  private String _rowRangeText;
   private UIInput _rowNumberInput;
   private UIData _dataTable;
   private UniqueDataHeaderNames _uniqueDataHeaderNames;
@@ -150,6 +151,8 @@ public class ScreenResultViewer extends AbstractBackingBean
    * give it to us w/o respecting data access permisisions
    */
   private ScreenResult _screenResult;
+  private UISelectOneBean<ResultValueType> _hitsForDataHeader;
+  private boolean _showHitsOnly;
 
 
   // public methods
@@ -272,7 +275,12 @@ public class ScreenResultViewer extends AbstractBackingBean
   public int getRawDataSize()
   {
     try {
-      return getScreenResult().getResultValueTypes().first().getResultValues().size();
+      if (isShowHitsOnly()) {
+        return getHitsForDataHeader().getSelection().getHits();
+      } 
+      else {
+        return getScreenResult().getResultValueTypes().first().getResultValues().size();
+      }
     }
     catch (Exception e) {
       return 0;
@@ -281,7 +289,12 @@ public class ScreenResultViewer extends AbstractBackingBean
 
   public String getRowRangeText()
   {
-    return getRowNumber() + ".." + (getRowNumber() + _dataTable.getRows() - 1) + " of " + getRawDataSize();
+    return getRowNumber() + 
+           ".." + 
+           Math.min(getRowNumber() + _dataTable.getRows() - 1, 
+                    getRawDataSize()) + 
+           " of " + 
+           getRawDataSize();
   }
   
   public UISelectManyBean<ResultValueType> getSelectedResultValueTypes()
@@ -356,6 +369,33 @@ public class ScreenResultViewer extends AbstractBackingBean
       };
     }
     return _sortManager;
+  }
+
+  public boolean isShowHitsOnly()
+  {
+    if (getHitsForDataHeader().getSelectItems().size() == 0) {
+      _showHitsOnly = false;
+    }
+    return _showHitsOnly;
+  }
+
+  public void setShowHitsOnly(boolean showHitsOnly)
+  {
+    if (getHitsForDataHeader().getSelectItems().size() == 0) {
+      // can't show hits only, if no assay indicator data headers are visible
+      _showHitsOnly = false;
+    }
+    else {
+      _showHitsOnly = showHitsOnly;
+    }
+  }
+
+  public UISelectOneBean<ResultValueType> getHitsForDataHeader()
+  {
+    if (_hitsForDataHeader == null) {
+      updateHitsForDataHeaderSelections();
+    }
+    return _hitsForDataHeader;
   }
 
   public String gotoPage(int pageIndex)
@@ -454,13 +494,21 @@ public class ScreenResultViewer extends AbstractBackingBean
     return _librariesController.viewWell(well, null);
   }
   
-  public String update()
+  public String updateDataHeaders()
   {
-    log.debug("update action received");
-    rebuildDataTable();
+    // clear state of our data headers model, forcing lazy initialization when needed
+    _dataHeadersColumnModel = null;
+    updateHitsForDataHeaderSelections();
+    updateDataTableRows();
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
+  public String updateDataTableRows()
+  {
+    setFirstResultValueIndex(0);
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
   public String showAllDataHeaders()
   {
     selectAllResultValueTypes();
@@ -479,15 +527,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   public void rowNumberListener(ValueChangeEvent event)
   {
     log.debug("rowNumberListener called: " + event.getNewValue());
-    _firstResultValueIndex = Integer.parseInt(event.getNewValue().toString()) - 1;
-    // ensure value is within valid range, and in particular that we never show
-    // less than the table's configured row count (unless it's more than the
-    // total number of rows)
-    _firstResultValueIndex = Math.max(0,
-                                      Math.min(_firstResultValueIndex,
-                                               getRawDataSize() - _dataTable.getRows()));
-    _rowNumberInput.setValue(_firstResultValueIndex + 1);
-    rebuildDataTable();
+    setFirstResultValueIndex(Integer.parseInt(event.getNewValue().toString()) - 1);
   }
   
   
@@ -518,6 +558,8 @@ public class ScreenResultViewer extends AbstractBackingBean
     _selectedResultValueTypes = null;
     _uniqueDataHeaderNames = null;
     _sortManager = null;
+    _showHitsOnly = false;
+    _hitsForDataHeader = null;
 
     // clear the bound UI components, so that they get recreated next time this view is used
     _dataTable = null;
@@ -529,7 +571,6 @@ public class ScreenResultViewer extends AbstractBackingBean
   private void rebuildDataTable()
   {
     // clear state of our data table, forcing lazy initialization when needed
-    _dataHeadersColumnModel = null;
     _rawDataModel = null;
 
     // enforce minimum of 1 selected data header (data table query will break otherwise)
@@ -545,6 +586,39 @@ public class ScreenResultViewer extends AbstractBackingBean
     List<String> columnHeaders = new ArrayList<String>(DATA_TABLE_FIXED_COLUMN_HEADERS);
     columnHeaders.addAll(getSelectedDataHeaderNames());
     getSortManager().setColumnNames(columnHeaders);
+  }
+
+  private void updateHitsForDataHeaderSelections()
+  {
+    List<ResultValueType> resultValueTypes = new ArrayList<ResultValueType>();
+    resultValueTypes.addAll(getScreenResult().getResultValueTypes());
+    for (Iterator iter = resultValueTypes.iterator(); iter.hasNext();) {
+      ResultValueType rvt = (ResultValueType) iter.next();
+      if (!rvt.isActivityIndicator() || 
+        !getSelectedResultValueTypes().getSelections().contains(rvt)) {
+        iter.remove();
+      }
+    }
+    _hitsForDataHeader = new UISelectOneBean<ResultValueType>(resultValueTypes) {
+      @Override
+      protected String getLabel(ResultValueType t)
+      {
+        return t.getName();
+      }
+    };
+  }
+
+  private void setFirstResultValueIndex(int firstResultValueIndex)
+  {
+    _firstResultValueIndex = firstResultValueIndex;
+    // ensure value is within valid range, and in particular that we never show
+    // less than the table's configured row count (unless it's more than the
+    // total number of rows)
+    _firstResultValueIndex = Math.max(0,
+                                      Math.min(_firstResultValueIndex,
+                                               getRawDataSize() - _dataTable.getRows()));
+    _rowNumberInput.setValue(_firstResultValueIndex + 1);
+    rebuildDataTable();
   }
 
   private int getPageIndex()
@@ -591,7 +665,8 @@ public class ScreenResultViewer extends AbstractBackingBean
                                                sortByArg,
                                                getSortManager().getCurrentSortDirection(),
                                                _firstResultValueIndex,
-                                               getDataTable().getRows());
+                                               getDataTable().getRows(),
+                                               isShowHitsOnly() ? getHitsForDataHeader().getSelection() : null);
       
       List<Map<String,String>> tableData = new ArrayList<Map<String,String>>();
       for (Map.Entry<WellKey,List<ResultValue>> entry : rvData.entrySet()) {
@@ -636,7 +711,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   private void selectAllResultValueTypes()
   {
     getSelectedResultValueTypes().setSelections(getScreenResult().getResultValueTypes());
-    rebuildDataTable();
+    updateDataHeaders();
   }
 
 

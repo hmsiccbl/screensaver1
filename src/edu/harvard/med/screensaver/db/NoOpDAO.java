@@ -137,7 +137,8 @@ public class NoOpDAO implements DAO
                                                                           int sortBy,
                                                                           SortDirection sortDirection,
                                                                           int fromIndex,
-                                                                          int toIndex)
+                                                                          int toIndex,
+                                                                          ResultValueType hitsOnlyRvt)
   {
     return null;
   }
