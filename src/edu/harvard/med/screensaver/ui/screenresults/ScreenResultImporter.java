@@ -20,7 +20,6 @@ import javax.faces.model.ListDataModel;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
@@ -48,24 +47,15 @@ public class ScreenResultImporter extends AbstractBackingBean
 
   private DAO _dao;
   private Screen _screen;
-  private ScreenResultParser _screenResultParser;
   private ScreensController _screensController;
   private UploadedFile _uploadedFile;
+  private ScreenResultParser _screenResultParser;
 
 
   // backing bean property getter and setter methods
 
   public void setDao(DAO dao) {
     _dao = dao;
-  }
-
-  public void setScreenResultParser(ScreenResultParser screenResultParser) {
-    _screenResultParser = screenResultParser;
-  }
-
-  public ScreenResultParser getScreenResultParser() 
-  {
-    return _screenResultParser;
   }
 
   public void setScreensController(ScreensController screensController) {
@@ -75,6 +65,15 @@ public class ScreenResultImporter extends AbstractBackingBean
   public void setScreen(Screen screen)
   {
     _screen = screen;
+  }
+
+  public void setScreenResultParser(ScreenResultParser screenResultParser) {
+    _screenResultParser = screenResultParser;
+  }
+
+  public ScreenResultParser getScreenResultParser() 
+  {
+    return _screenResultParser;
   }
 
   public void setUploadedFile(UploadedFile uploadedFile)
@@ -100,51 +99,13 @@ public class ScreenResultImporter extends AbstractBackingBean
     return _screensController.viewLastScreen();
   }
   
-  // TODO: this method contains real business logic that should be moved to a non-ui package class; it also needs a unit test
+  // TODO: this method contains real business logic that should be moved to a
+  // non-ui package class; it also needs a unit test
   public String doImport()
   {
-    _dao.persistEntity(_screen); // re-attach to Hibernate session
-
-    boolean parseSuccessful = false;
-    ScreenResult existingScreenResult = _screen.getScreenResult();
-    try {
-      log.info("starting import of ScreenResult for Screen " + _screen);
-
-      ScreenResult screenResult = null;
-      if (_uploadedFile.getInputStream().available() > 0) {
-        screenResult = _screenResultParser.parse(_screen, 
-                                                 new File("screen_result_" + _screen.getScreenNumber()),
-                                                 _uploadedFile.getInputStream());
-      }
-
-      if (screenResult == null) {
-        // this is an unexpected, system error, so we log at "error" level
-        log.error("fatal error during import of ScreenResult for Screen " + _screen);
-      }
-      if (_screenResultParser.getErrors().size() > 0) {
-        // these are data-related "user" errors, so we log at "info" level
-        log.info("parse errors encountered during import of ScreenResult for Screen " + _screen);
-        return _screensController.viewScreenResultImportErrors();
-      }
-      else {
-        log.info("successfully imported " + screenResult + " for Screen " + _screen);
-        parseSuccessful = true;
-        _dao.flush();
-        return _screensController.viewLastScreen();
-      }
-    }
-    catch (Exception e) {
-      reportSystemError(e);
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    finally {
-      if (!parseSuccessful) {
-        _screen.setScreenResult(existingScreenResult);
-      } 
-      else if (existingScreenResult != null) {
-        _dao.deleteEntity(existingScreenResult);
-      }
-    }
+    return _screensController.importScreenResult(_screen,
+                                                 _uploadedFile,
+                                                 _screenResultParser);
   }
   
   

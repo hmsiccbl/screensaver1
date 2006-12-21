@@ -9,9 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.screenresults;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +27,6 @@ import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
-import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
@@ -45,15 +41,12 @@ import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.TableSortManager;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 
 /**
@@ -451,33 +444,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   public String download()
   {
-    File exportedWorkbookFile = null;
-    FileOutputStream out = null;
-    try {
-      if (_screenResult != null) {
-        _dao.persistEntity(_screenResult);
-        HSSFWorkbook workbook = _screenResultExporter.build(_screenResult);
-        exportedWorkbookFile = File.createTempFile("screenResult" + _screen.getScreenNumber() + ".",
-        ".xls");
-        out = new FileOutputStream(exportedWorkbookFile);
-        workbook.write(out);
-        out.close();
-        JSFUtils.handleUserFileDownloadRequest(getFacesContext(),
-                                               exportedWorkbookFile,
-                                               Workbook.MIME_TYPE);
-      }
-    }
-    catch (IOException e)
-    {
-      reportApplicationError(e);
-    }
-    finally {
-      IOUtils.closeQuietly(out);
-      if (exportedWorkbookFile != null && exportedWorkbookFile.exists()) {
-        exportedWorkbookFile.delete();
-      }
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.downloadScreenResult(_screenResult);
   }
   
   public String delete()

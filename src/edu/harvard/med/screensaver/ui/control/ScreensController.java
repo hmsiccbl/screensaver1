@@ -9,13 +9,16 @@
 
 package edu.harvard.med.screensaver.ui.control;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
@@ -33,9 +36,12 @@ import edu.harvard.med.screensaver.ui.screens.ScreenFinder;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreensBrowser;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
+import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 /**
  * 
@@ -66,8 +72,8 @@ public class ScreensController extends AbstractUIController
   private HeatMapViewer _heatMapViewer;
   private ScreenResultImporter _screenResultImporter;
   private ScreenResultExporter _screenResultExporter;
-  private Screen _lastScreen;
-  private ScreenSearchResults _lastScreenSearchResults;
+  private Screen _currentScreen;
+  private ScreenSearchResults _currentScreenSearchResults;
   
 
   // public getters and setters
@@ -132,7 +138,7 @@ public class ScreensController extends AbstractUIController
     _screenResultExporter = screenResultExporter;
   }
 
-  
+ 
   // public controller methods
 
   @UIControllerMethod
@@ -148,63 +154,75 @@ public class ScreensController extends AbstractUIController
   @UIControllerMethod
   public String viewScreen(Screen screen, ScreenSearchResults screenSearchResults)
   {
-    _dao.persistEntity(screen); // re-attach to Hibernate session
-    // force initialization
-    Hibernate.initialize(screen.getAbaseTestsets());
-    Hibernate.initialize(screen.getAssayReadoutTypes());
-    Hibernate.initialize(screen.getHbnCollaborators());
-    Hibernate.initialize(screen.getAttachedFiles());
-    Hibernate.initialize(screen.getBillingInformation());
-    Hibernate.initialize(screen.getFundingSupports());
-    Hibernate.initialize(screen.getKeywords());
-    Hibernate.initialize(screen.getLettersOfSupport());
-    Hibernate.initialize(screen.getPublications());
-    Hibernate.initialize(screen.getStatusItems());
-    Hibernate.initialize(screen.getVisits());
-    Hibernate.initialize(screen.getLabHead());
-    Hibernate.initialize(screen.getLabHead().getLabMembers());
-    Hibernate.initialize(screen.getLeadScreener());
-    Hibernate.initialize(screen.getScreenResult());
-
+    _currentScreen = screen;
+    _currentScreenSearchResults = screenSearchResults;
+    
     _screenViewer.setDao(_dao);
-    _screenViewer.setScreen(screen);
-    _screenViewer.setCandidateLabHeads(_dao.findAllLabHeads());
-    _screenViewer.setCandidateCollaborators(_dao.findAllEntitiesWithType(ScreeningRoomUser.class));
+//    _screenViewer.setScreen(screen);
+//    _screenViewer.setCandidateLabHeads(_dao.findAllLabHeads());
+//    _screenViewer.setCandidateCollaborators(_dao.findAllEntitiesWithType(ScreeningRoomUser.class));
     _screenViewer.setScreenSearchResults(screenSearchResults);
 
-    initializeScreenResultBackingBeans(screen, screenSearchResults);
 
+    _screenResultImporter.setDao(_dao);
+    _screenResultImporter.setMessages(getMessages());
+//    _screenResultImporter.setScreen(screen);
+    _screenResultImporter.setScreenResultParser(new ScreenResultParser(_dao));
+
+//    _screenResultViewer.setScreen(screen);
+//    _screenResultViewer.setScreenResult(screenResult);
+    _screenResultViewer.setDao(_dao);
+    _screenResultViewer.setMessages(getMessages());
+    _screenResultViewer.setScreenResultExporter(_screenResultExporter);
+    _screenResultViewer.setLibrariesController(_librariesController);
+    _screenResultViewer.setScreenSearchResults(screenSearchResults);
+
+    _heatMapViewer.setDao(_dao);
+//    _heatMapViewer.setScreenResult(screenResult);
+    _heatMapViewer.setLibrariesController(_librariesController);
+
+    // note: the only reason for defining the setEntities() method in an anon subclass is for ease-of-coding
+    new ScreenAndResultViewerEntityInitializer(_dao, screen) 
+    {
+      @Override
+      public void setEntities()
+      {
+        _screenViewer.setScreen(_screen);
+        _screenViewer.setCandidateLabHeads(_dao.findAllLabHeads());
+        _screenViewer.setCandidateCollaborators(_dao.findAllEntitiesWithType(ScreeningRoomUser.class));
+        _screenResultImporter.setScreen(_screen);
+        _screenResultViewer.setScreen(_screen);
+        _heatMapViewer.setScreenResult(_screenResult);
+        _screenResultViewer.setScreenResult(_screenResult);
+        
+      }
+    }.initializeView();
+    
     return VIEW_SCREEN;
   }
 
   @UIControllerMethod
   public String saveScreen(Screen screen)
   {
-    try {
-      _dao.persistEntity(screen);
-    }
-    catch (Throwable e) {
-      reportSystemError(e);
-    }
+    _dao.persistEntity(screen);
     return VIEW_SCREEN;
   }
 
+  @UIControllerMethod
   public String deleteScreenResult(ScreenResult screenResult)
   {
     if (screenResult != null) {
-      _dao.persistEntity(screenResult); // really, we just want to reattach to Hibernate session
+      _dao.persistEntity(screenResult); // re-attach to Hibernate session
       _dao.deleteScreenResult(screenResult);
     }
     return viewLastScreen();
   }
 
   
-  // public control methods
- 
   @UIControllerMethod
   public String viewLastScreen()
   {
-    return viewScreen(_lastScreen, _lastScreenSearchResults);
+    return viewScreen(_currentScreen, _currentScreenSearchResults);
   }
     
   @UIControllerMethod
@@ -332,57 +350,99 @@ public class ScreensController extends AbstractUIController
       if (screen != null) {
         return viewScreen(screen, null);
       }
-    }
-    // TODO: add message to indicate failure
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-  
-
-  // private methods
-  
-  private ScreenResult inflateScreenResult(int entityId)
-  {
-    ScreenResult screenResult = _dao.findEntityById(ScreenResult.class, entityId);
-    if (screenResult != null) {
-      Hibernate.initialize(screenResult.getPlateNumbers());
-      Hibernate.initialize(screenResult.getResultValueTypes());
-      Hibernate.initialize(screenResult.getWells());
-      for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-        rvt.getDerivedTypes();
-        //rvt.getResultValues(); // major performance hit!  screenResultViewer expressly designed to not use this
-        rvt.getTypesDerivedFrom();
+      else {
+        showMessage("screens.noSuchScreenNumber", screenNumber);
       }
     }
-    return screenResult;
-  }
-  
-  private void initializeScreenResultBackingBeans(Screen screen, ScreenSearchResults screenSearchResults)
-  {
-    _lastScreen = screen;
-    _lastScreenSearchResults = screenSearchResults;
-    
-    // TODO: HACK: makes screenResult access data-access-permissions aware 
-    ScreenResult screenResult = null;
-    if (screen.getScreenResult() != null) {
-      screenResult = inflateScreenResult(screen.getScreenResult().getEntityId());
+    else {
+      showMessage("screens.screenNumberRequired", screenNumber);
     }
-
-    _screenResultImporter.setDao(_dao);
-    _screenResultImporter.setMessages(getMessages());
-    _screenResultImporter.setScreen(screen);
-    _screenResultImporter.setScreenResultParser(new ScreenResultParser(_dao));
-
-    _screenResultViewer.setScreen(screen);
-    _screenResultViewer.setScreenResult(screenResult);
-    _screenResultViewer.setDao(_dao);
-    _screenResultViewer.setMessages(getMessages());
-    _screenResultViewer.setScreenResultExporter(_screenResultExporter);
-    _screenResultViewer.setLibrariesController(_librariesController);
-    _screenResultViewer.setScreenSearchResults(screenSearchResults);
-
-    _heatMapViewer.setDao(_dao);
-    _heatMapViewer.setScreenResult(screenResult);
-    _heatMapViewer.setLibrariesController(_librariesController);
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
+
+  @UIControllerMethod
+  public String importScreenResult(Screen screen,
+                                   UploadedFile uploadedFile,
+                                   ScreenResultParser parser)
+  {
+    _dao.persistEntity(screen); // re-attach to Hibernate session
+
+    boolean parseSuccessful = false;
+    ScreenResult existingScreenResult = screen.getScreenResult();
+    try {
+      log.info("starting import of ScreenResult for Screen " + screen);
+
+      ScreenResult screenResult = null;
+      if (uploadedFile.getInputStream().available() > 0) {
+        screenResult = parser.parse(screen, 
+                                    new File("screen_result_" + screen.getScreenNumber()),
+                                    uploadedFile.getInputStream());
+      }
+
+      if (screenResult == null) {
+        // this is an unexpected, system error, so we log at "error" level
+        log.error("fatal error during import of ScreenResult for Screen " + screen);
+      }
+      if (parser.getErrors().size() > 0) {
+        // these are data-related "user" errors, so we log at "info" level
+        log.info("parse errors encountered during import of ScreenResult for Screen " + screen);
+        return viewScreenResultImportErrors();
+      }
+      else {
+        log.info("successfully imported " + screenResult + " for Screen " + screen);
+        parseSuccessful = true;
+        _dao.flush();
+        return viewLastScreen();
+      }
+    }
+    catch (Exception e) {
+      reportSystemError(e);
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    finally {
+      if (!parseSuccessful) {
+        screen.setScreenResult(existingScreenResult);
+      } 
+      else if (existingScreenResult != null) {
+        _dao.deleteEntity(existingScreenResult);
+      }
+    }
+  }
+
+  @UIControllerMethod
+  public String downloadScreenResult(ScreenResult screenResult)
+  {
+    File exportedWorkbookFile = null;
+    FileOutputStream out = null;
+    try {
+      if (screenResult != null) {
+        _dao.persistEntity(screenResult);
+        HSSFWorkbook workbook = _screenResultExporter.build(screenResult);
+        exportedWorkbookFile = File.createTempFile("screenResult" + screenResult.getScreen().getScreenNumber() + ".",
+        ".xls");
+        out = new FileOutputStream(exportedWorkbookFile);
+        workbook.write(out);
+        out.close();
+        JSFUtils.handleUserFileDownloadRequest(getFacesContext(),
+                                               exportedWorkbookFile,
+                                               Workbook.MIME_TYPE);
+      }
+    }
+    catch (IOException e)
+    {
+      reportApplicationError(e);
+    }
+    finally {
+      IOUtils.closeQuietly(out);
+      if (exportedWorkbookFile != null && exportedWorkbookFile.exists()) {
+        exportedWorkbookFile.delete();
+      }
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  
+  // private methods
+
 }
 

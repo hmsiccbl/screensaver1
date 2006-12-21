@@ -26,11 +26,9 @@ import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.ui.ExceptionReporter;
 
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
-import org.springframework.context.MessageSource;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.orm.hibernate3.support.OpenSessionInViewFilter;
 import org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor;
@@ -89,6 +87,8 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
 
   private static final String REPORT_EXCEPTION_URL = "/screensaver/reportException.jsf";
   private static final String LOGIN_URL = "/screensaver/login.jsf";
+
+  private static final String RELOAD_VIEW_ENTITIES_SESSION_PARAM = "reloadViewEntities";
 
 
   // instance data members
@@ -153,6 +153,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
     String httpSessionId = httpSession.getId();
     log.info(">>>> Screensaver STARTING to process HTTP request for session " + 
              httpSessionId + " @ " + request.getRequestURI());
+    
 
     try {
       DAO dao = lookupBeanViaSpring(DAO.class, "dao");
@@ -161,6 +162,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
         {
           Throwable caughtException = null;
           try {
+            reinitializeViewEntitiesIfNeeded(httpSession);
             filterChain.doFilter(request, response);
           }
           catch (Exception e) {
@@ -197,7 +199,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
     }
     catch (ConcurrencyFailureException e) {
       getMessages().setFacesMessageForComponent(httpSession, CONCURRENT_MODIFICATION_MESSAGE, null);
-      // TODO: reinitialize entities for current view
+      httpSession.setAttribute(RELOAD_VIEW_ENTITIES_SESSION_PARAM, true);
     }
     // note: we should never receive HibernateExceptions, as Spring is supposed to wrap all HibernateExceptions in DataAccessExceptions
 //    catch (HibernateException e) {
@@ -221,6 +223,26 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
       log.info("<<<< Screensaver FINISHED processing HTTP request for session " + 
                httpSessionId + " @ " + request.getRequestURI());
       
+    }
+  }
+
+  private void reinitializeViewEntitiesIfNeeded(final HttpSession httpSession)
+  {
+    try {
+      Boolean reloadViewEntities = (Boolean) httpSession.getAttribute(RELOAD_VIEW_ENTITIES_SESSION_PARAM);
+      if (reloadViewEntities != null && reloadViewEntities) {
+        ViewEntityInitializer viewEntityInitializer = 
+          (ViewEntityInitializer) httpSession.getAttribute(ViewEntityInitializer.LAST_VIEW_ENTITY_INITIALIZER);
+        if (viewEntityInitializer != null) {
+          viewEntityInitializer.initializeView();
+        }
+        else {
+          getMessages().setFacesMessageForComponent(httpSession, SYSTEM_ERROR_ENCOUNTERED, null, "No ViewEntityInitializer registered", "");
+        }
+      }
+    }
+    finally {
+      httpSession.removeAttribute(RELOAD_VIEW_ENTITIES_SESSION_PARAM);
     }
   }
 

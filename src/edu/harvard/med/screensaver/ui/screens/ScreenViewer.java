@@ -320,6 +320,8 @@ public class ScreenViewer extends AbstractBackingBean
    */
   @UIControllerMethod
   public String saveScreen() {
+    // TODO: this is an exception to our convention that Hibernate reattachment is the responsibility of the controller (we need to reattach before making getSelection{s} calls, below)
+   
     _dao.persistEntity(_screen); // re-attach to Hibernate session
     
     _screen.setLabHead(_labName.getSelection());
