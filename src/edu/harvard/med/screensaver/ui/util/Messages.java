@@ -19,6 +19,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.springframework.context.MessageSource;
@@ -69,42 +70,46 @@ public class Messages extends AbstractBackingBean implements PhaseListener
    *
    * @param messageKey the message key
    * @param clientId the client ID of the UI component
+   * @param args arguments to the message
    * @return the <code>FacesMessage</code>
    */
   public FacesMessage setFacesMessageForComponent(
     String messageKey,
-    String clientId)
+    String clientId,
+    Object... args)
   {
-    return setFacesMessageForComponent(messageKey, EMPTY_ARGS, clientId);
+    HttpSession session = (HttpSession) getFacesContext().getExternalContext().getSession(false);
+    return setFacesMessageForComponent(session, messageKey, clientId, args);
   }
-  
+
+
   /**
-   * Attach a <code>FacesMessage</code> to a specific UI component, based on the
-   * <code>message.properties</code> resource.
-   *
+   * Attach a <code>FacesMessage</code> to a specific UI component, based on
+   * the <code>message.properties</code> resource. This method can be called
+   * outside of the JSF context, as long as the caller can provide an
+   * HttpSession object (e.g. from a servlet filter).
+   * 
+   * @param session the HttpSession
    * @param messageKey the message key
-   * @param args arguments to the message
    * @param clientId the client ID of the UI component
+   * @param args arguments to the message
    * @return the <code>FacesMessage</code>
    */
   @SuppressWarnings("unchecked")
-  public FacesMessage setFacesMessageForComponent(
-    String messageKey,
-    Object[] args,
-    String clientId)
+  public FacesMessage setFacesMessageForComponent(HttpSession session,
+                                                  String messageKey,
+                                                  String clientId,
+                                                  Object... args)
   {
-    FacesMessage message = getFacesMessage(messageKey, args);
-    assert message != null : "expected non-null FacesMessage";
-    
-    Map sessionMap = getFacesContext().getExternalContext().getSessionMap();
-    List<Pair<String,FacesMessage>> queuedFacesMessages =
-      (List<Pair<String,FacesMessage>>) sessionMap.get(sessionToken);
+
+    List<Pair<String,FacesMessage>> queuedFacesMessages = (List<Pair<String,FacesMessage>>) session.getAttribute(sessionToken);
     if (queuedFacesMessages == null) {
       queuedFacesMessages = new ArrayList<Pair<String,FacesMessage>>();
-      sessionMap.put(sessionToken, queuedFacesMessages);
+      session.setAttribute(sessionToken, queuedFacesMessages);
     }
-    queuedFacesMessages.add(new Pair<String,FacesMessage>(clientId, message)); 
-
+    FacesMessage message = getFacesMessage(messageKey, args);
+    assert message != null : "expected non-null FacesMessage";
+    queuedFacesMessages.add(new Pair<String,FacesMessage>(clientId, message));
     return message;
   }
 

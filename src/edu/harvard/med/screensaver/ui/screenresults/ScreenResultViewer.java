@@ -469,8 +469,7 @@ public class ScreenResultViewer extends AbstractBackingBean
     }
     catch (IOException e)
     {
-      showMessage("systemError");
-      log.error(e.getMessage());
+      reportApplicationError(e);
     }
     finally {
       IOUtils.closeQuietly(out);

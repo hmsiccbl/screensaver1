@@ -74,7 +74,7 @@
     </description>
     <managed-bean-name>exceptionReporter</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.ExceptionReporter</managed-bean-class>            
-    <managed-bean-scope>request</managed-bean-scope>
+    <managed-bean-scope>session</managed-bean-scope>
   </managed-bean>
 
   <managed-bean>

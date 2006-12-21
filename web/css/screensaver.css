@@ -65,9 +65,9 @@ hr {
 }
 
 .errorMessage {
-	font-style: italic;
+	font-weight: bold;
 	font-size: large;
-	color: red;
+	color: fuchsia;
 	border: 1px;
 }
 

@@ -15,16 +15,25 @@
 	<h:form id="reportErrorForm">
 		<t:panelGrid>
 			<t:outputText
-				value="A serious error has occurred, which was not your fault."
+				value="A mysterious and untoward error has occurred, which was not your fault."
 				styleClass="errorMessage" />
 			<t:outputText
-				value="You have been automatically logged out and must log in again to resume using Screensaver."
-				styleClass="errorMessage" />
-			<t:outputText value="Rest assured, the developers will be notified!"
-				styleClass="errorMessage" />
-			<h:commandButton id="loginAgain"
-				action="#{exceptionReporter.loginAgain}" value="Login Again"
-				style="font-size: large; font-weight: bold" />
+				value="(On second thought, YOU are a developer, so it probably WAS your fault.  Back to work!)"
+				visibleOnUserRole="developer"/>
+			<t:outputText
+				value="You may go back and try again, though the error will probably reoccur.  If it does, we recommend you click the &quot;Login Again&quot; button, below, and then retry the operation.  We sincerely apologize for the inconvenience."
+				escape="true"
+				/>
+				<h:panelGroup>
+				<h:commandButton id="tryAgain"
+					value="Back"
+					style="font-size: large; font-weight: bold" 
+					onclick="javascript:history.back()"
+					disabled="true"/>
+				<h:commandButton id="loginAgain"
+					action="#{exceptionReporter.loginAgain}" value="Login Again"
+					style="font-size: large; font-weight: bold" />
+					</h:panelGroup>
 		</t:panelGrid>
 
 		<t:panelGrid visibleOnUserRole="developer">

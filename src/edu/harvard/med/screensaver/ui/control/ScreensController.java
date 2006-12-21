@@ -148,7 +148,8 @@ public class ScreensController extends AbstractUIController
   @UIControllerMethod
   public String viewScreen(Screen screen, ScreenSearchResults screenSearchResults)
   {
-    _dao.persistEntity(screen);
+    _dao.persistEntity(screen); // re-attach to Hibernate session
+    // force initialization
     Hibernate.initialize(screen.getAbaseTestsets());
     Hibernate.initialize(screen.getAssayReadoutTypes());
     Hibernate.initialize(screen.getHbnCollaborators());

@@ -343,7 +343,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
                                      String componentId, 
                                      Object... messageArgs)
   {
-    FacesMessage msg = _messages.setFacesMessageForComponent(messageKey, messageArgs, componentId);
+    FacesMessage msg = _messages.setFacesMessageForComponent(messageKey, componentId, messageArgs);
     if (msg == null) {
       log.error("no message exists for key '" + messageKey + "'");
     } 
@@ -414,8 +414,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    */
   protected void reportSystemError(String errorMessage)
   {
-    showMessage("systemError",
-                errorMessage);
+    showMessage("systemError", null, errorMessage, "");
     log.error(errorMessage);
   }
 
@@ -432,7 +431,8 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   protected void reportSystemError(Throwable throwable) 
   {
     throwable.printStackTrace();
-    reportSystemError(throwable.getMessage());
+    showMessage("systemError", null, throwable.getClass().getName(), throwable.getMessage());
+    log.error(throwable.toString());
   }
   
   /**
@@ -446,9 +446,14 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    */
   protected void reportApplicationError(String errorMessage)
   {
-    showMessage("systemError", errorMessage);
+    showMessage("systemError", null, "Application Error", errorMessage);
   }
   
+  protected void reportApplicationError(Throwable t)
+  {
+    showMessage("systemError", null, t.getClass().getName(), t.getMessage());
+  }
+
   protected void closeHttpSession()
   {
     log.debug("requesting close of HTTP session");

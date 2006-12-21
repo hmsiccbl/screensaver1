@@ -25,10 +25,9 @@ import edu.harvard.med.screensaver.util.Pair;
  */
 public class ExceptionReporter extends AbstractBackingBean
 {
-  
   public String loginAgain()
   {
-    getHttpSession().invalidate();
+    closeHttpSession();
     return LOGOUT_ACTION_RESULT;
   }
   
@@ -40,7 +39,6 @@ public class ExceptionReporter extends AbstractBackingBean
   private List<ExceptionInfo> getStackTrace()
   {
     List<ExceptionInfo> throwables = new ArrayList<ExceptionInfo>();    
-//    Throwable t = (Throwable) getRequestMap().get("javax.servlet.error.exception"); // for use with normal Servlet contaiiner error handling
     Throwable t = (Throwable) getHttpSession().getAttribute("javax.servlet.error.exception");
     while (t != null) {
       throwables.add(new ExceptionInfo(t));

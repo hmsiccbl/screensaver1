@@ -26,9 +26,12 @@ import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.ui.ExceptionReporter;
 
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
+import org.springframework.context.MessageSource;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.orm.hibernate3.support.OpenSessionInViewFilter;
 import org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor;
 import org.springframework.web.context.WebApplicationContext;
@@ -81,10 +84,12 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
 
   public static final String DEFAULT_SESSION_FACTORY_BEAN_NAME = "sessionFactory";
   public static final String CLOSE_HTTP_SESSION = "closeHttpSession";
-  public static final String SYSTEM_ERROR_ENCOUNTERED = "systemErrorEncountered";
+  public static final String SYSTEM_ERROR_ENCOUNTERED = "systemError";
+  private static final String CONCURRENT_MODIFICATION_MESSAGE = "concurrentModificationConflict";
 
   private static final String REPORT_EXCEPTION_URL = "/screensaver/reportException.jsf";
   private static final String LOGIN_URL = "/screensaver/login.jsf";
+
 
   // instance data members
   
@@ -149,72 +154,66 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
     log.info(">>>> Screensaver STARTING to process HTTP request for session " + 
              httpSessionId + " @ " + request.getRequestURI());
 
-    
-    // if we previously encountered a system error, the user's session is toast;
-    // redirect user to error page so that they are forced to re-login
-    // (this is a temporary measure until we resolve how best to handle Hibernate exceptions)
-    if (Boolean.TRUE.equals(httpSession.getAttribute(SYSTEM_ERROR_ENCOUNTERED))) {
-      if (request.getRequestURI().contains(REPORT_EXCEPTION_URL)) {
-        filterChain.doFilter(request, response);
-        return;
-      }
-      else {
-        // still logged in, and attempted to access a page other than the error page!  send back to the error page!
-        log.debug("user attempted to access a page (" + request.getRequestURI() + ") after a system error; redirecting to error page");
-        response.sendRedirect(REPORT_EXCEPTION_URL);
-        return;
-      }
-    }
-
-    
-    DAO dao = lookupBeanViaSpring(DAO.class, "dao");
-    
     try {
+      DAO dao = lookupBeanViaSpring(DAO.class, "dao");
       dao.doInTransaction(new DAOTransaction() {
         public void runTransaction() 
         {
+          Throwable caughtException = null;
           try {
             filterChain.doFilter(request, response);
           }
-          catch (IOException e) {
+          catch (Exception e) {
             // note: if an I/O exception occurs, we should still try to complete
             // our txn, since inability to communicate our response back to the
             // client is not grounds for aborting the operation the user
             // initiated
             e.printStackTrace();
-            log.error("caught I/O exception during invocation of servlet filter chain");
+            log.error("caught IOException during invocation of servlet filter chain");
+            caughtException = e;
+            // TODO: rollback txn?
           }
-          catch (ServletException e) {
-            // TODO: create our own exception type here
-            throw new RuntimeException(e);
-            
-            // TODO: rollback txn
+          finally {
+            if (caughtException != null) {
+              // any exceptions are thrown at this point may have occurred before response was rendered, so we must redirect to an error page, if we want to guarantee the user gets a response
+              httpSession.setAttribute("javax.servlet.error.exception", caughtException);
+              try {
+                response.sendRedirect(REPORT_EXCEPTION_URL);
+              }
+              catch (IOException e) {
+                e.printStackTrace();
+                try {
+                  response.sendError(500);
+                }
+                catch (IOException e1) {
+                  // nothing more we can do!
+                  e1.printStackTrace();
+                }
+              }
+            }
           }
         }
-      });
+      }); // note: data-access exceptions will be thrown when Hibernate session is being flushed, which occurs at end of txn (i.e., "here")
     }
+    catch (ConcurrencyFailureException e) {
+      getMessages().setFacesMessageForComponent(httpSession, CONCURRENT_MODIFICATION_MESSAGE, null);
+      // TODO: reinitialize entities for current view
+    }
+    // note: we should never receive HibernateExceptions, as Spring is supposed to wrap all HibernateExceptions in DataAccessExceptions
+//    catch (HibernateException e) {
+//    }
     catch (Throwable e) {
-      log.error("caught exception while processing HTTP request for '" + request.getRequestURI() + "' in transaction: " + e);
-      if (e instanceof ServletException) {
-        ((ServletException) e).getRootCause().printStackTrace();
-      }
-      else {
-        e.printStackTrace();
-      }
+      log.error("unexpected exception while processing HTTP request for '" + request.getRequestURI() + "' in a transaction: " + e);
+      e.printStackTrace();
 
       // don't invalidate session yet, so that our error page, which is a JSF page and requires 
       // JSF backing beans that are stored in our HTTP session, can still operate
-      httpSession.setAttribute(SYSTEM_ERROR_ENCOUNTERED, Boolean.TRUE);
       httpSession.setAttribute("javax.servlet.error.exception", e);
+      
+      getMessages().setFacesMessageForComponent(httpSession, SYSTEM_ERROR_ENCOUNTERED,  null, e.getClass().getName(), e.getMessage());
     }
     finally {
-      boolean closeHttpSession = 
-        Boolean.TRUE.equals(httpSession.getAttribute(CLOSE_HTTP_SESSION));
-        
-      if (Boolean.TRUE.equals(httpSession.getAttribute(SYSTEM_ERROR_ENCOUNTERED))) {
-        response.sendRedirect(REPORT_EXCEPTION_URL);
-      }
-      else if (closeHttpSession) {
+      if (Boolean.TRUE.equals(httpSession.getAttribute(CLOSE_HTTP_SESSION))) {
         httpSession.invalidate();
         log.info("closed HTTP session " + httpSessionId);
       }
@@ -223,6 +222,11 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
                httpSessionId + " @ " + request.getRequestURI());
       
     }
+  }
+
+  private Messages getMessages()
+  {
+    return lookupBeanViaSpring(Messages.class, "messages");
   }
   
   /**
