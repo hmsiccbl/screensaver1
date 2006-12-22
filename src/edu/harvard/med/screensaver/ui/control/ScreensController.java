@@ -37,6 +37,7 @@ import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreensBrowser;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.util.ViewEntityInitializer;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -152,25 +153,18 @@ public class ScreensController extends AbstractUIController
   }
   
   @UIControllerMethod
-  public String viewScreen(Screen screen, ScreenSearchResults screenSearchResults)
+  public String viewScreen(final Screen screen, ScreenSearchResults screenSearchResults)
   {
     _currentScreen = screen;
     _currentScreenSearchResults = screenSearchResults;
     
     _screenViewer.setDao(_dao);
-//    _screenViewer.setScreen(screen);
-//    _screenViewer.setCandidateLabHeads(_dao.findAllLabHeads());
-//    _screenViewer.setCandidateCollaborators(_dao.findAllEntitiesWithType(ScreeningRoomUser.class));
     _screenViewer.setScreenSearchResults(screenSearchResults);
-
 
     _screenResultImporter.setDao(_dao);
     _screenResultImporter.setMessages(getMessages());
-//    _screenResultImporter.setScreen(screen);
     _screenResultImporter.setScreenResultParser(new ScreenResultParser(_dao));
 
-//    _screenResultViewer.setScreen(screen);
-//    _screenResultViewer.setScreenResult(screenResult);
     _screenResultViewer.setDao(_dao);
     _screenResultViewer.setMessages(getMessages());
     _screenResultViewer.setScreenResultExporter(_screenResultExporter);
@@ -178,12 +172,68 @@ public class ScreensController extends AbstractUIController
     _screenResultViewer.setScreenSearchResults(screenSearchResults);
 
     _heatMapViewer.setDao(_dao);
-//    _heatMapViewer.setScreenResult(screenResult);
     _heatMapViewer.setLibrariesController(_librariesController);
 
-    // note: the only reason for defining the setEntities() method in an anon subclass is for ease-of-coding
-    new ScreenAndResultViewerEntityInitializer(_dao, screen) 
+    // note: the only reason for defining the setEntities() method in an anon
+    // subclass is for ease-of-coding, and visibility of what's being set (from
+    // this enclosing method)
+    new ViewEntityInitializer(_dao)
     {
+      private Screen _screen;
+      private ScreenResult _screenResult;
+      
+      @Override
+      protected void setup()
+      {
+        _screen = screen;
+        HACKupdateScreenResult();
+      }
+      
+      @Override
+      protected void reattachEntities()
+      {
+        reattach(_screen);
+        reattach(_screenResult);
+      }
+      
+      @Override
+      protected void inflateEntities()
+      {
+//        need(_screen.getAbaseTestsets());
+//        need(_screen.getAssayReadoutTypes());
+//        need(_screen.getHbnCollaborators());
+//        need(_screen.getAttachedFiles());
+//        need(_screen.getBillingInformation());
+//        need(_screen.getFundingSupports());
+//        need(_screen.getKeywords());
+//        need(_screen.getLettersOfSupport());
+//        need(_screen.getPublications());
+//        need(_screen.getStatusItems());
+//        need(_screen.getVisits());
+//        need(_screen.getLabHead());
+//        need(_screen.getLabHead().getLabMembers());
+//        need(_screen.getLeadScreener());
+//        need(_screen.getScreenResult());
+//
+//        if (_screenResult != null) {
+//          need(_screenResult.getPlateNumbers());
+//          need(_screenResult.getResultValueTypes());
+//          need(_screenResult.getWells());
+//          for (ResultValueType rvt : _screenResult.getResultValueTypes()) {
+//            rvt.getDerivedTypes();
+//            rvt.getTypesDerivedFrom();
+//            //rvt.getResultValues(); // major performance hit!  fortunateyl, screenResultViewer is expressly designed to not use this
+//          }
+//        }
+      }
+
+      @Override
+      protected void reloadEntities()
+      {
+        _screen = (Screen) reload(_screen);
+        HACKupdateScreenResult();
+      }
+
       @Override
       public void setEntities()
       {
@@ -194,10 +244,17 @@ public class ScreensController extends AbstractUIController
         _screenResultViewer.setScreen(_screen);
         _heatMapViewer.setScreenResult(_screenResult);
         _screenResultViewer.setScreenResult(_screenResult);
-        
       }
-    }.initializeView();
-    
+      
+      private void HACKupdateScreenResult()
+      {
+        _screenResult = null;
+        if (_screen.getScreenResult() != null) {
+          _screenResult = (ScreenResult) reload(_screen.getScreenResult());
+        }
+      }
+    };
+
     return VIEW_SCREEN;
   }
 

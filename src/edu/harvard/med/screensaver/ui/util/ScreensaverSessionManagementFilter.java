@@ -162,7 +162,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
         {
           Throwable caughtException = null;
           try {
-            reinitializeViewEntitiesIfNeeded(httpSession);
+            initializeEntities(httpSession);
             filterChain.doFilter(request, response);
           }
           catch (Exception e) {
@@ -170,8 +170,13 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
             // our txn, since inability to communicate our response back to the
             // client is not grounds for aborting the operation the user
             // initiated
-            e.printStackTrace();
-            log.error("caught IOException during invocation of servlet filter chain");
+            log.error("caught exception during invocation of servlet filter chain");
+            if (e instanceof ServletException) {
+              ((ServletException) e).getRootCause().printStackTrace();
+            } 
+            else {
+              e.printStackTrace();
+            }
             caughtException = e;
             // TODO: rollback txn?
           }
@@ -226,20 +231,24 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
     }
   }
 
-  private void reinitializeViewEntitiesIfNeeded(final HttpSession httpSession)
+  private void initializeEntities(final HttpSession httpSession)
   {
     try {
-      Boolean reloadViewEntities = (Boolean) httpSession.getAttribute(RELOAD_VIEW_ENTITIES_SESSION_PARAM);
-      if (reloadViewEntities != null && reloadViewEntities) {
-        ViewEntityInitializer viewEntityInitializer = 
-          (ViewEntityInitializer) httpSession.getAttribute(ViewEntityInitializer.LAST_VIEW_ENTITY_INITIALIZER);
-        if (viewEntityInitializer != null) {
-          viewEntityInitializer.initializeView();
+      ViewEntityInitializer viewEntityInitializer = 
+        (ViewEntityInitializer) httpSession.getAttribute(ViewEntityInitializer.LAST_VIEW_ENTITY_INITIALIZER);
+      if (viewEntityInitializer != null) {
+        Boolean reloadViewEntities = (Boolean) httpSession.getAttribute(RELOAD_VIEW_ENTITIES_SESSION_PARAM);
+        if (reloadViewEntities != null && reloadViewEntities) {
+          viewEntityInitializer.reloadView();
         }
         else {
-          getMessages().setFacesMessageForComponent(httpSession, SYSTEM_ERROR_ENCOUNTERED, null, "No ViewEntityInitializer registered", "");
+          viewEntityInitializer.reinitializeView();
         }
       }
+    }
+    catch (Throwable t) {
+      // in case *this* method threw the exception, ensure that we won't re-enter method when trying to view error page!
+      httpSession.removeAttribute(ViewEntityInitializer.LAST_VIEW_ENTITY_INITIALIZER);
     }
     finally {
       httpSession.removeAttribute(RELOAD_VIEW_ENTITIES_SESSION_PARAM);

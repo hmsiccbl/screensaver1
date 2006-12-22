@@ -38,6 +38,7 @@ import edu.harvard.med.screensaver.ui.libraries.WellSearchResultsViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
+import edu.harvard.med.screensaver.ui.util.ViewEntityInitializer;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
@@ -283,26 +284,49 @@ public class LibrariesController extends AbstractUIController
   }
   
   @UIControllerMethod
-  public String viewLibrary(Library library, LibrarySearchResults librarySearchResults)
+  public String viewLibrary(final Library library, LibrarySearchResults librarySearchResults)
   {
-    _dao.persistEntity(library); // re-attach to Hibernate session
-    library.getWells().iterator(); // force initialization
-    library.getCopies().iterator(); // force initialization
-    
     _libraryViewer.setLibrarySearchResults(librarySearchResults);
-    _libraryViewer.setLibrary(library);
+
+    new ViewEntityInitializer(_dao) 
+    {
+      protected void reattachEntities()
+      {
+        reattach(library);
+      }
+
+      @Override
+      protected void setEntities()
+      {
+        _libraryViewer.setLibrary(library);
+      }
+    };
+    
     return "viewLibrary";
   }
   
   @UIControllerMethod
-  public String viewLibraryContents(Library library)
+  public String viewLibraryContents(final Library library)
   {
-    _dao.persistEntity(library); // re-attach to Hibernate session
-    for (Well well : library.getWells()) {
-      // force initialization of persistent collections needed by search result viewer
-      well.getGenes().size();
-      well.getCompounds().size();
-    }
+    new ViewEntityInitializer(_dao) 
+    {
+      @Override
+      protected void reattachEntities()
+      {
+        reattach(library);
+      }
+      
+      @Override
+      protected void inflateEntities()
+      {
+//        for (Well well : library.getWells()) {
+//          // force initialization of persistent collections needed by search result viewer
+//          well.getGenes().size();
+//          well.getCompounds().size();
+//        }
+      }
+      
+    };
 
     WellSearchResults wellSearchResults = new WellSearchResults(
         new ArrayList<Well>(library.getWells()),
@@ -330,7 +354,7 @@ public class LibrariesController extends AbstractUIController
    * @param wellSearchResults <code>null</code> if well was not found within
    *          the context of a search result
    */
-  public String viewWell(Well well, WellSearchResults wellSearchResults)
+  public String viewWell(final Well well, WellSearchResults wellSearchResults)
   {
     // TODO: we should consider replicating this null-condition handling in our
     // other view*() methods (and in all controllers)
@@ -339,40 +363,85 @@ public class LibrariesController extends AbstractUIController
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     else {
-      _dao.persistEntity(well); // re-attach to Hibernate session
-      well.getGenes(); // force initialization of genes and silencing reagents
-      well.getCompounds().iterator(); // force initialization
       
       _wellViewer.setWellSearchResults(wellSearchResults);
-      _wellViewer.setWell(well);
+      
+      new ViewEntityInitializer(_dao) 
+      {
+        @Override
+        protected void reattachEntities()
+        {
+          _dao.persistEntity(well);
+        }
+        
+        @Override
+        protected void inflateEntities()
+        {
+//          well.getGenes(); // initialization of genes and silencing reagents
+//          well.getCompounds().iterator(); 
+        }
+
+        @Override
+        protected void setEntities()
+        {
+          _wellViewer.setWell(well);
+        }
+      };
       return "viewWell";
     }
   }
 
   @UIControllerMethod
-  public String viewGene(Gene gene, WellSearchResults wellSearchResults)
+  public String viewGene(final Gene gene, WellSearchResults wellSearchResults)
   {
-    _dao.persistEntity(gene); // re-attach to Hibernate session
     Hibernate.initialize(gene.getGenbankAccessionNumbers());
     
+    new ViewEntityInitializer(_dao) 
+    {
+      @Override
+      protected void reattachEntities()
+      {
+        _dao.persistEntity(gene);
+      }
+      
+      @Override
+      protected void setEntities()
+      {
+        _geneViewer.setGene(gene);
+      }
+    };
     _geneViewer.setWellSearchResults(wellSearchResults);
-    _geneViewer.setGene(gene);
     return "viewGene";
   }
 
   @UIControllerMethod
-  public String viewCompound(
-    Compound compound,
-    edu.harvard.med.screensaver.ui.searchresults.WellSearchResults wellSearchResults)
+  public String viewCompound(final Compound compound,
+                             WellSearchResults wellSearchResults)
   {
-    _dao.persistEntity(compound); // re-attach to Hibernate session
-    Hibernate.initialize(compound.getCompoundNames());
-    Hibernate.initialize(compound.getPubchemCids());
-    Hibernate.initialize(compound.getCasNumbers());
-    Hibernate.initialize(compound.getNscNumbers());
-    
+    new ViewEntityInitializer(_dao) 
+    {
+      @Override
+      protected void reattachEntities()
+      {
+        _dao.persistEntity(compound);
+      }
+      
+      @Override
+      protected void inflateEntities() 
+      {
+//        Hibernate.initialize(compound.getCompoundNames());
+//        Hibernate.initialize(compound.getPubchemCids());
+//        Hibernate.initialize(compound.getCasNumbers());
+//        Hibernate.initialize(compound.getNscNumbers());
+      }
+      
+      @Override
+      protected void setEntities()
+      {
+        _compoundViewer.setCompound(compound);
+      }
+    };
     _compoundViewer.setWellSearchResults(wellSearchResults);
-    _compoundViewer.setCompound(compound);
     return "viewCompound";
   }
 
