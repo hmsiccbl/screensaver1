@@ -123,6 +123,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private static final String UNKNOWN_ERROR = "unknown error";
   private static final String NO_DATA_SHEETS_FOUND_ERROR = "no data worksheets were found; no result data was imported";
   private static final String NO_SUCH_WELL = "library well does not exist";
+  private static final String NO_SUCH_LIBRARY_WITH_PLATE = "no library with given plate number";
 
 
   private static SortedMap<String,AssayReadoutType> assayReadoutTypeMap = new TreeMap<String,AssayReadoutType>();
@@ -742,11 +743,12 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @throws ExtantLibraryException if an existing Well entity cannot be found
    *           in the database
    * @throws IOException 
+   * @throws UnrecoverableScreenResultParseException 
    */
   private void parseData(
     Workbook workbook,
     ScreenResult screenResult) 
-    throws ExtantLibraryException, IOException
+    throws ExtantLibraryException, IOException, UnrecoverableScreenResultParseException
   {
     int dataSheetsParsed = 0;
     for (int iSheet = 0; iSheet < workbook.getWorkbook().getNumberOfSheets(); ++iSheet) {
@@ -835,7 +837,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     return stockPlateColumnName.equals(DATA_SHEET__STOCK_PLATE_COLUMN_NAME);
   }
 
-  private Well findWell(int iRow)
+  private Well findWell(int iRow) throws UnrecoverableScreenResultParseException
   {
     Integer plateNumber = _plateNumberParser.parse(dataCell(iRow,
                                                             DataColumn.STOCK_PLATE_ID,
@@ -844,31 +846,20 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                  DataColumn.WELL_NAME,
                                  true);
     String wellName = _wellNameParser.parse(wellNameCell);
-    Well well = _dao.findWell(plateNumber, wellName);
-
-    if (well != null) {
-      // optimization: ask Hibernate to load all well for this library now
-      well.getLibrary().getWells().iterator();
+    if (wellName.equals("")) {
+      return null;
     }
-    else {
-      // HACK
-      // TODO: Our "contract" is that all wells are created for all plates of a library by the time it is imported,
-      // so this should not be necessary.  But us developers are not always working with a full database (i.e., 
-      // with library contents imported), so this allows us to work in that environment.  This should be removed,
-      // ideally.  Removal will require re-running unit tests, at a minimum. --@
-      if ("hack".equals("hack")) {
-        List<Library> libraries = _dao.findAllEntitiesWithType(Library.class);
-        for (Library library : libraries) {
-          if (plateNumber >= library.getStartPlate() && plateNumber <= library.getEndPlate()) {
-            log.debug("creating missing wells for library " + library.getLibraryName());
-            _dao.createWellsForLibrary(library);
-          }
-        }
-      }
-      else {
-        _errors.addError(NO_SUCH_WELL + ": " + plateNumber + ":" + wellName,
-                         wellNameCell);
-      }
+    Library library = _dao.findLibraryWithPlate(plateNumber);
+    if (library == null) {
+      _errors.addError(NO_SUCH_LIBRARY_WITH_PLATE + ": " + plateNumber, wellNameCell);
+      return null;
+    }
+    _dao.loadOrCreateWellsForLibrary(library);
+    Well well = _dao.findWell(plateNumber, wellName);
+    if (well == null) {
+      throw new UnrecoverableScreenResultParseException(
+        NO_SUCH_WELL + ": " + plateNumber + ":" + wellName,
+        wellNameCell);
     }
 
     return well;

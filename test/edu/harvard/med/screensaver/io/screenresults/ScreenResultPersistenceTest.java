@@ -16,9 +16,9 @@ import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.SchemaUtil;
+import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -58,16 +58,14 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
           ScreenType.SMALL_MOLECULE,
           LibraryType.COMMERCIAL,
           1,
-          1);
-        new Well(library, 1, "A01");
-        new Well(library, 1, "A02");
-        new Well(library, 1, "A03");
-        new Well(library, 2, "A01");
-        new Well(library, 2, "A02");
-        new Well(library, 2, "A03");
+          3);
+        dao.loadOrCreateWellsForLibrary(library);
         dao.persistEntity(library);
         screenResultParser.parse(screen, 
                                  workbookFile);
+        for (ParseError error: screenResultParser.getErrors()) {
+          System.out.println("error: " + error);
+        }
         assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
         dao.persistEntity(screen);
       }

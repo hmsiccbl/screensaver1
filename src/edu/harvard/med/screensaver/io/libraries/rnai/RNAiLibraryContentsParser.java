@@ -213,10 +213,10 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
     _plateNumberParser = new PlateNumberParser(_errorManager);
     _wellNameParser = new WellNameParser(_errorManager);
     _geneInfoProvider = new NCBIGeneInfoProvider(_errorManager);
-    // note: has the beneficial side-effect of loading all of the library's
-    // wells in the Hibernate session, which avoids the need to make database
-    // queries when checking for existence of wells
-    _dao.createWellsForLibrary(library);
+
+    // load all of the library's wells in the Hibernate session, which avoids the need
+    // to make database queries when checking for existence of wells
+    _dao.loadOrCreateWellsForLibrary(library);
   }
   
 

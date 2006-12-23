@@ -333,6 +333,7 @@ public class ScreenResult extends AbstractEntity
    * @hibernate.collection-element type="integer" column="plate_number"
    * @return
    */
+  @DerivedEntityProperty(isPersistent=true)
   public SortedSet<Integer> getPlateNumbers()
   {
     return _plateNumbers;
@@ -402,6 +403,7 @@ public class ScreenResult extends AbstractEntity
    * @return the number of experimental wells that have data in this Screen Result
    * @hibernate.property type="integer" not-null="true"
    */
+  @DerivedEntityProperty(isPersistent=true)
   public int getExperimentalWellCount()
   {
     return _experimentalWellCount;

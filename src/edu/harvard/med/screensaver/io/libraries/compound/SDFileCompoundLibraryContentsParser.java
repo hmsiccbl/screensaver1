@@ -223,9 +223,9 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
     _sdFile = file;
     _sdFileReader = new BufferedReader(new InputStreamReader(stream));
     _errorManager = new SDFileParseErrorManager();
-    // note: has the beneficial side-effect of loading all of the library's
-    // wells in the Hibernate session, which avoids the need to make database
-    // queries when checking for existence of wells
-    _dao.createWellsForLibrary(library);
+
+    // load all of the library's wells in the Hibernate session, which avoids the need
+    // to make database queries when checking for existence of wells
+    _dao.loadOrCreateWellsForLibrary(library);
   }
 }

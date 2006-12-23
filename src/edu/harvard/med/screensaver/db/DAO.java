@@ -268,7 +268,7 @@ public interface DAO
 
   public Set<Well> findWellsForPlate(int plate);
   
-  public void createWellsForLibrary(Library library);
+  public void loadOrCreateWellsForLibrary(Library library);
 
   
   /**

@@ -12,11 +12,12 @@ package edu.harvard.med.screensaver.io.libraries.compound;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-
-import org.apache.log4j.Logger;
+import edu.harvard.med.screensaver.model.libraries.WellType;
 
 class SDRecordParser
 {
@@ -202,6 +203,7 @@ class SDRecordParser
       reportError("internal error: well " + wellKey + " was not created);");
       return null;
     }
+    well.setWellType(WellType.EXPERIMENTAL);
     well.setIccbNumber(_sdRecordData.getIccbNumber());
     well.setVendorIdentifier(_sdRecordData.getVendorIdentifier());
     if (_molfileToSmiles != null) {

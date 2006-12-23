@@ -22,20 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.libraries.Gene;
-import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
-import edu.harvard.med.screensaver.util.StringUtils;
-
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -43,6 +29,21 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
+
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 
 /**
@@ -328,34 +329,40 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   {
     return new TreeSet<Well>(getHibernateTemplate().find("from Well where plateNumber = ?", plate));
   }
-
-  public void createWellsForLibrary(Library library)
+  
+  @SuppressWarnings("unchecked")
+  public void loadOrCreateWellsForLibrary(Library library)
   {
+    // this might not perform awesome, but:
+    //   - is correct, in terms of the "load" part of method contract, since it is
+    //     always possible that some but not all of the library's wells have already
+    //     been loaded into the session.
+    //   - presumably this method is not called in time-critical sections of code
+    // further performance improvements possible by checking if a single well (or
+    // something like that) was in the session, but this fails to be correct, in
+    // terms of the "load" part of the method contract, although it will not cause
+    // any errors, just perf problems later when code is forced to get wells one at
+    // a time.
+    List<Well> wells = getHibernateTemplate().find(
+      "from Well where plateNumber >= ? and plateNumber <= ?",
+      new Object [] { library.getStartPlate(), library.getEndPlate() });
+    if (wells.size() > 0) {
+      return;
+    }
     for (int iPlate = library.getStartPlate(); iPlate <= library.getEndPlate(); ++iPlate) {
-      Map<WellKey,Well> _extantWells = new HashMap<WellKey,Well>();
-      for (Well well : findWellsForPlate(iPlate)) {
-        _extantWells.put(well.getWellKey(), well);
-      };
-      _logger.info("creating wells for library " + library.getLibraryName() + ", plate " + iPlate);
-      int wellsCreated = 0;
       for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
         for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
           WellKey wellKey = new WellKey(iPlate, iRow, iCol);
-          if (!_extantWells.containsKey(wellKey)) {
-            Well well = 
-              new Well(library,
-                       new Integer(iPlate),
-                       wellKey.getWellName());
-            persistEntity(well);
-            _extantWells.put(wellKey, well);
-            ++wellsCreated;
-          }
+          Well well = new Well(
+            library,
+            iPlate,
+            wellKey.getWellName(),
+            WellType.EMPTY);
+          persistEntity(well);
         }
       }
-      _logger.info("created " + wellsCreated + " wells for library " + 
-                   library.getLibraryName() + ", plate " + iPlate);
-      
     }
+    _logger.info("created wells for library " + library.getLibraryName());
   }
   
   @SuppressWarnings("unchecked")

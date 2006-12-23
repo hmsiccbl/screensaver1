@@ -90,7 +90,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     assertNotNull("error 0 has cell", error.getCell());
     assertEquals(
       "cell for error 0",
-      "column header errors.xls:duplicate plate:(C,1)",
+      "duplicate plate:(C,1)",
       error.getCell().toString());
   
     // error 1
@@ -171,7 +171,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     assertNotNull("error 0 has cell", error.getCell());
     assertEquals(
       "cell for error 0",
-      "data row errors.xls:Human Kinases:(A,2)",
+      "Human Kinases:(A,2)",
       error.getCell().toString());
 
     // error 1

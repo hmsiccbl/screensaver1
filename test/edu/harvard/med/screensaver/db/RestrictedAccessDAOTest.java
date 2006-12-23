@@ -13,12 +13,13 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -26,8 +27,6 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-
-import org.apache.log4j.Logger;
 
 /**
  * Tests DataAccessPolicy implementation, as well as Spring AOP configuration
@@ -136,22 +135,19 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
           ScreenType.SMALL_MOLECULE,
           LibraryType.COMMERCIAL,
           1,
-          1);
-        new Well(library, 1, "A01");
-        new Well(library, 1, "A02");
-        new Well(library, 1, "A03");
-        new Well(library, 2, "A01");
-        new Well(library, 2, "A02");
-        new Well(library, 2, "A03");
+          3);
+        dao.loadOrCreateWellsForLibrary(library);
         dao.persistEntity(library);
 
         Screen screen115 = ScreenResultParser.makeDummyScreen(115);
         screenResultParser.parse(screen115, new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
                                                      ScreenResultParserTest.SCREEN_RESULT_115_TEST_WORKBOOK_FILE));
-        assertFalse("screenresult import successful", screenResultParser.getHasErrors());
+
         if (screenResultParser.getHasErrors()) {
-          log.debug(screenResultParser.getErrors());
+          log.error(screenResultParser.getErrors());
         }
+        assertFalse("screenresult import successful", screenResultParser.getHasErrors());
+       
         screen115.setLeadScreener(users[0]);
         screen115.addCollaborator(users[1]);
         

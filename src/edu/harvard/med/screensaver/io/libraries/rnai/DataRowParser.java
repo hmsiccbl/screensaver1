@@ -181,6 +181,9 @@ public class DataRowParser
     if (isControl) {
       well.setWellType(WellType.LIBRARY_CONTROL);
     }
+    else {
+      well.setWellType(WellType.EXPERIMENTAL);
+    }
     String vendorIdentifier = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.VENDOR_IDENTIFIER),
       _rowIndex).getString();

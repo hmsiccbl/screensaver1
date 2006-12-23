@@ -825,6 +825,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    *         ActivityIndicator ResultValueType; otherwise null
    * @hibernate.property type="integer"
    */
+  @DerivedEntityProperty(isPersistent=true)
   public Integer getHits()
   {
     return _hits;
@@ -1058,12 +1059,11 @@ public class ResultValueType extends AbstractEntity implements Comparable
     _isNumericalnessDetermined = true;
   }
 
-  // should be private, cuz we only want this class or Hibernate to call, but breaks our naive units tests
   /**
    * @motivation for Hibernate
    * @param hits
    */
-  public void setHits(Integer hits)
+  private void setHits(Integer hits)
   {
     _hits = hits;
   }

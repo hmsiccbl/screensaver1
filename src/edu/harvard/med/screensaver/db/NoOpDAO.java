@@ -153,7 +153,7 @@ public class NoOpDAO implements DAO
     return null;
   }
 
-  public void createWellsForLibrary(Library library)
+  public void loadOrCreateWellsForLibrary(Library library)
   {
   }
 

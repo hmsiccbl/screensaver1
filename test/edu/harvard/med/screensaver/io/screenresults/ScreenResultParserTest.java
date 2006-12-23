@@ -348,7 +348,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setIndicatorCutoff(1.5);
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setNumeric(true);
-    rvt.setHits(3 + 19 + 40);
     expectedResultValueTypes.put(4, rvt);
 
     rvt = new ResultValueType(expectedScreenResult, "AssayIndicator2");
@@ -359,7 +358,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setActivityIndicatorType(ActivityIndicatorType.PARTITION);
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setNumeric(false);
-    rvt.setHits(38 + 84 + 88 - 3 /*non experimental or excluded wells*/);
     expectedResultValueTypes.put(5, rvt);
 
     rvt = new ResultValueType(expectedScreenResult, "AssayIndicator3");
@@ -370,7 +368,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setActivityIndicatorType(ActivityIndicatorType.BOOLEAN);
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setNumeric(false);
-    rvt.setHits(1 + 0 + 11);
     expectedResultValueTypes.put(6, rvt);
 
     Integer[] expectedPlateNumbers = {1, 1, 1, 1, 1, 1, 1, 1};
