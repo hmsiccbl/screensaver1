@@ -15,6 +15,7 @@ import javax.faces.context.FacesContext;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.ui.Login;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
@@ -164,7 +165,7 @@ public abstract class ViewEntityInitializer
     initializeView();
   }
 
-  protected DAO getDAO() 
+  final protected DAO getDAO() 
   { 
     return _dao; 
   }
@@ -209,7 +210,8 @@ public abstract class ViewEntityInitializer
   final private void registerCurrentViewInitializer()
   {
     log.debug("setting " + getClass().getName() + " as current view initializer");
-    FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put(LAST_VIEW_ENTITY_INITIALIZER, this);
+    FacesContext facesContext = FacesContext.getCurrentInstance();
+    facesContext.getExternalContext().getSessionMap().put(LAST_VIEW_ENTITY_INITIALIZER, this);
   }
 }
 

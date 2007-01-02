@@ -26,8 +26,10 @@ import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.HibernateSessionFactory;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.orm.hibernate3.support.OpenSessionInViewFilter;
@@ -162,8 +164,24 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
         {
           Throwable caughtException = null;
           try {
-            initializeEntities(httpSession);
+            int initialEntityCount = 0;
+            int initialCollectionCount = 0;
+            if (log.isDebugEnabled()) {
+              Session session = lookupSessionFactoryViaSpring().getCurrentSession();
+              initialCollectionCount = session.getStatistics().getCollectionCount();
+              initialEntityCount = session.getStatistics().getEntityCount();
+            }
+
+            initializeHibernateEntities(httpSession);
             filterChain.doFilter(request, response);
+
+            if (log.isDebugEnabled()) {
+              Session session = lookupSessionFactoryViaSpring().getCurrentSession();
+              int finalEntityCount = session.getStatistics().getEntityCount();
+              int finalCollectionCount = session.getStatistics().getCollectionCount();
+              log.debug("session entity count: pre=" + initialEntityCount + ", post=" + finalEntityCount + ", delta=" + (finalEntityCount - initialEntityCount));
+              log.debug("session collection count: pre=" + initialCollectionCount + ", post=" + finalCollectionCount + ", delta=" + (finalCollectionCount - initialCollectionCount));
+            }
           }
           catch (Exception e) {
             // note: if an I/O exception occurs, we should still try to complete
@@ -172,12 +190,12 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
             // initiated
             log.error("caught exception during invocation of servlet filter chain");
             if (e instanceof ServletException) {
-              ((ServletException) e).getRootCause().printStackTrace();
+              caughtException = ((ServletException) e).getRootCause();
             } 
             else {
-              e.printStackTrace();
+              caughtException = e;
             }
-            caughtException = e;
+            caughtException.printStackTrace();
             // TODO: rollback txn?
           }
           finally {
@@ -185,6 +203,8 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
               // any exceptions are thrown at this point may have occurred before response was rendered, so we must redirect to an error page, if we want to guarantee the user gets a response
               httpSession.setAttribute("javax.servlet.error.exception", caughtException);
               try {
+                httpSession.removeAttribute(ViewEntityInitializer.LAST_VIEW_ENTITY_INITIALIZER);
+                
                 response.sendRedirect(REPORT_EXCEPTION_URL);
               }
               catch (IOException e) {
@@ -216,7 +236,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
       // don't invalidate session yet, so that our error page, which is a JSF page and requires 
       // JSF backing beans that are stored in our HTTP session, can still operate
       httpSession.setAttribute("javax.servlet.error.exception", e);
-      
+
       getMessages().setFacesMessageForComponent(httpSession, SYSTEM_ERROR_ENCOUNTERED,  null, e.getClass().getName(), e.getMessage());
     }
     finally {
@@ -231,7 +251,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
     }
   }
 
-  private void initializeEntities(final HttpSession httpSession)
+  private void initializeHibernateEntities(final HttpSession httpSession)
   {
     try {
       ViewEntityInitializer viewEntityInitializer = 

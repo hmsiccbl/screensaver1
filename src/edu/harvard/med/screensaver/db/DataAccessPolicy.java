@@ -68,16 +68,6 @@ public class DataAccessPolicy implements AbstractEntityVisitor
   
   // public methods
 
-  public ScreensaverUser getScreensaverUser()
-  {
-    // handle usage within a web context
-    if (_screensaverUser == null) {
-      return getCurrentScreensaverUser();
-    }
-    // handle usage within a testing context
-    return _screensaverUser;
-  }
-  
   public void setScreensaverUser(ScreensaverUser user)
   {
     _screensaverUser = user;
@@ -338,10 +328,26 @@ public class DataAccessPolicy implements AbstractEntityVisitor
     return true;
   }
   
+
+  // protected methods
+  
+  protected ScreensaverUser getScreensaverUser()
+  {
+    // handle usage within a web context
+    if (_screensaverUser == null) {
+      return getCurrentScreensaverUser();
+    }
+    // handle usage within a testing context
+    return _screensaverUser;
+  }
+
   
   // private methods
   
-  // TODO: Major HACK alert! We need a better way of getting at the logged-in user.  Some form of injection...
+  // TODO: Major HACK alert! We need a better way of getting at the logged-in
+  // user, but one that will work outside the JSF framework (from just a vanilla
+  // servlet or servlet filter). Some form of injection...but this will require
+  // making DataAccessPolicy instances session-scoped.
   private ScreensaverUser getCurrentScreensaverUser()
   {
     FacesContext facesContext = FacesContext.getCurrentInstance();

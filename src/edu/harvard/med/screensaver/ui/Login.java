@@ -13,6 +13,7 @@ import java.security.Principal;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.ui.authentication.ScreensaverLoginModule;
 
 import org.apache.log4j.Logger;
 
@@ -54,31 +55,16 @@ public class Login extends AbstractBackingBean
   /**
    * Returns the ScreensaverUser that is logged in to the current HTTP session.
    * 
-   * @motivation <code>getExternalContext().getUserPrincipal()</code> does not
-   *             return the ScreensaverUserPrincipal object that we provided to
-   *             Tomcat during our JAAS authentication process (in
-   *             {@link ScreensaverLoginModule#commit}, and so we cannot get at
-   *             the ScreensaverUser object that would have available via the
-   *             ScreensaverUserPrincipal object. So we have to requery the
-   *             database to find the ScreensaverUser given only the user's
-   *             login ID.
    * @return the ScreensaverUser that is logged in to the current HTTP session
    */
   public ScreensaverUser getScreensaverUser()
   {
-    Principal principal = getExternalContext().getUserPrincipal();
-    if (principal == null) {
-      return null;
-    }
-    String eCommonsIdOrLoginId = principal.getName();
-    ScreensaverUser user = (ScreensaverUser) getHttpSession().getAttribute(SCREENSAVER_USER_SESSION_ATTRIBUTE);
+    ScreensaverUser user = getSessionCachedScreensaverUser();
     if (user == null) {
-      user = _dao.findEntityByProperty(ScreensaverUser.class, "ECommonsId", eCommonsIdOrLoginId);
-      if (user == null) {
-        user = _dao.findEntityByProperty(ScreensaverUser.class, "loginId", eCommonsIdOrLoginId);
-      }
+      Principal principal = getExternalContext().getUserPrincipal();
+      user = getScreensaverUserForPrincipal(principal);
+      setSessionCachedScreensaverUser(user);
     }
-    getHttpSession().setAttribute(SCREENSAVER_USER_SESSION_ATTRIBUTE, user);
     return user;
   }
 
@@ -104,5 +90,47 @@ public class Login extends AbstractBackingBean
     // this will force another login attempt
     return LOGOUT_ACTION_RESULT;
   }
+  
+  
+  // private methods
+  
+  /**
+   * Returns a ScreensaverUser object for the specified Principal.
+   * 
+   * @motivation Normally, the ScreensaverUser instance would be the same object
+   *             as the Principal instance, but
+   *             <code>getExternalContext().getUserPrincipal()</code> does not
+   *             return the ScreensaverUserPrincipal object that we provided to
+   *             Tomcat during our JAAS authentication process (in
+   *             {@link ScreensaverLoginModule#commit}, and so we cannot get at
+   *             the ScreensaverUser object that would have available via the
+   *             ScreensaverUserPrincipal object. So we have to requery the
+   *             database to find the ScreensaverUser given only the user's
+   *             login ID.
+   * @return the ScreensaverUser that is logged in to the current HTTP session
+   */
+  private ScreensaverUser getScreensaverUserForPrincipal(Principal principal)
+  {
+    if (principal == null) {
+      return null;
+    }
+    String eCommonsIdOrLoginId = principal.getName();
+    ScreensaverUser user = _dao.findEntityByProperty(ScreensaverUser.class, "ECommonsId", eCommonsIdOrLoginId);
+    if (user == null) {
+      user = _dao.findEntityByProperty(ScreensaverUser.class, "loginId", eCommonsIdOrLoginId);
+    }
+    return user;
+  }
 
+  
+  private void setSessionCachedScreensaverUser(ScreensaverUser user)
+  {
+    getHttpSession().setAttribute(SCREENSAVER_USER_SESSION_ATTRIBUTE, user);
+  }
+
+  private ScreensaverUser getSessionCachedScreensaverUser()
+  {
+    ScreensaverUser user = (ScreensaverUser) getHttpSession().getAttribute(SCREENSAVER_USER_SESSION_ATTRIBUTE);
+    return user;
+  }
 }
