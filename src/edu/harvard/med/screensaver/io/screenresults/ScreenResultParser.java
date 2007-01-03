@@ -19,9 +19,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -377,6 +379,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private Factory _metadataCellParserFactory;
   private Factory _dataCellParserFactory;
   private Map<Integer,Short> _dataHeaderIndex2DataHeaderColumn;
+  private Set<Library> _preloadedLibraries;
+  private Map<Integer,Library> _plate2Library;
 
   
   // public methods and constructors
@@ -484,6 +488,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   {
     _screenResult = null;
     _errors = new ParseErrorManager();
+    _preloadedLibraries = new HashSet<Library>();
+    _plate2Library = new HashMap<Integer,Library>();
     _assayReadoutTypeParser = new CellVocabularyParser<AssayReadoutType>(assayReadoutTypeMap, _errors);
     _dataTableColumnLabel2RvtMap = new TreeMap<String,ResultValueType>();
     _columnsDerivedFromParser = new ColumnLabelsParser(_dataTableColumnLabel2RvtMap, _errors);
@@ -849,12 +855,13 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     if (wellName.equals("")) {
       return null;
     }
-    Library library = _dao.findLibraryWithPlate(plateNumber);
+    Library library = findLibraryWithPlate(plateNumber);
     if (library == null) {
       _errors.addError(NO_SUCH_LIBRARY_WITH_PLATE + ": " + plateNumber, wellNameCell);
       return null;
     }
-    _dao.loadOrCreateWellsForLibrary(library);
+    preloadLibraryWells(library);
+    
     Well well = _dao.findWell(plateNumber, wellName);
     if (well == null) {
       throw new UnrecoverableScreenResultParseException(
@@ -863,6 +870,31 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     }
 
     return well;
+  }
+
+  /**
+   * @motivation database I/O optimization
+   */
+  private Library findLibraryWithPlate(Integer plateNumber)
+  {
+    if (!_plate2Library.containsKey(plateNumber)) {
+      Library library = _dao.findLibraryWithPlate(plateNumber); 
+      for (int p = library.getStartPlate(); p <= library.getEndPlate(); ++p) {
+        _plate2Library.put(p, library);
+      }
+    }
+    return _plate2Library.get(plateNumber);
+  }
+
+  /**
+   * @motivation database I/O optimization
+   */
+  private void preloadLibraryWells(Library library)
+  {
+    if (!_preloadedLibraries.contains(library)) {
+      _dao.loadOrCreateWellsForLibrary(library);
+      _preloadedLibraries.add(library);
+    }
   }
 
   private static class ParsedScreenInfo {
