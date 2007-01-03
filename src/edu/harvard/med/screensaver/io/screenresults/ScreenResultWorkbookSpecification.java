@@ -14,8 +14,6 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 
 public interface ScreenResultWorkbookSpecification
 {
-  public static final String FIRST_DATE_SCREENED = "First Date Screened";
-  public static final String SCREEN_ID_LABEL = "ID";
   public static final String SCREEN_INFO_SHEET_NAME = "Screen Info";
   public static final String DATA_HEADERS_SHEET_NAME = "Data Headers";
   public static final String DATA_SHEET_NAME = "Data";
@@ -117,7 +115,7 @@ public interface ScreenResultWorkbookSpecification
     LEAD_SCREENER("Lead Screener"),
     COLLABORATORS("Collaborators"),
     PUBMED_ID("Pubmed ID"),
-    FIRST_DATE_SCREENED("First Date Screened"),
+    FIRST_DATA_DEPOSITION("First Data Deposition"),
     EMAIL("Email"),
     LAB_AFFILIATION("Lab Affiliation"),
     ;

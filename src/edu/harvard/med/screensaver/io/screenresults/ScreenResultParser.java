@@ -119,8 +119,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
 
   // TODO: move these a messages (Spring) resource file
-  private static final String NO_CREATED_DATE_FOUND_ERROR = "\"First Date Screened\" value not found";
-  private static final String NO_SCREEN_ID_FOUND_ERROR = "no screen ID found";
+  private static final String NO_FIRST_DATA_DEPOSITION_DATE_FOUND_ERROR = "\"First Data Deposition\" value not found";
+  private static final String NO_SCREEN_ID_FOUND_ERROR = "Screen ID not found";
   private static final String DATA_HEADER_SHEET_NOT_FOUND_ERROR = "\"Data Headers\" sheet not found";
   private static final String UNKNOWN_ERROR = "unknown error";
   private static final String NO_DATA_SHEETS_FOUND_ERROR = "no data worksheets were found; no result data was imported";
@@ -946,10 +946,10 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         String rowLabel = labelCell.getString();
         if (rowLabel != null) {
           Cell valueCell = factory.getCell((short) 1, iRow, true);
-          if (rowLabel.equalsIgnoreCase(FIRST_DATE_SCREENED)) {
+          if (rowLabel.equalsIgnoreCase(ScreenInfoRow.FIRST_DATA_DEPOSITION.getDisplayText())) {
             parsedScreenInfo.setDate(valueCell.getDate());
           }
-          else if (rowLabel.equalsIgnoreCase(SCREEN_ID_LABEL)) {
+          else if (rowLabel.equalsIgnoreCase(ScreenInfoRow.ID.getDisplayText())) {
             parsedScreenInfo.setScreenId(valueCell.getInteger());
           }
         }
@@ -959,10 +959,10 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       _errors.addError(NO_SCREEN_ID_FOUND_ERROR);
     }
     else if (!parsedScreenInfo.getScreenNumber().equals(screen.getScreenNumber())) {
-        _errors.addError("screen result data file is for screen number " + parsedScreenInfo.getScreenNumber() + ", expected " + screen.getScreenNumber());
+      _errors.addError("screen result data file is for screen number " + parsedScreenInfo.getScreenNumber() + ", expected " + screen.getScreenNumber());
     }
     if (parsedScreenInfo.getDateCreated() == null) {
-      _errors.addError(NO_CREATED_DATE_FOUND_ERROR);
+      _errors.addError(NO_FIRST_DATA_DEPOSITION_DATE_FOUND_ERROR);
       parsedScreenInfo.setDate(new Date());
     }
     return parsedScreenInfo;

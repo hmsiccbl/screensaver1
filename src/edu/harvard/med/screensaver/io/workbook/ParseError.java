@@ -45,7 +45,7 @@ public class ParseError
   
   public String toString()
   {
-    return _message + " @ " + _atCell;
+    return _message + (_atCell == null ? "" : " @ " + _atCell);
   }
   
   public String getMessage() 
