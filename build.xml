@@ -297,7 +297,7 @@
 
     <copy
       todir="${exploded.war.dir}/downloads"
-      verbose="${verbose}"
+      verbose="${verbose}" 
     >
       <fileset dir="web/downloads"/>
     </copy>
@@ -329,12 +329,15 @@
       <hibernatecfg
         version="3.0" 
         showsql="false"
+        
         driver="org.postgresql.Driver"
         jdbcurl="jdbc:postgresql://localhost/${app.name}"
         username="${app.name}"
         password="${app.name}"
         dialect="org.hibernate.dialect.PostgreSQLDialect"
-      />
+      >
+        <otherProperty name="generate_statistics" value="${debug}"/>
+      </hibernatecfg>
       <!-- TODO: make 'hibernate.cfg.xml' property match this destinationFile attribute value -->
       <hibernate version="3.0" destinationFile="{0}.hbm.xml"/>
     </hibernatedoclet>

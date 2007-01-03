@@ -39,7 +39,6 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
-import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectManyEntityBean;
@@ -69,8 +68,6 @@ public class ScreenViewer extends AbstractBackingBean
   private AssayReadoutType _newAssayReadoutType = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs)
   private String _newKeyword = "";
   private boolean _isReadOnlyMode = true;
-  private ScreenSearchResults _screenSearchResults;
-
 
   
   // public property getter & setter methods
@@ -93,6 +90,21 @@ public class ScreenViewer extends AbstractBackingBean
   public void setScreen(Screen screen) 
   {
     _screen = screen;
+    resetView();
+  }
+  
+  private void resetView()
+  {
+    _isReadOnlyMode = true;
+    
+    _newFundingSupport = null;
+    _newStatusValue = null;
+    _newKeyword = "";
+    _newAssayReadoutType = AssayReadoutType.UNSPECIFIED;
+
+    _labName = null;
+    _leadScreener = null;
+    _collaborators = null;
   }
   
   public boolean isReadOnlyMode()
@@ -130,36 +142,6 @@ public class ScreenViewer extends AbstractBackingBean
       return _dao.findEntityById(ScreenResult.class, _screen.getScreenResult().getEntityId());
     }
     return null;
-  }
-
-  public void setCandidateLabHeads(List<ScreeningRoomUser> labHeads)
-  {
-    _labName = new UISelectOneEntityBean<ScreeningRoomUser>(labHeads, _screen.getLabHead(), _dao) { 
-      protected String getLabel(ScreeningRoomUser t) { return t.getLabName(); } 
-    };
-    updateLeadScreenerSelectItems();
-  }
-
-  public void setCandidateCollaborators(List<ScreeningRoomUser> screeningRoomUsers)
-  {
-    _collaborators =
-      new UISelectManyEntityBean<ScreeningRoomUser>(screeningRoomUsers, _screen.getCollaborators(), _dao)
-      {
-        protected String getLabel(ScreeningRoomUser t)
-        {
-          return t.getFullNameLastFirst();
-        }
-      };
-  }
-  
-  public ScreenSearchResults getScreenSearchResults()
-  {
-    return _screenSearchResults;
-  }
-
-  public void setScreenSearchResults(ScreenSearchResults searchResults)
-  {
-    _screenSearchResults = searchResults;
   }
 
   public AssayReadoutType getNewAssayReadoutType()
@@ -259,6 +241,11 @@ public class ScreenViewer extends AbstractBackingBean
 
   public UISelectOneBean<ScreeningRoomUser> getLabName()
   {
+    if (_labName == null) {
+      _labName = new UISelectOneEntityBean<ScreeningRoomUser>(_dao.findAllLabHeads(), _screen.getLabHead(), _dao) { 
+        protected String getLabel(ScreeningRoomUser t) { return t.getLabName(); } 
+      };
+    }
     return _labName;
   }
 
@@ -269,12 +256,27 @@ public class ScreenViewer extends AbstractBackingBean
    */
   public UISelectManyBean<ScreeningRoomUser> getCollaborators()
   {
+    if (_collaborators == null) {
+      _collaborators =
+        new UISelectManyEntityBean<ScreeningRoomUser>(_dao.findCandidateCollaborators(), 
+                                                      _screen.getCollaborators(),
+                                                      _dao)
+        {
+          protected String getLabel(ScreeningRoomUser t)
+          {
+            return t.getFullNameLastFirst();
+          }
+        };
+    }
     return _collaborators;
   }
   
 
-  public UISelectOneBean getLeadScreener()
+  public UISelectOneBean<ScreeningRoomUser> getLeadScreener()
   {
+    if (_leadScreener == null) {
+      updateLeadScreenerSelectItems();
+    }
     return _leadScreener;
   }
 
@@ -320,13 +322,9 @@ public class ScreenViewer extends AbstractBackingBean
    */
   @UIControllerMethod
   public String saveScreen() {
-    // TODO: this is an exception to our convention that Hibernate reattachment is the responsibility of the controller (we need to reattach before making getSelection{s} calls, below)
-   
-    _dao.persistEntity(_screen); // re-attach to Hibernate session
-    
-    _screen.setLabHead(_labName.getSelection());
-    _screen.setLeadScreener(_leadScreener.getSelection());
-    _screen.setCollaboratorsList(_collaborators.getSelections());
+    _screen.setLabHead(getLabName().getSelection());
+    _screen.setLeadScreener(getLeadScreener().getSelection());
+    _screen.setCollaboratorsList(getCollaborators().getSelections());
     _isReadOnlyMode = true;
     return _screensController.saveScreen(_screen);
   }
@@ -505,7 +503,7 @@ public class ScreenViewer extends AbstractBackingBean
     // despite the Tomahawk taglib docs, this event listener is called *before*
     // the *end* of the apply request values phase, preventing the
     // _labName.value property from being updated already
-    _labName.setValue((String) event.getNewValue());
+    getLabName().setValue((String) event.getNewValue());
     updateLeadScreenerSelectItems();
     getFacesContext().renderResponse();
   }
@@ -534,7 +532,6 @@ public class ScreenViewer extends AbstractBackingBean
     ArrayList<ScreeningRoomUser> leadScreenerCandidates = new ArrayList<ScreeningRoomUser>();
     if (labHead != null) {
       leadScreenerCandidates.add(labHead);
-      _dao.persistEntity(labHead); // re-attach to Hibernate session
       leadScreenerCandidates.addAll(labHead.getLabMembers());
     }
     _leadScreener = new UISelectOneEntityBean<ScreeningRoomUser>(leadScreenerCandidates, _screen.getLeadScreener(), _dao) {

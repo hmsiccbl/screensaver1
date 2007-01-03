@@ -28,7 +28,6 @@ import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
@@ -145,6 +144,7 @@ public class ScreensController extends AbstractUIController
   @UIControllerMethod
   public String browseScreens()
   {
+    ViewEntityInitializer.unregisterCurrentViewEntityInitializer(); // candidate for AOP
     if (_screensBrowser.getScreenSearchResults() == null) {
       List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
       _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens, this, _dao));
@@ -159,7 +159,6 @@ public class ScreensController extends AbstractUIController
     _currentScreenSearchResults = screenSearchResults;
     
     _screenViewer.setDao(_dao);
-    _screenViewer.setScreenSearchResults(screenSearchResults);
 
     _screenResultImporter.setDao(_dao);
     _screenResultImporter.setMessages(getMessages());
@@ -174,10 +173,7 @@ public class ScreensController extends AbstractUIController
     _heatMapViewer.setDao(_dao);
     _heatMapViewer.setLibrariesController(_librariesController);
 
-    // note: the only reason for defining the setEntities() method in an anon
-    // subclass is for ease-of-coding, and visibility of what's being set (from
-    // this enclosing method)
-    new ViewEntityInitializer(_dao)
+    new ViewEntityInitializer("viewScreen", _dao)
     {
       private Screen _screen;
       private ScreenResult _screenResult;
@@ -197,37 +193,6 @@ public class ScreensController extends AbstractUIController
       }
       
       @Override
-      protected void inflateEntities()
-      {
-//        need(_screen.getAbaseTestsets());
-//        need(_screen.getAssayReadoutTypes());
-//        need(_screen.getHbnCollaborators());
-//        need(_screen.getAttachedFiles());
-//        need(_screen.getBillingInformation());
-//        need(_screen.getFundingSupports());
-//        need(_screen.getKeywords());
-//        need(_screen.getLettersOfSupport());
-//        need(_screen.getPublications());
-//        need(_screen.getStatusItems());
-//        need(_screen.getVisits());
-//        need(_screen.getLabHead());
-//        need(_screen.getLabHead().getLabMembers());
-//        need(_screen.getLeadScreener());
-//        need(_screen.getScreenResult());
-//
-//        if (_screenResult != null) {
-//          need(_screenResult.getPlateNumbers());
-//          need(_screenResult.getResultValueTypes());
-//          need(_screenResult.getWells());
-//          for (ResultValueType rvt : _screenResult.getResultValueTypes()) {
-//            rvt.getDerivedTypes();
-//            rvt.getTypesDerivedFrom();
-//            //rvt.getResultValues(); // major performance hit!  fortunateyl, screenResultViewer is expressly designed to not use this
-//          }
-//        }
-      }
-
-      @Override
       protected void reloadEntities()
       {
         _screen = (Screen) reload(_screen);
@@ -238,8 +203,6 @@ public class ScreensController extends AbstractUIController
       public void setEntities()
       {
         _screenViewer.setScreen(_screen);
-        _screenViewer.setCandidateLabHeads(_dao.findAllLabHeads());
-        _screenViewer.setCandidateCollaborators(_dao.findAllEntitiesWithType(ScreeningRoomUser.class));
         _screenResultImporter.setScreen(_screen);
         _screenResultViewer.setScreen(_screen);
         _heatMapViewer.setScreenResult(_screenResult);
@@ -248,10 +211,12 @@ public class ScreensController extends AbstractUIController
       
       private void HACKupdateScreenResult()
       {
-        _screenResult = null;
-        if (_screen.getScreenResult() != null) {
-          _screenResult = (ScreenResult) reload(_screen.getScreenResult());
-        }
+        _screenResult = _screen.getScreenResult();
+        // TODO: reinstate!
+//        _screenResult = null;
+//        if (_screen.getScreenResult() != null) {
+//          _screenResult = (ScreenResult) reload(_screen.getScreenResult());
+//        }
       }
     };
 
@@ -269,7 +234,6 @@ public class ScreensController extends AbstractUIController
   public String deleteScreenResult(ScreenResult screenResult)
   {
     if (screenResult != null) {
-      _dao.persistEntity(screenResult); // re-attach to Hibernate session
       _dao.deleteScreenResult(screenResult);
     }
     return viewLastScreen();
@@ -285,6 +249,7 @@ public class ScreensController extends AbstractUIController
   @UIControllerMethod
   public String viewScreenResultImportErrors()
   {
+    ViewEntityInitializer.unregisterCurrentViewEntityInitializer();
     return VIEW_SCREEN_RESULT_IMPORT_ERRORS;
   }
 
@@ -422,8 +387,6 @@ public class ScreensController extends AbstractUIController
                                    UploadedFile uploadedFile,
                                    ScreenResultParser parser)
   {
-    _dao.persistEntity(screen); // re-attach to Hibernate session
-
     boolean parseSuccessful = false;
     ScreenResult existingScreenResult = screen.getScreenResult();
     try {
@@ -446,9 +409,10 @@ public class ScreensController extends AbstractUIController
         return viewScreenResultImportErrors();
       }
       else {
-        log.info("successfully imported " + screenResult + " for Screen " + screen);
+        log.info("successfully parsed " + screenResult + " for Screen " + screen);
         parseSuccessful = true;
         _dao.flush();
+        // TODO: reload screenResult so that screenResult.wells contents are not loaded (causes slow down on viewEntityInitializer.reattach())
         return viewLastScreen();
       }
     }
@@ -473,7 +437,6 @@ public class ScreensController extends AbstractUIController
     FileOutputStream out = null;
     try {
       if (screenResult != null) {
-        _dao.persistEntity(screenResult);
         HSSFWorkbook workbook = _screenResultExporter.build(screenResult);
         exportedWorkbookFile = File.createTempFile("screenResult" + screenResult.getScreen().getScreenNumber() + ".",
         ".xls");

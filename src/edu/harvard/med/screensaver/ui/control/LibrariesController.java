@@ -266,6 +266,7 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String browseLibraries()
   {
+    ViewEntityInitializer.unregisterCurrentViewEntityInitializer(); // candidate for AOP
     if (getLibrariesBrowser().getLibrarySearchResults() == null) {
       //List<Library> libraries = _dao.findAllEntitiesWithType(Library.class);
       List<Library> libraries = _dao.findLibrariesDisplayedInLibrariesBrowser();
@@ -288,7 +289,7 @@ public class LibrariesController extends AbstractUIController
   {
     _libraryViewer.setLibrarySearchResults(librarySearchResults);
 
-    new ViewEntityInitializer(_dao) 
+    new ViewEntityInitializer("viewLibrary", _dao) 
     {
       protected void reattachEntities()
       {
@@ -308,22 +309,26 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String viewLibraryContents(final Library library)
   {
-    new ViewEntityInitializer(_dao) 
+    new ViewEntityInitializer("viewLibraryContents", _dao) 
     {
-      @Override
-      protected void reattachEntities()
-      {
-        reattach(library);
-      }
+      // note: less expensive to inflate the entities once, rather than
+      // reattaching for each scrolling page view (reattaching requires an SQL
+      // statement for all entities of library, reachable via cascade)
+      
+//      @Override
+//      protected void reattachEntities()
+//      {
+//        reattach(library);
+//      }
       
       @Override
       protected void inflateEntities()
       {
-//        for (Well well : library.getWells()) {
-//          // force initialization of persistent collections needed by search result viewer
-//          well.getGenes().size();
-//          well.getCompounds().size();
-//        }
+        for (Well well : library.getWells()) {
+          // force initialization of persistent collections needed by search result viewer
+          need(well.getGenes());
+          need(well.getCompounds());
+        }
       }
       
     };
@@ -331,12 +336,14 @@ public class LibrariesController extends AbstractUIController
     WellSearchResults wellSearchResults = new WellSearchResults(
         new ArrayList<Well>(library.getWells()),
         this);
-    return viewWellSearchResults(wellSearchResults);
+    _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
+    return "viewWellSearchResults";
   }
   
   @UIControllerMethod
   public String viewWellSearchResults(WellSearchResults wellSearchResults)
   {
+    ViewEntityInitializer.unregisterCurrentViewEntityInitializer();
     _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
     return "viewWellSearchResults";
   }
@@ -363,15 +370,14 @@ public class LibrariesController extends AbstractUIController
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     else {
-      
       _wellViewer.setWellSearchResults(wellSearchResults);
       
-      new ViewEntityInitializer(_dao) 
+      new ViewEntityInitializer("viewWell", _dao) 
       {
         @Override
         protected void reattachEntities()
         {
-          _dao.persistEntity(well);
+          reattach(well);
         }
         
         @Override
@@ -396,12 +402,12 @@ public class LibrariesController extends AbstractUIController
   {
     Hibernate.initialize(gene.getGenbankAccessionNumbers());
     
-    new ViewEntityInitializer(_dao) 
+    new ViewEntityInitializer("viewGene", _dao) 
     {
       @Override
       protected void reattachEntities()
       {
-        _dao.persistEntity(gene);
+        reattach(gene);
       }
       
       @Override
@@ -418,12 +424,12 @@ public class LibrariesController extends AbstractUIController
   public String viewCompound(final Compound compound,
                              WellSearchResults wellSearchResults)
   {
-    new ViewEntityInitializer(_dao) 
+    new ViewEntityInitializer("viewCompound", _dao) 
     {
       @Override
       protected void reattachEntities()
       {
-        _dao.persistEntity(compound);
+        reattach(compound);
       }
       
       @Override

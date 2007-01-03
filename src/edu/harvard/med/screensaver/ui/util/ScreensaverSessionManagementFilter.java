@@ -26,14 +26,15 @@ import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.db.HibernateSessionFactory;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.stat.Statistics;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.orm.hibernate3.support.OpenSessionInViewFilter;
 import org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor;
+import org.springframework.transaction.TransactionException;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -86,7 +87,7 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
   public static final String CLOSE_HTTP_SESSION = "closeHttpSession";
   public static final String SYSTEM_ERROR_ENCOUNTERED = "systemError";
   private static final String CONCURRENT_MODIFICATION_MESSAGE = "concurrentModificationConflict";
-
+  private static final String OPERATION_CANCELLED_MESSAGE = "databaseOperationAborted";
   private static final String REPORT_EXCEPTION_URL = "/screensaver/reportException.jsf";
   private static final String LOGIN_URL = "/screensaver/login.jsf";
 
@@ -196,15 +197,13 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
               caughtException = e;
             }
             caughtException.printStackTrace();
-            // TODO: rollback txn?
           }
           finally {
             if (caughtException != null) {
-              // any exceptions are thrown at this point may have occurred before response was rendered, so we must redirect to an error page, if we want to guarantee the user gets a response
+              // any exceptions thrown at this point may have occurred before response was rendered, so we must redirect to an error page, if we want to guarantee the user gets a response
               httpSession.setAttribute("javax.servlet.error.exception", caughtException);
               try {
                 httpSession.removeAttribute(ViewEntityInitializer.LAST_VIEW_ENTITY_INITIALIZER);
-                
                 response.sendRedirect(REPORT_EXCEPTION_URL);
               }
               catch (IOException e) {
@@ -218,17 +217,21 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
                 }
               }
             }
+            logSessionStatistics();
           }
         }
       }); // note: data-access exceptions will be thrown when Hibernate session is being flushed, which occurs at end of txn (i.e., "here")
     }
+    // TODO: it is fundamentally flawed to handle database-related exceptions here, since there is nothing we can do about it to inform the user, as the response has already been generated
     catch (ConcurrencyFailureException e) {
       getMessages().setFacesMessageForComponent(httpSession, CONCURRENT_MODIFICATION_MESSAGE, null);
       httpSession.setAttribute(RELOAD_VIEW_ENTITIES_SESSION_PARAM, true);
     }
+    catch (TransactionException e) { // e.g. UnexpectedRollbackException
+      getMessages().setFacesMessageForComponent(httpSession, OPERATION_CANCELLED_MESSAGE, e.getMessage());
+    }
     // note: we should never receive HibernateExceptions, as Spring is supposed to wrap all HibernateExceptions in DataAccessExceptions
-//    catch (HibernateException e) {
-//    }
+    // catch (HibernateException e) {}
     catch (Throwable e) {
       log.error("unexpected exception while processing HTTP request for '" + request.getRequestURI() + "' in a transaction: " + e);
       e.printStackTrace();
@@ -236,7 +239,6 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
       // don't invalidate session yet, so that our error page, which is a JSF page and requires 
       // JSF backing beans that are stored in our HTTP session, can still operate
       httpSession.setAttribute("javax.servlet.error.exception", e);
-
       getMessages().setFacesMessageForComponent(httpSession, SYSTEM_ERROR_ENCOUNTERED,  null, e.getClass().getName(), e.getMessage());
     }
     finally {
@@ -248,6 +250,44 @@ public class ScreensaverSessionManagementFilter extends OncePerRequestFilter {
       log.info("<<<< Screensaver FINISHED processing HTTP request for session " + 
                httpSessionId + " @ " + request.getRequestURI());
       
+    }
+  }
+
+  private void logSessionStatistics()
+  {
+    // requires Hibernate's "generate_statistics" configuration parameter to be set to true; this is set by our build.xml's hibernatedoclet taks when debug flag is set
+    if (log.isDebugEnabled()) {
+      Statistics statistics = lookupSessionFactoryViaSpring().getStatistics();
+      if (statistics.isStatisticsEnabled()) {
+        StringBuilder s = new StringBuilder();
+        s.append("entities: ");
+        s.append("loaded=").append(statistics.getEntityLoadCount());
+        s.append(", fetched=").append(statistics.getEntityFetchCount());
+        s.append(", updated=").append(statistics.getEntityUpdateCount());
+        s.append(", inserted=").append(statistics.getEntityInsertCount());
+        s.append(", deleted=").append(statistics.getEntityDeleteCount());
+        log.debug(s.toString());
+        s.setLength(0);
+        s.append("collections: ");
+        s.append("loaded=").append(statistics.getCollectionLoadCount());
+        s.append(", fetched=").append(statistics.getCollectionFetchCount());
+        s.append(", updated=").append(statistics.getCollectionUpdateCount());
+        s.append(", recreated=").append(statistics.getCollectionRecreateCount());
+        s.append(", removed=").append(statistics.getCollectionRemoveCount());
+        log.debug(s.toString());
+        s.setLength(0);
+        s.append("flushes=").append(statistics.getFlushCount());
+        log.debug(s.toString());
+        s.setLength(0);
+        s.append("transactions: ");
+        s.append("started=").append(statistics.getTransactionCount());
+        s.append(", succeeded=").append(statistics.getSuccessfulTransactionCount());
+        log.debug(s.toString());
+        s.setLength(0);
+        s.append("optimistic failures=").append(statistics.getOptimisticFailureCount());
+        log.debug(s.toString());
+        statistics.clear();
+      }
     }
   }
 

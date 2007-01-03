@@ -69,6 +69,11 @@ public class NoOpDAO implements DAO
     return null;
   }
 
+  public List<ScreeningRoomUser> findCandidateCollaborators()
+  {
+    return null;
+  }
+
   public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClassController,
                                                                      Map<String,Object> name2ValueController)
   {

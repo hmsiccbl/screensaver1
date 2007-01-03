@@ -22,14 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.ScrollableResults;
-import org.hibernate.Session;
-import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -44,6 +36,14 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.util.StringUtils;
+
+import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
+import org.springframework.orm.hibernate3.HibernateCallback;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 
 /**
@@ -204,6 +204,17 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   {
     String hql = "select distinct lh from ScreeningRoomUser lh left outer join lh.hbnLabHead where lh.hbnLabHead is null";
     return (List<ScreeningRoomUser>) getHibernateTemplate().find(hql);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public List<ScreeningRoomUser> findCandidateCollaborators()
+  {
+    return (List<ScreeningRoomUser>) getHibernateTemplate().execute(new HibernateCallback() {
+      public Object doInHibernate(Session session) throws HibernateException, SQLException
+      {
+        return new ArrayList<ScreeningRoomUser>(session.createCriteria(ScreeningRoomUser.class).list());
+      }
+    });
   }
   
   public void deleteScreenResult(ScreenResult screenResult)

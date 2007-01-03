@@ -216,6 +216,8 @@ public interface DAO
    */
   @Transactional(readOnly = true)
   public List<ScreeningRoomUser> findAllLabHeads();
+  
+  public List<ScreeningRoomUser> findCandidateCollaborators();
 
   /**
    * Delete a screen result.
