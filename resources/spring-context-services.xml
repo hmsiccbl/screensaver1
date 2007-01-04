@@ -92,4 +92,10 @@
     <constructor-arg ref="rnaiLibraryContentsParser"/>
   </bean>
   
+  <bean 
+    id="bulkScreenResultImporter"
+    class="edu.harvard.med.screensaver.io.screenresults.BulkScreenResultImporter"
+    singleton="true">
+  </bean>
+  
 </beans>
