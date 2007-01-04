@@ -24,6 +24,7 @@ import org.w3c.dom.NodeList;
 
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
+import edu.harvard.med.screensaver.model.libraries.Gene;
 
 
 /**
@@ -43,6 +44,8 @@ public class NCBIGeneInfoProvider
   private static final Logger log = Logger.getLogger(NCBIGeneInfoProvider.class);
   private static final String EFETCH_URL_PREFIX =
     "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=gene&retmode=xml&id=";
+  private static final int NUM_RETRIES = 5;
+  private static final int CONNECT_TIMEOUT = 5000; // in millisecs
 
   
   // instance fields
@@ -112,17 +115,25 @@ public class NCBIGeneInfoProvider
    */
   private InputStream getContent(String url)
   {
-    try {
-      HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-      connection.connect();
-      return connection.getInputStream();
+    for (int i = 0; i < NUM_RETRIES; i ++) {
+      try {
+        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+        connection.setConnectTimeout(CONNECT_TIMEOUT);
+        connection.setReadTimeout(CONNECT_TIMEOUT);
+        connection.connect();
+        return connection.getInputStream();
+      }
+      catch (Exception e) {
+        log.warn(
+          "unable to get URL connection to NCBI for " + _entrezgeneId + ": " +
+          e.getMessage());
+      }
     }
-    catch (Exception e) {
-      _errorManager.addError(
-        "unable to get URL connection to NCBI for " + _entrezgeneId + ": " + e.getMessage(),
-        _cell);
-      return null;
-    }
+    _errorManager.addError(
+      "unable to get URL connection to NCBI for " + _entrezgeneId + " after " +
+      NUM_RETRIES + " tries.",
+      _cell);
+    return null;
   }
 
   /**
