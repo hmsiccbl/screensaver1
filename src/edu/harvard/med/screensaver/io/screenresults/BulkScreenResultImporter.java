@@ -74,12 +74,10 @@ public class BulkScreenResultImporter
       }
       //if (true) continue;
       String filename = screenResultFile.getName();
-      log.info("filename = :" + filename + ":");
       Matcher matcher = _screenResultFilenamePattern.matcher(filename);
       if (! matcher.matches()) {
         throw new RuntimeException("screen result file didnt match pattern: " + filename);
       }
-      log.info("match = " + matcher.group());
       String screenResultNumber = matcher.group(1);
       try {
         ScreenResultParser.main(new String [] {
@@ -95,7 +93,6 @@ public class BulkScreenResultImporter
         log.error("braindamage: " + e.getMessage());
       }
       log.info("finished processing SD File: " + screenResultFile.getName());
-      if (true) return;
     }
   }
 }
