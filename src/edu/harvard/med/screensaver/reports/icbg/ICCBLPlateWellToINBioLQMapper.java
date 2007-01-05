@@ -24,10 +24,8 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
-import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 
 
 /**
@@ -49,7 +47,7 @@ public class ICCBLPlateWellToINBioLQMapper
   // instance fields
   
   private HSSFSheet _mappingWorksheet;
-  private Map<Well,String> _wellToLQMap = new HashMap<Well,String>();
+  private Map<WellKey,String> _wellKeyToLQMap = new HashMap<WellKey,String>();
   
   
   // public constructor and instance methods
@@ -57,12 +55,12 @@ public class ICCBLPlateWellToINBioLQMapper
   public ICCBLPlateWellToINBioLQMapper()
   {
     initializeMappingWorksheet();
-    populateWellToLQMap();
+    populateWellKeyToLQMap();
   }
   
-  public String getLQForWell(Well well)
+  public String getLQForWellKey(WellKey wellKey)
   {
-    return _wellToLQMap.get(well);
+    return _wellKeyToLQMap.get(wellKey);
   }
   
   
@@ -83,15 +81,8 @@ public class ICCBLPlateWellToINBioLQMapper
     }
   }
   
-  private void populateWellToLQMap()
+  private void populateWellKeyToLQMap()
   {
-    Library library = new Library(
-      "fake library",
-      "fake lib",
-      ScreenType.SMALL_MOLECULE,
-      LibraryType.NATURAL_PRODUCTS,
-      0,
-      1);
     int lastRowNum = _mappingWorksheet.getLastRowNum();
     for (int i = 1; i <= lastRowNum; i++) {
       HSSFRow row = _mappingWorksheet.getRow(i);
@@ -101,17 +92,18 @@ public class ICCBLPlateWellToINBioLQMapper
       HSSFCell wellNameCell = row.getCell((short) 1);
       String wellName = wellNameCell.getStringCellValue();
       HSSFCell lqCell = row.getCell((short) 3);
+      if (lqCell == null) { continue; }
       String lq;
-      //lq = lqCell.getStringCellValue();
-      //if (lq.equals("")) { continue; }
-      try {
-        lq = String.valueOf((int) lqCell.getNumericCellValue());
-      }
-      catch (NullPointerException e) {
-        continue;
-      }
-      Well well = new Well(library, plateNumber, wellName);
-      _wellToLQMap.put(well, lq);
+      lq = lqCell.getStringCellValue();
+      if (lq.equals("")) { continue; }
+      //try {
+      //  lq = String.valueOf((int) lqCell.getNumericCellValue());
+      //}
+      //catch (NullPointerException e) {
+      //  continue;
+      //}
+      _wellKeyToLQMap.put(new WellKey(plateNumber, wellName), lq);
+      log.info("mapped " + plateNumber + wellName + " to " + lq);
     }
   }
 }

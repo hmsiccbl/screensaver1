@@ -9,28 +9,27 @@
 
 package edu.harvard.med.screensaver.reports.icbg;
 
-import java.io.File;
-import java.io.FileFilter;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
-
-import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultParserTest;
-import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
-import edu.harvard.med.screensaver.io.workbook.ParseError;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 
 /**
@@ -109,9 +108,14 @@ public class ICBGReportGenerator
    */
   public static void main(String[] args)
   {
+    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { 
+      "spring-context.xml",
+    });
+    DAO dao = (DAO) context.getBean("dao");
     ICCBLPlateWellToINBioLQMapper mapper =
       new ICCBLPlateWellToINBioLQMapper();
     ICBGReportGenerator generator = new ICBGReportGenerator(
+      dao,
       mapper,
       new ScreenDBProxy());
     HSSFWorkbook report = generator.produceReport();
@@ -129,6 +133,7 @@ public class ICBGReportGenerator
   
   // instance fields
 
+  private DAO _dao;
   private ICCBLPlateWellToINBioLQMapper _mapper;
   private ScreenDBProxy _screenDBProxy;
   private HSSFWorkbook _report;
@@ -139,9 +144,11 @@ public class ICBGReportGenerator
   // public constructor and instance methods
   
   public ICBGReportGenerator(
+    DAO dao,
     ICCBLPlateWellToINBioLQMapper mapper,
     ScreenDBProxy screenDBProxy)
   {
+    _dao = dao;
     _mapper = mapper;
     _screenDBProxy = screenDBProxy;
   }
@@ -303,59 +310,33 @@ public class ICBGReportGenerator
   
   private void parseScreenResults()
   {
-    File resultsDir = new File(RESULTS_DIR);
-    FileFilter directoryFilter = new FileFilter()
-    {
-      public boolean accept(File file)
-      {
-        return file.isDirectory();
-      }
-    };
-    FilenameFilter metadataFilter = new FilenameFilter()
-    {
-      public boolean accept(File file, String filename)
-      {
-        return filename.toLowerCase().contains("metadata");
-      }
-    };
-    for (File resultsSubdir : resultsDir.listFiles(directoryFilter)) {
-      Integer screenNumber = Integer.valueOf(resultsSubdir.getName());
-      if (! icbgScreens.contains(screenNumber)) {
-        continue;
-      }
-      log.info("examining results subdir: " + resultsSubdir.getName());
-      for (File metadataFile : resultsSubdir.listFiles(metadataFilter)) {
-        parseScreenResult(screenNumber, metadataFile);
-        
-        // this is not necessary, but helpful if you want early versions of the results
-        log.info("writing report..");
-        try {
-          _report.write(new FileOutputStream(REPORT_FILENAME));
-          log.info("report written.");
-        }
-        catch (Exception e) {
-          e.printStackTrace();
-          log.error("writing report generated error: " + e.getMessage());
+    _dao.doInTransaction(new DAOTransaction () {
+      public void runTransaction() {
+        List<ScreenResult> screenResults = _dao.findAllEntitiesWithType(ScreenResult.class);
+        for (ScreenResult screenResult : screenResults) {
+          parseScreenResult(screenResult);
+
+          // this is not necessary, but helpful if you want early versions of the results
+          log.info("writing report..");
+          try {
+            _report.write(new FileOutputStream(REPORT_FILENAME));
+            log.info("report written.");
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            log.error("writing report generated error: " + e.getMessage());
+          }
         }
       }
-    }
+    });
   }
   
-  private void parseScreenResult(Integer screenNumber, File metadataFile)
+  private void parseScreenResult(ScreenResult screenResult)
   {
-    log.info("parsing file: " + metadataFile.getName());
+    Integer screenNumber = screenResult.getScreen().getScreenNumber();
+    log.info("processing screen result for screen " + screenNumber); 
     AssayInfo assayInfo = _screenDBProxy.getAssayInfoForScreen(screenNumber);
-    
-    ScreenResultParser parser =
-      new ScreenResultParser(new MockDaoForScreenResultParserTest());
-    // TODO: need a real screen here...is this reasonable? [ant]
-    // @: for the time being this is fine. this code will need to be heavily rewritten the next
-    // time it is used. -s
-    ScreenResult screenResult = parser.parse(null, metadataFile);
-    logErrors(parser);
-    if (screenResult == null) {
-      return;
-    }
+
     // TODO: printBioactivityRows should be called once for each assay phenotype
     if (printBioactivityRows(assayInfo, screenResult)) {
       log.info("printed bioactivity rows.");
@@ -363,14 +344,12 @@ public class ICBGReportGenerator
     }
   }
   
-  private void logErrors(ScreenResultParser parser)
-  {
-    List<ParseError> errors = parser.getErrors();
-    for (ParseError error : errors) {
-      log.info("error: " + error.getMessage());
-    }
-  }
-  
+  /**
+   * Print bioactivity rows for this screen result.
+   * @param assayInfo
+   * @param screenResult
+   * @return true iff bioactivity rows were printed
+   */
   private boolean printBioactivityRows(AssayInfo assayInfo, ScreenResult screenResult)
   {
     ResultValueType scaledOrBooleanRVT =
@@ -383,27 +362,27 @@ public class ICBGReportGenerator
     }
     
     boolean printedBioactivityRow = false;
-    // TODO: update & reinstate to use new Map<WellKey,ResultValue> data
-    // structure returned by getResultValues(). Since above comment indicates
-    // this code will need to be heavily rewritten before next reuse, I'm just
-    // commenting this out for error-free compilation. Aw, heck, I'll be good
-    // and throw a run-time exception just in case someone actually runs this
-    // code, expecting it to work.
-    if (true) throw new RuntimeException("this method needs to be rewritten! -@");
-    //    Iterator<ResultValue> scaledOrBooleanRVs = (scaledOrBooleanRVT == null) ? null :
-//      scaledOrBooleanRVT.getResultValues().iterator();
-//    Iterator<ResultValue> numericalRVs = (numericalRVT == null) ? null :
-//      numericalRVT.getResultValues().iterator();
-//    while ((scaledOrBooleanRVs != null && scaledOrBooleanRVs.hasNext()) ||
-//           (numericalRVs != null && numericalRVs.hasNext())) {
-//      ResultValue scaledOrBooleanRV = (scaledOrBooleanRVs == null) ? null :
-//        scaledOrBooleanRVs.next();
-//      ResultValue numericalRV = (numericalRVs == null) ? null :
-//        numericalRVs.next();
-//      if (printBioactivityRow(assayInfo, scaledOrBooleanRVT, scaledOrBooleanRV, numericalRVT, numericalRV)) {
-//        printedBioactivityRow = true;
-//      }
-//    }
+    Map<WellKey,ResultValue> scaledOrBooleanRVMap = (scaledOrBooleanRVT != null) ?
+      scaledOrBooleanRVT.getResultValues() : null;
+    Map<WellKey,ResultValue> numericalRVMap = (numericalRVT != null) ?
+      numericalRVT.getResultValues() : null;
+
+    for (Well well : screenResult.getWells()) {
+      WellKey wellKey = well.getWellKey();
+      ResultValue scaledOrBooleanRV = (scaledOrBooleanRVMap == null) ? null : 
+        scaledOrBooleanRVMap.get(wellKey);
+      ResultValue numericalRV = (numericalRVMap == null) ? null : 
+        numericalRVMap.get(wellKey);
+      if (printBioactivityRow(
+            assayInfo,
+            wellKey,
+            scaledOrBooleanRVT,
+            scaledOrBooleanRV,
+            numericalRVT,
+            numericalRV)) {
+        printedBioactivityRow = true;
+      }
+    }
     return printedBioactivityRow;
   }
   
@@ -446,24 +425,17 @@ public class ICBGReportGenerator
   
   private boolean printBioactivityRow(
     AssayInfo assayInfo,
+    WellKey wellKey,
     ResultValueType scaledOrBooleanRVT,
     ResultValue scaledOrBooleanRV,
     ResultValueType numericalRVT,
     ResultValue numericalRV)
   {
-    Well well = null;
-    // TODO: update & reinstate
-//    if (scaledOrBooleanRV != null) {
-//      well = scaledOrBooleanRV.getWell();
-//    }
-//    else if (numericalRV != null) {
-//      well = numericalRV.getWell();
-//    }
-    String lq = _mapper.getLQForWell(well);
+    String lq = _mapper.getLQForWellKey(wellKey);
     if (lq == null) { return false; }
     String assayName = assayInfo.getAssayName();
-    String plateName = "P" + well.getPlateNumber();
-    String wellName = well.getWellName();
+    String plateName = "P" + wellKey.getPlateNumber();
+    String wellName = wellKey.getWellName();
     
     HSSFSheet sheet = _report.getSheet("BIOACTIVITY");
     HSSFRow row = sheet.createRow(_currentBioactivityRow);

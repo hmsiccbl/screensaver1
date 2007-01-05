@@ -14,6 +14,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -99,7 +101,24 @@ public class ScreenDBProxy
       statement = _connection.createStatement();
       resultSet = statement.executeQuery(sql2);
       resultSet.next();
-      assayInfo.setAssayDate(resultSet.getString(1));
+      String assayDate = resultSet.getString(1);
+      Pattern assayDatePattern = Pattern.compile("(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)");
+      Matcher assayDateMatcher = assayDatePattern.matcher(assayDate);
+      if (assayDateMatcher.matches()) {
+        String year = assayDateMatcher.group(1);
+        String month = assayDateMatcher.group(2);
+        if (month.startsWith("0")) {
+          month = month.substring(1);
+        }
+        String day = assayDateMatcher.group(3);
+        if (day.startsWith("0")) {
+          day = day.substring(1);
+        }
+        assayInfo.setAssayDate(month + "/" + day + "/" + year);
+      }
+      else {
+        log.error("bad dates: " + assayDate);
+      }
       statement.close();
     }
     catch (SQLException e) {
@@ -186,7 +205,12 @@ public class ScreenDBProxy
       assayCategoryText.contains("HIV")) {
       assayInfo.setAssayCategory("ANTI-HIV_AIDS");
     }
+    else if (
+      assayCategoryText.contains("INHIBIT THE RANGTPASE SYSTEM")) {
+      assayInfo.setAssayCategory("OTHER - INHIBIT THE RANGTPASE SYSTEM");
+    }
     else {
+      log.info("assigning assay category OTHER for assay category text: " + assayCategoryText);
       assayInfo.setAssayCategory("OTHER");
     }
   }
