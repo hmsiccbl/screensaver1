@@ -56,8 +56,7 @@ public class BulkScreenResultImporter
    * Database must be created and initialized before running this method.
    */
   public void bulkLoadLibraries()
-  {
-    
+  {    
     File [] screenResultFiles = _screenResultsDir.listFiles(new FilenameFilter() {
       public boolean accept(File dir, String filename) {
         return filename.endsWith(".xls") && ! filename.endsWith(".errors.xls");
@@ -65,7 +64,9 @@ public class BulkScreenResultImporter
     });
 
     for (final File screenResultFile : screenResultFiles) {
-      if (screenResultFile.getName().compareTo("000") >= 0) {
+      
+      // code to hack for doing partial runs:
+      if (screenResultFile.getName().compareTo("000_finalResults.xls") >= 0) {
         log.info("processing screen result file: " + screenResultFile.getName());
       }
       else {
@@ -73,6 +74,7 @@ public class BulkScreenResultImporter
         continue;
       }
       //if (true) continue;
+      
       String filename = screenResultFile.getName();
       Matcher matcher = _screenResultFilenamePattern.matcher(filename);
       if (! matcher.matches()) {
@@ -84,15 +86,12 @@ public class BulkScreenResultImporter
           "-s", screenResultNumber,
           "-f", screenResultFile.getAbsolutePath(),
           "-i",
-          //"-D", "icbg_report",
-          //"-H", "localhost",
-          //"-U", "icbg_report",
         });
       }
       catch (FileNotFoundException e) {
         log.error("braindamage: " + e.getMessage());
       }
-      log.info("finished processing SD File: " + screenResultFile.getName());
+      log.info("finished processing screen result file: " + screenResultFile.getName());
     }
   }
 }
