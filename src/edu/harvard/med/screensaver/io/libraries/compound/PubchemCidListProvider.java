@@ -22,6 +22,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
@@ -116,7 +117,7 @@ public class PubchemCidListProvider
     Document efetchDocument = getDocumentFromInputStream(esearchContent);
     NodeList efetchIds = efetchDocument.getElementsByTagName("Id");
     for (int i = 0; i < efetchIds.getLength(); i ++) {
-      String efetchId = efetchIds.item(i).getTextContent();
+      String efetchId = getTextContent(efetchIds.item(i));
       pubchemCids.add(efetchId);
     }
     return pubchemCids;
@@ -159,6 +160,24 @@ public class PubchemCidListProvider
       log.warn("unable to get content from NCBI: " + e.getMessage());
       throw new PubChemConnectionException();
     }
+  }
+
+  /**
+   * Recursively traverse the nodal structure of the node, accumulating the accumulate
+   * parts of the text content of the node and all its children.
+   * @param node the node to traversalate
+   * @return the accumulative recursive text content of the traversalated node
+   */
+  private String getTextContent(Node node)
+  {
+    if (node.getNodeType() == Node.TEXT_NODE) {
+      return node.getNodeValue();
+    }
+    String textContent = "";
+    for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling()) {
+      textContent += getTextContent(child);
+    }
+    return textContent;
   }
 }
 
