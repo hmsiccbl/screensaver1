@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.DAO;
@@ -148,10 +149,21 @@ public class ScreensController extends AbstractUIController
   @UIControllerMethod
   public String browseScreens()
   {
-    if (_screensBrowser.getScreenSearchResults() == null) {
-      List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
-      _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens, this, _dao));
-    }
+    _dao.doInTransaction(new DAOTransaction() 
+    {
+      public void runTransaction()
+      {
+        if (_screensBrowser.getScreenSearchResults() == null) {
+          List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
+          for (Screen screen : screens) {
+            need(screen.getScreenResult());
+          }
+          _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens, 
+                                                                         ScreensController.this, 
+                                                                         _dao));
+        }
+      }
+    });
     return BROWSE_SCREENS;
   }
   
