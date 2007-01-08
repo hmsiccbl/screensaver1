@@ -21,6 +21,7 @@ import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
@@ -318,10 +319,14 @@ public class ScreensController extends AbstractUIController
   public String addStatusItem(Screen screen, StatusValue statusValue)
   {
     if (statusValue != null) {
-      _dao.defineEntity(StatusItem.class,
-                        screen,
-                        new Date(),
-                        statusValue);
+      try {
+        new StatusItem(screen,
+                       new Date(),
+                       statusValue);
+      }
+      catch (DuplicateEntityException e) {
+        showMessage("screens.duplicateEntity", "status item");
+      }
       _screenViewer.setNewStatusValue(null);
     }
     return VIEW_SCREEN;
@@ -337,7 +342,12 @@ public class ScreensController extends AbstractUIController
   @UIControllerMethod
   public String addPublication(Screen screen)
   {
-    _dao.defineEntity(Publication.class, screen, "<new>", "", "", "");
+    try {
+      new Publication(screen, "<new>", "", "", "");
+    }
+    catch (DuplicateEntityException e) {
+      showMessage("screens.duplicateEntity", "publication");
+    }
     return VIEW_SCREEN;
   }
   
@@ -351,7 +361,12 @@ public class ScreensController extends AbstractUIController
   @UIControllerMethod
   public String addLetterOfSupport(Screen screen)
   {
-    _dao.defineEntity(LetterOfSupport.class, screen, new Date(), "");
+    try {
+      new LetterOfSupport(screen, new Date(), "");
+    }
+    catch (DuplicateEntityException e) {
+      showMessage("screens.duplicateEntity", "letter of support");
+    }
     return VIEW_SCREEN;
   }
   
@@ -365,7 +380,12 @@ public class ScreensController extends AbstractUIController
   @UIControllerMethod
   public String addAttachedFile(Screen screen)
   {
-    _dao.defineEntity(AttachedFile.class, screen, "<new>", "");
+    try {
+      new AttachedFile(screen, "<new>", "");
+    }
+    catch (DuplicateEntityException e) {
+      showMessage("screens.duplicateEntity", "attached file");
+    }
     return VIEW_SCREEN;
   }
   
@@ -380,7 +400,9 @@ public class ScreensController extends AbstractUIController
   public String addFundingSupport(Screen screen, FundingSupport fundingSupport)
   {
     if (fundingSupport != null) {
-      screen.addFundingSupport(fundingSupport);
+      if (!screen.addFundingSupport(fundingSupport)) {
+        showMessage("screens.duplicateEntity", "funding support");
+      }
       _screenViewer.setNewFundingSupport(null);
     }
     return VIEW_SCREEN;
@@ -396,7 +418,12 @@ public class ScreensController extends AbstractUIController
   @UIControllerMethod
   public String addAbaseTestset(Screen screen)
   {
-    _dao.defineEntity(AbaseTestset.class, screen, "<new>");
+    try {
+      new AbaseTestset(screen, "<new>");
+    }
+    catch (DuplicateEntityException e) {
+      showMessage("screens.duplicateEntity", "abase testset");
+    }
     return VIEW_SCREEN;
   }
   
@@ -411,7 +438,7 @@ public class ScreensController extends AbstractUIController
   public String addKeyword(Screen screen, String keyword)
   {
     if (! screen.addKeyword(keyword)) {
-      showMessage("screens.duplicateKeyword", "newKeyword", keyword);
+      showMessage("screens.duplicateEntity", "keyword");
     }
     else {
       _screenViewer.setNewKeyword("");
