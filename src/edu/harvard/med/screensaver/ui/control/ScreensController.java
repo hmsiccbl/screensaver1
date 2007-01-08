@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.DAO;
@@ -156,7 +155,7 @@ public class ScreensController extends AbstractUIController
         if (_screensBrowser.getScreenSearchResults() == null) {
           List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
           for (Screen screen : screens) {
-            need(screen.getScreenResult());
+            _dao.need(screen.getScreenResult());
           }
           _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens, 
                                                                          ScreensController.this, 
@@ -190,30 +189,30 @@ public class ScreensController extends AbstractUIController
       {
         public void runTransaction()
         {
-          Screen screen = _currentScreen = (Screen) reload(screenIn);
-          need(screen.getAbaseTestsets());
-          need(screen.getAssayReadoutTypes());
-          need(screen.getHbnCollaborators());
-          need(screen.getAttachedFiles());
-          need(screen.getBillingInformation());
-          need(screen.getFundingSupports());
-          need(screen.getKeywords());
-          need(screen.getLettersOfSupport());
-          need(screen.getPublications());
-          need(screen.getStatusItems());
-          need(screen.getVisits());
-          need(screen.getLabHead());
-          need(screen.getLabHead().getLabMembers());
-          need(screen.getLeadScreener());
+          Screen screen = _currentScreen = (Screen) _dao.reloadEntity(screenIn);
+          _dao.need(screen.getAbaseTestsets());
+          _dao.need(screen.getAssayReadoutTypes());
+          _dao.need(screen.getHbnCollaborators());
+          _dao.need(screen.getAttachedFiles());
+          _dao.need(screen.getBillingInformation());
+          _dao.need(screen.getFundingSupports());
+          _dao.need(screen.getKeywords());
+          _dao.need(screen.getLettersOfSupport());
+          _dao.need(screen.getPublications());
+          _dao.need(screen.getStatusItems());
+          _dao.need(screen.getVisits());
+          _dao.need(screen.getLabHead());
+          _dao.need(screen.getLabHead().getLabMembers());
+          _dao.need(screen.getLeadScreener());
           ScreenResult screenResult = screen.getScreenResult();
           if (screenResult != null) {
-            need(screenResult);
-            need(screenResult.getPlateNumbers());
-            need(screenResult.getResultValueTypes());
-            //need(screenResult.getWells());
+            _dao.need(screenResult);
+            _dao.need(screenResult.getPlateNumbers());
+            _dao.need(screenResult.getResultValueTypes());
+            //_dao.need(screenResult.getWells());
             for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-              need(rvt.getDerivedTypes());
-              need(rvt.getTypesDerivedFrom());
+              _dao.need(rvt.getDerivedTypes());
+              _dao.need(rvt.getTypesDerivedFrom());
               rvt.getResultValues().size();
             }
           }
@@ -245,7 +244,7 @@ public class ScreensController extends AbstractUIController
         public void runTransaction()
         {
           _dao.reattachEntity(screen); // checks if up-to-date
-          need(screen.getLabHead().getLabMembers());
+          _dao.need(screen.getLabHead().getLabMembers());
         }
       });
       return REDISPLAY_PAGE_ACTION_RESULT;
@@ -454,7 +453,7 @@ public class ScreensController extends AbstractUIController
       {
         public void runTransaction()
         {
-          Screen screen = (Screen) reload(screenIn);
+          Screen screen = (Screen) _dao.reloadEntity(screenIn);
           log.info("starting import of ScreenResult for Screen " + screen);
 
           try {
@@ -500,7 +499,7 @@ public class ScreensController extends AbstractUIController
       {
         public void runTransaction()
         {
-          ScreenResult screenResult = (ScreenResult) reload(screenResultIn);
+          ScreenResult screenResult = (ScreenResult) _dao.reloadEntity(screenResultIn);
           File exportedWorkbookFile = null;
           FileOutputStream out = null;
           try {

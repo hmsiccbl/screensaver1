@@ -299,10 +299,8 @@ public class LibrariesController extends AbstractUIController
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Library library = (Library) reload(libraryIn);
+        Library library = (Library) _dao.reloadEntity(libraryIn);
         library.getNumWells();
-        //need(library.getWells());
-        //need(library.getCopies());
         _libraryViewer.setLibrary(library);
       }
     });
@@ -317,10 +315,10 @@ public class LibrariesController extends AbstractUIController
       public void runTransaction()
       {
         // TODO: try outer join HQL query instead of iteration, for performance improvement
-        Library library = (Library) reload(libraryIn);
+        Library library = (Library) _dao.reloadEntity(libraryIn);
         for (Well well : library.getWells()) {
-          need(well.getGenes());
-          need(well.getCompounds());
+          _dao.need(well.getGenes());
+          _dao.need(well.getCompounds());
         }
         WellSearchResults wellSearchResults = 
           new WellSearchResults(new ArrayList<Well>(library.getWells()),
@@ -366,17 +364,18 @@ public class LibrariesController extends AbstractUIController
       _dao.doInTransaction(new DAOTransaction() {
         public void runTransaction()
         {
-          Well well = (Well) reload(wellIn);
-          need(well.getCompounds());
+          // TODO: try outer join HQL query instead of iteration, for performance improvement
+          Well well = (Well) _dao.reloadEntity(wellIn);
+          _dao.need(well.getCompounds());
           for (Compound compound : well.getCompounds()) {
-            need(compound.getCompoundNames());
-            need(compound.getPubchemCids());
-            need(compound.getNscNumbers());
-            need(compound.getCasNumbers());
+            _dao.need(compound.getCompoundNames());
+            _dao.need(compound.getPubchemCids());
+            _dao.need(compound.getNscNumbers());
+            _dao.need(compound.getCasNumbers());
           }
-          need(well.getGenes()); // initialization of genes and silencing reagents
+          _dao.need(well.getGenes()); // initialization of genes and silencing reagents
           for (Gene gene : well.getGenes()) {
-            need(gene.getGenbankAccessionNumbers());
+            _dao.need(gene.getGenbankAccessionNumbers());
           }
           _wellViewer.setWell(well);
         }
@@ -392,8 +391,8 @@ public class LibrariesController extends AbstractUIController
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Gene gene = (Gene) reload(geneIn);
-        need(gene.getGenbankAccessionNumbers());
+        Gene gene = (Gene) _dao.reloadEntity(geneIn);
+        _dao.need(gene.getGenbankAccessionNumbers());
         _geneViewer.setGene(gene);
       }
     });
@@ -409,12 +408,12 @@ public class LibrariesController extends AbstractUIController
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Compound compound = (Compound) reload(compoundIn);
-        need(compound.getCompoundNames());
-        need(compound.getPubchemCids());
-        need(compound.getCasNumbers());
-        need(compound.getNscNumbers());
-        need(compound.getWells());
+        Compound compound = (Compound) _dao.reloadEntity(compoundIn);
+        _dao.need(compound.getCompoundNames());
+        _dao.need(compound.getPubchemCids());
+        _dao.need(compound.getCasNumbers());
+        _dao.need(compound.getNscNumbers());
+        _dao.need(compound.getWells());
         _compoundViewer.setCompound(compound);
       }
     });
@@ -455,7 +454,7 @@ public class LibrariesController extends AbstractUIController
         public void runTransaction()
         {
           try {
-            Library library = (Library) reload(libraryIn);
+            Library library = (Library) _dao.reloadEntity(libraryIn);
             _compoundLibraryContentsParser.parseLibraryContents(library,
                                                                 new File(uploadedFile.getName()),
                                                                 uploadedFile.getInputStream());
@@ -521,7 +520,7 @@ public class LibrariesController extends AbstractUIController
         public void runTransaction()
         {
           try {
-            Library library = (Library) reload(libraryIn);
+            Library library = (Library) _dao.reloadEntity(libraryIn);
             _rnaiLibraryContentsParser.setSilencingReagentType(silencingReagentType);
             _rnaiLibraryContentsParser.parseLibraryContents(library,
                                                             new File(uploadedFile.getName()), 
@@ -563,7 +562,7 @@ public class LibrariesController extends AbstractUIController
         List<Well> reloadedWells = new ArrayList<Well>(searchResultsIn.getResultsSize());
         for (Iterator iter = ((List<Well>) searchResultsIn.getDataModel().getWrappedData()).iterator(); iter.hasNext();) {
           Well well = (Well) iter.next();
-          reloadedWells.add((Well) reload(well));
+          reloadedWells.add((Well) _dao.reloadEntity(well));
         }
         WellSearchResults searchResults = new WellSearchResults(reloadedWells, LibrariesController.this);
 

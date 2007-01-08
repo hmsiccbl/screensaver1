@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.ui;
 
 import java.security.Principal;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -26,15 +25,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
-import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.util.Messages;
 import edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
-import org.hibernate.collection.PersistentCollection;
 
 /**
  * A base Controller class for JSF backing beans (beans that handle JSF actions
@@ -518,53 +513,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
     return getExternalContext().isUserInRole(role.toString());
   }
 
-  /**
-   * @param entity the entity to be reloaded; assumption is that it does not
-   *          already exist in the Hibernate session
-   * @return a new instance of the specified entity
-   */
-  final protected AbstractEntity reload(AbstractEntity entity)
-  {
-    if (entity != null) {
-      log.debug("reloading entity " + entity);
-      // TODO: use injection for DAO
-      DAO dao = (DAO) this.getBean("dao");
-      return dao.findEntityById(entity.getClass(), entity.getEntityId());
-    }
-    return null;
-  }
-  
-  final protected void need(AbstractEntity entity)
-  {
-    if (entity != null) {
-      if (log.isDebugEnabled()) {
-        log.debug("inflating entity " + entity);
-      }
-      Hibernate.initialize(entity);
-    }
-  }
-  
-  final protected void need(PersistentCollection persistentCollection)
-  {
-    if (persistentCollection != null) {
-      if (log.isDebugEnabled()) {
-        log.debug("inflating collection " + persistentCollection);
-      }
-      Hibernate.initialize(persistentCollection);
-    }
-  }
 
-  final protected void need(Collection collection)
-  {
-    if (collection != null) {
-      if (log.isDebugEnabled()) {
-        log.debug("inflating collection " + collection);
-      }
-      collection.iterator();
-    }
-  }
-  
-  
   // private methods
   
   private UIComponent doFindComponent(UIComponent container, String componentId)

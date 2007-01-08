@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.db;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +29,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 
 import org.apache.log4j.Logger;
+import org.hibernate.collection.PersistentCollection;
 
 public class NoOpDAO implements DAO
 {
@@ -167,6 +169,23 @@ public class NoOpDAO implements DAO
   }
 
   public List<Library> findLibrariesDisplayedInLibrariesBrowser()
+  {
+    return null;
+  }
+
+  public void need(AbstractEntity entity)
+  {
+  }
+
+  public void need(PersistentCollection persistentCollection)
+  {
+  }
+
+  public void need(Collection collection)
+  {
+  }
+
+  public AbstractEntity reloadEntity(AbstractEntity entity)
   {
     return null;
   }

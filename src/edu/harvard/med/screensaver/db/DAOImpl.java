@@ -14,6 +14,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -38,10 +39,12 @@ import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.hibernate.collection.PersistentCollection;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
@@ -58,7 +61,8 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
 
   // private static fields
   
-  private static final Logger _logger = Logger.getLogger(DAOImpl.class);
+  private static final Logger log = Logger.getLogger(DAOImpl.class);
+  private static final Logger entityInflatorLog = Logger.getLogger(DAOImpl.class + ".EntityInflator");
   
   
   // public instance methods
@@ -85,9 +89,64 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   
   public void reattachEntity(AbstractEntity entity)
   {
-    // I don't think lock cascades, like update does...
+    // I don't think lock() cascades, like update() does...
 //  getHibernateTemplate().lock(entity, LockMode.READ);
+    // update() cascades, but also increments the entity's version counter, which is not really what we want
     getHibernateTemplate().update(entity);
+  }
+  
+  /**
+   * Reloads an entity into the current session. The assumption is that the
+   * entity does not already exist in the Hibernate session (it's okay if it
+   * does). This method is really just loading the entity; we use "reload" in
+   * its name to denote its intended usage, which is to load an entity from a
+   * defunct session into the current session.
+   * 
+   * @param entity the entity to be reloaded;
+   * @return a new Hibernate-managed instance of the specified entity
+   */
+  public AbstractEntity reloadEntity(AbstractEntity entity)
+  {
+    if (entity != null) {
+      log.debug("reloading entity " + entity);
+      return findEntityById(entity.getClass(), entity.getEntityId());
+    }
+    return null;
+  }
+  
+  public void need(AbstractEntity entity)
+  {
+    if (entity != null) {
+      if (entityInflatorLog.isDebugEnabled()) {
+        entityInflatorLog.debug("inflating entity " + entity);
+      }
+      Hibernate.initialize(entity);
+    }
+  }
+  
+  public void need(PersistentCollection persistentCollection)
+  {
+    if (persistentCollection != null) {
+      if (entityInflatorLog.isDebugEnabled()) {
+        entityInflatorLog.debug("inflating persistent collection " + persistentCollection);
+      }
+      Hibernate.initialize(persistentCollection);
+    }
+  }
+
+  /**
+   * @param collection
+   * @motivation some AbstractEntity getter methods return a normal collection,
+   *             not a Hibernate persistent collection.
+   */
+  public void need(Collection collection)
+  {
+    if (collection != null) {
+      if (entityInflatorLog.isDebugEnabled()) {
+        entityInflatorLog.debug("inflating wrapped persistent collection " + collection);
+      }
+      collection.iterator();
+    }
   }
   
   public void deleteEntity(AbstractEntity entity)
@@ -229,7 +288,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     screenResult.getScreen().setScreenResult(null);
 
     getHibernateTemplate().delete(screenResult);
-    _logger.debug("deleted " + screenResult);
+    log.debug("deleted " + screenResult);
   }
   
   public Well findWell(Integer plateNumber, String wellName)
@@ -379,7 +438,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
         }
       }
     }
-    _logger.info("created wells for library " + library.getLibraryName());
+    log.info("created wells for library " + library.getLibraryName());
   }
   
   @SuppressWarnings("unchecked")
@@ -524,8 +583,8 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     hql.append(" where ").append(StringUtils.makeListString(whereClauses, " and "));
     hql.append(" order by ").append(StringUtils.makeListString(orderByClauses, ", "));
     
-    if (_logger.isDebugEnabled()) {
-      _logger.debug("buildQueryForSortedResultValueTypeTableByRange() executing HQL: " + hql.toString());
+    if (log.isDebugEnabled()) {
+      log.debug("buildQueryForSortedResultValueTypeTableByRange() executing HQL: " + hql.toString());
     }
 
     Query query = session.createQuery(hql.toString());
