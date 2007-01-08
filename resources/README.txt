@@ -7,4 +7,4 @@ deployment, you can set the Ant property ${screensaver.properties.file} to whate
 want, and the deployed system will use that value at runtime. (See
 flotsam+jetsam/orchestra-bin/ss-deploy{,-dev} for examples.)
 
-(Or something like that. This is a new feature so thoughts are still evolving.)
+You can also define any Ant properties you want to in this file.
