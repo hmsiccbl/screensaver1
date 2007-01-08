@@ -8,5 +8,6 @@ ant \
   -Ddebug=true \
   -Ddeploy.dir=/www/dev.screensaver1.med.harvard.edu/docroot/screensaver/ \
   -Dappserver.dir=/www/dev.screensaver1.med.harvard.edu/tomcat/ \
+  -Dscreensaver.properties.file=resources/screensaver.properties.orchestra \
   deploy
 rm /www/dev.screensaver1.med.harvard.edu/docroot/screensaver/WEB-INF/classes/datasource.properties

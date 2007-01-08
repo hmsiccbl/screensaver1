@@ -7,5 +7,6 @@ cd ${SCREENSAVER_ROOT:-$HOME/screensaver}
 ant \
   -Ddeploy.dir=/www/screensaver1.med.harvard.edu/docroot/screensaver/ \
   -Dappserver.dir=/www/screensaver1.med.harvard.edu/tomcat/ \
+  -Dscreensaver.properties.file=resources/screensaver.properties.orchestra \
   deploy
 rm /www/screensaver1.med.harvard.edu/docroot/screensaver/WEB-INF/classes/datasource.properties
