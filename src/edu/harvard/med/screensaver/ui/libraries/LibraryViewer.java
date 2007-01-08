@@ -77,7 +77,7 @@ public class LibraryViewer extends AbstractBackingBean
     if (_library == null) {
       return 0;
     }
-    return _library.getWells().size();
+    return _library.getNumWells();
   }
 
   @UIControllerMethod

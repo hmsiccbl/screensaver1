@@ -466,7 +466,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   public String saveScreenResult()
   {
     // note: saving the parent screen will save its screenResult
-    return _screensController.saveScreen(getScreen());
+    return _screensController.saveScreen(getScreen(), null);
   }
   
   public String updateDataHeaders()

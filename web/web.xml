@@ -15,7 +15,7 @@
   </welcome-file-list>
 
   <!-- Configure a handler for exceptions thrown during server-side processing -->
-  <!-- For now, we're handling all exceptions ourselves in ScreensaverSessionManagementFilter, and not allowing them propagate to the Servlet container -->
+  <!-- For now, we're handling all exceptions ourselves in ScreensaverServletFilter, and not allowing them propagate to the Servlet container -->
   <!-- error-page>
     <error-code>500</error-code>
     <location>/reportException.jsf</location>
@@ -198,16 +198,12 @@
   <!-- Hibernate/Spring session management -->  
 
   <filter>
-    <filter-name>ScreensaverSessionManagementFilter</filter-name>
-    <filter-class>edu.harvard.med.screensaver.ui.util.ScreensaverSessionManagementFilter</filter-class>
-    <init-param>
-      <param-name>sessionFactoryBeanName</param-name>
-      <param-value>hibernateSessionFactory</param-value>
-    </init-param>
+    <filter-name>ScreensaverServletFilter</filter-name>
+    <filter-class>edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter</filter-class>
   </filter>
 
   <filter-mapping>
-    <filter-name>ScreensaverSessionManagementFilter</filter-name>
+    <filter-name>ScreensaverServletFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
   

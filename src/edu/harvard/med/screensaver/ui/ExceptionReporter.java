@@ -25,6 +25,8 @@ import edu.harvard.med.screensaver.util.Pair;
  */
 public class ExceptionReporter extends AbstractBackingBean
 {
+  public static final String EXCEPTION_SESSION_PARAM = "javax.servlet.error.exception";
+
   public String loginAgain()
   {
     closeHttpSession();
@@ -39,7 +41,7 @@ public class ExceptionReporter extends AbstractBackingBean
   private List<ExceptionInfo> getStackTrace()
   {
     List<ExceptionInfo> throwables = new ArrayList<ExceptionInfo>();    
-    Throwable t = (Throwable) getHttpSession().getAttribute("javax.servlet.error.exception");
+    Throwable t = (Throwable) getHttpSession().getAttribute(EXCEPTION_SESSION_PARAM);
     while (t != null) {
       throwables.add(new ExceptionInfo(t));
       if (t instanceof ServletException) {

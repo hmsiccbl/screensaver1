@@ -15,17 +15,18 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-
-import edu.harvard.med.screensaver.model.libraries.Compound;
-import edu.harvard.med.screensaver.model.libraries.Gene;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.control.LibrariesController;
 
 
 /**
@@ -75,6 +76,13 @@ public class WellSearchResults extends SearchResults<Well>
   {
     return true;
   }
+  
+  @UIControllerMethod
+  public String downloadSearchResults()
+  {
+    return _librariesController.downloadWellSearchResults(this);
+  }
+
   
   // implementations of the SearchResults abstract methods
   
@@ -214,20 +222,22 @@ public class WellSearchResults extends SearchResults<Well>
   protected void setEntityToView(Well well)
   {
     _librariesController.viewWell(well, this);
-    _librariesController.viewGene(well.getGene(), this);
-    _librariesController.viewCompound(well.getPrimaryCompound(), this);
+    if (well.getGene() != null) {
+      _librariesController.viewGene(well.getGene(), this);
+    }
+    if (well.getPrimaryCompound() != null) {
+      _librariesController.viewCompound(well.getPrimaryCompound(), this);
+    }
   }
 
-  @Override
-  protected void writeSDFileSearchResults(PrintWriter searchResultsPrintWriter)
+  public void writeSDFileSearchResults(PrintWriter searchResultsPrintWriter)
   {
     for (Well well : _currentSort) {
       well.writeToSDFile(searchResultsPrintWriter);
     }
   }
   
-  @Override
-  protected void writeExcelFileSearchResults(HSSFWorkbook searchResultsWorkbook)
+  public void writeExcelFileSearchResults(HSSFWorkbook searchResultsWorkbook)
   {
     HSSFCellStyle style = createHeaderStyle(searchResultsWorkbook);
     HSSFSheet rnaiSheet = createRNAiSheet(searchResultsWorkbook, style);
@@ -244,11 +254,12 @@ public class WellSearchResults extends SearchResults<Well>
         compoundSheetRow ++;
       }
     }
-    if (rnaiSheetRow == 1) {
-      searchResultsWorkbook.removeSheetAt(0);
-    }
+    // note: remove compounds sheet first, in case genes sheet is also removed
     if (compoundSheetRow == 1) {
       searchResultsWorkbook.removeSheetAt(1);
+    }
+    if (rnaiSheetRow == 1) {
+      searchResultsWorkbook.removeSheetAt(0);
     }
   }
   

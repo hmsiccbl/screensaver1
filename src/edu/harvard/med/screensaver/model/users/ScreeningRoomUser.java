@@ -674,6 +674,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    * @hibernate.set
    *   inverse="true" 
    *   lazy="true"
+   *   cascade="save-update"
    * @hibernate.collection-key
    *   column="lab_head_id"
    * @hibernate.collection-one-to-many

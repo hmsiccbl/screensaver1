@@ -50,6 +50,7 @@ public interface DAO
    * 
    * @param daoTransaction the object encapsulating the transactional code to
    *          execute.
+   * @throws Exception 
    */
   public void doInTransaction(DAOTransaction daoTransaction);
 
@@ -68,6 +69,8 @@ public interface DAO
   public <E extends AbstractEntity> E defineEntity(
     Class<E> entityClass,
     Object... constructorArguments);
+  
+  public void reattachEntity(AbstractEntity entity);
   
   /**
    * Update the database with the values for the given Entity. If the Entity was

@@ -22,6 +22,7 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
@@ -314,7 +315,7 @@ public class ScreenViewer extends AbstractBackingBean
     if (!super.isReadOnly()) {
       _isReadOnlyMode = false;
     }
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.editScreen(_screen);
   }
   
   /**
@@ -322,12 +323,19 @@ public class ScreenViewer extends AbstractBackingBean
    */
   @UIControllerMethod
   public String saveScreen() {
-    _screen.setLabHead(getLabName().getSelection());
-    _screen.setLeadScreener(getLeadScreener().getSelection());
-    _screen.setCollaboratorsList(getCollaborators().getSelections());
     _isReadOnlyMode = true;
-    return _screensController.saveScreen(_screen);
+    return _screensController.saveScreen(_screen,
+                                         new DAOTransaction() 
+    {
+      public void runTransaction() 
+      {
+        _screen.setLabHead(getLabName().getSelection());
+        _screen.setLeadScreener(getLeadScreener().getSelection());
+        _screen.setCollaboratorsList(getCollaborators().getSelections());
+      }
+    });
   }
+  
   
   public void cancelEditListener(ActionEvent event) {
     _isReadOnlyMode = false;
@@ -336,7 +344,8 @@ public class ScreenViewer extends AbstractBackingBean
   
   @UIControllerMethod
   public String cancelEdit() {
-    return VIEW_SCREEN_ACTION; // this should cause redirect and recreate JSF component tree, thus discarding local (edited) values
+    // edit is cancelled by virtue of controller reloading the screen from the database
+    return _screensController.viewLastScreen();
   }
   
   @UIControllerMethod
@@ -528,15 +537,21 @@ public class ScreenViewer extends AbstractBackingBean
    *             before the user saves his edits
    */
   private void updateLeadScreenerSelectItems() {
-    ScreeningRoomUser labHead = _labName.getSelection();
-    ArrayList<ScreeningRoomUser> leadScreenerCandidates = new ArrayList<ScreeningRoomUser>();
-    if (labHead != null) {
-      leadScreenerCandidates.add(labHead);
-      leadScreenerCandidates.addAll(labHead.getLabMembers());
-    }
-    _leadScreener = new UISelectOneEntityBean<ScreeningRoomUser>(leadScreenerCandidates, _screen.getLeadScreener(), _dao) {
-      protected String getLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); } 
-    };
+    _dao.doInTransaction(new DAOTransaction() 
+    {
+      public void runTransaction()
+      {
+        ScreeningRoomUser labHead = _labName.getSelection();
+        ArrayList<ScreeningRoomUser> leadScreenerCandidates = new ArrayList<ScreeningRoomUser>();
+        if (labHead != null) {
+          leadScreenerCandidates.add(labHead);
+          leadScreenerCandidates.addAll(labHead.getLabMembers());
+        }
+        _leadScreener = new UISelectOneEntityBean<ScreeningRoomUser>(leadScreenerCandidates, _screen.getLeadScreener(), _dao) {
+          protected String getLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); } 
+        };
+      }
+    });
   }
 
   @SuppressWarnings("unchecked")

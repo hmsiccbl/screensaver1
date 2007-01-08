@@ -11,17 +11,22 @@ package edu.harvard.med.screensaver.ui.control;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser;
 import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
+import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -37,13 +42,16 @@ import edu.harvard.med.screensaver.ui.libraries.WellFinder;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResultsViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
-import edu.harvard.med.screensaver.ui.util.ViewEntityInitializer;
+import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
-import org.hibernate.Hibernate;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.dao.DataAccessException;
 
 /**
  * 
@@ -266,7 +274,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String browseLibraries()
   {
-    ViewEntityInitializer.unregisterCurrentViewEntityInitializer(); // candidate for AOP
     if (getLibrariesBrowser().getLibrarySearchResults() == null) {
       //List<Library> libraries = _dao.findAllEntitiesWithType(Library.class);
       List<Library> libraries = _dao.findLibrariesDisplayedInLibrariesBrowser();
@@ -285,65 +292,49 @@ public class LibrariesController extends AbstractUIController
   }
   
   @UIControllerMethod
-  public String viewLibrary(final Library library, LibrarySearchResults librarySearchResults)
+  public String viewLibrary(final Library libraryIn, LibrarySearchResults librarySearchResults)
   {
     _libraryViewer.setLibrarySearchResults(librarySearchResults);
 
-    new ViewEntityInitializer("viewLibrary", _dao) 
-    {
-      protected void reattachEntities()
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
       {
-        reattach(library);
-      }
-
-      @Override
-      protected void setEntities()
-      {
+        Library library = (Library) reload(libraryIn);
+        library.getNumWells();
+        //need(library.getWells());
+        //need(library.getCopies());
         _libraryViewer.setLibrary(library);
       }
-    };
-    
+    });
+
     return "viewLibrary";
   }
   
   @UIControllerMethod
-  public String viewLibraryContents(final Library library)
+  public String viewLibraryContents(final Library libraryIn)
   {
-    new ViewEntityInitializer("viewLibraryContents", _dao) 
-    {
-      // note: less expensive to inflate the entities once, rather than
-      // reattaching for each scrolling page view (reattaching requires an SQL
-      // statement for all entities of library, reachable via cascade)
-      
-//      @Override
-//      protected void reattachEntities()
-//      {
-//        reattach(library);
-//      }
-      
-      @Override
-      protected void inflateEntities()
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
       {
+        // TODO: try outer join HQL query instead of iteration, for performance improvement
+        Library library = (Library) reload(libraryIn);
         for (Well well : library.getWells()) {
-          // force initialization of persistent collections needed by search result viewer
           need(well.getGenes());
           need(well.getCompounds());
         }
+        WellSearchResults wellSearchResults = 
+          new WellSearchResults(new ArrayList<Well>(library.getWells()),
+                                LibrariesController.this);
+        _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
       }
-      
-    };
+    });
 
-    WellSearchResults wellSearchResults = new WellSearchResults(
-        new ArrayList<Well>(library.getWells()),
-        this);
-    _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
     return "viewWellSearchResults";
   }
   
   @UIControllerMethod
   public String viewWellSearchResults(WellSearchResults wellSearchResults)
   {
-    ViewEntityInitializer.unregisterCurrentViewEntityInitializer();
     _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
     return "viewWellSearchResults";
   }
@@ -361,92 +352,73 @@ public class LibrariesController extends AbstractUIController
    * @param wellSearchResults <code>null</code> if well was not found within
    *          the context of a search result
    */
-  public String viewWell(final Well well, WellSearchResults wellSearchResults)
+  public String viewWell(final Well wellIn, WellSearchResults wellSearchResults)
   {
     // TODO: we should consider replicating this null-condition handling in our
     // other view*() methods (and in all controllers)
-    if (well == null) {
-      this.showMessage("libraries.noSuchWell", well.getPlateNumber(), well.getWellName());
+    if (wellIn == null) {
+      this.showMessage("libraries.noSuchWell", wellIn.getPlateNumber(), wellIn.getWellName());
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     else {
       _wellViewer.setWellSearchResults(wellSearchResults);
       
-      new ViewEntityInitializer("viewWell", _dao) 
-      {
-        @Override
-        protected void reattachEntities()
+      _dao.doInTransaction(new DAOTransaction() {
+        public void runTransaction()
         {
-          reattach(well);
-        }
-        
-        @Override
-        protected void inflateEntities()
-        {
-//          well.getGenes(); // initialization of genes and silencing reagents
-//          well.getCompounds().iterator(); 
-        }
-
-        @Override
-        protected void setEntities()
-        {
+          Well well = (Well) reload(wellIn);
+          need(well.getCompounds());
+          for (Compound compound : well.getCompounds()) {
+            need(compound.getCompoundNames());
+            need(compound.getPubchemCids());
+            need(compound.getNscNumbers());
+            need(compound.getCasNumbers());
+          }
+          need(well.getGenes()); // initialization of genes and silencing reagents
+          for (Gene gene : well.getGenes()) {
+            need(gene.getGenbankAccessionNumbers());
+          }
           _wellViewer.setWell(well);
         }
-      };
+      });
+
       return "viewWell";
     }
   }
 
   @UIControllerMethod
-  public String viewGene(final Gene gene, WellSearchResults wellSearchResults)
+  public String viewGene(final Gene geneIn, WellSearchResults wellSearchResults)
   {
-    Hibernate.initialize(gene.getGenbankAccessionNumbers());
-    
-    new ViewEntityInitializer("viewGene", _dao) 
-    {
-      @Override
-      protected void reattachEntities()
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
       {
-        reattach(gene);
-      }
-      
-      @Override
-      protected void setEntities()
-      {
+        Gene gene = (Gene) reload(geneIn);
+        need(gene.getGenbankAccessionNumbers());
         _geneViewer.setGene(gene);
       }
-    };
+    });
+      
     _geneViewer.setWellSearchResults(wellSearchResults);
     return "viewGene";
   }
 
   @UIControllerMethod
-  public String viewCompound(final Compound compound,
+  public String viewCompound(final Compound compoundIn,
                              WellSearchResults wellSearchResults)
   {
-    new ViewEntityInitializer("viewCompound", _dao) 
-    {
-      @Override
-      protected void reattachEntities()
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
       {
-        reattach(compound);
-      }
-      
-      @Override
-      protected void inflateEntities() 
-      {
-//        Hibernate.initialize(compound.getCompoundNames());
-//        Hibernate.initialize(compound.getPubchemCids());
-//        Hibernate.initialize(compound.getCasNumbers());
-//        Hibernate.initialize(compound.getNscNumbers());
-      }
-      
-      @Override
-      protected void setEntities()
-      {
+        Compound compound = (Compound) reload(compoundIn);
+        need(compound.getCompoundNames());
+        need(compound.getPubchemCids());
+        need(compound.getCasNumbers());
+        need(compound.getNscNumbers());
+        need(compound.getWells());
         _compoundViewer.setCompound(compound);
       }
-    };
+    });
+      
     _compoundViewer.setWellSearchResults(wellSearchResults);
     return "viewCompound";
   }
@@ -459,8 +431,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String importCompoundLibraryContents(Library library)
   {
-    _dao.persistEntity(library); // re-attach to Hibernate session
-
     _compoundLibraryContentsImporter.setLibrary(library);
     _compoundLibraryContentsImporter.setUploadedFile(null);
     _compoundLibraryContentsParser.clearErrors();
@@ -473,25 +443,14 @@ public class LibrariesController extends AbstractUIController
    * @return the control code for the appropriate next page
    */
   @UIControllerMethod
-  public String importCompoundLibraryContents(final Library library, final UploadedFile uploadedFile)
+  public String importCompoundLibraryContents(final Library libraryIn, final UploadedFile uploadedFile)
   {
     try {
       if (uploadedFile != null && uploadedFile.getInputStream().available() > 0) {
-        _dao.doInTransaction(new DAOTransaction() {
-          public void runTransaction()
-          {
-            try {
-              _compoundLibraryContentsParser.parseLibraryContents(
-                library,
-                new File(uploadedFile.getName()),
-                uploadedFile.getInputStream());
-              _dao.persistEntity(library);
-            }
-            catch (IOException e) {
-              reportSystemError(e);
-            }
-          }
-        });
+        _compoundLibraryContentsParser.parseLibraryContents(libraryIn,
+                                                            new File(uploadedFile.getName()),
+                                                            uploadedFile.getInputStream());
+        _dao.persistEntity(libraryIn);
       }
       else {
         showMessage("badUploadedFile", uploadedFile.getName());
@@ -506,7 +465,12 @@ public class LibrariesController extends AbstractUIController
         return "viewLibrary";
       }
     }
-    catch (IOException e) {
+    catch (DataAccessException e) {
+      // TODO: should reload library and goto library viewer
+      reportSystemError(e);
+      return "importCompoundLibraryContents";
+    }
+    catch (Exception e) {
       reportSystemError(e);
       return "importCompoundLibraryContents";
     }
@@ -558,12 +522,76 @@ public class LibrariesController extends AbstractUIController
         return "viewLibrary";
       }
     }
+    catch (DataAccessException e) {
+      // TODO: should reload library and goto library viewer
+      reportSystemError(e);
+      return "importRNAiLibraryContents";
+    }
     catch (IOException e) {
       reportSystemError(e);
       return "importRNAiLibraryContents";
     }
   }
   
+  // TODO: refactor code in WellSearchResults that exports well search results to our io.libraries.{compound,rnai} packages, and call directly
+  public String downloadWellSearchResults(final WellSearchResults searchResultsIn)
+  {
+    _dao.doInTransaction(new DAOTransaction() 
+    {
+      @SuppressWarnings("unchecked")
+      public void runTransaction() 
+      {
+        // reload the search result wells into the current hibernate session
+        List<Well> reloadedWells = new ArrayList<Well>(searchResultsIn.getResultsSize());
+        for (Iterator iter = ((List<Well>) searchResultsIn.getDataModel().getWrappedData()).iterator(); iter.hasNext();) {
+          Well well = (Well) iter.next();
+          reloadedWells.add((Well) reload(well));
+        }
+        WellSearchResults searchResults = new WellSearchResults(reloadedWells, LibrariesController.this);
+
+        
+        File searchResultsFile = null;
+        PrintWriter searchResultsPrintWriter = null;
+        FileOutputStream searchResultsFileOutputStream = null;
+        try {
+          searchResultsFile = File.createTempFile(
+            "searchResults.",
+            searchResultsIn.getDownloadFormat().equals(SearchResults.SD_FILE) ? ".sdf" : ".xls");
+          if (searchResultsIn.getDownloadFormat().equals(SearchResults.SD_FILE)) {
+            searchResultsPrintWriter = new PrintWriter(searchResultsFile);
+            searchResults.writeSDFileSearchResults(searchResultsPrintWriter);
+            searchResultsPrintWriter.close();
+          }
+          else {
+            HSSFWorkbook searchResultsWorkbook = new HSSFWorkbook();
+            searchResults.writeExcelFileSearchResults(searchResultsWorkbook);
+            searchResultsFileOutputStream = new FileOutputStream(searchResultsFile);
+            searchResultsWorkbook.write(searchResultsFileOutputStream);
+            searchResultsFileOutputStream.close();
+          }
+          JSFUtils.handleUserFileDownloadRequest(
+            getFacesContext(),
+            searchResultsFile,
+            searchResultsIn.getDownloadFormat().equals(SearchResults.SD_FILE) ? "chemical/x-mdl-sdfile" : Workbook.MIME_TYPE);
+        }
+        catch (IOException e)
+        {
+          showMessage("systemError");
+          log.error(e.getMessage());
+          throw new DAOTransactionRollbackException("could not create export file", e);
+        }
+        finally {
+          IOUtils.closeQuietly(searchResultsPrintWriter);
+          IOUtils.closeQuietly(searchResultsFileOutputStream);
+          if (searchResultsFile != null && searchResultsFile.exists()) {
+            searchResultsFile.delete();
+          }
+        }
+      }
+    });
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
   
   // private instance methods
     
@@ -590,47 +618,53 @@ public class LibrariesController extends AbstractUIController
    * @param plateWellList the plate-well list
    * @return the list of wells
    */
-  private List<Well> lookupWellsFromPlateWellList(String plateWellList)
+  private List<Well> lookupWellsFromPlateWellList(final String plateWellList)
   {
-    List<Well> wells = new ArrayList<Well>();
-    BufferedReader plateWellListReader = new BufferedReader(new StringReader(plateWellList));
-    try {
-      for (
-        String line = plateWellListReader.readLine();
-        line != null;
-        line = plateWellListReader.readLine()) {
+    final List<Well> wells = new ArrayList<Well>();
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        BufferedReader plateWellListReader = new BufferedReader(new StringReader(plateWellList));
+        try {
+          for (
+            String line = plateWellListReader.readLine();
+            line != null;
+            line = plateWellListReader.readLine()) {
 
-        // skip lines that say "Plate Well"
-        Matcher matcher = _plateWellHeaderLinePattern.matcher(line);
-        if (matcher.matches()) {
-          continue;
-        }
-        
-        // separate initial plate and well with a space if necessary
-        line = splitInitialPlateWell(line);
-        
-        // split the line into tokens; should be one plate, then one or more wells
-        String [] tokens = line.split("[\\s;,]+");
-        if (tokens.length == 0) {
-          continue;
-        }
-        
-        Integer plateNumber = parsePlateNumber(tokens[0]);
-        for (int i = 1; i < tokens.length; i ++) {
-          String wellName = parseWellName(tokens[i]);
-          if (plateNumber == null || wellName == null) {
-            continue;
+            // skip lines that say "Plate Well"
+            Matcher matcher = _plateWellHeaderLinePattern.matcher(line);
+            if (matcher.matches()) {
+              continue;
+            }
+
+            // separate initial plate and well with a space if necessary
+            line = splitInitialPlateWell(line);
+
+            // split the line into tokens; should be one plate, then one or more wells
+            String [] tokens = line.split("[\\s;,]+");
+            if (tokens.length == 0) {
+              continue;
+            }
+
+            Integer plateNumber = parsePlateNumber(tokens[0]);
+            for (int i = 1; i < tokens.length; i ++) {
+              String wellName = parseWellName(tokens[i]);
+              if (plateNumber == null || wellName == null) {
+                continue;
+              }
+              Well well = lookupWell(plateNumber, wellName);
+              if (well != null) {
+                wells.add(well);
+              }
+            }
           }
-          Well well = lookupWell(plateNumber, wellName);
-          if (well != null) {
-            wells.add(well);
-          }
+        }
+        catch (IOException e) {
+          showMessage("libraries.unexpectedErrorReadingPlateWellList", "searchResults");
         }
       }
-    }
-    catch (IOException e) {
-      showMessage("libraries.unexpectedErrorReadingPlateWellList", "searchResults");
-    }
+    });
     return wells;
   }
   
@@ -642,17 +676,25 @@ public class LibrariesController extends AbstractUIController
    * @param wellName the parse well name
    * @return
    */
-  private Well lookupWell(Integer plateNumber, String wellName) {
-    Well well = _dao.findWell(plateNumber, wellName);
-    if (well == null) {
-      showMessage("libraries.noSuchWell", "searchResults", plateNumber.toString(), wellName);
-    }
-    else {
-      // force initialization of persistent collections needed by search result viewer
-      well.getGenes().size();
-      well.getCompounds().size();
-    }
-    return well;
+  private Well lookupWell(final Integer plateNumber, final String wellName) {
+    final Well[] result = new Well[1];
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Well well = _dao.findWell(plateNumber, wellName);
+        if (well == null) {
+          showMessage("libraries.noSuchWell", "searchResults", plateNumber.toString(), wellName);
+        }
+        else {
+          // force initialization of persistent collections needed by search result viewer
+          well.getGenes().size();
+          well.getCompounds().size();
+        }
+        result[0] = well;
+      }
+    });
+    return result[0];
   }
   
   /**

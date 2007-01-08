@@ -52,11 +52,11 @@ public class NoOpDAO implements DAO
   {
   }
 
-  public void doInTransaction(DAOTransaction daoTransactionController)
+  public void doInTransaction(DAOTransaction daoTransaction)
   {
     // As a courtesy to the caller, we'll run it's callback code, even though
     // we're technically a "No Op" DAO.  We're just *too* nice...
-    daoTransactionController.runTransaction();
+    daoTransaction.runTransaction();
   }
 
   public <E extends AbstractEntity> List<E> findAllEntitiesWithType(Class<E> entityClassController)
@@ -128,6 +128,10 @@ public class NoOpDAO implements DAO
   public Well findWell(Integer plateNumberController, String wellNameController)
   {
     return null;
+  }
+
+  public void reattachEntity(AbstractEntity entity)
+  {
   }
 
   public void persistEntity(AbstractEntity entityController)

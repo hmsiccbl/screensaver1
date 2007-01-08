@@ -16,9 +16,12 @@ import java.util.Date;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
@@ -36,12 +39,13 @@ import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreensBrowser;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
-import edu.harvard.med.screensaver.ui.util.ViewEntityInitializer;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.DataAccessException;
 
 /**
  * 
@@ -144,7 +148,6 @@ public class ScreensController extends AbstractUIController
   @UIControllerMethod
   public String browseScreens()
   {
-    ViewEntityInitializer.unregisterCurrentViewEntityInitializer(); // candidate for AOP
     if (_screensBrowser.getScreenSearchResults() == null) {
       List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
       _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens, this, _dao));
@@ -153,11 +156,8 @@ public class ScreensController extends AbstractUIController
   }
   
   @UIControllerMethod
-  public String viewScreen(final Screen screen, ScreenSearchResults screenSearchResults)
+  public String viewScreen(final Screen screenIn, ScreenSearchResults screenSearchResults)
   {
-    _currentScreen = screen;
-    _currentScreenSearchResults = screenSearchResults;
-    
     _screenViewer.setDao(_dao);
 
     _screenResultImporter.setDao(_dao);
@@ -173,60 +173,103 @@ public class ScreensController extends AbstractUIController
     _heatMapViewer.setDao(_dao);
     _heatMapViewer.setLibrariesController(_librariesController);
 
-    new ViewEntityInitializer("viewScreen", _dao)
-    {
-      private Screen _screen;
-      private ScreenResult _screenResult;
+    try {
+      _dao.doInTransaction(new DAOTransaction() 
+      {
+        public void runTransaction()
+        {
+          Screen screen = _currentScreen = (Screen) reload(screenIn);
+          need(screen.getAbaseTestsets());
+          need(screen.getAssayReadoutTypes());
+          need(screen.getHbnCollaborators());
+          need(screen.getAttachedFiles());
+          need(screen.getBillingInformation());
+          need(screen.getFundingSupports());
+          need(screen.getKeywords());
+          need(screen.getLettersOfSupport());
+          need(screen.getPublications());
+          need(screen.getStatusItems());
+          need(screen.getVisits());
+          need(screen.getLabHead());
+          need(screen.getLabHead().getLabMembers());
+          need(screen.getLeadScreener());
+          ScreenResult screenResult = screen.getScreenResult();
+          if (screenResult != null) {
+            need(screenResult);
+            need(screenResult.getPlateNumbers());
+            need(screenResult.getResultValueTypes());
+            //need(screenResult.getWells());
+            for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+              need(rvt.getDerivedTypes());
+              need(rvt.getTypesDerivedFrom());
+              rvt.getResultValues().size();
+            }
+          }
+          
+          _screenViewer.setScreen(screen);
+          _screenResultImporter.setScreen(screen);
+          _screenResultViewer.setScreen(screen);
+          _heatMapViewer.setScreenResult(screen.getScreenResult());
+          _screenResultViewer.setScreenResult(screen.getScreenResult());
+        }
+      });
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    catch (Exception e) {
+      reportSystemError(e);
+    }
       
-      @Override
-      protected void setup()
-      {
-        _screen = screen;
-        HACKupdateScreenResult();
-      }
-      
-      @Override
-      protected void reattachEntities()
-      {
-        reattach(_screen);
-        reattach(_screenResult);
-      }
-      
-      @Override
-      protected void reloadEntities()
-      {
-        _screen = (Screen) reload(_screen);
-        HACKupdateScreenResult();
-      }
-
-      @Override
-      public void setEntities()
-      {
-        _screenViewer.setScreen(_screen);
-        _screenResultImporter.setScreen(_screen);
-        _screenResultViewer.setScreen(_screen);
-        _heatMapViewer.setScreenResult(_screenResult);
-        _screenResultViewer.setScreenResult(_screenResult);
-      }
-      
-      private void HACKupdateScreenResult()
-      {
-        _screenResult = _screen.getScreenResult();
-        // TODO: reinstate!
-//        _screenResult = null;
-//        if (_screen.getScreenResult() != null) {
-//          _screenResult = (ScreenResult) reload(_screen.getScreenResult());
-//        }
-      }
-    };
-
     return VIEW_SCREEN;
   }
 
   @UIControllerMethod
-  public String saveScreen(Screen screen)
+  public String editScreen(final Screen screen)
   {
-    _dao.persistEntity(screen);
+    try {
+      _dao.doInTransaction(new DAOTransaction() 
+      {
+        public void runTransaction()
+        {
+          _dao.reattachEntity(screen); // checks if up-to-date
+          need(screen.getLabHead().getLabMembers());
+        }
+      });
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    catch (ConcurrencyFailureException e) {
+      showMessage("concurrentModificationConflict");
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return viewLastScreen(); // reload
+  }
+
+  @UIControllerMethod
+  public String saveScreen(final Screen screen, final DAOTransaction updater)
+  {
+    try {
+      _dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          _dao.reattachEntity(screen);
+          if (updater != null) {
+            updater.runTransaction();
+          }
+        }
+      });
+    }
+    catch (ConcurrencyFailureException e) {
+      showMessage("concurrentModificationConflict");
+      viewLastScreen();
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+      viewLastScreen();
+    }
     return VIEW_SCREEN;
   }
 
@@ -234,7 +277,15 @@ public class ScreensController extends AbstractUIController
   public String deleteScreenResult(ScreenResult screenResult)
   {
     if (screenResult != null) {
-      _dao.deleteScreenResult(screenResult);
+      try {
+        _dao.deleteScreenResult(screenResult);
+      }
+      catch (ConcurrencyFailureException e) {
+        showMessage("concurrentModificationConflict");
+      }
+      catch (DataAccessException e) {
+        showMessage("databaseOperationFailed", e.getMessage());
+      }
     }
     return viewLastScreen();
   }
@@ -249,7 +300,6 @@ public class ScreensController extends AbstractUIController
   @UIControllerMethod
   public String viewScreenResultImportErrors()
   {
-    ViewEntityInitializer.unregisterCurrentViewEntityInitializer();
     return VIEW_SCREEN_RESULT_IMPORT_ERRORS;
   }
 
@@ -383,83 +433,99 @@ public class ScreensController extends AbstractUIController
   }
 
   @UIControllerMethod
-  public String importScreenResult(Screen screen,
-                                   UploadedFile uploadedFile,
-                                   ScreenResultParser parser)
+  public String importScreenResult(final Screen screenIn,
+                                   final UploadedFile uploadedFile,
+                                   final ScreenResultParser parser)
   {
-    boolean parseSuccessful = false;
-    ScreenResult existingScreenResult = screen.getScreenResult();
     try {
-      log.info("starting import of ScreenResult for Screen " + screen);
+      _dao.doInTransaction(new DAOTransaction() 
+      {
+        public void runTransaction()
+        {
+          Screen screen = (Screen) reload(screenIn);
+          log.info("starting import of ScreenResult for Screen " + screen);
 
-      ScreenResult screenResult = null;
-      if (uploadedFile.getInputStream().available() > 0) {
-        screenResult = parser.parse(screen, 
-                                    new File("screen_result_" + screen.getScreenNumber()),
-                                    uploadedFile.getInputStream());
-      }
-
-      if (screenResult == null) {
-        // this is an unexpected, system error, so we log at "error" level
-        log.error("fatal error during import of ScreenResult for Screen " + screen);
-      }
-      if (parser.getErrors().size() > 0) {
-        // these are data-related "user" errors, so we log at "info" level
-        log.info("parse errors encountered during import of ScreenResult for Screen " + screen);
-        return viewScreenResultImportErrors();
-      }
-      else {
-        log.info("successfully parsed " + screenResult + " for Screen " + screen);
-        parseSuccessful = true;
-        _dao.flush();
-        // TODO: reload screenResult so that screenResult.wells contents are not loaded (causes slow down on viewEntityInitializer.reattach())
-        return viewLastScreen();
-      }
+          try {
+            if (uploadedFile.getInputStream().available() > 0) {
+              parser.parse(screen, 
+                           new File("screen_result_" + screen.getScreenNumber()),
+                           uploadedFile.getInputStream());
+              if (parser.getErrors().size() > 0) {
+                // these are data-related "user" errors, so we log at "info" level
+                log.info("parse errors encountered during import of ScreenResult for Screen " + screenIn);
+                throw new ScreenResultParseErrorsException("parse errors encountered");
+              }
+              else {
+                log.info("successfully parsed ScreenResult for Screen " + screenIn);
+              }
+            }
+          }
+          catch (IOException e) {
+            showMessage("systemError", e.getMessage());
+            throw new DAOTransactionRollbackException("could not access uploaded file", e);
+          }
+        }
+      });
+      return viewLastScreen();
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    catch (ScreenResultParseErrorsException e) {
+      return viewScreenResultImportErrors();
     }
     catch (Exception e) {
       reportSystemError(e);
-      return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    finally {
-      if (!parseSuccessful) {
-        screen.setScreenResult(existingScreenResult);
-      } 
-      else if (existingScreenResult != null) {
-        _dao.deleteEntity(existingScreenResult);
-      }
-    }
+    return viewLastScreen();
   }
 
   @UIControllerMethod
-  public String downloadScreenResult(ScreenResult screenResult)
+  public String downloadScreenResult(final ScreenResult screenResultIn)
   {
-    File exportedWorkbookFile = null;
-    FileOutputStream out = null;
     try {
-      if (screenResult != null) {
-        HSSFWorkbook workbook = _screenResultExporter.build(screenResult);
-        exportedWorkbookFile = File.createTempFile("screenResult" + screenResult.getScreen().getScreenNumber() + ".",
-        ".xls");
-        out = new FileOutputStream(exportedWorkbookFile);
-        workbook.write(out);
-        out.close();
-        JSFUtils.handleUserFileDownloadRequest(getFacesContext(),
-                                               exportedWorkbookFile,
-                                               Workbook.MIME_TYPE);
-      }
+      _dao.doInTransaction(new DAOTransaction() 
+      {
+        public void runTransaction()
+        {
+          ScreenResult screenResult = (ScreenResult) reload(screenResultIn);
+          File exportedWorkbookFile = null;
+          FileOutputStream out = null;
+          try {
+            if (screenResult != null) {
+              HSSFWorkbook workbook = _screenResultExporter.build(screenResult);
+              exportedWorkbookFile = File.createTempFile("screenResult" + screenResult.getScreen().getScreenNumber() + ".", 
+              ".xls");
+              out = new FileOutputStream(exportedWorkbookFile);
+              workbook.write(out);
+              out.close();
+              JSFUtils.handleUserFileDownloadRequest(getFacesContext(),
+                                                     exportedWorkbookFile,
+                                                     Workbook.MIME_TYPE);
+            }
+          }
+          catch (IOException e)
+          {
+            reportApplicationError(e);
+          }
+          finally {
+            IOUtils.closeQuietly(out);
+            if (exportedWorkbookFile != null && exportedWorkbookFile.exists()) {
+              exportedWorkbookFile.delete();
+            }
+          }
+        }
+      });
     }
-    catch (IOException e)
-    {
-      reportApplicationError(e);
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
     }
-    finally {
-      IOUtils.closeQuietly(out);
-      if (exportedWorkbookFile != null && exportedWorkbookFile.exists()) {
-        exportedWorkbookFile.delete();
-      }
+    catch (Exception e) {
+      reportSystemError(e);
     }
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return viewLastScreen();
   }
+
 
   
   // private methods

@@ -17,6 +17,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 
@@ -130,6 +131,20 @@ public class Library extends AbstractEntity
   {
     return Collections.unmodifiableSet(_wells);
   }
+  
+  /**
+   * Get the number of wells.
+   * 
+   * @return the number of wells
+   * @motivation {@link #getWells} forces loading of all wells, just to get the
+   *             size; Hibernate can optimize a collection size request, if we
+   *             get directly from the underyling persistent collection.
+   */
+  @DerivedEntityProperty
+  public int getNumWells()
+  {
+    return _wells.size();
+  }
 
   /**
    * Add the well.
@@ -157,7 +172,21 @@ public class Library extends AbstractEntity
   }
 
   /**
-   * Add the copie.
+   * Get the number of copies.
+   * 
+   * @return the number of copies
+   * @motivation {@link #getCopis} forces loading of all copies, just to get the
+   *             size; Hibernate can optimize a collection size request, if we
+   *             get directly from the underyling persistent collection.
+   */
+  @DerivedEntityProperty
+  public int getNumCopies()
+  {
+    return _copies.size();
+  }
+
+  /**
+   * Add the copy.
    *
    * @param copy the copie to add
    * @return true iff the screening library did not already have the copie

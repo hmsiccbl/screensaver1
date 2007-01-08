@@ -9,10 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.searchresults;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,15 +22,12 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
-import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 
 /**
@@ -58,7 +51,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   private static final int [] PAGESIZES = { 10, 20, 50, 100 };
   private static final int DEFAULT_PAGESIZE = PAGESIZES[0];
   
-  private static final String SD_FILE = "SDFile";
+  public static final String SD_FILE = "SDFile";
   private static final String EXCEL_FILE = "Excel Spreadsheet";
   private static final String [] DOWNLOAD_FORMATS = { "", EXCEL_FILE, SD_FILE };
 
@@ -544,43 +537,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   
   public String downloadSearchResults()
   {
-    File searchResultsFile = null;
-    PrintWriter searchResultsPrintWriter = null;
-    FileOutputStream searchResultsFileOutputStream = null;
-    try {
-      searchResultsFile = File.createTempFile(
-        "searchResults.",
-        _downloadFormat.equals(SD_FILE) ? ".sdf" : ".xls");
-      if (_downloadFormat.equals(SD_FILE)) {
-        searchResultsPrintWriter = new PrintWriter(searchResultsFile);
-        writeSDFileSearchResults(searchResultsPrintWriter);
-        searchResultsPrintWriter.close();
-      }
-      else {
-        HSSFWorkbook searchResultsWorkbook = new HSSFWorkbook();
-        writeExcelFileSearchResults(searchResultsWorkbook);
-        searchResultsFileOutputStream = new FileOutputStream(searchResultsFile);
-        searchResultsWorkbook.write(searchResultsFileOutputStream);
-        searchResultsFileOutputStream.close();
-      }
-      JSFUtils.handleUserFileDownloadRequest(
-        getFacesContext(),
-        searchResultsFile,
-        _downloadFormat.equals(SD_FILE) ? "chemical/x-mdl-sdfile" : Workbook.MIME_TYPE);
-    }
-    catch (IOException e)
-    {
-      showMessage("systemError");
-      log.error(e.getMessage());
-    }
-    finally {
-      IOUtils.closeQuietly(searchResultsPrintWriter);
-      IOUtils.closeQuietly(searchResultsFileOutputStream);
-      if (searchResultsFile != null && searchResultsFile.exists()) {
-        searchResultsFile.delete();
-      }
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    throw new UnsupportedOperationException("This SearchResults (" + this + ") does not know how to download itself.");
   }
 
 
@@ -669,31 +626,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
     return (E) getDataModel().getRowData();
   }
   
-  /**
-   * Write the search results as an SD File to the print writer. Subclasses need to
-   * override this method to implement writing to SD File.
-   * @param searchResultsPrintWriter the print writer to write the search results to
-   */
-  protected void writeSDFileSearchResults(PrintWriter searchResultsPrintWriter)
-  {
-    throw new UnsupportedOperationException(
-      "This SearchResults (" + this + ") does not know how to write itself as an SD File.");
-  }
-  
-  /**
-   * Write the search results as an Excel File to the HSSFWorkbook. Subclasses need to
-   * override this method to implement writing to Excel File.
-   * @param searchResultsWorkbook the workbook to write the search results to
-   */
-  protected void writeExcelFileSearchResults(HSSFWorkbook searchResultsWorkbook)
-  {
-    throw new UnsupportedOperationException(
-      "This SearchResults (" + this + ") does not know how to write itself as an Excel File.");    
-  }
-
-
-  
-  
+ 
   // private instance methods
   
   /**
