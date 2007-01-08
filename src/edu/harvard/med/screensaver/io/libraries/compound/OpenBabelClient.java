@@ -34,6 +34,7 @@ public class OpenBabelClient
   // private fields
   
   private String _output;
+  private String _error;
   
   
   // public method
@@ -62,6 +63,8 @@ public class OpenBabelClient
       OutputStream openBabelInput = openBabelProcess.getOutputStream();
       openBabelInput.write(input.getBytes());
       openBabelInput.close();
+      
+      // capture the output
       final InputStream openBabelOutput = openBabelProcess.getInputStream();
       Thread openBabelOutputThread = new Thread() {
         public void run()
@@ -81,13 +84,43 @@ public class OpenBabelClient
         }
       };
       openBabelOutputThread.start();
+      
+      // capture the error
+      final InputStream openBabelError = openBabelProcess.getErrorStream();
+      Thread openBabelErrorThread = new Thread() {
+        public void run()
+        {
+          _error = "";
+          try {
+            for (
+              int ch = openBabelError.read();
+              ch != -1;
+              ch = openBabelError.read()) {
+              _error += (char) ch;
+            }
+          }
+          catch (IOException e) {
+            log.info("error reading Open Babel error stream", e);
+          }
+        }
+      };
+      openBabelErrorThread.start();
+
+      // wait until all output and error has been read
       openBabelOutputThread.join();
+      openBabelErrorThread.join();
+      
+      if (! _error.equals("")) {
+        log.error("error reported from babel tool: " + _error);
+      }
     }
     catch (IOException e) {
-      log.info("error running Open Babel", e);
+      log.error("error running Open Babel: " + e.getMessage());
+      return null;
     }
     catch (InterruptedException e) {
-      log.info("error waiting for Open Babel to complete", e);
+      log.info("error waiting for Open Babel to complete: " + e.getMessage());
+      return null;
     }
     
     if (outputFormat.equals("smi") && _output.indexOf('\t') != -1) {

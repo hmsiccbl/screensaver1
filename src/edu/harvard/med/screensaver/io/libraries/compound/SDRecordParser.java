@@ -81,7 +81,7 @@ class SDRecordParser
     }
     
     Well well = getWell();
-    if (well != null && _molfileToSmiles != null) {
+    if (well != null && _molfileToSmiles != null && _molfileToSmiles.getSmiles() != null) {
       addSmilesToWell(_molfileToSmiles.getPrimaryCompoundSmiles(), well, true);
       for (String secondaryCompoundSmiles : _molfileToSmiles.getSecondaryCompoundsSmiles()) {
         addSmilesToWell(secondaryCompoundSmiles, well, false);

@@ -84,6 +84,10 @@ public class MolfileToSmiles extends OpenBabelClient
   private void initialize()
   {
     _smiles = convertMolfileToSmiles(_molfile);
+    if (_smiles == null) {
+      log.error("couldnt convert Molfile to SMILES");
+      return;
+    }
     
     String [] componentsSmiles = _smiles.split("\\.");
     Arrays.sort(componentsSmiles, new Comparator<String>() {
