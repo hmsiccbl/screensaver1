@@ -535,7 +535,7 @@ public class ScreensController extends AbstractUIController
     catch (Exception e) {
       reportSystemError(e);
     }
-    return viewLastScreen();
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
 
