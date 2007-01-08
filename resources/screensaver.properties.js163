@@ -1,0 +1,5 @@
+# contains properties used at both build-time and run-time
+
+# Open Babel executable `babel` - needed for compound loading
+# get Open Babel here: http://openbabel.sourceforge.net/wiki/Main_Page
+babel.executable.path=/usr/local/openbabel/bin/babel

@@ -15,6 +15,8 @@ import java.io.OutputStream;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.ScreensaverProperties;
+
 /**
  * Encapsulates the details of locating the Open Babel executable. Converts
  * moleules between input and output types.
@@ -28,7 +30,8 @@ public class OpenBabelClient
   // private static final fields
   
   private static final Logger log = Logger.getLogger(OpenBabelClient.class);
-  private static final String OPEN_BABEL_EXE = "/usr/local/openbabel/bin/babel";
+  private static final String BABEL_EXECUTABLE_PATH =
+    ScreensaverProperties.getProperty("babel.executable.path");
 
   
   // private fields
@@ -56,7 +59,7 @@ public class OpenBabelClient
   {
     try {
       Process openBabelProcess = Runtime.getRuntime().exec(new String [] {
-        OPEN_BABEL_EXE,
+        BABEL_EXECUTABLE_PATH,
         "-i" + inputFormat,
         "-o" + outputFormat
       });
@@ -111,7 +114,7 @@ public class OpenBabelClient
       openBabelErrorThread.join();
       
       if (! _error.equals("")) {
-        log.error("error reported from babel tool: " + _error);
+        log.debug("error reported from babel tool: " + _error);
       }
     }
     catch (IOException e) {

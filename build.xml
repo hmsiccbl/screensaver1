@@ -21,6 +21,20 @@
 
   <!-- properties -->
 
+  <!--
+    a properties file to use for build and runtime screensaver properties.
+    
+    substituting a value for ${screensaver.properties.file} will propagate to
+    resource "screensaver.properties" in the runtime for any deployed sites.
+  -->
+  <property
+    name="screensaver.properties.file"
+	value="resources/screensaver.properties"
+  />
+  <property
+    file="${screensaver.properties.file}"
+  />
+
   <property 
     name="app.name" 
     value="screensaver"
@@ -511,14 +525,22 @@
       tofile="${classes.dir}/log4j.properties"
       verbose="${verbose}"/>
 
+    <copy
+      file="${screensaver.properties.file}"
+      tofile="${classes.dir}/screensaver.properties"
+      verbose="${verbose}"
+    />
+
     <copy 
       todir="${classes.dir}" 
       verbose="${verbose}"
     >
       <fileset dir="resources">
         <include name="**/*"/>
+        <exclude name="README.txt"/>
         <exclude name="log4j*properties"/>
         <exclude name="datasource*properties"/>
+        <exclude name="screensaver*properties*"/>
       </fileset>
     </copy>
 
