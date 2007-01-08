@@ -37,12 +37,14 @@ public class PubchemCidListProvider
   private static final Logger log = Logger.getLogger(PubchemCidListProvider.class);
   private static final String EUTILS_ROOT = "http://www.ncbi.nlm.nih.gov/entrez/eutils";
   private static final String ESEARCH_URL = EUTILS_ROOT + "/esearch.fcgi";
-  private static final int NUM_RETRIES = 3;
-  private static final int CONNECT_TIMEOUT = 2000; // in millisecs
+  private static final int NUM_RETRIES = 5;
+  private static final int CONNECT_TIMEOUT = 5000; // in millisecs
 
   
   // static methods
   
+  // little test code
+  // TODO: make this into a unit test
   public static void main(String [] args)
   {
     OpenBabelClient openBabelClient = new OpenBabelClient();
@@ -97,7 +99,7 @@ public class PubchemCidListProvider
       }
     }
     log.error("couldnt get PubChem CIDs for InChI after " + NUM_RETRIES + " tries.");
-    throw new NullPointerException();
+    return new ArrayList<String>();
   }
 
   
