@@ -446,23 +446,33 @@ public class LibrariesController extends AbstractUIController
   public String importCompoundLibraryContents(final Library libraryIn, final UploadedFile uploadedFile)
   {
     try {
-      if (uploadedFile != null && uploadedFile.getInputStream().available() > 0) {
-        _compoundLibraryContentsParser.parseLibraryContents(libraryIn,
-                                                            new File(uploadedFile.getName()),
-                                                            uploadedFile.getInputStream());
-        _dao.persistEntity(libraryIn);
-      }
-      else {
+      if (uploadedFile == null || uploadedFile.getInputStream().available() == 0) {
         showMessage("badUploadedFile", uploadedFile.getName());
         return "importCompoundLibraryContents";
       }
-
+      _dao.doInTransaction(new DAOTransaction() 
+      {
+        public void runTransaction()
+        {
+          try {
+            Library library = (Library) reload(libraryIn);
+            _compoundLibraryContentsParser.parseLibraryContents(library,
+                                                                new File(uploadedFile.getName()),
+                                                                uploadedFile.getInputStream());
+            _dao.persistEntity(library);
+          }
+          catch (IOException e) {
+            throw new DAOTransactionRollbackException("could not access uploaded file", e);
+          }
+        }
+      });
       if (_compoundLibraryContentsParser.getHasErrors()) {
         return "importCompoundLibraryContents";
       }
       else {
         showMessage("libraries.importedLibraryContents", "libraryViewer");
-        return "viewLibrary";
+        // TODO: to be correct, we should regen the search results, though I don't think anything in the results would actually be different after this import
+        return viewLibrary(libraryIn, _libraryViewer.getLibrarySearchResults());
       }
     }
     catch (DataAccessException e) {
@@ -497,38 +507,46 @@ public class LibrariesController extends AbstractUIController
    */
   @UIControllerMethod
   public String importRNAiLibraryContents(
-    final Library library,
+    final Library libraryIn,
     final UploadedFile uploadedFile,
     final SilencingReagentType silencingReagentType)
   {
     try {
-      if (uploadedFile != null && uploadedFile.getInputStream().available() > 0) {
-        _rnaiLibraryContentsParser.setSilencingReagentType(silencingReagentType);
-        _rnaiLibraryContentsParser.parseLibraryContents(
-          library,
-          new File(uploadedFile.getName()), uploadedFile.getInputStream());
-        _dao.persistEntity(library);
-      }
-      else {
+      if (uploadedFile == null || uploadedFile.getInputStream().available() == 0) {
         showMessage("badUploadedFile", uploadedFile.getName());
         return "importRNAiLibraryContents";
       }
-
+      _dao.doInTransaction(new DAOTransaction() 
+      {
+        public void runTransaction()
+        {
+          try {
+            Library library = (Library) reload(libraryIn);
+            _rnaiLibraryContentsParser.setSilencingReagentType(silencingReagentType);
+            _rnaiLibraryContentsParser.parseLibraryContents(library,
+                                                            new File(uploadedFile.getName()), 
+                                                            uploadedFile.getInputStream());
+            _dao.persistEntity(library);
+          }
+          catch (IOException e) {
+            throw new DAOTransactionRollbackException("could not access uploaded file", e);
+          }
+        }
+      });
       if (_rnaiLibraryContentsParser.getHasErrors()) {
         return "importRNAiLibraryContents";
       }
-      else {
-        showMessage("libraries.importedLibraryContents", "libraryViewer");
-        return "viewLibrary";
-      }
+      showMessage("libraries.importedLibraryContents", "libraryViewer");
+      // TODO: to be correct, we should regen the search results, though I don't think anything in the results would actually be different after this import
+      return viewLibrary(libraryIn, _libraryViewer.getLibrarySearchResults());
     }
     catch (DataAccessException e) {
       // TODO: should reload library and goto library viewer
       reportSystemError(e);
       return "importRNAiLibraryContents";
     }
-    catch (IOException e) {
-      reportSystemError(e);
+    catch (Exception e) {
+      reportApplicationError(e);
       return "importRNAiLibraryContents";
     }
   }
