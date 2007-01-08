@@ -19,13 +19,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
-
-import org.apache.log4j.Logger;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * A bulk loader for the compound libraries that we have SD files for.
@@ -40,7 +40,7 @@ public class BulkCompoundLibraryLoader
 
   private static final Logger log = Logger.getLogger(BulkCompoundLibraryLoader.class);
   private static final File _compoundLibraryDir = new File("/usr/local/compound-libraries");
-  private static final Pattern _pattern = Pattern.compile("^(.*?)(_\\d+)?\\.sdf$");
+  private static final Pattern _sdFilenamePattern = Pattern.compile("^(.*?)(_\\d+)?\\.sdf$");
   
   public static void main(String[] args)
   {
@@ -52,6 +52,16 @@ public class BulkCompoundLibraryLoader
     libraryLoader.bulkLoadLibraries();
   }
 
+  private static void patchCompoundFromSmiles(Compound compound)
+  {
+    String smiles = compound.getSmiles();
+    String inchi = new OpenBabelClient().convertSmilesToInchi(smiles);
+    compound.setInchi(inchi);
+    PubchemCidListProvider provider = new PubchemCidListProvider();
+    for (String pubchemCid : provider.getPubchemCidListForInchi(inchi)) {
+      compound.addPubchemCid(pubchemCid);
+    }
+  }
 
   // instance data members
   
@@ -82,16 +92,22 @@ public class BulkCompoundLibraryLoader
     });
 
     for (final File sdFile : sdFiles) {
+
+      // tweak the compareTo for partial runs. uncomment the "if (true) continue;"
+      // to see what would run without actually running it
+      if (//sdFile.getName().equals("CMLD1.sdf") ||
+        sdFile.getName().compareTo("0.sdf") >= 0) {
+        log.info("processing SD File: " + sdFile.getName());
+      }
+      else {
+        log.info("not processing SD File: " + sdFile.getName());
+        continue;
+      }
+      //if (true) continue;
+
       _dao.doInTransaction(new DAOTransaction() {
         public void runTransaction()
         {
-//          log.info("preloading extant compounds");
-//          List<Compound> compounds = _dao.findAllEntitiesWithType(Compound.class);
-//          Map<String,Compound> compoundCache = buildCompoundCache(compounds);
-//          log.info("preloaded " + compounds.size() + " compounds");
-//          _parser.setCompoundCache(compoundCache);
-          
-          log.info("processing SD File: " + sdFile.getName());
           Library library = getLibraryForSDFile(sdFile);
           try {
             _parser.parseLibraryContents(library, sdFile, new FileInputStream(sdFile));
@@ -103,19 +119,17 @@ public class BulkCompoundLibraryLoader
             for (SDFileParseError error : _parser.getErrors()) {
               log.error(error.toString());
             }
-            //throw new RuntimeException("SD File has parse errors: " + sdFile.getName());
           }
           _dao.persistEntity(library);
-          
-          log.info("finished processing SD File: " + sdFile.getName());
         }
       });
+      log.info("finished processing SD File: " + sdFile.getName());
     }
   }
 
   private Library getLibraryForSDFile(File sdFile) {
     String filename = sdFile.getName();
-    Matcher matcher = _pattern.matcher(filename);
+    Matcher matcher = _sdFilenamePattern.matcher(filename);
     if (! matcher.matches()) {
       throw new RuntimeException("sd file didnt match pattern: " + filename);
     }
