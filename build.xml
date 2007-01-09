@@ -80,15 +80,6 @@
   <property name="distro.build.dir" location="build/distro/${app.name}"/>
   <property name="distro.file.tgz" location="build/${app.name}.tgz"/>
   <property name="distro.file.zip" location="build/${app.name}.zip"/>
-  <property name="datasource" value="local" 
-    description="Determines which datasource*.properties file is used when generating a build or deployment.  Valid values are wildcard substring of 'resources/datasource-*.properties'"/>
-  <property name="datasource.file" location="resources/datasource-${datasource}.properties"/>
-  <condition 
-    property="log4j.properties.file"
-    value="resources/log4j.properties"
-    else="resources/log4j.debug.properties">
-    <isfalse value="${debug}"/>
-  </condition>
   <property name="loginmodule.config.filename" value="login.config"/>
   <property name="deployed.loginmodule.config.file" location="${appserver.dir}/conf/${loginmodule.config.filename}"/>
   <property name="dev.loginmodule.config.file" location="web/tomcat/conf/${loginmodule.config.filename}"/>
@@ -309,13 +300,17 @@
       <fileset dir="web/images"/>
     </copy>
 
+  	<antcall target="copy.downloads.dir"/>
+
+  </target>
+
+  <target name="copy.downloads.dir" if="copy.downloads.dir">
     <copy
       todir="${exploded.war.dir}/downloads"
-      verbose="${verbose}" 
+      verbose="${verbose}"
     >
       <fileset dir="web/downloads"/>
-    </copy>
-
+    </copy>	
   </target>
 
   <target 
@@ -492,8 +487,7 @@
     <description>A "subroutine" target that performs the common build operations 
       for either a WAR or non-web build.  Builds into the directory specified by
       the 'build.dir' property.  This target directory will contain 'classes/', 
-      'resources/', and 'lib/' subdirectories.  Configures the build to use a 
-      the DataSource specified by the 'datasource' property.
+      'resources/', and 'lib/' subdirectories.
     </description>
 
     <property name="classes.dir" value="${build.dir}/classes"/>
@@ -518,8 +512,7 @@
       <fileset refid="deploy.lib.fileset"/>
     </copy>
 
-    <!-- conditionally use log4j.debug.properties in place of log4j.properties; will be
-    overwritten by normal log4.properties unless 'debug' property is set -->
+    <!-- ${log4j.properties.file} is defined in resources/screensaver.properties -->
     <copy
       file="${log4j.properties.file}"
       tofile="${classes.dir}/log4j.properties"
@@ -538,14 +531,11 @@
       <fileset dir="resources">
         <include name="**/*"/>
         <exclude name="README.txt"/>
-        <exclude name="log4j*properties"/>
-        <exclude name="datasource*properties"/>
+        <exclude name="log4j*properties*"/>
         <exclude name="screensaver*properties*"/>
       </fileset>
     </copy>
 
-    <!-- copy the selected datasource properties file to its standard name ("datasource.properties") in the build directory -->
-    <copy file="${datasource.file}" tofile="${classes.dir}/datasource.properties" verbose="${verbose}"/>
   </target>
 
 
