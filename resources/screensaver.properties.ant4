@@ -1,0 +1,22 @@
+# screensaver.properties.js163
+# contains properties used at both build-time and run-time
+
+
+### build-time properties
+
+log4j.properties.file=resources/log4j.debug.properties
+# uncomment/comment the following line to copy/not copy downloads:
+#copy.downloads.dir=true
+
+
+### run-time properties
+
+# Open Babel executable `babel` - needed for compound loading
+# get Open Babel here: http://openbabel.sourceforge.net/wiki/Main_Page
+babel.executable.path=/usr/local/openbabel/bin/babel
+
+# database connection
+SCREENSAVER_PGSQL_SERVER=localhost
+SCREENSAVER_PGSQL_DB=devscreensaver1
+SCREENSAVER_PGSQL_USER=devscreensaver1
+SCREENSAVER_PGSQL_PASSWORD=
