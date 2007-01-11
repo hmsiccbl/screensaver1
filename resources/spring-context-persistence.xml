@@ -157,8 +157,11 @@
    <property name="perl5" value="true"/>
    <property name="patterns">
     <list>
-     <value>.*DAO.findEntitiesBy.*</value>
+     <value>.*DAO.find.*Entities.*</value>
      <value>.*DAO.findAll.*</value>
+     <value>.*DAO.findCandidateCollaborators</value>
+     <value>.*DAO.findWellsForPlate</value>
+     <value>.*DAO.findLibraries.*</value>
     </list>
    </property>
   </bean>
@@ -172,7 +175,10 @@
    <property name="patterns">
     <list>
      <value>.*DAO.delete.*</value>
-     <value>.*DAO.find(?!All|EntitiesBy|.*ResultValue|WellsForPlate|LibrariesDisplayedInLibrariesBrowser|CandidateCollaborators).*</value>
+     <value>.*DAO.findEntity.*</value>
+     <value>.*DAO.findWell</value>
+     <value>.*DAO.findSilencingReagent</value>
+     <value>.*DAO.findLibraryWithPlate</value>
     </list>
    </property>
   </bean>
