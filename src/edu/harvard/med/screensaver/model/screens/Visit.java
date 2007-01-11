@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
  *   type="boolean"
  *   not-null="true"
  */
-abstract public class Visit extends AbstractEntity
+abstract public class Visit extends AbstractEntity implements Comparable
 {
   
   // static fields
@@ -282,6 +282,15 @@ abstract public class Visit extends AbstractEntity
       throw new NullPointerException();
     }
     _performedBy = performedBy;
+  }
+  
+  public int compareTo(Object o)
+  {
+    if (o instanceof Visit) {
+      Visit other = (Visit) o;
+      return getDateCreated().compareTo(other.getDateCreated());
+    }
+    return 0;
   }
 
   

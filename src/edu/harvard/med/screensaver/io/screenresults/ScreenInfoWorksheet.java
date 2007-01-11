@@ -45,7 +45,7 @@ public class ScreenInfoWorksheet implements ScreenResultWorkbookSpecification
     if (screen.getPublications().size() > 0) {
       row2Value.put(ScreenInfoRow.PUBMED_ID, screen.getPublications().iterator().next());
     }
-    row2Value.put(ScreenInfoRow.FIRST_DATA_DEPOSITION, screenResult.getDateCreated());
+    row2Value.put(ScreenInfoRow.DATE_FIRST_VISIT, screenResult.getDateCreated());
     row2Value.put(ScreenInfoRow.EMAIL, screen.getLabHead().getEmail());
     row2Value.put(ScreenInfoRow.LAB_AFFILIATION, screen.getLabHead().getLabAffiliationName());
 

@@ -12,7 +12,6 @@ package edu.harvard.med.screensaver.io.screenresults;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,6 +27,7 @@ import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
@@ -35,11 +35,15 @@ import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
+import edu.harvard.med.screensaver.model.screens.NonCherryPickVisit;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.VisitType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
+import edu.harvard.med.screensaver.util.DateUtil;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -60,6 +64,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public static final String SCREEN_RESULT_115_TEST_WORKBOOK_FILE = "ScreenResultTest115.xls";
   public static final String SCREEN_RESULT_116_TEST_WORKBOOK_FILE = "ScreenResultTest116.xls";
   public static final String SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE = "ScreenResultTest115_30DataHeaders.xls";
+  public static final String SCREEN_RESULT_115_NO_DATE_TEST_WORKBOOK_FILE = "ScreenResultTest115-no-date.xls";
   public static final String ERRORS_TEST_WORKBOOK_FILE = "NewFormatErrorsTest.xls";
   public static final String FORMULA_VALUE_TEST_WORKBOOK_FILE = "formula_value.xls";
   
@@ -268,6 +273,39 @@ public class ScreenResultParserTest extends AbstractSpringTest
    }
   
   /**
+   * Test that if a screen result file has no "Date First Visit" value, the
+   * screen result's "date created" property should default to the Screen's
+   * first visit date.
+   */
+  public void testScreenResultDateCreated() throws Exception
+  {
+
+    Screen screen = ScreenResultParser.makeDummyScreen(115);
+    try {
+      new NonCherryPickVisit(screen,
+                             screen.getLeadScreener(),
+                             new Date(),
+                             DateUtil.makeDate(2007, 1, 1),
+                             VisitType.LIBRARY,
+                             AssayProtocolType.PRELIMINARY);
+    }
+    catch (DuplicateEntityException e) {
+      e.printStackTrace();
+    }
+    
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_NO_DATE_TEST_WORKBOOK_FILE);
+    ScreenResult screenResult = mockScreenResultParser.parse(screen,
+                                                             workbookFile);
+    assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
+
+    Date expectedDate = DateUtil.makeDate(2007, 1, 1);
+    ScreenResult expectedScreenResult = makeScreenResult(expectedDate);
+    assertEquals("date",
+                 expectedScreenResult.getDateCreated(),
+                 screenResult.getDateCreated());
+  }
+
+    /**
    * Tests parsing of the new ScreenResult workbook format, which is an
    * "all-in-one" format, and has significant structural changes.
    * 
@@ -280,10 +318,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
                                                              workbookFile);
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
 
-    Calendar expectedDate = Calendar.getInstance();
-    expectedDate.set(2006, 1 - 1, 1, 0, 0, 0);
-    expectedDate.set(Calendar.MILLISECOND, 0);
-    ScreenResult expectedScreenResult = makeScreenResult(expectedDate.getTime());
+    Date expectedDate = DateUtil.makeDate(2006, 1, 1);
+    ScreenResult expectedScreenResult = makeScreenResult(expectedDate);
     assertEquals("date",
                  expectedScreenResult.getDateCreated(),
                  screenResult.getDateCreated());
@@ -514,7 +550,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     }
   }
   
-  
+
   // testing  utility methods 
   
   public static ScreenResult makeScreenResult(Date date)

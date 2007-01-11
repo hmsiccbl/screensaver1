@@ -25,7 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,6 +54,7 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.Visit;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 
@@ -117,16 +120,12 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   private static final Logger log = Logger.getLogger(ScreenResultParser.class);
 
-
-  // TODO: move these a messages (Spring) resource file
-  private static final String NO_FIRST_DATA_DEPOSITION_DATE_FOUND_ERROR = "\"First Data Deposition\" value not found";
   private static final String NO_SCREEN_ID_FOUND_ERROR = "Screen ID not found";
   private static final String DATA_HEADER_SHEET_NOT_FOUND_ERROR = "\"Data Headers\" sheet not found";
   private static final String UNKNOWN_ERROR = "unknown error";
   private static final String NO_DATA_SHEETS_FOUND_ERROR = "no data worksheets were found; no result data was imported";
   private static final String NO_SUCH_WELL = "library well does not exist";
   private static final String NO_SUCH_LIBRARY_WITH_PLATE = "no library with given plate number";
-
 
   private static SortedMap<String,AssayReadoutType> assayReadoutTypeMap = new TreeMap<String,AssayReadoutType>();
   private static SortedMap<String,IndicatorDirection> indicatorDirectionMap = new TreeMap<String,IndicatorDirection>();
@@ -313,7 +312,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                new Date(),
                                ScreenType.SMALL_MOLECULE,
                                "Dummy screen");
-
     return screen;
   }
 
@@ -945,11 +943,12 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         Cell labelCell = factory.getCell((short) 0, iRow);
         String rowLabel = labelCell.getString();
         if (rowLabel != null) {
-          Cell valueCell = factory.getCell((short) 1, iRow, true);
-          if (rowLabel.equalsIgnoreCase(ScreenInfoRow.FIRST_DATA_DEPOSITION.getDisplayText())) {
+          if (rowLabel.equalsIgnoreCase(ScreenInfoRow.DATE_FIRST_VISIT.getDisplayText())) {
+            Cell valueCell = factory.getCell((short) 1, iRow, false);
             parsedScreenInfo.setDate(valueCell.getDate());
           }
           else if (rowLabel.equalsIgnoreCase(ScreenInfoRow.ID.getDisplayText())) {
+            Cell valueCell = factory.getCell((short) 1, iRow, true);
             parsedScreenInfo.setScreenId(valueCell.getInteger());
           }
         }
@@ -962,8 +961,14 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       _errors.addError("screen result data file is for screen number " + parsedScreenInfo.getScreenNumber() + ", expected " + screen.getScreenNumber());
     }
     if (parsedScreenInfo.getDateCreated() == null) {
-      _errors.addError(NO_FIRST_DATA_DEPOSITION_DATE_FOUND_ERROR);
-      parsedScreenInfo.setDate(new Date());
+      if (screen.getVisits().size() > 0) {
+        SortedSet<Visit> sortedVisits = new TreeSet<Visit>(screen.getVisits());
+        parsedScreenInfo.setDate(sortedVisits.first().getVisitDate());
+      }
+      else {
+        log.warn("screen result's screen has 0 visits, so screen result's \"date created\" property will be set to today");
+        parsedScreenInfo.setDate(new Date());
+      }
     }
     return parsedScreenInfo;
   }
