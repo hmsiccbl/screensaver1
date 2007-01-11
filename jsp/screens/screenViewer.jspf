@@ -10,13 +10,11 @@
 <%-- 
 TODO:
 - abasetestset name should be prompted for prior to an add
-- message user if duplicate keyword is added (other entity types as well?)
 - table sorting (fixed, but by business key, or something appropriate)
 - validation messages (per component)
 - save button needs to be more accessible (multiple locations)
 - provide file upload for attached file
 - sort subtables
-- show isShareable' property, and make editable
 --%>
 
 <f:subview id="screenViewer">
