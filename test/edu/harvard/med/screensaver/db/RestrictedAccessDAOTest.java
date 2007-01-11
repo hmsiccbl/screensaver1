@@ -138,6 +138,7 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
           3);
         dao.loadOrCreateWellsForLibrary(library);
         dao.persistEntity(library);
+        dao.flush();
 
         Screen screen115 = ScreenResultParser.makeDummyScreen(115);
         screenResultParser.parse(screen115, new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
