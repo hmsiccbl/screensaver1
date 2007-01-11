@@ -54,9 +54,9 @@ extends PropertyPlaceholderConfigurer
       
       String catalinaBase = System.getenv("CATALINA_BASE");
       log.info("CATALINA_BASE env var=" + catalinaBase);
-      if (! catalinaBase.matches("/www/[^/]+/tomcat")) {
+      if (catalinaBase == null || ! catalinaBase.matches("/www/[^/]+/tomcat")) {
         log.warn("We (admittedly not so cleverly) assumed that since the property " +
-          "\"SCREENSAVER_PGSQL_SERVER\" was not set, either in database.properties, or " +
+          "\"SCREENSAVER_PGSQL_SERVER\" was not set, either in screensaver.properties, or " +
           "in the environment variables passed to the JVM, that this was an instance " +
           "of Screensaver running on the orchestra webserver \"trumpet\". However, we " +
           "also expect such instances to have a \"CATALINA_BASE\" environment variable " +
