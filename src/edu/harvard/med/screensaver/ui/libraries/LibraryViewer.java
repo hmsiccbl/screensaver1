@@ -26,6 +26,7 @@ public class LibraryViewer extends AbstractBackingBean
   // private instance methods
   
   private Library _library;
+  private int _librarySize;
   private LibrarySearchResults _librarySearchResults;
   private LibrariesController _librariesController;
   
@@ -74,10 +75,13 @@ public class LibraryViewer extends AbstractBackingBean
   
   public int getLibrarySize()
   {
-    if (_library == null) {
-      return 0;
-    }
-    return _library.getNumWells();
+    // note: do not call _library.getWells().size(), as this is very expensive, as it loads all wells
+    return _librarySize;
+  }
+
+  public void setLibrarySize(int librarySize)
+  {
+    _librarySize = librarySize;
   }
 
   @UIControllerMethod
@@ -97,4 +101,5 @@ public class LibraryViewer extends AbstractBackingBean
   {
     return _librariesController.viewLibraryContents(_library);
   }
+
 }

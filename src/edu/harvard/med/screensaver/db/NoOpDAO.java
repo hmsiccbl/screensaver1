@@ -132,8 +132,9 @@ public class NoOpDAO implements DAO
     return null;
   }
 
-  public void reattachEntity(AbstractEntity entity)
+  public AbstractEntity reattachEntity(AbstractEntity entity)
   {
+    return null;
   }
 
   public void persistEntity(AbstractEntity entityController)
@@ -173,6 +174,10 @@ public class NoOpDAO implements DAO
     return null;
   }
 
+  public void need(AbstractEntity entity, String... relationships)
+  {
+  }
+  
   public void need(AbstractEntity entity)
   {
   }
@@ -189,4 +194,16 @@ public class NoOpDAO implements DAO
   {
     return null;
   }
+
+  public int relationshipSize(Object persistentCollection) 
+  {
+    return -1;
+  }
+
+  public int relationshipSize(AbstractEntity entity, String relationship)
+  {
+    return -1;
+  }
+  
+
 }

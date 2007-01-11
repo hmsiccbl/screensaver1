@@ -147,6 +147,8 @@ public class ScreenResultViewer extends AbstractBackingBean
   private UISelectOneBean<ResultValueType> _hitsForDataHeader;
   private boolean _showHitsOnly;
 
+  private int _screenResultSize;
+
 
   // public methods
   
@@ -201,6 +203,11 @@ public class ScreenResultViewer extends AbstractBackingBean
     return _screenResult;
   }
 
+  public void setScreenResultSize(int screenResultSize)
+  {
+    _screenResultSize = screenResultSize;
+  }
+  
   public void setScreenResultExporter(ScreenResultExporter screenResultExporter)
   {
     _screenResultExporter = screenResultExporter;
@@ -272,7 +279,7 @@ public class ScreenResultViewer extends AbstractBackingBean
         return getHitsForDataHeader().getSelection().getHits();
       } 
       else {
-        return getScreenResult().getResultValueTypes().first().getResultValues().size();
+        return _screenResultSize;
       }
     }
     catch (Exception e) {

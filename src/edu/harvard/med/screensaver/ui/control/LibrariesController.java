@@ -300,8 +300,8 @@ public class LibrariesController extends AbstractUIController
       public void runTransaction()
       {
         Library library = (Library) _dao.reloadEntity(libraryIn);
-        library.getNumWells();
         _libraryViewer.setLibrary(library);
+        _libraryViewer.setLibrarySize(_dao.relationshipSize(library, "hbnWells"));
       }
     });
 
@@ -311,19 +311,20 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String viewLibraryContents(final Library libraryIn)
   {
+    final Library[] libraryOut = new Library[1];
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        // TODO: try outer join HQL query instead of iteration, for performance improvement
         Library library = (Library) _dao.reloadEntity(libraryIn);
-        for (Well well : library.getWells()) {
-          _dao.need(well.getGenes());
-          _dao.need(well.getCompounds());
-        }
+        _dao.need(library,
+                  "hbnWells",
+                  "hbnWells.hbnSilencingReagents",
+                  "hbnWells.hbnCompounds");
         WellSearchResults wellSearchResults = 
           new WellSearchResults(new ArrayList<Well>(library.getWells()),
                                 LibrariesController.this);
         _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
+        libraryOut[0] = library;
       }
     });
 
@@ -366,17 +367,15 @@ public class LibrariesController extends AbstractUIController
         {
           // TODO: try outer join HQL query instead of iteration, for performance improvement
           Well well = (Well) _dao.reloadEntity(wellIn);
-          _dao.need(well.getCompounds());
-          for (Compound compound : well.getCompounds()) {
-            _dao.need(compound.getCompoundNames());
-            _dao.need(compound.getPubchemCids());
-            _dao.need(compound.getNscNumbers());
-            _dao.need(compound.getCasNumbers());
-          }
-          _dao.need(well.getGenes()); // initialization of genes and silencing reagents
-          for (Gene gene : well.getGenes()) {
-            _dao.need(gene.getGenbankAccessionNumbers());
-          }
+          _dao.need(well,
+                    "hbnSilencingReagents",
+                    "hbnSilencingReagents.gene",
+                    "hbnSilencingReagents.gene.genbankAccessionNumbers",
+                    "hbnCompounds",
+                    "hbnCompounds.compoundNames",
+                    "hbnCompounds.pubchemCids",
+                    "hbnCompounds.nscNumbers",
+                    "hbnCompounds.casNumbers");
           _wellViewer.setWell(well);
         }
       });
@@ -392,7 +391,7 @@ public class LibrariesController extends AbstractUIController
       public void runTransaction()
       {
         Gene gene = (Gene) _dao.reloadEntity(geneIn);
-        _dao.need(gene.getGenbankAccessionNumbers());
+        _dao.need(gene, "genbankAccessionNumbers");
         _geneViewer.setGene(gene);
       }
     });
@@ -409,11 +408,12 @@ public class LibrariesController extends AbstractUIController
       public void runTransaction()
       {
         Compound compound = (Compound) _dao.reloadEntity(compoundIn);
-        _dao.need(compound.getCompoundNames());
-        _dao.need(compound.getPubchemCids());
-        _dao.need(compound.getCasNumbers());
-        _dao.need(compound.getNscNumbers());
-        _dao.need(compound.getWells());
+        _dao.need(compound,
+                  "compoundNames",
+                  "pubchemCids",
+                  "casNumbers",
+                  "nscNumbers",
+                  "hbnWells");
         _compoundViewer.setCompound(compound);
       }
     });
@@ -560,9 +560,10 @@ public class LibrariesController extends AbstractUIController
       {
         // reload the search result wells into the current hibernate session
         List<Well> reloadedWells = new ArrayList<Well>(searchResultsIn.getResultsSize());
+        // TODO: optimize, as reattachment is slow, for large sets of wells
         for (Iterator iter = ((List<Well>) searchResultsIn.getDataModel().getWrappedData()).iterator(); iter.hasNext();) {
           Well well = (Well) iter.next();
-          reloadedWells.add((Well) _dao.reloadEntity(well));
+          reloadedWells.add((Well) _dao.reattachEntity(well));
         }
         WellSearchResults searchResults = new WellSearchResults(reloadedWells, LibrariesController.this);
 

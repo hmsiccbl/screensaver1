@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.db;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +27,6 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 
-import org.hibernate.collection.PersistentCollection;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -72,20 +70,31 @@ public interface DAO
     Class<E> entityClass,
     Object... constructorArguments);
   
-  public void reattachEntity(AbstractEntity entity);
+  public AbstractEntity reattachEntity(AbstractEntity entity);
   
   public AbstractEntity reloadEntity(AbstractEntity entity);
   
-  public void need(AbstractEntity entity);
-  
-  public void need(PersistentCollection persistentCollection);
-
   /**
-   * @param collection
-   * @motivation some AbstractEntity getter methods return a normal collection,
-   *             not a Hibernate persistent collection.
+   * Initializes (pre-loads) the relationships of an entity.
+   * 
+   * @motivation To prevent LazyInitializationExceptions when the entity's
+   *             relationships are accessed when not attached to a Hibernate
+   *             session.
+   * @param entity
+   * @param relationships each relationsihp argument is a dot-separated path of
+   *          entity relationships names (excluding the top-level entity). If
+   *          entity is a Library, and you want to preload all wells and wells'
+   *          compounds, the relationship strings would be <code>"hbnWells",
+   *          "hbnWells.hbnCompounds"</code>.
+   *          Be careful with those "hbn" prefixes, as they are required! Also,
+   *          it appears you need to explicitly specify intermediate
+   *          relationship paths as independent arguments.
    */
-  public void need(Collection collection);
+  public void need(AbstractEntity entity, String... relationships);
+  
+  public int relationshipSize(final Object persistentCollection);
+
+  public int relationshipSize(final AbstractEntity entity, final String relationship);
 
   /**
    * Update the database with the values for the given Entity. If the Entity was

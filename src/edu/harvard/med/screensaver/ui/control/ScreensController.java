@@ -22,7 +22,6 @@ import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
@@ -156,7 +155,7 @@ public class ScreensController extends AbstractUIController
         if (_screensBrowser.getScreenSearchResults() == null) {
           List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
           for (Screen screen : screens) {
-            _dao.need(screen.getScreenResult());
+            _dao.need(screen, "screenResult");
           }
           _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens, 
                                                                          ScreensController.this, 
@@ -191,46 +190,40 @@ public class ScreensController extends AbstractUIController
         public void runTransaction()
         {
           Screen screen = _currentScreen = (Screen) _dao.reloadEntity(screenIn);
-          _dao.need(screen.getAbaseTestsets());
-          _dao.need(screen.getAssayReadoutTypes());
-          _dao.need(screen.getHbnCollaborators());
-          _dao.need(screen.getAttachedFiles());
-          _dao.need(screen.getBillingInformation());
-          _dao.need(screen.getFundingSupports());
-          _dao.need(screen.getKeywords());
-          _dao.need(screen.getLettersOfSupport());
-          _dao.need(screen.getPublications());
-          _dao.need(screen.getStatusItems());
-          _dao.need(screen.getVisits());
-          _dao.need(screen.getLabHead());
-          _dao.need(screen.getLabHead().getLabMembers());
-          _dao.need(screen.getLeadScreener());
-          ScreenResult screenResult = screen.getScreenResult();
-          if (screenResult != null) {
-            _dao.need(screenResult);
-            _dao.need(screenResult.getPlateNumbers());
-            _dao.need(screenResult.getResultValueTypes());
-            //_dao.need(screenResult.getWells());
-            for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-              _dao.need(rvt.getDerivedTypes());
-              _dao.need(rvt.getTypesDerivedFrom());
-              rvt.getResultValues().size();
-            }
-          }
+          _dao.need(screen, 
+                    "abaseTestsets",
+                    "assayReadoutTypes",
+                    "attachedFiles",
+                    "billingInformation",
+                    "fundingSupports",
+                    "keywords",
+                    "lettersOfSupport",
+                    "publications",
+                    "statusItems",
+                    "visits",
+                    "hbnCollaborators",
+                    "hbnLabHead",
+                    "hbnLabHead.hbnLabMembers",
+                    "hbnLeadScreener",
+                    "screenResult",
+                    "screenResult.plateNumbers",
+                    "screenResult.resultValueTypes.hbnDerivedTypes",
+                    "screenResult.resultValueTypes.hbnTypesDerivedFrom");
           
           _screenViewer.setScreen(screen);
           _screenResultImporter.setScreen(screen);
           _screenResultViewer.setScreen(screen);
           _heatMapViewer.setScreenResult(screen.getScreenResult());
           _screenResultViewer.setScreenResult(screen.getScreenResult());
+          if (screen.getScreenResult() != null &&
+            screen.getScreenResult().getResultValueTypes().size() > 0) {
+            _screenResultViewer.setScreenResultSize(screen.getScreenResult().getResultValueTypesList().get(0).getResultValues().size());
+          }
         }
       });
     }
     catch (DataAccessException e) {
       showMessage("databaseOperationFailed", e.getMessage());
-    }
-    catch (Exception e) {
-      reportSystemError(e);
     }
       
     return VIEW_SCREEN;
@@ -245,7 +238,7 @@ public class ScreensController extends AbstractUIController
         public void runTransaction()
         {
           _dao.reattachEntity(screen); // checks if up-to-date
-          _dao.need(screen.getLabHead().getLabMembers());
+          _dao.need(screen, "hbnLabHead.hbnLabMembers");
         }
       });
       return REDISPLAY_PAGE_ACTION_RESULT;
@@ -512,9 +505,6 @@ public class ScreensController extends AbstractUIController
     catch (ScreenResultParseErrorsException e) {
       return viewScreenResultImportErrors();
     }
-    catch (Exception e) {
-      reportSystemError(e);
-    }
     return viewLastScreen();
   }
 
@@ -557,9 +547,6 @@ public class ScreensController extends AbstractUIController
     }
     catch (DataAccessException e) {
       showMessage("databaseOperationFailed", e.getMessage());
-    }
-    catch (Exception e) {
-      reportSystemError(e);
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }

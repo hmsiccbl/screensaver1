@@ -232,24 +232,20 @@ public class DataAccessPolicy implements AbstractEntityVisitor
         return false;
       }
       if (screener.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER)) {
-        boolean hasDepositedData = false;
         for (Screen screen : screener.getScreensCollaborated()) {
           if (screen.getScreenResult() != null) {
-            hasDepositedData = true;
+            return true;
           }
         }
         for (Screen screen : screener.getScreensLed()) {
           if (screen.getScreenResult() != null) {
-            hasDepositedData = true;
+            return true;
           }
         }
         for (Screen screen : screener.getScreensHeaded()) {
           if (screen.getScreenResult() != null) {
-            hasDepositedData = true;
+            return true;
           }
-        }
-        if (hasDepositedData) {
-          return true;
         }
       }
     }

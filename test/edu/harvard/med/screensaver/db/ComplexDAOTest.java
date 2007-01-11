@@ -22,11 +22,13 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
+import org.hibernate.LazyInitializationException;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -39,6 +41,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
+import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -807,6 +810,119 @@ public class ComplexDAOTest extends AbstractSpringTest
       ResultValue rv = resultValues.get(new WellKey(2, 0, iWell));
       assertEquals("rv.value", Integer.toString(iWell), rv.getValue());
     }
+  }
+  
+  public void testEntityInflation()
+  {
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = ScreenResultParser.makeDummyScreen(1); 
+        ScreeningRoomUser labMember = new ScreeningRoomUser(new Date(),
+                                                            "Lab",
+                                                            "Member",
+                                                            "lab_member@hms.harvard.edu",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
+                                                            false);
+        screen.getLabHead().addLabMember(labMember);
+        screen.addKeyword("keyword1");
+        screen.addKeyword("keyword2");
+        dao.persistEntity(screen);
+      }
+    });
+
+    final Screen[] screenOut = new Screen[1];
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        dao.need(screen, 
+                 "keywords", 
+                 "hbnLabHead.hbnLabMembers");
+        screenOut[0] = screen;
+      }
+    });
+    
+    // note: the Hibernate session/txn *must* be closed before we can make our assertions
+    Screen screen = screenOut[0];
+    try {
+      assertEquals("keywords size", 2, screen.getKeywords().size());
+      assertEquals("labHead last name", "Screener", screen.getLabHead().getLastName());
+      assertEquals("labHead.labMembers size", 1, screen.getLabHead().getLabMembers().size());
+      assertEquals("labHead.labMembers[0].lastName", "Member", screen.getLabHead().getLabMembers().iterator().next().getLastName());
+    }
+    catch (LazyInitializationException e) {
+      e.printStackTrace();
+      fail("screen relationships were not initialized by dao.need(AbstractEntity, String...)");
+    }
+    try {
+      screen.getCollaborators().iterator().next();
+      fail("expected LazyInitializationException for screen.collaborators access");
+    }
+    catch (LazyInitializationException e) {}
+  }
+  
+  public void testRelationshipSize()
+  {
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = ScreenResultParser.makeDummyScreen(1); 
+        try {
+          new Publication(screen, "1", "2007", "authro1", "Title1");
+          new Publication(screen, "2", "2007", "author2", "Title2");
+        }
+        catch (DuplicateEntityException e) {
+          e.printStackTrace();
+          fail(e.getMessage());
+        }
+        ScreeningRoomUser collab1 = new ScreeningRoomUser(new Date(),
+                                                          "Col",
+                                                          "Laborator",
+                                                          "collab1@hms.harvard.edu",
+                                                          "",
+                                                          "",
+                                                          "",
+                                                          "",
+                                                          "",
+                                                          ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
+                                                          false);
+        ScreeningRoomUser collab2 = new ScreeningRoomUser(new Date(),
+                                                          "Col",
+                                                          "Laborator",
+                                                          "collab2@hms.harvard.edu",
+                                                          "",
+                                                          "",
+                                                          "",
+                                                          "",
+                                                          "",
+                                                          ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
+                                                          false);
+        dao.persistEntity(collab1);
+        dao.persistEntity(collab2);
+        screen.addCollaborator(collab1);
+        screen.addCollaborator(collab2);
+        dao.persistEntity(screen);
+      }
+    });
+
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        assertEquals("keywords size", 2, dao.relationshipSize(screen, "publications"));
+        assertEquals("collaborators size", 2, dao.relationshipSize(screen.getHbnCollaborators()));
+      }
+    });
   }
 
 }

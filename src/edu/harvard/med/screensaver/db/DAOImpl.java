@@ -14,7 +14,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -39,12 +38,13 @@ import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
+import org.hibernate.Criteria;
+import org.hibernate.FetchMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.hibernate.collection.PersistentCollection;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
@@ -62,7 +62,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   // private static fields
   
   private static final Logger log = Logger.getLogger(DAOImpl.class);
-  private static final Logger entityInflatorLog = Logger.getLogger(DAOImpl.class + ".EntityInflator");
+  private static final Logger entityInflatorLog = Logger.getLogger(DAOImpl.class.getName() + ".EntityInflator");
   
   
   // public instance methods
@@ -87,12 +87,14 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     getHibernateTemplate().saveOrUpdate(entity);
   }
   
-  public void reattachEntity(AbstractEntity entity)
+  public AbstractEntity reattachEntity(AbstractEntity entity)
   {
-    // I don't think lock() cascades, like update() does...
-//  getHibernateTemplate().lock(entity, LockMode.READ);
+    // TODO: use lock(), instead of cascade(), after updating Hibernate entity model to cascade locks (as needed)
+//    // lock() does cascade, but we haven't configured our entities to cascade on locks (we're using cascade="save-update" currently)
+//    getHibernateTemplate().lock(entity, LockMode.READ);
     // update() cascades, but also increments the entity's version counter, which is not really what we want
     getHibernateTemplate().update(entity);
+    return entity;
   }
   
   /**
@@ -114,39 +116,55 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     return null;
   }
   
-  public void need(AbstractEntity entity)
+  public void need(final AbstractEntity entity,
+                   final String... relationships)
   {
-    if (entity != null) {
-      if (entityInflatorLog.isDebugEnabled()) {
-        entityInflatorLog.debug("inflating entity " + entity);
+    long start = 0;
+    if (entityInflatorLog.isDebugEnabled()) {
+      entityInflatorLog.debug("inflating " + entity + " for relationships: " + relationships);
+      start = System.currentTimeMillis();
+    }
+    getHibernateTemplate().execute(new HibernateCallback() 
+    {
+      public Object doInHibernate(Session session) throws HibernateException, SQLException
+      {
+        Criteria criteria = session.createCriteria(entity.getClass());
+        criteria.add(Restrictions.idEq(entity.getEntityId()));
+        for (String relationship : relationships) {
+          criteria.setFetchMode(relationship, FetchMode.JOIN);
+        }
+        return criteria.list();
       }
-      Hibernate.initialize(entity);
+    });
+    if (entityInflatorLog.isDebugEnabled()) {
+      entityInflatorLog.debug("inflating " + entity + " took " + (System.currentTimeMillis() - start) / 1000.0 + " seconds");
     }
   }
   
-  public void need(PersistentCollection persistentCollection)
+  public int relationshipSize(final Object persistentCollection)
   {
-    if (persistentCollection != null) {
-      if (entityInflatorLog.isDebugEnabled()) {
-        entityInflatorLog.debug("inflating persistent collection " + persistentCollection);
+    return (Integer) getHibernateTemplate().execute(new HibernateCallback() 
+    {
+      public Object doInHibernate(Session session) throws HibernateException, SQLException
+      {
+        return ((Integer) session.createFilter(persistentCollection, "select count(*)" ).list().get(0)).intValue();
       }
-      Hibernate.initialize(persistentCollection);
-    }
+    });
   }
-
-  /**
-   * @param collection
-   * @motivation some AbstractEntity getter methods return a normal collection,
-   *             not a Hibernate persistent collection.
-   */
-  public void need(Collection collection)
+  
+  public int relationshipSize(final AbstractEntity entity, final String relationship)
   {
-    if (collection != null) {
-      if (entityInflatorLog.isDebugEnabled()) {
-        entityInflatorLog.debug("inflating wrapped persistent collection " + collection);
+    return (Integer) getHibernateTemplate().execute(new HibernateCallback() 
+    {
+      public Object doInHibernate(Session session) throws HibernateException, SQLException
+      {
+        String entityName = session.getEntityName(entity);
+        String idProperty = session.getSessionFactory().getClassMetadata(entityName).getIdentifierPropertyName();
+        Query query = session.createQuery("select count(*) from " + entityName + " e join e." + relationship + " where e." + idProperty + " = :id");
+        query.setString("id", entity.getEntityId().toString());
+        return query.list().get(0);
       }
-      collection.iterator();
-    }
+    });
   }
   
   public void deleteEntity(AbstractEntity entity)

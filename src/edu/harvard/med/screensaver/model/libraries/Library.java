@@ -138,14 +138,14 @@ public class Library extends AbstractEntity
    * @return the number of wells
    * @motivation {@link #getWells} forces loading of all wells, just to get the
    *             size; Hibernate can optimize a collection size request, if we
-   *             get directly from the underyling persistent collection.
+   *             get directly from an underyling extra-lazy persistent collection.
    */
   @DerivedEntityProperty
   public int getNumWells()
   {
     return _wells.size();
   }
-
+  
   /**
    * Add the well.
    *
@@ -177,7 +177,7 @@ public class Library extends AbstractEntity
    * @return the number of copies
    * @motivation {@link #getCopis} forces loading of all copies, just to get the
    *             size; Hibernate can optimize a collection size request, if we
-   *             get directly from the underyling persistent collection.
+   *             get directly from an underyling extra-lazy persistent collection.
    */
   @DerivedEntityProperty
   public int getNumCopies()
