@@ -10,8 +10,11 @@
 package edu.harvard.med.screensaver.ui;
 
 import java.security.Principal;
+import java.util.List;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.authentication.ScreensaverLoginModule;
 
@@ -36,7 +39,12 @@ public class Login extends AbstractBackingBean
   private static final String AUTHENTICATION_ID_DESCRIPTION = "User ID";
   
   private DAO _dao;
+  private DAO _unrestrictedAccessDao;
   
+  // TODO: temporary code for conditionally controlling application's functionality for beta release
+  private boolean _isUserAllowedAccessToScreens;
+
+
   public DAO getDao()
   {
     return _dao;
@@ -45,6 +53,11 @@ public class Login extends AbstractBackingBean
   public void setDao(DAO dao)
   {
     _dao = dao;
+  }
+
+  public void setUnrestrictedAccessDao(DAO dao)
+  {
+    _unrestrictedAccessDao = dao;
   }
 
   public String getAuthenticationIdDescription()
@@ -63,7 +76,18 @@ public class Login extends AbstractBackingBean
     if (user == null) {
       Principal principal = getExternalContext().getUserPrincipal();
       user = getScreensaverUserForPrincipal(principal);
+                
       setSessionCachedScreensaverUser(user);
+
+      // TODO: temporary code for conditionally controlling application's functionality for beta release
+      _dao.doInTransaction(new DAOTransaction() 
+      {
+        public void runTransaction() 
+        {
+          List<ScreenResult> screenResults = _dao.findAllEntitiesWithType(ScreenResult.class);
+          _isUserAllowedAccessToScreens = screenResults.size() > 0;
+        }
+      });
     }
     return user;
   }
@@ -91,6 +115,12 @@ public class Login extends AbstractBackingBean
     return LOGOUT_ACTION_RESULT;
   }
   
+  // TODO: temporary code for conditionally controlling application's functionality for beta release
+  public boolean isUserAllowedAccessToScreens()
+  {
+    return _isUserAllowedAccessToScreens;
+  }
+  
   
   // private methods
   
@@ -109,19 +139,35 @@ public class Login extends AbstractBackingBean
    *             login ID.
    * @return the ScreensaverUser that is logged in to the current HTTP session
    */
-  private ScreensaverUser getScreensaverUserForPrincipal(Principal principal)
+  private ScreensaverUser getScreensaverUserForPrincipal(final Principal principal)
   {
     if (principal == null) {
       return null;
     }
-    String eCommonsIdOrLoginId = principal.getName();
-    ScreensaverUser user = _dao.findEntityByProperty(ScreensaverUser.class, "ECommonsId", eCommonsIdOrLoginId);
-    if (user == null) {
-      user = _dao.findEntityByProperty(ScreensaverUser.class, "loginId", eCommonsIdOrLoginId);
-    }
-    return user;
+    final ScreensaverUser[] result = new ScreensaverUser[1];
+    _unrestrictedAccessDao.doInTransaction(new DAOTransaction() 
+    {
+      public void runTransaction() 
+      {
+        String eCommonsIdOrLoginId = principal.getName();
+        ScreensaverUser user = _unrestrictedAccessDao.findEntityByProperty(ScreensaverUser.class, "ECommonsId", eCommonsIdOrLoginId);
+        if (user == null) {
+          user = _unrestrictedAccessDao.findEntityByProperty(ScreensaverUser.class, "loginId", eCommonsIdOrLoginId);
+        }
+        if (user != null) {
+          _unrestrictedAccessDao.need(user,
+                                      "hbnScreensLed",
+                                      "hbnScreensHeaded",
+                                      "hbnScreensCollaborated",
+                                      "hbnLabHead",
+                                      "hbnLabHead.hbnLabMembers",
+                                      "hbnLabMembers");
+        }
+        result[0] = user;
+      }
+    });
+    return result[0];
   }
-
   
   private void setSessionCachedScreensaverUser(ScreensaverUser user)
   {

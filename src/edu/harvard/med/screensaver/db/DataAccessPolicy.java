@@ -71,6 +71,12 @@ public class DataAccessPolicy implements AbstractEntityVisitor
   public void setScreensaverUser(ScreensaverUser user)
   {
     _screensaverUser = user;
+    if (user != null) {
+      log.info("DataAccessPolicy " + hashCode() + " assigned to single user " + user);
+    }
+    else {
+      log.info("DataAccessPolicy " + hashCode() + " user assignment has been cleared, allowing full data access");
+    }
   }
   
   public boolean visit(AbaseTestset entity)
@@ -343,7 +349,7 @@ public class DataAccessPolicy implements AbstractEntityVisitor
   // TODO: Major HACK alert! We need a better way of getting at the logged-in
   // user, but one that will work outside the JSF framework (from just a vanilla
   // servlet or servlet filter). Some form of injection...but this will require
-  // making DataAccessPolicy instances session-scoped.
+  // making DataAccessPolicy instances session-scoped.  
   private ScreensaverUser getCurrentScreensaverUser()
   {
     FacesContext facesContext = FacesContext.getCurrentInstance();
@@ -357,4 +363,3 @@ public class DataAccessPolicy implements AbstractEntityVisitor
   }
 
 }
-

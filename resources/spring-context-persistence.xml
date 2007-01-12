@@ -87,21 +87,38 @@
   <!-- The beans that are to be wrapped by transactional proxies -->
 
   <bean
-    id="transactionalDao"
+    id="screensaverTransactionalBeanBaseDefinition"
+    abstract="true"
     class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
     <property
       name="transactionManager"
       ref="txnManager" />
-    <!-- The class/interface to be imbued with transactional qualities -->
-    <property
-      name="target"
-      ref="daoImpl" />
     <!-- Use JDK5 annotation-based transaction declarations -->
     <property name="transactionAttributeSource">
       <bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource" />
     </property>
     <!-- Note: can also specify preInterceptors and postInterceptors properties for
       specifying other AOP advice -->
+  </bean>
+
+  <!-- unrestricted data access dao; special case DAO only for Login JSF backing bean -->
+  <bean
+    id="transactionalDao"
+    parent="screensaverTransactionalBeanBaseDefinition">
+    <!-- The class/interface to be imbued with transactional qualities -->
+    <property
+      name="target"
+      ref="daoImpl" />
+  </bean>
+
+  <!-- restricted data access dao; this is the top-level DAO proxy, to be used by the application -->
+  <bean
+    id="dao"
+    parent="screensaverTransactionalBeanBaseDefinition">
+    <!-- The class/interface to be imbued with transactional qualities -->
+    <property
+      name="target"
+      ref="restrictedAccessDao" />
   </bean>
   
   <!-- The following (alternate) configuration allows for auto-proxying beans whose source code contains 
@@ -137,18 +154,18 @@
   <!-- Restricted Access DAO proxy configuration -->
   
   <bean id="dataAccessPolicy"
-    class="edu.harvard.med.screensaver.db.DataAccessPolicy"/>
-  
+   class="edu.harvard.med.screensaver.db.DataAccessPolicy"/>
+
   <bean id="restrictedAccessCollectionDaoMethodInterceptor"
-    class="edu.harvard.med.screensaver.db.RestrictedAccessCollectionDaoMethodInterceptor">
-    <property name="dataAccessPolicy" ref="dataAccessPolicy"/>
+   class="edu.harvard.med.screensaver.db.RestrictedAccessCollectionDaoMethodInterceptor">
+   <property name="dataAccessPolicy" ref="dataAccessPolicy" />
   </bean>
- 
+
   <bean id="restrictedAccessEntityDaoMethodInterceptor"
-    class="edu.harvard.med.screensaver.db.RestrictedAccessEntityDaoMethodInterceptor">
-    <property name="dataAccessPolicy" ref="dataAccessPolicy"/>
+   class="edu.harvard.med.screensaver.db.RestrictedAccessEntityDaoMethodInterceptor">
+   <property name="dataAccessPolicy" ref="dataAccessPolicy" />
   </bean>
- 
+
   <bean id="restrictedAccessCollectionDaoAdvisor"
    class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
    <property name="advice">
@@ -186,7 +203,7 @@
   <bean id="restrictedAccessDao"
     class="org.springframework.aop.framework.ProxyFactoryBean">
     <property name="proxyInterfaces" value="edu.harvard.med.screensaver.db.DAO"/>
-    <property name="target" ref="transactionalDao"/>
+    <property name="target" ref="daoImpl"/>
     <property name="interceptorNames">
       <list>
         <value>restrictedAccessCollectionDaoAdvisor</value>
@@ -195,8 +212,6 @@
     </property>
   </bean>
 
-  <alias alias="dao" name="restrictedAccessDao"/>
-  
   <!-- end of Restricted Access DAO proxy configuration -->
   
   
