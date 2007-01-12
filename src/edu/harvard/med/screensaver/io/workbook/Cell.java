@@ -499,7 +499,9 @@ public class Cell
    * Get the number of digits requested to appear after the decimal point, based
    * upon the cell's style.
    * 
-   * @return the number of digits requested to appear after the decimal point; 0 if the 
+   * @return the number of digits requested to appear after the decimal point;
+   *         -1 no precision was defined by the cell's style, or if the cell
+   *         style cannot be determined for any reason
    */
   public int getDoublePrecision()
   {
@@ -521,10 +523,10 @@ public class Cell
           return decimalPrecision;
         }
       }
-      return 0;
+      return -1;
     }
     catch (CellOutOfRangeException e) {
-      return 0;
+      return -1;
     }
   }
   
