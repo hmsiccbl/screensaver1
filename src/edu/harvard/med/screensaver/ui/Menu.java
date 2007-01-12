@@ -10,11 +10,7 @@
 package edu.harvard.med.screensaver.ui;
 
 
-import javax.faces.event.ActionEvent;
-
-
 import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.navmenu.htmlnavmenu.HtmlCommandNavigationItem;
 
 
 public class Menu extends AbstractBackingBean
@@ -24,17 +20,4 @@ public class Menu extends AbstractBackingBean
   
   private static Logger log = Logger.getLogger(Menu.class);
 
-
-  // JSF event listener methods
-  
-  public void internalNodeEventListener(ActionEvent event)
-  {
-    HtmlCommandNavigationItem node = (HtmlCommandNavigationItem) event.getComponent();
-//    boolean isOpen = node.isOpen();
-//    node.setOpen(!isOpen);
-//    node.toggleOpen();
-    log.debug((node.isOpen() ? "expanded" : "collapsed") + " navigation node " + node.getId());
-//    getFacesContext().renderResponse();
-  }
-  
 }
