@@ -12,10 +12,12 @@ package edu.harvard.med.screensaver.ui.screenresults;
 import java.text.NumberFormat;
 
 import edu.harvard.med.screensaver.analysis.Filter;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 
@@ -31,7 +33,7 @@ public class HeatMapConfiguration
   private UISelectOneBean<ResultValueType> _dataHeaders;
   private UISelectOneBean<ScoringType> _scoringType;
   private UISelectOneBean<NumberFormat> _numericFormat;
-  private UISelectManyBean<Filter<ResultValue>> _excludedWellFilters;
+  private UISelectManyBean<Filter<Pair<WellKey,ResultValue>>> _excludedWellFilters;
 
 
   // public constructors and methods
@@ -46,12 +48,12 @@ public class HeatMapConfiguration
     _dataHeaders = dataHeaders;
   }
 
-  public UISelectManyBean<Filter<ResultValue>> getExcludedWellFilters()
+  public UISelectManyBean<Filter<Pair<WellKey,ResultValue>>> getExcludedWellFilters()
   {
     return _excludedWellFilters;
   }
 
-  public void setExcludedWellFilters(UISelectManyBean<Filter<ResultValue>> excludedWellFiltersController)
+  public void setExcludedWellFilters(UISelectManyBean<Filter<Pair<WellKey,ResultValue>>> excludedWellFiltersController)
   {
     _excludedWellFilters = excludedWellFiltersController;
   }

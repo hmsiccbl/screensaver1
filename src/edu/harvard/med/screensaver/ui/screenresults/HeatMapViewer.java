@@ -64,7 +64,7 @@ public class HeatMapViewer extends AbstractBackingBean
     DecimalFormat nf3m = new HackedDecimalFormat("0;(0)");
     NUMBER_FORMATS.add(nf3m);
   }
-  private static final Collection<Filter<ResultValue>> EXCLUDED_WELL_FILTERS = new ArrayList<Filter<ResultValue>>();
+  private static final Collection<Filter<Pair<WellKey,ResultValue>>> EXCLUDED_WELL_FILTERS = new ArrayList<Filter<Pair<WellKey,ResultValue>>>();
   static {
     EXCLUDED_WELL_FILTERS.add(new ControlWellsFilter());
     EXCLUDED_WELL_FILTERS.add(new EdgeWellsFilter());
@@ -76,7 +76,7 @@ public class HeatMapViewer extends AbstractBackingBean
       HEAT_MAP_ROW_LABELS[i] = Character.toString((char) ('A' + i));
     }
   }
-  private static final Filter<ResultValue> IMPLICIT_FILTER = new ExcludedOrNonDataProducingWellFilter();
+  private static final Filter<Pair<WellKey,ResultValue>> IMPLICIT_FILTER = new ExcludedOrNonDataProducingWellFilter();
   private static final Double SAMPLE_NUMBER = new Double(-1234.567);
   private static final NumberFormat DECIMAL_FORMAT = new DecimalFormat("0.0##");
   private static final int COLOR_LEGEND_GRADIENT_STEPS = 10;
@@ -215,7 +215,7 @@ public class HeatMapViewer extends AbstractBackingBean
     title.append(heatMapConfiguration.getDataHeaders().getSelection().getName());
     title.append(": ");
     title.append(heatMapConfiguration.getScoringType().getSelection().toString());
-    List<Filter<ResultValue>> filterSelections = heatMapConfiguration.getExcludedWellFilters().getSelections();
+    List<Filter<Pair<WellKey,ResultValue>>> filterSelections = heatMapConfiguration.getExcludedWellFilters().getSelections();
     if (filterSelections != null && filterSelections.size() > 0) {
       title.append(" (exclude ");
       boolean first = true;
@@ -249,9 +249,9 @@ public class HeatMapViewer extends AbstractBackingBean
                                        heatMapConfig.getDataHeaders().getSelection());
         HeatMap heatMap = new HeatMap(_plateNumber.getSelection(),
                                     resultValues,
-                                    new ChainedFilter<ResultValue>(IMPLICIT_FILTER,
-                                                                   new ChainedFilter<ResultValue>(heatMapConfig.getExcludedWellFilters()
-                                                                                                               .getSelections())),
+                                    new ChainedFilter<Pair<WellKey,ResultValue>>(
+                                      IMPLICIT_FILTER,
+                                      new ChainedFilter<Pair<WellKey,ResultValue>>(heatMapConfig.getExcludedWellFilters().getSelections())),
                                     heatMapConfig.getScoringType()
                                                  .getSelection()
                                                  .getFunction(),
@@ -324,7 +324,7 @@ public class HeatMapViewer extends AbstractBackingBean
     heatMapConfiguration.setNumericFormat(new UISelectOneBean<NumberFormat>(NUMBER_FORMATS) {
       protected String getLabel(NumberFormat t) { return t.format(SAMPLE_NUMBER); } 
     });
-    heatMapConfiguration.setExcludedWellFilters(new UISelectManyBean<Filter<ResultValue>>(EXCLUDED_WELL_FILTERS));
+    heatMapConfiguration.setExcludedWellFilters(new UISelectManyBean<Filter<Pair<WellKey,ResultValue>>>(EXCLUDED_WELL_FILTERS));
     _heatMapConfigurations.add(heatMapConfiguration);
     _heatMapConfigurationsDataModel = new ListDataModel(_heatMapConfigurations);
 

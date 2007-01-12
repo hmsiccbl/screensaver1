@@ -10,15 +10,17 @@
 package edu.harvard.med.screensaver.analysis.heatmaps;
 
 import edu.harvard.med.screensaver.analysis.Filter;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 
-public class NoOpFilter implements Filter<ResultValue>
+public class NoOpFilter implements Filter<Pair<WellKey,ResultValue>>
 {
   private static Logger log = Logger.getLogger(NoOpFilter.class);
 
-  public boolean exclude(ResultValue elementController)
+  public boolean exclude(Pair<WellKey,ResultValue> element)
   {
     return false;
   }

@@ -10,27 +10,20 @@
 package edu.harvard.med.screensaver.ui.screenresults;
 
 import edu.harvard.med.screensaver.analysis.Filter;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 
-public class ExcludedOrNonDataProducingWellFilter implements Filter<ResultValue>
+public class ExcludedOrNonDataProducingWellFilter implements Filter<Pair<WellKey,ResultValue>>
 {
-  // static members
-
   private static Logger log = Logger.getLogger(ExcludedOrNonDataProducingWellFilter.class);
 
-  public boolean exclude(ResultValue rv)
+  public boolean exclude(Pair<WellKey,ResultValue> pair)
   {
+    ResultValue rv = pair.getSecond();
     return rv.isExclude() || !rv.isDataProducerWell();
   }
-
-
-  // instance data members
-
-  // public constructors and methods
-
-  // private methods
-
 }
 

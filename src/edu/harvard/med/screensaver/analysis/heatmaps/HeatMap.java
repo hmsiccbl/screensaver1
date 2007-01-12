@@ -19,6 +19,7 @@ import edu.harvard.med.screensaver.analysis.Filter;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatisticsImpl;
 import org.apache.commons.math.stat.descriptive.rank.Median;
@@ -67,7 +68,7 @@ public class HeatMap
    */
   public HeatMap(int plateNumber,
                  Map<WellKey,ResultValue> resultValues,
-                 Filter<ResultValue> scoringFilter,
+                 Filter<Pair<WellKey,ResultValue>> scoringFilter,
                  AggregateFunction<Double> scoringFunc,
                  ColorFunction colorFunction)
   {
@@ -173,7 +174,7 @@ public class HeatMap
   
   // private methods
 
-  private void initialize(Filter<ResultValue> scoringFilter,
+  private void initialize(Filter<Pair<WellKey,ResultValue>> scoringFilter,
                           AggregateFunction<Double> scoringFunc)
   {
 
@@ -181,7 +182,7 @@ public class HeatMap
     for (WellKey wellKey : _resultValues.keySet()) {
       if (wellKey.getPlateNumber() == _plateNumber) {
         ResultValue rv = getResultValue(wellKey.getRow(), wellKey.getColumn());
-        if (rv != null && !scoringFilter.exclude(rv)) {
+        if (rv != null && !scoringFilter.exclude(new Pair<WellKey,ResultValue>(wellKey, rv))) {
           aggregationValues.add(getRawValue(wellKey.getRow(), wellKey.getColumn()));
         }
       }

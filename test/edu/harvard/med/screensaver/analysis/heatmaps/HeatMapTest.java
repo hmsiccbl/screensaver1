@@ -23,9 +23,11 @@ import edu.harvard.med.screensaver.analysis.ZScoreFunction;
 import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultParserTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 
@@ -97,8 +99,8 @@ public class HeatMapTest extends AbstractSpringTest
   {
     HeatMap heatMap = new HeatMap(1,
                                   _screenResult.getResultValueTypes().first().getResultValues(),
-                                  new ChainedFilter<ResultValue>(new ExcludedWellsFilter(), 
-                                    new ChainedFilter<ResultValue>(new ControlWellsFilter())),
+                                  new ChainedFilter<Pair<WellKey,ResultValue>>(new ExcludedWellsFilter(), 
+                                    new ChainedFilter<Pair<WellKey,ResultValue>>(new ControlWellsFilter())),
                                   new IdentityFunction(),
                                   new MultiGradientColorFunction(Color.BLACK,
                                                                  Color.WHITE));
@@ -111,8 +113,8 @@ public class HeatMapTest extends AbstractSpringTest
   {
     HeatMap heatMap = new HeatMap(1,
                                   _screenResult.getResultValueTypes().first().getResultValues(),
-                                  new ChainedFilter<ResultValue>(new ExcludedWellsFilter(),
-                                                                 new ChainedFilter<ResultValue>(new ControlWellsFilter())),
+                                  new ChainedFilter<Pair<WellKey,ResultValue>>(new ExcludedWellsFilter(),
+                                                                 new ChainedFilter<Pair<WellKey,ResultValue>>(new ControlWellsFilter())),
                                   new ZScoreFunction(),
                                   new DefaultMultiColorGradient());
     File file = File.createTempFile("heatmap", ".html");

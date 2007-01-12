@@ -10,18 +10,25 @@
 package edu.harvard.med.screensaver.analysis.heatmaps;
 
 import edu.harvard.med.screensaver.analysis.Filter;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 
-public class EdgeWellsFilter implements Filter<ResultValue>
+public class EdgeWellsFilter implements Filter<Pair<WellKey,ResultValue>>
 {
   private static Logger log = Logger.getLogger(EdgeWellsFilter.class);
 
-  public boolean exclude(ResultValue rv)
+  public boolean exclude(Pair<WellKey,ResultValue> pair)
   {
-    // TODO:
-    return false;//rv.getWell().isEdgeWell();
+    WellKey wellKey = pair.getFirst();
+    return 
+      wellKey.getRow() + Well.MIN_WELL_ROW == Well.MIN_WELL_ROW ||
+      wellKey.getRow() + Well.MIN_WELL_ROW == Well.MAX_WELL_ROW ||
+      wellKey.getColumn() + 1 == Well.MIN_WELL_COLUMN ||
+      wellKey.getColumn() + 1 == Well.MAX_WELL_COLUMN;
   }
   
   public String toString() 

@@ -10,17 +10,19 @@
 package edu.harvard.med.screensaver.analysis.heatmaps;
 
 import edu.harvard.med.screensaver.analysis.Filter;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 
-public class ExcludedWellsFilter implements Filter<ResultValue>
+public class ExcludedWellsFilter implements Filter<Pair<WellKey,ResultValue>>
 {
   private static Logger log = Logger.getLogger(ExcludedWellsFilter.class);
 
-  public boolean exclude(ResultValue rv)
+  public boolean exclude(Pair<WellKey,ResultValue> pair)
   {
-    return rv.isExclude();
+    return pair.getSecond().isExclude();
   }
 }
 
