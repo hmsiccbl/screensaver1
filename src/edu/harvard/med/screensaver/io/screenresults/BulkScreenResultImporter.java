@@ -26,6 +26,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * command line options for such things as the name of the directory where the screen
  * results are located, instead of using a hard-coded value. Also should consider
  * threading through some of the {@link ScreenResultParser} command line args.
+ * 
+ * TODO: figure out why logging stops after the first screen result.
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -37,7 +39,7 @@ public class BulkScreenResultImporter
 
   private static final Logger log = Logger.getLogger(BulkScreenResultImporter.class);
   private static final File _screenResultsDir = new File("/usr/local/screen-results");
-  private static final Pattern _screenResultFilenamePattern = Pattern.compile("^(\\d+)_finalResults\\.xls$");
+  private static final Pattern _screenResultFilenamePattern = Pattern.compile("^(\\d+)_\\w+\\.xls$");
   
   public static void main(String[] args)
   {
