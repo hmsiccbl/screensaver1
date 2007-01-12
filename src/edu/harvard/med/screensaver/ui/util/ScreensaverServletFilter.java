@@ -103,13 +103,13 @@ public class ScreensaverServletFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
     }
     catch (Exception e) {
-      log.error("caught exception during invocation of servlet filter chain");
       if (e instanceof ServletException) {
         caughtException = ((ServletException) e).getRootCause();
       } 
       else {
         caughtException = e;
       }
+      log.error("caught exception during invocation of servlet filter chain:" + e);
       caughtException.printStackTrace();
     }
     finally {
