@@ -170,7 +170,10 @@ public class ScreenDBProxy
       assayInfo.setAssayCategory("CARDIOVASCULAR");
     }
     else if (
-      assayCategoryText.contains("CANCER")) {
+      assayCategoryText.contains("CANCER") ||
+      assayCategoryText.contains("FANCONI ANEMIA/BRCA PATHWAY") ||
+      assayCategoryText.contains("E6-DEPENDENT DEGRADATION OF P53") ||
+      assayCategoryText.contains("WNT PATHWAY")) {
       assayInfo.setAssayCategory("ANTI-CANCER");
     }
     else if (
@@ -208,6 +211,30 @@ public class ScreenDBProxy
     else if (
       assayCategoryText.contains("INHIBIT THE RANGTPASE SYSTEM")) {
       assayInfo.setAssayCategory("OTHER - INHIBIT THE RANGTPASE SYSTEM");
+    }
+    else if (
+      assayCategoryText.contains("CRYPTOSPORIDIUM PARVUM")) {
+      assayInfo.setAssayCategory("OTHER - ANTI-PROTOZOA");
+    }
+    else if (
+      assayCategoryText.contains("INHIBIT TNF-ALPHA-MEDIATED NECROSIS IN JURKAT CELLS")) {
+      assayInfo.setAssayCategory("OTHER - NEURODEGENERATIVE DISEASE");
+    }
+    else if (
+      assayCategoryText.contains("SHWACHMAN DIAMOND SYNDROME")) {
+      assayInfo.setAssayCategory("OTHER - SHWACHMAN DIAMOND SYNDROME");
+    }
+    else if (
+      assayCategoryText.contains("DOWN SYNDROME")) {
+      assayInfo.setAssayCategory("OTHER - DOWN SYNDROME");
+    }
+    else if (
+      assayCategoryText.contains("MULLERIAN INHIBITING SUBSTANCE")) {
+      assayInfo.setAssayCategory("OTHER - HUMAN INFERTILITY");
+    }
+    else if (
+      assayCategoryText.contains("ADULT ONSET DEAFNESS SYNDROME")) {
+      assayInfo.setAssayCategory("OTHER - ADULT ONSET DEAFNESS SYNDROME");
     }
     else {
       log.info("assigning assay category OTHER for assay category text: " + assayCategoryText);
