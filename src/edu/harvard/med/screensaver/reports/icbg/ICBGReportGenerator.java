@@ -10,10 +10,8 @@
 package edu.harvard.med.screensaver.reports.icbg;
 
 import java.io.FileOutputStream;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 
 import org.apache.log4j.Logger;
@@ -43,61 +41,8 @@ public class ICBGReportGenerator
   // static fields
   
   private static Logger log = Logger.getLogger(ICBGReportGenerator.class);
-  private static final String RESULTS_DIR =
-    "icbg-support/screen-result-input-data";
   private static final String REPORT_FILENAME = "report.xls";
-  private static final Set<Integer> icbgScreens = new HashSet<Integer>();
-  static {
-    icbgScreens.add(116);
-    icbgScreens.add(131);
-    icbgScreens.add(227);
-    icbgScreens.add(272);
-    icbgScreens.add(276);
-    icbgScreens.add(301);
-    icbgScreens.add(327);
-    icbgScreens.add(337);
-    icbgScreens.add(343);
-    icbgScreens.add(367);
-    icbgScreens.add(412);
-    icbgScreens.add(415);
-    icbgScreens.add(422);
-    icbgScreens.add(428);
-    icbgScreens.add(430);
-    icbgScreens.add(449);
-    icbgScreens.add(452);
-    icbgScreens.add(453);
-    icbgScreens.add(454);
-    icbgScreens.add(460);
-    icbgScreens.add(461);
-    icbgScreens.add(462);
-    icbgScreens.add(464);    
-    icbgScreens.add(472);
-    icbgScreens.add(473);
-    icbgScreens.add(476);
-    icbgScreens.add(477);
-    icbgScreens.add(499);
-    icbgScreens.add(500);
-    icbgScreens.add(501);
-    icbgScreens.add(504);
-    icbgScreens.add(506);
-    icbgScreens.add(508);
-    icbgScreens.add(514);
-    icbgScreens.add(516);
-    icbgScreens.add(517);
-    icbgScreens.add(518);
-    icbgScreens.add(525);
-    icbgScreens.add(526);
-    icbgScreens.add(534);
-    icbgScreens.add(535);
-    icbgScreens.add(536);
-    icbgScreens.add(537);
-    icbgScreens.add(548);
-    icbgScreens.add(563);
-    icbgScreens.add(583);
-    icbgScreens.add(585);
-    icbgScreens.add(605);
-  }
-
+  
   
   // public static methods
   
