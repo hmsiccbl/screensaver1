@@ -5,9 +5,14 @@
 
 <f:subview id="geneViewerSubview">
 
-  <h:panelGrid columns="2" rendered="true">
+  <t:panelGrid
+    id="labelsAndDataColumns"
+    columns="2"
+    rowClasses="row1,row2"
+    columnClasses="keyColumn,column"
+  >
 
-    <h:outputText value="Gene Name:" />
+    <h:outputText value="Gene Name" />
     <t:commandLink
       action="#{controller.viewGene}"
       value="#{gene.geneName}"
@@ -15,16 +20,16 @@
       <f:param name="geneId" value="#{gene.geneId}" />
     </t:commandLink>
     
-    <h:outputText value="EntrezGene ID:" />
+    <h:outputText value="EntrezGene ID" />
     <h:outputLink
       value="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=gene&cmd=Retrieve&dopt=full_report&list_uids=#{gene.entrezgeneId}">
       <h:outputText value="#{gene.entrezgeneId}" />
     </h:outputLink>
     
-    <h:outputText value="EntrezGene Symbol:" />
+    <h:outputText value="EntrezGene Symbol" />
     <h:outputText value="#{gene.entrezgeneSymbol}" />
        
-    <h:outputText value="GenBank Accession Numbers:" />
+    <h:outputText value="GenBank Accession Numbers" />
     <t:dataList
       id="genbankAccessionNumbers"
       var="accessionNumber"
@@ -37,9 +42,9 @@
       </h:outputLink>
     </t:dataList>
        
-    <h:outputText value="Species Name:" />
+    <h:outputText value="Species Name" />
     <h:outputText value="#{gene.speciesName}" />
     
-  </h:panelGrid>
+  </t:panelGrid>
 
 </f:subview>

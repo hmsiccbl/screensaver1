@@ -5,13 +5,18 @@
 
 <f:subview id="compoundViewerSubview">
 
-  <h:panelGrid columns="2" rendered="true">
+  <t:panelGrid
+    id="labelsAndDataColumns"
+    columns="2"
+    rowClasses="row1,row2"
+    columnClasses="keyColumn,column"
+  >
   
-    <h:outputText value="Structure:" />
+    <h:outputText value="Structure" />
     <t:graphicImage url="#{compoundViewer.compoundImageUrl[compound.smiles]}" style="float: right;">
     </t:graphicImage>
 
-    <h:outputText value="Smiles:" />
+    <h:outputText value="Smiles" />
     <t:commandLink
       action="#{controller.viewCompound}"
       value="#{compound.smiles}"
@@ -19,11 +24,11 @@
       <f:param name="compoundId" value="#{compound.compoundId}" />
     </t:commandLink>
     
-    <h:outputText value="InChI:" />
+    <h:outputText value="InChI" />
     <h:outputText value="#{compound.inchi}" />
     
     <h:outputText
-      value="Compound Names:"
+      value="Compound Names"
       rendered="#{compound.numCompoundNames > 0}"
     />
     <t:dataList
@@ -42,14 +47,14 @@
       />
     </t:dataList>
     
-    <h:outputText value="Molecular Mass:" />
+    <h:outputText value="Molecular Mass" />
     <h:outputText value="#{compound.molecularMass}" />
     
-    <h:outputText value="Molecular Formula:" />
+    <h:outputText value="Molecular Formula" />
     <h:outputText value="#{compound.molecularFormula}" escape="false" />
 
     <h:outputText
-      value="PubChem CIDs:"
+      value="PubChem CIDs"
       rendered="#{compound.numPubchemCids > 0}"
     />
     <t:dataList
@@ -73,7 +78,7 @@
     </t:dataList>
 
     <h:outputText
-      value="ChemBank ID:"
+      value="ChemBank ID"
       rendered="#{compound.chembankId != null}"
     />
     <h:outputText
@@ -81,11 +86,11 @@
       rendered="#{compound.chembankId != null}"
     />
     
-    <h:outputText value="is salt:" />
+    <h:outputText value="Is Salt" />
     <h:outputText value="#{compound.salt}" />
 
     <h:outputText
-      value="NSC Numbers:"
+      value="NSC Numbers"
       rendered="#{compound.numNscNumbers > 0}"
     />
     <t:dataList
@@ -106,7 +111,7 @@
     
     <h:outputText
       rendered="#{compound.numCasNumbers > 0}"
-      value="CAS Numbers:"
+      value="CAS Numbers"
     />
     <t:dataList
       rendered="#{compound.numCasNumbers > 0}"
@@ -123,8 +128,7 @@
         rendered="#{rowIndex < rowCount - 1}"
       />
     </t:dataList>
-  </h:panelGrid>
+
+  </t:panelGrid>
 
 </f:subview>
-
-

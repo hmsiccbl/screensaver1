@@ -9,22 +9,27 @@
     <%@ include file="../searchResultsNavPanel.jspf"  %>
   </t:aliasBean>
 
-  <h:panelGrid columns="2" rendered="true">
-    <h:outputText value="short name:" />
-    <h:outputText value="#{libraryViewer.library.shortName}" />
-    <h:outputText value="library name:" />
+  <t:panelGrid
+    id="labelsAndDataColumns"
+    columns="2"
+    rowClasses="row1,row2"
+    columnClasses="keyColumn,column"
+  >
+    <h:outputText value="Library Name" />
     <h:outputText value="#{libraryViewer.library.libraryName}" />
-    <h:outputText value="screen type:" />
+    <h:outputText value="Short Name" />
+    <h:outputText value="#{libraryViewer.library.shortName}" />
+    <h:outputText value="Screen Type" />
     <h:outputText value="#{libraryViewer.library.screenType}" />
-    <h:outputText value="library type:" />
+    <h:outputText value="Library Type" />
     <h:outputText value="#{libraryViewer.library.libraryType}" />
-    <h:outputText value="vendor:" />
+    <h:outputText value="Vendor" />
     <h:outputText value="#{libraryViewer.library.vendor}" />
-    <h:outputText value="description:" />
+    <h:outputText value="Description" />
     <h:outputText value="#{libraryViewer.library.description}" />
-    <h:outputText value="number of wells:" />
+    <h:outputText value="Number of Wells" />
     <h:outputText value="#{libraryViewer.librarySize}" />
-  </h:panelGrid>
+  </t:panelGrid>
 
   <t:panelGroup>
     <h:form id="libraryContentsForm">
