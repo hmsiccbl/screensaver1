@@ -549,6 +549,22 @@ public class LibrariesController extends AbstractUIController
       return "importRNAiLibraryContents";
     }
   }
+
+  @UIControllerMethod
+  public String unloadLibraryContents(final Library libraryIn)
+  {
+    log.error("CALLING ME");
+    _dao.doInTransaction(new DAOTransaction() 
+    {
+      public void runTransaction() 
+      {
+        Library library = (Library) _dao.reloadEntity(libraryIn);
+        _dao.deleteLibraryContents(library);
+      }
+    });
+    showMessage("libraries.unloadedLibraryContents", "libraryViewer");
+    return "viewLibrary";
+  }
   
   // TODO: refactor code in WellSearchResults that exports well search results to our io.libraries.{compound,rnai} packages, and call directly
   public String downloadWellSearchResults(final WellSearchResults searchResultsIn)

@@ -210,6 +210,17 @@ public class Well extends AbstractEntity implements Comparable
     }
     return false;
   }
+  
+  /**
+   * Remove all the compounds. 
+   */
+  public void removeCompounds()
+  {
+    HashSet<Compound> compoundsCopy = new HashSet<Compound>(getHbnCompounds());
+    for (Compound compound : compoundsCopy) {
+      removeCompound(compound);
+    }
+  }
 
   /**
    * Get an unmodifiable copy of the set of silencing reagents.
@@ -284,6 +295,18 @@ public class Well extends AbstractEntity implements Comparable
       return silencingReagent.getHbnWells().remove(this);
     }
     return false;
+  }
+  
+  /**
+   * Remove all the silencing reagents. 
+   */
+  public void removeSilencingReagents()
+  {
+    HashSet<SilencingReagent> silencingReagentsCopy =
+      new HashSet<SilencingReagent>(getHbnSilencingReagents());
+    for (SilencingReagent silencingReagent : silencingReagentsCopy) {
+      removeSilencingReagent(silencingReagent);
+    }
   }
 
   /**
@@ -752,7 +775,7 @@ public class Well extends AbstractEntity implements Comparable
    *             {@link Compound} and {@link Well}).
    * @hibernate.set
    *   table="well_compound_link"
-   *   cascade="all"
+   *   cascade="all-delete-orphan"
    *   lazy="true"
    * @hibernate.collection-key
    *   column="well_id"
@@ -772,7 +795,7 @@ public class Well extends AbstractEntity implements Comparable
    * @return the silencing reagents
    * @hibernate.set
    *   table="well_silencing_reagent_link"
-   *   cascade="all"
+   *   cascade="all-delete-orphan"
    *   lazy="true"
    * @hibernate.collection-key
    *   column="well_id"

@@ -85,6 +85,12 @@ public class LibraryViewer extends AbstractBackingBean
   }
 
   @UIControllerMethod
+  public String viewLibraryContents()
+  {
+    return _librariesController.viewLibraryContents(_library);
+  }
+
+  @UIControllerMethod
   public String importCompoundLibraryContents()
   {
     return _librariesController.importCompoundLibraryContents(_library);
@@ -97,9 +103,9 @@ public class LibraryViewer extends AbstractBackingBean
   }
   
   @UIControllerMethod
-  public String viewLibraryContents()
+  public String unloadLibraryContents()
   {
-    return _librariesController.viewLibraryContents(_library);
+    log.error("CALLING CALLING");
+    return _librariesController.unloadLibraryContents(_library);
   }
-
 }

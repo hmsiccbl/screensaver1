@@ -26,27 +26,38 @@
     <h:outputText value="#{libraryViewer.librarySize}" />
   </h:panelGrid>
 
-  <h:form id="viewLibraryContentsForm">
-    <h:commandLink
-      value="view library contents"
-      action="#{libraryViewer.viewLibraryContents}"
-    />
-  </h:form>
-  
-  <h:form id="loadLibraryContentsForm">
-    <t:panelGroup visibleOnUserRole="librariesAdmin">
-      <h:commandLink
-        value="import RNAi library contents"
-        action="#{libraryViewer.importRNAiLibraryContents}"
-        rendered="#{libraryViewer.isRNAiLibrary}"
+  <t:panelGroup>
+    <h:form id="libraryContentsForm">
+      <h:commandButton
+        value="View Library Contents"
+        action="#{libraryViewer.viewLibraryContents}"
+        styleClass="command"
       />
-      <h:commandLink
-        value="import compound library contents"
-        action="#{libraryViewer.importCompoundLibraryContents}"
-        rendered="#{libraryViewer.isCompoundLibrary}"
+
+      <t:panelGroup visibleOnUserRole="librariesAdmin">
+        <h:commandButton
+          value="Import Library Contents"
+          action="#{libraryViewer.importRNAiLibraryContents}"
+          rendered="#{libraryViewer.isRNAiLibrary}"
+          styleClass="command"
+        />
+        <h:commandButton
+          value="Import Library Contents"
+          action="#{libraryViewer.importCompoundLibraryContents}"
+          rendered="#{libraryViewer.isCompoundLibrary}"
+          styleClass="command"
+        />
+      </t:panelGroup>
+
+      <h:commandButton
+        value="Unload Library Contents"
+        action="#{libraryViewer.unloadLibraryContents}"
+        onclick="javascript: return confirm('Are you sure you want to unload the contents of this library?');"
+        rendered="#{libraryViewer.librarySize > 0}"
+        styleClass="command"
       />
-    </t:panelGroup>
-  </h:form>
+    </h:form>
+  </t:panelGroup>
 
 </f:subview>
 

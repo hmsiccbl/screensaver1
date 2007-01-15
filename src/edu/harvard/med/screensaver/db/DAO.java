@@ -253,6 +253,14 @@ public interface DAO
   public void deleteScreenResult(ScreenResult screenResult);
 
   /**
+   * Delete library contents. Null out all the content-oriented content of all the
+   * wells; delete any dangling {@link Compound Compounds}, {@link SilencingReagent
+   * SilencingReagents}, and {@link Gene Genes}.
+   * @param library the library to delete the contents of
+   */
+  public void deleteLibraryContents(Library library);
+  
+  /**
    * Find and return the well. Return null if there is no well.
    * @param plateNumber the plate number
    * @param wellName the beautiful well name. remember - A through P, and 1 through 24!

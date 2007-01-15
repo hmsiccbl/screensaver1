@@ -49,6 +49,10 @@ public class NoOpDAO implements DAO
   public void deleteScreenResult(ScreenResult screenResultController)
   {
   }
+  
+  public void deleteLibraryContents(Library library)
+  {
+  }
 
   public void flush()
   {

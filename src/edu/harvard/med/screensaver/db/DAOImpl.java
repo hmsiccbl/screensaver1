@@ -309,6 +309,19 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     log.debug("deleted " + screenResult);
   }
   
+  public void deleteLibraryContents(Library library)
+  {
+    log.error("call TODO daoImpl.deleteLibraryContents");
+    for (Well well : library.getWells()) {
+      well.setGenbankAccessionNumber(null);
+      well.setIccbNumber(null);
+      well.setMolfile(null);
+      well.setSmiles(null);
+      well.removeCompounds();
+      well.removeSilencingReagents();
+    }
+  }
+  
   public Well findWell(Integer plateNumber, String wellName)
   {
     return findEntityById(Well.class, plateNumber + ":" + wellName);
