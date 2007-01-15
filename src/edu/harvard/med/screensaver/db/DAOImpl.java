@@ -319,6 +319,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
       well.setSmiles(null);
       well.removeCompounds();
       well.removeSilencingReagents();
+      well.setWellType(WellType.EMPTY);
     }
   }
   
