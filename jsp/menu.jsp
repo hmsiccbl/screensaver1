@@ -18,7 +18,7 @@
       to reference the managed-beads that need to get initialized first in a null context here.
 	--%>
 	<h:outputText value="#{librariesController}" rendered="#{empty librariesController && false}" />
-	<h:outputText value="#{screenssController}" rendered="#{empty screensController && false}" />
+	<h:outputText value="#{screensController}" rendered="#{empty screensController && false}" />
 	
     <t:commandLink id="menuTitle" action="goMain" value="#{menu.applicationTitle}" styleClass="menuItem title"/>
 
@@ -44,7 +44,7 @@
         separatorClass="navSeparator">
         <t:commandNavigation2 action="#{librariesController.findWells}" value="#{\"Find Wells\"}" rendered="#{menu.authenticatedUser}" accesskey="W"/>
         <t:commandNavigation2 action="#{librariesController.browseLibraries}" value="#{\"Browse Libraries\"}" rendered="#{menu.authenticatedUser}" accesskey="L" />
-        <t:commandNavigation2 action="#{screensController.browseScreens}" value="#{\"Browse Screens\"}" rendered="#{menu.authenticatedUser}" accesskey="S" />
+        <t:commandNavigation2 action="#{screensController.browseScreens}" value="#{\"Browse Screens\"}" rendered="#{menu.authenticatedUser && login.userAllowedAccessToScreens}" accesskey="S" />
         <t:commandNavigation2 accesskey="" />
         <t:commandNavigation2 action="#{mainController.viewDownloads}" value="#{\"Data Downloads\"}" rendered="#{menu.authenticatedUser}" accesskey="D"/>
         <t:commandNavigation2 action="#{mainController.viewHelp}" value="Instructions" accesskey="H" />
@@ -97,11 +97,12 @@
     </h:form>
     
     <h:form id="quickFindScreenForm">
-			<t:panelGrid columns="1" rendered="#{menu.authenticatedUser}">
+			<t:panelGrid columns="1"
+				rendered="#{menu.authenticatedUser && login.userAllowedAccessToScreens}">
 				<t:outputLabel id="screenNumberLabel" for="screenNumber"
 					value="Screen #" styleClass="menuItem inputLabel" />
 				<t:inputText id="screenNumber" value="#{screenFinder.screenNumber}"
-					size="5" styleClass="input" validator="IntegerConverter"/>
+					size="5" styleClass="input" validator="IntegerConverter" />
 				<t:commandButton action="#{screenFinder.findScreen}"
 					id="quickFindScreenSubmit" value="Go"
 					rendered="#{menu.authenticatedUser}" styleClass="command" />
