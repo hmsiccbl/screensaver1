@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
@@ -68,7 +67,8 @@ public class ScreenViewer extends AbstractBackingBean
   private StatusValue _newStatusValue;
   private AssayReadoutType _newAssayReadoutType = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs)
   private String _newKeyword = "";
-  private boolean _isReadOnlyMode = true;
+  private boolean _isEditMode = true;
+  private boolean _isAdminViewMode = false;
 
   
   // public property getter & setter methods
@@ -96,7 +96,8 @@ public class ScreenViewer extends AbstractBackingBean
   
   private void resetView()
   {
-    _isReadOnlyMode = true;
+    _isEditMode = false;
+    _isAdminViewMode = false;
     
     _newFundingSupport = null;
     _newStatusValue = null;
@@ -108,34 +109,16 @@ public class ScreenViewer extends AbstractBackingBean
     _collaborators = null;
   }
   
-  public boolean isReadOnlyMode()
+  public boolean isEditMode()
   {
-    return _isReadOnlyMode;
+    return !super.isReadOnly() && _isEditMode;
   }
   
-  public boolean isPotentiallyEditable()
+  public boolean isAdminViewMode()
   {
-    // note: we *cannot* substitute this call with super.isEditable(), since
-    // super.isEditable() polymorphically calls our very own isReadOnly()
-    // method!
-    return !super.isReadOnly();
+    return _isAdminViewMode;
   }
 
-  @Override
-  public boolean isEditable()
-  {
-    return !_isReadOnlyMode && !super.isReadOnly();
-  }
-  
-  @Override
-  public boolean isReadOnly()
-  {
-    // note: we *cannot* substitute this call with super.isEditable(), since
-    // super.isEditable() polymorphically calls our very own isReadOnly()
-    // method!
-    return _isReadOnlyMode || super.isReadOnly();
-  }
-  
   public ScreenResult getScreenResult()
   {
 //    return _screen.getScreenResult();
@@ -226,14 +209,19 @@ public class ScreenViewer extends AbstractBackingBean
     return new ListDataModel(new ArrayList<AssayReadoutType>(_screen.getAssayReadoutTypes()));
   }
 
-  public DataModel getAbaseTestsetsDataModel()
+  public String getAbaseTestsets()
   {
-    return new ListDataModel(new ArrayList<AbaseTestset>(_screen.getAbaseTestsets()));
+    return StringUtils.makeListString(new ArrayList<AbaseTestset>(_screen.getAbaseTestsets()), ", ");
   }
 
   public DataModel getKeywordsDataModel()
   {
     return new ListDataModel(new ArrayList<String>(_screen.getKeywords()));
+  }
+  
+  public String getKeywords()
+  {
+    return StringUtils.makeListString(new ArrayList<String>(_screen.getKeywords()), ", ");
   }
 
   public List<SelectItem> getScreenTypeSelectItems()
@@ -307,16 +295,30 @@ public class ScreenViewer extends AbstractBackingBean
   
   
   /* JSF Application methods */
-
-  public String setEditableMode()
+  
+  public String toggleAdminViewMode()
   {
-    // note: we *cannot* substitute this call with super.isEditable(), since
-    // super.isEditable() polymorphically calls our very own isReadOnly()
-    // method!
-    if (!super.isReadOnly()) {
-      _isReadOnlyMode = false;
-    }
+    _isEditMode = false;
+    _isAdminViewMode ^= true;
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String cancelAdminViewMode()
+  {
+    _isAdminViewMode = false;
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  public String setEditMode()
+  {
+    _isEditMode = true;
     return _screensController.editScreen(_screen);
+  }
+  
+  @UIControllerMethod
+  public String cancelEdit() {
+    // edits are discarded (and edit mode is cancelled) by virtue of controller reloading the screen entity from the database
+    return _screensController.viewLastScreen();
   }
   
   /**
@@ -324,7 +326,7 @@ public class ScreenViewer extends AbstractBackingBean
    */
   @UIControllerMethod
   public String saveScreen() {
-    _isReadOnlyMode = true;
+    _isEditMode = false;
     return _screensController.saveScreen(_screen,
                                          new DAOTransaction() 
     {
@@ -336,19 +338,7 @@ public class ScreenViewer extends AbstractBackingBean
       }
     });
   }
-  
-  
-  public void cancelEditListener(ActionEvent event) {
-    _isReadOnlyMode = false;
-    getFacesContext().renderResponse(); // skip update model JSF lifecycle phase
-  }
-  
-  @UIControllerMethod
-  public String cancelEdit() {
-    // edit is cancelled by virtue of controller reloading the screen from the database
-    return _screensController.viewLastScreen();
-  }
-  
+
   @UIControllerMethod
   public String addStatusItem()
   {
@@ -446,20 +436,6 @@ public class ScreenViewer extends AbstractBackingBean
     return _screensController.deleteFundingSupport(
       _screen,
       getSelectedEntityOfType(FundingSupport.class));
-  }
-  
-  @UIControllerMethod
-  public String addAbaseTestset()
-  {
-    return _screensController.addAbaseTestset(_screen);
-  }
-  
-  @UIControllerMethod
-  public String deleteAbaseTestset()
-  {
-    return _screensController.deleteAbaseTestset(
-      _screen,
-      getSelectedEntityOfType(AbaseTestset.class));
   }
   
   @UIControllerMethod

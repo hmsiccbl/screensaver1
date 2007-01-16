@@ -23,7 +23,6 @@ import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
@@ -409,25 +408,6 @@ public class ScreensController extends AbstractUIController
   public String deleteFundingSupport(Screen screen, FundingSupport fundingSupport)
   {
     screen.getFundingSupports().remove(fundingSupport);
-    return VIEW_SCREEN;
-  }
-  
-  @UIControllerMethod
-  public String addAbaseTestset(Screen screen)
-  {
-    try {
-      new AbaseTestset(screen, "<new>");
-    }
-    catch (DuplicateEntityException e) {
-      showMessage("screens.duplicateEntity", "abase testset");
-    }
-    return VIEW_SCREEN;
-  }
-  
-  @UIControllerMethod
-  public String deleteAbaseTestset(Screen screen, AbaseTestset abaseTestset)
-  {
-    screen.getAbaseTestsets().remove(abaseTestset);
     return VIEW_SCREEN;
   }
   

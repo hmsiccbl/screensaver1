@@ -81,12 +81,27 @@ TODO:
 					</t:div>
 				</f:facet>
 
+				<t:panelGroup>
+					<t:commandButton action="#{screenResultViewer.download}"
+						value="Download"
+						rendered="#{!empty screenResultViewer.screenResult}"
+						styleClass="command" />
+					<t:commandButton action="#{screenResultViewer.delete}"
+					value="Delete"
+					onclick="javascript: return confirm('Delete this screen result permanently?');"
+					styleClass="command"
+					rendered="#{!screenResultViewer.readOnly && !empty screenResultViewer.screenResult}" />
+				</t:panelGroup>
+
 				<t:panelGrid columns="2">
-					<t:outputLabel for="screenResultDateCreated"
-						value="First data deposition" styleClass="keyColumn" />
+				  <%-- as long as screenResult.dateCreated is synonymous with "first vist date", 
+				       there's no point in displaying this redundant field, as visit date are 
+				       shown in screen panel --%>
+					<%--t:outputLabel for="screenResultDateCreated"
+						value="Date of first visit" styleClass="keyColumn" />
 					<t:outputText id="screenResultDateCreated"
 						value="#{screenResultViewer.screenResult.dateCreated}"
-						styleClass="dataText" />
+						styleClass="dataText" /--%>
 
 					<t:outputLabel for="screenResultLastImported" value="Last Imported"
 						styleClass="keyColumn" />
@@ -127,22 +142,6 @@ TODO:
 
 				</t:panelGrid>
 			</t:collapsiblePanel>
-
-			<%--h:form id="commandForm" --%>
-
-				<t:panelGroup>
-					<t:commandButton action="#{screenResultViewer.download}"
-						value="Download"
-						rendered="#{!empty screenResultViewer.screenResult}"
-						styleClass="command" />
-					<t:commandButton action="#{screenResultViewer.delete}"
-						value="Delete"
-						onclick="javascript: return confirm('Delete this screen result permanently?');"
-						styleClass="command"
-						rendered="#{!screenResultViewer.readOnly && !empty screenResultViewer.screenResult}" />
-				</t:panelGroup>
-
-			<%--/h:form--%>
 
 			<t:panelGrid columns="1"
 				rendered="#{!empty screenResultViewer.screenResult && !(screenResultViewer.collapsablePanelsState['dataHeadersTable'] && screenResultViewer.collapsablePanelsState['dataTable'])}">
