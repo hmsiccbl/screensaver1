@@ -66,6 +66,7 @@
   <property name="deploy.dir" location="${appserver.dir}/webapps/${app.name}"/>
   <property name="appserver.start.cmd" value="${appserver.dir}/bin/catalina.sh"/>
   <property name="appserver.stop.cmd" value="${appserver.dir}/bin/shutdown.sh"/>
+  <property name="appserver.java.opts" value="-Xmx800M"/>
   <condition 
     property="appserver.start.cmd.options" 
     value="jpda start"
@@ -434,7 +435,7 @@
     depends="deploy"
   >
     <exec executable="${appserver.start.cmd}">
-      <env key="JAVA_OPTS" value="-Xmx800M"/>
+      <env key="JAVA_OPTS" value="${appserver.java.opts}"/>
       <arg line="${appserver.start.cmd.options}"/>
     </exec>
 
