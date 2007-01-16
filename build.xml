@@ -219,7 +219,8 @@
   </target> 
    
   <target name="copy-jsp">
-    <description>Internal target to copy JSP pages to directory specified by 'exploded.war.dir'</description>
+    <description>Internal target to copy JSP pages, and related resources (css stylesheets, images), 
+      to directory specified by 'exploded.war.dir'</description>
     <!-- if we were to copy jsp files below WEB-INF we have to map each of them in our web.xml file, 
     to allow them to be accessed -->
     <copy 
@@ -229,6 +230,21 @@
     >
       <fileset dir="jsp" includes="**/*"/>
     </copy>
+
+    <copy
+      todir="${exploded.war.dir}/css"
+      verbose="${verbose}"
+    >
+      <fileset dir="web/css"/>
+    </copy>
+
+    <copy
+      todir="${exploded.war.dir}/images"
+      verbose="${verbose}"
+    >
+      <fileset dir="web/images"/>
+    </copy>
+
   </target>
 
   <target 
@@ -285,20 +301,6 @@
         <include name="tiles.xml" />
         <include name="faces-config.xml"/>
       </fileset>
-    </copy>
-
-    <copy
-      todir="${exploded.war.dir}/css"
-      verbose="${verbose}"
-    >
-      <fileset dir="web/css"/>
-    </copy>
-
-    <copy
-      todir="${exploded.war.dir}/images"
-      verbose="${verbose}"
-    >
-      <fileset dir="web/images"/>
     </copy>
 
   	<antcall target="copy.downloads.dir"/>
