@@ -109,8 +109,9 @@ public class ScreenSearchResults extends SearchResults<Screen>
       return screen.getTitle();
     }
     if (columnName.equals(SCREEN_RESULT)) {
-      // HACK: be data-access-permissions aware, until we can do this behind the scenes
       if (screen.getScreenResult() != null) {
+//        return "available";
+        // HACK: be data-access-permissions aware, until we can do this behind the scenes
         if (_dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId()) != null) {
           return "available";
         }
@@ -162,12 +163,14 @@ public class ScreenSearchResults extends SearchResults<Screen>
     if (columnName.equals(SCREEN_RESULT)) {
       return new Comparator<Screen>() {
         public int compare(Screen s1, Screen s2) {
-          // HACK: be data-access-permissions aware, until we can do this behind the scenes
+//        ScreenResult sr1 = s1.getScreenResult();
+//        ScreenResult sr2 = s2.getScreenResult();
           ScreenResult sr1 = null;
+          ScreenResult sr2 = null;
+          // HACK: be data-access-permissions aware, until we can do this behind the scenes
           if (s1.getScreenResult() != null) {
             sr1 = _dao.findEntityById(ScreenResult.class, s1.getScreenResult().getEntityId());
           }
-          ScreenResult sr2 = null;
           if (s2.getScreenResult() != null) {
             sr2 = _dao.findEntityById(ScreenResult.class, s2.getScreenResult().getEntityId());
           }

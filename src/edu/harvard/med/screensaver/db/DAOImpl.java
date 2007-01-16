@@ -12,8 +12,11 @@ package edu.harvard.med.screensaver.db;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -45,6 +48,9 @@ import org.hibernate.Query;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.engine.SessionFactoryImplementor;
+import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.type.CollectionType;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
@@ -131,10 +137,44 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
         Criteria criteria = session.createCriteria(entity.getClass());
         criteria.add(Restrictions.idEq(entity.getEntityId()));
         for (String relationship : relationships) {
+          if (log.isDebugEnabled()) {
+            verifyEntityRelationshipExists(session, entity.getClass(), relationship);
+          }
           criteria.setFetchMode(relationship, FetchMode.JOIN);
         }
         return criteria.list();
       }
+
+      private boolean verifyEntityRelationshipExists(Session session, Class entityClass, String relationship)
+      {
+        ClassMetadata metadata = session.getSessionFactory().getClassMetadata(entityClass);
+        if (relationship.contains(".")) {
+          int next = relationship.indexOf(".");
+          String nextRelationship = relationship.substring(next + 1);
+          relationship = relationship.substring(0, next);
+          if (!verifyEntityRelationshipExists(session, entityClass, relationship)) {
+            return false;
+          }
+          
+          org.hibernate.type.Type nextType = metadata.getPropertyType(relationship);
+          if (nextType.isCollectionType()) {
+            nextType = ((CollectionType) nextType).getElementType((SessionFactoryImplementor) session.getSessionFactory());
+          }
+          Class nextEntityClass = nextType.getReturnedClass();
+          return verifyEntityRelationshipExists(session, 
+                                                nextEntityClass,
+                                                nextRelationship);
+        }
+        else {
+          if (!Arrays.asList(metadata.getPropertyNames()).contains(relationship)) {
+            // TODO: this should probably be a Java assert instead of just a log error msg
+            log.error("relationship does not exist: " + entityClass.getSimpleName() + "." + relationship);
+            return false;
+          }
+          return true;
+        }
+      }
+      
     });
     if (entityInflatorLog.isDebugEnabled()) {
       entityInflatorLog.debug("inflating " + entity + " took " + (System.currentTimeMillis() - start) / 1000.0 + " seconds");

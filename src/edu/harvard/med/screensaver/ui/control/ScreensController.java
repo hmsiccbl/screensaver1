@@ -192,7 +192,6 @@ public class ScreensController extends AbstractUIController
           Screen screen = _currentScreen = (Screen) _dao.reloadEntity(screenIn);
           _dao.need(screen, 
                     "abaseTestsets",
-                    "assayReadoutTypes",
                     "attachedFiles",
                     "billingInformation",
                     "fundingSupports",
@@ -205,19 +204,24 @@ public class ScreensController extends AbstractUIController
                     "hbnLabHead",
                     "hbnLabHead.hbnLabMembers",
                     "hbnLeadScreener",
-                    "screenResult",
                     "screenResult.plateNumbers",
-                    "screenResult.resultValueTypes.hbnDerivedTypes",
-                    "screenResult.resultValueTypes.hbnTypesDerivedFrom");
+                    "screenResult.hbnResultValueTypes",
+                    "screenResult.hbnResultValueTypes.hbnDerivedTypes",
+                    "screenResult.hbnResultValueTypes.hbnTypesDerivedFrom");
           
+          ScreenResult permissionsAwareScreenResult = 
+            _dao.findEntityById(ScreenResult.class, 
+                                screen.getScreenResult() == null ? -1 : 
+                                  screen.getScreenResult().getEntityId());
+
           _screenViewer.setScreen(screen);
           _screenResultImporter.setScreen(screen);
           _screenResultViewer.setScreen(screen);
-          _heatMapViewer.setScreenResult(screen.getScreenResult());
-          _screenResultViewer.setScreenResult(screen.getScreenResult());
-          if (screen.getScreenResult() != null &&
-            screen.getScreenResult().getResultValueTypes().size() > 0) {
-            _screenResultViewer.setScreenResultSize(screen.getScreenResult().getResultValueTypesList().get(0).getResultValues().size());
+          _heatMapViewer.setScreenResult(permissionsAwareScreenResult);
+          _screenResultViewer.setScreenResult(permissionsAwareScreenResult);
+          if (permissionsAwareScreenResult != null &&
+            permissionsAwareScreenResult.getResultValueTypes().size() > 0) {
+            _screenResultViewer.setScreenResultSize(permissionsAwareScreenResult.getResultValueTypesList().get(0).getResultValues().size());
           }
         }
       });

@@ -845,7 +845,8 @@ public class ComplexDAOTest extends AbstractSpringTest
         Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
         dao.need(screen, 
                  "keywords", 
-                 "hbnLabHead.hbnLabMembers");
+                 "hbnLabHead.hbnLabMembers",
+                 "hbnCollaborators.hbnLabHead"); // tests DAOImpl.verifyEntityRelationshipExists()
         screenOut[0] = screen;
       }
     });
@@ -867,6 +868,11 @@ public class ComplexDAOTest extends AbstractSpringTest
       fail("expected LazyInitializationException for screen.collaborators access");
     }
     catch (LazyInitializationException e) {}
+  }
+  
+  public void testEntityInflationInvalidRelationship()
+  {
+    // TODO: implement, but requires that DAOImpl.need() throws an exception or assertion failure on an invalid relationship request
   }
   
   public void testRelationshipSize()
