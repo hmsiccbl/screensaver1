@@ -329,8 +329,8 @@ public class Cell
       return null;
     }
     catch (NumberFormatException e) {
-      // note: we catch this exception, rather than checking if cell type is
-      // "Numeric", because it cell type can also be "Formula", and
+      // note: we catch this exception, rather than checking, above, if cell
+      // type is "Numeric", because cell type can also be "Formula", for which
       // getNumericCellValue() will still work
       _errors.addError(INVALID_CELL_TYPE_ERROR + " (expected a double)", this);
       if (_required) {
