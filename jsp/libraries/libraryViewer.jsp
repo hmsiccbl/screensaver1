@@ -58,7 +58,7 @@
         value="Unload Library Contents"
         action="#{libraryViewer.unloadLibraryContents}"
         onclick="javascript: return confirm('Are you sure you want to unload the contents of this library?');"
-        rendered="#{libraryViewer.librarySize > 0}"
+        rendered="#{libraryViewer.editable && libraryViewer.librarySize > 0}"
         styleClass="command"
       />
     </h:form>
