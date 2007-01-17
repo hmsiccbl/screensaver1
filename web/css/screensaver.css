@@ -158,8 +158,8 @@ a.heatMapValue:link,a.heatMapValue:visited {
 .tableHeader,.tableFooter,.heatMapBorderColumn {
 	font-size: small;
 	font-weight: bold;
-	background-color: teal;
-	color: white;
+	color: black;
+	background-color: #bbbbbb;
 	padding-left: 1px;
 	padding-right: 1px;
 }

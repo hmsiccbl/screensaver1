@@ -13,18 +13,14 @@
   <t:outputText value="Welcome #{login.screensaverUser.fullNameFirstLast}!" styleClass="title"/>
   <t:div/>
   <f:verbatim escape="false">
-    <p>
-      Thanks for trying out this early version of Screensaver1! 
-    <p>
-      To get started, try clicking some of the items in the left menu bar. 
-      Or, for a detailed description of what you can do, click on the "Instructions" link.
-    <p>
-      Please note that this is a <i>preview</i> release of Screensaver1, intended to elicit 
-      your feedback.  In particular, the data being presented is not permanent, 
-      and any changes you may make will be discarded in the future.  You may encounter 
-      buttons and links that are non-functional, and may even encounter unexpected system errors.
-      Your input will directly influence the order in which functionality is added, improved, 
-      and fixed!
-    </p>
-  </f:verbatim>
+    <p>Thanks for trying out Screensaver!</p>
+    <p>To get started, try clicking some of the items in the left menu
+		bar. For a detailed description of what you can see the <a href="helpViewer.jsf">Instructions</a>.</p>
+		<p>Please note that this is a <i>beta</i> release of Screensaver, and
+		is intended to elicit your feedback. Your input will directly
+		influence the order in which functionality is added, improved, and
+		fixed! Please send your comments to <a
+			href="mailto:john_sullivan@hms.harvard.edu,andrew_tolopko@hms_harvard.edu">john_sullivan@hms.harvard.edu,
+		andrew_tolopko@hms_harvard.edu</a>.</p>
+	</f:verbatim>
 </f:subview>

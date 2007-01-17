@@ -7,9 +7,8 @@
 
   <h:form id="wellFinderForm">
   
-    <t:outputText value="Find Wells:" styleClass="sectionHeader" />
     <t:panelGrid columns="2">
-
+	
       <t:panelGrid columns="1">
         <t:inputTextarea
           id="plateWellList"

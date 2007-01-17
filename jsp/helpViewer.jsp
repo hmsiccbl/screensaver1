@@ -6,7 +6,7 @@
 <f:subview id="helpViewer">
 
   <f:verbatim escape="false">
-	Thanks for trying out this early release of Screensaver1! Here's a quick guide to how you can
+	Thanks for trying out this early release of Screensaver! Here's a quick guide to how you can
 	use Screensaver and what it can do for you.
     <ul>
       <li>

@@ -22,8 +22,8 @@
     <t:div/>
     <t:panelGroup>
       <t:commandButton value="Login" styleClass="command" />
-      <t:commandLink value="Forgot your ID or password?" immediate="true"
-        action="#{login.forgotIdOrPassword}" styleClass="command" />
+      <%--t:commandLink value="Forgot your ID or password?" immediate="true"
+        action="#{login.forgotIdOrPassword}" styleClass="command" /--%>
     </t:panelGroup>
   </h:form>
   

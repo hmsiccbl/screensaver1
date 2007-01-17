@@ -27,11 +27,11 @@
 		<t:panelGroup rendered="#{menu.authenticatedUser}">
 			<h:form id="userForm">
 				<%--t:outputText value="User " styleClass="label"/--%>
-				<t:commandLink id="userName" action="goMyAccount"
+				<t:outputText id="userName" 
 					value="#{login.screensaverUser.fullNameFirstLast}" styleClass="menuItem userName" />
-                <t:div />
-				<t:commandLink id="account" action="goMyAccount" value="#{\"Edit\"}" styleClass="menuItem" />
-				<t:outputText value="|" styleClass="spacer" />
+					<t:div/>
+				<%-- t:commandLink id="account" action="goMyAccount" value="#{\"Edit\"}" styleClass="menuItem" />
+				<t:outputText value="|" styleClass="spacer" /--%>
 				<t:commandLink id="logout" action="#{login.logout}" value="#{\"Logout\"}" styleClass="menuItem"/>
 			</h:form>
 		</t:panelGroup>
@@ -39,29 +39,42 @@
     <t:htmlTag id="menuSectionSeparator1" value="hr" />
 
     <h:form id="navForm">
-      <t:panelNavigation2 id="navMenu" layout="table" itemClass="menuItem"
-        openItemClass="menuItem" activeItemClass="menuItemActive"
-        separatorClass="navSeparator">
-        <t:commandNavigation2 action="#{librariesController.findWells}" value="#{\"Find Wells\"}" rendered="#{menu.authenticatedUser}" accesskey="W"/>
-        <t:commandNavigation2 action="#{librariesController.browseLibraries}" value="#{\"Browse Libraries\"}" rendered="#{menu.authenticatedUser}" accesskey="L" />
-        <t:commandNavigation2 action="#{screensController.browseScreens}" value="#{\"Browse Screens\"}" rendered="#{menu.authenticatedUser && login.userAllowedAccessToScreens}" accesskey="S" />
-        <t:commandNavigation2 accesskey="" />
-        <t:commandNavigation2 action="#{mainController.viewDownloads}" value="#{\"Data Downloads\"}" rendered="#{menu.authenticatedUser}" accesskey="D"/>
-        <t:commandNavigation2 action="#{mainController.viewHelp}" value="Instructions" accesskey="H" />
-        <t:commandNavigation2 accesskey="" />
-        <t:commandNavigation2 id="navPanelDeveloperNode"
-          value="Developer >>" accesskey="" visibleOnUserRole="developer"
-          open="true"
-        >
-          <t:commandNavigation2 action="goEnvironmentInfo" value="Env Info" />
-          <t:commandNavigation2 action="goSchemaManager" value="#{\"Schema Manager\"}" />
-        </t:commandNavigation2>
-      </t:panelNavigation2>
-    </h:form>
-    
-    <t:htmlTag id="menuSectionSeparator2" value="hr" />
+			<t:panelNavigation2 id="navMenu" layout="table" itemClass="menuItem"
+				openItemClass="menuItem" activeItemClass="menuItemActive"
+				separatorClass="navSeparator" rendered="#{menu.authenticatedUser}">
+				<t:commandNavigation2 action="#{librariesController.findWells}"
+					value="#{\"Find Wells\"}"
+					accesskey="W" />
+				<t:commandNavigation2
+					action="#{librariesController.browseLibraries}"
+					value="#{\"Browse Libraries\"}"
+					rendered="#{menu.authenticatedUser}" accesskey="L" />
+				<t:commandNavigation2 action="#{screensController.browseScreens}"
+					value="#{\"Browse Screens\"}"
+					rendered="#{menu.authenticatedUser && login.userAllowedAccessToScreens}"
+					accesskey="S" />
+				<t:commandNavigation2 accesskey="" />
+				<t:commandNavigation2 action="#{mainController.viewDownloads}"
+					value="#{\"Data Downloads\"}"
+					accesskey="D" />
+				<t:commandNavigation2 action="#{mainController.viewHelp}"
+					value="Instructions"
+					accesskey="H" />
+				<t:commandNavigation2 accesskey="" />
+				<t:commandNavigation2 id="navPanelDeveloperNode"
+					value="Developer >>" accesskey="" visibleOnUserRole="developer"
+					open="true">
+					<t:commandNavigation2 action="goEnvironmentInfo" value="Env Info" />
+					<t:commandNavigation2 action="goSchemaManager"
+						value="#{\"Schema Manager\"}" />
+				</t:commandNavigation2>
+			</t:panelNavigation2>
+		</h:form>
 
-    <h:form id="quickFindWellForm">
+		<t:htmlTag id="menuSectionSeparator2" value="hr"
+			rendered="#{menu.authenticatedUser}" />
+
+		<h:form id="quickFindWellForm">
       <t:panelGrid columns="2" rendered="#{menu.authenticatedUser}">
         <t:outputLabel
           id="plateNumberLabel"
