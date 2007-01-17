@@ -48,13 +48,14 @@ h3,.subsectionHeader {
 }
 
 a,a:link,a:visited,a:active {
-	color: #000000;
+	color: inherit;
 	background-color: inherit;
 }
 
 a:hover {
-	color: #ff0000;
+	color: fuchsia;
 	background-color: inherit;
+	text-decoration: underline;
 }
 
 hr {
@@ -78,10 +79,13 @@ hr {
 
 .standardTable {
 	color: #000000;
-	border-style: solid;
-	border-width: 1px;
-	border-color: gray;
-	border-collapse: collapse;
+	border-style: none;
+	border-spacing: 0px;
+}
+
+.layoutPanel {
+	border-style: none;
+	border-spacing: 0px;
 }
 
 .heatMapsTable {
@@ -97,12 +101,16 @@ hr {
 	text-align: center;
 }
 
+.heatMapBorderColumn {
+	text-align: center;
+}
+
 .heatMapCell {
 	width: 100px;
 	min-width: 40px;
 }
 
-a.heatMapValue:link,a.heatMapValue:visited 	{
+a.heatMapValue:link,a.heatMapValue:visited {
 	text-decoration: none;
 	color: black;
 }
@@ -114,6 +122,7 @@ a.heatMapValue:link,a.heatMapValue:visited 	{
 
 .command,.input,.inputLabel {
 	margin-right: 4px;
+	vertical-align: bottom;
 }
 
 .hiddenCommand {
@@ -127,20 +136,32 @@ a.heatMapValue:link,a.heatMapValue:visited 	{
 
 .column,.keyColumn,.numericColumn {
 	vertical-align: top;
+	border-style: none;
+	padding-top: 1px;
+	padding-bottom: 0px;
+	padding-left: 3px;
+	padding-right: 3px;
 }
 
 .keyColumn {
 	font-weight: bold;
 }
 
-.numericColumn {
-	text-align: right
+.column,.keyColumn {
+	text-align: left;
 }
 
-.tableHeader,.tableFooter {
+.numericColumn {
+	text-align: right;
+}
+
+.tableHeader,.tableFooter,.heatMapBorderColumn {
+	font-size: small;
 	font-weight: bold;
-	background-color: #eeffff;
-	padding-right: 4px;
+	background-color: teal;
+	color: white;
+	padding-left: 1px;
+	padding-right: 1px;
 }
 
 .row1,.row2 {
@@ -185,7 +206,7 @@ a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visite
 }
 
 a.menuItem:hover,a.menuItemActive:hover {
-	color: white;
+	color: inherit;
 	text-decoration: underline;
 }
 
@@ -209,12 +230,6 @@ a.menuItem:hover,a.menuItemActive:hover {
 	margin-right: 4px;
 }
 
-.nonSpacingPanel {
-	padding: 0px;
-	margin: 0px;
-	border: 0px;
-}
-
 .stackTraceException {
 	font-size: medium;
 	font-weight: bold;
@@ -228,4 +243,3 @@ a.menuItem:hover,a.menuItemActive:hover {
 	font-size: x-small;
 	font-weight: bold;
 }
-

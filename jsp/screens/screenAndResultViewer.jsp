@@ -9,11 +9,6 @@
 <%-- Tiles --%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
-<%-- 
-TODO:
-- sectionHeader style is needing to be applied to 3 elements; should figure out what's going on w/css
---%>
-
 <f:subview id="screenAndResultViewer">
 
 	<t:aliasBean alias="#{navigator}" value="#{screensBrowser.screenSearchResults}">
@@ -48,16 +43,15 @@ TODO:
 						<t:outputText value="#{screenResultViewer.screen.screenNumber}: \"#{screenResultViewer.screen.title}\""
 							styleClass="dataText" />
 						<t:div>
-						<t:outputText value="Lab: " styleClass="inputLabel"/>
-						<t:commandLink
-							value="#{screenViewer.screen.labHead.labName}"
-							action="#{screenViewer.viewLabHead}"
-							styleClass="dataText entityLink"/>
-						<t:outputText value="&nbsp;&nbsp;Screener: " styleClass="inputLabel" escape="false"/>
-						<t:commandLink
-							value="#{screenViewer.screen.leadScreener.fullNameLastFirst}"
-							action="#{screenViewer.viewLeadScreener}"
-							styleClass="dataText entityLink"/>
+							<t:outputText value="Lab: " styleClass="inputLabel"/>
+							<t:commandLink value="#{screenViewer.screen.labHead.labName}"
+								action="#{screenViewer.viewLabHead}"
+								styleClass="dataText entityLink" />
+							<t:outputText value="&nbsp;&nbsp;Screener: " styleClass="inputLabel" escape="false"/>
+							<t:commandLink
+								value="#{screenViewer.screen.leadScreener.fullNameLastFirst}"
+								action="#{screenViewer.viewLeadScreener}"
+								styleClass="dataText entityLink" />
 						</t:div>
 					</t:panelGrid>
 				</f:facet>
@@ -93,8 +87,9 @@ TODO:
 					rendered="#{!screenResultViewer.readOnly && !empty screenResultViewer.screenResult}" />
 				</t:panelGroup>
 
-				<t:panelGrid columns="2">
-				  <%-- as long as screenResult.dateCreated is synonymous with "first vist date", 
+				<t:panelGrid columns="2" styleClass="standardTable"
+					columnClasses="keyColumn,column" rowClasses="row1,row2">
+					<%-- as long as screenResult.dateCreated is synonymous with "first vist date", 
 				       there's no point in displaying this redundant field, as visit date are 
 				       shown in screen panel --%>
 					<%--t:outputLabel for="screenResultDateCreated"
@@ -103,14 +98,12 @@ TODO:
 						value="#{screenResultViewer.screenResult.dateCreated}"
 						styleClass="dataText" /--%>
 
-					<t:outputLabel for="screenResultLastImported" value="Last Imported"
-						styleClass="keyColumn" />
+					<t:outputLabel for="screenResultLastImported" value="Last Imported" />
 					<t:outputText id="screenResultLastImported"
 						value="#{screenResultViewer.screenResult.dateLastImported}"
 						styleClass="dataText" />
 
-					<t:outputLabel for="screenResultIsShareable" value="Shareable"
-						styleClass="keyColumn" />
+					<t:outputLabel for="screenResultIsShareable" value="Shareable" />
 					<t:div>
 						<t:selectBooleanCheckbox id="screenResultIsShareable"
 							value="#{screenResultViewer.screenResult.shareable}"
@@ -118,27 +111,25 @@ TODO:
 							displayValueOnlyStyleClass="dataText"
 							onclick="javascript:document.getElementById('saveScreenResultButton').click()" />
 						<t:commandButton id="saveScreenResultButton" forceId="true"
-						action="#{screenResultViewer.saveScreenResult}"
-						styleClass="hiddenCommand" />
+							action="#{screenResultViewer.saveScreenResult}"
+							styleClass="hiddenCommand" />
 					</t:div>
-					
-					<t:outputLabel for="platesCount" value="Plates"
-						styleClass="keyColumn" />
+
+					<t:outputLabel for="platesCount" value="Plates" />
 					<t:outputText id="screenResultPlateCount"
 						value="#{screenResultViewer.screenResult.plateNumberCount}"
 						styleClass="dataText" />
 
-					<t:outputLabel for="screenResultReplicateCount" value="Replicates"
-						styleClass="keyColumn" />
+					<t:outputLabel for="screenResultReplicateCount" value="Replicates" />
 					<t:outputText id="screenResultReplicateCount"
 						value="#{screenResultViewer.screenResult.replicateCount}"
 						styleClass="dataText" />
 
 					<t:outputLabel for="screenResultExperimentalWellsCount"
-						value="Experimental Wells" styleClass="keyColumn" />
+						value="Experimental Wells" />
 					<t:outputText id="screenResultExperimentWellCount"
 						value="#{screenResultViewer.screenResult.experimentalWellCount}"
-						styleClass="dataText"/>
+						styleClass="dataText" />
 
 				</t:panelGrid>
 			</t:collapsiblePanel>
@@ -218,15 +209,18 @@ TODO:
 					styleClass="standardTable" headerClass="tableHeader"
 					rowClasses="row1,row2">
 					<t:columns value="#{screenResultViewer.sortManager.columnModel}"
-						var="columnName" styleClass="numericColumn">
+						var="columnName"
+						styleClass="#{screenResultViewer.numericColumn ? \"numericColumn\" : \"column\"}">
 						<f:facet name="header">
 							<t:commandLink
 								action="#{screenResultViewer.sortManager.sortOnColumn}"
-								disabled="#{columnName == \"Excluded\"}">
+								disabled="#{columnName == \"Excluded\"}"
+								styleClass="sortableColumn">
 								<t:outputText value="#{columnName}" />
 							</t:commandLink>
 						</f:facet>
-						<t:outputText value="#{row[columnName]}" rendered="#{columnName != \"Well\"}"/>
+						<t:outputText value="#{row[columnName]}"
+							rendered="#{columnName != \"Well\"}" />
 						<t:commandLink action="#{screenResultViewer.viewWell}"
 							rendered="#{columnName == \"Well\"}">
 							<t:outputText value="#{row[columnName]}" />
@@ -261,7 +255,7 @@ TODO:
 					action="#{screenResultViewer.updateDataTableRows}"
 					styleClass="command" />
 
-				<t:panelGroup id="showHitsOnlyCommandPanel"
+				<t:panelGroup id="showHitsOnlyCommandPanel" style="vertical-align: bottom"
 					rendered="#{!empty screenResultViewer.hitsForDataHeader.selectItems}">
 					<t:selectBooleanCheckbox id="showHitsOnly"
 						value="#{screenResultViewer.showHitsOnly}" immediate="true"

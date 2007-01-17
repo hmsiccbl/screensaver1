@@ -132,7 +132,6 @@ public class ScreenResultViewer extends AbstractBackingBean
    * Data model for the raw data, <i>containing only the set of rows being displayed in the current view</i>.
    */
   private DataModel _rawDataModel;
-  private DataModel _rawDataColumnModel;
   private DataModel _dataHeadersColumnModel;
   private DataModel _dataHeadersModel;
   private Map<String,Boolean> _collapsablePanelsState;
@@ -267,6 +266,18 @@ public class ScreenResultViewer extends AbstractBackingBean
       return EMPTY_RAW_DATA_MODEL;
     }
     return _rawDataModel;
+  }
+  
+  public boolean isNumericColumn()
+  {
+    int columnIndex = _sortManager.getColumnModel().getRowIndex();
+    // "plate", "well", "type", and "excluded" columns are non-numeric
+    if (columnIndex < 4) {
+      return false;
+    }
+    // columns based upon ResultValueTypes can be queried directly for numericalness
+    columnIndex -= 4;
+    return getSelectedResultValueTypes().getSelections().get(columnIndex).isNumeric();
   }
   
   /**

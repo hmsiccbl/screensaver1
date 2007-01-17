@@ -113,9 +113,8 @@ TODO:
 				var="plateRow" rowIndexVar="plateRowIndex" renderedIfEmpty="false"
 				styleClass="heatMapTable" headerClass="tableHeader"
 				preserveDataModel="false" footerClass="tableFooter">
-				<t:column styleClass="keyColumn">
+				<t:column styleClass="heatMapBorderColumn">
 					<f:facet name="header">
-						<t:outputText value="Row" />
 					</f:facet>
 					<t:outputText
 						value="#{heatMapViewer.heatMapRowLabels[plateRowIndex]}" />
@@ -136,9 +135,8 @@ TODO:
 							escape="false" />
 					</h:commandLink>
 				</t:columns>
-				<t:column styleClass="keyColumn">
+				<t:column styleClass="heatMapBorderColumn">
 					<f:facet name="header">
-						<t:outputText value="Row" />
 					</f:facet>
 					<t:outputText
 						value="#{heatMapViewer.heatMapRowLabels[plateRowIndex]}" />
@@ -146,7 +144,7 @@ TODO:
 			</t:dataTable>
 		</t:column>
 
-		<t:column style="vertical-align: center">
+		<t:column>
 			<t:dataTable id="legend"
 				value="#{heatMapViewer.colorLegendDataModel}" var="step"
 				style="height: 100%">
