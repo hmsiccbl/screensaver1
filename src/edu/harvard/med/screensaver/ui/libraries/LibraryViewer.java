@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
@@ -41,6 +42,12 @@ public class LibraryViewer extends AbstractBackingBean
   public Library getLibrary()
   {
     return _library;
+  }
+  
+  @Override
+  protected ScreensaverUserRole getEditableAdminRole()
+  {
+    return ScreensaverUserRole.LIBRARIES_ADMIN;
   }
 
   public LibrarySearchResults getLibrarySearchResults()
