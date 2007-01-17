@@ -9,6 +9,7 @@
     <t:panelGrid
       id="labelsAndDataColumns"
       columns="2"
+      styleClass="standardTable"
       rowClasses="row1,row2"
       columnClasses="keyColumn,column"
     >

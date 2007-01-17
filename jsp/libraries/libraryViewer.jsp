@@ -12,6 +12,7 @@
   <t:panelGrid
     id="labelsAndDataColumns"
     columns="2"
+    styleClass="standardTable"
     rowClasses="row1,row2"
     columnClasses="keyColumn,column"
   >
@@ -31,7 +32,7 @@
     <h:outputText value="#{libraryViewer.librarySize}" />
   </t:panelGrid>
 
-  <t:panelGroup>
+  <t:panelGroup rendered="#{libraryViewer.editable}">
     <h:form id="libraryContentsForm">
       <h:commandButton
         value="View Library Contents"
@@ -39,7 +40,7 @@
         styleClass="command"
       />
 
-      <t:panelGroup visibleOnUserRole="librariesAdmin">
+      <t:panelGroup>
         <h:commandButton
           value="Import Library Contents"
           action="#{libraryViewer.importRNAiLibraryContents}"
@@ -58,7 +59,7 @@
         value="Unload Library Contents"
         action="#{libraryViewer.unloadLibraryContents}"
         onclick="javascript: return confirm('Are you sure you want to unload the contents of this library?');"
-        rendered="#{libraryViewer.editable && libraryViewer.librarySize > 0}"
+        rendered="#{libraryViewer.librarySize > 0}"
         styleClass="command"
       />
     </h:form>
