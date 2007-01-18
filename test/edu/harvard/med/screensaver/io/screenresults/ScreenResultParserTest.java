@@ -67,6 +67,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public static final String SCREEN_RESULT_115_NO_DATE_TEST_WORKBOOK_FILE = "ScreenResultTest115-no-date.xls";
   public static final String ERRORS_TEST_WORKBOOK_FILE = "NewFormatErrorsTest.xls";
   public static final String FORMULA_VALUE_TEST_WORKBOOK_FILE = "formula_value.xls";
+  public static final String BLANK_ROWS_TEST_WORKBOOK_FILE = "ScreenResultTest115_blank_rows.xls";
   
   protected ScreenResultParser mockScreenResultParser;
 
@@ -156,8 +157,28 @@ public class ScreenResultParserTest extends AbstractSpringTest
                  hssfNumericValue,
                  parsedNumericValue.doubleValue(),
                  0.0001);
-  }
 
+    // test numeric precision (TODO: should probably be a separate unit test)
+    assertEquals("precision of numeric format on formula cell", 4, cell.getDoublePrecision());
+    Cell generalFormatFormulaCell = cellFactory.getCell((short) 3, (short) 0);
+    assertEquals("precision of general format on formula cell", -1, 
+                 generalFormatFormulaCell.getDoublePrecision());
+    Cell generalFormatNumericCell = cellFactory.getCell((short) 0, (short) 0);
+    assertEquals("precision of general format on numeric cell", -1, 
+                 generalFormatNumericCell.getDoublePrecision());
+    Cell numericFormatNumericCell = cellFactory.getCell((short) 1, (short) 0);
+    assertEquals("precision of numeric format on numeric cell", 3, 
+                 numericFormatNumericCell.getDoublePrecision());
+  }
+  
+  public void testDetectEmptyRow() throws Exception
+  {
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, BLANK_ROWS_TEST_WORKBOOK_FILE);
+    mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(115), workbookFile);
+    assertFalse("screen result had no errors", mockScreenResultParser.getHasErrors());
+    assertEquals("well count", 4, mockScreenResultParser.getParsedScreenResult().getExperimentalWellCount());
+  }
+  
   // Note: this test cannot pass because the POI/HSSF library is crappy and does
   // not allow you to read a boolean-typed formula cell value!
   public void testReadBooleanFormulaCellValue() throws Exception

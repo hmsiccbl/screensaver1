@@ -302,7 +302,7 @@ public class Cell
   /**
    * Get a <code>Double</code> value from the cell.
    * 
-   * @return a <code>Double</code> value if cell contains a valid double
+   * @return a <code>Double</code> value if cell contains a valid double 
    *         value; if cell does not contain a double or an error occurs
    *         <code>null</code> is returned, unless cell is required, in which
    *         case <code>0.0</code> is returned (to allow parsing
@@ -319,7 +319,12 @@ public class Cell
         }
         return null;
       }
-      return new Double(cell.getNumericCellValue());
+      Double value = new Double(cell.getNumericCellValue());
+      // we need some special-case handling for formulas are expected to return a numeric value, but do not
+      if (value.isNaN()) {
+        throw new NumberFormatException("bad numeric value (maybe formula is not returning a numeric type?)");
+      }
+      return value;
     } 
     catch (CellOutOfRangeException e) {
       if (_required) {
@@ -510,7 +515,8 @@ public class Cell
       HSSFDataFormat dataFormat = _workbook.getWorkbook().createDataFormat();
       String formatStr = dataFormat.getFormat(cell.getCellStyle().getDataFormat());
       if (formatStr != null) {
-        if (formatStr.equals(GENERAL_FORMAT)) {
+        // note: I have witnessed both "GENERAL" and "General" from cell.getCellStyle().getDataFormat()
+        if (formatStr.trim().equalsIgnoreCase(GENERAL_FORMAT)) {
           return -1;
         }
         Matcher matcher = DECIMAL_PRECISION_PATTERN.matcher(formatStr);
@@ -547,8 +553,8 @@ public class Cell
       annotatedCellValue = "ERROR: ";
     }
     annotatedCellValue += error.getMessage();
-    cell.setCellValue(annotatedCellValue);
     cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+    cell.setCellValue(annotatedCellValue);
   }
   
   /**

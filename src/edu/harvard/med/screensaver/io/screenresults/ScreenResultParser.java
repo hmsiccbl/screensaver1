@@ -761,70 +761,72 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         ++dataSheetsParsed;
         log.info("parsing sheet " + workbook.getWorkbookFile().getName() + ":" + workbook.getWorkbook().getSheetName(iSheet));
         for (int iRow = RAWDATA_FIRST_DATA_ROW_INDEX; iRow <= sheet.getLastRowNum(); ++iRow) {
-          Well well = findWell(iRow);
-          if (well != null) {
-            // TODO: should verify with Library Well Type, if not specific to AssayWellType
-            AssayWellType assayWellType = _assayWellTypeParser.parse(dataCell(iRow, DataColumn.ASSAY_WELL_TYPE));
-
-            List<ResultValueType> wellExcludes = _excludeParser.parseList(dataCell(iRow, DataColumn.EXCLUDE));
-
-            int iDataHeader = 0;
-            for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-              Cell cell = dataCell(iRow, iDataHeader);
-              try {
-                if (rvt.isActivityIndicator()) {
-                  String value;
-                  if (rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN) {
-                    if (cell.isBoolean()) {
-                      value = cell.getBoolean().toString();
-                    } 
-                    else {
-                      value = _booleanParser.parse(cell).toString();
+          if (!ignoreRow(sheet, iRow)) {
+            Well well = findWell(iRow);
+            if (well != null) {
+              // TODO: should verify with Library Well Type, if not specific to AssayWellType
+              AssayWellType assayWellType = _assayWellTypeParser.parse(dataCell(iRow, DataColumn.ASSAY_WELL_TYPE));
+              
+              List<ResultValueType> wellExcludes = _excludeParser.parseList(dataCell(iRow, DataColumn.EXCLUDE));
+              
+              int iDataHeader = 0;
+              for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+                Cell cell = dataCell(iRow, iDataHeader);
+                try {
+                  if (rvt.isActivityIndicator()) {
+                    String value;
+                    if (rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN) {
+                      if (cell.isBoolean()) {
+                        value = cell.getBoolean().toString();
+                      } 
+                      else {
+                        value = _booleanParser.parse(cell).toString();
+                      }
+                      rvt.addResultValue(well,
+                                         assayWellType,
+                                         value,
+                                         (wellExcludes != null && wellExcludes.contains(rvt)));
                     }
-                    rvt.addResultValue(well,
-                                       assayWellType,
-                                       value,
-                                       (wellExcludes != null && wellExcludes.contains(rvt)));
-                  }
-                  else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.PARTITION) {
-                    rvt.addResultValue(well,
-                                       assayWellType,
-                                       _partitionedValueParser.parse(cell).toString(),
-                                       (wellExcludes != null && wellExcludes.contains(rvt)));
-                  }
-                  else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL) {
-                    rvt.addResultValue(well,
-                                       assayWellType,
-                                       cell.getDouble(),
-                                       cell.getDoublePrecision(),
-                                       (wellExcludes != null && wellExcludes.contains(rvt)));
-                  }
-                }
-                else {
-                  // TODO: avoid the subtle bug of implicitly flagging a
-                  // ResultValueType as non-numeric if an initial set of values are blank, but are
-                  // then followed by (valid) numeric data
-                  if ((!rvt.isNumericalnessDetermined() && cell.isNumeric()) || 
-                    rvt.isNumericalnessDetermined() && rvt.isNumeric()) {
-                    rvt.addResultValue(well,
-                                       assayWellType,
-                                       cell.getDouble(),
-                                       cell.getDoublePrecision(),
-                                       (wellExcludes != null && wellExcludes.contains(rvt)));
+                    else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.PARTITION) {
+                      rvt.addResultValue(well,
+                                         assayWellType,
+                                         _partitionedValueParser.parse(cell).toString(),
+                                         (wellExcludes != null && wellExcludes.contains(rvt)));
+                    }
+                    else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL) {
+                      rvt.addResultValue(well,
+                                         assayWellType,
+                                         cell.getDouble(),
+                                         cell.getDoublePrecision(),
+                                         (wellExcludes != null && wellExcludes.contains(rvt)));
+                    }
                   }
                   else {
-                    rvt.addResultValue(well,
-                                       assayWellType,
-                                       cell.getString(),
-                                       (wellExcludes != null && wellExcludes.contains(rvt)));
+                    // TODO: avoid the subtle bug of implicitly flagging a
+                    // ResultValueType as non-numeric if an initial set of values are blank, but are
+                    // then followed by (valid) numeric data
+                    if ((!rvt.isNumericalnessDetermined() && cell.isNumeric()) || 
+                      rvt.isNumericalnessDetermined() && rvt.isNumeric()) {
+                      rvt.addResultValue(well,
+                                         assayWellType,
+                                         cell.getDouble(),
+                                         cell.getDoublePrecision(),
+                                         (wellExcludes != null && wellExcludes.contains(rvt)));
+                    }
+                    else {
+                      rvt.addResultValue(well,
+                                         assayWellType,
+                                         cell.getString(),
+                                         (wellExcludes != null && wellExcludes.contains(rvt)));
+                    }
                   }
                 }
+                catch (IllegalArgumentException e) {
+                  // inconsistency in numeric or string types in RVT's result values
+                  _errors.addError(e.getMessage(), cell);
+                }
+                ++iDataHeader;
               }
-              catch (IllegalArgumentException e) {
-                // inconsistency in numeric or string types in RVT's result values
-                _errors.addError(e.getMessage(), cell);
-              }
-              ++iDataHeader;
             }
           }
         }
@@ -833,6 +835,38 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     if (dataSheetsParsed == 0) {
       _errors.addError(NO_DATA_SHEETS_FOUND_ERROR);
     }
+  }
+
+  /**
+   * Determines if the logical row at the specified 0-based index should be ignored,
+   * which is the case if the row is undefined, has no cells, or the first cell
+   * is blank or contains the empty string or only whitespace.
+   * 
+   * @param sheet
+   * @param rowIndex
+   * @return
+   */
+  private boolean ignoreRow(HSSFSheet sheet, int rowIndex)
+  {
+    HSSFRow row = sheet.getRow(rowIndex);
+    if (row == null) return true;
+    if (row.getPhysicalNumberOfCells() == 0) {
+      return true;
+    }
+    HSSFCell cell = row.getCell((short) 0);
+    if (cell == null) {
+      return true;
+    }
+    if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
+      return true;
+    }
+    if (cell.getStringCellValue() == null) {
+      return true;
+    }
+    if (cell.getStringCellValue().trim().length() == 0) {
+      return true;
+    }
+    return false;
   }
 
   private boolean isActiveSheetRawDataSheet()
