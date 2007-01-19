@@ -222,6 +222,7 @@ public class ResultValue
     return getAssayWellType().equals(AssayWellType.EXPERIMENTAL);
   }
   
+  // TODO: move this method's logic to AssayWellType
   @DerivedEntityProperty
   public boolean isControlWell()
   {
@@ -230,6 +231,7 @@ public class ResultValue
     getAssayWellType().equals(AssayWellType.LIBRARY_CONTROL);
   }
   
+  // TODO: move this method's logic to AssayWellType
   @DerivedEntityProperty
   public boolean isDataProducerWell()
   {

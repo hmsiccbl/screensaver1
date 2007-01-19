@@ -25,7 +25,7 @@ public enum WellType implements VocabularyTerm
   // the vocabulary
   
   EXPERIMENTAL("experimental"),
-  EMPTY("empty"), // for RNAi, on assay, can become Assay Control, Positive Control, Other
+  EMPTY("empty"), // for RNAi, on assay, can become Assay Control, Assay Positive Control, Other
   DMSO("DMSO"), // small compound only
   LIBRARY_CONTROL("library control"), // RNAi only
   BUFFER("buffer"), // RNAi only
