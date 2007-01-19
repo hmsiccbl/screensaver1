@@ -19,7 +19,8 @@
 		<p>Please note that this is a <i>beta</i> release of Screensaver, and
 		is intended to elicit your feedback. Your input will directly
 		influence the order in which functionality is added, improved, and
-		fixed! Please send your comments to <a
+		fixed!</p>
+		<p>Please send your comments to <a
 			href="mailto:john_sullivan@hms.harvard.edu,andrew_tolopko@hms_harvard.edu">john_sullivan@hms.harvard.edu,
 		andrew_tolopko@hms_harvard.edu</a>.</p>
 	</f:verbatim>
