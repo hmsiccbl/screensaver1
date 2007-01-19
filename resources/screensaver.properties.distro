@@ -1,10 +1,10 @@
-# screensaver.properties.ant4
+# screensaver.properties.distro
 # contains properties used at both build-time and run-time
 
 
 ### build-time properties
 
-log4j.properties.file=resources/log4j.debug.properties
+log4j.properties.file=resources/log4j.distro.properties
 
 # uncomment/comment the following line to copy/not copy downloads:
 #copy.downloads.dir=true
