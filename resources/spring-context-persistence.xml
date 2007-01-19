@@ -22,7 +22,7 @@
   >
     <property name="location" value="classpath:screensaver.properties"/>
     <property name="ignoreResourceNotFound" value="true"/>
-    <!-- if datasource settings are available as environment variables, use them instead of datasource.properties file -->
+    <!-- if datasource settings are available as environment variables, use them instead of screensaver.properties file -->
     <property name="searchSystemEnvironment" value="true"/>
     <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
   </bean>
@@ -110,6 +110,8 @@
       name="target"
       ref="daoImpl" />
   </bean>
+  
+  <alias name="transactionalDao" alias="unrestrictedDao" />
 
   <!-- restricted data access dao; this is the top-level DAO proxy, to be used by the application -->
   <bean

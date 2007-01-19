@@ -39,7 +39,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * <ul>.
  * <p>
  * Normally, a screensaver distribution will use the database connection
- * settings specified in "classpath:datasource.properties". However, if
+ * settings specified in "classpath:screensaver.properties". However, if
  * {@link #processOptions(boolean, boolean)} is called with
  * acceptDatabaseOptions=true, the command line options 'dbhost', 'dbport',
  * 'dbname', 'dbuser', and 'dbpassword' will be used to configure the database
@@ -133,7 +133,7 @@ public class CommandLineApplication
   public void addCommandLineOption(Option option, Object defaultValue)
   {
     _options.addOption(option);
-    _option2DefaultValue.put(option.getArgName(), defaultValue);
+    _option2DefaultValue.put(option.getOpt(), defaultValue);
   }
   
   public String getCommandLineOptionValue(String optionName) throws ParseException
