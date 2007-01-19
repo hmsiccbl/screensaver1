@@ -553,6 +553,8 @@ public class Cell
       annotatedCellValue = "ERROR: ";
     }
     annotatedCellValue += error.getMessage();
+    // HSSF requires us to null the cell before changing it's type! (or its throws an exception)
+    cell.setCellValue((String) null);
     cell.setCellType(HSSFCell.CELL_TYPE_STRING);
     cell.setCellValue(annotatedCellValue);
   }

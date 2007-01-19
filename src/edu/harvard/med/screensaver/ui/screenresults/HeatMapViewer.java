@@ -243,79 +243,86 @@ public class HeatMapViewer extends AbstractBackingBean
     _heatMapColumnDataModels = new ArrayList<DataModel>();
     _heatMaps = new ArrayList<HeatMap>();
     _heatMapStatistics = new ArrayList<DataModel>();
-      for (HeatMapConfiguration heatMapConfig : _heatMapConfigurations) {
+    for (HeatMapConfiguration heatMapConfig : _heatMapConfigurations) {
+      if (heatMapConfig.getDataHeaders().getSelection() != null &&
+        _plateNumber.getSelection() != null) {
         Map<WellKey,ResultValue> resultValues = 
           _dao.findResultValuesByPlate(_plateNumber.getSelection(), 
                                        heatMapConfig.getDataHeaders().getSelection());
         HeatMap heatMap = new HeatMap(_plateNumber.getSelection(),
-                                    resultValues,
-                                    new ChainedFilter<Pair<WellKey,ResultValue>>(
-                                      IMPLICIT_FILTER,
-                                      new ChainedFilter<Pair<WellKey,ResultValue>>(heatMapConfig.getExcludedWellFilters().getSelections())),
-                                    heatMapConfig.getScoringType()
-                                                 .getSelection()
-                                                 .getFunction(),
-                                    new DefaultMultiColorGradient());
+                                      resultValues,
+                                      new ChainedFilter<Pair<WellKey,ResultValue>>(
+                                        IMPLICIT_FILTER,
+                                        new ChainedFilter<Pair<WellKey,ResultValue>>(heatMapConfig.getExcludedWellFilters().getSelections())),
+                                        heatMapConfig.getScoringType()
+                                        .getSelection()
+                                        .getFunction(),
+                                        new DefaultMultiColorGradient());
 
-      NumberFormat format = heatMapConfig.getNumericFormat()
-                                         .getSelection();
-      List<List<HeatMapCell>> rows = new ArrayList<List<HeatMapCell>>();
-      for (int row = 0; row < heatMap.getRowCount(); row++) {
-        List<HeatMapCell> rowData = new ArrayList<HeatMapCell>();
-        for (int column = 0; column < heatMap.getColumnCount(); column++) {
-          rowData.add(new HeatMapCell(heatMap.getResultValue(row, column),
-                                      heatMap.getWellKey(row, column),
-                                      heatMap.getScoredValue(row, column),
-                                      heatMap.getColor(row, column),
-                                      isShowValues(),
-                                      format));
+        NumberFormat format = heatMapConfig.getNumericFormat()
+        .getSelection();
+        List<List<HeatMapCell>> rows = new ArrayList<List<HeatMapCell>>();
+        for (int row = 0; row < heatMap.getRowCount(); row++) {
+          List<HeatMapCell> rowData = new ArrayList<HeatMapCell>();
+          for (int column = 0; column < heatMap.getColumnCount(); column++) {
+            rowData.add(new HeatMapCell(heatMap.getResultValue(row, column),
+                                        heatMap.getWellKey(row, column),
+                                        heatMap.getScoredValue(row, column),
+                                        heatMap.getColor(row, column),
+                                        isShowValues(),
+                                        format));
+          }
+          rows.add(rowData);
         }
-        rows.add(rowData);
-      }
-      _heatMapDataModels.add(new ListDataModel(rows));
+        _heatMapDataModels.add(new ListDataModel(rows));
 
-      List<Integer> columnIndexes = new ArrayList<Integer>();
-      for (int column = 0; column < heatMap.getColumnCount(); column++) {
-        columnIndexes.add(column);
-      }
-      _heatMapColumnDataModels.add(new ListDataModel(columnIndexes));
-      _heatMaps.add(heatMap);
+        List<Integer> columnIndexes = new ArrayList<Integer>();
+        for (int column = 0; column < heatMap.getColumnCount(); column++) {
+          columnIndexes.add(column);
+        }
+        _heatMapColumnDataModels.add(new ListDataModel(columnIndexes));
+        _heatMaps.add(heatMap);
 
-      if (format == null) {
-        format = NUMBER_FORMATS.get(1);
+        if (format == null) {
+          format = NUMBER_FORMATS.get(1);
+        }
+        List<FormattedStatistic> heatMapStatistics = new ArrayList<FormattedStatistic>();
+        heatMapStatistics.add(new FormattedStatistic("N", heatMap.getCount()));
+        heatMapStatistics.add(new FormattedStatistic("Min",
+                                                     heatMap.getMin(),
+                                                     format));
+        heatMapStatistics.add(new FormattedStatistic("Max",
+                                                     heatMap.getMax(),
+                                                     format));
+        heatMapStatistics.add(new FormattedStatistic("Mean",
+                                                     heatMap.getMean(),
+                                                     format));
+        heatMapStatistics.add(new FormattedStatistic("Median",
+                                                     heatMap.getMedian(),
+                                                     format));
+        heatMapStatistics.add(new FormattedStatistic("Stdev",
+                                                     heatMap.getStandardDeviation(),
+                                                     format));
+        heatMapStatistics.add(new FormattedStatistic("Var",
+                                                     heatMap.getVariance(),
+                                                     format));
+        heatMapStatistics.add(new FormattedStatistic("Skewness",
+                                                     heatMap.getSkewness(),
+                                                     DECIMAL_FORMAT));
+        _heatMapStatistics.add(new ListDataModel(heatMapStatistics));
       }
-      List<FormattedStatistic> heatMapStatistics = new ArrayList<FormattedStatistic>();
-      heatMapStatistics.add(new FormattedStatistic("N", heatMap.getCount()));
-      heatMapStatistics.add(new FormattedStatistic("Min",
-                                                   heatMap.getMin(),
-                                                   format));
-      heatMapStatistics.add(new FormattedStatistic("Max",
-                                                   heatMap.getMax(),
-                                                   format));
-      heatMapStatistics.add(new FormattedStatistic("Mean",
-                                                   heatMap.getMean(),
-                                                   format));
-      heatMapStatistics.add(new FormattedStatistic("Median",
-                                                   heatMap.getMedian(),
-                                                   format));
-      heatMapStatistics.add(new FormattedStatistic("Stdev",
-                                                   heatMap.getStandardDeviation(),
-                                                   format));
-      heatMapStatistics.add(new FormattedStatistic("Var",
-                                                   heatMap.getVariance(),
-                                                   format));
-      heatMapStatistics.add(new FormattedStatistic("Skewness",
-                                                   heatMap.getSkewness(),
-                                                   DECIMAL_FORMAT));
-      _heatMapStatistics.add(new ListDataModel(heatMapStatistics));
     }
     
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-
+  
   // TODO: set initial values to previous HeatMapConfig
   public String addHeatMap()
   {
+    if (_screenResult.getNumericResultValueTypes().size() == 0) {
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+
     HeatMapConfiguration heatMapConfiguration = new HeatMapConfiguration();
     heatMapConfiguration.setDataHeaders(new UISelectOneBean<ResultValueType>(_screenResult.getNumericResultValueTypes()) {
       protected String getLabel(ResultValueType t) { return t.getName(); } 
@@ -332,7 +339,7 @@ public class HeatMapViewer extends AbstractBackingBean
     heatMapConfiguration.getDataHeaders().setValue(Integer.toString(_screenResult.getResultValueTypesList().get(0).hashCode()));
     heatMapConfiguration.getExcludedWellFilters().setValue(Arrays.asList(new String[] { 
       (String) heatMapConfiguration.getExcludedWellFilters().getSelectItems().get(0).getValue() }));
-    
+
     return update();
   }
   
@@ -351,8 +358,7 @@ public class HeatMapViewer extends AbstractBackingBean
   public String viewWell()
   {
     HeatMapCell heatMapCell = getHeatMapCell();
-    Well well = _dao.findWell(heatMapCell.getWellKey().getPlateNumber(),
-                              heatMapCell.getWellKey().getWellName());
+    Well well = _dao.findWell(heatMapCell.getWellKey());
     return _librariesController.viewWell(well, null);
   }
   

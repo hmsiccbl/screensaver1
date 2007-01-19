@@ -470,7 +470,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
         setDefaultValues(actualRvt);
         assertTrue("ResultValueType " + iRvt, expectedRvt.isEquivalent(actualRvt));
 
-        // compare result valuesb
+        // compare result values
         assertEquals(960, actualRvt.getResultValues().size());
         int iWell = 0;
         Map<WellKey,ResultValue> resultValues = actualRvt.getResultValues();

@@ -10,13 +10,28 @@
 package edu.harvard.med.screensaver.io.screenresults;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.harvard.med.screensaver.CommandLineApplication;
+import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
+import edu.harvard.med.screensaver.io.workbook.ParseError;
+import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.util.StringUtils;
+
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.hibernate.FlushMode;
+import org.springframework.orm.hibernate3.HibernateTemplate;
 
 /**
  * A bulk loader for screen results. Originally written to load screen results for
@@ -40,60 +55,186 @@ public class BulkScreenResultImporter
   private static final Logger log = Logger.getLogger(BulkScreenResultImporter.class);
   private static final File _screenResultsDir = new File("/usr/local/screen-results");
   private static final Pattern _screenResultFilenamePattern = Pattern.compile("^(\\d+)_\\w+\\.xls$");
+  protected static final int MAX_ERRORS_TO_LOG = 4;
   
-  public static void main(String[] args)
+  private static final int SHORT_OPTION = ScreenResultParser.SHORT_OPTION;
+  private static final int LONG_OPTION = ScreenResultParser.LONG_OPTION;
+  private static final String[] INPUT_DIRECTORY_OPTION = new String[] { "d", "input-directory" };
+  private static final String[] FROM_FILE_OPTION = new String[] { "f", "from-file" };
+  private static final String[] TO_FILE_OPTION = new String[] { "t", "to-file" };
+  private static final String[] IMPORT_OPTION = ScreenResultParser.IMPORT_OPTION;
+  
+  
+  @SuppressWarnings("static-access")
+  public static void main(String[] args) throws ParseException
   {
-    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { 
-      "spring-context.xml",
-    });
-    BulkScreenResultImporter resultImporter =
-      (BulkScreenResultImporter) context.getBean("bulkScreenResultImporter");
-    resultImporter.bulkLoadLibraries();
+    CommandLineApplication app  = new CommandLineApplication(args);
+    
+    app.addCommandLineOption(OptionBuilder.withDescription("Directory containing screen result workbook files.  ")
+                                                           .withLongOpt(INPUT_DIRECTORY_OPTION[LONG_OPTION])
+                                                           .hasArg()
+                                                           .create(INPUT_DIRECTORY_OPTION[SHORT_OPTION]),
+                                                           _screenResultsDir);
+    app.addCommandLineOption(OptionBuilder.withDescription("process files that are lexigraphically greater than or equal to the specified file; file name should be relative to input directory")
+                             .hasArg()
+                             .isRequired(false)
+                             .withLongOpt(FROM_FILE_OPTION[LONG_OPTION])
+                             .create(FROM_FILE_OPTION[SHORT_OPTION]));
+    app.addCommandLineOption(OptionBuilder.withDescription("process files that are lexigraphically less than the specified file (specified file is not processed); file name should be relative to input directory")
+                             .hasArg()
+                             .isRequired(false)
+                             .withLongOpt(TO_FILE_OPTION[LONG_OPTION])
+                             .create(TO_FILE_OPTION[SHORT_OPTION]));
+    app.addCommandLineOption(OptionBuilder
+                             .withDescription("Import screen result into database if parsing is successful.  " +
+                                              "(By default, the parser only validates the input and then exits.)")
+                             .hasArg(false)
+                             .withLongOpt(IMPORT_OPTION[LONG_OPTION])
+                             .create(IMPORT_OPTION[SHORT_OPTION]));
+    
+    try {
+      app.setDatabaseRequired(true); // database is required even if importFlag is not set
+      if (!app.processOptions(/* acceptDatabaseOptions= */true, 
+                              /* showHelpOnError= */true)) {
+        System.exit(1);
+      }
+      File inputDir = app.getCommandLineOptionValue(INPUT_DIRECTORY_OPTION[SHORT_OPTION], File.class);
+      boolean importFlag = app.isCommandLineFlagSet(IMPORT_OPTION[SHORT_OPTION]);
+      
+      File fromFile = new File(inputDir, app.getCommandLineOptionValue(FROM_FILE_OPTION[SHORT_OPTION]));
+      File toFile = new File(inputDir, app.getCommandLineOptionValue(TO_FILE_OPTION[SHORT_OPTION]));
+      
+      BulkScreenResultImporter resultImporter =
+        (BulkScreenResultImporter) app.getSpringBean("bulkScreenResultImporter");
+      resultImporter.bulkLoadLibraries(inputDir, importFlag, fromFile, toFile);
+    }
+    catch (ParseException e) {
+      System.err.println("error parsing command line options: "
+                         + e.getMessage());
+      System.exit(1);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+    
   }
+  
+  
+  // instance data
+  
+  private ScreenResultParser _parser;
+  private DAO _dao;
+  private HibernateTemplate _hibernateTemplate;
   
 
   // public constructors and methods
+  
+  public BulkScreenResultImporter(ScreenResultParser parser, DAO dao, HibernateTemplate hibernateTemplate)
+  {
+    _parser = parser;
+    _dao = dao;
+    _hibernateTemplate = hibernateTemplate;
+  }
 
   /**
    * Database must be created and initialized before running this method.
+   * @param importFlag 
+   * @param inputDir 
    */
-  public void bulkLoadLibraries()
+  public void bulkLoadLibraries(File inputDir, final boolean importFlag, File fromFile, File toFile)
   {    
-    File [] screenResultFiles = _screenResultsDir.listFiles(new FilenameFilter() {
+    List<Integer> succeededScreenNumbers = new ArrayList<Integer>();
+    List<Integer> failedImports = new ArrayList<Integer>();
+
+    File [] screenResultFiles = inputDir.listFiles(new FilenameFilter() {
       public boolean accept(File dir, String filename) {
         return filename.endsWith(".xls") && ! filename.endsWith(".errors.xls");
       }
     });
-
-    for (final File screenResultFile : screenResultFiles) {
-      
-      // code to hack for doing partial runs:
-      if (screenResultFile.getName().compareTo("000_finalResults.xls") >= 0) {
-        log.info("processing screen result file: " + screenResultFile.getName());
-      }
-      else {
-        log.info("not processing screen result file: " + screenResultFile.getName());
-        continue;
-      }
-      //if (true) continue;
-      
+    SortedSet<File> sortedScreenResultFiles = new TreeSet<File>(Arrays.asList(screenResultFiles));
+    if (fromFile != null) {
+      sortedScreenResultFiles = sortedScreenResultFiles.tailSet(fromFile);
+    }
+    if (toFile != null) {
+      sortedScreenResultFiles = sortedScreenResultFiles.headSet(toFile);
+    }
+    
+    for (final File screenResultFile : sortedScreenResultFiles) {
       String filename = screenResultFile.getName();
       Matcher matcher = _screenResultFilenamePattern.matcher(filename);
       if (! matcher.matches()) {
         throw new RuntimeException("screen result file didnt match pattern: " + filename);
       }
-      String screenResultNumber = matcher.group(1);
+      final int screenNumber = Integer.parseInt(matcher.group(1));
       try {
-        ScreenResultParser.main(new String [] {
-          "-s", screenResultNumber,
-          "-f", screenResultFile.getAbsolutePath(),
-          "-i",
+
+        if (importFlag) {
+          // delete extant screen result; do this in separate txn, to minimize memory usage
+          _dao.doInTransaction(new DAOTransaction() 
+          {
+            public void runTransaction() 
+            {
+              final Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+              if (screen == null) {
+                throw new DAOTransactionRollbackException("no such screen " + screenNumber);
+              }
+              if (screen.getScreenResult() != null) {
+                log.info("deleting existing screen result for screen " + screenNumber);
+                _dao.deleteScreenResult(screen.getScreenResult());
+              }
+            };
+          });
+        }
+        
+        // parse & (maybe) import
+        _dao.doInTransaction(new DAOTransaction() 
+        {
+          public void runTransaction() 
+          {
+            final Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+            if (screen == null) {
+              throw new DAOTransactionRollbackException("no such screen " + screenNumber);
+            }
+            _parser.parse(screen, screenResultFile);
+            if (_parser.getHasErrors()) {
+              int nErrors = 0;
+              for (ParseError error : _parser.getErrors()) {
+                log.error("parse error " + (++nErrors) + ": " + error);
+                int totalErrors = _parser.getErrors().size();
+                if (nErrors == MAX_ERRORS_TO_LOG && nErrors < totalErrors) {
+                  log.error("additional errors not shown (" + totalErrors  + " total errors)");
+                  break;
+                }
+              }
+              String failureMessage = "screen result file " + screenResultFile + " for screen " + screenNumber + " had errors";
+              throw new DAOTransactionRollbackException(failureMessage);
+            }
+            if (!importFlag) {
+              throw new SkipCommitException();
+            }
+          }
         });
+        succeededScreenNumbers.add(screenNumber);
+        log.info("successfully imported screen result file: " + screenResultFile.getName());
       }
-      catch (FileNotFoundException e) {
-        log.error("braindamage: " + e.getMessage());
+      catch (SkipCommitException e) {
+        succeededScreenNumbers.add(screenNumber);
+        log.info("successfully parsed screen result file: " + screenResultFile.getName());
       }
-      log.info("finished processing screen result file: " + screenResultFile.getName());
+      catch (DAOTransactionRollbackException e) {
+        failedImports.add(screenNumber);
+        log.error("failed to " + (importFlag ? "importe" : "parse") + 
+                  "screen result for screen " + screenNumber + " : " + e.getMessage());
+      }
+    }
+    log.info(succeededScreenNumbers.size() + " of " + sortedScreenResultFiles.size() + 
+             " screen result(s) were successfully " + (importFlag ? "imported" : "parsed") + 
+             "; skipped " + 
+             (screenResultFiles.length - sortedScreenResultFiles.size())); 
+    log.info("succeeded: " + StringUtils.makeListString(succeededScreenNumbers, ", "));
+    if (failedImports.size() > 0) {
+      log.info("failed: " + StringUtils.makeListString(failedImports, ", "));
     }
   }
 }

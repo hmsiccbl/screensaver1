@@ -12,11 +12,9 @@ package edu.harvard.med.screensaver.db;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -363,9 +361,13 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     }
   }
   
+  public Well findWell(WellKey wellKey) {
+    return findEntityById(Well.class, wellKey.getKey());
+  }
+
   public Well findWell(Integer plateNumber, String wellName)
   {
-    return findEntityById(Well.class, plateNumber + ":" + wellName);
+    return findWell(new WellKey(plateNumber, wellName));
   }
   
   public SilencingReagent findSilencingReagent(
@@ -500,11 +502,9 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     for (int iPlate = library.getStartPlate(); iPlate <= library.getEndPlate(); ++iPlate) {
       for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
         for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
-          WellKey wellKey = new WellKey(iPlate, iRow, iCol);
           Well well = new Well(
             library,
-            iPlate,
-            wellKey.getWellName(),
+            new WellKey(iPlate, iRow, iCol),
             WellType.EMPTY);
           persistEntity(well);
         }

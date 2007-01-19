@@ -334,7 +334,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
     getScreenResult().addWell(well);
     
-    return _resultValues.put(well.getWellKey(), rv) != null;
+    return _resultValues.put(well.getWellKey(), rv) == null;
   }
 
   /**

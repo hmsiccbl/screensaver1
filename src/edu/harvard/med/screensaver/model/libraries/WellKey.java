@@ -37,6 +37,9 @@ public class WellKey implements Comparable
   private int _row;
   private int _column;
 
+  private transient String _wellName;
+  private transient int _hashCode;
+
 
   // public constructors and methods
   
@@ -53,7 +56,8 @@ public class WellKey implements Comparable
   
   public WellKey(int plateNumber, String wellName)
   {
-    this(plateNumber + ":" + wellName);
+    _plateNumber = plateNumber;
+    setWellName(wellName);
   }
   
   public WellKey(String key)
@@ -68,6 +72,7 @@ public class WellKey implements Comparable
   
   public void setKey(String key)
   {
+    resetDerivedValues();
     Matcher matcher = keyPattern.matcher(key);
     if (matcher.matches()) {
       _plateNumber = Integer.parseInt(matcher.group(1));
@@ -92,6 +97,7 @@ public class WellKey implements Comparable
     if (column >= Well.PLATE_COLUMNS) {
       throw new IllegalArgumentException("column " + column + " is not < " + Well.PLATE_COLUMNS);
     }
+    resetDerivedValues();
     _column = column;
   }
 
@@ -115,9 +121,16 @@ public class WellKey implements Comparable
     if (row >= Well.PLATE_ROWS) {
       throw new IllegalArgumentException("row " + row + " is not < " + Well.PLATE_ROWS);
     }
+    resetDerivedValues();
     _row = row;
   }
   
+  private void resetDerivedValues()
+  {
+    _wellName = null;
+    _hashCode = -1;
+  }
+
   public boolean equals(Object o)
   {
     WellKey other = (WellKey) o;
@@ -126,7 +139,10 @@ public class WellKey implements Comparable
   
   public int hashCode()
   {
-    return _plateNumber * (Well.MAX_WELL_COLUMN * Well.MAX_WELL_ROW) + _row * Well.MAX_WELL_COLUMN + _column;
+    if (_hashCode == -1) {
+      _hashCode = _plateNumber * (Well.PLATE_ROWS * Well.PLATE_COLUMNS) + _row * Well.PLATE_COLUMNS + _column;
+    }
+    return _hashCode;
   }
   
   public String toString()
@@ -136,12 +152,26 @@ public class WellKey implements Comparable
   
   public int compareTo(Object o)
   {
-    return toString().compareTo(((WellKey) o).toString());
+    WellKey other = (WellKey) o;
+    int hashCode1 = hashCode();
+    int hashCode2 = other.hashCode();
+    return hashCode1 < hashCode2 ? -1 : hashCode1 > hashCode2 ? 1 : 0;
+  }
+
+  public void setWellName(String wellName)
+  {
+    setRow(wellName.charAt(0) - 'A');
+    setColumn(Integer.parseInt(wellName.substring(1)) - 1);
   }
 
   public String getWellName()
   {
-    return String.format("%c%02d", 'A' + _row, _column + 1);
+    if (_wellName == null) {
+      _wellName = String.format("%c%02d", 
+                                Well.MIN_WELL_ROW + _row, 
+                                _column + Well.MIN_WELL_COLUMN);
+    }
+    return _wellName;
   }
 
   // private methods

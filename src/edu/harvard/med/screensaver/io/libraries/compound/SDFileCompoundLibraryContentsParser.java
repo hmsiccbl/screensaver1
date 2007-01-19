@@ -173,7 +173,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
    */
   Well getWell(WellKey key)
   {
-    return _dao.findWell(key.getPlateNumber(), key.getWellName());
+    return _dao.findWell(key);
   }
 
   /**

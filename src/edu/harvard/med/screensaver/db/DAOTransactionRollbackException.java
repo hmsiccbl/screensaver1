@@ -25,6 +25,11 @@ public class DAOTransactionRollbackException extends NestedRuntimeException
 {
   private static final long serialVersionUID = 1L;
 
+  public DAOTransactionRollbackException(String msg)
+  {
+    super(msg, null);
+  }
+
   public DAOTransactionRollbackException(String msg, Throwable ex)
   {
     super(msg, ex);

@@ -15,7 +15,6 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -59,8 +58,6 @@ public class Well extends AbstractEntity implements Comparable
   private Library _library;
   private Set<Compound> _compounds = new HashSet<Compound>();
   private Set<SilencingReagent> _silencingReagents = new HashSet<SilencingReagent>();
-  private Integer _plateNumber;
-  private String _wellName;
   private String _iccbNumber;
   private String _vendorIdentifier;
   private WellType _wellType = WellType.EXPERIMENTAL;
@@ -68,8 +65,8 @@ public class Well extends AbstractEntity implements Comparable
   private String _smiles;
   private Set<String> _molfile = new HashSet<String>();
   private String _genbankAccessionNumber;
-  private char _rowLetter;
-  private int _column;
+
+  private transient WellKey _wellKey;
 
 
   // public constructors and instance methods
@@ -81,9 +78,8 @@ public class Well extends AbstractEntity implements Comparable
    * @param plateNumber
    * @param wellName
    */
-  public Well(Library parentLibrary, Integer plateNumber, String wellName, WellType wellType) {
-    _plateNumber = plateNumber;
-    setWellName(wellName);
+  public Well(Library parentLibrary, WellKey wellKey, WellType wellType) {
+    _wellKey = wellKey;
     _wellType = wellType;
     // this call must occur after assignments of wellName and plateNumber (to
     // ensure hashCode() works)
@@ -99,7 +95,7 @@ public class Well extends AbstractEntity implements Comparable
    */
   public Well(Library parentLibrary, Integer plateNumber, String wellName)
   {
-    this(parentLibrary, plateNumber, wellName, WellType.EXPERIMENTAL);
+    this(parentLibrary, new WellKey(plateNumber, wellName), WellType.EXPERIMENTAL);
   }
 
   @Override
@@ -139,14 +135,14 @@ public class Well extends AbstractEntity implements Comparable
    */
   public void setLibrary(Library library)
   {
-    assert _wellName != null && _plateNumber != null : "properties forming business key have not been defined";
+    assert _wellKey != null : "properties forming business key have not been defined";
     if (_library != null) {
       _library.getHbnWells().remove(this);
     }
     setHbnLibrary(library);
     library.getHbnWells().add(this);
   }
-
+  
   /**
    * Get an unmodifiable copy of the set of compounds.
    * 
@@ -318,7 +314,7 @@ public class Well extends AbstractEntity implements Comparable
   @EntityIdProperty
   public Integer getPlateNumber()
   {
-    return _plateNumber;
+    return _wellKey.getPlateNumber();
   }
 
   /**
@@ -328,7 +324,12 @@ public class Well extends AbstractEntity implements Comparable
    */
   private void setPlateNumber(Integer plateNumber)
   {
-    _plateNumber = plateNumber;
+    if (_wellKey == null) {
+      _wellKey = new WellKey(plateNumber, 0, 0);
+    }
+    else {
+      _wellKey.setPlateNumber(plateNumber);
+    }
   }
 
   /**
@@ -340,7 +341,7 @@ public class Well extends AbstractEntity implements Comparable
   @EntityIdProperty
   public String getWellName()
   {
-    return _wellName;
+    return _wellKey.getWellName();
   }
 
   /**
@@ -350,24 +351,18 @@ public class Well extends AbstractEntity implements Comparable
    */
   private void setWellName(String wellName)
   {
-    _wellName = wellName;
-    Matcher matcher = _wellParsePattern.matcher(wellName);
-    if (matcher.matches()) {
-      _rowLetter = matcher.group(1).toUpperCase().charAt(0);
-      _column = Integer.parseInt(matcher.group(2)) - 1;
-      if (_column < 0 || _column > 23) {
-        throw new IllegalArgumentException("well column '" + _column + "' is illegal in well name '" + wellName + "'");
-      }
-    } 
+    if (_wellKey == null) {
+      _wellKey = new WellKey(0, wellName);
+    }
     else {
-      throw new IllegalArgumentException("well name is illegal: '" + wellName + "'");
+      _wellKey.setWellName(wellName);
     }
   }
   
   @DerivedEntityProperty
   public WellKey getWellKey()
   {
-    return new WellKey(_plateNumber, getRow(), getColumn());
+    return _wellKey;
   }
 
   /**
@@ -587,7 +582,7 @@ public class Well extends AbstractEntity implements Comparable
   @DerivedEntityProperty
   public int getRow()
   {
-    return _rowLetter - 'A';
+    return _wellKey.getRow();
   }
   
   @DerivedEntityProperty
@@ -597,7 +592,7 @@ public class Well extends AbstractEntity implements Comparable
    */
   public char getRowLetter()
   {
-    return _rowLetter;
+    return (char) (_wellKey.getRow() + MIN_WELL_ROW);
   }
 
   /**
@@ -607,15 +602,15 @@ public class Well extends AbstractEntity implements Comparable
   @DerivedEntityProperty
   public int getColumn()
   {
-    return _column;
+    return _wellKey.getColumn();
   }
   
   @DerivedEntityProperty
   public boolean isEdgeWell()
   {
     // TODO: use plate size/layout to determine this dynamically
-    return _rowLetter == 'A' || _rowLetter == 'P' || 
-    _column == 0 || _column == 23;
+    return _wellKey.getRow() == 0 || _wellKey.getRow() == PLATE_ROWS - 1 || 
+    _wellKey.getColumn() == 0 || _wellKey.getColumn() == PLATE_COLUMNS - 1;
   }
   
   /**
@@ -693,57 +688,9 @@ public class Well extends AbstractEntity implements Comparable
 
   protected Object getBusinessKey()
   {
-    return new BusinessKey();
+    return _wellKey;
   }
   
-  /**
-   * A business key class for the well.
-   */
-  private class BusinessKey
-  {
-    /**
-     * Get the plate number for the well.
-     * @return the plate number for the well
-     */
-    private Integer getPlateNumber()
-    {
-      return _plateNumber;
-    }
-    
-    /**
-     * Get the well name.
-     * @return the well name
-     */
-    private String getWellName()
-    {
-      return _wellName;
-    }
-    
-    @Override
-    public boolean equals(Object object)
-    {
-      if (!(object instanceof BusinessKey)) {
-        return false;
-      }
-      BusinessKey that = (BusinessKey) object;
-      return getPlateNumber().equals(that.getPlateNumber()) && getWellName().equals(
-        that.getWellName());
-    }
-
-    @Override
-    public int hashCode()
-    {
-      assert _plateNumber != null && _wellName != null : "business key fields have not been defined";
-      return getPlateNumber().hashCode() + getWellName().hashCode();
-    }
-
-    @Override
-    public String toString()
-    {
-      assert _plateNumber != null && _wellName != null : "business key fields have not been defined";
-      return getPlateNumber() + ":" + getWellName();
-    }
-  }
 
   // package getters and setters
 

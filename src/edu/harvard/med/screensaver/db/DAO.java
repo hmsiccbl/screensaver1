@@ -265,8 +265,12 @@ public interface DAO
    * @param plateNumber the plate number
    * @param wellName the beautiful well name. remember - A through P, and 1 through 24!
    * @return the well. Return null if there is no well.
+   * @deprecated use {@link #findWell(WellKey)}
    */
   public Well findWell(Integer plateNumber, String wellName);
+  
+  public Well findWell(WellKey wellKey);
+  
   
   /**
    * Find and return the silencing reagent. Return null if there is no matching

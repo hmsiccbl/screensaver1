@@ -45,6 +45,7 @@ import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
@@ -57,6 +58,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Visit;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
@@ -107,14 +109,13 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   // static data members
   
-  private static final int SHORT_OPTION = 0;
-  private static final int LONG_OPTION = 1;
+  public static final int SHORT_OPTION = 0;
+  public static final int LONG_OPTION = 1;
 
-  private static final String[] INPUT_FILE_OPTION = { "f", "input-file" };
-  private static final String[] SCREEN_OPTION = { "s", "screen" };
-  private static final String[] IMPORT_OPTION = { "i", "import" };
-  private static final String[] IGNORE_FILE_PATHS_OPTION = { "p", "ignore-file-paths" };
-  private static final String[] WELLS_OPTION = { "w", "wells" };
+  public static final String[] INPUT_FILE_OPTION = { "f", "input-file" };
+  public static final String[] SCREEN_OPTION = { "s", "screen" };
+  public static final String[] IMPORT_OPTION = { "i", "import" };
+  public static final String[] WELLS_OPTION = { "w", "wells" };
 
   private static final String ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION = "errors.xls";
 
@@ -240,7 +241,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         screenResultParser = (ScreenResultParser) app.getSpringBean("mockScreenResultParser");
       }
 
-      final boolean ignoreFilePathOptions = app.isCommandLineFlagSet(IGNORE_FILE_PATHS_OPTION[SHORT_OPTION]);
       final Integer wellsToPrint = app.getCommandLineOptionValue(WELLS_OPTION[SHORT_OPTION],
                                                                  Integer.class);
       final Screen finalScreen = screen;
@@ -251,8 +251,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         {
           ScreenResult screenResult = finalScreenResultParser.parse(finalScreen,
                                                                     inputFile,
-                                                                    inputFileStream,
-                                                                    ignoreFilePathOptions);
+                                                                    inputFileStream);
           if (wellsToPrint != null) {
             new ScreenResultPrinter(screenResult).print(wellsToPrint);
           }
@@ -411,8 +410,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     try {
       return parse(screen, 
                    workbookFile, 
-                   new FileInputStream(workbookFile), 
-                   /*ignored file paths=*/ true);
+                   new FileInputStream(workbookFile));
     }
     catch (FileNotFoundException e) {
       e.printStackTrace();
@@ -449,40 +447,14 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    */
   public ScreenResult parse(Screen screen, File workbookFile, InputStream inputStream)
   {
-    return parse(screen, 
-                 workbookFile, 
-                 inputStream, 
-                 true /*arg ignored*/);
+    return doParse(screen, 
+                   workbookFile, 
+                   inputStream);
   }
 
-  /**
-   * Parses the specified workbook file that contains Screen Result data in this
-   * <a
-   * href="https://wiki.med.harvard.edu/ICCBL/NewScreenResultFileFormat">
-   * format</a>. Errors encountered during parsing are stored with this object
-   * until a parse() method is called again, and these errors can be retrieved
-   * via {@link #getErrors}. The returned <code>ScreenResult</code> may only
-   * be partially populated if errors are encountered, so always call
-   * getErrors() to determine parsing success.
-   * 
-   * @param the parent Screen of the Screen Result being parsed
-   * @param the workbook file to be parsed
-   * @param an InputStream that provides the workbook file as...well... an
-   *          InputStream
-   * @param ignoreFilePaths if <code>true</code>, the directory path of the
-   *          file names of the workbooks containing the "raw data" will be
-   *          ignored; only the base file name will be used and it will be
-   *          assumed that the file is in the same directory as the "metadata"
-   *          workbook file.
-   * @return a ScreenResult object containing the data parsed from the workbook
-   *         file; <code>null</code> if a fatal error occurs
-   * @see #getErrors()
-   */
-  public ScreenResult parse(
-    Screen screen,
-    File workbookFile,
-    InputStream workbookInputStream,
-    boolean ignoreFilePaths)
+  private ScreenResult doParse(Screen screen,
+                               File workbookFile,
+                               InputStream workbookInputStream)
   {
     _screenResult = null;
     _errors = new ParseErrorManager();
@@ -505,8 +477,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       Workbook workbook = new Workbook(workbookFile, workbookInputStream, _errors);
       log.info("parsing " + workbookFile.getAbsolutePath());
       DataHeadersParseResult metadataParseResult = parseDataHeaders(screen,
-                                                                    workbook, 
-                                                                    ignoreFilePaths);
+                                                                    workbook);
       if (_errors.getHasErrors()) {
         log.info("errors found in data headers, will not attempt to parse data sheets");
       }
@@ -605,9 +576,14 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     return n - 1;
   }
 
+  /**
+   * Prepares the _dataCellParserFactory to return Cells from the specified sheet.
+   * @param workbook
+   * @param sheetIndex
+   * @return
+   */
   private HSSFSheet initializeDataSheet(Workbook workbook, int sheetIndex)
   {
-    // TODO: find the sheet in a more reliable, flexible fashion
     HSSFSheet dataSheet = workbook.getWorkbook().getSheetAt(sheetIndex);
 
     _dataCellParserFactory = new Cell.Factory(workbook,
@@ -675,13 +651,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   /**
    * Parse the workbook containing the ScreenResult metadata
    * @param workbook
-   * @param ignoreFilePaths
    * @throws UnrecoverableScreenResultParseException 
    */
   private DataHeadersParseResult parseDataHeaders(
     Screen screen,
-    Workbook workbook, 
-    boolean ignoreFilePaths) 
+    Workbook workbook)
     throws UnrecoverableScreenResultParseException 
   {
     DataHeadersParseResult dataHeadersParseResult = new DataHeadersParseResult();
@@ -754,25 +728,35 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     ScreenResult screenResult) 
     throws ExtantLibraryException, IOException, UnrecoverableScreenResultParseException
   {
+    List<Pair<HSSFSheet,String>> dataSheets = getDataSheets(workbook);
     int dataSheetsParsed = 0;
-    for (int iSheet = 0; iSheet < workbook.getWorkbook().getNumberOfSheets(); ++iSheet) {
-      HSSFSheet sheet = initializeDataSheet(workbook, iSheet);
-      if (isActiveSheetRawDataSheet()) {
+    for (Pair<HSSFSheet,String> sheetAndName : dataSheets) {
         ++dataSheetsParsed;
-        log.info("parsing sheet " + workbook.getWorkbookFile().getName() + ":" + workbook.getWorkbook().getSheetName(iSheet));
+        HSSFSheet sheet = sheetAndName.getFirst();
+        String sheetName = sheetAndName.getSecond();
+        log.info("parsing sheet " + dataSheetsParsed + " of " + dataSheets.size() + ", " + 
+                 sheetName);
+        initializeDataSheet(workbook, workbook.findSheetIndex(sheetName));
         for (int iRow = RAWDATA_FIRST_DATA_ROW_INDEX; iRow <= sheet.getLastRowNum(); ++iRow) {
           if (!ignoreRow(sheet, iRow)) {
             Well well = findWell(iRow);
-            if (well != null) {
+            if (well != null) 
+            {
               // TODO: should verify with Library Well Type, if not specific to AssayWellType
               AssayWellType assayWellType = _assayWellTypeParser.parse(dataCell(iRow, DataColumn.ASSAY_WELL_TYPE));
               
               List<ResultValueType> wellExcludes = _excludeParser.parseList(dataCell(iRow, DataColumn.EXCLUDE));
               
+              // TODO: should also continue on any assayWellTypes that are not "data-producing"
+              if (assayWellType.equals(AssayWellType.EMPTY)) {
+                continue;
+              }
+              
               int iDataHeader = 0;
               for (ResultValueType rvt : screenResult.getResultValueTypes()) {
                 Cell cell = dataCell(iRow, iDataHeader);
                 try {
+                  boolean resultValueAdded = false;
                   if (rvt.isActivityIndicator()) {
                     String value;
                     if (rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN) {
@@ -782,23 +766,27 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                       else {
                         value = _booleanParser.parse(cell).toString();
                       }
-                      rvt.addResultValue(well,
-                                         assayWellType,
-                                         value,
-                                         (wellExcludes != null && wellExcludes.contains(rvt)));
+                      
+                      resultValueAdded = 
+                        rvt.addResultValue(well,
+                                           assayWellType,
+                                           value,
+                                           (wellExcludes != null && wellExcludes.contains(rvt)));
                     }
                     else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.PARTITION) {
-                      rvt.addResultValue(well,
-                                         assayWellType,
-                                         _partitionedValueParser.parse(cell).toString(),
-                                         (wellExcludes != null && wellExcludes.contains(rvt)));
+                      resultValueAdded = 
+                        rvt.addResultValue(well,
+                                           assayWellType,
+                                           _partitionedValueParser.parse(cell).toString(),
+                                           (wellExcludes != null && wellExcludes.contains(rvt)));
                     }
                     else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL) {
-                      rvt.addResultValue(well,
-                                         assayWellType,
-                                         cell.getDouble(),
-                                         cell.getDoublePrecision(),
-                                         (wellExcludes != null && wellExcludes.contains(rvt)));
+                      resultValueAdded = 
+                        rvt.addResultValue(well,
+                                           assayWellType,
+                                           cell.getDouble(),
+                                           cell.getDoublePrecision(),
+                                           (wellExcludes != null && wellExcludes.contains(rvt)));
                     }
                   }
                   else {
@@ -807,18 +795,23 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                     // then followed by (valid) numeric data
                     if ((!rvt.isNumericalnessDetermined() && cell.isNumeric()) || 
                       rvt.isNumericalnessDetermined() && rvt.isNumeric()) {
-                      rvt.addResultValue(well,
-                                         assayWellType,
-                                         cell.getDouble(),
-                                         cell.getDoublePrecision(),
-                                         (wellExcludes != null && wellExcludes.contains(rvt)));
+                      resultValueAdded = 
+                        rvt.addResultValue(well,
+                                           assayWellType,
+                                           cell.getDouble(),
+                                           cell.getDoublePrecision(),
+                                           (wellExcludes != null && wellExcludes.contains(rvt)));
                     }
                     else {
-                      rvt.addResultValue(well,
-                                         assayWellType,
-                                         cell.getString(),
-                                         (wellExcludes != null && wellExcludes.contains(rvt)));
+                      resultValueAdded = 
+                        rvt.addResultValue(well,
+                                           assayWellType,
+                                           cell.getString(),
+                                           (wellExcludes != null && wellExcludes.contains(rvt)));
                     }
+                  }
+                  if (!resultValueAdded) {
+                    _errors.addError("duplicate well", cell);
                   }
                 }
                 catch (IllegalArgumentException e) {
@@ -830,11 +823,24 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
             }
           }
         }
-      }
     }
     if (dataSheetsParsed == 0) {
       _errors.addError(NO_DATA_SHEETS_FOUND_ERROR);
+    } else {
+      log.info("done parsing " + dataSheetsParsed + " data sheet(s) " + workbook.getWorkbookFile().getName());
     }
+  }
+
+  private List<Pair<HSSFSheet,String>> getDataSheets(Workbook workbook)
+  {
+    List<Pair<HSSFSheet,String>> dataSheets = new ArrayList<Pair<HSSFSheet,String>>();
+    for (int iSheet = 0; iSheet < workbook.getWorkbook().getNumberOfSheets(); ++iSheet) {
+      HSSFSheet sheet = initializeDataSheet(workbook, iSheet);
+      if (isActiveSheetRawDataSheet()) {
+        dataSheets.add(new Pair<HSSFSheet,String>(sheet, workbook.getWorkbook().getSheetName(iSheet)));
+      }
+    }
+    return dataSheets;
   }
 
   /**
@@ -871,7 +877,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   private boolean isActiveSheetRawDataSheet()
   {
-    String stockPlateColumnName = dataCell(RAWDATA_HEADER_ROW_INDEX, DataColumn.STOCK_PLATE_ID).getAsString(false);
+    Cell cell = dataCell(RAWDATA_HEADER_ROW_INDEX, DataColumn.STOCK_PLATE_ID);
+    if (cell == null) {
+      return false;
+    }
+    String stockPlateColumnName = cell.getAsString(false);
     return stockPlateColumnName.equals(DATA_SHEET__STOCK_PLATE_COLUMN_NAME);
   }
 
@@ -894,7 +904,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     }
     preloadLibraryWells(library);
     
-    Well well = _dao.findWell(plateNumber, wellName);
+    Well well = _dao.findWell(new WellKey(plateNumber, wellName));
     if (well == null) {
       throw new UnrecoverableScreenResultParseException(
         NO_SUCH_WELL + ": " + plateNumber + ":" + wellName,
@@ -1060,13 +1070,13 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       String textMultiValue = cell.getString();
       List<ResultValueType> result = new ArrayList<ResultValueType>();
 
-      if (textMultiValue == null) {
+      if (textMultiValue == null || textMultiValue.trim().length() == 0) {
         return result;
       }
       
       String[] textValues = textMultiValue.split(",");
       for (int i = 0; i < textValues.length; i++) {
-        String text = textValues[i];
+        String text = textValues[i].trim();
         ResultValueType rvt = doParseSingleValue(text, cell);
         if (rvt != null) {
           result.add(rvt);

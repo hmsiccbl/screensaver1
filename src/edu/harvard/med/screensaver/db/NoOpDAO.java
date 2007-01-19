@@ -124,14 +124,19 @@ public class NoOpDAO implements DAO
     return null;
   }
 
-  public SilencingReagent findSilencingReagent(Gene geneController,
-                                               SilencingReagentType silencingReagentTypeController,
-                                               String sequenceController)
+  public SilencingReagent findSilencingReagent(Gene gene,
+                                               SilencingReagentType silencingReagentType,
+                                               String sequence)
   {
     return null;
   }
 
-  public Well findWell(Integer plateNumberController, String wellNameController)
+  public Well findWell(Integer plateNumber, String wellName)
+  {
+    return null;
+  }
+
+  public Well findWell(WellKey wellKey)
   {
     return null;
   }

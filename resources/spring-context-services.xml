@@ -80,7 +80,7 @@
     id="bulkCompoundLibraryLoader"
     class="edu.harvard.med.screensaver.io.libraries.compound.BulkCompoundLibraryLoader"
     singleton="true">
-    <constructor-arg ref="dao"/>
+    <constructor-arg ref="unrestrictedDao"/>
     <constructor-arg ref="compoundLibraryContentsParser"/>
   </bean>
   
@@ -88,7 +88,7 @@
     id="bulkRNAiLibraryLoader"
     class="edu.harvard.med.screensaver.io.libraries.rnai.BulkRNAiLibraryLoader"
     singleton="true">
-    <constructor-arg ref="dao"/>
+    <constructor-arg ref="unrestrictedDao"/>
     <constructor-arg ref="rnaiLibraryContentsParser"/>
   </bean>
   
@@ -96,6 +96,14 @@
     id="bulkScreenResultImporter"
     class="edu.harvard.med.screensaver.io.screenresults.BulkScreenResultImporter"
     singleton="true">
+    <constructor-arg>
+     <bean
+      class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser">
+      <constructor-arg ref="unrestrictedDao" />
+     </bean>
+    </constructor-arg>
+    <constructor-arg ref="unrestrictedDao"/>
+    <constructor-arg ref="hibernateTemplate"/>
   </bean>
   
 </beans>
