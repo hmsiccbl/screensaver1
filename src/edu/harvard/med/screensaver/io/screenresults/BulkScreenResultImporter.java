@@ -104,7 +104,7 @@ public class BulkScreenResultImporter
       File fromFile = null;
       String fromFileName = app.getCommandLineOptionValue(FROM_FILE_OPTION[SHORT_OPTION]);
       if (fromFileName != null && fromFileName.length() > 0) {
-        fromFile = new File(fromFileName);
+        fromFile = new File(inputDir, fromFileName);
         if (!fromFile.exists()) {
           log.error("no such \"from\" file: " + fromFile);
           System.exit(1);
@@ -113,7 +113,7 @@ public class BulkScreenResultImporter
       File toFile = null;
       String toFileName = app.getCommandLineOptionValue(TO_FILE_OPTION[SHORT_OPTION]);
       if (toFileName != null && toFileName.length() > 0) {
-        toFile = new File(toFileName);
+        toFile = new File(inputDir, toFileName);
         if (!fromFile.exists()) {
           log.error("no such \"to\" file: " + toFile);
           System.exit(1);
