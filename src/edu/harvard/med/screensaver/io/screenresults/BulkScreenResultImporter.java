@@ -101,8 +101,24 @@ public class BulkScreenResultImporter
       File inputDir = app.getCommandLineOptionValue(INPUT_DIRECTORY_OPTION[SHORT_OPTION], File.class);
       boolean importFlag = app.isCommandLineFlagSet(IMPORT_OPTION[SHORT_OPTION]);
       
-      File fromFile = new File(inputDir, app.getCommandLineOptionValue(FROM_FILE_OPTION[SHORT_OPTION]));
-      File toFile = new File(inputDir, app.getCommandLineOptionValue(TO_FILE_OPTION[SHORT_OPTION]));
+      File fromFile = null;
+      String fromFileName = app.getCommandLineOptionValue(FROM_FILE_OPTION[SHORT_OPTION]);
+      if (fromFileName != null && fromFileName.length() > 0) {
+        fromFile = new File(fromFileName);
+        if (!fromFile.exists()) {
+          log.error("no such \"from\" file: " + fromFile);
+          System.exit(1);
+        }
+      }
+      File toFile = null;
+      String toFileName = app.getCommandLineOptionValue(TO_FILE_OPTION[SHORT_OPTION]);
+      if (toFileName != null && toFileName.length() > 0) {
+        toFile = new File(toFileName);
+        if (!fromFile.exists()) {
+          log.error("no such \"to\" file: " + toFile);
+          System.exit(1);
+        }
+      }
       
       BulkScreenResultImporter resultImporter =
         (BulkScreenResultImporter) app.getSpringBean("bulkScreenResultImporter");
