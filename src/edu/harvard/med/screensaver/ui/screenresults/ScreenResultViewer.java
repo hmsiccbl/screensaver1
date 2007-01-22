@@ -553,12 +553,6 @@ public class ScreenResultViewer extends AbstractBackingBean
     _sortManager = null;
     _showHitsOnly = false;
     _hitsForDataHeader = null;
-
-    // clear the bound UI components, so that they get recreated next time this view is used
-    _dataTable = null;
-    _rowNumberInput = null;
-
-    // _rowToPlateConverter = null;    
   }
 
   private void rebuildDataTable()

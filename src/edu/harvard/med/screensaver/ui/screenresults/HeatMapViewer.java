@@ -87,9 +87,11 @@ public class HeatMapViewer extends AbstractBackingBean
   
   // instance data members
 
+  private DAO _dao;
+  private LibrariesController _librariesController;
+
   private ScreenResult _screenResult;
   private UISelectOneBean<Integer> _plateNumber;
-  private DAO _dao;
   private ArrayList<HeatMap> _heatMaps;
   private boolean _showValues;
   private List<HeatMapConfiguration> _heatMapConfigurations;
@@ -98,7 +100,6 @@ public class HeatMapViewer extends AbstractBackingBean
   private List<DataModel> _heatMapStatistics;
   private List<DataModel> _heatMapColumnDataModels;
   private List<String> _heatMapRowLabels;
-  private LibrariesController _librariesController;
 
   
   // bean property methods
@@ -116,11 +117,21 @@ public class HeatMapViewer extends AbstractBackingBean
   {
     _screenResult = screenResult;
     if (_screenResult != null) {
-      _plateNumber = new UISelectOneBean<Integer>(_screenResult.getPlateNumbers());
-      _heatMaps = new ArrayList<HeatMap>();
-      _heatMapConfigurations = new ArrayList<HeatMapConfiguration>();
+      resetView();
       addHeatMap();
     }
+  }
+
+  private void resetView()
+  {
+    _plateNumber = new UISelectOneBean<Integer>(_screenResult.getPlateNumbers());
+    _heatMaps = new ArrayList<HeatMap>();
+    _heatMapConfigurations = new ArrayList<HeatMapConfiguration>();
+    _heatMapConfigurationsDataModel = null;
+    _heatMapDataModels = null;
+    _heatMapStatistics = null;
+    _heatMapColumnDataModels = null;
+    _heatMapRowLabels = null;
   }
   
   public ScreenResult getScreenResult()
