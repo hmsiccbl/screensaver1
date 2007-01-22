@@ -16,6 +16,8 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 /**
@@ -61,6 +63,11 @@ public class MockDaoForScreenResultParserTest extends NoOpDAO
   public Well findWell(Integer plateNumber, String wellName)
   {
     return new Well(_library, plateNumber, wellName);
+  }
+  
+  public Well findWell(WellKey wellKey)
+  {
+    return new Well(_library, wellKey, WellType.EXPERIMENTAL);
   }
   
   public Library findLibraryWithPlate(Integer plateNumber)

@@ -222,21 +222,16 @@ public class ResultValue
     return getAssayWellType().equals(AssayWellType.EXPERIMENTAL);
   }
   
-  // TODO: move this method's logic to AssayWellType
   @DerivedEntityProperty
   public boolean isControlWell()
   {
-    return getAssayWellType().equals(AssayWellType.ASSAY_CONTROL) ||
-    getAssayWellType().equals(AssayWellType.ASSAY_POSITIVE_CONTROL) ||
-    getAssayWellType().equals(AssayWellType.LIBRARY_CONTROL);
+    return getAssayWellType().isControl();
   }
   
-  // TODO: move this method's logic to AssayWellType
   @DerivedEntityProperty
   public boolean isDataProducerWell()
   {
-    // TODO: I'm assuming wells of type "other" can contain data values --ant
-    return isExperimentalWell() || isControlWell() || isOtherWell();
+    return getAssayWellType().isDataProducing();
   }
   
   @DerivedEntityProperty

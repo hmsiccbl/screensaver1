@@ -731,98 +731,110 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     List<Pair<HSSFSheet,String>> dataSheets = getDataSheets(workbook);
     int dataSheetsParsed = 0;
     for (Pair<HSSFSheet,String> sheetAndName : dataSheets) {
-        ++dataSheetsParsed;
-        HSSFSheet sheet = sheetAndName.getFirst();
-        String sheetName = sheetAndName.getSecond();
-        log.info("parsing sheet " + dataSheetsParsed + " of " + dataSheets.size() + ", " + 
-                 sheetName);
-        initializeDataSheet(workbook, workbook.findSheetIndex(sheetName));
-        for (int iRow = RAWDATA_FIRST_DATA_ROW_INDEX; iRow <= sheet.getLastRowNum(); ++iRow) {
-          if (!ignoreRow(sheet, iRow)) {
-            Well well = findWell(iRow);
-            if (well != null) 
-            {
-              // TODO: should verify with Library Well Type, if not specific to AssayWellType
-              AssayWellType assayWellType = _assayWellTypeParser.parse(dataCell(iRow, DataColumn.ASSAY_WELL_TYPE));
-              
-              List<ResultValueType> wellExcludes = _excludeParser.parseList(dataCell(iRow, DataColumn.EXCLUDE));
-              
-              // TODO: should also continue on any assayWellTypes that are not "data-producing"
-              if (assayWellType.equals(AssayWellType.EMPTY)) {
-                continue;
+      ++dataSheetsParsed;
+      HSSFSheet sheet = sheetAndName.getFirst();
+      String sheetName = sheetAndName.getSecond();
+      log.info("parsing sheet " + dataSheetsParsed + " of " + dataSheets.size() + ", " + 
+               sheetName);
+      initializeDataSheet(workbook, workbook.findSheetIndex(sheetName));
+      for (int iRow = RAWDATA_FIRST_DATA_ROW_INDEX; iRow <= sheet.getLastRowNum(); ++iRow) {
+        if (ignoreRow(sheet, iRow)) {
+          continue;
+        }
+
+        Well well = findWell(iRow);
+        if (well == null) {
+          continue;
+        }
+
+        // TODO: should verify with Library Well Type, if not specific to AssayWellType
+        AssayWellType assayWellType = _assayWellTypeParser.parse(dataCell(iRow, DataColumn.ASSAY_WELL_TYPE));
+
+        List<ResultValueType> wellExcludes = _excludeParser.parseList(dataCell(iRow, DataColumn.EXCLUDE));
+        int iDataHeader = 0;
+        for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+          Cell cell = dataCell(iRow, iDataHeader);
+          boolean isExclude = (wellExcludes != null && wellExcludes.contains(rvt));
+          try {
+            boolean resultValueAdded = false;
+            if (!assayWellType.isDataProducing()) {
+              // ignore any value provided in the workbook, but create a null-valued result value
+
+              // TODO: avoid the subtle bug of implicitly flagging a
+              // ResultValueType as non-numeric if an initial set of values are blank, but are
+              // then followed by (valid) numeric data
+              if ((!rvt.isNumericalnessDetermined() && cell.isNumeric()) || 
+                rvt.isNumericalnessDetermined() && rvt.isNumeric()) {
+                resultValueAdded = rvt.addResultValue(well, assayWellType, null, -1, isExclude);
               }
-              
-              int iDataHeader = 0;
-              for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-                Cell cell = dataCell(iRow, iDataHeader);
-                try {
-                  boolean resultValueAdded = false;
-                  if (rvt.isActivityIndicator()) {
-                    String value;
-                    if (rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN) {
-                      if (cell.isBoolean()) {
-                        value = cell.getBoolean().toString();
-                      } 
-                      else {
-                        value = _booleanParser.parse(cell).toString();
-                      }
-                      
-                      resultValueAdded = 
-                        rvt.addResultValue(well,
-                                           assayWellType,
-                                           value,
-                                           (wellExcludes != null && wellExcludes.contains(rvt)));
-                    }
-                    else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.PARTITION) {
-                      resultValueAdded = 
-                        rvt.addResultValue(well,
-                                           assayWellType,
-                                           _partitionedValueParser.parse(cell).toString(),
-                                           (wellExcludes != null && wellExcludes.contains(rvt)));
-                    }
-                    else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL) {
-                      resultValueAdded = 
-                        rvt.addResultValue(well,
-                                           assayWellType,
-                                           cell.getDouble(),
-                                           cell.getDoublePrecision(),
-                                           (wellExcludes != null && wellExcludes.contains(rvt)));
-                    }
-                  }
-                  else {
-                    // TODO: avoid the subtle bug of implicitly flagging a
-                    // ResultValueType as non-numeric if an initial set of values are blank, but are
-                    // then followed by (valid) numeric data
-                    if ((!rvt.isNumericalnessDetermined() && cell.isNumeric()) || 
-                      rvt.isNumericalnessDetermined() && rvt.isNumeric()) {
-                      resultValueAdded = 
-                        rvt.addResultValue(well,
-                                           assayWellType,
-                                           cell.getDouble(),
-                                           cell.getDoublePrecision(),
-                                           (wellExcludes != null && wellExcludes.contains(rvt)));
-                    }
-                    else {
-                      resultValueAdded = 
-                        rvt.addResultValue(well,
-                                           assayWellType,
-                                           cell.getString(),
-                                           (wellExcludes != null && wellExcludes.contains(rvt)));
-                    }
-                  }
-                  if (!resultValueAdded) {
-                    _errors.addError("duplicate well", cell);
-                  }
-                }
-                catch (IllegalArgumentException e) {
-                  // inconsistency in numeric or string types in RVT's result values
-                  _errors.addError(e.getMessage(), cell);
-                }
-                ++iDataHeader;
+              else {
+                resultValueAdded = rvt.addResultValue(well, assayWellType, null, isExclude);
               }
             }
+            else if (rvt.isActivityIndicator()) {
+              String value;
+              if (rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN) {
+                if (cell.isBoolean()) {
+                  value = cell.getBoolean().toString();
+                } 
+                else {
+                  value = _booleanParser.parse(cell).toString();
+                }
+
+                resultValueAdded = 
+                  rvt.addResultValue(well,
+                                     assayWellType,
+                                     value,
+                                     isExclude);
+              }
+              else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.PARTITION) {
+                resultValueAdded = 
+                  rvt.addResultValue(well,
+                                     assayWellType,
+                                     _partitionedValueParser.parse(cell).toString(),
+                                     isExclude);
+              }
+              else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL) {
+                resultValueAdded = 
+                  rvt.addResultValue(well,
+                                     assayWellType,
+                                     cell.getDouble(),
+                                     cell.getDoublePrecision(),
+                                     isExclude);
+              }
+            }
+            else {
+              // TODO: avoid the subtle bug of implicitly flagging a
+              // ResultValueType as non-numeric if an initial set of values are blank, but are
+              // then followed by (valid) numeric data
+              if ((!rvt.isNumericalnessDetermined() && cell.isNumeric()) || 
+                rvt.isNumericalnessDetermined() && rvt.isNumeric()) {
+                resultValueAdded = 
+                  rvt.addResultValue(well,
+                                     assayWellType,
+                                     cell.getDouble(),
+                                     cell.getDoublePrecision(),
+                                     isExclude);
+              }
+              else {
+                resultValueAdded = 
+                  rvt.addResultValue(well,
+                                     assayWellType,
+                                     cell.getString(),
+                                     isExclude);
+              }
+            }
+            if (!resultValueAdded) {
+              _errors.addError("duplicate well", cell);
+            }
           }
+          catch (IllegalArgumentException e) {
+            // inconsistency in numeric or string types in RVT's result values
+            _errors.addError(e.getMessage(), cell);
+          }
+          ++iDataHeader;
         }
+      }
     }
     if (dataSheetsParsed == 0) {
       _errors.addError(NO_DATA_SHEETS_FOUND_ERROR);

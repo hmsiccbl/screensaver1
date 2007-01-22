@@ -452,14 +452,14 @@ public class ScreenResultParserTest extends AbstractSpringTest
       {false, false, false, false, false, false, false}};
 
     Object[][] expectedValues = {
-          { 1071894., 1196906., 0.98, 1.11, 1.045, "", "false" },
+          { 1071894., 1196906., 0.98, 1.11, 1.045, "", "true" },
           { 1174576., 1469296., null, 5.8, 5.800, "S", "true" },
           { 1294182., 1280934., 1.18, 1.19, 1.185, "", "false" },
           { 1158888., 1458878., 1.06, 1.35, 1.205, "W", "false" },
           { 1385142., 1383446., 1.26, 1.28, 1.270, "W", "false" },
-          { null, null, null, null, null, "", "false" },
+          { null, null, null, null, null, null, null },
           { 1666646., 1154436., 1.52, 1.07, 1.295, "W", "false" },
-          { null, null, null, null, null, "", "false" } };
+          { null, null, null, null, null, null, null } };
 
     SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
     int iRvt = 0;

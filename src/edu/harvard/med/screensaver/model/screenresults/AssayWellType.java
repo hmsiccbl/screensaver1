@@ -89,4 +89,19 @@ public enum AssayWellType implements VocabularyTerm
   {
     return getValue();
   }
+
+
+  public boolean isDataProducing()
+  {
+    // TODO: I'm assuming wells of type "other" can contain data values --ant
+    return this.equals(AssayWellType.EXPERIMENTAL) || isControl() || this.equals(AssayWellType.OTHER);
+  }
+
+
+  public boolean isControl()
+  {
+    return this.equals(AssayWellType.ASSAY_CONTROL) ||
+    this.equals(AssayWellType.ASSAY_POSITIVE_CONTROL) ||
+    this.equals(AssayWellType.LIBRARY_CONTROL);
+  }
 }
