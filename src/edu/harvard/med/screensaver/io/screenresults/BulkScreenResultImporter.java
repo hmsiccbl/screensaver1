@@ -29,8 +29,8 @@ import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
+
 import org.apache.log4j.Logger;
-import org.hibernate.FlushMode;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 
 /**
