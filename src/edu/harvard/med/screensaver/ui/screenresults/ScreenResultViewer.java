@@ -67,7 +67,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   private static final DataModel EMPTY_DATAHEADERS_MODEL = new ListDataModel(new ArrayList<DataHeaderRow>());
   private static final DataModel EMPTY_RAW_DATA_MODEL = new ListDataModel(new ArrayList<Map<String,String>>());
-  private static final List<String> DATA_TABLE_FIXED_COLUMN_HEADERS = Arrays.asList("Plate", "Well", "Type", "Excluded");
+  private static final List<String> DATA_TABLE_FIXED_COLUMN_HEADERS = Arrays.asList("Plate", "Well", "Type");
   private static final DataHeaderRowDefinition[] DATA_HEADER_ATTRIBUTES = new DataHeaderRowDefinition[] {
     new DataHeaderRowDefinition("description", "Description"),
     new DataHeaderRowDefinition("replicateOrdinal", "Replicate Number"),
@@ -111,6 +111,8 @@ public class ScreenResultViewer extends AbstractBackingBean
     }
   };
 
+  private static final int DATA_TABLE_FIXED_COLUMNS = 3;
+
   
   // instance data members
 
@@ -121,32 +123,38 @@ public class ScreenResultViewer extends AbstractBackingBean
   private ScreenSearchResults _screenSearchResults;
   private ScreenResultExporter _screenResultExporter;
   /**
-   * For internal tracking of first data row displayed in data table.
-   */
-  private int _firstResultValueIndex;
-  private UISelectManyBean<ResultValueType> _selectedResultValueTypes;
-  private UIInput _rowNumberInput;
-  private UIData _dataTable;
-  private UniqueDataHeaderNames _uniqueDataHeaderNames;
-  /**
-   * Data model for the raw data, <i>containing only the set of rows being displayed in the current view</i>.
-   */
-  private DataModel _rawDataModel;
-  private DataModel _dataHeadersColumnModel;
-  private DataModel _dataHeadersModel;
-  private Map<String,Boolean> _collapsablePanelsState;
-  private TableSortManager _sortManager;
-  /**
    * HACK: we maintain a screenResult reference, distinct from
    * screen.getScreenResult(), since data access permissions may dictate that
    * screenResult is not accessible, even though screen.getScreenResult() will
    * give it to us w/o respecting data access permisisions
    */
   private ScreenResult _screenResult;
+  private Map<String,Boolean> _collapsablePanelsState;
+  
+  // data members for data headers table
+  private UniqueDataHeaderNames _uniqueDataHeaderNames;
+  private UISelectManyBean<ResultValueType> _selectedResultValueTypes;
+  private DataModel _dataHeadersColumnModel;
+  private DataModel _dataHeadersModel;
+  private TableSortManager _sortManager;
+
+  // data members for raw data table 
+  /**
+   * Data model for the raw data, <i>containing only the set of rows being displayed in the current view</i>.
+   */
+  private DataModel _rawDataModel;
+  private List<List<Boolean>> _excludedResultValues;
+  /**
+   * For internal tracking of first data row displayed in data table (the data
+   * table's model rowIndex is always 0).
+   */
+  private int _firstResultValueIndex;
+  private UIInput _rowNumberInput;
+  private UIData _dataTable;
   private UISelectOneBean<ResultValueType> _hitsForDataHeader;
   private boolean _showHitsOnly;
-
   private int _screenResultSize;
+
 
 
   // public methods
@@ -271,14 +279,25 @@ public class ScreenResultViewer extends AbstractBackingBean
   public boolean isNumericColumn()
   {
     int columnIndex = _sortManager.getColumnModel().getRowIndex();
-    // "plate", "well", "type", and "excluded" columns are non-numeric
-    if (columnIndex < 4) {
+    // "plate", "well", and "type" columns are non-numeric
+    if (columnIndex < DATA_TABLE_FIXED_COLUMNS) {
       return false;
     }
     // columns based upon ResultValueTypes can be queried directly for numericalness
-    columnIndex -= 4;
+    columnIndex -= DATA_TABLE_FIXED_COLUMNS;
     return getSelectedResultValueTypes().getSelections().get(columnIndex).isNumeric();
   }
+  
+  public boolean isResultValueCellExcluded()
+  {
+    int columnIndex = _sortManager.getColumnModel().getRowIndex();
+    if (columnIndex < DATA_TABLE_FIXED_COLUMNS) {
+      return false;
+    }
+    int rowIndex = _rawDataModel.getRowIndex();
+    return _excludedResultValues.get(rowIndex).get(columnIndex - DATA_TABLE_FIXED_COLUMNS);
+  }
+                                       
   
   /**
    * @motivation for rowNumber validator maximum
@@ -547,6 +566,7 @@ public class ScreenResultViewer extends AbstractBackingBean
     _dataHeadersColumnModel = null;
     _dataHeadersModel = null;
     _rawDataModel = null;
+    _excludedResultValues = null;
     _firstResultValueIndex = 0;
     _selectedResultValueTypes = null;
     _uniqueDataHeaderNames = null;
@@ -643,9 +663,8 @@ public class ScreenResultViewer extends AbstractBackingBean
       case 0: sortByArg = DAO.SORT_BY_PLATE_WELL; break;
       case 1: sortByArg = DAO.SORT_BY_WELL_PLATE; break;
       case 2: sortByArg = DAO.SORT_BY_ASSAY_WELL_TYPE; break;
-      case 3: sortByArg = DAO.SORT_BY_PLATE_WELL; break; // error! can't sort by "excluded" col currently
       default:
-          sortByArg = getSortManager().getCurrentSortColumnIndex() - 4;
+          sortByArg = getSortManager().getCurrentSortColumnIndex() - DATA_TABLE_FIXED_COLUMNS;
       }
       Map<WellKey,List<ResultValue>> rvData = 
         _dao.findSortedResultValueTableByRange(_selectedResultValueTypes.getSelections(),
@@ -656,6 +675,7 @@ public class ScreenResultViewer extends AbstractBackingBean
                                                isShowHitsOnly() ? getHitsForDataHeader().getSelection() : null);
       
       List<Map<String,String>> tableData = new ArrayList<Map<String,String>>();
+      _excludedResultValues = new ArrayList<List<Boolean>>();
       for (Map.Entry<WellKey,List<ResultValue>> entry : rvData.entrySet()) {
         WellKey wellKey = entry.getKey();
         tableData.add(buildRow(wellKey,
@@ -666,31 +686,25 @@ public class ScreenResultViewer extends AbstractBackingBean
     }
   }
   
-  
+  /**  
+   * @sideeffect adds element to {@link #_excludedResultValues}
+   */
   private Map<String,String> buildRow(WellKey wellKey,
                                       AssayWellType assayWellType,
                                       List<ResultValue> resultValues)
   {
     List<String> columnNames = getSortManager().getColumnNames();
-    StringBuilder excludes = new StringBuilder();
-    for (int i = 0; i < resultValues.size(); ++i) {
-      ResultValue rv = resultValues.get(i);
-      if (rv != null && rv.isExclude()) {
-        if (excludes.length() > 0) {
-          excludes.append(", ");
-        }
-        excludes.append(columnNames.get(i));
-      }
-    }
     int i = 0;
     HashMap<String,String> cellValues = new HashMap<String,String>();
     cellValues.put(columnNames.get(i++), Integer.toString(wellKey.getPlateNumber()));
     cellValues.put(columnNames.get(i++), wellKey.getWellName());
     cellValues.put(columnNames.get(i++), assayWellType.toString());
-    cellValues.put(columnNames.get(i++), excludes.toString());
+    List<Boolean> excludedResultValuesRow = new ArrayList<Boolean>();
     for (ResultValue rv : resultValues) {
+      excludedResultValuesRow.add(rv.isExclude());
       cellValues.put(columnNames.get(i++), rv.getValue());
     }
+    _excludedResultValues.add(excludedResultValuesRow);
     return cellValues;
   }
     

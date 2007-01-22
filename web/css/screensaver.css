@@ -155,6 +155,10 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	text-align: right;
 }
 
+.excludedValue {
+	text-decoration: line-through;
+}
+
 .tableHeader,.tableFooter,.heatMapBorderColumn {
 	font-size: small;
 	font-weight: bold;
@@ -200,7 +204,8 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	font-weight: bold;
 }
 
-a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited 	{
+a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited
+	{
 	color: white;
 	text-decoration: none;
 }
