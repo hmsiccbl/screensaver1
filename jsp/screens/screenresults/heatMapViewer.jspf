@@ -156,8 +156,8 @@ TODO:
 						<t:column>
 							<t:outputText value="#{statistic.name}" styleClass="inputLabel" />
 						</t:column>
-						<t:column style="text-align: right">
-							<t:outputText value="#{statistic.value}" styleClass="data" />
+						<t:column style="numericColumn">
+							<t:outputText value="#{statistic.value}" styleClass="dataText" />
 						</t:column>
 					</t:dataTable>
 

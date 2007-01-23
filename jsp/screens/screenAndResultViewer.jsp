@@ -203,7 +203,7 @@
 					</t:div>
 				</f:facet>
 
-				<t:panelGrid columns="1">
+				<t:panelGrid columns="1" style="width: 100%">
 					<t:panelGroup id="dataTableCommandPanel" styleClass="commandPanel">
 						<h:commandButton id="firstPageCommand"
 							action="#{screenResultViewer.firstPage}" value="First"
