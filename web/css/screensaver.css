@@ -20,7 +20,6 @@ h2,.sectionHeader {
 	text-decoration: none;
 	width: 100%;
 	padding: 0px;
-	padding: px 2px 2px 2px;
 	margin-top: 2px;
 	margin-bottom: 2px;
 	margin-left: 0px;
@@ -91,7 +90,6 @@ hr {
 
 /* for panelGroup containing horizontal sequence of command buttons (and possibly input controls) */
 .commandPanel {
-	vertical-align: bottom;
 	float: left;
 }
 
@@ -135,6 +133,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 
 .command,.input,.inputLabel {
 	margin-right: 4px;
+	vertical-align: bottom;
 }
 
 .hiddenCommand {
@@ -142,7 +141,6 @@ a.heatMapValue:link,a.heatMapValue:visited {
 }
 
 .inputLabel {
-	vertical-align: top;
 	font-family: sans-serif;
 }
 
@@ -205,7 +203,6 @@ a.heatMapValue:link,a.heatMapValue:visited {
 
 .menuAndContent {
 	table-layout: fixed;
-	/*	overflow: scroll	;*/
 }
 
 .menuColumn,.contentColumn {

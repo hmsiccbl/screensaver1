@@ -115,7 +115,7 @@
 				<t:outputLabel id="screenNumberLabel" for="screenNumber"
 					value="Screen #" styleClass="menuItem inputLabel" />
 				<t:inputText id="screenNumber" value="#{screenFinder.screenNumber}"
-					size="5" styleClass="input" validator="IntegerConverter" />
+					size="5" styleClass="input" />
 				<t:commandButton action="#{screenFinder.findScreen}"
 					id="quickFindScreenSubmit" value="Go"
 					rendered="#{menu.authenticatedUser}" styleClass="command" />

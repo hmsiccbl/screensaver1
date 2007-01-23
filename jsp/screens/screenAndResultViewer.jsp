@@ -39,15 +39,15 @@
 				</f:facet>
 
 				<f:facet name="closedContent">
-					<t:panelGrid columns="2">
+					<t:panelGrid columns="1">
 						<t:outputText value="#{screenResultViewer.screen.screenNumber}: \"#{screenResultViewer.screen.title}\""
 							styleClass="dataText" />
 						<t:div>
-							<t:outputText value="Lab: " styleClass="inputLabel"/>
+							<t:outputText value="Lab:" styleClass="inputLabel"/>
 							<t:commandLink value="#{screenViewer.screen.labHead.labName}"
 								action="#{screenViewer.viewLabHead}"
 								styleClass="dataText entityLink" />
-							<t:outputText value="&nbsp;&nbsp;Screener: " styleClass="inputLabel" escape="false"/>
+							<t:outputText value="&nbsp;&nbsp;Screener:" styleClass="inputLabel" escape="false"/>
 							<t:commandLink
 								value="#{screenViewer.screen.leadScreener.fullNameLastFirst}"
 								action="#{screenViewer.viewLeadScreener}"
