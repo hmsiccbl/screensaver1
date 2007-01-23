@@ -203,80 +203,83 @@
 					</t:div>
 				</f:facet>
 
-				<t:dataTable id="rawDataTable"
-					binding="#{screenResultViewer.dataTable}"
-					value="#{screenResultViewer.rawData}" var="row" rows="24"
-					styleClass="standardTable" headerClass="tableHeader"
-					rowClasses="row1,row2">
-					<t:columns value="#{screenResultViewer.sortManager.columnModel}"
-						var="columnName"
-						styleClass="#{(columnName==\"Plate\" || columnName==\"Well\") ? \"keyColumn\" : (screenResultViewer.numericColumn ? \"numericColumn\" : \"textColumn\")} #{screenResultViewer.resultValueCellExcluded ? \"excludedValue\" : \"\"} ">
-						<f:facet name="header">
-							<t:commandLink
-								action="#{screenResultViewer.sortManager.sortOnColumn}"
-								styleClass="sortableColumn">
-								<t:outputText value="#{columnName}" />
-							</t:commandLink>
-						</f:facet>
-						<t:outputText value="#{row[columnName]}"
-							rendered="#{columnName != \"Well\"}" />
-						<t:commandLink action="#{screenResultViewer.viewWell}"
-							rendered="#{columnName == \"Well\"}">
-							<t:outputText value="#{row[columnName]}" />
-						</t:commandLink>
-					</t:columns>
-				</t:dataTable>
+				<t:panelGrid columns="1">
+					<t:panelGroup id="dataTableCommandPanel" styleClass="commandPanel">
+						<h:commandButton id="firstPageCommand"
+							action="#{screenResultViewer.firstPage}" value="First"
+							image="/images/arrow-first.png" styleClass="command" />
+						<t:commandButton id="prevPageCommand"
+							action="#{screenResultViewer.prevPlate}" value="Prev Plate"
+							image="/images/arrow-fastrewind.png" styleClass="command" />
+						<t:commandButton id="prevPlateCommand"
+							action="#{screenResultViewer.prevPage}" value="Prev"
+							image="/images/arrow-previous.png" styleClass="command" />
+						<t:commandButton id="nextPageCommand"
+							action="#{screenResultViewer.nextPage}" value="Next"
+							image="/images/arrow-next.png" styleClass="command" />
+						<t:commandButton id="nextPlateCommand"
+							action="#{screenResultViewer.nextPlate}" value="Next Plate"
+							image="/images/arrow-fastforward.png" styleClass="command" />
+						<h:commandButton id="lastPageCommand"
+							action="#{screenResultViewer.lastPage}" value="Last"
+							image="/images/arrow-last.png" styleClass="command" />
 
-				<t:panelGroup id="dataTableCommandPanel" styleClass="commandPanel"  >
-					<h:commandButton id="firstPageCommand"
-						action="#{screenResultViewer.firstPage}" value="First"
-						image="/images/arrow-first.png" styleClass="command" />
-					<t:commandButton id="prevPageCommand"
-						action="#{screenResultViewer.prevPlate}" value="Prev Plate"
-						image="/images/arrow-fastrewind.png" styleClass="command" />
-					<t:commandButton id="prevPlateCommand"
-						action="#{screenResultViewer.prevPage}" value="Prev"
-						image="/images/arrow-previous.png" styleClass="command" />
-					<t:commandButton id="nextPageCommand"
-						action="#{screenResultViewer.nextPage}" value="Next"
-						image="/images/arrow-next.png" styleClass="command" />
-					<t:commandButton id="nextPlateCommand"
-						action="#{screenResultViewer.nextPlate}" value="Next Plate"
-						image="/images/arrow-fastforward.png" styleClass="command" />
-					<h:commandButton id="lastPageCommand"
-						action="#{screenResultViewer.lastPage}" value="Last"
-						image="/images/arrow-last.png" styleClass="command" />
-
-					<t:outputLabel id="rowRange"
-						value="#{screenResultViewer.rowRangeText}" for="rowNumber"
-						styleClass="inputLabel" />
-					<t:inputText id="rowNumber" value="#{screenResultViewer.rowNumber}"
-						binding="#{screenResultViewer.rowNumberInput}"
-						valueChangeListener="#{screenResultViewer.rowNumberListener}"
-						size="6" styleClass="input">
-						<%--f:validateLongRange minimum="1"
-						maximum="#{screenResultViewer.rawDataSize}" /--%>
-					</t:inputText>
-					<t:commandButton id="updateDataTableRowsButton" forceId="true"
-						value="Go" action="#{screenResultViewer.updateDataTableRows}"
-						styleClass="command" />
-
-					<t:panelGroup id="showHitsOnlyCommandPanel"
-						rendered="#{!empty screenResultViewer.hitsForDataHeader.selectItems}">
-						<t:selectBooleanCheckbox id="showHitsOnly" styleClass="command"
-							value="#{screenResultViewer.showHitsOnly}" immediate="true"
-							onchange="javascript:document.getElementById('updateDataTableRowsButton').click()" />
-						<t:outputLabel value="Show only hits for" for="showHitsOnly"
+						<t:outputLabel id="rowRange"
+							value="#{screenResultViewer.rowRangeText}" for="rowNumber"
 							styleClass="inputLabel" />
-						<t:selectOneMenu id="hitsForDataHeaderList"
-							value="#{screenResultViewer.hitsForDataHeader.value}"
-							onchange="javascript:document.getElementById('updateDataTableRowsButton').click()"
-							immediate="true" styleClass="input">
-							<f:selectItems id="hitsForDataHeader"
-								value="#{screenResultViewer.hitsForDataHeader.selectItems}" />
-						</t:selectOneMenu>
+						<t:inputText id="rowNumber"
+							value="#{screenResultViewer.rowNumber}"
+							binding="#{screenResultViewer.rowNumberInput}"
+							valueChangeListener="#{screenResultViewer.rowNumberListener}"
+							size="6" styleClass="input">
+							<%--f:validateLongRange minimum="1"
+						maximum="#{screenResultViewer.rawDataSize}" /--%>
+						</t:inputText>
+						<t:commandButton id="updateDataTableRowsButton" forceId="true"
+							value="Go" action="#{screenResultViewer.updateDataTableRows}"
+							styleClass="command" />
+
+						<t:panelGroup id="showHitsOnlyCommandPanel"
+							rendered="#{!empty screenResultViewer.hitsForDataHeader.selectItems}">
+							<t:selectBooleanCheckbox id="showHitsOnly" styleClass="command"
+								value="#{screenResultViewer.showHitsOnly}" immediate="true"
+								onchange="javascript:document.getElementById('updateDataTableRowsButton').click()" />
+							<t:outputLabel value="Show only hits for" for="showHitsOnly"
+								styleClass="inputLabel" />
+							<t:selectOneMenu id="hitsForDataHeaderList"
+								value="#{screenResultViewer.hitsForDataHeader.value}"
+								onchange="javascript:document.getElementById('updateDataTableRowsButton').click()"
+								immediate="true" styleClass="input">
+								<f:selectItems id="hitsForDataHeader"
+									value="#{screenResultViewer.hitsForDataHeader.selectItems}" />
+							</t:selectOneMenu>
+						</t:panelGroup>
 					</t:panelGroup>
-				</t:panelGroup>
+
+					<t:dataTable id="rawDataTable"
+						binding="#{screenResultViewer.dataTable}"
+						value="#{screenResultViewer.rawData}" var="row" rows="24"
+						styleClass="standardTable" headerClass="tableHeader"
+						rowClasses="row1,row2">
+						<t:columns value="#{screenResultViewer.sortManager.columnModel}"
+							var="columnName"
+							styleClass="#{(columnName==\"Plate\" || columnName==\"Well\") ? \"keyColumn\" : (screenResultViewer.numericColumn ? \"numericColumn\" : \"textColumn\")} #{screenResultViewer.resultValueCellExcluded ? \"excludedValue\" : \"\"} ">
+							<f:facet name="header">
+								<t:commandLink
+									action="#{screenResultViewer.sortManager.sortOnColumn}"
+									styleClass="sortableColumn">
+									<t:outputText value="#{columnName}" />
+								</t:commandLink>
+							</f:facet>
+							<t:outputText value="#{row[columnName]}"
+								rendered="#{columnName != \"Well\"}" />
+							<t:commandLink action="#{screenResultViewer.viewWell}"
+								rendered="#{columnName == \"Well\"}">
+								<t:outputText value="#{row[columnName]}" />
+							</t:commandLink>
+						</t:columns>
+					</t:dataTable>
+				</t:panelGrid>
 			</t:collapsiblePanel>
 
 			<t:collapsiblePanel id="heatMapsPanel"
