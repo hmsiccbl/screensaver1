@@ -124,6 +124,7 @@ hr {
 a.heatMapValue:link,a.heatMapValue:visited {
 	text-decoration: none;
 	color: black;
+	vertical-align: bottom;
 }
 
 .dataText,.input {
@@ -155,12 +156,13 @@ a.heatMapValue:link,a.heatMapValue:visited {
 
 /* table columns that contain text should have a min width to make text readable (not too vertical) */
 .textColumn {
-	min-width: 80px;
+	min-width: 100px;
 }
 
 .keyColumn {
 	font-weight: bold;
 	/* allows data columns to dominate the table width; still given the width it needs */
+	/* use non-breaking spaces (&nbsp;) if you do not want words to wrap in a key column */
 	width: 1px;
 }
 
@@ -239,6 +241,7 @@ a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visite
 	{
 	color: white;
 	text-decoration: none;
+	vertical-align: bottom;
 }
 
 a.menuItem:hover,a.menuItemActive:hover {
@@ -248,6 +251,8 @@ a.menuItem:hover,a.menuItemActive:hover {
 
 .entityLink,.labLink {
 	text-decoration: none;
+	/* cause bottom of text to align with non-link text around it (rather than bottom of where link underline would appear) */
+	vertical-align: bottom;
 }
 
 .labLink {
