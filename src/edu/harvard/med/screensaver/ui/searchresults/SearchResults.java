@@ -49,7 +49,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   private static final Logger log = Logger.getLogger(SearchResults.class);
   
   private static final int [] PAGESIZES = { 10, 20, 50, 100 };
-  private static final int DEFAULT_PAGESIZE = PAGESIZES[0];
+  private static final int DEFAULT_PAGESIZE = PAGESIZES[1];
   
   public static final String SD_FILE = "SDFile";
   private static final String EXCEL_FILE = "Excel Spreadsheet";
