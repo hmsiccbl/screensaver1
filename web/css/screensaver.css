@@ -81,6 +81,7 @@ hr {
 	color: #000000;
 	border-style: none;
 	border-spacing: 0px;
+	width: 100%;
 }
 
 .layoutPanel {
@@ -134,13 +135,17 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	font-family: sans-serif;
 }
 
-.column,.keyColumn,.numericColumn {
+.column,.keyColumn,.numericColumn,.textColumn {
 	vertical-align: top;
 	border-style: none;
 	padding-top: 1px;
 	padding-bottom: 0px;
 	padding-left: 3px;
 	padding-right: 3px;
+}
+
+.textColumn {
+	width: 80px;
 }
 
 .keyColumn {
@@ -153,6 +158,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 
 .numericColumn {
 	text-align: right;
+	max-width: 80px;
 }
 
 .excludedValue {
@@ -186,6 +192,11 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	font-weight: bold;
 }
 
+.menuAndContent {
+	table-layout: fixed;
+/*	overflow: scroll	;*/
+}
+
 .menuColumn,.contentColumn {
 	vertical-align: top;
 }
@@ -194,6 +205,13 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	background-color: blue;
 	color: white;
 	font-size: small;
+	width: 200px;
+	overflow: hidden;
+}
+
+.contentColumn {
+	min-width: 1000px;
+	overflow: scroll;
 }
 
 .menuItem,.menuItemActive {

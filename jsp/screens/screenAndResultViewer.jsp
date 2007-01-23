@@ -210,7 +210,7 @@
 					rowClasses="row1,row2">
 					<t:columns value="#{screenResultViewer.sortManager.columnModel}"
 						var="columnName"
-						styleClass="#{screenResultViewer.numericColumn ? \"numericColumn\" : \"column\"} #{screenResultViewer.resultValueCellExcluded ? \"excludedValue\" : \"\"} ">
+						styleClass="#{screenResultViewer.numericColumn ? \"numericColumn\" : \"textColumn\"} #{screenResultViewer.resultValueCellExcluded ? \"excludedValue\" : \"\"} ">
 						<f:facet name="header">
 							<t:commandLink
 								action="#{screenResultViewer.sortManager.sortOnColumn}"

@@ -42,7 +42,7 @@
     </t:documentHead>
 
     <t:documentBody>
-      <t:panelGrid id="menuAndBodyPanel" columns="2" style="table-layout: fixed; overflow: scroll"
+      <t:panelGrid id="menuAndBodyPanel" columns="2" styleClass="menuAndContent"
         columnClasses="menuColumn,contentColumn">
         <tiles:insert attribute="menu" flush="false" />
         <t:panelGrid id="bodyPanel" columns="1">
