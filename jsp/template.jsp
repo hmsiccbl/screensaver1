@@ -37,7 +37,7 @@
         <%-- It seems that with Tiles, the context-relative path of this template changes with the 
              requested URL, so we need to specify an absolute location for our CSS file.  Using
              "css/screensaver.css", or even "/css/screensaver.css", does not work. --%>
-        <link rel="stylesheet" type="text/css" href="/screensaver/css/screensaver2.css" />
+        <link rel="stylesheet" type="text/css" href="/screensaver/css/screensaver.css" />
       </f:verbatim>
     </t:documentHead>
 
