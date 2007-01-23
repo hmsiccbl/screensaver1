@@ -227,49 +227,50 @@
 					</t:columns>
 				</t:dataTable>
 
-				<h:commandButton id="firstPageCommand"
-					action="#{screenResultViewer.firstPage}" value="First"
-					image="/images/arrow-first.gif" styleClass="command" />
-				<t:commandButton id="prevPageCommand"
-					action="#{screenResultViewer.prevPage}" value="Prev"
-					image="/images/arrow-previous.gif" styleClass="command" />
-				<t:commandButton id="nextPageCommand"
-					action="#{screenResultViewer.nextPage}" value="Next"
-					image="/images/arrow-next.gif" styleClass="command" />
-				<h:commandButton id="lastPageCommand"
-					action="#{screenResultViewer.lastPage}" value="Last"
-					image="/images/arrow-last.gif" styleClass="command" />
+				<t:panelGroup id="dataTableCommandPanel" styleClass="commandPanel">
+					<h:commandButton id="firstPageCommand"
+						action="#{screenResultViewer.firstPage}" value="First"
+						image="/images/arrow-first.png" styleClass="command" />
+					<t:commandButton id="prevPageCommand"
+						action="#{screenResultViewer.prevPage}" value="Prev"
+						image="/images/arrow-previous.png" styleClass="command" />
+					<t:commandButton id="nextPageCommand"
+						action="#{screenResultViewer.nextPage}" value="Next"
+						image="/images/arrow-next.png" styleClass="command" />
+					<h:commandButton id="lastPageCommand"
+						action="#{screenResultViewer.lastPage}" value="Last"
+						image="/images/arrow-last.png" styleClass="command" />
 
-				<t:outputLabel id="rowRange"
-					value="#{screenResultViewer.rowRangeText}" for="rowNumber"
-					styleClass="inputLabel" />
-				<t:inputText id="rowNumber" value="#{screenResultViewer.rowNumber}"
-					binding="#{screenResultViewer.rowNumberInput}"
-					valueChangeListener="#{screenResultViewer.rowNumberListener}"
-					size="6" styleClass="input">
-					<%--f:validateLongRange minimum="1"
-						maximum="#{screenResultViewer.rawDataSize}" /--%>
-				</t:inputText>
-				<t:commandButton id="updateDataTableRowsButton" forceId="true" value="Go"
-					action="#{screenResultViewer.updateDataTableRows}"
-					styleClass="command" />
-
-				<t:panelGroup id="showHitsOnlyCommandPanel" style="vertical-align: bottom"
-					rendered="#{!empty screenResultViewer.hitsForDataHeader.selectItems}">
-					<t:selectBooleanCheckbox id="showHitsOnly"
-						value="#{screenResultViewer.showHitsOnly}" immediate="true"
-						onchange="javascript:document.getElementById('updateDataTableRowsButton').click()"/>
-					<t:outputLabel value="Show only hits for" for="showHitsOnly"
+					<t:outputLabel id="rowRange"
+						value="#{screenResultViewer.rowRangeText}" for="rowNumber"
 						styleClass="inputLabel" />
-					<t:selectOneMenu id="hitsForDataHeaderList"
-						value="#{screenResultViewer.hitsForDataHeader.value}"
-						onchange="javascript:document.getElementById('updateDataTableRowsButton').click()"
-						immediate="true" styleClass="input">
-						<f:selectItems id="hitsForDataHeader"
-							value="#{screenResultViewer.hitsForDataHeader.selectItems}" />
-					</t:selectOneMenu>
-				</t:panelGroup>
+					<t:inputText id="rowNumber" value="#{screenResultViewer.rowNumber}"
+						binding="#{screenResultViewer.rowNumberInput}"
+						valueChangeListener="#{screenResultViewer.rowNumberListener}"
+						size="6" styleClass="input">
+						<%--f:validateLongRange minimum="1"
+						maximum="#{screenResultViewer.rawDataSize}" /--%>
+					</t:inputText>
+					<t:commandButton id="updateDataTableRowsButton" forceId="true"
+						value="Go" action="#{screenResultViewer.updateDataTableRows}"
+						styleClass="command" />
 
+					<t:panelGroup id="showHitsOnlyCommandPanel"
+						rendered="#{!empty screenResultViewer.hitsForDataHeader.selectItems}">
+						<t:selectBooleanCheckbox id="showHitsOnly"
+							value="#{screenResultViewer.showHitsOnly}" immediate="true"
+							onchange="javascript:document.getElementById('updateDataTableRowsButton').click()" />
+						<t:outputLabel value="Show only hits for" for="showHitsOnly"
+							styleClass="inputLabel" />
+						<t:selectOneMenu id="hitsForDataHeaderList"
+							value="#{screenResultViewer.hitsForDataHeader.value}"
+							onchange="javascript:document.getElementById('updateDataTableRowsButton').click()"
+							immediate="true" styleClass="input">
+							<f:selectItems id="hitsForDataHeader"
+								value="#{screenResultViewer.hitsForDataHeader.selectItems}" />
+						</t:selectOneMenu>
+					</t:panelGroup>
+				</t:panelGroup>
 			</t:collapsiblePanel>
 
 			<t:collapsiblePanel id="heatMapsPanel"

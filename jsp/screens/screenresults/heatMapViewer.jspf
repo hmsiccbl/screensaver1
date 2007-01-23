@@ -36,10 +36,10 @@ TODO:
 		</t:selectOneMenu>
 
 		<t:commandButton id="previousPlateButton"
-			image="/images/arrow-previous.gif"
+			image="/images/arrow-previous.png"
 			action="#{heatMapViewer.previousPlate}" styleClass="command" />
 
-		<t:commandButton id="nextPlateButton" image="/images/arrow-next.gif"
+		<t:commandButton id="nextPlateButton" image="/images/arrow-next.png"
 			action="#{heatMapViewer.nextPlate}" styleClass="command" />
 
 		<t:outputLabel for="showValues" value="Show values"

@@ -5,77 +5,79 @@
 
 <f:subview id="searchResultsNavPanelSubview" rendered="#{navigator != null}">
 
-	<h:panelGrid style="margin: 0px; border: 1px solid grey; padding: 1px;"
+	<t:panelGrid style="margin: 0px; border: 1px solid grey; padding: 1px;"
 		border="0" cellpadding="0" cellspacing="0" columns="4" width="100%">
 
 		<h:form id="navigationButtons">
-			<h:panelGroup style="float: left;">
-				<h:commandButton id="firstPageCommand"
+			<t:panelGroup>
+				<t:commandButton id="firstPageCommand"
 					action="#{navigator.firstPage}"
-					value="First" image="/images/arrow-first.gif" styleClass="command" />
-				<h:commandButton id="prevPageCommand"
-					action="#{navigator.prevPage}"
-					value="Prev" image="/images/arrow-previous.gif"
+					value="First" image="/images/arrow-first.png" styleClass="command" />
+				<t:commandButton id="prevPageCommand" action="#{navigator.prevPage}"
+					value="Prev" image="/images/arrow-previous.png"
 					styleClass="command" />
-				<h:commandButton id="nextPageCommand"
+				<t:commandButton id="nextPageCommand"
 					action="#{navigator.nextPage}"
-					value="Next" image="/images/arrow-next.gif" styleClass="command" />
-				<h:commandButton id="lastPageCommand"
+					value="Next" image="/images/arrow-next.png" styleClass="command" />
+				<t:commandButton id="lastPageCommand"
 					action="#{navigator.lastPage}"
-					value="Last" image="/images/arrow-last.gif" styleClass="command" />
-			</h:panelGroup>
+					value="Last" image="/images/arrow-last.png" styleClass="command" />
+			</t:panelGroup>
 		</h:form>
 
-		<h:panelGroup style="">
-			<h:outputText rendered="#{navigator.summaryView}"
+		<t:panelGroup>
+			<t:outputText rendered="#{navigator.summaryView}"
 				value="#{navigator.firstIndex}..#{navigator.lastIndex} out of #{navigator.resultsSize}"
 				styleClass="resultsNavPanelStatus" />
-			<h:outputText rendered="#{! navigator.summaryView}"
+			<t:outputText rendered="#{! navigator.summaryView}"
 				value="#{navigator.currentIndex} of #{navigator.resultsSize}"
 				styleClass="resultsNavPanelStatus" />
-		</h:panelGroup>
+		</t:panelGroup>
 		
-		<h:form id="sortOrderForm" style="vertical-align: middle">
-			<t:outputLabel for="sortOrderMenu" value="Sort by" styleClass="inputLabel"/>
-			<h:commandButton id="updateSortOder" value="update sort order"
-				action="#{navigator.sortOnSelectedColumn}" style="display: none" />
-			<t:selectOneMenu id="sortOrderMenu"
-				value="#{navigator.currentSortColumnName}"
-				onchange="this.previousSibling.click();">
-				<f:selectItems value="#{navigator.sortColumnSelections}" />
-			</t:selectOneMenu>
-			<t:selectOneMenu id="sortDirection"
-				value="#{navigator.currentSortDirection}" converter="SortDirectionConverter" styleClass="command"
-				onchange="this.previousSibling.previousSibling.click();" >
-				<f:selectItems value="#{navigator.sortDirectionSelections}" />
-			</t:selectOneMenu>
+		<h:form id="sortOrderForm">
+			<t:panelGroup>
+				<t:outputLabel for="sortOrderMenu" value="Sort by"
+					styleClass="inputLabel" />
+				<t:commandButton id="updateSortOder" value="update sort order"
+					action="#{navigator.sortOnSelectedColumn}" style="display: none" />
+				<t:selectOneMenu id="sortOrderMenu"
+					value="#{navigator.currentSortColumnName}"
+					onchange="this.previousSibling.click();">
+					<f:selectItems value="#{navigator.sortColumnSelections}" />
+				</t:selectOneMenu>
+				<t:selectOneMenu id="sortDirection"
+					value="#{navigator.currentSortDirection}"
+					converter="SortDirectionConverter" styleClass="command"
+					onchange="this.previousSibling.previousSibling.click();">
+					<f:selectItems value="#{navigator.sortDirectionSelections}" />
+				</t:selectOneMenu>
+			</t:panelGroup>
 		</h:form>
 
 		<h:form id="itemsPerPageForm"
 			rendered="#{navigator.summaryView}">
-			<h:panelGroup style="float: right">
-				<h:commandButton id="updateItemsPerPage"
+			<t:panelGroup style="float: right">
+				<t:commandButton id="updateItemsPerPage"
 					value="update items per page"
-					action="#{navigator.updateItemsPerPage}"
-					style="display: none" />
-				<h:selectOneMenu id="itemsPerPage"
+					action="#{navigator.updateItemsPerPage}" style="display: none" />
+				<t:selectOneMenu id="itemsPerPage"
 					value="#{navigator.itemsPerPageSelector.value}"
 					onchange="this.previousSibling.click();">
 					<f:selectItems
 						value="#{navigator.itemsPerPageSelector.selectItems}" />
-				</h:selectOneMenu>
-				<h:outputText value=" per page" />
-			</h:panelGroup>
+				</t:selectOneMenu>
+				<t:outputText value=" per page" />
+			</t:panelGroup>
 		</h:form>
 
-		<h:form id="showSummaryViewForm"
-			rendered="#{! navigator.summaryView}">
-			<h:commandButton id="summaryView" value="Results Summary"
-				action="#{navigator.showSummaryView}"
-				style="vertical-align: middle"
-				styleClass="command" />
+		<h:form id="showSummaryViewForm" rendered="#{! navigator.summaryView}">
+			<t:panelGroup style="float: right">
+				<t:commandButton id="summaryView" value="Results Summary"
+					action="#{navigator.showSummaryView}"
+					style="vertical-align: middle" styleClass="command" />
+			</t:panelGroup>
 		</h:form>
 
-	</h:panelGrid>
+	</t:panelGrid>
 
 </f:subview>

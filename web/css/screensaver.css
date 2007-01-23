@@ -19,7 +19,12 @@ h2,.sectionHeader {
 	background-color: blue;
 	text-decoration: none;
 	width: 100%;
-	padding: 2px 2px 2px 2px;
+	padding: 0px;
+	padding: px 2px 2px 2px;
+	margin-top: 2px;
+	margin-bottom: 2px;
+	margin-left: 0px;
+	margin-right: 0px;
 }
 
 h3,.subsectionHeader {
@@ -47,6 +52,13 @@ h3,.subsectionHeader {
 	font-style: italic;
 }
 
+.errorMessage {
+	font-weight: bold;
+	font-size: large;
+	color: fuchsia;
+	border: 1px;
+}
+
 a,a:link,a:visited,a:active {
 	color: inherit;
 	background-color: inherit;
@@ -65,13 +77,6 @@ hr {
 	border-width: 0px 0px 1px 0px;
 }
 
-.errorMessage {
-	font-weight: bold;
-	font-size: large;
-	color: fuchsia;
-	border: 1px;
-}
-
 .spacer {
 	margin-left: 4px;
 	margin-right: 4px;
@@ -84,6 +89,13 @@ hr {
 	width: 100%;
 }
 
+/* for panelGroup containing horizontal sequence of command buttons (and possibly input controls) */
+.commandPanel {
+	vertical-align: bottom;
+	float: left;
+}
+
+/* for panels used for layout purposes only, and that should not introduce any additional spacing around their child components */
 .layoutPanel {
 	border-style: none;
 	border-spacing: 0px;
@@ -123,7 +135,6 @@ a.heatMapValue:link,a.heatMapValue:visited {
 
 .command,.input,.inputLabel {
 	margin-right: 4px;
-	vertical-align: bottom;
 }
 
 .hiddenCommand {
@@ -194,7 +205,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 
 .menuAndContent {
 	table-layout: fixed;
-/*	overflow: scroll	;*/
+	/*	overflow: scroll	;*/
 }
 
 .menuColumn,.contentColumn {
