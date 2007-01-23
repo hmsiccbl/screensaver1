@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.io.screenresults;
 
 import java.io.File;
-import java.util.Collections;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.DAO;
