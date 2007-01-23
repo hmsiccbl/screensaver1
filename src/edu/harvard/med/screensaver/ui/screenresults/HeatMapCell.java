@@ -53,7 +53,7 @@ public class HeatMapCell
   {
     _resultValue = resultValue;
     _wellKey = wellKey;
-    _containsValue = resultValue != null && !resultValue.isEmptyWell();
+    _containsValue = resultValue != null && resultValue.isDataProducerWell();
     String formattedValue = _containsValue ? format.format(scoredValue) : "<empty>";
     _cellText = showValues ? formattedValue : INVISIBLE_HYPERLINK_VALUE;
     _popupText = _resultValue == null ? "" :
