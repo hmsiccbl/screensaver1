@@ -59,14 +59,15 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
           LibraryType.COMMERCIAL,
           1,
           3);
-        dao.loadOrCreateWellsForLibrary(library);
         dao.persistEntity(library);
+        dao.flush();
+        
         screenResultParser.parse(screen, 
                                  workbookFile);
         for (ParseError error: screenResultParser.getErrors()) {
           System.out.println("error: " + error);
         }
-        assertEquals(Collections.EMPTY_LIST, screenResultParser.getErrors());
+        assertFalse(screenResultParser.getHasErrors());
         dao.persistEntity(screen);
       }
     });
@@ -78,10 +79,10 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
         assertNotNull(screenResult);
         ResultValueType rvt0 = screenResult.getResultValueTypesList().get(0);
         ResultValue rv = rvt0.getResultValues().get(new WellKey(1,0,0));
-        assertEquals("1071894.0", rv.getValue());
+        assertEquals("1071894", rv.getValue());
         // this tests how Hibernate will make use of WellKey, initializing with a concatenated key string
         rv = rvt0.getResultValues().get(new WellKey("00001:A01"));
-        assertEquals("1071894.0", rv.getValue());
+        assertEquals("1071894", rv.getValue());
       }
     });
     

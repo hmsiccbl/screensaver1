@@ -155,11 +155,7 @@ public class ComplexDAOTest extends AbstractSpringTest
             Compound.class,
             "compound P");
           compound.setChembankId("P");
-          Well well = dao.defineEntity(
-            Well.class,
-            library,
-            27,
-            "A01");
+          Well well = new Well(library, 27, "A01");
           well.addCompound(compound);
         }
       });

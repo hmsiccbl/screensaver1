@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.io.screenresults;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -159,7 +160,9 @@ public class ScreenResultParserTest extends AbstractSpringTest
                  0.0001);
 
     // test numeric precision (TODO: should probably be a separate unit test)
-    assertEquals("precision of numeric format on formula cell", 4, cell.getDoublePrecision());
+    Cell numericFormatFormulaCell = cellFactory.getCell((short) 2, (short) 0, false);
+    assertEquals("precision of numeric format on formula cell", 4, 
+                 numericFormatFormulaCell.getDoublePrecision());
     Cell generalFormatFormulaCell = cellFactory.getCell((short) 3, (short) 0);
     assertEquals("precision of general format on formula cell", -1, 
                  generalFormatFormulaCell.getDoublePrecision());
@@ -169,6 +172,12 @@ public class ScreenResultParserTest extends AbstractSpringTest
     Cell numericFormatNumericCell = cellFactory.getCell((short) 1, (short) 0);
     assertEquals("precision of numeric format on numeric cell", 3, 
                  numericFormatNumericCell.getDoublePrecision());
+    Cell integerNumericFormatNumericCell = cellFactory.getCell((short) 4, (short) 0);
+    assertEquals("precision of integer number format on numeric cell", 0, 
+                 integerNumericFormatNumericCell.getDoublePrecision());
+    Cell percentageNumericCell = cellFactory.getCell((short) 5, (short) 0);
+    assertEquals("precision of percentage number format on numeric cell", 3, 
+                 percentageNumericCell.getDoublePrecision());
   }
   
   public void testDetectEmptyRow() throws Exception
@@ -499,9 +508,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
                            expectedNumericValue,
                            rv.getNumericValue(),
                            0.001);
-              assertEquals("rvt " + iRvt + " well #" + iWell + " result value (numeric formatted as string)",
-                           expectedValues[iWell][iRvt] == null ? "" : String.format("%g", expectedNumericValue),
-                           rv.getValue());
             }
             else {
               assertEquals("rvt " + iRvt + " well #" + iWell + " result value (non-numeric)",

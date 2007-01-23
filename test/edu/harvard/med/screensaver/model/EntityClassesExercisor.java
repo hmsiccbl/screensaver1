@@ -24,6 +24,7 @@ import java.util.Map;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.NonCherryPickVisit;
 import edu.harvard.med.screensaver.model.screens.Visit;
 
@@ -54,6 +55,7 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
   private long    _dateMilliseconds = 0;
   private int     _vocabularyTermCounter = 0;
   private int     _wellNameTestValueIndex = 0;
+  private WellKey _wellKeyTestValue = new WellKey("00001:A01");
   
   @SuppressWarnings("unchecked")
   protected Object getTestValueForType(Class type)
@@ -93,10 +95,30 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
         fail("vocabulary term test value code threw an exception");
       }
     }    
+    if (WellKey.class.isAssignableFrom(type)) {
+      return nextWellKey(_wellKeyTestValue);
+    }
     throw new IllegalArgumentException(
       "can't create test values for type: " + type.getName());
   }
   
+  private Object nextWellKey(WellKey wellKey)
+  {
+    int col = wellKey.getColumn() + 1;
+    int row = wellKey.getRow();
+    int plateNumber = wellKey.getPlateNumber();
+    if (col >= Well.PLATE_COLUMNS) {
+      col = 0;
+      ++row;
+    }
+    if (row >= Well.PLATE_ROWS) {
+      row = 0;
+      ++plateNumber;
+    }
+    _wellKeyTestValue = new WellKey(plateNumber, row, col);
+    return _wellKeyTestValue;
+  }
+
   private Object getTestValueForWellName()
   {
     String wellName = String.format("%c%02d",
@@ -193,10 +215,6 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
   {
     Class[] parameterTypes = constructor.getParameterTypes();
     Object[] arguments = getArgumentsForParameterTypes(parameterTypes);
-    // HACK: special cases
-    if (constructor.getDeclaringClass().equals(Well.class)) {
-      arguments[2] = getTestValueForWellName();
-    }
     return arguments;
   }
 

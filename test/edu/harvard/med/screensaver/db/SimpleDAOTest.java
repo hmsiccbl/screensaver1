@@ -21,6 +21,8 @@ import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -159,27 +161,29 @@ public class SimpleDAOTest extends AbstractSpringTest
   
   public void testFindEntityByProperties()
   {
+    final Library[] expectedLibrary = new Library[1];
     dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
-        Map<String,Object> name2Value = new HashMap<String,Object>();
-        name2Value.put("plateNumber", new Integer(1));
-        name2Value.put("wellName", "A01");
-
-        Library library = dao.defineEntity(Library.class,
+        expectedLibrary[0] = dao.defineEntity(Library.class,
           "ln1",
           "sn1",
           ScreenType.SMALL_MOLECULE,
           LibraryType.NATURAL_PRODUCTS,
           1,
           50);
-        Well expectedWell = dao.defineEntity(Well.class,
-          library,
-          name2Value.get("plateNumber"),
-          name2Value.get("wellName"));
-        Well actualWell = dao.findEntityByProperties(Well.class, name2Value);
-        assertTrue(actualWell.isEquivalent(expectedWell));
+      }
+    });
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Map<String,Object> props = new HashMap<String,Object>();
+        props.put("startPlate", 1);
+        props.put("endPlate", 50);
+        Library actualLibrary = dao.findEntityByProperties(Library.class, props);
+        assertEquals(expectedLibrary[0], actualLibrary);
       }
     });
   }

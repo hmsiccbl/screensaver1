@@ -32,8 +32,6 @@ public class WellTest extends TestCase
   
   public void testWellNameParser()
   {
-    // TODO: should test based upon some fixed plate size (size shouldn't be
-    // determined here)
     for (char row = Character.toLowerCase(Well.MIN_WELL_ROW); row <= Character.toLowerCase(Well.MAX_WELL_ROW); ++row) {
       for (int col = 0; col < Well.PLATE_COLUMNS; ++col) {
         doTestWellName(row, col);

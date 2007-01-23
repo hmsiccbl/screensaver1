@@ -183,7 +183,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     assertNotNull("error 1 has cell", error.getCell());
     assertEquals(
       "cell for error 1",
-      "data row errors.xls:Human Kinases:(A,3)",
+      "Human Kinases:(A,3)",
       error.getCell().toString());
 
     // error 2
@@ -195,7 +195,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     assertNotNull("error 2 has cell", error.getCell());
     assertEquals(
       "cell for error 2",
-      "data row errors.xls:Human Kinases:(B,4)",
+      "Human Kinases:(B,4)",
       error.getCell().toString());
 
     // error 3
@@ -207,7 +207,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     assertNotNull("error 3 has cell", error.getCell());
     assertEquals(
       "cell for error 3",
-      "data row errors.xls:Human Kinases:(B,5)",
+      "Human Kinases:(B,5)",
       error.getCell().toString());
 
     // error 4
@@ -219,7 +219,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     assertNotNull("error 4 has cell", error.getCell());
     assertEquals(
       "cell for error 4",
-      "data row errors.xls:Human Kinases:(F,6)",
+      "Human Kinases:(F,6)",
       error.getCell().toString());
 
     // error 5
@@ -231,7 +231,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     assertNotNull("error 5 has cell", error.getCell());
     assertEquals(
       "cell for error 5",
-      "data row errors.xls:Human Kinases:(G,7)",
+      "Human Kinases:(G,7)",
       error.getCell().toString());
 
     // error 6
@@ -243,7 +243,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     assertNotNull("error 6 has cell", error.getCell());
     assertEquals(
       "cell for error 6",
-      "data row errors.xls:Human Kinases:(H,8)",
+      "Human Kinases:(H,8)",
       error.getCell().toString());
 
     // error 7
@@ -255,7 +255,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     assertNotNull("error 7 has cell", error.getCell());
     assertEquals(
       "cell for error 7",
-      "data row errors.xls:Human Kinases:(H,9)",
+      "Human Kinases:(H,9)",
       error.getCell().toString());
 
     // error 8
@@ -267,7 +267,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     assertNotNull("error 8 has cell", error.getCell());
     assertEquals(
       "cell for error 8",
-      "data row errors.xls:Human Kinases:(H,9)",
+      "Human Kinases:(H,9)",
       error.getCell().toString());
   }
 
