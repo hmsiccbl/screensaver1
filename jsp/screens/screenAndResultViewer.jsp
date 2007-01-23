@@ -88,7 +88,7 @@
 				</t:panelGroup>
 
 				<t:panelGrid columns="2" styleClass="standardTable"
-					columnClasses="keyColumn,column" rowClasses="row1,row2">
+					columnClasses="keyColumn,textColumn" rowClasses="row1,row2">
 					<%-- as long as screenResult.dateCreated is synonymous with "first vist date", 
 				       there's no point in displaying this redundant field, as visit date are 
 				       shown in screen panel --%>
@@ -210,7 +210,7 @@
 					rowClasses="row1,row2">
 					<t:columns value="#{screenResultViewer.sortManager.columnModel}"
 						var="columnName"
-						styleClass="#{screenResultViewer.numericColumn ? \"numericColumn\" : \"textColumn\"} #{screenResultViewer.resultValueCellExcluded ? \"excludedValue\" : \"\"} ">
+						styleClass="#{(columnName==\"Plate\" || columnName==\"Well\") ? \"keyColumn\" : (screenResultViewer.numericColumn ? \"numericColumn\" : \"textColumn\")} #{screenResultViewer.resultValueCellExcluded ? \"excludedValue\" : \"\"} ">
 						<f:facet name="header">
 							<t:commandLink
 								action="#{screenResultViewer.sortManager.sortOnColumn}"

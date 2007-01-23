@@ -153,21 +153,25 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	padding-right: 3px;
 }
 
+/* table columns that contain text should have a min width to make text readable (not too vertical) */
 .textColumn {
-	width: 80px;
+	min-width: 80px;
 }
 
 .keyColumn {
 	font-weight: bold;
+	/* allows data columns to dominate the table width; still given the width it needs */
+	width: 1px;
 }
 
-.column,.keyColumn {
+.column,.textColumn,.keyColumn {
 	text-align: left;
 }
 
 .numericColumn {
 	text-align: right;
-	max-width: 80px;
+	/* allows text columns to dominate the table width; still given the width it needs */
+	width: 1px;
 }
 
 .excludedValue {
@@ -181,6 +185,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	background-color: #bbbbbb;
 	padding-left: 1px;
 	padding-right: 1px;
+	text-align: left;
 }
 
 .row1,.row2 {
