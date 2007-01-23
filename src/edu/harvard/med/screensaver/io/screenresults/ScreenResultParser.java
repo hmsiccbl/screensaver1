@@ -753,6 +753,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         List<ResultValueType> wellExcludes = _excludeParser.parseList(dataCell(iRow, DataColumn.EXCLUDE));
         int iDataHeader = 0;
         for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+          // TODO: raw data cells should probably be required; but maybe we want maintain leniency here in case real-life data is missing for some reason?
           Cell cell = dataCell(iRow, iDataHeader);
           boolean isExclude = (wellExcludes != null && wellExcludes.contains(rvt));
           try {
