@@ -469,6 +469,20 @@ public class ScreenResultViewer extends AbstractBackingBean
     }
   }
   
+  public String nextPlate()
+  {
+    int rowsPerPage = getDataTable().getRows();
+    assert (Well.PLATE_ROWS * Well.PLATE_COLUMNS) % rowsPerPage == 0 : "expected rows per page to divide evenly into plate well size";
+    return gotoPage(getPageIndex() + (Well.PLATE_ROWS * Well.PLATE_COLUMNS) / rowsPerPage); 
+  }
+  
+  public String prevPlate()
+  {
+    int rowsPerPage = getDataTable().getRows();
+    assert (Well.PLATE_ROWS * Well.PLATE_COLUMNS) % rowsPerPage == 0 : "expected rows per page to divide evenly into plate well size";
+    return gotoPage(getPageIndex() - (Well.PLATE_ROWS * Well.PLATE_COLUMNS) / rowsPerPage); 
+  }
+  
   public String nextPage()
   {
     return gotoPage(getPageIndex() + 1); 

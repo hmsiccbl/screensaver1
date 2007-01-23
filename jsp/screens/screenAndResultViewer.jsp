@@ -232,11 +232,17 @@
 						action="#{screenResultViewer.firstPage}" value="First"
 						image="/images/arrow-first.png" styleClass="command" />
 					<t:commandButton id="prevPageCommand"
+						action="#{screenResultViewer.prevPlate}" value="Prev Plate"
+						image="/images/arrow-fastrewind.png" styleClass="command" />
+					<t:commandButton id="prevPlateCommand"
 						action="#{screenResultViewer.prevPage}" value="Prev"
 						image="/images/arrow-previous.png" styleClass="command" />
 					<t:commandButton id="nextPageCommand"
 						action="#{screenResultViewer.nextPage}" value="Next"
 						image="/images/arrow-next.png" styleClass="command" />
+					<t:commandButton id="nextPlateCommand"
+						action="#{screenResultViewer.nextPlate}" value="Next Plate"
+						image="/images/arrow-fastforward.png" styleClass="command" />
 					<h:commandButton id="lastPageCommand"
 						action="#{screenResultViewer.lastPage}" value="Last"
 						image="/images/arrow-last.png" styleClass="command" />
