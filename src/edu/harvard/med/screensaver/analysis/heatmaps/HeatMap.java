@@ -106,7 +106,7 @@ public class HeatMap
   public double getRawValue(int row, int column)
   {
     ResultValue rv = getResultValue(row, column);
-    if (rv == null) {
+    if (rv == null || rv.getNumericValue() == null) {
       return Double.NaN;
     }
     return rv.getNumericValue();
@@ -115,10 +115,10 @@ public class HeatMap
   public double getScoredValue(int row, int column)
   {
     ResultValue rv = getResultValue(row, column);
-    if (rv == null) {
+    if (rv == null || rv.getNumericValue() == null) {
       return Double.NaN;
     }
-    return _scoringFunc.compute(getRawValue(row, column));
+    return _scoringFunc.compute(rv.getNumericValue());
   }
 
   public int getCount()
