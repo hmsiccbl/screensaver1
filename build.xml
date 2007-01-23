@@ -70,7 +70,7 @@
   <condition 
     property="appserver.start.cmd.options" 
     value="jpda start"
-    else="">
+    else="start">
     <istrue value="${debug}"/>
   </condition>
   <property name="war.build.dir" location="build/war"/>
