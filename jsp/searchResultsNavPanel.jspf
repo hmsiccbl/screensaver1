@@ -66,7 +66,7 @@
 					<f:selectItems
 						value="#{navigator.itemsPerPageSelector.selectItems}" />
 				</t:selectOneMenu>
-				<t:outputText value=" per page" />
+				<t:outputText value=" per page" styleClass="inputLabel" />
 			</t:panelGroup>
 		</h:form>
 

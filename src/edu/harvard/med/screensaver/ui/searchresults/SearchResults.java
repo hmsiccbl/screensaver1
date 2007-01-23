@@ -48,15 +48,13 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   
   private static final Logger log = Logger.getLogger(SearchResults.class);
   
-  private static final int [] PAGESIZES = { 10, 20, 50, 100 };
-  private static final int DEFAULT_PAGESIZE = PAGESIZES[1];
-  
   public static final String SD_FILE = "SDFile";
   private static final String EXCEL_FILE = "Excel Spreadsheet";
   private static final String [] DOWNLOAD_FORMATS = { "", EXCEL_FILE, SD_FILE };
 
   private static final List<String> PAGE_SIZE_SELECTIONS =
     Arrays.asList("10", "20", "50", "100", "All");
+  private static final String DEFAULT_PAGESIZE = PAGE_SIZE_SELECTIONS.get(1);
   
 
   // private instance data
@@ -70,7 +68,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   private int _resultsSize;
   private int _currentPageIndex = 0;
   private int _currentEntityIndex = 0;
-  private UISelectOneBean<String> _itemsPerPage = new UISelectOneBean<String>(PAGE_SIZE_SELECTIONS);
+  private UISelectOneBean<String> _itemsPerPage = new UISelectOneBean<String>(PAGE_SIZE_SELECTIONS, DEFAULT_PAGESIZE);
   private String _downloadFormat = "";
   
   private UIData _dataTable;
