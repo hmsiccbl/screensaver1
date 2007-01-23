@@ -36,7 +36,6 @@ public class HeatMapCell
   
   private String _cellText;
   private ResultValue _resultValue;
-  private boolean _containsValue;
   private String _popupText;
   private String _style;
   private WellKey _wellKey;
@@ -53,11 +52,22 @@ public class HeatMapCell
   {
     _resultValue = resultValue;
     _wellKey = wellKey;
-    _containsValue = resultValue != null && resultValue.isDataProducerWell();
-    String formattedValue = _containsValue ? format.format(scoredValue) : "<empty>";
-    _cellText = showValues ? formattedValue : INVISIBLE_HYPERLINK_VALUE;
-    _popupText = _resultValue == null ? "" :
-      _wellKey.getWellName() + ": " + formattedValue;
+    _popupText = "<missing>";
+    String formattedValue = null;
+    if (resultValue != null) {
+      if (resultValue.isExclude()) {
+        _popupText = "<exclude>";
+      }
+      else if (resultValue.isDataProducerWell() && resultValue.getValue() != null) {
+        formattedValue = _popupText = format.format(scoredValue);
+      }
+      else if (resultValue.isEmptyWell()) {
+        _popupText = "<empty>";
+      }
+    }
+    
+    _cellText = showValues && formattedValue != null ? formattedValue : INVISIBLE_HYPERLINK_VALUE;
+    _popupText = _wellKey.getWellName() + ": " + _popupText;
     _style = getStyle(resultValue, color);
   }
 
@@ -102,7 +112,8 @@ public class HeatMapCell
         return "background-color: " + hexColor;
       }
       else if (resultValue.isControlWell()) {
-        return "background-color: " + hexColor + "; border-style: double";
+        // note: if you change the border-width, also change heatMapCell.border-width in screensaver.css
+        return "padding: 0px; border-width: 4px; border-style: double; border-color: black; background-color: " + hexColor;
       }
     }
 

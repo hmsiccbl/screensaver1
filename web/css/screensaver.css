@@ -107,18 +107,18 @@ hr {
 
 .heatMapTable {
 	border-style: none;
-	border-collapse: collapse;
-	font-size: x-small;
-	text-align: center;
-}
-
-.heatMapBorderColumn {
+	/* controls space between cells */
+	border-spacing: 1px;
+	font-size: xx-small;
 	text-align: center;
 }
 
 .heatMapCell {
-	width: 30px;
+	border-style: none;
+	width: 20px;
 	height: 20px;
+	/* must match border width for control cells; see HeatMapCell.getStyle() */
+	padding: 4px;
 }
 
 a.heatMapValue:link,a.heatMapValue:visited {
@@ -180,14 +180,21 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	text-decoration: line-through;
 }
 
-.tableHeader,.tableFooter,.heatMapBorderColumn {
+.tableHeader,.heatMapTableHeader {
 	font-size: small;
 	font-weight: bold;
 	color: black;
 	background-color: #bbbbbb;
 	padding-left: 1px;
 	padding-right: 1px;
+}
+
+.tableHeader {
 	text-align: left;
+}
+
+.heatMapTableHeader {
+	text-align: center;
 }
 
 .row1,.row2 {

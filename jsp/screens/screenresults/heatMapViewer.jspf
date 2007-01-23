@@ -111,9 +111,9 @@ TODO:
 			<t:dataTable id="heatMapTable"
 				value="#{heatMapViewer.heatMapDataModels[heatMapIndex]}"
 				var="plateRow" rowIndexVar="plateRowIndex" renderedIfEmpty="false"
-				styleClass="heatMapTable" headerClass="tableHeader"
-				preserveDataModel="false" footerClass="tableFooter">
-				<t:column styleClass="heatMapBorderColumn">
+				styleClass="heatMapTable" headerClass="heatMapTableHeader"
+				footerClass="heatMapTableHeader" preserveDataModel="false">
+				<t:column styleClass="heatMapTableHeader">
 					<f:facet name="header">
 					</f:facet>
 					<t:outputText
@@ -136,7 +136,7 @@ TODO:
 							escape="false" />
 					</h:commandLink>
 				</t:columns>
-				<t:column styleClass="heatMapBorderColumn">
+				<t:column styleClass="heatMapTableHeader">
 					<f:facet name="header">
 					</f:facet>
 					<t:outputText
@@ -149,6 +149,18 @@ TODO:
 			<t:panelGrid columns="1">
 
 				<t:panelGrid columns="2">
+
+					<t:dataTable id="statisticsTable"
+						value="#{heatMapViewer.heatMapStatisticsDataModels[heatMapIndex]}"
+						var="statistic" styleClass="standardTable">
+						<t:column>
+							<t:outputText value="#{statistic.name}" styleClass="inputLabel" />
+						</t:column>
+						<t:column style="text-align: right">
+							<t:outputText value="#{statistic.value}" styleClass="data" />
+						</t:column>
+					</t:dataTable>
+
 					<t:dataTable id="colorLegend"
 						value="#{heatMapViewer.colorLegendDataModel}" var="step"
 						style="height: 100%">
@@ -159,16 +171,6 @@ TODO:
 						</t:column>
 					</t:dataTable>
 
-					<t:dataTable id="statisticsTable"
-						value="#{heatMapViewer.heatMapStatisticsDataModels[heatMapIndex]}"
-						var="statistic" styleClass="standardTable">
-						<t:column>
-							<t:outputText value="#{statistic.name}" styleClass="inputLabel" />
-						</t:column>
-						<t:column style="text-align: right">
-							<t:outputText value="#{statistic.value}" />
-						</t:column>
-					</t:dataTable>
 				</t:panelGrid>
 
 				<t:dataTable value="#{heatMapViewer.cellTypeLegendDataModel}"
