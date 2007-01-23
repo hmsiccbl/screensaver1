@@ -107,7 +107,7 @@ TODO:
 		</t:column>
 
 		<t:column>
-			<t:outputText value="#{heatMapViewer.heatMapTitle}"/>
+			<t:outputText value="#{heatMapViewer.heatMapTitle}" />
 			<t:dataTable id="heatMapTable"
 				value="#{heatMapViewer.heatMapDataModels[heatMapIndex]}"
 				var="plateRow" rowIndexVar="plateRowIndex" renderedIfEmpty="false"
@@ -121,7 +121,8 @@ TODO:
 				</t:column>
 				<t:columns
 					value="#{heatMapViewer.heatMapColumnDataModels[heatMapIndex]}"
-					var="columnIndex" styleClass="heatMapCell" style="#{heatMapViewer.heatMapCell.style}">
+					var="columnIndex" styleClass="heatMapCell"
+					style="#{heatMapViewer.heatMapCell.style}">
 					<f:facet name="header">
 						<t:outputText value="#{columnIndex + 1}" styleClass="keyColumn" />
 					</f:facet>
@@ -145,28 +146,45 @@ TODO:
 		</t:column>
 
 		<t:column>
-			<t:dataTable id="legend"
-				value="#{heatMapViewer.colorLegendDataModel}" var="step"
-				style="height: 100%">
-				<t:column style="#{step.first}; text-align: right">
-					<t:div style="min-width: 20px; min-height: 6px">
-						<t:outputText value="#{step.second}" style="font-size: xx-small"/>
-					</t:div>
-				</t:column>
-			</t:dataTable>
+			<t:panelGrid columns="1">
+
+				<t:panelGrid columns="2">
+					<t:dataTable id="colorLegend"
+						value="#{heatMapViewer.colorLegendDataModel}" var="step"
+						style="height: 100%">
+						<t:column style="#{step.first}; text-align: right">
+							<t:div style="min-width: 20px; min-height: 6px">
+								<t:outputText value="#{step.second}" style="font-size: xx-small" />
+							</t:div>
+						</t:column>
+					</t:dataTable>
+
+					<t:dataTable id="statisticsTable"
+						value="#{heatMapViewer.heatMapStatisticsDataModels[heatMapIndex]}"
+						var="statistic" styleClass="standardTable">
+						<t:column>
+							<t:outputText value="#{statistic.name}" styleClass="inputLabel" />
+						</t:column>
+						<t:column style="text-align: right">
+							<t:outputText value="#{statistic.value}" />
+						</t:column>
+					</t:dataTable>
+				</t:panelGrid>
+
+				<t:dataTable value="#{heatMapViewer.cellTypeLegendDataModel}"
+					var="legendItem">
+					<t:column>
+						<t:outputText value="#{legendItem.name}" styleClass="inputLabel" />
+					</t:column>
+					<t:column styleClass="heatMapCell" style="#{legendItem.cellStyle}">
+						<t:outputText value="#{legendItem.cellText}" escape="false" />
+					</t:column>
+				</t:dataTable>
+
+			</t:panelGrid>
 		</t:column>
 
 		<t:column style="vertical-align: center">
-			<t:dataTable id="statisticsTable"
-				value="#{heatMapViewer.heatMapStatisticsDataModels[heatMapIndex]}"
-				var="statistic" styleClass="standardTable" style="border: none">
-				<t:column>
-					<t:outputText value="#{statistic.name}" />
-				</t:column>
-				<t:column style="text-align: right">
-					<t:outputText value="#{statistic.value}" />
-				</t:column>
-			</t:dataTable>
 		</t:column>
 	</t:dataTable>
 

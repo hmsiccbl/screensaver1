@@ -28,7 +28,7 @@ public class HeatMapCell
 {
   // static members
 
-  private static final String INVISIBLE_HYPERLINK_VALUE = "&nbsp;&nbsp;&nbsp;&nbsp;";
+  public static final String INVISIBLE_HYPERLINK_VALUE = "&nbsp;&nbsp;&nbsp;&nbsp;";
 
   private static Logger log = Logger.getLogger(HeatMapCell.class);
 
@@ -58,8 +58,7 @@ public class HeatMapCell
     _cellText = showValues ? formattedValue : INVISIBLE_HYPERLINK_VALUE;
     _popupText = _resultValue == null ? "" :
       _wellKey.getWellName() + ": " + formattedValue;
-    
-    updateStyle(resultValue, color);
+    _style = getStyle(resultValue, color);
   }
 
   public HeatMapCell()
@@ -91,28 +90,24 @@ public class HeatMapCell
   
   // protected methods
   
-  protected void updateStyle(ResultValue resultValue, Color color)
+  public static String getStyle(ResultValue resultValue, Color color)
   {
     String hexColor = String.format("#%02x%02x%02x",
-      color.getRed(),
-      color.getGreen(),
-      color.getBlue());
+                                    color.getRed(),
+                                    color.getGreen(),
+                                    color.getBlue());
 
-    if (resultValue != null &&
-      !resultValue.isExclude()) {
+    if (resultValue != null && resultValue.getValue() != null && !resultValue.isExclude()) {
       if (resultValue.isExperimentalWell()) {
-        _style = "background-color: " + hexColor;
-        return;
+        return "background-color: " + hexColor;
       }
-      else if (_resultValue.isControlWell()) {
-        _style = "background-color: " + hexColor + "; border-style: double";
-        return;
+      else if (resultValue.isControlWell()) {
+        return "background-color: " + hexColor + "; border-style: double";
       }
     }
 
     // non-data-producing well
-    _style = "background-color: transparent";
+    return "background-color: #eeeeee";
   }
-
 }
 

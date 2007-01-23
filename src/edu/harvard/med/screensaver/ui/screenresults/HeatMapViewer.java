@@ -31,6 +31,7 @@ import edu.harvard.med.screensaver.analysis.heatmaps.HeatMap;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -80,6 +81,14 @@ public class HeatMapViewer extends AbstractBackingBean
   private static final Double SAMPLE_NUMBER = new Double(-1234.567);
   private static final NumberFormat DECIMAL_FORMAT = new DecimalFormat("0.0##");
   private static final int COLOR_LEGEND_GRADIENT_STEPS = 10;
+  private static final DataModel HEAT_MAP_CELL_LEGEND_MODEL;
+  static {
+    List<LegendItem> legendItems = new ArrayList<LegendItem>();
+    legendItems.add(new LegendItem("Experimental", HeatMapCell.getStyle(new ResultValue(AssayWellType.EXPERIMENTAL, 0.0, 0, false), Color.GREEN)));
+    legendItems.add(new LegendItem("Control", HeatMapCell.getStyle(new ResultValue(AssayWellType.ASSAY_CONTROL, 0.0, 0, false), Color.BLUE)));
+    legendItems.add(new LegendItem("Empty/Excluded", HeatMapCell.getStyle(new ResultValue(AssayWellType.EMPTY, 0.0, 0, true), Color.WHITE)));
+    HEAT_MAP_CELL_LEGEND_MODEL = new ListDataModel(legendItems);
+  }
 
 
   private static Logger log = Logger.getLogger(HeatMapViewer.class);
@@ -100,7 +109,6 @@ public class HeatMapViewer extends AbstractBackingBean
   private List<DataModel> _heatMapStatistics;
   private List<DataModel> _heatMapColumnDataModels;
   private List<String> _heatMapRowLabels;
-
   
   // bean property methods
   
@@ -155,6 +163,11 @@ public class HeatMapViewer extends AbstractBackingBean
   public String[] getHeatMapRowLabels()
   {
     return HEAT_MAP_ROW_LABELS;
+  }
+  
+  public DataModel getCellTypeLegendDataModel()
+  {
+    return HEAT_MAP_CELL_LEGEND_MODEL;
   }
 
   public List<DataModel> getHeatMapDataModels()

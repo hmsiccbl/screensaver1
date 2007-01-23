@@ -117,8 +117,8 @@ hr {
 }
 
 .heatMapCell {
-	width: 100px;
-	min-width: 40px;
+	width: 30px;
+	height: 20px;
 }
 
 a.heatMapValue:link,a.heatMapValue:visited {

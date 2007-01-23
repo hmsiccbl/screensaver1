@@ -96,10 +96,10 @@ public class ResultValue
    * @param decimalPrecision the number of digits to appear after the decimal point, when displayed
    * @param exclude the exclude flag of the new ResultValue
    */
-  ResultValue(AssayWellType assayWellType,
-              Double value,
-              int decimalPrecision,
-              boolean exclude)
+  public ResultValue(AssayWellType assayWellType,
+                     Double value,
+                     int decimalPrecision,
+                     boolean exclude)
   {
     setAssayWellType(assayWellType);
     setNumericValue(value);
@@ -396,8 +396,8 @@ public class ResultValue
   }
 
   /**
-   * Set whether this <code>ResultValue</code> is to be excluded in any
-   * subsequent analyses.
+   * Set whether the screener has deemed that this <code>ResultValue</code>
+   * should be excluded in any subsequent analyses.
    * 
    * @param exclude set to <code>true</code> iff this <code>ResultValue</code>
    *          is to be excluded in any subsequent analysis

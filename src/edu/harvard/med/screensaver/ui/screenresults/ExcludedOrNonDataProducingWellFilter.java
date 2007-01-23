@@ -23,7 +23,11 @@ public class ExcludedOrNonDataProducingWellFilter implements Filter<Pair<WellKey
   public boolean exclude(Pair<WellKey,ResultValue> pair)
   {
     ResultValue rv = pair.getSecond();
-    return rv.isExclude() || !rv.isDataProducerWell();
+    return 
+      rv.isExclude() || 
+      !rv.isDataProducerWell() || 
+      // accept case that data was simply missing in the screen result file (this will work for numeric result values as well)
+      rv.getValue() == null;
   }
 }
 
