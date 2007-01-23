@@ -133,7 +133,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 
 .command,.input,.inputLabel {
 	margin-right: 4px;
-	vertical-align: bottom;
+	vertical-align: middle;
 }
 
 .hiddenCommand {

@@ -227,7 +227,7 @@
 					</t:columns>
 				</t:dataTable>
 
-				<t:panelGroup id="dataTableCommandPanel" styleClass="commandPanel">
+				<t:panelGroup id="dataTableCommandPanel" styleClass="commandPanel"  >
 					<h:commandButton id="firstPageCommand"
 						action="#{screenResultViewer.firstPage}" value="First"
 						image="/images/arrow-first.png" styleClass="command" />
@@ -257,7 +257,7 @@
 
 					<t:panelGroup id="showHitsOnlyCommandPanel"
 						rendered="#{!empty screenResultViewer.hitsForDataHeader.selectItems}">
-						<t:selectBooleanCheckbox id="showHitsOnly"
+						<t:selectBooleanCheckbox id="showHitsOnly" styleClass="command"
 							value="#{screenResultViewer.showHitsOnly}" immediate="true"
 							onchange="javascript:document.getElementById('updateDataTableRowsButton').click()" />
 						<t:outputLabel value="Show only hits for" for="showHitsOnly"
