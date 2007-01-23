@@ -76,7 +76,7 @@ public class WellKey implements Comparable
     Matcher matcher = keyPattern.matcher(key);
     if (matcher.matches()) {
       _plateNumber = Integer.parseInt(matcher.group(1));
-      setRow(matcher.group(2).charAt(0) - 'A');
+      setRow(matcher.group(2).toUpperCase().charAt(0) - Well.MIN_WELL_ROW);
       setColumn(Integer.parseInt(matcher.group(3)) - 1);
 //      if (log.isDebugEnabled()) {
 //        log.debug("decomposed key " + key + " to " + this);
@@ -160,7 +160,7 @@ public class WellKey implements Comparable
 
   public void setWellName(String wellName)
   {
-    setRow(wellName.charAt(0) - 'A');
+    setRow(wellName.toUpperCase().charAt(0) - Well.MIN_WELL_ROW);
     setColumn(Integer.parseInt(wellName.substring(1)) - 1);
   }
 
