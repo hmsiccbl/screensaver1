@@ -5,12 +5,23 @@
 
 <f:subview id="compoundLibraryContentsUploaderSubview">
 
-  <h:form id="silencingReagentTypeForm" enctype="multipart/form-data">
-    <t:panelGrid columns="2">
+  <h:form id="viewLibraryForm">
+    <t:panelGroup>
+      <t:outputText value="Library:" />
+      <t:commandLink
+        action="#{compoundLibraryContentsImporter.viewLibrary}"
+        value="#{compoundLibraryContentsImporter.library}"
+        styleClass="spacer"
+      />
+    </t:panelGroup>
+  </h:form>
 
+  <h:form id="uploadLibraryContentsForm" enctype="multipart/form-data">
+    <t:panelGroup>
       <t:outputLabel
         for="uploadCompoundLibraryContentsFile"
         value="Import Compound Library Contents file:"
+        style="margin-right: 4px;"
       />
       <t:inputFileUpload
         id="uploadCompoundLibraryContentsFile"
@@ -21,15 +32,13 @@
         maxlength="134217728"
         styleClass="input"
       />
-      
       <t:commandButton
         id="import"
         value="Import"
         action="#{compoundLibraryContentsImporter.importCompoundLibraryContents}"
         styleClass="command"
       />
-
-    </t:panelGrid>
+    </t:panelGroup>
   </h:form>
 
 </f:subview>

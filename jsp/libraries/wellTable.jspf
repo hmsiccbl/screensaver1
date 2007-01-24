@@ -4,14 +4,17 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 
 <f:subview id="wellTable">
-  
+
+  <t:outputText value="&nbsp;" escape="false" />
+    
   <h:form id="wellTableForm">
     <t:dataTable
       id="wellTable"
       var="well"
       value="#{wells}"
-      headerClass="alignLeft"
-      border="1"
+      styleClass="standardTable"
+      headerClass="tableHeader"
+      rowClasses="row1,row2"
     >
       <t:column>
         <f:facet name="header">

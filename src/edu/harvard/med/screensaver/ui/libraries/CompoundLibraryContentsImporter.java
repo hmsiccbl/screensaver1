@@ -79,6 +79,12 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
     return new ListDataModel(_librariesController.getCompoundLibraryContentsParser().getErrors());
   }
 
+  @UIControllerMethod
+  public String viewLibrary()
+  {
+    return _librariesController.viewLibrary(_library, null);
+  }
+
   /**
    * Parse the compound library contents from the file, and go to the appropriate next page
    * depending on the result.

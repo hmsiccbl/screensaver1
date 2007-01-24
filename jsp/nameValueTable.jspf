@@ -13,7 +13,7 @@
       var="row"
       rows="#{nameValueTable.numRows}"
       rendered="true"
-      styleClass="borderedTable"
+      styleClass="standardTable"
       rowClasses="row1,row2"
       width="100%">
       <t:columns

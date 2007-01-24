@@ -5,9 +5,19 @@
 
 <f:subview id="rnaiLibraryContentsUploaderSubview">
 
-  <h:form id="silencingReagentTypeForm" enctype="multipart/form-data">
-    <t:panelGrid columns="2">
+  <h:form id="viewLibraryForm">
+	<t:panelGroup>
+      <t:outputText value="Library:" styleClass="spacer" />
+      <t:commandLink
+        action="#{rnaiLibraryContentsImporter.viewLibrary}"
+      	value="#{rnaiLibraryContentsImporter.library}"
+        styleClass="spacer"
+      />
+	</t:panelGroup>
+  </h:form>
 
+  <h:form id="uploadLibraryContentsForm" enctype="multipart/form-data">
+    <t:panelGrid columns="2">
       <t:outputLabel
         for="silencingReagentType"
         value="Silencing reagent type:"
