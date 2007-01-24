@@ -122,7 +122,7 @@ abstract public class NameValueTable extends AbstractBackingBean
 
   public String getColumnStyle()
   {
-    return isNameColumn() ? "keyColumn" : "column";
+    return isNameColumn() ? "keyColumn" : "textColumn";
   }
 
   public Object getCellValue()

@@ -19,7 +19,8 @@
       <t:columns
         value="#{nameValueTable.columnModel}"
         var="columnName"
-        styleClass="#{nameValueTable.columnStyle}">
+        styleClass="#{nameValueTable.columnStyle}"
+      >
         <h:outputText
           value="#{nameValueTable.cellValue}"
           rendered="#{nameValueTable.isTextValue}"
@@ -33,7 +34,7 @@
           action="#{nameValueTable.action}"
           value="#{nameValueTable.cellValue}"
           rendered="#{nameValueTable.isCommandValue}"
-        >
+          >
           <f:param name="actionValue" value="#{nameValueTable.cellValue}" />
         </h:commandLink>
         <h:outputLink
