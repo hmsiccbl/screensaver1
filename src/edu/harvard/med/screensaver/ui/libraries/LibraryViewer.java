@@ -17,6 +17,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.namevaluetable.LibraryNameValueTable;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 
 public class LibraryViewer extends AbstractBackingBean
@@ -30,6 +31,7 @@ public class LibraryViewer extends AbstractBackingBean
   private int _librarySize;
   private LibrarySearchResults _librarySearchResults;
   private LibrariesController _librariesController;
+  private LibraryNameValueTable _libraryNameValueTable;
   
 
   // public getters and setters
@@ -90,6 +92,16 @@ public class LibraryViewer extends AbstractBackingBean
   {
     _librarySize = librarySize;
   }
+  
+  public LibraryNameValueTable getLibraryNameValueTable()
+  {
+    return _libraryNameValueTable;
+  }
+  
+  public void setLibraryNameValueTable(LibraryNameValueTable libraryNameValueTable)
+  {
+    _libraryNameValueTable = libraryNameValueTable;
+  }
 
   @UIControllerMethod
   public String viewLibraryContents()
@@ -112,7 +124,6 @@ public class LibraryViewer extends AbstractBackingBean
   @UIControllerMethod
   public String unloadLibraryContents()
   {
-    log.error("CALLING CALLING");
     return _librariesController.unloadLibraryContents(_library);
   }
 }

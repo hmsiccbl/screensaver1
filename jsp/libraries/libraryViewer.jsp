@@ -9,28 +9,9 @@
     <%@ include file="../searchResultsNavPanel.jspf"  %>
   </t:aliasBean>
 
-  <t:panelGrid
-    id="labelsAndDataColumns"
-    columns="2"
-    styleClass="standardTable"
-    rowClasses="row1,row2"
-    columnClasses="keyColumn,column"
-  >
-    <h:outputText value="Library Name" />
-    <h:outputText value="#{libraryViewer.library.libraryName}" />
-    <h:outputText value="Short Name" />
-    <h:outputText value="#{libraryViewer.library.shortName}" />
-    <h:outputText value="Screen Type" />
-    <h:outputText value="#{libraryViewer.library.screenType}" />
-    <h:outputText value="Library Type" />
-    <h:outputText value="#{libraryViewer.library.libraryType}" />
-    <h:outputText value="Vendor" />
-    <h:outputText value="#{libraryViewer.library.vendor}" />
-    <h:outputText value="Description" />
-    <h:outputText value="#{libraryViewer.library.description}" />
-    <h:outputText value="Number of Wells" />
-    <h:outputText value="#{libraryViewer.librarySize}" />
-  </t:panelGrid>
+  <t:aliasBean alias="#{nameValueTable}" value="#{libraryViewer.libraryNameValueTable}" >
+    <%@ include file="../nameValueTable.jspf"  %>
+  </t:aliasBean>
 
   <t:panelGroup rendered="#{libraryViewer.editable}">
     <h:form id="libraryContentsForm">

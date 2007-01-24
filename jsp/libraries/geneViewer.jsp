@@ -9,10 +9,12 @@
     <%@ include file="../searchResultsNavPanel.jspf" %>
   </t:aliasBean>
 
-  <t:aliasBean alias="#{gene}" value="#{geneViewer.gene}">
-    <t:aliasBean alias="#{controller}" value="#{geneViewer}">
-      <%@ include file="geneViewer.jspf" %>
-    </t:aliasBean>
+  <t:aliasBean alias="#{nameValueTable}" value="#{geneViewer.geneNameValueTable}">
+    <%@ include file="../nameValueTable.jspf" %>
+  </t:aliasBean>
+
+  <t:aliasBean alias="#{wells}" value="#{geneViewer.gene.wells}">
+    <%@ include file="wellTable.jspf" %>
   </t:aliasBean>
 
 </f:subview>

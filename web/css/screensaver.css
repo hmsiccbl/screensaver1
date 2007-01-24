@@ -89,6 +89,12 @@ hr {
 	width: 100%;
 }
 
+.borderedTable {
+	color: #000000;
+	border-style: none;
+	border-width: 5px;
+}
+
 /* for panelGroup containing horizontal sequence of command buttons (and possibly input controls) */
 .commandPanel {
 	float: left;

@@ -17,6 +17,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 public class WellViewer extends AbstractBackingBean
@@ -30,6 +31,7 @@ public class WellViewer extends AbstractBackingBean
   private LibrariesController _librariesController;
   private Well _well;
   private WellSearchResults _wellSearchResults;
+  private WellNameValueTable _wellNameValueTable;
   
   
   // public instance methods
@@ -62,6 +64,16 @@ public class WellViewer extends AbstractBackingBean
   public void setWellSearchResults(WellSearchResults searchResults)
   {
     _wellSearchResults = searchResults;
+  }
+
+  public WellNameValueTable getWellNameValueTable()
+  {
+    return _wellNameValueTable;
+  }
+
+  public void setWellNameValueTable(WellNameValueTable wellNameValueTable)
+  {
+    _wellNameValueTable = wellNameValueTable;
   }
 
   @UIControllerMethod

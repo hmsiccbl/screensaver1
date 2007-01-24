@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui.libraries;
 
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.namevaluetable.GeneNameValueTable;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 public class GeneViewer extends AbstractBackingBean
@@ -20,6 +21,7 @@ public class GeneViewer extends AbstractBackingBean
   
   private Gene _gene;
   private WellSearchResults _wellSearchResults;
+  private GeneNameValueTable _geneNameValueTable;
 
   
   // public instance methods
@@ -42,5 +44,15 @@ public class GeneViewer extends AbstractBackingBean
   public void setWellSearchResults(WellSearchResults wellSearchResults)
   {
     _wellSearchResults = wellSearchResults;
+  }
+
+  public GeneNameValueTable getGeneNameValueTable()
+  {
+    return _geneNameValueTable;
+  }
+
+  public void setGeneNameValueTable(GeneNameValueTable geneNameValueTable)
+  {
+    _geneNameValueTable = geneNameValueTable;
   }
 }

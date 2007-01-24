@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.EntityIdProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 
@@ -127,6 +128,23 @@ public class Gene extends AbstractEntity
     return Collections.unmodifiableSet(_silencingReagents);
   }
 
+
+  /**
+   * Get the set of wells that contain silencing reagents for this gene.
+   * @return the set of wells that contain silencing reagents for this gene
+   */
+  @DerivedEntityProperty
+  public Set<Well> getWells()
+  {
+    Set<Well> wells = new HashSet<Well>();
+    for (SilencingReagent silencingReagent : getSilencingReagents()) {
+      for (Well well : silencingReagent.getWells()) {
+        wells.add(well);
+      }
+    }
+    return wells;
+  }
+  
   /**
    * Get the gene name.
    *

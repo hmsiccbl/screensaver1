@@ -21,6 +21,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.dao.DataAccessException;
+
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
@@ -41,17 +47,15 @@ import edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporter;
 import edu.harvard.med.screensaver.ui.libraries.WellFinder;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResultsViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
+import edu.harvard.med.screensaver.ui.namevaluetable.CompoundNameValueTable;
+import edu.harvard.med.screensaver.ui.namevaluetable.GeneNameValueTable;
+import edu.harvard.med.screensaver.ui.namevaluetable.LibraryNameValueTable;
+import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.springframework.dao.DataAccessException;
 
 /**
  * 
@@ -302,6 +306,8 @@ public class LibrariesController extends AbstractUIController
         Library library = (Library) _dao.reloadEntity(libraryIn);
         _libraryViewer.setLibrary(library);
         _libraryViewer.setLibrarySize(_dao.relationshipSize(library, "hbnWells"));
+        _libraryViewer.setLibraryNameValueTable(
+          new LibraryNameValueTable(library, _libraryViewer.getLibrarySize()));
       }
     });
 
@@ -377,6 +383,7 @@ public class LibrariesController extends AbstractUIController
                     "hbnCompounds.nscNumbers",
                     "hbnCompounds.casNumbers");
           _wellViewer.setWell(well);
+          _wellViewer.setWellNameValueTable(new WellNameValueTable(LibrariesController.this, well));
         }
       });
 
@@ -391,8 +398,12 @@ public class LibrariesController extends AbstractUIController
       public void runTransaction()
       {
         Gene gene = (Gene) _dao.reloadEntity(geneIn);
-        _dao.need(gene, "genbankAccessionNumbers");
+        _dao.need(gene,
+          "genbankAccessionNumbers",
+          "hbnSilencingReagents",
+          "hbnSilencingReagents.hbnWells");
         _geneViewer.setGene(gene);
+        _geneViewer.setGeneNameValueTable(new GeneNameValueTable(LibrariesController.this, gene));
       }
     });
       
@@ -415,9 +426,11 @@ public class LibrariesController extends AbstractUIController
                   "nscNumbers",
                   "hbnWells");
         _compoundViewer.setCompound(compound);
+        _compoundViewer.setCompoundNameValueTable(
+          new CompoundNameValueTable(LibrariesController.this, compound));
       }
     });
-      
+
     _compoundViewer.setWellSearchResults(wellSearchResults);
     return "viewCompound";
   }

@@ -1018,14 +1018,14 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       _errors.addError("screen result data file is for screen number " + parsedScreenInfo.getScreenNumber() + ", expected " + screen.getScreenNumber());
     }
     if (parsedScreenInfo.getDateCreated() == null) {
-      if (screen.getVisits().size() > 0) {
-        SortedSet<Visit> sortedVisits = new TreeSet<Visit>(screen.getVisits());
-        parsedScreenInfo.setDate(sortedVisits.first().getVisitDate());
-      }
-      else {
-        log.warn("screen result's screen has 0 visits, so screen result's \"date created\" property will be set to today");
+//      if (screen.getVisits().size() > 0) {
+//        SortedSet<Visit> sortedVisits = new TreeSet<Visit>(screen.getVisits());
+//        parsedScreenInfo.setDate(sortedVisits.first().getVisitDate());
+//      }
+//      else {
+//        log.warn("screen result's screen has 0 visits, so screen result's \"date created\" property will be set to today");
         parsedScreenInfo.setDate(new Date());
-      }
+//      }
     }
     return parsedScreenInfo;
   }

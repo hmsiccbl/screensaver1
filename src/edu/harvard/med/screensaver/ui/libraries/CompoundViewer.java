@@ -20,6 +20,7 @@ import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.namevaluetable.CompoundNameValueTable;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 public class CompoundViewer extends AbstractBackingBean
@@ -55,6 +56,7 @@ public class CompoundViewer extends AbstractBackingBean
   private LibrariesController _librariesController;
   private Compound _compound;
   private WellSearchResults _wellSearchResults;
+  private CompoundNameValueTable _compoundNameValueTable;
 
   
   // public getters and setters
@@ -87,6 +89,16 @@ public class CompoundViewer extends AbstractBackingBean
   public void setWellSearchResults(WellSearchResults wellSearchResults)
   {
     _wellSearchResults = wellSearchResults;
+  }
+
+  public CompoundNameValueTable getCompoundNameValueTable()
+  {
+    return _compoundNameValueTable;
+  }
+
+  public void setCompoundNameValueTable(CompoundNameValueTable compoundNameValueTable)
+  {
+    _compoundNameValueTable = compoundNameValueTable;
   }
 
   public Map<String,String> getCompoundImageUrl()

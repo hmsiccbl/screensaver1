@@ -390,8 +390,8 @@ public class ICBGReportGenerator
     row.createCell((short) 2).setCellValue(wellName);
     row.createCell((short) 3).setCellValue(assayInfo.getAssayCategory());
     row.createCell((short) 4).setCellValue(assayName);
-    if (numericalRV != null) {
-      row.createCell((short) 5).setCellValue(numericalRV.getValue());
+    if (numericalRV != null && numericalRV.getNumericValue() != null) {
+      row.createCell((short) 5).setCellValue(numericalRV.getNumericValue());
       row.createCell((short) 6).setCellValue(numericalRVT.getDescription());
     }
     if (scaledOrBooleanRV != null) {
