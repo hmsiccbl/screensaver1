@@ -24,13 +24,13 @@ public class LibraryNameValueTable extends NameValueTable
   
   private static final Logger log = Logger.getLogger(LibraryNameValueTable.class);
   private static final String [] NAMES = {
-    "Library Name",
-    "Short Name",
-    "Screen Type",
-    "Library Type",
+    "Library&nbsp;Name",
+    "Short&nbsp;Name",
+    "Screen&nbsp;Type",
+    "Library&nbsp;Type",
     "Vendor",
     "Description",
-    "Number of Wells",
+    "Number&nbsp;of&nbsp;Wells",
   };
 
   

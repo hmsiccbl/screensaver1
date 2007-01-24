@@ -36,14 +36,14 @@ public class CompoundNameValueTable extends NameValueTable
   private static final String STRUCTURE = "Structure";
   private static final String SMILES = "Smiles";
   private static final String INCHI = "InChI";
-  private static final String COMPOUND_NAMES = "Compound Names";
-  private static final String MOLECULAR_MASS = "Molecular Mass";
-  private static final String MOLECULAR_FORMULA = "Molecular Formula";
-  private static final String PUBCHEM_CIDS = "PubChem CIDs";
-  private static final String CHEMBANK_IDS = "ChemBank ID";
-  private static final String IS_SALT = "Is Salt";
-  private static final String NSC_NUMBERS = "NSC Numbers";
-  private static final String CAS_NUMBERS = "CAS Numbers";
+  private static final String COMPOUND_NAMES = "Compound&nbsp;Names";
+  private static final String MOLECULAR_MASS = "Molecular&nbsp;Mass";
+  private static final String MOLECULAR_FORMULA = "Molecular&nbsp;Formula";
+  private static final String PUBCHEM_CIDS = "PubChem&nbsp;CIDs";
+  private static final String CHEMBANK_IDS = "ChemBank&nbsp;ID";
+  private static final String IS_SALT = "Is&nbsp;Salt";
+  private static final String NSC_NUMBERS = "NSC&nbsp;Numbers";
+  private static final String CAS_NUMBERS = "CAS&nbsp;Numbers";
 
   
   // private instance fields

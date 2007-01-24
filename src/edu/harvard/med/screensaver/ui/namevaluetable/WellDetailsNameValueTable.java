@@ -33,9 +33,9 @@ public class WellDetailsNameValueTable extends NameValueTable
   private static final String LIBRARY = "Library";
   private static final String PLATE = "Plate";
   private static final String WELL = "Well";
-  private static final String WELL_TYPE = "Well Type";
-  private static final String ICCB_NUMBER = "ICCB Number";
-  private static final String VENDOR_IDENTIFIER = "Vendor Identifier";
+  private static final String WELL_TYPE = "Well&nbsp;Type";
+  private static final String ICCB_NUMBER = "ICCB&nbsp;Number";
+  private static final String VENDOR_IDENTIFIER = "Vendor&nbsp;Identifier";
 
   
   // private instance fields

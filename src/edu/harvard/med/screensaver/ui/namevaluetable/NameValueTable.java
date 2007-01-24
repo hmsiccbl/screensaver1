@@ -133,14 +133,14 @@ abstract public class NameValueTable extends AbstractBackingBean
     return getValue(getRowIndex());
   }
 
-  public boolean getIsNameOrTextValue()
+  public boolean getIsTextValue()
   {
-    return isNameColumn() || getValueType(getRowIndex()).equals(ValueType.TEXT);
+    return ! isNameColumn() && getValueType(getRowIndex()).equals(ValueType.TEXT);
   }
   
-  public boolean getIsUnescapedTextValue()
+  public boolean getIsNameOrUnescapedTextValue()
   {
-    return ! isNameColumn() && getValueType(getRowIndex()).equals(ValueType.UNESCAPED_TEXT);
+    return isNameColumn() || getValueType(getRowIndex()).equals(ValueType.UNESCAPED_TEXT);
   }
 
   public boolean getIsCommandValue()

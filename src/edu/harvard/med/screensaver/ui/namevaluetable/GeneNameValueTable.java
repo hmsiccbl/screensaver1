@@ -30,11 +30,11 @@ public class GeneNameValueTable extends NameValueTable
   private static final String ENTREZGENE_ID_LOOKUP_URL_PREFIX =
     "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=gene&cmd=Retrieve&dopt=full_report&list_uids=";
   
-  private static final String GENE_NAME = "Gene Name";
-  private static final String ENTREZGENE_ID = "EntrezGene ID";
-  private static final String ENTREZGENE_SYMBOL = "EntrezGene Symbol";
-  private static final String GENBANK_ACCESSION_NUMBERS = "GenBank Accession Numbers";
-  private static final String SPECIES_NAME = "Species Name";
+  private static final String GENE_NAME = "Gene&nbsp;Name";
+  private static final String ENTREZGENE_ID = "EntrezGene&nbsp;ID";
+  private static final String ENTREZGENE_SYMBOL = "EntrezGene&nbsp;Symbol";
+  private static final String GENBANK_ACCESSION_NUMBERS = "GenBank&nbsp;Accession&nbsp;Numbers";
+  private static final String SPECIES_NAME = "Species&nbsp;Name";
 
   
   // private instance fields

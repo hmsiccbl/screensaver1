@@ -22,11 +22,11 @@
         styleClass="#{nameValueTable.columnStyle}">
         <h:outputText
           value="#{nameValueTable.cellValue}"
-          rendered="#{nameValueTable.isNameOrTextValue}"
+          rendered="#{nameValueTable.isTextValue}"
         />
         <h:outputText
           value="#{nameValueTable.cellValue}"
-          rendered="#{nameValueTable.isUnescapedTextValue}"
+          rendered="#{nameValueTable.isNameOrUnescapedTextValue}"
           escape="false"
         />
         <h:commandLink
