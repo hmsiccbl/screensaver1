@@ -66,6 +66,11 @@ public class ScreenResultImporter extends AbstractBackingBean
   {
     _screen = screen;
   }
+  
+  public Screen getScreen()
+  {
+    return _screen;
+  }
 
   public void setScreenResultParser(ScreenResultParser screenResultParser) {
     _screenResultParser = screenResultParser;

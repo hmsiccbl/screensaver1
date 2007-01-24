@@ -234,7 +234,7 @@
     extends=".base">
     <put
       name="pageTitle"
-      value="Screen Result Importer and Error Viewer"/>
+      value="Screen Result Import Errors"/>
     <put
       name="body"
       value="/screens/screenresults/admin/screenResultImporter.jsp" />
