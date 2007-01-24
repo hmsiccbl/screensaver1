@@ -40,11 +40,11 @@ TODO:
 		columnClasses="keyColumn,column">
 
 		<t:outputLabel for="screenId" value="Screen ID"
-			visibleOnUserRole="developer" />
+			visibleOnUserRole="developer"/>
 		<t:outputText id="screenId" value="#{screenViewer.screen.screenId}"
 			styleClass="dataText" visibleOnUserRole="developer" />
 
-		<t:outputLabel for="screenNumber" value="Screen Number" />
+		<t:outputLabel for="screenNumber" value="Screen Number"/>
 		<t:outputText id="screenNumber"
 			value="#{screenViewer.screen.screenNumber}" styleClass="dataText" />
 
@@ -484,15 +484,17 @@ TODO:
 
 		<t:outputLabel for="keywords" value="Keywords" />
 		<t:outputText value="<none>" styleClass="dataText"
-			rendered="#{empty screenViewer.screen.keywords}" />
+			rendered="#{!screenViewer.editMode && empty screenViewer.screen.keywords}" />
 		<t:outputText value="#{screenViewer.keywords}"
 			rendered="#{!screenViewer.editMode && !empty screenViewer.screen.keywords}" />
-		<t:panelGrid columns="1"
-			rendered="#{screenViewer.editMode && !empty screenViewer.screen.keywords}">
+		<t:panelGrid columns="1" rendered="#{screenViewer.editMode}">
+			<t:outputText value="<none>" styleClass="dataText"
+				rendered="#{!empty screenViewer.screen.keywords}" />
 			<t:dataTable id="keywords" var="keyword"
 				value="#{screenViewer.keywordsDataModel}" preserveDataModel="false"
 				styleClass="standardTable" rowClasses="row1,row2"
-				columnClasses="column" headerClass="tableHeader">
+				columnClasses="column" headerClass="tableHeader"
+				rendered="#{!empty screenViewer.screen.keywords}">
 				<t:column>
 					<t:outputText value="#{keyword}" styleClass="dataText" />
 				</t:column>

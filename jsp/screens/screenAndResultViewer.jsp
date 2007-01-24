@@ -177,7 +177,7 @@
 						<f:facet name="header">
 							<t:outputText value="Property" />
 						</f:facet>
-						<t:outputText value="#{row.rowLabel}" />
+						<t:outputText value="#{row.rowLabel}" escape="false"/>
 					</t:column>
 					<t:columns value="#{screenResultViewer.dataHeadersColumnModel}"
 						var="columnName" styleClass="column">

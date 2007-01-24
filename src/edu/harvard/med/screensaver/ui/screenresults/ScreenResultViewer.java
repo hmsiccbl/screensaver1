@@ -738,10 +738,11 @@ public class ScreenResultViewer extends AbstractBackingBean
     private String _displayName;
 
     public DataHeaderRowDefinition(String propertyName, 
-                            String displayName)
+                                   String displayName)
     {
       _propertyName = propertyName;
-      _displayName = displayName;
+      // TODO: HACK: nbsp replacement; right place to do this?
+      _displayName = displayName.replaceAll(" ", "&nbsp;");
     }
 
     public String getDisplayName()
