@@ -38,7 +38,7 @@
       <t:panelGrid id="menuAndBodyPanel" columns="2" styleClass="menuAndContent"
         columnClasses="menuColumn,contentColumn">
         <tiles:insert attribute="menu" flush="false" />
-        <t:panelGrid id="bodyPanel" columns="1">
+        <t:panelGrid id="bodyPanel" columns="1" style="width: 100%">
           <tiles:insert attribute="header" flush="false" />
           <tiles:insert attribute="body" flush="false" />
         </t:panelGrid>
