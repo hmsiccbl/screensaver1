@@ -48,7 +48,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   
   private static final Logger log = Logger.getLogger(SearchResults.class);
   
-  public static final String SD_FILE = "SDFile";
+  public static final String SD_FILE = "SD File";
   private static final String EXCEL_FILE = "Excel Spreadsheet";
   private static final String [] DOWNLOAD_FORMATS = { "", EXCEL_FILE, SD_FILE };
 
