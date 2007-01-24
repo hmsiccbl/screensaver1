@@ -24,170 +24,173 @@ TODO:
 
 <f:subview id="heatMapViewer">
 
-	<t:panelGroup>
-		<t:outputLabel for="plateNumber" value="Plate:"
-			styleClass="inputLabel" />
+	<t:panelGrid columns="1">
 
-		<t:selectOneMenu id="plateNumber"
-			value="#{heatMapViewer.plateNumber.value}" required="true"
-			onchange="javascript:document.getElementById('updateButton').click()"
-			styleClass="input">
-			<f:selectItems value="#{heatMapViewer.plateNumber.selectItems}" />
-		</t:selectOneMenu>
+		<t:panelGroup styleClass="commandPanel">
+			<t:outputLabel for="plateNumber" value="Plate:"
+				styleClass="inputLabel" />
 
-		<t:commandButton id="previousPlateButton"
-			image="/images/arrow-previous.png"
-			action="#{heatMapViewer.previousPlate}" styleClass="command" />
+			<t:selectOneMenu id="plateNumber"
+				value="#{heatMapViewer.plateNumber.value}" required="true"
+				onchange="javascript:document.getElementById('updateButton').click()"
+				styleClass="input">
+				<f:selectItems value="#{heatMapViewer.plateNumber.selectItems}" />
+			</t:selectOneMenu>
 
-		<t:commandButton id="nextPlateButton" image="/images/arrow-next.png"
-			action="#{heatMapViewer.nextPlate}" styleClass="command" />
+			<t:commandButton id="previousPlateButton"
+				image="/images/arrow-previous.png"
+				action="#{heatMapViewer.previousPlate}" styleClass="command" />
 
-		<t:outputLabel for="showValues" value="Show values"
-			styleClass="inputLabel" />
-		<t:selectBooleanCheckbox id="showValues"
-			value="#{heatMapViewer.showValues}" 
-			onchange="javascript:document.getElementById('updateButton').click()"
-			styleClass="input" />
+			<t:commandButton id="nextPlateButton" image="/images/arrow-next.png"
+				action="#{heatMapViewer.nextPlate}" styleClass="command" />
 
-		<t:commandButton id="addHeatMap" value="Add Heat Map"
-			action="#{heatMapViewer.addHeatMap}" styleClass="command" />
+			<t:outputLabel for="showValues" value="Show values"
+				styleClass="inputLabel" />
+			<t:selectBooleanCheckbox id="showValues"
+				value="#{heatMapViewer.showValues}"
+				onclick="javascript:document.getElementById('updateButton').click()"
+				styleClass="input" />
 
-		<t:commandButton id="updateButton" value="Update" forceId="true"
-			styleClass="hiddenCommand" action="#{heatMapViewer.update}"
-			styleClass="command" />
-	</t:panelGroup>
+			<t:commandButton id="addHeatMap" value="Add Heat Map"
+				action="#{heatMapViewer.addHeatMap}" styleClass="command" />
 
-	<t:div />
+			<t:commandButton id="updateButton" value="Update" forceId="true"
+				styleClass="hiddenCommand" action="#{heatMapViewer.update}"
+				styleClass="command" />
+		</t:panelGroup>
 
-	<t:dataTable id="heatMapsTable"
-		value="#{heatMapViewer.heatMapConfigurationsDataModel}"
-		var="heatMapConfig" rowIndexVar="heatMapIndex"
-		styleClass="heatMapsTable">
-		<t:column>
-			<t:panelGrid>
-				<t:outputLabel for="dataHeader" value="Data header:"
-					styleClass="inputLabel" />
-				<t:selectOneMenu id="dataHeader"
-					value="#{heatMapConfig.dataHeaders.value}" required="true"
-					styleClass="input">
-					<f:selectItems value="#{heatMapConfig.dataHeaders.selectItems}" />
-				</t:selectOneMenu>
 
-				<t:outputLabel for="scoringType" value="Scoring:"
-					styleClass="inputLabel" />
-				<t:selectOneMenu id="scoringType"
-					value="#{heatMapConfig.scoringType.value}" required="true"
-					styleClass="input">
-					<f:selectItems value="#{heatMapConfig.scoringType.selectItems}" />
-				</t:selectOneMenu>
+		<t:dataTable id="heatMapsTable"
+			value="#{heatMapViewer.heatMapConfigurationsDataModel}"
+			var="heatMapConfig" rowIndexVar="heatMapIndex"
+			styleClass="heatMapsTable">
+			<t:column>
+				<t:panelGrid>
+					<t:outputLabel for="dataHeader" value="Data header:"
+						styleClass="inputLabel" />
+					<t:selectOneMenu id="dataHeader"
+						value="#{heatMapConfig.dataHeaders.value}" required="true"
+						styleClass="input">
+						<f:selectItems value="#{heatMapConfig.dataHeaders.selectItems}" />
+					</t:selectOneMenu>
 
-				<t:outputLabel for="excludedWellFilters" value="Exclude:"
-					styleClass="inputLabel" />
-				<t:selectManyCheckbox id="excludedWellFilters"
-					layout="pageDirection"
-					value="#{heatMapConfig.excludedWellFilters.value}"
-					styleClass="input">
-					<f:selectItems
-						value="#{heatMapConfig.excludedWellFilters.selectItems}" />
-				</t:selectManyCheckbox>
+					<t:outputLabel for="scoringType" value="Scoring:"
+						styleClass="inputLabel" />
+					<t:selectOneMenu id="scoringType"
+						value="#{heatMapConfig.scoringType.value}" required="true"
+						styleClass="input">
+						<f:selectItems value="#{heatMapConfig.scoringType.selectItems}" />
+					</t:selectOneMenu>
 
-				<t:outputLabel for="numericFormat" value="Numeric Format:"
-					styleClass="inputLabel" />
-				<t:selectOneMenu id="numericFormat"
-					value="#{heatMapConfig.numericFormat.value}" styleClass="input">
-					<f:selectItems value="#{heatMapConfig.numericFormat.selectItems}" />
-				</t:selectOneMenu>
+					<t:outputLabel for="excludedWellFilters" value="Exclude:"
+						styleClass="inputLabel" />
+					<t:selectManyCheckbox id="excludedWellFilters"
+						layout="pageDirection"
+						value="#{heatMapConfig.excludedWellFilters.value}"
+						styleClass="input">
+						<f:selectItems
+							value="#{heatMapConfig.excludedWellFilters.selectItems}" />
+					</t:selectManyCheckbox>
 
-				<t:commandButton id="updateButton2" value="Update"
-					action="#{heatMapViewer.update}" styleClass="command" />
-				<t:commandButton id="deleteButton" value="Delete"
-					image="/images/delete.png" action="#{heatMapViewer.deleteHeatMap}"
-					styleClass="command" />
-			</t:panelGrid>
-		</t:column>
+					<t:outputLabel for="numericFormat" value="Numeric Format:"
+						styleClass="inputLabel" />
+					<t:selectOneMenu id="numericFormat"
+						value="#{heatMapConfig.numericFormat.value}" styleClass="input">
+						<f:selectItems value="#{heatMapConfig.numericFormat.selectItems}" />
+					</t:selectOneMenu>
 
-		<t:column>
-			<t:outputText value="#{heatMapViewer.heatMapTitle}" />
-			<t:dataTable id="heatMapTable"
-				value="#{heatMapViewer.heatMapDataModels[heatMapIndex]}"
-				var="plateRow" rowIndexVar="plateRowIndex" renderedIfEmpty="false"
-				styleClass="heatMapTable" headerClass="heatMapTableHeader"
-				footerClass="heatMapTableHeader" preserveDataModel="false">
-				<t:column styleClass="heatMapTableHeader">
-					<f:facet name="header">
-					</f:facet>
-					<t:outputText
-						value="#{heatMapViewer.heatMapRowLabels[plateRowIndex]}" />
-				</t:column>
-				<t:columns
-					value="#{heatMapViewer.heatMapColumnDataModels[heatMapIndex]}"
-					var="columnIndex" styleClass="heatMapCell"
-					style="#{heatMapViewer.heatMapCell.style}">
-					<f:facet name="header">
-						<t:outputText value="#{columnIndex + 1}" styleClass="keyColumn" />
-					</f:facet>
-					<f:facet name="footer">
-						<t:outputText value="#{columnIndex + 1}" styleClass="keyColumn" />
-					</f:facet>
-					<h:commandLink id="viewWellLink" action="#{heatMapViewer.viewWell}"
-						immediate="true" styleClass="heatMapValue"
-						title="#{heatMapViewer.heatMapCell.popupText}">
-						<t:outputText value="#{heatMapViewer.heatMapCell.cellText}"
-							escape="false" />
-					</h:commandLink>
-				</t:columns>
-				<t:column styleClass="heatMapTableHeader">
-					<f:facet name="header">
-					</f:facet>
-					<t:outputText
-						value="#{heatMapViewer.heatMapRowLabels[plateRowIndex]}" />
-				</t:column>
-			</t:dataTable>
-		</t:column>
+					<t:commandButton id="updateButton2" value="Update"
+						action="#{heatMapViewer.update}" styleClass="command" />
+					<t:commandButton id="deleteButton" value="Delete"
+						image="/images/delete.png" action="#{heatMapViewer.deleteHeatMap}"
+						styleClass="command" />
+				</t:panelGrid>
+			</t:column>
 
-		<t:column>
-			<t:panelGrid columns="1">
+			<t:column>
+				<t:outputText value="#{heatMapViewer.heatMapTitle}" />
+				<t:dataTable id="heatMapTable"
+					value="#{heatMapViewer.heatMapDataModels[heatMapIndex]}"
+					var="plateRow" rowIndexVar="plateRowIndex" renderedIfEmpty="false"
+					styleClass="heatMapTable" headerClass="heatMapTableHeader"
+					footerClass="heatMapTableHeader" preserveDataModel="false">
+					<t:column styleClass="heatMapTableHeader">
+						<f:facet name="header">
+						</f:facet>
+						<t:outputText
+							value="#{heatMapViewer.heatMapRowLabels[plateRowIndex]}" />
+					</t:column>
+					<t:columns
+						value="#{heatMapViewer.heatMapColumnDataModels[heatMapIndex]}"
+						var="columnIndex" styleClass="heatMapCell"
+						style="#{heatMapViewer.heatMapCell.style}">
+						<f:facet name="header">
+							<t:outputText value="#{columnIndex + 1}" styleClass="keyColumn" />
+						</f:facet>
+						<f:facet name="footer">
+							<t:outputText value="#{columnIndex + 1}" styleClass="keyColumn" />
+						</f:facet>
+						<h:commandLink id="viewWellLink"
+							action="#{heatMapViewer.viewWell}" immediate="true"
+							styleClass="heatMapValue"
+							title="#{heatMapViewer.heatMapCell.popupText}">
+							<t:outputText value="#{heatMapViewer.heatMapCell.cellText}"
+								escape="false" />
+						</h:commandLink>
+					</t:columns>
+					<t:column styleClass="heatMapTableHeader">
+						<f:facet name="header">
+						</f:facet>
+						<t:outputText
+							value="#{heatMapViewer.heatMapRowLabels[plateRowIndex]}" />
+					</t:column>
+				</t:dataTable>
+			</t:column>
 
-				<t:panelGrid columns="2">
+			<t:column>
+				<t:panelGrid columns="1">
 
-					<t:dataTable id="statisticsTable"
-						value="#{heatMapViewer.heatMapStatisticsDataModels[heatMapIndex]}"
-						var="statistic" styleClass="standardTable">
+					<t:panelGrid columns="2">
+
+						<t:dataTable id="statisticsTable"
+							value="#{heatMapViewer.heatMapStatisticsDataModels[heatMapIndex]}"
+							var="statistic" styleClass="standardTable">
+							<t:column>
+								<t:outputText value="#{statistic.name}" styleClass="inputLabel" />
+							</t:column>
+							<t:column style="numericColumn">
+								<t:outputText value="#{statistic.value}" styleClass="dataText" />
+							</t:column>
+						</t:dataTable>
+
+						<t:dataTable id="colorLegend"
+							value="#{heatMapViewer.colorLegendDataModel}" var="step"
+							style="height: 100%">
+							<t:column style="#{step.first}; text-align: right">
+								<t:div style="min-width: 20px; min-height: 6px">
+									<t:outputText value="#{step.second}"
+										style="font-size: xx-small" />
+								</t:div>
+							</t:column>
+						</t:dataTable>
+
+					</t:panelGrid>
+
+					<t:dataTable value="#{heatMapViewer.cellTypeLegendDataModel}"
+						var="legendItem">
 						<t:column>
-							<t:outputText value="#{statistic.name}" styleClass="inputLabel" />
+							<t:outputText value="#{legendItem.name}" styleClass="inputLabel" />
 						</t:column>
-						<t:column style="numericColumn">
-							<t:outputText value="#{statistic.value}" styleClass="dataText" />
-						</t:column>
-					</t:dataTable>
-
-					<t:dataTable id="colorLegend"
-						value="#{heatMapViewer.colorLegendDataModel}" var="step"
-						style="height: 100%">
-						<t:column style="#{step.first}; text-align: right">
-							<t:div style="min-width: 20px; min-height: 6px">
-								<t:outputText value="#{step.second}" style="font-size: xx-small" />
-							</t:div>
+						<t:column styleClass="heatMapCell" style="#{legendItem.cellStyle}">
+							<t:outputText value="#{legendItem.cellText}" escape="false" />
 						</t:column>
 					</t:dataTable>
 
 				</t:panelGrid>
+			</t:column>
 
-				<t:dataTable value="#{heatMapViewer.cellTypeLegendDataModel}"
-					var="legendItem">
-					<t:column>
-						<t:outputText value="#{legendItem.name}" styleClass="inputLabel" />
-					</t:column>
-					<t:column styleClass="heatMapCell" style="#{legendItem.cellStyle}">
-						<t:outputText value="#{legendItem.cellText}" escape="false" />
-					</t:column>
-				</t:dataTable>
+		</t:dataTable>
 
-			</t:panelGrid>
-		</t:column>
-
-		<t:column style="vertical-align: center">
-		</t:column>
-	</t:dataTable>
+	</t:panelGrid>
 
 </f:subview>

@@ -1,48 +1,46 @@
-<%@ taglib uri="http://java.sun.com/jsf/html"        prefix="h"     %>
-<%@ taglib uri="http://java.sun.com/jsf/core"        prefix="f"     %>
-<%@ taglib uri="http://myfaces.apache.org/tomahawk"  prefix="t"     %>
-<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
+<%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
-<f:subview id="searchResultsNavPanelSubview" rendered="#{navigator != null}">
+<f:subview id="searchResultsNavPanelSubview"
+	rendered="#{navigator != null}">
 
-	<t:panelGrid style="margin: 0px; border: 1px solid grey; padding: 1px;"
-		border="0" cellpadding="0" cellspacing="0" columns="4" width="100%">
+	<h:form id="searchResultNavForm" style="width: 100%">
+		<t:panelGrid id="searchResultsNavPanel" columns="4"
+			styleClass="searchResultsCommandPanel" width="100%">
 
-		<h:form id="navigationButtons">
-			<t:panelGroup>
+			<t:panelGroup style="vertical-align: middle">
 				<t:commandButton id="firstPageCommand"
-					action="#{navigator.firstPage}"
-					value="First" image="/images/arrow-first.png" styleClass="command" />
+					action="#{navigator.firstPage}" value="First"
+					image="/images/arrow-first.png" styleClass="command" />
 				<t:commandButton id="prevPageCommand" action="#{navigator.prevPage}"
 					value="Prev" image="/images/arrow-previous.png"
 					styleClass="command" />
-				<t:commandButton id="nextPageCommand"
-					action="#{navigator.nextPage}"
+				<t:commandButton id="nextPageCommand" action="#{navigator.nextPage}"
 					value="Next" image="/images/arrow-next.png" styleClass="command" />
-				<t:commandButton id="lastPageCommand"
-					action="#{navigator.lastPage}"
+				<t:commandButton id="lastPageCommand" action="#{navigator.lastPage}"
 					value="Last" image="/images/arrow-last.png" styleClass="command" />
 			</t:panelGroup>
-		</h:form>
 
-		<t:panelGroup>
-			<t:outputText rendered="#{navigator.summaryView}"
-				value="#{navigator.firstIndex}..#{navigator.lastIndex} out of #{navigator.resultsSize}"
-				styleClass="resultsNavPanelStatus" />
-			<t:outputText rendered="#{! navigator.summaryView}"
-				value="#{navigator.currentIndex} of #{navigator.resultsSize}"
-				styleClass="resultsNavPanelStatus" />
-		</t:panelGroup>
-		
-		<h:form id="sortOrderForm">
+			<t:panelGroup>
+				<t:outputText rendered="#{navigator.summaryView}"
+					value="#{navigator.firstIndex}..#{navigator.lastIndex} out of #{navigator.resultsSize}"
+					styleClass="searchResultNavPanelStatus" />
+				<t:outputText rendered="#{! navigator.summaryView}"
+					value="#{navigator.currentIndex} of #{navigator.resultsSize}"
+					styleClass="searchResultNavPanelStatus" />
+			</t:panelGroup>
+
 			<t:panelGroup>
 				<t:outputLabel for="sortOrderMenu" value="Sort by"
 					styleClass="inputLabel" />
-				<t:commandButton id="updateSortOder" value="update sort order"
-					action="#{navigator.sortOnSelectedColumn}" style="display: none" />
+				<t:commandButton id="updateSortOrder" value="update sort order"
+					action="#{navigator.sortOnSelectedColumn}"
+					styleClass="hiddenCommand" />
 				<t:selectOneMenu id="sortOrderMenu"
 					value="#{navigator.currentSortColumnName}"
-					onchange="this.previousSibling.click();">
+					onchange="this.previousSibling.click();" styleClass="command">
 					<f:selectItems value="#{navigator.sortColumnSelections}" />
 				</t:selectOneMenu>
 				<t:selectOneMenu id="sortDirection"
@@ -52,11 +50,9 @@
 					<f:selectItems value="#{navigator.sortDirectionSelections}" />
 				</t:selectOneMenu>
 			</t:panelGroup>
-		</h:form>
 
-		<h:form id="itemsPerPageForm"
-			rendered="#{navigator.summaryView}">
-			<t:panelGroup style="float: right">
+			<t:panelGroup style="float: right"
+				rendered="#{navigator.summaryView}">
 				<t:commandButton id="updateItemsPerPage"
 					value="update items per page"
 					action="#{navigator.updateItemsPerPage}" style="display: none" />
@@ -68,16 +64,15 @@
 				</t:selectOneMenu>
 				<t:outputText value=" per page" styleClass="inputLabel" />
 			</t:panelGroup>
-		</h:form>
 
-		<h:form id="showSummaryViewForm" rendered="#{! navigator.summaryView}">
-			<t:panelGroup style="float: right">
+			<t:panelGroup style="float: right"
+				rendered="#{! navigator.summaryView}">
 				<t:commandButton id="summaryView" value="Results Summary"
-					action="#{navigator.showSummaryView}"
-					style="vertical-align: middle" styleClass="command" />
+					action="#{navigator.showSummaryView}" styleClass="command" />
 			</t:panelGroup>
-		</h:form>
 
-	</t:panelGrid>
+		</t:panelGrid>
+
+	</h:form>
 
 </f:subview>

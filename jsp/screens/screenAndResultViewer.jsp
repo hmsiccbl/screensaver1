@@ -138,15 +138,16 @@
 				rendered="#{!empty screenResultViewer.screenResult && !(screenResultViewer.collapsablePanelsState['dataHeadersTable'] && screenResultViewer.collapsablePanelsState['dataTable'])}">
 				<t:outputLabel for="dataHeadersList"
 					value="Show selected data headers:" styleClass="inputLabel" />
-				<t:selectManyListbox id="dataHeadersList"
+				<t:selectManyCheckbox id="dataHeadersList" layout="pageDirection" layoutWidth="4"
 					value="#{screenResultViewer.selectedResultValueTypes.value}"
-					styleClass="input">
-					<f:selectItems id="dataHeaders"
+					styleClass="input" style="vertical-align: top">
+					<f:selectItems id="dataHeaders" 
 						value="#{screenResultViewer.selectedResultValueTypes.selectItems}" />
-				</t:selectManyListbox>
+				</t:selectManyCheckbox>
 				<t:panelGroup>
-					<t:commandButton id="updateDataHeadersButton" forceId="true" value="Update"
-						action="#{screenResultViewer.updateDataHeaders}" styleClass="command" />
+					<t:commandButton id="updateDataHeadersButton" forceId="true"
+						value="Update" action="#{screenResultViewer.updateDataHeaders}"
+						styleClass="command" />
 					<t:commandButton id="allDataHeadersButton" value="All"
 						action="#{screenResultViewer.showAllDataHeaders}"
 						styleClass="command" />
@@ -243,7 +244,7 @@
 							rendered="#{!empty screenResultViewer.hitsForDataHeader.selectItems}">
 							<t:selectBooleanCheckbox id="showHitsOnly" styleClass="command"
 								value="#{screenResultViewer.showHitsOnly}" immediate="true"
-								onchange="javascript:document.getElementById('updateDataTableRowsButton').click()" />
+								onclick="javascript:document.getElementById('updateDataTableRowsButton').click()" />
 							<t:outputLabel value="Show only hits for" for="showHitsOnly"
 								styleClass="inputLabel" />
 							<t:selectOneMenu id="hitsForDataHeaderList"

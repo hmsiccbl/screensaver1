@@ -67,6 +67,16 @@ public abstract class UISelectBean<T>
     return _selectItems;
   }
   
+  /**
+   * @motivation JSF EL does not have a size or length operator
+   * @return the total number of SelectItems (<i>not</i> the number of user-selected items)
+   */
+  public int getSize()
+  {
+    return _selectItems.size();
+  }
+
+  
   // protected methods
   
   protected String getKey(T t)

@@ -84,13 +84,30 @@ hr {
 .standardTable {
 	color: #000000;
 	border-style: none;
-	border-spacing: 0px;
+	/* note: IE doesn't support border-spacing, seems to default to 1 */
+	border-spacing: 1px;
 	width: 100%;
 }
 
 /* for panelGroup containing horizontal sequence of command buttons (and possibly input controls) */
 .commandPanel {
 	float: left;
+}
+
+.searchResultsCommandPanel {
+	padding: 1px;
+	border-width: 1px;
+	border-style: solid;
+	border-color: gray;
+	width: 100%;
+}
+
+.searchResultsNavPanelStatus {
+	font-weight: bold;
+	font-size: large;
+	margin-left: 4px;
+	margin-right: 4px;
+	vertical-align: middle;
 }
 
 /* for panels used for layout purposes only, and that should not introduce any additional spacing around their child components */
@@ -127,7 +144,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	vertical-align: bottom;
 }
 
-.dataText,.input {
+.dataText,.input,.inputLabel {
 	font-family: sans-serif;
 	font-size: small;
 }
@@ -138,11 +155,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 }
 
 .hiddenCommand {
-	visibility: hidden;
-}
-
-.inputLabel {
-	font-family: sans-serif;
+	display: none;
 }
 
 .column,.keyColumn,.numericColumn,.textColumn {
@@ -232,8 +245,8 @@ a.heatMapValue:link,a.heatMapValue:visited {
 }
 
 .contentColumn {
-	min-width: 1000px;
-	overflow: scroll;
+/*	min-width: 1000px;*/
+/*	overflow: scroll;*/
 }
 
 .menuItem,.menuItemActive {
@@ -269,13 +282,6 @@ a.menuItem:hover,a.menuItemActive:hover {
 .navSeparator {
 	line-height: 12px;
 	border-bottom: 1px solid white;
-}
-
-.resultsNavPanelStatus {
-	font-weight: bold;
-	font-size: large;
-	margin-left: 4px;
-	margin-right: 4px;
 }
 
 .stackTraceException {

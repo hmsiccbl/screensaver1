@@ -5,7 +5,7 @@
 
 <f:subview id="searchResultsSubview">
   <h:panelGrid
-    style="margin: 0px; border: 0px solid grey; padding: 0px; width: 100%;"
+    style="margin: 0px; border: 1px solid grey; padding: 0px; width: 100%;"
     columns="1"
     width="100%"
   >
