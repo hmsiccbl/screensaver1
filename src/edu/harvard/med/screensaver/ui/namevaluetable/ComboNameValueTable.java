@@ -41,6 +41,9 @@ public class ComboNameValueTable extends NameValueTable
   @SuppressWarnings("unchecked")
   protected void initializeComboNameValueTable(NameValueTable [] comboTables)
   {
+    // TODO: see if i can do without the setDataModel crap. or maybe I can do it more simply
+    // with an Arrays.fill() or something like that. why is this needed? i am managing all the
+    // callbacks from here...
     List<Object> dataModelContents = new ArrayList<Object>();
     _comboTables = comboTables;
     _comboTableIndexes = new int[comboTables.length + 1];
@@ -50,9 +53,11 @@ public class ComboNameValueTable extends NameValueTable
       _comboTableIndexes[i] = currentIndex;
       currentIndex += comboTables[i].getNumRows() + 1;
       dataModelContents.addAll((List<Object>) comboTables[i].getDataModel().getWrappedData());
+      dataModelContents.add("spacer");
       i ++;
     }
-    _comboTableIndexes[i] = -- currentIndex; // the -- prevents a blank line at the end of the table
+    _comboTableIndexes[i] = currentIndex;
+    dataModelContents.remove(currentIndex - 1);
     setDataModel(new ListDataModel(dataModelContents));
   }
   
@@ -80,7 +85,7 @@ public class ComboNameValueTable extends NameValueTable
   {
     int comboTableIndex = getComboTableIndexFromRowIndex(index);
     if (comboTableIndex == -1) {
-      return null;
+      return "&nbsp;";
     }
     int adjustedRowIndex = index - _comboTableIndexes[comboTableIndex];
     return _comboTables[comboTableIndex].getName(adjustedRowIndex);
@@ -117,6 +122,8 @@ public class ComboNameValueTable extends NameValueTable
    * @param rowIndex
    * @return
    */
+  // TODO: this is getting called repeatedly for the same index. pre-compute these values and
+  // store them in an array.
   private int getComboTableIndexFromRowIndex(int rowIndex)
   {
     for (int tableIndex = 0; tableIndex < _comboTableIndexes.length - 1; tableIndex ++) {
