@@ -15,12 +15,12 @@
 		<%@ include file="../searchResultsNavPanel.jspf"%>
 	</t:aliasBean>
 
-	<t:panelGroup rendered="#{!screenResultViewer.readOnly}">
-		<%--@ include file="screenresults/admin/cherryPickUploader.jspf" --%>
-	</t:panelGroup>
+	<%--t:panelGroup rendered="#{!screenResultViewer.readOnly}">
+		<%@ include file="screenresults/admin/cherryPickUploader.jspf">
+	</t:panelGroup--%>
 
 	<h:form id="dataForm">
-		<t:panelGrid columns="1">
+		<t:panelGrid columns="1" width="100%">
 			<t:collapsiblePanel id="screenPanel"
 				value="#{screenResultViewer.collapsablePanelsState['screenSummary']}"
 				title="Screen Summary" var="state" titleVar="title">

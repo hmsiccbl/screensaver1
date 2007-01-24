@@ -6,11 +6,11 @@
 <f:subview id="searchResultsNavPanelSubview"
 	rendered="#{navigator != null}">
 
-	<h:form id="searchResultNavForm" style="width: 100%">
+	<h:form id="searchResultNavForm">
 		<t:panelGrid id="searchResultsNavPanel" columns="4"
 			styleClass="searchResultsCommandPanel" width="100%">
 
-			<t:panelGroup style="vertical-align: middle">
+			<t:panelGroup>
 				<t:commandButton id="firstPageCommand"
 					action="#{navigator.firstPage}" value="First"
 					image="/images/arrow-first.png" styleClass="command" />

@@ -86,7 +86,7 @@ hr {
 	border-style: none;
 	/* note: IE doesn't support border-spacing, seems to default to 1 */
 	border-spacing: 1px;
-	width: 100%;
+	/*width: 100%;*/
 }
 
 /* for panelGroup containing horizontal sequence of command buttons (and possibly input controls) */
@@ -229,7 +229,8 @@ a.heatMapValue:link,a.heatMapValue:visited {
 }
 
 .menuAndContent {
-	table-layout: fixed;
+	/* using fixed table layout prevents horiz scrollbar to appear on IE when content column width is at minimum */
+	/*	table-layout: fixed;*/
 }
 
 .menuColumn,.contentColumn {
@@ -240,13 +241,12 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	background-color: blue;
 	color: white;
 	font-size: small;
-	width: 200px;
-	overflow: hidden;
+	/* prevents menu from consuming 50% width (with content panel consuming other 50%) on IE */
+	width: 180px;
 }
 
 .contentColumn {
-/*	min-width: 1000px;*/
-/*	overflow: scroll;*/
+	width: 100%;
 }
 
 .menuItem,.menuItemActive {
@@ -257,8 +257,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	font-weight: bold;
 }
 
-a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited
-	{
+a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited 	{
 	color: white;
 	text-decoration: none;
 	vertical-align: bottom;
