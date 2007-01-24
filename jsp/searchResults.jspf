@@ -81,20 +81,19 @@
         id="searchResultsDownloadForm"
       >
         <h:panelGroup style="float: right">
-          <h:outputText value="download search results to " />
-          <h:commandButton
-            id="downloadSearchResults"
-            value="downloadSearchResults"
-            action="#{searchResults.downloadSearchResults}"
-            style="display: none"
-          />
+          <h:outputText value="download search results to: " />
           <h:selectOneMenu
             id="downloadFormat"
             value="#{searchResults.downloadFormat}"
-            onchange="this.previousSibling.click();"
+            onchange="this.nextSibling.disabled = (this.value == '');"
           >
             <f:selectItems value="#{searchResults.downloadFormatSelections}" />
           </h:selectOneMenu>
+          <h:commandButton
+            id="downloadSearchResultsCommandButton"
+            value="Download"
+            action="#{searchResults.downloadSearchResults}"
+          />
         </h:panelGroup>
       </h:form>
     </h:panelGrid>
