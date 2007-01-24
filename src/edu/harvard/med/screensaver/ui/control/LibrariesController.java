@@ -38,6 +38,7 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.ui.libraries.CompoundLibraryContentsImporter;
 import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
@@ -566,7 +567,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String unloadLibraryContents(final Library libraryIn)
   {
-    log.error("CALLING ME");
     _dao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction() 
@@ -729,7 +729,7 @@ public class LibrariesController extends AbstractUIController
     {
       public void runTransaction()
       {
-        Well well = _dao.findWell(plateNumber, wellName);
+        Well well = _dao.findWell(new WellKey(plateNumber, wellName)); 
         if (well == null) {
           showMessage("libraries.noSuchWell", "searchResults", plateNumber.toString(), wellName);
         }
@@ -770,12 +770,16 @@ public class LibrariesController extends AbstractUIController
     Matcher matcher = _plateNumberPattern.matcher(plateNumber);
     if (matcher.matches()) {
       plateNumber = matcher.group(2);
-      return Integer.parseInt(plateNumber);
+      try {
+        return Integer.parseInt(plateNumber);
+      }
+      catch (NumberFormatException e) {
+        // this seems unlikely given the _plateNumberPattern match, but it's actually possible
+        // to match that pattern and still get a NFE, if the number is larger than MAXINT
+      }
     }
-    else {
-      showMessage("libraries.invalidPlateNumber", plateNumber.toString());
-      return null;
-    }
+    showMessage("libraries.invalidPlateNumber", plateNumber.toString());
+    return null;
   }
   
   /**
