@@ -55,6 +55,20 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   private static final List<String> PAGE_SIZE_SELECTIONS =
     Arrays.asList("10", "20", "50", "100", "All");
   private static final String DEFAULT_PAGESIZE = PAGE_SIZE_SELECTIONS.get(1);
+
+  /**
+   * Workaround for JSF suckiness. Two things: first, I need to use the returning a Map trick to
+   * get around the problem that JSF EL doesn't allow parameterized methods. Second, I gotta
+   * escape the backslashes in the f:param, since the JSF EL is evaluating that backslash as an
+   * escape character somewhere.
+   */
+  private final Map<String,String> _backslashEscaper = new HashMap<String,String>() {
+    private static final long serialVersionUID = 1L;
+    public String get(Object key)
+    {
+      return ((String) key).replace("\\", "\\\\");
+    }
+  };
   
 
   // private instance data
@@ -74,7 +88,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   private UIData _dataTable;
   private DataModel _dataModel;
   private DataModel _dataHeaderColumnModel = new ListDataModel(getColumnHeaders());
-
+  
   
   // public constructor
   
@@ -538,7 +552,12 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
     throw new UnsupportedOperationException("This SearchResults (" + this + ") does not know how to download itself.");
   }
 
+  public Map<String,String> getEscapeBackslashes()
+  {
+    return _backslashEscaper;
+  }
 
+  
   // abstract public and private methods
 
   /**

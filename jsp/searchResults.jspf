@@ -57,7 +57,7 @@
               value="#{commandValue}">
               <f:param
                 name="commandValue"
-                value="#{commandValue}" />
+                value="#{searchResults.escapeBackslashes[commandValue]}" />
             </h:commandLink>
             <h:outputText
               value=";"

@@ -156,10 +156,13 @@ public class WellSearchResults extends SearchResults<Well>
         return _librariesController.viewGene(well.getGene(), this);
       }
       if (getCompoundCount(well) > 0) {
-        String compoundId = (String) getRequestParameter("commandValue");
+        // TODO: commandValue is really a smiles, not a compoundId
+        String smiles = (String) getRequestParameter("commandValue");
         Compound compound = null;
+        log.info("smiles is " + smiles);
         for (Compound compound2 : well.getCompounds()) {
-          if (compound2.getCompoundId().equals(compoundId)) {
+          log.info("compound2 is " + compound2);
+          if (compound2.getSmiles().equals(smiles)) {
             compound = compound2;
             break;
           }
