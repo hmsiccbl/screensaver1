@@ -6,7 +6,7 @@
 <f:subview id="helpViewer">
 
   <f:verbatim escape="false">
-	Thanks for trying out this early release of Screensaver! Here's a quick guide to how you can
+	Thanks for trying out the beta release of Screensaver! Here's a quick guide to how you can
 	use Screensaver and what it can do for you.
     <ul>
       <li>
@@ -21,22 +21,15 @@
           </li>
           <li>
             Or, click on the "Find Wells" link in the left menu pane to get to the Well Finder
-            page;
+            page; 
           </li>
           <li>
-            You can enter in the coordinates for a single well at the top of the page;
+            You can enter in the coordinates for a single well or for multiple wells; 
+            the Well Finder page contains detailed instructions explaining how the well coordinates 
+            should be specified.
           </li>
           <li>
-            Or, multiple wells at the bottom;
-          </li>
-          <li>
-            There are many formats you can enter in multiple wells. The first item on the line should
-            be the plate number, and the remaining items should be the well name (e.g., "A05" or
-            "a5"). You can enter in as many lines as you want, and use whitespace or punctuation to
-            separate the plate number from the well names, and the individual well names;
-          </li>
-          <li>
-            Try the following:
+            Or you can also try the following:
             <ul>
               <li>
                 Open a Screen Results spreadsheet;
@@ -128,10 +121,10 @@
       <li>
         <b>Browsing Screens</b>
         <br/>
+        <i>Note: this feature is only available to screeners that have screen result data deposited into the system.</i>
+        <br/>
         Click on the "Browse Screens" link in the left menu page to get to the Screens Browser,
-        which contains a "search results" of all the screens you are allowed to see. If you are
-        an <i>administrator</i>, this will be the complete set of screens. If you are a
-        <i>screener</i>, then it will be a smaller set of screens.
+        which contains a list of all the screens you are allowed to see. 
         From there, you can:
         <ul>
           <li>
@@ -140,23 +133,36 @@
           </li>
           <li>
             View information about a screen by clicking on the screen number, which takes you to the
-            Screen Viewer page;
+            Screen Viewer page...
+          </li>
+  			</ul>
+  		</li>
+      <li>
+        <b>Viewing a Screen and its Screen Result</b>
+        <br/>
+        <i>Note: this feature is only available to screeners that have screen result data deposited into the system.</i>
+        <br/>
+        From the Screen Viewer page you can:
+        <ul>
+          <li>
+            Open and close the five major sections of the Screen Results Viewer page (Screen Summary,
+            Screen Result Summary, Data Headers, Data, and Heat Maps) by clicking on
+            the triangles next to the section headers;
           </li>
           <li>
             If you are a <i>screener</i>, the Screen Viewer page will display some basic information about
             the screen.
           </li>
           <li>
-            If you are an <i>administrator</i>, it will display administrative information about
-            the screen that is not viewable by normal users;
+            If you are an <i>administrator</i>, you can click the "Show Admin" button to display 
+            administrative information about the screen that is not viewable by normal users;
           </li>
           <li>
-            If you are a <i>screens administrator</i>, it will allow you to edit the information
-            about a screen.
-            (Keep in mind that any changes you make to the screen will not be permanent! You will want
+            If you are a <i>screens administrator</i>, an Edit button will allow you to edit the information
+            about a screen.  (<i>Note that any changes you make to the screen will not be permanent! You will want
             to change the information as it appears in ScreenDB instead. The
             information about the libraries, screens, and screeners will be reloaded from ScreenDB
-            into Screensaver periodically);
+            into Screensaver periodically</i>);
           </li>
           <li>
             You can also view the screen results from the Screen Viewer page if they are currently
@@ -164,43 +170,25 @@
           </li>
           <li>
             You will only be able to view screen results you have permission to see. If you are a
-            <i>screener</i>, this should include all your own screens, plus the screens you
-            collaborated on;
-          </li>
-          <li>
-            <i>Administrators</i> can see all the screen results;
+            <i>screener</i>, this should include all of your own screens, plus the screens you
+            collaborated on, and any other screens that have been marked as "shareable"; 
+            <i>Administrators</i> can see all the screen result for any screen.
           </li>
           <li>
             <i>Screen results administrators</i> can also load or reload screen results into the
             database.
           </li>
-        </ul>
-      </li>
-      <li>
-        <b>Viewing Screen Results</b>
-        <br/>
-        Clicking "View Screen Results" from the Screen Viewer page will take you to the Screen Result
-        Viewer page. From there, you can:
-        <ul>
           <li>
             Download the screen results to an Excel file by clicking the "Download" button;
-          </li>
-          <li>
-            Go back to the Screen Viewer page by clicking the "View Screen" button;
           </li>
           <li>
             If you are a <i>screen results administrator</i>, you will see controls for deleting the
             screen results, and reloading them from a file;
           </li>
           <li>
-            Show or hide some or all of the data headers for the screen results: use control-clicks
-            (apple-clicks on Mac) to select the data headers you want to see in the list below the
-            "Show selected data headers:" label;
-          </li>
-          <li>
-            Open and close the four major sections of the Screen Results Viewer page (Summary; Data
-            Headers; Data; and Heat Maps) by clicking on
-            the triangles next to the section headers;
+            Show or hide some or all of the data headers for the screen results by selecting the data 
+            header checkboxes you want to see.  The data header selections will affect both the 
+            Data Headers table and the Data table.
           </li>
           <li>
             Be sure to check out the Heat Map Viewer - it's pretty awesome!
@@ -214,15 +202,18 @@
             color scaling by checking the "Control wells" and "Edge wells" checkboxes to the left
             of the heat map.
           </li>
+          <li>
+          	Clicking on a heat map cell will take to the Well Viewer.  Hovering your the mouse cursor 
+          	over the cell will popup some information about the cell.
+          </li>
         </ul>
       </li>
       <li>
-        <b>Give us feedback!</b>
+        <b>Please give us feedback!</b>
         <br/>
         We want to know what you think!
         For now, you can give us feedback by sending email to
-        <a href="mailto:andrew_tolopko@hms.harvard.edu">andrew_tolopko@hms.harvard.edu</a> and
-        <a href="mailto:john_sullivan@hms.harvard.edu">john_sullivan@hms.harvard.edu</a>.
+        <a href="mailto:john_sullivan@hms.harvard.edu,andrew_tolopko@hms.harvard.edu">john_sullivan@hms.harvard.edu, andrew_tolopko@hms.harvard.edu</a>.
       </li>
     </ul>
   </f:verbatim>
