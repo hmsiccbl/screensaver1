@@ -19,10 +19,12 @@
 	--%>
 	<h:outputText value="#{librariesController}" rendered="#{empty librariesController && false}" />
 	<h:outputText value="#{screensController}" rendered="#{empty screensController && false}" />
-	
-    <t:commandLink id="menuTitle" action="goMain" value="#{menu.applicationTitle}" styleClass="menuItem title"/>
 
-    <t:htmlTag id="menuSectionSeparator0" value="hr" rendered="#{menu.authenticatedUser}"/>
+		<t:commandLink id="menuTitle" action="goMain"
+			value="#{menu.applicationTitle}" styleClass="menuItem title" />
+
+		<t:htmlTag id="menuSectionSeparator0" value="hr" 
+			rendered="#{menu.authenticatedUser}" />
 
 		<t:panelGroup rendered="#{menu.authenticatedUser}">
 			<h:form id="userForm">
@@ -36,7 +38,7 @@
 			</h:form>
 		</t:panelGroup>
   
-    <t:htmlTag id="menuSectionSeparator1" value="hr" />
+    <t:htmlTag id="menuSectionSeparator1" value="hr"/>
 
     <h:form id="navForm">
 			<t:panelNavigation2 id="navMenu" layout="table" itemClass="menuItem"
@@ -53,21 +55,17 @@
 					value="#{\"Browse Screens\"}"
 					rendered="#{menu.authenticatedUser && login.userAllowedAccessToScreens}"
 					accesskey="S" />
-				<t:commandNavigation2 accesskey="" />
+				<t:commandNavigation2 />
 				<t:commandNavigation2 action="#{mainController.viewDownloads}"
 					value="#{\"Data Downloads\"}"
 					accesskey="D" />
 				<t:commandNavigation2 action="#{mainController.viewHelp}"
 					value="Instructions"
 					accesskey="H" />
-				<t:commandNavigation2 accesskey="" />
-				<t:commandNavigation2 id="navPanelDeveloperNode"
-					value="Developer >>" accesskey="" visibleOnUserRole="developer"
-					open="true">
-					<t:commandNavigation2 action="goEnvironmentInfo" value="Env Info" />
-					<t:commandNavigation2 action="goSchemaManager"
-						value="#{\"Schema Manager\"}" />
-				</t:commandNavigation2>
+				<t:commandNavigation2 />
+				<t:commandNavigation2 action="goEnvironmentInfo" value="Environment" />
+				<t:commandNavigation2 action="goSchemaManager"
+					value="Schema Manager" />
 			</t:panelNavigation2>
 		</h:form>
 
