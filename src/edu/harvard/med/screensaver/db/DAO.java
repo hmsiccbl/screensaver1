@@ -96,6 +96,9 @@ public interface DAO
 
   public int relationshipSize(final AbstractEntity entity, final String relationship);
 
+  public int relationshipSize(final AbstractEntity entity, final String relationship,
+    final String relationshipProperty, final String relationshipPropertyValue);
+
   /**
    * Update the database with the values for the given Entity. If the Entity was
    * not previously in the database, then create it.

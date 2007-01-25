@@ -204,6 +204,29 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
       }
     });
   }
+
+  public int relationshipSize(
+    final AbstractEntity entity,
+    final String relationship,
+    final String relationshipProperty,
+    final String relationshipPropertyValue)
+  {
+    return (Integer) getHibernateTemplate().execute(new HibernateCallback() 
+    {
+      public Object doInHibernate(Session session) throws HibernateException, SQLException
+      {
+        String entityName = session.getEntityName(entity);
+        String idProperty = session.getSessionFactory().getClassMetadata(entityName).getIdentifierPropertyName();
+        Query query = session.createQuery(
+          "select count(*) from " + entityName + " e join e." + relationship + " r " +
+          "where e." + idProperty + " = :id " +
+          "and r." + relationshipProperty + " = :propValue");
+        query.setString("id", entity.getEntityId().toString());
+        query.setString("propValue", relationshipPropertyValue);
+        return query.list().get(0);
+      }
+    });
+  }
   
   public void deleteEntity(AbstractEntity entity)
   {

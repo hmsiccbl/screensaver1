@@ -306,7 +306,8 @@ public class LibrariesController extends AbstractUIController
       {
         Library library = (Library) _dao.reloadEntity(libraryIn);
         _libraryViewer.setLibrary(library);
-        _libraryViewer.setLibrarySize(_dao.relationshipSize(library, "hbnWells"));
+        _libraryViewer.setLibrarySize(
+          _dao.relationshipSize(library, "hbnWells", "wellType", "experimental"));
         _libraryViewer.setLibraryNameValueTable(
           new LibraryNameValueTable(library, _libraryViewer.getLibrarySize()));
       }

@@ -213,6 +213,10 @@ public class NoOpDAO implements DAO
   {
     return -1;
   }
-  
 
+  public int relationshipSize(final AbstractEntity entity, final String relationship,
+    final String relationshipProperty, final String relationshipPropertyValue)
+  {
+    return -1;
+  }
 }

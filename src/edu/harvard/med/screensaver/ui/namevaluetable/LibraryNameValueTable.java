@@ -30,7 +30,7 @@ public class LibraryNameValueTable extends NameValueTable
     "Library&nbsp;Type",
     "Vendor",
     "Description",
-    "Number&nbsp;of&nbsp;Wells",
+    "Number&nbsp;of&nbsp;Experimental&nbsp;Wells",
   };
 
   
