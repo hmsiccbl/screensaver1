@@ -92,6 +92,7 @@
             id="downloadSearchResultsCommandButton"
             value="Download"
             action="#{searchResults.downloadSearchResults}"
+            disabled="true"
           />
         </h:panelGroup>
       </h:form>
