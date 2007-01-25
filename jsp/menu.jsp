@@ -63,9 +63,10 @@
 					value="Instructions"
 					accesskey="H" />
 				<t:commandNavigation2 />
-				<t:commandNavigation2 action="goEnvironmentInfo" value="Environment" />
+				<t:commandNavigation2 action="goEnvironmentInfo" value="Environment"
+					visibleOnUserRole="developer" />
 				<t:commandNavigation2 action="goSchemaManager"
-					value="Schema Manager" />
+					value="Schema Manager" visibleOnUserRole="developer" />
 			</t:panelNavigation2>
 		</h:form>
 
