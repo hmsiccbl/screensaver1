@@ -30,7 +30,7 @@ public class WellNameValueTable extends ComboNameValueTable
     for (Gene gene : well.getGenes()) {
       comboNameValueTables.add(new GeneNameValueTable(librariesController, gene));
     }
-    for (Compound compound : well.getCompounds()) {
+    for (Compound compound : well.getOrderedCompounds()) {
       comboNameValueTables.add(new CompoundNameValueTable(librariesController, compound));
     }
     initializeComboNameValueTable((NameValueTable [])

@@ -411,7 +411,7 @@ public class WellSearchResults extends SearchResults<Well>
     }
     if (compoundCount > 1) {
       List<String> smiles = new ArrayList<String>();
-      for (Compound compound : well.getCompounds()) {
+      for (Compound compound : well.getOrderedCompounds()) {
         smiles.add(compound.getSmiles());
       }
       return smiles;

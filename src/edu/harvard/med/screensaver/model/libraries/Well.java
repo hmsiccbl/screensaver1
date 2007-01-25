@@ -13,16 +13,19 @@ package edu.harvard.med.screensaver.model.libraries;
 
 import java.io.PrintWriter;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
+
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.EntityIdProperty;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -153,6 +156,23 @@ public class Well extends AbstractEntity implements Comparable
     return Collections.unmodifiableSet(getHbnCompounds());
   }
 
+  /**
+   * Get the set of compounds, ordered by length of SMILES string, from longest to shortest.
+   * @return the set of compounds, ordered by length of SMILES string, from longest to shortest
+   */
+  @DerivedEntityProperty
+  public SortedSet<Compound> getOrderedCompounds()
+  {
+    SortedSet<Compound> orderedCompounds = new TreeSet<Compound>(new Comparator<Compound>() {
+      public int compare(Compound compound1, Compound compound2)
+      {
+        return compound2.getSmiles().length() - compound1.getSmiles().length();
+      }
+    });
+    orderedCompounds.addAll(getHbnCompounds());
+    return orderedCompounds;
+  }
+  
   /**
    * Get the primary compound: the compound that is most likely the one being tested for
    * bioactivity. Normally, we expect a single potentially bioactive
