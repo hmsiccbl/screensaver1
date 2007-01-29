@@ -17,6 +17,10 @@ public interface ScreensaverConstants
   public static final String APPLICATION_VERSION = "1.00b";
   public static final String APPLICATION_TITLE = APPLICATION_NAME + " " + APPLICATION_VERSION;
 
+  /**
+   * Name of session attribute that holds the current screensaver user (of type {@link ScreensaverUser}).
+   */
+  public static final String SCREENSAVER_USER_SESSION_ATTRIBUTE = "screensaverUser";
   
   // JSF Action Results 
   // these values are returned by backing beans' action methods and are used to
@@ -26,7 +30,9 @@ public interface ScreensaverConstants
   public static final String SUCCESS_ACTION_RESULT = "success";
   public static final String ERROR_ACTION_RESULT = "error";
   public static final String DONE_ACTION_RESULT = "done";
-  public static final String LOGOUT_ACTION_RESULT = "logout";
+  public static final String VIEW_MAIN ="viewMain";
+  public static final String VIEW_INSTRUCTIONS ="viewInstructions";
+  public static final String VIEW_DOWNLOADS ="viewDownloads";
   public static final String VIEW_SCREENING_ROOM_USER_ACTION_RESULT = "viewScreeningRoomUser";
   public static final String SHOW_SEARCH_RESULTS_SUMMARY_ACTION = "showSearchResultsSummary";
   public static final String VIEW_SCREEN_ACTION = "viewScreen";

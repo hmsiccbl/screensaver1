@@ -17,11 +17,17 @@
       of the JSF managed-beads as enumerated in the faces-config.xml file. a current workaround is
       to reference the managed-beads that need to get initialized first in a null context here.
 	--%>
+	<h:outputText value="#{mainController}" rendered="#{empty mainController && false}" />
 	<h:outputText value="#{librariesController}" rendered="#{empty librariesController && false}" />
 	<h:outputText value="#{screensController}" rendered="#{empty screensController && false}" />
 
-		<t:commandLink id="menuTitle" action="goMain"
-			value="#{menu.applicationTitle}" styleClass="menuItem title" />
+    <h:form id="titleForm">
+			<t:commandLink id="menuTitle" action="#{mainController.viewMain}"
+				value="#{menu.applicationName}" styleClass="menuItem title" />
+			<t:htmlTag value="br"/>
+			<t:outputText id="version" value="#{menu.applicationVersion}"
+				styleClass="menuItem label" />
+		</h:form>
 
 		<t:htmlTag id="menuSectionSeparator0" value="hr" 
 			rendered="#{menu.authenticatedUser}" />
@@ -30,11 +36,12 @@
 			<h:form id="userForm">
 				<%--t:outputText value="User " styleClass="label"/--%>
 				<t:outputText id="userName" 
-					value="#{login.screensaverUser.fullNameFirstLast}" styleClass="menuItem userName" />
+					value="#{menu.screensaverUser.fullNameFirstLast}" styleClass="menuItem userName" />
 					<t:div/>
 				<%-- t:commandLink id="account" action="goMyAccount" value="#{\"Edit\"}" styleClass="menuItem" />
 				<t:outputText value="|" styleClass="spacer" /--%>
-				<t:commandLink id="logout" action="#{login.logout}" value="#{\"Logout\"}" styleClass="menuItem"/>
+				<t:commandLink id="logout" action="#{mainController.logout}"
+					value="#{\"Logout\"}" styleClass="menuItem" />
 			</h:form>
 		</t:panelGroup>
   
@@ -53,13 +60,13 @@
 					rendered="#{menu.authenticatedUser}" accesskey="L" />
 				<t:commandNavigation2 action="#{screensController.browseScreens}"
 					value="#{\"Browse Screens\"}"
-					rendered="#{menu.authenticatedUser && login.userAllowedAccessToScreens}"
+					rendered="#{menu.authenticatedUser && menu.userAllowedAccessToScreens}"
 					accesskey="S" />
 				<t:commandNavigation2 />
 				<t:commandNavigation2 action="#{mainController.viewDownloads}"
 					value="#{\"Data Downloads\"}"
 					accesskey="D" />
-				<t:commandNavigation2 action="#{mainController.viewHelp}"
+				<t:commandNavigation2 action="#{mainController.viewInstructions}"
 					value="Instructions"
 					accesskey="H" />
 				<t:commandNavigation2 />
@@ -110,7 +117,7 @@
     
     <h:form id="quickFindScreenForm">
 			<t:panelGrid columns="1"
-				rendered="#{menu.authenticatedUser && login.userAllowedAccessToScreens}">
+				rendered="#{menu.authenticatedUser && menu.userAllowedAccessToScreens}">
 				<t:outputLabel id="screenNumberLabel" for="screenNumber"
 					value="Screen #" styleClass="menuItem inputLabel" />
 				<t:inputText id="screenNumber" value="#{screenFinder.screenNumber}"

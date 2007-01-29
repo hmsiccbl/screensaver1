@@ -10,7 +10,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
 <f:subview id="main">
-  <t:outputText value="Welcome #{login.screensaverUser.fullNameFirstLast}!" styleClass="title"/>
+  <t:outputText value="Welcome #{menu.screensaverUser.fullNameFirstLast}!" styleClass="title"/>
   <t:div/>
   <f:verbatim escape="false">
     <p>Thanks for trying out Screensaver!</p>

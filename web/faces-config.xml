@@ -42,27 +42,9 @@
     <managed-bean-name>mainController</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.control.MainController</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
-  </managed-bean>
-  
-  <managed-bean>
-    <description>Menu navigation panel</description>
-    <managed-bean-name>menu</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.Menu</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-  </managed-bean>
-
-  <managed-bean>
-    <description>Login form backing bean</description>
-    <managed-bean-name>login</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.Login</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
     <managed-property>
-      <property-name>unrestrictedAccessDao</property-name>
-      <value>#{transactionalDao}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
+      <property-name>exceptionReporter</property-name>
+      <value>#{exceptionReporter}</value>
     </managed-property>
     <managed-property>
       <property-name>messages</property-name>
@@ -70,6 +52,15 @@
     </managed-property>
   </managed-bean>
   
+  <managed-bean>
+    <description>
+    Backing bean for the menu panel.
+    </description>
+    <managed-bean-name>menu</managed-bean-name>
+    <managed-bean-class>edu.harvard.med.screensaver.ui.Menu</managed-bean-class>            
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+
   <managed-bean>
     <description>
       Backing bean for the reportException view, enabling exception stack traces to be viewed in
@@ -85,28 +76,13 @@
     <managed-bean-name>schemaManager</managed-bean-name>
     <managed-bean-class>edu.harvard.med.screensaver.ui.SchemaManager</managed-bean-class>
     <managed-bean-scope>session</managed-bean-scope>
-	<managed-property>
+    <managed-property>
       <property-name>schemaUtil</property-name>
       <value>#{schemaUtil}</value>
     </managed-property>
     <managed-property>
       <property-name>screenDBDataImporter</property-name>
       <value>#{screenDBDataImporter}</value>
-    </managed-property>
-  </managed-bean>
-
-  <managed-bean>
-    <description>Hibernate Session Test</description>
-    <managed-bean-name>hibernateSessionTest</managed-bean-name>
-    <managed-bean-class>edu.harvard.med.screensaver.ui.HibernateSessionTest</managed-bean-class>
-    <managed-bean-scope>session</managed-bean-scope>
-    <managed-property>
-      <property-name>dao</property-name>
-      <value>#{dao}</value>
-    </managed-property>
-    <managed-property>
-      <property-name>hibernateTemplate</property-name>
-      <value>#{hibernateTemplate}</value>
     </managed-property>
   </managed-bean>
 
@@ -364,6 +340,11 @@
 
     <!-- === top-level wildcard navigation rules === -->
     <navigation-case>
+      <from-outcome>viewMain</from-outcome>
+      <to-view-id>/main</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>viewHelp</from-outcome>
       <to-view-id>/helpViewer</to-view-id>
       <redirect/>
@@ -371,12 +352,6 @@
     <navigation-case>
       <from-outcome>viewDownloads</from-outcome>
       <to-view-id>/downloadsViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>logout</from-outcome>
-      <!-- maybe we want a "you have been logged out" page; for now we send to the query page, which will force a login -->
-      <to-view-id>/main</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>

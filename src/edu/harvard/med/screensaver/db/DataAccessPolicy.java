@@ -10,7 +10,9 @@
 package edu.harvard.med.screensaver.db;
 
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpSession;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.derivatives.Derivative;
 import edu.harvard.med.screensaver.model.derivatives.DerivativeScreenResult;
@@ -45,7 +47,6 @@ import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.Login;
 
 import org.apache.log4j.Logger;
 
@@ -357,8 +358,12 @@ public class DataAccessPolicy implements AbstractEntityVisitor
       log.warn("no current screensaver user, since not executing within a web context; all data access permissions granted");
       return null;
     }
-    Login login = (Login) facesContext.getApplication().getVariableResolver().resolveVariable(facesContext, "login");
-    ScreensaverUser user = login.getScreensaverUser();
+    HttpSession httpSession = (HttpSession) facesContext.getExternalContext().getSession(false);
+    if (httpSession == null) {
+      log.warn("no current screensaver user, since no current HTTP session all data access permissions granted");
+      return null;
+    }
+    ScreensaverUser user = (ScreensaverUser) httpSession.getAttribute(ScreensaverConstants.SCREENSAVER_USER_SESSION_ATTRIBUTE);
     return user;
   }
 

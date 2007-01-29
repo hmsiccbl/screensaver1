@@ -19,5 +19,9 @@ public class Menu extends AbstractBackingBean
   // static data members
   
   private static Logger log = Logger.getLogger(Menu.class);
+  
+
+  // JSF application methods
+
 
 }

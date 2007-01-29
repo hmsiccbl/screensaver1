@@ -9,14 +9,14 @@
 
 package edu.harvard.med.screensaver.ui.control;
 
+import edu.harvard.med.screensaver.ui.ExceptionReporter;
+
 import org.apache.log4j.Logger;
 
 /**
  * A controller for top-level pages and controls such as logging in and out, going to the
  * help page, and other sophisticated controls.
  * 
- * TODO: move control code from login, main, etc, to here.
- *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
@@ -28,17 +28,41 @@ public class MainController extends AbstractUIController
 
 
   // instance data members
+  
+  private ExceptionReporter _exceptionReporter;
 
-  // public constructors and methods
-
-  public String viewHelp()
+  
+  public void setExceptionReporter(ExceptionReporter exceptionReporter)
   {
-    return "viewHelp";
+    _exceptionReporter = exceptionReporter;
+    _exceptionReporter.setMainController(this);
+  }
+
+  
+  // public constructors and methods
+  
+  @UIControllerMethod
+  public String viewMain()
+  {
+    return VIEW_MAIN;
+  }
+
+  @UIControllerMethod
+  public String viewInstructions()
+  {
+    return VIEW_INSTRUCTIONS;
   }
   
+  @UIControllerMethod
   public String viewDownloads()
   {
-    return "viewDownloads";
+    return VIEW_DOWNLOADS;
+  }
+  
+  public String logout()
+  {
+    log.info("logout for session "  + getHttpSession().getId());
+    closeHttpSession();
+    return viewMain();
   }
 }
-

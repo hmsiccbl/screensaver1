@@ -16,6 +16,7 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.servlet.ServletException;
 
+import edu.harvard.med.screensaver.ui.control.MainController;
 import edu.harvard.med.screensaver.util.Pair;
 
 /**
@@ -26,11 +27,17 @@ import edu.harvard.med.screensaver.util.Pair;
 public class ExceptionReporter extends AbstractBackingBean
 {
   public static final String EXCEPTION_SESSION_PARAM = "javax.servlet.error.exception";
+  
+  private MainController _mainController;
+
+  public void setMainController(MainController menuController)
+  {
+    _mainController = menuController;
+  }
 
   public String loginAgain()
   {
-    closeHttpSession();
-    return LOGOUT_ACTION_RESULT;
+    return _mainController.logout();
   }
   
   public DataModel getThrowablesDataModel()
