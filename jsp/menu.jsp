@@ -86,25 +86,25 @@
           id="plateNumberLabel"
           for="plateNumber"
           value="Plate"
-          styleClass="menuItem inputLabel"
+          styleClass="menuItem label"
         />
         <t:outputLabel
           id="wellNameLabel"
           for="wellName"
           value="Well"
-          styleClass="menuItem inputLabel"
+          styleClass="menuItem label"
         />
         <t:inputText
           id="plateNumber"
           value="#{wellFinder.plateNumber}"
           size="5"
-          styleClass="input"
+          styleClass="inputText"
         />
         <t:inputText
           id="wellName"
           value="#{wellFinder.wellName}"
           size="3"
-          styleClass="input"
+          styleClass="inputText"
         />
         <t:commandButton
 	      action="#{wellFinder.findWell}"
@@ -119,9 +119,9 @@
 			<t:panelGrid columns="1"
 				rendered="#{menu.authenticatedUser && menu.userAllowedAccessToScreens}">
 				<t:outputLabel id="screenNumberLabel" for="screenNumber"
-					value="Screen #" styleClass="menuItem inputLabel" />
+					value="Screen #" styleClass="menuItem label" />
 				<t:inputText id="screenNumber" value="#{screenFinder.screenNumber}"
-					size="5" styleClass="input" />
+					size="5" styleClass="inputText" />
 				<t:commandButton action="#{screenFinder.findScreen}"
 					id="quickFindScreenSubmit" value="Go"
 					rendered="#{menu.authenticatedUser}" styleClass="command" />

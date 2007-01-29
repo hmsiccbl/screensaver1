@@ -26,7 +26,7 @@
         id="silencingReagentType"
         value="#{librariesController.rnaiLibraryContentsParser.silencingReagentType}"
         converter="SilencingReagentTypeConverter"
-        styleClass="input"
+        styleClass="inputText"
       >
         <f:selectItems
           value="#{rnaiLibraryContentsImporter.silencingReagentTypeSelections}"
@@ -44,7 +44,7 @@
         accept="application/vnd.ms-excel"
         required="true"
         maxlength="134217728"
-        styleClass="input"
+        styleClass="inputText"
       />
       
       <t:commandButton

@@ -30,7 +30,7 @@
         accept="application/vnd.ms-excel"
         required="true"
         maxlength="134217728"
-        styleClass="input"
+        styleClass="inputText"
       />
       <t:commandButton
         id="import"

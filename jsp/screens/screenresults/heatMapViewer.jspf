@@ -28,12 +28,12 @@ TODO:
 
 		<t:panelGroup styleClass="commandPanel">
 			<t:outputLabel for="plateNumber" value="Plate:"
-				styleClass="inputLabel" />
+				styleClass="label" />
 
 			<t:selectOneMenu id="plateNumber"
 				value="#{heatMapViewer.plateNumber.value}" required="true"
 				onchange="javascript:document.getElementById('updateButton').click()"
-				styleClass="input">
+				styleClass="inputText">
 				<f:selectItems value="#{heatMapViewer.plateNumber.selectItems}" />
 			</t:selectOneMenu>
 
@@ -45,11 +45,11 @@ TODO:
 				action="#{heatMapViewer.nextPlate}" styleClass="command" />
 
 			<t:outputLabel for="showValues" value="Show values"
-				styleClass="inputLabel" />
+				styleClass="label" />
 			<t:selectBooleanCheckbox id="showValues"
 				value="#{heatMapViewer.showValues}"
 				onclick="javascript:document.getElementById('updateButton').click()"
-				styleClass="input" />
+				styleClass="label" />
 
 			<t:commandButton id="addHeatMap" value="Add Heat Map"
 				action="#{heatMapViewer.addHeatMap}" styleClass="command" />
@@ -67,35 +67,35 @@ TODO:
 			<t:column>
 				<t:panelGrid>
 					<t:outputLabel for="dataHeader" value="Data header:"
-						styleClass="inputLabel" />
+						styleClass="label" />
 					<t:selectOneMenu id="dataHeader"
 						value="#{heatMapConfig.dataHeaders.value}" required="true"
-						styleClass="input">
+						styleClass="inputText">
 						<f:selectItems value="#{heatMapConfig.dataHeaders.selectItems}" />
 					</t:selectOneMenu>
 
 					<t:outputLabel for="scoringType" value="Scoring:"
-						styleClass="inputLabel" />
+						styleClass="label" />
 					<t:selectOneMenu id="scoringType"
 						value="#{heatMapConfig.scoringType.value}" required="true"
-						styleClass="input">
+						styleClass="inputText">
 						<f:selectItems value="#{heatMapConfig.scoringType.selectItems}" />
 					</t:selectOneMenu>
 
 					<t:outputLabel for="excludedWellFilters" value="Exclude:"
-						styleClass="inputLabel" />
+						styleClass="label" />
 					<t:selectManyCheckbox id="excludedWellFilters"
 						layout="pageDirection"
 						value="#{heatMapConfig.excludedWellFilters.value}"
-						styleClass="input">
+						styleClass="label">
 						<f:selectItems
 							value="#{heatMapConfig.excludedWellFilters.selectItems}" />
 					</t:selectManyCheckbox>
 
 					<t:outputLabel for="numericFormat" value="Numeric Format:"
-						styleClass="inputLabel" />
+						styleClass="label" />
 					<t:selectOneMenu id="numericFormat"
-						value="#{heatMapConfig.numericFormat.value}" styleClass="input">
+						value="#{heatMapConfig.numericFormat.value}" styleClass="inputText">
 						<f:selectItems value="#{heatMapConfig.numericFormat.selectItems}" />
 					</t:selectOneMenu>
 
@@ -156,7 +156,7 @@ TODO:
 							value="#{heatMapViewer.heatMapStatisticsDataModels[heatMapIndex]}"
 							var="statistic" styleClass="standardTable">
 							<t:column>
-								<t:outputText value="#{statistic.name}" styleClass="inputLabel" />
+								<t:outputText value="#{statistic.name}" styleClass="label" />
 							</t:column>
 							<t:column style="numericColumn">
 								<t:outputText value="#{statistic.value}" styleClass="dataText" />
@@ -179,7 +179,7 @@ TODO:
 					<t:dataTable value="#{heatMapViewer.cellTypeLegendDataModel}"
 						var="legendItem">
 						<t:column>
-							<t:outputText value="#{legendItem.name}" styleClass="inputLabel" />
+							<t:outputText value="#{legendItem.name}" styleClass="label" />
 						</t:column>
 						<t:column styleClass="heatMapCell" style="#{legendItem.cellStyle}">
 							<t:outputText value="#{legendItem.cellText}" escape="false" />

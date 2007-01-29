@@ -13,7 +13,7 @@
         <t:inputTextarea
           id="plateWellList"
           value="#{wellFinder.plateWellList}"
-          styleClass="input"
+          styleClass="inputText"
           cols="50"
           rows="40"
         ></t:inputTextarea>

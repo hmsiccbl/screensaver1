@@ -34,7 +34,7 @@
 
 			<t:panelGroup>
 				<t:outputLabel for="sortOrderMenu" value="Sort by"
-					styleClass="inputLabel" />
+					styleClass="label" />
 				<t:commandButton id="updateSortOrder" value="update sort order"
 					action="#{navigator.sortOnSelectedColumn}"
 					styleClass="hiddenCommand" />
@@ -62,7 +62,7 @@
 					<f:selectItems
 						value="#{navigator.itemsPerPageSelector.selectItems}" />
 				</t:selectOneMenu>
-				<t:outputText value=" per page" styleClass="inputLabel" />
+				<t:outputText value=" per page" styleClass="label" />
 			</t:panelGroup>
 
 			<t:panelGroup style="float: right"

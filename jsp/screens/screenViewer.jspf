@@ -51,14 +51,14 @@ TODO:
 		<t:outputLabel for="title" value="Title" />
 		<t:inputText id="title" value="#{screenViewer.screen.title}"
 			displayValueOnly="#{!screenViewer.editMode}" size="80"
-			styleClass="input" displayValueOnlyStyleClass="dataText" />
+			styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 
 		<t:outputLabel for="screenType" value="Screen Type" />
 		<t:selectOneMenu id="screenType"
 			value="#{screenViewer.screen.screenType}"
 			converter="ScreenTypeConverter"
-			displayValueOnly="#{!screenViewer.editMode}" styleClass="input"
-			displayValueOnlyStyleClass="input">
+			displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
+			displayValueOnlyStyleClass="dataText">
 			<f:selectItems value="#{screenViewer.screenTypeSelectItems}" />
 		</t:selectOneMenu>
 
@@ -79,7 +79,7 @@ TODO:
 		<t:selectOneMenu id="labNameEditable"
 			value="#{screenViewer.labName.value}" onchange="javascript:submit()"
 			immediate="true" valueChangeListener="#{screenViewer.update}"
-			rendered="#{screenViewer.editMode}" styleClass="input">
+			rendered="#{screenViewer.editMode}" styleClass="inputText">
 			<f:selectItems value="#{screenViewer.labName.selectItems}" />
 		</t:selectOneMenu>
 
@@ -100,7 +100,7 @@ TODO:
 		</h:panelGroup>
 		<t:selectOneMenu id="leadScreenerEditable"
 			value="#{screenViewer.leadScreener.value}"
-			rendered="#{screenViewer.editMode}" styleClass="input">
+			rendered="#{screenViewer.editMode}" styleClass="inputText">
 			<f:selectItems value="#{screenViewer.leadScreener.selectItems}" />
 		</t:selectOneMenu>
 
@@ -126,7 +126,7 @@ TODO:
 		</t:panelGrid>
 		<t:selectManyListbox id="collaboratorsEditable"
 			value="#{screenViewer.collaborators.value}"
-			rendered="#{screenViewer.editMode}" size="5" styleClass="input">
+			rendered="#{screenViewer.editMode}" size="5" styleClass="inputText">
 			<f:selectItems value="#{screenViewer.collaborators.selectItems}" />
 		</t:selectManyListbox>
 
@@ -134,7 +134,7 @@ TODO:
 			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}" />
 		<t:inputDate id="dateCreatedEditable"
 			value="#{screenViewer.screen.dateCreated}" popupCalendar="true"
-			rendered="#{screenViewer.editMode}" styleClass="input" />
+			rendered="#{screenViewer.editMode}" styleClass="inputText" />
 		<t:outputText id="dateCreated"
 			value="#{screenViewer.screen.dateCreated}"
 			rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
@@ -144,7 +144,7 @@ TODO:
 			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}" />
 		<t:inputDate id="dateOfApplicationEditable"
 			value="#{screenViewer.screen.dateOfApplication}" popupCalendar="true"
-			rendered="#{screenViewer.editMode}" styleClass="input" />
+			rendered="#{screenViewer.editMode}" styleClass="inputText" />
 		<t:outputText id="dateOfApplication"
 			value="#{screenViewer.screen.dateOfApplication}"
 			rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
@@ -155,7 +155,7 @@ TODO:
 		<t:inputDate id="dateDataMeetingScheduledEditable"
 			value="#{screenViewer.screen.dataMeetingScheduled}"
 			popupCalendar="true" rendered="#{screenViewer.editMode}"
-			styleClass="input" />
+			styleClass="inputText" />
 		<t:outputText id="dateDataMeetingScheduled"
 			value="#{screenViewer.screen.dataMeetingScheduled}"
 			rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
@@ -166,7 +166,7 @@ TODO:
 		<t:inputDate id="dateDataMeetingCompletedEditable"
 			value="#{screenViewer.screen.dataMeetingComplete}"
 			popupCalendar="true" rendered="#{screenViewer.editMode}"
-			styleClass="input" />
+			styleClass="inputText" />
 		<t:outputText id="dateDataMeetingCompleted"
 			value="#{screenViewer.screen.dataMeetingComplete}"
 			rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
@@ -174,13 +174,13 @@ TODO:
 		<t:outputLabel for="publishableProtocol" value="Publishable Protocol" />
 		<t:inputTextarea id="publishableProtocol" rows="3" cols="80"
 			value="#{screenViewer.screen.publishableProtocol}"
-			displayValueOnly="#{!screenViewer.editMode}" styleClass="input"
+			displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
 			displayValueOnlyStyleClass="dataText" />
 
 		<t:outputLabel for="summary" value="Summary" />
 		<t:inputTextarea id="summary" rows="3" cols="80"
 			value="#{screenViewer.screen.summary}"
-			displayValueOnly="#{!screenViewer.editMode}" styleClass="input"
+			displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
 			displayValueOnlyStyleClass="dataText" />
 
 		<t:outputLabel for="comments" value="Comments"
@@ -188,7 +188,7 @@ TODO:
 		<t:inputTextarea id="comments" rows="3" cols="80"
 			value="#{screenViewer.screen.comments}"
 			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
-			displayValueOnly="#{screenViewer.adminViewMode}" styleClass="input"
+			displayValueOnly="#{screenViewer.adminViewMode}" styleClass="inputText"
 			displayValueOnlyStyleClass="dataText" />
 
 		<t:outputLabel for="visitItems" value="Visits" />
@@ -273,7 +273,7 @@ TODO:
 					</f:facet>
 					<t:inputDate id="statusDateEditable"
 						value="#{statusItem.statusDate}" popupCalendar="true"
-						rendered="#{screenViewer.editMode}" styleClass="input" />
+						rendered="#{screenViewer.editMode}" styleClass="inputText" />
 					<t:outputText id="statusDate" value="#{statusItem.statusDate}"
 						rendered="#{!screenViewer.editMode}" styleClass="dataText" />
 				</t:column>
@@ -284,7 +284,7 @@ TODO:
 			</t:dataTable>
 			<t:panelGroup rendered="#{screenViewer.editMode}">
 				<t:selectOneMenu value="#{screenViewer.newStatusValue}"
-					required="false" styleClass="input"
+					required="false" styleClass="inputText"
 					converter="StatusValueConverter">
 					<f:selectItems value="#{screenViewer.newStatusValueSelectItems}" />
 				</t:selectOneMenu>
@@ -310,7 +310,7 @@ TODO:
 						<t:outputText value="Pubmed ID" />
 					</f:facet>
 					<t:inputText value="#{publication.pubmedId}"
-						rendered="#{screenViewer.editMode}" styleClass="dataText" />
+						rendered="#{screenViewer.editMode}" styleClass="inputText" />
 					<h:outputLink value="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi"
 						rendered="#{!screenViewer.editMode}">
 						<f:param name="cmd" value="Search" />
@@ -325,7 +325,7 @@ TODO:
 					</f:facet>
 					<t:inputText value="#{publication.yearPublished}"
 						displayValueOnly="#{!screenViewer.editMode}" maxlength="4"
-						styleClass="input" displayValueOnlyStyleClass="dataText" />
+						styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 					<%-- TODO: f:validator validatorId="YearValidator" />
 						</t:inputText --%>
 				</t:column>
@@ -334,7 +334,7 @@ TODO:
 						<t:outputText value="Title" />
 					</f:facet>
 					<t:inputText value="#{publication.title}"
-						displayValueOnly="#{!screenViewer.editMode}" styleClass="input"
+						displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
 						displayValueOnlyStyleClass="dataText" />
 				</t:column>
 				<t:column>
@@ -342,7 +342,7 @@ TODO:
 						<t:outputText value="Authors" />
 					</f:facet>
 					<t:inputText value="#{publication.authors}"
-						displayValueOnly="#{!screenViewer.editMode}" styleClass="input"
+						displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
 						displayValueOnlyStyleClass="dataText" />
 				</t:column>
 				<t:column>
@@ -374,7 +374,7 @@ TODO:
 						<t:outputText value="Written By" />
 					</f:facet>
 					<t:inputText value="#{letterOfSupport.writtenBy}"
-						displayValueOnly="#{!screenViewer.editMode}" styleClass="input"
+						displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
 						displayValueOnlyStyleClass="dataText" />
 				</t:column>
 				<t:column>
@@ -383,7 +383,7 @@ TODO:
 					</f:facet>
 					<t:inputDate id="statusDateEditable"
 						value="#{letterOfSupport.dateWritten}" popupCalendar="true"
-						rendered="#{screenViewer.editMode}" styleClass="input" />
+						rendered="#{screenViewer.editMode}" styleClass="inputText" />
 					<t:outputText id="statusDate"
 						value="#{letterOfSupport.dateWritten}"
 						rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
@@ -417,7 +417,7 @@ TODO:
 						<t:outputText value="File Name" />
 					</f:facet>
 					<t:inputText value="#{attachedFile.filename}"
-						displayValueOnly="#{!screenViewer.editMode}" styleClass="input"
+						displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
 						displayValueOnlyStyleClass="dataText" />
 				</t:column>
 				<t:column>
@@ -425,7 +425,7 @@ TODO:
 						<t:outputText value="Contents" />
 					</f:facet>
 					<t:inputText value="#{attachedFile.fileContents}"
-						displayValueOnly="#{!screenViewer.editMode}" styleClass="input"
+						displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
 						displayValueOnlyStyleClass="dataText" />
 				</t:column>
 				<t:column>
@@ -465,7 +465,7 @@ TODO:
 			</t:dataTable>
 			<t:panelGroup rendered="#{screenViewer.editMode}">
 				<t:selectOneMenu value="#{screenViewer.newFundingSupport}"
-					required="false" styleClass="input"
+					required="false" styleClass="inputText"
 					converter="FundingSupportConverter">
 					<f:selectItems value="#{screenViewer.newFundingSupportSelectItems}" />
 				</t:selectOneMenu>
@@ -506,7 +506,7 @@ TODO:
 			</t:dataTable>
 			<t:panelGroup rendered="#{screenViewer.editMode}">
 				<t:inputText id="newKeyword" value="#{screenViewer.newKeyword}"
-					styleClass="input" required="false" />
+					styleClass="inputText" required="false" />
 				<t:commandButton id="addKeywordCommand" value="Add Keyword"
 					action="#{screenViewer.addKeyword}" styleClass="command" />
 			</t:panelGroup>
@@ -516,25 +516,25 @@ TODO:
 			rendered="#{screenViewer.adminViewMode}" />
 		<t:panelGroup rendered="#{screenViewer.adminViewMode}">
 			<t:outputLabel for="abaseStudyId" value="Study ID: "
-				rendered="#{screenViewer.adminViewMode}" styleClass="inputLabel" />
+				rendered="#{screenViewer.adminViewMode}" styleClass="label" />
 			<t:outputText id="abaseStudyId"
 				value="#{screenViewer.screen.abaseStudyId}"
 				rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
 
 			<t:outputLabel for="abaseProtocolId" value=", Protocol ID: "
-				rendered="#{screenViewer.adminViewMode}" styleClass="inputLabel" />
+				rendered="#{screenViewer.adminViewMode}" styleClass="label" />
 			<t:outputText id="abaseProtocolId"
 				value="#{screenViewer.screen.abaseProtocolId}"
 				rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
 
 			<t:outputLabel for="AbaseTestsets" value=", Testsets: "
-				rendered="#{screenViewer.adminViewMode}" styleClass="inputLabel" />
+				rendered="#{screenViewer.adminViewMode}" styleClass="label" />
 			<t:outputText
 				value="#{empty screenViewer.screen.abaseTestsets ? \"<none>\" : screenViewer.abaseTestsets}"
 				styleClass="dataText" rendered="#{screenViewer.adminViewMode}" />
 		</t:panelGroup>
 
-		<t:outputLabel value="Billing Information" styleClass="inputLabel"
+		<t:outputLabel value="Billing Information" styleClass="label"
 			visibleOnUserRole="billingAdmin" />
 		<t:commandButton id="viewBillingInformation"
 			value="#{screenViewer.editMode ? \"Edit...\" : \"View...\"}"

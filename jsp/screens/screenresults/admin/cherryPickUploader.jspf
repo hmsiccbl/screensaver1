@@ -18,7 +18,7 @@
 			<t:inputFileUpload id="uploadCherryPickFile"
 				value="#{cherryPickImporter.uploadedFile}" storage="file"
 				accept="application/vnd.ms-excel" required="true"
-				maxlength="134217728" styleClass="input" />
+				maxlength="134217728" styleClass="inputText" />
 			<t:commandButton value="Import" action="#{cherryPickImporter.submit}"
 				styleClass="command" />
 		</h:form>

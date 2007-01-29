@@ -43,11 +43,11 @@
 						<t:outputText value="#{screenResultViewer.screen.screenNumber}: \"#{screenResultViewer.screen.title}\""
 							styleClass="dataText" />
 						<t:div>
-							<t:outputText value="Lab:" styleClass="inputLabel"/>
+							<t:outputText value="Lab:" styleClass="label"/>
 							<t:commandLink value="#{screenViewer.screen.labHead.labName}"
 								action="#{screenViewer.viewLabHead}"
 								styleClass="dataText entityLink" />
-							<t:outputText value="&nbsp;&nbsp;Screener:" styleClass="inputLabel" escape="false"/>
+							<t:outputText value="&nbsp;&nbsp;Screener:" styleClass="label" escape="false"/>
 							<t:commandLink
 								value="#{screenViewer.screen.leadScreener.fullNameLastFirst}"
 								action="#{screenViewer.viewLeadScreener}"
@@ -107,6 +107,7 @@
 					<t:div>
 						<t:selectBooleanCheckbox id="screenResultIsShareable"
 							value="#{screenResultViewer.screenResult.shareable}"
+							styleClass="label"
 							displayValueOnly="#{screenResultViewer.readOnly}"
 							displayValueOnlyStyleClass="dataText"
 							onclick="javascript:document.getElementById('saveScreenResultButton').click()" />
@@ -137,10 +138,10 @@
 			<t:panelGrid columns="1"
 				rendered="#{!empty screenResultViewer.screenResult && !(screenResultViewer.collapsablePanelsState['dataHeadersTable'] && screenResultViewer.collapsablePanelsState['dataTable'])}">
 				<t:outputLabel for="dataHeadersList"
-					value="Show selected data headers:" styleClass="inputLabel" />
+					value="Show selected data headers:" styleClass="label" />
 				<t:selectManyCheckbox id="dataHeadersList" layout="pageDirection" layoutWidth="4"
 					value="#{screenResultViewer.selectedResultValueTypes.value}"
-					styleClass="input" style="vertical-align: top">
+					styleClass="label" style="vertical-align: top">
 					<f:selectItems id="dataHeaders" 
 						value="#{screenResultViewer.selectedResultValueTypes.selectItems}" />
 				</t:selectManyCheckbox>
@@ -227,12 +228,12 @@
 
 						<t:outputLabel id="rowRange"
 							value="#{screenResultViewer.rowRangeText}" for="rowNumber"
-							styleClass="inputLabel" />
+							styleClass="label" />
 						<t:inputText id="rowNumber"
 							value="#{screenResultViewer.rowNumber}"
 							binding="#{screenResultViewer.rowNumberInput}"
 							valueChangeListener="#{screenResultViewer.rowNumberListener}"
-							size="6" styleClass="input">
+							size="6" styleClass="inputText">
 							<%--f:validateLongRange minimum="1"
 						maximum="#{screenResultViewer.rawDataSize}" /--%>
 						</t:inputText>
@@ -242,15 +243,15 @@
 
 						<t:panelGroup id="showHitsOnlyCommandPanel"
 							rendered="#{!empty screenResultViewer.hitsForDataHeader.selectItems}">
-							<t:selectBooleanCheckbox id="showHitsOnly" styleClass="command"
+							<t:selectBooleanCheckbox id="showHitsOnly" styleClass="label"
 								value="#{screenResultViewer.showHitsOnly}" immediate="true"
 								onclick="javascript:document.getElementById('updateDataTableRowsButton').click()" />
 							<t:outputLabel value="Show only hits for" for="showHitsOnly"
-								styleClass="inputLabel" />
+								styleClass="label" />
 							<t:selectOneMenu id="hitsForDataHeaderList"
 								value="#{screenResultViewer.hitsForDataHeader.value}"
 								onchange="javascript:document.getElementById('updateDataTableRowsButton').click()"
-								immediate="true" styleClass="input">
+								immediate="true" styleClass="inputText">
 								<f:selectItems id="hitsForDataHeader"
 									value="#{screenResultViewer.hitsForDataHeader.selectItems}" />
 							</t:selectOneMenu>

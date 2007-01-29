@@ -144,12 +144,12 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	vertical-align: bottom;
 }
 
-.dataText,.input,.inputLabel {
+.dataText,.inputText,.label {
 	font-family: sans-serif;
 	font-size: small;
 }
 
-.command,.input,.inputLabel {
+.command,.inputText,.label {
 	margin-right: 4px;
 	vertical-align: middle;
 }
