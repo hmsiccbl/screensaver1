@@ -15,6 +15,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
@@ -52,6 +54,7 @@ public class Screen extends AbstractEntity
   private ScreeningRoomUser _labHead;
   private Set<ScreeningRoomUser> _collaborators = new HashSet<ScreeningRoomUser>();
   private Set<StatusItem> _statusItems = new HashSet<StatusItem>();
+  private transient SortedSet<StatusItem> _sortedStatusItems;
   private Set<Visit> _visits = new HashSet<Visit>();
   private Set<AbaseTestset> _abaseTestsets = new HashSet<AbaseTestset>();
   private Set<Publication> _publications = new HashSet<Publication>();
@@ -326,6 +329,22 @@ public class Screen extends AbstractEntity
   public Set<StatusItem> getStatusItems()
   {
     return _statusItems;
+  }
+  
+  /**
+   * Get the status items, sorted by their natural ordering.
+   * 
+   * @return the status items, sorted by their natural ordering; null if there
+   *         are no status items
+   */
+  @DerivedEntityProperty
+  public SortedSet<StatusItem> getSortedStatusItems()
+  {
+    assert _sortedStatusItems != null;
+    if (_sortedStatusItems == null) {
+      _sortedStatusItems = new TreeSet<StatusItem>(getStatusItems());
+    }
+    return _sortedStatusItems;
   }
 
   /**

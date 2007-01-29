@@ -154,7 +154,9 @@ public class ScreensController extends AbstractUIController
         if (_screensBrowser.getScreenSearchResults() == null) {
           List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
           for (Screen screen : screens) {
-            _dao.need(screen, "screenResult");
+            _dao.need(screen, 
+                      "screenResult", 
+                      "statusItems"); // TODO: only need this is screensAdmin or readEverythingAdmin; query is faster if not requested
           }
           _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens, 
                                                                          ScreensController.this, 

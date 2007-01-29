@@ -25,7 +25,7 @@ import edu.harvard.med.screensaver.model.ToOneRelationship;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @hibernate.class lazy="false"
  */
-public class StatusItem extends AbstractEntity
+public class StatusItem extends AbstractEntity implements Comparable
 {
   
   // static fields
@@ -149,6 +149,22 @@ public class StatusItem extends AbstractEntity
     _screen.getStatusItems().remove(this);
     _statusValue = statusValue;
     _screen.getStatusItems().add(this);
+  }
+  
+
+  // Comparable interface methods
+
+  public int compareTo(Object o)
+  {
+    if (o == null) {
+      return 1;
+    }
+    StatusItem other = (StatusItem) o;
+    int result = _statusValue.compareTo(other._statusValue);
+    if (result == 0) {
+      return _statusDate.compareTo(other._statusDate);
+    }
+    return result;
   }
 
 
@@ -293,4 +309,5 @@ public class StatusItem extends AbstractEntity
   {
     _statusValue = statusValue;
   }
+
 }
