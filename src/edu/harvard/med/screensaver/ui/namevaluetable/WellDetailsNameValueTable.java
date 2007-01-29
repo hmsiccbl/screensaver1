@@ -19,6 +19,12 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 
+/**
+ * A NameValueTable for the well details portion of the Well Viewer.
+ *
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ */
 public class WellDetailsNameValueTable extends NameValueTable
 {
   
@@ -30,6 +36,7 @@ public class WellDetailsNameValueTable extends NameValueTable
   private static final String ENTREZGENE_ID_LOOKUP_URL_PREFIX =
     "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=gene&cmd=Retrieve&dopt=full_report&list_uids=";
   
+  // the row names:
   private static final String LIBRARY = "Library";
   private static final String PLATE = "Plate";
   private static final String WELL = "Well";
@@ -46,6 +53,9 @@ public class WellDetailsNameValueTable extends NameValueTable
   private List<Object> _values = new ArrayList<Object>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
   
+  
+  // public constructor and implementations of NameValueTable abstract methods
+  
   public WellDetailsNameValueTable(LibrariesController librariesController, Well well)
   {
     _librariesController = librariesController;
@@ -54,7 +64,32 @@ public class WellDetailsNameValueTable extends NameValueTable
     setDataModel(new ListDataModel(_values));
   }
 
-  protected String getAction(int index, String value)
+  @Override
+  public int getNumRows()
+  {
+    return _names.size();
+  }
+
+  @Override
+  public String getName(int index)
+  {
+    return _names.get(index);
+  }
+
+  @Override
+  public ValueType getValueType(int index)
+  {
+    return _valueTypes.get(index);
+  }
+
+  @Override
+  public Object getValue(int index)
+  {
+    return _values.get(index);
+  }
+
+  @Override
+  public String getAction(int index, String value)
   {
     String name = getName(index);
     if (name.equals(LIBRARY)) {
@@ -64,32 +99,20 @@ public class WellDetailsNameValueTable extends NameValueTable
     return null;
   }
   
-  protected String getLink(int index, String value)
+  @Override
+  public String getLink(int index, String value)
   {
     // no well detail fields have links
     return null;
   }
 
-  public String getName(int index)
-  {
-    return _names.get(index);
-  }
-
-  public int getNumRows()
-  {
-    return _names.size();
-  }
-
-  protected Object getValue(int index)
-  {
-    return _values.get(index);
-  }
-
-  protected ValueType getValueType(int index)
-  {
-    return _valueTypes.get(index);
-  }
-
+  
+  // private instance methods
+  
+  /**
+   * Initialize the lists {@link #_names}, {@link #_values}, and {@link #_valueTypes}. Don't
+   * add rows for missing values.
+   */
   private void initializeLists(Well well) {
     addItem(LIBRARY, well.getLibrary().getLibraryName(), ValueType.COMMAND);
     addItem(PLATE, Integer.toString(well.getPlateNumber()), ValueType.TEXT);

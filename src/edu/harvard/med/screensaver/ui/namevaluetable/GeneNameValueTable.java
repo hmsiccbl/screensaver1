@@ -19,6 +19,12 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 
+/**
+ * A NameValueTable for the Gene Viewer.
+ *
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ */
 public class GeneNameValueTable extends NameValueTable
 {
   
@@ -30,6 +36,7 @@ public class GeneNameValueTable extends NameValueTable
   private static final String ENTREZGENE_ID_LOOKUP_URL_PREFIX =
     "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=gene&cmd=Retrieve&dopt=full_report&list_uids=";
   
+  // the row names
   private static final String GENE_NAME = "Gene&nbsp;Name";
   private static final String ENTREZGENE_ID = "EntrezGene&nbsp;ID";
   private static final String ENTREZGENE_SYMBOL = "EntrezGene&nbsp;Symbol";
@@ -45,6 +52,9 @@ public class GeneNameValueTable extends NameValueTable
   private List<Object> _values = new ArrayList<Object>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
   
+  
+  // public constructor and implementations of NameValueTable abstract methods
+  
   public GeneNameValueTable(LibrariesController librariesController, Gene gene)
   {
     _librariesController = librariesController;
@@ -53,7 +63,32 @@ public class GeneNameValueTable extends NameValueTable
     setDataModel(new ListDataModel(_values));
   }
 
-  protected String getAction(int index, String value)
+  @Override
+  public int getNumRows()
+  {
+    return _names.size();
+  }
+
+  @Override
+  public String getName(int index)
+  {
+    return _names.get(index);
+  }
+
+  @Override
+  public ValueType getValueType(int index)
+  {
+    return _valueTypes.get(index);
+  }
+
+  @Override
+  public Object getValue(int index)
+  {
+    return _values.get(index);
+  }
+
+  @Override
+  public String getAction(int index, String value)
   {
     String name = getName(index);
     if (name.equals(GENE_NAME)) {
@@ -63,7 +98,8 @@ public class GeneNameValueTable extends NameValueTable
     return null;
   }
   
-  protected String getLink(int index, String value)
+  @Override
+  public String getLink(int index, String value)
   {
     String name = getName(index);
     if (name.equals(ENTREZGENE_ID)) {
@@ -76,26 +112,13 @@ public class GeneNameValueTable extends NameValueTable
     return null;
   }
 
-  public String getName(int index)
-  {
-    return _names.get(index);
-  }
-
-  public int getNumRows()
-  {
-    return _names.size();
-  }
-
-  protected Object getValue(int index)
-  {
-    return _values.get(index);
-  }
-
-  protected ValueType getValueType(int index)
-  {
-    return _valueTypes.get(index);
-  }
-
+  
+  // private instance methods
+  
+  /**
+   * Initialize the lists {@link #_names}, {@link #_values}, and {@link #_valueTypes}. Don't
+   * add rows for missing values.
+   */
   private void initializeLists(Gene gene) {
     addItem(GENE_NAME, gene.getGeneName(), ValueType.COMMAND);
     addItem(ENTREZGENE_ID, Integer.toString(gene.getEntrezgeneId()), ValueType.LINK);

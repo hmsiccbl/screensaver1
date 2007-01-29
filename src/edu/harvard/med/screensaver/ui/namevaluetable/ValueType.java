@@ -9,6 +9,13 @@
 
 package edu.harvard.med.screensaver.ui.namevaluetable;
 
+/**
+ * All the different types for the content in the right-hand column (the value column) of a
+ * {@link NameValueTable}.
+ *
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ */
 enum ValueType {
   TEXT,
   UNESCAPED_TEXT,

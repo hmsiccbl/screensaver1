@@ -17,14 +17,15 @@ import javax.faces.model.ListDataModel;
 import org.apache.log4j.Logger;
 
 /**
- * A combintation of a list of {@link NameValueTable NameValueTables}. The data from each
+ * A combination of a list of {@link NameValueTable NameValueTables}. The data from each
  * NameValueTable are presented in order, with an empty row between each.
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class ComboNameValueTable extends NameValueTable
+abstract public class ComboNameValueTable extends NameValueTable
 {
+  
   // static members
 
   private static Logger log = Logger.getLogger(ComboNameValueTable.class);
@@ -32,112 +33,127 @@ public class ComboNameValueTable extends NameValueTable
   
   // private instance fields
   
-  private NameValueTable [] _comboTables;
-  private int [] _comboTableIndexes;
+  private NameValueTable [] _childTables;
+  private int [] _rowIndexToChildTableIndex;
+  private int [] _rowIndexToChildTableRowIndex;
   
   
   // instance methods
   
+  /**
+   * Initialize the ComboNameValueTable with the child tables. This method must be called
+   * before any attempt to use this table! You may want to call it in the constructor or any
+   * subclass of this class, as in {@link WellNameValueTable}.
+   * @param childTables the child tables
+   */
   @SuppressWarnings("unchecked")
-  protected void initializeComboNameValueTable(NameValueTable [] comboTables)
+  protected void initializeComboNameValueTable(NameValueTable [] childTables)
   {
+    _childTables = childTables;
+    
+    int numRows = countRows(childTables);
+    _rowIndexToChildTableIndex = new int[numRows];
+    _rowIndexToChildTableRowIndex = new int[numRows];
+    
     // TODO: see if i can do without the setDataModel crap. or maybe I can do it more simply
     // with an Arrays.fill() or something like that. why is this needed? i am managing all the
     // callbacks from here...
+
     List<Object> dataModelContents = new ArrayList<Object>();
-    _comboTables = comboTables;
-    _comboTableIndexes = new int[comboTables.length + 1];
-    int currentIndex = 0;
-    int i = 0;
-    while (i < comboTables.length) {
-      _comboTableIndexes[i] = currentIndex;
-      currentIndex += comboTables[i].getNumRows() + 1;
-      dataModelContents.addAll((List<Object>) comboTables[i].getDataModel().getWrappedData());
-      dataModelContents.add("spacer");
-      i ++;
+    int parentRowIndex = 0;
+    for (int childTableIndex = 0; childTableIndex < _childTables.length; childTableIndex ++) {
+      NameValueTable childTable = _childTables[childTableIndex];
+      for (int childTableRowIndex = 0; childTableRowIndex < childTable.getNumRows(); childTableRowIndex ++) {
+        _rowIndexToChildTableIndex[parentRowIndex] = childTableIndex;
+        _rowIndexToChildTableRowIndex[parentRowIndex] = childTableRowIndex;
+        parentRowIndex ++;
+        
+        dataModelContents.add(childTable.getValue(childTableRowIndex));
+      }
+      
+      // blank row between child tables
+      if (childTableIndex + 1 < _childTables.length) {
+        _rowIndexToChildTableIndex[parentRowIndex] = -1;
+        _rowIndexToChildTableRowIndex[parentRowIndex] = -1;
+        parentRowIndex ++;
+        
+        dataModelContents.add("spacer");
+      }
     }
-    _comboTableIndexes[i] = currentIndex;
-    dataModelContents.remove(currentIndex - 1);
+    
     setDataModel(new ListDataModel(dataModelContents));
   }
   
-  protected String getAction(int index, String value)
-  {
-    int comboTableIndex = getComboTableIndexFromRowIndex(index);
-    if (comboTableIndex == -1) {
-      return null;
-    }
-    int adjustedRowIndex = index - _comboTableIndexes[comboTableIndex];
-    return _comboTables[comboTableIndex].getAction(adjustedRowIndex, value);
-  }
-
-  protected String getLink(int index, String value)
-  {
-    int comboTableIndex = getComboTableIndexFromRowIndex(index);
-    if (comboTableIndex == -1) {
-      return null;
-    }
-    int adjustedRowIndex = index - _comboTableIndexes[comboTableIndex];
-    return _comboTables[comboTableIndex].getLink(adjustedRowIndex, value);
-  }
-
-  public String getName(int index)
-  {
-    int comboTableIndex = getComboTableIndexFromRowIndex(index);
-    if (comboTableIndex == -1) {
-      return "&nbsp;";
-    }
-    int adjustedRowIndex = index - _comboTableIndexes[comboTableIndex];
-    return _comboTables[comboTableIndex].getName(adjustedRowIndex);
-  }
-
+  @Override
   public int getNumRows()
   {
-    return _comboTableIndexes[_comboTableIndexes.length - 1];
+    return _rowIndexToChildTableIndex.length;
   }
 
-  protected Object getValue(int index)
+  @Override
+  public String getName(int rowIndex)
   {
-    int comboTableIndex = getComboTableIndexFromRowIndex(index);
-    if (comboTableIndex == -1) {
+    int childTableIndex = _rowIndexToChildTableIndex[rowIndex];
+    if (childTableIndex == -1) {
       return "&nbsp;";
     }
-    int adjustedRowIndex = index - _comboTableIndexes[comboTableIndex];
-    return _comboTables[comboTableIndex].getValue(adjustedRowIndex);
+    int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
+    return _childTables[childTableIndex].getName(childTableRowIndex);
   }
 
-  protected ValueType getValueType(int index)
+  @Override
+  public ValueType getValueType(int rowIndex)
   {
-    int comboTableIndex = getComboTableIndexFromRowIndex(index);
-    if (comboTableIndex == -1) {
+    int childTableIndex = _rowIndexToChildTableIndex[rowIndex];
+    if (childTableIndex == -1) {
       return ValueType.UNESCAPED_TEXT;
     }
-    int adjustedRowIndex = index - _comboTableIndexes[comboTableIndex];
-    return _comboTables[comboTableIndex].getValueType(adjustedRowIndex);
+    int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
+    return _childTables[childTableIndex].getValueType(childTableRowIndex);
+  }
+
+  @Override
+  public Object getValue(int rowIndex)
+  {
+    int childTableIndex = _rowIndexToChildTableIndex[rowIndex];
+    if (childTableIndex == -1) {
+      return "&nbsp;";
+    }
+    int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
+    return _childTables[childTableIndex].getValue(childTableRowIndex);
+  }
+
+  @Override
+  public String getAction(int rowIndex, String value)
+  {
+    int childTableIndex = _rowIndexToChildTableIndex[rowIndex];
+    if (childTableIndex == -1) {
+      return null;
+    }
+    int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
+    return _childTables[childTableIndex].getAction(childTableRowIndex, value);
+  }
+
+  @Override
+  public String getLink(int rowIndex, String value)
+  {
+    int childTableIndex = _rowIndexToChildTableIndex[rowIndex];
+    if (childTableIndex == -1) {
+      return null;
+    }
+    int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
+    return _childTables[childTableIndex].getLink(childTableRowIndex, value);
   }
   
-  /**
-   * Return the index of the combo table that this row index indexes into. Return -1 if this row
-   * index hits a blank row between two combo tables.
-   * @param rowIndex
-   * @return
-   */
-  // TODO: this is getting called repeatedly for the same index. pre-compute these values and
-  // store them in an array.
-  private int getComboTableIndexFromRowIndex(int rowIndex)
+  
+  // private instance methods
+  
+  private int countRows(NameValueTable [] childTables)
   {
-    for (int tableIndex = 0; tableIndex < _comboTableIndexes.length - 1; tableIndex ++) {
-      int startRowIndexForComboTable = _comboTableIndexes[tableIndex];
-      int endRowIndexForComboTable = _comboTableIndexes[tableIndex + 1] - 1;
-      if (rowIndex >= startRowIndexForComboTable) {
-        if (rowIndex < endRowIndexForComboTable) {
-          return tableIndex;
-        }
-        if (rowIndex == endRowIndexForComboTable) {
-          return -1;
-        }
-      }
+    int numRows = 0;
+    for (int i = 0; i < childTables.length; i++) {
+      numRows += childTables[i].getNumRows() + 1;
     }
-    throw new IndexOutOfBoundsException(Integer.toString(rowIndex));
+    return -- numRows;
   }
 }

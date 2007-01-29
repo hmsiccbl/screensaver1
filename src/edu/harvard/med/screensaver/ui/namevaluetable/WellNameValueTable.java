@@ -19,10 +19,21 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 
+/**
+ * A NameValueTable for the Well Viewer.
+ *
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ */
 public class WellNameValueTable extends ComboNameValueTable
 {
   private static Logger log = Logger.getLogger(WellNameValueTable.class);
 
+  /**
+   * Construct a new WellNameValueTable object.
+   * @param librariesController
+   * @param well
+   */
   public WellNameValueTable(LibrariesController librariesController, Well well)
   {
     List<NameValueTable> comboNameValueTables = new ArrayList<NameValueTable>();
@@ -34,7 +45,7 @@ public class WellNameValueTable extends ComboNameValueTable
       comboNameValueTables.add(new CompoundNameValueTable(librariesController, compound));
     }
     initializeComboNameValueTable((NameValueTable [])
-      comboNameValueTables.toArray(new NameValueTable [comboNameValueTables.size()]));
+      comboNameValueTables.toArray(new NameValueTable [0]));
   }
 }
 

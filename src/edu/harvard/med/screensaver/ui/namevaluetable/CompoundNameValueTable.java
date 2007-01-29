@@ -21,6 +21,12 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 
+/**
+ * A NameValueTable for the Compound Viewer.
+ *
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ */
 public class CompoundNameValueTable extends NameValueTable
 {
   
@@ -33,6 +39,7 @@ public class CompoundNameValueTable extends NameValueTable
   private static final String PUBCHEM_CID_LOOKUP_URL_PREFIX =
     "http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid=";
   
+  // the row names
   private static final String STRUCTURE = "Structure";
   private static final String SMILES = "Smiles";
   private static final String INCHI = "InChI";
@@ -54,6 +61,9 @@ public class CompoundNameValueTable extends NameValueTable
   private List<Object> _values = new ArrayList<Object>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
   
+  
+  // public constructor and implementations of NameValueTable abstract methods
+  
   public CompoundNameValueTable(LibrariesController librariesController, Compound compound)
   {
     _librariesController = librariesController;
@@ -62,7 +72,32 @@ public class CompoundNameValueTable extends NameValueTable
     setDataModel(new ListDataModel(_values));
   }
 
-  protected String getAction(int index, String value)
+  @Override
+  public int getNumRows()
+  {
+    return _names.size();
+  }
+
+  @Override
+  public String getName(int index)
+  {
+    return _names.get(index);
+  }
+
+  @Override
+  public ValueType getValueType(int index)
+  {
+    return _valueTypes.get(index);
+  }
+
+  @Override
+  public Object getValue(int index)
+  {
+    return _values.get(index);
+  }
+
+  @Override
+  public String getAction(int index, String value)
   {
     String name = getName(index);
     if (name.equals(SMILES)) {
@@ -72,7 +107,8 @@ public class CompoundNameValueTable extends NameValueTable
     return null;
   }
   
-  protected String getLink(int index, String value)
+  @Override
+  public String getLink(int index, String value)
   {
     String name = getName(index);
     if (name.equals(PUBCHEM_CIDS)) {
@@ -90,27 +126,15 @@ public class CompoundNameValueTable extends NameValueTable
     // other fields do not have links
     return null;
   }
+  
+  
+  // private instance methods
 
-  public String getName(int index)
-  {
-    return _names.get(index);
-  }
-
-  public int getNumRows()
-  {
-    return _names.size();
-  }
-
-  protected Object getValue(int index)
-  {
-    return _values.get(index);
-  }
-
-  protected ValueType getValueType(int index)
-  {
-    return _valueTypes.get(index);
-  }
-
+  /**
+   * Initialize the lists {@link #_names}, {@link #_values}, and {@link #_valueTypes}. Don't
+   * add rows for missing values.
+   * @param compound
+   */
   private void initializeLists(Compound compound) {
     addItem(STRUCTURE, compound.getSmiles(), ValueType.IMAGE);
     addItem(SMILES, compound.getSmiles(), ValueType.COMMAND);

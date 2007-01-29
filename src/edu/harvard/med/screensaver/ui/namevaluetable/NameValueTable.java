@@ -24,7 +24,9 @@ import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 
 
 /**
- * A name-value table! TODO: add some documentation around here somewhere.
+ * A name-value table! A two-column table whose left column is a label, and whose right column
+ * can contain various value types, such as text, links, commands, lists of links, etc., as
+ * described by the {@link ValueType ValueType enum}.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -46,7 +48,7 @@ abstract public class NameValueTable extends AbstractBackingBean
   private DataModel _columnModel;
 
   /**
-   * Workaround for JSF suckiness.
+   * Workaround for JSF suckiness. Used by {@link #getLink()}.
    */
   private final Map<String,String> _linkMapper = new HashMap<String,String>() {
     private static final long serialVersionUID = 1L;
@@ -158,7 +160,6 @@ abstract public class NameValueTable extends AbstractBackingBean
     return ! isNameColumn() && getValueType(getRowIndex()).equals(ValueType.IMAGE);
   }
 
-
   public boolean getIsTextListValue()
   {
     return ! isNameColumn() && getValueType(getRowIndex()).equals(ValueType.TEXT_LIST);
@@ -191,29 +192,65 @@ abstract public class NameValueTable extends AbstractBackingBean
   }
 
 
-  // abstract public and private methods
+  // abstract public methods
   
+  /**
+   * Get the number of rows in the table.
+   * @return the number of rows in the table
+   */
   abstract public int getNumRows();
   
+  /**
+   * Get the name (left-column value) for the row with the given index.
+   * @param index the index of the table row
+   * @return the name for the row
+   */
   abstract public String getName(int index);
   
-  abstract protected ValueType getValueType(int index);
+  /**
+   * Get the value type (the type of the right-column) for the row with the given index.
+   * @param index the index of the table row
+   * @return the value type for the row
+   */
+  abstract public ValueType getValueType(int index);
   
-  abstract protected Object getValue(int index);
+  /**
+   * Get the display value for the row with the given index. Normally a String value, this
+   * should return a list of strings when {@link #getValueType(int)} returns {@link
+   * ValueType#TEXT_LIST} or {@link ValueType#LINK_LIST}.
+   * @param index the index of the table row
+   * @return the display value for the row
+   */
+  abstract public Object getValue(int index);
   
-  abstract protected String getAction(int index, String value);
+  /**
+   * Perform the action, and return the action code, associated with the given row index and
+   * value. The value parameter is supplied to differentiate between the different elements of
+   * the currently non-existent COMMAND_LIST {@link ValueType}.
+   * @param index the index of the table row
+   * @param value the value of the list element in the table row
+   * @return the action for the given row and value
+   */
+  abstract public String getAction(int index, String value);
   
-  abstract protected String getLink(int index, String value);
+  /**
+   * Return the URL link associated with the given row index and value. The value parameter is
+   * supplied to differentiate between the different elements of {@link ValueType#LINK_LIST}.
+   * @param index the index of the table row
+   * @param value the value of the list element in the table row
+   * @return the action for the given row and value
+   */
+  abstract public String getLink(int index, String value);
 
   
-  // protected instance methods
+  // private instance methods
   
-  protected int getRowIndex()
+  private int getRowIndex()
   {
     return getDataModel().getRowIndex();
   }
   
-  protected boolean isNameColumn()
+  private boolean isNameColumn()
   {
     return getColumnModel().getRowData().equals(NAME);
   }
