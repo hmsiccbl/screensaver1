@@ -12,6 +12,7 @@
   <import resource="spring-context-logging.xml"/>
   <import resource="spring-context-persistence.xml"/>
   <import resource="spring-context-services.xml"/>
+  <import resource="spring-context-services-sans-db.xml"/>
   <import resource="spring-context-ui.xml"/>
   
 </beans>

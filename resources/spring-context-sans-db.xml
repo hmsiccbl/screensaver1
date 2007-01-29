@@ -10,6 +10,8 @@
 
   <bean id="dao"
    class="edu.harvard.med.screensaver.db.NoOpDAO" />
+   
+  <alias name="dao" alias="unrestrictedDao"/>
 
   <import resource="spring-context-logging.xml"/>
   <import resource="spring-context-services.xml"/>

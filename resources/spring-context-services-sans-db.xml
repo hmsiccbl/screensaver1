@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+ 
+  <bean 
+    id="mockScreenResultParser"
+    class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
+    singleton="false">
+    <description>A ScreenResultParser that does not need access to a database.  Used for testing and for command-line ScreenResultParser (when --no-verify option is specified)</description>
+    <constructor-arg index="0" >
+      <bean class="edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultParserTest"/>
+    </constructor-arg>
+  </bean>
+
+  <bean 
+    id="screenResultExporter"
+    class="edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter"
+    singleton="true">
+  </bean>
+  
+</beans>

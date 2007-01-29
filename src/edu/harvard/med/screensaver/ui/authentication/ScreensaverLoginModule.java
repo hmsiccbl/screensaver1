@@ -220,7 +220,7 @@ public class ScreensaverLoginModule implements LoginModule
                                " not available to garner authentication information from the user");
     }
     
-    log.info("authentication attempt for user '" + _username + "'");
+    log.debug("attempting authentication for user '" + _username + "'");
     //log.debug("user entered _password: " + new String(_password));
     
     // verify the username/password
@@ -263,13 +263,15 @@ public class ScreensaverLoginModule implements LoginModule
       }
 
       if (_isAuthenticated) {
-        log.info("authentication succeeded with status code " + _authenticationResult.getStatusCode() + 
+        log.info("authentication succeeded for user '" + _username + 
+                 "' with status code " + _authenticationResult.getStatusCode() + 
                  " (" + _authenticationResult.getStatusCodeCategory() + ")");
         return true;
       } 
       else {
         // authentication failed, clean out state
-        log.info("authentication failed with status code " + _authenticationResult.getStatusCode() + 
+        log.info("authentication failed for user '" + _username + 
+                 "' with status code " + _authenticationResult.getStatusCode() + 
                  " (" + _authenticationResult.getStatusCodeCategory() + ")");
         String statusMessage = _authenticationResult.getStatusMessage();
         reset(true);
