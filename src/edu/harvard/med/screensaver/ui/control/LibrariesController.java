@@ -70,6 +70,8 @@ public class LibrariesController extends AbstractUIController
   // private static final fields
   
   private static final Logger log = Logger.getLogger(LibrariesController.class);
+  
+  // TODO: consider moving these to WellKey
   private static final Pattern _plateWellHeaderLinePattern = Pattern.compile(
     "^\\s*plate\\s+well\\s*$",
     Pattern.CASE_INSENSITIVE);

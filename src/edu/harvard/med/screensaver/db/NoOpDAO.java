@@ -131,11 +131,6 @@ public class NoOpDAO implements DAO
     return null;
   }
 
-  public Well findWell(Integer plateNumber, String wellName)
-  {
-    return null;
-  }
-
   public Well findWell(WellKey wellKey)
   {
     return null;

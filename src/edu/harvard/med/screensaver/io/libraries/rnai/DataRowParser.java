@@ -13,9 +13,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-
 import edu.harvard.med.screensaver.io.libraries.DataRowType;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
@@ -23,7 +20,11 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
+
+import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFRow;
 
 
 /**
@@ -173,7 +174,7 @@ public class DataRowParser
     if (wellName.equals("")) {
       return null;
     }
-    Well well = _parser.getDAO().findWell(plateNumber, wellName);
+    Well well = _parser.getDAO().findWell(new WellKey(plateNumber, wellName));
     if (well == null) {
       log.error("well does not exist, but should");
       return null;

@@ -388,11 +388,6 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     return findEntityById(Well.class, wellKey.getKey());
   }
 
-  public Well findWell(Integer plateNumber, String wellName)
-  {
-    return findWell(new WellKey(plateNumber, wellName));
-  }
-  
   public SilencingReagent findSilencingReagent(
     Gene gene,
     SilencingReagentType silencingReagentType,

@@ -145,8 +145,11 @@ public interface ScreenResultWorkbookSpecification
 
   public static final String EXCLUDE_ALL_VALUE = "all";
 
+  // TODO: merge with LibrariesController._plateNumberPattern
   public static final String PLATE_NUMBER_REGEX = "(PL[-_])?(\\d+)(\\.0)?";
   public static final String PLATE_NUMBER_FORMAT = "PL-%0" + Well.PLATE_NUMBER_LEN + "d";
+  // TODO: merge with LibrariesController._wellNamePattern
+  public static final String WELL_NAME_REGEX = "[A-P]\\d\\d";
 
 }
 

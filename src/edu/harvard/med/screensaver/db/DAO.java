@@ -265,13 +265,9 @@ public interface DAO
   
   /**
    * Find and return the well. Return null if there is no well.
-   * @param plateNumber the plate number
-   * @param wellName the beautiful well name. remember - A through P, and 1 through 24!
+   * @param wellKey the wellKey
    * @return the well. Return null if there is no well.
-   * @deprecated use {@link #findWell(WellKey)}
    */
-  public Well findWell(Integer plateNumber, String wellName);
-  
   public Well findWell(WellKey wellKey);
   
   

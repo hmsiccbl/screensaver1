@@ -510,7 +510,7 @@ public class ScreenResultViewer extends AbstractBackingBean
     
     Integer plateNumber = Integer.valueOf((String) ((Map) _rawDataModel.getRowData()).get(DATA_TABLE_FIXED_COLUMN_HEADERS.get(0)));
     String wellName = (String) ((Map) _rawDataModel.getRowData()).get(DATA_TABLE_FIXED_COLUMN_HEADERS.get(1));
-    Well well = _dao.findWell(plateNumber, wellName);
+    Well well = _dao.findWell(new WellKey(plateNumber, wellName));
     return _librariesController.viewWell(well, null);
   }
   

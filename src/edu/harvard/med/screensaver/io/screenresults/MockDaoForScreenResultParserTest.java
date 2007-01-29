@@ -9,10 +9,7 @@
 
 package edu.harvard.med.screensaver.io.screenresults;
 
-import java.util.Map;
-
 import edu.harvard.med.screensaver.db.NoOpDAO;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -46,25 +43,7 @@ public class MockDaoForScreenResultParserTest extends NoOpDAO
                   1,
                   9999);
   }
-    
 
-
-  @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value)
-  {
-    if (Well.class.equals(entityClass)) {
-      return (E) new Well(_library,
-                          (Integer) name2Value.get("plateNumber"),
-                          (String) name2Value.get("wellName"));
-    }
-    return null;
-  }
-
-  public Well findWell(Integer plateNumber, String wellName)
-  {
-    return new Well(_library, plateNumber, wellName);
-  }
-  
   public Well findWell(WellKey wellKey)
   {
     return new Well(_library, wellKey, WellType.EXPERIMENTAL);

@@ -30,6 +30,7 @@ public class WellKey implements Comparable
 
   private static Logger log = Logger.getLogger(WellKey.class);
 
+  // TODO: merge with LibrariesController._wellNamePattern
   private static Pattern keyPattern = Pattern.compile("(\\d+):([A-P])(\\d+)");
   
   // instance data members
@@ -133,6 +134,9 @@ public class WellKey implements Comparable
 
   public boolean equals(Object o)
   {
+    if (o == this) { 
+      return true;
+    }
     WellKey other = (WellKey) o;
     return _plateNumber == other._plateNumber && _row == other._row && _column == other._column;
   }

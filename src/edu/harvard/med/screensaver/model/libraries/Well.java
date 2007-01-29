@@ -78,8 +78,8 @@ public class Well extends AbstractEntity implements Comparable
    * Constructs an initialized <code>Well</code> object.
    * 
    * @param parentLibrary
-   * @param plateNumber
-   * @param wellName
+   * @param wellKey
+   * @param wellType
    */
   public Well(Library parentLibrary, WellKey wellKey, WellType wellType) {
     _wellKey = wellKey;
