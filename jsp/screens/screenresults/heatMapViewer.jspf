@@ -39,10 +39,10 @@ TODO:
 
 			<t:commandButton id="previousPlateButton"
 				image="/images/arrow-previous.png"
-				action="#{heatMapViewer.previousPlate}" styleClass="command" />
+				action="#{heatMapViewer.previousPlate}" styleClass="command" title="Previous plate" />
 
 			<t:commandButton id="nextPlateButton" image="/images/arrow-next.png"
-				action="#{heatMapViewer.nextPlate}" styleClass="command" />
+				action="#{heatMapViewer.nextPlate}" styleClass="command" title="Next plage" />
 
 			<t:outputLabel for="showValues" value="Show values"
 				styleClass="label" />

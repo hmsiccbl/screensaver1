@@ -13,14 +13,17 @@
 			<t:panelGroup>
 				<t:commandButton id="firstPageCommand"
 					action="#{navigator.firstPage}" value="First"
-					image="/images/arrow-first.png" styleClass="command" />
+					image="/images/arrow-first.png" styleClass="command"
+					title="First page" />
 				<t:commandButton id="prevPageCommand" action="#{navigator.prevPage}"
-					value="Prev" image="/images/arrow-previous.png"
-					styleClass="command" />
+					value="Prev" image="/images/arrow-previous.png" 
+					styleClass="command" title="Previous page" />
 				<t:commandButton id="nextPageCommand" action="#{navigator.nextPage}"
-					value="Next" image="/images/arrow-next.png" styleClass="command" />
+					value="Next" image="/images/arrow-next.png" styleClass="command"
+					title="Next page" />
 				<t:commandButton id="lastPageCommand" action="#{navigator.lastPage}"
-					value="Last" image="/images/arrow-last.png" styleClass="command" />
+					value="Last" image="/images/arrow-last.png" styleClass="command"
+					title="Last page" />
 			</t:panelGroup>
 
 			<t:panelGroup>

@@ -209,22 +209,22 @@
 					<t:panelGroup id="dataTableCommandPanel" styleClass="commandPanel">
 						<h:commandButton id="firstPageCommand"
 							action="#{screenResultViewer.firstPage}" value="First"
-							image="/images/arrow-first.png" styleClass="command" />
+							image="/images/arrow-first.png" styleClass="command" title="First page" />
 						<t:commandButton id="prevPageCommand"
 							action="#{screenResultViewer.prevPlate}" value="Prev Plate"
-							image="/images/arrow-fastrewind.png" styleClass="command" />
+							image="/images/arrow-fastrewind.png" styleClass="command" title="Next plate"/>
 						<t:commandButton id="prevPlateCommand"
-							action="#{screenResultViewer.prevPage}" value="Prev"
-							image="/images/arrow-previous.png" styleClass="command" />
+							action="#{screenResultViewer.prevPage}" value="Prev" 
+							image="/images/arrow-previous.png" styleClass="command" title="Previous page"/>
 						<t:commandButton id="nextPageCommand"
 							action="#{screenResultViewer.nextPage}" value="Next"
-							image="/images/arrow-next.png" styleClass="command" />
+							image="/images/arrow-next.png" styleClass="command" title="Next page"/>
 						<t:commandButton id="nextPlateCommand"
 							action="#{screenResultViewer.nextPlate}" value="Next Plate"
-							image="/images/arrow-fastforward.png" styleClass="command" />
+							image="/images/arrow-fastforward.png" styleClass="command" title="Previous plate" />
 						<h:commandButton id="lastPageCommand"
 							action="#{screenResultViewer.lastPage}" value="Last"
-							image="/images/arrow-last.png" styleClass="command" />
+							image="/images/arrow-last.png" styleClass="command" title="Last page" />
 
 						<t:outputLabel id="rowRange"
 							value="#{screenResultViewer.rowRangeText}" for="rowNumber"

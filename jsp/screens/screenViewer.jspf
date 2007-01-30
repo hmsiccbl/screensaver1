@@ -235,7 +235,7 @@ TODO:
 						styleClass="command" />
 					<t:commandButton id="copyVisit" action="#{screenViewer.copyVisit}"
 						rendered="#{screenViewer.editMode}" value="#{\"Copy...\"}"
-						styleClass="command" alt="Copy to another screen" />
+						styleClass="command" title="Copy to another screen" />
 				</t:column>
 			</t:dataTable>
 			<t:panelGroup>
