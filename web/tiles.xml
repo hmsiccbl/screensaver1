@@ -26,6 +26,11 @@
     <put
       name="menu"
       value="/menu.jsp" />
+    <!-- the JSF ID of the input component that should have initial focus 
+         (specify forceId="true" in the JSF component definition) -->
+    <put
+      name="inputFocusId"
+      value="" />
   </definition>
 
 
@@ -54,6 +59,9 @@
     <put
       name="body"
       value="/login.jsp" />
+    <put
+      name="inputFocusId"
+      value="j_username" />
   </definition>
   
   <definition

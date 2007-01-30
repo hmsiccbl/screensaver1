@@ -27,6 +27,7 @@
 
 <%-- Push component attributes defined in Tiles definitions into request context (scope="request" required for JSF integration) --%>
 <tiles:importAttribute scope="request" name="pageTitle" />
+<tiles:importAttribute scope="request" name="inputFocusId" />
 
 <f:view>
   <t:document>
@@ -53,6 +54,24 @@
       </t:div>
 
     </t:documentBody>
+    
+			<%-- HACK: provide a generic mechanism for setting the input element to have the initial focus --%>
+			<%-- To specify the element having the initial input focus, define inputFocusId arg in tiles.xml for 
+			     the page, where the value is the JSF ID of the input component (also, use forceId="true") --%>
+			<t:jsValueSet name="jsInputFocusId" value="#{inputFocusId}"/>
+			<f:verbatim>
+				<script type="text/javascript">
+        function setFocus(id) 
+        {
+          var elt = document.getElementById(id);
+          if (elt && elt.focus) {
+            elt.focus();
+          }
+        }
+        setFocus(jsInputFocusId);
+        </script>
+			</f:verbatim>
+    
   </t:document>
 </f:view>
 
