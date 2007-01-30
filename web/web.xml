@@ -73,27 +73,61 @@
 
   <context-param>
     <description>
-      State saving method: "client" or "server" (= default). See JSF Specification 2.5.3. Server
-      performs better.
+     State saving method: "client" or "server" (= default). See JSF
+     Specification 2.5.3. Server performs better. [ant4: saving
+     component tree and UI state to client-side (in HTML) can create
+     huge HTML files, which impacts performance, and in both directions,
+     as the UI state data is also sent back to server as form field.
+     Also UI state data is repeated for every HTML form on the page. Bad
+     news, all around. I've tested using server-side state saving,
+     and it seems to work just fine. And it creates a considerably
+     faster UI response time, as one would hope.]
     </description>
     <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
-    <param-value>client</param-value>
+    <param-value>server</param-value>
   </context-param>
 
   <context-param>
     <description>
-      Only applicable if state saving method is "server" (= default). Defines the amount (default =
-      20) of the latest views are stored in session.
+     Only applicable if state saving method is "server" (= default).
+     Defines the amount (default = 20) of the latest views are stored in
+     session. [ant4: looking at JspStateManagerImpl, it appears this
+     affects how many serialized views of previous *requests* will be
+     cached (not views); the cache is keyed on the 'jsf_sequence'
+     attribute, which increments with each request. It would appear,
+     then, that this affects how many times the user can use his
+     browser's back command and arrive at a view whose UI state and
+     component tree is still available. Values must >=1, or else
+     defaults to 20. JspStateManagerImpl saves "old" UI states, beyond
+     the size specified here, so this setting is not a a hard
+     upper-limit in any case (but the "old" ones are WeakReferences,
+     fortunately). Not sure why *this* project would want to ever save
+     more than the state for the current view, since accessing old views
+     is dangerous due to our highly-stateful backing beans.]
     </description>
     <param-name>org.apache.myfaces.NUMBER_OF_VIEWS_IN_SESSION</param-name>
-    <param-value>20</param-value>
+    <param-value>1</param-value>
   </context-param>
 
   <context-param>
     <description>
-      Only applicable if state saving method is "server". If true (default) the state will be
-      serialized to a byte stream before it is written to the session. If false the state will not
-      be serialized to a byte stream. Serializing negatively impacts perfomance.
+     Only applicable if state saving method is "server". If true
+     (default) the state will be serialized to a byte stream before it
+     is written to the session. If false the state will not be
+     serialized to a byte stream. Serializing negatively impacts
+     perfomance. [ant4: I can't quite figure out why this option exists!
+     If set to true, the UI state of the component tree is serialized to
+     a byte stream, and then saved; if false, the component tree and UI
+     state is still saved, but as first-class object network. Why would
+     you ever want the performance hit of serializing this data when
+     this only affects server-side state saving? Why not just always
+     save the object network? For session replication perhaps? Either
+     way, I can't see why *this* project would set to true. Also, the
+     code in JspStateManagerImpl seems a bit off, as they use a
+     SerializedView object to store both serialized and unserialized
+     component trees and UI state! Guessing this option was added later
+     on, and they didn't both to rename the SerializedView class.
+     Beware when code reading!]
     </description>
     <param-name>org.apache.myfaces.SERIALIZE_STATE_IN_SESSION</param-name>
     <param-value>false</param-value>
