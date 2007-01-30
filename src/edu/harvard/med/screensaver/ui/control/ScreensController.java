@@ -76,8 +76,7 @@ public class ScreensController extends AbstractUIController
   private ScreenResultImporter _screenResultImporter;
   private ScreenResultExporter _screenResultExporter;
   private Screen _currentScreen;
-  private ScreenSearchResults _currentScreenSearchResults;
-  
+ 
 
   // public getters and setters
   
@@ -156,9 +155,9 @@ public class ScreensController extends AbstractUIController
           for (Screen screen : screens) {
             _dao.need(screen, 
                       "screenResult", 
-                      "statusItems"); // TODO: only need this is screensAdmin or readEverythingAdmin; query is faster if not requested
+                      "statusItems"); // TODO: only need this for screensAdmin or readEverythingAdmin; query would be faster if not requested
           }
-          _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens, 
+          _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens,
                                                                          ScreensController.this, 
                                                                          _dao));
         }
@@ -280,6 +279,7 @@ public class ScreensController extends AbstractUIController
       showMessage("databaseOperationFailed", e.getMessage());
       viewLastScreen();
     }
+    screenSearchResultsChanged();
     return VIEW_SCREEN;
   }
 
@@ -297,6 +297,7 @@ public class ScreensController extends AbstractUIController
         showMessage("databaseOperationFailed", e.getMessage());
       }
     }
+    screenSearchResultsChanged();
     return viewLastScreen();
   }
 
@@ -304,7 +305,8 @@ public class ScreensController extends AbstractUIController
   @UIControllerMethod
   public String viewLastScreen()
   {
-    return viewScreen(_currentScreen, _currentScreenSearchResults);
+    return viewScreen(_currentScreen, 
+                      _screensBrowser.getScreenSearchResults());
   }
     
   @UIControllerMethod
@@ -483,7 +485,6 @@ public class ScreensController extends AbstractUIController
           }
         }
       });
-      return viewLastScreen();
     }
     catch (DataAccessException e) {
       showMessage("databaseOperationFailed", e.getMessage());
@@ -491,6 +492,7 @@ public class ScreensController extends AbstractUIController
     catch (ScreenResultParseErrorsException e) {
       return viewScreenResultImportErrors();
     }
+    screenSearchResultsChanged();
     return viewLastScreen();
   }
 
@@ -540,6 +542,19 @@ public class ScreensController extends AbstractUIController
 
   
   // private methods
+
+  /**
+   * Poor man's "event" (we don't have a real app event architecture, currently) to
+   * be invoked when the ScreenSearchResults may have become stale.
+   */
+  private void screenSearchResultsChanged()
+  {
+    // TODO: should attempt to maintain search result position, sort order,
+    // etc.; right now, we just clear the search result, causing it be recreated
+    // entirely when browseScreens() is called
+    _screensBrowser.setScreenSearchResults(null);
+    browseScreens();
+  }
 
 }
 

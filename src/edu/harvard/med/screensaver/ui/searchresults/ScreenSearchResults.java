@@ -69,8 +69,6 @@ public class ScreenSearchResults extends SearchResults<Screen>
   @Override
   public String showSummaryView()
   {
-    // NOTE: if there were more ways to get to a screen search results, then this method would
-    // need to be more intelligent
     return _screensController.browseScreens();
   }
   
