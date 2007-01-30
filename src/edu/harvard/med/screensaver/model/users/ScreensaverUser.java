@@ -487,6 +487,9 @@ public class ScreensaverUser extends AbstractEntity
    */
   public void setECommonsId(String eCommonsId)
   {
+    if (!eCommonsId.toLowerCase().equals(eCommonsId)) {
+      throw new IllegalArgumentException("eCommons ID must contain only lowercase letters");
+    }
     _eCommonsId = eCommonsId;
   }
 

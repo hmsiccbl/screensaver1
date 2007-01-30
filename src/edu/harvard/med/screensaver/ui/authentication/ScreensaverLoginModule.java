@@ -248,19 +248,19 @@ public class ScreensaverLoginModule implements LoginModule
         }
       }
       else {
-        _user = findUser(_username, "ECommonsId");
+        String normalizedUsername = _username.toLowerCase();
+        if (!normalizedUsername.equals(_username)) {
+          log.warn("lowercasing eCommons ID '" + _username + " to " + normalizedUsername);
+        }
+        _user = findUser(normalizedUsername, "ECommonsId");
         if (_user != null) {
-          log.info(FOUND_ECOMMONS_USER + " '" + _username + "'");
-          String normalizedUsername = _username.toLowerCase();
-          if (!normalizedUsername.equals(_username)) {
-            log.warn("lowercasing eCommons ID '" + _username + " to " + normalizedUsername);
-          }
+          log.info(FOUND_ECOMMONS_USER + " '" + normalizedUsername + "'");
           _authenticationResult = _authenticationClient.authenticate(new Credentials(normalizedUsername,
                                                                                      new String(_password)));
           _isAuthenticated = _authenticationResult.isAuthenticated();
         }
         else {
-          String message = NO_SUCH_USER + " '" + _username + "'";
+          String message = NO_SUCH_USER + " '" + normalizedUsername + "'";
           log.info(message);
           throw new FailedLoginException(message);
         }
