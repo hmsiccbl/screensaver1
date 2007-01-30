@@ -36,7 +36,8 @@ public class ScreenSearchResults extends SearchResults<Screen>
   
   private static final String SCREEN_NUMBER = "Screen Number";
   private static final String SCREEN_TYPE = "Screen Type";
-  private static final String SCREEN_STATUS = "Screen Status";
+  private static final String SCREEN_STATUS = "Status";
+  private static final String SCREEN_STATUS_DATE = "Status Date";
   private static final String TITLE = "Title";
   private static final String LAB_HEAD = "Lab Head";
   private static final String LEAD_SCREENER = "Lead Screener";
@@ -81,6 +82,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
     if (isUserInRole(ScreensaverUserRole.SCREEN_RESULTS_ADMIN) ||
       isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
       columnHeaders.add(SCREEN_STATUS);
+      columnHeaders.add(SCREEN_STATUS_DATE);
     }
     columnHeaders.add(TITLE);
     columnHeaders.add(LAB_HEAD);
@@ -116,9 +118,15 @@ public class ScreenSearchResults extends SearchResults<Screen>
         return "";
       }
       StatusItem statusItem = statusItems.last();
-      return String.format("%s (%tD)",
-                           statusItem.getStatusValue(),
-                           statusItem.getStatusDate());
+      return statusItem.getStatusValue();
+    }
+    if (columnName.equals(SCREEN_STATUS_DATE)) {
+      SortedSet<StatusItem> statusItems = screen.getSortedStatusItems();
+      if (statusItems.size() == 0) {
+        return "";
+      }
+      StatusItem statusItem = statusItems.last();
+      return String.format("%tD", statusItem.getStatusDate());
     }
     if (columnName.equals(TITLE)) {
       return screen.getTitle();
@@ -189,6 +197,26 @@ public class ScreenSearchResults extends SearchResults<Screen>
           StatusItem statusItem1 = statusItems1.last();
           StatusItem statusItem2 = statusItems2.last();
           return statusItem1.compareTo(statusItem2);
+        }
+      };
+    }
+    if (columnName.equals(SCREEN_STATUS_DATE)) {
+      return new Comparator<Screen>() {
+        public int compare(Screen s1, Screen s2) {
+          SortedSet<StatusItem> statusItems1 = s1.getSortedStatusItems();
+          SortedSet<StatusItem> statusItems2 = s2.getSortedStatusItems();
+          if (statusItems1.size() == 0) {
+            if (statusItems2.size() == 0) {
+              return s1.getScreenNumber().compareTo(s2.getScreenNumber());
+            }
+            return -1;
+          }
+          if (statusItems2.size() == 0) {
+            return 1;
+          }
+          StatusItem statusItem1 = statusItems1.last();
+          StatusItem statusItem2 = statusItems2.last();
+          return statusItem1.getStatusDate().compareTo(statusItem2.getStatusDate());
         }
       };
     }
