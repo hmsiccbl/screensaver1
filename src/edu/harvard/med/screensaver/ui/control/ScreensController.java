@@ -179,7 +179,8 @@ public class ScreensController extends AbstractUIController
     _screenResultViewer.setMessages(getMessages());
     _screenResultViewer.setScreenResultExporter(_screenResultExporter);
     _screenResultViewer.setLibrariesController(_librariesController);
-    _screenResultViewer.setScreenSearchResults(screenSearchResults);
+
+    _screensBrowser.setScreenSearchResults(screenSearchResults);
 
     _heatMapViewer.setDao(_dao);
     _heatMapViewer.setLibrariesController(_librariesController);
@@ -539,7 +540,6 @@ public class ScreensController extends AbstractUIController
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-
   
   // private methods
 
@@ -553,8 +553,6 @@ public class ScreensController extends AbstractUIController
     // etc.; right now, we just clear the search result, causing it be recreated
     // entirely when browseScreens() is called
     _screensBrowser.setScreenSearchResults(null);
-    browseScreens();
   }
-
 }
 

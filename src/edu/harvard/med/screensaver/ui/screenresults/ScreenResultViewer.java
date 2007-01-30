@@ -39,7 +39,6 @@ import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
-import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.ui.util.TableSortManager;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
@@ -120,7 +119,6 @@ public class ScreenResultViewer extends AbstractBackingBean
   private LibrariesController _librariesController;
   private DAO _dao;
   private Screen _screen;
-  private ScreenSearchResults _screenSearchResults;
   private ScreenResultExporter _screenResultExporter;
   /**
    * HACK: we maintain a screenResult reference, distinct from
@@ -182,10 +180,6 @@ public class ScreenResultViewer extends AbstractBackingBean
   public void setLibrariesController(LibrariesController librariesController) 
   {
     _librariesController = librariesController;
-  }
-
-  public void setScreenSearchResults(ScreenSearchResults screenSearchResults) {
-    _screenSearchResults = screenSearchResults;
   }
 
   public void setScreen(Screen screen) 
