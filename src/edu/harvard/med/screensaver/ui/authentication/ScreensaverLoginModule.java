@@ -109,9 +109,6 @@ public class ScreensaverLoginModule implements LoginModule
   private boolean _isAuthenticated = false;
   private boolean _commitSucceeded = false;
   
-  // username and password
-  private String _username;
-  private char[] _password;
   
   /**
    * The Principals, which identify the user and the roles the Subject belongs
@@ -191,7 +188,7 @@ public class ScreensaverLoginModule implements LoginModule
     
     log.debug("login()");
     
-    // prompt for a user name and _password
+    // prompt for a user name and password
     if (_callbackHandler == null)
       throw new LoginException("Error: no CallbackHandler available " +
       "to garner authentication information from the user");
@@ -200,17 +197,20 @@ public class ScreensaverLoginModule implements LoginModule
     callbacks[0] = new NameCallback("user name: ");
     callbacks[1] = new PasswordCallback("password: ", false);
     
+    String username;
+    char[] password;
     try {
       _callbackHandler.handle(callbacks);
-      _username = ((NameCallback) callbacks[0]).getName();
+      // username and password
+      username = ((NameCallback) callbacks[0]).getName();
       char[] tmpPassword = ((PasswordCallback) callbacks[1]).getPassword();
       // treat a NULL password as an empty password
       if (tmpPassword == null) {
         tmpPassword = new char[0];
       }
-      _password = new char[tmpPassword.length];
+      password = new char[tmpPassword.length];
       System.arraycopy(tmpPassword, 0,
-                       _password, 0, tmpPassword.length);
+                       password, 0, tmpPassword.length);
       ((PasswordCallback)callbacks[1]).clearPassword();
       
     } catch (java.io.IOException ioe) {
@@ -220,18 +220,18 @@ public class ScreensaverLoginModule implements LoginModule
                                " not available to garner authentication information from the user");
     }
     
-    log.debug("attempting authentication for user '" + _username + "'");
-    //log.debug("user entered _password: " + new String(_password));
+    log.debug("attempting authentication for user '" + username + "'");
+    //log.debug("user entered password: " + new String(password));
     
     // verify the username/password
     try {
-      _user = findUser(_username, "loginId");
+      _user = findUser(username, "loginId");
       if (_user != null) {
-        log.info(FOUND_SCREENSAVER_USER + " '" + _username + "'");
-        if (_user.getDigestedPassword().equals(CryptoUtils.digest(_password))) {
+        log.info(FOUND_SCREENSAVER_USER + " '" + username + "'");
+        if (_user.getDigestedPassword().equals(CryptoUtils.digest(password))) {
           _isAuthenticated = true;
-          _authenticationResult = new SimpleAuthenticationResult(_username,
-                                                                 new String(_password), 
+          _authenticationResult = new SimpleAuthenticationResult(username,
+                                                                 new String(password), 
                                                                  true,
                                                                  1,
                                                                  "success",
@@ -239,8 +239,8 @@ public class ScreensaverLoginModule implements LoginModule
         } 
         else {
           _isAuthenticated = false;
-          _authenticationResult = new SimpleAuthenticationResult(_username,
-                                                                 new String(_password), 
+          _authenticationResult = new SimpleAuthenticationResult(username,
+                                                                 new String(password), 
                                                                  _isAuthenticated,
                                                                  0,
                                                                  "failure",
@@ -248,15 +248,15 @@ public class ScreensaverLoginModule implements LoginModule
         }
       }
       else {
-        String normalizedUsername = _username.toLowerCase();
-        if (!normalizedUsername.equals(_username)) {
-          log.warn("lowercasing eCommons ID '" + _username + " to " + normalizedUsername);
+        String normalizedUsername = username.toLowerCase();
+        if (!normalizedUsername.equals(username)) {
+          log.warn("lowercasing eCommons ID '" + username + " to " + normalizedUsername);
         }
         _user = findUser(normalizedUsername, "ECommonsId");
         if (_user != null) {
           log.info(FOUND_ECOMMONS_USER + " '" + normalizedUsername + "'");
           _authenticationResult = _authenticationClient.authenticate(new Credentials(normalizedUsername,
-                                                                                     new String(_password)));
+                                                                                     new String(password)));
           _isAuthenticated = _authenticationResult.isAuthenticated();
         }
         else {
@@ -267,14 +267,14 @@ public class ScreensaverLoginModule implements LoginModule
       }
 
       if (_isAuthenticated) {
-        log.info("authentication succeeded for user '" + _username + 
+        log.info("authentication succeeded for user '" + username + 
                  "' with status code " + _authenticationResult.getStatusCode() + 
                  " (" + _authenticationResult.getStatusCodeCategory() + ")");
         return true;
       } 
       else {
         // authentication failed, clean out state
-        log.info("authentication failed for user '" + _username + 
+        log.info("authentication failed for user '" + username + 
                  "' with status code " + _authenticationResult.getStatusCode() + 
                  " (" + _authenticationResult.getStatusCodeCategory() + ")");
         String statusMessage = _authenticationResult.getStatusMessage();
@@ -419,16 +419,8 @@ public class ScreensaverLoginModule implements LoginModule
     // note: _subject must only be modified in initialize(); it can be inspected after logout, etc.
     _authenticationResult = null;
     _isAuthenticated = false;
-    _username = null;
-    if (_password != null) {
-      for (int i = 0; i < _password.length; i++) {
-        _password[i] = ' ';
-      }
-    }
-    _password = null;
     if (alsoResetPrincipals) {
       _grantedPrincipals = null;
     }
   }
-
 }

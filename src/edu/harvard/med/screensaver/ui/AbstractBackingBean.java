@@ -604,9 +604,13 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
       public void runTransaction() 
       {
         String eCommonsIdOrLoginId = principal.getName();
-        ScreensaverUser user = unrestrictedAccessDao.findEntityByProperty(ScreensaverUser.class, "ECommonsId", eCommonsIdOrLoginId);
+        ScreensaverUser user = unrestrictedAccessDao.findEntityByProperty(ScreensaverUser.class, 
+                                                                          "ECommonsId", 
+                                                                          eCommonsIdOrLoginId.toLowerCase());
         if (user == null) {
-          user = unrestrictedAccessDao.findEntityByProperty(ScreensaverUser.class, "loginId", eCommonsIdOrLoginId);
+          user = unrestrictedAccessDao.findEntityByProperty(ScreensaverUser.class, 
+                                                            "loginId", 
+                                                            eCommonsIdOrLoginId);
         }
         if (user != null) {
           unrestrictedAccessDao.need(user,
