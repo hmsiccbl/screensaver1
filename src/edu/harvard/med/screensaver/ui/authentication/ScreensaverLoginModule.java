@@ -251,7 +251,11 @@ public class ScreensaverLoginModule implements LoginModule
         _user = findUser(_username, "ECommonsId");
         if (_user != null) {
           log.info(FOUND_ECOMMONS_USER + " '" + _username + "'");
-          _authenticationResult = _authenticationClient.authenticate(new Credentials(_username,
+          String normalizedUsername = _username.toLowerCase();
+          if (!normalizedUsername.equals(_username)) {
+            log.warn("lowercasing eCommons ID '" + _username + " to " + normalizedUsername);
+          }
+          _authenticationResult = _authenticationClient.authenticate(new Credentials(normalizedUsername,
                                                                                      new String(_password)));
           _isAuthenticated = _authenticationResult.isAuthenticated();
         }
