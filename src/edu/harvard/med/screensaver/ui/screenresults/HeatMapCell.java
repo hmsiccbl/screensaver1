@@ -58,7 +58,7 @@ public class HeatMapCell
       if (resultValue.isExclude()) {
         _popupText = "<exclude>";
       }
-      else if (resultValue.isDataProducerWell() && resultValue.getValue() != null) {
+      else if (resultValue.isDataProducerWell() && !resultValue.isNull()) {
         formattedValue = _popupText = format.format(scoredValue);
       }
       else if (resultValue.isEmptyWell()) {

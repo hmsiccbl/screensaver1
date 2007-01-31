@@ -25,12 +25,13 @@ public enum AssayWellType implements VocabularyTerm
   // the vocabulary
   
   EXPERIMENTAL("experimental", "X"),
-  EMPTY("empty", "E"), 
+  EMPTY("empty", "E"),  
   LIBRARY_CONTROL("library control", "C"),
   ASSAY_POSITIVE_CONTROL("assay positive control", "P"),
   ASSAY_CONTROL("assay control", "N"), // aka "assay negative control", but stakeholders prefer simply "assay control"
   BUFFER("buffer", "B"), // RNAi only
   DMSO("DMSO", "D"), // small compound only
+                     // note: as of 2007-01-31, screen result files don't use this; they use EMPTY for what should be DMSO wells
   OTHER("other", "O"),
   ;
  
@@ -90,13 +91,11 @@ public enum AssayWellType implements VocabularyTerm
     return getValue();
   }
 
-
   public boolean isDataProducing()
   {
     // TODO: I'm assuming wells of type "other" can contain data values --ant
     return this.equals(AssayWellType.EXPERIMENTAL) || isControl() || this.equals(AssayWellType.OTHER);
   }
-
 
   public boolean isControl()
   {

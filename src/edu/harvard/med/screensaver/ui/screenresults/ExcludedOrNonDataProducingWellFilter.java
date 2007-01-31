@@ -26,8 +26,8 @@ public class ExcludedOrNonDataProducingWellFilter implements Filter<Pair<WellKey
     return 
       rv.isExclude() || 
       !rv.isDataProducerWell() || 
-      // accept case that data was simply missing in the screen result file (this will work for numeric result values as well)
-      rv.getValue() == null;
+      // accept case that data was simply missing in the screen result file
+      rv.isNull();
   }
 }
 

@@ -753,26 +753,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         List<ResultValueType> wellExcludes = _excludeParser.parseList(dataCell(iRow, DataColumn.EXCLUDE));
         int iDataHeader = 0;
         for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-          // TODO: raw data cells should probably be required; but maybe we want maintain leniency here in case real-life data is missing for some reason?
           Cell cell = dataCell(iRow, iDataHeader);
           boolean isExclude = (wellExcludes != null && wellExcludes.contains(rvt));
           try {
             boolean resultValueAdded = false;
-            if (!assayWellType.isDataProducing()) {
-              // ignore any value provided in the workbook, but create a null-valued result value
-
-              // TODO: avoid the subtle bug of implicitly flagging a
-              // ResultValueType as non-numeric if an initial set of values are blank, but are
-              // then followed by (valid) numeric data
-              if ((!rvt.isNumericalnessDetermined() && cell.isNumeric()) || 
-                rvt.isNumericalnessDetermined() && rvt.isNumeric()) {
-                resultValueAdded = rvt.addResultValue(well, assayWellType, null, -1, isExclude);
-              }
-              else {
-                resultValueAdded = rvt.addResultValue(well, assayWellType, null, isExclude);
-              }
-            }
-            else if (rvt.isActivityIndicator()) {
+            if (rvt.isActivityIndicator()) {
               String value;
               if (rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN) {
                 if (cell.isBoolean()) {
@@ -804,7 +789,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                      isExclude);
               }
             }
-            else {
+            else { // not assay activity indicator
               // TODO: avoid the subtle bug of implicitly flagging a
               // ResultValueType as non-numeric if an initial set of values are blank, but are
               // then followed by (valid) numeric data

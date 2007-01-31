@@ -466,9 +466,9 @@ public class ScreenResultParserTest extends AbstractSpringTest
           { 1294182., 1280934., 1.18, 1.19, 1.185, "", "false" },
           { 1158888., 1458878., 1.06, 1.35, 1.205, "W", "false" },
           { 1385142., 1383446., 1.26, 1.28, 1.270, "W", "false" },
-          { null, null, null, null, null, null, null },
+          { null, null, null, null, null, "", false },
           { 1666646., 1154436., 1.52, 1.07, 1.295, "W", "false" },
-          { null, null, null, null, null, null, null } };
+          { null, null, null, null, null, "", false } };
 
     SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
     int iRvt = 0;
@@ -498,8 +498,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
                        expectedExcludeValues[iWell][iRvt],
                        rv.isExclude());
           if (expectedValues[iWell][iRvt] == null) {
-            assertNull("rvt " + iRvt + " well #" + iWell + " result value is null",
-                       rv.getValue());
+            assertTrue("rvt " + iRvt + " well #" + iWell + " result value is null",
+                       rv.isNull());
           }
           else {
             if (expectedRvt.isNumeric()) {

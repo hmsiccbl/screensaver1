@@ -16,14 +16,15 @@ import org.apache.log4j.Logger;
 /**
  * A <code>ResultValue</code> holds the actual value of a screen result data
  * point for a given {@link ScreenResult}, {@link ResultValueType}, and
- * {@link edu.harvard.med.screensaver.model.libraries.Well}. The value is
- * always stored as a string, and this is considered the canonical version of
- * the value. However, for ResultValues that are deemed "numeric" the value is
- * redundantly stored as a numeric type, to allow for efficient sorting of
- * numeric values in the database. Client code must always set the value as
- * string, but may get the numeric value. Note that the ResultValueType contains
- * an "isNumeric" property that indicates whether its member ResultValues are
- * numeric.
+ * {@link edu.harvard.med.screensaver.model.libraries.Well}. For alphanumeric
+ * ResultValueTypes, the value is stored canonically as a string. For numeric
+ * ResultValueTypes, the value is stored canonically as a double, allowing for
+ * efficient sorting of numeric values in the database. For numeric ResultValue, the
+ * getValue() will return a string representing the numeric value formatted to
+ * the ResultValue's decimal precision. Note that the parent ResultValueType
+ * contains an "isNumeric" property that indicates whether its member
+ * ResultValues are numeric (the isNumeric flag is not stored with each
+ * ResultValue for space efficiency).
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -142,6 +143,17 @@ public class ResultValue
     return _assayWellType;
   }
   
+  /**
+   * @motivation reduces confusion as to whether callers needs to check both
+   *             getValue() and getNumericValue() to determine if ResultValue is
+   *             null
+   * @return
+   */
+  public boolean isNull()
+  {
+    return _value == null;
+  }
+
   /**
    * Get the string value of this <code>ResultValue</code>.
    * 
@@ -282,7 +294,7 @@ public class ResultValue
    */
   public static Object getTypedValue(ResultValue rv, ResultValueType rvt)
   {
-    if (!rv.isDataProducerWell()) {
+    if (rv == null || rv.isNull()) {
       return null;
     }
     
@@ -319,7 +331,7 @@ public class ResultValue
     return rv.getValue();
   }
 
-  
+
   // package-protected methods
   
   /**
