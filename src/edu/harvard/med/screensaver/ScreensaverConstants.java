@@ -31,7 +31,7 @@ public interface ScreensaverConstants
   public static final String ERROR_ACTION_RESULT = "error";
   public static final String DONE_ACTION_RESULT = "done";
   public static final String VIEW_MAIN ="viewMain";
-  public static final String VIEW_INSTRUCTIONS ="viewInstructions";
+  public static final String VIEW_INSTRUCTIONS ="viewHelp";
   public static final String VIEW_DOWNLOADS ="viewDownloads";
   public static final String VIEW_SCREENING_ROOM_USER_ACTION_RESULT = "viewScreeningRoomUser";
   public static final String SHOW_SEARCH_RESULTS_SUMMARY_ACTION = "showSearchResultsSummary";
