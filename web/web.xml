@@ -77,7 +77,7 @@
      Specification 2.5.3. Server performs better. [ant4: saving
      component tree and UI state to client-side (in HTML) can create
      huge HTML files, which impacts performance, and in both directions,
-     as the UI state data is also sent back to server as form field.
+     as the UI state data is also sent back to server as a form field.
      Also UI state data is repeated for every HTML form on the page. Bad
      news, all around. I've tested using server-side state saving,
      and it seems to work just fine. And it creates a considerably
@@ -99,7 +99,7 @@
      browser's back command and arrive at a view whose UI state and
      component tree is still available. Values must >=1, or else
      defaults to 20. JspStateManagerImpl saves "old" UI states, beyond
-     the size specified here, so this setting is not a a hard
+     the size specified here, so this setting is not a hard
      upper-limit in any case (but the "old" ones are WeakReferences,
      fortunately). Not sure why *this* project would want to ever save
      more than the state for the current view, since accessing old views
