@@ -25,10 +25,11 @@ TODO:
 
 	<t:outputText
 		value="Heat maps not available (there is no numeric screen result data)"
+		rendered="#{empty heatMapViewer.screenResult.numericResultValueTypes}"
 		styleClass="label" />
 
 	<t:panelGrid columns="1"
-		rendered="#{heatMapViewer.heatMapConfigurationsDataModel.rowCount > 0}">
+		rendered="#{!empty heatMapViewer.screenResult.numericResultValueTypes}">
 
 		<t:panelGroup styleClass="commandPanel">
 			<t:outputLabel for="plateNumber" value="Plate:" styleClass="label" />
