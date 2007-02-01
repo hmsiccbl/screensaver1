@@ -324,9 +324,10 @@
     <display-name>Public</display-name>
 
     <web-resource-collection>
-      <web-resource-name>Home</web-resource-name>
-      <description>Allow unauthenticated user to request the home URL (i.e., the URL(s) in the welcome-file-list).</description>
+      <web-resource-name>HelloAndGoodbye</web-resource-name>
+      <description>Allow unauthenticated user to request the home URL (i.e., the URL(s) in the welcome-file-list), and the goodbye URL.</description>
       <url-pattern>/index.jsp</url-pattern>
+      <url-pattern>/goodbye.jsf</url-pattern>
       <http-method>GET</http-method>
     </web-resource-collection>
     

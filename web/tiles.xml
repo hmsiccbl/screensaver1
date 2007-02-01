@@ -65,6 +65,17 @@
   </definition>
   
   <definition
+    name="/goodbye.tiles"
+    extends=".base">
+    <put 
+      name="pageTitle"
+      value="Thanks for using Screensaver!"/>
+    <put
+      name="body"
+      value="/goodbye.jsp" />
+  </definition>
+  
+  <definition
     name="/login-error.tiles"
     extends=".base">
     <put 
