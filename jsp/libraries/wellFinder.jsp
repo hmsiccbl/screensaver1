@@ -10,6 +10,13 @@
     <t:panelGrid columns="2">
 	
       <t:panelGrid columns="1">
+        <t:commandButton
+	      action="#{wellFinder.findWells}"
+          id="findWellsSubmit1"
+          value="Find Wells"
+          styleClass="command"
+        />
+
         <t:inputTextarea
           id="plateWellList"
           value="#{wellFinder.plateWellList}"
@@ -20,7 +27,7 @@
         
         <t:commandButton
 	      action="#{wellFinder.findWells}"
-          id="findMultipleWellsSubmit"
+          id="findWellsSubmit2"
           value="Find Wells"
           styleClass="command"
         />
