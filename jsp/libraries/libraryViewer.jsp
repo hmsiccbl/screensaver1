@@ -33,6 +33,14 @@
 		</h:form>
   </t:panelGroup>
 
+  <t:panelGroup rendered="#{libraryViewer.isCompoundLibrary}">
+    <h:form id="viewDownloadsForm" style="margin-top: 10px">
+      <t:outputText value="Visit the " />
+      <t:commandLink action="#{mainController.viewDownloads}" value="Data Downloads page" />
+      <t:outputText value=" to download SD Files for the ICCB-L compound libraries." />
+    </h:form>
+  </t:panelGroup>
+
 </f:subview>
 
 
