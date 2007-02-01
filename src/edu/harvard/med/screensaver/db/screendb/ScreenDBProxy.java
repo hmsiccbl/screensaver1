@@ -208,7 +208,7 @@ public class ScreenDBProxy
           resultSet.getString("phone"),
           resultSet.getString("lab_location"), // mailing address
           resultSet.getString("comments"),
-          null, // TODO: put in the eCommonsId when it is in ScreenDB
+          resultSet.getString("ecommons_id"),
           resultSet.getString("harvard_id"),
           classification,
           resultSet.getBoolean("non_user")
