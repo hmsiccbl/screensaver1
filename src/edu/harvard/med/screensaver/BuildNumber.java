@@ -24,7 +24,7 @@ public class BuildNumber
   /**
    * match valid outputs of 'svnversion'; see 'svnversion --help' for possible formats of its output
    */
-  private static final String SVN_VERSION_NUMBER_REGEX = "(\\d)+[MS]?(:\\d+[MS]?)?";
+  private static final String SVN_VERSION_NUMBER_REGEX = "(\\d+)[MS]?(:\\d+[MS]?)?";
 
   private static Logger log = Logger.getLogger(BuildNumber.class);
   
