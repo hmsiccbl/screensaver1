@@ -15,7 +15,6 @@
 
 <%-- 
 TODO:
-- color legend
 - scaling: min/max from controls (absolute, avg), plate samples, experiment samples
 - place matching color next to max, min, median
 - label well name next to max, min, median
@@ -24,11 +23,15 @@ TODO:
 
 <f:subview id="heatMapViewer">
 
-	<t:panelGrid columns="1">
+	<t:outputText
+		value="Heat maps not available (there is no numeric screen result data)"
+		styleClass="label" />
+
+	<t:panelGrid columns="1"
+		rendered="#{heatMapViewer.heatMapConfigurationsDataModel.rowCount > 0}">
 
 		<t:panelGroup styleClass="commandPanel">
-			<t:outputLabel for="plateNumber" value="Plate:"
-				styleClass="label" />
+			<t:outputLabel for="plateNumber" value="Plate:" styleClass="label" />
 
 			<t:selectOneMenu id="plateNumber"
 				value="#{heatMapViewer.plateNumber.value}" required="true"
@@ -39,10 +42,12 @@ TODO:
 
 			<t:commandButton id="previousPlateButton"
 				image="/images/arrow-previous.png"
-				action="#{heatMapViewer.previousPlate}" styleClass="command" title="Previous plate" />
+				action="#{heatMapViewer.previousPlate}" styleClass="command"
+				title="Previous plate" />
 
 			<t:commandButton id="nextPlateButton" image="/images/arrow-next.png"
-				action="#{heatMapViewer.nextPlate}" styleClass="command" title="Next plage" />
+				action="#{heatMapViewer.nextPlate}" styleClass="command"
+				title="Next plage" />
 
 			<t:outputLabel for="showValues" value="Show values"
 				styleClass="label" />
@@ -95,7 +100,8 @@ TODO:
 					<t:outputLabel for="numericFormat" value="Numeric Format:"
 						styleClass="label" />
 					<t:selectOneMenu id="numericFormat"
-						value="#{heatMapConfig.numericFormat.value}" styleClass="inputText">
+						value="#{heatMapConfig.numericFormat.value}"
+						styleClass="inputText">
 						<f:selectItems value="#{heatMapConfig.numericFormat.selectItems}" />
 					</t:selectOneMenu>
 
