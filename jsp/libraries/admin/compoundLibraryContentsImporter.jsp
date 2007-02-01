@@ -19,15 +19,9 @@
       columnClasses="">
       <t:column styleClass="column">
         <f:facet name="header">
-          <h:outputText value="Worksheet" />
+          <h:outputText value="SD File Record Number" />
         </f:facet>
-        <h:outputText value="#{row.cell.sheetName}" />
-      </t:column>
-      <t:column styleClass="column">
-        <f:facet name="header">
-          <h:outputText value="Cell" />
-        </f:facet>
-        <h:outputText value="#{row.cell.formattedRowAndColumn}" />
+        <h:outputText value="#{row.recordNumber}" />
       </t:column>
       <t:column styleClass="column">
         <f:facet name="header">

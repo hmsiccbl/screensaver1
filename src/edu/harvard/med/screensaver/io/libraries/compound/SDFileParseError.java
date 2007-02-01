@@ -64,7 +64,7 @@ public class SDFileParseError
     return _sdFile;
   }
   
-  public int getSDFileRecordNumber()
+  public int getRecordNumber()
   {
     return _sdRecordNumber;
   }
