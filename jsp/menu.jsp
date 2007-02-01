@@ -15,7 +15,7 @@
     <%--
       HACK: there remain some difficulties in determining / predicting the order of initialization
       of the JSF managed-beads as enumerated in the faces-config.xml file. a current workaround is
-      to reference the managed-beads that need to get initialized first in a null context here.
+      to reference the managed-beans that need to get initialized first in a null context here.
 	--%>
 	<h:outputText value="#{mainController}" rendered="#{empty mainController && false}" />
 	<h:outputText value="#{librariesController}" rendered="#{empty librariesController && false}" />
