@@ -45,11 +45,15 @@
         </t:panelGrid>
       </t:panelGrid>
 
-      <t:div style="text-align: center">
+      <t:div styleClass="footer">
         <t:htmlTag value="hr"/>
         <h:outputText value="#{menu.applicationTitle} | "/>
         <h:outputLink value="http://iccb.med.harvard.edu">
           <h:outputText value="Harvard Medical School: ICCB-Longwood" />
+        </h:outputLink>
+        <h:outputText value=" | "/>
+        <h:outputLink value="#{menu.feedbackUrl}">
+          <h:outputText value="Feedback" />
         </h:outputLink>
       </t:div>
 

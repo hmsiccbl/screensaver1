@@ -345,6 +345,11 @@
       <redirect/>
     </navigation-case>
     <navigation-case>
+      <from-outcome>goodbye</from-outcome>
+      <to-view-id>/goodbye</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>viewHelp</from-outcome>
       <to-view-id>/helpViewer</to-view-id>
       <redirect/>

@@ -19,21 +19,18 @@
 				styleClass="errorMessage" />
 			<t:outputText
 				value="(On second thought, YOU are a developer, so it probably WAS your fault.  Back to work!)"
-				visibleOnUserRole="developer"/>
+				visibleOnUserRole="developer" />
 			<t:outputText
 				value="You may go back and try again, though the error will probably reoccur.  If it does, we recommend you click the &quot;Login Again&quot; button, below, and then retry the operation.  We sincerely apologize for the inconvenience."
-				escape="true"
-				/>
-				<h:panelGroup>
-				<h:commandButton id="tryAgain"
-					value="Back"
-					style="font-size: large; font-weight: bold" 
-					onclick="javascript:history.back()"
-					disabled="true"/>
+				escape="true" />
+			<h:panelGroup>
+				<h:commandButton id="tryAgain" value="Back"
+					style="font-size: large; font-weight: bold"
+					onclick="javascript:history.back()" disabled="true" />
 				<h:commandButton id="loginAgain"
 					action="#{exceptionReporter.loginAgain}" value="Login Again"
 					style="font-size: large; font-weight: bold" />
-					</h:panelGroup>
+			</h:panelGroup>
 		</t:panelGrid>
 
 		<t:panelGrid visibleOnUserRole="developer">

@@ -304,7 +304,12 @@
     </copy>
 
   	<antcall target="copy.downloads.dir"/>
-
+    
+    <exec executable="svnversion" output="${exploded.war.dir}/WEB-INF/classes/build-number.txt">
+      <arg value="-n" />
+      <arg value="${basedir}" />
+    </exec>
+    
   </target>
 
   <target name="copy.downloads.dir" if="copy.downloads.dir">

@@ -9,6 +9,8 @@
 <%-- Tiles --%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
+<%-- TODO: use ScreensaverConstants.FEEDBACK_URL here --%>
+
 <f:subview id="main">
   <t:outputText value="Welcome #{menu.screensaverUser.fullNameFirstLast}!" styleClass="title"/>
   <t:div/>
@@ -21,7 +23,6 @@
 		influence the order in which functionality is added, improved, and
 		fixed!</p>
 		<p>Please send your comments to <a
-			href="mailto:john_sullivan@hms.harvard.edu,andrew_tolopko@hms_harvard.edu">john_sullivan@hms.harvard.edu,
-		andrew_tolopko@hms_harvard.edu</a>.</p>
+			href="mailto:john_sullivan@hms.harvard.edu,andrew_tolopko@hms_harvard.edu">john_sullivan@hms.harvard.edu,andrew_tolopko@hms_harvard.edu</a>.</p>
 	</f:verbatim>
 </f:subview>

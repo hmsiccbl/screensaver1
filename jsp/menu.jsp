@@ -27,6 +27,8 @@
 			<t:htmlTag value="br"/>
 			<t:outputText id="version" value="#{menu.applicationVersion}"
 				styleClass="menuItem label" />
+			<t:outputText id="buildNumber" value="(#{menu.applicationBuildNumber})"
+				styleClass="menuItem label" visibleOnUserRole="developer" />
 		</h:form>
 
 		<t:htmlTag id="menuSectionSeparator0" value="hr" 
