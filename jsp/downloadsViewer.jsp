@@ -18,8 +18,8 @@ and the latter to search against specific libraries.
 </p>
 
 <p style="color: fuchsia;">
-Please note that we do not have SD Files for every ICCB-L Compound Libraries. In
-particular, we don't have SD Files for natural products libraries.
+Please note that we do not have SD Files for every ICCB-L Compound Library. In
+particular, there are no structures available for natural product extracts.
 </p>
 
 <div style="margin-left: 20px;">
