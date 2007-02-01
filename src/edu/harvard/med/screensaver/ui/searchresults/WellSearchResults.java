@@ -125,7 +125,7 @@ public class WellSearchResults extends SearchResults<Well>
   protected Object getCellValue(Well well, String columnName)
   {
     if (columnName.equals(LIBRARY)) {
-      return well.getLibrary().getShortName();
+      return well.getLibrary().getLibraryName();
     }
     if (columnName.equals(PLATE)) {
       return well.getPlateNumber();
