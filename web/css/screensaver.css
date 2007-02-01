@@ -42,7 +42,8 @@ h3,.subsectionHeader {
 }
 
 .footer {
-	color: graytext;
+	text-align: center;
+ 	color: graytext;
 	font-size: small;
 }
 

@@ -18,6 +18,8 @@
 		<t:outputText value="#{envInfo.applicationName}" />
 		<t:outputText value="Version" />
 		<t:outputText value="#{envInfo.applicationVersion}" />
+		<t:outputText value="Build" />
+		<t:outputText value="#{envInfo.applicationBuildNumber}" />
 	</h:panelGrid>
 
 	<t:outputText value="Database Connection Settings" styleClass="sectionHeader" />

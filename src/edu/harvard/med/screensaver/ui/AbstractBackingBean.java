@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import edu.harvard.med.screensaver.BuildNumber;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -36,6 +37,8 @@ import edu.harvard.med.screensaver.ui.util.Messages;
 import edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter;
 
 import org.apache.log4j.Logger;
+
+import sun.security.provider.certpath.Builder;
 
 /**
  * A base Controller class for JSF backing beans (beans that handle JSF actions
@@ -83,6 +86,14 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   }
   
   /**
+   * Get the application version number, as a string.
+   */
+  public String getApplicationBuildNumber()
+  {
+    return BuildNumber.getBuildNumber();
+  }
+  
+  /**
    * Get the application title as "[Application Name] [Version]".
    */
   public String getApplicationTitle()
@@ -90,6 +101,14 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
     return APPLICATION_TITLE;
   }
   
+  /**
+   * Get the URL to which user feedback can be submitted.
+   */
+  public String getFeedbackUrl()
+  {
+    return FEEDBACK_URL;
+  }
+
   /**
    * Get the group of messages that was injected into this backing bean.
    * 

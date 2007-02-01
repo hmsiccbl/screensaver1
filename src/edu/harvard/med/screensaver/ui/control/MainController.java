@@ -63,6 +63,6 @@ public class MainController extends AbstractUIController
   {
     log.info("logout for session "  + getHttpSession().getId());
     closeHttpSession();
-    return viewMain();
+    return VIEW_GOODBYE;
   }
 }
