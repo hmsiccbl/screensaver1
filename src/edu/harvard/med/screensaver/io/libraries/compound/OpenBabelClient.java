@@ -46,10 +46,14 @@ public class OpenBabelClient
   {
     return convertMolecule("mol", "smi", molfile);
   }
-  
+
   public String convertSmilesToInchi(String smiles)
   {
     return convertMolecule("smi", "inchi", smiles);
+  }
+  public String convertSmilesToMolfile(String smiles)
+  {
+    return convertMolecule("smi", "mol", smiles);
   }
   
   public synchronized String convertMolecule(
