@@ -21,6 +21,7 @@ public class NCBIGeneInfo
   
   private String _geneName;
   private String _speciesName;
+  private String _entrezgeneSymbol;
   
 
   // public constructor and instance methods
@@ -30,10 +31,11 @@ public class NCBIGeneInfo
    * @param geneName the gene name
    * @param speciesName the species name
    */
-  public NCBIGeneInfo(String geneName, String speciesName)
+  public NCBIGeneInfo(String geneName, String speciesName, String entrezgeneSymbol)
   {
     _geneName = geneName;
     _speciesName = speciesName;
+    _entrezgeneSymbol = entrezgeneSymbol;
   }
   
   /**
@@ -52,5 +54,10 @@ public class NCBIGeneInfo
   public String getSpeciesName()
   {
     return _speciesName;
+  }
+  
+  public String getEntrezgeneSymbol()
+  {
+    return _entrezgeneSymbol;
   }
 }

@@ -39,6 +39,12 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
 public class NCBIGeneInfoProvider
 {
   
+  public static void main(String [] args)
+  {
+    NCBIGeneInfoProvider provider = new NCBIGeneInfoProvider(new ParseErrorManager());
+    provider.getGeneInfoForEntrezgeneId(14696, null);
+  }
+  
   // static fields
   
   private static final Logger log = Logger.getLogger(NCBIGeneInfoProvider.class);
@@ -93,6 +99,7 @@ public class NCBIGeneInfoProvider
     if (efetchContent == null) {
       return null;
     }
+    
     Document efetchDocument = getEfetchDocument(efetchContent);
     if (efetchDocument == null) {
       return null;
@@ -100,10 +107,11 @@ public class NCBIGeneInfoProvider
     NodeList nodes = efetchDocument.getElementsByTagName("Item");
     String geneName = getGeneNameFromNodeList(nodes);
     String speciesName = getSpeciesNameFromNodeList(nodes);
+    String entrezgeneSymbol = getEntrezgeneSymbolFromNodeList(nodes); 
     if (geneName == null || speciesName == null) {
       return null;
     }
-    return new NCBIGeneInfo(geneName, speciesName);
+    return new NCBIGeneInfo(geneName, speciesName, entrezgeneSymbol);
   }
 
   /**
@@ -175,6 +183,16 @@ public class NCBIGeneInfoProvider
     return getNamedItemFromNodeList(nodes, "Orgname");
   }
 
+  /**
+   * Get the species name from the list of "Item" element nodes.
+   * @param nodes the list of "Item" element nodes
+   * @return the species name from the list of "Item" element nodes
+   */
+  private String getEntrezgeneSymbolFromNodeList(NodeList nodes)
+  {
+    return getNamedItemFromNodeList(nodes, "Name");
+  }
+  
   /**
    * Find the element node in the node list that has an attribute named "Name" with the
    * specified attribute value. Return the text content of that element node. 

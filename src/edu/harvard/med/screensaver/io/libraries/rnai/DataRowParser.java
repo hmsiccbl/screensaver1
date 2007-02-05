@@ -258,6 +258,11 @@ public class DataRowParser
       return null;
     }
     
+    // revise the entrezgeneSymbol if the NCBIGeneInfoProvider has a better value
+    if (geneInfo.getEntrezgeneSymbol() != null) {
+      entrezgeneSymbol = geneInfo.getEntrezgeneSymbol();
+    }
+    
     // lookup existing gene
     Gene gene = getExistingGene(entrezgeneId);
     if (gene != null) {
