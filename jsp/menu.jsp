@@ -108,14 +108,11 @@
           size="3"
           styleClass="inputText"
         />
-        <t:commandButton
-	      action="#{wellFinder.findWell}"
-          id="quickFindWellSubmit"
-          value="Go"
-          styleClass="command"
-        />
       </t:panelGrid>
-    </h:form>
+			<t:commandButton action="#{wellFinder.findWell}"
+				id="quickFindWellSubmit" value="Go" styleClass="command"
+				rendered="#{menu.authenticatedUser}" />
+		</h:form>
     
     <h:form id="quickFindScreenForm">
 			<t:panelGrid columns="1"
