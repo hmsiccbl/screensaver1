@@ -84,10 +84,10 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   private int _currentEntityIndex = 0;
   private UISelectOneBean<String> _itemsPerPage = new UISelectOneBean<String>(PAGE_SIZE_SELECTIONS, DEFAULT_PAGESIZE);
   private String _downloadFormat = "";
-  
   private UIData _dataTable;
   private DataModel _dataModel;
   private DataModel _dataHeaderColumnModel = new ListDataModel(getColumnHeaders());
+  private boolean _isDataModelUpdateNeeded;
   
   
   // public constructor
@@ -101,13 +101,29 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   {
     _unsortedResults = unsortedResults;
     _resultsSize = unsortedResults.size();
-    doSort(getColumnHeaders().get(0), SortDirection.ASCENDING);
-    _dataModel = new ListDataModel(_currentSort);
+    assert getColumnHeaders().size() > 0 : "> 0 column headers required";
+    _currentSortColumnName = getColumnHeaders().get(0);
+    setDataModelUpdateNeeded();
   }
 
   
   // public getters and setters - used by searchResults.jspf
   
+  protected boolean isDataModelUpdateNeeded()
+  {
+    return _isDataModelUpdateNeeded;
+  }
+
+  protected void setDataModelUpdateNeeded() 
+  {
+    _isDataModelUpdateNeeded = true;
+  }
+  
+  protected void setDataModelUpdateNeeded(boolean isDataModelUpdateNeeded)
+  {
+    _isDataModelUpdateNeeded = isDataModelUpdateNeeded;
+  }
+
   /**
    * Get the data table.
    * @return the data table
@@ -132,6 +148,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public DataModel getDataModel()
   {
+    doSort();
     return _dataModel;
   }
 
@@ -290,8 +307,35 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public void setCurrentSortColumnName(String currentSortColumnName)
   {
-    _currentSortColumnName = currentSortColumnName;
+    if (!_currentSortColumnName.equals(currentSortColumnName)) {
+      setDataModelUpdateNeeded();
+      _currentSortColumnName = currentSortColumnName;
+    }
   }
+
+  /**
+   * Called by dataTable JSF component.
+   * @param sortAscending true if new sort direction is ascending; false if descending
+   */
+  public void setSortAscending(boolean sortAscending)
+  {
+    if (sortAscending) {
+      setCurrentSortDirection(SortDirection.ASCENDING);
+    }
+    else {
+      setCurrentSortDirection(SortDirection.DESCENDING);
+    }
+  }
+  
+  /**
+   * Called by dataTable JSF component.
+   * @return true if current sort direction is ascending; false if descending
+   */
+  public boolean isSortAscending()
+  {
+    return getCurrentSortDirection().equals(SortDirection.ASCENDING);
+  }
+    
 
   /**
    * Get the current sort direction.
@@ -314,7 +358,10 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public void setCurrentSortDirection(SortDirection currentSortDirection)
   {
-    _currentSortDirection = currentSortDirection;
+    if (currentSortDirection != _currentSortDirection) {
+      setDataModelUpdateNeeded();
+      _currentSortDirection = currentSortDirection;
+    }
   }
 
   /**
@@ -354,28 +401,6 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   // public action command methods & action listeners
 
   /**
-   * Resort the results according to the column most recently selected by the
-   * user (via the UI), and redisplay the page. Sort descending if the previous
-   * sort order was ascending and on the same column. Otherwise, sort
-   * descending. Cache any newly computed sorts of the results for reuse.
-   * 
-   * @return the navigation rule to redisplay the current page
-   */
-  public Object sortOnColumn()
-  {
-    String sortColumnName = getColumnName();
-
-    // toggle sort order
-    SortDirection sortDirection = sortColumnName.equals(_currentSortColumnName) ? 
-      _currentSortDirection.equals(SortDirection.ASCENDING) ? 
-        SortDirection.DESCENDING : SortDirection.ASCENDING : 
-          SortDirection.ASCENDING;
-
-    doSort(sortColumnName, sortDirection);
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  /**
    * Resort the results according to the current column, as selected by the user
    * in a drop-down list (in the UI), and redisplay the page. Sort direction is
    * determined by last call to {@link #setCurrentSortDirection(SortDirection)}.
@@ -386,7 +411,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   public Object sortOnSelectedColumn()
   {
     Object currentEntity = _currentSort.get(_currentEntityIndex);
-    doSort(_currentSortColumnName, _currentSortDirection);
+    doSort();
     _currentEntityIndex = _currentSort.indexOf(currentEntity);
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -666,14 +691,21 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   }
 
   /**
-   * Internal method for peforming and caching sorted results, by both sort
-   * column and direction.
+   * Internal method for performing and caching sorted results, by both sort
+   * column and direction. {@link #setDataModelUpdateNeeded()} must have been
+   * called previously for this method do perform its work.
    * 
    * @param sortColumnName
    * @param sortDirection
    */
-  private void doSort(String sortColumnName, SortDirection sortDirection)
+  private void doSort()
   {
+    if (!_isDataModelUpdateNeeded && _dataModel != null) {
+      return;
+    }
+    String sortColumnName = _currentSortColumnName;
+    SortDirection sortDirection = _currentSortDirection;
+
     // get the forward sort for the specified column, computing it if needed
     List<E> forwardSort = _forwardSorts.get(sortColumnName);
     if (forwardSort == null) {
@@ -687,7 +719,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
       _currentSort = forwardSort;
     }
     else {
-      
+
       // get the reverse sort for the specified column, computing it if needed
       List<E> reverseSort = _reverseSorts.get(sortColumnName);
       if (reverseSort == null) {
@@ -698,10 +730,8 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
       
       _currentSort = reverseSort;
     }
-    
-    // update other instance fields that need to be set to track the current sort
-    _currentSortColumnName = sortColumnName;
-    _currentSortDirection = sortDirection;
+
     _dataModel = new ListDataModel(_currentSort);
+    setDataModelUpdateNeeded(false);
   }
 }
