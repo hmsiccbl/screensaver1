@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.faces.component.UIData;
 import javax.faces.component.UIInput;
 import javax.faces.component.UISelectBoolean;
+import javax.faces.component.UISelectMany;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
@@ -131,6 +132,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   // data members for data headers table
   private UniqueDataHeaderNames _uniqueDataHeaderNames;
+  private UISelectMany _dataHeadersSelectMany;
   private UISelectManyBean<ResultValueType> _selectedResultValueTypes;
   private DataModel _dataHeadersColumnModel;
   private DataModel _dataHeadersModel;
@@ -219,6 +221,16 @@ public class ScreenResultViewer extends AbstractBackingBean
     return _collapsablePanelsState;
   }
   
+  public UISelectMany getDataHeadersSelectMany()
+  {
+    return _dataHeadersSelectMany;
+  }
+
+  public void setDataHeadersSelectMany(UISelectMany dataHeadersSelectMany)
+  {
+    _dataHeadersSelectMany = dataHeadersSelectMany;
+  }
+
   public UIInput getRowNumberInput()
   {
     return _rowNumberInput;
@@ -272,7 +284,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   public boolean isNumericColumn()
   {
-    int columnIndex = _sortManager.getColumnModel().getRowIndex();
+    int columnIndex = getSortManager().getColumnModel().getRowIndex();
     // "plate", "well", and "type" columns are non-numeric
     if (columnIndex < DATA_TABLE_FIXED_COLUMNS) {
       return false;
@@ -284,7 +296,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   public boolean isResultValueCellExcluded()
   {
-    int columnIndex = _sortManager.getColumnModel().getRowIndex();
+    int columnIndex = getSortManager().getColumnModel().getRowIndex();
     if (columnIndex < DATA_TABLE_FIXED_COLUMNS) {
       return false;
     }
@@ -381,7 +393,7 @@ public class ScreenResultViewer extends AbstractBackingBean
       columnHeaders.addAll(getUniqueDataHeaderNames().asList());
       _sortManager = new TableSortManager(columnHeaders) {
         @Override
-        protected void doSort(String sortColumnName, SortDirection sortDirection)
+        protected void sortChanged(String sortColumnName, SortDirection sortDirection)
         {
           // we cannot efficiently determine the new row index, so we set back to 0 on a sort
           _firstResultValueIndex = 0;
@@ -587,13 +599,6 @@ public class ScreenResultViewer extends AbstractBackingBean
   {
     // clear state of our data table, forcing lazy initialization when needed
     _rawDataModel = null;
-
-    // enforce minimum of 1 selected data header (data table query will break otherwise)
-    if (getSelectedDataHeaderNames().size() == 0) {
-      _selectedResultValueTypes.setSelections(Arrays.asList(getScreenResult().getResultValueTypes().first()));
-    }
-
-    updateSortManagerWithSelectedDataHeaders();
   }
 
   private void updateSortManagerWithSelectedDataHeaders()
@@ -662,6 +667,23 @@ public class ScreenResultViewer extends AbstractBackingBean
   }
 
   @SuppressWarnings("unchecked")
+  public void resultValueTypesChangeListener(ValueChangeEvent event)
+  {
+    _selectedResultValueTypes.setValue((List<String>) event.getNewValue());
+    // enforce minimum of 1 selected data header (data table query will break otherwise)
+    if (getSelectedDataHeaderNames().size() == 0) {
+      _selectedResultValueTypes.setSelections(Arrays.asList(getScreenResult().getResultValueTypes().first()));
+    }
+
+    // next line sets the local value of the dataHeaders JSF component, and
+    // prevents its old value from being used during the Update Model JSF phase,
+    // when updating our UISelectManyBean
+    _dataHeadersSelectMany.setValue(_selectedResultValueTypes.getValue());
+    
+    updateSortManagerWithSelectedDataHeaders();
+  }
+  
+  @SuppressWarnings("unchecked")
   private void lazyBuildRawData()
   {
     if (getScreenResult() != null && _rawDataModel == null) {
@@ -721,6 +743,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   {
     getSelectedResultValueTypes().setSelections(getScreenResult().getResultValueTypes());
     updateDataHeaders();
+    updateSortManagerWithSelectedDataHeaders();
   }
 
 

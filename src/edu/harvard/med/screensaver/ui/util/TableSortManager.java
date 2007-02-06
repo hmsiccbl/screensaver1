@@ -16,7 +16,6 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
-import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 
 import org.apache.log4j.Logger;
@@ -71,9 +70,35 @@ public abstract class TableSortManager
    */
   public void setCurrentSortColumnName(String currentSortColumnName)
   {
-    _currentSortColumnName = currentSortColumnName;
+    if (!_currentSortColumnName.equals(currentSortColumnName)) {
+      _currentSortColumnName = currentSortColumnName;
+      sortChanged(_currentSortColumnName, _currentSortDirection);
+    }
   }
 
+  /**
+   * Called by dataTable JSF component.
+   * @param sortAscending true if new sort direction is ascending; false if descending
+   */
+  public void setSortAscending(boolean sortAscending)
+  {
+    if (sortAscending) {
+      setCurrentSortDirection(SortDirection.ASCENDING);
+    }
+    else {
+      setCurrentSortDirection(SortDirection.DESCENDING);
+    }
+  }
+  
+  /**
+   * Called by dataTable JSF component.
+   * @return true if current sort direction is ascending; false if descending
+   */
+  public boolean isSortAscending()
+  {
+    return getCurrentSortDirection().equals(SortDirection.ASCENDING);
+  }
+    
   /**
    * Get the current sort direction.
    * 
@@ -95,7 +120,10 @@ public abstract class TableSortManager
    */
   public void setCurrentSortDirection(SortDirection currentSortDirection)
   {
-    _currentSortDirection = currentSortDirection;
+    if (!_currentSortDirection.equals(currentSortDirection)) {
+      _currentSortDirection = currentSortDirection;
+      sortChanged(_currentSortColumnName, _currentSortDirection);
+    }
   }
 
   /**
@@ -151,6 +179,7 @@ public abstract class TableSortManager
     if (!columnNames.contains(_currentSortColumnName)) {
       _currentSortColumnName = columnNames.get(0);
       _currentSortDirection = SortDirection.ASCENDING;
+      sortChanged(_currentSortColumnName, _currentSortDirection);
     }
   }
 
@@ -158,40 +187,17 @@ public abstract class TableSortManager
   {
     return _columnNames;
   }
+
   
   // public action command methods & action listeners
 
-  /**
-   * Resort the results according to the column most recently selected by the
-   * user (via the UI), and redisplay the page. Sort descending if the previous
-   * sort order was ascending and on the same column. Otherwise, sort
-   * descending. Cache any newly computed sorts of the results for reuse.
-   * 
-   * @return the navigation rule to redisplay the current page
-   */
-  public Object sortOnColumn()
-  {
-    String newSortColumnName = (String) getColumnModel().getRowData();
 
-    // toggle sort order
-    SortDirection newSortDirection = newSortColumnName.equals(_currentSortColumnName) ? 
-      _currentSortDirection.equals(SortDirection.ASCENDING) ? 
-        SortDirection.DESCENDING : SortDirection.ASCENDING : 
-          SortDirection.ASCENDING;
-
-    _currentSortColumnName = newSortColumnName;
-    _currentSortDirection = newSortDirection;
-    doSort(newSortColumnName, newSortDirection);
-    return ScreensaverConstants.REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  
   // abstract methods
 
-  abstract protected void doSort(String newSortColumnName, SortDirection newSortDirection);
+  abstract protected void sortChanged(String newSortColumnName, SortDirection newSortDirection);
 
   
   // private methods
-
+  
 }
 
