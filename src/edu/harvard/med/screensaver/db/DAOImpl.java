@@ -534,11 +534,12 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   @SuppressWarnings("unchecked")
   public List<Library> findLibrariesDisplayedInLibrariesBrowser()
   {
+    // TODO: make this HQL type-safe by using LibraryType enum to obtain the values
     return new ArrayList<Library>(getHibernateTemplate().find(
       "from Library where libraryType not in ('Annotation', 'DOS', 'NCI', 'Discrete')")); 
   }
   
-  
+
   // private instance methods
 
   /**

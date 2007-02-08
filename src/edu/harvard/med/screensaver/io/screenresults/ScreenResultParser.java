@@ -249,6 +249,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       screenResultParser._dao.doInTransaction(new DAOTransaction() {
         public void runTransaction()
         {
+          finalScreenResultParser._dao.reattachEntity(finalScreen);
           ScreenResult screenResult = finalScreenResultParser.parse(finalScreen,
                                                                     inputFile,
                                                                     inputFileStream);
@@ -292,19 +293,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   public static Screen makeDummyScreen(int screenNumber)
   {
-    ScreeningRoomUser labHead = new ScreeningRoomUser(new Date(),
-                                                      "Joe",
-                                                      "Screener",
-                                                      "joe_screener_"
-                                                        + screenNumber
-                                                        + "@hms.harvard.edu",
-                                                      "",
-                                                      "",
-                                                      "",
-                                                      "",
-                                                      "",
-                                                      ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
-                                                      true);
+    ScreeningRoomUser labHead = makeDummyUser(screenNumber, "Joe", "Screener");
     Screen screen = new Screen(labHead,
                                labHead,
                                screenNumber,
@@ -314,12 +303,27 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     return screen;
   }
 
+  public static ScreeningRoomUser makeDummyUser(int screenNumber, String first, String last)
+  {
+    return new ScreeningRoomUser(new Date(),
+                                 first,
+                                 last,
+                                 first.toLowerCase() + "_" + last.toLowerCase() + "_" + screenNumber + "@hms.harvard.edu",
+                                 "",
+                                 "",
+                                 "",
+                                 "",
+                                 "",
+                                 ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
+                                 true);
+  }
+
   private static Screen findScreenOrExit(CommandLineApplication app) throws ParseException
   {
     int screenNumber = Integer.parseInt(app.getCommandLineOptionValue(SCREEN_OPTION[SHORT_OPTION]));
     DAO dao = (DAO) app.getSpringBean("dao");
     Screen screen = dao.findEntityByProperty(Screen.class, 
-                                              "hbnScreenNumber", 
+                                              "hbnScreenNumber",
                                               screenNumber);
     if (screen == null) {
       System.err.println("screen " + screenNumber + " does not exist");

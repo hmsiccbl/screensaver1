@@ -19,17 +19,28 @@ import java.util.Map;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
+/**
+ * This class generates unique data header names for a ScreenResult. It does so
+ * by appending increasing numeric suffixes to non-unique names.
+ * 
+ * @motivation Existing screen results can have non-unique data header names,
+ *             but this creates ambiguity in the user interface.
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ */
 public class UniqueDataHeaderNames
 {
-  private ScreenResult _screenResult;
-  private Map<ResultValueType,String> _uniqueDataHeaderNamesMap;
-  private Map<String,ResultValueType> _uniqueDataHeaderName2ResultValueType;
+  private Map<ResultValueType,String> _resultValueType2UniqueName;
+  private Map<String,ResultValueType> _uniqueName2ResultValueType;
+//  private List<String> _orderedUniqueNames;
 
   public UniqueDataHeaderNames(ScreenResult screenResult)
   {
-    _screenResult = screenResult;
-    _uniqueDataHeaderNamesMap = new LinkedHashMap<ResultValueType,String>();
-    _uniqueDataHeaderName2ResultValueType = new HashMap<String,ResultValueType>();
+    _resultValueType2UniqueName = new LinkedHashMap<ResultValueType,String>();
+    _uniqueName2ResultValueType = new HashMap<String,ResultValueType>();
+    if (screenResult == null) {
+      return;
+    }
     List<String> names = new ArrayList<String>();
     for (ResultValueType rvt : screenResult.getResultValueTypes()) {
       names.add(rvt.getName());
@@ -41,37 +52,32 @@ public class UniqueDataHeaderNames
         names2.add(name);
         name += " (" + Collections.frequency(names2, name) + ")";
       }
-      _uniqueDataHeaderNamesMap.put(rvt, name);
-      _uniqueDataHeaderName2ResultValueType.put(name, rvt);
+      _resultValueType2UniqueName.put(rvt, name);
+      _uniqueName2ResultValueType.put(name, rvt);
     }
   }
 
   public String get(ResultValueType rvt)
   {
-    return _uniqueDataHeaderNamesMap.get(rvt);
+    return _resultValueType2UniqueName.get(rvt);
   }
 
-  public String get(Integer ordinal)
-  {
-    return _uniqueDataHeaderNamesMap.get(_screenResult.getResultValueTypesList().get(ordinal));
-  }
-  
   public ResultValueType get(String uniqueDataHeaderName)
   {
-    return _uniqueDataHeaderName2ResultValueType.get(uniqueDataHeaderName);
+    return _uniqueName2ResultValueType.get(uniqueDataHeaderName);
   }
   
   public List<String> get(List<ResultValueType> rvts) {
     List<String> uniqueDataHeaderNames = new ArrayList<String>(rvts.size());
     for (ResultValueType rvt : rvts) {
-      uniqueDataHeaderNames.add(_uniqueDataHeaderNamesMap.get(rvt));
+      uniqueDataHeaderNames.add(_resultValueType2UniqueName.get(rvt));
     }
     return uniqueDataHeaderNames;
   }
 
   public List<String> asList()
   {
-    return new ArrayList<String>(_uniqueDataHeaderNamesMap.values());
+    return new ArrayList<String>(_resultValueType2UniqueName.values());
   }
   
   public String[] asArray()
@@ -81,6 +87,6 @@ public class UniqueDataHeaderNames
 
   public int size()
   {
-    return _uniqueDataHeaderNamesMap.size();
+    return _resultValueType2UniqueName.size();
   }
 }
