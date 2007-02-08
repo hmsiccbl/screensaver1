@@ -24,7 +24,7 @@ TODO:
 <f:subview id="heatMapViewer">
 
 	<t:outputText
-		value="Heat maps not available (there is no numeric screen result data)"
+		value="Heat maps not available (there are no data headers with numeric data)"
 		rendered="#{empty heatMapViewer.screenResult.numericResultValueTypes}"
 		styleClass="label" />
 
