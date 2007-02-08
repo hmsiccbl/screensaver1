@@ -12,8 +12,11 @@ package edu.harvard.med.screensaver.ui.control;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -30,6 +33,7 @@ import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
@@ -150,20 +154,58 @@ public class ScreensController extends AbstractUIController
     {
       public void runTransaction()
       {
-        if (_screensBrowser.getScreenSearchResults() == null) {
-          List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
-          for (Screen screen : screens) {
-            _dao.need(screen, 
-                      "screenResult", 
-                      "statusItems"); // TODO: only need this for screensAdmin or readEverythingAdmin; query would be faster if not requested
-          }
-          _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens,
-                                                                         ScreensController.this, 
-                                                                         _dao));
+        List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
+        for (Screen screen : screens) {
+          _dao.need(screen, 
+                    "screenResult", 
+                    // TODO: only need this for screensAdmin or
+                    // readEverythingAdmin; query would be faster if not
+                    // requested
+                    "statusItems"); 
         }
+        _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens,
+                                                                       ScreensController.this, 
+                                                                       _dao));
       }
     });
     return BROWSE_SCREENS;
+  }
+  
+  @UIControllerMethod
+  public String browseMyScreens()
+  {
+    final String[] result = { REDISPLAY_PAGE_ACTION_RESULT };
+    _dao.doInTransaction(new DAOTransaction() 
+    {
+      public void runTransaction()
+      {
+        Set<Screen> screens = new HashSet<Screen>();
+        if (getScreensaverUser() instanceof ScreeningRoomUser) {
+          ScreeningRoomUser screener = (ScreeningRoomUser) getScreensaverUser();
+          screens.addAll(screener.getScreensHeaded());
+          screens.addAll(screener.getScreensLed());
+          screens.addAll(screener.getScreensCollaborated());
+          if (screens.size() == 0) {
+            showMessage("screens.noScreensForUser");
+          }
+          else {
+            for (Screen screen : screens) {
+              _dao.need(screen, 
+                        "screenResult");
+            }
+            _screensBrowser.setScreenSearchResults(new ScreenSearchResults(new ArrayList<Screen>(screens),
+                                                                           ScreensController.this, 
+                                                                           _dao));
+            result[0] = BROWSE_SCREENS;
+          }
+        }
+        else {
+          // admin user!
+          showMessage("screens.noScreensForUser");
+        }
+      }
+    });
+    return result[0];
   }
   
   @UIControllerMethod

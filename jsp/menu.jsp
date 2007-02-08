@@ -54,19 +54,24 @@
 				openItemClass="menuItem" activeItemClass="menuItemActive"
 				separatorClass="navSeparator" rendered="#{menu.authenticatedUser}">
 				<t:commandNavigation2 action="#{librariesController.findWells}"
-					value="#{\"Find Wells\"}"
+					value="Find Wells"
 					accesskey="W" />
 				<t:commandNavigation2
 					action="#{librariesController.browseLibraries}"
-					value="#{\"Browse Libraries\"}"
-					rendered="#{menu.authenticatedUser}" accesskey="L" />
+					value="Browse Libraries"
+					accesskey="L" />
 				<t:commandNavigation2 action="#{screensController.browseScreens}"
-					value="#{\"Browse Screens\"}"
-					rendered="#{menu.authenticatedUser && menu.userAllowedAccessToScreens}"
+					value="Browse Screens"
+					rendered="#{menu.readOnlyAdmin}"
 					accesskey="S" />
 				<t:commandNavigation2 />
+				<t:commandNavigation2 action="#{screensController.browseMyScreens}"
+					value="Browse My Screens"
+					rendered="#{!menu.readOnlyAdmin}"
+					accesskey="M" />
+				<t:commandNavigation2 />
 				<t:commandNavigation2 action="#{mainController.viewDownloads}"
-					value="#{\"Data Downloads\"}"
+					value="Data Downloads"
 					accesskey="D" />
 				<t:commandNavigation2 action="#{mainController.viewInstructions}"
 					value="Instructions"
@@ -116,7 +121,7 @@
     
     <h:form id="quickFindScreenForm">
 			<t:panelGrid columns="1"
-				rendered="#{menu.authenticatedUser && menu.userAllowedAccessToScreens}">
+				rendered="#{menu.authenticatedUser}">
 				<t:outputLabel id="screenNumberLabel" for="screenNumber"
 					value="Screen #" styleClass="menuItem label" />
 				<t:inputText id="screenNumber" value="#{screenFinder.screenNumber}"

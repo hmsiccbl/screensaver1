@@ -38,7 +38,6 @@ import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.Visit;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
@@ -54,6 +53,10 @@ import org.apache.log4j.Logger;
 // TODO: add a unit test that ensures all AbstractEntity classes have a corresponding method in this class
 
 // TODO: implement billing permissions
+
+// TODO: currently, we're assuming that if a user has a specific admin role,
+// more than just readEverythingAdmin, that she also has the readEverythingAdmin
+// role. This assumption is not verified in our data model, so we should be more careful
 
 public class DataAccessPolicy implements AbstractEntityVisitor
 {
@@ -206,14 +209,22 @@ public class DataAccessPolicy implements AbstractEntityVisitor
     if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
       return true;
     }
-    if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE) && 
-      user.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER)) {
-      return true;
+    // TODO: temporary data access policy for beta, until Harvard legal dept
+    // (OTL) approves pubilc visibility of screens (as of 2007-02-08)
+    if (user instanceof ScreeningRoomUser) {
+      ScreeningRoomUser screener = (ScreeningRoomUser) user;
+      return screener.getScreensLed().contains(screener) ||
+      screener.getScreensHeaded().contains(screener) ||
+      screener.getScreensCollaborated().contains(screener);
     }
-    if (screen.getScreenType().equals(ScreenType.RNAI) && 
-      user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER)) {
-      return true;
-    }
+//    if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE) && 
+//      user.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER)) {
+//      return true;
+//    }
+//    if (screen.getScreenType().equals(ScreenType.RNAI) && 
+//      user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER)) {
+//      return true;
+//    }
     return false;
   }
 

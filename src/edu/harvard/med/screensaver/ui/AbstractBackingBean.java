@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.ui;
 
 import java.security.Principal;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.faces.application.Application;
@@ -29,7 +28,6 @@ import edu.harvard.med.screensaver.BuildNumber;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.authentication.ScreensaverLoginModule;
@@ -37,8 +35,6 @@ import edu.harvard.med.screensaver.ui.util.Messages;
 import edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter;
 
 import org.apache.log4j.Logger;
-
-import sun.security.provider.certpath.Builder;
 
 /**
  * A base Controller class for JSF backing beans (beans that handle JSF actions
@@ -64,7 +60,6 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   // private data members
   
   private Messages _messages;
-  private boolean _isUserAllowedAccessToScreens;
 
 
   // bean property methods
@@ -163,15 +158,13 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   }
 
   /**
-   * Get whether user can view administrative fields but cannot edit them.
+   * Get whether user can view administrative fields.
    * 
-   * @return <code>true</code> iff user can view administrative fields but
-   *         cannot edit them
+   * @return <code>true</code> iff user can view administrative fields.
    */
   public boolean isReadOnlyAdmin()
   {
-    return !isUserInRole(getEditableAdminRole())
-           && isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+    return isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
   }
   
   public String getUserPrincipalName()
@@ -191,12 +184,6 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
     return getExternalContext().getUserPrincipal() != null && (pendingSessionCloseRequest == null || pendingSessionCloseRequest.equals(Boolean.FALSE));
   }
   
-  // TODO: temporary code for conditionally controlling application's functionality for beta release
-  public boolean isUserAllowedAccessToScreens()
-  {
-    return _isUserAllowedAccessToScreens;
-  }
-  
   /**
    * Returns the ScreensaverUser that is logged in to the current HTTP session.
    * 
@@ -210,17 +197,6 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
       user = getScreensaverUserForPrincipal(principal);
                 
       setSessionCachedScreensaverUser(user);
-
-      // TODO: temporary code for conditionally controlling application's functionality for beta release
-      final DAO dao = (DAO) getBean("dao");
-      dao.doInTransaction(new DAOTransaction() 
-      {
-        public void runTransaction() 
-        {
-          List<ScreenResult> screenResults = dao.findAllEntitiesWithType(ScreenResult.class);
-          _isUserAllowedAccessToScreens = screenResults.size() > 0;
-        }
-      });
     }
     return user;
   }
@@ -570,6 +546,9 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    */
   protected boolean isUserInRole(ScreensaverUserRole role)
   {
+    if (role == null) {
+      return false;
+    }
     return getExternalContext().isUserInRole(role.toString());
   }
 
@@ -632,6 +611,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
                                                             eCommonsIdOrLoginId);
         }
         if (user != null) {
+          // fetch relationships needed by data access policy
           unrestrictedAccessDao.need(user,
                                       "hbnScreensLed",
                                       "hbnScreensHeaded",
