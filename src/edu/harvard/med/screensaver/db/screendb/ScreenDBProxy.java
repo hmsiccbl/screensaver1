@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.db.screendb;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -200,6 +201,10 @@ public class ScreenDBProxy
         if (classification == null) {
           classification = ScreeningRoomUserClassification.UNASSIGNED;
         }
+        String eCommonsId = resultSet.getString("ecommons_id");
+        if (eCommonsId != null) {
+          eCommonsId = eCommonsId.toLowerCase();
+        }
         ScreeningRoomUser user = new ScreeningRoomUser(
           resultSet.getDate("date_created"),
           resultSet.getString("first"),
@@ -208,12 +213,11 @@ public class ScreenDBProxy
           resultSet.getString("phone"),
           resultSet.getString("lab_location"), // mailing address
           resultSet.getString("comments"),
-          resultSet.getString("ecommons_id"),
+          eCommonsId,
           resultSet.getString("harvard_id"),
           classification,
           resultSet.getBoolean("non_user")
         );
-        
         // TODO: Currently, a user is an RNAi screener OR a Compound screener, but not both.  If not explicitly an RNAi screener, we assume a Compound screener.  Is this a valid assumption? [ant]
         if (resultSet.getBoolean("rani_user" /*[sic]*/)) {
           user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
@@ -221,6 +225,7 @@ public class ScreenDBProxy
         else {
           user.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
         }
+        
         
         // TODO: include the lab affiliation
         Integer id = resultSet.getInt("id");
@@ -278,9 +283,34 @@ public class ScreenDBProxy
           resultSet.getString("comments"),
           resultSet.getString("study_id"),
           resultSet.getString("protocol_id"));
+        loadScreenCollaborators(screen);
         Integer id = resultSet.getInt("id");
         _screenMap.put(id, screen);
         // TODO: get all the one-to-many fields
+      }
+    }
+    catch (SQLException e) {
+      log.error("sql error: " + e.getMessage());
+      e.printStackTrace();
+    }
+  }
+
+  private void loadScreenCollaborators(Screen screen)
+  {
+    try {
+      PreparedStatement statement = 
+        _connection.prepareStatement("SELECT user_id FROM collaborators WHERE screen_id = ?");
+      statement.setInt(1, screen.getScreenNumber());
+      ResultSet resultSet = statement.executeQuery();
+      while (resultSet.next()) {
+        Integer userId = resultSet.getInt("user_id");
+        ScreeningRoomUser collaborator = _screeningRoomUserMap.get(userId);
+        if (collaborator == null) {
+          log.error("no user " + userId);
+        }
+        else {
+          screen.addCollaborator(collaborator);
+        }
       }
     }
     catch (SQLException e) {

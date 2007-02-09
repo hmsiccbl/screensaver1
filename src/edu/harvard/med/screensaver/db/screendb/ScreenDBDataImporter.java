@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -83,16 +84,21 @@ public class ScreenDBDataImporter
    */
   public void loadScreenDBData()
   {
-    ScreenDBProxy screenDBProxy = new ScreenDBProxy();
-    for (Library library : screenDBProxy.getLibraries()) {
-      _dao.persistEntity(library);
-    }
-    for (ScreeningRoomUser screeningRoomUser : screenDBProxy.getScreeningRoomUsers()) {
-      // TODO: add ScreensaverUserRoles to this user
-      _dao.persistEntity(screeningRoomUser);
-    }
-    for (Screen screen : screenDBProxy.getScreens()) {
-      _dao.persistEntity(screen);
-    }
+    final ScreenDBProxy screenDBProxy = new ScreenDBProxy();
+    _dao.doInTransaction(new DAOTransaction() 
+    {
+      public void runTransaction() 
+      {
+        for (Library library : screenDBProxy.getLibraries()) {
+          _dao.persistEntity(library);
+        }
+        for (ScreeningRoomUser screeningRoomUser : screenDBProxy.getScreeningRoomUsers()) {
+          _dao.persistEntity(screeningRoomUser);
+        }
+        for (Screen screen : screenDBProxy.getScreens()) {
+          _dao.persistEntity(screen);
+        }
+      }
+    });
   }
 }
