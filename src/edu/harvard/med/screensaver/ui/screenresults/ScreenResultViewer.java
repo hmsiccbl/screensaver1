@@ -90,8 +90,8 @@ public class ScreenResultViewer extends AbstractBackingBean
         return typesDerivedFromText.toString();
       }
     },
-    new DataHeaderRowDefinition("activityIndicator", "Activity Indicator"),
-    new DataHeaderRowDefinition("activityIndicatorType", "Activity Indicator Type"),
+    new DataHeaderRowDefinition("activityIndicator", "Positive Indicator"),
+    new DataHeaderRowDefinition("activityIndicatorType", "Positive Indicator Type"),
     new DataHeaderRowDefinition("indicatorDirection", "Indicator Direction"),
     new DataHeaderRowDefinition("indicatorCutoff", "Indicator Cutoff"),
     new DataHeaderRowDefinition("followUpData", "Follow Up Data"),
