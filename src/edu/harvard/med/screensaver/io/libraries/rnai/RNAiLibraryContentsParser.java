@@ -235,13 +235,15 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
       return;
     }
     for (short i = 1; i <= hssfSheet.getLastRowNum(); i++) {
-      DataRowParser dataRowParser = new DataRowParser(
-        this,
-        columnHeaders,
-        hssfSheet.getRow(i),
-        i,
-        cellFactory);
-      dataRowParser.parseDataRow();
+      if (hssfSheet.getRow(i) != null) {
+        DataRowParser dataRowParser = new DataRowParser(
+          this,
+          columnHeaders,
+          hssfSheet.getRow(i),
+          i,
+          cellFactory);
+        dataRowParser.parseDataRow();
+      }
       if (i % 100 == 0) {
         log.info("parsed " + i + " for library " + _library.getLibraryName());
       }
