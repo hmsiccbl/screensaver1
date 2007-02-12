@@ -242,6 +242,9 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
         i,
         cellFactory);
       dataRowParser.parseDataRow();
+      if (i % 100 == 0) {
+        log.info("parsed " + i + " for library " + _library.getLibraryName());
+      }
     }
   }
 
