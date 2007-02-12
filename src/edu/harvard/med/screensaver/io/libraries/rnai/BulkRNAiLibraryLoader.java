@@ -37,7 +37,7 @@ public class BulkRNAiLibraryLoader
 
   private static final Logger log = Logger.getLogger(BulkRNAiLibraryLoader.class);
   private static final File _rnaiLibraryDir = new File("/usr/local/rnai-libraries");
-  private static final Pattern _pattern = Pattern.compile("^Dharmacon_([^_]*?)(_\\w+)\\.xls$");
+  private static final Pattern _pattern = Pattern.compile("^(Dharmacon_)?([^_]*?)(_\\w+)?\\.xls$");
   
   public static void main(String[] args)
   {
@@ -105,7 +105,7 @@ public class BulkRNAiLibraryLoader
     if (! matcher.matches()) {
       throw new RuntimeException("RNAi file didnt match pattern: " + filename);
     }
-    String libraryName = matcher.group(1);
+    String libraryName = matcher.group(2);
     Library library = _dao.findEntityByProperty(
       Library.class,
       "libraryName",
