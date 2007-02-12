@@ -74,7 +74,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   // private instance data
   
   private List<E> _unsortedResults;
-  protected List<E> _currentSort;
+  private List<E> _currentSort;
   private String _currentSortColumnName;
   private SortDirection  _currentSortDirection = SortDirection.ASCENDING;
   private Map<String,List<E>> _forwardSorts = new HashMap<String,List<E>>();
@@ -122,6 +122,12 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   protected void setDataModelUpdateNeeded(boolean isDataModelUpdateNeeded)
   {
     _isDataModelUpdateNeeded = isDataModelUpdateNeeded;
+  }
+  
+  protected List<E> getCurrentSort()
+  {
+    doSort();
+    return _currentSort;
   }
 
   /**
@@ -692,8 +698,9 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
 
   /**
    * Internal method for performing and caching sorted results, by both sort
-   * column and direction. {@link #setDataModelUpdateNeeded()} must have been
-   * called previously for this method do perform its work.
+   * column and direction. If _dataModel has already been initialized,
+   * {@link #setDataModelUpdateNeeded()} must have been called previously for
+   * this method do perform its work.
    * 
    * @param sortColumnName
    * @param sortDirection

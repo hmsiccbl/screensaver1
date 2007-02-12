@@ -235,7 +235,7 @@ public class WellSearchResults extends SearchResults<Well>
 
   public void writeSDFileSearchResults(PrintWriter searchResultsPrintWriter)
   {
-    for (Well well : _currentSort) {
+    for (Well well : getCurrentSort()) {
       well.writeToSDFile(searchResultsPrintWriter);
     }
   }
@@ -249,7 +249,7 @@ public class WellSearchResults extends SearchResults<Well>
     searchResultsWorkbook.setSheetName(1, "Compounds");
     int rnaiSheetRow = 1;
     int compoundSheetRow = 1;
-    for (Well well : _currentSort) {
+    for (Well well : getCurrentSort()) {
       if (writeWellToRNAiSheet(well, rnaiSheet, rnaiSheetRow)) {
         rnaiSheetRow ++;
       }
