@@ -21,12 +21,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.springframework.dao.DataAccessException;
-
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
@@ -57,6 +51,12 @@ import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.dao.DataAccessException;
 
 /**
  * 
@@ -401,37 +401,53 @@ public class LibrariesController extends AbstractUIController
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Gene gene = (Gene) _dao.reloadEntity(geneIn);
-        _dao.need(gene,
-          "genbankAccessionNumbers",
-          "hbnSilencingReagents",
+        if (geneIn != null) {
+          Gene gene = (Gene) _dao.reloadEntity(geneIn);
+          _dao.need(gene,
+                    "genbankAccessionNumbers",
+                    "hbnSilencingReagents",
           "hbnSilencingReagents.hbnWells");
-        _geneViewer.setGene(gene);
-        _geneViewer.setGeneNameValueTable(new GeneNameValueTable(LibrariesController.this, gene));
+          _geneViewer.setGene(gene);
+          _geneViewer.setGeneNameValueTable(new GeneNameValueTable(LibrariesController.this, gene));
+        }
+        else {
+          _geneViewer.setGene(null);
+          _geneViewer.setGeneNameValueTable(null);
+        }
       }
     });
       
     _geneViewer.setWellSearchResults(wellSearchResults);
+
     return "viewGene";
   }
 
   @UIControllerMethod
   public String viewCompound(final Compound compoundIn,
-                             WellSearchResults wellSearchResults)
+                             final WellSearchResults wellSearchResults)
   {
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Compound compound = (Compound) _dao.reloadEntity(compoundIn);
-        _dao.need(compound,
-                  "compoundNames",
-                  "pubchemCids",
-                  "casNumbers",
-                  "nscNumbers",
-                  "hbnWells");
-        _compoundViewer.setCompound(compound);
-        _compoundViewer.setCompoundNameValueTable(
-          new CompoundNameValueTable(LibrariesController.this, compound));
+        if (compoundIn != null) {
+          Compound compound = (Compound) _dao.reloadEntity(compoundIn);
+          _dao.need(compound,
+                    "compoundNames",
+                    "pubchemCids",
+                    "casNumbers",
+                    "nscNumbers",
+          "hbnWells");
+          _compoundViewer.setCompound(compound);
+          Well parentWellOfInterest = wellSearchResults.getCurrentRowDataObject();
+          _compoundViewer.setParentWellOfInterest(parentWellOfInterest);
+          _compoundViewer.setCompoundNameValueTable(
+            new CompoundNameValueTable(LibrariesController.this, compound));
+        }
+        else {
+          _compoundViewer.setParentWellOfInterest(wellSearchResults.getCurrentRowDataObject());
+          _compoundViewer.setCompound(null);
+          _compoundViewer.setCompoundNameValueTable(null);
+        }
       }
     });
 

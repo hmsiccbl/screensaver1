@@ -9,14 +9,22 @@
     <%@ include file="../searchResultsNavPanel.jspf" %>
   </t:aliasBean>
 
-  <t:aliasBean alias="#{nameValueTable}" value="#{compoundViewer.compoundNameValueTable}">
-    <%@ include file="../nameValueTable.jspf" %>
-  </t:aliasBean>
-  
-  <t:aliasBean alias="#{wells}" value="#{compoundViewer.compound.wells}">
-    <%@ include file="wellTable.jspf" %>
-  </t:aliasBean>
-    
+	<t:panelGroup rendered="#{! empty compoundViewer.compound}">
+		<t:aliasBean alias="#{nameValueTable}"
+			value="#{compoundViewer.compoundNameValueTable}">
+			<%@ include file="../nameValueTable.jspf"%>
+		</t:aliasBean>
+
+		<t:aliasBean alias="#{wells}" value="#{compoundViewer.compound.wells}">
+			<%@ include file="wellTable.jspf"%>
+		</t:aliasBean>
+	</t:panelGroup>
+	
+	<t:panelGroup rendered="#{empty compoundViewer.compound}">
+		<t:outputText
+			value="There are no compounds in well #{compoundViewer.parentWellOfInterest.wellKey}"
+			styleClass="label" />
+	</t:panelGroup>
 </f:subview>
 
 

@@ -9,13 +9,21 @@
     <%@ include file="../searchResultsNavPanel.jspf" %>
   </t:aliasBean>
 
-  <t:aliasBean alias="#{nameValueTable}" value="#{geneViewer.geneNameValueTable}">
-    <%@ include file="../nameValueTable.jspf" %>
-  </t:aliasBean>
+	<t:panelGroup rendered="#{! empty geneViewer.gene}">
+		<t:aliasBean alias="#{nameValueTable}" value="#{geneViewer.geneNameValueTable}">
+			<%@ include file="../nameValueTable.jspf" %>
+		</t:aliasBean>
 
-  <t:aliasBean alias="#{wells}" value="#{geneViewer.gene.wells}">
-    <%@ include file="wellTable.jspf" %>
-  </t:aliasBean>
+		<t:aliasBean alias="#{wells}" value="#{geneViewer.gene.wells}">
+			<%@ include file="wellTable.jspf" %>
+		</t:aliasBean>
+	</t:panelGroup>
+
+	<t:panelGroup rendered="#{empty geneViewer.gene}">
+		<t:outputText
+			value="There are no genes associated with this well"
+			styleClass="label" />
+	</t:panelGroup>
 
 </f:subview>
 

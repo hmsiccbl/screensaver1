@@ -224,13 +224,13 @@ public class WellSearchResults extends SearchResults<Well>
   @Override
   protected void setEntityToView(Well well)
   {
+    // TODO: we should really only call the view*() method for the mode we're in; otherwise we're doing extra db work
     _librariesController.viewWell(well, this);
-    if (well.getGene() != null) {
-      _librariesController.viewGene(well.getGene(), this);
-    }
-    if (well.getPrimaryCompound() != null) {
-      _librariesController.viewCompound(well.getPrimaryCompound(), this);
-    }
+    // we need to call these view methods even, if the gene/compound is null, so
+    // that the view can at least be updated to reflect the emptiness of the
+    // well
+    _librariesController.viewGene(well.getGene(), this);
+    _librariesController.viewCompound(well.getPrimaryCompound(), this);
   }
 
   public void writeSDFileSearchResults(PrintWriter searchResultsPrintWriter)

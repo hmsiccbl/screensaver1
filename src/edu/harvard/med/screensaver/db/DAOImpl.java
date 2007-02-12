@@ -123,6 +123,9 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   public void need(final AbstractEntity entity,
                    final String... relationships)
   {
+    if (entity == null) {
+      return;
+    }
     long start = 0;
     if (entityInflatorLog.isDebugEnabled()) {
       entityInflatorLog.debug("inflating " + entity + " for relationships: " + relationships);

@@ -266,6 +266,18 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   }
   
   /**
+   * Get the data object associated with the current row.
+   * @return the data object associated with the current row
+   */
+  public E getCurrentRowDataObject()
+  {
+    if (_resultsSize == 0) {
+      return null;
+    }
+    return getCurrentSort().get(getCurrentIndex());
+  }
+  
+  /**
    * Get the total size of the search results.
    * @return the total size of the search results
    */
