@@ -159,9 +159,7 @@ public class WellSearchResults extends SearchResults<Well>
         // TODO: commandValue is really a smiles, not a compoundId
         String smiles = (String) getRequestParameter("commandValue");
         Compound compound = null;
-        log.info("smiles is " + smiles);
         for (Compound compound2 : well.getCompounds()) {
-          log.info("compound2 is " + compound2);
           if (compound2.getSmiles().equals(smiles)) {
             compound = compound2;
             break;
