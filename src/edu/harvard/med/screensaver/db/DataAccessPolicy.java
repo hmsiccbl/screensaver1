@@ -213,9 +213,9 @@ public class DataAccessPolicy implements AbstractEntityVisitor
     // (OTL) approves pubilc visibility of screens (as of 2007-02-08)
     if (user instanceof ScreeningRoomUser) {
       ScreeningRoomUser screener = (ScreeningRoomUser) user;
-      return screener.getScreensLed().contains(screener) ||
-      screener.getScreensHeaded().contains(screener) ||
-      screener.getScreensCollaborated().contains(screener);
+      return screener.getScreensLed().contains(screen) ||
+      screener.getScreensHeaded().contains(screen) ||
+      screener.getScreensCollaborated().contains(screen);
     }
 //    if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE) && 
 //      user.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER)) {
