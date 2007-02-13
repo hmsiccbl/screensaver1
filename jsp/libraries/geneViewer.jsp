@@ -21,7 +21,7 @@
 
 	<t:panelGroup rendered="#{empty geneViewer.gene}">
 		<t:outputText
-			value="There are no genes associated with this well"
+			value="There are no genes in well #{compoundViewer.parentWellOfInterest.wellKey}"
 			styleClass="label" />
 	</t:panelGroup>
 

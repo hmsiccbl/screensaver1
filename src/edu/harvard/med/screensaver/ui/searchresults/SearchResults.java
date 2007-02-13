@@ -279,7 +279,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
     if (_resultsSize == 0) {
       return null;
     }
-    return getCurrentSort().get(getCurrentIndex());
+    return getCurrentSort().get(getCurrentIndex() - 1);
   }
   
   /**

@@ -418,6 +418,8 @@ public class LibrariesController extends AbstractUIController
     });
       
     _geneViewer.setWellSearchResults(wellSearchResults);
+    Well parentWellOfInterest = wellSearchResults.getCurrentRowDataObject();
+    _geneViewer.setParentWellOfInterest(parentWellOfInterest);
 
     return "viewGene";
   }
@@ -438,20 +440,20 @@ public class LibrariesController extends AbstractUIController
                     "nscNumbers",
           "hbnWells");
           _compoundViewer.setCompound(compound);
-          Well parentWellOfInterest = wellSearchResults.getCurrentRowDataObject();
-          _compoundViewer.setParentWellOfInterest(parentWellOfInterest);
           _compoundViewer.setCompoundNameValueTable(
             new CompoundNameValueTable(LibrariesController.this, compound));
         }
         else {
-          _compoundViewer.setParentWellOfInterest(wellSearchResults.getCurrentRowDataObject());
           _compoundViewer.setCompound(null);
           _compoundViewer.setCompoundNameValueTable(null);
         }
       }
     });
-
+    
     _compoundViewer.setWellSearchResults(wellSearchResults);
+    Well parentWellOfInterest = wellSearchResults.getCurrentRowDataObject();
+    _compoundViewer.setParentWellOfInterest(parentWellOfInterest);
+    
     return "viewCompound";
   }
 
