@@ -66,7 +66,12 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
     private static final long serialVersionUID = 1L;
     public String get(Object key)
     {
-      return ((String) key).replace("\\", "\\\\");
+      if (key instanceof String) {
+        return ((String) key).replace("\\", "\\\\");
+      }
+      else {
+        return key.toString();
+      }
     }
   };
   
