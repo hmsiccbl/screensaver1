@@ -84,6 +84,7 @@
   <property name="loginmodule.config.filename" value="login.config"/>
   <property name="deployed.loginmodule.config.file" location="${appserver.dir}/conf/${loginmodule.config.filename}"/>
   <property name="dev.loginmodule.config.file" location="web/tomcat/conf/${loginmodule.config.filename}"/>
+  <property name="svnversion.cmd" value="svnversion"/>
   
   <!-- file sets -->
 
@@ -305,7 +306,8 @@
 
   	<antcall target="copy.downloads.dir"/>
     
-    <exec executable="/usr/local/bin/svnversion" output="${exploded.war.dir}/WEB-INF/classes/build-number.txt">
+    <exec executable="${svnversion.cmd}" 
+          output="${exploded.war.dir}/WEB-INF/classes/build-number.txt">
       <arg value="-n" />
       <arg value="${basedir}" />
     </exec>
