@@ -41,7 +41,7 @@ public class MockDaoForScreenResultParserTest extends NoOpDAO
                   ScreenType.OTHER,
                   LibraryType.OTHER,
                   1,
-                  9999);
+                  Integer.MAX_VALUE);
   }
 
   public Well findWell(WellKey wellKey)

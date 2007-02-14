@@ -385,6 +385,17 @@ public class Library extends AbstractEntity
   }
 
   /**
+   * Get whether this library contains the specified plate.
+   * @param plateNumber
+   * @return true iff this library contains the specified plate
+   */
+  @DerivedEntityProperty
+  public boolean containsPlate(Integer plateNumber)
+  {
+    return plateNumber != null && plateNumber >= getStartPlate() && plateNumber <= getEndPlate();
+  }
+
+  /**
    * Get the alias.
    *
    * @return the alias

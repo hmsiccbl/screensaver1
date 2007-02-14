@@ -381,7 +381,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private Factory _dataCellParserFactory;
   private Map<Integer,Short> _dataHeaderIndex2DataHeaderColumn;
   private Set<Library> _preloadedLibraries;
-  private Map<Integer,Library> _plate2Library;
+  /**
+   * The library that was associated with the plate that was last accessed.
+   * @motivation optimization for findLibraryWithPlate(); reduce db I/O
+   */
+  private Library _lastLibrary;
 
   
   // public methods and constructors
@@ -463,7 +467,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     _screenResult = null;
     _errors = new ParseErrorManager();
     _preloadedLibraries = new HashSet<Library>();
-    _plate2Library = new HashMap<Integer,Library>();
+    _lastLibrary = null;
     _assayReadoutTypeParser = new CellVocabularyParser<AssayReadoutType>(assayReadoutTypeMap, _errors);
     _dataTableColumnLabel2RvtMap = new TreeMap<String,ResultValueType>();
     _columnsDerivedFromParser = new ColumnLabelsParser(_dataTableColumnLabel2RvtMap, _errors);
@@ -921,13 +925,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    */
   private Library findLibraryWithPlate(Integer plateNumber)
   {
-    if (!_plate2Library.containsKey(plateNumber)) {
-      Library library = _dao.findLibraryWithPlate(plateNumber); 
-      for (int p = library.getStartPlate(); p <= library.getEndPlate(); ++p) {
-        _plate2Library.put(p, library);
-      }
+    if (_lastLibrary == null ||
+      !_lastLibrary.containsPlate(plateNumber)) {
+      _lastLibrary = _dao.findLibraryWithPlate(plateNumber); 
     }
-    return _plate2Library.get(plateNumber);
+    return _lastLibrary;
   }
 
   /**
