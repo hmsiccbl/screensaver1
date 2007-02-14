@@ -1,0 +1,19 @@
+# screensaver.properties.orchestra
+# contains properties used at both build-time and run-time
+
+
+### build-time properties
+
+appserver.dir=/www/screensaver1.med.harvard.edu/tomcat/
+deploy.dir==/www/screensaver1.med.harvard.edu/docroot/screensaver/
+log4j.properties.file=resources/log4j.properties.orchestra.prod
+
+# uncomment/comment the following line to copy/not copy downloads:
+copy.downloads.dir=true
+
+
+### run-time properties
+
+# Open Babel executable `babel` - needed for compound loading
+# get Open Babel here: http://openbabel.sourceforge.net/wiki/Main_Page
+babel.executable.path=/home/js163/bin/openbabel-2.0.2/bin/babel

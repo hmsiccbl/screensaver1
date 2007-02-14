@@ -1,10 +1,14 @@
 # screensaver.properties.ant4
-# contains properties used at both build-time and run-time
+# contains properties used at both build-time and run-time 
+# for running the Screensaver1 web application on 'androsta' 
+# (ant4's development host)
 
 
 ### build-time properties
 
-log4j.properties.file=resources/log4j.debug.properties
+debug=true
+appserver.dir=/usr/local/tomcat
+log4j.properties.file=resources/log4j.properties.web.ant4
 
 # uncomment/comment the following line to copy/not copy downloads:
 #copy.downloads.dir=true
