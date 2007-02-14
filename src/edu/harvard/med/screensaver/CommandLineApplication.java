@@ -51,18 +51,17 @@ public class CommandLineApplication
 {
   private static final Logger log = Logger.getLogger(CommandLineApplication.class);
   
-  private static final String SPRING_CONFIG = "spring-context.xml";
-  private static final String SPRING_CONFIG_SANS_DB = "spring-context-sans-db.xml";
+  private static final String DEFAULT_SPRING_CONFIG = "spring-context.xml";
   
   
   // instanc data
   
+  private String _springConfigurationResource = DEFAULT_SPRING_CONFIG;
   private ApplicationContext _appCtx;
   private Options _options;
   private CommandLine _cmdLine;
   private String[] _cmdLineArgs;
   private Map<String,Object> _option2DefaultValue = new HashMap<String,Object>();
-  private boolean _isDatabaseRequired;
   
   
   // public methods
@@ -93,36 +92,22 @@ public class CommandLineApplication
   public ApplicationContext getSpringApplicationContext()
   {
     if (_appCtx == null) {
-      if (isDatabaseRequired()) {
-        _appCtx = new ClassPathXmlApplicationContext(SPRING_CONFIG);
-      }
-      else {
-        _appCtx = new ClassPathXmlApplicationContext(SPRING_CONFIG_SANS_DB);
-      }
+      
+      _appCtx = new ClassPathXmlApplicationContext(getSpringConfigurationResource());
     }
     return _appCtx;
   }
   
-  public boolean isDatabaseRequired()
-  {
-    return _isDatabaseRequired;
-  }
-
   /**
-   * Configures whether the application will be configured with database access.
-   * Affects which top-level Spring context configuration file is used to
-   * initialize the application, "spring-context.xml" or
-   * "spring-context-sans-db.xml".
+   * Override this method to specify a different spring configuration resource
+   * file.
    * 
-   * @param isDatabaseRequired
+   * @return the name of the spring configuration resource file (resource name
+   *         relative to the classpath root).
    */
-  public void setDatabaseRequired(boolean isDatabaseRequired)
+  protected String getSpringConfigurationResource()
   {
-    if (_appCtx != null) {
-      throw new IllegalStateException("setDatabaseRequired() must be called before " +
-      "first call to getSpringBean() or getSpringApplicationContext()");
-    }
-    _isDatabaseRequired = isDatabaseRequired;
+    return _springConfigurationResource;
   }
 
   public void addCommandLineOption(Option option)
@@ -295,6 +280,15 @@ public class CommandLineApplication
                          withLongOpt("dbname").
                          withDescription("database name").
                          create("D"));
+  }
+
+
+  public void setSpringConfigurationResource(String springConfigurationResource)
+  {
+    if (_appCtx != null) {
+      throw new IllegalStateException("spring application context has already been instantiated; it is too late to set spring configuration resource");
+    }
+    _springConfigurationResource = springConfigurationResource;
   }
   
 }

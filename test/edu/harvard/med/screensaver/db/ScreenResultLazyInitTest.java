@@ -21,7 +21,7 @@ import org.hibernate.engine.EntityKey;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
+import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -60,7 +60,7 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Screen screen = ScreenResultParser.makeDummyScreen(107);
+        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(107);
         ScreenResult screenResult = new ScreenResult(screen, new Date());
         new ResultValueType(screenResult, "Luminescence");
         new ResultValueType(screenResult, "FI");
@@ -89,7 +89,7 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Screen screen = ScreenResultParser.makeDummyScreen(107);
+        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(107);
         ScreenResult screenResult = new ScreenResult(screen, new Date());
         ResultValueType rvt = new ResultValueType(screenResult, "Luminescence");
         Library library = new Library(

@@ -50,7 +50,7 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         File workbookFile = new File(TEST_INPUT_FILE_DIR, ScreenResultParserTest.SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
-        Screen screen = ScreenResultParser.makeDummyScreen(115);
+        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(115);
         Library library = new Library(
           "library 1",
           "lib1",

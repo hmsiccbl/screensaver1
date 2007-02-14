@@ -16,6 +16,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -140,7 +141,7 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
         dao.persistEntity(library);
         dao.flush();
 
-        Screen screen115 = ScreenResultParser.makeDummyScreen(115);
+        Screen screen115 = MockDaoForScreenResultImporter.makeDummyScreen(115);
         screenResultParser.parse(screen115, new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
                                                      ScreenResultParserTest.SCREEN_RESULT_115_TEST_WORKBOOK_FILE));
 
@@ -152,7 +153,7 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
         screen115.setLeadScreener(users[0]);
         screen115.addCollaborator(users[1]);
         
-        Screen screen116 = ScreenResultParser.makeDummyScreen(116);
+        Screen screen116 = MockDaoForScreenResultImporter.makeDummyScreen(116);
         screenResultParser.parse(screen116, new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
                                                      ScreenResultParserTest.SCREEN_RESULT_116_TEST_WORKBOOK_FILE));
         screen116.getScreenResult().setShareable(true);

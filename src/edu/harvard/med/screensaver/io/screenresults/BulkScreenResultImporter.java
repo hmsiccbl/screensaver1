@@ -29,7 +29,6 @@ import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
-
 import org.apache.log4j.Logger;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 
@@ -57,12 +56,12 @@ public class BulkScreenResultImporter
   private static final Pattern _screenResultFilenamePattern = Pattern.compile("^(\\d+)_\\w+\\.xls$");
   protected static final int MAX_ERRORS_TO_LOG = 4;
   
-  private static final int SHORT_OPTION = ScreenResultParser.SHORT_OPTION;
-  private static final int LONG_OPTION = ScreenResultParser.LONG_OPTION;
+  private static final int SHORT_OPTION = ScreenResultImporter.SHORT_OPTION;
+  private static final int LONG_OPTION = ScreenResultImporter.LONG_OPTION;
   private static final String[] INPUT_DIRECTORY_OPTION = new String[] { "d", "input-directory" };
   private static final String[] FROM_FILE_OPTION = new String[] { "f", "from-file" };
   private static final String[] TO_FILE_OPTION = new String[] { "t", "to-file" };
-  private static final String[] IMPORT_OPTION = ScreenResultParser.IMPORT_OPTION;
+  private static final String[] IMPORT_OPTION = ScreenResultImporter.IMPORT_OPTION;
   
   
   @SuppressWarnings("static-access")
@@ -93,7 +92,6 @@ public class BulkScreenResultImporter
                              .create(IMPORT_OPTION[SHORT_OPTION]));
     
     try {
-      app.setDatabaseRequired(true); // database is required even if importFlag is not set
       if (!app.processOptions(/* acceptDatabaseOptions= */true, 
                               /* showHelpOnError= */true)) {
         System.exit(1);

@@ -183,7 +183,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testDetectEmptyRow() throws Exception
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, BLANK_ROWS_TEST_WORKBOOK_FILE);
-    mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(115), workbookFile);
+    mockScreenResultParser.parse(MockDaoForScreenResultImporter.makeDummyScreen(115), workbookFile);
     assertFalse("screen result had no errors", mockScreenResultParser.getHasErrors());
     assertEquals("well count", 4, mockScreenResultParser.getParsedScreenResult().getExperimentalWellCount());
   }
@@ -226,7 +226,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testSaveScreenResultErrors() throws IOException
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
-    mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(115), workbookFile);
+    mockScreenResultParser.parse(MockDaoForScreenResultImporter.makeDummyScreen(115), workbookFile);
     String extension = "errors.xls";
     Map<Workbook,File> workbook2File =
       mockScreenResultParser.outputErrorsInAnnotatedWorkbooks(new File(System.getProperty("java.io.tmpdir")),
@@ -269,7 +269,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testRecycledCellUsage() 
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
-    mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(115), workbookFile);
+    mockScreenResultParser.parse(MockDaoForScreenResultImporter.makeDummyScreen(115), workbookFile);
     Set<Cell> cellsWithErrors = new HashSet<Cell>();
     List<ParseError> errors = mockScreenResultParser.getErrors();
     for (ParseError error : errors) {
@@ -282,7 +282,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testParserReuse() throws Exception
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
-    Screen screen = ScreenResultParser.makeDummyScreen(115);
+    Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(115);
     ScreenResult result1 = mockScreenResultParser.parse(screen, workbookFile);
     List<ParseError> errors1 = mockScreenResultParser.getErrors();
     assertNotNull("1st parse returns a result", result1);
@@ -310,7 +310,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testScreenResultDateCreated() throws Exception
   {
 
-    Screen screen = ScreenResultParser.makeDummyScreen(115);
+    Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(115);
     try {
       new NonCherryPickVisit(screen,
                              screen.getLeadScreener(),
@@ -344,7 +344,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testParseScreenResult() throws Exception
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
-    ScreenResult screenResult = mockScreenResultParser.parse(ScreenResultParser.makeDummyScreen(115), 
+    ScreenResult screenResult = mockScreenResultParser.parse(MockDaoForScreenResultImporter.makeDummyScreen(115), 
                                                              workbookFile);
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
 
@@ -525,7 +525,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   
   public void testIllegalScreenNumber()
   {
-    Screen screen = ScreenResultParser.makeDummyScreen(999);
+    Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(999);
     File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
     mockScreenResultParser.parse(screen,
                                  workbookFile);
@@ -535,7 +535,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     
   public void testMultiCharColumnLabels()
   {
-    Screen screen = ScreenResultParser.makeDummyScreen(115);
+    Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(115);
     File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE);
     ScreenResult result = mockScreenResultParser.parse(screen,workbookFile);
     if (mockScreenResultParser.getHasErrors()) {

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,9 +30,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.CellValueParser;
 import edu.harvard.med.screensaver.io.workbook.CellVocabularyParser;
@@ -54,15 +51,9 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Visit;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.util.Pair;
 
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -109,16 +100,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   // static data members
   
-  public static final int SHORT_OPTION = 0;
-  public static final int LONG_OPTION = 1;
-
-  public static final String[] INPUT_FILE_OPTION = { "f", "input-file" };
-  public static final String[] SCREEN_OPTION = { "s", "screen" };
-  public static final String[] IMPORT_OPTION = { "i", "import" };
-  public static final String[] WELLS_OPTION = { "w", "wells" };
-
-  private static final String ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION = "errors.xls";
-
   private static final Logger log = Logger.getLogger(ScreenResultParser.class);
 
   private static final String NO_SCREEN_ID_FOUND_ERROR = "Screen ID not found";
@@ -189,172 +170,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   // static methods
 
-  @SuppressWarnings("static-access")
-  public static void main(String[] args) throws FileNotFoundException
-  {
-    CommandLineApplication app = new CommandLineApplication(args);
-    app.addCommandLineOption(OptionBuilder.hasArg()
-                                          .withArgName("#")
-                                          .isRequired()
-                                          .withDescription("the screen number of the screen for which the screen result is being parsed")
-                                          .withLongOpt(SCREEN_OPTION[LONG_OPTION])
-                                          .create(SCREEN_OPTION[SHORT_OPTION]));
-    app.addCommandLineOption(OptionBuilder.hasArg()
-                                          .withArgName("file")
-                                          .isRequired()
-                                          .withDescription("the file location of the Excel workbook file holding the Screen Result metadata")
-                                          .withLongOpt(INPUT_FILE_OPTION[LONG_OPTION])
-                                          .create(INPUT_FILE_OPTION[SHORT_OPTION]));
-    app.addCommandLineOption(OptionBuilder.hasArg()
-                                          .withArgName("#")
-                                          .isRequired(false)
-                                          .withDescription("the number of wells to print out")
-                                          .withLongOpt(WELLS_OPTION[LONG_OPTION])
-                                          .create(WELLS_OPTION[SHORT_OPTION]));
-    app.addCommandLineOption(OptionBuilder.withDescription("Import screen result into database if parsing is successful.  "
-                                                           + "(By default, the parser only validates the input and then exits.)")
-                                          .withLongOpt(IMPORT_OPTION[LONG_OPTION])
-                                          .create(IMPORT_OPTION[SHORT_OPTION]));
-    try {
-      if (!app.processOptions(/* acceptDatabaseOptions= */true, 
-                              /* showHelpOnError= */true)) {
-        return;
-      }
-      
-      app.setDatabaseRequired(app.isCommandLineFlagSet(IMPORT_OPTION[SHORT_OPTION]));
-      
-      final File inputFile = app.getCommandLineOptionValue(INPUT_FILE_OPTION[SHORT_OPTION],
-                                                           File.class);
-      cleanOutputDirectory(inputFile.getAbsoluteFile().getParentFile());
-
-      Screen screen = null;
-      ScreenResultParser screenResultParser = null;
-      if (app.isCommandLineFlagSet(IMPORT_OPTION[SHORT_OPTION])) {
-        // database-dependent screenResultParser
-        screen = findScreenOrExit(app);
-        screenResultParser = (ScreenResultParser) app.getSpringBean("screenResultParser");
-      }
-      else {
-        // database-independent screenResultParser
-        int screenNumber = Integer.parseInt(app.getCommandLineOptionValue(SCREEN_OPTION[SHORT_OPTION]));
-        screen = makeDummyScreen(screenNumber);
-        screenResultParser = (ScreenResultParser) app.getSpringBean("mockScreenResultParser");
-      }
-
-      final Integer wellsToPrint = app.getCommandLineOptionValue(WELLS_OPTION[SHORT_OPTION],
-                                                                 Integer.class);
-      final Screen finalScreen = screen;
-      final ScreenResultParser finalScreenResultParser = screenResultParser;
-      final InputStream inputFileStream = new FileInputStream(inputFile);
-      screenResultParser._dao.doInTransaction(new DAOTransaction() {
-        public void runTransaction()
-        {
-          finalScreenResultParser._dao.reattachEntity(finalScreen);
-          ScreenResult screenResult = finalScreenResultParser.parse(finalScreen,
-                                                                    inputFile,
-                                                                    inputFileStream);
-          if (wellsToPrint != null) {
-            new ScreenResultPrinter(screenResult).print(wellsToPrint);
-          }
-          else {
-            new ScreenResultPrinter(screenResult).print();
-          }
-
-        }
-      });
-      screenResultParser.outputErrorsInAnnotatedWorkbooks(null,
-                                                          ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
-      if (screenResultParser.getErrors()
-                            .size() > 0) {
-        System.err.println("Errors encountered during parse:");
-        for (ParseError error : screenResultParser.getErrors()) {
-          System.err.println(error.toString());
-        }
-      }
-      else {
-        screenResultParser._dao.persistEntity(screen);
-        System.err.println("Success!");
-      }
-    }
-    catch (IOException e) {
-      String errorMsg = "I/O error: " + e.getMessage();
-      log.error(errorMsg);
-      System.err.println(errorMsg);
-    }
-    catch (ParseException e) {
-      System.err.println("error parsing command line options: "
-                         + e.getMessage());
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      System.err.println("application error: " + e.getMessage());
-    }
-  }
-
-  public static Screen makeDummyScreen(int screenNumber)
-  {
-    ScreeningRoomUser labHead = makeDummyUser(screenNumber, "Joe", "Screener");
-    Screen screen = new Screen(labHead,
-                               labHead,
-                               screenNumber,
-                               new Date(),
-                               ScreenType.SMALL_MOLECULE,
-                               "Dummy screen");
-    return screen;
-  }
-
-  public static ScreeningRoomUser makeDummyUser(int screenNumber, String first, String last)
-  {
-    return new ScreeningRoomUser(new Date(),
-                                 first,
-                                 last,
-                                 first.toLowerCase() + "_" + last.toLowerCase() + "_" + screenNumber + "@hms.harvard.edu",
-                                 "",
-                                 "",
-                                 "",
-                                 "",
-                                 "",
-                                 ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
-                                 true);
-  }
-
-  private static Screen findScreenOrExit(CommandLineApplication app) throws ParseException
-  {
-    int screenNumber = Integer.parseInt(app.getCommandLineOptionValue(SCREEN_OPTION[SHORT_OPTION]));
-    DAO dao = (DAO) app.getSpringBean("dao");
-    Screen screen = dao.findEntityByProperty(Screen.class, 
-                                              "hbnScreenNumber",
-                                              screenNumber);
-    if (screen == null) {
-      System.err.println("screen " + screenNumber + " does not exist");
-      System.exit(1);
-    }
-    if (screen.getScreenResult() != null) {
-      System.err.println("screen " + screenNumber + " already has a screen result");
-      System.exit(1);
-    }
-    return screen;
-  }
-
-  private static void cleanOutputDirectory(File parentFile)
-  {
-    if (!parentFile.isDirectory()) {
-      log.warn("cannot clean the directory '" + parentFile + "' since it is not a directory");
-      return;
-    }
-    log.info("cleaning directory " + parentFile);
-    Iterator iterator = FileUtils.iterateFiles(parentFile,
-                                               new String[] {ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION, ".out"},
-                                               false);
-    while (iterator.hasNext()) {
-      File fileToDelete = (File) iterator.next();
-      log.info("deleting previously generated outputfile '" + fileToDelete + "'");
-      fileToDelete.delete();
-    }
-  }
-  
-  
-  // instance data members
 
   /**
    * The ScreenResult object to be populated with data parsed from the spreadsheet.

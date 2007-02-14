@@ -26,7 +26,7 @@ import org.hibernate.LazyInitializationException;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter;
-import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
+import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.libraries.Compound;
@@ -593,7 +593,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen1 = ScreenResultParser.makeDummyScreen(1); 
+        Screen screen1 = MockDaoForScreenResultImporter.makeDummyScreen(1); 
         new ScreenResult(screen1, new Date());
         dao.persistEntity(screen1);
       }
@@ -640,7 +640,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen = ScreenResultParser.makeDummyScreen(1); 
+        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1); 
         ScreenResult screenResult = new ScreenResult(screen, new Date());
         ResultValueType rvt = new ResultValueType(screenResult, "Raw Value");
         rvt.setActivityIndicator(true);
@@ -687,7 +687,7 @@ public class ComplexDAOTest extends AbstractSpringTest
   
   public void testFindSortedResultValueTableByRange()
   {
-    final Screen screen = ScreenResultParser.makeDummyScreen(1); 
+    final Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1); 
     ScreenResult screenResult = new ScreenResult(screen, new Date());
     ResultValueType rvt1 = new ResultValueType(screenResult, "Raw Value");
     ResultValueType rvt2 = new ResultValueType(screenResult, "Derived Value");
@@ -781,7 +781,7 @@ public class ComplexDAOTest extends AbstractSpringTest
   
   public void testFindResultValuesByPlate()
   {
-    final Screen screen = ScreenResultParser.makeDummyScreen(1); 
+    final Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1); 
     ScreenResult screenResult = new ScreenResult(screen, new Date());
     ResultValueType rvt = new ResultValueType(screenResult, "Raw Value");
     Library library = new Library(
@@ -814,7 +814,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen = ScreenResultParser.makeDummyScreen(1); 
+        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1); 
         ScreeningRoomUser labMember = new ScreeningRoomUser(new Date(),
                                                             "Lab",
                                                             "Member",
@@ -877,7 +877,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen = ScreenResultParser.makeDummyScreen(1); 
+        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1); 
         try {
           new Publication(screen, "1", "2007", "authro1", "Title1");
           new Publication(screen, "2", "2007", "author2", "Title2");

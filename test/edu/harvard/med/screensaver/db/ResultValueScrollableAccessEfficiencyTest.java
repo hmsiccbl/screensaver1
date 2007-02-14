@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter;
-import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
+import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -92,7 +92,7 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
     {
       public void runTransaction()
       {
-        final Screen screen = ScreenResultParser.makeDummyScreen(1); 
+        final Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1); 
         ScreenResult screenResult = new ScreenResult(screen, new Date());
         ResultValueType rvt = new ResultValueType(screenResult, "rvt");
         Library library = new Library(
