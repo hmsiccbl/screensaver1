@@ -41,7 +41,7 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
   
   private static final Logger log = Logger.getLogger(ScreensaverLoginModuleTest.class);
   
-  private static final String TEST_VALID_ECOMMONS_USER_LOGIN = "eCommonId";
+  private static final String TEST_VALID_ECOMMONS_USER_LOGIN = "ecom";
   private static final String TEST_VALID_SCREENSAVER_USER_LOGIN = "screensaverId";
   private static final String TEST_VALID_ECOMMONS_PASSWORD = "eCommonsPassword";
   private static final String TEST_VALID_SCREENSAVER_PASSWORD = "screensaverPassword";
