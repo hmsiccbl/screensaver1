@@ -28,7 +28,7 @@ insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_ro
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'screensAdmin';
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'screenResultsAdmin';
 
-insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password, ecommons_id) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Caroline', 'Shamu', 'caroline_shamu@hms.harvard.edu', 'cshamu', '2c762bfe28e265e516a570341cce61a761d6fe1e', null);
+insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password, ecommons_id) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Caroline', 'Shamu', 'caroline_shamu@hms.harvard.edu', 'cshamu', '2c762bfe28e265e516a570341cce61a761d6fe1e', 'ces6');
 insert into administrator_user (screensaver_user_id) values (currval('screensaver_user_id_seq'));
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'readEverythingAdmin';
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'billingAdmin';
@@ -44,7 +44,7 @@ insert into screensaver_user (screensaver_user_id, version, date_created, first_
 insert into administrator_user (screensaver_user_id) values (currval('screensaver_user_id_seq'));
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'readEverythingAdmin';
 
-insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password, ecommons_id) values (nextval('screensaver_user_id_seq'), 1, 'today', 'David', 'Fletcher', 'david_fletcher@hms.harvard.edu', 'dfletcher', '5a86c7155e31e6236ae7006e2afc78baa002f211', null);
+insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password, ecommons_id) values (nextval('screensaver_user_id_seq'), 1, 'today', 'David', 'Fletcher', 'david_fletcher@hms.harvard.edu', 'dfletcher', '5a86c7155e31e6236ae7006e2afc78baa002f211', 'df30');
 insert into administrator_user (screensaver_user_id) values (currval('screensaver_user_id_seq'));
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'readEverythingAdmin';
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'usersAdmin';
@@ -57,7 +57,7 @@ insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_ro
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'screensAdmin';
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'screenResultsAdmin';
 
-insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password, ecommons_id) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Kyungae', 'Lee', 'kyungae_lee@hms.harvard.edu', 'klee', '03e1c66f01302049d9c831d71e75ffe94a8a7b78', null);
+insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password, ecommons_id) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Kyungae', 'Lee', 'kyungae_lee@hms.harvard.edu', 'klee', '03e1c66f01302049d9c831d71e75ffe94a8a7b78', 'kl66');
 insert into administrator_user (screensaver_user_id) values (currval('screensaver_user_id_seq'));
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'readEverythingAdmin';
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'medicinalChemistUser';
@@ -70,19 +70,19 @@ insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_ro
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'screensAdmin';
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'usersAdmin';
 
-insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password, ecommons_id) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Melody', 'Tsui', 'Melody_Tsui@hms.harvard.edu', 'mtsui', '5a3414e8095a5a241b185ab7b5098f7cbd448768', null);
+insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password, ecommons_id) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Melody', 'Tsui', 'Melody_Tsui@hms.harvard.edu', 'mtsui', '5a3414e8095a5a241b185ab7b5098f7cbd448768', 'ymt3');
 insert into administrator_user (screensaver_user_id) values (currval('screensaver_user_id_seq'));
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'readEverythingAdmin';
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'usersAdmin';
 
-insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password, ecommons_id) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Su', 'Chiang', 'Su_Chiang@hms.harvard.edu', 'schiang', '92317c686edbd519de9a6db6abb9ea2acf230576', null);
+insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password, ecommons_id) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Su', 'Chiang', 'Su_Chiang@hms.harvard.edu', 'schiang', '92317c686edbd519de9a6db6abb9ea2acf230576', 'slc9');
 insert into administrator_user (screensaver_user_id) values (currval('screensaver_user_id_seq'));
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'readEverythingAdmin';
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'screensAdmin';
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'screenResultsAdmin';
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'usersAdmin';
 
-insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password, ecommons_id) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Sean', 'Johnston', 'sean_johnston@hms.harvard.edu', 'sjohnston', 'c06a65c1c72280dee1fad18017975e95c9da88b4', null);
+insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password, ecommons_id) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Sean', 'Johnston', 'sean_johnston@hms.harvard.edu', 'sjohnston', 'c06a65c1c72280dee1fad18017975e95c9da88b4', 'smj9');
 insert into administrator_user (screensaver_user_id) values (currval('screensaver_user_id_seq'));
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'readEverythingAdmin';
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'screensAdmin';
