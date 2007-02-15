@@ -12,16 +12,7 @@
 <f:subview id="menu">
   <t:panelGrid columns="1">
 
-    <%--
-      HACK: there remain some difficulties in determining / predicting the order of initialization
-      of the JSF managed-beads as enumerated in the faces-config.xml file. a current workaround is
-      to reference the managed-beans that need to get initialized first in a null context here.
-	--%>
-	<h:outputText value="#{mainController}" rendered="#{empty mainController && false}" />
-	<h:outputText value="#{librariesController}" rendered="#{empty librariesController && false}" />
-	<h:outputText value="#{screensController}" rendered="#{empty screensController && false}" />
-
-    <h:form id="titleForm">
+		<h:form id="titleForm">
 			<t:commandLink id="menuTitle" action="#{mainController.viewMain}"
 				value="#{menu.applicationName}" styleClass="menuItem title" />
 			<t:htmlTag value="br"/>

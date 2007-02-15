@@ -35,13 +35,20 @@
     <param-value>classpath*:spring-context.xml</param-value>
   </context-param>
 
-  <!-- Use a servlet listener to allow us to load the above Spring application context XML files -->
+  <!-- Servlet listener to enable loading the above Spring application context XML files. -->
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
 
+  <!-- Servlet listener to enable access to Spring {request,session}-scoped beans. -->
+  <listener>
+    <listener-class>
+      org.springframework.web.context.request.RequestContextListener
+    </listener-class>
+  </listener>
 
-  <!--  JSF/MyFaces configuration (by MyEclipse) -->
+
+  <!-- JSF/MyFaces configuration -->
 
   <servlet>
     <servlet-name>Faces Servlet</servlet-name>

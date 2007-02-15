@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
 <beans>
 
   <bean
@@ -7,8 +9,7 @@
     class="edu.harvard.med.screensaver.LogConfigurer">
     <constructor-arg
     value="classpath:log4j.properties"/>
-    <constructor-arg 
-      value="60000" />
+    <constructor-arg value="60000" />
     <constructor-arg><null/></constructor-arg>
   </bean>
   

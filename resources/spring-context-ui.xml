@@ -1,20 +1,249 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
-<beans>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
-  <bean 
-    id="messageSource"
-    class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
-    <!-- specify the properties (or xml) resource containing the localized messages, without a locale extension and without a file extension -->
-    <property name="basename" value="classpath:messages"/>
-  </bean>
+<beans>
 
   <bean
     id="messages"
     class="edu.harvard.med.screensaver.ui.util.Messages">
-    <property name="messageSource" ref="messageSource"/>
+    <property name="messageSource">
+      <bean
+        class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <!-- specify the properties (or xml) resource containing the localized messages, without a locale extension and without a file extension -->
+        <property
+          name="basename"
+          value="classpath:messages" />
+      </bean>
+    </property>
     <!--  TODO property name="locale" value=""/-->
-    
+  </bean>
+
+  <bean
+    id="uiBean"
+    abstract="true"
+    scope="session">
+    <description>
+      Abstract bean definitinon for user interface beans.
+    </description>
+    <property
+      name="messages"
+      ref="messages" />
+  </bean>
+
+
+  <!-- === top-level & misc backing beans === -->
+
+  <bean
+    id="exceptionReporter"
+    parent="uiBean"
+    class="edu.harvard.med.screensaver.ui.ExceptionReporter">
+    <description>
+      Backing bean for the reportException view, enabling exception
+      stack traces to be viewed in a custom manner.
+    </description>
+  </bean>
+
+  <bean
+    id="mainController"
+    parent="uiBean"
+    class="edu.harvard.med.screensaver.ui.control.MainController">
+    <property
+      name="exceptionReporter"
+      ref="exceptionReporter" />
+  </bean>
+
+  <bean
+    id="menu"
+    parent="uiBean"
+    class="edu.harvard.med.screensaver.ui.Menu">
+    <description>Backing bean for the menu panel.</description>
+  </bean>
+
+  <bean
+    id="schemaManager"
+    class="edu.harvard.med.screensaver.ui.SchemaManager">
+    <description>Schema Manager</description>
+    <property
+      name="schemaUtil"
+      ref="schemaUtil"/>
+    <property
+      name="screenDBDataImporter"
+      ref="screenDBDataImporter" />
+  </bean>
+
+
+  <!-- === libraries backing beans === -->
+
+  <bean
+    id="librariesController"
+    class="edu.harvard.med.screensaver.ui.control.LibrariesController">
+    <description>Libraries Controller Bean</description>
+    <property
+      name="dao"
+      ref="dao" />
+    <property
+      name="messages"
+      ref="messages" />
+    <property
+      name="wellFinder"
+      ref="wellFinder" />
+    <property
+      name="librariesBrowser"
+      ref="librariesBrowser" />
+    <property
+      name="libraryViewer"
+      ref="libraryViewer" />
+    <property
+      name="wellSearchResultsViewer"
+      ref="wellSearchResultsViewer" />
+    <property
+      name="wellViewer"
+      ref="wellViewer" />
+    <property
+      name="geneViewer"
+      ref="geneViewer" />
+    <property
+      name="compoundViewer"
+      ref="compoundViewer" />
+    <property
+      name="compoundLibraryContentsImporter"
+      ref="compoundLibraryContentsImporter" />
+    <property
+      name="compoundLibraryContentsParser"
+      ref="compoundLibraryContentsParser" />
+    <property
+      name="rnaiLibraryContentsImporter"
+      ref="rnaiLibraryContentsImporter" />
+    <property
+      name="rnaiLibraryContentsParser"
+      ref="rnaiLibraryContentsParser" />
+  </bean>
+
+  <bean
+    id="wellFinder"
+    class="edu.harvard.med.screensaver.ui.libraries.WellFinder">
+    <description>Well Finder</description>
+  </bean>
+
+  <bean
+    id="librariesBrowser"
+    class="edu.harvard.med.screensaver.ui.libraries.LibrariesBrowser">
+    <description>Libraries Browser</description>
+  </bean>
+
+  <bean
+    id="libraryViewer"
+    class="edu.harvard.med.screensaver.ui.libraries.LibraryViewer">
+    <description>Library Viewer</description>
+  </bean>
+
+  <bean
+    id="wellSearchResultsViewer"
+    class="edu.harvard.med.screensaver.ui.libraries.WellSearchResultsViewer">
+    <description>Well Search Results Viewer</description>
+  </bean>
+
+  <bean
+    id="wellViewer"
+    class="edu.harvard.med.screensaver.ui.libraries.WellViewer">
+    <description>Well Viewer</description>
+  </bean>
+
+  <bean
+    id="geneViewer"
+    class="edu.harvard.med.screensaver.ui.libraries.GeneViewer">
+    <description>Gene Viewer</description>
+  </bean>
+
+  <bean
+    id="compoundViewer"
+    class="edu.harvard.med.screensaver.ui.libraries.CompoundViewer">
+    <description>Compound Viewer</description>
+  </bean>
+
+  <bean
+    id="compoundLibraryContentsImporter"
+    class="edu.harvard.med.screensaver.ui.libraries.CompoundLibraryContentsImporter">
+    <description>Compound Library Contents Importer</description>
+
+  </bean>
+
+  <bean
+    id="rnaiLibraryContentsImporter"
+    class="edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporter">
+    <description>
+      RNAi Library Contents Importer backing bean
+    </description>
+  </bean>
+
+
+  <!-- === screens backing beans === -->
+
+  <bean
+    id="screensController"
+    class="edu.harvard.med.screensaver.ui.control.ScreensController">
+    <description>Screens Controller</description>
+    <property
+      name="dao"
+      ref="dao" />
+    <property
+      name="messages"
+      ref="messages" />
+    <property
+      name="librariesController"
+      ref="librariesController" />
+    <property
+      name="screensBrowser"
+      ref="screensBrowser" />
+    <property
+      name="screenViewer"
+      ref="screenViewer" />
+    <property
+      name="screenResultViewer"
+      ref="screenResultViewer" />
+    <property
+      name="screenFinder"
+      ref="screenFinder" />
+    <property
+      name="heatMapViewer"
+      ref="heatMapViewer" />
+    <property
+      name="screenResultImporter"
+      ref="screenResultImporter" />
+    <property
+      name="screenResultExporter"
+      ref="screenResultExporter" />
+  </bean>
+
+  <bean
+    id="screensBrowser"
+    class="edu.harvard.med.screensaver.ui.screens.ScreensBrowser">
+    <description>Screens Browser</description>
+  </bean>
+
+  <bean
+    id="screenViewer"
+    class="edu.harvard.med.screensaver.ui.screens.ScreenViewer">
+    <description>Screen Viewer</description>
+  </bean>
+
+  <bean
+    id="screenResultViewer"
+    class="edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer">
+    <description>Screen Result Viewer</description>
+  </bean>
+
+  <bean
+    id="screenFinder"
+    class="edu.harvard.med.screensaver.ui.screens.ScreenFinder">
+    <description>Screen Finder</description>
+  </bean>
+
+  <bean
+    id="heatMapViewer"
+    class="edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer">
+    <description>Heat Map Viewer</description>
   </bean>
 
 </beans>

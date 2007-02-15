@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
 <beans>
  
   <bean
@@ -17,7 +19,7 @@
   <bean
     id="screensaverLoginModule"
     class="edu.harvard.med.screensaver.ui.authentication.ScreensaverLoginModule"
-    singleton="false">
+    scope="prototype">
     <description>JAAS LoginModule implementation that can be used to authenticate and authorize a user.  In our case, the Tomcat app server will make calls to this bean.  Maintains state between method calls, so cannot be a singleton.</description>
     <property name="dao" ref="dao"/>
     <property name="authenticationClient" ref="eCommonsAuthenticationClient"/>
@@ -32,7 +34,7 @@
   <bean 
     id="screenResultParser"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
-    singleton="false">
+    scope="prototype">
     <constructor-arg index="0" ref="dao"/>
   </bean>
 
@@ -40,23 +42,29 @@
   <bean 
     id="mockScreenResultParser"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
-    singleton="false">
+    scope="prototype">
     <description>A ScreenResultParser that does not need access to a database.  Used for testing.</description>
     <constructor-arg index="0" >
       <bean class="edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter"/>
     </constructor-arg>
   </bean>
 
+  <bean
+    id="screenResultImporter"
+    class="edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter">
+    <description>Screen Result Importer</description>
+  </bean>
+
   <bean 
     id="screenResultExporter"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter"
-    singleton="true">
+    scope="singleton">
   </bean>
 
   <bean 
     id="compoundLibraryContentsParser"
     class="edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser"
-    singleton="false"
+    scope="prototype"
   >
     <constructor-arg ref="dao"/>
   </bean>
@@ -64,7 +72,7 @@
   <bean 
     id="rnaiLibraryContentsParser"
     class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser"
-    singleton="false"
+    scope="prototype"
   >
     <constructor-arg ref="dao"/>
   </bean>
@@ -72,14 +80,14 @@
   <bean 
     id="screenDBDataImporter"
     class="edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter"
-    singleton="true">
+    scope="singleton">
     <constructor-arg ref="dao"/>
   </bean>
 
   <bean 
     id="bulkCompoundLibraryLoader"
     class="edu.harvard.med.screensaver.io.libraries.compound.BulkCompoundLibraryLoader"
-    singleton="true">
+    scope="singleton">
     <constructor-arg ref="unrestrictedDao"/>
     <constructor-arg ref="compoundLibraryContentsParser"/>
   </bean>
@@ -87,7 +95,7 @@
   <bean 
     id="bulkRNAiLibraryLoader"
     class="edu.harvard.med.screensaver.io.libraries.rnai.BulkRNAiLibraryLoader"
-    singleton="true">
+    scope="singleton">
     <constructor-arg ref="unrestrictedDao"/>
     <constructor-arg ref="rnaiLibraryContentsParser"/>
   </bean>
@@ -95,7 +103,7 @@
   <bean 
     id="bulkScreenResultImporter"
     class="edu.harvard.med.screensaver.io.screenresults.BulkScreenResultImporter"
-    singleton="true">
+    scope="singleton">
     <constructor-arg>
      <bean
       class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser">

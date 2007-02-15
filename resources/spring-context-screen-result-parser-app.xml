@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <!-- Top-level spring configuration for command-line ScreenResultImporter, running in validation mode (parse-only, no import) -->
 
@@ -11,7 +12,7 @@
    <bean 
     id="screenResultParser"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
-    singleton="false">
+    scope="prototype">
     <description>A ScreenResultParser that does not need access to a database.  Used for testing and for command-line ScreenResultParser (when --no-verify option is specified)</description>
     <constructor-arg index="0" ref="dao">
     </constructor-arg>
@@ -20,7 +21,7 @@
   <bean 
     id="screenResultExporter"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter"
-    singleton="true">
+    scope="singleton">
   </bean>
   
 </beans>
