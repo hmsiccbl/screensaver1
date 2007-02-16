@@ -116,7 +116,7 @@
 							styleClass="hiddenCommand" />
 					</t:div>
 
-					<t:outputLabel for="platesCount" value="Plates" />
+					<t:outputLabel for="screenResultPlateCount" value="Plates" />
 					<t:outputText id="screenResultPlateCount"
 						value="#{screenResultViewer.screenResult.plateNumberCount}"
 						styleClass="dataText" />
@@ -126,9 +126,9 @@
 						value="#{screenResultViewer.screenResult.replicateCount}"
 						styleClass="dataText" />
 
-					<t:outputLabel for="screenResultExperimentalWellsCount"
+					<t:outputLabel for="screenResultExperimentalWellCount"
 						value="Experimental Wells" />
-					<t:outputText id="screenResultExperimentWellCount"
+					<t:outputText id="screenResultExperimentalWellCount"
 						value="#{screenResultViewer.screenResult.experimentalWellCount}"
 						styleClass="dataText" />
 

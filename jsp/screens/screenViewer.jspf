@@ -104,12 +104,12 @@ TODO:
 			<f:selectItems value="#{screenViewer.leadScreener.selectItems}" />
 		</t:selectOneMenu>
 
-		<t:outputLabel for="collaborators" value="Collaborators" />
+		<t:outputLabel for="collaboratorsEditable" value="Collaborators" />
 		<t:panelGrid columns="1" styleClass="layoutPanel"
 			rendered="#{!screenViewer.editMode}">
 			<t:outputText value="<none>" styleClass="dataText"
 				rendered="#{empty screenViewer.screen.collaborators}" />
-			<t:dataTable var="collaborator"
+			<t:dataTable id="collaborators" var="collaborator"
 				value="#{screenViewer.screen.collaborators}"
 				styleClass="standardTable" columnClasses="column"
 				rendered="#{!empty screenViewer.screen.collaborators}">
@@ -478,7 +478,7 @@ TODO:
 		</t:panelGrid>
 
 		<t:outputLabel for="assayReadoutTypes" value="Assay Readout Types" />
-		<t:outputText
+		<t:outputText id="assayReadoutTypes"
 			value="#{empty screenViewer.screen.assayReadoutTypes ? \"<none>\" : screenViewer.screen.assayReadoutTypesString}"
 			styleClass="dataText" />
 

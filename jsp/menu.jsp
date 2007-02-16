@@ -104,10 +104,11 @@
           size="3"
           styleClass="inputText"
         />
-      </t:panelGrid>
-			<t:commandButton action="#{wellFinder.findWell}"
-				id="quickFindWellSubmit" value="Go" styleClass="command"
-				rendered="#{menu.authenticatedUser}" />
+				<t:commandButton action="#{wellFinder.findWell}"
+					id="quickFindWellSubmit" value="Go" styleClass="command"
+					rendered="#{menu.authenticatedUser}" />
+				<t:outputText id="nowPanelGridHasEvenChildCount" value="" />
+			</t:panelGrid>
 		</h:form>
     
     <h:form id="quickFindScreenForm">
