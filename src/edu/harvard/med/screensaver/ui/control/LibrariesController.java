@@ -418,7 +418,7 @@ public class LibrariesController extends AbstractUIController
     });
       
     _geneViewer.setWellSearchResults(wellSearchResults);
-    Well parentWellOfInterest = wellSearchResults.getCurrentRowDataObject();
+    Well parentWellOfInterest = wellSearchResults == null ? null : wellSearchResults.getCurrentRowDataObject();
     _geneViewer.setParentWellOfInterest(parentWellOfInterest);
 
     return "viewGene";
@@ -451,7 +451,7 @@ public class LibrariesController extends AbstractUIController
     });
     
     _compoundViewer.setWellSearchResults(wellSearchResults);
-    Well parentWellOfInterest = wellSearchResults.getCurrentRowDataObject();
+    Well parentWellOfInterest = wellSearchResults == null ? null : wellSearchResults.getCurrentRowDataObject();
     _compoundViewer.setParentWellOfInterest(parentWellOfInterest);
     
     return "viewCompound";
