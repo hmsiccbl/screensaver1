@@ -177,6 +177,11 @@ public class NoOpDAO implements DAO
   {
     return null;
   }
+  
+  public List<String> findDeveloperECommonsIds()
+  {
+    return null;
+  }
 
   public void need(AbstractEntity entity, String... relationships)
   {

@@ -542,6 +542,13 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
       "from Library where libraryType not in ('Annotation', 'DOS', 'NCI', 'Discrete')")); 
   }
   
+  @SuppressWarnings("unchecked")
+  public List<String> findDeveloperECommonsIds()
+  {
+    return new ArrayList<String>(getHibernateTemplate().find(
+      "select ECommonsId from ScreensaverUser where ECommonsId != null and 'developer' in elements(screensaverUserRoles)"));
+  }
+  
 
   // private instance methods
 

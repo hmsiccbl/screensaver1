@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
@@ -125,9 +126,9 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
   private LocalSessionFactoryBean _sessionFactory;
 
   private String _sessionFactoryBeanId;
-
   
-  // instance methods
+  private DAO _dao;
+
   
   public void setSessionFactoryBeanId(String sessionFactoryBeanId)
   {
@@ -148,6 +149,11 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
     _appCtx = applicationContext;
   }
   
+  public void setDao(DAO dao)
+  {
+    _dao = dao;
+  }
+
   /**
    * Drop the schema that is configured for this Spring+Hibernate enabled project.
    */
@@ -247,31 +253,64 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
     Connection connection = session.connection();
     
     try {
-      String url = connection.getMetaData().getURL();
-      String schemaName = url.substring(url.lastIndexOf('/') + 1);
-
-      Statement statement = connection.createStatement();
-      statement.execute(
-        "SELECT table_name FROM information_schema.tables\n" +
-        "WHERE\n" +
-        " table_catalog = '" + schemaName + "' AND\n" +
-        " table_schema = 'public'\n");
-      
-      String sql = "TRUNCATE TABLE "; 
-      ResultSet resultSet = statement.getResultSet();
-      while (resultSet.next()) {
-        sql += resultSet.getString(1) + ", ";
-      }
-      statement.close();
-      
+      String sql = "TRUNCATE TABLE " + getCommaSepratedTableList();
       if (sql.equals("TRUNCATE TABLE ")) { // no tables in the schema
         createSchema();
         return;
       }
+
+      Statement statement = connection.createStatement();
+      statement.execute(sql);
+      statement.close();
+
+      // QUESTION: any reason to close the connection here? presumably if i am going
+      // to release the session, the connection will get closed anyways. but who tf
+      // knows? -s
+      //connection.close();
+    }
+    catch (HibernateException e) {
+      throw convertHibernateAccessException(e);
+    }
+    catch (IllegalStateException e) {
+      log.error("bad illegal state exception", e);
+    }
+    catch (SQLException e) {
+      log.error("bad sql exception", e);
+    }
+    finally {
+      releaseSession(session);
+    }
+  }
+
+  /**
+   * Grant all privileges on all tables to the developers.
+   * @motivation allow developers to access and modify tables from psql
+   */
+  @SuppressWarnings("unchecked")
+  public void grantDeveloperPermissions()
+  {
+    log.info("granting developer permissions for " + makeDataSourceString());
+    Session session = getSession();
+    Connection connection = session.connection();
+    
+    try {
+      String tableList = getCommaSepratedTableList();
+      if (tableList.equals("")) {
+        return;
+      }
+      String sql = "GRANT ALL ON " + tableList + " TO ";
+      List<String> developerECommonsIds = _dao.findDeveloperECommonsIds();
+      if (developerECommonsIds.size() == 0) {
+        return;
+      }
+      for (String eCommonsId : developerECommonsIds)
+      {
+        sql += eCommonsId + ", ";
+      }
       
       sql = sql.substring(0, sql.length() - 2);
 
-      statement = connection.createStatement();
+      Statement statement = connection.createStatement();
       statement.execute(sql);
       statement.close();
 
@@ -334,5 +373,54 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
     finally {
       releaseSession(session);
     }
+  }
+  
+  /**
+   * Get a list of all the tables in the schema, separated by commas.
+   * @return a list of all the tables in the schema, separated by commas
+   */
+  @SuppressWarnings("unchecked")
+  private String getCommaSepratedTableList()
+  {
+    Session session = getSession();
+    Connection connection = session.connection();
+    
+    try {
+      String url = connection.getMetaData().getURL();
+      String schemaName = url.substring(url.lastIndexOf('/') + 1);
+
+      Statement statement = connection.createStatement();
+      statement.execute(
+        "SELECT table_name FROM information_schema.tables\n" +
+        "WHERE\n" +
+        " table_catalog = '" + schemaName + "' AND\n" +
+        " table_schema = 'public'\n");
+      
+      String tableList = ""; 
+      ResultSet resultSet = statement.getResultSet();
+      while (resultSet.next()) {
+        tableList += resultSet.getString(1) + ", ";
+      }
+      statement.close();
+      
+      if (tableList.equals("")) { // no tables in the schema
+        return "";
+      }
+      
+      return tableList.substring(0, tableList.length() - 2);
+    }
+    catch (HibernateException e) {
+      throw convertHibernateAccessException(e);
+    }
+    catch (IllegalStateException e) {
+      log.error("bad illegal state exception", e);
+    }
+    catch (SQLException e) {
+      log.error("bad sql exception", e);
+    }
+    finally {
+      releaseSession(session);
+    }
+    return "";
   }
 }

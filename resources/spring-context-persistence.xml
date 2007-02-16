@@ -221,16 +221,12 @@
   
   
   
-  <bean
-    id="schemaUtil"
-    class="edu.harvard.med.screensaver.db.SchemaUtil">
+  <bean id="schemaUtil" class="edu.harvard.med.screensaver.db.SchemaUtil">
     <property name="sessionFactoryBeanId">
       <idref bean="hibernateSessionFactory"/>
     </property>
-    <property
-      name="hibernateTemplate"
-      ref="hibernateTemplate"
-    />
+    <property name="hibernateTemplate" ref="hibernateTemplate" />
+    <property name="dao" ref="dao" />
   </bean>
 
 

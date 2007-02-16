@@ -316,4 +316,6 @@ public interface DAO
    * @return
    */
   public List<Library> findLibrariesDisplayedInLibrariesBrowser();
+  
+  public List<String> findDeveloperECommonsIds();
 }

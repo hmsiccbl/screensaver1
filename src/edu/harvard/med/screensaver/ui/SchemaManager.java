@@ -63,6 +63,11 @@ public class SchemaManager extends AbstractBackingBean
     _schemaUtil.truncateTablesOrCreateSchema();
   }
   
+  public void grantDeveloperPermissions()
+  {
+    _schemaUtil.grantDeveloperPermissions();
+  }
+  
   public void loadScreenDB()
   {
     _screenDBDataImporter.loadScreenDBData();
