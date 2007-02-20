@@ -96,7 +96,7 @@ public class LogConfigurer
         if (_rootLoggerLevel != null) {
           Logger.getRootLogger().setLevel(_rootLoggerLevel);
         }
-        Logger.getLogger(LogConfigurer.class).info("Configured logger with properties file '" + _logPropertiesResource);
+        Logger.getLogger(LogConfigurer.class).info("Configured logger with properties file '" + _logPropertiesResource + "'");
       }
       catch (FileNotFoundException e) {
         e.printStackTrace();

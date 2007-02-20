@@ -49,7 +49,7 @@ public class BuildNumber
         }
       }
       catch (Exception e) {
-        log.error("cannot determine build number: " + e.getMessage());
+        log.warn("cannot determine build number: " + e.getMessage());
         buildNumber = "";
       }
     }
