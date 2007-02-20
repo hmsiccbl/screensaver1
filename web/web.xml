@@ -379,7 +379,8 @@
     </web-resource-collection>
 
     <auth-constraint>
-      <role-name>screeningRoomUser</role-name>
+      <role-name>compoundScreeningRoomUser</role-name>
+      <role-name>rnaiScreeningRoomUser</role-name>
       <role-name>readEverythingAdmin</role-name>
       <role-name>developer</role-name>
     </auth-constraint>
