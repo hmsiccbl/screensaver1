@@ -7,10 +7,11 @@
   <bean
     name="logConfigurer"
     class="edu.harvard.med.screensaver.LogConfigurer">
-    <constructor-arg
-    value="classpath:log4j.properties"/>
+    <constructor-arg value="classpath:log4j.properties" />
     <constructor-arg value="60000" />
-    <constructor-arg><null/></constructor-arg>
+    <constructor-arg>
+      <null />
+    </constructor-arg>
   </bean>
-  
+
 </beans>

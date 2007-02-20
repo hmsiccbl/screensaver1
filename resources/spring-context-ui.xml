@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
-    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!--DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+  "http://www.springframework.org/dtd/spring-beans-2.0.dtd"-->
 
-<beans>
+<beans
+  xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd 
+                      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
+  <!--aop:aspectj-autoproxy proxy-target-class="true"/ -->
+  
+  <!-- bean
+    id="userActivityLogAspect"
+    class="edu.harvard.med.screensaver.ui.UserActivityLoggerAspect"/-->
+  
   <bean
     id="messages"
     class="edu.harvard.med.screensaver.ui.util.Messages">
@@ -19,12 +30,13 @@
     <!--  TODO property name="locale" value=""/-->
   </bean>
 
+
+  <!-- WARNING: if scope attribute is defined here, it will NOT be inherited!!! -->
   <bean
     id="uiBean"
-    abstract="true"
-    scope="session">
+    abstract="true">
     <description>
-      Abstract bean definitinon for user interface beans.
+      Abstract bean definition for user interface beans.
     </description>
     <property
       name="messages"
@@ -33,43 +45,66 @@
 
 
   <!-- === top-level & misc backing beans === -->
+  
+  <bean
+    id="appInfo"
+    class="edu.harvard.med.screensaver.ui.Menu"
+    scope="singleton">
+    <description>
+      A global UI bean that provides static information about our
+      application (e.g., application name). This is the only UI bean
+      that can be accessed by login.jsp.
+    </description>
+  </bean>
 
   <bean
     id="exceptionReporter"
     parent="uiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.ExceptionReporter">
     <description>
       Backing bean for the reportException view, enabling exception
       stack traces to be viewed in a custom manner.
     </description>
+    <property
+      name="mainController"
+      ref="mainController"/>
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="mainController"
     parent="uiBean"
-    class="edu.harvard.med.screensaver.ui.control.MainController">
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.control.MainControllerImpl">
     <property
       name="exceptionReporter"
       ref="exceptionReporter" />
+    <aop:scoped-proxy/>
   </bean>
-
+  
   <bean
     id="menu"
     parent="uiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.Menu">
     <description>Backing bean for the menu panel.</description>
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="schemaManager"
+    parent="uiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.SchemaManager">
     <description>Schema Manager</description>
     <property
       name="schemaUtil"
-      ref="schemaUtil"/>
+      ref="schemaUtil" />
     <property
       name="screenDBDataImporter"
       ref="screenDBDataImporter" />
+    <aop:scoped-proxy/>
   </bean>
 
 
@@ -77,14 +112,13 @@
 
   <bean
     id="librariesController"
-    class="edu.harvard.med.screensaver.ui.control.LibrariesController">
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.control.LibrariesControllerImpl">
     <description>Libraries Controller Bean</description>
     <property
       name="dao"
       ref="dao" />
-    <property
-      name="messages"
-      ref="messages" />
     <property
       name="wellFinder"
       ref="wellFinder" />
@@ -118,63 +152,103 @@
     <property
       name="rnaiLibraryContentsParser"
       ref="rnaiLibraryContentsParser" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="librariesUiBean"
+    parent="uiBean"
+    abstract="true">
+    <description>
+      Abstract bean definition for user interface beans that are
+      associated with the ScreensController.
+    </description>
+    <property
+      name="librariesController"
+      ref="librariesController" />
   </bean>
 
   <bean
     id="wellFinder"
+    parent="librariesUiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.WellFinder">
     <description>Well Finder</description>
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="librariesBrowser"
+    parent="uiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.LibrariesBrowser">
     <description>Libraries Browser</description>
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="libraryViewer"
+    parent="librariesUiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.LibraryViewer">
     <description>Library Viewer</description>
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="wellSearchResultsViewer"
+    parent="uiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.WellSearchResultsViewer">
     <description>Well Search Results Viewer</description>
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="wellViewer"
+    parent="librariesUiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.WellViewer">
     <description>Well Viewer</description>
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="geneViewer"
+    parent="uiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.GeneViewer">
     <description>Gene Viewer</description>
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="compoundViewer"
+    parent="librariesUiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.CompoundViewer">
     <description>Compound Viewer</description>
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="compoundLibraryContentsImporter"
+    parent="librariesUiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.CompoundLibraryContentsImporter">
     <description>Compound Library Contents Importer</description>
-
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="rnaiLibraryContentsImporter"
+    parent="librariesUiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporter">
     <description>
       RNAi Library Contents Importer backing bean
     </description>
+    <aop:scoped-proxy/>
   </bean>
 
 
@@ -182,14 +256,13 @@
 
   <bean
     id="screensController"
-    class="edu.harvard.med.screensaver.ui.control.ScreensController">
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.control.ScreensControllerImpl">
     <description>Screens Controller</description>
     <property
       name="dao"
       ref="dao" />
-    <property
-      name="messages"
-      ref="messages" />
     <property
       name="librariesController"
       ref="librariesController" />
@@ -214,36 +287,65 @@
     <property
       name="screenResultExporter"
       ref="screenResultExporter" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="screensUiBean"
+    parent="uiBean"
+    abstract="true">
+    <description>
+      Abstract bean definition for user interface beans that are
+      associated with the ScreensController.
+    </description>
+    <property
+      name="screensController"
+      ref="screensController" />
   </bean>
 
   <bean
     id="screensBrowser"
+    parent="uiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.screens.ScreensBrowser">
     <description>Screens Browser</description>
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="screenViewer"
+    parent="screensUiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.screens.ScreenViewer">
     <description>Screen Viewer</description>
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="screenResultViewer"
+    parent="screensUiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer">
     <description>Screen Result Viewer</description>
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="screenFinder"
+    parent="screensUiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.screens.ScreenFinder">
     <description>Screen Finder</description>
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="heatMapViewer"
+    parent="uiBean"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer">
     <description>Heat Map Viewer</description>
+    <aop:scoped-proxy/>
   </bean>
 
 </beans>

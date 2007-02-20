@@ -10,9 +10,20 @@
 
 <beans>
 
-  <import resource="spring-context-logging.xml"/>
+  <!-- Enable AspectJ annotation support 
+  -->
+  <bean
+    class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator">
+    <property name="includePatterns">
+      <list>
+        <value>.*Aspect$</value>
+      </list>
+    </property>
+  </bean>
+  
   <import resource="spring-context-persistence.xml"/>
   <import resource="spring-context-services.xml"/>
   <import resource="spring-context-ui.xml"/>
+  <import resource="spring-context-logging.xml"/>
   
 </beans>

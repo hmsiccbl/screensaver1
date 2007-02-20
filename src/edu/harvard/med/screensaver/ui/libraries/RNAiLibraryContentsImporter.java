@@ -16,16 +16,15 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-
 import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
-import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
 
 /**
  * The JSF backing bean for the rnaiLibraryContentsImporter subview.
@@ -40,6 +39,7 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
   // instance data
 
   private LibrariesController _librariesController;
+  private RNAiLibraryContentsParser _rnaiLibraryContentsParser;
   private UploadedFile _uploadedFile;
   private Library _library;
   private SilencingReagentType _silencingReagentType =
@@ -56,6 +56,16 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
   public void setLibrariesController(LibrariesController librariesController)
   {
     _librariesController = librariesController;
+  }
+
+  public RNAiLibraryContentsParser getRnaiLibraryContentsParser()
+  {
+    return _rnaiLibraryContentsParser;
+  }
+
+  public void setRnaiLibraryContentsParser(RNAiLibraryContentsParser rnaiLibraryContentsParser)
+  {
+    _rnaiLibraryContentsParser = rnaiLibraryContentsParser;
   }
 
   public void setUploadedFile(UploadedFile uploadedFile)
@@ -107,15 +117,14 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
 
   public boolean getHasErrors()
   {
-    return _librariesController.getRnaiLibraryContentsParser().getHasErrors();
+    return _rnaiLibraryContentsParser.getHasErrors();
   }
   
   public DataModel getImportErrors()
   {
-    return new ListDataModel(_librariesController.getRnaiLibraryContentsParser().getErrors());
+    return new ListDataModel(_rnaiLibraryContentsParser.getErrors());
   }
   
-  @UIControllerMethod
   public String viewLibrary()
   {
     return _librariesController.viewLibrary(_library, null);
@@ -126,7 +135,6 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
    * depending on the result.
    * @return the control code for the appropriate next page
    */
-  @UIControllerMethod
   public String importRNAiLibraryContents()
   {
     return _librariesController.importRNAiLibraryContents(

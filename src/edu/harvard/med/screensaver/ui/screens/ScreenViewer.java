@@ -38,7 +38,6 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
-import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectManyEntityBean;
@@ -315,7 +314,6 @@ public class ScreenViewer extends AbstractBackingBean
     return _screensController.editScreen(_screen);
   }
   
-  @UIControllerMethod
   public String cancelEdit() {
     // edits are discarded (and edit mode is cancelled) by virtue of controller reloading the screen entity from the database
     return _screensController.viewLastScreen();
@@ -324,7 +322,6 @@ public class ScreenViewer extends AbstractBackingBean
   /**
    * A command to save the user's edits.
    */
-  @UIControllerMethod
   public String saveScreen() {
     _isEditMode = false;
     return _screensController.saveScreen(_screen,
@@ -339,13 +336,11 @@ public class ScreenViewer extends AbstractBackingBean
     });
   }
 
-  @UIControllerMethod
   public String addStatusItem()
   {
     return _screensController.addStatusItem(_screen, _newStatusValue);
   }
   
-  @UIControllerMethod
   public String deleteStatusItem()
   {
     return _screensController.deleteStatusItem(_screen, getSelectedEntityOfType(StatusItem.class));
@@ -382,13 +377,11 @@ public class ScreenViewer extends AbstractBackingBean
     return VIEW_ATTACHED_FILE_ACTION_RESULT;
   }  
   
-  @UIControllerMethod
   public String addPublication()
   {
     return _screensController.addPublication(_screen);
   }
   
-  @UIControllerMethod
   public String deletePublication()
   {
     return _screensController.deletePublication(
@@ -396,13 +389,11 @@ public class ScreenViewer extends AbstractBackingBean
       getSelectedEntityOfType(Publication.class));
   }
   
-  @UIControllerMethod
   public String addLetterOfSupport()
   {
     return _screensController.addLetterOfSupport(_screen);
   }
   
-  @UIControllerMethod
   public String deleteLetterOfSupport()
   {
     return _screensController.deleteLetterOfSupport(
@@ -410,13 +401,11 @@ public class ScreenViewer extends AbstractBackingBean
       getSelectedEntityOfType(LetterOfSupport.class));
   }
   
-  @UIControllerMethod
   public String addAttachedFile()
   {
     return _screensController.addAttachedFile(_screen);
   }
   
-  @UIControllerMethod
   public String deleteAttachedFile()
   {
     return _screensController.deleteAttachedFile(
@@ -424,13 +413,11 @@ public class ScreenViewer extends AbstractBackingBean
       getSelectedEntityOfType(AttachedFile.class));
   }
   
-  @UIControllerMethod
   public String addFundingSupport()
   {
     return _screensController.addFundingSupport(_screen, _newFundingSupport);
   }
   
-  @UIControllerMethod
   public String deleteFundingSupport()
   {
     return _screensController.deleteFundingSupport(
@@ -438,13 +425,11 @@ public class ScreenViewer extends AbstractBackingBean
       getSelectedEntityOfType(FundingSupport.class));
   }
   
-  @UIControllerMethod
   public String addKeyword()
   {
     return _screensController.addKeyword(_screen, _newKeyword);
   }
   
-  @UIControllerMethod
   public String deleteKeyword()
   {
     return _screensController.deleteKeyword(

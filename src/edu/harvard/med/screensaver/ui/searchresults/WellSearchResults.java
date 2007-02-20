@@ -19,7 +19,6 @@ import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
-import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
@@ -77,7 +76,6 @@ public class WellSearchResults extends SearchResults<Well>
     return true;
   }
   
-  @UIControllerMethod
   public String downloadSearchResults()
   {
     return _librariesController.downloadWellSearchResults(this);

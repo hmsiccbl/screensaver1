@@ -12,13 +12,13 @@ package edu.harvard.med.screensaver.ui.libraries;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-
+import edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
-import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
 
 /**
  * The JSF backing bean for the compoundLibraryContentsImporter subview.
@@ -33,6 +33,7 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
   // instance data
 
   private LibrariesController _librariesController;
+  private SDFileCompoundLibraryContentsParser _compoundLibraryContentsParser;
   private UploadedFile _uploadedFile;
   private Library _library;
   
@@ -49,6 +50,16 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
     _librariesController = librariesController;
   }
   
+  public SDFileCompoundLibraryContentsParser getCompoundLibraryContentsParser()
+  {
+    return _compoundLibraryContentsParser;
+  }
+
+  public void setCompoundLibraryContentsParser(SDFileCompoundLibraryContentsParser compoundLibraryContentsParser)
+  {
+    _compoundLibraryContentsParser = compoundLibraryContentsParser;
+  }
+
   public void setUploadedFile(UploadedFile uploadedFile)
   {
     _uploadedFile = uploadedFile;
@@ -71,15 +82,14 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
 
   public boolean getHasErrors()
   {
-    return _librariesController.getCompoundLibraryContentsParser().getHasErrors();
+    return _compoundLibraryContentsParser.getHasErrors();
   }
   
   public DataModel getImportErrors()
   {
-    return new ListDataModel(_librariesController.getCompoundLibraryContentsParser().getErrors());
+    return new ListDataModel(_compoundLibraryContentsParser.getErrors());
   }
 
-  @UIControllerMethod
   public String viewLibrary()
   {
     return _librariesController.viewLibrary(_library, null);
@@ -90,7 +100,6 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
    * depending on the result.
    * @return the control code for the appropriate next page
    */
-  @UIControllerMethod
   public String importCompoundLibraryContents()
   {
     return _librariesController.importCompoundLibraryContents(_library, _uploadedFile);

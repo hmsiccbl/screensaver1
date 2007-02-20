@@ -9,60 +9,29 @@
 
 package edu.harvard.med.screensaver.ui.control;
 
-import edu.harvard.med.screensaver.ui.ExceptionReporter;
-
-import org.apache.log4j.Logger;
 
 /**
- * A controller for top-level pages and controls such as logging in and out, going to the
- * help page, and other sophisticated controls.
- * 
+ * @motivation Allows Spring to create an AOP proxy for our MainControllerImpl
+ *             concrete class, which can then be injected into other beans
+ *             expecting a MainController type. If MainController was the
+ *             concrete class, its proxy would not be injectable into other
+ *             beans.
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class MainController extends AbstractUIController
+public interface MainController
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(MainController.class);
-
-
-  // instance data members
-  
-  private ExceptionReporter _exceptionReporter;
-
-  
-  public void setExceptionReporter(ExceptionReporter exceptionReporter)
-  {
-    _exceptionReporter = exceptionReporter;
-    _exceptionReporter.setMainController(this);
-  }
-
-  
-  // public constructors and methods
-  
-  @UIControllerMethod
-  public String viewMain()
-  {
-    return VIEW_MAIN;
-  }
 
   @UIControllerMethod
-  public String viewInstructions()
-  {
-    return VIEW_INSTRUCTIONS;
-  }
-  
+  public String viewMain();
+
   @UIControllerMethod
-  public String viewDownloads()
-  {
-    return VIEW_DOWNLOADS;
-  }
-  
-  public String logout()
-  {
-    log.info("logout for session "  + getHttpSession().getId());
-    closeHttpSession();
-    return VIEW_GOODBYE;
-  }
+  public String viewInstructions();
+
+  @UIControllerMethod
+  public String viewDownloads();
+
+  @UIControllerMethod
+  public String logout();
+
 }

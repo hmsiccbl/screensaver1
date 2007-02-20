@@ -47,12 +47,12 @@
 
       <t:div styleClass="footer">
         <t:htmlTag value="hr"/>
-        <h:outputText value="#{menu.applicationTitle} | "/>
+        <h:outputText value="#{appInfo.applicationTitle} | "/>
         <h:outputLink value="http://iccb.med.harvard.edu">
           <h:outputText value="Harvard Medical School: ICCB-Longwood" />
         </h:outputLink>
         <h:outputText value=" | "/>
-        <h:outputLink value="#{menu.feedbackUrl}">
+        <h:outputLink value="#{appInfo.feedbackUrl}">
           <h:outputText value="Feedback" />
         </h:outputLink>
       </t:div>

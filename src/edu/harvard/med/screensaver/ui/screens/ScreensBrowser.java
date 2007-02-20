@@ -9,11 +9,10 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
+
+import org.apache.log4j.Logger;
 
 /**
  * TODO: add comments
@@ -30,21 +29,10 @@ public class ScreensBrowser extends AbstractBackingBean
   
   // private instance fields
   
-  private ScreensController _screensController;
   private ScreenSearchResults _screenSearchResults;
   
   
   // public instance methods
-
-  public ScreensController getScreensController()
-  {
-    return _screensController;
-  }
-  
-  public void setScreensController(ScreensController screensController)
-  {
-    _screensController = screensController;
-  }
 
   public ScreenSearchResults getScreenSearchResults()
   {

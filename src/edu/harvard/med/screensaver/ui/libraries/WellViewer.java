@@ -9,16 +9,15 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
-import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
+
+import org.apache.log4j.Logger;
 
 public class WellViewer extends AbstractBackingBean
 {
@@ -76,13 +75,11 @@ public class WellViewer extends AbstractBackingBean
     _wellNameValueTable = wellNameValueTable;
   }
 
-  @UIControllerMethod
   public String viewLibrary()
   {
     return _librariesController.viewLibrary(_well.getLibrary(), null);
   }
   
-  @UIControllerMethod
   public String viewGene()
   {
     String geneId = (String) getFacesContext().getExternalContext().getRequestParameterMap().get("geneId");
@@ -96,7 +93,6 @@ public class WellViewer extends AbstractBackingBean
     return _librariesController.viewGene(gene, _wellSearchResults);
   }
   
-  @UIControllerMethod
   public String viewCompound()
   {
     String compoundId = (String) getRequestParameter("compoundId");

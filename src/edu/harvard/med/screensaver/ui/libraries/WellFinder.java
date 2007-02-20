@@ -9,11 +9,10 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
-import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -83,7 +82,6 @@ public class WellFinder extends AbstractBackingBean
    * page depending on the result.
    * @return the control code for the appropriate next page
    */
-  @UIControllerMethod
   public String findWell()
   {
     return _librariesController.findWell(_plateNumber, _wellName);
@@ -94,7 +92,6 @@ public class WellFinder extends AbstractBackingBean
    * page.
    * @return the controler code for the next appropriate page
    */
-  @UIControllerMethod
   public String findWells()
   {
     return _librariesController.findWells(_plateWellList);

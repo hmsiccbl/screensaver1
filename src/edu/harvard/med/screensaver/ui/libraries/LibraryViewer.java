@@ -9,16 +9,15 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
-import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.LibraryNameValueTable;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
+
+import org.apache.log4j.Logger;
 
 public class LibraryViewer extends AbstractBackingBean
 {
@@ -103,25 +102,21 @@ public class LibraryViewer extends AbstractBackingBean
     _libraryNameValueTable = libraryNameValueTable;
   }
 
-  @UIControllerMethod
   public String viewLibraryContents()
   {
     return _librariesController.viewLibraryContents(_library);
   }
 
-  @UIControllerMethod
   public String importCompoundLibraryContents()
   {
     return _librariesController.importCompoundLibraryContents(_library);
   }
 
-  @UIControllerMethod
   public String importRNAiLibraryContents()
   {
     return _librariesController.importRNAiLibraryContents(_library);
   }
   
-  @UIControllerMethod
   public String unloadLibraryContents()
   {
     return _librariesController.unloadLibraryContents(_library);

@@ -56,6 +56,9 @@
     <put 
       name="pageTitle"
       value="Screensaver kindly requests that you identify yourself as an authorized user."/>
+    <put 
+      name="menu"
+      value="menu-for-login.jsp"/>
     <put
       name="body"
       value="/login.jsp" />
