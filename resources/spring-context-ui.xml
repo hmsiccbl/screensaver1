@@ -32,6 +32,7 @@
 
 
   <!-- WARNING: if scope attribute is defined here, it will NOT be inherited!!! -->
+  <!-- WARNING: if <aop:scoped-proxy/> element is defined here, it will NOT make the inheriting bean definition into a scoped proxy! -->
   <bean
     id="uiBean"
     abstract="true">
