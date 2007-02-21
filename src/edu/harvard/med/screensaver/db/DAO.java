@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -245,9 +246,9 @@ public interface DAO
    * @return a List of {@link ScreeningRoomUsers}s.
    */
   @Transactional(readOnly = true)
-  public List<ScreeningRoomUser> findAllLabHeads();
+  public SortedSet<ScreeningRoomUser> findAllLabHeads();
   
-  public List<ScreeningRoomUser> findCandidateCollaborators();
+  public SortedSet<ScreeningRoomUser> findCandidateCollaborators();
 
   /**
    * Delete a screen result.

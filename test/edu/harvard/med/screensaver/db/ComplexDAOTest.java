@@ -578,7 +578,7 @@ public class ComplexDAOTest extends AbstractSpringTest
       }
     });
 
-    List<ScreeningRoomUser> actualLabHeads = dao.findAllLabHeads();
+    Set<ScreeningRoomUser> actualLabHeads = dao.findAllLabHeads();
     assertTrue(expectedLabHeads.containsAll(actualLabHeads) && actualLabHeads.containsAll(expectedLabHeads));
   }
   

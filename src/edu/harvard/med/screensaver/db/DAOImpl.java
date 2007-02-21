@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -36,6 +37,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
+import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
@@ -347,23 +349,41 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   // public special-case data access methods
   
   @SuppressWarnings("unchecked")
-  public List<ScreeningRoomUser> findAllLabHeads()
+  public SortedSet<ScreeningRoomUser> findAllLabHeads()
   {
+    // note: we perform sorting via a TreeSet, rather than asking persistence
+    // layer to do sorting, as this keeps sorting order policy in
+    // ScreensaverUserComparator, and also keeps our query simpler. Also, the
+    // SortedSet return type makes return value more explicit
     String hql = "select distinct lh from ScreeningRoomUser lh left outer join lh.hbnLabHead where lh.hbnLabHead is null";
-    return (List<ScreeningRoomUser>) getHibernateTemplate().find(hql);
+    SortedSet labHeads = new TreeSet<ScreeningRoomUser>(ScreensaverUserComparator.getInstance());
+    labHeads.addAll((List<ScreeningRoomUser>) getHibernateTemplate().find(hql));
+    return labHeads;
   }
   
   @SuppressWarnings("unchecked")
-  public List<ScreeningRoomUser> findCandidateCollaborators()
+  public SortedSet<ScreeningRoomUser> findCandidateCollaborators()
   {
-    return (List<ScreeningRoomUser>) getHibernateTemplate().execute(new HibernateCallback() {
-      public Object doInHibernate(Session session) throws HibernateException, SQLException
-      {
-        return new ArrayList<ScreeningRoomUser>(session.createCriteria(ScreeningRoomUser.class).list());
-      }
-    });
+    // note: we perform sorting via a TreeSet, rather than asking persistence
+    // layer to do sorting, as this keeps sorting order policy in
+    // ScreensaverUserComparator, and also keeps our query simpler. Also, the
+    // SortedSet return type makes return value more explicit. Performance
+    // is not really an issue.
+    SortedSet<ScreeningRoomUser> collaborators = 
+      new TreeSet<ScreeningRoomUser>(ScreensaverUserComparator.getInstance());
+    collaborators.addAll((List<ScreeningRoomUser>) 
+                         getHibernateTemplate().execute(new HibernateCallback() 
+                         {
+                           public Object doInHibernate(Session session) throws HibernateException, SQLException
+                           {
+                             return new ArrayList<ScreeningRoomUser>(session.
+                               createCriteria(ScreeningRoomUser.class).
+                               list());
+                           }
+                         }));
+    return collaborators;
   }
-  
+
   public void deleteScreenResult(ScreenResult screenResult)
   {
     // disassociate ScreenResult from Screen

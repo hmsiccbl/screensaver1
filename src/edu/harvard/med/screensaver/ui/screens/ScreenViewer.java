@@ -239,15 +239,13 @@ public class ScreenViewer extends AbstractBackingBean
   }
 
   /**
-   * Get a list of SelectItems for the screen's collaborators. Collaborators are
-   * grouped (and indented) by lab, and the (unindented) lab SelectItem maps to
-   * the lab head.
+   * Get a list of SelectItems for selecting the screen's collaborators.
    */
   public UISelectManyBean<ScreeningRoomUser> getCollaborators()
   {
     if (_collaborators == null) {
       _collaborators =
-        new UISelectManyEntityBean<ScreeningRoomUser>(_dao.findCandidateCollaborators(), 
+        new UISelectManyEntityBean<ScreeningRoomUser>(_dao.findCandidateCollaborators(),
                                                       _screen.getCollaborators(),
                                                       _dao)
         {
