@@ -33,6 +33,14 @@
       value="" />
   </definition>
 
+  <definition
+    name=".unauthenticatedBase"
+    extends=".base"
+    path="/template.jsp">
+    <put 
+      name="menu"
+      value="menu-for-unauthenticated.jsp"/>
+  </definition>
 
   <!-- Concrete definitions -->
 
@@ -52,13 +60,10 @@
 
   <definition
     name="/login.tiles"
-    extends=".base">
+    extends=".unauthenticatedBase">
     <put 
       name="pageTitle"
       value="Screensaver kindly requests that you identify yourself as an authorized user."/>
-    <put 
-      name="menu"
-      value="menu-for-login.jsp"/>
     <put
       name="body"
       value="/login.jsp" />
@@ -69,7 +74,7 @@
   
   <definition
     name="/goodbye.tiles"
-    extends=".base">
+    extends=".unauthenticatedBase">
     <put 
       name="pageTitle"
       value="Thanks for using Screensaver!"/>
@@ -80,7 +85,7 @@
   
   <definition
     name="/login-error.tiles"
-    extends=".base">
+    extends=".unauthenticatedBase">
     <put 
       name="pageTitle"
       value="Login failed! (sorry)"/>
