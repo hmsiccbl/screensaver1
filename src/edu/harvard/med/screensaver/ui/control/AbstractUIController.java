@@ -9,9 +9,9 @@
 
 package edu.harvard.med.screensaver.ui.control;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+
+import org.apache.log4j.Logger;
 
 /**
  * An abstract superclass for the UIController classes.
@@ -23,14 +23,19 @@ public abstract class AbstractUIController extends AbstractBackingBean
 {
   // static members
 
-  private static Logger log = Logger
-    .getLogger(AbstractUIController.class);
+  private static Logger log = Logger.getLogger(AbstractUIController.class);
 
 
   // instance data members
-
+  
+  
   // public constructors and methods
 
+  public void logUserActivity(String s)
+  {
+    getCurrentScreensaverUser().logActivity(s);
+  }
+  
   // private methods
 
 }

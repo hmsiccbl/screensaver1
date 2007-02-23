@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.db.screendb;
 import org.apache.log4j.Logger;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.SchemaUtil;
@@ -57,7 +58,7 @@ public class ScreenDBDataImporter
   public static void main(String [] args)
   {
     ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { 
-      "spring-context.xml",
+      CommandLineApplication.DEFAULT_SPRING_CONFIG,
     });
     SchemaUtil schemaUtil = (SchemaUtil) context.getBean("schemaUtil");
     schemaUtil.recreateSchema();

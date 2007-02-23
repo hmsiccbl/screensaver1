@@ -148,6 +148,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String browseScreens()
   {
+    logUserActivity("browseScreens");
     _dao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction()
@@ -175,6 +176,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String browseMyScreens()
   {
+    logUserActivity("browseMyScreens");
     final String[] result = { REDISPLAY_PAGE_ACTION_RESULT };
     _dao.doInTransaction(new DAOTransaction() 
     {
@@ -215,6 +217,8 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String viewScreen(final Screen screenIn, ScreenSearchResults screenSearchResults)
   {
+    logUserActivity("viewScreen " + screenIn);
+    
     _screenViewer.setDao(_dao);
 
     _screenResultImporter.setDao(_dao);
@@ -286,6 +290,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String editScreen(final Screen screen)
   {
+    logUserActivity("editScreen " + screen);
     try {
       _dao.doInTransaction(new DAOTransaction() 
       {
@@ -312,6 +317,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String saveScreen(final Screen screen, final DAOTransaction updater)
   {
+    logUserActivity("saveScreen " + screen);
     try {
       _dao.doInTransaction(new DAOTransaction()
       {
@@ -342,6 +348,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String deleteScreenResult(ScreenResult screenResult)
   {
+    logUserActivity("deleteScreenResult " + screenResult);
     if (screenResult != null) {
       try {
         _dao.deleteScreenResult(screenResult);
@@ -364,6 +371,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String viewLastScreen()
   {
+    logUserActivity("viewLastScreen " + _currentScreen);
     return viewScreen(_currentScreen, 
                       _screensBrowser.getScreenSearchResults());
   }
@@ -374,6 +382,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String viewScreenResultImportErrors()
   {
+    logUserActivity("viewScreenResultImportErrors");
     return VIEW_SCREEN_RESULT_IMPORT_ERRORS;
   }
 
@@ -385,9 +394,10 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   {
     if (statusValue != null) {
       try {
-        new StatusItem(screen,
-                       new Date(),
-                       statusValue);
+        StatusItem statusItem = new StatusItem(screen,
+                                               new Date(),
+                                               statusValue);
+        logUserActivity("addStatusItem " + screen + " " + statusItem);
       }
       catch (DuplicateEntityException e) {
         showMessage("screens.duplicateEntity", "status item");
@@ -403,6 +413,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String deleteStatusItem(Screen screen, StatusItem statusItem)
   {
+    logUserActivity("deleteStatusItem " + screen + " " + statusItem);
     screen.getStatusItems().remove(statusItem);
     return VIEW_SCREEN;
   }
@@ -414,7 +425,8 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public String addPublication(Screen screen)
   {
     try {
-      new Publication(screen, "<new>", "", "", "");
+      Publication publication = new Publication(screen, "<new>", "", "", "");
+      logUserActivity("addPublication " + screen + " " + publication);
     }
     catch (DuplicateEntityException e) {
       showMessage("screens.duplicateEntity", "publication");
@@ -428,6 +440,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String deletePublication(Screen screen, Publication publication)
   {
+    logUserActivity("deletePublication " + screen + " " + publication);
     screen.getPublications().remove(publication);
     return VIEW_SCREEN;
   }
@@ -439,7 +452,9 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public String addLetterOfSupport(Screen screen)
   {
     try {
-      new LetterOfSupport(screen, new Date(), "");
+      LetterOfSupport letterOfSupport = new LetterOfSupport(screen, new Date(), "");
+      logUserActivity("addLetterOfSupport " + screen + " " + letterOfSupport);
+
     }
     catch (DuplicateEntityException e) {
       showMessage("screens.duplicateEntity", "letter of support");
@@ -453,6 +468,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String deleteLetterOfSupport(Screen screen, LetterOfSupport letterOfSupport)
   {
+    logUserActivity("deleteLetterOfSupport " + screen + " " + letterOfSupport);
     screen.getLettersOfSupport().remove(letterOfSupport);
     return VIEW_SCREEN;
   }
@@ -464,7 +480,8 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public String addAttachedFile(Screen screen)
   {
     try {
-      new AttachedFile(screen, "<new>", "");
+      AttachedFile attachedFile = new AttachedFile(screen, "<new>", "");
+      logUserActivity("addAttachedFile " + screen + " " + attachedFile);
     }
     catch (DuplicateEntityException e) {
       showMessage("screens.duplicateEntity", "attached file");
@@ -478,6 +495,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String deleteAttachedFile(Screen screen, AttachedFile attachedFile)
   {
+    logUserActivity("deleteAttachedFile " + screen + " " + attachedFile);
     screen.getAttachedFiles().remove(attachedFile);
     return VIEW_SCREEN;
   }
@@ -488,6 +506,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String addFundingSupport(Screen screen, FundingSupport fundingSupport)
   {
+    logUserActivity("addFundingSupport " + screen + " " + fundingSupport);
     if (fundingSupport != null) {
       if (!screen.addFundingSupport(fundingSupport)) {
         showMessage("screens.duplicateEntity", "funding support");
@@ -503,6 +522,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String deleteFundingSupport(Screen screen, FundingSupport fundingSupport)
   {
+    logUserActivity("deleteFundingSupport " + screen + " " + fundingSupport);
     screen.getFundingSupports().remove(fundingSupport);
     return VIEW_SCREEN;
   }
@@ -513,6 +533,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String addKeyword(Screen screen, String keyword)
   {
+    logUserActivity("addKeyword " + screen + " " + keyword);
     if (! screen.addKeyword(keyword)) {
       showMessage("screens.duplicateEntity", "keyword");
     }
@@ -528,6 +549,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String deleteKeyword(Screen screen, String keyword)
   {
+    logUserActivity("deleteKeyword " + screen + " " + keyword);
     screen.getKeywords().remove(keyword);
     return VIEW_SCREEN;
   }
@@ -537,6 +559,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
    */
   public String findScreen(Integer screenNumber)
   {
+    logUserActivity("findScreen " + screenNumber);
     if (screenNumber != null) {
       Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
       if (screen != null) {
@@ -560,6 +583,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                                    final UploadedFile uploadedFile,
                                    final ScreenResultParser parser)
   {
+    logUserActivity("importScreenResult " + screenIn + " " + uploadedFile.getName() + " " + uploadedFile.getSize());
     try {
       _dao.doInTransaction(new DAOTransaction() 
       {
@@ -606,6 +630,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String downloadScreenResult(final ScreenResult screenResultIn)
   {
+    logUserActivity("downloadScreenResult " + screenResultIn);
     try {
       _dao.doInTransaction(new DAOTransaction() 
       {

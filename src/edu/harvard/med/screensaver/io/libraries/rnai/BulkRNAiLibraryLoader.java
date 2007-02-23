@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
@@ -42,7 +43,7 @@ public class BulkRNAiLibraryLoader
   public static void main(String[] args)
   {
     ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { 
-      "spring-context.xml",
+      CommandLineApplication.DEFAULT_SPRING_CONFIG,
     });
     BulkRNAiLibraryLoader libraryLoader =
       (BulkRNAiLibraryLoader) context.getBean("bulkRNAiLibraryLoader");

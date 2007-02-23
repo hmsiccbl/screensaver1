@@ -26,11 +26,8 @@ import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.BuildNumber;
 import edu.harvard.med.screensaver.ScreensaverConstants;
-import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.authentication.ScreensaverLoginModule;
 import edu.harvard.med.screensaver.ui.util.Messages;
 import edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter;
 
@@ -60,6 +57,8 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   // private data members
   
   private Messages _messages;
+
+  private CurrentScreensaverUser _currentScreensaverUser;
 
 
   // bean property methods
@@ -185,20 +184,34 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   }
   
   /**
-   * Returns the ScreensaverUser that is logged in to the current HTTP session.
+   * Returns the ScreensaverUser entity representing the user that is logged in
+   * to the current HTTP session.
    * 
    * @return the ScreensaverUser that is logged in to the current HTTP session
    */
   public ScreensaverUser getScreensaverUser()
   {
-    ScreensaverUser user = getSessionCachedScreensaverUser();
-    if (user == null) {
-      Principal principal = getExternalContext().getUserPrincipal();
-      user = getScreensaverUserForPrincipal(principal);
-                
-      setSessionCachedScreensaverUser(user);
-    }
-    return user;
+    return _currentScreensaverUser.getScreensaverUser();
+  }
+  
+  /**
+   * Set the CurrentScreensaverUser.
+   * 
+   * @param currentScreensaverUser
+   */
+  public void setCurrentScreensaverUser(CurrentScreensaverUser currentScreensaverUser)
+  {
+    _currentScreensaverUser = currentScreensaverUser;
+  }
+
+  /**
+   * Get the CurrentScreensaverUser.
+   * 
+   * @return a CurrentScreensaverUser
+   */
+  public CurrentScreensaverUser getCurrentScreensaverUser()
+  {
+    return _currentScreensaverUser;
   }
 
 
@@ -575,65 +588,4 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
     return null;
   }
  
-  /**
-   * Returns a ScreensaverUser object for the specified Principal.
-   * 
-   * @motivation Normally, the ScreensaverUser instance would be the same object
-   *             as the Principal instance, but
-   *             <code>getExternalContext().getUserPrincipal()</code> does not
-   *             return the ScreensaverUserPrincipal object that we provided to
-   *             Tomcat during our JAAS authentication process (in
-   *             {@link ScreensaverLoginModule#commit}, and so we cannot get at
-   *             the ScreensaverUser object that would have available via the
-   *             ScreensaverUserPrincipal object. So we have to requery the
-   *             database to find the ScreensaverUser given only the user's
-   *             login ID.
-   * @return the ScreensaverUser that is logged in to the current HTTP session
-   */
-  private ScreensaverUser getScreensaverUserForPrincipal(final Principal principal)
-  {
-    if (principal == null) {
-      return null;
-    }
-    final ScreensaverUser[] result = new ScreensaverUser[1];
-    final DAO unrestrictedAccessDao = (DAO) getBean("unrestrictedDao");
-    unrestrictedAccessDao.doInTransaction(new DAOTransaction() 
-    {
-      public void runTransaction() 
-      {
-        String eCommonsIdOrLoginId = principal.getName();
-        ScreensaverUser user = unrestrictedAccessDao.findEntityByProperty(ScreensaverUser.class, 
-                                                                          "ECommonsId", 
-                                                                          eCommonsIdOrLoginId.toLowerCase());
-        if (user == null) {
-          user = unrestrictedAccessDao.findEntityByProperty(ScreensaverUser.class, 
-                                                            "loginId", 
-                                                            eCommonsIdOrLoginId);
-        }
-        if (user != null) {
-          // fetch relationships needed by data access policy
-          unrestrictedAccessDao.need(user,
-                                      "hbnScreensLed",
-                                      "hbnScreensHeaded",
-                                      "hbnScreensCollaborated",
-                                      "hbnLabHead",
-                                      "hbnLabHead.hbnLabMembers",
-                                      "hbnLabMembers");
-        }
-        result[0] = user;
-      }
-    });
-    return result[0];
-  }
-  
-  private void setSessionCachedScreensaverUser(ScreensaverUser user)
-  {
-    getHttpSession().setAttribute(ScreensaverConstants.SCREENSAVER_USER_SESSION_ATTRIBUTE, user);
-  }
-
-  private ScreensaverUser getSessionCachedScreensaverUser()
-  {
-    ScreensaverUser user = (ScreensaverUser) getHttpSession().getAttribute(ScreensaverConstants.SCREENSAVER_USER_SESSION_ATTRIBUTE);
-    return user;
-  }
 }

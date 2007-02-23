@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.libraries.Compound;
@@ -45,7 +46,7 @@ public class BulkCompoundLibraryLoader
   public static void main(String[] args)
   {
     ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { 
-      "spring-context.xml",
+      CommandLineApplication.DEFAULT_SPRING_CONFIG,
     });
     BulkCompoundLibraryLoader libraryLoader =
       (BulkCompoundLibraryLoader) context.getBean("bulkCompoundLibraryLoader");

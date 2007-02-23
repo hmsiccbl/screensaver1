@@ -18,11 +18,6 @@ public interface ScreensaverConstants
   public static final String APPLICATION_TITLE = APPLICATION_NAME + " " + APPLICATION_VERSION;
   public static final String FEEDBACK_URL = "mailto:john_sullivan@hms.harvard.edu,andrew_tolopko@hms_harvard.edu";
   public static final String BUILD_NUMBER_FILE = "/build-number.txt";
-
-  /**
-   * Name of session attribute that holds the current screensaver user (of type {@link ScreensaverUser}).
-   */
-  public static final String SCREENSAVER_USER_SESSION_ATTRIBUTE = "screensaverUser";
   
   // JSF Action Results 
   // these values are returned by backing beans' action methods and are used to

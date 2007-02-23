@@ -51,7 +51,7 @@ public class CommandLineApplication
 {
   private static final Logger log = Logger.getLogger(CommandLineApplication.class);
   
-  private static final String DEFAULT_SPRING_CONFIG = "spring-context.xml";
+  public static final String DEFAULT_SPRING_CONFIG = "spring-context-cmdline.xml";
   
   
   // instanc data

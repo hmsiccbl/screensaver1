@@ -94,8 +94,8 @@ public class ScreensaverServletFilter extends OncePerRequestFilter {
 
     final HttpSession httpSession = request.getSession();
     String httpSessionId = httpSession.getId();
-    log.info(">>>> Screensaver STARTING to process HTTP request for session " + 
-             httpSessionId + " @ " + request.getRequestURI());
+    log.debug(">>>> Screensaver STARTING to process HTTP request for session " + 
+              httpSessionId + " @ " + request.getRequestURI());
 
 
     Throwable caughtException = null;
@@ -135,8 +135,8 @@ public class ScreensaverServletFilter extends OncePerRequestFilter {
       log.info("closed HTTP session " + httpSessionId);
     }
 
-    log.info("<<<< Screensaver FINISHED processing HTTP request for session " + 
-             httpSessionId + " @ " + request.getRequestURI());
+    log.debug("<<<< Screensaver FINISHED processing HTTP request for session " + 
+              httpSessionId + " @ " + request.getRequestURI());
 
   }
 

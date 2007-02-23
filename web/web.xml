@@ -32,7 +32,7 @@
   <!-- Specify Spring context configuration files, possibly one per application tier. -->
   <context-param>
     <param-name>contextConfigLocation</param-name>
-    <param-value>classpath*:spring-context.xml</param-value>
+    <param-value>classpath*:spring-context-web.xml</param-value>
   </context-param>
 
   <!-- Servlet listener to enable loading the above Spring application context XML files. -->

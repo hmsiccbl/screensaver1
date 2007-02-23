@@ -14,7 +14,7 @@
   <!-- bean
     id="userActivityLogAspect"
     class="edu.harvard.med.screensaver.ui.UserActivityLoggerAspect"/-->
-  
+
   <bean
     id="messages"
     class="edu.harvard.med.screensaver.ui.util.Messages">
@@ -29,7 +29,21 @@
     </property>
     <!--  TODO property name="locale" value=""/-->
   </bean>
+  
+  <!--  user authentication -->
 
+  <bean
+    id="currentScreensaverUser"
+    class="edu.harvard.med.screensaver.ui.WebCurrentScreensaverUser"
+    scope="session">
+    <property
+      name="dao"
+      ref="unrestrictedDao" />
+    <aop:scoped-proxy />
+  </bean>
+
+
+  <!-- JSF beans -->
 
   <!-- WARNING: if scope attribute is defined here, it will NOT be inherited!!! -->
   <!-- WARNING: if <aop:scoped-proxy/> element is defined here, it will NOT make the inheriting bean definition into a scoped proxy! -->
@@ -42,8 +56,11 @@
     <property
       name="messages"
       ref="messages" />
+    <property
+      name="currentScreensaverUser"
+      ref="currentScreensaverUser" />
   </bean>
-
+  
 
   <!-- === top-level & misc backing beans === -->
   

@@ -157,17 +157,18 @@
   
   <!-- Restricted Access DAO proxy configuration -->
   
-  <bean id="dataAccessPolicy"
-   class="edu.harvard.med.screensaver.db.DataAccessPolicy"/>
-
   <bean id="restrictedAccessCollectionDaoMethodInterceptor"
    class="edu.harvard.med.screensaver.db.RestrictedAccessCollectionDaoMethodInterceptor">
-   <property name="dataAccessPolicy" ref="dataAccessPolicy" />
+   <property
+     name="dataAccessPolicy"
+     ref="dataAccessPolicy" />
   </bean>
 
   <bean id="restrictedAccessEntityDaoMethodInterceptor"
    class="edu.harvard.med.screensaver.db.RestrictedAccessEntityDaoMethodInterceptor">
-   <property name="dataAccessPolicy" ref="dataAccessPolicy" />
+   <property
+     name="dataAccessPolicy"
+     ref="dataAccessPolicy" />
   </bean>
 
   <bean id="restrictedAccessCollectionDaoAdvisor"

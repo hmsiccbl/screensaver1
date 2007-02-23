@@ -71,6 +71,11 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
   // test setup methods
   
   @Override
+  protected String[] getConfigLocations() {
+    return new String[] { "spring-context-test-authentication.xml" } ;
+  }
+
+  @Override
   protected void onSetUp() throws Exception
   {
     super.onSetUp();
@@ -147,12 +152,6 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
   
   
   // test methods
-
-  public void testSpringInjection()
-  {
-    assertNotNull("injected DAO", screensaverLoginModule.getDao());
-    assertNotNull("injected authentication client", screensaverLoginModule.getAuthenticationClient());
-  }
 
   public void testInitialize()
   {

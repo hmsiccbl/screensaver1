@@ -21,44 +21,11 @@ import javax.faces.application.FacesMessage;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 
-/**
- * Tests Spring/Hibernate integration. This is one of the rare cases where
- * testing must be Spring-aware, as we're testing our application's Spring
- * configuration. Thus we use
- * <code>AbstractDependencyInjectionSpringContextTests</code> to have Spring
- * inject our Spring-managed objects into our test class.
- * 
- * @author andrew tolopko
- */
-public class SpringUtilTest extends AbstractSpringTest
+public class MessagesTest extends AbstractSpringTest
 {
 
   protected Messages messages;
   
-  
-  public SpringUtilTest() {
-    // have AbstractDependencyInjectionSpringContextTests inject the properties
-    // we need into protected data members that share the same name as beans in
-    // our Spring configuration files.
-    setPopulateProtectedVariables(true);
-  }
-  
-  // bean property setter/getter methods
-  
-  public void setSpringUiUtil(Messages messages) {
-    this.messages = messages;
-  }
-  
-  
-  /* AbstractDependencyInjectionSpringContextTests methods */
-  
-  @Override
-  protected void onSetUp() throws Exception
-  {
-  }
-  
-  
-  /* JUnit test methods */
   
   @SuppressWarnings("unchecked")
   public void testMessagesArgSubstitution() throws Exception {

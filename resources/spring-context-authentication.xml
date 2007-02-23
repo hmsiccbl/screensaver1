@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!-- A top-level, composite Spring context configuration file, intended for unit testing
+  Screensaver.  Allows a full Spring configuration to be referenced 
+  via a single file.  -->
+
+<beans>
+
+  <bean
+    id="eCommonsAuthenticationClient"
+    class="edu.harvard.med.authentication.eCommons.ECommonsAuthenticationClient">
+    <description>Client for an HMS network service that authenticates a given eCommons ID / password pair.</description>
+    <!-- requesting application's name; arbitrary, for server auditing only -->
+    <constructor-arg index="0" value="Screensaver1"/>
+    <!-- the HMS-assigned "issuer" ID; must be approved -->
+    <constructor-arg index="1" value="Orchestra_ATTR_CLIENT"/>
+    <!-- the URL of the eCommons authentication server -->
+    <constructor-arg index="2" value="https://authenticate.med.harvard.edu/wsAuthenticate.asp"/>
+  </bean>
+
+  <bean
+    id="screensaverLoginModule"
+    class="edu.harvard.med.screensaver.ui.authentication.ScreensaverLoginModule"
+    scope="prototype">
+    <description>JAAS LoginModule implementation that can be used to authenticate and authorize a user.  In our case, the Tomcat app server will make calls to this bean.  Maintains state between method calls, so cannot be a singleton.</description>
+    <property name="dao" ref="unrestrictedDao"/>
+    <property name="authenticationClient" ref="eCommonsAuthenticationClient"/>
+    <property name="currentScreensaverUser" ref="currentScreensaverUser"/>
+  </bean>
+  
+  <bean
+    id="loginModuleFactory" 
+    class="edu.harvard.med.screensaver.ui.authentication.LoginModuleFactoryImpl"
+    init-method="initialize">
+  </bean>
+  
+</beans>

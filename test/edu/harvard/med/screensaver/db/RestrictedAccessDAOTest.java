@@ -13,8 +13,6 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
@@ -28,6 +26,9 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
+
+import org.apache.log4j.Logger;
 
 /**
  * Tests DataAccessPolicy implementation, as well as Spring AOP configuration
@@ -49,9 +50,16 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
   protected DAO dao;
   protected SchemaUtil schemaUtil;
   protected DataAccessPolicy dataAccessPolicy;
+  protected CurrentScreensaverUser currentScreensaverUser;
   protected ScreenResultParser screenResultParser;
 
   // public constructors and methods
+  
+  @Override
+  protected String[] getConfigLocations()
+  {
+    return new String[] { "spring-context-test-authentication.xml" };
+  }
   
   @Override
   protected void onSetUp() throws Exception
@@ -64,10 +72,8 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
   protected void onTearDown() throws Exception
   {
     // must clear the "current" user, so that subsequent tests are not affected
-    // by data access permissions; note that
-    // DataAccessPolicy.setScreensaverUser() is only used for testing purposes,
-    // so this special cleanup not as impure as it might otherwise seem
-    dataAccessPolicy.setScreensaverUser(null);
+    // by data access permissions
+    currentScreensaverUser.setScreensaverUser(null);
   }
   
   public void testScreensaverUserAccountPermissions()
@@ -85,14 +91,14 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
       }
     } );
     
-    dataAccessPolicy.setScreensaverUser(users[1]);
+    currentScreensaverUser.setScreensaverUser(users[1]);
     List<ScreeningRoomUser> filterUsers = dao.findAllEntitiesWithType(ScreeningRoomUser.class);
     assertTrue("user can view own account ", filterUsers.contains(users[1]));
     assertTrue("user can view account of user in same lab", filterUsers.contains(users[2]));
     assertTrue("user can view account of lab head", filterUsers.contains(users[0]));
     assertFalse("user cannot view account of user not in same lab", filterUsers.contains(users[3]));
     
-    dataAccessPolicy.setScreensaverUser(users[0]);
+    currentScreensaverUser.setScreensaverUser(users[0]);
     filterUsers = dao.findAllEntitiesWithType(ScreeningRoomUser.class);
     assertTrue("lab head can view own account", filterUsers.contains(users[0]));
     assertTrue("lab head can view account of user in same lab", filterUsers.contains(users[1]));
@@ -165,33 +171,33 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
 
     Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 115);
 
-    dataAccessPolicy.setScreensaverUser(users[0]);
+    currentScreensaverUser.setScreensaverUser(users[0]);
     ScreenResult screenResult1 = dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
     assertNotNull("lead screener can view private screen result", screenResult1);
 
-    dataAccessPolicy.setScreensaverUser(users[1]);
+    currentScreensaverUser.setScreensaverUser(users[1]);
     ScreenResult screenResult2 = dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
     assertNotNull("screen collobarator can view private screen result", screenResult2);
     
-    dataAccessPolicy.setScreensaverUser(users[2]);
+    currentScreensaverUser.setScreensaverUser(users[2]);
     ScreenResult screenResult3 = dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
     assertNull("lab member cannot view private screen result, if not also lead screener or collaborator", screenResult3);
 
-    dataAccessPolicy.setScreensaverUser(users[3]);
+    currentScreensaverUser.setScreensaverUser(users[3]);
     ScreenResult screenResult4 = dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
     assertNull("lab head cannot view private screen result, if not also lead screener or collaborator", screenResult4);
 
     Screen screen116 = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 116);
 
-    dataAccessPolicy.setScreensaverUser(users[0]);
+    currentScreensaverUser.setScreensaverUser(users[0]);
     ScreenResult screenResult5 = dao.findEntityById(ScreenResult.class, screen116.getScreenResult().getEntityId());
     assertNotNull("compound screener with deposited data can view shareable screen result", screenResult5);
     
-    dataAccessPolicy.setScreensaverUser(users[2]);
+    currentScreensaverUser.setScreensaverUser(users[2]);
     ScreenResult screenResult6 = dao.findEntityById(ScreenResult.class, screen116.getScreenResult().getEntityId());
     assertNull("compound screener without deposited data cannot view shareable screen result", screenResult6);
     
-    dataAccessPolicy.setScreensaverUser(users[4]);
+    currentScreensaverUser.setScreensaverUser(users[4]);
     ScreenResult screenResult7 = dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
     assertNull("compound screener without deposited data cannot view private screen result", screenResult7);
   }
@@ -206,7 +212,7 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
   
   private void doTestScreenResultUserPermissions(ScreenType screenType, ScreensaverUser user)
   {
-    dataAccessPolicy.setScreensaverUser(user);
+    currentScreensaverUser.setScreensaverUser(user);
     List<Screen> screens = dao.findAllEntitiesWithType(Screen.class);
     assertTrue("non-empty screens list", screens.size() > 0);
     for (Screen screen : screens) {

@@ -236,6 +236,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String findWells()
   {
+    logUserActivity("open findWells");
     return "findWells";
   }
 
@@ -245,6 +246,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String findWell(String plateNumber, String wellName)
   {
+    logUserActivity("findWell " + plateNumber + ":" + wellName);
     Well well = lookupWell(plateNumber, wellName);
     if (well == null) {
       return "findWells";
@@ -258,6 +260,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String findWells(String plateWellList)
   {
+    logUserActivity("findWells");
     List<Well> wells = lookupWellsFromPlateWellList(plateWellList);
     if (wells.size() == 1) {
       return viewWell(wells.get(0), null);
@@ -273,6 +276,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String browseLibraries()
   {
+    logUserActivity("browseLibraries");
     if (getLibrariesBrowser().getLibrarySearchResults() == null) {
       //List<Library> libraries = _dao.findAllEntitiesWithType(Library.class);
       List<Library> libraries = _dao.findLibrariesDisplayedInLibrariesBrowser();
@@ -299,6 +303,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String viewLibrary(final Library libraryIn, LibrarySearchResults librarySearchResults)
   {
+    logUserActivity("viewLibrary " + libraryIn);
     _libraryViewer.setLibrarySearchResults(librarySearchResults);
 
     _dao.doInTransaction(new DAOTransaction() {
@@ -322,6 +327,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String viewLibraryContents(final Library libraryIn)
   {
+    logUserActivity("viewLibraryContents " + libraryIn);
     final Library[] libraryOut = new Library[1];
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
@@ -348,6 +354,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String viewWellSearchResults(WellSearchResults wellSearchResults)
   {
+    logUserActivity("viewWellSearchResults");
     _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
     return "viewWellSearchResults";
   }
@@ -373,6 +380,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
    */
   public String viewWell(final Well wellIn, WellSearchResults wellSearchResults)
   {
+    logUserActivity("viewWell " + wellIn);
     // TODO: we should consider replicating this null-condition handling in our
     // other view*() methods (and in all controllers)
     if (wellIn == null) {
@@ -411,6 +419,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String viewGene(final Gene geneIn, WellSearchResults wellSearchResults)
   {
+    logUserActivity("viewGene " + geneIn);
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
@@ -444,6 +453,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   public String viewCompound(final Compound compoundIn,
                              final WellSearchResults wellSearchResults)
   {
+    logUserActivity("viewCompound " + compoundIn);
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
@@ -479,6 +489,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String importCompoundLibraryContents(Library library)
   {
+    logUserActivity("importCompoundLibraryContents " + library);
     _compoundLibraryContentsImporter.setLibrary(library);
     _compoundLibraryContentsImporter.setUploadedFile(null);
     _compoundLibraryContentsImporter.setCompoundLibraryContentsParser(_compoundLibraryContentsParser);
@@ -492,6 +503,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String importCompoundLibraryContents(final Library libraryIn, final UploadedFile uploadedFile)
   {
+    logUserActivity("importCompoundLibraryContents " + libraryIn + " " + uploadedFile.getName() + " " + uploadedFile.getSize());
     try {
       if (uploadedFile == null || uploadedFile.getInputStream().available() == 0) {
         showMessage("badUploadedFile", uploadedFile.getName());
@@ -539,6 +551,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String importRNAiLibraryContents(Library library)
   {
+    logUserActivity("importRNAiLibraryContents " + library);
     _rnaiLibraryContentsImporter.setLibrary(library);
     _rnaiLibraryContentsImporter.setUploadedFile(null);
     _rnaiLibraryContentsParser.clearErrors();
@@ -554,6 +567,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     final UploadedFile uploadedFile,
     final SilencingReagentType silencingReagentType)
   {
+    logUserActivity("importRNAiLibraryContents " + libraryIn + " " + uploadedFile.getName() + " " + uploadedFile.getSize());
     try {
       if (uploadedFile == null || uploadedFile.getInputStream().available() == 0) {
         showMessage("badUploadedFile", uploadedFile.getName());
@@ -600,6 +614,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String unloadLibraryContents(final Library libraryIn)
   {
+    logUserActivity("unloadLibraryContents " + libraryIn);
     _dao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction() 
@@ -618,6 +633,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
    */
   public String downloadWellSearchResults(final WellSearchResults searchResultsIn)
   {
+    logUserActivity("downloadWellSearchResults");
     _dao.doInTransaction(new DAOTransaction() 
     {
       @SuppressWarnings("unchecked")

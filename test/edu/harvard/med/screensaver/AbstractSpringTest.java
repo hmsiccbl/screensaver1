@@ -16,7 +16,7 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
  * <code>AbstractDependencyInjectionSpringContextTests</code> that implements
  * the abstract method
  * {@link org.springframework.test.AbstractDependencyInjectionSpringContextTests#getConfigLocations}
- * by loading our <code>spring-context.xml</code> resource file.
+ * by loading our <code>spring-context-test.xml</code> resource file.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -31,7 +31,7 @@ extends AbstractDependencyInjectionSpringContextTests
    * specified in this constant.
    */
   private static final String[] SPRING_CONFIG_FILES = new String[] {
-    "spring-context.xml",
+    "spring-context-test.xml",
   };
   
   
@@ -57,6 +57,6 @@ extends AbstractDependencyInjectionSpringContextTests
   protected void onSetUp() throws Exception
   {
     // setup debug-level logging
-    logConfigurer.setLogPropertiesResource("classpath:log4j.debug.properties");
+    logConfigurer.setLogPropertiesResource("classpath:log4j.properties.debug");
   }
 }

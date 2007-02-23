@@ -46,6 +46,7 @@ public class MainControllerImpl extends AbstractUIController implements MainCont
   @UIControllerMethod
   public String viewMain()
   {
+    logUserActivity("viewMain");
     return VIEW_MAIN;
   }
 
@@ -55,6 +56,7 @@ public class MainControllerImpl extends AbstractUIController implements MainCont
   @UIControllerMethod
   public String viewInstructions()
   {
+    logUserActivity("viewInstructions");
     return VIEW_INSTRUCTIONS;
   }
   
@@ -64,6 +66,7 @@ public class MainControllerImpl extends AbstractUIController implements MainCont
   @UIControllerMethod
   public String viewDownloads()
   {
+    logUserActivity("viewDownloads");
     return VIEW_DOWNLOADS;
   }
   
@@ -72,6 +75,7 @@ public class MainControllerImpl extends AbstractUIController implements MainCont
    */
   public String logout()
   {
+    logUserActivity("logout");
     log.info("logout for session "  + getHttpSession().getId());
     closeHttpSession();
     return VIEW_GOODBYE;
