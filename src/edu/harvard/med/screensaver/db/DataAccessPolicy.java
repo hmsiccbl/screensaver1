@@ -9,10 +9,6 @@
 
 package edu.harvard.med.screensaver.db;
 
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpSession;
-
-import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.derivatives.Derivative;
 import edu.harvard.med.screensaver.model.derivatives.DerivativeScreenResult;
@@ -43,339 +39,69 @@ import edu.harvard.med.screensaver.model.screens.Visit;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 
-import org.apache.log4j.Logger;
-
-
-// TODO: add a unit test that ensures all AbstractEntity classes have a corresponding method in this class
-
-// TODO: implement billing permissions
-
-// TODO: currently, we're assuming that if a user has a specific admin role,
-// more than just readEverythingAdmin, that she also has the readEverythingAdmin
-// role. This assumption is not verified in our data model, so we should be more careful
-
-public class DataAccessPolicy implements AbstractEntityVisitor
+public interface DataAccessPolicy extends AbstractEntityVisitor
 {
-  // static members
 
-  private static Logger log = Logger.getLogger(DataAccessPolicy.class);
-  
-  
-  // instance data
+  public boolean visit(AbaseTestset entity);
 
-  private ScreensaverUser _screensaverUser;
-  
-  
-  // public methods
+  public boolean visit(AttachedFile entity);
 
-  public void setScreensaverUser(ScreensaverUser user)
-  {
-    _screensaverUser = user;
-    if (user != null) {
-      log.info("DataAccessPolicy " + hashCode() + " assigned to single user " + user);
-    }
-    else {
-      log.info("DataAccessPolicy " + hashCode() + " user assignment has been cleared, allowing full data access");
-    }
-  }
-  
-  public boolean visit(AbaseTestset entity)
-  {
-    return true;
-  }
+  public boolean visit(BillingInformation entity);
 
-  public boolean visit(AttachedFile entity)
-  {
-    return true;
-  }
+  public boolean visit(BillingItem entity);
 
-  public boolean visit(BillingInformation entity)
-  {
-    return true;
-  }
+  public boolean visit(ChecklistItem entity);
 
-  public boolean visit(BillingItem entity)
-  {
-    return true;
-  }
+  public boolean visit(ChecklistItemType entity);
 
-  public boolean visit(ChecklistItem entity)
-  {
-    return true;
-  }
+  public boolean visit(CherryPick entity);
 
-  public boolean visit(ChecklistItemType entity)
-  {
-    return true;
-  }
+  public boolean visit(Compound entity);
 
-  public boolean visit(CherryPick entity)
-  {
-    return true;
-  }
+  public boolean visit(Copy entity);
 
-  public boolean visit(Compound entity)
-  {
-    return true;
-  }
+  public boolean visit(CopyAction entity);
 
-  public boolean visit(Copy entity)
-  {
-    return true;
-  }
+  public boolean visit(CopyInfo entity);
 
-  public boolean visit(CopyAction entity)
-  {
-    return true;
-  }
+  public boolean visit(Derivative entity);
 
-  public boolean visit(CopyInfo entity)
-  {
-    return true;
-  }
+  public boolean visit(DerivativeScreenResult entity);
 
-  public boolean visit(Derivative entity)
-  {
-    return true;
-  }
+  public boolean visit(EquipmentUsed entity);
 
-  public boolean visit(DerivativeScreenResult entity)
-  {
-    return true;
-  }
+  public boolean visit(Gene entity);
 
-  public boolean visit(EquipmentUsed entity)
-  {
-    return true;
-  }
+  public boolean visit(LabAffiliation entity);
 
-  public boolean visit(Gene entity)
-  {
-    return true;
-  }
+  public boolean visit(LetterOfSupport entity);
 
-  public boolean visit(LabAffiliation entity)
-  {
-    return true;
-  }
+  public boolean visit(Library entity);
 
-  public boolean visit(LetterOfSupport entity)
-  {
-    return true;
-  }
+  public boolean visit(PlatesUsed entity);
 
-  public boolean visit(Library entity)
-  {
-    return true;
-  }
+  public boolean visit(Publication entity);
 
-  public boolean visit(PlatesUsed entity)
-  {
-    return true;
-  }
+  public boolean visit(ResultValue entity);
 
-  public boolean visit(Publication entity)
-  {
+  public boolean visit(ResultValueType entity);
 
-    return true;
-  }
+  public boolean visit(RNAiKnockdownConfirmation entity);
 
-  public boolean visit(ResultValue entity)
-  {
-    return true;
-  }
+  public boolean visit(Screen screen);
 
-  public boolean visit(ResultValueType entity)
-  {
-    return true;
-  }
+  public boolean visit(ScreenResult screenResult);
 
-  public boolean visit(RNAiKnockdownConfirmation entity)
-  {
-    return true;
-  }
+  public boolean visit(ScreensaverUser screensaverUser);
 
-  public boolean visit(Screen screen)
-  {
-    ScreensaverUser user = getScreensaverUser();
-    if (user == null) {
-      // non-web context, allow all permissions
-      return true;
-    }
-    if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
-      return true;
-    }
-    // TODO: temporary data access policy for beta, until Harvard legal dept
-    // (OTL) approves pubilc visibility of screens (as of 2007-02-08)
-    if (user instanceof ScreeningRoomUser) {
-      ScreeningRoomUser screener = (ScreeningRoomUser) user;
-      return screener.getScreensLed().contains(screen) ||
-      screener.getScreensHeaded().contains(screen) ||
-      screener.getScreensCollaborated().contains(screen);
-    }
-//    if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE) && 
-//      user.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER)) {
-//      return true;
-//    }
-//    if (screen.getScreenType().equals(ScreenType.RNAI) && 
-//      user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER)) {
-//      return true;
-//    }
-    return false;
-  }
+  public boolean visit(SilencingReagent entity);
 
-  public boolean visit(ScreenResult screenResult)
-  {
-    ScreensaverUser user = getScreensaverUser();
-    if (user == null) {
-      // non-web context, allow all permissions
-      return true;
-    }
-    if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
-      return true;
-    }
-    if (user instanceof ScreeningRoomUser) {
-      ScreeningRoomUser screener = (ScreeningRoomUser) user;
-      if (screener.getScreensLed().contains(screenResult.getScreen())) {
-        return true;
-      }
-      if (screener.getScreensCollaborated().contains(screenResult.getScreen())) {
-        return true;
-      }
-      if (!screenResult.isShareable()) {
-        return false;
-      }
-      if (screener.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER)) {
-        for (Screen screen : screener.getScreensCollaborated()) {
-          if (screen.getScreenResult() != null) {
-            return true;
-          }
-        }
-        for (Screen screen : screener.getScreensLed()) {
-          if (screen.getScreenResult() != null) {
-            return true;
-          }
-        }
-        for (Screen screen : screener.getScreensHeaded()) {
-          if (screen.getScreenResult() != null) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  }
+  public boolean visit(StatusItem entity);
 
-  public boolean visit(ScreensaverUser screensaverUser)
-  {
-    ScreensaverUser loggedInUser = getScreensaverUser();
-    if (loggedInUser == null) {
-      // non-web context, allow all permissions
-      return true;
-    }
-    if (loggedInUser.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
-      return true;
-    }
-    if (screensaverUser.equals(loggedInUser)) {
-      return true;
-    }
-    if (loggedInUser instanceof ScreeningRoomUser) {
-      ScreeningRoomUser loggedInScreener = (ScreeningRoomUser) loggedInUser;
-      if (loggedInScreener.isHeadOfLab()) {
-        if (loggedInScreener.getLabMembers().contains(screensaverUser)) {
-          // lab head can view her lab members
-          return true;
-        }
-      }
-      else {
-        if (loggedInScreener.getLabHead().equals(screensaverUser)) {
-          // non-lab head can view his lab head
-          return true;
-        }
-        if (loggedInScreener.getLabHead().getLabMembers().contains(screensaverUser)) {
-          // non-lab head can view his fellow lab members
-          return true;
-        }
-      }
-    }
-    return false;
-  }
+  public boolean visit(Visit visit);
 
-  public boolean visit(SilencingReagent entity)
-  {
-    return true;
-  }
-
-  public boolean visit(StatusItem entity)
-  {
-    return true;
-  }
-
-  public boolean visit(Visit visit)
-  {
-    ScreensaverUser user = getScreensaverUser();
-    if (user == null) {
-      // non-web context, allow all permissions
-      return true;
-    }
-    if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
-      return true;
-    }
-    if (user instanceof ScreeningRoomUser) {
-      ScreeningRoomUser screener = (ScreeningRoomUser) user;
-      if (screener.getScreensLed().contains(visit.getScreen())) {
-        return true;
-      }
-      if (screener.getScreensCollaborated().contains(visit.getScreen())) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public boolean visit(Well entity)
-  {
-    return true;
-  }
-  
-
-  // protected methods
-  
-  protected ScreensaverUser getScreensaverUser()
-  {
-    // handle usage within a web context
-    if (_screensaverUser == null) {
-      return getCurrentScreensaverUser();
-    }
-    // handle usage within a testing context
-    return _screensaverUser;
-  }
-
-  
-  // private methods
-  
-  // TODO: Major HACK alert! We need a better way of getting at the logged-in
-  // user, but one that will work outside the JSF framework (from just a vanilla
-  // servlet or servlet filter). Some form of injection...but this will require
-  // making DataAccessPolicy instances session-scoped.  
-  private ScreensaverUser getCurrentScreensaverUser()
-  {
-    FacesContext facesContext = FacesContext.getCurrentInstance();
-    if (facesContext == null) {
-      log.warn("no current screensaver user, since not executing within a web context; all data access permissions granted");
-      return null;
-    }
-    HttpSession httpSession = (HttpSession) facesContext.getExternalContext().getSession(false);
-    if (httpSession == null) {
-      log.warn("no current screensaver user, since no current HTTP session all data access permissions granted");
-      return null;
-    }
-    ScreensaverUser user = (ScreensaverUser) httpSession.getAttribute(ScreensaverConstants.SCREENSAVER_USER_SESSION_ATTRIBUTE);
-    return user;
-  }
+  public boolean visit(Well entity);
 
 }
