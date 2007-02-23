@@ -5,7 +5,7 @@
 <!-- A top-level, composite Spring context configuration file, intended for unit testing
   Screensaver.  Allows a full Spring configuration to be referenced 
   via a single file.  -->
-
+  
 <beans>
 
   <bean
@@ -27,7 +27,6 @@
     <description>JAAS LoginModule implementation that can be used to authenticate and authorize a user.  In our case, the Tomcat app server will make calls to this bean.  Maintains state between method calls, so cannot be a singleton.</description>
     <property name="dao" ref="unrestrictedDao"/>
     <property name="authenticationClient" ref="eCommonsAuthenticationClient"/>
-    <property name="currentScreensaverUser" ref="currentScreensaverUser"/>
   </bean>
   
   <bean
