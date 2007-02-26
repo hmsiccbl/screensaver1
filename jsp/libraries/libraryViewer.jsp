@@ -13,23 +13,26 @@
     <%@ include file="../nameValueTable.jspf"  %>
   </t:aliasBean>
 
-  <t:panelGroup rendered="#{libraryViewer.editable}">
+  <t:panelGroup>
     <h:form id="libraryContentsForm">
 			<h:commandButton value="View Library Contents"
 				action="#{libraryViewer.viewLibraryContents}" styleClass="command" />
 
 			<h:commandButton value="Import Library Contents"
 				action="#{libraryViewer.importRNAiLibraryContents}"
-				rendered="#{libraryViewer.isRNAiLibrary}" styleClass="command" />
+				rendered="#{libraryViewer.editable && libraryViewer.isRNAiLibrary}"
+			    styleClass="command" />
 
 			<h:commandButton value="Import Library Contents"
 				action="#{libraryViewer.importCompoundLibraryContents}"
-				rendered="#{libraryViewer.isCompoundLibrary}" styleClass="command" />
+				rendered="#{libraryViewer.editable && libraryViewer.isCompoundLibrary}"
+			    styleClass="command" />
 
 			<h:commandButton value="Unload Library Contents"
 				action="#{libraryViewer.unloadLibraryContents}"
 				onclick="javascript: return confirm('Are you sure you want to unload the contents of this library?');"
-				rendered="#{libraryViewer.librarySize > 0}" styleClass="command" />
+				rendered="#{libraryViewer.editable && libraryViewer.librarySize > 0}"
+				styleClass="command" />
 		</h:form>
   </t:panelGroup>
 
