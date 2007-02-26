@@ -93,6 +93,7 @@ public class ScreeningRoomUser extends ScreensaverUser
     setECommonsId(eCommonsId);
     setHarvardId(harvardId);
     setUserClassification(userClassification);
+    setNonScreeningUser(isNonScreeningUser);
   }
 
 
