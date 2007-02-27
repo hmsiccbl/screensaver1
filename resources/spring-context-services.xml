@@ -22,12 +22,6 @@
     </constructor-arg>
   </bean>
 
-  <bean
-    id="screenResultImporter"
-    class="edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter">
-    <description>Screen Result Importer</description>
-  </bean>
-
   <bean 
     id="screenResultExporter"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter"

@@ -222,11 +222,9 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     _screenViewer.setDao(_dao);
 
     _screenResultImporter.setDao(_dao);
-    _screenResultImporter.setMessages(getMessages());
     _screenResultImporter.setScreenResultParser(new ScreenResultParser(_dao));
 
     _screenResultViewer.setDao(_dao);
-    _screenResultViewer.setMessages(getMessages());
     _screenResultViewer.setScreenResultExporter(_screenResultExporter);
     _screenResultViewer.setLibrariesController(_librariesController);
 

@@ -349,6 +349,14 @@
   </bean>
 
   <bean
+    id="screenResultImporter"
+    parent="screensUiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter">
+    <description>Screen Result Importer</description>
+  </bean>
+
+  <bean
     id="screenFinder"
     parent="screensUiBean"
     scope="session"
