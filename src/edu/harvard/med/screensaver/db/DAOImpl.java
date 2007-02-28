@@ -241,6 +241,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   public void flush()
   {
     getHibernateTemplate().flush();
+    getHibernateTemplate().clear();
   }
 
   @SuppressWarnings("unchecked")

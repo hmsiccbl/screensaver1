@@ -740,6 +740,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     if (!_preloadedLibraries.contains(library)) {
       _dao.loadOrCreateWellsForLibrary(library);
       _preloadedLibraries.add(library);
+      log.debug("flushing hibernate session after loading library");
+      releaseMemory(new Runnable() { public void run() { _dao.flush(); } });
     }
   }
 
@@ -938,17 +940,18 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   
   private void releaseMemory(Runnable runBeforeGarbageCollection)
   {
-    long freeMem = Runtime.getRuntime().freeMemory();
+    long freeMem = 0L;
     //long usedMem = Runtime.getRuntime().totalMemory() - freeMem;
     if (log.isDebugEnabled()) {
-        //log.debug(String.format("totalMem=%.2fMB", Runtime.getRuntime().totalMemory() / (1024.0*1024.0)));
-        //log.debug(String.format("freeMem=%.2fMB", Runtime.getRuntime().freeMemory() / (1024.0*1024.0)));
+      freeMem = Runtime.getRuntime().freeMemory();
+      //log.debug(String.format("totalMem=%.2fMB", Runtime.getRuntime().totalMemory() / (1024.0*1024.0)));
+      //log.debug(String.format("freeMem=%.2fMB", Runtime.getRuntime().freeMemory() / (1024.0*1024.0)));
       long availMem = (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) + freeMem;
       log.debug(String.format("Before GC: avail mem=%.2fMB",  availMem / (1024.0*1024.0)));
     }
     runBeforeGarbageCollection.run();
-    Runtime.getRuntime().gc();
     if (log.isDebugEnabled()) {
+      Runtime.getRuntime().gc();
       //log.debug(String.format("freeMem=%.2fMB", Runtime.getRuntime().freeMemory() / (1024.0*1024.0)));
       long availMem = (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) + Runtime.getRuntime().freeMemory();
       log.debug(String.format("After GC:  avail mem=%.2fMB, delta=%.2fMB",  
