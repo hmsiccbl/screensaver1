@@ -70,15 +70,16 @@ public class Workbook
           _workbookStream = new FileInputStream(_workbookFile);
         }
         POIFSFileSystem dataFs = new POIFSFileSystem(new BufferedInputStream(_workbookStream));
-        _workbook = new HSSFWorkbook(dataFs);
+        _workbook = new HSSFWorkbook(dataFs, false);
       }
       catch (IOException e) {
+        // avoid NPE in calling code, and allow addError(), below, to work
+        _workbook = new HSSFWorkbook();
+
         String errorMsg = "could not read workbook '" + _workbookFile.getAbsolutePath() + "': " + e.getMessage();
         _errors.addError(errorMsg);
         log.error(errorMsg);
 
-        // avoid NPE in calling code
-        _workbook = new HSSFWorkbook();
       }
     }
     return _workbook;
@@ -134,10 +135,31 @@ public class Workbook
                                                                 newDirectory,
                                                                 newExtension);
     FileOutputStream out = new FileOutputStream(outputFile);
-    _workbook.write(out);
+    getWorkbook().write(out);
     out.close();
     log.info("saved workbook " + _workbookFile + " as " + outputFile);
     return outputFile;
   }
 
+  /**
+   * @motivation to release memory held by sheets that are no longer needed
+   */
+  public void reload()
+  {
+    if (_workbookFile.exists() && _workbookFile.canRead()) {
+      try {
+        _workbookStream.close();
+      }
+      catch (IOException e) {
+        // at worst, this will cause a memory leak, but we'll be re-creating the
+        // input stream when needed
+        log.error("could not close existing input stream for workbook");
+      }
+      _workbookStream = null;
+      _workbook = null;
+    }
+    else {
+      log.warn("cannot reload workbook, since it is not backed by a real file (data was provided via an InputStream)");
+    }
+  }
 }

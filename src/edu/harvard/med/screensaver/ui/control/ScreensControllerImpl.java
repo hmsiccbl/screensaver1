@@ -593,7 +593,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
           try {
             if (uploadedFile.getInputStream().available() > 0) {
               parser.parse(screen, 
-                           new File("screen_result_" + screen.getScreenNumber()),
+                           "screen_result_" + screen.getScreenNumber(),
                            uploadedFile.getInputStream());
               if (parser.getErrors().size() > 0) {
                 // these are data-related "user" errors, so we log at "info" level

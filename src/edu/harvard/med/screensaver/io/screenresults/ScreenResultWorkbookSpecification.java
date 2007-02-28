@@ -16,8 +16,7 @@ public interface ScreenResultWorkbookSpecification
 {
   public static final String SCREEN_INFO_SHEET_NAME = "Screen Info";
   public static final String DATA_HEADERS_SHEET_NAME = "Data Headers";
-  public static final String DATA_SHEET_NAME = "Data";
-  public static final Object DATA_SHEET__STOCK_PLATE_COLUMN_NAME = "Stock Plate ID";
+  public static final int FIRST_DATA_SHEET_INDEX = 2;
 
   public static final int METADATA_FIRST_DATA_HEADER_COLUMN_INDEX = 1;
   public static final char DATA_SHEET__FIRST_DATA_HEADER_COLUMN_LABEL = 'E';

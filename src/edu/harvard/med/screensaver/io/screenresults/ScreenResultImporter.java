@@ -97,14 +97,12 @@ public class ScreenResultImporter
                                                                  Integer.class);
       final Screen finalScreen = screen;
       final ScreenResultParser finalScreenResultParser = screenResultParser;
-      final InputStream inputFileStream = new FileInputStream(inputFile);
       dao.doInTransaction(new DAOTransaction() {
         public void runTransaction()
         {
           dao.reattachEntity(finalScreen);
           ScreenResult screenResult = finalScreenResultParser.parse(finalScreen,
-                                                                    inputFile,
-                                                                    inputFileStream);
+                                                                    inputFile);
           if (wellsToPrint != null) {
             new ScreenResultPrinter(screenResult).print(wellsToPrint);
           }

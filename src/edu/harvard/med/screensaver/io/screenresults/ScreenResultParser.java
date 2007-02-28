@@ -11,6 +11,7 @@
 
 package edu.harvard.med.screensaver.io.screenresults;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -108,6 +109,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private static final String NO_DATA_SHEETS_FOUND_ERROR = "no data worksheets were found; no result data was imported";
   private static final String NO_SUCH_WELL = "library well does not exist";
   private static final String NO_SUCH_LIBRARY_WITH_PLATE = "no library with given plate number";
+
+  private static final int RELOAD_WORKBOOK_AFTER_SHEET_COUNT = 32;
 
   private static SortedMap<String,AssayReadoutType> assayReadoutTypeMap = new TreeMap<String,AssayReadoutType>();
   private static SortedMap<String,IndicatorDirection> indicatorDirectionMap = new TreeMap<String,IndicatorDirection>();
@@ -231,17 +234,12 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   public ScreenResult parse(Screen screen, File workbookFile)
   {
     try {
-      return parse(screen, 
-                   workbookFile, 
-                   new FileInputStream(workbookFile));
+      return doParse(screen, 
+                     workbookFile,
+                     new BufferedInputStream(new FileInputStream(workbookFile)));
     }
     catch (FileNotFoundException e) {
-      e.printStackTrace();
-      String errorMsg = UNKNOWN_ERROR + " of type : " + e
-      .getClass() + ": " + e
-      .getMessage();
-      _errors
-      .addError(errorMsg);
+      _errors.addError("input file not found: " + e.getMessage());
     }
     return null;
   }
@@ -257,21 +255,22 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * getErrors() to determine parsing success.
    * 
    * @param the parent Screen of the Screen Result being parsed
-   * @param the workbook file to be parsed; this File object is used only to
-   *          communicate the name of the file; the file itself is not accessed
-   *          (we rely upon the inputStream argument instead)
-   * @param an InputStream that provides the workbook file as...well...
-   *          an InputStream
+   * @param the workbook file to be parsed; if inputStream is null, will be used
+   *          to obtain the workbook file, otherwise just used to hold a name
+   *          for display/output purposes; if named file does not actually
+   *          exist, inputStream must not be null
+   * @param an InputStream that provides the workbook file as...well... an
+   *          InputStream
    * @return a ScreenResult object containing the data parsed from the workbook
    *         file; <code>null</code> if a fatal error occurs
    * @see #getErrors()
    * @motivation For use by the web application UI; the InputStream allows us to
    *             avoid making (another) temporary copy of the file.
    */
-  public ScreenResult parse(Screen screen, File workbookFile, InputStream inputStream)
+  public ScreenResult parse(Screen screen, String inputSourceName, InputStream inputStream)
   {
     return doParse(screen, 
-                   workbookFile, 
+                   new File(inputSourceName), 
                    inputStream);
   }
 
@@ -405,10 +404,16 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @param sheetIndex
    * @return
    */
-  private HSSFSheet initializeDataSheet(Workbook workbook, int sheetIndex)
+  private HSSFSheet initializeDataSheet(final Workbook workbook, int sheetIndex)
   {
+//    // HACK: occassionally reclaim memory, since data held by previously loaded
+//    // sheets are no longer needed
+//    if (sheetIndex % RELOAD_WORKBOOK_AFTER_SHEET_COUNT == 0) {
+//      log.debug("releasing memory held by workbook");
+//      releaseMemory(new Runnable() { public void run() { workbook.reload(); } });
+//    }
+    
     HSSFSheet dataSheet = workbook.getWorkbook().getSheetAt(sheetIndex);
-
     _dataCellParserFactory = new Cell.Factory(workbook,
                                               sheetIndex,
                                               _errors);  
@@ -551,15 +556,13 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     ScreenResult screenResult) 
     throws ExtantLibraryException, IOException, UnrecoverableScreenResultParseException
   {
-    List<Pair<HSSFSheet,String>> dataSheets = getDataSheets(workbook);
     int dataSheetsParsed = 0;
-    for (Pair<HSSFSheet,String> sheetAndName : dataSheets) {
-      ++dataSheetsParsed;
-      HSSFSheet sheet = sheetAndName.getFirst();
-      String sheetName = sheetAndName.getSecond();
-      log.info("parsing sheet " + dataSheetsParsed + " of " + dataSheets.size() + ", " + 
-               sheetName);
-      initializeDataSheet(workbook, workbook.findSheetIndex(sheetName));
+    int totalSheets = workbook.getWorkbook().getNumberOfSheets();
+    int totalDataSheets = totalSheets - FIRST_DATA_SHEET_INDEX;
+    for (int i = FIRST_DATA_SHEET_INDEX; i < totalSheets; ++i) {
+      String sheetName = workbook.getWorkbook().getSheetName(i);
+      log.info("parsing sheet " + (dataSheetsParsed + 1) + " of " + totalDataSheets + ", " + sheetName);
+      final HSSFSheet sheet = initializeDataSheet(workbook, workbook.findSheetIndex(sheetName));
       for (int iRow = RAWDATA_FIRST_DATA_ROW_INDEX; iRow <= sheet.getLastRowNum(); ++iRow) {
         if (ignoreRow(sheet, iRow)) {
           continue;
@@ -644,24 +647,16 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
           ++iDataHeader;
         }
       }
+      ++dataSheetsParsed;
+      releaseMemory(new Runnable() {
+        public void run() { sheet.releaseData(); }
+      });
     }
     if (dataSheetsParsed == 0) {
       _errors.addError(NO_DATA_SHEETS_FOUND_ERROR);
     } else {
       log.info("done parsing " + dataSheetsParsed + " data sheet(s) " + workbook.getWorkbookFile().getName());
     }
-  }
-
-  private List<Pair<HSSFSheet,String>> getDataSheets(Workbook workbook)
-  {
-    List<Pair<HSSFSheet,String>> dataSheets = new ArrayList<Pair<HSSFSheet,String>>();
-    for (int iSheet = 0; iSheet < workbook.getWorkbook().getNumberOfSheets(); ++iSheet) {
-      HSSFSheet sheet = initializeDataSheet(workbook, iSheet);
-      if (isActiveSheetRawDataSheet()) {
-        dataSheets.add(new Pair<HSSFSheet,String>(sheet, workbook.getWorkbook().getSheetName(iSheet)));
-      }
-    }
-    return dataSheets;
   }
 
   /**
@@ -694,16 +689,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       return true;
     }
     return false;
-  }
-
-  private boolean isActiveSheetRawDataSheet()
-  {
-    Cell cell = dataCell(RAWDATA_HEADER_ROW_INDEX, DataColumn.STOCK_PLATE_ID);
-    if (cell == null) {
-      return false;
-    }
-    String stockPlateColumnName = cell.getAsString(false);
-    return stockPlateColumnName.equals(DATA_SHEET__STOCK_PLATE_COLUMN_NAME);
   }
 
   private Well findWell(int iRow) throws UnrecoverableScreenResultParseException
@@ -950,4 +935,26 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       return super.parseList(cell);
     }
   }
+  
+  private void releaseMemory(Runnable runBeforeGarbageCollection)
+  {
+    long freeMem = Runtime.getRuntime().freeMemory();
+    //long usedMem = Runtime.getRuntime().totalMemory() - freeMem;
+    if (log.isDebugEnabled()) {
+        //log.debug(String.format("totalMem=%.2fMB", Runtime.getRuntime().totalMemory() / (1024.0*1024.0)));
+        //log.debug(String.format("freeMem=%.2fMB", Runtime.getRuntime().freeMemory() / (1024.0*1024.0)));
+      long availMem = (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) + freeMem;
+      log.debug(String.format("Before GC: avail mem=%.2fMB",  availMem / (1024.0*1024.0)));
+    }
+    runBeforeGarbageCollection.run();
+    Runtime.getRuntime().gc();
+    if (log.isDebugEnabled()) {
+      //log.debug(String.format("freeMem=%.2fMB", Runtime.getRuntime().freeMemory() / (1024.0*1024.0)));
+      long availMem = (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) + Runtime.getRuntime().freeMemory();
+      log.debug(String.format("After GC:  avail mem=%.2fMB, delta=%.2fMB",  
+                              availMem / (1024.0*1024.0),
+                              (freeMem - Runtime.getRuntime().freeMemory()) / (1024.0*1024.0)));
+    }
+  }
+
 }
