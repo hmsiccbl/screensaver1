@@ -10,11 +10,14 @@
 package edu.harvard.med.screensaver.io.screenresults;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Iterator;
+
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAO;
@@ -23,11 +26,6 @@ import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
-
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 
 public class ScreenResultImporter
 {
@@ -102,12 +100,13 @@ public class ScreenResultImporter
         public void runTransaction()
         {
           dao.reattachEntity(finalScreen);
-          if (finalScreen.getScreenResult() != null) {
-            log.info("deleting existing screen result for " + finalScreen);
-            dao.deleteScreenResult(finalScreen.getScreenResult());
-          }
+//          if (finalScreen.getScreenResult() != null) {
+//            log.info("deleting existing screen result for " + finalScreen);
+//            dao.deleteScreenResult(finalScreen.getScreenResult());
+//          }
           ScreenResult screenResult = finalScreenResultParser.parse(finalScreen,
                                                                     inputFile);
+          dao.persistEntity(screenResult);
           if (wellsToPrint != null) {
             new ScreenResultPrinter(screenResult).print(wellsToPrint);
           }
@@ -160,10 +159,10 @@ public class ScreenResultImporter
       System.err.println("screen " + screenNumber + " does not exist");
       System.exit(1);
     }
-//    if (screen.getScreenResult() != null) {
-//      System.err.println("screen " + screenNumber + " already has a screen result");
-//      System.exit(1);
-//    }
+    if (screen.getScreenResult() != null) {
+      System.err.println("screen " + screenNumber + " already has a screen result");
+      System.exit(1);
+    }
     return screen;
   }
 

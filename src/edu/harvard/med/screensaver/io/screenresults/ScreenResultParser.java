@@ -31,6 +31,11 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.CellValueParser;
@@ -53,12 +58,6 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Visit;
-import edu.harvard.med.screensaver.util.Pair;
-
-import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 
 /**
  * Parses data from a workbook files (a.k.a. Excel spreadsheets) necessary for
@@ -740,8 +739,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     if (!_preloadedLibraries.contains(library)) {
       _dao.loadOrCreateWellsForLibrary(library);
       _preloadedLibraries.add(library);
-      log.debug("flushing hibernate session after loading library");
-      releaseMemory(new Runnable() { public void run() { _dao.flush(); } });
+      //log.debug("flushing hibernate session after loading library");
+      //releaseMemory(new Runnable() { public void run() { _dao.flush(); } });
     }
   }
 
