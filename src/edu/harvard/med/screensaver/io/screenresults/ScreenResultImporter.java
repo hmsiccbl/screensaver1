@@ -19,6 +19,7 @@ import java.util.Iterator;
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -101,6 +102,10 @@ public class ScreenResultImporter
         public void runTransaction()
         {
           dao.reattachEntity(finalScreen);
+          if (finalScreen.getScreenResult() != null) {
+            log.info("deleting existing screen result for " + finalScreen);
+            dao.deleteScreenResult(finalScreen.getScreenResult());
+          }
           ScreenResult screenResult = finalScreenResultParser.parse(finalScreen,
                                                                     inputFile);
           if (wellsToPrint != null) {
@@ -109,31 +114,34 @@ public class ScreenResultImporter
           else {
             new ScreenResultPrinter(screenResult).print();
           }
+          if (finalScreenResultParser.getErrors().size() > 0) {
+            System.err.println("Errors encountered during parse:");
+            for (ParseError error : finalScreenResultParser.getErrors()) {
+              System.err.println(error.toString());
+            }
 
+            try {
+              finalScreenResultParser.outputErrorsInAnnotatedWorkbooks(null,
+                                                                       ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
+            }
+            catch (IOException e) {
+              log.error("could not create error-annotated workbook: " + e.getMessage());
+            }
+            throw new DAOTransactionRollbackException("screen result errors");
+          }
+          else {
+            System.err.println("Success!");
+          }
         }
       });
-      screenResultParser.outputErrorsInAnnotatedWorkbooks(null,
-                                                          ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
-      if (screenResultParser.getErrors()
-                            .size() > 0) {
-        System.err.println("Errors encountered during parse:");
-        for (ParseError error : screenResultParser.getErrors()) {
-          System.err.println(error.toString());
-        }
-      }
-      else {
-        dao.persistEntity(screen);
-        System.err.println("Success!");
-      }
-    }
-    catch (IOException e) {
-      String errorMsg = "I/O error: " + e.getMessage();
-      log.error(errorMsg);
-      System.err.println(errorMsg);
     }
     catch (ParseException e) {
       System.err.println("error parsing command line options: "
                          + e.getMessage());
+    }
+    catch (DAOTransactionRollbackException e) {
+      // already handled
+      log.error("aborted import due to error: " + e.getMessage());
     }
     catch (Exception e) {
       e.printStackTrace();
@@ -152,10 +160,10 @@ public class ScreenResultImporter
       System.err.println("screen " + screenNumber + " does not exist");
       System.exit(1);
     }
-    if (screen.getScreenResult() != null) {
-      System.err.println("screen " + screenNumber + " already has a screen result");
-      System.exit(1);
-    }
+//    if (screen.getScreenResult() != null) {
+//      System.err.println("screen " + screenNumber + " already has a screen result");
+//      System.exit(1);
+//    }
     return screen;
   }
 
