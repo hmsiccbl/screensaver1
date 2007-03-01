@@ -95,9 +95,10 @@ public class MockDaoForScreenResultImporter extends NoOpDAO
 
   public static Screen makeDummyScreen(int screenNumber)
   {
-    ScreeningRoomUser labHead = MockDaoForScreenResultImporter.makeDummyUser(screenNumber, "Joe", "Screener");
+    ScreeningRoomUser labHead = MockDaoForScreenResultImporter.makeDummyUser(screenNumber, "Lab", "Head");
+    ScreeningRoomUser leadScreener = MockDaoForScreenResultImporter.makeDummyUser(screenNumber, "Lead", "Screener");
     Screen screen = new Screen(labHead,
-                               labHead,
+                               leadScreener,
                                screenNumber,
                                new Date(),
                                ScreenType.SMALL_MOLECULE,
