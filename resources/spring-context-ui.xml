@@ -116,9 +116,8 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.SchemaManager">
     <description>Schema Manager</description>
-    <property
-      name="schemaUtil"
-      ref="schemaUtil" />
+    <property name="schemaUtil" ref="schemaUtil" />
+    <property name="dao" ref="dao" />
     <aop:scoped-proxy/>
   </bean>
 

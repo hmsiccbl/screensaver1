@@ -15,6 +15,8 @@ import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.db.DAO;
+
 public class ScreenDBSynchronizer
 {
   // static members
@@ -37,17 +39,19 @@ public class ScreenDBSynchronizer
   private String _username;
   private String _password;
   private Connection _connection;
+  private DAO _dao;
   private String _errorMessageKey;
   
 
   // public constructors and methods
 
-  public ScreenDBSynchronizer(String server, String database, String username, String password)
+  public ScreenDBSynchronizer(String server, String database, String username, String password, DAO dao)
   {
     _server = server;
     _database = database;
     _username = username;
     _password = password;
+    _dao = dao;
   }
   
   /**
@@ -63,8 +67,11 @@ public class ScreenDBSynchronizer
       return false;
     }
 
-    // TODO
-    
+    ScreenDBUserSynchronizer userSynchronizer = new ScreenDBUserSynchronizer(_connection, _dao);
+    userSynchronizer.synchronizeUsers();
+
+    // TODO: screens, visits, libraries
+
     return true;
   }
   

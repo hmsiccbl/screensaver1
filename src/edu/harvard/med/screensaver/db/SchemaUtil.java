@@ -194,6 +194,7 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
       });
       Arrays.sort(filenames);
       for (String filename : filenames) {
+
         log.info("processing file = " + filename);
         File file = new File(directory, filename);
         BufferedReader reader =

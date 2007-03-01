@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.db.screendb.ScreenDBSynchronizer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
@@ -20,6 +21,7 @@ public class SchemaManager extends AbstractBackingBean
   private static Logger log = Logger.getLogger(ScreenViewer.class);
   
   private SchemaUtil _schemaUtil;
+  private DAO _dao;
 
   private String _screenDBServer = "localhost";
   private String _screenDBDatabase = "screendb";
@@ -37,6 +39,16 @@ public class SchemaManager extends AbstractBackingBean
   public void setSchemaUtil(SchemaUtil schemaUtil)
   {
     _schemaUtil = schemaUtil;
+  }
+
+  public DAO getDao()
+  {
+    return _dao;
+  }
+
+  public void setDao(DAO dao)
+  {
+    _dao = dao;
   }
 
   public String getScreenDBServer()
@@ -117,7 +129,8 @@ public class SchemaManager extends AbstractBackingBean
       _screenDBServer,
       _screenDBDatabase,
       _screenDBUsername,
-      _screenDBPassword);
+      _screenDBPassword,
+      _dao);
     if (screenDBSynchronizer.synchronize()) {
       showMessage("screenDBSynchronizer.screenDBSynchronized");
     }
