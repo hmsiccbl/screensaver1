@@ -9,14 +9,23 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.SchemaUtil;
-import edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter;
+import edu.harvard.med.screensaver.db.screendb.ScreenDBSynchronizer;
+import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 
 public class SchemaManager extends AbstractBackingBean
 {
+  private static Logger log = Logger.getLogger(ScreenViewer.class);
+  
   private SchemaUtil _schemaUtil;
-  private ScreenDBDataImporter _screenDBDataImporter;
 
+  private String _screenDBServer = "localhost";
+  private String _screenDBDatabase = "screendb";
+  private String _screenDBUsername;
+  private String _screenDBPassword;
+  
   
   // getters and setters
   
@@ -30,19 +39,49 @@ public class SchemaManager extends AbstractBackingBean
     _schemaUtil = schemaUtil;
   }
 
-  public ScreenDBDataImporter getScreenDBDataImporter()
+  public String getScreenDBServer()
   {
-    return _screenDBDataImporter;
+    return _screenDBServer;
   }
 
-  public void setScreenDBDataImporter(ScreenDBDataImporter screenDBDataImporter)
+  public void setScreenDBServer(String screenDBServer)
   {
-    _screenDBDataImporter = screenDBDataImporter;
+    _screenDBServer = screenDBServer;
   }
 
+  public String getScreenDBDatabase()
+  {
+    return _screenDBDatabase;
+  }
 
+  public void setScreenDBDatabase(String screenDBDatabase)
+  {
+    _screenDBDatabase = screenDBDatabase;
+  }
+
+  public String getScreenDBUsername()
+  {
+    return _screenDBUsername;
+  }
+
+  public void setScreenDBUsername(String screenDBUsername)
+  {
+    _screenDBUsername = screenDBUsername;
+  }
+
+  public String getScreenDBPassword()
+  {
+    return _screenDBPassword;
+  }
+
+  public void setScreenDBPassword(String screenDBPassword)
+  {
+    _screenDBPassword = screenDBPassword;
+  }
+
+  
   // JSF application methods
-
+  
   public void dropSchema()
   {
     _schemaUtil.dropSchema();
@@ -68,8 +107,22 @@ public class SchemaManager extends AbstractBackingBean
     _schemaUtil.grantDeveloperPermissions();
   }
   
-  public void loadScreenDB()
+  public void synchronizeScreenDB()
   {
-    _screenDBDataImporter.loadScreenDBData();
+    if (_screenDBUsername.equals("")) {
+      showMessage("screenDBSynchronizer.missingUsernamePassword");
+      return; 
+    }
+    ScreenDBSynchronizer screenDBSynchronizer = new ScreenDBSynchronizer(
+      _screenDBServer,
+      _screenDBDatabase,
+      _screenDBUsername,
+      _screenDBPassword);
+    if (screenDBSynchronizer.synchronize()) {
+      showMessage("screenDBSynchronizer.screenDBSynchronized");
+    }
+    else {
+      showMessage(screenDBSynchronizer.getErrorMessageKey());
+    }
   }
 }
