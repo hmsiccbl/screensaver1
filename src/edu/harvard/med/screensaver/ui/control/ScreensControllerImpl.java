@@ -252,11 +252,12 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                     "hbnCollaborators",
                     "hbnLabHead",
                     "hbnLabHead.hbnLabMembers",
-                    "hbnLeadScreener",
-                    "screenResult.plateNumbers",
-                    "screenResult.hbnResultValueTypes",
-                    "screenResult.hbnResultValueTypes.hbnDerivedTypes",
-                    "screenResult.hbnResultValueTypes.hbnTypesDerivedFrom");
+                    "hbnLeadScreener");
+          _dao.need(screen.getScreenResult(),
+                    "plateNumbers",
+                    "hbnResultValueTypes",
+                    "hbnResultValueTypes.hbnDerivedTypes",
+                    "hbnResultValueTypes.hbnTypesDerivedFrom");
           
           ScreenResult permissionsAwareScreenResult = 
             _dao.findEntityById(ScreenResult.class, 
