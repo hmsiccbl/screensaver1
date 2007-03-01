@@ -100,23 +100,18 @@ public class ScreenResultImporter
         public void runTransaction()
         {
           dao.reattachEntity(finalScreen);
-//          if (finalScreen.getScreenResult() != null) {
-//            log.info("deleting existing screen result for " + finalScreen);
-//            dao.deleteScreenResult(finalScreen.getScreenResult());
-//          }
+
+          if (finalScreen.getScreenResult() != null) {
+            log.info("deleting existing screen result for " + finalScreen);
+            dao.deleteScreenResult(finalScreen.getScreenResult());
+          }
+
           ScreenResult screenResult = finalScreenResultParser.parse(finalScreen,
                                                                     inputFile);
-          dao.persistEntity(screenResult);
-          if (wellsToPrint != null) {
-            new ScreenResultPrinter(screenResult).print(wellsToPrint);
-          }
-          else {
-            new ScreenResultPrinter(screenResult).print();
-          }
           if (finalScreenResultParser.getErrors().size() > 0) {
-            System.err.println("Errors encountered during parse:");
+            log.error("Errors encountered during parse:");
             for (ParseError error : finalScreenResultParser.getErrors()) {
-              System.err.println(error.toString());
+              log.error(error.toString());
             }
 
             try {
@@ -128,23 +123,29 @@ public class ScreenResultImporter
             }
             throw new DAOTransactionRollbackException("screen result errors");
           }
-          else {
-            System.err.println("Success!");
+
+          if (wellsToPrint != null) {
+            new ScreenResultPrinter(screenResult).print(wellsToPrint);
           }
+          else {
+            new ScreenResultPrinter(screenResult).print();
+          }
+          dao.persistEntity(screenResult);
+          log.info("Done parsing input file.");
         }
       });
+      log.info("Import completed successfully!");
     }
     catch (ParseException e) {
-      System.err.println("error parsing command line options: "
-                         + e.getMessage());
+      log.error("error parsing command line options: " + e.getMessage());
     }
     catch (DAOTransactionRollbackException e) {
       // already handled
       log.error("aborted import due to error: " + e.getMessage());
     }
     catch (Exception e) {
+      log.error("application error: " + e.getMessage());
       e.printStackTrace();
-      System.err.println("application error: " + e.getMessage());
     }
   }
 
@@ -156,24 +157,20 @@ public class ScreenResultImporter
                                               "hbnScreenNumber",
                                               screenNumber);
     if (screen == null) {
-      System.err.println("screen " + screenNumber + " does not exist");
-      System.exit(1);
-    }
-    if (screen.getScreenResult() != null) {
-      System.err.println("screen " + screenNumber + " already has a screen result");
+      log.error("screen " + screenNumber + " does not exist");
       System.exit(1);
     }
     return screen;
   }
 
-  private static void cleanOutputDirectory(File parentFile)
+  private static void cleanOutputDirectory(File dir)
   {
-    if (!parentFile.isDirectory()) {
-      log.warn("cannot clean the directory '" + parentFile + "' since it is not a directory");
+    if (!dir.isDirectory()) {
+      log.warn("cannot clean the directory '" + dir + "' since it is not a directory");
       return;
     }
-    log.info("cleaning directory " + parentFile);
-    Iterator iterator = FileUtils.iterateFiles(parentFile,
+    log.info("cleaning directory " + dir);
+    Iterator iterator = FileUtils.iterateFiles(dir,
                                                new String[] {ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION, ".out"},
                                                false);
     while (iterator.hasNext()) {
@@ -182,12 +179,5 @@ public class ScreenResultImporter
       fileToDelete.delete();
     }
   }
-
-  // instance data members
-
-  // public constructors and methods
-
-  // private methods
-
 }
 
