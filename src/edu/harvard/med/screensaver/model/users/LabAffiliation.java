@@ -10,6 +10,9 @@
 package edu.harvard.med.screensaver.model.users;
 
 
+import java.util.Collections;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -33,9 +36,8 @@ public class LabAffiliation extends AbstractEntity
 
   // instance fields
 
-  private Integer _labAffiliationId;
   private Integer _version;
-  private ScreeningRoomUser _screeningRoomUser;
+  private Set<ScreeningRoomUser> _screeningRoomUsers;
   private String _affiliationName;
   private AffiliationCategory _affiliationCategory;
 
@@ -45,62 +47,45 @@ public class LabAffiliation extends AbstractEntity
   /**
    * Constructs an initialized <code>LabAffiliation</code> object.
    *
-   * @param screeningRoomUser the screening room user
    * @param affiliationName the affiliation name
    * @param affiliationCategory the affiliation category
    */
-  public LabAffiliation(
-    ScreeningRoomUser screeningRoomUser,
-    String affiliationName,
-    AffiliationCategory affiliationCategory)
+  public LabAffiliation(String affiliationName, AffiliationCategory affiliationCategory)
   {
-    _screeningRoomUser = screeningRoomUser;
     _affiliationName = affiliationName;
     _affiliationCategory = affiliationCategory;
-    _screeningRoomUser.setHbnLabAffiliation(this);
   }
 
 
   // public methods
 
   @Override
-  public Integer getEntityId()
+  public String getEntityId()
   {
-    return getLabAffiliationId();
+    return getAffiliationName();
   }
 
+  /**
+   * Get an unmodifiable copy of the set of screening room users with this lab affiliation.
+   * 
+   * @return the screening room users with this lab affiliation
+   */
+  public Set<ScreeningRoomUser> getScreeningRoomUsers()
+  {
+    return Collections.unmodifiableSet(_screeningRoomUsers);
+  }
+  
   /**
    * Get the id for the lab affiliation.
    *
    * @return the id for the lab affiliation
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="lab_affiliation_id_seq"
+   * @hibernate.id
+   *   generator-class="assigned"
+   *   length="2047"
    */
-  public Integer getLabAffiliationId()
+  public String getLabAffiliationId()
   {
-    return _labAffiliationId;
-  }
-
-  /**
-   * Get the screening room user.
-   *
-   * @return the screening room user
-   */
-  public ScreeningRoomUser getScreeningRoomUser()
-  {
-    return _screeningRoomUser;
-  }
-
-  /**
-   * Set the screening room user.
-   *
-   * @param screeningRoomUser the new screening room user
-   */
-  public void setScreeningRoomUser(ScreeningRoomUser screeningRoomUser)
-  {
-    _screeningRoomUser.setHbnLabAffiliation(null);
-    _screeningRoomUser = screeningRoomUser;
-    _screeningRoomUser.setHbnLabAffiliation(this);
+    return getAffiliationName();
   }
 
   /**
@@ -110,6 +95,7 @@ public class LabAffiliation extends AbstractEntity
    * @hibernate.property
    *   type="text"
    *   not-null="true"
+   *   unique="true"
    */
   public String getAffiliationName()
   {
@@ -152,83 +138,10 @@ public class LabAffiliation extends AbstractEntity
 
   // protected methods
 
-  /**
-   * A business key class for the well.
-   */
-  private class BusinessKey
-  {
-    
-    /**
-     * Get the screening room user.
-     *
-     * @return the screening room user
-     */
-    public ScreeningRoomUser getScreeningRoomUser()
-    {
-      return _screeningRoomUser;
-    }
-    
-    /**
-     * Get the affiliation name.
-     *
-     * @return the affiliation name
-     */
-    public String getAffiliationName()
-    {
-      return _affiliationName;
-    }
-
-    @Override
-    public boolean equals(Object object)
-    {
-      if (! (object instanceof BusinessKey)) {
-        return false;
-      }
-      BusinessKey that = (BusinessKey) object;
-      return
-        getScreeningRoomUser().equals(that.getScreeningRoomUser()) &&
-        getAffiliationName().equals(that.getAffiliationName());
-    }
-
-    @Override
-    public int hashCode()
-    {
-      return
-        getScreeningRoomUser().hashCode() +
-        getAffiliationName().hashCode();
-    }
-
-    @Override
-    public String toString()
-    {
-      return getScreeningRoomUser() + ":" + getAffiliationName();
-    }
-  }
-
   @Override
   protected Object getBusinessKey()
   {
-    // TODO: assure changes to business key update relationships whose other side is many
-    return new BusinessKey();
-  }
-
-
-  // package methods
-
-  /**
-   * Set the screening room user.
-   * Throw a NullPointerException when the screening room user is null.
-   *
-   * @param screeningRoomUser the new screening room user
-   * @throws NullPointerException when the screening room user is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  void setHbnScreeningRoomUser(ScreeningRoomUser screeningRoomUser)
-  {
-    if (screeningRoomUser == null) {
-      throw new NullPointerException();
-    }
-    _screeningRoomUser = screeningRoomUser;
+    return _affiliationName;
   }
 
 
@@ -250,8 +163,8 @@ public class LabAffiliation extends AbstractEntity
    * @param labAffiliationId the new id for the lab affiliation
    * @motivation for hibernate
    */
-  private void setLabAffiliationId(Integer labAffiliationId) {
-    _labAffiliationId = labAffiliationId;
+  private void setLabAffiliationId(String labAffiliationId)
+  {
   }
 
   /**
@@ -261,7 +174,8 @@ public class LabAffiliation extends AbstractEntity
    * @motivation for hibernate
    * @hibernate.version
    */
-  private Integer getVersion() {
+  private Integer getVersion()
+  {
     return _version;
   }
 
@@ -271,24 +185,36 @@ public class LabAffiliation extends AbstractEntity
    * @param version the new version for the lab affiliation
    * @motivation for hibernate
    */
-  private void setVersion(Integer version) {
+  private void setVersion(Integer version)
+  {
     _version = version;
   }
-
+  
   /**
-   * Get the screening room user.
-   *
-   * @return the Screensaver user
-   * @hibernate.many-to-one
+   * Get the screening room users with this affiliation.
+   * 
+   * @return the screening room users with this affiliation
+   * @hibernate.set
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="lab_affiliation_id"
+   * @hibernate.collection-one-to-many
    *   class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser"
-   *   column="screensaver_user_id"
-   *   not-null="true"
-   *   foreign-key="fk_lab_affiliation_to_screening_room_user"
-   *   cascade="save-update"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  private Set<ScreeningRoomUser> getHbnScreeningRoomUsers()
+  {
+    return _screeningRoomUsers;
+  }
+  
+  /**
+   * Set the screening room users with this lab affiliation.
+   * 
+   * @param screeningRoomUsers
    * @motivation for hibernate
    */
-  private ScreeningRoomUser getHbnScreeningRoomUser()
+  private void setHbnScreeningRoomUsers(Set<ScreeningRoomUser> screeningRoomUsers)
   {
-    return _screeningRoomUser;
+    _screeningRoomUsers = screeningRoomUsers;
   }
 }

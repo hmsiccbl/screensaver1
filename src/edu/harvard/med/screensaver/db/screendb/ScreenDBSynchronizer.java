@@ -66,9 +66,16 @@ public class ScreenDBSynchronizer
       _errorMessageKey = "screenDBSynchronizer.couldNotConnect";
       return false;
     }
-
-    ScreenDBUserSynchronizer userSynchronizer = new ScreenDBUserSynchronizer(_connection, _dao);
-    userSynchronizer.synchronizeUsers();
+    try {
+      ScreenDBUserSynchronizer userSynchronizer = new ScreenDBUserSynchronizer(_connection, _dao);
+      userSynchronizer.synchronizeUsers();
+    }
+    catch (ScreenDBSynchronizationException e) {
+      // TODO: report error message as well
+      log.error(e);
+      _errorMessageKey = "screenDBSynchronizer.synchronizationException";
+      return false;
+    }
 
     // TODO: screens, visits, libraries
 

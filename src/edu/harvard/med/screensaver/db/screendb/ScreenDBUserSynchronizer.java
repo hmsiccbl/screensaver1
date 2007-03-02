@@ -21,6 +21,8 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.model.users.AffiliationCategory;
+import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -42,6 +44,9 @@ public class ScreenDBUserSynchronizer
     new HashMap<Integer,ScreeningRoomUser>();
   ScreeningRoomUserClassification.UserType _userClassificationUserType =
     new ScreeningRoomUserClassification.UserType();
+  private LabAffiliationCategoryMapper _labAffiliationCategoryMapper =
+    new LabAffiliationCategoryMapper();
+  private ScreenDBSynchronizationException _synchronizationException = null;
 
   
   // public constructors and methods
@@ -52,17 +57,30 @@ public class ScreenDBUserSynchronizer
     _dao = dao;
   }
   
-  public void synchronizeUsers()
+  public void synchronizeUsers() throws ScreenDBSynchronizationException
   {
     _dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
-        constructMappings();
-        connectUsersToLabHeads();
-        persistScreeningRoomUsers();
+        try {
+          constructMappings();
+          connectUsersToLabHeads();
+          persistScreeningRoomUsers();
+        }
+        catch (SQLException e) {
+          _synchronizationException = new ScreenDBSynchronizationException(
+            "SQL exception synchronizing users: " + e.getMessage(),
+            e);
+        }
+        catch (ScreenDBSynchronizationException e) {
+          _synchronizationException = e;
+        }
       }
     });
+    if (_synchronizationException != null) {
+      throw _synchronizationException;
+    }
   }
   
   
@@ -71,26 +89,22 @@ public class ScreenDBUserSynchronizer
   /**
    * Construct the {@link #_screenDBUserIdToLabHeadId} and
    * {@link #_screenDBUserIdToScreensaverUserMap} maps. 
+   * @throws SQLException 
+   * @throws ScreenDBSynchronizationException 
    */
-  private void constructMappings()
+  private void constructMappings() throws SQLException, ScreenDBSynchronizationException
   {
-    try {
-      Statement statement = _connection.createStatement();
-      ResultSet resultSet = statement.executeQuery("SELECT * FROM users");
-      while (resultSet.next()) {
-        ScreeningRoomUser user = constructScreeningRoomUser(resultSet);
-        Integer id = resultSet.getInt("id");
-        _screenDBUserIdToLabHeadId.put(id, resultSet.getInt("lab_name"));
-        _screenDBUserIdToScreeningRoomUserMap.put(id, user);
-      }
-    }
-    catch (SQLException e) {
-      log.error("sql error: " + e.getMessage());
-      e.printStackTrace();
+    Statement statement = _connection.createStatement();
+    ResultSet resultSet = statement.executeQuery("SELECT * FROM users");
+    while (resultSet.next()) {
+      ScreeningRoomUser user = constructScreeningRoomUser(resultSet);
+      Integer id = resultSet.getInt("id");
+      _screenDBUserIdToLabHeadId.put(id, resultSet.getInt("lab_name"));
+      _screenDBUserIdToScreeningRoomUserMap.put(id, user);
     }
   }
 
-  private ScreeningRoomUser constructScreeningRoomUser(ResultSet resultSet) throws SQLException
+  private ScreeningRoomUser constructScreeningRoomUser(ResultSet resultSet) throws SQLException, ScreenDBSynchronizationException
   {
     Date dateCreated = resultSet.getDate("date_created");
     String firstName = resultSet.getString("first");
@@ -101,7 +115,7 @@ public class ScreenDBUserSynchronizer
     String comments = resultSet.getString("comments");
     String ecommonsId = getEcommonsId(resultSet);
     String harvardId = resultSet.getString("harvard_id");
-    //String labAffiliation = resultSet.getString("lab_affiliation");
+    String affiliationName = resultSet.getString("lab_affiliation");
     ScreeningRoomUserClassification classification = getClassification(resultSet);
     boolean isNonScreeningUser = resultSet.getBoolean("non_user");
     boolean isRnaiUser = resultSet.getBoolean("rani_user" /*[sic]*/);
@@ -123,6 +137,7 @@ public class ScreenDBUserSynchronizer
       user.setNonScreeningUser(isNonScreeningUser);
     }
 
+    user.addScreensaverUserRole(ScreensaverUserRole.SCREENING_ROOM_USER);
     if (isRnaiUser) {
       user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
     }
@@ -130,10 +145,34 @@ public class ScreenDBUserSynchronizer
       user.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
     }
 
-    // TODO: lab affiliation
+    user.setLabAffiliation(getLabAffiliation(affiliationName));
+    
     // TODO: checklist items
+    // TODO: permit stuff
     
     return user;
+  }
+  
+  private LabAffiliation getLabAffiliation(String affiliationName)
+  throws ScreenDBSynchronizationException
+  {
+    if (affiliationName == null || affiliationName.equals("")) {
+      return null;
+    }
+    LabAffiliation labAffiliation = _dao.findEntityById(LabAffiliation.class, affiliationName);
+    if (labAffiliation == null) {
+      AffiliationCategory affiliationCategory =
+        _labAffiliationCategoryMapper.getAffiliationCategoryForLabAffiliation(affiliationName);
+      if (affiliationCategory == null) {
+        throw new ScreenDBSynchronizationException(
+          "no affiliation category mapping for affiliation name: " + affiliationName);
+      }
+      labAffiliation = new LabAffiliation(
+        affiliationName,
+        affiliationCategory);
+      _dao.persistEntity(labAffiliation);
+    }
+    return labAffiliation;
   }
   
   private ScreeningRoomUser getExistingUser(String firstName, String lastName) {

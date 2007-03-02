@@ -25,7 +25,7 @@ public class SchemaManager extends AbstractBackingBean
 
   private String _screenDBServer = "localhost";
   private String _screenDBDatabase = "screendb";
-  private String _screenDBUsername;
+  private String _screenDBUsername = "s";
   private String _screenDBPassword;
   
   

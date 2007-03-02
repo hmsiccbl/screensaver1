@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Visit;
 
@@ -301,11 +302,17 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Get the lab affiliation.
+   * Get the lab affiliation. The lab affiliation should always be present, whether this user
+   * is a lab head or a lab member.
    *
    * @return the lab affiliation
-   * // TODO: document whether this is null when _labHead!=null
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.users.LabAffiliation"
+   *   column="lab_affiliation_id"
+   *   foreign-key="fk_screening_room_user_to_lab_affiliation"
+   *   cascade="save-update"
    */
+  @ToOneRelationship(nullable=true)
   public LabAffiliation getLabAffiliation()
   {
     return _labAffiliation;
@@ -318,13 +325,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    */
   public void setLabAffiliation(LabAffiliation labAffiliation)
   {
-    if (_labAffiliation != null) {
-      _labAffiliation.setHbnScreeningRoomUser(null);
-    }
     _labAffiliation = labAffiliation;
-    if (_labAffiliation != null) {
-      _labAffiliation.setHbnScreeningRoomUser(this);
-    }
   }
 
 
@@ -561,17 +562,6 @@ public class ScreeningRoomUser extends ScreensaverUser
     return _checklistItems;
   }
 
-  /**
-   * Set the lab affiliation.
-   *
-   * @param labAffiliation the new lab affiliation
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  void setHbnLabAffiliation(LabAffiliation labAffiliation)
-  {
-    _labAffiliation = labAffiliation;
-  }
-
 
   // private constructor
 
@@ -704,22 +694,4 @@ public class ScreeningRoomUser extends ScreensaverUser
   {
     _labMembers = labMembers;
   }
-
-  /**
-   * Get the lab affiliation.
-   *
-   * @return the lab affiliation
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.users.LabAffiliation"
-   *   column="lab_affiliation_id"
-   *   foreign-key="fk_screening_room_user_to_lab_affiliation"
-   *   cascade="save-update"
-   *   lazy="no-proxy"
-   * @motivation for hibernate
-   */
-  private LabAffiliation getHbnLabAffiliation()
-  {
-    return _labAffiliation;
-  }
-
 }

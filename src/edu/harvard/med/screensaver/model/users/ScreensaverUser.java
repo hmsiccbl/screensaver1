@@ -13,12 +13,12 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.util.CryptoUtils;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -401,12 +401,23 @@ public class ScreensaverUser extends AbstractEntity
   
   /**
    * Remove this user from a role.
-   * @param well the role to remove this user from
+   * @param role the role to remove this user from
    * @return     true iff the user previously belonged to the role
    */
   public boolean removeScreensaverUserRole(ScreensaverUserRole role)
   {
     return _roles.remove(role);
+  }
+  
+  /**
+   * Remove this user from all roles.
+   * @param well the role to remove this user from
+   */
+  public void removeScreensaverUserRoles()
+  {
+    for (ScreensaverUserRole role : new HashSet<ScreensaverUserRole>(getScreensaverUserRoles())) {
+      removeScreensaverUserRole(role);
+    }
   }
   
   /**
