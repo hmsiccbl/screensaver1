@@ -54,7 +54,7 @@ public class CommandLineApplication
   public static final String DEFAULT_SPRING_CONFIG = "spring-context-cmdline.xml";
   
   
-  // instanc data
+  // instance data
   
   private String _springConfigurationResource = DEFAULT_SPRING_CONFIG;
   private ApplicationContext _appCtx;

@@ -26,14 +26,17 @@ public class TestScreenDBSynchronizer extends AbstractSpringTest
     schemaUtil.truncateTablesOrCreateSchema();
   }
   
-  // commenting out the actual test, since this depends on there being a screendb database with
+  // commenting out the actual tests, since they depend on there being a screendb database with
   // the right connection strings, which is a bit much to ask of a testing env
   /*
   public void testSynchronizer()
   {
-    ScreenDBSynchronizer synchronizer =
-      new ScreenDBSynchronizer("localhost", "screendb", "s", "", dao);
-    synchronizer.synchronize();
+    new ScreenDBSynchronizer("localhost", "screendb", "s", "", dao).synchronize();
+  }
+  public void testSynchronizer2x()
+  {
+    new ScreenDBSynchronizer("localhost", "screendb", "s", "", dao).synchronize();
+    new ScreenDBSynchronizer("localhost", "screendb", "s", "", dao).synchronize();
   }
   */
 }

@@ -135,6 +135,7 @@ public class SchemaManager extends AbstractBackingBean
       showMessage("screenDBSynchronizer.screenDBSynchronized");
     }
     else {
+      log.error("errorMessageKey = " + screenDBSynchronizer.getErrorMessageKey());
       showMessage(screenDBSynchronizer.getErrorMessageKey());
     }
   }

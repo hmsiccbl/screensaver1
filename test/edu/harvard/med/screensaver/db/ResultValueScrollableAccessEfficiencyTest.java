@@ -21,7 +21,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter;
 import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -71,8 +70,6 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
    * For schema-related test setup tasks.
    */
   protected SchemaUtil schemaUtil;
-
-  protected ScreenDBDataImporter screenDBDataImporter;
 
   private final int plates = 1000;
   private ResultValueType rvt;

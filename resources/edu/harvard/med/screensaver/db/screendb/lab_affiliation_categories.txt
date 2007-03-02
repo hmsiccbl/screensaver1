@@ -6,9 +6,10 @@ Other	Brandeis University
 Other	Brandeis University, Department of Biochemistry
 HMS Affiliated Hospital	Brigham and Women's Hospital
 HMS Affiliated Hospital	Brigham and Women's Hospital, Cardiology Department
+HMS Affiliated Hospital	Brigham and Women's Hospital, Department of Dermatology
 HMS Affiliated Hospital	Brigham and Women's Hospital, Pathology Department
 Other	Cellicon Biotechnologies, Inc.
-Other	Center for Biochemical & Biophysical Sciences & Medicine (CBBSM)
+HMS	Harvard Medical School, Center for Biochemical & Biophysical Sciences & Medicine (CBBSM)
 Other	Center for Genomic Research
 Other	Central Michigan University, Department of Chemistry
 HMS Affiliated Hospital	Children's Hospital
@@ -17,8 +18,6 @@ Other	Cleveland Clinic
 Other	Columbia University
 HMS Affiliated Hospital	Dana Farber Cancer Institute
 HMS Affiliated Hospital	Dana Farber Cancer Institute and Harvard Medical School, BCMP Department
-Other	Dept of Nephrology
-Other	Dimitroff Lab, Dept of Dermatology
 Other	European Molecular Biology Laboratory (EMBL), Grenoble
 Other	Fox Chase Cancer Center
 Other	Fred Hutchinson Cancer Research Center
@@ -30,9 +29,9 @@ HMS	Harvard Medical School, Center for Blood Research
 HMS	Harvard Medical School, Department of Otolaryngology
 HMS	Harvard Medical School, Department of Pathology and Center for Blood Research
 HMS	Harvard Medical School, Genetics Department
-HMS	Harvard Medical School, Institute of Chemistry and Cell Biologyy
-HMS	Harvard Medical School, Institute of Chemistry and Cell Biologyy and BCMP Department
-HMS	Harvard Medical School, Institute of Chemistry and Cell Biologyy and Cellular Biology Department
+HMS	Harvard Medical School, Institute of Chemistry and Cell Biology
+HMS	Harvard Medical School, Institute of Chemistry and Cell Biology and BCMP Department
+HMS	Harvard Medical School, Institute of Chemistry and Cell Biology and Cellular Biology Department
 HMS	Harvard Medical School, Laboratory of Molecular Neuro-Radiation Oncology
 HMS	Harvard Medical School, Laboratory of Translational Research
 HMS	Harvard Medical School, Microbiology and Molecular Genetics Department
@@ -50,8 +49,8 @@ HMS Affiliated Hospital	Massachusetts General Hospital
 HMS Affiliated Hospital	Massachusetts General Hospital - Boston
 HMS Affiliated Hospital	Massachusetts General Hospital - Charlestown
 HMS Affiliated Hospital	Massachusetts General Hospital Charlestown, Developmental Biology Lab
-HMS Affiliated Hospital	Massachusetts General Hospital, Department of Molecular Biologyy
-HMS Affiliated Hospital	Massachusetts General Hospital, Renal Amin Arnaout
+HMS Affiliated Hospital	Massachusetts General Hospital, Department of Molecular Biology
+HMS Affiliated Hospital	Massachusetts General Hospital, Division of Nephrology
 Other	Massachusetts Institute of Technology
 Other	Massachusetts Institute of Techology, Biology Department
 Other	Massachusetts Institute of Techology, Center for Cancer Researcch
@@ -67,7 +66,7 @@ Other	Oregon Health Sciences University, Department of Molecular and Medical Gen
 Other	PI David Sacks
 Other	Princeton University, Chemistry Department
 Other	Samuel Lunenfield Research Institute/Mount Sinai Hospital
-Broad/ICG	Schreiber Lab
+Broad/ICG	Broad Institute and Harvard University
 Other	St. Andrew's University, Scotland
 Other	State University of New York, Stonybrook
 Other	Texas A&M University
@@ -89,7 +88,7 @@ Other	University of California Los Angeles, Department of Biological Chemistry
 Other	University of California Riverside
 Other	University of California Riverside, Botany and Developmental Biology
 Other	University of California Riverside, Center for Plant Cell Biology
-Other	University of California Riversire, Center for Plant Biology
+Other	University of California Riverside, Center for Plant Biology
 Other	University of Chicago
 Other	University of Illinois at Urbana-Champaign
 Other	University of Massachusetts Medical School
@@ -99,7 +98,7 @@ Other	University of Michigan
 Other	University of Nevada - Las Vegas, Department of Chemistry
 Other	University of Pennsylvania
 Other	University of Rochester, Department of Pediatrics
-Other	University of Texas, Department of Carcinogenesi, M.D. Anderson Cancer Center
+Other	University of Texas, Department of Carcinogenesis, M.D. Anderson Cancer Center
 Other	University of Texas, Medical Branch
 Other	University of Vermont
 Other	University of Vermont, Department of Microbiology and Molecular Genetics

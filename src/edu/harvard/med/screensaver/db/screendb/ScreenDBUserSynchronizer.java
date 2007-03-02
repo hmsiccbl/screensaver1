@@ -27,6 +27,13 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 
+/**
+ * Assumes first/last doesn't change, that it is safe to use a business key across the two
+ * databases.
+ *
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ */
 public class ScreenDBUserSynchronizer
 {
   // static members
@@ -39,7 +46,7 @@ public class ScreenDBUserSynchronizer
   private Connection _connection;
   private DAO _dao;
 
-  private Map<Integer,Integer> _screenDBUserIdToLabHeadId = new HashMap<Integer,Integer>();
+  private Map<Integer,Integer> _screenDBUserIdToLabHeadIdMap = new HashMap<Integer,Integer>();
   private Map<Integer,ScreeningRoomUser> _screenDBUserIdToScreeningRoomUserMap =
     new HashMap<Integer,ScreeningRoomUser>();
   ScreeningRoomUserClassification.UserType _userClassificationUserType =
@@ -83,11 +90,16 @@ public class ScreenDBUserSynchronizer
     }
   }
   
+  public ScreeningRoomUser getScreeningRoomUserForScreenDBUserId(Integer userId)
+  {
+    return _screenDBUserIdToScreeningRoomUserMap.get(userId);
+  }
+  
   
   // private methods
 
   /**
-   * Construct the {@link #_screenDBUserIdToLabHeadId} and
+   * Construct the {@link #_screenDBUserIdToLabHeadIdMap} and
    * {@link #_screenDBUserIdToScreensaverUserMap} maps. 
    * @throws SQLException 
    * @throws ScreenDBSynchronizationException 
@@ -99,7 +111,7 @@ public class ScreenDBUserSynchronizer
     while (resultSet.next()) {
       ScreeningRoomUser user = constructScreeningRoomUser(resultSet);
       Integer id = resultSet.getInt("id");
-      _screenDBUserIdToLabHeadId.put(id, resultSet.getInt("lab_name"));
+      _screenDBUserIdToLabHeadIdMap.put(id, resultSet.getInt("lab_name"));
       _screenDBUserIdToScreeningRoomUserMap.put(id, user);
     }
   }
@@ -223,8 +235,8 @@ public class ScreenDBUserSynchronizer
   
   private void connectUsersToLabHeads()
   {
-    for (Integer memberId : _screenDBUserIdToLabHeadId.keySet()) {
-      Integer headId = _screenDBUserIdToLabHeadId.get(memberId);
+    for (Integer memberId : _screenDBUserIdToLabHeadIdMap.keySet()) {
+      Integer headId = _screenDBUserIdToLabHeadIdMap.get(memberId);
       ScreeningRoomUser member = _screenDBUserIdToScreeningRoomUserMap.get(memberId);
       ScreeningRoomUser head = _screenDBUserIdToScreeningRoomUserMap.get(headId);
       if (head != null && head != member) {

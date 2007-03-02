@@ -25,7 +25,6 @@ import org.apache.log4j.Logger;
 import org.hibernate.LazyInitializationException;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter;
 import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
@@ -81,8 +80,6 @@ public class ComplexDAOTest extends AbstractSpringTest
    * For schema-related test setup tasks.
    */
   protected SchemaUtil schemaUtil;
-
-  protected ScreenDBDataImporter screenDBDataImporter;
   
   // AbstractDependencyInjectionSpringContextTests methods
 

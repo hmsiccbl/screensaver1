@@ -13,9 +13,16 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
 
 public class ScreenDBSynchronizer
 {
@@ -29,6 +36,40 @@ public class ScreenDBSynchronizer
     catch (ClassNotFoundException e) {
       log.error("couldn't find postgresql driver");
     }    
+  }
+  
+  public static void main(String [] args)
+  {
+    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { 
+      CommandLineApplication.DEFAULT_SPRING_CONFIG,
+    });
+    Options options = new Options();
+    options.addOption("S", true, "server");
+    options.addOption("D", true, "database");
+    options.addOption("U", true, "username");
+    options.addOption("P", true, "password");
+    CommandLine commandLine;
+    try {
+      commandLine = new GnuParser().parse(options, args);
+    }
+    catch (ParseException e) {
+      log.error("error parsing command line options", e);
+      return;
+    }
+    ScreenDBSynchronizer synchronizer = new ScreenDBSynchronizer(
+      commandLine.getOptionValue("S"),
+      commandLine.getOptionValue("D"),
+      commandLine.getOptionValue("U"),
+      commandLine.getOptionValue("P"),
+      (DAO) context.getBean("dao"));
+    synchronizer.synchronize();
+    String errorMessageKey = synchronizer.getErrorMessageKey();
+    if (errorMessageKey != null) {
+      log.error("synchronization error: " + errorMessageKey);
+    }
+    else {
+      log.error("successes!");
+    }
   }
   
 
@@ -62,26 +103,15 @@ public class ScreenDBSynchronizer
    */
   public boolean synchronize()
   {
-    if (! initializeConnection()) {
-      _errorMessageKey = "screenDBSynchronizer.couldNotConnect";
-      return false;
-    }
-    try {
-      ScreenDBUserSynchronizer userSynchronizer = new ScreenDBUserSynchronizer(_connection, _dao);
-      userSynchronizer.synchronizeUsers();
-    }
-    catch (ScreenDBSynchronizationException e) {
-      // TODO: report error message as well
-      log.error(e);
-      _errorMessageKey = "screenDBSynchronizer.synchronizationException";
-      return false;
-    }
-
-    // TODO: screens, visits, libraries
-
-    return true;
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        synchronizeInTransaction();
+      }
+    });
+    return _errorMessageKey == null;
   }
-  
+
   /**
    * Get the message key for the error that occurred. It is expected that this method is only
    * called after {@link #synchronize()}, and only when that method returned <code>false</code>.
@@ -109,6 +139,38 @@ public class ScreenDBSynchronizer
       return false;
     }
     return true;
+  }
+
+  private void synchronizeInTransaction() {
+    if (! initializeConnection()) {
+      _errorMessageKey = "screenDBSynchronizer.couldNotConnect";
+      return;
+    }
+    try {
+      ScreenDBUserSynchronizer userSynchronizer = new ScreenDBUserSynchronizer(_connection, _dao);
+      userSynchronizer.synchronizeUsers();
+      ScreenDBLibrarySynchronizer librarySynchronizer =
+        new ScreenDBLibrarySynchronizer(_connection, _dao);
+      librarySynchronizer.synchronizeLibraries();
+      ScreenDBScreenSynchronizer screenSynchronizer =
+        new ScreenDBScreenSynchronizer(_connection, _dao, userSynchronizer);
+      screenSynchronizer.synchronizeScreens();
+    }
+    catch (ScreenDBSynchronizationException e) {
+      // TODO: report error message as well
+      log.error(e);
+      _errorMessageKey = "screenDBSynchronizer.synchronizationException";
+      return;
+    }
+    finally {
+      try {
+        _connection.close();
+      }
+      catch (SQLException e) {
+      }
+    }
+  
+    // TODO: screens, visits, libraries
   }
 }
 
