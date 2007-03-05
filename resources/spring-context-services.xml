@@ -45,13 +45,6 @@
   </bean>
 
   <bean 
-    id="screenDBDataImporter"
-    class="edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter"
-    scope="singleton">
-    <constructor-arg ref="dao"/>
-  </bean>
-
-  <bean 
     id="bulkCompoundLibraryLoader"
     class="edu.harvard.med.screensaver.io.libraries.compound.BulkCompoundLibraryLoader"
     scope="singleton">
