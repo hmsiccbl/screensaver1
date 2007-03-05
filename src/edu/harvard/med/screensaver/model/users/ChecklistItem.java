@@ -51,6 +51,25 @@ public class ChecklistItem extends AbstractEntity
    *
    * @param checklistItemType the checklist item type
    * @param screeningRoomUser the screening room user
+   */
+  public ChecklistItem(
+    ChecklistItemType checklistItemType,
+    ScreeningRoomUser screeningRoomUser)
+  {
+    if (checklistItemType == null || screeningRoomUser == null) {
+      throw new NullPointerException();
+    }
+    _checklistItemType = checklistItemType;
+    _screeningRoomUser = screeningRoomUser;
+    _checklistItemType.getHbnChecklistItems().add(this);
+    _screeningRoomUser.getHbnChecklistItems().add(this);
+  }
+
+  /**
+   * Constructs an initialized <code>ChecklistItem</code> object.
+   *
+   * @param checklistItemType the checklist item type
+   * @param screeningRoomUser the screening room user
    * @param activationDate the activation date
    * @param activationInitials the activation initials
    */
@@ -60,15 +79,32 @@ public class ChecklistItem extends AbstractEntity
     Date activationDate,
     String activationInitials)
   {
-    if (checklistItemType == null || screeningRoomUser == null) {
-      throw new NullPointerException();
-    }
-    _checklistItemType = checklistItemType;
-    _screeningRoomUser = screeningRoomUser;
+    this(checklistItemType, screeningRoomUser);
     _activationDate = truncateDate(activationDate);
     _activationInitials = activationInitials;
-    _checklistItemType.getHbnChecklistItems().add(this);
-    _screeningRoomUser.getHbnChecklistItems().add(this);
+  }
+
+  /**
+   * Constructs an initialized <code>ChecklistItem</code> object.
+   *
+   * @param checklistItemType the checklist item type
+   * @param screeningRoomUser the screening room user
+   * @param activationDate the activation date
+   * @param activationInitials the activation initials
+   * @param deactivationDate the deactivation date
+   * @param deactivationInitials the deactivation initials
+   */
+  public ChecklistItem(
+    ChecklistItemType checklistItemType,
+    ScreeningRoomUser screeningRoomUser,
+    Date activationDate,
+    String activationInitials,
+    Date deactivationDate,
+    String deactivationInitials)
+  {
+    this(checklistItemType, screeningRoomUser, activationDate, activationInitials);
+    _deactivationDate = truncateDate(deactivationDate);
+    _deactivationInitials = deactivationInitials;
   }
 
 
@@ -151,7 +187,6 @@ public class ChecklistItem extends AbstractEntity
    *
    * @return the activation date
    * @hibernate.property
-   *   not-null="true"
    */
   public Date getActivationDate()
   {
@@ -174,7 +209,6 @@ public class ChecklistItem extends AbstractEntity
    * @return the activation initials
    * @hibernate.property
    *   type="text"
-   *   not-null="true"
    */
   public String getActivationInitials()
   {
