@@ -14,6 +14,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
 
 
 /**
@@ -61,7 +62,6 @@ public class ChecklistItem extends AbstractEntity
     }
     _checklistItemType = checklistItemType;
     _screeningRoomUser = screeningRoomUser;
-    _checklistItemType.getHbnChecklistItems().add(this);
     _screeningRoomUser.getHbnChecklistItems().add(this);
   }
 
@@ -148,10 +148,8 @@ public class ChecklistItem extends AbstractEntity
     if (checklistItemType == null) {
       throw new NullPointerException();
     }
-    _checklistItemType.getHbnChecklistItems().remove(this);
     _screeningRoomUser.getHbnChecklistItems().remove(this);
     _checklistItemType = checklistItemType;
-    _checklistItemType.getHbnChecklistItems().add(this);
     _screeningRoomUser.getHbnChecklistItems().add(this);
   }
 
@@ -175,10 +173,8 @@ public class ChecklistItem extends AbstractEntity
     if (screeningRoomUser == null) {
       throw new NullPointerException();
     }
-    _checklistItemType.getHbnChecklistItems().remove(this);
     _screeningRoomUser.getHbnChecklistItems().remove(this);
     _screeningRoomUser = screeningRoomUser;
-    _checklistItemType.getHbnChecklistItems().add(this);
     _screeningRoomUser.getHbnChecklistItems().add(this);
   }
 
@@ -384,7 +380,8 @@ public class ChecklistItem extends AbstractEntity
    * @param checklistItemId the new id for the checklist item
    * @motivation for hibernate
    */
-  private void setChecklistItemId(Integer checklistItemId) {
+  private void setChecklistItemId(Integer checklistItemId)
+  {
     _checklistItemId = checklistItemId;
   }
 
@@ -395,7 +392,8 @@ public class ChecklistItem extends AbstractEntity
    * @motivation for hibernate
    * @hibernate.version
    */
-  private Integer getVersion() {
+  private Integer getVersion()
+  {
     return _version;
   }
 
@@ -405,7 +403,8 @@ public class ChecklistItem extends AbstractEntity
    * @param version the new version for the checklist item
    * @motivation for hibernate
    */
-  private void setVersion(Integer version) {
+  private void setVersion(Integer version)
+  {
     _version = version;
   }
 
@@ -421,6 +420,7 @@ public class ChecklistItem extends AbstractEntity
    *   cascade="save-update"
    * @motivation for hibernate
    */
+  @ToOneRelationship(unidirectional=true)
   private ChecklistItemType getHbnChecklistItemType()
   {
     return _checklistItemType;

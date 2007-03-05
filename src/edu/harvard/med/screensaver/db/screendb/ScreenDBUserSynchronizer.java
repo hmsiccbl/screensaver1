@@ -10,18 +10,23 @@
 package edu.harvard.med.screensaver.db.screendb;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
+import edu.harvard.med.screensaver.model.users.ChecklistItem;
+import edu.harvard.med.screensaver.model.users.ChecklistItemType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
@@ -39,6 +44,40 @@ public class ScreenDBUserSynchronizer
   // static members
 
   private static Logger log = Logger.getLogger(ScreenDBUserSynchronizer.class);
+  private static Map<String,String> CHECKLIST_ITEM_TYPE_MAP = new HashMap<String,String>();
+  static {
+    CHECKLIST_ITEM_TYPE_MAP.put(
+      "ID submitted for access to screening room",
+      "ID submitted for access to screening room");
+    CHECKLIST_ITEM_TYPE_MAP.put(
+      "ICCB server account requested",
+      "Historical - ICCB server account requested");
+    CHECKLIST_ITEM_TYPE_MAP.put(
+      "ICCB server account set up",
+      "ICCB-L/NSRB server account set up (general account)");
+    CHECKLIST_ITEM_TYPE_MAP.put(
+      "Added to ICCB screening users list",
+      "Added to ICCB-L/NSRB screening users list");
+    CHECKLIST_ITEM_TYPE_MAP.put(
+      "Added to autoscope users list",
+      "Added to autoscope users list");
+    CHECKLIST_ITEM_TYPE_MAP.put(
+      "Added to PI email list",
+      "Added to PI email list");
+    CHECKLIST_ITEM_TYPE_MAP.put(
+      "Data sharing agreement signed",
+      "Data sharing agreement signed");
+  }
+  private static final String [] NON_SCREENDB_CHECKLIST_ITEM_TYPE_NAMES = {
+    "ID submitted for C-607 access",
+    "ICCB-L/NSRB image file server access set up",
+    "Non-HMS Biosafety Training Form on File",
+    "CellWoRx training",
+    "Autoscope training",
+    "Image Analysis I training",
+    "Image Xpress Micro Training",
+    "Evotech Opera Training",
+  };
 
 
   // instance data members
@@ -113,6 +152,7 @@ public class ScreenDBUserSynchronizer
       Integer id = resultSet.getInt("id");
       _screenDBUserIdToLabHeadIdMap.put(id, resultSet.getInt("lab_name"));
       _screenDBUserIdToScreeningRoomUserMap.put(id, user);
+      synchronizeChecklistItems(id, user);
     }
   }
 
@@ -131,6 +171,8 @@ public class ScreenDBUserSynchronizer
     ScreeningRoomUserClassification classification = getClassification(resultSet);
     boolean isNonScreeningUser = resultSet.getBoolean("non_user");
     boolean isRnaiUser = resultSet.getBoolean("rani_user" /*[sic]*/);
+    String comsCrhbaPermitNumber = resultSet.getString("permit_no");
+    String comsCrhbaPermitPrincipalInvestigator = resultSet.getString("permit_pi");
     
     ScreeningRoomUser user = getExistingUser(firstName, lastName);
     if (user == null) {
@@ -159,8 +201,8 @@ public class ScreenDBUserSynchronizer
 
     user.setLabAffiliation(getLabAffiliation(affiliationName));
     
-    // TODO: checklist items
-    // TODO: permit stuff
+    user.setComsCrhbaPermitNumber(comsCrhbaPermitNumber);
+    user.setComsCrhbaPermitPrincipalInvestigator(comsCrhbaPermitPrincipalInvestigator);
     
     return user;
   }
@@ -231,6 +273,83 @@ public class ScreenDBUserSynchronizer
       classification = ScreeningRoomUserClassification.UNASSIGNED;
     }
     return classification;
+  }
+  
+  private void synchronizeChecklistItems(Integer screendbUserId, ScreeningRoomUser user) throws SQLException, ScreenDBSynchronizationException
+  {
+    for (ChecklistItem checklistItem : user.getChecklistItems()) {
+      _dao.deleteEntity(checklistItem);
+    }
+    user.removeChecklistItems();
+    addScreenDBChecklistItems(screendbUserId, user);
+    addNonScreenDBChecklistItems(user);
+  }
+
+  private void addScreenDBChecklistItems(Integer screendbUserId, ScreeningRoomUser user) throws SQLException, ScreenDBSynchronizationException
+  {
+    PreparedStatement statement = _connection.prepareStatement(
+      "SELECT * FROM checklist_item AS ci, checklist_item_type AS cit\n" +
+      "WHERE ci.user_id = ? AND ci.item_type_id = cit.id");
+    statement.setInt(1, screendbUserId);
+    ResultSet resultSet = statement.executeQuery();
+    Set<String> screendbChecklistItemTypeNamesFound = new HashSet<String>();
+    while (resultSet.next()) {
+      Date activationDate = resultSet.getDate("activate_date");
+      String activationInitials = resultSet.getString("activate_initials");
+      Date deactivationDate = resultSet.getDate("deactivate_date");
+      String deactivationInitials = resultSet.getString("deactivate_initials");
+
+      String screendbChecklistItemName = resultSet.getString("name");
+      ChecklistItemType checklistItemType =
+        getChecklistItemTypeForScreenDBChecklistItemName(screendbChecklistItemName);
+      
+      new ChecklistItem(
+        checklistItemType, user, activationDate, activationInitials, deactivationDate, deactivationInitials);
+      screendbChecklistItemTypeNamesFound.add(screendbChecklistItemName);
+    }
+    
+    // go back and fill in anything missing in ScreenDB
+    for (String screendbChecklistItemTypeName : CHECKLIST_ITEM_TYPE_MAP.keySet()) {
+      if (screendbChecklistItemTypeNamesFound.contains(screendbChecklistItemTypeName)) {
+        continue;
+      }
+      String screensaverChecklistItemTypeName = 
+        CHECKLIST_ITEM_TYPE_MAP.get(screendbChecklistItemTypeName);
+      addEmptyChecklistItem(user, screensaverChecklistItemTypeName);
+    }
+  }
+
+  private ChecklistItemType getChecklistItemTypeForScreenDBChecklistItemName(String screendbChecklistItemName) throws ScreenDBSynchronizationException {
+    String screensaverChecklistItemName = CHECKLIST_ITEM_TYPE_MAP.get(screendbChecklistItemName);
+    if (screensaverChecklistItemName == null) {
+      throw new ScreenDBSynchronizationException(
+        "couldn't find Screensaver checklist item corresponding to ScreenDB checklist item \"" +
+        screendbChecklistItemName + "\"");
+    }
+    ChecklistItemType checklistItemType = _dao.findEntityByProperty(
+      ChecklistItemType.class, "itemName", screensaverChecklistItemName);
+    if (checklistItemType == null) {
+      throw new ScreenDBSynchronizationException(
+        "couldn't find Screensaver checklist item type for \"" + screensaverChecklistItemName + "\"");
+    }
+    return checklistItemType;
+  }
+
+  private void addNonScreenDBChecklistItems(ScreeningRoomUser user) throws ScreenDBSynchronizationException
+  {
+    for (String checklistItemTypeName : NON_SCREENDB_CHECKLIST_ITEM_TYPE_NAMES) {
+      addEmptyChecklistItem(user, checklistItemTypeName);
+    }
+  }
+
+  private void addEmptyChecklistItem(ScreeningRoomUser user, String checklistItemTypeName) throws ScreenDBSynchronizationException {
+    ChecklistItemType checklistItemType = _dao.findEntityByProperty(
+      ChecklistItemType.class, "itemName", checklistItemTypeName);
+    if (checklistItemType == null) {
+      throw new ScreenDBSynchronizationException(
+        "couldn't find Screensaver checklist item type for \"" + checklistItemTypeName + "\"");
+    }
+    new ChecklistItem(checklistItemType, user);
   }
   
   private void connectUsersToLabHeads()

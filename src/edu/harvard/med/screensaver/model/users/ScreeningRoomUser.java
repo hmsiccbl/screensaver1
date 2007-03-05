@@ -127,6 +127,25 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
+   * Remove the checklist item.
+   *
+   * @param checklistItem the checklist item to remove
+   * @return true iff the screening room user previsouly had the checklist item
+   */
+  public boolean removeChecklistItem(ChecklistItem checklistItem)
+  {
+    return getHbnChecklistItems().remove(checklistItem);
+  }
+  
+  /**
+   * Remove all the checklist items.
+   */
+  public void removeChecklistItems()
+  {
+    setHbnChecklistItems(new HashSet<ChecklistItem>());
+  }
+  
+  /**
    * Get an unmodifiable copy of the set of screens for which this user was the lead screener.
    *
    * @return the screens for which this user was the lead screener
@@ -590,7 +609,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    *
    * @return the checklist items
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="all"
    *   inverse="true"
    *   lazy="true"
    * @hibernate.collection-key

@@ -9,10 +9,6 @@
 
 package edu.harvard.med.screensaver.model.users;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -38,7 +34,6 @@ public class ChecklistItemType extends AbstractEntity
 
   private Integer _checklistItemTypeId;
   private Integer _version;
-  private Set<ChecklistItem> _checklistItems = new HashSet<ChecklistItem>();
   private Integer _orderStatistic;
   private String _itemName;
   private boolean _hasDeactivation;
@@ -82,31 +77,6 @@ public class ChecklistItemType extends AbstractEntity
   public Integer getChecklistItemTypeId()
   {
     return _checklistItemTypeId;
-  }
-
-  /**
-   * Get an unmodifiable copy of the set of checklist items.
-   *
-   * @return the checklist items
-   */
-  public Set<ChecklistItem> getChecklistItems()
-  {
-    return Collections.unmodifiableSet(_checklistItems);
-  }
-
-  /**
-   * Add the checklist item.
-   *
-   * @param checklistItem the checklist item to add
-   * @return true iff the checklist item type did not already have the checklist item
-   */
-  public boolean addChecklistItem(ChecklistItem checklistItem)
-  {
-    if (getHbnChecklistItems().add(checklistItem)) {
-      checklistItem.setHbnChecklistItemType(this);
-      return true;
-    }
-    return false;
   }
 
   /**
@@ -188,27 +158,6 @@ public class ChecklistItemType extends AbstractEntity
   }
 
 
-  // package methods
-
-  /**
-   * Get the checklist items.
-   *
-   * @return the checklist items
-   * @hibernate.set
-   *   cascade="save-update"
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="checklist_item_type_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.users.ChecklistItem"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  Set<ChecklistItem> getHbnChecklistItems()
-  {
-    return _checklistItems;
-  }
-
-
   // private constructor
 
   /**
@@ -227,7 +176,8 @@ public class ChecklistItemType extends AbstractEntity
    * @param checklistItemTypeId the new id for the checklist item type
    * @motivation for hibernate
    */
-  private void setChecklistItemTypeId(Integer checklistItemTypeId) {
+  private void setChecklistItemTypeId(Integer checklistItemTypeId)
+  {
     _checklistItemTypeId = checklistItemTypeId;
   }
 
@@ -238,7 +188,8 @@ public class ChecklistItemType extends AbstractEntity
    * @motivation for hibernate
    * @hibernate.version
    */
-  private Integer getVersion() {
+  private Integer getVersion()
+  {
     return _version;
   }
 
@@ -248,18 +199,8 @@ public class ChecklistItemType extends AbstractEntity
    * @param version the new version for the checklist item type
    * @motivation for hibernate
    */
-  private void setVersion(Integer version) {
-    _version = version;
-  }
-
-  /**
-   * Set the checklist items.
-   *
-   * @param checklistItems the new checklist items
-   * @motivation for hibernate
-   */
-  private void setHbnChecklistItems(Set<ChecklistItem> checklistItems)
+  private void setVersion(Integer version)
   {
-    _checklistItems = checklistItems;
+    _version = version;
   }
 }
