@@ -228,9 +228,14 @@ public class Cell
   }
 
   public static int columnLabelToIndex(String columnLabel)
+    throws IllegalArgumentException
   {
-    int columnIndex= 1;
+    if (!columnLabel.matches("^[A-Za-z][A-Za-z]?$")) {
+      throw new IllegalArgumentException("malformed column label string:" + columnLabel);
+    }
+    
     columnLabel = columnLabel.toUpperCase();
+    int columnIndex= 1;
     if (columnLabel.length() == 2) {
       columnIndex = 26 * (columnLabel.charAt(0) - 'A' + 1) + (columnLabel.charAt(1) - 'A');
     }

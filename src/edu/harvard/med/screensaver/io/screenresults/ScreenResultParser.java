@@ -533,10 +533,16 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   {
     assert _dataHeaderIndex2DataHeaderColumn != null :
       "uninitialized _dataHeaderIndex2DataHeaderColumn";
-    String forColumnInRawDataWorksheet = dataHeadersCell(DataHeaderRow.COLUMN_IN_DATA_WORKSHEET, iDataHeader, true).getString();
-    if (forColumnInRawDataWorksheet != null) {
-      _dataHeaderIndex2DataHeaderColumn.put(iDataHeader,
-                                            (short) Cell.columnLabelToIndex(forColumnInRawDataWorksheet));
+    Cell cell = dataHeadersCell(DataHeaderRow.COLUMN_IN_DATA_WORKSHEET, iDataHeader, true);
+    String forColumnInRawDataWorksheet = cell.getString().trim();
+    try {
+      if (forColumnInRawDataWorksheet != null) {
+        _dataHeaderIndex2DataHeaderColumn.put(iDataHeader,
+                                              (short) Cell.columnLabelToIndex(forColumnInRawDataWorksheet));
+      }
+    }
+    catch (IllegalArgumentException e) {
+      _errors.addError(e.getMessage(), cell);
     }
   }
 

@@ -360,7 +360,6 @@ public class HeatMapViewer extends AbstractBackingBean
     _heatMapConfigurationsDataModel = new ListDataModel(_heatMapConfigurations);
 
     // set default values
-    heatMapConfiguration.getDataHeaders().setValue(Integer.toString(_screenResult.getResultValueTypesList().get(0).hashCode()));
     heatMapConfiguration.getExcludedWellFilters().setValue(Arrays.asList(new String[] { 
       (String) heatMapConfiguration.getExcludedWellFilters().getSelectItems().get(0).getValue() }));
 
