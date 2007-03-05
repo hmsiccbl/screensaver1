@@ -8,3 +8,6 @@ These SQL files have only started being maintained at svn revision 1109. This sh
 for us, since there are no extant databases in need of revisions to bring up-to-date further than
 that. The oldest extant database was probably created a number of revisions back from that, but 1109
 is most likely the first svn revision with schema changes of any significance.
+
+WARNING: make sure you run these database updates as the appropriate user! (Normally the web user.)
+Otherwise you will run into permissions problems.
