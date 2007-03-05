@@ -51,7 +51,8 @@ public class ScreeningRoomUser extends ScreensaverUser
   private Set<ScreeningRoomUser> _labMembers = new HashSet<ScreeningRoomUser>();
   private LabAffiliation _labAffiliation;
   private boolean _isNonScreeningUser;
-  private String _comments;
+  private String _comsCrhbaPermitNumber;
+  private String _comsCrhbaPermitPrincipalInvestigator;
 
 
   // public constructors
@@ -400,6 +401,47 @@ public class ScreeningRoomUser extends ScreensaverUser
   {
     _isNonScreeningUser = isNonScreeningUser;
   }
+
+  /**
+   * Get the COMS-CRHBA permit number.
+   * 
+   * @return the COMS-CRHBA permit number
+   * @hibernate.property type="text"
+   */
+  public String getComsCrhbaPermitNumber()
+  {
+    return _comsCrhbaPermitNumber;
+  }
+
+  /**
+   * Set the COMS-CRHBA permit number.
+   * @param comsCrhbaPermitNumber the new COMS-CRHBA permit number for the user
+   */
+  public void setComsCrhbaPermitNumber(String comsCrhbaPermitNumber)
+  {
+    _comsCrhbaPermitNumber = comsCrhbaPermitNumber;
+  }
+
+  /**
+   * Get the COMS-CRHBA permit principal investigator.
+   * 
+   * @return the COMS-CRHBA permit principal investigator
+   * @hibernate.property type="text"
+   */
+  public String getComsCrhbaPermitPrincipalInvestigator()
+  {
+    return _comsCrhbaPermitPrincipalInvestigator;
+  }
+
+  /**
+   * Set the COMS-CRHBA permit principal investigator.
+   * @param comsCrhbaPermitNumber the new COMS-CRHBA permit principal investigator
+   */
+  public void setComsCrhbaPermitPrincipalInvestigator(String comsCrhbaPermitPrincipalInvestigator)
+  {
+    _comsCrhbaPermitPrincipalInvestigator = comsCrhbaPermitPrincipalInvestigator;
+  }
+
 
   /**
    * Get whether this user is an RNAi screener.
