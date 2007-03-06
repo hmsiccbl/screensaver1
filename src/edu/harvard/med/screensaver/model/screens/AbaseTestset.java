@@ -50,27 +50,6 @@ public class AbaseTestset extends AbstractEntity
    * Constructs an initialized <code>AbaseTestset</code> object.
    *
    * @param screen the screen
-   * @param testsetName the testset name
-   * @throws DuplicateEntityException 
-   */
-  public AbaseTestset(
-    Screen screen,
-    String testsetName) throws DuplicateEntityException
-  {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
-    _screen = screen;
-    _testsetName = testsetName;
-    if (!_screen.getAbaseTestsets().add(this)) {
-      throw new DuplicateEntityException(_screen, this);
-    }
-  }
-
-  /**
-   * Constructs an initialized <code>AbaseTestset</code> object.
-   *
-   * @param screen the screen
    * @param testsetDate the testset date
    * @param testsetName the testset name
    * @param comments the comments
@@ -79,9 +58,16 @@ public class AbaseTestset extends AbstractEntity
   public AbaseTestset(Screen screen, Date testsetDate, String testsetName, String comments)
   throws DuplicateEntityException
   {
-    this(screen, testsetName);
+    if (screen == null) {
+      throw new NullPointerException();
+    }
+    _screen = screen;
     _testsetDate = testsetDate;
+    _testsetName = testsetName;
     _comments = comments;
+    if (!_screen.getAbaseTestsets().add(this)) {
+      throw new DuplicateEntityException(_screen, this);
+    }
   }
   
 
@@ -126,7 +112,7 @@ public class AbaseTestset extends AbstractEntity
    * Get the testset date.
    *
    * @return the testset date
-   * @hibernate.property
+   * @hibernate.property not-null="true"
    */
   public Date getTestsetDate()
   {
@@ -174,6 +160,7 @@ public class AbaseTestset extends AbstractEntity
    * @return the comments
    * @hibernate.property
    *   type="text"
+   *   not-null="true"
    */
   public String getComments()
   {
@@ -236,24 +223,15 @@ public class AbaseTestset extends AbstractEntity
         return false;
       }
       BusinessKey that = (BusinessKey) object;
-      String thatComments = that.getComments();
-      if ((_comments == null) != (thatComments == null)) {
-        return false;
-      }
-      if (_comments != null && ! _comments.equals(thatComments)) {
-        return false;
-      }
       return
         getScreen().equals(that.getScreen()) &&
-        getTestsetName().equals(that.getTestsetName());
+        getTestsetName().equals(that.getTestsetName()) &&
+        getComments().equals(that.getComments());
     }
 
     @Override
     public int hashCode()
     {
-      if (getComments() == null) {
-        return getScreen().hashCode() +  17 * getTestsetName().hashCode();
-      }
       return
         getScreen().hashCode() +
         17 * getTestsetName().hashCode() +
@@ -327,5 +305,4 @@ public class AbaseTestset extends AbstractEntity
   private void setVersion(Integer version) {
     _version = version;
   }
-
 }
