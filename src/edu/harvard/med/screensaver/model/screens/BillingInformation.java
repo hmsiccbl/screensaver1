@@ -42,8 +42,11 @@ public class BillingInformation extends AbstractEntity
   private Integer _version;
   private Screen _screen;
   private Set<BillingItem> _billingItems = new HashSet<BillingItem>();
-  private IsFeeToBeChargedForScreening _isFeeToBeChargedForScreening;
+  private BillingInfoToBeRequested _billingInfoToBeRequested;
+  private boolean _billingForSuppliesOnly;
+  private Date _billingInfoReturnDate;
   private String _amountToBeChargedForScreen;
+  private String _facilitiesAndAdministrationCharge;
   private Date _feeFormRequestedDate;
   private String _feeFormRequestedInitials;
   private boolean _isFeeFormOnFile;
@@ -59,19 +62,19 @@ public class BillingInformation extends AbstractEntity
    * Constructs an initialized <code>BillingInformation</code> object.
    *
    * @param screen the screen
-   * @param isFeeToBeChargedForScreening is fee to be charged for screening
+   * @param billingInfoToBeRequested is fee to be charged for screening
    * @param isFeeFormOnFile the is fee form on file
    */
   public BillingInformation(
     Screen screen,
-    IsFeeToBeChargedForScreening isFeeToBeChargedForScreening,
+    BillingInfoToBeRequested billingInfoToBeRequested,
     boolean isFeeFormOnFile)
   {
     if (screen == null) {
       throw new NullPointerException();
     }
     _screen = screen;
-    _isFeeToBeChargedForScreening = isFeeToBeChargedForScreening;
+    _billingInfoToBeRequested = billingInfoToBeRequested;
     _isFeeFormOnFile = isFeeFormOnFile;
     _screen.setBillingInformation(this);
   }
@@ -144,24 +147,62 @@ public class BillingInformation extends AbstractEntity
    *
    * @return the is fee to be charged for screening
    * @hibernate.property
-   *   type="edu.harvard.med.screensaver.model.screens.IsFeeToBeChargedForScreening$UserType"
+   *   type="edu.harvard.med.screensaver.model.screens.BillingInfoToBeRequested$UserType"
    *   not-null="true"
    */
-  public IsFeeToBeChargedForScreening getIsFeeToBeChargedForScreening()
+  public BillingInfoToBeRequested getBillingInfoToBeRequested()
   {
-    return _isFeeToBeChargedForScreening;
+    return _billingInfoToBeRequested;
   }
 
   /**
    * Set the is fee to be charged for screening.
    *
-   * @param isFeeToBeChargedForScreening the new is fee to be charged for screening
+   * @param billingInfoToBeRequested the new is fee to be charged for screening
    */
-  public void setIsFeeToBeChargedForScreening(IsFeeToBeChargedForScreening isFeeToBeChargedForScreening)
+  public void setBillingInfoToBeRequested(BillingInfoToBeRequested billingInfoToBeRequested)
   {
-    _isFeeToBeChargedForScreening = isFeeToBeChargedForScreening;
+    _billingInfoToBeRequested = billingInfoToBeRequested;
   }
 
+  /**
+   * Get the billing for supplies only.
+   * @return the billing for supplies only
+   * @hibernate.property
+   */
+  public boolean getBillingForSuppliesOnly()
+  {
+    return _billingForSuppliesOnly;
+  }
+  
+  /**
+   * Get the billing info return date.
+   * @return the billing info return date
+   * @hibernate.property
+   */
+  public Date getBillingInfoReturnDate() 
+  {
+    return _billingInfoReturnDate;
+  }
+
+  /**
+   * Set the billing info return date.
+   * @param billingInfoReturnDate the new billing info return date
+   */
+  public void setBillingInfoReturnDate(Date billingInfoReturnDate)
+  {
+    _billingInfoReturnDate = billingInfoReturnDate;
+  }
+
+  /**
+   * Set the billing for supplies only.
+   * @param billingForSuppliesOnly the new billing for supplies only
+   */
+  public void setBillingForSuppliesOnly(boolean billingForSuppliesOnly)
+  {
+    _billingForSuppliesOnly = billingForSuppliesOnly;
+  }
+  
   /**
    * Get the amount to be charged for screen.
    *
@@ -182,6 +223,26 @@ public class BillingInformation extends AbstractEntity
   public void setAmountToBeChargedForScreen(String amountToBeChargedForScreen)
   {
     _amountToBeChargedForScreen = amountToBeChargedForScreen;
+  }
+
+  /**
+   * Get the facilities and administration charge.
+   * @return the facilities and administration charge
+   * @hibernate.property
+   *   type="text"
+   */
+  public String getFacilitiesAndAdministrationCharge()
+  {
+    return _facilitiesAndAdministrationCharge;
+  }
+
+  /**
+   * Set the facilities and administration charge.
+   * @param facilitiesAndAdministrationCharge the new facilities and administration charge
+   */
+  public void setFacilitiesAndAdministrationCharge(String facilitiesAndAdministrationCharge)
+  {
+    _facilitiesAndAdministrationCharge = facilitiesAndAdministrationCharge;
   }
 
   /**

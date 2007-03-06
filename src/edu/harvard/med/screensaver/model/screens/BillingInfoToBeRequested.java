@@ -13,12 +13,12 @@ import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
- * The is fee to be charged for screening vocabulary.
+ * The billing info to be requested vocabulary.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public enum IsFeeToBeChargedForScreening implements VocabularyTerm
+public enum BillingInfoToBeRequested implements VocabularyTerm
 {
 
   // the vocabulary
@@ -32,13 +32,13 @@ public enum IsFeeToBeChargedForScreening implements VocabularyTerm
   // static inner class
 
   /**
-   * A Hibernate <code>UserType</code> to map the {@link IsFeeToBeChargedForScreening} vocabulary.
+   * A Hibernate <code>UserType</code> to map the {@link BillingInfoToBeRequested} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<IsFeeToBeChargedForScreening>
+  public static class UserType extends VocabularyUserType<BillingInfoToBeRequested>
   {
     public UserType()
     {
-      super(IsFeeToBeChargedForScreening.values());
+      super(BillingInfoToBeRequested.values());
     }
   }
 
@@ -48,10 +48,10 @@ public enum IsFeeToBeChargedForScreening implements VocabularyTerm
   private String _value;
 
   /**
-   * Constructs a <code>IsFeeToBeChargedForScreening</code> vocabulary term.
+   * Constructs a <code>BillingInfoToBeRequested</code> vocabulary term.
    * @param value The value of the term.
    */
-  private IsFeeToBeChargedForScreening(String value)
+  private BillingInfoToBeRequested(String value)
   {
     _value = value;
   }
