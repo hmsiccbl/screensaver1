@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.db.screendb;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -18,13 +17,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.StatusItem;
+import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 public class ScreenDBScreenSynchronizer
@@ -42,7 +45,8 @@ public class ScreenDBScreenSynchronizer
   private ScreenDBUserSynchronizer _userSynchronizer;
   private ScreenDBSynchronizationException _synchronizationException = null;
   private ScreenType.UserType _screenUserType = new ScreenType.UserType();
-  private Map<Integer,Screen> _screenDBScreenIdToScreenMap = new HashMap<Integer,Screen>();
+  private StatusValue.UserType _statusValueUserType = new StatusValue.UserType();
+  private Map<Integer,Screen> _screenNumberToScreenMap = new HashMap<Integer,Screen>();
 
   
   // public constructors and methods
@@ -62,15 +66,17 @@ public class ScreenDBScreenSynchronizer
       {
         try {
           synchronizeScreensProper();
-          for (Screen screen : _screenDBScreenIdToScreenMap.values()) {
-            synchronizeScreenCollaborators(screen);
-            // TODO: get all the one-to-many fields
-          }
+          synchronizeCollaborators();
+          synchronizeStatusItems();
+          // TODO: get all the one-to-many fields
         }
         catch (SQLException e) {
           _synchronizationException = new ScreenDBSynchronizationException(
             "Encountered an SQL exception while synchonrizing screens: " + e.getMessage(),
             e);
+        }
+        catch (ScreenDBSynchronizationException e) {
+          _synchronizationException = e;
         }
       }
     });
@@ -121,7 +127,7 @@ public class ScreenDBScreenSynchronizer
         screen.setAbaseProtocolId(abaseProtocolId);
       }
       _dao.persistEntity(screen);
-      _screenDBScreenIdToScreenMap.put(screenNumber, screen);
+      _screenNumberToScreenMap.put(screenNumber, screen);
     }
   }
 
@@ -139,24 +145,79 @@ public class ScreenDBScreenSynchronizer
     return leadScreener;
   }
 
-  private void synchronizeScreenCollaborators(Screen screen) throws SQLException
+  private void synchronizeCollaborators() throws SQLException, ScreenDBSynchronizationException
   {
-    screen.setCollaboratorsList(new ArrayList<ScreeningRoomUser>());
-    PreparedStatement statement = 
-      _connection.prepareStatement("SELECT user_id FROM collaborators WHERE screen_id = ?");
-    statement.setInt(1, screen.getScreenNumber());
-    ResultSet resultSet = statement.executeQuery();
+    // synchronizing requires emptying out all previous collaborators
+    for (Screen screen : _screenNumberToScreenMap.values()) {
+      screen.setCollaboratorsList(new ArrayList<ScreeningRoomUser>());
+    }
+    Statement statement = _connection.createStatement();
+    ResultSet resultSet = statement.executeQuery("SELECT user_id, screen_id FROM collaborators");
     while (resultSet.next()) {
       Integer userId = resultSet.getInt("user_id");
-      ScreeningRoomUser collaborator =
-        _userSynchronizer.getScreeningRoomUserForScreenDBUserId(userId);
-      if (collaborator == null) {
-        log.error("no user " + userId);
+      ScreeningRoomUser user = _userSynchronizer.getScreeningRoomUserForScreenDBUserId(userId);
+      Integer screenId = resultSet.getInt("screen_id");
+      Screen screen = _screenNumberToScreenMap.get(screenId);
+      if (user != null && screen != null) {
+        screen.addCollaborator(user);
       }
       else {
-        screen.addCollaborator(collaborator);
+        String message;
+        if (user == null) {
+          message = "invalid user_id in screendb collaborators table: " + userId; 
+        }
+        else {
+          message = "invalid screen_id in screendb collaborators table: " + screenId;
+        }
+        log.error(message);
+        throw new ScreenDBSynchronizationException(message);
       }
     }
+    statement.close();
+  }
+
+  private void synchronizeStatusItems() throws SQLException, ScreenDBSynchronizationException
+  {
+    // synchronizing requires emptying out all previous statuses
+    for (Screen screen : _screenNumberToScreenMap.values()) {
+      Set<StatusItem> statusItems = screen.getStatusItems();
+      statusItems.removeAll(statusItems);
+    }
+    Statement statement = _connection.createStatement();
+    ResultSet resultSet = statement.executeQuery("SELECT * FROM screen_status");
+    while (resultSet.next()) {
+      Integer screenNumber = resultSet.getInt("screen_id");
+      Screen screen = _screenNumberToScreenMap.get(screenNumber);
+      Date statusDate = resultSet.getDate("status_date");
+      StatusValue statusValue = getStatusValue(resultSet);
+      if (screen != null) {
+        try {
+          new StatusItem(screen, statusDate, statusValue);
+        }
+        catch (DuplicateEntityException e) {
+          throw new ScreenDBSynchronizationException(
+            "duplicate status item for screen number " + screenNumber, e);
+        }
+      }
+      else {
+        throw new ScreenDBSynchronizationException(
+          "invalid screen_id in screendb screen_status table: " + screenNumber);
+      }
+    }
+    statement.close();
+  }
+
+  private StatusValue getStatusValue(ResultSet resultSet) throws SQLException, ScreenDBSynchronizationException {
+    String statusValueString = resultSet.getString("status");
+    if (statusValueString.equals("Moved to Broad Institute")) {
+      statusValueString = "Transferred to Broad Institute";
+    }
+    StatusValue statusValue = _statusValueUserType.getTermForValue(statusValueString);
+    if (statusValue == null) {
+      throw new ScreenDBSynchronizationException(
+        "invalid status value in screendb screen_status table: \"" + statusValueString + "\".");
+    }
+    return statusValue;
   }
 }
 
