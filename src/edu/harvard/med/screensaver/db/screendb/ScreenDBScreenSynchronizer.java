@@ -25,6 +25,7 @@ import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
+import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
@@ -47,6 +48,7 @@ public class ScreenDBScreenSynchronizer
   private ScreenDBSynchronizationException _synchronizationException = null;
   private ScreenType.UserType _screenUserType = new ScreenType.UserType();
   private StatusValue.UserType _statusValueUserType = new StatusValue.UserType();
+  private FundingSupport.UserType _fundingSupportUserType = new FundingSupport.UserType();
   private Map<Integer,Screen> _screenNumberToScreenMap = new HashMap<Integer,Screen>();
 
   
@@ -70,6 +72,8 @@ public class ScreenDBScreenSynchronizer
           synchronizeCollaborators();
           synchronizeStatusItems();
           synchronizeAbaseTestsets();
+          // TODO: fields directly in screens:
+          // - four billing fields
           // TODO: get all the one-to-many fields
         }
         catch (SQLException e) {
@@ -90,7 +94,7 @@ public class ScreenDBScreenSynchronizer
 
   // private instance methods
   
-  private void synchronizeScreensProper() throws SQLException
+  private void synchronizeScreensProper() throws SQLException, ScreenDBSynchronizationException
   {
     Statement statement = _connection.createStatement();
     ResultSet resultSet = statement.executeQuery(
@@ -108,6 +112,8 @@ public class ScreenDBScreenSynchronizer
       String comments = resultSet.getString("comments");
       String abaseStudyId = resultSet.getString("study_id");
       String abaseProtocolId = resultSet.getString("protocol_id");
+      String keywords = resultSet.getString("keywords");
+      String fundingSupportString = resultSet.getString("funding_support");
 
       Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
       if (screen == null) {
@@ -128,8 +134,32 @@ public class ScreenDBScreenSynchronizer
         screen.setAbaseStudyId(abaseStudyId);
         screen.setAbaseProtocolId(abaseProtocolId);
       }
+      synchronizeKeywords(keywords, screen);
+      synchronizeFundingSupports(fundingSupportString, screen);
       _dao.persistEntity(screen);
       _screenNumberToScreenMap.put(screenNumber, screen);
+    }
+  }
+
+  private void synchronizeFundingSupports(String fundingSupportString, Screen screen) throws ScreenDBSynchronizationException {
+    Set<FundingSupport> fundingSupports = screen.getFundingSupports();
+    fundingSupports.removeAll(fundingSupports);
+    FundingSupport fundingSupport = _fundingSupportUserType.getTermForValue(fundingSupportString);
+    if (fundingSupport == null) {
+      throw new ScreenDBSynchronizationException(
+        "unrecognized funding support category \"" + fundingSupportString + "\"");
+    }
+    fundingSupports.add(fundingSupport);
+  }
+
+  private void synchronizeKeywords(String keywords, Screen screen) {
+    Set<String> keywordSet = screen.getKeywords();
+    keywordSet.removeAll(keywordSet);
+    if (keywords == null || keywords.equals("")) {
+      return;
+    }
+    for (String keyword : keywords.split(",\\s*")) {
+      keywordSet.add(keyword);
     }
   }
 
