@@ -25,14 +25,17 @@ public enum FundingSupport implements VocabularyTerm
   
   CLARDY_GRANTS("Clardy Grants"),
   D_ANDREA_CMCR("D'Andrea CMCR"),
-  ICCBL_HMS_INTERNAL("ICCB-L HMS Internal"),
+  ICCBL_HMS_AFFILIATE("ICCB-L HMS Affiliate"),
+  ICCBL_HMS_QUAD_INTERNAL("ICCB-L HMS Quad (Internal)"),
   ICCBL_EXTERNAL("ICCB-L External"),
   MITCHISON_P01("Mitchison P01"),
   ICG("ICG"),
   NERCE_NSRB("NERCE/NSRB"),
+  NOVARTIS("Novartis"),
   SANOFI_AVENTIS("Sanofi-Aventis"),
   YUAN_NIH_06_07("Yuan NIH 06-07"),
-  OTHER("Other")
+  OTHER("Other"),
+  UNSPECIFIED("Unspecified")
   ;
 
  
