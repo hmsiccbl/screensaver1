@@ -277,10 +277,8 @@ public class ScreenDBUserSynchronizer
   
   private void synchronizeChecklistItems(Integer screendbUserId, ScreeningRoomUser user) throws SQLException, ScreenDBSynchronizationException
   {
-    for (ChecklistItem checklistItem : user.getChecklistItems()) {
-      _dao.deleteEntity(checklistItem);
-    }
-    user.removeChecklistItems();
+    Set<ChecklistItem> checklistItems = user.getChecklistItems();
+    checklistItems.removeAll(checklistItems);
     addScreenDBChecklistItems(screendbUserId, user);
     addNonScreenDBChecklistItems(user);
   }

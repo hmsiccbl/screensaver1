@@ -105,46 +105,20 @@ public class ScreeningRoomUser extends ScreensaverUser
    * Get an unmodifiable copy of the set of checklist items.
    *
    * @return the checklist items
+   * @hibernate.set
+   *   cascade="all-delete-orphan"
+   *   inverse="true"
+   *   lazy="true"
+   * @hibernate.collection-key
+   *   column="screensaver_user_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.users.ChecklistItem"
    */
   public Set<ChecklistItem> getChecklistItems()
   {
-    return Collections.unmodifiableSet(_checklistItems);
+    return _checklistItems;
   }
 
-  /**
-   * Add the checklist item.
-   *
-   * @param checklistItem the checklist item to add
-   * @return true iff the screening room user did not already have the checklist item
-   */
-  public boolean addChecklistItem(ChecklistItem checklistItem)
-  {
-    if (getHbnChecklistItems().add(checklistItem)) {
-      checklistItem.setHbnScreeningRoomUser(this);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Remove the checklist item.
-   *
-   * @param checklistItem the checklist item to remove
-   * @return true iff the screening room user previsouly had the checklist item
-   */
-  public boolean removeChecklistItem(ChecklistItem checklistItem)
-  {
-    return getHbnChecklistItems().remove(checklistItem);
-  }
-  
-  /**
-   * Remove all the checklist items.
-   */
-  public void removeChecklistItems()
-  {
-    setHbnChecklistItems(new HashSet<ChecklistItem>());
-  }
-  
   /**
    * Get an unmodifiable copy of the set of screens for which this user was the lead screener.
    *
@@ -598,31 +572,6 @@ public class ScreeningRoomUser extends ScreensaverUser
     return _visitsPerformed;
   }
 
-  
-  // package methods
-
-
-  // protected methods
-  
-  /**
-   * Get the checklist items.
-   *
-   * @return the checklist items
-   * @hibernate.set
-   *   cascade="all"
-   *   inverse="true"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="screensaver_user_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.users.ChecklistItem"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  Set<ChecklistItem> getHbnChecklistItems()
-  {
-    return _checklistItems;
-  }
-
 
   // private constructor
 
@@ -642,7 +591,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    * @param checklistItems the new checklist items
    * @motivation for hibernate
    */
-  private void setHbnChecklistItems(Set<ChecklistItem> checklistItems)
+  private void setChecklistItems(Set<ChecklistItem> checklistItems)
   {
     _checklistItems = checklistItems;
   }

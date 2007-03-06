@@ -62,7 +62,7 @@ public class ChecklistItem extends AbstractEntity
     }
     _checklistItemType = checklistItemType;
     _screeningRoomUser = screeningRoomUser;
-    _screeningRoomUser.getHbnChecklistItems().add(this);
+    _screeningRoomUser.getChecklistItems().add(this);
   }
 
   /**
@@ -148,9 +148,9 @@ public class ChecklistItem extends AbstractEntity
     if (checklistItemType == null) {
       throw new NullPointerException();
     }
-    _screeningRoomUser.getHbnChecklistItems().remove(this);
+    _screeningRoomUser.getChecklistItems().remove(this);
     _checklistItemType = checklistItemType;
-    _screeningRoomUser.getHbnChecklistItems().add(this);
+    _screeningRoomUser.getChecklistItems().add(this);
   }
 
   /**
@@ -173,9 +173,9 @@ public class ChecklistItem extends AbstractEntity
     if (screeningRoomUser == null) {
       throw new NullPointerException();
     }
-    _screeningRoomUser.getHbnChecklistItems().remove(this);
+    _screeningRoomUser.getChecklistItems().remove(this);
     _screeningRoomUser = screeningRoomUser;
-    _screeningRoomUser.getHbnChecklistItems().add(this);
+    _screeningRoomUser.getChecklistItems().add(this);
   }
 
   /**
