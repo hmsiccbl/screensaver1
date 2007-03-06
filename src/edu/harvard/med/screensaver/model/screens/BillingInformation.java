@@ -63,19 +63,14 @@ public class BillingInformation extends AbstractEntity
    *
    * @param screen the screen
    * @param billingInfoToBeRequested is fee to be charged for screening
-   * @param isFeeFormOnFile the is fee form on file
    */
-  public BillingInformation(
-    Screen screen,
-    BillingInfoToBeRequested billingInfoToBeRequested,
-    boolean isFeeFormOnFile)
+  public BillingInformation(Screen screen, BillingInfoToBeRequested billingInfoToBeRequested)
   {
     if (screen == null) {
       throw new NullPointerException();
     }
     _screen = screen;
     _billingInfoToBeRequested = billingInfoToBeRequested;
-    _isFeeFormOnFile = isFeeFormOnFile;
     _screen.setBillingInformation(this);
   }
 
