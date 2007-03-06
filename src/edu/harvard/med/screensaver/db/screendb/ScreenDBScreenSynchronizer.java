@@ -25,6 +25,8 @@ import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
+import edu.harvard.med.screensaver.model.screens.BillingInfoToBeRequested;
+import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -72,9 +74,7 @@ public class ScreenDBScreenSynchronizer
           synchronizeCollaborators();
           synchronizeStatusItems();
           synchronizeAbaseTestsets();
-          // TODO: fields directly in screens:
-          // - four billing fields
-          // TODO: get all the one-to-many fields
+          // TODO: publications
         }
         catch (SQLException e) {
           _synchronizationException = new ScreenDBSynchronizationException(
@@ -137,7 +137,33 @@ public class ScreenDBScreenSynchronizer
       synchronizeKeywords(keywords, screen);
       synchronizeFundingSupports(fundingSupportString, screen);
       _dao.persistEntity(screen);
+      synchronizeBillingInformation(resultSet, screen);
       _screenNumberToScreenMap.put(screenNumber, screen);
+    }
+  }
+
+  private ScreeningRoomUser getLeadScreener(ResultSet resultSet) throws SQLException {
+    ScreeningRoomUser leadScreener =
+      _userSynchronizer.getScreeningRoomUserForScreenDBUserId(resultSet.getInt("user_id"));
+    return leadScreener;
+  }
+
+  private ScreeningRoomUser getLabHead(ScreeningRoomUser leadScreener) {
+    ScreeningRoomUser labHead = leadScreener.getLabHead();
+    if (labHead == null) {
+      labHead = leadScreener;
+    }
+    return labHead;
+  }
+
+  private void synchronizeKeywords(String keywords, Screen screen) {
+    Set<String> keywordSet = screen.getKeywords();
+    keywordSet.removeAll(keywordSet);
+    if (keywords == null || keywords.equals("")) {
+      return;
+    }
+    for (String keyword : keywords.split(",\\s*")) {
+      keywordSet.add(keyword);
     }
   }
 
@@ -152,29 +178,20 @@ public class ScreenDBScreenSynchronizer
     fundingSupports.add(fundingSupport);
   }
 
-  private void synchronizeKeywords(String keywords, Screen screen) {
-    Set<String> keywordSet = screen.getKeywords();
-    keywordSet.removeAll(keywordSet);
-    if (keywords == null || keywords.equals("")) {
-      return;
+  private void synchronizeBillingInformation(ResultSet resultSet, Screen screen) throws SQLException
+  {
+    BillingInformation oldBillingInformation = screen.getBillingInformation();
+    if (oldBillingInformation != null) {
+      _dao.deleteEntity(oldBillingInformation);
     }
-    for (String keyword : keywords.split(",\\s*")) {
-      keywordSet.add(keyword);
-    }
-  }
-
-  private ScreeningRoomUser getLabHead(ScreeningRoomUser leadScreener) {
-    ScreeningRoomUser labHead = leadScreener.getLabHead();
-    if (labHead == null) {
-      labHead = leadScreener;
-    }
-    return labHead;
-  }
-
-  private ScreeningRoomUser getLeadScreener(ResultSet resultSet) throws SQLException {
-    ScreeningRoomUser leadScreener =
-      _userSynchronizer.getScreeningRoomUserForScreenDBUserId(resultSet.getInt("user_id"));
-    return leadScreener;
+    boolean billingInfoToBeRequested = resultSet.getBoolean("billing_info_to_be_requested");
+    Date billingInfoReturnDate = resultSet.getDate("billing_info_return_date");
+    String billingComments = resultSet.getString("billing_comments");
+    BillingInformation billingInformation = new BillingInformation(
+      screen,
+      billingInfoToBeRequested ? BillingInfoToBeRequested.YES : BillingInfoToBeRequested.NO);
+    billingInformation.setBillingInfoReturnDate(billingInfoReturnDate);
+    billingInformation.setComments(billingComments);
   }
 
   private void synchronizeCollaborators() throws SQLException, ScreenDBSynchronizationException
@@ -193,7 +210,9 @@ public class ScreenDBScreenSynchronizer
     statement.close();
   }
 
-  private ScreeningRoomUser getCollaborator(ResultSet resultSet) throws SQLException, ScreenDBSynchronizationException {
+  private ScreeningRoomUser getCollaborator(ResultSet resultSet)
+  throws SQLException, ScreenDBSynchronizationException
+  {
     Integer userId = resultSet.getInt("user_id");
     ScreeningRoomUser user = _userSynchronizer.getScreeningRoomUserForScreenDBUserId(userId);
     if (user == null) {
@@ -228,7 +247,9 @@ public class ScreenDBScreenSynchronizer
     statement.close();
   }
 
-  private Screen getScreenFromTable(String tablename, Integer screenNumber) throws ScreenDBSynchronizationException {
+  private Screen getScreenFromTable(String tablename, Integer screenNumber)
+  throws ScreenDBSynchronizationException
+  {
     Screen screen = _screenNumberToScreenMap.get(screenNumber);
     if (screen == null) {
       throw new ScreenDBSynchronizationException(
