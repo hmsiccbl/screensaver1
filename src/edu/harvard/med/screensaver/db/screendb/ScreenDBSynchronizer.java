@@ -68,7 +68,7 @@ public class ScreenDBSynchronizer
       log.error("synchronization error: " + errorMessageKey);
     }
     else {
-      log.error("successes!");
+      log.info("successfully synchronized with ScreenDB.");
     }
   }
   
