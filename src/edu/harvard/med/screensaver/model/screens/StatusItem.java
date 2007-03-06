@@ -190,8 +190,6 @@ public class StatusItem extends AbstractEntity implements Comparable
      * Get the status date.
      *
      * @return the status date
-     * @hibernate.property
-     *   not-null="true"
      */
     public Date getStatusDate()
     {
