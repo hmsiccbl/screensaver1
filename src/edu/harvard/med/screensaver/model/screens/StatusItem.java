@@ -185,6 +185,18 @@ public class StatusItem extends AbstractEntity implements Comparable
     {
       return _screen;
     }
+
+    /**
+     * Get the status date.
+     *
+     * @return the status date
+     * @hibernate.property
+     *   not-null="true"
+     */
+    public Date getStatusDate()
+    {
+      return _statusDate;
+    }
     
     /**
      * Get the status value.
@@ -205,7 +217,9 @@ public class StatusItem extends AbstractEntity implements Comparable
       BusinessKey that = (BusinessKey) object;
       return
         getScreen().equals(that.getScreen()) &&
+        getStatusDate().equals(that.getStatusDate()) &&
         getStatusValue().equals(that.getStatusValue());
+        
     }
 
     @Override
@@ -213,13 +227,14 @@ public class StatusItem extends AbstractEntity implements Comparable
     {
       return
         getScreen().hashCode() +
-        getStatusValue().hashCode();
+        17 * getStatusDate().hashCode() +
+        163 * getStatusValue().hashCode();
     }
 
     @Override
     public String toString()
     {
-      return getScreen() + ":" + getStatusValue();
+      return getScreen() + ":" + getStatusDate() + ":" + getStatusValue();
     }
   }
 
