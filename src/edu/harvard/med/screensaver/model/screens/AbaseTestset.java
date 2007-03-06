@@ -67,6 +67,23 @@ public class AbaseTestset extends AbstractEntity
     }
   }
 
+  /**
+   * Constructs an initialized <code>AbaseTestset</code> object.
+   *
+   * @param screen the screen
+   * @param testsetDate the testset date
+   * @param testsetName the testset name
+   * @param comments the comments
+   * @throws DuplicateEntityException 
+   */
+  public AbaseTestset(Screen screen, Date testsetDate, String testsetName, String comments)
+  throws DuplicateEntityException
+  {
+    this(screen, testsetName);
+    _testsetDate = testsetDate;
+    _comments = comments;
+  }
+  
 
   // public methods
 
