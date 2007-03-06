@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
@@ -68,6 +69,7 @@ public class ScreenDBScreenSynchronizer
           synchronizeScreensProper();
           synchronizeCollaborators();
           synchronizeStatusItems();
+          synchronizeAbaseTestsets();
           // TODO: get all the one-to-many fields
         }
         catch (SQLException e) {
@@ -154,26 +156,21 @@ public class ScreenDBScreenSynchronizer
     Statement statement = _connection.createStatement();
     ResultSet resultSet = statement.executeQuery("SELECT user_id, screen_id FROM collaborators");
     while (resultSet.next()) {
-      Integer userId = resultSet.getInt("user_id");
-      ScreeningRoomUser user = _userSynchronizer.getScreeningRoomUserForScreenDBUserId(userId);
-      Integer screenId = resultSet.getInt("screen_id");
-      Screen screen = _screenNumberToScreenMap.get(screenId);
-      if (user != null && screen != null) {
-        screen.addCollaborator(user);
-      }
-      else {
-        String message;
-        if (user == null) {
-          message = "invalid user_id in screendb collaborators table: " + userId; 
-        }
-        else {
-          message = "invalid screen_id in screendb collaborators table: " + screenId;
-        }
-        log.error(message);
-        throw new ScreenDBSynchronizationException(message);
-      }
+      ScreeningRoomUser user = getCollaborator(resultSet);
+      Screen screen = getScreenFromTable("collaborators", resultSet.getInt("screen_id"));
+      screen.addCollaborator(user);
     }
     statement.close();
+  }
+
+  private ScreeningRoomUser getCollaborator(ResultSet resultSet) throws SQLException, ScreenDBSynchronizationException {
+    Integer userId = resultSet.getInt("user_id");
+    ScreeningRoomUser user = _userSynchronizer.getScreeningRoomUserForScreenDBUserId(userId);
+    if (user == null) {
+      throw new ScreenDBSynchronizationException(
+        "invalid user_id in screendb collaborators table: " + userId);
+    }
+    return user;
   }
 
   private void synchronizeStatusItems() throws SQLException, ScreenDBSynchronizationException
@@ -187,24 +184,27 @@ public class ScreenDBScreenSynchronizer
     ResultSet resultSet = statement.executeQuery("SELECT * FROM screen_status");
     while (resultSet.next()) {
       Integer screenNumber = resultSet.getInt("screen_id");
-      Screen screen = _screenNumberToScreenMap.get(screenNumber);
+      Screen screen = getScreenFromTable("screen_status", screenNumber);
       Date statusDate = resultSet.getDate("status_date");
       StatusValue statusValue = getStatusValue(resultSet);
-      if (screen != null) {
-        try {
-          new StatusItem(screen, statusDate, statusValue);
-        }
-        catch (DuplicateEntityException e) {
-          throw new ScreenDBSynchronizationException(
-            "duplicate status item for screen number " + screenNumber, e);
-        }
+      try {
+        new StatusItem(screen, statusDate, statusValue);
       }
-      else {
+      catch (DuplicateEntityException e) {
         throw new ScreenDBSynchronizationException(
-          "invalid screen_id in screendb screen_status table: " + screenNumber);
+          "duplicate status item for screen number " + screenNumber, e);
       }
     }
     statement.close();
+  }
+
+  private Screen getScreenFromTable(String tablename, Integer screenNumber) throws ScreenDBSynchronizationException {
+    Screen screen = _screenNumberToScreenMap.get(screenNumber);
+    if (screen == null) {
+      throw new ScreenDBSynchronizationException(
+        "invalid screen_id in screendb " + tablename + " table: " + screenNumber);        
+    }
+    return screen;
   }
 
   private StatusValue getStatusValue(ResultSet resultSet) throws SQLException, ScreenDBSynchronizationException {
@@ -218,6 +218,32 @@ public class ScreenDBScreenSynchronizer
         "invalid status value in screendb screen_status table: \"" + statusValueString + "\".");
     }
     return statusValue;
+  }
+
+  private void synchronizeAbaseTestsets() throws SQLException, ScreenDBSynchronizationException
+  {
+    // synchronizing requires emptying out all previous abase testsets
+    for (Screen screen : _screenNumberToScreenMap.values()) {
+      Set<AbaseTestset> abaseTestsets = screen.getAbaseTestsets();
+      abaseTestsets.removeAll(abaseTestsets);
+    }
+    Statement statement = _connection.createStatement();
+    ResultSet resultSet = statement.executeQuery("SELECT * FROM abase");
+    while (resultSet.next()) {
+      Integer screenNumber = resultSet.getInt("screen_id");
+      Screen screen = getScreenFromTable("abase", screenNumber);
+      Date testsetDate = resultSet.getDate("abase_date");
+      String testsetName = resultSet.getString("testset_name");
+      String comments = resultSet.getString("comments");
+      try {
+        new AbaseTestset(screen, testsetDate, testsetName, comments);
+      }
+      catch (DuplicateEntityException e) {
+        throw new ScreenDBSynchronizationException(
+          "duplicate abase testset for screen number " + screenNumber, e);
+      }
+    }
+    statement.close();
   }
 }
 
