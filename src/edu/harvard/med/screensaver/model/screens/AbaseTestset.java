@@ -236,15 +236,24 @@ public class AbaseTestset extends AbstractEntity
         return false;
       }
       BusinessKey that = (BusinessKey) object;
+      String thatComments = that.getComments();
+      if ((_comments == null) != (thatComments == null)) {
+        return false;
+      }
+      if (_comments != null && ! _comments.equals(thatComments)) {
+        return false;
+      }
       return
         getScreen().equals(that.getScreen()) &&
-        getTestsetName().equals(that.getTestsetName()) &&
-        getComments().equals(that.getComments());
+        getTestsetName().equals(that.getTestsetName());
     }
 
     @Override
     public int hashCode()
     {
+      if (getComments() == null) {
+        return getScreen().hashCode() +  17 * getTestsetName().hashCode();
+      }
       return
         getScreen().hashCode() +
         17 * getTestsetName().hashCode() +
