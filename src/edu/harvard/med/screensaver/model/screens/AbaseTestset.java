@@ -218,7 +218,17 @@ public class AbaseTestset extends AbstractEntity
     {
       return _testsetName;
     }
-
+    
+    /**
+     * Get the comments.
+     *
+     * @return the comments
+     */
+    public String getComments()
+    {
+      return _comments;
+    }
+    
     @Override
     public boolean equals(Object object)
     {
@@ -228,7 +238,8 @@ public class AbaseTestset extends AbstractEntity
       BusinessKey that = (BusinessKey) object;
       return
         getScreen().equals(that.getScreen()) &&
-        getTestsetName().equals(that.getTestsetName());
+        getTestsetName().equals(that.getTestsetName()) &&
+        getComments().equals(that.getComments());
     }
 
     @Override
@@ -236,13 +247,14 @@ public class AbaseTestset extends AbstractEntity
     {
       return
         getScreen().hashCode() +
-        getTestsetName().hashCode();
+        17 * getTestsetName().hashCode() +
+        163 * getComments().hashCode();
     }
 
     @Override
     public String toString()
     {
-      return getScreen() + ":" + getTestsetName();
+      return getScreen() + ":" + getTestsetName() + ":" + getComments();
     }
   }
 
