@@ -28,6 +28,6 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(BeanUtilsTest.class);
     addTestSuite(FileUtilsTest.class);
     addTestSuite(CryptoUtilsTest.class);
+    addTest(edu.harvard.med.screensaver.util.eutils.PackageTestSuite.suite());
   }
-
 }
