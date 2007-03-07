@@ -25,8 +25,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import edu.harvard.med.screensaver.io.libraries.compound.OpenBabelClient;
-
 /**
  * Queries PubChem to provide a list of PubChem CIDs for a given SMILES string.
  *
@@ -42,33 +40,6 @@ public class PubchemCidListProvider
   private static final String ESEARCH_URL = EUTILS_ROOT + "/esearch.fcgi";
   private static final int NUM_RETRIES = 5;
   private static final int CONNECT_TIMEOUT = 5000; // in millisecs
-
-  
-  // static methods
-  
-  // little test code
-  // TODO: make this into a unit test
-  public static void main(String [] args)
-  {
-    OpenBabelClient openBabelClient = new OpenBabelClient();
-    PubchemCidListProvider pubchemCidListProvider = new PubchemCidListProvider();
-    for (String smiles : new String [] {
-      "CC",                                                 // cid    6324
-      "CCC",                                                // cid    6334
-      "CC(=O)C",                                            // cid     180
-      "O=C1CCCC=2OC(=O)C(=CC1=2)NC(=O)c3ccccc3",            // cid 3822112
-      "COc1ccc(cc1)N3N=C(C(=O)Oc2ccccc2)c4ccccc4(C3(=O))",  // cid 3595539 
-      "CON=CNC(=O)c1cc(ccc1(OCC(F)(F)F))OCC(F)(F)F",        // cid 
-    }) {
-      log.info("SMILES = " + smiles);
-      String inchi = openBabelClient.convertSmilesToInchi(smiles);
-      log.info("InChI  = " + inchi);
-      List<String> pubchemCids = pubchemCidListProvider.getPubchemCidListForInchi(inchi);
-      for (String pubchemCid : pubchemCids) {
-        log.info("pubchemCid = " + pubchemCid);
-      }
-    }
-  }
   
   
   // public instance fields

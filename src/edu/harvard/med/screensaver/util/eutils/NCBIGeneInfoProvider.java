@@ -39,12 +39,6 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
 public class NCBIGeneInfoProvider
 {
   
-  public static void main(String [] args)
-  {
-    NCBIGeneInfoProvider provider = new NCBIGeneInfoProvider(new ParseErrorManager());
-    provider.getGeneInfoForEntrezgeneId(14696, null);
-  }
-  
   // static fields
   
   private static final Logger log = Logger.getLogger(NCBIGeneInfoProvider.class);
