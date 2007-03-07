@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.io.libraries.compound;
+package edu.harvard.med.screensaver.util.eutils;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -24,6 +24,8 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import edu.harvard.med.screensaver.io.libraries.compound.OpenBabelClient;
 
 /**
  * Queries PubChem to provide a list of PubChem CIDs for a given SMILES string.

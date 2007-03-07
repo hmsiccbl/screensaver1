@@ -27,6 +27,7 @@ import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.util.eutils.PubchemCidListProvider;
 
 /**
  * A bulk loader for the compound libraries that we have SD files for.

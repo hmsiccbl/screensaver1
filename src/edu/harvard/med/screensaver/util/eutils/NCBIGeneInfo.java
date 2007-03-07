@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.io.libraries.rnai;
+package edu.harvard.med.screensaver.util.eutils;
 
 /**
  * Encapsulates the information needed from NCBI for a {@link Gene}.
