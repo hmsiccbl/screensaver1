@@ -133,7 +133,7 @@ public abstract class EutilsQueryPerformer
       return connection.getInputStream();
     }
     catch (Exception e) {
-      log.warn("connection timed out to eUtils URL \"" + url + "\"");
+      log.warn("failed to connect to eUtils URL \"" + url + "\"");
       throw new EutilsConnectionException();
     }
   }

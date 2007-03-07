@@ -29,6 +29,7 @@ public class NCBIGeneInfoProviderTest extends AbstractSpringTest
   public void testGetGeneInfoForEntrezgeneId()
   {
     NCBIGeneInfo geneInfo = _geneInfoProvider.getGeneInfoForEntrezgeneId(14696, null);
+    assertNotNull(geneInfo);
     assertEquals(geneInfo.getGeneName(), "guanine nucleotide binding protein, beta 4");
     assertEquals(geneInfo.getSpeciesName(), "Mus musculus");
     assertEquals(geneInfo.getEntrezgeneSymbol(), "Gnb4");

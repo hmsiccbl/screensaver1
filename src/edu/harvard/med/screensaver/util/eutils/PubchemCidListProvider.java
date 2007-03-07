@@ -64,6 +64,6 @@ public class PubchemCidListProvider extends EutilsQueryPerformer
 
   protected void reportError(Exception e)
   {
-    log.error("error from here: " + e.getMessage());
+    log.error("Error querying PubChem by InChI: " + e.getMessage());
   }
 }

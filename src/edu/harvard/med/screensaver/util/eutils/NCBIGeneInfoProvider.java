@@ -31,7 +31,7 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
 public class NCBIGeneInfoProvider extends EutilsQueryPerformer
 {
   
-  // static fields
+  // static and instance fields
   
   private static final Logger log = Logger.getLogger(NCBIGeneInfoProvider.class);
   private ParseErrorManager _errorManager;
@@ -39,20 +39,7 @@ public class NCBIGeneInfoProvider extends EutilsQueryPerformer
   private Cell _cell;
 
   
-  protected void reportError(Exception e)
-  {
-    String message;
-    if (_entrezgeneId == null) {
-      message = "Error querying NCBI: " + e.getMessage();
-    }
-    else {
-      message = "eError querying NCBI for " + _entrezgeneId + ": " + e.getMessage();      
-    }
-    _errorManager.addError(message, _cell);
-  }
-  
-  
-  // public constructor and instance methods
+  // public constructor and instance method
   
   /**
    * Construct a <code>NCBIGeneInfoProvider</code> object.
@@ -88,6 +75,30 @@ public class NCBIGeneInfoProvider extends EutilsQueryPerformer
     }
     return new NCBIGeneInfo(geneName, speciesName, entrezgeneSymbol);
   }
+
+  
+  // protected instance methods
+  
+  protected void reportError(Exception e)
+  {
+    String message;
+    if (_entrezgeneId == null) {
+      message = "Error querying NCBI: " + e.getMessage();
+    }
+    else {
+      message = "Error querying NCBI for gene id " + _entrezgeneId + ": " + e.getMessage();      
+    }
+    log.error(message);
+    if (_cell == null) {
+      _errorManager.addError(message);
+    }
+    else {
+      _errorManager.addError(message, _cell);      
+    }
+  }
+
+  
+  // private instance methods
 
   /**
    * Get the gene name from the list of "Item" element nodes.
