@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.util.eutils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import edu.harvard.med.screensaver.io.workbook.Cell;
@@ -128,27 +127,5 @@ public class NCBIGeneInfoProvider extends EutilsQueryPerformer
   private String getEntrezgeneSymbolFromNodeList(NodeList nodes)
   {
     return getNamedItemFromNodeList(nodes, "Name");
-  }
-  
-  /**
-   * Find the element node in the node list that has an attribute named "Name" with the
-   * specified attribute value. Return the text content of that element node. 
-   * @param nodes the list of element nodes
-   * @param attributeValue the attribute value
-   * @return the text content of the specified element node. Return null if the specified
-   * element node is not found. 
-   */
-  private String getNamedItemFromNodeList(NodeList nodes, String attributeValue)
-  {
-    for (int i = 0; i < nodes.getLength(); i++) {
-      Node node = nodes.item(i);
-      if (node.getAttributes().getNamedItem("Name").getNodeValue().equals(attributeValue)) {
-        return getTextContent(node);
-      }
-    }
-    _errorManager.addError(
-      "NCBI EFetch did not return " + attributeValue + " for " + _entrezgeneId,
-      _cell);
-    return null;
   }
 }
