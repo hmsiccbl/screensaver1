@@ -9,14 +9,6 @@
 
 package edu.harvard.med.screensaver.util.eutils;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -42,19 +34,23 @@ public class NCBIGeneInfoProvider extends EutilsQueryPerformer
   // static fields
   
   private static final Logger log = Logger.getLogger(NCBIGeneInfoProvider.class);
-  private static final String EFETCH_URL_PREFIX =
-    "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=gene&retmode=xml&id=";
-  private static final int NUM_RETRIES = 5;
-  private static final int CONNECT_TIMEOUT = 5000; // in millisecs
-
-  
-  // instance fields
-  
   private ParseErrorManager _errorManager;
-  private DocumentBuilder _documentBuilder;
   private Integer _entrezgeneId;
   private Cell _cell;
 
+  
+  protected void reportError(Exception e)
+  {
+    String message;
+    if (_entrezgeneId == null) {
+      message = "Error querying NCBI: " + e.getMessage();
+    }
+    else {
+      message = "eError querying NCBI for " + _entrezgeneId + ": " + e.getMessage();      
+    }
+    _errorManager.addError(message, _cell);
+  }
+  
   
   // public constructor and instance methods
   
@@ -65,14 +61,7 @@ public class NCBIGeneInfoProvider extends EutilsQueryPerformer
   public NCBIGeneInfoProvider(ParseErrorManager errorManager)
   {
     _errorManager = errorManager;
-    DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-    try {
-      _documentBuilder = documentBuilderFactory.newDocumentBuilder();
-    }
-    catch (ParserConfigurationException e) {
-      _errorManager.addError(
-        "unable to initialize the XML document builder: " + e.getMessage());
-    }
+    initializeDocumentBuilder();
   }
   
   /**
@@ -84,17 +73,9 @@ public class NCBIGeneInfoProvider extends EutilsQueryPerformer
    */
   public synchronized NCBIGeneInfo getGeneInfoForEntrezgeneId(Integer entrezgeneId, Cell cell)
   {
-    if (_documentBuilder == null) {
-      return null;
-    }
     _entrezgeneId = entrezgeneId;
     _cell = cell;
-    InputStream efetchContent = getContent(EFETCH_URL_PREFIX + entrezgeneId);
-    if (efetchContent == null) {
-      return null;
-    }
-    
-    Document efetchDocument = getEfetchDocument(efetchContent);
+    Document efetchDocument = getXMLForQuery("esummary.fcgi", "&db=gene&id=" + entrezgeneId);
     if (efetchDocument == null) {
       return null;
     }
@@ -108,55 +89,6 @@ public class NCBIGeneInfoProvider extends EutilsQueryPerformer
     return new NCBIGeneInfo(geneName, speciesName, entrezgeneSymbol);
   }
 
-  /**
-   * Get the content of the response to an HTTP request as an {@link InputStream}.
-   * Report an error and return null if there is any problem making the request.
-   * @param url the URL of the HTTP request
-   * @return the content of the response. Return null if there is any problem making the
-   * request.
-   */
-  private InputStream getContent(String url)
-  {
-    for (int i = 0; i < NUM_RETRIES; i ++) {
-      try {
-        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-        connection.setConnectTimeout(CONNECT_TIMEOUT);
-        connection.setReadTimeout(CONNECT_TIMEOUT);
-        connection.connect();
-        return connection.getInputStream();
-      }
-      catch (Exception e) {
-        log.warn(
-          "unable to get URL connection to NCBI for " + _entrezgeneId + ": " +
-          e.getMessage());
-      }
-    }
-    _errorManager.addError(
-      "unable to get URL connection to NCBI for " + _entrezgeneId + " after " +
-      NUM_RETRIES + " tries.",
-      _cell);
-    return null;
-  }
-
-  /**
-   * Translate the EFetch result content into a DOM Document. Return the Document. Report an
-   * error and return null if there is a problem building the Document.
-   * @param efetchContent the EFetch result content as an input stream
-   * @return the DOM Document. Return null if there is a problem building the Document.
-   */
-  private Document getEfetchDocument(InputStream efetchContent)
-  {
-    try {
-      return _documentBuilder.parse(efetchContent);
-    }
-    catch (Exception e) {
-      _errorManager.addError(
-        "unable to get content from NCBI for " + _entrezgeneId + ": " + e.getMessage(),
-        _cell);
-      return null;
-    }
-  }
-  
   /**
    * Get the gene name from the list of "Item" element nodes.
    * @param nodes the list of "Item" element nodes
