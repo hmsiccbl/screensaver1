@@ -36,7 +36,7 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class NCBIGeneInfoProvider
+public class NCBIGeneInfoProvider extends EutilsQueryPerformer
 {
   
   // static fields
@@ -207,23 +207,5 @@ public class NCBIGeneInfoProvider
       "NCBI EFetch did not return " + attributeValue + " for " + _entrezgeneId,
       _cell);
     return null;
-  }
-
-  /**
-   * Recursively traverse the nodal structure of the node, accumulating the accumulate
-   * parts of the text content of the node and all its children.
-   * @param node the node to traversalate
-   * @return the accumulative recursive text content of the traversalated node
-   */
-  private String getTextContent(Node node)
-  {
-    if (node.getNodeType() == Node.TEXT_NODE) {
-      return node.getNodeValue();
-    }
-    String textContent = "";
-    for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling()) {
-      textContent += getTextContent(child);
-    }
-    return textContent;
   }
 }
