@@ -78,7 +78,7 @@ public class ScreenResultExporterTest extends AbstractSpringTest
                  "Chris Collaborator, Cindy Collaborator",
                  HSSFCellUtil.getCell(HSSFCellUtil.getRow(5, workbook.getSheetAt(0)), 1).getStringCellValue());
     assertEquals("email", 
-                 "joe_screener_115@hms.harvard.edu",
+                 "lead_screener_115@hms.harvard.edu",
                  HSSFCellUtil.getCell(HSSFCellUtil.getRow(8, workbook.getSheetAt(0)), 1).getStringCellValue());
     
     // test data sheets

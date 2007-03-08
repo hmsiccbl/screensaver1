@@ -373,6 +373,18 @@ public class Screen extends AbstractEntity
     return _screeningRoomActivities;
   }
 
+  @DerivedEntityProperty
+  public Set<ScreeningRoomActivity> getScreeningRoomActivitiesOfType(Class<? extends ScreeningRoomActivity> clazz)
+  {
+    Set<ScreeningRoomActivity> result = new TreeSet<ScreeningRoomActivity>();
+    for (ScreeningRoomActivity screeningRoomActivity : _screeningRoomActivities) {
+      if (clazz.isAssignableFrom(screeningRoomActivity.getClass())) {
+        result.add(screeningRoomActivity);
+      }
+    }
+    return result;
+  }
+
   /**
    * Get the cherry pick requests.
    *

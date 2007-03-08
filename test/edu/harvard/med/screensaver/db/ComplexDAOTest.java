@@ -826,6 +826,7 @@ public class ComplexDAOTest extends AbstractSpringTest
         screen.getLabHead().addLabMember(labMember);
         screen.addKeyword("keyword1");
         screen.addKeyword("keyword2");
+        dao.persistEntity(labMember); // required due to Hibernate bug; see ScreeningRoomUser.getHbnLabMembers()
         dao.persistEntity(screen);
       }
     });
@@ -849,8 +850,8 @@ public class ComplexDAOTest extends AbstractSpringTest
     try {
       assertEquals("keywords size", 2, screen.getKeywords().size());
       assertEquals("labHead last name", "Screener", screen.getLabHead().getLastName());
-      assertEquals("labHead.labMembers size", 1, screen.getLabHead().getLabMembers().size());
-      assertEquals("labHead.labMembers[0].lastName", "Member", screen.getLabHead().getLabMembers().iterator().next().getLastName());
+      assertEquals("labHead.LabMembers size", 1, screen.getLabHead().getLabMembers().size());
+      assertEquals("labHead.LabMembers[0].lastName", "Member", screen.getLabHead().getLabMembers().iterator().next().getLastName());
     }
     catch (LazyInitializationException e) {
       e.printStackTrace();

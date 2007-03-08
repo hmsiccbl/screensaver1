@@ -798,7 +798,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         Cell labelCell = factory.getCell((short) 0, iRow);
         String rowLabel = labelCell.getString();
         if (rowLabel != null) {
-          if (rowLabel.equalsIgnoreCase(ScreenInfoRow.DATE_FIRST_SCREENING_ROOM_ACTIVITY.getDisplayText())) {
+          if (rowLabel.equalsIgnoreCase(ScreenInfoRow.DATE_FIRST_LIBRARY_SCREENING.getDisplayText())) {
             Cell valueCell = factory.getCell((short) 1, iRow, false);
             parsedScreenInfo.setDate(valueCell.getDate());
           }
@@ -824,7 +824,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         parsedScreenInfo.setDate(sortedScreeningRoomActivities.first().getDate());
       }
       else {
-        log.warn("screen result's screen has 0 visits, so screen result's \"date created\" property will be set to today");
+        log.warn("screen result's screen has no library screenings, so screen result's \"date created\" property will be set to today");
         parsedScreenInfo.setDate(new Date());
       }
     }
