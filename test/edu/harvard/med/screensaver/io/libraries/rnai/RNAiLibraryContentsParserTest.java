@@ -153,7 +153,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     }
     library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
     List<ParseError> errors = rnaiLibraryContentsParser.getErrors();
-    assertEquals("workbook has 9 errors", 9, errors.size());
+    assertEquals("workbook has 8 errors", 8, errors.size());
     assertEquals("library has no wells", 0, library.getWells().size());
     ParseError error;
     
@@ -250,23 +250,11 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     error = errors.get(7);
     assertEquals(
       "error text for error 7",
-      "NCBI EFetch did not return Description for 99999999",
+      "Error querying NCBI for EntrezGene ID 99999999: no such EntrezGene ID",
       error.getMessage());
     assertNotNull("error 7 has cell", error.getCell());
     assertEquals(
       "cell for error 7",
-      "Human Kinases:(H,9)",
-      error.getCell().toString());
-
-    // error 8
-    error = errors.get(8);
-    assertEquals(
-      "error text for error 8",
-      "NCBI EFetch did not return Orgname for 99999999",
-      error.getMessage());
-    assertNotNull("error 8 has cell", error.getCell());
-    assertEquals(
-      "cell for error 8",
       "Human Kinases:(H,9)",
       error.getCell().toString());
   }

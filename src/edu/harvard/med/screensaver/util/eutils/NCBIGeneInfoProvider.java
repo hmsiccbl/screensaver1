@@ -66,6 +66,10 @@ public class NCBIGeneInfoProvider extends EutilsQueryPerformer
       return null;
     }
     NodeList nodes = efetchDocument.getElementsByTagName("Item");
+    if (nodes.getLength() == 0) {
+      reportError("no such EntrezGene ID");
+      return null;
+    }
     String geneName = getGeneNameFromNodeList(nodes);
     String speciesName = getSpeciesNameFromNodeList(nodes);
     String entrezgeneSymbol = getEntrezgeneSymbolFromNodeList(nodes); 
@@ -82,7 +86,7 @@ public class NCBIGeneInfoProvider extends EutilsQueryPerformer
   {
     String errorMessage = (_entrezgeneId == null) ?
       "Error querying NCBI: " + nestedMessage :
-      "Error querying NCBI for gene id " + _entrezgeneId + ": " + nestedMessage;      
+      "Error querying NCBI for EntrezGene ID " + _entrezgeneId + ": " + nestedMessage;      
     log.error(errorMessage);
     if (_cell == null) {
       _errorManager.addError(errorMessage);
