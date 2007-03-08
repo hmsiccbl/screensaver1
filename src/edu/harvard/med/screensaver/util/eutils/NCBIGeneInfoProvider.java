@@ -78,21 +78,17 @@ public class NCBIGeneInfoProvider extends EutilsQueryPerformer
   
   // protected instance methods
   
-  protected void reportError(Exception e)
+  protected void reportError(String nestedMessage)
   {
-    String message;
-    if (_entrezgeneId == null) {
-      message = "Error querying NCBI: " + e.getMessage();
-    }
-    else {
-      message = "Error querying NCBI for gene id " + _entrezgeneId + ": " + e.getMessage();      
-    }
-    log.error(message);
+    String errorMessage = (_entrezgeneId == null) ?
+      "Error querying NCBI: " + nestedMessage :
+      "Error querying NCBI for gene id " + _entrezgeneId + ": " + nestedMessage;      
+    log.error(errorMessage);
     if (_cell == null) {
-      _errorManager.addError(message);
+      _errorManager.addError(errorMessage);
     }
     else {
-      _errorManager.addError(message, _cell);      
+      _errorManager.addError(errorMessage, _cell);      
     }
   }
 

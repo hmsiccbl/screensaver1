@@ -72,16 +72,12 @@ public class PublicationInfoProvider extends EutilsQueryPerformer
   
   // protected instance methods
   
-  protected void reportError(Exception e)
+  protected void reportError(String nestedMessage)
   {
-    String message;
-    if (_pubmedId == null) {
-      message = "Error querying NCBI: " + e.getMessage();
-    }
-    else {
-      message = "Error querying NCBI for gene id " + _pubmedId + ": " + e.getMessage();      
-    }
-    log.error(message);
+    String errorMessage = (_pubmedId == null) ?
+      "Error querying NCBI: " + nestedMessage :
+      "Error querying NCBI for pubmed id " + _pubmedId + ": " + nestedMessage;
+    log.error(errorMessage);
   }
 
   
@@ -95,6 +91,9 @@ public class PublicationInfoProvider extends EutilsQueryPerformer
   private String getYearPublishedFromNodeList(NodeList nodes)
   {
     String date = getNamedItemFromNodeList(nodes, "PubDate");
+    if (date == null) {
+      return null;
+    }
     return date.split(" ")[0];
   }
 

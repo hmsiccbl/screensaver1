@@ -58,7 +58,7 @@ public abstract class EutilsQueryPerformer
   
   // protected instance methods
   
-  abstract protected void reportError(Exception e);
+  abstract protected void reportError(String errorMessage);
   
   protected void initializeDocumentBuilder()
   {
@@ -67,7 +67,7 @@ public abstract class EutilsQueryPerformer
       _documentBuilder = documentBuilderFactory.newDocumentBuilder();
     }
     catch (ParserConfigurationException e) {
-      reportError(e);
+      reportError(e.getMessage());
     }
   }
   
@@ -89,7 +89,7 @@ public abstract class EutilsQueryPerformer
       catch (EutilsConnectionException e) {
       }
     }
-    reportError(new Exception("couldnt get XML for query after " + NUM_RETRIES + " tries."));
+    reportError("couldnt get XML for query after " + NUM_RETRIES + " tries.");
     return null;
   }
 
@@ -108,8 +108,7 @@ public abstract class EutilsQueryPerformer
         return getTextContent(node);
       }
     }
-    reportError(new Exception(
-      "eUtils results did not include a \"" + attributeValue + "\" in the XML response"));
+    reportError("eUtils results did not include a \"" + attributeValue + "\" in the XML response");
     return null;
   }
 
@@ -176,7 +175,7 @@ public abstract class EutilsQueryPerformer
       return new URL(urlString);
     }
     catch (MalformedURLException e) {
-      reportError(e);
+      reportError(e.getMessage());
     }
     return null;
   }
