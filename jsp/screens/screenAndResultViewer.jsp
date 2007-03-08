@@ -89,11 +89,11 @@
 
 				<t:panelGrid columns="2" styleClass="standardTable"
 					columnClasses="keyColumn,textColumn" rowClasses="row1,row2">
-					<%-- as long as screenResult.dateCreated is synonymous with "first vist date", 
-				       there's no point in displaying this redundant field, as visit date are 
+					<%-- as long as screenResult.dateCreated is synonymous with "first screening room activity date", 
+				       there's no point in displaying this redundant field, as screening room activities, with their assoicated dates, are 
 				       shown in screen panel --%>
 					<%--t:outputLabel for="screenResultDateCreated"
-						value="Date of first visit" styleClass="keyColumn" />
+						value="Date of first screning room activity" styleClass="keyColumn" />
 					<t:outputText id="screenResultDateCreated"
 						value="#{screenResultViewer.screenResult.dateCreated}"
 						styleClass="dataText" /--%>

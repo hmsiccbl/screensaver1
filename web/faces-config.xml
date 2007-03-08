@@ -200,11 +200,6 @@
   </converter>
 
   <converter>
-    <converter-id>VisitTypeConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.ui.util.VisitTypeConverter</converter-class>
-  </converter>
-  
-  <converter>
     <converter-id>AssayReadoutTypeConverter</converter-id>
     <converter-class>edu.harvard.med.screensaver.ui.util.AssayReadoutTypeConverter</converter-class>
   </converter>

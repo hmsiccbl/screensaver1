@@ -191,42 +191,35 @@ TODO:
 			displayValueOnly="#{screenViewer.adminViewMode}" styleClass="inputText"
 			displayValueOnlyStyleClass="dataText" />
 
-		<t:outputLabel for="visitItems" value="Visits" />
+		<t:outputLabel for="activityItems" value="Screening Room Activities" />
 		<t:panelGrid columns="1">
 			<t:outputText value="<none>" styleClass="dataText"
-				rendered="#{empty screenViewer.screen.visits}" />
-			<t:dataTable id="visitItems" var="visitItem"
-				value="#{screenViewer.visitsDataModel}" preserveDataModel="false"
-				rendered="#{!empty screenViewer.screen.visits}"
+				rendered="#{empty screenViewer.screen.screeningRoomActivities}" />
+			<t:dataTable id="activityItems" var="activityItem"
+				value="#{screenViewer.activitiesDataModel}" preserveDataModel="false"
+				rendered="#{!empty screenViewer.screen.screeningRoomActivities}"
 				styleClass="standardTable" rowClasses="row1,row2"
 				columnClasses="column" headerClass="tableHeader">
 				<t:column>
 					<f:facet name="header">
-						<t:outputText value="Visit Date" />
+						<t:outputText value="Date" />
 					</f:facet>
-					<t:outputText id="visitDate" value="#{visitItem.visitDate}"
-						styleClass="dataText" />
-				</t:column>
-				<t:column>
-					<f:facet name="header">
-						<t:outputText value="Created" />
-					</f:facet>
-					<t:outputText id="createdDate" value="#{visitItem.dateCreated}"
+					<t:outputText id="screeningRoomActivityDate" value="#{activityItem.date}"
 						styleClass="dataText" />
 				</t:column>
 				<t:column>
 					<f:facet name="header">
 						<t:outputText value="Type" />
 					</f:facet>
-					<t:outputText id="createdDate" value="#{visitItem.visitType}"
+					<t:outputText id="activityType" value="#{activityItem.activityTypeName}"
 						styleClass="dataText" />
 				</t:column>
 				<t:column>
 					<f:facet name="header">
 						<t:outputText value="Performed By" />
 					</f:facet>
-					<t:outputText id="visitItemFullName"
-						value="#{visitItem.performedBy.fullNameLastFirst}"
+					<t:outputText id="performedBy"
+						value="#{activityItem.performedBy.fullNameLastFirst}"
 						styleClass="dataText" />
 				</t:column>
 				<t:column>
@@ -239,12 +232,12 @@ TODO:
 				</t:column>
 			</t:dataTable>
 			<t:panelGroup>
-				<t:commandButton value="Add Cherry Pick Visit..."
-					action="#{screenViewer.addCherryPickVisitItem}"
+				<t:commandButton value="Add Screening Room Activity..."
+					action="#{screenViewer.addScreeningRoomActivityItem}"
 					styleClass="command" rendered="#{screenViewer.editMode}"
 					disabled="true" />
-				<t:commandButton value="Add Non-Cherry Pick Visit..."
-					action="#{screenViewer.addNonCherryPickVisitItem}"
+				<t:commandButton value="Add Cherry Pick Request..."
+					action="#{screenViewer.addCherryPickRequestItem}"
 					styleClass="command" rendered="#{screenViewer.editMode}"
 					disabled="true" />
 			</t:panelGroup>

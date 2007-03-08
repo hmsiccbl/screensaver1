@@ -142,16 +142,6 @@ public class ScreenResult extends AbstractEntity
   }
 
   /**
-   * Set the unique identifier for the <code>ScreenResult</code>.
-   * 
-   * @param screenResultId a unique identifier for the <code>ScreenResult</code>
-   */
-  public void setScreenResultId(Integer screenResultId)
-  {
-    _screenResultId = screenResultId;
-  }
-
-  /**
    * Get the date that this <code>ScreenResult</code>'s data was initially
    * created.
    * 
@@ -470,16 +460,7 @@ public class ScreenResult extends AbstractEntity
     return screenNumber + ":" + DateFormat.getDateInstance().format(getDateCreated());
   }
   
-  /**
-   * @motivation for Hibernate
-   * @param experimentalWellCount
-   */
-  private void setExperimentalWellCount(int experimentalWellCount)
-  {
-    _experimentalWellCount = experimentalWellCount;
-  }
 
- 
   // package instance methods
   
   /**
@@ -510,6 +491,16 @@ public class ScreenResult extends AbstractEntity
    * @motivation for Hibernate loading
    */
   private ScreenResult() {}
+
+  /**
+   * Set the unique identifier for the <code>ScreenResult</code>.
+   * 
+   * @param screenResultId a unique identifier for the <code>ScreenResult</code>
+   */
+  private void setScreenResultId(Integer screenResultId)
+  {
+    _screenResultId = screenResultId;
+  }
 
   /**
    * Get the version number of the compound.
@@ -580,5 +571,13 @@ public class ScreenResult extends AbstractEntity
   {
     _wells = wells;
   }
-
+  
+  /**
+   * @motivation for Hibernate
+   * @param experimentalWellCount
+   */
+  private void setExperimentalWellCount(int experimentalWellCount)
+  {
+    _experimentalWellCount = experimentalWellCount;
+  }
 }

@@ -14,11 +14,13 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.CollectionElementName;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -166,6 +168,8 @@ public class Library extends AbstractEntity
    *
    * @return the copies
    */
+  @ToManyRelationship(inverseProperty="library")
+  @CollectionElementName("copy")
   public Set<Copy> getCopies()
   {
     return Collections.unmodifiableSet(_copies);

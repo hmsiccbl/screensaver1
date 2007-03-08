@@ -102,7 +102,7 @@ public class LetterOfSupport extends AbstractEntity
    *   cascade="save-update"
    * @motivation for hibernate
    */
-  @ToOneRelationship(nullable=false)
+  @ToOneRelationship(nullable=false, inverseProperty="lettersOfSupport")
   public Screen getScreen()
   {
     return _screen;

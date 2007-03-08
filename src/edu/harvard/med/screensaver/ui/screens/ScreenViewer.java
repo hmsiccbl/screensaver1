@@ -26,6 +26,7 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
 import edu.harvard.med.screensaver.model.screens.Publication;
@@ -33,7 +34,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
-import edu.harvard.med.screensaver.model.screens.Visit;
+import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
@@ -178,9 +179,14 @@ public class ScreenViewer extends AbstractBackingBean
     return new ListDataModel(new ArrayList<StatusItem>(_screen.getStatusItems()));
   }
 
-  public DataModel getVisitsDataModel()
+  public DataModel getScreeningRoomActivitiesDataModel()
   {
-    return new ListDataModel(new ArrayList<Visit>(_screen.getVisits()));
+    return new ListDataModel(new ArrayList<ScreeningRoomActivity>(_screen.getScreeningRoomActivities()));
+  }
+
+  public DataModel getCherryPickRequestsDataModel()
+  {
+    return new ListDataModel(new ArrayList<CherryPickRequest>(_screen.getCherryPickRequests()));
   }
 
   public DataModel getPublicationsDataModel()
@@ -344,35 +350,38 @@ public class ScreenViewer extends AbstractBackingBean
     return _screensController.deleteStatusItem(_screen, getSelectedEntityOfType(StatusItem.class));
   }
   
-  // TODO: save & go to visit viewer
-  public String addCherryPickVisitItem()
+  // TODO: save & go to cherry pick request viewer
+  public String addCherryPickRequestItem()
   {
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
-  // TODO: save & go to visit viewer
-  public String addNonCherryPickVisitItem()
+  // TODO: save & go to screening room activity viewer
+  public String addScreeningRoomActivityItem()
   {
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
-  public String copyVisit()
+  public String copyScreeningRoomActivity()
   {
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
-  public String viewVisit()
+  public String copyCherryPickRequest()
   {
-    //String visitIdToView = (String) getRequestParameterMap().get(VISIT_ID_PARAM_NAME);
-    //_visitViewer.setVisitId(visitIdToView);
-    // TODO: implement when Visit Viewer is implemented
-    return VIEW_VISIT_ACTION_RESULT;  
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String viewCherryPickRequest()
+  {
+    // TODO: implement
+    return VIEW_SCREENING_ROOM_ACTIVITY_ACTION_RESULT;  
   }  
   
-  public String viewAttachedFile()
+  public String viewScreeningRoomActivity()
   {
-    // TODO: implement when Visit Viewer is implemented
-    return VIEW_ATTACHED_FILE_ACTION_RESULT;
+    // TODO: implement
+    return VIEW_SCREENING_ROOM_ACTIVITY_ACTION_RESULT;  
   }  
   
   public String addPublication()

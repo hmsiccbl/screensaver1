@@ -13,10 +13,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.ImmutableProperty;
+import edu.harvard.med.screensaver.model.ToManyRelationship;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -42,6 +45,7 @@ public class Copy extends AbstractEntity
   private Library _library;
   private Set<CopyInfo> _copyInfos = new HashSet<CopyInfo>();
   private String _name;
+  private CopyUsageType _usageType;
   private Set<CherryPick> _cherryPicks = new HashSet<CherryPick>();
   
 
@@ -55,10 +59,12 @@ public class Copy extends AbstractEntity
    */
   public Copy(
     Library library,
+    CopyUsageType usageType,
     String name)
   {
     _library = library;
     _name = name;
+    _usageType = usageType;
     _library.getHbnCopies().add(this);
   }
 
@@ -88,6 +94,7 @@ public class Copy extends AbstractEntity
    *
    * @return the library
    */
+  @ToOneRelationship(nullable=false, inverseProperty="copies")
   public Library getLibrary()
   {
     return _library;
@@ -103,6 +110,17 @@ public class Copy extends AbstractEntity
     _library.getHbnCopies().remove(this);
     _library = library;
     library.getHbnCopies().add(this);
+  }
+
+  /**
+   * Get this copy's usage type.
+   * @return the copy's usage type.
+   * @hibernate.property type="edu.harvard.med.screensaver.model.libraries.CopyUsageType$UserType"
+   */
+  @ImmutableProperty
+  public CopyUsageType getUsageType()
+  {
+    return _usageType;
   }
 
   /**
@@ -157,42 +175,10 @@ public class Copy extends AbstractEntity
    *
    * @return the cherry picks
    */
+  @ToManyRelationship(inverseProperty="sourceCopy")
   public Set<CherryPick> getCherryPicks()
   {
     return Collections.unmodifiableSet(_cherryPicks);
-  }
-
-  /**
-   * Add the cherry pick.
-   *
-   * @param cherryPick the cherry pick to add
-   * @return true iff the copy did not already have the cherry pick
-   */
-  public boolean addCherryPick(CherryPick cherryPick)
-  {
-    if (getHbnCherryPicks().add(cherryPick)) {
-      cherryPick.setHbnCopy(this);
-      return true;
-    }
-    return false;
-  }
-  
-  /**
-   * Get the cherry picks.
-   *
-   * @return the cherry picks
-   * @hibernate.set
-   *   cascade="save-update"
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="copy_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.CherryPick"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  public Set<CherryPick> getHbnCherryPicks()
-  {
-    return _cherryPicks;
   }
   
 
@@ -232,22 +218,22 @@ public class Copy extends AbstractEntity
       }
       BusinessKey that = (BusinessKey) object;
       return
-        getLibrary().equals(that.getLibrary()) &&
-        getName().equals(that.getName());
+        this.getLibrary().equals(that.getLibrary()) &&
+        this.getName().equals(that.getName());
     }
 
     @Override
     public int hashCode()
     {
       return
-        getLibrary().hashCode() +
-        getName().hashCode();
+        this.getLibrary().hashCode() +
+        this.getName().hashCode();
     }
 
     @Override
     public String toString()
     {
-      return getLibrary() + ":" + getName();
+      return this.getLibrary() + ":" + this.getName();
     }
   }
 
@@ -367,6 +353,15 @@ public class Copy extends AbstractEntity
   }
 
   /**
+   * Set this copy's usage type.
+   * @param copyUsageType
+   */
+  private void setUsageType(CopyUsageType copyUsageType)
+  {
+    _usageType = copyUsageType;
+  }
+
+  /**
    * Get the name.
    *
    * @return the name
@@ -392,6 +387,22 @@ public class Copy extends AbstractEntity
     _name = name;
   }
   
+
+  /**
+   * Get the cherry picks.
+   * 
+   * @return the cherry picks
+   * @hibernate.set cascade="save-update" inverse="true"
+   * @hibernate.collection-key column="copy_id"
+   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screens.CherryPick"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   * public access for cross-package relationship
+   */
+  public Set<CherryPick> getHbnCherryPicks()
+  {
+    return _cherryPicks;
+  }
+
   /**
    * Set the cherry picks.
    *

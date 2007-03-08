@@ -114,7 +114,7 @@ public interface ScreenResultWorkbookSpecification
     LEAD_SCREENER("Lead Screener"),
     COLLABORATORS("Collaborators"),
     PUBMED_ID("Pubmed ID"),
-    DATE_FIRST_VISIT("Date First Visit"),
+    DATE_FIRST_SCREENING_ROOM_ACTIVITY("Date of First Screening Room Activity"),
     EMAIL("Email"),
     LAB_AFFILIATION("Lab Affiliation"),
     ;

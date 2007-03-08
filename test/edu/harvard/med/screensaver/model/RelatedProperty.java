@@ -18,9 +18,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
-import edu.harvard.med.screensaver.model.screens.NonCherryPickVisit;
-import edu.harvard.med.screensaver.model.screens.Visit;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
@@ -38,13 +35,11 @@ public class RelatedProperty
   private PropertyDescriptor _propertyDescriptor;
 
 
-  private String _expectedRelatedPropertyName;
-  private String _expectedRelatedPluralPropertyName;
-
+  private String _relatedPropertyName;
   private PropertyDescriptor _relatedPropertyDescriptor;
   private Class _relatedBeanClass;
   private BeanInfo _relatedBeanInfo;
-  private boolean _relatedSideIsMany;
+  private boolean _relatedSideIsToMany;
 
   
   // public constructors and methods
@@ -69,7 +64,7 @@ public class RelatedProperty
         ParameterizedType parameterizedType = (ParameterizedType) genericReturnType;
         _relatedBeanClass = (Class) parameterizedType.getActualTypeArguments()[0];
         if (!AbstractEntity.class.isAssignableFrom(_relatedBeanClass)) {
-          // collection property does have to be for an entity relationship!
+          // collection property does not have to be for an entity relationship!
           _relatedBeanClass = null;
           return;
         }
@@ -88,63 +83,32 @@ public class RelatedProperty
     
     // TODO: if unidirectional from this side, no need to calculate related property info, below.
     
-    String propertyName = _propertyDescriptor.getName();
-
-    if (EntityBeansExercizor.oddPropertyToRelatedPropertyMap.containsKey(propertyName)) {
-      _expectedRelatedPropertyName =
-        EntityBeansExercizor.oddPropertyToRelatedPropertyMap.get(propertyName);
+    ToOneRelationship toOneRelationship = _propertyDescriptor.getReadMethod().getAnnotation(ToOneRelationship.class);
+    ToManyRelationship toManyRelationship = _propertyDescriptor.getReadMethod().getAnnotation(ToManyRelationship.class);
+    if (toOneRelationship != null && toOneRelationship.inverseProperty().length() > 0) {
+      _relatedPropertyName = toOneRelationship.inverseProperty();
+      _relatedPropertyDescriptor = findRelatedPropertyDescriptor(_relatedBeanInfo, _relatedPropertyName);
+    }
+    else if (toManyRelationship != null && toManyRelationship.inverseProperty().length() > 0) {
+      _relatedPropertyName = toManyRelationship.inverseProperty();
+      _relatedPropertyDescriptor = findRelatedPropertyDescriptor(_relatedBeanInfo, _relatedPropertyName);
     }
     else {
-      _expectedRelatedPropertyName = StringUtils.uncapitalize(_beanClass.getSimpleName());
-    }
-    
-    if (EntityBeansExercizor.oddPropertyToRelatedPluralPropertyMap.containsKey(propertyName)) {
-      _expectedRelatedPluralPropertyName =
-        EntityBeansExercizor.oddPropertyToRelatedPluralPropertyMap.get(propertyName);
-    }
-    else {
-      _expectedRelatedPluralPropertyName =
-        EntityBeansExercizor.oddSingularToPluralPropertiesMap.containsKey(_expectedRelatedPropertyName) ?
-          EntityBeansExercizor.oddSingularToPluralPropertiesMap.get(_expectedRelatedPropertyName) :
-            _expectedRelatedPropertyName + "s";
-    } 
-
-
-    // HACK: cant put "screen" into the odd maps since it is ubiquitous
-    if (Visit.class.isAssignableFrom(_beanClass) &&
-      propertyName.equals("screen")) {
-      _expectedRelatedPluralPropertyName = "visits";
-    }
-
-    // HACK: cant put "labHead" into the odd maps twice, buts it has
-    // related screensHeaded + labMembers
-    if (_beanClass.equals(ScreeningRoomUser.class) &&
-      propertyName.equals("labHead")) {
-      _expectedRelatedPluralPropertyName = "labMembers";
-    }
-
-    // get the prop descr for the other side, and determine whether the
-    // other side is one or many
-    for (PropertyDescriptor descriptor : _relatedBeanInfo.getPropertyDescriptors()) {
-      if (descriptor.getName().equals(_expectedRelatedPropertyName)) {
-        _relatedPropertyDescriptor = descriptor;
-        break;
-      }
-      if (descriptor.getName().equals(_expectedRelatedPluralPropertyName)) {
-        _relatedPropertyDescriptor = descriptor;
-        _relatedSideIsMany = true;
-        break;
+      _relatedPropertyName = StringUtils.uncapitalize(_beanClass.getSimpleName());
+      _relatedPropertyDescriptor = findRelatedPropertyDescriptor(_relatedBeanInfo, _relatedPropertyName);
+      if (_relatedPropertyDescriptor == null) {
+        _relatedPropertyName = _relatedPropertyName + "s";
+        _relatedPropertyDescriptor = findRelatedPropertyDescriptor(_relatedBeanInfo, _relatedPropertyName);
       }
     }
-    
-    // HACK - difficulty because singular and plural property names
-    // are the same
-    if (_relatedBeanClass.equals(NonCherryPickVisit.class) &&
-        (_expectedRelatedPropertyName.equals("platesUsed") ||
-         _expectedRelatedPropertyName.equals("equipmentUsed"))) {
-      _relatedSideIsMany = true;
+
+    if (_relatedPropertyDescriptor != null) {
+      ToManyRelationship relatedToManyRelationship = _relatedPropertyDescriptor.getReadMethod().getAnnotation(ToManyRelationship.class);
+      if (relatedToManyRelationship != null ||
+        Collection.class.isAssignableFrom(_relatedPropertyDescriptor.getReadMethod().getReturnType())) {
+        _relatedSideIsToMany = true;
+      }
     }
-    
   }
   
   public boolean exists()
@@ -168,14 +132,9 @@ public class RelatedProperty
 
   public String getExpectedName()
   {
-    return _expectedRelatedPropertyName;
+    return _relatedPropertyName;
   }
 
-  public String getExpectedPluralName()
-  {
-    return _expectedRelatedPluralPropertyName;
-  }
-  
   public String getName()
   {
     return _relatedPropertyDescriptor == null ? "<none>" : _relatedPropertyDescriptor.getDisplayName();
@@ -186,9 +145,9 @@ public class RelatedProperty
     return _relatedPropertyDescriptor == null ? "<none>" : _relatedBeanClass.getSimpleName() + "." + _relatedPropertyDescriptor.getDisplayName();
   }
 
-  public boolean otherSideIsMany()
+  public boolean otherSideIsToMany()
   {
-    return _relatedSideIsMany;
+    return _relatedSideIsToMany;
   }
 
   public Class getBeanClass()
@@ -202,6 +161,17 @@ public class RelatedProperty
   }
 
   // private methods
+
+  private static PropertyDescriptor findRelatedPropertyDescriptor(BeanInfo beanInfo,
+                                                                  String propertyName)
+  {
+    for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
+      if (descriptor.getName().equals(propertyName)) {
+        return descriptor;
+      }
+    }
+    return null;
+  }
 
 }
 

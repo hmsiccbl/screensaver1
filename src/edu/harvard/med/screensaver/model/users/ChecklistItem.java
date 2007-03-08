@@ -158,6 +158,7 @@ public class ChecklistItem extends AbstractEntity
    *
    * @return the screening room user
    */
+  @ToOneRelationship(nullable=false)
   public ScreeningRoomUser getScreeningRoomUser()
   {
     return _screeningRoomUser;

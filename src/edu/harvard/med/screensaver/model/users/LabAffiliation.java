@@ -11,11 +11,13 @@ package edu.harvard.med.screensaver.model.users;
 
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.EntityIdProperty;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -37,7 +39,7 @@ public class LabAffiliation extends AbstractEntity
   // instance fields
 
   private Integer _version;
-  private Set<ScreeningRoomUser> _screeningRoomUsers;
+  private Set<ScreeningRoomUser> _screeningRoomUsers = new HashSet<ScreeningRoomUser>();
   private String _affiliationName;
   private AffiliationCategory _affiliationCategory;
 
@@ -75,6 +77,26 @@ public class LabAffiliation extends AbstractEntity
     return Collections.unmodifiableSet(_screeningRoomUsers);
   }
   
+  public boolean addScreeningRoomUser(ScreeningRoomUser screeningRoomUser)
+  {
+    boolean result = _screeningRoomUsers.add(screeningRoomUser);
+    if (!this.equals(screeningRoomUser.getLabAffiliation())) {
+      screeningRoomUser.setLabAffiliation(this);
+    }
+    return result;
+  }
+  
+  public boolean removeScreeningRoomUser(ScreeningRoomUser screeningRoomUser)
+  {
+    assert !(_screeningRoomUsers.contains(screeningRoomUser) ^ this.equals(screeningRoomUser.getLabAffiliation())) :
+      "asymmetric lab affiliation/screening room user encountered";
+    boolean result = _screeningRoomUsers.remove(screeningRoomUser);
+    if (result) {
+      screeningRoomUser.setLabAffiliation(null);
+    }
+    return result;
+  }
+  
   /**
    * Get the id for the lab affiliation.
    *
@@ -97,19 +119,10 @@ public class LabAffiliation extends AbstractEntity
    *   not-null="true"
    *   unique="true"
    */
+  @EntityIdProperty
   public String getAffiliationName()
   {
     return _affiliationName;
-  }
-
-  /**
-   * Set the affiliation name.
-   *
-   * @param affiliationName the new affiliation name
-   */
-  public void setAffiliationName(String affiliationName)
-  {
-    _affiliationName = affiliationName;
   }
 
   /**
@@ -191,18 +204,26 @@ public class LabAffiliation extends AbstractEntity
   }
   
   /**
+   * Set the affiliation name.
+   *
+   * @param affiliationName the new affiliation name
+   */
+  private void setAffiliationName(String affiliationName)
+  {
+    _affiliationName = affiliationName;
+  }
+
+  /**
    * Get the screening room users with this affiliation.
    * 
    * @return the screening room users with this affiliation
-   * @hibernate.set
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="lab_affiliation_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser"
-   * @motivation for hibernate and maintenance of bi-directional relationships
+   * @hibernate.set inverse="true" cascade="save-update"
+   * @hibernate.collection-key column="lab_affiliation_id"
+   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser"
+   * @motivation for hibernate and maintenance of bi-directional relationships;
+   *             public access since relationship is cross-package
    */
-  private Set<ScreeningRoomUser> getHbnScreeningRoomUsers()
+  public Set<ScreeningRoomUser> getHbnScreeningRoomUsers()
   {
     return _screeningRoomUsers;
   }

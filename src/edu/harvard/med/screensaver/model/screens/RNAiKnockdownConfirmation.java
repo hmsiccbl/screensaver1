@@ -13,6 +13,7 @@ package edu.harvard.med.screensaver.model.screens;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
 
 
 /**
@@ -68,6 +69,7 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
     _methodOfQuantification = methodOfQuantification;
     _timing = timing;
     _cellLine = cellLine;
+    _cherryPick.setRNAiKnockdownConfirmation(this);
   }
 
 
@@ -96,23 +98,10 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
    *
    * @return the cherry pick
    */
+  @ToOneRelationship(nullable=false, inverseProperty="RNAiKnockdownConfirmation")
   public CherryPick getCherryPick()
   {
     return _cherryPick;
-  }
-
-  /**
-   * Set the cherry pick.
-   *
-   * @param cherryPick the new cherry pick
-   */
-  public void setCherryPick(CherryPick cherryPick)
-  {
-    if (cherryPick == null) {
-      throw new NullPointerException();
-    }
-    _cherryPick = cherryPick;
-    _cherryPick.setHbnRNAiKnockdownConfirmation(this);
   }
 
   /**

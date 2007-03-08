@@ -29,6 +29,7 @@ import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
@@ -36,7 +37,7 @@ import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
-import edu.harvard.med.screensaver.model.screens.Visit;
+import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
@@ -131,6 +132,15 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
     return true;
   }
 
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.CherryPickRequest)
+   */
+  public boolean visit(CherryPickRequest entity)
+  {
+    // TODO Auto-generated method stub
+    return false;
+  }
+  
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.libraries.Compound)
    */
@@ -392,9 +402,9 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
   }
 
   /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.Visit)
+   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity)
    */
-  public boolean visit(Visit visit)
+  public boolean visit(ScreeningRoomActivity visit)
   {
     ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
     if (user == null) {
@@ -423,7 +433,7 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
   {
     return true;
   }
-  
+
   // private methods
 
 }

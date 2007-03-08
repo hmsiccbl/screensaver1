@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.EntityIdProperty;
+import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
 
 
@@ -556,45 +557,12 @@ public class Well extends AbstractEntity implements Comparable
    *
    * @return the cherry picks
    */
+  @ToManyRelationship(inverseProperty="sourceWell")
   public Set<CherryPick> getCherryPicks()
   {
     return Collections.unmodifiableSet(_cherryPicks);
   }
 
-  /**
-   * Add the cherry pick.
-   *
-   * @param cherryPick the cherry pick to add
-   * @return true iff the well did not already have the cherry pick
-   */
-  public boolean addCherryPick(CherryPick cherryPick)
-  {
-    if (getHbnCherryPicks().add(cherryPick)) {
-      cherryPick.setHbnWell(this);
-      return true;
-    }
-    return false;
-  }
-  
-  /**
-   * Get the cherry picks.
-   *
-   * @return the cherry picks
-   * @hibernate.set
-   *   cascade="save-update"
-   *   inverse="true"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="well_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.CherryPick"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  public Set<CherryPick> getHbnCherryPicks()
-  {
-    return _cherryPicks;
-  }
-  
   /**
    * Get the <i>zero-based</i> row index of this well.
    * @return the <i>zero-based</i> row index of this well
@@ -860,6 +828,26 @@ public class Well extends AbstractEntity implements Comparable
     _silencingReagents = silencingReagents;
   }
   
+  /**
+   * Get the cherry picks.
+   *
+   * @return the cherry picks
+   * @hibernate.set
+   *   cascade="save-update"
+   *   inverse="true"
+   *   lazy="true"
+   * @hibernate.collection-key
+   *   column="well_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.CherryPick"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   * public access for cross-package relationship
+   */
+  public Set<CherryPick> getHbnCherryPicks()
+  {
+    return _cherryPicks;
+  }
+
   /**
    * Set the cherry picks.
    *

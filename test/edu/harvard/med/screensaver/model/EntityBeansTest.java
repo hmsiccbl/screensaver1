@@ -97,8 +97,7 @@ public class EntityBeansTest extends EntityBeansExercizor
             if (result instanceof Collection) {
               assertEquals("getter for uninitialized property returns collection of expected initial size (usually 0): " +
                            bean.getClass() + "." + getter.getName(),
-                           getExpectedInitialCollectionSize(beanInfo.getBeanDescriptor().getName(), 
-                                                            propertyDescriptor),
+                           getExpectedInitialCollectionSize(propertyDescriptor),
                                                             ((Collection) result).size());
             }
           }
@@ -106,6 +105,60 @@ public class EntityBeansTest extends EntityBeansExercizor
       }
     });
   }
+  
+  /**
+   * If a property is immutable, test that it is set via constructor (simply by
+   * testing that the getter does not return null), and that no public setter
+   * method.
+   */
+  public void testGettersForImmutableProperties()
+  {
+    exercizePropertyDescriptors(new PropertyDescriptorExercizor()
+    {
+      public void exercizePropertyDescriptor(
+        AbstractEntity bean,
+        BeanInfo beanInfo,
+        final PropertyDescriptor propertyDescriptor)
+      {
+        final String propFullName = bean.getClass() + "." + propertyDescriptor.getName();
+
+        if (!isImmutableProperty(bean.getClass(), propertyDescriptor)) {
+          return;
+        }
+        
+        try {
+          final Object originalValue = propertyDescriptor.getReadMethod().invoke(bean);
+          testBean(bean, new BeanTester()
+          {
+            public void testBean(AbstractEntity bean) {
+              assertNull("immutable property has no public setter method",
+                         propertyDescriptor.getWriteMethod());
+              try {
+                Object getterValue = propertyDescriptor.getReadMethod().invoke(bean);
+                assertNotNull("constructor sets value for immutable property; " + propFullName, getterValue);
+                // note: this test makes sense when run from the
+                // EntityBeansPersistenceTest subclass, which compares the
+                // original value to the persisted value; run from this class,
+                // it is vacuously true
+                assertEquals("getter for immutable property " + propFullName + 
+                             " returns value specified in constructor",
+                             originalValue,
+                             getterValue);
+              }
+              catch (Exception e) {
+                e.printStackTrace();
+                fail("this.getter() threw exception: " + propFullName);
+              }
+            }
+          });
+        } catch (Exception e) {
+          e.printStackTrace();
+          fail("this.getter() threw exception: " + propFullName);
+        }
+      }
+    });
+  }
+    
   
   /**
    * Test that a call to the getter for a property returns the same thing
@@ -214,7 +267,7 @@ public class EntityBeansTest extends EntityBeansExercizor
   /**
    * Test collection property:
    * <ul>
-   * <li>has a pluralized name
+   * <li><del>has a pluralized name</del>
    * <li>does not have a (public) setter
    * <li>has boolean add/remove methods with param of right type
    * <li>add;get returns set of one
@@ -231,16 +284,16 @@ public class EntityBeansTest extends EntityBeansExercizor
     String propertyName = propertyDescriptor.getName();
     final String fullPropName = beanClassName + "." + propertyName;
     
-    // collection property has pluralized name
-    assertTrue(
-      "collection property getter has plural name: " + fullPropName,
-      EntityBeansTest.oddPluralToSingularPropertiesMap.containsKey(propertyName) ||
-      propertyName.endsWith("s"));
+//    // collection property has pluralized name
+//    assertTrue(
+//      "collection property getter has plural name: " + fullPropName,
+//      EntityBeansTest.oddPluralToSingularPropertiesMap.containsKey(propertyName) ||
+//      propertyName.endsWith("s"));
 
-    String singularPropName =
-      EntityBeansTest.oddPluralToSingularPropertiesMap.containsKey(propertyName) ?
-      EntityBeansTest.oddPluralToSingularPropertiesMap.get(propertyName) :
-      propertyName.substring(0, propertyName.length() - 1);
+    String singularPropName = propertyName.substring(0, propertyName.length() - 1);
+    if (propertyDescriptor.getReadMethod().getAnnotation(CollectionElementName.class) != null) {
+      singularPropName = propertyDescriptor.getReadMethod().getAnnotation(CollectionElementName.class).value();
+    }
     String capitalizedSingularPropName = StringUtils.capitalize(singularPropName);
     
     // collection property has no setter (should only have add and/or remove methods)
@@ -257,6 +310,11 @@ public class EntityBeansTest extends EntityBeansExercizor
       log.info("testCollectionProperty(): skipping add/remove test for collection " + fullPropName + 
                ": related property " + relatedProperty.getName() + 
                " has foreign key constraint, and cannot be added/removed from this bean");
+    }
+    else if (isImmutableProperty(beanClass, propertyDescriptor)) {
+      // do nothing
+      log.info("testCollectionProperty(): skipping add/remove test for collection " + fullPropName + 
+               ": collection is immutable");
     }
     else {
       // has boolean add methods with param of right type
@@ -298,7 +356,7 @@ public class EntityBeansTest extends EntityBeansExercizor
           try {
             Collection result = (Collection) getterMethod.invoke(bean);
             assertEquals("collection prop with one element added has size one greater than initial size: " + fullPropName,
-                         getExpectedInitialCollectionSize(bean.getClass().getSimpleName(), propertyDescriptor) + 1,
+                         getExpectedInitialCollectionSize(propertyDescriptor) + 1,
                          result.size());
         
             // TODO: isContained1 is false while others are true! At least for DerivativeScreenResult. Something to do with hashCode probably, since collection is a Set...
@@ -375,7 +433,7 @@ public class EntityBeansTest extends EntityBeansExercizor
             Collection result = (Collection) getterMethod.invoke(bean);
             assertEquals("collection prop with element removed has original size: " + fullPropName,
                          result.size(),
-                         getExpectedInitialCollectionSize(bean.getClass().getSimpleName(), propertyDescriptor));
+                         getExpectedInitialCollectionSize(propertyDescriptor));
           }
           catch (Exception e) {
             e.printStackTrace();
@@ -445,7 +503,6 @@ public class EntityBeansTest extends EntityBeansExercizor
     assertNotNull("related bean " + relatedProperty.getBeanClass().getSimpleName() + 
                   " has property with name " +
                   relatedProperty.getExpectedName() + 
-                  " or " + relatedProperty.getExpectedPluralName() + 
                   " for " + propFullName,
                   relatedProperty.getPropertyDescriptor());
     
@@ -481,14 +538,15 @@ public class EntityBeansTest extends EntityBeansExercizor
                                             AbstractEntity relatedBean)
         {
           try {
-            if (relatedProperty.otherSideIsMany()) {
-              assertTrue("related.getter() contains this bean",
+            if (relatedProperty.otherSideIsToMany()) {
+              assertTrue("related getter contains this bean",
                          ((Collection) relatedProperty.invokeGetter(relatedBean)).contains(bean));
             }
             else {
+              Object beanFromRelatedGetter = relatedProperty.invokeGetter(relatedBean);
               assertEquals("related getter, " + relatedProperty.getFullName() + ", returns this bean",
                            bean,
-                           relatedProperty.invokeGetter(relatedBean));
+                           beanFromRelatedGetter);
             }
           }
           catch (Exception e) {
@@ -499,7 +557,7 @@ public class EntityBeansTest extends EntityBeansExercizor
         }
       });
     }
-    else if (relatedProperty.hasForeignKeyConstraint()) { 
+    else if (relatedProperty.hasForeignKeyConstraint()) {
       // no setter method on this side; this bean would be associated with related bean in related bean's constructor (e.g. Screen.screenResult)
       log.info("testBidirectionalityOfOneSideOfRelationship(): " + propFullName + 
       " has foreign key constraint on related side: nothing to test from this side");
@@ -531,7 +589,7 @@ public class EntityBeansTest extends EntityBeansExercizor
         public void testBeanWithRelatedBean(AbstractEntity bean,
                                             AbstractEntity relatedBean)
         {
-          if (relatedProperty.otherSideIsMany()) {
+          if (relatedProperty.otherSideIsToMany()) {
             try {
               Collection result = (Collection) relatedProperty.invokeGetter(relatedBean);
               assertEquals("related getter, " + relatedProperty.getFullName() + ", returns set of size 1 for " + propFullName,
@@ -586,16 +644,18 @@ public class EntityBeansTest extends EntityBeansExercizor
     Class<? extends AbstractEntity> beanClass = bean.getClass();
     String propertyName = propertyDescriptor.getName();
     final String propFullName = beanClass.getSimpleName() + "." + propertyName;
-    
-    final String singularPropName = oddPluralToSingularPropertiesMap.containsKey(propertyName) ? 
-      oddPluralToSingularPropertiesMap.get(propertyName) : 
-        propertyName.substring(0, propertyName.length() - 1);
-        
 
+    // determine the add method of this bean (that adds the related bean)
+    Method readMethod = propertyDescriptor.getReadMethod();
+    final String singularPropName = 
+      readMethod.getAnnotation(CollectionElementName.class) != null 
+      ? readMethod.getAnnotation(CollectionElementName.class).value() :
+        propertyName.substring(0, propertyName.length() - 1);
+    final String addMethodName = "add" + StringUtils.capitalize(singularPropName);
+    
     assertTrue("related bean " + relatedProperty.getBeanClass().getSimpleName() + 
                " has property with name " +
                relatedProperty.getExpectedName() + 
-               " or " + relatedProperty.getExpectedPluralName() + 
                " for " + propFullName,
                relatedProperty.exists());
     
@@ -650,7 +710,6 @@ public class EntityBeansTest extends EntityBeansExercizor
         {
           try {
             // find the addMethod
-            String addMethodName = "add" + StringUtils.capitalize(singularPropName);
             Method addMethod = findAndCheckMethod(bean.getClass(), 
                                                   addMethodName,
                                                   ExistenceRequirement.REQUIRED);
@@ -669,7 +728,7 @@ public class EntityBeansTest extends EntityBeansExercizor
                                             AbstractEntity relatedBean)
         {
           try {
-            if (relatedProperty.otherSideIsMany()) {
+            if (relatedProperty.otherSideIsToMany()) {
               Collection result = (Collection) relatedProperty.invokeGetter(relatedBean);
               assertEquals("related getter, " + relatedProperty.getFullName() + ", returns set of size 1 for " + propFullName,
                            1,

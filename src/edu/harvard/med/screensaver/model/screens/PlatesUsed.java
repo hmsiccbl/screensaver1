@@ -13,9 +13,11 @@ package edu.harvard.med.screensaver.model.screens;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
 
+//TODO: this doesn't need to be a first-class entity; could be just a value-type for a collection in LibraryScreening
 
-/**
+/** 
  * A Hibernate entity bean representing a plates used.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -35,7 +37,7 @@ public class PlatesUsed extends AbstractEntity
 
   private Integer _platesUsedId;
   private Integer _version;
-  private NonCherryPickVisit _visit;
+  private LibraryScreening _libraryScreening;
   private Integer _startPlate;
   private Integer _endPlate;
   private String _copy;
@@ -46,25 +48,25 @@ public class PlatesUsed extends AbstractEntity
   /**
    * Constructs an initialized <code>PlatesUsed</code> object.
    *
-   * @param visit the visit
+   * @param libraryScreening the library screening
    * @param startPlate the start plate
    * @param endPlate the end plate
    * @param copy the copy
    */
   public PlatesUsed(
-    NonCherryPickVisit visit,
+    LibraryScreening libraryScreening,
     Integer startPlate,
     Integer endPlate,
     String copy)
   {
-    if (visit== null) {
+    if (libraryScreening== null) {
       throw new NullPointerException();
     }
-    _visit = visit;
+    _libraryScreening = libraryScreening;
     _startPlate = startPlate;
     _endPlate = endPlate;
     _copy = copy;
-    _visit.getHbnPlatesUsed().add(this);
+    _libraryScreening.getPlatesUsed().add(this);
   }
 
 
@@ -89,28 +91,21 @@ public class PlatesUsed extends AbstractEntity
   }
 
   /**
-   * Get the visit.
+   * Get the library screening for which these plates were used.
    *
-   * @return the visit
+   * @return the library screening
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.LibraryScreening"
+   *   column="library_screening_id"
+   *   not-null="true"
+   *   foreign-key="fk_plates_used_to_library_screening"
+   *   cascade="save-update"
+   * @motivation for hibernate
    */
-  public NonCherryPickVisit getVisit()
+  @ToOneRelationship(nullable=false, inverseProperty="platesUsed")
+  public LibraryScreening getLibraryScreening()
   {
-    return _visit;
-  }
-
-  /**
-   * Set the visit.
-   *
-   * @param visit the new visit
-   */
-  public void setVisit(NonCherryPickVisit visit)
-  {
-    if (visit== null) {
-      throw new NullPointerException();
-    }
-    _visit.getHbnPlatesUsed().remove(this);
-    _visit = visit;
-    _visit.getHbnPlatesUsed().add(this);
+    return _libraryScreening;
   }
 
   /**
@@ -130,9 +125,9 @@ public class PlatesUsed extends AbstractEntity
    */
   public void setStartPlate(Integer startPlate)
   {
-    _visit.getHbnPlatesUsed().remove(this);
+    _libraryScreening.getPlatesUsed().remove(this);
     _startPlate = startPlate;
-    _visit.getHbnPlatesUsed().add(this);
+    _libraryScreening.getPlatesUsed().add(this);
   }
 
   /**
@@ -191,13 +186,13 @@ public class PlatesUsed extends AbstractEntity
   {
     
     /**
-     * Get the visit.
+     * Get the library screening.
      *
-     * @return the visit
+     * @return the library screening
      */
-    public NonCherryPickVisit getVisit()
+    public LibraryScreening getLibraryScreening()
     {
-      return _visit;
+      return _libraryScreening;
     }
     
     /**
@@ -218,22 +213,22 @@ public class PlatesUsed extends AbstractEntity
       }
       BusinessKey that = (BusinessKey) object;
       return
-        getVisit().equals(that.getVisit()) &&
-        getStartPlate().equals(that.getStartPlate());
+        this.getLibraryScreening().equals(that.getLibraryScreening()) &&
+        this.getStartPlate().equals(that.getStartPlate());
     }
 
     @Override
     public int hashCode()
     {
       return
-        getVisit().hashCode() +
-        getStartPlate().hashCode();
+        this.getLibraryScreening().hashCode() +
+        this.getStartPlate().hashCode();
     }
 
     @Override
     public String toString()
     {
-      return getVisit() + ":" + getStartPlate();
+      return this.getLibraryScreening() + ":" + this.getStartPlate();
     }
   }
 
@@ -241,25 +236,6 @@ public class PlatesUsed extends AbstractEntity
   protected Object getBusinessKey()
   {
     return new BusinessKey();
-  }
-
-
-  // package methods
-
-  /**
-   * Set the visit.
-   * Throw a NullPointerException when the visit is null.
-   *
-   * @param visit the new visit
-   * @throws NullPointerException when the visit is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  void setHbnVisit(NonCherryPickVisit visit)
-  {
-    if (visit == null) {
-      throw new NullPointerException();
-    }
-    _visit = visit;
   }
 
 
@@ -285,6 +261,18 @@ public class PlatesUsed extends AbstractEntity
     _platesUsedId = platesUsedId;
   }
 
+
+  /**
+   * Set the library screening.
+   *
+   * @param libraryScreening the library screening.
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  private void setLibraryScreening(LibraryScreening libraryScreening)
+  {
+    _libraryScreening = libraryScreening;
+  }
+
   /**
    * Get the version for the plates used.
    *
@@ -306,21 +294,9 @@ public class PlatesUsed extends AbstractEntity
     _version = version;
   }
 
-  /**
-   * Get the visit.
-   *
-   * @return the visit
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.NonCherryPickVisit"
-   *   column="visit_id"
-   *   not-null="true"
-   *   foreign-key="fk_plates_used_to_visit"
-   *   cascade="save-update"
-   * @motivation for hibernate
-   */
-  private NonCherryPickVisit getHbnVisit()
+  private LibraryScreening get()
   {
-    return _visit;
+    return _libraryScreening;
   }
 
   /**

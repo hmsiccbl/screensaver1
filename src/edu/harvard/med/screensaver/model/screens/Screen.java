@@ -21,6 +21,8 @@ import java.util.TreeSet;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import edu.harvard.med.screensaver.model.ToManyRelationship;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -55,7 +57,8 @@ public class Screen extends AbstractEntity
   private Set<ScreeningRoomUser> _collaborators = new HashSet<ScreeningRoomUser>();
   private Set<StatusItem> _statusItems = new HashSet<StatusItem>();
   private transient SortedSet<StatusItem> _sortedStatusItems;
-  private Set<Visit> _visits = new HashSet<Visit>();
+  private Set<ScreeningRoomActivity> _screeningRoomActivities = new HashSet<ScreeningRoomActivity>();
+  private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
   private Set<AbaseTestset> _abaseTestsets = new HashSet<AbaseTestset>();
   private Set<Publication> _publications = new HashSet<Publication>();
   private Set<LetterOfSupport> _lettersOfSupport = new HashSet<LetterOfSupport>();
@@ -181,6 +184,7 @@ public class Screen extends AbstractEntity
    *
    * @return the lead screener
    */
+  @ToOneRelationship(nullable=false, inverseProperty="screensLed")
   public ScreeningRoomUser getLeadScreener()
   {
     return _leadScreener;
@@ -206,6 +210,7 @@ public class Screen extends AbstractEntity
    *
    * @return the lab head
    */
+  @ToOneRelationship(nullable=false, inverseProperty="screensHeaded")
   public ScreeningRoomUser getLabHead()
   {
     return _labHead;
@@ -231,6 +236,7 @@ public class Screen extends AbstractEntity
    *
    * @return the collaborators
    */
+  @ToManyRelationship(inverseProperty="screensCollaborated")
   public Set<ScreeningRoomUser> getCollaborators()
   {
     return Collections.unmodifiableSet(_collaborators);
@@ -348,9 +354,9 @@ public class Screen extends AbstractEntity
   }
 
   /**
-   * Get the visits.
+   * Get the screening room activities.
    *
-   * @return the visits
+   * @return the screening room activities
    * @hibernate.set
    *   cascade="all-delete-orphan"
    *   lazy="true"
@@ -358,12 +364,33 @@ public class Screen extends AbstractEntity
    * @hibernate.collection-key
    *   column="screen_id"
    * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.Visit"
+   *   class="edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity"
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
-  public Set<Visit> getVisits()
+  @ToManyRelationship(inverseProperty="screen")
+  public Set<ScreeningRoomActivity> getScreeningRoomActivities()
   {
-    return _visits;
+    return _screeningRoomActivities;
+  }
+
+  /**
+   * Get the cherry pick requests.
+   *
+   * @return the cherry pick requests
+   * @hibernate.set
+   *   cascade="all-delete-orphan"
+   *   lazy="true"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="screen_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.CherryPickRequest"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  @ToManyRelationship(inverseProperty="screen")
+  public Set<CherryPickRequest> getCherryPickRequests()
+  {
+    return _cherryPickRequests;
   }
 
   /**
@@ -416,6 +443,7 @@ public class Screen extends AbstractEntity
    * @hibernate.collection-one-to-many
    *   class="edu.harvard.med.screensaver.model.screens.LetterOfSupport"
    */
+  @ToManyRelationship(inverseProperty="screen")
   public Set<LetterOfSupport> getLettersOfSupport()
   {
     return _lettersOfSupport;
@@ -1050,14 +1078,25 @@ public class Screen extends AbstractEntity
   }
 
   /**
-   * Set the visits.
+   * Set the screening room activities.
    *
-   * @param visits the new visits
+   * @param screeningRoomActivities the new screening room activities
    * @motivation for hibernate
    */
-  private void setVisits(Set<Visit> visits)
+  private void setScreeningRoomActivities(Set<ScreeningRoomActivity> screeningRoomActivities)
   {
-    _visits = visits;
+    _screeningRoomActivities = screeningRoomActivities;
+  }
+
+  /**
+   * Set the cherry pick requests.
+   *
+   * @param cherryPickRequests the new cherry pick requests
+   * @motivation for hibernate
+   */
+  private void setCherryPickRequests(Set<CherryPickRequest> cherryPickRequests)
+  {
+    _cherryPickRequests = cherryPickRequests;
   }
 
   /**

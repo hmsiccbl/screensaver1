@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL: svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/model/screens/AssayProtocolType.java $
+// $Id: AssayProtocolType.java 275 2006-06-28 15:32:40Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -7,39 +7,37 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model.screens;
+package edu.harvard.med.screensaver.model.libraries;
 
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
- * The visit type vocabulary.
+ * The copy usage type vocabulary.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public enum VisitType implements VocabularyTerm
+public enum CopyUsageType implements VocabularyTerm
 {
 
   // the vocabulary
   
-  LIBRARY("Library"),
-  CHERRY_PICK("Cherry Pick"),
-  LIQUID_HANDLING_ONLY("Liquid Handling Only"),
-  SPECIAL("Special")
+  FOR_LIBRARY_SCREENING("For Library Screening"),
+  FOR_CHERRY_PICK_SCREENING("For Cherry Pick Screening"),
   ;
 
  
   // static inner class
 
   /**
-   * A Hibernate <code>UserType</code> to map the {@link VisitType} vocabulary.
+   * A Hibernate <code>UserType</code> to map the {@link CopyUsageType} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<VisitType>
+  public static class UserType extends VocabularyUserType<CopyUsageType>
   {
     public UserType()
     {
-      super(VisitType.values());
+      super(CopyUsageType.values());
     }
   }
 
@@ -49,10 +47,10 @@ public enum VisitType implements VocabularyTerm
   private String _value;
 
   /**
-   * Constructs a <code>VisitType</code> vocabulary term.
+   * Constructs a <code>CopyUsageType</code> vocabulary term.
    * @param value The value of the term.
    */
-  private VisitType(String value)
+  private CopyUsageType(String value)
   {
     _value = value;
   }

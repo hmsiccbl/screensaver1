@@ -14,10 +14,13 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.CollectionElementName;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import edu.harvard.med.screensaver.model.ToManyRelationship;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.Visit;
+import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 
 import org.apache.log4j.Logger;
 
@@ -46,7 +49,8 @@ public class ScreeningRoomUser extends ScreensaverUser
   private Set<Screen> _screensLed = new HashSet<Screen>();
   private Set<Screen> _screensHeaded = new HashSet<Screen>();
   private Set<Screen> _screensCollaborated = new HashSet<Screen>();
-  private Set<Visit> _visitsPerformed = new HashSet<Visit>();
+  private Set<ScreeningRoomActivity> _screeningRoomActivitiesPerformed = new HashSet<ScreeningRoomActivity>();
+  private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
   private ScreeningRoomUser _labHead;
   private Set<ScreeningRoomUser> _labMembers = new HashSet<ScreeningRoomUser>();
   private LabAffiliation _labAffiliation;
@@ -124,6 +128,8 @@ public class ScreeningRoomUser extends ScreensaverUser
    *
    * @return the screens for which this user was the lead screener
    */
+  @ToManyRelationship(inverseProperty="leadScreener")
+  @CollectionElementName("screenLed")
   public Set<Screen> getScreensLed()
   {
     return Collections.unmodifiableSet(_screensLed);
@@ -149,6 +155,8 @@ public class ScreeningRoomUser extends ScreensaverUser
    *
    * @return the screens for which this user was the lab head
    */
+  @ToManyRelationship(inverseProperty="labHead")
+  @CollectionElementName("screenHeaded")
   public Set<Screen> getScreensHeaded()
   {
     return Collections.unmodifiableSet(_screensHeaded);
@@ -174,6 +182,8 @@ public class ScreeningRoomUser extends ScreensaverUser
    *
    * @return the screens for which this user was a collaborator
    */
+  @ToManyRelationship(inverseProperty="collaborators")
+  @CollectionElementName("screenCollaborated")
   public Set<Screen> getScreensCollaborated()
   {
     return Collections.unmodifiableSet(_screensCollaborated);
@@ -196,8 +206,8 @@ public class ScreeningRoomUser extends ScreensaverUser
   /**
    * Remove the screens for which this user was a collaborator.
    *
-   * @param screenCollaborated the screens for which this user was a collaborato to remove
-   * @return true iff the screening room user previously had the screens for which this user was a collaborato
+   * @param screenCollaborated the screens from which this user is no longer a collaborator
+   * @return true iff the screening room user previously was a collaborator on the screen
    */
   public boolean removeScreenCollaborated(Screen screenCollaborated)
   {
@@ -208,28 +218,41 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Get an unmodifiable copy of the set of visits performed.
+   * Get an unmodifiable copy of the set of screening room activities performed by this user.
    *
-   * @return the visits performed
+   * @return the screening room activities performed
    */
-  public Set<Visit> getVisitsPerformed()
+  @ToManyRelationship(inverseProperty="performedBy")
+  @CollectionElementName("screeningRoomActivityPerformed")
+  public Set<ScreeningRoomActivity> getScreeningRoomActivitiesPerformed()
   {
-    return Collections.unmodifiableSet(_visitsPerformed);
+    return Collections.unmodifiableSet(_screeningRoomActivitiesPerformed);
   }
 
   /**
-   * Add the visits performe.
+   * Add a screening room activity that was performed by this user.
    *
-   * @param visitPerformed the visits performe to add
-   * @return true iff the screening room user did not already have the visits performe
+   * @param screeningRoomActivityPerformed the new screening room activity that was performed by this user
+   * @return true iff the screening room user did not perform the screening room activity
    */
-  public boolean addVisitPerformed(Visit visitPerformed)
+  public boolean addScreeningRoomActivityPerformed(ScreeningRoomActivity screeningRoomActivityPerformed)
   {
-    if (getHbnVisitsPerformed().add(visitPerformed)) {
-      visitPerformed.setHbnPerformedBy(this);
+    if (getHbnScreeningRoomActivitiesPerformed().add(screeningRoomActivityPerformed)) {
+      screeningRoomActivityPerformed.setPerformedBy(this);
       return true;
     }
     return false;
+  }
+
+  /**
+   * Get an unmodifiable copy of the set of cherry pick requests.
+   *
+   * @return the cherry pick requests
+   */
+  @ToManyRelationship(inverseProperty="requestedBy")
+  public Set<CherryPickRequest> getCherryPickRequests()
+  {
+    return Collections.unmodifiableSet(_cherryPickRequests);
   }
 
   /**
@@ -238,6 +261,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    *
    * @return the lab head; null if this user is the head of her own lab.
    */
+  @ToOneRelationship(inverseProperty="labMembers")
   public ScreeningRoomUser getLabHead()
   {
     if (_labHead == null) {
@@ -275,6 +299,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    * 
    * @return the lab members
    */
+  @ToManyRelationship(inverseProperty="labHead")
   public Set<ScreeningRoomUser> getLabMembers()
   {
     return Collections.unmodifiableSet(_labMembers);
@@ -300,11 +325,6 @@ public class ScreeningRoomUser extends ScreensaverUser
    * is a lab head or a lab member.
    *
    * @return the lab affiliation
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.users.LabAffiliation"
-   *   column="lab_affiliation_id"
-   *   foreign-key="fk_screening_room_user_to_lab_affiliation"
-   *   cascade="save-update"
    */
   @ToOneRelationship(nullable=true)
   public LabAffiliation getLabAffiliation()
@@ -319,9 +339,17 @@ public class ScreeningRoomUser extends ScreensaverUser
    */
   public void setLabAffiliation(LabAffiliation labAffiliation)
   {
+    if (labAffiliation == _labAffiliation) {
+      return;
+    }
+    if (_labAffiliation != null) {
+      _labAffiliation.getHbnScreeningRoomUsers().remove(this);
+    }
     _labAffiliation = labAffiliation;
+    if (_labAffiliation != null) {
+      _labAffiliation.getHbnScreeningRoomUsers().add(this);
+    }
   }
-
 
   /**
    * Set the email, updating this entity's membership in any related entity sets
@@ -552,9 +580,9 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Get the visits performed.
+   * Get the screening room activities performed.
    *
-   * @return the visits performed
+   * @return the screening room activities performed
    * @hibernate.set
    *   cascade="save-update"
    *   inverse="true"
@@ -562,17 +590,36 @@ public class ScreeningRoomUser extends ScreensaverUser
    * @hibernate.collection-key
    *   column="performed_by_id"
    * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.Visit"
+   *   class="edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity"
    * @motivation for hibernate and maintenance of bi-directional relationships
    * this method is public only because the bi-directional relationship
    * is cross-package.
    */
-  public Set<Visit> getHbnVisitsPerformed()
+  public Set<ScreeningRoomActivity> getHbnScreeningRoomActivitiesPerformed()
   {
-    return _visitsPerformed;
+    return _screeningRoomActivitiesPerformed;
   }
 
-
+  /**
+   * Get the cherry pick requests made by this user.
+   *
+   * @return the cherry pick requests made by this user
+   * @hibernate.set
+   *   cascade="save-update"
+   *   inverse="true"
+   *   lazy="true"
+   * @hibernate.collection-key
+   *   column="requested_by_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.CherryPickRequest"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   * public access since relationship is cross-package
+   */
+  public Set<CherryPickRequest> getHbnCherryPickRequests()
+  {
+    return _cherryPickRequests;
+  }
+  
   // private constructor
 
   /**
@@ -630,14 +677,25 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Set the visits performed.
+   * Set the screening room screening room activities performed by this user.
    *
-   * @param visitsPerformed the new visits performed
+   * @param screeningRoomActivitiesPerformed the screening room activities performed by this user
    * @motivation for hibernate
    */
-  private void setHbnVisitsPerformed(Set<Visit> visitsPerformed)
+  private void setHbnScreeningRoomActivitiesPerformed(Set<ScreeningRoomActivity> screeningRoomActivitiesPerformed)
   {
-    _visitsPerformed = visitsPerformed;
+    _screeningRoomActivitiesPerformed = screeningRoomActivitiesPerformed;
+  }
+
+  /**
+   * Set the cherry pick requests made by this user.
+   *
+   * @param cherryPickRequests the cherry pick requests made by this user
+   * @motivation for hibernate
+   */
+  private void setHbnCherryPickRequests(Set<CherryPickRequest> cherryPickRequests)
+  {
+    _cherryPickRequests = cherryPickRequests;
   }
 
   /**
@@ -703,5 +761,22 @@ public class ScreeningRoomUser extends ScreensaverUser
   private void setHbnLabMembers(Set<ScreeningRoomUser> labMembers)
   {
     _labMembers = labMembers;
+  }
+  
+  /**
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.users.LabAffiliation"
+   *   column="lab_affiliation_id"
+   *   foreign-key="fk_screening_room_user_to_lab_affiliation"
+   *   cascade="save-update"
+   */
+  private LabAffiliation getHbnLabAffiliation()
+  {
+    return _labAffiliation;
+  }
+
+  private void setHbnLabAffiliation(LabAffiliation labAffiliation)
+  {
+    _labAffiliation = labAffiliation;
   }
 }

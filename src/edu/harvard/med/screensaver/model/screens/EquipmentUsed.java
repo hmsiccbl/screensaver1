@@ -10,9 +10,10 @@
 package edu.harvard.med.screensaver.model.screens;
 
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -35,7 +36,7 @@ public class EquipmentUsed extends AbstractEntity
 
   private Integer _equipmentUsedId;
   private Integer _version;
-  private NonCherryPickVisit _visit;
+  private ScreeningRoomActivity _screeningRoomActivity;
   private String _equipment;
   private String _protocol;
   private String _description;
@@ -46,25 +47,25 @@ public class EquipmentUsed extends AbstractEntity
   /**
    * Constructs an initialized <code>EquipmentUsed</code> object.
    *
-   * @param visit the visit
+   * @param screeningRoomActivity the screening room activity
    * @param equipment the equipment
    * @param protocol the protocol
    * @param description the description
    */
   public EquipmentUsed(
-    NonCherryPickVisit visit,
+    ScreeningRoomActivity screeningRoomActivity,
     String equipment,
     String protocol,
     String description)
   {
-    if (visit == null) {
+    if (screeningRoomActivity == null) {
       throw new NullPointerException();
     }
-    _visit = visit;
+    _screeningRoomActivity = screeningRoomActivity;
     _equipment = equipment;
     _protocol = protocol;
     _description = description;
-    _visit.getHbnEquipmentUsed().add(this);
+    _screeningRoomActivity.getEquipmentUsed().add(this);
   }
 
 
@@ -89,28 +90,21 @@ public class EquipmentUsed extends AbstractEntity
   }
 
   /**
-   * Get the visit.
+   * Get the screening room activity.
    *
-   * @return the visit
+   * @return the screening room activity
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity"
+   *   column="screening_room_activity_id"
+   *   not-null="true"
+   *   foreign-key="fk_equipment_used_to_screening_room_activity"
+   *   cascade="save-update"
+   * @motivation for hibernate
    */
-  public NonCherryPickVisit getVisit()
+  @ToOneRelationship(nullable=false, inverseProperty="equipmentUsed")
+  public ScreeningRoomActivity getScreeningRoomActivity()
   {
-    return _visit;
-  }
-
-  /**
-   * Set the visit.
-   *
-   * @param visit the new visit
-   */
-  public void setVisit(NonCherryPickVisit visit)
-  {
-    if (visit == null) {
-      throw new NullPointerException();
-    }
-    _visit.getHbnEquipmentUsed().remove(this);
-    _visit = visit;
-    _visit.getHbnEquipmentUsed().add(this);
+    return _screeningRoomActivity;
   }
 
   /**
@@ -130,9 +124,7 @@ public class EquipmentUsed extends AbstractEntity
    */
   public void setEquipment(String equipment)
   {
-    _visit.getHbnEquipmentUsed().remove(this);
     _equipment = equipment;
-    _visit.getHbnEquipmentUsed().add(this);
   }
 
   /**
@@ -191,13 +183,13 @@ public class EquipmentUsed extends AbstractEntity
   {
     
     /**
-     * Get the visit.
+     * Get the screening room activity.
      *
-     * @return the visit
+     * @return the screening room activity
      */
-    public NonCherryPickVisit getVisit()
+    public ScreeningRoomActivity getScreeningRoomActivity()
     {
-      return _visit;
+      return _screeningRoomActivity;
     }
     
     /**
@@ -218,22 +210,22 @@ public class EquipmentUsed extends AbstractEntity
       }
       BusinessKey that = (BusinessKey) object;
       return
-        getVisit().equals(that.getVisit()) &&
-        getEquipment().equals(that.getEquipment());
+        this.getScreeningRoomActivity().equals(that.getScreeningRoomActivity()) &&
+        this.getEquipment().equals(that.getEquipment());
     }
 
     @Override
     public int hashCode()
     {
       return
-        getVisit().hashCode() +
+        getScreeningRoomActivity().hashCode() +
         getEquipment().hashCode();
     }
 
     @Override
     public String toString()
     {
-      return getVisit() + ":" + getEquipment();
+      return getScreeningRoomActivity() + ":" + getEquipment();
     }
   }
 
@@ -241,25 +233,6 @@ public class EquipmentUsed extends AbstractEntity
   protected Object getBusinessKey()
   {
     return new BusinessKey();
-  }
-
-
-  // package methods
-
-  /**
-   * Set the visit.
-   * Throw a NullPointerException when the visit is null.
-   *
-   * @param visit the new visit
-   * @throws NullPointerException when the visit is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  void setHbnVisit(NonCherryPickVisit visit)
-  {
-    if (visit == null) {
-      throw new NullPointerException();
-    }
-    _visit = visit;
   }
 
 
@@ -274,6 +247,17 @@ public class EquipmentUsed extends AbstractEntity
 
 
   // private methods
+
+  /**
+   * Set the screening room activity.
+   *
+   * @param screening room activity the new screening room activity
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  private void setScreeningRoomActivity(ScreeningRoomActivity screeningRoomActivity)
+  {
+    _screeningRoomActivity = screeningRoomActivity;
+  }
 
   /**
    * Set the id for the equipment used.
@@ -304,23 +288,6 @@ public class EquipmentUsed extends AbstractEntity
    */
   private void setVersion(Integer version) {
     _version = version;
-  }
-
-  /**
-   * Get the visit.
-   *
-   * @return the visit
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.NonCherryPickVisit"
-   *   column="visit_id"
-   *   not-null="true"
-   *   foreign-key="fk_equipment_used_to_visit"
-   *   cascade="save-update"
-   * @motivation for hibernate
-   */
-  private NonCherryPickVisit getHbnVisit()
-  {
-    return _visit;
   }
 
   /**

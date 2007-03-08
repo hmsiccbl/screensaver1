@@ -38,10 +38,9 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
-import edu.harvard.med.screensaver.model.screens.NonCherryPickVisit;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.VisitType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.util.DateUtil;
@@ -303,21 +302,19 @@ public class ScreenResultParserTest extends AbstractSpringTest
    }
   
   /**
-   * Test that if a screen result file has no "Date First Visit" value, the
-   * screen result's "date created" property should default to the Screen's
-   * first visit date.
+   * Test that if a screen result file has no "Date of First Screening Room
+   * Activity" value, the screen result's "date created" property should default
+   * to the Screen's first visit date.
    */
   public void testScreenResultDateCreated() throws Exception
   {
 
     Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(115);
     try {
-      new NonCherryPickVisit(screen,
-                             screen.getLeadScreener(),
-                             new Date(),
-                             DateUtil.makeDate(2007, 1, 1),
-                             VisitType.LIBRARY,
-                             AssayProtocolType.PRELIMINARY);
+      new LibraryScreening(screen,
+                           screen.getLeadScreener(),
+                           DateUtil.makeDate(2007, 1, 1),
+                           AssayProtocolType.PRELIMINARY);
     }
     catch (DuplicateEntityException e) {
       e.printStackTrace();

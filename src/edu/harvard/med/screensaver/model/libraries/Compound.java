@@ -88,7 +88,6 @@ public class Compound extends AbstractEntity
   // public methods
 
   @Override
-  @EntityIdProperty
   public String getEntityId()
   {
     return getBusinessKey().toString();
@@ -102,7 +101,6 @@ public class Compound extends AbstractEntity
    *   generator-class="assigned"
    *   length="2047"
    */
-  @EntityIdProperty
 	public String getCompoundId()
   {
 		return getBusinessKey().toString();

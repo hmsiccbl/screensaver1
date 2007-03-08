@@ -14,6 +14,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -25,8 +26,11 @@ import java.util.Map;
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screens.NonCherryPickVisit;
-import edu.harvard.med.screensaver.model.screens.Visit;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
+import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.Screening;
+import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 
 import org.apache.commons.lang.time.DateUtils;
 
@@ -67,6 +71,12 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
     if (type.equals(Double.class)) {
       _doubleTestValue *= 1.32;
       return new Double(new Double(_doubleTestValue * 1000).intValue() / 1000);
+    }
+    if (type.equals(BigDecimal.class)) {
+      BigDecimal val = new BigDecimal(((Double) getTestValueForType(Double.class)).doubleValue());
+      // 2 is the default scale used in our Hibernate mapping, not sure how to change it via xdoclet
+      val = val.setScale(2);
+      return val;
     }
     if (type.equals(Boolean.TYPE)) {
       _booleanTestValue = ! _booleanTestValue;
@@ -190,7 +200,9 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
   private static Map<Class<? extends AbstractEntity>,Class<? extends AbstractEntity>> _concreteStandinMap =
       new HashMap<Class<? extends AbstractEntity>,Class<? extends AbstractEntity>>();
   static {
-    _concreteStandinMap.put(Visit.class, NonCherryPickVisit.class);
+    _concreteStandinMap.put(Screening.class, LibraryScreening.class);
+    _concreteStandinMap.put(ScreeningRoomActivity.class, LibraryScreening.class);
+    _concreteStandinMap.put(CherryPickRequest.class, RNAiCherryPickRequest.class);
   }
   
   protected AbstractEntity newInstance(Class<? extends AbstractEntity> entityClass) {
@@ -202,7 +214,17 @@ abstract class EntityClassesExercisor extends AbstractSpringTest
     Constructor constructor = getMaxArgConstructor(entityClass);
     Object[] arguments = getArgumentsForConstructor(constructor);
     try {
-      return (AbstractEntity) constructor.newInstance(arguments);
+      AbstractEntity entity = (AbstractEntity) constructor.newInstance(arguments);
+//      // special case logic for entities whose properties/relationships cannot
+//      // be fully tested without first calling additional setter methods
+//      if (entity instanceof CherryPick) {
+//        CherryPick cp = (CherryPick) entity;
+//        cp.setAllocated(PlateType.ABGENE,
+//                        "testPlateName",
+//                        1,
+//                        1);
+//      }
+      return entity;
     }
     catch (Exception e) {
       e.printStackTrace();

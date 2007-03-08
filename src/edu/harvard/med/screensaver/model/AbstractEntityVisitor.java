@@ -34,7 +34,7 @@ import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
-import edu.harvard.med.screensaver.model.screens.Visit;
+import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
@@ -70,7 +70,7 @@ public interface AbstractEntityVisitor
   public boolean visit(ScreensaverUser screensaverUser);
   public boolean visit(SilencingReagent entity);
   public boolean visit(StatusItem entity);
-  public boolean visit(Visit entity);
+  public boolean visit(ScreeningRoomActivity entity);
   public boolean visit(Well entity);
 }
 

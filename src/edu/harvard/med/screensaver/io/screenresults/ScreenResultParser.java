@@ -57,7 +57,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.Visit;
+import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 
 /**
  * Parses data from a workbook files (a.k.a. Excel spreadsheets) necessary for
@@ -798,7 +798,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         Cell labelCell = factory.getCell((short) 0, iRow);
         String rowLabel = labelCell.getString();
         if (rowLabel != null) {
-          if (rowLabel.equalsIgnoreCase(ScreenInfoRow.DATE_FIRST_VISIT.getDisplayText())) {
+          if (rowLabel.equalsIgnoreCase(ScreenInfoRow.DATE_FIRST_SCREENING_ROOM_ACTIVITY.getDisplayText())) {
             Cell valueCell = factory.getCell((short) 1, iRow, false);
             parsedScreenInfo.setDate(valueCell.getDate());
           }
@@ -813,12 +813,15 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       _errors.addError(NO_SCREEN_ID_FOUND_ERROR);
     }
     else if (!parsedScreenInfo.getScreenNumber().equals(screen.getScreenNumber())) {
-      _errors.addError("screen result data file is for screen number " + parsedScreenInfo.getScreenNumber() + ", expected " + screen.getScreenNumber());
+      _errors.addError("screen result data file is for screen number " + 
+                       parsedScreenInfo.getScreenNumber() + 
+                       ", expected " + screen.getScreenNumber());
     }
     if (parsedScreenInfo.getDateCreated() == null) {
-      if (screen.getVisits().size() > 0) {
-        SortedSet<Visit> sortedVisits = new TreeSet<Visit>(screen.getVisits());
-        parsedScreenInfo.setDate(sortedVisits.first().getVisitDate());
+      if (screen.getScreeningRoomActivities().size() > 0) {
+        SortedSet<ScreeningRoomActivity> sortedScreeningRoomActivities = 
+          new TreeSet<ScreeningRoomActivity>(screen.getScreeningRoomActivities());
+        parsedScreenInfo.setDate(sortedScreeningRoomActivities.first().getDate());
       }
       else {
         log.warn("screen result's screen has 0 visits, so screen result's \"date created\" property will be set to today");

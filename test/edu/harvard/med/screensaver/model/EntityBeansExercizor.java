@@ -14,8 +14,6 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -94,58 +92,6 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
     }
   }
 
-  static Map<String, String> oddPluralToSingularPropertiesMap =
-    new HashMap<String, String>();
-  static {
-    oddPluralToSingularPropertiesMap.put("children", "child");
-    oddPluralToSingularPropertiesMap.put("copies", "copy");
-    oddPluralToSingularPropertiesMap.put("typesDerivedFrom", "typeDerivedFrom");
-    oddPluralToSingularPropertiesMap.put("lettersOfSupport", "letterOfSupport");
-    oddPluralToSingularPropertiesMap.put("equipmentUsed", "equipmentUsed");
-    oddPluralToSingularPropertiesMap.put("visitsPerformed", "visitPerformed");
-    oddPluralToSingularPropertiesMap.put("screensLed", "screenLed");
-    oddPluralToSingularPropertiesMap.put("screensHeaded", "screenHeaded");
-    oddPluralToSingularPropertiesMap.put("screensCollaborated", "screenCollaborated");
-    oddPluralToSingularPropertiesMap.put("platesUsed", "platesUsed");
-  }
-  static Map<String, String> oddSingularToPluralPropertiesMap =
-    new HashMap<String, String>();
-  static {
-    oddSingularToPluralPropertiesMap.put("child", "children");
-    oddSingularToPluralPropertiesMap.put("copy", "copies");
-    oddSingularToPluralPropertiesMap.put("typeDerivedFrom", "typesDerivedFrom");
-    oddSingularToPluralPropertiesMap.put("letterOfSupport", "lettersOfSupport");
-    oddSingularToPluralPropertiesMap.put("equipmentUsed", "equipmentUsed");
-    oddSingularToPluralPropertiesMap.put("visitPerformed", "visitPerformed");
-    oddSingularToPluralPropertiesMap.put("screenLed", "screensLed");
-    oddSingularToPluralPropertiesMap.put("screenHeaded", "screensHeaded");
-    oddSingularToPluralPropertiesMap.put("screenCollaborated", "screensCollaborated");
-    oddSingularToPluralPropertiesMap.put("platesUsed", "platesUsed");
-  }
-  
-  static Map<String, String> oddPropertyToRelatedPropertyMap =
-    new HashMap<String, String>();
-  static {
-    oddPropertyToRelatedPropertyMap.put("cherryPick", "RNAiKnockdownConfirmation");
-    oddPropertyToRelatedPropertyMap.put("equipmentUsed", "visit");
-    oddPropertyToRelatedPropertyMap.put("platesUsed", "visit");
-    oddPropertyToRelatedPropertyMap.put("labMembers", "labHead");
-    oddPropertyToRelatedPropertyMap.put("screensHeaded", "labHead");
-    oddPropertyToRelatedPropertyMap.put("screensLed", "leadScreener");
-    oddPropertyToRelatedPropertyMap.put("visitsPerformed", "performedBy");
-  }
-  static Map<String, String> oddPropertyToRelatedPluralPropertyMap =
-    new HashMap<String, String>();
-  static {
-    oddPropertyToRelatedPluralPropertyMap.put("derivedTypes", "typesDerivedFrom");
-    oddPropertyToRelatedPluralPropertyMap.put("typesDerivedFrom", "derivedTypes");
-    oddPropertyToRelatedPluralPropertyMap.put("collaborators", "screensCollaborated");
-    oddPropertyToRelatedPluralPropertyMap.put("screensCollaborated", "collaborators");
-    oddPropertyToRelatedPluralPropertyMap.put("labHead", "screensHeaded");
-    oddPropertyToRelatedPluralPropertyMap.put("leadScreener", "screensLed");
-    oddPropertyToRelatedPluralPropertyMap.put("performedBy", "visitsPerformed");
-  }
-
   /**
    * Find the method with the given name, and unspecified arguments. If no such
    * method exists, and the isRequiredMethod parameter is true, then fail. If no
@@ -185,8 +131,8 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
                requirement != ExistenceRequirement.REQUIRED || foundMethod != null);
 
     assertEquals("collection property method returns boolean: " + fullMethodName,
-                 foundMethod.getReturnType(),
-                 Boolean.TYPE);
+                 Boolean.TYPE,
+                 foundMethod.getReturnType());
     return foundMethod;
   }
   
@@ -237,7 +183,6 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
   
   // HACK: special case handling 
   protected int getExpectedInitialCollectionSize(
-    String beanName,
     PropertyDescriptor propertyDescriptor)
   {
     Method getter = propertyDescriptor.getReadMethod();
@@ -274,8 +219,12 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
 
   protected boolean setterMethodNotExpected(Class<? extends AbstractEntity> beanClass, PropertyDescriptor propertyDescriptor)
   {
-    String propFullName = beanClass.getSimpleName() + 
-    "." + propertyDescriptor.getName();
+    String propFullName = beanClass.getSimpleName() + "." + propertyDescriptor.getName();
+    
+    if (isImmutableProperty(beanClass, propertyDescriptor)) {
+      log.info("setter method not expected for immutable property: " + propFullName);
+      return true;
+    }
 
     // no setter expected if property participates in defining the entity ID
     if (isEntityIdProperty(beanClass, propertyDescriptor)) {
@@ -291,7 +240,8 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
       return true;
     }
     
-    // no setter expected if property is for a one-to-one relationship and related side has a foreign key constraint relationship
+    // no public setter expected if property is for a one-to-one relationship and related side has a foreign key constraint relationship
+    // (in this case, either a package or public setter method is required, but we're not verifying this currently)
     RelatedProperty relatedProperty = new RelatedProperty(beanClass, propertyDescriptor);
     if (relatedProperty.exists() && relatedProperty.hasForeignKeyConstraint()) {
       log.info("setter method not expected for property that is on the \"one\" side of a relationship with a foreign key constraint: " + 
@@ -300,6 +250,16 @@ abstract class EntityBeansExercizor extends EntityClassesExercisor
     }
     return false;
   }
+
+  protected boolean isImmutableProperty(Class<? extends AbstractEntity> beanClass, PropertyDescriptor propertyDescriptor)
+  {
+    Method getter = propertyDescriptor.getReadMethod();
+    if (getter.isAnnotationPresent(ImmutableProperty.class)) {
+      return true;
+    }
+    return false;
+  }
+
 
   // private methods
   

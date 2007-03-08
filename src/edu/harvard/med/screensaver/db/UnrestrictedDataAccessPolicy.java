@@ -27,14 +27,15 @@ import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
-import edu.harvard.med.screensaver.model.screens.Visit;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
@@ -85,6 +86,12 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
   }
 
   public boolean visit(CherryPick entity)
+  {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean visit(CherryPickRequest entity)
   {
     // TODO Auto-generated method stub
     return true;
@@ -192,6 +199,12 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
     return true;
   }
 
+  public boolean visit(ScreeningRoomActivity visit)
+  {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
   public boolean visit(ScreenResult screenResult)
   {
     // TODO Auto-generated method stub
@@ -211,12 +224,6 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
   }
 
   public boolean visit(StatusItem entity)
-  {
-    // TODO Auto-generated method stub
-    return true;
-  }
-
-  public boolean visit(Visit visit)
   {
     // TODO Auto-generated method stub
     return true;

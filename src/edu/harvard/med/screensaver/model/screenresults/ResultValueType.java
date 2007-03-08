@@ -16,7 +16,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.CollectionElementName;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
@@ -207,6 +209,12 @@ public class ResultValueType extends AbstractEntity implements Comparable
     return _isNumeric;
   }
   
+  public void setNumeric(boolean isNumeric)
+  {
+    _isNumeric = isNumeric;
+    _isNumericalnessDetermined = true;
+  }
+
   @DerivedEntityProperty
   public boolean isNumericalnessDetermined()
   {
@@ -526,6 +534,8 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @return the set of {@link ResultValueType}s that this
    *         <code>ResultValueType</code> was derived from
    */
+  @ToManyRelationship(inverseProperty="derivedTypes")
+  @CollectionElementName("typeDerivedFrom")
   public SortedSet<ResultValueType> getTypesDerivedFrom() {
     return Collections.unmodifiableSortedSet(getHbnTypesDerivedFrom());
   }
@@ -571,6 +581,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @return the set of {@link ResultValueType}s that derive from this
    *         <code>ResultValueType</code>
    */
+  @ToManyRelationship(inverseProperty="typesDerivedFrom")
   public SortedSet<ResultValueType> getDerivedTypes() {
     return Collections.unmodifiableSortedSet(getHbnDerivedTypes());
   }
@@ -718,7 +729,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
   /**
    * Get whether this <code>ResultValueType</code> contains follow up data
-   * [TODO: presumably generated during a subsequent visit?]
+   * [TODO: presumably generated during a subsequent library screening?]
    * 
    * @return <code>true</code> iff this <code>ResultValueType</code>
    *         contains follow up data
@@ -730,7 +741,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
   /**
    * Set whether this <code>ResultValueType</code> contains follow up data
-   * [TODO: presumably generated during a subsequent visit?]
+   * [TODO: presumably generated during a subsequent library screening?]
    * 
    * @param isFollowUpData set to <code>true</code> iff this
    *          <code>ResultValueType</code> contains follow up data
@@ -1052,13 +1063,6 @@ public class ResultValueType extends AbstractEntity implements Comparable
     _derivedTypes = derivedTypes;
   }
   
-  // should be private, cuz we only want this class or Hibernate to call, but breaks our naive units tests
-  public void setNumeric(boolean isNumeric)
-  {
-    _isNumeric = isNumeric;
-    _isNumericalnessDetermined = true;
-  }
-
   /**
    * @motivation for Hibernate
    * @param hits

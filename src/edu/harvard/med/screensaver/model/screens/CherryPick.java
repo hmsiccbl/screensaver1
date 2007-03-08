@@ -10,13 +10,21 @@
 package edu.harvard.med.screensaver.model.screens;
 
 
-import org.apache.log4j.Logger;
+import java.math.BigDecimal;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 
+import org.apache.log4j.Logger;
 
+
+// TODO: for performance, we may have to make CherryPick into a Hibernate value
+// type, rather than an entity type, as we did with ResultValue (this would mean
+// eliminating the navigability to CherryPickRequest)
 /**
  * A Hibernate entity bean representing a cherry pick.
  * 
@@ -37,12 +45,22 @@ public class CherryPick extends AbstractEntity
 
   private Integer _cherryPickId;
   private Integer _version;
-  private CherryPickVisit _cherryPickVisit;
-  private Well _well;
-  private Copy _copy;
+
+  private CherryPickRequest _cherryPickRequest;
+  private Well _sourceWell;
+  private Copy _sourceCopy;
+  
+  // Note: dest plate type must the same for all cherry picks from the same *library*; we shall enforce at the business tier, rather than the schema-level (this design is denormalized)
+  private PlateType _destinationPlateType;   
+  // TODO: perhaps plate name should be an index into a list of plate names maintained by CherryPickRequest (this is a more space-efficient and normalized designed)
+  private String _destinationPlateName;
+  private int _destinationPlateRow;
+  private int _destinationPlateColumn;
+
+  private CherryPickLiquidTransfer _cherryPickLiquidTransfer;
+  
+  /* follow-up data from screener, after cherry pick screening is completed */
   private RNAiKnockdownConfirmation _rnaiKnockdownConfirmation;
-  private String _volume;
-  private String _plateMap;
   private IsHitConfirmedViaExperimentation _isHitConfirmedViaExperimentation;
   private String _notesOnHitConfirmation;
 
@@ -52,25 +70,23 @@ public class CherryPick extends AbstractEntity
   /**
    * Constructs an initialized <code>CherryPick</code> object.
    *
-   * @param cherryPickVisit the cherry pick visit
+   * @param cherryPickRequest the cherry pick request
    * @param well the well
    * @param copy the copy
-   * @param volume the volume
    */
-  public CherryPick(
-    CherryPickVisit cherryPickVisit,
-    Well well,
-    Copy copy,
-    String volume)
+  public CherryPick(CherryPickRequest cherryPickRequest,
+                    Well well,
+                    Copy copy)
   {
-    if (cherryPickVisit == null || well == null || copy == null) {
+    if (cherryPickRequest == null || well == null || copy == null) {
         throw new NullPointerException();
     }
-    _cherryPickVisit = cherryPickVisit;
-    _well = well;
-    _copy = copy;
-    _volume = volume;
-    registerWithParents();
+    _cherryPickRequest = cherryPickRequest;
+    _sourceWell = well;
+    _sourceCopy = copy;
+    _cherryPickRequest.getCherryPicks().add(this);
+    _sourceWell.getHbnCherryPicks().add(this);
+    _sourceCopy.getHbnCherryPicks().add(this);
   }
 
   @Override
@@ -92,143 +108,138 @@ public class CherryPick extends AbstractEntity
   }
 
   /**
-   * Get the cherry pick visit.
+   * Get the cherry pick request.
    *
-   * @return the cherry pick visit
+   * @return the cherry pick request
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.CherryPickRequest"
+   *   column="cherry_pick_request_id"
+   *   not-null="true"
+   *   foreign-key="fk_cherry_pick_to_cherry_pick_request"
+   *   cascade="save-update"
+   * @motivation for hibernate
    */
-  public CherryPickVisit getCherryPickVisit()
+  @ToOneRelationship(nullable=false)
+  public CherryPickRequest getCherryPickRequest()
   {
-    return _cherryPickVisit;
+    return _cherryPickRequest;
   }
 
   /**
-   * Set the cherry pick visit.
-   *
-   * @param cherryPickVisit the new cherry pick visit
-   */
-  public void setCherryPickVisit(CherryPickVisit cherryPickVisit)
-  {
-    if (cherryPickVisit == null) {
-      throw new NullPointerException();
-    }
-    unregisterWithParents();
-    _cherryPickVisit = cherryPickVisit;
-    registerWithParents();
-  }
-
-  /**
-   * Get the well.
+   * Get the source library well that is the target of this cherry pick.
    *
    * @return the well
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.libraries.Well"
+   *   column="well_id"
+   *   not-null="true"
+   *   foreign-key="fk_cherry_pick_to_well"
+   *   cascade="save-update"
+   * @motivation for hibernate
    */
-  public Well getWell()
+  @ToOneRelationship(nullable=false)
+  public Well getSourceWell()
   {
-    return _well;
-  }
-
-  /**
-   * Set the well.
-   *
-   * @param well the new well
-   */
-  public void setWell(Well well)
-  {
-    if (well == null) {
-      throw new NullPointerException();
-    }
-    unregisterWithParents();
-    _well = well;
-    registerWithParents();
+    return _sourceWell;
   }
 
   /**
    * Get the copy.
    *
    * @return the copy
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.libraries.Copy"
+   *   column="copy_id"
+   *   not-null="true"
+   *   foreign-key="fk_cherry_pick_to_copy"
+   *   cascade="save-update"
+   * @motivation for hibernate
    */
-  public Copy getCopy()
+  @ToOneRelationship(nullable=false)
+  public Copy getSourceCopy()
   {
-    return _copy;
+    return _sourceCopy;
+  }
+
+  // HACK: This property is marked as derived for unit testing purposes
+  // only! It is in fact a real hibernate relationshp, though it is unique in that it can only be
+  // modified from the other side (CherryPickLiquidTransfer). Our unit tests do
+  // not yet handle this case.
+  /**
+   * Get the cherry pick liquid transfer that marks the plating of this cherry
+   * pick. 
+   * 
+   * @param cherryPickLiquidTransfer
+   * @see #setCherryPickLiquidTransfer(CherryPickLiquidTransfer) to set this
+   *      cherry pick's relationship to a chery pick liquid transfer
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer"
+   *   column="cherry_pick_liquid_transfer_id"
+   *   not-null="false"
+   *   foreign-key="fk_cherry_pick_to_cherry_pick_liquid_transfer"
+   *   cascade="save-update"
+   */
+  @ToOneRelationship(inverseProperty="platedCherryPicks")
+  @DerivedEntityProperty(isPersistent=true)
+  public CherryPickLiquidTransfer getCherryPickLiquidTransfer()
+  {
+    return _cherryPickLiquidTransfer;
   }
 
   /**
-   * Set the copy.
-   *
-   * @param copy the new copy
+   * Marks the cherry pick as has having source plate well volume allocated for
+   * it, and specifies the destination cherry pick assay plate and well that the
+   * liquid volume has been allocated to.
+   * 
+   * @param destinationPlateType
+   * @param destinationPlateName
+   * @param destinationPlateRow
+   * @param destinationPlateColumn
    */
-  public void setCopy(Copy copy)
+  public void setAllocated(PlateType destinationPlateType,
+                           String destinationPlateName,
+                           int destinationPlateRow,
+                           int destinationPlateColumn)
   {
-    if (copy == null) {
-      throw new NullPointerException();
+    if (destinationPlateType == null ||
+      destinationPlateName == null) {
+      throw new IllegalArgumentException("null argument values not allowed");
     }
-    _copy = copy;
-    copy.getHbnCherryPicks().add(this);
+      
+    _destinationPlateType = destinationPlateType;
+    _destinationPlateName = destinationPlateName;
+    _destinationPlateRow = destinationPlateRow;
+    _destinationPlateColumn = destinationPlateColumn;
+  }
+  
+  /**
+   * Get the volume.
+   *
+   * @return the volume
+   */
+  @DerivedEntityProperty
+  public BigDecimal getVolume()
+  {
+    if (!isPlated()) {
+      throw new IllegalStateException("a cherry pick does not have a transferred volume before it has been transfered");
+    }
+    return _cherryPickLiquidTransfer.getActualMicroliterTransferVolumePerWell();
   }
 
   /**
    * Get the RNAi knockdown confirmation.
    *
    * @return the RNAi knockdown confirmation
+   * @hibernate.one-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation"
+   *   property-ref="hbnCherryPick"
+   *   cascade="save-update"
+   * @motivation for hibernate
    */
+  @ToOneRelationship(inverseProperty="cherryPick")
   public RNAiKnockdownConfirmation getRNAiKnockdownConfirmation()
   {
     return _rnaiKnockdownConfirmation;
-  }
-
-  /**
-   * Set the RNAi knockdown confirmation.
-   *
-   * @param rNAiKnockdownConfirmation the new RNAi knockdown confirmation
-   */
-  public void setRNAiKnockdownConfirmation(RNAiKnockdownConfirmation rNAiKnockdownConfirmation)
-  {
-    _rnaiKnockdownConfirmation = rNAiKnockdownConfirmation;
-    rNAiKnockdownConfirmation.setHbnCherryPick(this);
-  }
-
-  /**
-   * Get the volume.
-   *
-   * @return the volume
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
-   */
-  public String getVolume()
-  {
-    return _volume;
-  }
-
-  /**
-   * Set the volume.
-   *
-   * @param volume the new volume
-   */
-  public void setVolume(String volume)
-  {
-    _volume = volume;
-  }
-
-  /**
-   * Get the plate map.
-   *
-   * @return the plate map
-   * @hibernate.property
-   *   type="text"
-   */
-  public String getPlateMap()
-  {
-    return _plateMap;
-  }
-
-  /**
-   * Set the plate map.
-   *
-   * @param plateMap the new plate map
-   */
-  public void setPlateMap(String plateMap)
-  {
-    _plateMap = plateMap;
   }
 
   /**
@@ -275,59 +286,96 @@ public class CherryPick extends AbstractEntity
     _notesOnHitConfirmation = notesOnHitConfirmation;
   }
 
-
+  // HACK: annotating as DerivedEntityProperty to avoid unit tests expecting a
+  // setter method (setAllocated() updates this property's value)
   /**
-   * Set the well.
-   * Throw a NullPointerException when the well is null.
+   * Get the destination plate type
    *
-   * @param well the new well
-   * @throws NullPointerException when the well is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   * this method is public only because the bi-directional relationship
-   * is cross-package.
+   * @return the destination plate type
+   * @hibernate.property type="edu.harvard.med.screensaver.model.libraries.PlateType$UserType"
    */
-  public void setHbnWell(Well well)
+  @DerivedEntityProperty
+  public PlateType getDestinationPlateType()
   {
-    if (well == null) {
-      throw new NullPointerException();
-    }
-    _well = well;
+    return _destinationPlateType;
   }
 
-
+  // HACK: annotating as DerivedEntityProperty to avoid unit tests expecting a
+  // setter method (setAllocated() updates this property's value)
   /**
-   * Set the copy.
-   * Throw a NullPointerException when the copy is null.
-   *
-   * @param copy the new copy
-   * @throws NullPointerException when the copy is null
-   * @motivation for hibernate and maintenance of bi-directional relationships.
-   * this method is public only because the bi-directional relationship
-   * is cross-package.
+   * The name of the cherry pick assay plate.
+   * @hibernate.property type="text"
+   * @return
    */
-  public void setHbnCopy(Copy copy)
+  @DerivedEntityProperty
+  public String getDestinationPlateName()
   {
-    if (copy == null) {
-      throw new NullPointerException();
-    }
-    _copy = copy;
+    return _destinationPlateName;
   }
 
+  // HACK: annotating as DerivedEntityProperty to avoid unit tests expecting a
+  // setter method (setAllocated() updates this property's value)
+  /**
+   * @hiberate.property type="int"
+   * @return
+   */
+  @DerivedEntityProperty
+  public int getDestinationPlateRow()
+  {
+    return _destinationPlateRow;
+  }
+  
+  // HACK: annotating as DerivedEntityProperty to avoid unit tests expecting a
+  // setter method (setAllocated() updates this property's value)
+  /**
+   * @hiberate.property type="int"
+   * @return
+   */
+  @DerivedEntityProperty
+  public int getDestinationPlateColumn()
+  {
+    return _destinationPlateColumn;
+  }
+  
+  // TODO: unit test this property
+  /**
+   * Get whether liquid volume for this cherry pick has been allocated from a
+   * source plate well.
+   * 
+   * @return true, if source plate well liquid volume has been allocated
+   */
+  @DerivedEntityProperty
+  public boolean isAllocated()
+  {
+    return _destinationPlateName != null;
+  }
 
   /**
-   * A business key class for the well.
+   * Get whether liquid volume for this cherry pick has been transferred from a
+   * source copy plate to a cherry pick assay plate.
+   * 
+   * @return true, if source plate well liquid volume has been transfered
+   */
+  @DerivedEntityProperty
+  public boolean isPlated()
+  {
+    return _cherryPickLiquidTransfer != null;
+  }
+
+  /**
+   * A business key class for the cherry pick
    */
   private class BusinessKey
   {
     
     /**
-     * Get the cherry pick visit.
+     * Get the cherry pick request.
      *
-     * @return the cherry pick visit
+     * @return the cherry pick request
      */
-    public CherryPickVisit getCherryPickVisit()
+    public CherryPickRequest getCherryPickRequest()
     {
-      return _cherryPickVisit;
+      return _cherryPickRequest;
     }
     
     /**
@@ -337,7 +385,7 @@ public class CherryPick extends AbstractEntity
      */
     public Well getWell()
     {
-      return _well;
+      return _sourceWell;
     }
 
     @Override
@@ -348,22 +396,22 @@ public class CherryPick extends AbstractEntity
       }
       BusinessKey that = (BusinessKey) object;
       return
-        getCherryPickVisit().equals(that.getCherryPickVisit()) &&
-        getWell().equals(that.getWell());
+        this.getCherryPickRequest().equals(that.getCherryPickRequest()) &&
+        this.getWell().equals(that.getWell());
     }
 
     @Override
     public int hashCode()
     {
       return
-        getCherryPickVisit().hashCode() +
-        getWell().hashCode();
+        this.getCherryPickRequest().hashCode() +
+        this.getWell().hashCode();
     }
 
     @Override
     public String toString()
     {
-      return getCherryPickVisit() + ":" + getWell();
+      return this.getCherryPickRequest() + ":" + this.getWell();
     }
   }
 
@@ -377,30 +425,29 @@ public class CherryPick extends AbstractEntity
   // package methods
 
   /**
-   * Set the cherry pick visit.
-   * Throw a NullPointerException when the cherry pick visit is null.
-   *
-   * @param cherryPickVisit the new cherry pick visit
-   * @throws NullPointerException when the cherry pick visit is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  void setHbnCherryPickVisit(CherryPickVisit cherryPickVisit)
-  {
-    if (cherryPickVisit == null) {
-      throw new NullPointerException();
-    }
-    _cherryPickVisit = cherryPickVisit;
-  }
-
-  /**
    * Set the RNAi knockdown confirmation.
    *
    * @param rNAiKnockdownConfirmation the new RNAi knockdown confirmation
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
-  void setHbnRNAiKnockdownConfirmation(RNAiKnockdownConfirmation rNAiKnockdownConfirmation)
+  void setRNAiKnockdownConfirmation(RNAiKnockdownConfirmation rNAiKnockdownConfirmation)
   {
     _rnaiKnockdownConfirmation = rNAiKnockdownConfirmation;
+  }
+
+  /**
+   * Set the cherry pick liquid transfer.
+   * 
+   * @see #setCherryPickLiquidTransfer(CherryPickLiquidTransfer) for application
+   *      use
+   * @motivation for hibernate and maintenance of bi-directional relationships;
+   *             the only reason we need Hibernate get/set methods for this
+   *             property is to allow validation logic to be invoked in the
+   *             public setter.
+   */
+  void setCherryPickLiquidTransfer(CherryPickLiquidTransfer cherryPickLiquidTransfer)
+  {
+    _cherryPickLiquidTransfer = cherryPickLiquidTransfer;
   }
 
 
@@ -448,86 +495,61 @@ public class CherryPick extends AbstractEntity
   }
 
   /**
-   * Get the cherry pick visit.
+   * Set the cherry pick request.
    *
-   * @return the cherry pick visit
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.CherryPickVisit"
-   *   column="cherry_pick_visit_id"
-   *   not-null="true"
-   *   foreign-key="fk_cherry_pick_to_cherry_pick_visit"
-   *   cascade="save-update"
-   * @motivation for hibernate
+   * @param cherryPickRequest the new cherry pick request
+   * @motivation for hibernate and maintenance of bi-directional relationships
    */
-  private CherryPickVisit getHbnCherryPickVisit()
+  private void setCherryPickRequest(CherryPickRequest cherryPickRequest)
   {
-    return _cherryPickVisit;
+    _cherryPickRequest = cherryPickRequest;
   }
 
   /**
-   * Get the well.
+   * Set the source well.
    *
-   * @return the well
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.libraries.Well"
-   *   column="well_id"
-   *   not-null="true"
-   *   foreign-key="fk_cherry_pick_to_well"
-   *   cascade="save-update"
-   * @motivation for hibernate
+   * @param well the new well
+   * @motivation for hibernate and maintenance of bi-directional relationships
    */
-  private Well getHbnWell()
+  private void setSourceWell(Well well)
   {
-    return _well;
+    _sourceWell = well;
   }
 
   /**
-   * Get the copy.
+   * Set the source copy.
    *
-   * @return the copy
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.libraries.Copy"
-   *   column="copy_id"
-   *   not-null="true"
-   *   foreign-key="fk_cherry_pick_to_copy"
-   *   cascade="save-update"
-   * @motivation for hibernate
+   * @param copy the new copy
+   * @motivation for hibernate and maintenance of bi-directional relationships.
    */
-  private Copy getHbnCopy()
+  private void setSourceCopy(Copy copy)
   {
-    return _copy;
+    _sourceCopy = copy;
   }
 
-  /**
-   * Get the RNAi knockdown confirmation.
-   *
-   * @return the RNAi knockdown confirmation
-   * @hibernate.one-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation"
-   *   property-ref="hbnCherryPick"
-   *   cascade="save-update"
-   * @motivation for hibernate
-   */
-  private RNAiKnockdownConfirmation getHbnRNAiKnockdownConfirmation()
+  private void setDestinationPlateType(PlateType destinationPlateType)
   {
-    return _rnaiKnockdownConfirmation;
+    _destinationPlateType = destinationPlateType;
   }
 
-  /**
-   * Register this <code>CherryPick</code> with its parent objects.
-   */
-  private void registerWithParents() {
-    _cherryPickVisit.getHbnCherryPicks().add(this);
-    _well.getHbnCherryPicks().add(this);
-    _copy.getHbnCherryPicks().add(this);
+  private void setDestinationPlateName(String destinationPlateName)
+  {
+    _destinationPlateName = destinationPlateName;
+  }
+  
+  private void setDestinationPlateRow(int row)
+  {
+    _destinationPlateRow = row;
+  }
+  
+  private void setDestinationPlateColumn(int column)
+  {
+    _destinationPlateColumn = column;
+  }
+  
+  CherryPickLiquidTransfer getHbnCherryPickLiquidTransfer()
+  {
+    return _cherryPickLiquidTransfer;
   }
 
-  /**
-   * Unregister this <code>CherryPick</code> with its parent objects.
-   */
-  private void unregisterWithParents() {
-    _cherryPickVisit.getHbnCherryPicks().remove(this);
-    _well.getHbnCherryPicks().remove(this);
-    _copy.getHbnCherryPicks().remove(this);
-  }
 }
