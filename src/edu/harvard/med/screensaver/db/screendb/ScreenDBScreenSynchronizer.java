@@ -28,11 +28,14 @@ import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.BillingInfoToBeRequested;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
+import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.util.eutils.PublicationInfo;
+import edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider;
 
 public class ScreenDBScreenSynchronizer
 {
@@ -52,6 +55,7 @@ public class ScreenDBScreenSynchronizer
   private StatusValue.UserType _statusValueUserType = new StatusValue.UserType();
   private FundingSupport.UserType _fundingSupportUserType = new FundingSupport.UserType();
   private Map<Integer,Screen> _screenNumberToScreenMap = new HashMap<Integer,Screen>();
+  private PublicationInfoProvider _publicationInfoProvider = new PublicationInfoProvider();
 
   
   // public constructors and methods
@@ -74,7 +78,7 @@ public class ScreenDBScreenSynchronizer
           synchronizeCollaborators();
           synchronizeStatusItems();
           synchronizeAbaseTestsets();
-          // TODO: publications
+          synchronizePublications();
         }
         catch (SQLException e) {
           _synchronizationException = new ScreenDBSynchronizationException(
@@ -292,6 +296,40 @@ public class ScreenDBScreenSynchronizer
       catch (DuplicateEntityException e) {
         throw new ScreenDBSynchronizationException(
           "duplicate abase testset for screen number " + screenNumber, e);
+      }
+    }
+    statement.close();
+  }
+  
+  private void synchronizePublications() throws SQLException, ScreenDBSynchronizationException
+  {
+    // synchronizing requires emptying out all previous publications
+    for (Screen screen : _screenNumberToScreenMap.values()) {
+      Set<Publication> publications = screen.getPublications();
+      publications.removeAll(publications);
+    }
+    Statement statement = _connection.createStatement();
+    ResultSet resultSet = statement.executeQuery("SELECT * FROM pub_med");
+    while (resultSet.next()) {
+      Integer screenNumber = resultSet.getInt("screen_id");
+      Screen screen = getScreenFromTable("pub_med", screenNumber);
+      String pubmedId = resultSet.getString("pubmed_id");
+      PublicationInfo publicationInfo = 
+        _publicationInfoProvider.getPublicationInfoForPubmedId(new Integer(pubmedId));
+      if (publicationInfo == null) {
+        throw new ScreenDBSynchronizationException("unable to get publication info from pubmed");
+      }
+      try {
+        new Publication(
+          screen,
+          pubmedId,
+          publicationInfo.getYearPublished(),
+          publicationInfo.getAuthors(),
+          publicationInfo.getTitle());
+      }
+      catch (DuplicateEntityException e) {
+        throw new ScreenDBSynchronizationException(
+          "duplicate publication for screen number " + screenNumber, e);
       }
     }
     statement.close();
