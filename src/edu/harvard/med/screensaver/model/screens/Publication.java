@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.model.screens;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 
 import org.apache.log4j.Logger;
@@ -50,24 +51,18 @@ public class Publication extends AbstractEntity
    * Constructs an initialized <code>Publication</code> object.
    *
    * @param screen the screen
-   * @param pubmedId the pubmed id
    * @param yearPublished the year published
    * @param authors the authors
    * @param title the title
    * @throws DuplicateEntityException 
    */
-  public Publication(
-    Screen screen,
-    String pubmedId,
-    String yearPublished,
-    String authors,
-    String title) throws DuplicateEntityException
+  public Publication(Screen screen, String yearPublished, String authors, String title)
+  throws DuplicateEntityException
   {
     if (screen == null) {
       throw new NullPointerException();
     }
     _screen = screen;
-    _pubmedId = pubmedId;
     _yearPublished = yearPublished;
     _authors = authors;
     _title = title;
@@ -76,7 +71,25 @@ public class Publication extends AbstractEntity
     }
   }
 
+  /**
+   * Constructs an initialized <code>Publication</code> object.
+   *
+   * @param screen the screen
+   * @param pubmedId the pubmed id
+   * @param yearPublished the year published
+   * @param authors the authors
+   * @param title the title
+   * @throws DuplicateEntityException 
+   */
+  public Publication(Screen screen, String pubmedId, String yearPublished, String authors, String title)
+  throws DuplicateEntityException
+  {
+    this(screen, yearPublished, authors, title);
+    _pubmedId = pubmedId;
+  }
 
+  // TODO : private setters
+  
   // public methods
 
   @Override
@@ -118,22 +131,12 @@ public class Publication extends AbstractEntity
    * Get the pubmed id.
    *
    * @return the pubmed id
+   * @hibernate.property type="text"
    */
+  @ImmutableProperty
   public String getPubmedId()
   {
     return _pubmedId;
-  }
-
-  /**
-   * Set the pubmed id.
-   *
-   * @param pubmedId the new pubmed id
-   */
-  public void setPubmedId(String pubmedId)
-  {
-    _screen.getPublications().remove(this);
-    _pubmedId = pubmedId;
-    _screen.getPublications().add(this);
   }
 
   /**
@@ -144,19 +147,10 @@ public class Publication extends AbstractEntity
    *   type="text"
    *   not-null="true"
    */
+  @ImmutableProperty
   public String getYearPublished()
   {
     return _yearPublished;
-  }
-
-  /**
-   * Set the year published.
-   *
-   * @param yearPublished the new year published
-   */
-  public void setYearPublished(String yearPublished)
-  {
-    _yearPublished = yearPublished;
   }
 
   /**
@@ -167,19 +161,10 @@ public class Publication extends AbstractEntity
    *   type="text"
    *   not-null="true"
    */
+  @ImmutableProperty
   public String getAuthors()
   {
     return _authors;
-  }
-
-  /**
-   * Set the authors.
-   *
-   * @param authors the new authors
-   */
-  public void setAuthors(String authors)
-  {
-    _authors = authors;
   }
 
   /**
@@ -190,19 +175,10 @@ public class Publication extends AbstractEntity
    *   type="text"
    *   not-null="true"
    */
+  @ImmutableProperty
   public String getTitle()
   {
     return _title;
-  }
-
-  /**
-   * Set the title.
-   *
-   * @param title the new title
-   */
-  public void setTitle(String title)
-  {
-    _title = title;
   }
 
 
@@ -211,7 +187,7 @@ public class Publication extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    return getPubmedId();
+    return getYearPublished() + ":" + getAuthors() + ":" + getTitle();
   }
 
 
@@ -244,7 +220,8 @@ public class Publication extends AbstractEntity
    * @param publicationId the new id for the publication
    * @motivation for hibernate
    */
-  private void setPublicationId(Integer publicationId) {
+  private void setPublicationId(Integer publicationId)
+  {
     _publicationId = publicationId;
   }
 
@@ -255,7 +232,8 @@ public class Publication extends AbstractEntity
    * @motivation for hibernate
    * @hibernate.version
    */
-  private Integer getVersion() {
+  private Integer getVersion()
+  {
     return _version;
   }
 
@@ -265,33 +243,47 @@ public class Publication extends AbstractEntity
    * @param version the new version for the publication
    * @motivation for hibernate
    */
-  private void setVersion(Integer version) {
+  private void setVersion(Integer version)
+  {
     _version = version;
   }
 
   /**
-   * Get the pubmed id.
-   *
-   * @return the pubmed id
-   * @hibernate.property
-   *   column="pubmed_id"
-   *   type="text"
-   *   not-null="true"
-   * @motivation for hibernate
-   */
-  private String getHbnPubmedId()
-  {
-    return _pubmedId;
-  }
-
-  /**
    * Set the pubmed id.
-   *
    * @param pubmedId the new pubmed id
    * @motivation for hibernate
    */
-  private void setHbnPubmedId(String pubmedId)
+  private void setPubmedId(String pubmedId)
   {
     _pubmedId = pubmedId;
+  }
+
+  /**
+   * Set the year published.
+   * @param yearPublished the new year published
+   */
+  private void setYearPublished(String yearPublished)
+  {
+    _yearPublished = yearPublished;
+  }
+
+  /**
+   * Set the authors.
+   * @param authors the new authors
+   * @motivation for hibernate
+   */
+  private void setAuthors(String authors)
+  {
+    _authors = authors;
+  }
+
+  /**
+   * Set the title.
+   * @param title the new title
+   * @motivation for hibernate
+   */
+  private void setTitle(String title)
+  {
+    _title = title;
   }
 }
