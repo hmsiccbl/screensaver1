@@ -47,11 +47,12 @@ public class RNAiCherryPickScreening extends Screening
 
   public RNAiCherryPickScreening(Screen screen,
                                  ScreeningRoomUser performedBy,
-                                 Date date,
+                                 Date dateCreated,
+                                 Date dateOfActivity,
                                  RNAiCherryPickRequest rnaiCherryPickRequest) 
     throws DuplicateEntityException
   {
-    super(screen, performedBy, date);
+    super(screen, performedBy, dateCreated, dateOfActivity);
     _rnaiCherryPickRequest = rnaiCherryPickRequest;
     _rnaiCherryPickRequest.setRnaiCherryPickScreening(this);
   }

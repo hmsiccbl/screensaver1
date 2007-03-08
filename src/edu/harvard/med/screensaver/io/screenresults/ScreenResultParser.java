@@ -821,7 +821,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       if (screen.getScreeningRoomActivities().size() > 0) {
         SortedSet<ScreeningRoomActivity> sortedScreeningRoomActivities = 
           new TreeSet<ScreeningRoomActivity>(screen.getScreeningRoomActivities());
-        parsedScreenInfo.setDate(sortedScreeningRoomActivities.first().getDate());
+        parsedScreenInfo.setDate(sortedScreeningRoomActivities.first().getDateOfActivity());
       }
       else {
         log.warn("screen result's screen has no library screenings, so screen result's \"date created\" property will be set to today");

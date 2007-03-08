@@ -204,7 +204,7 @@ TODO:
 					<f:facet name="header">
 						<t:outputText value="Date" />
 					</f:facet>
-					<t:outputText id="screeningRoomActivityDate" value="#{activityItem.date}"
+					<t:outputText id="screeningRoomActivityDate" value="#{activityItem.dateOfActivity}"
 						styleClass="dataText" />
 				</t:column>
 				<t:column>

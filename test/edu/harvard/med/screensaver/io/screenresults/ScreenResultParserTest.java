@@ -314,6 +314,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
       new LibraryScreening(screen,
                            screen.getLeadScreener(),
                            DateUtil.makeDate(2007, 1, 1),
+                           DateUtil.makeDate(2007, 2, 2),
                            AssayProtocolType.PRELIMINARY);
     }
     catch (DuplicateEntityException e) {
@@ -325,9 +326,9 @@ public class ScreenResultParserTest extends AbstractSpringTest
                                                              workbookFile);
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
 
-    Date expectedDate = DateUtil.makeDate(2007, 1, 1);
+    Date expectedDate = DateUtil.makeDate(2007, 2, 2);
     ScreenResult expectedScreenResult = makeScreenResult(expectedDate);
-    assertEquals("date",
+    assertEquals("dateCreated",
                  expectedScreenResult.getDateCreated(),
                  screenResult.getDateCreated());
   }

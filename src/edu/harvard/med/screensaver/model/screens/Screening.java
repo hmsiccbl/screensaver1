@@ -46,9 +46,10 @@ public abstract class Screening extends ScreeningRoomActivity
 
   public Screening(Screen screen,
                    ScreeningRoomUser performedBy,
-                   Date date) throws DuplicateEntityException
+                   Date dateCreated,
+                   Date dateOfActivity) throws DuplicateEntityException
   {
-    super(screen, performedBy, date);
+    super(screen, performedBy, dateCreated, dateOfActivity);
   }
 
   /**

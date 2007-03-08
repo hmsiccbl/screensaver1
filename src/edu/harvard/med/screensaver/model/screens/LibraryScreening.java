@@ -66,9 +66,10 @@ public class LibraryScreening extends Screening
     Screen screen,
     ScreeningRoomUser performedBy,
     Date dateCreated,
+    Date dateOfActivity,
     AssayProtocolType assayProtocolType) throws DuplicateEntityException
   {
-    super(screen, performedBy, dateCreated);
+    super(screen, performedBy, dateCreated, dateOfActivity);
     _assayProtocolType = assayProtocolType;
   }
 

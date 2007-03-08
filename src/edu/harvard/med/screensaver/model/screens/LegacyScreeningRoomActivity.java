@@ -44,9 +44,9 @@ public class LegacyScreeningRoomActivity extends ScreeningRoomActivity
 
   // public constructors and methods
 
-  public LegacyScreeningRoomActivity(Screen screen, ScreeningRoomUser performedBy, Date date, String activityTypeName) throws DuplicateEntityException
+  public LegacyScreeningRoomActivity(Screen screen, ScreeningRoomUser performedBy, Date dateCreated, Date dateOfActivity, String activityTypeName) throws DuplicateEntityException
   {
-    super(screen, performedBy, date);
+    super(screen, performedBy, dateCreated, dateOfActivity);
     _activityTypeName = activityTypeName;
   }
   

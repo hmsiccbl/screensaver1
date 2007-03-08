@@ -46,7 +46,8 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   private Screen _screen;
   private ScreeningRoomUser _performedBy;
   private Set<EquipmentUsed> _equipmentUsed = new HashSet<EquipmentUsed>();
-  private Date _date;
+  private Date _dateCreated;
+  private Date _dateOfActivity;
   private String _comments;
 
   
@@ -58,19 +59,22 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
    * @param screen the screen
    * @param performedBy the user that performed the activity
    * @param dateCreated the date created
+   * @param dateOfActivity the date the screening room activity took place
    * @throws DuplicateEntityException 
    */
   public ScreeningRoomActivity(
     Screen screen,
     ScreeningRoomUser performedBy,
-    Date date) throws DuplicateEntityException
+    Date dateCreated,
+    Date dateOfActivity) throws DuplicateEntityException
   {
     if (screen == null || performedBy == null) {
       throw new NullPointerException();
     }
     _screen = screen;
     _performedBy = performedBy;
-    _date = truncateDate(date);
+    _dateCreated = truncateDate(dateCreated);
+    _dateOfActivity = truncateDate(dateOfActivity);
     if (!_screen.getScreeningRoomActivities().add(this)) {
       throw new DuplicateEntityException(_screen, this);
     }
@@ -145,6 +149,30 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   }
 
   /**
+   * Get the date the activity entity was created.
+   *
+   * @return the date the activity entity was created
+   * @hibernate.property
+   *   not-null="true"
+   */
+  @ImmutableProperty
+  public Date getDateCreated()
+  {
+    return _dateCreated;
+  }
+
+  /**
+   * Set the date the activity entity was created.
+   *
+   * @param dateCreated the new date the activity entity was created
+   * @motivation for hibernate
+   */
+  private void setDateCreated(Date dateCreated)
+  {
+    _dateCreated = truncateDate(dateCreated);
+  }
+  
+  /**
    * Get the date the activity was performed.
    *
    * @return the date the activity was performed
@@ -152,9 +180,9 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
    *   not-null="true"
    */
   @ImmutableProperty
-  public Date getDate()
+  public Date getDateOfActivity()
   {
-    return _date;
+    return _dateOfActivity;
   }
 
   /**
@@ -162,9 +190,9 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
    *
    * @param dateCreated the new date the activity was performed.
    */
-  private void setDate(Date date)
+  private void setDateOfActivity(Date dateOfActivity)
   {
-    _date = truncateDate(date);
+    _dateOfActivity = truncateDate(dateOfActivity);
   }
 
   /**
@@ -212,7 +240,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   {
     if (o instanceof ScreeningRoomActivity) {
       ScreeningRoomActivity other = (ScreeningRoomActivity) o;
-      return getDate().compareTo(other.getDate());
+      return getDateOfActivity().compareTo(other.getDateOfActivity());
     }
     return 0;
   }
@@ -263,7 +291,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
      */
     public Date getDate()
     {
-      return _date;
+      return _dateOfActivity;
     }
     
     @Override

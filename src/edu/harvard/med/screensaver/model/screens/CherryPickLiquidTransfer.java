@@ -59,12 +59,13 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
   // public constructors and methods
 
   public CherryPickLiquidTransfer(ScreeningRoomUser performedBy,
-                                  Date date,
+                                  Date dateCreated,
+                                  Date dateOfActivity,
                                   BigDecimal actualMicroliterTransferVolumePerWell,
                                   CherryPickRequest cherryPickRequest) throws DuplicateEntityException
   {
     
-    super(cherryPickRequest.getScreen(), performedBy, date);
+    super(cherryPickRequest.getScreen(), performedBy, dateCreated, dateOfActivity);
     _cherryPickRequest = cherryPickRequest;
     _actualMicroliterTransferVolumePerWell = actualMicroliterTransferVolumePerWell;
     _cherryPickRequest.setCherryPickLiquidTransfer(this);
