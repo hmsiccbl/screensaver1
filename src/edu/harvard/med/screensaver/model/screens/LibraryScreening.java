@@ -97,11 +97,28 @@ public class LibraryScreening extends Screening
     return _platesUsed;
   }
 
+  /**
+   * Get the abase testset id
+   * @return the abase testset id
+   * @hibernate.property type="text"
+   */
+  public String getAbaseTestsetId()
+  {
+    return _abaseTestsetId;
+  }
+
+  /**
+   * Set the abase testset id
+   * @param abaseTestsetId the new abase testset id
+   */
+  public void setAbaseTestsetId(String abaseTestsetId)
+  {
+    _abaseTestsetId = abaseTestsetId;
+  }
+
   
-  // package methods
-
   // private constructor
-
+  
   /**
    * Construct an uninitialized <code>LibraryScreening</code> object.
    *
