@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,6 +47,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   private Screen _screen;
   private ScreeningRoomUser _performedBy;
   private Set<EquipmentUsed> _equipmentUsed = new HashSet<EquipmentUsed>();
+  private BigDecimal _microliterVolumeTransferedPerWell;
   private Date _dateCreated;
   private Date _dateOfActivity;
   private String _comments;
@@ -149,6 +151,26 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   }
 
   /**
+   * Get the volume transferred per well, in microliters
+   * @return the volume transferred per well, in microliters
+   * @hibernate.property type="big_decimal"
+   */
+  public BigDecimal getMicroliterVolumeTransferedPerWell()
+  {
+    return _microliterVolumeTransferedPerWell;
+  }
+
+  /**
+   * Set the volume transferred per well, in microliters
+   * @param microliterVolumeTransferedPerWell the new volume transferrde per well, in microliters
+   */
+  public void setMicroliterVolumeTransferedPerWell(
+    BigDecimal microliterVolumeTransferedPerWell)
+  {
+    _microliterVolumeTransferedPerWell = microliterVolumeTransferedPerWell;
+  }
+
+  /**
    * Get the date the activity entity was created.
    *
    * @return the date the activity entity was created
@@ -162,17 +184,6 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   }
 
   /**
-   * Set the date the activity entity was created.
-   *
-   * @param dateCreated the new date the activity entity was created
-   * @motivation for hibernate
-   */
-  private void setDateCreated(Date dateCreated)
-  {
-    _dateCreated = truncateDate(dateCreated);
-  }
-  
-  /**
    * Get the date the activity was performed.
    *
    * @return the date the activity was performed
@@ -183,16 +194,6 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   public Date getDateOfActivity()
   {
     return _dateOfActivity;
-  }
-
-  /**
-   * Set the date the activity was performed.
-   *
-   * @param dateCreated the new date the activity was performed.
-   */
-  private void setDateOfActivity(Date dateOfActivity)
-  {
-    _dateOfActivity = truncateDate(dateOfActivity);
   }
 
   /**
@@ -385,6 +386,30 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   {
     _performedBy = performedBy;
   }
+
+
+  /**
+   * Set the date the activity entity was created.
+   *
+   * @param dateCreated the new date the activity entity was created
+   * @motivation for hibernate
+   */
+  private void setDateCreated(Date dateCreated)
+  {
+    _dateCreated = truncateDate(dateCreated);
+  }
+
+
+  /**
+   * Set the date the activity was performed.
+   *
+   * @param dateCreated the new date the activity was performed.
+   */
+  private void setDateOfActivity(Date dateOfActivity)
+  {
+    _dateOfActivity = truncateDate(dateOfActivity);
+  }
+
   /**
    * Set the equipment used.
    *

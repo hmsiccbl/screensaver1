@@ -9,20 +9,17 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
-import org.apache.log4j.Logger;
 
 /**
  * Tracks the event whereby a set (or subset) of cherry picks have been plated
@@ -51,8 +48,6 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
   // instance data members
 
   private CherryPickRequest _cherryPickRequest;
-  // TODO: do we actually need this? will there ever be a case where the CPR's approved volume is not actually used?  Or perhaps we need to track this per dest plate or even per individual cherry pick?
-  private BigDecimal _actualMicroliterTransferVolumePerWell;
   private Set<CherryPick> _platedCherryPicks = new HashSet<CherryPick>();
 
 
@@ -61,13 +56,11 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
   public CherryPickLiquidTransfer(ScreeningRoomUser performedBy,
                                   Date dateCreated,
                                   Date dateOfActivity,
-                                  BigDecimal actualMicroliterTransferVolumePerWell,
                                   CherryPickRequest cherryPickRequest) throws DuplicateEntityException
   {
     
     super(cherryPickRequest.getScreen(), performedBy, dateCreated, dateOfActivity);
     _cherryPickRequest = cherryPickRequest;
-    _actualMicroliterTransferVolumePerWell = actualMicroliterTransferVolumePerWell;
     _cherryPickRequest.setCherryPickLiquidTransfer(this);
   }
 
@@ -95,25 +88,6 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
   public CherryPickRequest getCherryPickRequest()
   {
     return _cherryPickRequest;
-  }
-
-  /**
-   * @hibernate.property type="big_decimal"
-   */
-  @ImmutableProperty
-  public BigDecimal getActualMicroliterTransferVolumePerWell()
-  {
-    return _actualMicroliterTransferVolumePerWell;
-  }
-
-  // TODO: unit test (not covered by automated model unit tests)
-  // making derived property to avoid automated model unit testing, as
-  // _plateCherryPicks is (indirectly) updated by calling
-  // addPlatedCherryPicksForPlate{s}()
-  @DerivedEntityProperty
-  public Set<CherryPick> getPlatedCherryPicks()
-  {
-    return Collections.unmodifiableSet(_platedCherryPicks);
   }
 
   /**
@@ -155,11 +129,6 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
   private void setCherryPickRequest(CherryPickRequest cherryPickRequest)
   {
     _cherryPickRequest = cherryPickRequest;
-  }
-  
-  private void setActualMicroliterTransferVolumePerWell(BigDecimal actualMicroliterTransferVolumePerWell)
-  {
-    _actualMicroliterTransferVolumePerWell = actualMicroliterTransferVolumePerWell;
   }
   
   /**

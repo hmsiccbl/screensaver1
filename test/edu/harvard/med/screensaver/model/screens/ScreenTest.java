@@ -11,17 +11,16 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.util.DateUtil;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -54,8 +53,7 @@ public class ScreenTest extends AbstractSpringTest
                                                          1),
                                                        DateUtil.makeDate(2007,
                                                          3,
-                                                         7),
-                                                       AssayProtocolType.ESTABLISHED);
+                                                         7));
     LibraryScreening screening2 = new LibraryScreening(screen,
                                                        screen.getLeadScreener(),
                                                        DateUtil.makeDate(2007,
@@ -63,8 +61,7 @@ public class ScreenTest extends AbstractSpringTest
                                                          1),
                                                        DateUtil.makeDate(2007,
                                                                          3,
-                                                                         8),
-                                                       AssayProtocolType.ESTABLISHED);
+                                                                         8));
     CherryPickRequest cpr = new CompoundCherryPickRequest(screen,
                                                           screen.getLeadScreener(),
                                                           DateUtil.makeDate(2007,
@@ -77,7 +74,6 @@ public class ScreenTest extends AbstractSpringTest
                                                                    1,
                                                                    1),
                                                                  new Date(),
-                                                                 new BigDecimal(6.5),
                                                                  cpr);
 
     Set<ScreeningRoomActivity> activities = screen.getScreeningRoomActivitiesOfType(LibraryScreening.class);

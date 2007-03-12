@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
@@ -37,12 +38,13 @@ public abstract class Screening extends ScreeningRoomActivity
   // instance data members
 
   private String _assayProtocol;
+  private Date _assayProtocolLastModifiedDate;
+  private AssayProtocolType _assayProtocolType;
   private Integer _numberOfReplicates;
+  private BigDecimal _estimatedFinalScreenConcentrationInMoles;
 
   
   // public constructors and methods
-  
-  
 
   public Screening(Screen screen,
                    ScreeningRoomUser performedBy,
@@ -75,6 +77,45 @@ public abstract class Screening extends ScreeningRoomActivity
   }
 
   /**
+   * Get the date the assay protocol was last modified.
+   * @return the date the assay protocol was last modified
+   * @hibernate.property
+   */
+  public Date getAssayProtocolLastModifiedDate()
+  {
+    return _assayProtocolLastModifiedDate;
+  }
+
+  /**
+   * Set the date the assay protocol was last modified
+   * @param assayProtocolLastModifiedDate the new date the assay protocol was last modified
+   */
+  public void setAssayProtocolLastModifiedDate(Date assayProtocolLastModifiedDate)
+  {
+    _assayProtocolLastModifiedDate = truncateDate(assayProtocolLastModifiedDate);
+  }
+
+  /**
+   * Get the assay protocol type
+   * @return the assay protocol type
+   * @hibernate.property
+   *   type="edu.harvard.med.screensaver.model.screens.AssayProtocolType$UserType"
+   */
+  public AssayProtocolType getAssayProtocolType()
+  {
+    return _assayProtocolType;
+  }
+
+  /**
+   * Set the assay protocol type.
+   * @param assayProtocolType the new assay protocol type
+   */
+  public void setAssayProtocolType(AssayProtocolType assayProtocolType)
+  {
+    _assayProtocolType = assayProtocolType;
+  }
+
+  /**
    * Get the number of replicates.
    *
    * @return the number of replicates
@@ -95,9 +136,29 @@ public abstract class Screening extends ScreeningRoomActivity
     _numberOfReplicates = numberOfReplicates;
   }
 
+  /**
+   * Get the estimated final screen concentration, in Moles.
+   * @return the estimated final screen concentration, in Moles
+   * @hibernate.property type="big_decimal"
+   */
+  public BigDecimal getEstimatedFinalScreenConcentrationInMoles()
+  {
+    return _estimatedFinalScreenConcentrationInMoles;
+  }
+
+  /**
+   * Set the estimated final screen concentration, in Moles.
+   * @param estimatedFinalScreenConcentrationInMoles the new estimated final screen concentration,
+   * in Moles.
+   */
+  public void setEstimatedFinalScreenConcentrationInMoles(
+    BigDecimal estimatedFinalScreenConcentrationInMoles)
+  {
+    _estimatedFinalScreenConcentrationInMoles = estimatedFinalScreenConcentrationInMoles;
+  }
+
 
   // private methods
-
 
   /**
    * @motivation for Hibernate and subclasses
@@ -105,6 +166,5 @@ public abstract class Screening extends ScreeningRoomActivity
   protected Screening()
   {
   }
-
 }
 

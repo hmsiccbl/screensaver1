@@ -13,12 +13,12 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -45,9 +45,6 @@ public class LibraryScreening extends Screening
   // instance fields
 
   private Set<PlatesUsed> _platesUsed = new HashSet<PlatesUsed>();
-  private String _volumeOfCompoundTransferred;
-  // TOOD: might this be applicable to RNAiCherryPickScreening entities as well?
-  private AssayProtocolType _assayProtocolType;
   private String _abaseTestsetId;
 
 
@@ -66,11 +63,9 @@ public class LibraryScreening extends Screening
     Screen screen,
     ScreeningRoomUser performedBy,
     Date dateCreated,
-    Date dateOfActivity,
-    AssayProtocolType assayProtocolType) throws DuplicateEntityException
+    Date dateOfActivity) throws DuplicateEntityException
   {
     super(screen, performedBy, dateCreated, dateOfActivity);
-    _assayProtocolType = assayProtocolType;
   }
 
 
@@ -102,49 +97,6 @@ public class LibraryScreening extends Screening
     return _platesUsed;
   }
 
-  /**
-   * Get the volume of compound transferred.
-   *
-   * @return the volume of compound transferred
-   * @hibernate.property
-   *   type="text"
-   */
-  public String getVolumeOfCompoundTransferred()
-  {
-    return _volumeOfCompoundTransferred;
-  }
-
-  /**
-   * Set the volume of compound transferred.
-   *
-   * @param volumeOfCompoundTransferred the new volume of compound transferred
-   */
-  public void setVolumeOfCompoundTransferred(String volumeOfCompoundTransferred)
-  {
-    _volumeOfCompoundTransferred = volumeOfCompoundTransferred;
-  }
-
-  /**
-   * Get the assay protocol type.
-   *
-   * @return the assay protocol type
-   * @hibernate.property
-   *   type="edu.harvard.med.screensaver.model.screens.AssayProtocolType$UserType"
-   */
-  public AssayProtocolType getAssayProtocolType()
-  {
-    return _assayProtocolType;
-  }
-
-  /**
-   * Set the assay protocol type.
-   *
-   * @param assayProtocolType the new assay protocol type
-   */
-  public void setAssayProtocolType(AssayProtocolType assayProtocolType)
-  {
-    _assayProtocolType = assayProtocolType;
-  }
   
   // package methods
 

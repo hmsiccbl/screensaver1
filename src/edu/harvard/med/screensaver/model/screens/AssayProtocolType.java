@@ -25,7 +25,6 @@ public enum AssayProtocolType implements VocabularyTerm
   
   PRELIMINARY("Preliminary"),
   ESTABLISHED("Established"),
-  PROTOCOL_LAST_MODIFIED_ON("Protocol last modified on")
   ;
 
  

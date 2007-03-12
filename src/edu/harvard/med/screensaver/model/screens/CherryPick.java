@@ -14,14 +14,14 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
-
-import org.apache.log4j.Logger;
 
 
 // TODO: for performance, we may have to make CherryPick into a Hibernate value
@@ -222,7 +222,7 @@ public class CherryPick extends AbstractEntity
     if (!isPlated()) {
       throw new IllegalStateException("a cherry pick does not have a transferred volume before it has been transfered");
     }
-    return _cherryPickLiquidTransfers.iterator().next().getActualMicroliterTransferVolumePerWell();
+    return _cherryPickLiquidTransfers.iterator().next().getMicroliterVolumeTransferedPerWell();
   }
 
   /**
