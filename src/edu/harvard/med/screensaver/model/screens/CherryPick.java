@@ -11,6 +11,8 @@ package edu.harvard.med.screensaver.model.screens;
 
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
@@ -57,7 +59,7 @@ public class CherryPick extends AbstractEntity
   private int _destinationPlateRow;
   private int _destinationPlateColumn;
 
-  private CherryPickLiquidTransfer _cherryPickLiquidTransfer;
+  private Set<CherryPickLiquidTransfer> _cherryPickLiquidTransfers = new HashSet<CherryPickLiquidTransfer>();
   
   /* follow-up data from screener, after cherry pick screening is completed */
   private RNAiKnockdownConfirmation _rnaiKnockdownConfirmation;
@@ -166,24 +168,21 @@ public class CherryPick extends AbstractEntity
   // modified from the other side (CherryPickLiquidTransfer). Our unit tests do
   // not yet handle this case.
   /**
-   * Get the cherry pick liquid transfer that marks the plating of this cherry
-   * pick. 
+   * Get the cherry pick liquid transfers that mark the plating of this cherry
+   * pick. Normally, a cherry pick will be subject to only a single transfer.
+   * However, if the lab process goes awry (e.g., someone drops the assay plate
+   * on the floor!), it may be necessary to re-run a cherry pick plate mapping
+   * file. The cherry pick will have been drawn more than once from the library
+   * copy source well, and this needs to be recorded by Screensaver.
    * 
-   * @param cherryPickLiquidTransfer
+   * @return a set of CherryPickLiquidTransfers
    * @see #setCherryPickLiquidTransfer(CherryPickLiquidTransfer) to set this
    *      cherry pick's relationship to a chery pick liquid transfer
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer"
-   *   column="cherry_pick_liquid_transfer_id"
-   *   not-null="false"
-   *   foreign-key="fk_cherry_pick_to_cherry_pick_liquid_transfer"
-   *   cascade="save-update"
    */
-  @ToOneRelationship(inverseProperty="platedCherryPicks")
   @DerivedEntityProperty(isPersistent=true)
-  public CherryPickLiquidTransfer getCherryPickLiquidTransfer()
+  public Set<CherryPickLiquidTransfer> getCherryPickLiquidTransfers()
   {
-    return _cherryPickLiquidTransfer;
+    return _cherryPickLiquidTransfers;
   }
 
   /**
@@ -223,7 +222,7 @@ public class CherryPick extends AbstractEntity
     if (!isPlated()) {
       throw new IllegalStateException("a cherry pick does not have a transferred volume before it has been transfered");
     }
-    return _cherryPickLiquidTransfer.getActualMicroliterTransferVolumePerWell();
+    return _cherryPickLiquidTransfers.iterator().next().getActualMicroliterTransferVolumePerWell();
   }
 
   /**
@@ -359,7 +358,7 @@ public class CherryPick extends AbstractEntity
   @DerivedEntityProperty
   public boolean isPlated()
   {
-    return _cherryPickLiquidTransfer != null;
+    return _cherryPickLiquidTransfers.size() > 0;
   }
 
   /**
@@ -436,18 +435,11 @@ public class CherryPick extends AbstractEntity
   }
 
   /**
-   * Set the cherry pick liquid transfer.
-   * 
-   * @see #setCherryPickLiquidTransfer(CherryPickLiquidTransfer) for application
-   *      use
-   * @motivation for hibernate and maintenance of bi-directional relationships;
-   *             the only reason we need Hibernate get/set methods for this
-   *             property is to allow validation logic to be invoked in the
-   *             public setter.
+   * Add a cherry pick liquid transfer.
    */
-  void setCherryPickLiquidTransfer(CherryPickLiquidTransfer cherryPickLiquidTransfer)
+  void addCherryPickLiquidTransfer(CherryPickLiquidTransfer cherryPickLiquidTransfer)
   {
-    _cherryPickLiquidTransfer = cherryPickLiquidTransfer;
+    _cherryPickLiquidTransfers.add(cherryPickLiquidTransfer);
   }
 
 
@@ -547,9 +539,26 @@ public class CherryPick extends AbstractEntity
     _destinationPlateColumn = column;
   }
   
-  CherryPickLiquidTransfer getHbnCherryPickLiquidTransfer()
+  /**
+   * @hibernate.set
+   *   table="cherry_pick_liquid_transfer_cherry_pick_link"
+   *   cascade="save-update"
+   * @hibernate.collection-key
+   *   column="cherry_pick_id"
+   * @hibernate.collection-many-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer"
+   *   column="cherry_pick_liquid_transfer_id"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  @ToOneRelationship(inverseProperty="platedCherryPicks")
+  Set<CherryPickLiquidTransfer> getHbnCherryPickLiquidTransfers()
   {
-    return _cherryPickLiquidTransfer;
+    return _cherryPickLiquidTransfers;
+  }
+  
+  private void setHbnCherryPickLiquidTransfers(Set<CherryPickLiquidTransfer> cherryPickLiquidTransfers)
+  {
+    _cherryPickLiquidTransfers = cherryPickLiquidTransfers;
   }
 
 }

@@ -63,7 +63,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   /**
    * Constructs an initialized <code>CherryPickRequest</code> object.
    * 
-   * @param screen the screen // *
+   * @param screen the screen
    * @param requestedBy the user that made the requet
    * @param dateRequested the date created
    * @throws DuplicateEntityException

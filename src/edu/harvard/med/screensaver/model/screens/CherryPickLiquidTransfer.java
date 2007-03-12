@@ -126,7 +126,7 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
   public void addPlatedCherryPicksForPlate(String cherryPickDestinationPlateName)
   {
     for (CherryPick cherryPick : _cherryPickRequest.getCherryPicksForDestinationPlate(cherryPickDestinationPlateName)) {
-      cherryPick.setCherryPickLiquidTransfer(this);
+      cherryPick.addCherryPickLiquidTransfer(this);
     }
   }
 
@@ -164,15 +164,17 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
   
   /**
    * @hibernate.set
+   *   table="cherry_pick_liquid_transfer_cherry_pick_link"
    *   cascade="save-update"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="cherry_pick_liquid_transfer_id"
-   * @hibernate.collection-one-to-many
+   * @hibernate.collection-many-to-many
    *   class="edu.harvard.med.screensaver.model.screens.CherryPick"
+   *   column="cherry_pick_id"
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
-  @ToManyRelationship
+  @ToManyRelationship(inverseProperty="cherryPickLiquidTransfers")
   private Set<CherryPick> getHbnPlatedCherryPicks()
   {
     return _platedCherryPicks;
