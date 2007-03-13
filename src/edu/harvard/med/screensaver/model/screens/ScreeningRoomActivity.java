@@ -290,7 +290,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
      *
      * @return the date the activity was performed
      */
-    public Date getDate()
+    public Date getDateOfActivity()
     {
       return _dateOfActivity;
     }
@@ -305,7 +305,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
       return
         this.getScreen().equals(that.getScreen()) &&
         this.getPerformedBy().equals(that.getPerformedBy()) &&
-        this.getDate().equals(that.getDate());
+        this.getDateOfActivity().equals(that.getDateOfActivity());
     }
 
     @Override
@@ -314,13 +314,13 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
       return
         this.getScreen().hashCode() +
         this.getPerformedBy().hashCode() +
-        this.getDate().hashCode();
+        this.getDateOfActivity().hashCode();
     }
 
     @Override
     public String toString()
     {
-      return getScreen() + ":" + getPerformedBy() + ":" + getDate();
+      return getScreen() + ":" + getPerformedBy() + ":" + getDateOfActivity();
     }
   }
 
