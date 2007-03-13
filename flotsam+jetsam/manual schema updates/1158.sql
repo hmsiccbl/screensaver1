@@ -1,0 +1,1 @@
+ALTER TABLE screening RENAME COLUMN screening_room_activity_user_id TO screening_room_activity_id;

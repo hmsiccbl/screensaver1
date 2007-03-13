@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * 
  * @hibernate.joined-subclass table="screening" lazy="false"
- * @hibernate.joined-subclass-key column="screening_room_activity_user_id"
+ * @hibernate.joined-subclass-key column="screening_room_activity_id"
  */
 public abstract class Screening extends ScreeningRoomActivity
 {
