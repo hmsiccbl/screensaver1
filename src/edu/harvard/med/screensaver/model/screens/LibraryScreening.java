@@ -46,6 +46,7 @@ public class LibraryScreening extends Screening
 
   private Set<PlatesUsed> _platesUsed = new HashSet<PlatesUsed>();
   private String _abaseTestsetId;
+  private boolean _isSpecial;
 
 
   // public constructor
@@ -114,6 +115,25 @@ public class LibraryScreening extends Screening
   public void setAbaseTestsetId(String abaseTestsetId)
   {
     _abaseTestsetId = abaseTestsetId;
+  }
+
+  /**
+   * Get the is special boolean flag.
+   * @return the is special boolean flag
+   * @hibernate.property not-null="true"
+   */
+  public boolean getIsSpecial()
+  {
+    return _isSpecial;
+  }
+
+  /**
+   * Set the is special boolean flag.
+   * @param isSpecial the new value for the is special boolean flag
+   */
+  public void setIsSpecial(boolean isSpecial)
+  {
+    _isSpecial = isSpecial;
   }
 
   
