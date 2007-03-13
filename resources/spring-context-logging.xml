@@ -7,11 +7,25 @@
   <bean
     name="logConfigurer"
     class="edu.harvard.med.screensaver.LogConfigurer">
-    <constructor-arg value="classpath:log4j.properties" />
+    <constructor-arg value="classpath:${log4j.properties.resource}" />
     <constructor-arg value="60000" />
     <constructor-arg>
       <null />
     </constructor-arg>
+  </bean>
+
+  <!-- WARNING: Another PropertyPlaceholderConfigurer with bean name
+       "dataSourceConfigurer" exists in spring context resource
+       "spring-context-persistence.xml". Both configurers have the same location property value,
+       "classpath:screensaver.properties". If you change this location property value in one of the
+       two configurers, you may get unexpected results, as it may pick up the values from the
+       other configurer.
+   -->
+  <bean
+    id="logConfigurerPropertiesPlaceholder"
+    class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+  >
+    <property name="location" value="classpath:screensaver.properties"/>
   </bean>
 
 </beans>

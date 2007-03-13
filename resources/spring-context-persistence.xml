@@ -18,6 +18,13 @@
     <property name="minIdle" value="0"/>
   </bean>
   
+  <!-- WARNING: Another PropertyPlaceholderConfigurer with bean name
+       "logConfigurerPropertiesPlaceholder" exists in spring context resource
+       "spring-context-logging.xml". Both configurers have the same location property value,
+       "classpath:screensaver.properties". If you change this location property value in one of the
+       two configurers, you may get unexpected results, as it may pick up the values from the
+       other configurer.
+   -->
   <bean
     id="dataSourceConfigurer"
     class="edu.harvard.med.screensaver.db.OrchestraPropertyPlaceholderConfigurer"

@@ -524,12 +524,6 @@
       <fileset refid="deploy.lib.fileset"/>
     </copy>
 
-    <!-- ${log4j.properties.file} is defined in resources/screensaver.properties -->
-    <copy
-      file="${log4j.properties.file}"
-      tofile="${classes.dir}/log4j.properties"
-      verbose="${verbose}"/>
-
     <copy
       file="${screensaver.properties.file}"
       tofile="${classes.dir}/screensaver.properties"
@@ -543,7 +537,6 @@
       <fileset dir="resources">
         <include name="**/*"/>
         <exclude name="README.txt"/>
-        <exclude name="log4j*properties*"/>
         <exclude name="screensaver*properties*"/>
       </fileset>
     </copy>

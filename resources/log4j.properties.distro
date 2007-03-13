@@ -22,3 +22,8 @@ log4j.rootLogger=info, file, stdout
 ### Screensaver application
 
 log4j.logger.edu.harvard.med.screensaver=info
+
+
+### User Activity logger
+
+log4j.logger.userActivity=info

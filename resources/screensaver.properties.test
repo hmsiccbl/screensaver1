@@ -4,7 +4,7 @@
 
 ### build-time properties
 
-log4j.properties.file=resources/log4j.properties.debug
+log4j.properties.resource=log4j.properties.debug
 # uncomment/comment the following line to copy/not copy downloads:
 #copy.downloads.dir=true
 

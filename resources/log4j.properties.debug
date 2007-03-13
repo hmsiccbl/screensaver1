@@ -24,7 +24,7 @@ log4j.rootLogger=info, file
 
 ### User Activity logger
 
-log4j.logger.userActivity=info, userActivityLog
+log4j.logger.userActivity=info
 
 ### Screensaver application
 

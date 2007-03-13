@@ -6,7 +6,7 @@
 
 appserver.dir=/www/screensaver1.med.harvard.edu/tomcat/
 deploy.dir=/www/screensaver1.med.harvard.edu/docroot/screensaver/
-log4j.properties.file=resources/log4j.properties.orchestra.prod
+log4j.properties.resource=log4j.properties.orchestra.prod
 
 # uncomment/comment the following line to copy/not copy downloads:
 copy.downloads.dir=true
