@@ -120,11 +120,12 @@ log4j.logger.org.hibernate.impl.SessionImpl=warn
 
 
 ### log JDBC bind parameters ###
-log4j.logger.org.hibernate.type=warn
-#log4j.logger.org.hibernate.type=debug
+### WARNING: this setting does not work with our current configuration, where spring dynamically
+### reconfigures the logging
+#log4j.logger.org.hibernate.type=trace
 
 ### log schema export/update ###
-log4j.logger.org.hibernate.tool.hbm2ddl=debug
+#log4j.logger.org.hibernate.tool.hbm2ddl=debug
 
 # log HQL parse trees
 #log4j.logger.org.hibernate.hql=debug
