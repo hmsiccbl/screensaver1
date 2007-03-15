@@ -11,7 +11,9 @@ package edu.harvard.med.screensaver.ui.screens;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,7 @@ import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
 import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
@@ -36,6 +39,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
+import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -51,6 +55,13 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private static final String[] ASSAY_PLATES_TABLE_COLUMNS = { "Assay Plate Name", "Liquid Transfers" };
   private static final String[] PLATE_MAPPING_TABLE_COLUMNS = { "Source Plate", "Source Copy", "Source Well", "Assay Plate Name", "Destination Well" };
   private static final String[] LIQUID_TRANSFER_TABLE_COLUMNS = { "Date", "By", "Assay Plates" };
+
+  private static final Collection<Integer> COLUMNS_LIST = new ArrayList<Integer>();
+  static {
+    for (int i = Well.MIN_WELL_COLUMN; i <= Well.MAX_WELL_COLUMN; i++) {
+      COLUMNS_LIST.add(i);
+    }
+  }
 
 
   // static members
@@ -70,6 +81,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private Map<String,Boolean> _assayPlateSelectionMap = new HashMap<String,Boolean>();
   private UISelectOneEntityBean<ScreeningRoomUser> _requestedBy;
   private UISelectOneBean<PlateType> _assayPlateType;
+  private UISelectManyBean<Integer> _emptyColumnsOnAssayPlate;
 
   private DataModel _cherryPicksColumnModel;
   private DataModel _cherryPicksDataModel;
@@ -124,6 +136,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     };
 
     _assayPlateType = new UISelectOneBean<PlateType>(Arrays.asList(PlateType.values()));
+    _emptyColumnsOnAssayPlate = new UISelectManyBean<Integer>(COLUMNS_LIST, _cherryPickRequest.getEmptyColumnsOnAssayPlate());
     
     _cherryPicksColumnModel = new ArrayDataModel(CHERRY_PICKS_TABLE_COLUMNS);
     _assayPlatesColumnModel = new ArrayDataModel(ASSAY_PLATES_TABLE_COLUMNS);
@@ -160,9 +173,14 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return _requestedBy;
   }
 
-  public void setRequestedBy(UISelectOneEntityBean<ScreeningRoomUser> requestedBy)
+  public UISelectManyBean<Integer> getEmptyColumnsOnAssayPlate()
   {
-    _requestedBy = requestedBy;
+    return _emptyColumnsOnAssayPlate;
+  }
+
+  public String getEmptyColumnsOnAssayPlateAsString()
+  {
+    return StringUtils.makeListString(new TreeSet<Integer>(_cherryPickRequest.getEmptyColumnsOnAssayPlate()), ", ");
   }
 
   public UISelectOneBean<PlateType> getAssayPlateType()
@@ -379,6 +397,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       public void runTransaction() 
       {
         _cherryPickRequest.setRequestedBy(_requestedBy.getSelection());
+        _cherryPickRequest.setEmptyColumnsOnAssayPlate(new HashSet<Integer>(_emptyColumnsOnAssayPlate.getSelections()));
       }
     });
   }

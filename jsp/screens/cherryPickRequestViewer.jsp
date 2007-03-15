@@ -139,6 +139,21 @@ TODO:
 				value="#{cherryPickRequestViewer.cherryPickRequest.randomizedAssayPlateLayout}"
 				displayValueOnly="#{!cherryPickRequestViewer.editMode}"
 				styleClass="command" displayValueOnlyStyleClass="dataText" />
+
+			<t:outputText
+				value="Empty&nbsp;columns&nbsp;on&nbsp;assay&nbsp;plate"
+				escape="false" />
+			<t:outputText
+				value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlateAsString}"
+				rendered="#{!cherryPickRequestViewer.editMode}" styleClass="dataText"/>
+			<t:selectManyListbox
+				value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlate.value}"
+				size="24" rendered="#{cherryPickRequestViewer.editMode}"
+				styleClass="input">
+				<f:selectItems
+					value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlate.selectItems}" />
+			</t:selectManyListbox>
+
 		</t:panelGrid>
 
 		<t:div styleClass="sectionHeader">
@@ -197,7 +212,6 @@ TODO:
 		<t:div styleClass="sectionHeader">
 			<t:outputText value="Assay Plates" styleClass="sectionHeader" />
 		</t:div>
-
 
 		<t:panelGroup id="assayPlatesCommandPanel"
 			rendered="#{cherryPickRequestViewer.editable}">
