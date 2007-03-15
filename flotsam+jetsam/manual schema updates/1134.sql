@@ -53,7 +53,8 @@ alter table copy add column usage_type text;
 
 alter table equipment_used drop column visit_id;
 
-alter table equipment_used add column screening_room_activity_id int4 not null;
+alter table equipment_used add column screening_room_activity_id int4;
+alter table equipment_used alter column screening_room_activity_id set not null;
 
 create table legacy_screening_room_activity (
     screening_room_activity_user_id int4 not null,
@@ -70,7 +71,8 @@ create table library_screening (
 
 alter table plates_used drop column visit_id;
 
-alter table plates_used add column library_screening_id int4 not null;
+alter table plates_used add column library_screening_id int4;
+alter table plates_used alter column library_screening_id set not null;
 
 create table rnai_cherry_pick_request (
     cherry_pick_request_id int4 not null,

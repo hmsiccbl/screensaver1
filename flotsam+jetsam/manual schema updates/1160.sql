@@ -4,8 +4,10 @@ alter table cherry_pick rename column destination_plate_name TO assay_plate_name
 alter table cherry_pick add column assay_plate_row int4;
 alter table cherry_pick add column assay_plate_column int4;
 
-alter table cherry_pick_request add column randomized_assay_plate_layout bool not null;
-alter table cherry_pick_request add column ordinal int4 not null;
+alter table cherry_pick_request add column randomized_assay_plate_layout bool;
+alter table cherry_pick_request alter column randomized_assay_plate_layout set not null;
+alter table cherry_pick_request add column ordinal int4;
+alter table cherry_pick_request alter column ordinal set not null;
 
 create table cherry_pick_request_empty_columns (
     cherry_pick_request_id int4 not null,
