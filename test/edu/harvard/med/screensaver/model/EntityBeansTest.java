@@ -739,7 +739,7 @@ public class EntityBeansTest extends EntityBeansExercizor
                          result.iterator().next());
             }
             else {
-              assertSame("related getter, " + relatedProperty.getFullName() + ", returns this after this.setter(related) for " +
+              assertSame("related getter, " + relatedProperty.getFullName() + ", returns this after this.add(related) for " +
                          propFullName,
                          bean,
                          relatedProperty.invokeGetter(relatedBean));

@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
@@ -61,7 +62,7 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
     
     super(cherryPickRequest.getScreen(), performedBy, dateCreated, dateOfActivity);
     _cherryPickRequest = cherryPickRequest;
-    _cherryPickRequest.setCherryPickLiquidTransfer(this);
+    _cherryPickRequest.getCherryPickLiquidTransfers().add(this);
   }
 
   @Override
@@ -84,7 +85,7 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
    *   cascade="save-update"
    * @motivation for hibernate
    */
-  @ToOneRelationship(nullable=false, inverseProperty="cherryPickLiquidTransfer")
+  @ToOneRelationship(nullable=false)
   public CherryPickRequest getCherryPickRequest()
   {
     return _cherryPickRequest;
@@ -99,7 +100,7 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
    */
   public void addPlatedCherryPicksForPlate(String cherryPickDestinationPlateName)
   {
-    for (CherryPick cherryPick : _cherryPickRequest.getCherryPicksForDestinationPlate(cherryPickDestinationPlateName)) {
+    for (CherryPick cherryPick : _cherryPickRequest.getCherryPicksForAssayPlate(cherryPickDestinationPlateName)) {
       cherryPick.addCherryPickLiquidTransfer(this);
     }
   }
@@ -117,6 +118,19 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
       addPlatedCherryPicksForPlate(cherryPickDestinationPlateName);
     }
   }
+  
+  @DerivedEntityProperty
+  public Set<String> getAssayPlates() 
+  {
+    Set<String> assayPlates = new HashSet<String>();
+    for (CherryPick platedCherryPick : _platedCherryPicks) {
+      if (platedCherryPick.getCherryPickLiquidTransfers().contains(this)) {
+        assayPlates.add(platedCherryPick.getAssayPlateName());
+      }
+    }
+    return assayPlates;
+  }
+
 
   
   // private methods

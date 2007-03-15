@@ -264,7 +264,6 @@ public class ScreenViewer extends AbstractBackingBean
     return _collaborators;
   }
   
-
   public UISelectOneBean<ScreeningRoomUser> getLeadScreener()
   {
     if (_leadScreener == null) {
@@ -312,7 +311,7 @@ public class ScreenViewer extends AbstractBackingBean
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  public String setEditMode()
+  public String editScreen()
   {
     _isEditMode = true;
     return _screensController.editScreen(_screen);
@@ -353,7 +352,7 @@ public class ScreenViewer extends AbstractBackingBean
   // TODO: save & go to cherry pick request viewer
   public String addCherryPickRequestItem()
   {
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.createCherryPickRequest(_screen);
   }
   
   // TODO: save & go to screening room activity viewer
@@ -374,8 +373,7 @@ public class ScreenViewer extends AbstractBackingBean
   
   public String viewCherryPickRequest()
   {
-    // TODO: implement
-    return VIEW_SCREENING_ROOM_ACTIVITY_ACTION_RESULT;  
+    return _screensController.viewCherryPickRequest((CherryPickRequest) getRequestMap().get("cherryPickRequestItem"));
   }  
   
   public String viewScreeningRoomActivity()

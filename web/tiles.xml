@@ -267,6 +267,17 @@
       value="/screens/screenresults/admin/screenResultImporter.jsp" />
   </definition>
 
+  <definition
+    name="/screens/cherryPickRequestViewer.tiles"
+    extends=".base">
+    <put
+      name="pageTitle"
+      value="Cherry Pick Request Viewer"/>
+    <put
+      name="body"
+      value="/screens/cherryPickRequestViewer.jsp" />
+  </definition>
+  
   
   <!-- dev tiles -->
 

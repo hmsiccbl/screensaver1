@@ -37,6 +37,7 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   USERS_ADMIN("usersAdmin", "Administrators that can create and modify user accounts."),
   SCREENS_ADMIN("screensAdmin", "Administrators that can create and modify screens."),
   SCREEN_RESULTS_ADMIN("screenResultsAdmin", "Administrators that can create and modify screen results."),
+  CHERRY_PICK_ADMIN("cherryPickAdmin", "Administrators that can create and modify cherry pick requests, including the generation of cherry pick plate mapping files, and the recording of cherry pick liquid transfers."),
   BILLING_ADMIN("billingAdmin", "Administrators that can view, create, and modify billing information for a screen."),
   SCREENING_ROOM_USER("screeningRoomUser", "Users that have permission to view and search over non-administrative information for certain data records."),
   COMPOUND_SCREENING_ROOM_USER("compoundScreeningRoomUser", "Users that have permission to view and search over non-administrative information for all compound screens and any compound screen results which are demarked \'shareable\'."),

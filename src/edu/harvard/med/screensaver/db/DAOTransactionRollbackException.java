@@ -30,6 +30,11 @@ public class DAOTransactionRollbackException extends NestedRuntimeException
     super(msg, null);
   }
 
+  public DAOTransactionRollbackException(Throwable ex)
+  {
+    super(null, ex);
+  }
+
   public DAOTransactionRollbackException(String msg, Throwable ex)
   {
     super(msg, ex);

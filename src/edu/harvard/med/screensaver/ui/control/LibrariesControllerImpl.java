@@ -9,21 +9,19 @@
 
 package edu.harvard.med.screensaver.ui.control;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
+import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
+import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
 import edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser;
 import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
@@ -50,7 +48,7 @@ import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
-import edu.harvard.med.screensaver.util.StringUtils;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -70,22 +68,8 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   // private static final fields
   
   private static final Logger log = Logger.getLogger(LibrariesController.class);
+
   
-  // TODO: consider moving these to WellKey
-  private static final Pattern _plateWellHeaderLinePattern = Pattern.compile(
-    "^\\s*plate\\s+well\\s*$",
-    Pattern.CASE_INSENSITIVE);
-  private static final Pattern _plateWellPattern = Pattern.compile(
-    "^\\s*((PL[-_]?)?(\\d+))[A-P]([0-9]|[01][0-9]|2[0-4]).*",
-    Pattern.CASE_INSENSITIVE);
-  private static final Pattern _plateNumberPattern = Pattern.compile(
-    "^\\s*(PL[-_]?)?(\\d+)\\s*$",
-    Pattern.CASE_INSENSITIVE);
-  private static final Pattern _wellNamePattern = Pattern.compile(
-    "^\\s*([A-P]([0-9]|[01][0-9]|2[0-4]))\\s*$",
-    Pattern.CASE_INSENSITIVE);
-
-
   // instance variables
   
   private DAO _dao;
@@ -100,7 +84,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   private SDFileCompoundLibraryContentsParser _compoundLibraryContentsParser;
   private RNAiLibraryContentsImporter _rnaiLibraryContentsImporter;
   private RNAiLibraryContentsParser _rnaiLibraryContentsParser;
-  
+  private PlateWellListParser _plateWellListParser;
   
   // public getters and setters
   
@@ -230,6 +214,16 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
 
   // controller methods
   
+  public PlateWellListParser getPlateWellListParser()
+  {
+    return _plateWellListParser;
+  }
+
+  public void setPlateWellListParser(PlateWellListParser plateWellLristParser)
+  {
+    _plateWellListParser = plateWellLristParser;
+  }
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.LibrariesController#findWells()
    */
@@ -247,9 +241,10 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   public String findWell(String plateNumber, String wellName)
   {
     logUserActivity("findWell " + plateNumber + ":" + wellName);
-    Well well = lookupWell(plateNumber, wellName);
+    Well well = _plateWellListParser.lookupWell(plateNumber, wellName);
     if (well == null) {
-      return "findWells";
+      showMessage("libraries.noSuchWell", "searchResults");
+      return REDISPLAY_PAGE_ACTION_RESULT;
     }
     return viewWell(well, null);
   }
@@ -261,13 +256,29 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   public String findWells(String plateWellList)
   {
     logUserActivity("findWells");
-    List<Well> wells = lookupWellsFromPlateWellList(plateWellList);
-    if (wells.size() == 1) {
-      return viewWell(wells.get(0), null);
+    PlateWellListParserResult result = _plateWellListParser.lookupWellsFromPlateWellList(plateWellList);
+    if (result.getFatalErrors().size() > 0) {
+      showMessage("libraries.unexpectedErrorReadingPlateWellList", "searchResults");
+      return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    WellSearchResults searchResults =
-      new edu.harvard.med.screensaver.ui.searchresults.WellSearchResults(wells, this);
-    return viewWellSearchResults(searchResults);
+    
+    // display errors before proceeding with successfully parsed wells
+    for (Pair<Integer,String> error : result.getSyntaxErrors()) {
+      showMessage("libraries.plateWellListParseError", error.getSecond());
+    }
+    for (WellKey wellKey : result.getWellsNotFound()) {
+      showMessage("libraries.noSuchWell", wellKey.getPlateNumber(), wellKey.getWellName());
+    }
+    
+    if (result.getWells().size() == 1) {
+      return viewWell(result.getWells().first(), null);
+    }
+    else {
+      WellSearchResults searchResults =
+        new WellSearchResults(new ArrayList<Well>(result.getWells()),
+                              this);
+      return viewWellSearchResults(searchResults);
+    }
   }
   
   /* (non-Javadoc)
@@ -694,165 +705,4 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   
   // private instance methods
     
-  /**
-   * Parse and return the well for the plate number and well name.
-   * Helper method for {@link #findWell(Integer, String)}.
-   * @param plateNumberString the unparsed plate number
-   * @param wellName the unparsed well name
-   * @return the well
-   */
-  private Well lookupWell(String plateNumberString, String wellName)
-  {
-    Integer plateNumber = parsePlateNumber(plateNumberString);
-    wellName = parseWellName(wellName);
-    if (plateNumber == null || wellName == null) {
-      return null;
-    }
-    return lookupWell(plateNumber, wellName);
-  }
-
-  /**
-   * Parse and return the list of wells from the plate-well list.
-   * Helper method for {@link #findWells(String)}.
-   * @param plateWellList the plate-well list
-   * @return the list of wells
-   */
-  private List<Well> lookupWellsFromPlateWellList(final String plateWellList)
-  {
-    final List<Well> wells = new ArrayList<Well>();
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        BufferedReader plateWellListReader = new BufferedReader(new StringReader(plateWellList));
-        try {
-          for (
-            String line = plateWellListReader.readLine();
-            line != null;
-            line = plateWellListReader.readLine()) {
-
-            // skip lines that say "Plate Well"
-            Matcher matcher = _plateWellHeaderLinePattern.matcher(line);
-            if (matcher.matches()) {
-              continue;
-            }
-
-            // separate initial plate and well with a space if necessary
-            line = splitInitialPlateWell(line);
-
-            // split the line into tokens; should be one plate, then one or more wells
-            String [] tokens = line.split("[\\s;,]+");
-            if (tokens.length == 0) {
-              continue;
-            }
-
-            Integer plateNumber = parsePlateNumber(tokens[0]);
-            for (int i = 1; i < tokens.length; i ++) {
-              String wellName = parseWellName(tokens[i]);
-              if (plateNumber == null || wellName == null) {
-                continue;
-              }
-              Well well = lookupWell(plateNumber, wellName);
-              if (well != null) {
-                wells.add(well);
-              }
-            }
-          }
-        }
-        catch (IOException e) {
-          showMessage("libraries.unexpectedErrorReadingPlateWellList", "searchResults");
-        }
-      }
-    });
-    return wells;
-  }
-  
-  /**
-   * Lookup the well from the dao by plate number and well name.
-   * Helper method for {@link #lookupWell(String, String)} and {@link
-   * #lookupWellsFromPlateWellList(String)}.
-   * @param plateNumber the parsed plate number
-   * @param wellName the parse well name
-   * @return
-   */
-  private Well lookupWell(final Integer plateNumber, final String wellName) {
-    final Well[] result = new Well[1];
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        Well well = _dao.findWell(new WellKey(plateNumber, wellName)); 
-        if (well == null) {
-          showMessage("libraries.noSuchWell", "searchResults", plateNumber.toString(), wellName);
-        }
-        else {
-          // force initialization of persistent collections needed by search result viewer
-          well.getGenes().size();
-          well.getCompounds().size();
-        }
-        result[0] = well;
-      }
-    });
-    return result[0];
-  }
-  
-  /**
-   * Insert a space between the first plate number and well name if there is no
-   * space there already.
-   * @param line the line to patch up
-   * @return the patched up line
-   */
-  private String splitInitialPlateWell(String line)
-  {
-    Matcher matcher = _plateWellPattern.matcher(line);
-    if (matcher.matches()) {
-      int spliceIndex = matcher.group(1).length();
-      line = line.substring(0, spliceIndex) + " " + line.substring(spliceIndex);
-    }
-    return line;
-  }
-  
-  /**
-   * Parse the plate number.
-   * Helper method for {@link #lookupWell(String, String)} and {@link
-   * #lookupWellsFromPlateWellList(String)}.
-   */
-  private Integer parsePlateNumber(String plateNumber)
-  {
-    Matcher matcher = _plateNumberPattern.matcher(plateNumber);
-    if (matcher.matches()) {
-      plateNumber = matcher.group(2);
-      try {
-        return Integer.parseInt(plateNumber);
-      }
-      catch (NumberFormatException e) {
-        // this seems unlikely given the _plateNumberPattern match, but it's actually possible
-        // to match that pattern and still get a NFE, if the number is larger than MAXINT
-      }
-    }
-    showMessage("libraries.invalidPlateNumber", plateNumber.toString());
-    return null;
-  }
-  
-  /**
-   * Parse the well name.
-   * Helper method for {@link #lookupWell(String, String)} and {@link
-   * #lookupWellsFromPlateWellList(String)}.
-   */
-  private String parseWellName(String wellName)
-  {
-    Matcher matcher = _wellNamePattern.matcher(wellName);
-    if (matcher.matches()) {
-      wellName = matcher.group(1);
-      if (wellName.length() == 2) {
-        wellName = wellName.charAt(0) + "0" + wellName.charAt(1);
-      }
-      wellName = StringUtils.capitalize(wellName);
-      return wellName;
-    }
-    else {
-      showMessage("libraries.invalidWellName", wellName);
-      return null;
-    }
-  }
 }

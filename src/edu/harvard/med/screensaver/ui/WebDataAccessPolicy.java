@@ -137,8 +137,7 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
    */
   public boolean visit(CherryPickRequest entity)
   {
-    // TODO Auto-generated method stub
-    return false;
+    return true;
   }
   
   /* (non-Javadoc)

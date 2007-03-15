@@ -166,6 +166,9 @@
     <property
       name="rnaiLibraryContentsParser"
       ref="rnaiLibraryContentsParser" />
+    <property
+      name="plateWellListParser"
+      ref="plateWellListParser" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -290,6 +293,9 @@
       name="screenResultViewer"
       ref="screenResultViewer" />
     <property
+      name="cherryPickRequestViewer"
+      ref="cherryPickRequestViewer" />
+    <property
       name="screenFinder"
       ref="screenFinder" />
     <property
@@ -350,6 +356,18 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter">
     <description>Screen Result Importer</description>
+  </bean>
+
+  <bean
+    id="cherryPickRequestViewer"
+    parent="screensUiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer">
+    <description>Cherry Pick Request Viewer</description>
+    <property
+      name="plateWellListParser"
+      ref="plateWellListParser" />
+    <aop:scoped-proxy/>
   </bean>
 
   <bean

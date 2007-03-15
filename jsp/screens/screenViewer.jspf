@@ -25,7 +25,7 @@ TODO:
 			action="#{screenViewer.toggleAdminViewMode}" styleClass="command" />
 		<h:commandButton id="editCommand" value="Edit"
 			rendered="#{screenViewer.editable && !screenViewer.editMode}"
-			action="#{screenViewer.setEditMode}" styleClass="command" />
+			action="#{screenViewer.editScreen}" styleClass="command" />
 		<t:commandButton id="saveCommand" value="Save"
 			action="#{screenViewer.saveScreen}" styleClass="command"
 			rendered="#{screenViewer.editMode}" />
@@ -223,26 +223,66 @@ TODO:
 						styleClass="dataText" />
 				</t:column>
 				<t:column>
-					<t:commandButton id="viewVisit" action="#{screenViewer.viewVisit}"
+					<t:commandButton id="viewActivity" action="#{screenViewer.viewScreeningRoomActivity}"
 						value="#{screenViewer.editMode ? \"View/Edit...\" : \"View...\"}"
 						styleClass="command" />
-					<t:commandButton id="copyVisit" action="#{screenViewer.copyVisit}"
+					<%-- t:commandButton id="copyScreeningRoomActivity" action="#{screenViewer.copyScreeningRoomActivity}"
 						rendered="#{screenViewer.editMode}" value="#{\"Copy...\"}"
-						styleClass="command" title="Copy to another screen" />
+						styleClass="command" title="Copy to another screen" --%>
 				</t:column>
 			</t:dataTable>
 			<t:panelGroup>
 				<t:commandButton value="Add Screening Room Activity..."
 					action="#{screenViewer.addScreeningRoomActivityItem}"
-					styleClass="command" rendered="#{screenViewer.editMode}"
-					disabled="true" />
+					styleClass="command" rendered="#{screenViewer.editMode}"/>
+			</t:panelGroup>
+		</t:panelGrid>
+		
+		<t:outputLabel for="cherryPickRequests" value="Cherry Pick Requests" />
+		<t:panelGrid columns="1">
+			<t:outputText value="<none>" styleClass="dataText"
+				rendered="#{empty screenViewer.screen.cherryPickRequests}" />
+			<t:dataTable id="cherryPickRequestItems" var="cherryPickRequestItem"
+				value="#{screenViewer.cherryPickRequestsDataModel}"
+				preserveDataModel="false"
+				rendered="#{!empty screenViewer.screen.cherryPickRequests}"
+				styleClass="standardTable" rowClasses="row1,row2"
+				columnClasses="column" headerClass="tableHeader">
+				<t:column>
+					<f:facet name="header">
+						<t:outputText value="Date Requested" />
+					</f:facet>
+					<t:outputText id="dateRequested"
+						value="#{cherryPickRequestItem.dateRequested}"
+						styleClass="dataText" />
+				</t:column>
+				<t:column>
+					<f:facet name="header">
+						<t:outputText value="Requested By" />
+					</f:facet>
+					<t:outputText id="requestedBy"
+						value="#{cherryPickRequestItem.requestedBy.fullNameLastFirst}"
+						styleClass="dataText" />
+				</t:column>
+				<t:column>
+					<t:commandButton id="viewCherryPickRequest"
+						action="#{screenViewer.viewCherryPickRequest}"
+						value="#{screenViewer.editMode ? \"View/Edit...\" : \"View...\"}"
+						styleClass="command" />
+					<t:commandButton id="duplicateCherryPickRequest"
+						action="#{screenViewer.duplicateCherryPickRequest}"
+						rendered="#{screenViewer.editMode}" value="#{\"Duplicate...\"}"
+						styleClass="command" title="Duplicate" />
+				</t:column>
+			</t:dataTable>
+			<t:panelGroup>
 				<t:commandButton value="Add Cherry Pick Request..."
 					action="#{screenViewer.addCherryPickRequestItem}"
 					styleClass="command" rendered="#{screenViewer.editMode}"
-					disabled="true" />
+					/>
 			</t:panelGroup>
 		</t:panelGrid>
-
+		
 		<t:outputLabel for="statusItems" value="Status Items" />
 		<t:panelGrid columns="1">
 			<t:outputText value="<none>" styleClass="dataText"

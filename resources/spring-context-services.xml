@@ -74,4 +74,11 @@
     <constructor-arg ref="hibernateTemplate"/>
   </bean>
   
+  <bean
+    id="plateWellListParser"
+    class="edu.harvard.med.screensaver.io.libraries.PlateWellListParser"
+    scope="singleton">
+    <constructor-arg ref="dao"/>
+  </bean>
+  
 </beans>

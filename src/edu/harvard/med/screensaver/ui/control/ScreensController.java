@@ -9,10 +9,14 @@
 
 package edu.harvard.med.screensaver.ui.control;
 
+import java.util.Set;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
 import edu.harvard.med.screensaver.model.screens.Publication;
@@ -109,5 +113,20 @@ public interface ScreensController
 
   @UIControllerMethod
   public String downloadScreenResult(final ScreenResult screenResultIn);
+
+  @UIControllerMethod
+  public String createCherryPickRequest(Screen screen);
+
+  @UIControllerMethod
+  public String editCherryPickRequest(CherryPickRequest cherryPickRequest);
+
+  @UIControllerMethod
+  public String saveCherryPickRequest(CherryPickRequest cherryPickRequest, DAOTransaction transaction);
+
+  @UIControllerMethod
+  public String viewCherryPickRequest(CherryPickRequest cherryPickRequestIn);
+
+  @UIControllerMethod
+  public String addCherryPicksForWells(CherryPickRequest cherryPickRequest, Set<Well> cherryPicks);
 
 }

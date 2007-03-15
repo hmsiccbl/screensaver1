@@ -907,6 +907,25 @@ public class Screen extends AbstractEntity
   }
   
  
+  /**
+   * A factory method for creating an appropriately typed cherry pick request
+   * for this screen.
+   * 
+   * @return
+   */
+  public CherryPickRequest createCherryPickRequest()
+  {
+    if (getScreenType().equals(ScreenType.RNAI)) {
+      return new RNAiCherryPickRequest(this, getLeadScreener(), new Date());
+    }
+    else if(getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+      return new CompoundCherryPickRequest(this, getLeadScreener(), new Date());
+    }
+    log.error("screen of type " + getScreenType() + " does not support cherry pick requests");
+    return null;
+  }
+
+  
   // protected methods
 
   /**
@@ -1201,5 +1220,4 @@ public class Screen extends AbstractEntity
   {
     _screenNumber = screenNumber;
   }
-
 }

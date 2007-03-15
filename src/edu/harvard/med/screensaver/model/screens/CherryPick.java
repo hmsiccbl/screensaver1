@@ -52,12 +52,12 @@ public class CherryPick extends AbstractEntity
   private Well _sourceWell;
   private Copy _sourceCopy;
   
-  // Note: dest plate type must the same for all cherry picks from the same *library*; we shall enforce at the business tier, rather than the schema-level (this design is denormalized)
-  private PlateType _destinationPlateType;   
+  // Note: assay plate type must the same for all cherry picks from the same *library*; we shall enforce at the business tier, rather than the schema-level (this design is denormalized)
+  private PlateType _assayPlateType;   
   // TODO: perhaps plate name should be an index into a list of plate names maintained by CherryPickRequest (this is a more space-efficient and normalized designed)
-  private String _destinationPlateName;
-  private int _destinationPlateRow;
-  private int _destinationPlateColumn;
+  private String _assayPlateName;
+  private Integer _assayPlateRow;
+  private Integer _assayPlateColumn;
 
   private Set<CherryPickLiquidTransfer> _cherryPickLiquidTransfers = new HashSet<CherryPickLiquidTransfer>();
   
@@ -74,21 +74,17 @@ public class CherryPick extends AbstractEntity
    *
    * @param cherryPickRequest the cherry pick request
    * @param well the well
-   * @param copy the copy
    */
   public CherryPick(CherryPickRequest cherryPickRequest,
-                    Well well,
-                    Copy copy)
+                    Well well)
   {
-    if (cherryPickRequest == null || well == null || copy == null) {
+    if (cherryPickRequest == null || well == null) {
         throw new NullPointerException();
     }
     _cherryPickRequest = cherryPickRequest;
     _sourceWell = well;
-    _sourceCopy = copy;
     _cherryPickRequest.getCherryPicks().add(this);
     _sourceWell.getHbnCherryPicks().add(this);
-    _sourceCopy.getHbnCherryPicks().add(this);
   }
 
   @Override
@@ -145,6 +141,8 @@ public class CherryPick extends AbstractEntity
     return _sourceWell;
   }
 
+  // HACK: annotating as DerivedEntityProperty to prevent unit tests from
+  // expecting a setter method (setAllocated() updates this property's value)
   /**
    * Get the copy.
    *
@@ -152,19 +150,20 @@ public class CherryPick extends AbstractEntity
    * @hibernate.many-to-one
    *   class="edu.harvard.med.screensaver.model.libraries.Copy"
    *   column="copy_id"
-   *   not-null="true"
+   *   not-null="false"
    *   foreign-key="fk_cherry_pick_to_copy"
    *   cascade="save-update"
    * @motivation for hibernate
    */
-  @ToOneRelationship(nullable=false)
+  @ToOneRelationship(nullable=true)
+  @DerivedEntityProperty
   public Copy getSourceCopy()
   {
     return _sourceCopy;
   }
 
   // HACK: This property is marked as derived for unit testing purposes
-  // only! It is in fact a real hibernate relationshp, though it is unique in that it can only be
+  // only! It is in fact a real hibernate relationship, though it is unique in that it can only be
   // modified from the other side (CherryPickLiquidTransfer). Our unit tests do
   // not yet handle this case.
   /**
@@ -176,7 +175,7 @@ public class CherryPick extends AbstractEntity
    * copy source well, and this needs to be recorded by Screensaver.
    * 
    * @return a set of CherryPickLiquidTransfers
-   * @see #setCherryPickLiquidTransfer(CherryPickLiquidTransfer) to set this
+   * @see #addCherryPickLiquidTransfer(CherryPickLiquidTransfer) to set this
    *      cherry pick's relationship to a chery pick liquid transfer
    */
   @DerivedEntityProperty(isPersistent=true)
@@ -186,29 +185,32 @@ public class CherryPick extends AbstractEntity
   }
 
   /**
-   * Marks the cherry pick as has having source plate well volume allocated for
-   * it, and specifies the destination cherry pick assay plate and well that the
-   * liquid volume has been allocated to.
+   * Marks the cherry pick as has having source library plate copy well volume
+   * allocated for it, and specifies the assay plate and well that the liquid
+   * volume has been allocated to
    * 
-   * @param destinationPlateType
-   * @param destinationPlateName
-   * @param destinationPlateRow
-   * @param destinationPlateColumn
+   * @param sourceCopy
+   * @param assayPlateType
+   * @param assayPlateName
+   * @param assayPlateRow
+   * @param assayPlateColumn
    */
-  public void setAllocated(PlateType destinationPlateType,
-                           String destinationPlateName,
-                           int destinationPlateRow,
-                           int destinationPlateColumn)
+  public void setAllocated(Copy sourceCopy,
+                           PlateType assayPlateType,
+                           String assayPlateName,
+                           int assayPlateRow,
+                           int assayPlateColumn)
   {
-    if (destinationPlateType == null ||
-      destinationPlateName == null) {
+    if (assayPlateType == null ||
+      assayPlateName == null) {
       throw new IllegalArgumentException("null argument values not allowed");
     }
-      
-    _destinationPlateType = destinationPlateType;
-    _destinationPlateName = destinationPlateName;
-    _destinationPlateRow = destinationPlateRow;
-    _destinationPlateColumn = destinationPlateColumn;
+    _sourceCopy = sourceCopy;
+    _sourceCopy.getHbnCherryPicks().add(this);
+    _assayPlateType = assayPlateType;
+    _assayPlateName = assayPlateName;
+    _assayPlateRow = assayPlateRow;
+    _assayPlateColumn = assayPlateColumn;
   }
   
   /**
@@ -285,55 +287,62 @@ public class CherryPick extends AbstractEntity
     _notesOnHitConfirmation = notesOnHitConfirmation;
   }
 
-  // HACK: annotating as DerivedEntityProperty to avoid unit tests expecting a
-  // setter method (setAllocated() updates this property's value)
+  // HACK: annotating as DerivedEntityProperty to prevent unit tests from
+  // expecting a setter method (setAllocated() updates this property's value)
   /**
-   * Get the destination plate type
+   * Get the assay plate type
    *
-   * @return the destination plate type
+   * @return the assay plate type
    * @hibernate.property type="edu.harvard.med.screensaver.model.libraries.PlateType$UserType"
    */
   @DerivedEntityProperty
-  public PlateType getDestinationPlateType()
+  public PlateType getAssayPlateType()
   {
-    return _destinationPlateType;
+    return _assayPlateType;
   }
 
-  // HACK: annotating as DerivedEntityProperty to avoid unit tests expecting a
-  // setter method (setAllocated() updates this property's value)
+  // HACK: annotating as DerivedEntityProperty to prevent unit tests from
+  // expecting a setter method (setAllocated() updates this property's value)
   /**
    * The name of the cherry pick assay plate.
-   * @hibernate.property type="text"
+   * 
    * @return
+   * @hibernate.property type="text"
    */
   @DerivedEntityProperty
-  public String getDestinationPlateName()
+  public String getAssayPlateName()
   {
-    return _destinationPlateName;
+    return _assayPlateName;
   }
 
-  // HACK: annotating as DerivedEntityProperty to avoid unit tests expecting a
-  // setter method (setAllocated() updates this property's value)
+  // HACK: annotating as DerivedEntityProperty to prevent unit tests from
+  // expecting a setter method (setAllocated() updates this property's value)
   /**
-   * @hiberate.property type="int"
    * @return
+   * @hibernate.property type="integer"
    */
   @DerivedEntityProperty
-  public int getDestinationPlateRow()
+  public Integer getAssayPlateRow()
   {
-    return _destinationPlateRow;
+    return _assayPlateRow;
   }
   
-  // HACK: annotating as DerivedEntityProperty to avoid unit tests expecting a
-  // setter method (setAllocated() updates this property's value)
+  // HACK: annotating as DerivedEntityProperty to prevent unit tests from
+  // expecting a setter method (setAllocated() updates this property's value)
   /**
-   * @hiberate.property type="int"
    * @return
+   * @hibernate.property type="integer"
    */
   @DerivedEntityProperty
-  public int getDestinationPlateColumn()
+  public Integer getAssayPlateColumn()
   {
-    return _destinationPlateColumn;
+    return _assayPlateColumn;
+  }
+  
+  @DerivedEntityProperty
+  public String getAssayPlateWellName()
+  {
+    return String.format("%d:%s", _assayPlateColumn, _assayPlateRow);
   }
   
   // TODO: unit test this property
@@ -346,7 +355,7 @@ public class CherryPick extends AbstractEntity
   @DerivedEntityProperty
   public boolean isAllocated()
   {
-    return _destinationPlateName != null;
+    return _sourceCopy != null;
   }
 
   /**
@@ -519,24 +528,24 @@ public class CherryPick extends AbstractEntity
     _sourceCopy = copy;
   }
 
-  private void setDestinationPlateType(PlateType destinationPlateType)
+  private void setAssayPlateType(PlateType assayPlateType)
   {
-    _destinationPlateType = destinationPlateType;
+    _assayPlateType = assayPlateType;
   }
 
-  private void setDestinationPlateName(String destinationPlateName)
+  private void setAssayPlateName(String assayPlateName)
   {
-    _destinationPlateName = destinationPlateName;
+    _assayPlateName = assayPlateName;
   }
   
-  private void setDestinationPlateRow(int row)
+  private void setAssayPlateRow(Integer row)
   {
-    _destinationPlateRow = row;
+    _assayPlateRow = row;
   }
   
-  private void setDestinationPlateColumn(int column)
+  private void setAssayPlateColumn(Integer column)
   {
-    _destinationPlateColumn = column;
+    _assayPlateColumn = column;
   }
   
   /**

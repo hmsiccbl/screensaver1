@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
@@ -170,18 +171,23 @@ public class Copy extends AbstractEntity
     _library.getHbnCopies().add(this);
   }
 
+  // HACK: This property is marked as derived for unit testing purposes
+  // only! It is in fact a real hibernate relationship, though it is unique in that it can only be
+  // modified from the other side (via CherryPick.setAllocated()). Our unit tests do
+  // not yet handle this case.
   /**
    * Get an unmodifiable copy of the set of cherry picks.
    *
    * @return the cherry picks
    */
   @ToManyRelationship(inverseProperty="sourceCopy")
+  @DerivedEntityProperty
   public Set<CherryPick> getCherryPicks()
   {
     return Collections.unmodifiableSet(_cherryPicks);
   }
-  
 
+  
   // protected methods
 
   /**

@@ -150,6 +150,11 @@
       <to-view-id>/screens/screenAndResultViewer</to-view-id>
       <redirect/>
     </navigation-case>
+    <navigation-case>
+      <from-outcome>viewCherryPickRequest</from-outcome>
+      <to-view-id>/screens/cherryPickRequestViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
 
     <!-- === screenresults wildcard navigation rules === --> 
     <navigation-case>

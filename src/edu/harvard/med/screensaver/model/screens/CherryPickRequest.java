@@ -12,12 +12,13 @@ package edu.harvard.med.screensaver.model.screens;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
-import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -46,16 +47,16 @@ public abstract class CherryPickRequest extends AbstractEntity
   private Integer _cherryPickRequestId;
   private Integer _version;
   private Screen _screen;
+  private Integer _ordinal; // only needed for business key 
   private ScreeningRoomUser _requestedBy;
   private Date _dateRequested;
   private BigDecimal _microliterTransferVolumePerWellRequested;
   private BigDecimal _microliterTransferVolumePerWellApproved;
-  
-  private boolean _randomize;
-  private Set<Integer> _emptyColumns;
+  private boolean _randomizedAssayPlateLayout;
+  private Set<Integer> _emptyColumnsOnAssayPlate;
   private String _comments;
   private Set<CherryPick> _cherryPicks = new HashSet<CherryPick>();
-  private CherryPickLiquidTransfer _cherryPickLiquidTransfer;
+  private Set<CherryPickLiquidTransfer> _cherryPickLiquidTransfers = new HashSet<CherryPickLiquidTransfer>();
 
 
   // public constructor
@@ -75,8 +76,10 @@ public abstract class CherryPickRequest extends AbstractEntity
     _screen = screen;
     _requestedBy = requestedBy;
     _dateRequested = dateRequested;
+    _ordinal = screen.getCherryPickRequests().size();
     requestedBy.getHbnCherryPickRequests().add(this);
     screen.getCherryPickRequests().add(this);
+    // TODO: guard against race condition; minimally, add database uniqueness constraint for business key fields (screen_id, ordinal)
   }
 
 
@@ -119,27 +122,22 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
-   * Get the cherry pick liquid transfer.
+   * Get the set of cherry pick liquid transfers for this cherry pick request.
    *
-   * @return the cherry pick liquid transfer
-   * @hibernate.one-to-one class="edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer"
-   *                       property-ref="cherryPickRequest"
-   *                       cascade="save-update"
-   * @motivation for hibernate
+   * @return the cherry pick liquid transfers
+   * @hibernate.set
+   *   cascade="save-update"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="cherry_pick_request_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer"
+   * @motivation for hibernate and maintenance of bi-directional relationships
    */
-  @ToOneRelationship(inverseProperty="cherryPickRequest")
-  public CherryPickLiquidTransfer getCherryPickLiquidTransfer()
+  @ToManyRelationship(inverseProperty="cherryPickRequest")
+  public Set<CherryPickLiquidTransfer> getCherryPickLiquidTransfers()
   {
-    return _cherryPickLiquidTransfer;
-  }
-
-  /**
-   * Set the cherry pick liquid transfer.
-   * @param cherryPickLiquidTransfer the new cherry pick liquid transfer
-   */
-  public void setCherryPickLiquidTransfer(CherryPickLiquidTransfer cherryPickLiquidTransfer)
-  {
-    _cherryPickLiquidTransfer = cherryPickLiquidTransfer;
+    return _cherryPickLiquidTransfers;
   }
   
   /**
@@ -192,10 +190,19 @@ public abstract class CherryPickRequest extends AbstractEntity
    * @hibernate.property
    *   not-null="true"
    */
-  @ImmutableProperty
   public Date getDateRequested()
   {
     return _dateRequested;
+  }
+
+  /**
+   * Set the date created.
+   *
+   * @param dateRequested the new date created
+   */
+  public void setDateRequested(Date dateRequested)
+  {
+    _dateRequested = truncateDate(dateRequested);
   }
 
   /**
@@ -243,6 +250,35 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
+   * @return
+   * @hibernate.set table="cherry_pick_request_empty_columns"
+   * @hibernate.collection-key column="cherry_pick_request_id"
+   * @hibernate.collection-element type="integer" not-null="true"
+   */
+  public Set<Integer> getEmptyColumnsOnAssayPlate()
+  {
+    return _emptyColumnsOnAssayPlate;
+  }
+
+  public void setEmptyColumnsOnAssayPlate(Set<Integer> emptyColumnsOnAssayPlate)
+  {
+    _emptyColumnsOnAssayPlate = emptyColumnsOnAssayPlate;
+  }
+
+  /**
+   * @hibernate.property type="boolean" not-null="true"
+   */
+  public boolean isRandomizedAssayPlateLayout()
+  {
+    return _randomizedAssayPlateLayout;
+  }
+
+  public void setRandomizedAssayPlateLayout(boolean randomizedAssayPlateLayout)
+  {
+    _randomizedAssayPlateLayout = randomizedAssayPlateLayout;
+  }
+
+  /**
    * Get the comments.
    *
    * @return the comments
@@ -265,18 +301,48 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   @DerivedEntityProperty
-  public Set<CherryPick> getCherryPicksForDestinationPlate(String cherryPickDestPlateName)
+  public Set<CherryPick> getCherryPicksForAssayPlate(String assayPlateName)
   {
     Set<CherryPick> cherryPicksForPlate = new HashSet<CherryPick>();
 
     for (CherryPick cherryPick : _cherryPicks) {
-      if (cherryPick.isAllocated() && cherryPick.getDestinationPlateName().equals(cherryPickDestPlateName)) {
+      if (cherryPick.isAllocated() && cherryPick.getAssayPlateName().equals(assayPlateName)) {
         cherryPicksForPlate.add(cherryPick);
       }
     }
     return cherryPicksForPlate;
   }
+  
+  @DerivedEntityProperty
+  public Set<CherryPickLiquidTransfer> getCherryPickLiquidTransfersForAssayPlate(String assayPlateName)
+  {
+    Iterator<CherryPick> iter = getCherryPicksForAssayPlate(assayPlateName).iterator();
+    if (iter.hasNext()) {
+      return iter.next().getCherryPickLiquidTransfers();
+    }
+    return new TreeSet<CherryPickLiquidTransfer>();
+  }
 
+  @DerivedEntityProperty
+  public boolean isAllocated()
+  {
+    Iterator<CherryPick> cherryPickIter = getCherryPicks().iterator();
+    // we assume that if one cherry pick is allocated, they are all allocated
+    return cherryPickIter.hasNext() && cherryPickIter.next().isAllocated();
+  }
+
+  @DerivedEntityProperty
+  public Set<String> getAssayPlates()
+  {
+    if (!isAllocated()) {
+      return new TreeSet<String>();
+    }
+    Set<String> assayPlates = new TreeSet<String>();
+    for (CherryPick cherryPick : getCherryPicks()) {
+      assayPlates.add(cherryPick.getAssayPlateName());
+    }
+    return assayPlates;
+  }
   
   // package methods
 
@@ -285,35 +351,14 @@ public abstract class CherryPickRequest extends AbstractEntity
    */
   private class BusinessKey
   {
-    
-    /**
-     * Get the screen.
-     *
-     * @return the screen
-     */
     public Screen getScreen()
     {
       return _screen;
     }
     
-    /**
-     * Get the user that requested the cherry pick.
-     *
-     * @return the user that requested the cherry pick
-     */
-    public ScreeningRoomUser getRequestedBy()
+    public Integer getOrdinal()
     {
-      return _requestedBy;
-    }
-    
-    /**
-     * Get the date of the request
-     *
-     * @return the date of the request
-     */
-    public Date getDateRequested()
-    {
-      return _dateRequested;
+      return _ordinal;
     }
     
     @Override
@@ -325,8 +370,7 @@ public abstract class CherryPickRequest extends AbstractEntity
       BusinessKey that = (BusinessKey) object;
       return
         this.getScreen().equals(that.getScreen()) &&
-        this.getRequestedBy().equals(that.getRequestedBy()) &&
-        this.getDateRequested().equals(that.getDateRequested());
+        this.getOrdinal().equals(that.getOrdinal());
     }
 
     @Override
@@ -334,14 +378,13 @@ public abstract class CherryPickRequest extends AbstractEntity
     {
       return
         this.getScreen().hashCode() +
-        this.getRequestedBy().hashCode() +
-        this.getDateRequested().hashCode();
+        this.getOrdinal().hashCode();
     }
 
     @Override
     public String toString()
     {
-      return this.getScreen() + ":" + this.getRequestedBy() + ":" + this.getDateRequested();
+      return this.getScreen() + ":#" + this.getOrdinal();
     }
   }
 
@@ -418,6 +461,15 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
   
   /**
+   * Set the set of cherry pick liquid transfers.
+   * @param cherryPickLiquidTransfer the new cherry pick liquid transfer
+   */
+  private void setCherryPickLiquidTransfers(Set<CherryPickLiquidTransfer> cherryPickLiquidTransfers)
+  {
+    _cherryPickLiquidTransfers = cherryPickLiquidTransfers;
+  }
+  
+  /**
    * Get the user that requested the cherry pick.
    *
    * @return the user that requested the cherry pick
@@ -447,12 +499,15 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
-   * Set the date created.
-   *
-   * @param dateRequested the new date created
+   * @hibernate.property type="integer" not-null="true"
    */
-  private void setDateRequested(Date dateRequested)
+  private Integer getOrdinal()
   {
-    _dateRequested = truncateDate(dateRequested);
+    return _ordinal;
+  }
+
+  private void setOrdinal(Integer ordinal)
+  {
+    _ordinal = ordinal;
   }
 }
