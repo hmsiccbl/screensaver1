@@ -9,9 +9,15 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.model.ToOneRelationship;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
@@ -29,6 +35,12 @@ public class RNAiCherryPickRequest extends CherryPickRequest
 
   private static final long serialVersionUID = 1L;
 
+  private static final Set<Integer> REQUIRED_EMPTY_COLUMNS = 
+    new HashSet<Integer>(Arrays.asList(Well.MIN_WELL_COLUMN,
+                                       Well.MIN_WELL_COLUMN + 1,
+                                       Well.MAX_WELL_COLUMN - 1,
+                                       Well.MAX_WELL_COLUMN ));
+
   private static Logger log = Logger.getLogger(RNAiCherryPickRequest.class);
 
 
@@ -43,6 +55,7 @@ public class RNAiCherryPickRequest extends CherryPickRequest
                                Date dateRequested)
   {
     super(screen, requestedBy, dateRequested);
+    super.getEmptyColumnsOnAssayPlate().addAll(REQUIRED_EMPTY_COLUMNS);
   }
 
   // public constructors and methods
@@ -89,6 +102,12 @@ public class RNAiCherryPickRequest extends CherryPickRequest
     _rnaiCherryPickScreening = rnaiCherryPickScreening;
   }
   
+  @Override
+  public void setEmptyColumnsOnAssayPlate(Set<Integer> emptyColumnsOnAssayPlate)
+  {
+    super.setEmptyColumnsOnAssayPlate(emptyColumnsOnAssayPlate);
+    getEmptyColumnsOnAssayPlate().addAll(REQUIRED_EMPTY_COLUMNS);
+  }
 
 
   // private methods
