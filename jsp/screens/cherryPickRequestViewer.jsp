@@ -171,7 +171,7 @@ TODO:
 					rendered="#{cherryPickRequestViewer.editable}">
 					<t:commandButton id="deleteCherryPicks" value="Delete All"
 						action="#{cherryPickRequestViewer.deallocateCherryPicks}"
-						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated}"
+            disabled="#{cherryPickRequestViewer.cherryPickRequest.allocated}"
 						styleClass="command" />
 				</t:panelGroup>
 
@@ -203,7 +203,7 @@ TODO:
 			rendered="#{cherryPickRequestViewer.editable}">
 			<t:commandButton id="allocateCherryPicks" value="Reserve Liquid"
 				action="#{cherryPickRequestViewer.allocateCherryPicks}"
-				disabled="#{cherryPickRequestViewer.cherryPickRequest.allocated}"
+				disabled="#{empty cherryPickRequestViewer.cherryPickRequest.cherryPicks || cherryPickRequestViewer.cherryPickRequest.allocated}"
 				style="command" />
 			<t:commandButton id="deallocateCherryPicks"
 				value="Cancel Reservation"
@@ -243,7 +243,9 @@ TODO:
 
 		<t:panelGroup id="selectedAssayPlatesCommandPanel"
 			rendered="#{cherryPickRequestViewer.editable}">
-			<t:outputText styleClass="label" value="For selected assay plates:"/>
+			<t:div>
+				<t:outputText styleClass="label" value="For selected assay plates:"/>
+			</t:div>
 			<t:commandButton id="downloadPlateMappingFiles"
 				value="Download Files"
 				action="#{cherryPickRequestViewer.downloadPlateMappingFilesForSelectedAssayPlates}"

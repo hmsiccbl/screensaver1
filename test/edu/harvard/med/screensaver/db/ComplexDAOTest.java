@@ -21,9 +21,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
-import org.hibernate.LazyInitializationException;
-
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
@@ -40,6 +37,8 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
+import edu.harvard.med.screensaver.model.screens.CherryPick;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -47,6 +46,9 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
+
+import org.apache.log4j.Logger;
+import org.hibernate.LazyInitializationException;
 
 
 /**
@@ -621,6 +623,63 @@ public class ComplexDAOTest extends AbstractSpringTest
     });
   }
   
+  public void testDeleteCherryPick()
+  {
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Library library = new Library("library 1",
+                                      "lib1",
+                                      ScreenType.RNAI,
+                                      LibraryType.COMMERCIAL,
+                                      1,
+                                      2);
+        Well well1 = new Well(library, 1, "A01");
+        Well well2 = new Well(library, 2, "P24");
+        dao.persistEntity(library);
+        
+        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1); 
+        screen.setScreenType(ScreenType.RNAI);
+        CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
+        new CherryPick(cherryPickRequest, well1);
+        new CherryPick(cherryPickRequest, well2);
+        dao.persistEntity(cherryPickRequest); // why do we need this, if we're also persisting the screens?!
+        dao.persistEntity(screen);
+      }
+    });
+
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
+        assertEquals("cherry picks exist before delete",
+                     2, 
+                     cherryPickRequest.getCherryPicks().size());
+        assertEquals("cherry picks exist in well1 before delete", 1, dao.findWell(new WellKey(1, "A01")).getCherryPicks().size());
+        assertEquals("cherry picks exist in well2 before delete", 1, dao.findWell(new WellKey(2, "P24")).getCherryPicks().size());
+        Set<CherryPick> cherryPicksToDelete = new HashSet<CherryPick>(cherryPickRequest.getCherryPicks());
+        for (CherryPick cherryPick : cherryPicksToDelete) {
+          dao.deleteCherryPick(cherryPick);
+        }
+      }
+    });
+    
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
+        assertEquals("cherry picks deleted from cherry pick request", 0, cherryPickRequest.getCherryPicks().size());
+        assertEquals("cherry picks deleted from well1", 0, dao.findWell(new WellKey(1, "A01")).getCherryPicks().size());
+        assertEquals("cherry picks deleted from well2", 0, dao.findWell(new WellKey(2, "P24")).getCherryPicks().size());
+      }
+    });
+  }
+
   /**
    * A ScreenResult's plateNumbers, wells, experimentWellCount, and hits
    * properties should be updated when a ResultValue is added to a
@@ -924,6 +983,8 @@ public class ComplexDAOTest extends AbstractSpringTest
       }
     });
   }
+  
+  
 
 }
 

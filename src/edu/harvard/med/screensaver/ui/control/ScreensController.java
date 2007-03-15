@@ -129,4 +129,7 @@ public interface ScreensController
   @UIControllerMethod
   public String addCherryPicksForWells(CherryPickRequest cherryPickRequest, Set<Well> cherryPicks);
 
+  @UIControllerMethod
+  public String deleteAllCherryPicks(CherryPickRequest cherryPickRequest);
+
 }

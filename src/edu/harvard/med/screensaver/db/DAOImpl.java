@@ -41,6 +41,7 @@ import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -51,6 +52,7 @@ import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.CherryPick;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
@@ -407,6 +409,22 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
       well.removeSilencingReagents();
       well.setWellType(WellType.EMPTY);
     }
+  }
+  
+  public void deleteCherryPick(CherryPick cherryPick)
+  {
+    if (cherryPick.getCherryPickLiquidTransfers().size() > 0) {
+      throw new BusinessRuleViolationException("cannot delete a cherry pick that has been plated");
+    }
+
+    // disassociate from related entities
+    cherryPick.getCherryPickRequest().getCherryPicks().remove(cherryPick);
+    if (cherryPick.getSourceCopy() != null) {
+      cherryPick.getSourceCopy().getHbnCherryPicks().remove(cherryPick);
+    }
+    cherryPick.getSourceWell().getHbnCherryPicks().remove(cherryPick);
+
+    getHibernateTemplate().delete(cherryPick);
   }
   
   public Well findWell(WellKey wellKey) {

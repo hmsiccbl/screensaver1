@@ -14,14 +14,15 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellType;
+
+import org.apache.log4j.Logger;
 
 
 // TODO: for performance, we may have to make CherryPick into a Hibernate value
@@ -81,6 +82,17 @@ public class CherryPick extends AbstractEntity
     if (cherryPickRequest == null || well == null) {
         throw new NullPointerException();
     }
+    
+    // TODO: verify well was actually one that was screened 
+
+    if (!well.getWellType().equals(WellType.EXPERIMENTAL)
+      || (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE) && 
+        well.getCompounds().size() == 0)
+        || (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI) && 
+          well.getSilencingReagents().size() == 0)) {
+      throw new InvalidCherryPickWellException("only experimental wells can be cherry picked", well);
+    }
+    
     _cherryPickRequest = cherryPickRequest;
     _sourceWell = well;
     _cherryPickRequest.getCherryPicks().add(this);

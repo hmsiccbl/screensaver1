@@ -320,8 +320,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
   public String deallocateCherryPicks()
   {
-    // TODO
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _screensController.deleteAllCherryPicks(_cherryPickRequest);
   }
   
   public String selectAllAssayPlates()

@@ -24,14 +24,15 @@ import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
+import edu.harvard.med.screensaver.model.screens.InvalidCherryPickWellException;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -819,26 +820,50 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       {
         public void runTransaction()
         {
-          CherryPickRequest cherryPickRequest = _dao.findEntityById(CherryPickRequest.class,
-                                                                    cherryPickRequestIn.getEntityId());
+          CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reloadEntity(cherryPickRequestIn);
           if (cherryPickRequest.isAllocated()) {
-            String message = "New cherry picks cannot be added to a cherry pick requested that has already been allocated";
-            showMessage("businessError", message);
-            throw new DAOTransactionRollbackException(message);
+            throw new BusinessRuleViolationException("new cherry picks cannot be added to a cherry pick request that has already been allocated");
           }
-          // TODO: verify that well was actually one that was screened 
           // TODO: enforce cherry pick size limits
           for (Well cherryPickWell : cherryPicks) {
             _dao.reattachEntity(cherryPickWell);
-
-            if (!cherryPickWell.getWellType().equals(WellType.EXPERIMENTAL)
-              || (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE) && 
-                cherryPickWell.getCompounds().size() == 0)
-              || (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI) && 
-                cherryPickWell.getSilencingReagents().size() == 0)) {
-              showMessage("screens.cherryPickInvalidWell", cherryPickWell.getWellKey().toString());
-            }
             _dao.persistEntity(new CherryPick(cherryPickRequest, cherryPickWell));
+          }
+        }
+      });
+      return viewCherryPickRequest(cherryPickRequestIn);
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    catch (BusinessRuleViolationException e) {
+      showMessage("businessError", e.getMessage());
+    }
+    catch (InvalidCherryPickWellException e) {
+      showMessage("screens.cherryPickedInvalidWell", e.getWell());
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  public String deleteAllCherryPicks(final CherryPickRequest cherryPickRequestIn)
+  {
+    logUserActivity("deleteAllCherryPicks from " + cherryPickRequestIn);
+    
+    try {
+      _dao.doInTransaction(new DAOTransaction() 
+      {
+        public void runTransaction()
+        {
+          CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reloadEntity(cherryPickRequestIn);
+          if (cherryPickRequest.isPlated()) {
+            String message = "Cherry picks cannot be deleted once a cherry pick request has been plated";
+            showMessage("businessError", message);
+            throw new DAOTransactionRollbackException(message);
+          }
+          Set<CherryPick> cherryPicksToDelete = new HashSet<CherryPick>(cherryPickRequest.getCherryPicks());
+          for (CherryPick cherryPick : cherryPicksToDelete) {
+            _dao.deleteCherryPick(cherryPick);
           }
         }
       });
@@ -852,7 +877,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     
     return viewCherryPickRequest(cherryPickRequestIn);
   }
-
+  
   
   // private methods
 

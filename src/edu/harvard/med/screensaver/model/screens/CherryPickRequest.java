@@ -332,6 +332,12 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   @DerivedEntityProperty
+  public boolean isPlated()
+  {
+    return _cherryPickLiquidTransfers.size() > 0;
+  }
+
+  @DerivedEntityProperty
   public Set<String> getAssayPlates()
   {
     if (!isAllocated()) {
