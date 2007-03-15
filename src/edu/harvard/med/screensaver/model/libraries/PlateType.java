@@ -23,10 +23,23 @@ public enum PlateType implements VocabularyTerm
 
   // the vocabulary
   
-  MARSH("Marsh"),
-  ABGENE("ABgene"),
-  GENETIX("Genetix")
+  ABGENE("ABgene", 384, "CB", "PP"),
+  COSTAR("Costar", 96, "RB", "PS"),
+  EPPENDORF("Eppendorf", 384, "CB", "PP"),
+  GENETIX("Genetix", 384, "CB", "PP"),
+  MARSH("Marsh", 384, "VB", "PP"),
+  NUNC("Nunc", 96, "VB", "PS"),
   ;
+  
+  // TODO: consider enums for auxiliary attributes
+  // Legend:
+  //
+  //  RB - Round Bottom
+  //  CB - Conical Bottom
+  //  VB - V-shaped Bottom
+  //
+  //  PP - Polypropylene
+  //  PS - Polystyrene
 
  
   // static inner class
@@ -46,14 +59,20 @@ public enum PlateType implements VocabularyTerm
   // private instance field and constructor
 
   private String _value;
+  private int _plateSize;
+  private String _wellBottomShape;
+  private String _material;
 
   /**
    * Constructs a <code>PlateType</code> vocabulary term.
    * @param value The value of the term.
    */
-  private PlateType(String value)
+  private PlateType(String value, int plateSize, String wellBottomShape, String material)
   {
     _value = value;
+    _plateSize = plateSize;
+    _wellBottomShape = wellBottomShape;
+    _material = material;
   }
 
 
@@ -68,12 +87,38 @@ public enum PlateType implements VocabularyTerm
     return _value;
   }
 
-  /* (non-Javadoc)
+  public String getMaterial()
+  {
+    return _material;
+  }
+
+
+  public int getPlateSize()
+  {
+    return _plateSize;
+  }
+
+
+  public String getWellBottomShape()
+  {
+    return _wellBottomShape;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see java.lang.Object#toString()
    */
   @Override
   public String toString()
   {
-    return getValue();
+    return new StringBuilder().append(_value)
+                              .append(' ')
+                              .append(_plateSize)
+                              .append(' ')
+                              .append(_wellBottomShape)
+                              .append(' ')
+                              .append(_material)
+                              .toString();
   }
 }

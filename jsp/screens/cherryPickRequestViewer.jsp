@@ -124,13 +124,9 @@ TODO:
 				styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 
 			<t:outputText value="Assay&nbsp;Plate&nbsp;Type" escape="false" />
-			<t:selectOneMenu id="assayPlateType"
-				value="#{cherryPickRequestViewer.assayPlateType.value}"
-				displayValueOnly="#{!cherryPickRequestViewer.editMode}"
-				styleClass="inputText" displayValueOnlyStyleClass="dataText">
-				<f:selectItems
-					value="#{cherryPickRequestViewer.assayPlateType.selectItems}" />
-			</t:selectOneMenu>
+			<t:outputText 
+				value="#{cherryPickRequestViewer.cherryPickRequest.assayPlateType}"
+				styleClass="dataText"/>
 
 			<t:outputText
 				value="Randomize&nbsp;assay&nbsp;plate well&nbsp;layout"

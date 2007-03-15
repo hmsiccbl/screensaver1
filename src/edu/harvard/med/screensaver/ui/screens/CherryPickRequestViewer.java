@@ -80,7 +80,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private String _cherryPicksInput;
   private Map<String,Boolean> _assayPlateSelectionMap = new HashMap<String,Boolean>();
   private UISelectOneEntityBean<ScreeningRoomUser> _requestedBy;
-  private UISelectOneBean<PlateType> _assayPlateType;
   private UISelectManyBean<Integer> _emptyColumnsOnAssayPlate;
 
   private DataModel _cherryPicksColumnModel;
@@ -135,7 +134,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       }
     };
 
-    _assayPlateType = new UISelectOneBean<PlateType>(Arrays.asList(PlateType.values()));
     _emptyColumnsOnAssayPlate = new UISelectManyBean<Integer>(COLUMNS_LIST, _cherryPickRequest.getEmptyColumnsOnAssayPlate());
     
     _cherryPicksColumnModel = new ArrayDataModel(CHERRY_PICKS_TABLE_COLUMNS);
@@ -183,16 +181,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return StringUtils.makeListString(new TreeSet<Integer>(_cherryPickRequest.getEmptyColumnsOnAssayPlate()), ", ");
   }
 
-  public UISelectOneBean<PlateType> getAssayPlateType()
-  {
-    return _assayPlateType;
-  }
-
-  public void setAssayPlateType(UISelectOneBean<PlateType> assayPlateType)
-  {
-    _assayPlateType = assayPlateType;
-  }
-  
   public DataModel getCherryPicksColumnModel()
   {
     return _cherryPicksColumnModel;

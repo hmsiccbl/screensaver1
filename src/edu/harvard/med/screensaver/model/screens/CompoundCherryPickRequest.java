@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.model.screens;
 
 import java.util.Date;
 
+import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
@@ -28,6 +29,8 @@ public class CompoundCherryPickRequest extends CherryPickRequest
 
   private static final long serialVersionUID = 1L;
 
+  private static final PlateType COMPOUND_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.ABGENE;
+
   private static Logger log = Logger.getLogger(CompoundCherryPickRequest.class);
 
 
@@ -43,7 +46,12 @@ public class CompoundCherryPickRequest extends CherryPickRequest
     super(screen, requestedBy, dateRequested);
   }
 
-  
+  public PlateType getAssayPlateType()
+  {
+    return COMPOUND_CHERRY_PICK_ASSAY_PLATE_TYPE;
+  }
+
+
   // private methods
   
   /**

@@ -9,14 +9,13 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.ToOneRelationship;
+import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
@@ -34,6 +33,7 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   // static members
 
   private static final long serialVersionUID = 1L;
+  private static Logger log = Logger.getLogger(RNAiCherryPickRequest.class);
 
   private static final Set<Integer> REQUIRED_EMPTY_COLUMNS = 
     new HashSet<Integer>(Arrays.asList(Well.MIN_WELL_COLUMN,
@@ -41,7 +41,7 @@ public class RNAiCherryPickRequest extends CherryPickRequest
                                        Well.MAX_WELL_COLUMN - 1,
                                        Well.MAX_WELL_COLUMN ));
 
-  private static Logger log = Logger.getLogger(RNAiCherryPickRequest.class);
+  private static final PlateType RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.EPPENDORF;
 
 
   // instance data members
@@ -81,6 +81,11 @@ public class RNAiCherryPickRequest extends CherryPickRequest
     return _assayProtocol;
   }
   
+  public PlateType getAssayPlateType()
+  {
+    return RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE;
+  }
+
   /**
    * Get the set of RNAi cherry pick assay
    *

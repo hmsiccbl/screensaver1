@@ -21,6 +21,7 @@ import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
+import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
@@ -204,6 +205,8 @@ public abstract class CherryPickRequest extends AbstractEntity
   {
     _dateRequested = truncateDate(dateRequested);
   }
+
+  abstract public PlateType getAssayPlateType();
 
   /**
    * Get the requested microliterTransferVolumePerWell.
