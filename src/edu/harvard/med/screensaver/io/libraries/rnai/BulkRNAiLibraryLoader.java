@@ -38,7 +38,8 @@ public class BulkRNAiLibraryLoader
 
   private static final Logger log = Logger.getLogger(BulkRNAiLibraryLoader.class);
   private static final File _rnaiLibraryDir = new File("/usr/local/rnai-libraries");
-  private static final Pattern _pattern = Pattern.compile("^(Dharmacon_)?([^_]*?)(_\\w+)?\\.xls$");
+  private static final Pattern _pattern = Pattern.compile(
+    "^((Mitchison1)|(([^_]*)_([^_]*)_(Pools|Duplexes)))\\.xls$");
   
   public static void main(String[] args)
   {
@@ -82,6 +83,9 @@ public class BulkRNAiLibraryLoader
         {
           log.info("processing RNAi File: " + rnaiFile.getName());
           Library library = getLibraryForRNAiFile(rnaiFile);
+          if (! library.getLibraryName().contains("Duplex")) {
+            return;
+          }
           try {
             _parser.parseLibraryContents(library, rnaiFile, new FileInputStream(rnaiFile));
           }
@@ -106,17 +110,16 @@ public class BulkRNAiLibraryLoader
     if (! matcher.matches()) {
       throw new RuntimeException("RNAi file didnt match pattern: " + filename);
     }
+    // first try to match Mitchison1
     String libraryName = matcher.group(2);
+    if (libraryName == null) {
+      // if not Mitchison1, build Dharmacon library shortName
+      libraryName = matcher.group(4) + " " + matcher.group(6);
+    }
     Library library = _dao.findEntityByProperty(
       Library.class,
-      "libraryName",
+      "shortName",
       libraryName);
-    if (library == null) {
-      library = _dao.findEntityByProperty(
-        Library.class,
-        "shortName",
-        libraryName);
-    }
     if (library == null) {
       throw new RuntimeException("library not found with name: " + libraryName);
     }
