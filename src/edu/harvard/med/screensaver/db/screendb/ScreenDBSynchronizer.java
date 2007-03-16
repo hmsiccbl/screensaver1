@@ -24,6 +24,33 @@ import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 
+/**
+ * Synchronizes the Screensaver database to the latest contents of ScreenDB. For every ScreenDB
+ * entity parsed, the synchronizer tries to find a matching corresponding entity in Screensaver.
+ * If it finds one, it will update the existing entity to match the contents in ScreenDB. If not,
+ * it will create a new Screensaver entity to represent the ScreenDB entity.
+ * <p>
+ * This procedure works fine, unless a ScreenDB entity previously synchronized over to Screensaver
+ * is modified in such a way that the synchronizer is unable to make the connection between the
+ * new version of the ScreenDB entity, and the old version as translated into Screensaver terms.
+ * In such a case, the original entity will be duplicated in Screensaver, having both an up-to-date
+ * version, and an out-of-date version.
+ * <p>
+ * This could only happen when part of the "business key" for the entity changes. These aren't
+ * necessarilly Screensaver entity business keys, and also should not really change that much.
+ * A list of the different entity types, and the "business keys" used by the synchronizer, follows:
+ * 
+ * <ul>
+ * <li>ScreeningRoomUsers are looked up by firstName, lastName
+ * <li>Libraries are looked up by startPlate
+ * <li>Screns are looked up by screenNumber
+ * <li>LibraryScreenings are looked up by screen, performedBy, and dateOfActivity
+ * <li>TODO: fill in this list as more types are synchronized
+ * </ul>
+ *
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ */
 public class ScreenDBSynchronizer
 {
   // static members
@@ -155,6 +182,12 @@ public class ScreenDBSynchronizer
       ScreenDBScreenSynchronizer screenSynchronizer =
         new ScreenDBScreenSynchronizer(_connection, _dao, userSynchronizer);
       screenSynchronizer.synchronizeScreens();
+      ScreenDBLibraryScreeningSynchronizer libraryScreeningSynchronizer =
+        new ScreenDBLibraryScreeningSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
+      libraryScreeningSynchronizer.synchronizeLibraryScreenings();
+      // TODO: 'Liquid Handling only' Visits to LiquidHandling
+      // TODO: 'Cherry Pick' Visits to Compound CherryPickRequest
+      // TODO: 'RNAi Cherry Pick' Visits to RNAi CherryPickRequest
     }
     catch (ScreenDBSynchronizationException e) {
       // TODO: report error message as well
@@ -169,8 +202,6 @@ public class ScreenDBSynchronizer
       catch (SQLException e) {
       }
     }
-  
-    // TODO: screens, visits, libraries
   }
 }
 

@@ -95,6 +95,11 @@ public class ScreenDBScreenSynchronizer
     }
   }
 
+  public Screen getScreenForScreenNumber(Integer screenNumber)
+  {
+    return _screenNumberToScreenMap.get(screenNumber);
+  }
+  
 
   // private instance methods
   

@@ -60,6 +60,9 @@ public class ScreenDBLibrarySynchronizer
       public void runTransaction()
       {
         try {
+          // TODO: review this, make sure we are not missing anything (e.g., copy info)
+          // TODO: try to figure out some way to grok the vendor for these libraries. we will
+          // need vendor eventually, especially to try looking up compounds in PubChem by vendor id
           Statement statement = _connection.createStatement();
           ResultSet resultSet = statement.executeQuery(
             "SELECT l.*, lt.name AS library_type\n" +
