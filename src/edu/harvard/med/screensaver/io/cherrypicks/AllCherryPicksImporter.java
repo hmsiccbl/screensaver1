@@ -9,18 +9,23 @@
 
 package edu.harvard.med.screensaver.io.cherrypicks;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import jxl.CellType;
 import jxl.LabelCell;
 import jxl.NumberCell;
 import jxl.Sheet;
 import jxl.Workbook;
+import jxl.WorkbookSettings;
 import jxl.read.biff.BiffException;
 
 import edu.harvard.med.screensaver.db.DAO;
@@ -31,6 +36,7 @@ import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 public class AllCherryPicksImporter
@@ -45,6 +51,11 @@ public class AllCherryPicksImporter
   private static final int COPY_PLATE_COLUMN = 0;
   private static final int COPY_COPY_NAME_COLUMN = 1;
   private static final int COPY_VOLUME_COLUMN = 2;
+
+  private static final WorkbookSettings WORKBOOK_SETTINGS = new WorkbookSettings();
+  static {
+    WORKBOOK_SETTINGS.setIgnoreBlanks(true);
+  }
 
   // instance data members
   
@@ -61,9 +72,22 @@ public class AllCherryPicksImporter
   public Set<Copy> importCherryPickCopies(File workbookFile) 
     throws IOException, CherryPickCopiesDataException, FatalParseException
   {
+    BufferedInputStream bis = null;
+    try {
+      bis = new BufferedInputStream(new FileInputStream(workbookFile));
+      return importCherryPickCopies(bis);
+    }
+    finally {
+      IOUtils.closeQuietly(bis);
+    }
+  }
+
+  public Set<Copy> importCherryPickCopies(InputStream workbookInputStream) 
+    throws IOException, CherryPickCopiesDataException, FatalParseException
+  {
     Workbook workbook;
     try {
-      workbook = Workbook.getWorkbook(workbookFile);
+      workbook = Workbook.getWorkbook(workbookInputStream, WORKBOOK_SETTINGS);
     }
     catch (BiffException e) {
       throw new FatalParseException(e);
@@ -77,6 +101,9 @@ public class AllCherryPicksImporter
       public void runTransaction() 
       {
         for (int iRow = 1; iRow < sheet.getRows(); iRow++) {
+          if (isRowBlank(sheet, iRow)) {
+            break;
+          }
           Integer plate;
           String copyName;
           BigDecimal volume;
@@ -119,5 +146,9 @@ public class AllCherryPicksImporter
 
   // private methods
 
+  private boolean isRowBlank(Sheet sheet, int row)
+  {
+    return sheet.getCell(0, row).getType().equals(CellType.EMPTY);
+  }
 }
 

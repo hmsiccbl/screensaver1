@@ -11,6 +11,7 @@
 <%-- 
 TODO:
  - add lead screener, lab head to Screen Summary
+ - paged, sortable cherry pick table
 --%>
 
 <f:subview id="cherryPickRequestViewer">
@@ -214,7 +215,7 @@ TODO:
 			<t:commandButton id="allocateCherryPicks" value="Reserve Liquid"
 				action="#{cherryPickRequestViewer.allocateCherryPicks}"
 				disabled="#{empty cherryPickRequestViewer.cherryPickRequest.cherryPicks || cherryPickRequestViewer.cherryPickRequest.allocated}"
-				style="command" />
+				styleClass="command" />
 			<t:commandButton id="deallocateCherryPicks"
 				value="Cancel Reservation"
 				action="#{cherryPickRequestViewer.deallocateCherryPicks}"
@@ -260,12 +261,12 @@ TODO:
 				value="Download Files"
 				action="#{cherryPickRequestViewer.downloadPlateMappingFilesForSelectedAssayPlates}"
 				disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated}"
-				style="command" />
+				styleClass="command" />
 			<t:commandButton id="recordLiquidTransfer"
 				value="Record Liquid Transfer"
 				action="#{cherryPickRequestViewer.recordLiquidTransferForSelectedAssayPlates}"
 				disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated}"
-				style="command" />
+				styleClass="command" />
 			<h:commandButton id="duplicateCherryPickRequest" value="Duplicate"
 				disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated}"
 				action="#{cherryPickRequestViewer.createDuplicateCherryPickRequestForSelectedAssayPlates}"
