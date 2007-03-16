@@ -20,6 +20,8 @@ import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Logger;
 
 
@@ -187,6 +189,24 @@ public class Library extends AbstractEntity
   public int getNumCopies()
   {
     return _copies.size();
+  }
+  
+  public Copy getCopy(final String copyName)
+  {
+    return (Copy) CollectionUtils.find(_copies, new Predicate() 
+    {
+      public boolean evaluate(Object e) { return ((Copy) e).getName().equals(copyName); };
+    });
+//    return CollectionUtils.indexCollection(_copies,
+//                                           new Transformer() 
+//    {
+//      public Object transform(Object e)
+//      {
+//        return ((Copy) e).getName();
+//      }
+//    },
+//    String.class,
+//    Copy.class).get(copyName);
   }
 
   /**

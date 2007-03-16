@@ -20,11 +20,16 @@ import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Logger;
 
 
 /**
- * A Hibernate entity bean representing a copy.
+ * A Hibernate entity bean representing a copy, which is a set of plates
+ * representing a copy of a library's contents. The lab works from library
+ * copies, rather than directly from master library plates, in order to reduce
+ * freeze/thaw cycles, minimize the impact of loss due to a physical loss, etc.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -132,6 +137,24 @@ public class Copy extends AbstractEntity
   public Set<CopyInfo> getCopyInfos()
   {
     return Collections.unmodifiableSet(_copyInfos);
+  }
+
+  public CopyInfo getCopyInfo(final Integer plateNumber)
+  {
+    return (CopyInfo) CollectionUtils.find(_copyInfos, new Predicate() 
+    {
+      public boolean evaluate(Object e) { return ((CopyInfo) e).getPlateNumber().equals(plateNumber); };
+    });
+//    return CollectionUtils.indexCollection(_copyInfos,
+//                                           new Transformer() 
+//    {
+//      public Object transform(Object e)
+//      {
+//        return ((CopyInfo) e).getPlateNumber();
+//      }
+//    },
+//    Integer.class,
+//    CopyInfo.class).get(plate);
   }
 
   /**

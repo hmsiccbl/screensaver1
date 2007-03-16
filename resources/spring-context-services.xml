@@ -81,4 +81,11 @@
     <constructor-arg ref="dao"/>
   </bean>
   
+  <bean
+    id="allCherryPicksImporter"
+    class="edu.harvard.med.screensaver.io.cherrypicks.AllCherryPicksImporter"
+    scope="singleton">
+    <constructor-arg ref="unrestrictedDao"/>
+  </bean>
+  
 </beans>

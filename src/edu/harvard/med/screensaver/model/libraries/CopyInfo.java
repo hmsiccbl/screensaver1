@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -44,7 +45,7 @@ public class CopyInfo extends AbstractEntity
   private Integer _plateNumber;
   private String _location;
   private PlateType _plateType;
-  private String _volume;
+  private BigDecimal _volume;
   private String _comments;
   private Date _datePlated;
   private Date _dateRetired;
@@ -66,7 +67,7 @@ public class CopyInfo extends AbstractEntity
     Integer plateNumber,
     String location,
     PlateType plateType,
-    String volume)
+    BigDecimal volume)
   {
     _copy = copy;
     _plateNumber = plateNumber;
@@ -217,10 +218,10 @@ public class CopyInfo extends AbstractEntity
    *
    * @return the volume
    * @hibernate.property
-   *   type="text"
+   *   type="big_decimal"
    *   not-null="true"
    */
-  public String getVolume()
+  public BigDecimal getVolume()
   {
     return _volume;
   }
@@ -230,7 +231,7 @@ public class CopyInfo extends AbstractEntity
    *
    * @param volume the new volume
    */
-  public void setVolume(String volume)
+  public void setVolume(BigDecimal volume)
   {
     _volume = volume;
   }
