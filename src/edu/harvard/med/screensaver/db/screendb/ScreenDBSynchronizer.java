@@ -182,9 +182,10 @@ public class ScreenDBSynchronizer
       ScreenDBScreenSynchronizer screenSynchronizer =
         new ScreenDBScreenSynchronizer(_connection, _dao, userSynchronizer);
       screenSynchronizer.synchronizeScreens();
-      ScreenDBLibraryScreeningSynchronizer libraryScreeningSynchronizer =
-        new ScreenDBLibraryScreeningSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
-      libraryScreeningSynchronizer.synchronizeLibraryScreenings();
+      // TODO: turn library screening synching back on once i got it fixed
+      //ScreenDBLibraryScreeningSynchronizer libraryScreeningSynchronizer =
+      //  new ScreenDBLibraryScreeningSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
+      //libraryScreeningSynchronizer.synchronizeLibraryScreenings();
       // TODO: 'Liquid Handling only' Visits to LiquidHandling
       // TODO: 'Cherry Pick' Visits to Compound CherryPickRequest
       // TODO: 'RNAi Cherry Pick' Visits to RNAi CherryPickRequest

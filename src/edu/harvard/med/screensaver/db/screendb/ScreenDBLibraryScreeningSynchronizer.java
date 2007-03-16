@@ -17,6 +17,7 @@ import java.sql.Statement;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -24,7 +25,9 @@ import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
+import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
+import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
@@ -97,6 +100,7 @@ public class ScreenDBLibraryScreeningSynchronizer
       "SELECT v.*, s.screen_type, s.user_id AS lead_screener_id FROM visits v, screens s " +
       "WHERE v.screen_id = s.id AND visit_type IN ('Library', 'Special')");
     while (resultSet.next()) {
+      log.info("resultSet");
       LibraryScreening screening = findOrCreateLibraryScreening(resultSet);
       screening.setComments(resultSet.getString("comments"));
       screening.setAssayProtocol(resultSet.getString("assay_protocol"));
@@ -108,9 +112,12 @@ public class ScreenDBLibraryScreeningSynchronizer
       synchronizeEstimatedFinalScreenConcentration(resultSet, screening);
       synchronizeAssayProtocolType(resultSet, screening);
       
+      log.info("libraryScreening = " + screening);
+      
       _screenDBVisitIdToLibraryScreeningMap.put(resultSet.getInt("id"), screening);
       _dao.persistEntity(screening);
     }
+    statement.close();
   }
 
   /**
@@ -142,9 +149,14 @@ public class ScreenDBLibraryScreeningSynchronizer
         screening = new LibraryScreening(screen, performedBy, dateCreated, dateOfActivity);
       }
       catch (DuplicateEntityException e) {
+        // TODO: handle this case. merge multiple LibraryScreenings when multiples occur in
+        // ScreenDB
         throw new ScreenDBSynchronizationException(
           "duplicate library screening for screen number " + screenNumber, e);
       }
+    }
+    else {
+      screening.setPerformedBy(performedBy);
     }
     return screening;
   }
@@ -238,5 +250,47 @@ public class ScreenDBLibraryScreeningSynchronizer
     screening.setAssayProtocolType(null);
   }
 
+  private void synchronizePlatesUsed() throws SQLException
+  {
+    // synchronizing requires emptying out all old PlatesUsed
+    for (LibraryScreening screening : _screenDBVisitIdToLibraryScreeningMap.values()) {
+      Set<PlatesUsed> platesUsed = screening.getPlatesUsed();
+      platesUsed.removeAll(platesUsed);
+    }
+    
+    Statement statement = _connection.createStatement();
+    ResultSet resultSet = statement.executeQuery("SELECT * FROM plate_used");
+    while (resultSet.next()) {
+      Integer visitId = resultSet.getInt("visit_id");
+      Integer startPlate = resultSet.getInt("start_plate");
+      Integer endPlate = resultSet.getInt("end_plate");
+      String copy = resultSet.getString("copy");
+      LibraryScreening screening = _screenDBVisitIdToLibraryScreeningMap.get(visitId);
+      new PlatesUsed(screening, startPlate, endPlate, copy);
+    }
+    statement.close();
+  }
+
+  private void synchronizeEquipmentUsed() throws SQLException
+  {
+    // synchronizing requires emptying out all old EquipmentUsed
+    for (LibraryScreening screening : _screenDBVisitIdToLibraryScreeningMap.values()) {
+      Set<EquipmentUsed> equipmentUsed = screening.getEquipmentUsed();
+      equipmentUsed.removeAll(equipmentUsed);
+    }
+    
+    Statement statement = _connection.createStatement();
+    ResultSet resultSet = statement.executeQuery("SELECT * FROM plate_used");
+    while (resultSet.next()) {
+      Integer visitId = resultSet.getInt("visit_id");
+      String equipment = resultSet.getString("equipment");
+      String protocol = resultSet.getString("protocol");
+      String description = resultSet.getString("description");
+
+      LibraryScreening screening = _screenDBVisitIdToLibraryScreeningMap.get(visitId);
+      new EquipmentUsed(screening, equipment, protocol, description);
+    }
+    statement.close();
+  }
 }
 
