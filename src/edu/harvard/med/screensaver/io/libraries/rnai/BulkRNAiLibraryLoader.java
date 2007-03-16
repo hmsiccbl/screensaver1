@@ -83,9 +83,6 @@ public class BulkRNAiLibraryLoader
         {
           log.info("processing RNAi File: " + rnaiFile.getName());
           Library library = getLibraryForRNAiFile(rnaiFile);
-          if (! library.getLibraryName().contains("Duplex")) {
-            return;
-          }
           try {
             _parser.parseLibraryContents(library, rnaiFile, new FileInputStream(rnaiFile));
           }
