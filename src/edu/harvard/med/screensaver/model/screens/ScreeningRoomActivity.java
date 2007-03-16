@@ -313,8 +313,8 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
     {
       return
         this.getScreen().hashCode() +
-        this.getPerformedBy().hashCode() +
-        this.getDateOfActivity().hashCode();
+        17 * this.getPerformedBy().hashCode() +
+        163 * this.getDateOfActivity().hashCode();
     }
 
     @Override
