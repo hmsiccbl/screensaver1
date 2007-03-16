@@ -14,8 +14,12 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
+import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
@@ -114,6 +118,30 @@ public class RNAiCherryPickRequest extends CherryPickRequest
     getEmptyColumnsOnAssayPlate().addAll(REQUIRED_EMPTY_COLUMNS);
   }
 
+  @Override
+  public Set<Well> findCherryPickSourceWells(Set<Well> poolCherryPickWells)
+  {
+    // TODO: currently assumes that all RNAi cherry picks are from Dharmacon
+    // libraries, which are split into pool and duplex libraries
+    
+    // TODO: assert source/pool well is experimental
+    
+    // TODO: report anomalies, i.e., when 4 duplexes are not found
+    
+    Set<Well> duplexWells = new HashSet<Well>(poolCherryPickWells.size() * 4 /*duplexes per pool*/);
+    for (Well poolCherryPickWell : poolCherryPickWells) {
+      String duplexLibraryName = getDuplexLibraryNameForPoolLibrary(poolCherryPickWell.getLibrary());
+      for (SilencingReagent silencingReagent : poolCherryPickWell.getSilencingReagents()) {
+        for (Well candidateCherryPickSourceWell : silencingReagent.getWells()) {
+          if (candidateCherryPickSourceWell.getLibrary().getLibraryName().equals(duplexLibraryName)) {
+            duplexWells.add(candidateCherryPickSourceWell);
+          }
+        }
+      }
+    }
+    return duplexWells;
+  }
+
 
   // private methods
   
@@ -123,6 +151,18 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   private RNAiCherryPickRequest()
   {
   }
-
+  
+  private String getDuplexLibraryNameForPoolLibrary(Library library)
+  {
+    // Note: this mapping relies upon our library naming convention
+    String duplexLibraryName = library.getLibraryName()
+                                      .replace("Pools", "Duplexes");
+    if (!duplexLibraryName.contains("Duplexes")) {
+      throw new IllegalArgumentException("Dharmacon pool library '"
+                                         + library.getLibraryName()
+                                         + "' cannot be mapped to a duplex library name");
+    }
+    return duplexLibraryName;
+  }
 }
 

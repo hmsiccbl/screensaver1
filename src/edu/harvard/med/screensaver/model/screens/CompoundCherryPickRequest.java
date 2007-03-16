@@ -10,8 +10,10 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.util.Date;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
@@ -51,6 +53,12 @@ public class CompoundCherryPickRequest extends CherryPickRequest
     return COMPOUND_CHERRY_PICK_ASSAY_PLATE_TYPE;
   }
 
+  @Override
+  public Set<Well> findCherryPickSourceWells(Set<Well> screenedCherryPickWells)
+  {
+    return screenedCherryPickWells;
+  }
+
 
   // private methods
   
@@ -60,6 +68,5 @@ public class CompoundCherryPickRequest extends CherryPickRequest
   private CompoundCherryPickRequest()
   {
   }
-
 }
 

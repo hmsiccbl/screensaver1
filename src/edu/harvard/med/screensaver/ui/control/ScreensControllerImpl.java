@@ -825,9 +825,12 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
             throw new BusinessRuleViolationException("new cherry picks cannot be added to a cherry pick request that has already been allocated");
           }
           // TODO: enforce cherry pick size limits
-          for (Well cherryPickWell : cherryPicks) {
-            _dao.reattachEntity(cherryPickWell);
-            _dao.persistEntity(new CherryPick(cherryPickRequest, cherryPickWell));
+          for (Well screenedCherryPickWell : cherryPicks) {
+            _dao.reattachEntity(screenedCherryPickWell);
+          }
+          Set<Well> sourceCherryPickWells = cherryPickRequest.findCherryPickSourceWells(cherryPicks);
+          for (Well sourceCherryPickWell : sourceCherryPickWells) {
+            _dao.persistEntity(new CherryPick(cherryPickRequest, sourceCherryPickWell));
           }
         }
       });
