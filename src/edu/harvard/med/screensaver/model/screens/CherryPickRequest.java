@@ -151,7 +151,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    *   column="screen_id"
    *   not-null="true"
    *   foreign-key="fk_cherry_pick_request_to_screen"
-   *   cascade="save-update"
+   *   cascade="none"
    */
   @ToOneRelationship(nullable=false, inverseProperty="cherryPickRequests")
   public Screen getScreen()
@@ -457,7 +457,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * @param the screen
    * @motivation for hibernate
    */
-  public void setScreen(Screen screen)
+  private void setScreen(Screen screen)
   {
     _screen = screen;
   }

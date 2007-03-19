@@ -518,7 +518,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    *
    * @return the screens for which this user was the lead screener
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="none"
    *   inverse="true"
    *   lazy="true"
    * @hibernate.collection-key
@@ -539,7 +539,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    *
    * @return the screens for which this user was the lab head
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="none"
    *   inverse="true"
    *   lazy="true"
    * @hibernate.collection-key
@@ -562,7 +562,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    * @hibernate.set
    *   inverse="true"
    *   table="collaborator_link"
-   *   cascade="all"
+   *   cascade="none"
    *   lazy="true"
    * @hibernate.collection-key
    *   column="collaborator_id"

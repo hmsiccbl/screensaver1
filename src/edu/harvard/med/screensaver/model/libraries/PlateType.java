@@ -112,13 +112,19 @@ public enum PlateType implements VocabularyTerm
   @Override
   public String toString()
   {
+    return getValue();
+  }
+
+  // Note: we cannot return this in toString(), as it prevents String->Enum reverse lookup
+  public String getFullName()
+  {
     return new StringBuilder().append(_value)
-                              .append(' ')
-                              .append(_plateSize)
-                              .append(' ')
-                              .append(_wellBottomShape)
-                              .append(' ')
-                              .append(_material)
-                              .toString();
+    .append(' ')
+    .append(_plateSize)
+    .append(' ')
+    .append(_wellBottomShape)
+    .append(' ')
+    .append(_material)
+    .toString();
   }
 }

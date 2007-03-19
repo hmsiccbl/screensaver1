@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -207,18 +208,34 @@ public class CherryPick extends AbstractEntity
    * @param assayPlateRow
    * @param assayPlateColumn
    */
-  public void setAllocated(Copy sourceCopy,
-                           PlateType assayPlateType,
-                           String assayPlateName,
-                           int assayPlateRow,
-                           int assayPlateColumn)
+  public void setAllocated(Copy sourceCopy)
   {
+    _sourceCopy = sourceCopy;
+    _sourceCopy.getHbnCherryPicks().add(this);
+  }
+  
+  /**
+   * Marks the cherry pick as has having source library plate copy well volume
+   * allocated for it, and specifies the assay plate and well that the liquid
+   * volume has been allocated to
+   * 
+   * @param assayPlateType
+   * @param assayPlateName
+   * @param assayPlateRow
+   * @param assayPlateColumn
+   */
+  public void setMapped(PlateType assayPlateType,
+                        String assayPlateName,
+                        int assayPlateRow,
+                        int assayPlateColumn)
+  {
+    if (!isAllocated()) {
+      throw new BusinessRuleViolationException("cannot map a cherry pick to an assay plate before it has been allocated");
+    }
     if (assayPlateType == null ||
       assayPlateName == null) {
       throw new IllegalArgumentException("null argument values not allowed");
     }
-    _sourceCopy = sourceCopy;
-    _sourceCopy.getHbnCherryPicks().add(this);
     _assayPlateType = assayPlateType;
     _assayPlateName = assayPlateName;
     _assayPlateRow = assayPlateRow;
@@ -369,7 +386,19 @@ public class CherryPick extends AbstractEntity
   {
     return _sourceCopy != null;
   }
-
+  
+  // TODO: unit test this property
+  /**
+   * Get whether this cherry pick has been mapped to an assay plate well.
+   * 
+   * @return true, if this cherry pick has been mapped to an assay plate well
+   */
+  @DerivedEntityProperty
+  public boolean isMapped()
+  {
+    return _assayPlateName != null;
+  }
+  
   /**
    * Get whether liquid volume for this cherry pick has been transferred from a
    * source copy plate to a cherry pick assay plate.

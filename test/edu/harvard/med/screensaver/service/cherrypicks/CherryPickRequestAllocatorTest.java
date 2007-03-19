@@ -11,9 +11,12 @@ package edu.harvard.med.screensaver.service.cherrypicks;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -31,10 +34,11 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.util.DateUtil;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
 
@@ -68,7 +72,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
 
         Copy copy1 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
         new CopyInfo(copy1, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(12.0));
-        new CopyInfo(copy1, 2, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
+        new CopyInfo(copy1, 2, "loc1", PlateType.EPPENDORF, new BigDecimal(11.0));
         new CopyInfo(copy1, 3, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
         new CopyInfo(copy1, 4, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
         new CopyInfo(copy1, 5, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
@@ -76,11 +80,12 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         
         Copy copy2 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "E");
         new CopyInfo(copy2, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(22.0));
-        new CopyInfo(copy2, 2, "loc1", PlateType.EPPENDORF, new BigDecimal(11.0));
+        new CopyInfo(copy2, 2, "loc1", PlateType.EPPENDORF, new BigDecimal(22.0));
         new CopyInfo(copy2, 3, "loc1", PlateType.EPPENDORF, new BigDecimal(12.0));
         new CopyInfo(copy2, 4, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
         new CopyInfo(copy2, 5, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
-        CopyInfo retiredPlateCopyInfo = new CopyInfo(copy1, 6, "loc1", PlateType.EPPENDORF, new BigDecimal(22.0));
+        CopyInfo retiredPlateCopyInfo = 
+        new CopyInfo(copy2, 6, "loc1", PlateType.EPPENDORF, new BigDecimal(22.0));
         retiredPlateCopyInfo.setDateRetired(new Date());
 
         Copy copy3 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "F");
@@ -95,29 +100,29 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
 
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
-        screen.setScreenType(ScreenType.RNAI);
-        RNAiCherryPickRequest cherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
-        cherryPickRequest.setMicroliterTransferVolumePerWellApproved(new BigDecimal(11));
+        CherryPickRequest cherryPickRequest = createCherryPickRequest(1, 11);
+
         CherryPick cherryPick1 = new CherryPick(cherryPickRequest, dao.findWell(new WellKey(1, "A01")));
         CherryPick cherryPick2 = new CherryPick(cherryPickRequest, dao.findWell(new WellKey(2, "A01")));
         CherryPick cherryPick3 = new CherryPick(cherryPickRequest, dao.findWell(new WellKey(3, "A01")));
-        CherryPick cherryPick4 = new CherryPick(cherryPickRequest, dao.findWell(new WellKey(5, "A01")));
+        CherryPick cherryPick4 = new CherryPick(cherryPickRequest, dao.findWell(new WellKey(4, "A01")));
         CherryPick cherryPick5 = new CherryPick(cherryPickRequest, dao.findWell(new WellKey(5, "A01")));
         CherryPick cherryPick6 = new CherryPick(cherryPickRequest, dao.findWell(new WellKey(6, "A01")));
+        dao.persistEntity(cherryPickRequest.getScreen());
+
         Set<CherryPick> unfulfillableCherryPicks = cherryPickRequestAllocator.allocate(cherryPickRequest);
 
-        assertEquals("sufficient volume in copy 1", "D", cherryPick1.getSourceCopy());
-        assertEquals("exact sufficient volume in copy 1", "D", cherryPick2.getSourceCopy());
-        assertEquals("sufficient volume in copy 2", "E", cherryPick3.getSourceCopy());
-        assertEquals("sufficient volume in copy 3", "E", cherryPick4.getSourceCopy());
+        assertEquals("sufficient volume in copy 1", "D", cherryPick1.getSourceCopy().getName());
+        assertEquals("exact sufficient volume in copy 1", "D", cherryPick2.getSourceCopy().getName());
+        assertEquals("sufficient volume in copy 2", "E", cherryPick3.getSourceCopy().getName());
+        assertEquals("sufficient volume in copy 3", "F", cherryPick4.getSourceCopy().getName());
         assertFalse("insufficient volume in any copy; not allocated", cherryPick5.isAllocated());
-        assertFalse("insufficient volume in any copy due to retrired plate; not allocated", cherryPick6.isAllocated());
+        assertFalse("insufficient volume in any copy due to retired plate; not allocated", cherryPick6.isAllocated());
         
         Set<CherryPick> expectedUnfulfillableCherryPicks = new HashSet<CherryPick>();
         expectedUnfulfillableCherryPicks.add(cherryPick5);
         expectedUnfulfillableCherryPicks.add(cherryPick6);
-        assertEquals("unfulfillabe cherry picks", expectedUnfulfillableCherryPicks, unfulfillableCherryPicks);
+        assertEquals("unfulfillable cherry picks", expectedUnfulfillableCherryPicks, unfulfillableCherryPicks);
       }
     });
   }
@@ -132,58 +137,85 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         }
         dao.persistEntity(library);
 
-        Copy copy1 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
+        Copy copy1 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
         new CopyInfo(copy1, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
         Copy copy2 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
         new CopyInfo(copy2, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(12.0));
       }
     });
     
-    doTestCheryPickRequestAllocation(new String[] {"A01"}, 
+    doTestCheryPickRequestAllocation(1, 
+                                     new String[] {"A01"}, 
                                      new String[] {});
-    doTestCheryPickRequestAllocation(new String[] {"A01", "B02"}, 
+    doTestCheryPickRequestAllocation(2,
+                                     new String[] {"A01", "B02"}, 
                                      new String[] {});
-    doTestCheryPickRequestAllocation(new String[] {"A01", "B02", "C03"}, 
+    doTestCheryPickRequestAllocation(3,
+                                     new String[] {"A01", "B02", "C03"}, 
                                      new String[] {});
-    doTestCheryPickRequestAllocation(new String[] {"A01", "B02", "C03", "D04"}, 
+    doTestCheryPickRequestAllocation(4,
+                                     new String[] {"A01", "B02", "C03", "D04"}, 
                                      new String[] {"A01"});
-    doTestCheryPickRequestAllocation(new String[] {"A01", "B02", "C03", "D04", "E05"}, 
+    doTestCheryPickRequestAllocation(5,
+                                     new String[] {"A01", "B02", "C03", "D04", "E05"}, 
                                      new String[] {"A01", "B02"});
-    doTestCheryPickRequestAllocation(new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
+    doTestCheryPickRequestAllocation(6,
+                                     new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
                                      new String[] {"A01", "B02", "C03"});
-    doTestCheryPickRequestAllocation(new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
+    doTestCheryPickRequestAllocation(7,
+                                     new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
                                      new String[] {"A01", "B02", "C03", "D04"});
-    doTestCheryPickRequestAllocation(new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
+    doTestCheryPickRequestAllocation(8,
+                                     new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
                                      new String[] {"A01", "B02", "C03", "D04", "E05"});
-    doTestCheryPickRequestAllocation(new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
+    doTestCheryPickRequestAllocation(9,
+                                     new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
                                      new String[] {"A01", "B02", "C03", "D04", "E05", "F06"});
     
   }
   
   
   // private methods
+  
+  private CherryPickRequest createCherryPickRequest(int screenNumber, int volume)
+  {
+    Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(screenNumber);
+    screen.setScreenType(ScreenType.RNAI);
+    // Note: if we use screen.getLeadScreener() as requestor, Hibernate complains!
+    ScreeningRoomUser cherryPickRequestor =
+      MockDaoForScreenResultImporter.makeDummyUser(screenNumber, "Cherry", "Picker");
+    RNAiCherryPickRequest cherryPickRequest = new RNAiCherryPickRequest(screen,
+                                                                        cherryPickRequestor,
+                                                                        new Date());
+    cherryPickRequest.setMicroliterTransferVolumePerWellApproved(new BigDecimal(volume));
+    return cherryPickRequest;
+  }
 
-  private void doTestCheryPickRequestAllocation(final String[] cherryPickWellNames, 
+  private void doTestCheryPickRequestAllocation(final int screenNumber,
+                                                final String[] cherryPickWellNames, 
                                                 final String[] expectedUnfillableCherryPickWellNames)
   {
     dao.doInTransaction(new DAOTransaction() {
-      public void runTransaction() {
-        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
-        screen.setScreenType(ScreenType.RNAI);
-        RNAiCherryPickRequest cherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), DateUtil.makeDate(2007, 1, 1));
-        cherryPickRequest.setMicroliterTransferVolumePerWellApproved(new BigDecimal(6));
+      public void runTransaction()
+      {
+        CherryPickRequest cherryPickRequest = createCherryPickRequest(screenNumber, 6);
         Set<CherryPick> cherryPicks = new HashSet<CherryPick>();
         Set<CherryPick> expectedUnfulfillableCherryPicks = new HashSet<CherryPick>();
         Set<String> expectedUnfillableCherryPickWellNamesSet = new HashSet<String>(Arrays.asList(expectedUnfillableCherryPickWellNames));
         for (String cherryPickWellName : cherryPickWellNames) {
-          CherryPick cherryPick = new CherryPick(cherryPickRequest, dao.findWell(new WellKey(1, cherryPickWellName)));
+          CherryPick cherryPick = new CherryPick(cherryPickRequest,
+                                                 dao.findWell(new WellKey(1,
+                                                                          cherryPickWellName)));
           cherryPicks.add(cherryPick);
           if (expectedUnfillableCherryPickWellNamesSet.contains(cherryPickWellName)) {
             expectedUnfulfillableCherryPicks.add(cherryPick);
           }
         }
+        dao.persistEntity(cherryPickRequest.getScreen());
         Set<CherryPick> unfulfillableCherryPicks = cherryPickRequestAllocator.allocate(cherryPickRequest);
-        assertEquals("unfulfillabe cherry picks", expectedUnfulfillableCherryPicks, unfulfillableCherryPicks);
+        assertEquals("unfulfillable cherry picks for requested " + Arrays.asList(cherryPickWellNames),
+                     expectedUnfulfillableCherryPicks,
+                     unfulfillableCherryPicks);
       }
     });
   }

@@ -18,6 +18,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 
 
 /**
@@ -300,6 +301,11 @@ public class CopyInfo extends AbstractEntity
     _dateRetired = truncateDate(dateRetired);
   }
 
+  @DerivedEntityProperty
+  public boolean isRetired()
+  {
+    return _dateRetired != null;
+  }
 
   // protected methods
 
