@@ -332,6 +332,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   @DerivedEntityProperty
   public boolean isAllocated()
   {
+    // TODO: this is WRONG!  not all cherry picks may be allocated successfully!  including the first one!
     Iterator<CherryPick> cherryPickIter = getCherryPicks().iterator();
     // we assume that if one cherry pick is allocated, they are all allocated
     return cherryPickIter.hasNext() && cherryPickIter.next().isAllocated();

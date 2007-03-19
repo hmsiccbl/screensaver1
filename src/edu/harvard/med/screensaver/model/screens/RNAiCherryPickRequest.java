@@ -14,9 +14,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
-import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -118,15 +116,20 @@ public class RNAiCherryPickRequest extends CherryPickRequest
     getEmptyColumnsOnAssayPlate().addAll(REQUIRED_EMPTY_COLUMNS);
   }
 
+  /**
+   * Maps cherry pick wells from a Dharmacon SMARTPool library to the respective
+   * wells in the related Dharmacon duplex library. The mapping is keyed on the
+   * SilencingReagents contained in the pool well, <i>not</i> the gene they are
+   * silencing.
+   */
   @Override
   public Set<Well> findCherryPickSourceWells(Set<Well> poolCherryPickWells)
   {
     // TODO: currently assumes that all RNAi cherry picks are from Dharmacon
     // libraries, which are split into pool and duplex libraries
     
-    // TODO: assert source/pool well is experimental
-    
-    // TODO: report anomalies, i.e., when 4 duplexes are not found
+    // TODO: report anomalies, i.e., when exactly 4 duplexes are not found (and,
+    // most importantly, when 0 duplexes are found).
     
     Set<Well> duplexWells = new HashSet<Well>(poolCherryPickWells.size() * 4 /*duplexes per pool*/);
     for (Well poolCherryPickWell : poolCherryPickWells) {
