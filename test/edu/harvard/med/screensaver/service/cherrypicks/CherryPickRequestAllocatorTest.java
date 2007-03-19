@@ -21,10 +21,15 @@ import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImport
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
+import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -56,8 +61,10 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         // plate independently
         
         Library library = new Library("library", "lib", ScreenType.RNAI, LibraryType.COMMERCIAL, 1, 6);
+        for (int plateNumber = library.getStartPlate(); plateNumber <= library.getEndPlate(); plateNumber++) {
+          makeRNAiWell(library, plateNumber, "A01");
+        }
         dao.persistEntity(library);
-        dao.loadOrCreateWellsForLibrary(library); 
 
         Copy copy1 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
         new CopyInfo(copy1, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(12.0));
@@ -89,6 +96,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
+        screen.setScreenType(ScreenType.RNAI);
         RNAiCherryPickRequest cherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
         cherryPickRequest.setMicroliterTransferVolumePerWellApproved(new BigDecimal(11));
         CherryPick cherryPick1 = new CherryPick(cherryPickRequest, dao.findWell(new WellKey(1, "A01")));
@@ -119,8 +127,10 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         Library library = new Library("library", "lib", ScreenType.RNAI, LibraryType.COMMERCIAL, 1, 1);
+        for (int i = 0; i < 6; ++i) {
+          makeRNAiWell(library, 1, String.format("%c%02d", 'A' + i, i + 1));
+        }
         dao.persistEntity(library);
-        dao.loadOrCreateWellsForLibrary(library); 
 
         Copy copy1 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
         new CopyInfo(copy1, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
@@ -159,6 +169,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
+        screen.setScreenType(ScreenType.RNAI);
         RNAiCherryPickRequest cherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), DateUtil.makeDate(2007, 1, 1));
         cherryPickRequest.setMicroliterTransferVolumePerWellApproved(new BigDecimal(6));
         Set<CherryPick> cherryPicks = new HashSet<CherryPick>();
@@ -176,5 +187,18 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
       }
     });
   }
+  
+  private void makeRNAiWell(Library library, int plateNumber, String wellName)
+  {
+    Well well = new Well(library, new WellKey(plateNumber, wellName), WellType.EXPERIMENTAL);
+    Gene gene = new Gene("gene" + plateNumber + wellName,
+                         new WellKey(plateNumber, wellName).hashCode(),
+                         "entrezGeneSymbol" + wellName,
+                         "Human");
+    well.addSilencingReagent(new SilencingReagent(gene,
+                                                  SilencingReagentType.SIRNA,
+                                                  "ATCG"));
+  }
+  
 }
 

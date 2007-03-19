@@ -9,9 +9,7 @@
 
 package edu.harvard.med.screensaver.service.cherrypicks;
 
-import java.util.Set;
-
-import edu.harvard.med.screensaver.model.screens.CherryPick;
+import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 
 import org.apache.log4j.Logger;
@@ -32,11 +30,19 @@ public class CherryPickRequestPlateMapper
 
   // instance data members
   
-  private Set<CherryPick> _unfulfillableCherryPicks;
+  private DAO dao;
+
+
+  // public constructors and methods
+
+  public CherryPickRequestPlateMapper(DAO dao)
+  {
+    this.dao = dao;
+  }
 
   // public constructors and methods
   
-  public CherryPickRequestPlateMapper(CherryPickRequest cherryPickRequest)
+  public void generatePlateMapping(CherryPickRequest cherryPickRequest)
   {
   }
 

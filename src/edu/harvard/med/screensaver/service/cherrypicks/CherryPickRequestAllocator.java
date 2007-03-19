@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.service.cherrypicks;
 
 import java.util.Set;
 
+import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 
@@ -31,13 +32,16 @@ public class CherryPickRequestAllocator
 
 
   // instance data members
+  
+  private DAO dao;
+
 
   // public constructors and methods
 
-  public CherryPickRequestAllocator(CherryPickRequest cherryPickRequest)
+  public CherryPickRequestAllocator(DAO dao)
   {
+    this.dao = dao;
   }
-
 
   /**
    * 

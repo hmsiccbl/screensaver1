@@ -88,4 +88,18 @@
     <constructor-arg ref="unrestrictedDao"/>
   </bean>
   
+  <bean
+    id="cherryPickRequestAllocator"
+    class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator"
+    scope="singleton">
+    <constructor-arg ref="dao"/>
+  </bean>
+
+  <bean
+    id="cherryPickRequestPlateMapper"
+    class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper"
+    scope="singleton">
+    <constructor-arg ref="dao"/>
+  </bean>
+  
 </beans>
