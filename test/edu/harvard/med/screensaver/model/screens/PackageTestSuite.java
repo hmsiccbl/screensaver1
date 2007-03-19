@@ -28,5 +28,6 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     addTestSuite(ScreenTest.class);
+    addTestSuite(RNAiCherryPickRequestTest.class);
   }
 }

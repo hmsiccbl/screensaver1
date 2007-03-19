@@ -55,7 +55,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   private BigDecimal _microliterTransferVolumePerWellRequested;
   private BigDecimal _microliterTransferVolumePerWellApproved;
   private boolean _randomizedAssayPlateLayout;
-  private Set<Integer> _emptyColumnsOnAssayPlate;
+  private Set<Integer> _emptyColumnsOnAssayPlate = new HashSet<Integer>();
   private String _comments;
   private Set<CherryPick> _cherryPicks = new HashSet<CherryPick>();
   private Set<CherryPickLiquidTransfer> _cherryPickLiquidTransfers = new HashSet<CherryPickLiquidTransfer>();
