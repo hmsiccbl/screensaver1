@@ -10,10 +10,12 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -49,7 +51,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   private Integer _cherryPickRequestId;
   private Integer _version;
   private Screen _screen;
-  private Integer _ordinal; // only needed for business key 
+  private Integer _ordinal; // needed for business key, but also used in plate mapping file name generation
   private ScreeningRoomUser _requestedBy;
   private Date _dateRequested;
   private BigDecimal _microliterTransferVolumePerWellRequested;
@@ -90,6 +92,14 @@ public abstract class CherryPickRequest extends AbstractEntity
   public Integer getEntityId()
   {
     return getCherryPickRequestId();
+  }
+
+  /**
+   * @hibernate.property type="integer" not-null="true"
+   */
+  public Integer getOrdinal()
+  {
+    return _ordinal;
   }
 
   /**
@@ -271,6 +281,13 @@ public abstract class CherryPickRequest extends AbstractEntity
     _emptyColumnsOnAssayPlate = emptyColumnsOnAssayPlate;
   }
 
+  @SuppressWarnings("unchecked")
+  @DerivedEntityProperty
+  public Set<Character> getEmptyRowsOnAssayPlate()
+  {
+    return Collections.EMPTY_SET;
+  }
+
   /**
    * @hibernate.property type="boolean" not-null="true"
    */
@@ -362,9 +379,9 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   @DerivedEntityProperty
-  public Set<String> getAssayPlates()
+  public SortedSet<String> getAssayPlates()
   {
-    Set<String> assayPlates = new TreeSet<String>();
+    SortedSet<String> assayPlates = new TreeSet<String>();
     for (CherryPick cherryPick : getCherryPicks()) {
       if (cherryPick.isMapped()) {
         assayPlates.add(cherryPick.getAssayPlateName());
@@ -373,6 +390,7 @@ public abstract class CherryPickRequest extends AbstractEntity
     return assayPlates;
   }
   
+
   // package methods
 
   /**
@@ -525,14 +543,6 @@ public abstract class CherryPickRequest extends AbstractEntity
   private void setHbnRequestedBy(ScreeningRoomUser requestedBy)
   {
     _requestedBy = requestedBy;
-  }
-
-  /**
-   * @hibernate.property type="integer" not-null="true"
-   */
-  private Integer getOrdinal()
-  {
-    return _ordinal;
   }
 
   private void setOrdinal(Integer ordinal)

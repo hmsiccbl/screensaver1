@@ -31,6 +31,7 @@ public class SourceCopyComparator implements Comparator<Copy>
   
   public int compare(Copy copy1, Copy copy2)
   {
+    assert copy1.getLibrary().equals(copy2.getLibrary());
     return copy1.getName().compareTo(copy2.getName());
   }
 }

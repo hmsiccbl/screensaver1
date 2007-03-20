@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model;
+package edu.harvard.med.screensaver.model.libraries;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -27,14 +27,7 @@ public class PackageTestSuite extends TestSuite
 
   public PackageTestSuite()
   {
-    addTestSuite(AbstractEntityTest.class);
-    addTestSuite(EntityClassesTest.class);
-    addTestSuite(EntityBeansTest.class);
-    addTestSuite(EntityBeansPersistenceTest.class);
-    addTestSuite(HibernateClassesTest.class);
-    addTestSuite(WellTest.class);
-    addTest(edu.harvard.med.screensaver.model.screenresults.PackageTestSuite.suite());
-    addTest(edu.harvard.med.screensaver.model.screens.PackageTestSuite.suite());
-    addTest(edu.harvard.med.screensaver.model.libraries.PackageTestSuite.suite());
+    addTestSuite(edu.harvard.med.screensaver.model.libraries.WellKeyTest.class);
   }
+
 }

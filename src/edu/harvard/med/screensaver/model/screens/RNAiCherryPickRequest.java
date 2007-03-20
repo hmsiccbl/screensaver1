@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
@@ -42,6 +43,11 @@ public class RNAiCherryPickRequest extends CherryPickRequest
                                        Well.MIN_WELL_COLUMN + 1,
                                        Well.MAX_WELL_COLUMN - 1,
                                        Well.MAX_WELL_COLUMN ));
+  private static final Set<Character> REQUIRED_EMPTY_ROWS = 
+    new HashSet<Character>(Arrays.asList(Well.MIN_WELL_ROW,
+                                         new Character((char) (Well.MIN_WELL_ROW + 1)),
+                                         new Character((char) (Well.MAX_WELL_ROW - 1)),
+                                         Well.MAX_WELL_ROW));
 
   private static final PlateType RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.EPPENDORF;
 
@@ -114,6 +120,13 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   {
     super.setEmptyColumnsOnAssayPlate(emptyColumnsOnAssayPlate);
     getEmptyColumnsOnAssayPlate().addAll(REQUIRED_EMPTY_COLUMNS);
+  }
+  
+  @Override
+  @DerivedEntityProperty
+  public Set<Character> getEmptyRowsOnAssayPlate()
+  {
+    return REQUIRED_EMPTY_ROWS;
   }
 
   /**

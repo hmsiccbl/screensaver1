@@ -21,6 +21,7 @@ import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 
 import org.apache.log4j.Logger;
@@ -375,7 +376,7 @@ public class CherryPick extends AbstractEntity
   @DerivedEntityProperty
   public String getAssayPlateWellName()
   {
-    return String.format("%d:%s", _assayPlateColumn, _assayPlateRow);
+    return WellName.toString(_assayPlateRow, _assayPlateColumn);
   }
   
   // TODO: unit test this property
