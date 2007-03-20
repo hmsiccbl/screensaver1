@@ -18,6 +18,8 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -25,7 +27,7 @@ import edu.harvard.med.screensaver.model.screens.CherryPick;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 
 import org.apache.log4j.Logger;
-import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.DataAccessException;
 
 /**
  * For a cherry pick request, selects source plate copies to draw from, and
@@ -58,35 +60,49 @@ public class CherryPickRequestAllocator
    * @param cherryPickRequest
    * @return the set of <i>unfulfillable</i> cherry picks
    */
-  public Set<CherryPick> allocate(final CherryPickRequest cherryPickRequestIn)
+  public Set<CherryPick> allocate(final CherryPickRequest cherryPickRequestIn) throws DataAccessException
   {
     // TODO: handle concurrency; perform appropriate locking to prevent race conditions (overdrawing wellw) among multiple allocate() calls
     final Set<CherryPick> unfulfillableCherryPicks = new HashSet<CherryPick>();
-    try {
-      _dao.doInTransaction(new DAOTransaction() 
+    _dao.doInTransaction(new DAOTransaction() 
+    {
+      public void runTransaction() 
       {
-        public void runTransaction() 
-        {
-          CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
-          for (CherryPick cherryPick : cherryPickRequest.getCherryPicks()) {
-            Copy copy = selectCopy(cherryPick.getSourceWell(),
-                                   cherryPickRequest.getMicroliterTransferVolumePerWellApproved());
-            if (copy == null) {
-              unfulfillableCherryPicks.add(cherryPick);
-            }
-            else {
-              cherryPick.setAllocated(copy);
-            }
+        CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
+        BigDecimal volume = cherryPickRequest.getMicroliterTransferVolumePerWellApproved();
+        if (volume == null) {
+          throw new BusinessRuleViolationException("cannot allocate cherry picks unless the approved transfer volume has been specified in the cherry pick request");
+        }
+        if (volume.compareTo(BigDecimal.ZERO) <= 0) {
+          throw new DataModelViolationException("cherry pick request approved transfer volume must be positive");
+        }
+        for (CherryPick cherryPick : cherryPickRequest.getCherryPicks()) {
+          Copy copy = selectCopy(cherryPick.getSourceWell(),
+                                 cherryPickRequest.getMicroliterTransferVolumePerWellApproved());
+          if (copy == null) {
+            unfulfillableCherryPicks.add(cherryPick);
+          }
+          else {
+            cherryPick.setAllocated(copy);
           }
         }
-      });
-    }
-    catch (ConcurrencyFailureException e)
-    {
-      // TODO: how should we handle this?
-      throw e;
-    }
+      }
+    });
     return unfulfillableCherryPicks;
+  }
+  
+  public void deallocate(final CherryPickRequest cherryPickRequestIn)
+  {
+    _dao.doInTransaction(new DAOTransaction() 
+    {
+      public void runTransaction() 
+      {
+        CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
+        for (CherryPick cherryPick : cherryPickRequest.getCherryPicks()) {
+          cherryPick.setAllocated(null);
+        }
+      }
+    });
   }
 
   

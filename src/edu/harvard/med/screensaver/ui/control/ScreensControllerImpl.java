@@ -40,6 +40,8 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator;
+import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper;
 import edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
@@ -88,7 +90,9 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   private ScreenResultImporter _screenResultImporter;
   private ScreenResultExporter _screenResultExporter;
   private Screen _currentScreen;
- 
+  private CherryPickRequestAllocator _cherryPickRequestAllocator;
+  private CherryPickRequestPlateMapper _cherryPickRequestPlateMapper;
+  
 
   // public getters and setters
   
@@ -154,6 +158,16 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
 
  
   // public controller methods
+
+  public void setCherryPickRequestAllocator(CherryPickRequestAllocator cherryPickRequestAllocator)
+  {
+    _cherryPickRequestAllocator = cherryPickRequestAllocator;
+  }
+
+  public void setCherryPickRequestPlateMapper(CherryPickRequestPlateMapper cherryPickRequestPlateMapper)
+  {
+    _cherryPickRequestPlateMapper = cherryPickRequestPlateMapper;
+  }
 
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#browseScreens()
@@ -881,7 +895,57 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     return viewCherryPickRequest(cherryPickRequestIn);
   }
   
-  
+  @UIControllerMethod
+  public String allocateCherryPicks(final CherryPickRequest cherryPickRequestIn)
+  {
+    logUserActivity("allocateCherryPicks for " + cherryPickRequestIn);
+    
+    try {
+      _cherryPickRequestAllocator.allocate(cherryPickRequestIn);
+    }
+    catch (ConcurrencyFailureException e) {
+      showMessage("concurrentModificationConflict");
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return viewCherryPickRequest(cherryPickRequestIn);
+  }
+
+  @UIControllerMethod
+  public String deallocateCherryPicks(final CherryPickRequest cherryPickRequestIn)
+  {
+    logUserActivity("deallocateCherryPicks for " + cherryPickRequestIn);
+    
+    try {
+      _cherryPickRequestAllocator.deallocate(cherryPickRequestIn);
+    }
+    catch (ConcurrencyFailureException e) {
+      showMessage("concurrentModificationConflict");
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return viewCherryPickRequest(cherryPickRequestIn);
+  }
+
+  @UIControllerMethod
+  public String plateMapCherryPicks(final CherryPickRequest cherryPickRequestIn)
+  {
+    logUserActivity("plateMapCherryPicks for " + cherryPickRequestIn);
+    
+    try {
+      _cherryPickRequestPlateMapper.generatePlateMapping(cherryPickRequestIn);
+    }
+    catch (ConcurrencyFailureException e) {
+      showMessage("concurrentModificationConflict");
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return viewCherryPickRequest(cherryPickRequestIn);
+  }
+
   // private methods
 
   /**

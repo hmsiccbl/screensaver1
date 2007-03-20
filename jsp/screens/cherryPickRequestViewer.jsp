@@ -179,11 +179,28 @@ TODO:
 
 			<t:panelGrid id="viewCherryPicks" columns="1">
 
-				<t:panelGroup id="plateMappingCommandPanel"
+				<t:panelGroup id="cherryPicksCommandPanel"
 					rendered="#{cherryPickRequestViewer.editable}">
 					<t:commandButton id="deleteCherryPicks" value="Delete All"
+						action="#{cherryPickRequestViewer.deleteAllCherryPicks}"
+						disabled="#{cherryPickRequestViewer.cherryPickRequest.allocated}"
+						styleClass="command" />
+					<t:commandButton id="allocateCherryPicks" value="Reserve Liquid"
+						action="#{cherryPickRequestViewer.allocateCherryPicks}"
+						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.cherryPicks || cherryPickRequestViewer.cherryPickRequest.allocated}"
+						styleClass="command" />
+					<t:commandButton id="deallocateCherryPicks"
+						value="Cancel Reservation"
 						action="#{cherryPickRequestViewer.deallocateCherryPicks}"
-            disabled="#{cherryPickRequestViewer.cherryPickRequest.allocated}"
+						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated}"
+						styleClass="command" />
+					<t:commandButton id="plateMapCherryPicks" value="Map to Assay Plates"
+						action="#{cherryPickRequestViewer.plateMapCherryPicks}"
+						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated || cherryPickRequestViewer.cherryPickRequest.mapped}"
+						styleClass="command" />
+					<h:commandButton id="createCherryPickRequestForUnfulfillable" value="New Cherry Pick Request for Unfulfilled"
+						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated}"
+						action="#{cherryPickRequestViewer.createCherryPickRequestForUnfulfilledCherryPicks}"
 						styleClass="command" />
 				</t:panelGroup>
 
@@ -210,23 +227,35 @@ TODO:
 			<t:outputText value="Assay Plates" styleClass="sectionHeader" />
 		</t:div>
 
-		<t:panelGroup id="assayPlatesCommandPanel"
-			rendered="#{cherryPickRequestViewer.editable}">
-			<t:commandButton id="allocateCherryPicks" value="Reserve Liquid"
-				action="#{cherryPickRequestViewer.allocateCherryPicks}"
-				disabled="#{empty cherryPickRequestViewer.cherryPickRequest.cherryPicks || cherryPickRequestViewer.cherryPickRequest.allocated}"
+		<t:outputText value="<none>" styleClass="label"
+			rendered="#{!cherryPickRequestViewer.cherryPickRequest.mapped}" />
+
+		<t:panelGroup id="selectedAssayPlatesCommandPanel"
+			rendered="#{cherryPickRequestViewer.editable && cherryPickRequestViewer.cherryPickRequest.mapped">
+			<t:div>
+				<t:outputText styleClass="label" value="For selected assay plates:"/>
+			</t:div>
+			<t:commandButton id="downloadPlateMappingFiles"
+				value="Download Files"
+				action="#{cherryPickRequestViewer.downloadPlateMappingFilesForSelectedAssayPlates}"
+				disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 				styleClass="command" />
-			<t:commandButton id="deallocateCherryPicks"
-				value="Cancel Reservation"
-				action="#{cherryPickRequestViewer.deallocateCherryPicks}"
-				disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated}"
+			<t:commandButton id="recordLiquidTransfer"
+				value="Record Liquid Transfer"
+				action="#{cherryPickRequestViewer.recordLiquidTransferForSelectedAssayPlates}"
+				disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
+				styleClass="command" />
+			<h:commandButton id="duplicateCherryPickRequestForAssayPlates" value="Duplicate"
+				disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
+				action="#{cherryPickRequestViewer.createDuplicateCherryPickRequestForSelectedAssayPlates}"
 				styleClass="command" />
 		</t:panelGroup>
 
 		<t:dataTable id="assayPlatesTable" var="assayPlateRow"
 			value="#{cherryPickRequestViewer.assayPlatesDataModel}"
 			styleClass="standardTable" columnClasses="column"
-			rowClasses="row1,row2" headerClass="tableHeader">
+			rowClasses="row1,row2" headerClass="tableHeader"
+			rendered="#{cherryPickRequestViewer.cherryPickRequest.mapped}">
 			<t:columns value="#{cherryPickRequestViewer.assayPlatesColumnModel}"
 				var="columnName" styleClass="column">
 				<f:facet name="header">
@@ -242,49 +271,11 @@ TODO:
 				<t:selectBooleanCheckbox value="#{assayPlateRow.selected}" />
 			</t:column>
 		</t:dataTable>
-		<t:div>
-			<t:outputText
-				value="Click 'Reserve Liquid' button to create assay plates"
-				styleClass="label" style="font-style:italic" />
-		</t:div>
 
 		<t:commandButton id="selectAllAssayPlatesButton" forceId="true"
 			action="#{cherryPickRequestViewer.selectAllAssayPlates}"
+			rendered="#{cherryPickRequestViewer.cherryPickRequest.mapped}"
 			style="display:none" />
-
-		<t:panelGroup id="selectedAssayPlatesCommandPanel"
-			rendered="#{cherryPickRequestViewer.editable}">
-			<t:div>
-				<t:outputText styleClass="label" value="For selected assay plates:"/>
-			</t:div>
-			<t:commandButton id="downloadPlateMappingFiles"
-				value="Download Files"
-				action="#{cherryPickRequestViewer.downloadPlateMappingFilesForSelectedAssayPlates}"
-				disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated}"
-				styleClass="command" />
-			<t:commandButton id="recordLiquidTransfer"
-				value="Record Liquid Transfer"
-				action="#{cherryPickRequestViewer.recordLiquidTransferForSelectedAssayPlates}"
-				disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated}"
-				styleClass="command" />
-			<h:commandButton id="duplicateCherryPickRequest" value="Duplicate"
-				disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated}"
-				action="#{cherryPickRequestViewer.createDuplicateCherryPickRequestForSelectedAssayPlates}"
-				styleClass="command" />
-		</t:panelGroup>
-
-		<%--t:dataTable id="plateMappingTable" var="plateMappingRow"
-			value="#{cherryPickRequestViewer.plateMappingDataModel}"
-			styleClass="standardTable" columnClasses="column"
-			rowClasses="row1,row2" headerClass="tableHeader">
-			<t:columns value="#{cherryPickRequestViewer.plateMappingColumnModel}"
-				var="columnName" styleClass="column">
-				<f:facet name="header">
-					<t:outputText value="#{columnName}" />
-				</f:facet>
-				<t:outputText value="#{plateMappingRow[columnName]}" />
-			</t:columns>
-		</t:dataTable--%>
 
 		<t:div styleClass="sectionHeader">
 			<t:outputText value="Liquid Transfers" styleClass="sectionHeader" />

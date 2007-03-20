@@ -312,7 +312,7 @@ public abstract class CherryPickRequest extends AbstractEntity
     Set<CherryPick> cherryPicksForPlate = new HashSet<CherryPick>();
 
     for (CherryPick cherryPick : _cherryPicks) {
-      if (cherryPick.isAllocated() && cherryPick.getAssayPlateName().equals(assayPlateName)) {
+      if (cherryPick.isMapped() && cherryPick.getAssayPlateName().equals(assayPlateName)) {
         cherryPicksForPlate.add(cherryPick);
       }
     }
@@ -332,10 +332,27 @@ public abstract class CherryPickRequest extends AbstractEntity
   @DerivedEntityProperty
   public boolean isAllocated()
   {
-    // TODO: this is WRONG!  not all cherry picks may be allocated successfully!  including the first one!
+    // TODO: this is not efficient, but it's 2007 and we've got cycles to burn, right?
     Iterator<CherryPick> cherryPickIter = getCherryPicks().iterator();
-    // we assume that if one cherry pick is allocated, they are all allocated
-    return cherryPickIter.hasNext() && cherryPickIter.next().isAllocated();
+    while (cherryPickIter.hasNext()) {
+      if (cherryPickIter.next().isAllocated()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @DerivedEntityProperty
+  public boolean isMapped()
+  {
+    // TODO: this is not efficient, but it's 2007 and we've got cycles to burn, right?
+    Iterator<CherryPick> cherryPickIter = getCherryPicks().iterator();
+    while (cherryPickIter.hasNext()) {
+      if (cherryPickIter.next().isMapped()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @DerivedEntityProperty
@@ -347,12 +364,11 @@ public abstract class CherryPickRequest extends AbstractEntity
   @DerivedEntityProperty
   public Set<String> getAssayPlates()
   {
-    if (!isAllocated()) {
-      return new TreeSet<String>();
-    }
     Set<String> assayPlates = new TreeSet<String>();
     for (CherryPick cherryPick : getCherryPicks()) {
-      assayPlates.add(cherryPick.getAssayPlateName());
+      if (cherryPick.isMapped()) {
+        assayPlates.add(cherryPick.getAssayPlateName());
+      }
     }
     return assayPlates;
   }

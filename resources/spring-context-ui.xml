@@ -307,6 +307,12 @@
     <property
       name="screenResultExporter"
       ref="screenResultExporter" />
+    <property
+      name="cherryPickRequestAllocator"
+      ref="cherryPickRequestAllocator"/>
+    <property
+      name="cherryPickRequestPlateMapper"
+      ref="cherryPickRequestPlateMapper"/>
     <aop:scoped-proxy/>
   </bean>
 

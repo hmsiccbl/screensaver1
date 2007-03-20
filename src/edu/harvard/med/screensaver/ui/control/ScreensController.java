@@ -132,4 +132,12 @@ public interface ScreensController
   @UIControllerMethod
   public String deleteAllCherryPicks(CherryPickRequest cherryPickRequest);
 
+  @UIControllerMethod
+  public String allocateCherryPicks(CherryPickRequest cherryPickRequest);
+
+  @UIControllerMethod
+  public String deallocateCherryPicks(CherryPickRequest cherryPickRequest);
+
+  @UIControllerMethod
+  public String plateMapCherryPicks(CherryPickRequest cherryPickRequest);
 }

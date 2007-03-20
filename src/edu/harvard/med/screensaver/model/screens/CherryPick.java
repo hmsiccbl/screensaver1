@@ -199,19 +199,23 @@ public class CherryPick extends AbstractEntity
 
   /**
    * Marks the cherry pick as has having source library plate copy well volume
-   * allocated for it, and specifies the assay plate and well that the liquid
-   * volume has been allocated to
+   * allocated for it
    * 
    * @param sourceCopy
-   * @param assayPlateType
-   * @param assayPlateName
-   * @param assayPlateRow
-   * @param assayPlateColumn
    */
   public void setAllocated(Copy sourceCopy)
   {
+    if (isPlated()) {
+      throw new BusinessRuleViolationException("cannot allocate or deallocate cherry picks after they have been plated");
+    }
+    
+    if (_sourceCopy != null) {
+      _sourceCopy.getHbnCherryPicks().remove(this);
+    }
     _sourceCopy = sourceCopy;
-    _sourceCopy.getHbnCherryPicks().add(this);
+    if (_sourceCopy != null) {
+      _sourceCopy.getHbnCherryPicks().add(this);
+    }
   }
   
   /**
