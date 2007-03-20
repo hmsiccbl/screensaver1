@@ -180,11 +180,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   {
     if (_cherryPicksDataModel == null) {
       List<Map> rows = new ArrayList<Map>();
-      boolean isAllocated = _cherryPickRequest.isAllocated();
+      boolean isRequestAllocated = _cherryPickRequest.isAllocated();
       for (CherryPick cherryPick : _cherryPickRequest.getCherryPicks()) {
         Map<String,String> row = new HashMap<String,String>();
         int col = 0;
-        row.put(CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.isAllocated() ? "reserved" : cherryPick.isMapped() ? "mapped" : cherryPick.isPlated() ? "plated" : isAllocated ? "unfulfillable" : "new");
+        row.put(CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.isPlated() ? "plated" : cherryPick.isMapped() ? "mapped" : cherryPick.isAllocated() ? "reserved" : isRequestAllocated ? "unfulfillable" : "new");
         row.put(CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getSourceWell().getPlateNumber().toString());
         row.put(CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getSourceCopy() != null ? cherryPick.getSourceCopy().getName() : "");
         row.put(CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getSourceWell().getWellName());
@@ -204,7 +204,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           row.put(CHERRY_PICKS_TABLE_COLUMNS[col++], "");
         }
         
-        if (cherryPick.isPlated()) {
+        if (cherryPick.isMapped()) {
           row.put(CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getAssayPlateName());
           row.put(CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getAssayPlateWellName());
         }

@@ -99,6 +99,9 @@ public class CherryPickRequestAllocator
       {
         CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
         for (CherryPick cherryPick : cherryPickRequest.getCherryPicks()) {
+          if (cherryPick.isMapped()) {
+            throw new BusinessRuleViolationException("cannot deallocate a cherry pick after it is mapped");
+          }
           cherryPick.setAllocated(null);
         }
       }

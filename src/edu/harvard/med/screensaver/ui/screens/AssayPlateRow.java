@@ -14,11 +14,31 @@ import java.util.Map;
 public class AssayPlateRow
 {
   public Map<String,String> values;
-  public Boolean selected;
+  public Boolean selected = true;
 
   public AssayPlateRow(Map<String,String> values)
   {
     this.values = values;
   }
+  public Boolean getSelected()
+  {
+    return selected;
+  }
+
+  public void setSelected(Boolean selected)
+  {
+    this.selected = selected;
+  }
+
+  public Map<String,String> getValues()
+  {
+    return values;
+  }
+
+  public void setValues(Map<String,String> values)
+  {
+    this.values = values;
+  }
+
 }
 

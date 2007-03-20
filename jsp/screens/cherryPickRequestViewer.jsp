@@ -192,7 +192,7 @@ TODO:
 					<t:commandButton id="deallocateCherryPicks"
 						value="Cancel Reservation"
 						action="#{cherryPickRequestViewer.deallocateCherryPicks}"
-						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated}"
+						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated || cherryPickRequestViewer.cherryPickRequest.mapped}"
 						styleClass="command" />
 					<t:commandButton id="plateMapCherryPicks" value="Map to Assay Plates"
 						action="#{cherryPickRequestViewer.plateMapCherryPicks}"
@@ -231,7 +231,7 @@ TODO:
 			rendered="#{!cherryPickRequestViewer.cherryPickRequest.mapped}" />
 
 		<t:panelGroup id="selectedAssayPlatesCommandPanel"
-			rendered="#{cherryPickRequestViewer.editable && cherryPickRequestViewer.cherryPickRequest.mapped">
+			rendered="#{cherryPickRequestViewer.editable && cherryPickRequestViewer.cherryPickRequest.mapped}">
 			<t:div>
 				<t:outputText styleClass="label" value="For selected assay plates:"/>
 			</t:div>

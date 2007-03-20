@@ -19,6 +19,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
@@ -57,7 +58,22 @@ public class CherryPickRequestPlateMapper
 
   // public constructors and methods
 
-  public void generatePlateMapping(CherryPickRequest cherryPickRequest)
+  public void generatePlateMapping(final CherryPickRequest cherryPickRequestIn)
+  {
+    dao.doInTransaction(new DAOTransaction() 
+    {
+      public void runTransaction() 
+      {
+        CherryPickRequest cherryPickRequest = (CherryPickRequest) dao.reattachEntity(cherryPickRequestIn);
+        doGeneratePlateMapping(cherryPickRequest);
+      }
+    });
+  }
+
+  
+  // private methods
+
+  private void doGeneratePlateMapping(CherryPickRequest cherryPickRequest)
   {
     SortedSet<CherryPick> toBeMapped = findCherryPicksToBeMapped(cherryPickRequest);
     List<WellName> availableWellNamesMaster = findAvailableWellNames(cherryPickRequest);
@@ -94,9 +110,6 @@ public class CherryPickRequestPlateMapper
     // second pass: for each cherry pick, generate plate name and call cherryPick.setMapped()
     updateCherryPicks(cherryPickRequest, plateIndex + 1, plateWellMapping);
   }
-
-  
-  // private methods
 
   private void updateCherryPicks(CherryPickRequest cherryPickRequest,
                                  int plateCount,
