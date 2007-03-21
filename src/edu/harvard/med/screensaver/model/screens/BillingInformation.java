@@ -186,7 +186,7 @@ public class BillingInformation extends AbstractEntity
    */
   public void setBillingInfoReturnDate(Date billingInfoReturnDate)
   {
-    _billingInfoReturnDate = billingInfoReturnDate;
+    _billingInfoReturnDate = truncateDate(billingInfoReturnDate);
   }
 
   /**

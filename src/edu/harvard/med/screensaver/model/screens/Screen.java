@@ -114,8 +114,8 @@ public class Screen extends AbstractEntity
       dateCreated,
       screenType,
       title);
-    _dataMeetingScheduled = dataMeetingScheduled;
-    _dataMeetingComplete = dataMeetingComplete;
+    _dataMeetingScheduled = truncateDate(dataMeetingScheduled);
+    _dataMeetingComplete = truncateDate(dataMeetingComplete);
     _summary = summary;
     _comments = comments;
     _abaseStudyId = abaseStudyId;

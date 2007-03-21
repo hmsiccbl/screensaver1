@@ -308,7 +308,7 @@ public class LetterOfSupport extends AbstractEntity
    */
   private void setHbnDateWritten(Date dateWritten)
   {
-    _dateWritten = dateWritten;
+    _dateWritten = truncateDate(dateWritten);
   }
 
   /**

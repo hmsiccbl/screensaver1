@@ -163,7 +163,10 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     doTestCheryPickRequestAllocation(9,
                                      new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
                                      new String[] {"A01", "B02", "C03", "D04", "E05", "F06"});
-    
+   
+    // TODO: it would be good to test the case where allocation 1 is fulfilled
+    // by copy 1, allocation 2 is only fullfillable by copy 2, but then
+    // allocation 3 is fulfillable (again) by copy 1
   }
   
   

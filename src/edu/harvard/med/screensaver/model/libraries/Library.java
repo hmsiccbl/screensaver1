@@ -568,7 +568,7 @@ public class Library extends AbstractEntity
    */
   public void setDateReceived(Date dateReceived)
   {
-    _dateReceived = dateReceived;
+    _dateReceived = truncateDate(dateReceived);
   }
 
   /**
@@ -589,7 +589,7 @@ public class Library extends AbstractEntity
    */
   public void setDateScreenable(Date dateScreenable)
   {
-    _dateScreenable = dateScreenable;
+    _dateScreenable = truncateDate(dateScreenable);
   }
 
   /**

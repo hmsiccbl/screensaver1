@@ -69,7 +69,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * Constructs an initialized <code>CherryPickRequest</code> object.
    * 
    * @param screen the screen
-   * @param requestedBy the user that made the requet
+   * @param requestedBy the user that made the request
    * @param dateRequested the date created
    * @throws DuplicateEntityException
    */
@@ -79,7 +79,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   {
     _screen = screen;
     _requestedBy = requestedBy;
-    _dateRequested = dateRequested;
+    _dateRequested = truncateDate(dateRequested);
     _ordinal = screen.getCherryPickRequests().size();
     requestedBy.getHbnCherryPickRequests().add(this);
     screen.getCherryPickRequests().add(this);
