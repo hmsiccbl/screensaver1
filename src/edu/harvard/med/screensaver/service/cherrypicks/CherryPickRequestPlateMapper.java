@@ -136,7 +136,7 @@ public class CherryPickRequestPlateMapper
   {
     StringBuilder name = new StringBuilder();
     name.append(cherryPickRequest.getRequestedBy().getFullNameFirstLast()).
-    append(" (").append(cherryPickRequest.getEntityId()).append(") ").
+    append(" (").append(cherryPickRequest.getScreen().getScreenNumber()).append(") ").
     append("CP").append(cherryPickRequest.getOrdinal()).
     append("  Plate ").append(String.format("%02d", (i + 1))).append(" of ").
     append(totalPlateCount);

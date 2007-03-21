@@ -6,7 +6,7 @@
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
-
+  
 package edu.harvard.med.screensaver.service.cherrypicks;
 
 import java.math.BigDecimal;
@@ -134,7 +134,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
     List<CherryPick> indexedCherryPicks = new ArrayList<CherryPick>(sortedCherryPicks);
     for (int index = firstIndex; index <= lastIndex; index++) {
       String expectedAssayPlateName = String.format("Cherry Picker (%d) CP%d  Plate %02d of %d",
-                                                    cherryPickRequest.getEntityId(),
+                                                    cherryPickRequest.getScreen().getScreenNumber(),
                                                     cherryPickRequest.getOrdinal(),
                                                     expectedAssayPlateIndex + 1,
                                                     cherryPickRequest.getAssayPlates().size());
