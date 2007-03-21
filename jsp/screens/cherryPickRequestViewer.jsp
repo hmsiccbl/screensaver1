@@ -207,12 +207,24 @@ TODO:
 				<t:dataTable id="cherryPicksTable" var="cherryPickRow"
 					value="#{cherryPickRequestViewer.cherryPicksDataModel}"
 					styleClass="standardTable" columnClasses="column"
-					rowClasses="row1,row2" headerClass="tableHeader">
+					rowClasses="row1,row2" headerClass="tableHeader"
+					sortColumn="#{cherryPickRequestViewer.cherryPicksSortManager.currentSortColumnName}"
+					sortAscending="#{cherryPickRequestViewer.cherryPicksSortManager.sortAscending}">
 					<t:columns
-						value="#{cherryPickRequestViewer.cherryPicksColumnModel}"
+						value="#{cherryPickRequestViewer.cherryPicksSortManager.columnModel}"
 						var="columnName" styleClass="column">
 						<f:facet name="header">
-							<t:outputText value="#{columnName}" />
+							<t:commandSortHeader columnName="#{columnName}" arrow="false">
+								<f:facet name="ascending">
+									<t:graphicImage value="/images/ascending-arrow.gif"
+										rendered="true" border="0" />
+								</f:facet>
+								<f:facet name="descending">
+									<t:graphicImage value="/images/descending-arrow.gif"
+										rendered="true" border="0" />
+								</f:facet>
+								<h:outputText value="#{columnName}" />
+							</t:commandSortHeader>
 						</f:facet>
 						<t:outputText value="#{cherryPickRow[columnName]}" />
 					</t:columns>

@@ -10,7 +10,9 @@
 package edu.harvard.med.screensaver.ui.screens;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,7 +38,9 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
+import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
+import edu.harvard.med.screensaver.ui.util.TableSortManager;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -78,7 +82,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private UISelectOneEntityBean<ScreeningRoomUser> _requestedBy;
   private UISelectManyBean<Integer> _emptyColumnsOnAssayPlate;
 
-  private DataModel _cherryPicksColumnModel;
+  private TableSortManager _cherryPicksSortManager;
   private DataModel _cherryPicksDataModel;
   private DataModel _assayPlatesColumnModel;
   private DataModel _assayPlatesDataModel;
@@ -128,7 +132,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
     _emptyColumnsOnAssayPlate = new UISelectManyBean<Integer>(COLUMNS_LIST, _cherryPickRequest.getEmptyColumnsOnAssayPlate());
     
-    _cherryPicksColumnModel = new ArrayDataModel(CHERRY_PICKS_TABLE_COLUMNS);
     _assayPlatesColumnModel = new ArrayDataModel(ASSAY_PLATES_TABLE_COLUMNS);
     _liquidTransferColumnModel = new ArrayDataModel(LIQUID_TRANSFER_TABLE_COLUMNS);
     _cherryPicksDataModel = null;
@@ -171,11 +174,26 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return StringUtils.makeListString(new TreeSet<Integer>(_cherryPickRequest.getEmptyColumnsOnAssayPlate()), ", ");
   }
 
-  public DataModel getCherryPicksColumnModel()
+  public TableSortManager getCherryPicksSortManager()
   {
-    return _cherryPicksColumnModel;
+    if (_cherryPicksSortManager == null) {
+      _cherryPicksSortManager = new TableSortManager(Arrays.asList(CHERRY_PICKS_TABLE_COLUMNS)) 
+      {
+        @Override
+        protected void sortChanged(String newSortColumnName, SortDirection newSortDirection)
+        {
+          _cherryPicksDataModel = null;
+        }
+      };
+    }
+    return _cherryPicksSortManager;
   }
-  
+
+  public void setCherryPicksSortManager(TableSortManager cherryPicksSortManager)
+  {
+    _cherryPicksSortManager = cherryPicksSortManager;
+  }
+
   public DataModel getCherryPicksDataModel()
   {
     if (_cherryPicksDataModel == null) {
@@ -215,6 +233,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean
         
         rows.add(row);
       }
+      Collections.sort(rows, 
+                       new CherryPickTableRowComparator(_cherryPicksSortManager.getCurrentSortColumnName(), 
+                                                        _cherryPicksSortManager.getCurrentSortDirection()));
       _cherryPicksDataModel = new ListDataModel(rows);
     }
     return _cherryPicksDataModel;
