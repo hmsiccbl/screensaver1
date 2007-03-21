@@ -265,6 +265,9 @@
     <description>
       RNAi Library Contents Importer backing bean
     </description>
+    <property
+      name="rnaiLibraryContentsParser"
+      ref="rnaiLibraryContentsParser" />
     <aop:scoped-proxy/>
   </bean>
 
