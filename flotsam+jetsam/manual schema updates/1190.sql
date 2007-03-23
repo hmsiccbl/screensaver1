@@ -1,5 +1,3 @@
-update screensaver_user set first_name='Nathan', ecommons_id=null, login='nmoerke', digested_password='d805a86e89cadb3f27357f75257ae737c7b800cc' where email='nathan_moerke@hms.harvard.edu';
-
 drop table cherry_pick_request_empty_columns;
 
 create table cherry_pick_request_requested_empty_columns (
