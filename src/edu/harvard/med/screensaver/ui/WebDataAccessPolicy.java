@@ -274,31 +274,7 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
    */
   public boolean visit(Screen screen)
   {
-    ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
-    if (user == null) {
-      // non-web context, allow all permissions
-      return true;
-    }
-    if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
-      return true;
-    }
-    // TODO: temporary data access policy for beta, until Harvard legal dept
-    // (OTL) approves pubilc visibility of screens (as of 2007-02-08)
-    if (user instanceof ScreeningRoomUser) {
-      ScreeningRoomUser screener = (ScreeningRoomUser) user;
-      return screener.getScreensLed().contains(screen) ||
-      screener.getScreensHeaded().contains(screen) ||
-      screener.getScreensCollaborated().contains(screen);
-    }
-//    if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE) && 
-//      user.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER)) {
-//      return true;
-//    }
-//    if (screen.getScreenType().equals(ScreenType.RNAI) && 
-//      user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER)) {
-//      return true;
-//    }
-    return false;
+    return true;
   }
 
   /* (non-Javadoc)

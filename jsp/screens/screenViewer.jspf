@@ -171,17 +171,21 @@ TODO:
 			value="#{screenViewer.screen.dataMeetingComplete}"
 			rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
 
-		<t:outputLabel for="publishableProtocol" value="Publishable Protocol" />
+		<t:outputLabel for="publishableProtocol" value="Publishable Protocol"
+			rendered="#{screenViewer.userAssociatedWithScreen}" />
 		<t:inputTextarea id="publishableProtocol" rows="3" cols="80"
 			value="#{screenViewer.screen.publishableProtocol}"
 			displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
-			displayValueOnlyStyleClass="dataText" />
+			displayValueOnlyStyleClass="dataText"
+			rendered="#{screenViewer.userAssociatedWithScreen}" />
 
-		<t:outputLabel for="summary" value="Summary" />
+		<t:outputLabel for="summary" value="Summary"
+			rendered="#{screenViewer.userAssociatedWithScreen}" />
 		<t:inputTextarea id="summary" rows="3" cols="80"
 			value="#{screenViewer.screen.summary}"
 			displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
-			displayValueOnlyStyleClass="dataText" />
+			displayValueOnlyStyleClass="dataText"
+			rendered="#{screenViewer.userAssociatedWithScreen}" />
 
 		<t:outputLabel for="comments" value="Comments"
 			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}" />
@@ -191,12 +195,15 @@ TODO:
 			displayValueOnly="#{screenViewer.adminViewMode}" styleClass="inputText"
 			displayValueOnlyStyleClass="dataText" />
 
-		<t:outputLabel for="activityItems" value="Screening Room Activities" />
-		<t:panelGrid columns="1">
+		<t:outputLabel for="activityItems" value="Screening Room Activities"
+			rendered="#{screenViewer.userAssociatedWithScreen}" />
+		<t:panelGrid columns="1"
+			rendered="#{screenViewer.userAssociatedWithScreen}">
 			<t:outputText value="<none>" styleClass="dataText"
 				rendered="#{empty screenViewer.screen.screeningRoomActivities}" />
 			<t:dataTable id="activityItems" var="activityItem"
-				value="#{screenViewer.activitiesDataModel}" preserveDataModel="false"
+				value="#{screenViewer.activitiesDataModel}"
+				preserveDataModel="false"
 				rendered="#{!empty screenViewer.screen.screeningRoomActivities}"
 				styleClass="standardTable" rowClasses="row1,row2"
 				columnClasses="column" headerClass="tableHeader">
@@ -204,15 +211,15 @@ TODO:
 					<f:facet name="header">
 						<t:outputText value="Date" />
 					</f:facet>
-					<t:outputText id="screeningRoomActivityDate" value="#{activityItem.dateOfActivity}"
-						styleClass="dataText" />
+					<t:outputText id="screeningRoomActivityDate"
+						value="#{activityItem.dateOfActivity}" styleClass="dataText" />
 				</t:column>
 				<t:column>
 					<f:facet name="header">
 						<t:outputText value="Type" />
 					</f:facet>
-					<t:outputText id="activityType" value="#{activityItem.activityTypeName}"
-						styleClass="dataText" />
+					<t:outputText id="activityType"
+						value="#{activityItem.activityTypeName}" styleClass="dataText" />
 				</t:column>
 				<t:column>
 					<f:facet name="header">
@@ -223,7 +230,8 @@ TODO:
 						styleClass="dataText" />
 				</t:column>
 				<t:column>
-					<t:commandButton id="viewActivity" action="#{screenViewer.viewScreeningRoomActivity}"
+					<t:commandButton id="viewActivity"
+						action="#{screenViewer.viewScreeningRoomActivity}"
 						value="#{screenViewer.editMode ? \"View/Edit...\" : \"View...\"}"
 						styleClass="command" />
 					<%-- t:commandButton id="copyScreeningRoomActivity" action="#{screenViewer.copyScreeningRoomActivity}"
@@ -234,12 +242,14 @@ TODO:
 			<t:panelGroup>
 				<t:commandButton value="Add Screening Room Activity..."
 					action="#{screenViewer.addScreeningRoomActivityItem}"
-					styleClass="command" rendered="#{screenViewer.editMode}"/>
+					styleClass="command" rendered="#{screenViewer.editMode}" />
 			</t:panelGroup>
 		</t:panelGrid>
-		
-		<t:outputLabel for="cherryPickRequests" value="Cherry Pick Requests" />
-		<t:panelGrid columns="1">
+
+		<t:outputLabel for="cherryPickRequests" value="Cherry Pick Requests"
+			rendered="#{screenViewer.userAssociatedWithScreen}" />
+		<t:panelGrid columns="1"
+			rendered="#{screenViewer.userAssociatedWithScreen}">
 			<t:outputText value="<none>" styleClass="dataText"
 				rendered="#{empty screenViewer.screen.cherryPickRequests}" />
 			<t:dataTable id="cherryPickRequestItems" var="cherryPickRequestItem"
@@ -278,13 +288,14 @@ TODO:
 			<t:panelGroup>
 				<t:commandButton value="Add Cherry Pick Request..."
 					action="#{screenViewer.addCherryPickRequestItem}"
-					styleClass="command" rendered="#{screenViewer.editMode}"
-					/>
+					styleClass="command" rendered="#{screenViewer.editMode}" />
 			</t:panelGroup>
 		</t:panelGrid>
-		
-		<t:outputLabel for="statusItems" value="Status Items" />
-		<t:panelGrid columns="1">
+
+		<t:outputLabel for="statusItems" value="Status Items"
+			rendered="#{screenViewer.userAssociatedWithScreen}" />
+		<t:panelGrid columns="1"
+			rendered="#{screenViewer.userAssociatedWithScreen}">
 			<t:outputText value="<none>" styleClass="dataText"
 				rendered="#{empty screenViewer.screen.statusItems}" />
 			<t:dataTable id="statusItems" var="statusItem"
@@ -510,10 +521,12 @@ TODO:
 			</t:panelGroup>
 		</t:panelGrid>
 
-		<t:outputLabel for="assayReadoutTypes" value="Assay Readout Types" />
+		<t:outputLabel for="assayReadoutTypes" value="Assay Readout Types"
+			rendered="#{screenViewer.userAssociatedWithScreen}" />
 		<t:outputText id="assayReadoutTypes"
 			value="#{empty screenViewer.screen.assayReadoutTypes ? \"<none>\" : screenViewer.screen.assayReadoutTypesString}"
-			styleClass="dataText" />
+			styleClass="dataText"
+			rendered="#{screenViewer.userAssociatedWithScreen}" />
 
 		<t:outputLabel for="keywords" value="Keywords" />
 		<t:outputText value="<none>" styleClass="dataText"

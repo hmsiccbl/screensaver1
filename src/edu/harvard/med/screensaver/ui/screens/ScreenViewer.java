@@ -36,6 +36,7 @@ import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
@@ -117,6 +118,24 @@ public class ScreenViewer extends AbstractBackingBean
   public boolean isAdminViewMode()
   {
     return _isAdminViewMode;
+  }
+  
+  /**
+   * Determine if the current user can view the restricted screen fields.
+   * @return
+   */
+  public boolean isUserAssociatedWithScreen()
+  {
+    ScreensaverUser user = getCurrentScreensaverUser().getScreensaverUser();
+    Set<ScreensaverUserRole> roles = user.getScreensaverUserRoles();
+    if (roles.contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
+      roles.contains(ScreensaverUserRole.SCREENS_ADMIN)) {
+      return true;
+    }
+    return 
+    _screen.getLeadScreener().equals(user) ||
+    _screen.getLabHead().equals(user) ||
+    _screen.getCollaborators().contains(user);
   }
 
   public ScreenResult getScreenResult()

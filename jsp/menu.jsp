@@ -53,12 +53,8 @@
 					accesskey="L" />
 				<t:commandNavigation2 action="#{screensController.browseScreens}"
 					value="Browse Screens"
-					rendered="#{menu.readOnlyAdmin}"
 					accesskey="S" />
-				<t:commandNavigation2 />
-				<t:commandNavigation2 action="#{screensController.browseMyScreens}"
-					value="Browse My Screens"
-					rendered="#{!menu.readOnlyAdmin}"
+				<t:commandNavigation2 action="#{screensController.browseMyScreens}" value="My Screens"
 					accesskey="M" />
 				<t:commandNavigation2 />
 				<t:commandNavigation2 action="#{mainController.viewDownloads}"
