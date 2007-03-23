@@ -30,6 +30,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
@@ -44,6 +45,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
+import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
@@ -635,8 +637,8 @@ public class ComplexDAOTest extends AbstractSpringTest
                                       LibraryType.COMMERCIAL,
                                       1,
                                       2);
-        Well well1 = new Well(library, 1, "A01");
-        Well well2 = new Well(library, 2, "P24");
+        Well well1 = CherryPickRequestAllocatorTest.makeRNAiWell(library, 1, new WellName("A01"));
+        Well well2 = CherryPickRequestAllocatorTest.makeRNAiWell(library, 2, new WellName("P24"));
         dao.persistEntity(library);
         
         Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1); 
@@ -644,7 +646,7 @@ public class ComplexDAOTest extends AbstractSpringTest
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
         new CherryPick(cherryPickRequest, well1);
         new CherryPick(cherryPickRequest, well2);
-        dao.persistEntity(cherryPickRequest); // why do we need this, if we're also persisting the screens?!
+        dao.persistEntity(cherryPickRequest); // why do we need this, if we're also persisting the screen?!
         dao.persistEntity(screen);
       }
     });

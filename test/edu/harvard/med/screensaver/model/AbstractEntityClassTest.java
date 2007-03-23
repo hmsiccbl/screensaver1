@@ -19,9 +19,9 @@ import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
 
-public class AbstractEntityTest extends TestCase
+public class AbstractEntityClassTest extends TestCase
 {
-  private static Logger log = Logger.getLogger(AbstractEntityTest.class);
+  private static Logger log = Logger.getLogger(AbstractEntityClassTest.class);
   
   private static class LessAbstractEntity extends AbstractEntity
   {

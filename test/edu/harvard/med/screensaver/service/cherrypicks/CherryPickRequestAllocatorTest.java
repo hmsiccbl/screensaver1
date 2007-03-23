@@ -204,7 +204,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     return cherryPickRequest;
   }
   
-  static Well makeRNAiWell(Library library, int plateNumber, WellName wellName)
+  public static Well makeRNAiWell(Library library, int plateNumber, WellName wellName)
   {
     Well well = new Well(library, new WellKey(plateNumber, wellName), WellType.EXPERIMENTAL);
     Gene gene = new Gene("gene" + plateNumber + wellName,

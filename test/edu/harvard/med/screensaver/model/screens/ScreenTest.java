@@ -1,7 +1,5 @@
-// $HeadURL:
-// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/test/edu/harvard/med/screensaver/TestHibernate.java
-// $
-// $Id: ComplexDAOTest.java 1110 2007-03-02 23:06:48Z js163 $
+// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml $
+// $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -11,37 +9,35 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
+import java.beans.IntrospectionException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
-
-import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
+import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.util.DateUtil;
 
+import org.apache.log4j.Logger;
 
-/**
- * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- */
-public class ScreenTest extends AbstractSpringTest
+public class ScreenTest extends AbstractEntityInstanceTest
 {
-  
-  private static final Logger log = Logger.getLogger(ScreenTest.class);
-  
-  // public static methods
-  
-  public static void main(String[] args)
-  {
-    junit.textui.TestRunner.run(ScreenTest.class);
-  }
+  // static members
+
+  private static Logger log = Logger.getLogger(ScreenTest.class);
+
+
+  // instance data members
 
   
+  // public constructors and methods
+
+  public ScreenTest() throws IntrospectionException
+  {
+    super(Screen.class);
+  }
   
-  // JUnit test methods
 
   public void testGetScreeningRoomActivities() throws Exception
   {
@@ -92,6 +88,5 @@ public class ScreenTest extends AbstractSpringTest
                  new TreeSet<ScreeningRoomActivity>(Arrays.asList(screening1, screening2, cplt)),
                  activities);
   }
-
 }
 

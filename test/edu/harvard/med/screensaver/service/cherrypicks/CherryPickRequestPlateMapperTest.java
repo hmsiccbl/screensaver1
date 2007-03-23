@@ -72,7 +72,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         cherryPickRequest.setRandomizedAssayPlateLayout(false);
         Set<Integer> emptyColumns = new HashSet<Integer>();
         emptyColumns.addAll(Arrays.asList(4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22));
-        cherryPickRequest.setEmptyColumnsOnAssayPlate(emptyColumns);
+        cherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(emptyColumns);
         addCherryPicks(cherryPickRequest, 1, "A01", "A14"); // to assay plate 1, col 3 and 8 (partially)
         addCherryPicks(cherryPickRequest, 2, "A01", "A08"); // to assay plate 1, col 8 (leaving 2 available)
         addCherryPicks(cherryPickRequest, 3, "A01", "A16"); // to assay plate 2

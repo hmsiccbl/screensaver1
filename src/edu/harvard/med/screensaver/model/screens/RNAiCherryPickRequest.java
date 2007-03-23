@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
@@ -63,7 +64,6 @@ public class RNAiCherryPickRequest extends CherryPickRequest
                                Date dateRequested)
   {
     super(screen, requestedBy, dateRequested);
-    super.getEmptyColumnsOnAssayPlate().addAll(REQUIRED_EMPTY_COLUMNS);
   }
 
   // public constructors and methods
@@ -89,6 +89,7 @@ public class RNAiCherryPickRequest extends CherryPickRequest
     return _assayProtocol;
   }
   
+  @DerivedEntityProperty
   public PlateType getAssayPlateType()
   {
     return RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE;
@@ -116,15 +117,15 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   }
   
   @Override
-  public void setEmptyColumnsOnAssayPlate(Set<Integer> emptyColumnsOnAssayPlate)
+  @ImmutableProperty
+  public Set<Integer> getRequiredEmptyColumnsOnAssayPlate()
   {
-    super.setEmptyColumnsOnAssayPlate(emptyColumnsOnAssayPlate);
-    getEmptyColumnsOnAssayPlate().addAll(REQUIRED_EMPTY_COLUMNS);
+    return REQUIRED_EMPTY_COLUMNS;
   }
   
   @Override
-  @DerivedEntityProperty
-  public Set<Character> getEmptyRowsOnAssayPlate()
+  @ImmutableProperty
+  public Set<Character> getRequiredEmptyRowsOnAssayPlate()
   {
     return REQUIRED_EMPTY_ROWS;
   }

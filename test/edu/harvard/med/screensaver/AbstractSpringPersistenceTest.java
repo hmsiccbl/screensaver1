@@ -41,6 +41,15 @@ public class AbstractSpringPersistenceTest extends AbstractSpringTest
   }
   
   // public constructors and methods
+  
+  public AbstractSpringPersistenceTest()
+  {
+  }
+  
+  public AbstractSpringPersistenceTest(String testName)
+  {
+    super(testName);
+  }
 
   // private methods
 

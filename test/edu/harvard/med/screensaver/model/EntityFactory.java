@@ -9,8 +9,10 @@
 
 package edu.harvard.med.screensaver.model;
 
-public interface BeanTester
+import org.apache.log4j.Logger;
+
+public interface EntityFactory
 {
-  public void testBean(AbstractEntity bean);
+
 }
 

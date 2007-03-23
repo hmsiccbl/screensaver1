@@ -44,8 +44,7 @@ public class CherryPick extends AbstractEntity
 
   private static final Logger log = Logger.getLogger(CherryPick.class);
   private static final long serialVersionUID = 0L;
-
-
+  
   // instance fields
 
   private Integer _cherryPickId;

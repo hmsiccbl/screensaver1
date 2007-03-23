@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -53,7 +54,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
 
   private static final String[] CHERRY_PICKS_TABLE_COLUMNS = { "Status", "Library Plate", "Source Copy", "Source Well", "Gene", "Entrez ID", "Symbol", "AccNo", "Assay Plate", "Assay Well" };
-  private static final String[] ASSAY_PLATES_TABLE_COLUMNS = { "Assay Plate Name", "Liquid Transfers" };
+  private static final String[] ASSAY_PLATES_TABLE_COLUMNS = { "Assay Plate Name", "Date Plated" };
   private static final String[] LIQUID_TRANSFER_TABLE_COLUMNS = { "Date", "By", "Assay Plates" };
 
   private static final Collection<Integer> COLUMNS_LIST = new ArrayList<Integer>();
@@ -130,7 +131,10 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       }
     };
 
-    _emptyColumnsOnAssayPlate = new UISelectManyBean<Integer>(COLUMNS_LIST, _cherryPickRequest.getEmptyColumnsOnAssayPlate());
+    Set<Integer> selectableEmtpyColumns = new HashSet<Integer>(COLUMNS_LIST);
+    selectableEmtpyColumns.removeAll(_cherryPickRequest.getRequiredEmptyColumnsOnAssayPlate());
+    _emptyColumnsOnAssayPlate = new UISelectManyBean<Integer>(selectableEmtpyColumns, 
+                                                              _cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate());
     
     _assayPlatesColumnModel = new ArrayDataModel(ASSAY_PLATES_TABLE_COLUMNS);
     _liquidTransferColumnModel = new ArrayDataModel(LIQUID_TRANSFER_TABLE_COLUMNS);
@@ -171,7 +175,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
   public String getEmptyColumnsOnAssayPlateAsString()
   {
-    return StringUtils.makeListString(new TreeSet<Integer>(_cherryPickRequest.getEmptyColumnsOnAssayPlate()), ", ");
+    return StringUtils.makeListString(new TreeSet<Integer>(_cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate()), ", ");
   }
 
   public TableSortManager getCherryPicksSortManager()
@@ -395,7 +399,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       public void runTransaction() 
       {
         _cherryPickRequest.setRequestedBy(_requestedBy.getSelection());
-        _cherryPickRequest.setEmptyColumnsOnAssayPlate(new HashSet<Integer>(_emptyColumnsOnAssayPlate.getSelections()));
+        _cherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(new HashSet<Integer>(_emptyColumnsOnAssayPlate.getSelections()));
       }
     });
   }

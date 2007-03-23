@@ -21,6 +21,8 @@ import java.util.TreeSet;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.EntityIdProperty;
+import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
@@ -44,7 +46,7 @@ public abstract class CherryPickRequest extends AbstractEntity
 
   private static final Logger log = Logger.getLogger(CherryPickRequest.class);
   private static final long serialVersionUID = 0L;
-
+  
 
   // instance fields
 
@@ -57,7 +59,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   private BigDecimal _microliterTransferVolumePerWellRequested;
   private BigDecimal _microliterTransferVolumePerWellApproved;
   private boolean _randomizedAssayPlateLayout;
-  private Set<Integer> _emptyColumnsOnAssayPlate = new HashSet<Integer>();
+  private Set<Integer> _requestedEmptyColumnsOnAssayPlate = new HashSet<Integer>();
   private String _comments;
   private Set<CherryPick> _cherryPicks = new HashSet<CherryPick>();
   private Set<CherryPickLiquidTransfer> _cherryPickLiquidTransfers = new HashSet<CherryPickLiquidTransfer>();
@@ -97,6 +99,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   /**
    * @hibernate.property type="integer" not-null="true"
    */
+  @EntityIdProperty
   public Integer getOrdinal()
   {
     return _ordinal;
@@ -161,7 +164,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    *   column="screen_id"
    *   not-null="true"
    *   foreign-key="fk_cherry_pick_request_to_screen"
-   *   cascade="none"
+   *   cascade="save-update"
    */
   @ToOneRelationship(nullable=false, inverseProperty="cherryPickRequests")
   public Screen getScreen()
@@ -217,6 +220,7 @@ public abstract class CherryPickRequest extends AbstractEntity
     _dateRequested = truncateDate(dateRequested);
   }
 
+  @DerivedEntityProperty
   abstract public PlateType getAssayPlateType();
 
   abstract public Set<Well> findCherryPickSourceWells(Set<Well> screenedCherryPickWells);
@@ -266,24 +270,45 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
+   * Get the set of empty columns requested by the screener. The union of this
+   * method's result with the result of
+   * {@link #getRequiredEmptyColumnsOnAssayPlate()} determines the full set
+   * columns that must left empty.
+   * 
+   * @see #getRequiredEmptyRowsOnAssayPlate()
    * @return
-   * @hibernate.set table="cherry_pick_request_empty_columns"
+   * @hibernate.set table="cherry_pick_request_requested_empty_columns"
    * @hibernate.collection-key column="cherry_pick_request_id"
    * @hibernate.collection-element type="integer" not-null="true"
    */
-  public Set<Integer> getEmptyColumnsOnAssayPlate()
+  @DerivedEntityProperty
+  public Set<Integer> getRequestedEmptyColumnsOnAssayPlate()
   {
-    return _emptyColumnsOnAssayPlate;
+    return _requestedEmptyColumnsOnAssayPlate;
   }
 
-  public void setEmptyColumnsOnAssayPlate(Set<Integer> emptyColumnsOnAssayPlate)
+  public void setRequestedEmptyColumnsOnAssayPlate(Set<Integer> requestedEmptyColumnsOnAssayPlate)
   {
-    _emptyColumnsOnAssayPlate = emptyColumnsOnAssayPlate;
+    _requestedEmptyColumnsOnAssayPlate = requestedEmptyColumnsOnAssayPlate;
   }
 
   @SuppressWarnings("unchecked")
-  @DerivedEntityProperty
-  public Set<Character> getEmptyRowsOnAssayPlate()
+  @ImmutableProperty
+  /**
+   * The union of this method's result with the result of
+   * {@link #getEmptyColumnsOnAssayPlate()} determines the full set columns that
+   * must left empty.
+   * 
+   * @see #getEmptyRowsOnAssayPlate()
+   */
+  public Set<Integer> getRequiredEmptyColumnsOnAssayPlate()
+  {
+    return Collections.EMPTY_SET;
+  }
+
+  @SuppressWarnings("unchecked")
+  @ImmutableProperty
+  public Set<Character> getRequiredEmptyRowsOnAssayPlate()
   {
     return Collections.EMPTY_SET;
   }

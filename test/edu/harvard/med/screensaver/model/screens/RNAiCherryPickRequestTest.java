@@ -9,14 +9,16 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
+import java.beans.IntrospectionException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
+import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -27,16 +29,50 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 
 import org.apache.log4j.Logger;
 
-public class RNAiCherryPickRequestTest extends AbstractSpringPersistenceTest
+public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
 {
   // static members
 
   private static Logger log = Logger.getLogger(RNAiCherryPickRequestTest.class);
 
 
+  public RNAiCherryPickRequestTest() throws IntrospectionException
+  {
+    super(RNAiCherryPickRequest.class);
+  }
+  
+  public void testRequestedEmptyColumnsOnAssayPlate()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+
+    final Set<Integer> requestedEmptyColumns = new HashSet<Integer>(Arrays.asList(3, 7, 11));
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction() 
+      {
+        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
+        screen.setScreenType(ScreenType.RNAI);
+        CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
+        cherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(requestedEmptyColumns);
+        dao.persistEntity(cherryPickRequest); // why do we need this, if we're also persisting the screen?!
+        dao.persistEntity(screen);
+      }
+    });
+    
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction() 
+      {
+        Screen screen2 = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        assertEquals(requestedEmptyColumns,
+                     screen2.getCherryPickRequests().iterator().next().getRequestedEmptyColumnsOnAssayPlate());
+      }
+    });
+  }
 
   public void testFindCherryPickSourceWells()
   {
+    schemaUtil.truncateTablesOrCreateSchema();
     // TODO: consider testing same gene in 2 libs, but with different silencing reagents (shared gene, above, also sahres same silencing reagents between the 2 libraries)
     dao.doInTransaction(new DAOTransaction()
     {

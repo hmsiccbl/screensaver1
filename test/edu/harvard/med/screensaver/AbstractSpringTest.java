@@ -35,7 +35,17 @@ extends AbstractDependencyInjectionSpringContextTests
   };
   
   
-  public AbstractSpringTest() {
+  public AbstractSpringTest(String testName) 
+  {
+    super(testName);
+    // have AbstractDependencyInjectionSpringContextTests inject the properties
+    // we need into protected data members that share the same name as beans in
+    // our Spring configuration files.
+    setPopulateProtectedVariables(true);
+  }
+  
+  public AbstractSpringTest() 
+  {
     // have AbstractDependencyInjectionSpringContextTests inject the properties
     // we need into protected data members that share the same name as beans in
     // our Spring configuration files.

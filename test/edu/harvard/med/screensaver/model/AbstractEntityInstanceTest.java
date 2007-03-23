@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml $
+// $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -10,26 +10,179 @@
 package edu.harvard.med.screensaver.model;
 
 import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
+import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.SchemaUtil;
+import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.screens.CherryPick;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
+import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.Screening;
+import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.util.StringUtils;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.hibernate.SessionFactory;
+import org.hibernate.metadata.ClassMetadata;
+import org.springframework.orm.hibernate3.HibernateTemplate;
 
-/**
- * Test the entities as JavaBeans.
- * <p>
- * Note from s: my test code is a bit sloppy! Ha, you can still read it.
- * Them methods are way too long! Well, "it's just test code"...
- */
-public class EntityBeansTest extends EntityBeansExercizor
+public abstract class AbstractEntityInstanceTest extends AbstractSpringTest
 {
-  private static Logger log = Logger.getLogger(EntityBeansTest.class);
+  // static members
+
+  private static Logger log = Logger.getLogger(AbstractEntityInstanceTest.class);
+
   
+  // instance data members
+
+  /**
+   * The Hibernate <code>SessionFactory</code>. Used for getting
+   * <code>ClassMetadata</code> objects 
+   */
+  protected SessionFactory hibernateSessionFactory;
+  protected HibernateTemplate hibernateTemplate;
+  protected DAO dao;
+  protected SchemaUtil schemaUtil;
+
+  private Class<? extends AbstractEntity> entityClass;
+  private BeanInfo beanInfo;
+  private AbstractEntity bean;
+  
+  @Override
+  protected void onSetUp() throws Exception
+  {
+    super.onSetUp();
+  }
+  
+
+  // public constructors and methods
+
+  public AbstractEntityInstanceTest(Class<? extends AbstractEntity> clazz) throws IntrospectionException
+  {
+    super(clazz.getName());
+    entityClass = clazz;
+    beanInfo = Introspector.getBeanInfo(entityClass);
+    bean = newInstance(entityClass);
+  }
+  
+  // Hibernate tests
+  
+  public void testIsVersioned()
+  {
+    ClassMetadata classMetadata = hibernateSessionFactory.getClassMetadata(entityClass);
+    String entityName = classMetadata.getEntityName();
+    assertTrue(
+               "hibernate class is versioned: " + entityName,
+               classMetadata.isVersioned());
+    int versionIndex = classMetadata.getVersionProperty();
+    String versionName = classMetadata.getPropertyNames()[versionIndex];
+    assertTrue(
+               "name of version property is version: " + entityName,
+               versionName.equals("version"));
+  }
+  
+  // TODO: test getId() is public and setId() is private
+  // TODO: test hbn properties have non-hbn equivalent public getters
+
+  
+  // Class-level tests
+  
+  public void testHasAtLeastOnePublicConstructor()
+  {
+    boolean hasPublicConstructor = false;
+    for (Constructor constructor : entityClass.getConstructors()) {
+      if (Modifier.isPublic(constructor.getModifiers())) {
+        hasPublicConstructor = true;
+        break;
+      }
+    }
+    assertTrue(
+               "at least one public constructor in " + entityClass.getName(),
+               hasPublicConstructor);
+  }
+
+  public void testPublicConstructorHasAtLeastOneParameter()
+  {
+    for (Constructor constructor : entityClass.getConstructors()) {
+      if (Modifier.isPublic(constructor.getModifiers())) {
+        assertTrue(
+                   "public constructors have at least one param in " + entityClass.getName(),
+                   constructor.getParameterTypes().length > 0);
+      }
+    }
+  }
+
+  /**
+   * Test version accessors modifiers, arguments, and return types.
+   * This test might be a little excessive, but I had to put <i>something</i>
+   * here!  ;-)
+   */
+  public void testVersionAccessors()
+  {
+    // skip classes that have a getVersion from a superclass
+    if (! entityClass.getSuperclass().equals(AbstractEntity.class)) {
+      return;
+    }
+
+    // getVersion
+    try {
+      Method getVersionMethod = entityClass.getDeclaredMethod("getVersion");
+      assertTrue("private getVersion for " + entityClass, Modifier.isPrivate(getVersionMethod.getModifiers()));
+      assertFalse("instance getVersion for " + entityClass, Modifier.isStatic(getVersionMethod.getModifiers()));
+      assertEquals("getVersion return type for " + entityClass, getVersionMethod.getReturnType(), Integer.class);
+    }
+    catch (SecurityException e) {
+      e.printStackTrace();
+      fail("getting declared method getVersion for " + entityClass + ": " + e);
+    }
+    catch (NoSuchMethodException e) {
+      fail("getting declared method getVersion for " + entityClass + ": " + e);
+    }
+
+    // setVersion
+    try {
+      Method setVersionMethod = entityClass.getDeclaredMethod("setVersion", Integer.class);
+      assertTrue("private setVersion for " + entityClass, Modifier.isPrivate(setVersionMethod.getModifiers()));
+      assertFalse("instance setVersion for " + entityClass, Modifier.isStatic(setVersionMethod.getModifiers()));
+      assertEquals("setVersion return type for " + entityClass, setVersionMethod.getReturnType(), void.class);
+    }
+    catch (SecurityException e) {
+      e.printStackTrace();
+      fail("getting declared method getVersion for " + entityClass + ": " + e);
+    }
+    catch (NoSuchMethodException e) {
+      fail("getting declared method getVersion for " + entityClass + ": " + e);
+    }
+  }
+  
+  
+  // Entity tests
+
   /**
    * Test that all properties have a getter, and all properties aside from
    * set-based properties and hibernate ids have a setter
@@ -72,6 +225,7 @@ public class EntityBeansTest extends EntityBeansExercizor
    */
   public void testCollectionPropertiesStartOutEmpty()
   {
+    createPersistentBeanForTest();
     exercizePropertyDescriptors(new PropertyDescriptorExercizor()
     {
       public void exercizePropertyDescriptor(
@@ -79,9 +233,16 @@ public class EntityBeansTest extends EntityBeansExercizor
         final BeanInfo beanInfo,
         final PropertyDescriptor propertyDescriptor)
       {
-        testBean(bean, new BeanTester() {
+        doTestBean(bean, new BeanTester() {
           public void testBean(AbstractEntity bean) 
           {
+            if (isImmutableProperty(bean.getClass(), propertyDescriptor)) {
+              // do nothing
+              String fullPropName = bean.getClass().getSimpleName() + "." + propertyDescriptor.getDisplayName();
+              log.info("testCollectionPropertiesStartOutEmpty(): skipping test for collection " + fullPropName + 
+                       ": collection is immutable");
+              return;
+            }
             Method getter = propertyDescriptor.getReadMethod();
             // TODO: check if the getter returns a collection before invoking it
             Object result = null;
@@ -113,6 +274,7 @@ public class EntityBeansTest extends EntityBeansExercizor
    */
   public void testGettersForImmutableProperties()
   {
+    createPersistentBeanForTest();
     exercizePropertyDescriptors(new PropertyDescriptorExercizor()
     {
       public void exercizePropertyDescriptor(
@@ -128,7 +290,7 @@ public class EntityBeansTest extends EntityBeansExercizor
         
         try {
           final Object originalValue = propertyDescriptor.getReadMethod().invoke(bean);
-          testBean(bean, new BeanTester()
+          doTestBean(bean, new BeanTester()
           {
             public void testBean(AbstractEntity bean) {
               assertNull("immutable property has no public setter method",
@@ -136,10 +298,6 @@ public class EntityBeansTest extends EntityBeansExercizor
               try {
                 Object getterValue = propertyDescriptor.getReadMethod().invoke(bean);
                 assertNotNull("constructor sets value for immutable property; " + propFullName, getterValue);
-                // note: this test makes sense when run from the
-                // EntityBeansPersistenceTest subclass, which compares the
-                // original value to the persisted value; run from this class,
-                // it is vacuously true
                 assertEquals("getter for immutable property " + propFullName + 
                              " returns value specified in constructor",
                              originalValue,
@@ -168,6 +326,7 @@ public class EntityBeansTest extends EntityBeansExercizor
    */
   public void testGetterReturnsWhatSetterSet()
   {
+    createPersistentBeanForTest();
     exercizePropertyDescriptors(new PropertyDescriptorExercizor()
     {
       public void exercizePropertyDescriptor(
@@ -188,7 +347,7 @@ public class EntityBeansTest extends EntityBeansExercizor
         final Object testValue = getTestValueForType(getter.getReturnType());
 
         // call the setter
-        testBean(bean, new BeanTester() 
+        doTestBean(bean, new BeanTester() 
         {
           public void testBean(AbstractEntity bean) 
           {
@@ -205,7 +364,7 @@ public class EntityBeansTest extends EntityBeansExercizor
         });
 
         // call the getter
-        testBean(bean, new BeanTester() 
+        doTestBean(bean, new BeanTester() 
         {
           public void testBean(AbstractEntity bean) 
           {
@@ -249,6 +408,7 @@ public class EntityBeansTest extends EntityBeansExercizor
    */
   public void testCollectionProperties()
   {
+    createPersistentBeanForTest();
     exercizePropertyDescriptors(new PropertyDescriptorExercizor()
       {
         public void exercizePropertyDescriptor(
@@ -274,15 +434,15 @@ public class EntityBeansTest extends EntityBeansExercizor
    * <li>add;remove;get returns empty set
    */
   @SuppressWarnings("unchecked")
-  protected void doTestCollectionProperty(
-    AbstractEntity bean,
-    Method getter,
-    final PropertyDescriptor propertyDescriptor)
+  private void doTestCollectionProperty(AbstractEntity bean,
+                                        Method getter,
+                                        final PropertyDescriptor propertyDescriptor)
   {
     Class<? extends AbstractEntity> beanClass = bean.getClass();
     String beanClassName = beanClass.getSimpleName();
     String propertyName = propertyDescriptor.getName();
     final String fullPropName = beanClassName + "." + propertyName;
+    
     
 //    // collection property has pluralized name
 //    assertTrue(
@@ -331,7 +491,7 @@ public class EntityBeansTest extends EntityBeansExercizor
       final Object testValue = getTestValueForType(propertyType);
       
       // add the test value
-      testBean(bean, new BeanTester()
+      doTestBean(bean, new BeanTester()
       {
         public void testBean(AbstractEntity bean)
         {
@@ -346,10 +506,10 @@ public class EntityBeansTest extends EntityBeansExercizor
           }
         }
       });
-
+ 
       
       // call the getter to test it was added
-      testBean(bean, new BeanTester()
+      doTestBean(bean, new BeanTester()
       {
         public void testBean(AbstractEntity bean)
         {
@@ -389,7 +549,7 @@ public class EntityBeansTest extends EntityBeansExercizor
         // treat the testValue as an AbstractEntity, rather than just an Object;
         // for persistence tests, this enables Hibernate to update the testValue 
         // entity during flush (if just an Object, this doesn't occur)
-        testRelatedBeans(bean, (AbstractEntity) testValue, new RelatedBeansTester()
+        doTestRelatedBeans(bean, (AbstractEntity) testValue, new RelatedBeansTester()
         {
           public void testBeanWithRelatedBean(AbstractEntity bean, 
                                               AbstractEntity testValue)
@@ -407,7 +567,7 @@ public class EntityBeansTest extends EntityBeansExercizor
         });
       }
       else {
-        testBean(bean, new BeanTester()
+        doTestBean(bean, new BeanTester()
         {
           public void testBean(AbstractEntity bean)
           {
@@ -425,7 +585,7 @@ public class EntityBeansTest extends EntityBeansExercizor
       }
 
       // call the getter to test it was removed
-      testBean(bean, new BeanTester()
+      doTestBean(bean, new BeanTester()
       {
         public void testBean(AbstractEntity bean)
         {
@@ -446,6 +606,7 @@ public class EntityBeansTest extends EntityBeansExercizor
 
   public void testRelationshipBidirectionality()
   {
+    createPersistentBeanForTest();
     exercizePropertyDescriptors(new PropertyDescriptorExercizor()
       {
         public void exercizePropertyDescriptor(
@@ -482,12 +643,18 @@ public class EntityBeansTest extends EntityBeansExercizor
         }
       });
   }
+
+
+  private void createPersistentBeanForTest()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+    dao.persistEntity(bean);
+  }
   
-  protected void doTestBidirectionalityOfOneSideOfRelationship(
-    AbstractEntity bean,
-    BeanInfo beanInfo,
-    final PropertyDescriptor propertyDescriptor,
-    Method getter)
+  private void doTestBidirectionalityOfOneSideOfRelationship(AbstractEntity bean,
+                                                             BeanInfo beanInfo,
+                                                             final PropertyDescriptor propertyDescriptor,
+                                                             Method getter)
   {
     final String propFullName = bean.getClass() + "." + propertyDescriptor.getName();
     
@@ -512,7 +679,7 @@ public class EntityBeansTest extends EntityBeansExercizor
                 " has foreign key constraint: assuming related bean is associated in this bean's constructor");
       final AbstractEntity[] relatedBeanHolder = new AbstractEntity[1];
       // assert this bean's getter method returns the related bean that was set via the constructor
-      testBean(bean, new BeanTester()
+      doTestBean(bean, new BeanTester()
       {
         public void testBean(AbstractEntity bean)
         {
@@ -532,7 +699,7 @@ public class EntityBeansTest extends EntityBeansExercizor
 
       // assert related bean property returns/contains this bean (depending upon otherSideIsMany)
       // TODO: the rest of this block duplicates the getter-testing code below
-      testRelatedBeans(bean, relatedBeanHolder[0], new RelatedBeansTester()
+      doTestRelatedBeans(bean, relatedBeanHolder[0], new RelatedBeansTester()
       {
         public void testBeanWithRelatedBean(AbstractEntity bean,
                                             AbstractEntity relatedBean)
@@ -566,7 +733,7 @@ public class EntityBeansTest extends EntityBeansExercizor
       final AbstractEntity relatedBean = (AbstractEntity) getTestValueForType(relatedProperty.getBeanClass());
 
       // invoke the setter on this side
-      testBean(bean, new BeanTester()
+      doTestBean(bean, new BeanTester()
       {
         public void testBean(AbstractEntity bean)
         {
@@ -584,7 +751,7 @@ public class EntityBeansTest extends EntityBeansExercizor
       });
 
       // invoke the getter on the other (related) side
-      testRelatedBeans(bean, relatedBean, new RelatedBeansTester()
+      doTestRelatedBeans(bean, relatedBean, new RelatedBeansTester()
       {
         public void testBeanWithRelatedBean(AbstractEntity bean,
                                             AbstractEntity relatedBean)
@@ -623,11 +790,10 @@ public class EntityBeansTest extends EntityBeansExercizor
     }
   }
 
-  protected void doTestBidirectionalityOfManySideOfRelationship(
-    AbstractEntity bean,
-    BeanInfo beanInfo,
-    PropertyDescriptor propertyDescriptor,
-    final Method getter)
+  private void doTestBidirectionalityOfManySideOfRelationship(AbstractEntity bean,
+                                                              BeanInfo beanInfo,
+                                                              PropertyDescriptor propertyDescriptor,
+                                                              final Method getter)
   {
     // do not test bidirectionality of relationships that are explicitly annotated as unidirectional
     if (isUnidirectionalRelationship(bean.getClass(), propertyDescriptor)) {
@@ -668,7 +834,7 @@ public class EntityBeansTest extends EntityBeansExercizor
 
       final AbstractEntity[] thisSideBeanHolder = new AbstractEntity[1];
       // assert this bean's getter method returns the related bean that was set via the constructor
-      testBean(relatedBean, new BeanTester()
+      doTestBean(relatedBean, new BeanTester()
       {
         public void testBean(AbstractEntity relatedBean)
         {
@@ -684,7 +850,7 @@ public class EntityBeansTest extends EntityBeansExercizor
         }
       });
       
-      testRelatedBeans(thisSideBeanHolder[0], relatedBean, new RelatedBeansTester()
+      doTestRelatedBeans(thisSideBeanHolder[0], relatedBean, new RelatedBeansTester()
       {
         public void testBeanWithRelatedBean(AbstractEntity bean,
                                             AbstractEntity relatedBean)
@@ -703,7 +869,7 @@ public class EntityBeansTest extends EntityBeansExercizor
     }
     else {
       // invoke the adder on this side
-      testRelatedBeans(bean, relatedBean, new RelatedBeansTester()
+      doTestRelatedBeans(bean, relatedBean, new RelatedBeansTester()
       {
         public void testBeanWithRelatedBean(AbstractEntity bean,
                                             AbstractEntity relatedBean)
@@ -722,7 +888,7 @@ public class EntityBeansTest extends EntityBeansExercizor
         }
       });
 
-      testRelatedBeans(bean, relatedBean, new RelatedBeansTester()
+      doTestRelatedBeans(bean, relatedBean, new RelatedBeansTester()
       {
         public void testBeanWithRelatedBean(AbstractEntity bean,
                                             AbstractEntity relatedBean)
@@ -755,17 +921,473 @@ public class EntityBeansTest extends EntityBeansExercizor
   }
   
 
-  // protected methods
-
-  protected void testBean(AbstractEntity bean, BeanTester tester)
+  // private methods
+  
+  private static String STRING_TEST_VALUE_PREFIX = "test:";
+  private static int STRING_TEST_VALUE_RADIX = 36;
+  
+  private Integer _integerTestValue = 77;
+  private double  _doubleTestValue = 77.1;
+  private boolean _booleanTestValue = true;
+  private int     _stringTestValueIndex = Integer.parseInt("antz", STRING_TEST_VALUE_RADIX);
+  private long    _dateMilliseconds = 0;
+  private int     _vocabularyTermCounter = 0;
+  private int     _wellNameTestValueIndex = 0;
+  private WellKey _wellKeyTestValue = new WellKey("00001:A01");
+  
+  @SuppressWarnings("unchecked")
+  public Object getTestValueForType(Class type)
   {
-    tester.testBean(bean);
+    if (type.equals(Integer.class)) {
+      _integerTestValue += 1;
+      return _integerTestValue;
+    }
+    if (type.equals(Double.class)) {
+      _doubleTestValue *= 1.32;
+      return new Double(new Double(_doubleTestValue * 1000).intValue() / 1000);
+    }
+    if (type.equals(BigDecimal.class)) {
+      BigDecimal val = new BigDecimal(((Double) getTestValueForType(Double.class)).doubleValue());
+      // 2 is the default scale used in our Hibernate mapping, not sure how to change it via xdoclet
+      val = val.setScale(2);
+      return val;
+    }
+    if (type.equals(Boolean.TYPE)) {
+      _booleanTestValue = ! _booleanTestValue;
+      return _booleanTestValue;
+    }
+    if (type.equals(String.class)) {
+      return STRING_TEST_VALUE_PREFIX + Integer.toString(++_stringTestValueIndex, STRING_TEST_VALUE_RADIX);
+    }
+    if (type.equals(Date.class)) {
+      _dateMilliseconds += 1000 * 60 * 60 * 24 * 1.32;
+      return DateUtils.round(new Date(_dateMilliseconds), Calendar.DATE);
+    }
+    if (AbstractEntity.class.isAssignableFrom(type)) {
+      return newInstance((Class<AbstractEntity>) type);
+    }
+    if (VocabularyTerm.class.isAssignableFrom(type)) {
+      try {
+        Method valuesMethod = type.getMethod("values");
+        Object values = (Object) valuesMethod.invoke(null);
+        int numValues = Array.getLength(values);
+        int valuesIndex = ++ _vocabularyTermCounter % numValues;
+        return Array.get(values, valuesIndex);
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+        fail("vocabulary term test value code threw an exception");
+      }
+    }    
+    if (WellKey.class.isAssignableFrom(type)) {
+      return nextWellKey(_wellKeyTestValue);
+    }
+    throw new IllegalArgumentException(
+      "can't create test values for type: " + type.getName());
+  }
+  
+  private Object nextWellKey(WellKey wellKey)
+  {
+    int col = wellKey.getColumn() + 1;
+    int row = wellKey.getRow();
+    int plateNumber = wellKey.getPlateNumber();
+    if (col >= Well.PLATE_COLUMNS) {
+      col = 0;
+      ++row;
+    }
+    if (row >= Well.PLATE_ROWS) {
+      row = 0;
+      ++plateNumber;
+    }
+    _wellKeyTestValue = new WellKey(plateNumber, row, col);
+    return _wellKeyTestValue;
   }
 
-  protected void testRelatedBeans(AbstractEntity bean,
-                                  AbstractEntity relatedBean,
-                                  RelatedBeansTester tester)
+  private Object getTestValueForWellName()
   {
-    tester.testBeanWithRelatedBean(bean, relatedBean);
+    String wellName = String.format("%c%02d",
+                                    'A' + (_wellNameTestValueIndex / 24),
+                                    (_wellNameTestValueIndex % 24) + 1);
+    ++_wellNameTestValueIndex;
+    return wellName;
   }
+
+  private static Map<Class<? extends AbstractEntity>,Class<? extends AbstractEntity>> _concreteStandinMap =
+      new HashMap<Class<? extends AbstractEntity>,Class<? extends AbstractEntity>>();
+  static {
+    _concreteStandinMap.put(Screening.class, LibraryScreening.class);
+    _concreteStandinMap.put(ScreeningRoomActivity.class, LibraryScreening.class);
+    _concreteStandinMap.put(CherryPickRequest.class, RNAiCherryPickRequest.class);
+  }
+  
+  private static interface EntityFactory
+  {
+    AbstractEntity newInstance();
+  }
+  
+  private Map<Class<? extends AbstractEntity>,EntityFactory> _entityFactoryMap =
+    new HashMap<Class<? extends AbstractEntity>,EntityFactory>();
+  {
+    _entityFactoryMap.put(CherryPick.class, new EntityFactory() 
+    {
+      private int testEntrezGeneId = 0;
+      public AbstractEntity newInstance()
+      {
+        CherryPickRequest cherryPickRequest = (CherryPickRequest) getTestValueForType(CherryPickRequest.class);
+        Well well = (Well) getTestValueForType(Well.class);
+        well.setWellType(WellType.EXPERIMENTAL);
+        if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+          well.addCompound(new Compound("CCC"));
+        }
+        else if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI)) {
+          Gene gene = new Gene("AAA", ++testEntrezGeneId, "entrezSymbol" + testEntrezGeneId, "Human");
+          well.addSilencingReagent(new SilencingReagent(gene, SilencingReagentType.SIRNA, "ATCG"));
+        }
+        return new CherryPick(cherryPickRequest, well);
+      }
+    });
+  }
+  
+  protected AbstractEntity newInstance(Class<? extends AbstractEntity> entityClass) {
+    if (Modifier.isAbstract(entityClass.getModifiers())) {
+      Class<? extends AbstractEntity> concreteStandin =
+        _concreteStandinMap.get(entityClass);
+      return newInstance(concreteStandin);
+    }
+    
+    EntityFactory entityFactory = _entityFactoryMap.get(entityClass);
+    if (entityFactory != null) {
+      return entityFactory.newInstance();
+    }
+
+    try {
+      Constructor constructor = getMaxArgConstructor(entityClass);
+      Object[] arguments = getArgumentsForConstructor(constructor);
+      return (AbstractEntity) constructor.newInstance(arguments);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      fail("newInstance for " + entityClass + " threw an Exception: " + e);
+    }
+    return null;
+  }
+  
+  protected Object[] getArgumentsForConstructor(Constructor constructor)
+  {
+    Class[] parameterTypes = constructor.getParameterTypes();
+    Object[] arguments = getArgumentsForParameterTypes(parameterTypes);
+    return arguments;
+  }
+
+  private Object[] getArgumentsForParameterTypes(Class[] parameterTypes) {
+    
+    Object [] arguments = new Object[parameterTypes.length];
+    for (int i = 0; i < arguments.length; i++) {
+      arguments[i] = getTestValueForType(parameterTypes[i]);
+    }
+    
+    return arguments;
+  }
+
+  protected Constructor getMaxArgConstructor(Class<? extends AbstractEntity> entityClass)
+  {
+    int maxArgs = 0;
+    Constructor maxArgConstructor = null;
+    for (Constructor constructor : entityClass.getConstructors()) {
+      if (Modifier.isPublic(constructor.getModifiers())) {
+        int numArgs = constructor.getParameterTypes().length;
+        if (numArgs > maxArgs) {
+          maxArgs = numArgs;
+          maxArgConstructor = constructor;
+        }
+      }
+    }
+    return maxArgConstructor;
+  }
+  
+  
+  protected static interface PropertyDescriptorExercizor
+  {
+    public void exercizePropertyDescriptor(
+      AbstractEntity bean,
+      BeanInfo beanInfo,
+      PropertyDescriptor propertyDescriptor);
+  }
+  
+  protected void exercizePropertyDescriptors(final PropertyDescriptorExercizor exercizor)
+  {
+    for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
+      String propertyName = propertyDescriptor.getName();
+      String propFullName = bean.getClass().getSimpleName() + "." + propertyName;
+      if (propertyName.equals("class")) {
+        log.debug("skipping \"class\" property " + propFullName);
+        continue;
+      }
+
+      if (propertyName.startsWith("hbn")) {
+        log.info("skipping Hibernate property " + propFullName);
+        continue;
+      }
+
+      // skip what appears to be an entity's property, but that has been
+      // explicitly annotated as a non-property
+      if (propertyDescriptor.getReadMethod().isAnnotationPresent(DerivedEntityProperty.class)) {
+        log.info("skipping derived property " + propFullName);
+        continue;
+      }
+
+      log.debug("excercizing JavaBean entity property " + bean.getClass().getSimpleName() + "." + propertyName + 
+                " with " + exercizor.getClass().getEnclosingMethod().getName());
+      exercizor.exercizePropertyDescriptor(bean, beanInfo, propertyDescriptor);
+    }
+  }
+  
+
+  /**
+   * Find the method with the given name, and unspecified arguments. If no such
+   * method exists, and the isRequiredMethod parameter is true, then fail. If no
+   * such method exists, and isRequiredMethod is false, then return null. Fail if
+   * the method does not return a boolen. Return the method.
+   * @param beanClass the class to find the method in
+   * @param methodName the name of the method to find
+   * @param isRequiredMethod true iff the method is required to exist
+   * @return the method. Return null if isRequiredMethod is false and no such
+   * method exists.
+   */
+  protected Method findAndCheckMethod(
+    Class<? extends AbstractEntity> beanClass,
+    String methodName,
+    ExistenceRequirement requirement)
+  {
+    String fullMethodName = beanClass.getName() + "." + methodName;
+    Method foundMethod = null;
+    // note: we're calling getMethods() instead of getDeclaredMethods() to allow
+    // inherited methods to satisfy our isRequiredMethod constraint (e.g. for
+    // AdministratorUser.addRole())
+    // TODO: getMethods() will only return public methods, is this okay?
+    for (Method method : beanClass.getMethods()) {
+      if (method.getName().equals(methodName)) {
+        foundMethod = method;
+        break;
+      }
+    }
+    
+    if (requirement != ExistenceRequirement.REQUIRED && foundMethod == null) {
+      log.debug("findAndCheckMethod(): non-required method was not found: " + fullMethodName);
+      return null;
+    }
+    assertTrue("collection property not allowed: " + fullMethodName, 
+               requirement != ExistenceRequirement.NOT_ALLOWED || foundMethod == null);
+    assertTrue("collection property missing method: " + fullMethodName,
+               requirement != ExistenceRequirement.REQUIRED || foundMethod != null);
+
+    assertEquals("collection property method returns boolean: " + fullMethodName,
+                 Boolean.TYPE,
+                 foundMethod.getReturnType());
+    return foundMethod;
+  }
+  
+  /**
+   * Returns true iff the property corresponds to the entity's ID. Such methods
+   * include: getEntityId(), getFooId() (for bean of type Foo), and any
+   * properties that may be used to define the ID (for cases where the entity ID
+   * is not an auto-generated database ID, but instead correspdonds to the
+   * entity's business key).
+   * 
+   * @param beanInfo the bean the property belongs to
+   * @param propertyDescriptor the property
+   * @return true iff property is "entityId" or the property that is named the
+   *         same as the entity, but with an "Id" suffix; otherwise false
+   */
+  @SuppressWarnings("unchecked")
+  private boolean isEntityIdProperty(Class<? extends AbstractEntity> beanClass,
+                                     PropertyDescriptor propertyDescriptor)
+  {
+    Method getter = propertyDescriptor.getReadMethod();
+    if (getter.isAnnotationPresent(EntityIdProperty.class)) {
+      log.debug("isEntityIdProperty(): property participates in defining entity ID: " + propertyDescriptor.getName());
+      return true;
+    }
+
+    // legacy logic for finding the standard entity-ID related methods below...
+    if (propertyDescriptor.getName().equals("entityId")) {
+      log.debug("isEntityIdProperty(): property participates in defining entity ID: " + propertyDescriptor.getName());
+      return true;
+    }
+
+    // Check whether property corresponds to the bean's Hibernate ID method, which is named similarly to the bean.
+    // We also check the parent classes, to handle the case where the property
+    // has been inherited, as the property name will depend upon the class it
+    // was declared in.
+    String capitalizedPropertyName = propertyDescriptor.getName().substring(0, 1).toUpperCase() + propertyDescriptor.getName().substring(1);
+    while (!beanClass.equals(AbstractEntity.class) && beanClass != null) {
+      if (capitalizedPropertyName.endsWith(beanClass.getSimpleName() + "Id")) {
+        log.debug("isEntityIdProperty(): property participates in defining entity ID: " + propertyDescriptor.getName() + 
+                  " in " + beanClass.getSimpleName());
+        return true;
+      }
+      beanClass = (Class<? extends AbstractEntity>) beanClass.getSuperclass();
+    }
+    return false;
+  }
+  
+  
+  // HACK: special case handling 
+  protected int getExpectedInitialCollectionSize(
+    PropertyDescriptor propertyDescriptor)
+  {
+    Method getter = propertyDescriptor.getReadMethod();
+    ToManyRelationship toManyRelationship = getter.getAnnotation(ToManyRelationship.class);
+    if (toManyRelationship != null) {
+      return toManyRelationship.minCardinality();
+    }
+    return 0;
+  }
+  
+  protected boolean isUnidirectionalRelationship(Class<? extends AbstractEntity> beanClass, 
+                                                 PropertyDescriptor propertyDescriptor)
+  {
+    try {
+      return isUnidirectionalRelationshipMethod(propertyDescriptor.getReadMethod()) ||
+      isUnidirectionalRelationshipMethod(beanClass.
+                                         getDeclaredMethod("getHbn" + 
+                                                           StringUtils.capitalize(propertyDescriptor.getName())));
+    }
+    catch (SecurityException e) {
+      throw e;
+    }
+    catch (NoSuchMethodException e) {
+      return false;
+    }
+  }
+
+  protected boolean hasForeignKeyConstraint(PropertyDescriptor propertyDescriptor)
+  {
+    Method getter = propertyDescriptor.getReadMethod();
+    ToOneRelationship toOneRelationship = getter.getAnnotation(ToOneRelationship.class);
+    return toOneRelationship != null && !toOneRelationship.nullable();
+  }
+
+  protected boolean setterMethodNotExpected(Class<? extends AbstractEntity> beanClass, PropertyDescriptor propertyDescriptor)
+  {
+    String propFullName = beanClass.getSimpleName() + "." + propertyDescriptor.getName();
+    
+    if (isImmutableProperty(beanClass, propertyDescriptor)) {
+      log.info("setter method not expected for immutable property: " + propFullName);
+      return true;
+    }
+
+    // no setter expected if property participates in defining the entity ID
+    if (isEntityIdProperty(beanClass, propertyDescriptor)) {
+      log.info("setter method not expected for property that participates in defining the entity ID: " + 
+               propFullName);
+      return true;
+    }
+
+    // no setter expected if property is for a *-to-one relationship and has a foreign key constraint
+    if (hasForeignKeyConstraint(propertyDescriptor)) {
+      log.info("setter method not expected for property that is a *-to-one relationship with a foreign key constraint: " + 
+               propFullName);
+      return true;
+    }
+    
+    // no public setter expected if property is for a one-to-one relationship and related side has a foreign key constraint relationship
+    // (in this case, either a package or public setter method is required, but we're not verifying this currently)
+    RelatedProperty relatedProperty = new RelatedProperty(beanClass, propertyDescriptor);
+    if (relatedProperty.exists() && relatedProperty.hasForeignKeyConstraint()) {
+      log.info("setter method not expected for property that is on the \"one\" side of a relationship with a foreign key constraint: " + 
+               propFullName);
+      return true;
+    }
+    return false;
+  }
+
+  protected boolean isImmutableProperty(Class<? extends AbstractEntity> beanClass, PropertyDescriptor propertyDescriptor)
+  {
+    Method getter = propertyDescriptor.getReadMethod();
+    if (getter.isAnnotationPresent(ImmutableProperty.class)) {
+      return true;
+    }
+    return false;
+  }
+
+  private boolean isUnidirectionalRelationshipMethod(Method getter)
+  {
+    ToOneRelationship toOneRelationship = getter.getAnnotation(ToOneRelationship.class);
+    ToManyRelationship toManyRelationship = getter.getAnnotation(ToManyRelationship.class);
+    if ((toOneRelationship != null && toOneRelationship.unidirectional()) ||
+      (toManyRelationship != null && toManyRelationship.unidirectional())) {
+      return true;
+    }
+    return false;
+  }
+  
+  
+  
+//  protected void testBean(AbstractEntity bean, BeanTester tester)
+//  {
+//    tester.testBean(bean);
+//  }
+//
+//  protected void testRelatedBeans(AbstractEntity bean,
+//                                  AbstractEntity relatedBean,
+//                                  RelatedBeansTester tester)
+//  {
+//    tester.testBeanWithRelatedBean(bean, relatedBean);
+//  }
+
+  
+  static private interface BeanTester
+  {
+    public void testBean(AbstractEntity bean);
+  }
+
+  static private interface RelatedBeansTester
+  {
+    public void testBeanWithRelatedBean(AbstractEntity bean,
+                                        AbstractEntity relatedBean);
+  }  
+
+  private void doTestBean(final AbstractEntity bean,
+                          final BeanTester tester)
+  {
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        AbstractEntity localBean = getPersistedEntity(bean);
+        tester.testBean(localBean);
+      }
+    });
+  }
+  
+  private void doTestRelatedBeans(final AbstractEntity bean,
+                                final AbstractEntity relatedBean,
+                                final RelatedBeansTester tester)
+  {
+    dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        AbstractEntity localBean = getPersistedEntity(bean);
+        AbstractEntity localRelatedBean = getPersistedEntity(relatedBean);
+        tester.testBeanWithRelatedBean(localBean, localRelatedBean);
+      }
+    });
+  }  
+
+  // if the bean has already been persisted, then get the persisted copy, as the current
+  // copy is stale. if it has not, persist it now so we can get the entityId
+  private AbstractEntity getPersistedEntity(AbstractEntity bean)
+  {
+    AbstractEntity beanFromHibernate = null;
+    if (bean.getEntityId() != null) {
+      beanFromHibernate = (AbstractEntity) hibernateTemplate.get(bean.getClass(), bean.getEntityId());
+    }
+    if (beanFromHibernate == null) {
+      hibernateTemplate.saveOrUpdate(bean);
+      beanFromHibernate = (AbstractEntity) hibernateTemplate.get(bean.getClass(), bean.getEntityId());
+    }
+    return beanFromHibernate;
+  }
+  
 }
