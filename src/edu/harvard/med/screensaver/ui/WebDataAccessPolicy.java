@@ -36,6 +36,7 @@ import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
@@ -274,6 +275,15 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
    */
   public boolean visit(Screen screen)
   {
+    ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
+    if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE) && 
+      user.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER)) {
+      return true;
+    }
+    if (screen.getScreenType().equals(ScreenType.RNAI) && 
+      user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER)) {
+      return true;
+    }
     return true;
   }
 
@@ -301,6 +311,7 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
       if (!screenResult.isShareable()) {
         return false;
       }
+      // TODO: do we really want the following to only apply to compound screeners, and not RNAi screeners?
       if (screener.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER)) {
         for (Screen screen : screener.getScreensCollaborated()) {
           if (screen.getScreenResult() != null) {
