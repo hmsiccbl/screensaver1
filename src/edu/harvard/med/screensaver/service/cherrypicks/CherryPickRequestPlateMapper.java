@@ -86,6 +86,7 @@ public class CherryPickRequestPlateMapper
     // cherryPick.setMapped())
     List<CherryPick> nextIndivisibleBlock;
     while (toBeMapped.size() > 0) {
+      int toBeMappedCount = toBeMapped.size();
       nextIndivisibleBlock = findNextIndivisibleBlock(toBeMapped);
       if (nextIndivisibleBlock.size() > availableWellNamesMaster.size() ){
         throw new BusinessRuleViolationException("there are more cherry picks from " + 
@@ -97,8 +98,14 @@ public class CherryPickRequestPlateMapper
         availableWellNamesWorking = new ArrayList<WellName>(availableWellNamesMaster);
         
         if (cherryPickRequest.isRandomizedAssayPlateLayout()) {
+          // only randomize over the left-most set of wells whose size is sufficent
+          // to accommodate the remaining cherry picks to be mapped
+          availableWellNamesWorking.subList(Math.min(toBeMappedCount,
+                                                     availableWellNamesWorking.size()),
+                                            availableWellNamesWorking.size()).clear();
           Collections.shuffle(availableWellNamesWorking);
         }
+
         plateIndex++;
       }
 
