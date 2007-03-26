@@ -64,6 +64,12 @@ TODO:
 					action="#{cherryPickRequestViewer.setEditMode}"
 					styleClass="command"
 					rendered="#{!cherryPickRequestViewer.editMode}" />
+				<t:commandButton id="deleteCommand" value="Delete"
+					action="#{cherryPickRequestViewer.deleteCherryPickRequest}"
+					onclick="javascript: return confirm('Delete this cherry pick request and all of its cherry picks permanently?');"
+					styleClass="command"
+					rendered="#{cherryPickRequestViewer.editable && !cherryPickRequestViewer.editMode}" 
+					disabled="#{cherryPickRequestViewer.cherryPickRequest.allocated}" />
 				<t:commandButton id="saveCommand" value="Save"
 					action="#{cherryPickRequestViewer.save}" styleClass="command"
 					rendered="#{cherryPickRequestViewer.editMode}" />

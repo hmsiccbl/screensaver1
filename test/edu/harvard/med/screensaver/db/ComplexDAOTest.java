@@ -625,8 +625,26 @@ public class ComplexDAOTest extends AbstractSpringTest
     });
   }
   
-  public void testDeleteCherryPick()
+  public void testDeleteCherryPickRequest()
   {
+    final int screenNumber = 1;
+    final CherryPickRequest cherryPickRequest = makeCherryPickRequest(screenNumber);
+    dao.deleteCherryPickRequest(cherryPickRequest);
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+        assertEquals("screen has no cherry pick requests", 0, screen.getCherryPickRequests().size());
+        assertNull("cherry pick request deleted",
+                   dao.findEntityById(CherryPickRequest.class, cherryPickRequest.getEntityId()));
+      }
+    });
+  }
+      
+  private CherryPickRequest makeCherryPickRequest(final int screenNumber)
+  {
+    final CherryPickRequest[] result = new CherryPickRequest[1];
     dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -641,21 +659,28 @@ public class ComplexDAOTest extends AbstractSpringTest
         Well well2 = CherryPickRequestAllocatorTest.makeRNAiWell(library, 2, new WellName("P24"));
         dao.persistEntity(library);
         
-        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1); 
+        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(screenNumber); 
         screen.setScreenType(ScreenType.RNAI);
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
         new CherryPick(cherryPickRequest, well1);
         new CherryPick(cherryPickRequest, well2);
         dao.persistEntity(cherryPickRequest); // why do we need this, if we're also persisting the screen?!
         dao.persistEntity(screen);
+        result[0] = cherryPickRequest;
       }
     });
-
+    return result[0];
+  }
+  
+  public void testDeleteCherryPick()
+  {
+    final int screenNumber = 1;
+    makeCherryPickRequest(screenNumber);
     dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
-        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
         assertEquals("cherry picks exist before delete",
                      2, 
@@ -673,7 +698,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
         assertEquals("cherry picks deleted from cherry pick request", 0, cherryPickRequest.getCherryPicks().size());
         assertEquals("cherry picks deleted from well1", 0, dao.findWell(new WellKey(1, "A01")).getCherryPicks().size());

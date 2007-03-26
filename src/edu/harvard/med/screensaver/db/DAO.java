@@ -26,6 +26,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 
@@ -322,4 +323,6 @@ public interface DAO
   public List<String> findDeveloperECommonsIds();
 
   public void deleteCherryPick(CherryPick cherryPick);
+
+  public void deleteCherryPickRequest(CherryPickRequest cherryPickRequest);
 }

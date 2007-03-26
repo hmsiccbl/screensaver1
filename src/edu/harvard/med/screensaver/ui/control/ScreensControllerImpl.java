@@ -445,6 +445,23 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     return viewLastScreen();
   }
 
+  @UIControllerMethod
+  public String deleteCherryPickRequest(CherryPickRequest cherryPickRequest)
+  {
+    logUserActivity("deleteCherryPickRequest " + cherryPickRequest);
+    if (cherryPickRequest != null) {
+      try {
+        _dao.deleteCherryPickRequest(cherryPickRequest);
+      }
+      catch (ConcurrencyFailureException e) {
+        showMessage("concurrentModificationConflict");
+      }
+      catch (DataAccessException e) {
+        showMessage("databaseOperationFailed", e.getMessage());
+      }
+    }
+    return viewScreen(cherryPickRequest.getScreen(), null);
+  }
   
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#viewLastScreen()
@@ -843,6 +860,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
             _dao.reattachEntity(screenedCherryPickWell);
           }
           Set<Well> sourceCherryPickWells = cherryPickRequest.findCherryPickSourceWells(cherryPicks);
+          // TODO: report incomplete mapping from pools to duplexes
           for (Well sourceCherryPickWell : sourceCherryPickWells) {
             _dao.persistEntity(new CherryPick(cherryPickRequest, sourceCherryPickWell));
           }

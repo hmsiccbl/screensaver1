@@ -53,6 +53,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
@@ -413,8 +414,8 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   
   public void deleteCherryPick(CherryPick cherryPick)
   {
-    if (cherryPick.getCherryPickLiquidTransfers().size() > 0) {
-      throw new BusinessRuleViolationException("cannot delete a cherry pick that has been plated");
+    if (cherryPick.isAllocated()) {
+      throw new BusinessRuleViolationException("cannot delete a cherry pick that has been allocated");
     }
 
     // disassociate from related entities
@@ -427,6 +428,23 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     getHibernateTemplate().delete(cherryPick);
   }
   
+  public void deleteCherryPickRequest(final CherryPickRequest cherryPickRequestIn)
+  {
+    CherryPickRequest cherryPickRequest = (CherryPickRequest) reattachEntity(cherryPickRequestIn);  
+
+    if (cherryPickRequestIn.isAllocated()) {
+      throw new BusinessRuleViolationException("cannot delete a cherry pick request that has been allocated");
+    }
+
+    // disassociate from related entities
+    for (CherryPick cherryPick : new ArrayList<CherryPick>(cherryPickRequest.getCherryPicks())) {
+      deleteCherryPick(cherryPick);
+    }
+    cherryPickRequest.getRequestedBy().getHbnCherryPickRequests().remove(cherryPickRequest);
+    cherryPickRequest.getScreen().getCherryPickRequests().remove(cherryPickRequest);
+    getHibernateTemplate().delete(cherryPickRequest);
+  }
+
   public Well findWell(WellKey wellKey) {
     return findEntityById(Well.class, wellKey.getKey());
   }

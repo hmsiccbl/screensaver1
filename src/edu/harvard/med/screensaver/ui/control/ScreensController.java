@@ -140,4 +140,7 @@ public interface ScreensController
 
   @UIControllerMethod
   public String plateMapCherryPicks(CherryPickRequest cherryPickRequest);
+
+  @UIControllerMethod
+  public String deleteCherryPickRequest(CherryPickRequest cherryPickRequest);
 }

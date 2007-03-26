@@ -336,6 +336,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean
                                                      result.getWells());
   }
   
+  public String deleteCherryPickRequest()
+  {
+    return _screensController.deleteCherryPickRequest(_cherryPickRequest);
+  }
+  
   public String deleteAllCherryPicks()
   {
     return _screensController.deleteAllCherryPicks(_cherryPickRequest);
