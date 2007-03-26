@@ -35,6 +35,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.CherryPick;
 import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
@@ -53,8 +54,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.CHERRY_PICK_ADMIN;
 
 
-  private static final String[] CHERRY_PICKS_TABLE_COLUMNS = { "Status", "Library Plate", "Source Copy", "Source Well", "Gene", "Entrez ID", "Symbol", "AccNo", "Assay Plate", "Assay Well" };
-  private static final String[] ASSAY_PLATES_TABLE_COLUMNS = { "Assay Plate Name", "Date Plated" };
+  private static final String[] CHERRY_PICKS_TABLE_COLUMNS = { "Status", "Library Plate", "Source Copy", "Source Well", "Gene", "Entrez ID", "Symbol", "AccNo", "Cherry Pick Plate", "Destination Well" };
+  private static final String[] ASSAY_PLATES_TABLE_COLUMNS = { "Plate Name", "Date Plated" };
   private static final String[] LIQUID_TRANSFER_TABLE_COLUMNS = { "Date", "By", "Assay Plates" };
 
   private static final Collection<Integer> COLUMNS_LIST = new ArrayList<Integer>();
@@ -256,10 +257,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       List<AssayPlateRow> rows = new ArrayList<AssayPlateRow>();
       for (String assayPlateName : _cherryPickRequest.getAssayPlates()) {
         Map<String,String> rowValues = new HashMap<String,String>();
+        Set<CherryPickLiquidTransfer> cherryPickLiquidTransfersForAssayPlate = 
+          _cherryPickRequest.getCherryPickLiquidTransfersForAssayPlate(assayPlateName);
         rowValues.put(ASSAY_PLATES_TABLE_COLUMNS[0], assayPlateName);
         rowValues.put(ASSAY_PLATES_TABLE_COLUMNS[1],
-                      Integer.toString(_cherryPickRequest.
-                                       getCherryPickLiquidTransfersForAssayPlate(assayPlateName).size()));
+                      StringUtils.makeListString(cherryPickLiquidTransfersForAssayPlate, ", "));
         AssayPlateRow row = new AssayPlateRow(rowValues);
         rows.add(row);
       }
@@ -294,7 +296,23 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return _liquidTransferDataModel;
   }
 
+  /**
+   * @motivation tune the UI labels to reflect the type of screen being cherry picked
+   */
+  public String getLiquidTerm()
+  {
+    ScreenType screenType = _cherryPickRequest.getScreen().getScreenType();
+    // TODO: implement polymorphically
+    if (screenType.equals(ScreenType.RNAI)) {
+      return "Reagent";
+    }
+    if (screenType.equals(ScreenType.SMALL_MOLECULE)) {
+      return "Compound";
+    }
+    return "Liquid";
+  }
 
+  
   /* JSF Application methods */
   
   public String viewScreen()

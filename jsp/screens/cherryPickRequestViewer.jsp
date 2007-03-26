@@ -56,26 +56,29 @@ TODO:
 			<t:outputText value="Cherry Pick Request" styleClass="sectionHeader" />
 		</t:div>
 
+		<t:panelGroup id="commandPanel"
+			rendered="#{cherryPickRequestViewer.editable}"
+			styleClass="commandPanel">
+			<t:commandButton id="editCommand" value="Edit"
+				action="#{cherryPickRequestViewer.setEditMode}" styleClass="command"
+				rendered="#{!cherryPickRequestViewer.editMode && !cherryPickRequestViewer.cherryPickRequest.allocated}" />
+			<t:commandButton id="saveCommand" value="Save"
+				action="#{cherryPickRequestViewer.save}" styleClass="command"
+				rendered="#{cherryPickRequestViewer.editMode}" />
+			<h:commandButton id="cancelEditCommand" value="Cancel"
+				rendered="#{cherryPickRequestViewer.editMode}"
+				action="#{cherryPickRequestViewer.cancelEdit}" immediate="true"
+				styleClass="command" />
+		</t:panelGroup>
+
 		<t:panelGrid id="cherryPickRequestInfoTable" columns="2"
 			styleClass="standardTable" rowClasses="row1,row2"
 			columnClasses="keyColumn,column">
 
-			<t:panelGroup id="commandPanel"
-				rendered="#{cherryPickRequestViewer.editable}"
-				styleClass="commandPanel">
-				<t:commandButton id="editCommand" value="Edit"
-					action="#{cherryPickRequestViewer.setEditMode}"
-					styleClass="command"
-					rendered="#{!cherryPickRequestViewer.editMode && !cherryPickRequestViewer.cherryPickRequest.allocated}" />
-				<t:commandButton id="saveCommand" value="Save"
-					action="#{cherryPickRequestViewer.save}" styleClass="command"
-					rendered="#{cherryPickRequestViewer.editMode}" />
-				<h:commandButton id="cancelEditCommand" value="Cancel"
-					rendered="#{cherryPickRequestViewer.editMode}"
-					action="#{cherryPickRequestViewer.cancelEdit}" immediate="true"
-					styleClass="command" />
-			</t:panelGroup>
-			<t:htmlTag value="br" />
+			<t:outputText value="Cherry Pick Request ID" />
+			<t:outputText id="cherryPickRequestEntityId"
+				value="#{cherryPickRequestViewer.cherryPickRequest.entityId}"
+				styleClass="dataText" />
 
 			<t:outputText value="Date Requested" />
 			<t:inputDate id="dateRequestedEditable"
@@ -124,13 +127,13 @@ TODO:
 				displayValueOnly="#{!cherryPickRequestViewer.editMode}" size="5"
 				styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 
-			<t:outputText value="Assay&nbsp;Plate&nbsp;Type" escape="false" />
+			<t:outputText value="Cherry&nbsp;Pick&nbsp;Plate&nbsp;Type" escape="false" />
 			<t:outputText 
 				value="#{cherryPickRequestViewer.cherryPickRequest.assayPlateType}"
 				styleClass="dataText"/>
 
 			<t:outputText
-				value="Randomize&nbsp;assay&nbsp;plate well&nbsp;layout"
+				value="Random&nbsp;plate&nbsp;well&nbsp;layout"
 				escape="false" />
 			<t:selectBooleanCheckbox
 				value="#{cherryPickRequestViewer.cherryPickRequest.randomizedAssayPlateLayout}"
@@ -138,7 +141,7 @@ TODO:
 				styleClass="command" displayValueOnlyStyleClass="dataText" />
 
 			<t:outputText
-				value="Empty&nbsp;columns&nbsp;on&nbsp;assay&nbsp;plate"
+				value="Empty&nbsp;columns&nbsp;on&nbsp;plate"
 				escape="false" />
 			<t:outputText
 				value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlateAsString}"
@@ -185,7 +188,7 @@ TODO:
 						action="#{cherryPickRequestViewer.deleteAllCherryPicks}"
 						disabled="#{cherryPickRequestViewer.cherryPickRequest.allocated}"
 						styleClass="command" />
-					<t:commandButton id="allocateCherryPicks" value="Reserve Liquid"
+					<t:commandButton id="allocateCherryPicks" value="Reserve #{cherryPickRequestViewer.liquidTerm}"
 						action="#{cherryPickRequestViewer.allocateCherryPicks}"
 						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.cherryPicks || cherryPickRequestViewer.cherryPickRequest.allocated}"
 						styleClass="command" />
@@ -194,7 +197,7 @@ TODO:
 						action="#{cherryPickRequestViewer.deallocateCherryPicks}"
 						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated || cherryPickRequestViewer.cherryPickRequest.mapped}"
 						styleClass="command" />
-					<t:commandButton id="plateMapCherryPicks" value="Map to Assay Plates"
+					<t:commandButton id="plateMapCherryPicks" value="Map to Plates"
 						action="#{cherryPickRequestViewer.plateMapCherryPicks}"
 						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated || cherryPickRequestViewer.cherryPickRequest.mapped}"
 						styleClass="command" />
@@ -236,7 +239,7 @@ TODO:
 
 
 		<t:div styleClass="sectionHeader">
-			<t:outputText value="Assay Plates" styleClass="sectionHeader" />
+			<t:outputText value="Cherry Pick Plates" styleClass="sectionHeader" />
 		</t:div>
 
 		<t:outputText value="<none>" styleClass="label"
@@ -245,7 +248,7 @@ TODO:
 		<t:panelGroup id="selectedAssayPlatesCommandPanel"
 			rendered="#{cherryPickRequestViewer.editable && cherryPickRequestViewer.cherryPickRequest.mapped}">
 			<t:div>
-				<t:outputText styleClass="label" value="For selected assay plates:"/>
+				<t:outputText styleClass="label" value="For selected plates:"/>
 			</t:div>
 			<t:commandButton id="downloadPlateMappingFiles"
 				value="Download Files"
@@ -253,7 +256,7 @@ TODO:
 				disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 				styleClass="command" />
 			<t:commandButton id="recordLiquidTransfer"
-				value="Record Liquid Transfer"
+				value="Record #{cherryPickRequestViewer.liquidTerm} Transfer"
 				action="#{cherryPickRequestViewer.recordLiquidTransferForSelectedAssayPlates}"
 				disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 				styleClass="command" />
@@ -290,7 +293,7 @@ TODO:
 			style="display:none" />
 
 		<t:div styleClass="sectionHeader">
-			<t:outputText value="Liquid Transfers" styleClass="sectionHeader" />
+			<t:outputText value="#{cherryPickRequestViewer.liquidTerm} Transfers" styleClass="sectionHeader" />
 		</t:div>
 
 		<t:dataTable id="liquidTransferTable" var="liquidTransferRow"
