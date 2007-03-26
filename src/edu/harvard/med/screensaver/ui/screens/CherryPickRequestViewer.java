@@ -132,10 +132,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       }
     };
 
-    Set<Integer> selectableEmtpyColumns = new HashSet<Integer>(COLUMNS_LIST);
-    selectableEmtpyColumns.removeAll(_cherryPickRequest.getRequiredEmptyColumnsOnAssayPlate());
-    _emptyColumnsOnAssayPlate = new UISelectManyBean<Integer>(selectableEmtpyColumns, 
-                                                              _cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate());
+    Set<Integer> selectableEmptyColumns = new TreeSet<Integer>(COLUMNS_LIST);
+    selectableEmptyColumns.removeAll(_cherryPickRequest.getRequiredEmptyColumnsOnAssayPlate());
+    _emptyColumnsOnAssayPlate = 
+      new UISelectManyBean<Integer>(selectableEmptyColumns, 
+                                    _cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate());
     
     _assayPlatesColumnModel = new ArrayDataModel(ASSAY_PLATES_TABLE_COLUMNS);
     _liquidTransferColumnModel = new ArrayDataModel(LIQUID_TRANSFER_TABLE_COLUMNS);

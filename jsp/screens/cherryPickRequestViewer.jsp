@@ -56,104 +56,117 @@ TODO:
 			<t:outputText value="Cherry Pick Request" styleClass="sectionHeader" />
 		</t:div>
 
-		<t:panelGroup id="commandPanel"
-			rendered="#{cherryPickRequestViewer.editable}"
-			styleClass="commandPanel">
-			<t:commandButton id="editCommand" value="Edit"
-				action="#{cherryPickRequestViewer.setEditMode}" styleClass="command"
-				rendered="#{!cherryPickRequestViewer.editMode && !cherryPickRequestViewer.cherryPickRequest.allocated}" />
-			<t:commandButton id="saveCommand" value="Save"
-				action="#{cherryPickRequestViewer.save}" styleClass="command"
-				rendered="#{cherryPickRequestViewer.editMode}" />
-			<h:commandButton id="cancelEditCommand" value="Cancel"
-				rendered="#{cherryPickRequestViewer.editMode}"
-				action="#{cherryPickRequestViewer.cancelEdit}" immediate="true"
-				styleClass="command" />
-		</t:panelGroup>
+		<t:panelGrid columns="1">
+			<t:panelGroup id="commandPanel"
+				rendered="#{cherryPickRequestViewer.editable}"
+				styleClass="commandPanel">
+				<t:commandButton id="editCommand" value="Edit"
+					action="#{cherryPickRequestViewer.setEditMode}"
+					styleClass="command"
+					rendered="#{!cherryPickRequestViewer.editMode}" />
+				<t:commandButton id="saveCommand" value="Save"
+					action="#{cherryPickRequestViewer.save}" styleClass="command"
+					rendered="#{cherryPickRequestViewer.editMode}" />
+				<h:commandButton id="cancelEditCommand" value="Cancel"
+					rendered="#{cherryPickRequestViewer.editMode}"
+					action="#{cherryPickRequestViewer.cancelEdit}" immediate="true"
+					styleClass="command" />
+			</t:panelGroup>
 
-		<t:panelGrid id="cherryPickRequestInfoTable" columns="2"
-			styleClass="standardTable" rowClasses="row1,row2"
-			columnClasses="keyColumn,column">
+			<t:panelGrid id="cherryPickRequestInfoTable" columns="2"
+				styleClass="standardTable" rowClasses="row1,row2"
+				columnClasses="keyColumn,column">
 
-			<t:outputText value="Cherry Pick Request ID" />
-			<t:outputText id="cherryPickRequestEntityId"
-				value="#{cherryPickRequestViewer.cherryPickRequest.entityId}"
-				styleClass="dataText" />
+				<t:outputText value="Cherry Pick Request ID" />
+				<t:outputText id="cherryPickRequestEntityId"
+					value="#{cherryPickRequestViewer.cherryPickRequest.entityId}"
+					styleClass="dataText" />
 
-			<t:outputText value="Date Requested" />
-			<t:inputDate id="dateRequestedEditable"
-				value="#{cherryPickRequestViewer.cherryPickRequest.dateRequested}"
-				popupCalendar="true" rendered="#{cherryPickRequestViewer.editMode}"
-				styleClass="inputText" />
-			<t:outputText id="dateRequested"
-				value="#{cherryPickRequestViewer.cherryPickRequest.dateRequested}"
-				rendered="#{!cherryPickRequestViewer.editMode}"
-				styleClass="dataText" />
+				<t:outputText value="Date Requested" />
+				<t:inputDate id="dateRequestedEditable"
+					value="#{cherryPickRequestViewer.cherryPickRequest.dateRequested}"
+					popupCalendar="true" rendered="#{cherryPickRequestViewer.editMode}"
+					styleClass="inputText" />
+				<t:outputText id="dateRequested"
+					value="#{cherryPickRequestViewer.cherryPickRequest.dateRequested}"
+					rendered="#{!cherryPickRequestViewer.editMode}"
+					styleClass="dataText" />
 
-			<t:outputText value="Requested&nbsp;By" escape="false" />
-			<h:panelGroup rendered="#{!cherryPickRequestViewer.editMode}">
-				<t:commandLink id="requestedBy"
-					value="#{cherryPickRequestViewer.cherryPickRequest.requestedBy.fullNameLastFirst}"
-					action="#{cherryPickRequestViewer.viewLeadScreener}"
-					styleClass="dataText entityLink" style="margin-right: 4px" />
-				<t:outputText value=" (" styleClass="dataText" />
-				<h:outputLink
-					value="mailto:#{cherryPickRequestViewer.cherryPickRequest.requestedBy.email}">
-					<t:outputText id="requestedByEmail"
-						value="#{cherryPickRequestViewer.cherryPickRequest.requestedBy.email}"
-						styleClass="dataText" />
-				</h:outputLink>
-				<t:outputText value=")" styleClass="dataText" />
-			</h:panelGroup>
-			<t:selectOneMenu id="requestedByEditable"
-				value="#{cherryPickRequestViewer.requestedBy.value}"
-				rendered="#{cherryPickRequestViewer.editMode}"
-				styleClass="inputText">
-				<f:selectItems
-					value="#{cherryPickRequestViewer.requestedBy.selectItems}" />
-			</t:selectOneMenu>
+				<t:outputText value="Requested&nbsp;By" escape="false" />
+				<h:panelGroup rendered="#{!cherryPickRequestViewer.editMode}">
+					<t:commandLink id="requestedBy"
+						value="#{cherryPickRequestViewer.cherryPickRequest.requestedBy.fullNameLastFirst}"
+						action="#{cherryPickRequestViewer.viewLeadScreener}"
+						styleClass="dataText entityLink" style="margin-right: 4px" />
+					<t:outputText value=" (" styleClass="dataText" />
+					<h:outputLink
+						value="mailto:#{cherryPickRequestViewer.cherryPickRequest.requestedBy.email}">
+						<t:outputText id="requestedByEmail"
+							value="#{cherryPickRequestViewer.cherryPickRequest.requestedBy.email}"
+							styleClass="dataText" />
+					</h:outputLink>
+					<t:outputText value=")" styleClass="dataText" />
+				</h:panelGroup>
+				<t:selectOneMenu id="requestedByEditable"
+					value="#{cherryPickRequestViewer.requestedBy.value}"
+					rendered="#{cherryPickRequestViewer.editMode}"
+					styleClass="inputText">
+					<f:selectItems
+						value="#{cherryPickRequestViewer.requestedBy.selectItems}" />
+				</t:selectOneMenu>
 
-			<t:outputText value="Requested&nbsp;Volume&nbsp;(&#181;L)"
-				escape="false" />
-			<t:inputText id="requestedVolume"
-				value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellRequested}"
-				displayValueOnly="#{!cherryPickRequestViewer.editMode}" size="5"
-				styleClass="inputText" displayValueOnlyStyleClass="dataText" />
+				<t:outputText value="Requested&nbsp;Volume&nbsp;(&#181;L)"
+					escape="false" />
+				<t:inputText id="requestedVolume"
+					value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellRequested}"
+					displayValueOnly="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.allocated}"
+					size="5" styleClass="inputText"
+					displayValueOnlyStyleClass="dataText" />
 
-			<t:outputText value="Approved&nbsp;Volume&nbsp;(&#181;L)"
-				escape="false" />
-			<t:inputText id="approvedVolume"
-				value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellApproved}"
-				displayValueOnly="#{!cherryPickRequestViewer.editMode}" size="5"
-				styleClass="inputText" displayValueOnlyStyleClass="dataText" />
+				<t:outputText value="Approved&nbsp;Volume&nbsp;(&#181;L)"
+					escape="false" />
+				<t:inputText id="approvedVolume"
+					value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellApproved}"
+					displayValueOnly="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.allocated}"
+					size="5" styleClass="inputText"
+					displayValueOnlyStyleClass="dataText" />
 
-			<t:outputText value="Cherry&nbsp;Pick&nbsp;Plate&nbsp;Type" escape="false" />
-			<t:outputText 
-				value="#{cherryPickRequestViewer.cherryPickRequest.assayPlateType}"
-				styleClass="dataText"/>
+				<t:outputText value="Cherry&nbsp;Pick&nbsp;Plate&nbsp;Type"
+					escape="false" />
+				<t:outputText
+					value="#{cherryPickRequestViewer.cherryPickRequest.assayPlateType}"
+					styleClass="dataText" />
 
-			<t:outputText
-				value="Random&nbsp;plate&nbsp;well&nbsp;layout"
-				escape="false" />
-			<t:selectBooleanCheckbox
-				value="#{cherryPickRequestViewer.cherryPickRequest.randomizedAssayPlateLayout}"
-				displayValueOnly="#{!cherryPickRequestViewer.editMode}"
-				styleClass="command" displayValueOnlyStyleClass="dataText" />
+				<t:outputText value="Random&nbsp;plate&nbsp;well&nbsp;layout"
+					escape="false" />
+				<t:selectBooleanCheckbox
+					value="#{cherryPickRequestViewer.cherryPickRequest.randomizedAssayPlateLayout}"
+					displayValueOnly="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.mapped}"
+					styleClass="command" displayValueOnlyStyleClass="dataText" />
 
-			<t:outputText
-				value="Empty&nbsp;columns&nbsp;on&nbsp;plate"
-				escape="false" />
-			<t:outputText
-				value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlateAsString}"
-				rendered="#{!cherryPickRequestViewer.editMode}" styleClass="dataText"/>
-			<t:selectManyListbox
-				value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlate.value}"
-				size="24" rendered="#{cherryPickRequestViewer.editMode}"
-				styleClass="input">
-				<f:selectItems
-					value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlate.selectItems}" />
-			</t:selectManyListbox>
+				<t:outputText value="Empty&nbsp;columns&nbsp;on&nbsp;plate"
+					escape="false" />
+				<t:outputText
+					value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlateAsString}"
+					rendered="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.mapped}"
+					styleClass="dataText" />
+				<t:selectManyListbox
+					value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlate.value}"
+					size="20"
+					rendered="#{cherryPickRequestViewer.editMode && !cherryPickRequestViewer.cherryPickRequest.mapped}"
+					styleClass="input">
+					<f:selectItems
+						value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlate.selectItems}" />
+				</t:selectManyListbox>
 
+				<t:outputText value="Comments" escape="false" />
+				<t:inputTextarea id="comments"
+					value="#{cherryPickRequestViewer.cherryPickRequest.comments}"
+					rows="10" cols="80"
+					displayValueOnly="#{!cherryPickRequestViewer.editMode}"
+					styleClass="inputText" displayValueOnlyStyleClass="dataText" />
+
+			</t:panelGrid>
 		</t:panelGrid>
 
 		<t:div styleClass="sectionHeader">
