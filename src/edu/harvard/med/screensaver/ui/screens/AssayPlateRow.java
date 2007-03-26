@@ -14,18 +14,18 @@ import java.util.Map;
 public class AssayPlateRow
 {
   public Map<String,String> values;
-  public Boolean selected = true;
+  public boolean selected = true;
 
   public AssayPlateRow(Map<String,String> values)
   {
     this.values = values;
   }
-  public Boolean getSelected()
+  public boolean isSelected()
   {
     return selected;
   }
 
-  public void setSelected(Boolean selected)
+  public void setSelected(boolean selected)
   {
     this.selected = selected;
   }

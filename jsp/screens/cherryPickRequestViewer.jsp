@@ -299,7 +299,7 @@ TODO:
 			</t:columns>
 			<t:column>
 				<f:facet name="header">
-					<t:selectBooleanCheckbox id="selectAll" value=""
+					<t:selectBooleanCheckbox id="selectAll" value="#{cherryPickRequestViewer.selectAllAssayPlates}"
 						onclick="document.getElementById('selectAllAssayPlatesButton').click()" />
 				</f:facet>
 				<t:selectBooleanCheckbox value="#{assayPlateRow.selected}" />

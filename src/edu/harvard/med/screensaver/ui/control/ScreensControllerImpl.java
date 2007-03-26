@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.ui.control;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -41,6 +42,7 @@ import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator;
+import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper;
 import edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
@@ -92,6 +94,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   private Screen _currentScreen;
   private CherryPickRequestAllocator _cherryPickRequestAllocator;
   private CherryPickRequestPlateMapper _cherryPickRequestPlateMapper;
+  private CherryPickRequestPlateMapFilesBuilder _cherryPickRequestPlateMapFilesBuilder;
   
 
   // public getters and setters
@@ -167,6 +170,11 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public void setCherryPickRequestPlateMapper(CherryPickRequestPlateMapper cherryPickRequestPlateMapper)
   {
     _cherryPickRequestPlateMapper = cherryPickRequestPlateMapper;
+  }
+
+  public void setCherryPickRequestPlateMapFilesBuilder(CherryPickRequestPlateMapFilesBuilder cherryPickRequestPlateMapFilesBuilder)
+  {
+    _cherryPickRequestPlateMapFilesBuilder = cherryPickRequestPlateMapFilesBuilder;
   }
 
   /* (non-Javadoc)
@@ -759,6 +767,47 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
             if (exportedWorkbookFile != null && exportedWorkbookFile.exists()) {
               exportedWorkbookFile.delete();
             }
+          }
+        }
+      });
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  public String downloadCherryPickRequestPlateMappingFiles(final CherryPickRequest cherryPickRequestIn,
+                                                           final Set<String> plateNames)
+  {
+    logUserActivity("downloadScreenResult " + cherryPickRequestIn);
+    
+    if (plateNames.size() == 0) {
+      showMessage("cherryPicks.noPlatesSelected");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    
+    try {
+      _dao.doInTransaction(new DAOTransaction() 
+      {
+        public void runTransaction()
+        {
+          CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reloadEntity(cherryPickRequestIn);
+          try {
+            if (cherryPickRequest != null) {
+              InputStream zipStream = _cherryPickRequestPlateMapFilesBuilder.buildZip(cherryPickRequest, plateNames);  
+              JSFUtils.handleUserDownloadRequest(getFacesContext(),
+                                                 zipStream,
+                                                 "CherryPickRequest" + cherryPickRequest.getEntityId() + "_PlateMapFiles.zip",
+                                                 "application/zip");
+            }
+          }
+          catch (IOException e)
+          {
+            reportApplicationError(e);
+          }
+          finally {
           }
         }
       });

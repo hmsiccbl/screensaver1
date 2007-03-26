@@ -101,5 +101,12 @@
     scope="singleton">
     <constructor-arg ref="dao"/>
   </bean>
+
+  <bean
+    id="cherryPickRequestPlateMapFilesBuilder"
+    class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder"
+    scope="singleton">
+    <constructor-arg ref="dao"/>
+  </bean>
   
 </beans>

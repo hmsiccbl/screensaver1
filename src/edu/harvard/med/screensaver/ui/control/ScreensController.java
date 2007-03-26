@@ -107,12 +107,16 @@ public interface ScreensController
   public String findScreen(Integer screenNumber);
 
   @UIControllerMethod
-  public String importScreenResult(final Screen screenIn,
-                                   final UploadedFile uploadedFile,
-                                   final ScreenResultParser parser);
+  public String importScreenResult(Screen screen,
+                                   UploadedFile uploadedFile,
+                                   ScreenResultParser parser);
 
   @UIControllerMethod
-  public String downloadScreenResult(final ScreenResult screenResultIn);
+  public String downloadScreenResult(ScreenResult screenResult);
+
+  @UIControllerMethod
+  public String downloadCherryPickRequestPlateMappingFiles(CherryPickRequest cherryPickRequest,
+                                                           Set<String> plateNames);
 
   @UIControllerMethod
   public String createCherryPickRequest(Screen screen);

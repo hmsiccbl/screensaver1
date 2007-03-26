@@ -316,6 +316,9 @@
     <property
       name="cherryPickRequestPlateMapper"
       ref="cherryPickRequestPlateMapper"/>
+    <property
+      name="cherryPickRequestPlateMapFilesBuilder"
+      ref="cherryPickRequestPlateMapFilesBuilder"/>
     <aop:scoped-proxy/>
   </bean>
 

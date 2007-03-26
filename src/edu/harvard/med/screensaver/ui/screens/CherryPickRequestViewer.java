@@ -80,7 +80,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private CherryPickRequest _cherryPickRequest;
   private boolean _isEditMode = false;
   private String _cherryPicksInput;
-  private Map<String,Boolean> _assayPlateSelectionMap = new HashMap<String,Boolean>();
   private UISelectOneEntityBean<ScreeningRoomUser> _requestedBy;
   private UISelectManyBean<Integer> _emptyColumnsOnAssayPlate;
 
@@ -90,6 +89,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private DataModel _assayPlatesDataModel;
   private DataModel _liquidTransferColumnModel;
   private DataModel _liquidTransferDataModel;
+  private boolean _selectAllAssayPlates;
 
 
   // public constructors and methods
@@ -271,11 +271,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return _assayPlatesDataModel;
   }
   
-  public Map<String,Boolean> getAssayPlateSelectionMap()
-  {
-    return _assayPlateSelectionMap;
-  }
-  
   public DataModel getLiquidTransferColumnModel()
   {
     return _liquidTransferColumnModel;
@@ -295,6 +290,16 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       _liquidTransferDataModel = new ListDataModel(rows);
     }
     return _liquidTransferDataModel;
+  }
+
+  public boolean isSelectAllAssayPlates()
+  {
+    return _selectAllAssayPlates;
+  }
+
+  public void setSelectAllAssayPlates(boolean selectAllAssayPlates)
+  {
+    _selectAllAssayPlates = selectAllAssayPlates;
   }
 
   /**
@@ -361,15 +366,12 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return _screensController.plateMapCherryPicks(_cherryPickRequest);
   }
 
+  @SuppressWarnings("unchecked")
   public String selectAllAssayPlates()
   {
-    if (_assayPlateSelectionMap.size() > 0) {
-      _assayPlateSelectionMap.clear();
-    }
-    else {
-      for (String assayPlateName : _cherryPickRequest.getAssayPlates()) {
-        _assayPlateSelectionMap.put(assayPlateName, true);
-      }
+    List<AssayPlateRow> data = (List<AssayPlateRow>) getAssayPlatesDataModel().getWrappedData();
+    for (AssayPlateRow row : data) {
+      row.setSelected(_selectAllAssayPlates);
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -388,8 +390,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
   public String downloadPlateMappingFilesForSelectedAssayPlates()
   {
-    // TODO
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    Set<String> plateNames = getSelectedAssayPlates();
+      return _screensController.downloadCherryPickRequestPlateMappingFiles(_cherryPickRequest, 
+                                                                           plateNames);
   }
   
   public String viewLeadScreener()
@@ -437,5 +440,17 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
   // private methods
 
+  @SuppressWarnings("unchecked")
+  private Set<String> getSelectedAssayPlates()
+  {
+    Set<String> selectedAssayPlates = new HashSet<String>();
+    List<AssayPlateRow> data = (List<AssayPlateRow>) getAssayPlatesDataModel().getWrappedData();
+    for (AssayPlateRow row : data) {
+      if (row.isSelected()) {
+        selectedAssayPlates.add(row.getValues().get(ASSAY_PLATES_TABLE_COLUMNS[0]));
+      }
+    }
+    return selectedAssayPlates;
+  }
 }
 
