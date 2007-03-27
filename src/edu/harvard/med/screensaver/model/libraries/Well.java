@@ -610,12 +610,12 @@ public class Well extends AbstractEntity implements Comparable
     if (_molfile == null) {
       return;
     }
-    sdFilePrintWriter.println(_molfile);
+    sdFilePrintWriter.println(getMolfile());
     sdFilePrintWriter.println(">  <Library>");
     sdFilePrintWriter.println(getLibrary().getLibraryName());
     sdFilePrintWriter.println();
     sdFilePrintWriter.println(">  <Plate>");
-    sdFilePrintWriter.println(getPlateNumber());
+    sdFilePrintWriter.println(getPlateNumber().intValue());
     sdFilePrintWriter.println();
     sdFilePrintWriter.println(">  <Well>");
     sdFilePrintWriter.println(getWellName());
@@ -624,7 +624,7 @@ public class Well extends AbstractEntity implements Comparable
     sdFilePrintWriter.println(getPlateNumber() + getWellName());
     sdFilePrintWriter.println();
     sdFilePrintWriter.println(">  <Well_Type>");
-    sdFilePrintWriter.println(getWellType());
+    sdFilePrintWriter.println(getWellType().getValue());
     sdFilePrintWriter.println();
     sdFilePrintWriter.println(">  <Smiles>");
     sdFilePrintWriter.println(getSmiles());
