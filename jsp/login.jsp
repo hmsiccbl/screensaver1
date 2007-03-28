@@ -14,7 +14,7 @@
   <h:form id="loginForm" onsubmit="javascript:document.forms['login:loginForm'].action='j_security_check'">
     <t:outputText value="If you are a screener, you may use your eCommons ID and password to login."/>
     <t:panelGrid columns="2" columnClasses="keyColumn,column">
-      <t:outputText value="User ID:" styleClass="inputText" />
+      <t:outputText value="User&nbsp;ID:" styleClass="inputText" escape="false" />
       <t:inputText id="j_username" forceId="true" styleClass="inputText" />
       <t:outputText value="Password:" styleClass="label" />
       <t:inputSecret id="j_password" forceId="true" styleClass="inputText" />
