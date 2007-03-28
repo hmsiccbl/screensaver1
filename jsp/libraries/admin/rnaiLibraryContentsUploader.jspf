@@ -10,7 +10,7 @@
       <t:outputText value="Library:" styleClass="spacer" />
       <t:commandLink
         action="#{rnaiLibraryContentsImporter.viewLibrary}"
-      	value="#{rnaiLibraryContentsImporter.library}"
+      	value="#{rnaiLibraryContentsImporter.library.libraryName}"
         styleClass="spacer"
       />
 	</t:panelGroup>

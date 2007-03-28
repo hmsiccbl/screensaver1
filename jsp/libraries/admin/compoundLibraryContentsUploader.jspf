@@ -10,7 +10,7 @@
       <t:outputText value="Library:" />
       <t:commandLink
         action="#{compoundLibraryContentsImporter.viewLibrary}"
-        value="#{compoundLibraryContentsImporter.library}"
+        value="#{compoundLibraryContentsImporter.library.libraryName}"
         styleClass="spacer"
       />
     </t:panelGroup>
