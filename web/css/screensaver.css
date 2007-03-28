@@ -37,6 +37,11 @@ h3,.subsectionHeader {
 	padding: 2px 2px 2px 2px;
 }
 
+form {
+	margin: 0px 0px 0px 0px;
+	padding: 0px 0px 0px 0px;
+}
+
 .icon {
 	border: none
 }
