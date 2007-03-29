@@ -88,6 +88,12 @@
             "download search results to". (Be aware that large search results may take a while to
             download.)
           </li>
+          <li>
+            <b><i>Internet Explorer Tip:</i></b> Are you getting a "Security Information" popup
+            window every time you try to view another compound? Go to Tools; Internet Options...;
+            Security; Custom Level...; scroll down to "Display mixed content"; select "Enable";
+            click OK; click Yes; click OK.
+          </li>
         </ul>
       </li>
       <li>
