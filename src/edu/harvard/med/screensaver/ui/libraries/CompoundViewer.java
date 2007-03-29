@@ -29,26 +29,6 @@ public class CompoundViewer extends AbstractBackingBean
   // private static stuff
   
   private static final Logger log = Logger.getLogger(CompoundViewer.class);
-  private static final String _screensaver0ImageRenderer =
-    "http://screensaver1:insecure@screensaver.med.harvard.edu/screenbank/compounds-screensaver1/render_molecule.png";
-  
-  /**
-   * This map is a workaround for the JSF EL limitation of no parameters allowed to methods. 
-   */
-  private static final Map<String,String> _compoundImageUrl = new HashMap<String,String>() {
-    private static final long serialVersionUID = 1L;
-    public String get(Object key)
-    {
-      String smiles = (String) key;
-      try {
-        smiles = URLEncoder.encode(smiles, "UTF-8");
-      }
-      catch (UnsupportedEncodingException ex){
-        throw new RuntimeException("UTF-8 not supported", ex);
-      }
-      return _screensaver0ImageRenderer + "?smiles=" + smiles;
-    }
-  };
   
   
   // private instance fields
@@ -129,11 +109,6 @@ public class CompoundViewer extends AbstractBackingBean
     _compoundNameValueTable = compoundNameValueTable;
   }
 
-  public Map<String,String> getCompoundImageUrl()
-  {
-    return _compoundImageUrl;
-  }
-  
   public String viewCompound()
   {
     return _librariesController.viewCompound(_compound, _wellSearchResults);
