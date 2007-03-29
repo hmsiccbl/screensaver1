@@ -34,8 +34,7 @@ public class CompoundNameValueTable extends NameValueTable
   
   private static final Logger log = Logger.getLogger(CompoundNameValueTable.class);
   private static final String SCREENSAVER0_IMAGE_RENDERER_URL_PREFIX =
-    "http://screensaver1:insecure@screensaver.med.harvard.edu/screenbank/" +
-    "compounds-screensaver1/render_molecule.png?smiles=";
+    "http://screensaver1.med.harvard.edu/render_molecule.png?smiles=";
   private static final String PUBCHEM_CID_LOOKUP_URL_PREFIX =
     "http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid=";
   
