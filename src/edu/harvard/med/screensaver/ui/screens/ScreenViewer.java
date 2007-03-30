@@ -454,7 +454,7 @@ public class ScreenViewer extends AbstractBackingBean
   
   public String viewCherryPickRequest()
   {
-    return _screensController.viewCherryPickRequest((CherryPickRequest) getRequestMap().get("cherryPickRequestItem"));
+    return _screensController.viewCherryPickRequest((CherryPickRequest) getRequestMap().get("cherryPickRequest"));
   }  
   
   public String viewScreeningRoomActivity()
