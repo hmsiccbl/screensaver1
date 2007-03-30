@@ -241,7 +241,7 @@ TODO:
 			</t:dataTable>
 			<t:panelGroup>
 				<t:commandButton value="Add Screening Room Activity..."
-					action="#{screenViewer.addScreeningRoomActivityItem}"
+					action="#{screenViewer.addScreeningRoomActivity}"
 					styleClass="command" rendered="#{screenViewer.editMode}" />
 			</t:panelGroup>
 		</t:panelGrid>
@@ -252,7 +252,7 @@ TODO:
 			rendered="#{screenViewer.userAssociatedWithScreen}">
 			<t:outputText value="<none>" styleClass="dataText"
 				rendered="#{empty screenViewer.screen.cherryPickRequests}" />
-			<t:dataTable id="cherryPickRequestItems" var="cherryPickRequestItem"
+			<t:dataTable id="cherryPickRequests" var="cherryPickRequest"
 				value="#{screenViewer.cherryPickRequestsDataModel}"
 				preserveDataModel="false"
 				rendered="#{!empty screenViewer.screen.cherryPickRequests}"
@@ -260,10 +260,18 @@ TODO:
 				columnClasses="column" headerClass="tableHeader">
 				<t:column>
 					<f:facet name="header">
+						<t:outputText value="ID" />
+					</f:facet>
+					<t:outputText id="cherryPickId"
+						value="#{cherryPickRequest.entityId}"
+						styleClass="dataText" />
+				</t:column>
+				<t:column>
+					<f:facet name="header">
 						<t:outputText value="Date Requested" />
 					</f:facet>
 					<t:outputText id="dateRequested"
-						value="#{cherryPickRequestItem.dateRequested}"
+						value="#{cherryPickRequest.dateRequested}"
 						styleClass="dataText" />
 				</t:column>
 				<t:column>
@@ -271,7 +279,7 @@ TODO:
 						<t:outputText value="Requested By" />
 					</f:facet>
 					<t:outputText id="requestedBy"
-						value="#{cherryPickRequestItem.requestedBy.fullNameLastFirst}"
+						value="#{cherryPickRequest.requestedBy.fullNameLastFirst}"
 						styleClass="dataText" />
 				</t:column>
 				<t:column>
@@ -287,7 +295,7 @@ TODO:
 			</t:dataTable>
 			<t:panelGroup>
 				<t:commandButton value="Add Cherry Pick Request..."
-					action="#{screenViewer.addCherryPickRequestItem}"
+					action="#{screenViewer.addCherryPickRequest}"
 					styleClass="command" rendered="#{screenViewer.editMode}" />
 			</t:panelGroup>
 		</t:panelGrid>

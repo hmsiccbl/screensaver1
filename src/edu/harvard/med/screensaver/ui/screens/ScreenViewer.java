@@ -11,6 +11,8 @@ package edu.harvard.med.screensaver.ui.screens;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -195,32 +197,80 @@ public class ScreenViewer extends AbstractBackingBean
 
   public DataModel getStatusItemsDataModel()
   {
-    return new ListDataModel(new ArrayList<StatusItem>(_screen.getStatusItems()));
+    ArrayList<StatusItem> statusItems = new ArrayList<StatusItem>(_screen.getStatusItems());
+    Collections.sort(statusItems,
+                     new Comparator<StatusItem>() {
+      public int compare(StatusItem si1, StatusItem si2) 
+      { 
+        return si1.getStatusDate().compareTo(si2.getStatusDate()); 
+      }
+    });
+    return new ListDataModel(statusItems);
   }
 
   public DataModel getScreeningRoomActivitiesDataModel()
   {
-    return new ListDataModel(new ArrayList<ScreeningRoomActivity>(_screen.getScreeningRoomActivities()));
+    ArrayList<ScreeningRoomActivity> screeningRoomActivities = new ArrayList<ScreeningRoomActivity>(_screen.getScreeningRoomActivities());
+    Collections.sort(screeningRoomActivities,
+                     new Comparator<ScreeningRoomActivity>() {
+      public int compare(ScreeningRoomActivity sra1, ScreeningRoomActivity sra2) 
+      { 
+        return sra1.getDateOfActivity().compareTo(sra2.getDateOfActivity()); 
+      }
+    });
+    return new ListDataModel(screeningRoomActivities);
   }
 
   public DataModel getCherryPickRequestsDataModel()
   {
-    return new ListDataModel(new ArrayList<CherryPickRequest>(_screen.getCherryPickRequests()));
+    ArrayList<CherryPickRequest> cherryPickRequests = new ArrayList<CherryPickRequest>(_screen.getCherryPickRequests());
+    Collections.sort(cherryPickRequests,
+                     new Comparator<CherryPickRequest>() {
+      public int compare(CherryPickRequest cpr1, CherryPickRequest cpr2) 
+      { 
+        return cpr1.getEntityId().compareTo(cpr2.getEntityId()); 
+      }
+    });
+    return new ListDataModel(cherryPickRequests);
   }
 
   public DataModel getPublicationsDataModel()
   {
-    return new ListDataModel(new ArrayList<Publication>(_screen.getPublications()));
+    ArrayList<Publication> publications = new ArrayList<Publication>(_screen.getPublications());
+    Collections.sort(publications,
+                     new Comparator<Publication>() {
+      public int compare(Publication p1, Publication p2) 
+      { 
+        return p1.getAuthors().compareTo(p2.getAuthors()); 
+      }
+    });
+    return new ListDataModel(publications);
   }
 
   public DataModel getLettersOfSupportDataModel()
   {
-    return new ListDataModel(new ArrayList<LetterOfSupport>(_screen.getLettersOfSupport()));
+    ArrayList<LetterOfSupport> lettersOfSupport = new ArrayList<LetterOfSupport>(_screen.getLettersOfSupport());
+    Collections.sort(lettersOfSupport,
+                     new Comparator<LetterOfSupport>() {
+      public int compare(LetterOfSupport los1, LetterOfSupport los2) 
+      { 
+        return los1.getDateWritten().compareTo(los2.getDateWritten()); 
+      }
+    });
+    return new ListDataModel(lettersOfSupport);
   }
 
   public DataModel getAttachedFilesDataModel()
   {
-    return new ListDataModel(new ArrayList<AttachedFile>(_screen.getAttachedFiles()));
+    ArrayList<AttachedFile> attachedFiles = new ArrayList<AttachedFile>(_screen.getAttachedFiles());
+    Collections.sort(attachedFiles,
+                     new Comparator<AttachedFile>() {
+      public int compare(AttachedFile af1, AttachedFile af2) 
+      { 
+        return af1.getFilename().compareTo(af2.getFilename()); 
+      }
+    });
+    return new ListDataModel(attachedFiles);
   }
 
   public DataModel getFundingSupportsDataModel()
@@ -230,6 +280,14 @@ public class ScreenViewer extends AbstractBackingBean
 
   public DataModel getAssayReadoutTypesDataModel()
   {
+    ArrayList<AttachedFile> attachedFiles = new ArrayList<AttachedFile>(_screen.getAttachedFiles());
+    Collections.sort(attachedFiles,
+                     new Comparator<AttachedFile>() {
+      public int compare(AttachedFile af1, AttachedFile af2) 
+      { 
+        return af1.getFilename().compareTo(af2.getFilename()); 
+      }
+    });
     return new ListDataModel(new ArrayList<AssayReadoutType>(_screen.getAssayReadoutTypes()));
   }
 
@@ -240,12 +298,16 @@ public class ScreenViewer extends AbstractBackingBean
 
   public DataModel getKeywordsDataModel()
   {
-    return new ListDataModel(new ArrayList<String>(_screen.getKeywords()));
+    ArrayList<String> keywords = new ArrayList<String>(_screen.getKeywords());
+    Collections.sort(keywords);
+    return new ListDataModel(keywords);
   }
   
   public String getKeywords()
   {
-    return StringUtils.makeListString(new ArrayList<String>(_screen.getKeywords()), ", ");
+    ArrayList<String> keywords = new ArrayList<String>(_screen.getKeywords());
+    Collections.sort(keywords);
+    return StringUtils.makeListString(keywords, ", ");
   }
 
   public List<SelectItem> getScreenTypeSelectItems()
@@ -368,14 +430,14 @@ public class ScreenViewer extends AbstractBackingBean
     return _screensController.deleteStatusItem(_screen, getSelectedEntityOfType(StatusItem.class));
   }
   
-  // TODO: save & go to cherry pick request viewer
-  public String addCherryPickRequestItem()
+  public String addCherryPickRequest()
   {
+    // TODO: save screen
     return _screensController.createCherryPickRequest(_screen);
   }
   
   // TODO: save & go to screening room activity viewer
-  public String addScreeningRoomActivityItem()
+  public String addScreeningRoomActivity()
   {
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
