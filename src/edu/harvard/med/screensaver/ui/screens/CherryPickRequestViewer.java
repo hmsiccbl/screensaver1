@@ -116,6 +116,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
   private CherryPickRequest _cherryPickRequest;
   private boolean _isEditMode = false;
+  private Map<String,Boolean> _collapsiblePanelsState;
   private String _cherryPicksInput;
   private UISelectOneEntityBean<ScreeningRoomUser> _requestedBy;
   private UISelectManyBean<Integer> _emptyColumnsOnAssayPlate;
@@ -130,6 +131,16 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
 
   // public constructors and methods
+  
+  public CherryPickRequestViewer()
+  {
+    _collapsiblePanelsState = new HashMap<String,Boolean>();
+    _collapsiblePanelsState.put("screenSummary", true);
+    _collapsiblePanelsState.put("cherryPickRequest", false);
+    _collapsiblePanelsState.put("screenerCherryPicks", false);
+    _collapsiblePanelsState.put("labCherryPicks", false);
+    _collapsiblePanelsState.put("cherryPickAssayPlates", false);
+  }
 
   public void setDao(DAO dao)
   {
@@ -191,6 +202,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return _isEditMode;
   }
 
+  public Map getCollapsiblePanelsState()
+  {
+    return _collapsiblePanelsState;
+  }
+  
   public String getCherryPicksInput()
   {
     return _cherryPicksInput;
