@@ -38,11 +38,12 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
-import edu.harvard.med.screensaver.model.screens.CherryPick;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
@@ -649,21 +650,33 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Library library = new Library("library 1",
-                                      "lib1",
-                                      ScreenType.RNAI,
-                                      LibraryType.COMMERCIAL,
-                                      1,
-                                      2);
-        Well well1 = CherryPickRequestAllocatorTest.makeRNAiWell(library, 1, new WellName("A01"));
-        Well well2 = CherryPickRequestAllocatorTest.makeRNAiWell(library, 2, new WellName("P24"));
-        dao.persistEntity(library);
+        Library poolLibrary = new Library("Pools library 1",
+                                          "poollib1",
+                                          ScreenType.RNAI,
+                                          LibraryType.COMMERCIAL,
+                                          1,
+                                          2);
+        Well poolWell1 = CherryPickRequestAllocatorTest.makeRNAiWell(poolLibrary, 1, new WellName("A01"));
+        Well poolWell2 = CherryPickRequestAllocatorTest.makeRNAiWell(poolLibrary, 2, new WellName("P24"));
+        dao.persistEntity(poolLibrary);
+
+        Library duplexLibrary = new Library("Duplexes library 1",
+                                            "duplib1",
+                                            ScreenType.RNAI,
+                                            LibraryType.COMMERCIAL,
+                                            3,
+                                            4);
+        CherryPickRequestAllocatorTest.makeRNAiDuplexWellForPoolWell(duplexLibrary, poolWell1, 3, new WellName("A01"));
+        CherryPickRequestAllocatorTest.makeRNAiDuplexWellForPoolWell(duplexLibrary, poolWell2, 4, new WellName("P24"));
+        dao.persistEntity(duplexLibrary);
         
         Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(screenNumber); 
         screen.setScreenType(ScreenType.RNAI);
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
-        new CherryPick(cherryPickRequest, well1);
-        new CherryPick(cherryPickRequest, well2);
+        new ScreenerCherryPick(cherryPickRequest, poolWell1);
+        new ScreenerCherryPick(cherryPickRequest, poolWell2);
+        cherryPickRequest.createLabCherryPicks();
+        assertEquals("created lab cherry picks", 2, cherryPickRequest.getLabCherryPicks().size());
         dao.persistEntity(cherryPickRequest); // why do we need this, if we're also persisting the screen?!
         dao.persistEntity(screen);
         result[0] = cherryPickRequest;
@@ -672,7 +685,8 @@ public class ComplexDAOTest extends AbstractSpringTest
     return result[0];
   }
   
-  public void testDeleteCherryPick()
+  // TODO: test case where deletion not allowed
+  public void testDeleteScreenerCherryPick()
   {
     final int screenNumber = 1;
     makeCherryPickRequest(screenNumber);
@@ -682,14 +696,14 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
-        assertEquals("cherry picks exist before delete",
+        assertEquals("screener cherry picks exist before delete",
                      2, 
-                     cherryPickRequest.getCherryPicks().size());
-        assertEquals("cherry picks exist in well1 before delete", 1, dao.findWell(new WellKey(1, "A01")).getCherryPicks().size());
-        assertEquals("cherry picks exist in well2 before delete", 1, dao.findWell(new WellKey(2, "P24")).getCherryPicks().size());
-        Set<CherryPick> cherryPicksToDelete = new HashSet<CherryPick>(cherryPickRequest.getCherryPicks());
-        for (CherryPick cherryPick : cherryPicksToDelete) {
-          dao.deleteCherryPick(cherryPick);
+                     cherryPickRequest.getScreenerCherryPicks().size());
+        assertEquals("screener cherry picks exist for well1 before delete", 1, dao.findWell(new WellKey(1, "A01")).getScreenerCherryPicks().size());
+        assertEquals("screener cherry picks exist for well2 before delete", 1, dao.findWell(new WellKey(2, "P24")).getScreenerCherryPicks().size());
+        Set<ScreenerCherryPick> cherryPicksToDelete = new HashSet<ScreenerCherryPick>(cherryPickRequest.getScreenerCherryPicks());
+        for (ScreenerCherryPick cherryPick : cherryPicksToDelete) {
+          dao.deleteScreenerCherryPick(cherryPick);
         }
       }
     });
@@ -700,9 +714,45 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
-        assertEquals("cherry picks deleted from cherry pick request", 0, cherryPickRequest.getCherryPicks().size());
-        assertEquals("cherry picks deleted from well1", 0, dao.findWell(new WellKey(1, "A01")).getCherryPicks().size());
-        assertEquals("cherry picks deleted from well2", 0, dao.findWell(new WellKey(2, "P24")).getCherryPicks().size());
+        assertEquals("screener cherry picks deleted from cherry pick request", 0, cherryPickRequest.getScreenerCherryPicks().size());
+        assertEquals("screener cherry picks deleted from well1", 0, dao.findWell(new WellKey(1, "A01")).getScreenerCherryPicks().size());
+        assertEquals("screener cherry picks deleted from well2", 0, dao.findWell(new WellKey(2, "P24")).getScreenerCherryPicks().size());
+      }
+    });
+  }
+
+  // TODO: test case where deletion not allowed
+  public void testDeleteLabCherryPick()
+  {
+    final int screenNumber = 1;
+    makeCherryPickRequest(screenNumber);
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+        CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
+        assertEquals("lab cherry picks exist before delete",
+                     2, 
+                     cherryPickRequest.getLabCherryPicks().size());
+        assertEquals("lab cherry picks exist in well1 before delete", 1, dao.findWell(new WellKey(3, "A01")).getLabCherryPicks().size());
+        assertEquals("lab cherry picks exist in well2 before delete", 1, dao.findWell(new WellKey(4, "P24")).getLabCherryPicks().size());
+        Set<LabCherryPick> cherryPicksToDelete = new HashSet<LabCherryPick>(cherryPickRequest.getLabCherryPicks());
+        for (LabCherryPick cherryPick : cherryPicksToDelete) {
+          dao.deleteLabCherryPick(cherryPick);
+        }
+      }
+    });
+    
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+        CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
+        assertEquals("lab cherry picks deleted from cherry pick request", 0, cherryPickRequest.getLabCherryPicks().size());
+        assertEquals("lab cherry picks deleted from well1", 0, dao.findWell(new WellKey(3, "A01")).getLabCherryPicks().size());
+        assertEquals("lab cherry picks deleted from well2", 0, dao.findWell(new WellKey(4, "P24")).getLabCherryPicks().size());
       }
     });
   }

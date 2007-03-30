@@ -36,7 +36,7 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
 
   private Integer _rnaiKnockdownConfirmationId;
   private Integer _version;
-  private CherryPick _cherryPick;
+  private ScreenerCherryPick _screenerCherryPick;
   private Double _percentKnockdown;
   private MethodOfQuantification _methodOfQuantification;
   private String _timing;
@@ -48,28 +48,28 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
   /**
    * Constructs an initialized <code>RNAiKnockdownConfirmation</code> object.
    *
-   * @param cherryPick the cherry pick
+   * @param screenerCherryPick the screener cherry pick
    * @param percentKnockdown the percent knockdown
    * @param methodOfQuantification the method of quantification
    * @param timing the timing
    * @param cellLine the cell line
    */
   public RNAiKnockdownConfirmation(
-    CherryPick cherryPick,
+    ScreenerCherryPick screenerCherryPick,
     Double percentKnockdown,
     MethodOfQuantification methodOfQuantification,
     String timing,
     String cellLine)
   {
-    if (cherryPick == null) {
+    if (screenerCherryPick == null) {
       throw new NullPointerException();
     }
-    _cherryPick = cherryPick;
+    _screenerCherryPick = screenerCherryPick;
     _percentKnockdown = percentKnockdown;
     _methodOfQuantification = methodOfQuantification;
     _timing = timing;
     _cellLine = cellLine;
-    _cherryPick.setRNAiKnockdownConfirmation(this);
+    _screenerCherryPick.setRNAiKnockdownConfirmation(this);
   }
 
 
@@ -94,14 +94,14 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
   }
 
   /**
-   * Get the cherry pick.
+   * Get the screener cherry pick.
    *
-   * @return the cherry pick
+   * @return the screener cherry pick
    */
   @ToOneRelationship(nullable=false, inverseProperty="RNAiKnockdownConfirmation")
-  public CherryPick getCherryPick()
+  public ScreenerCherryPick getScreenerCherryPick()
   {
-    return _cherryPick;
+    return _screenerCherryPick;
   }
 
   /**
@@ -201,26 +201,26 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    return getCherryPick();
+    return getScreenerCherryPick();
   }
 
 
   // package methods
 
   /**
-   * Set the cherry pick.
+   * Set the screener cherry pick.
    * Throw a NullPointerException when the cherry pick is null.
    *
-   * @param cherryPick the new cherry pick
+   * @param screenerCherryPick the new cherry pick
    * @throws NullPointerException when the cherry pick is null
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
-  void setHbnCherryPick(CherryPick cherryPick)
+  void setHbnScreenerCherryPick(ScreenerCherryPick screenerCherryPick)
   {
-    if (cherryPick == null) {
+    if (screenerCherryPick == null) {
       throw new NullPointerException();
     }
-    _cherryPick = cherryPick;
+    _screenerCherryPick = screenerCherryPick;
   }
 
 
@@ -272,15 +272,15 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
    *
    * @return the cherry pick
    * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.CherryPick"
-   *   column="cherry_pick_id"
+   *   class="edu.harvard.med.screensaver.model.screens.ScreenerCherryPick"
+   *   column="screener_cherry_pick_id"
    *   not-null="true"
-   *   foreign-key="fk_rnai_knockdown_confirmation_to_cherry_pick"
+   *   foreign-key="fk_rnai_knockdown_confirmation_to_screener_cherry_pick"
    *   cascade="save-update"
    * @motivation for hibernate
    */
-  private CherryPick getHbnCherryPick()
+  private ScreenerCherryPick getHbnScreenerCherryPick()
   {
-    return _cherryPick;
+    return _screenerCherryPick;
   }
 }

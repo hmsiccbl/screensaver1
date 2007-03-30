@@ -26,14 +26,17 @@ import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
-import edu.harvard.med.screensaver.model.screens.CherryPick;
+import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
@@ -51,187 +54,171 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(AbaseTestset entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(AttachedFile entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(BillingInformation entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(BillingItem entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(ChecklistItem entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(ChecklistItemType entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
-  public boolean visit(CherryPick entity)
+  public boolean visit(LabCherryPick entity)
   {
-    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean visit(ScreenerCherryPick entity)
+  {
     return true;
   }
 
   public boolean visit(CherryPickRequest entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(Compound entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(Copy entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(CopyAction entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(CopyInfo entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(Derivative entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(DerivativeScreenResult entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(EquipmentUsed entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(Gene entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(LabAffiliation entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(LetterOfSupport entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(Library entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(PlatesUsed entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(Publication entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(ResultValue entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(ResultValueType entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(RNAiKnockdownConfirmation entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(Screen screen)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(ScreeningRoomActivity visit)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(ScreenResult screenResult)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(ScreensaverUser screensaverUser)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(SilencingReagent entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(StatusItem entity)
   {
-    // TODO Auto-generated method stub
     return true;
   }
 
   public boolean visit(Well entity)
   {
-    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean visit(CherryPickAssayPlate entity)
+  {
+    return true;
+  }
+
+  public boolean visit(CherryPickLiquidTransfer entity)
+  {
     return true;
   }
 }

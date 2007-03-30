@@ -9,7 +9,10 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
@@ -27,7 +30,7 @@ public class CherryPickTableRowComparator implements Comparator<Map>
 
   // instance data members
 
-  private String _sortKey;
+  private List<String> _sortKeys;
   private SortDirection _sortDirection;
 
   
@@ -35,16 +38,31 @@ public class CherryPickTableRowComparator implements Comparator<Map>
   
   public CherryPickTableRowComparator(String sortKey, SortDirection sortDirection)
   {
-    _sortKey = sortKey;
+    _sortKeys = new ArrayList<String>();
+    _sortKeys.add(sortKey);
+    _sortDirection = sortDirection;
+  }
+
+  public CherryPickTableRowComparator(String[] sortKeys, SortDirection sortDirection)
+  {
+    _sortKeys = Arrays.asList(sortKeys);
     _sortDirection = sortDirection;
   }
 
   @SuppressWarnings("unchecked")
   public int compare(Map row1, Map row2)
   {
-    int result = ((Comparable) row1.get(_sortKey)).compareTo((Comparable) row2.get(_sortKey));
-    if (_sortDirection.equals(SortDirection.DESCENDING)) {
-      result = result * -1;
+    int result = 0;
+    boolean first = true;
+    for (String sortKey : _sortKeys) {
+      result = ((Comparable) row1.get(sortKey)).compareTo((Comparable) row2.get(sortKey));
+      if (first && _sortDirection.equals(SortDirection.DESCENDING)) {
+        result = result * -1;
+        first = false;
+      }
+      if (result != 0) {
+        break;
+      }
     }
     return result;
   }

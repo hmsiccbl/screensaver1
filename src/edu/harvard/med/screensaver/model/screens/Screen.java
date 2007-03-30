@@ -390,7 +390,7 @@ public class Screen extends AbstractEntity
    *
    * @return the cherry pick requests
    * @hibernate.set
-   *   cascade="all-delete-orphan"
+   *   cascade="save-update"
    *   lazy="true"
    *   inverse="true"
    * @hibernate.collection-key

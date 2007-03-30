@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.util.Date;
-import java.util.Set;
 
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
@@ -93,19 +92,6 @@ public class RNAiCherryPickScreening extends Screening
   public String getRequestedAssayProtocol()
   {
     return _rnaiCherryPickRequest.getAssayProtocol();
-  }
-  
-  /**
-   * Get the cherry picks that comprise this screening. This is a convenience
-   * method, as the cherry picks equivalently accessible via
-   * {@link RNAiCherryPickRequest#getCherryPicks() getRNAiCherryPickRequest().getCherryPicks()}.
-   * 
-   * @return a Set of CherryPick objects
-   */
-  @DerivedEntityProperty
-  public Set<CherryPick> getCherryPicks()
-  {
-    return _rnaiCherryPickRequest.getCherryPicks();
   }
 
 

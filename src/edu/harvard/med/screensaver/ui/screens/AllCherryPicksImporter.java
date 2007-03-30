@@ -62,10 +62,10 @@ public class AllCherryPicksImporter extends AbstractBackingBean
   {
     try {
       _allCherryPicksImporter.importCherryPickCopies(_uploadedFile.getInputStream());
-      showMessage("screens.allCherryPicksImported");
+      showMessage("cherryPicks.importedAllCherryPicksFile");
     }
     catch (Exception e) {
-      showMessage("screens.allCherryPicksImportError", e.getMessage());
+      showMessage("cherryPicks.errorImportingAllCherryPicksFile", e.getMessage());
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }

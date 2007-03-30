@@ -26,8 +26,9 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.CherryPick;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
+import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 
@@ -223,7 +224,11 @@ public class NoOpDAO implements DAO
     return -1;
   }
 
-  public void deleteCherryPick(CherryPick cherryPick)
+  public void deleteLabCherryPick(LabCherryPick cherryPick)
+  {
+  }
+
+  public void deleteScreenerCherryPick(ScreenerCherryPick cherryPick)
   {
   }
 

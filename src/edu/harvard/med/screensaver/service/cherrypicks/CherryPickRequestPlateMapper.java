@@ -23,8 +23,9 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
-import edu.harvard.med.screensaver.model.screens.CherryPick;
+import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
@@ -75,16 +76,13 @@ public class CherryPickRequestPlateMapper
 
   private void doGeneratePlateMapping(CherryPickRequest cherryPickRequest)
   {
-    SortedSet<CherryPick> toBeMapped = findCherryPicksToBeMapped(cherryPickRequest);
+    SortedSet<LabCherryPick> toBeMapped = findLabCherryPicksToBeMapped(cherryPickRequest);
     List<WellName> availableWellNamesMaster = findAvailableWellNames(cherryPickRequest);
     List<WellName> availableWellNamesWorking = null;
-    int plateIndex = -1;
-    Map<CherryPick,Pair<Integer,WellName>> plateWellMapping = new HashMap<CherryPick,Pair<Integer,WellName>>();
+    int plateIndex = 0;
+    CherryPickAssayPlate assayPlate = null;
 
-    // first pass: assign cherry picks to wells, in a temporary data structure
-    // (since we need to know total plate count before calling
-    // cherryPick.setMapped())
-    List<CherryPick> nextIndivisibleBlock;
+    List<LabCherryPick> nextIndivisibleBlock;
     while (toBeMapped.size() > 0) {
       int toBeMappedCount = toBeMapped.size();
       nextIndivisibleBlock = findNextIndivisibleBlock(toBeMapped);
@@ -94,7 +92,7 @@ public class CherryPickRequestPlateMapper
       }
 
       // create next plate, if necessary
-      if (plateIndex == -1 || nextIndivisibleBlock.size() > availableWellNamesWorking.size()) {
+      if (assayPlate == null || nextIndivisibleBlock.size() > availableWellNamesWorking.size()) {
         availableWellNamesWorking = new ArrayList<WellName>(availableWellNamesMaster);
         
         if (cherryPickRequest.isRandomizedAssayPlateLayout()) {
@@ -105,76 +103,44 @@ public class CherryPickRequestPlateMapper
                                             availableWellNamesWorking.size()).clear();
           Collections.shuffle(availableWellNamesWorking);
         }
-
-        plateIndex++;
+        assayPlate = new CherryPickAssayPlate(cherryPickRequest, 
+                                              plateIndex++, 
+                                              0, 
+                                              cherryPickRequest.getAssayPlateType());
       }
 
-      plateWellMapping.putAll(plateMapCherryPicks(nextIndivisibleBlock,
-                                                  plateIndex,
-                                                  availableWellNamesWorking));
+      plateMapCherryPicks(assayPlate,
+                          nextIndivisibleBlock,
+                          availableWellNamesWorking);
     }
 
-    // second pass: for each cherry pick, generate plate name and call cherryPick.setMapped()
-    updateCherryPicks(cherryPickRequest, plateIndex + 1, plateWellMapping);
   }
 
-  private void updateCherryPicks(CherryPickRequest cherryPickRequest,
-                                 int plateCount,
-                                 Map<CherryPick,Pair<Integer,WellName>> plateWellMapping)
-  {
-    for (Map.Entry<CherryPick,Pair<Integer,WellName>> entry : plateWellMapping.entrySet()) {
-      CherryPick cherryPick = entry.getKey();
-      Integer assayPlateNumber = entry.getValue().getFirst();
-      WellName assayWellName = entry.getValue().getSecond();
-
-      String assayPlateName = makePlateName(cherryPickRequest,
-                                                assayPlateNumber,
-                                                plateCount);
-      cherryPick.setMapped(cherryPickRequest.getAssayPlateType(),
-                           assayPlateName,
-                           assayWellName.getRowIndex(),
-                           assayWellName.getColumnIndex());
-    }
-  }
-
-  private String makePlateName(CherryPickRequest cherryPickRequest,
-                                   int i,
-                                   int totalPlateCount)
-  {
-    StringBuilder name = new StringBuilder();
-    name.append(cherryPickRequest.getRequestedBy().getFullNameFirstLast()).
-    append(" (").append(cherryPickRequest.getScreen().getScreenNumber()).append(") ").
-    append("CP").append(cherryPickRequest.getEntityId()).
-    append("  Plate ").append(String.format("%02d", (i + 1))).append(" of ").
-    append(totalPlateCount);
-    return name.toString();
-  }
-
-  private Map<CherryPick,Pair<Integer,WellName>> plateMapCherryPicks(List<CherryPick> nextIndivisibleBlock,
-                                                                     int plateIndex,
-                                                                     List<WellName> availableWellNames)
+  private Map<LabCherryPick,Pair<Integer,WellName>> plateMapCherryPicks(CherryPickAssayPlate assayPlate,
+                                                                        List<LabCherryPick> nextIndivisibleBlock,
+                                                                        List<WellName> availableWellNames)
 
   {
-    Map<CherryPick,Pair<Integer,WellName>> plateWellMapping = new HashMap<CherryPick,Pair<Integer,WellName>>();
+    Map<LabCherryPick,Pair<Integer,WellName>> plateWellMapping = new HashMap<LabCherryPick,Pair<Integer,WellName>>();
     assert availableWellNames.size() >= nextIndivisibleBlock.size();
     Iterator<WellName> availableWellNamesIter = availableWellNames.iterator();
-    for (CherryPick cherryPick : nextIndivisibleBlock) {
+    for (LabCherryPick cherryPick : nextIndivisibleBlock) {
       WellName assayWellName = availableWellNamesIter.next();
-      plateWellMapping.put(cherryPick,
-                           new Pair<Integer,WellName>(plateIndex, assayWellName));
+      cherryPick.setMapped(assayPlate,
+                           assayWellName.getRowIndex(),
+                           assayWellName.getColumnIndex());
       availableWellNamesIter.remove();
     }
     return plateWellMapping;
   }
 
-
-  private List<CherryPick> findNextIndivisibleBlock(SortedSet<CherryPick> toBeMapped)
+  private List<LabCherryPick> findNextIndivisibleBlock(SortedSet<LabCherryPick> toBeMapped)
   {
-    List<CherryPick> block = new ArrayList<CherryPick>();
+    List<LabCherryPick> block = new ArrayList<LabCherryPick>();
     Integer plateNumber = null;
     String copyName = null;
-    for (Iterator<CherryPick> iter = toBeMapped.iterator(); iter.hasNext();) {
-      CherryPick cherryPick = (CherryPick) iter.next();
+    for (Iterator<LabCherryPick> iter = toBeMapped.iterator(); iter.hasNext();) {
+      LabCherryPick cherryPick = (LabCherryPick) iter.next();
       if (plateNumber == null) {
         plateNumber = cherryPick.getSourceWell().getPlateNumber();
         copyName = cherryPick.getSourceCopy().getName();
@@ -206,13 +172,13 @@ public class CherryPickRequestPlateMapper
     return availableWellNames;
   }
 
-  private SortedSet<CherryPick> findCherryPicksToBeMapped(CherryPickRequest cherryPickRequest)
+  private SortedSet<LabCherryPick> findLabCherryPicksToBeMapped(CherryPickRequest cherryPickRequest)
   {
-    SortedSet<CherryPick> toBeMapped = new TreeSet<CherryPick>(PlateMappingCherryPickComparator.getInstance());
-    for (Iterator iter = cherryPickRequest.getCherryPicks().iterator(); iter.hasNext();) {
-      CherryPick cherryPick = (CherryPick) iter.next();
-      // no cherry pick may be plated at this time
-      if (cherryPick.isPlated()) {
+    SortedSet<LabCherryPick> toBeMapped = new TreeSet<LabCherryPick>(PlateMappingCherryPickComparator.getInstance());
+    for (Iterator iter = cherryPickRequest.getLabCherryPicks().iterator(); iter.hasNext();) {
+      LabCherryPick cherryPick = (LabCherryPick) iter.next();
+      if (cherryPick.isMapped() || cherryPick.isPlated()) {
+        // no cherry picks may be plated at this time
         throw new BusinessRuleViolationException("cannot generate assay plate mapping if any cherry pick has already been plated");
       }
       // note: some cherry picks may have been unfulfillable, and therefore not allocated

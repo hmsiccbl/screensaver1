@@ -15,11 +15,11 @@ import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
 import org.apache.log4j.Logger;
 
-public class CherryPickTest extends AbstractEntityInstanceTest
+public class ScreenerCherryPickTest extends AbstractEntityInstanceTest
 {
   // static members
 
-  private static Logger log = Logger.getLogger(CherryPickTest.class);
+  private static Logger log = Logger.getLogger(ScreenerCherryPickTest.class);
 
   private static int testEntrezGeneId = 0;
   
@@ -29,9 +29,9 @@ public class CherryPickTest extends AbstractEntityInstanceTest
   
   // public constructors and methods
 
-  public CherryPickTest() throws IntrospectionException
+  public ScreenerCherryPickTest() throws IntrospectionException
   {
-    super(CherryPick.class);
+    super(ScreenerCherryPick.class);
   }
 }
 

@@ -23,8 +23,8 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.screens.CherryPick;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
@@ -60,10 +60,10 @@ public class CherryPickRequestAllocator
    * @param cherryPickRequest
    * @return the set of <i>unfulfillable</i> cherry picks
    */
-  public Set<CherryPick> allocate(final CherryPickRequest cherryPickRequestIn) throws DataAccessException
+  public Set<LabCherryPick> allocate(final CherryPickRequest cherryPickRequestIn) throws DataAccessException
   {
-    // TODO: handle concurrency; perform appropriate locking to prevent race conditions (overdrawing wellw) among multiple allocate() calls
-    final Set<CherryPick> unfulfillableCherryPicks = new HashSet<CherryPick>();
+    // TODO: handle concurrency; perform appropriate locking to prevent race conditions (overdrawing well) among multiple allocate() calls
+    final Set<LabCherryPick> unfulfillableLabCherryPicks = new HashSet<LabCherryPick>();
     _dao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction() 
@@ -73,22 +73,23 @@ public class CherryPickRequestAllocator
         if (volume == null) {
           throw new BusinessRuleViolationException("cannot allocate cherry picks unless the approved transfer volume has been specified in the cherry pick request");
         }
+        // TODO: this check should be done in CherryPickRequest instead
         if (volume.compareTo(BigDecimal.ZERO) <= 0) {
           throw new DataModelViolationException("cherry pick request approved transfer volume must be positive");
         }
-        for (CherryPick cherryPick : cherryPickRequest.getCherryPicks()) {
-          Copy copy = selectCopy(cherryPick.getSourceWell(),
+        for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
+          Copy copy = selectCopy(labCherryPick.getSourceWell(),
                                  cherryPickRequest.getMicroliterTransferVolumePerWellApproved());
           if (copy == null) {
-            unfulfillableCherryPicks.add(cherryPick);
+            unfulfillableLabCherryPicks.add(labCherryPick);
           }
           else {
-            cherryPick.setAllocated(copy);
+            labCherryPick.setAllocated(copy);
           }
         }
       }
     });
-    return unfulfillableCherryPicks;
+    return unfulfillableLabCherryPicks;
   }
   
   public void deallocate(final CherryPickRequest cherryPickRequestIn)
@@ -98,11 +99,11 @@ public class CherryPickRequestAllocator
       public void runTransaction() 
       {
         CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
-        for (CherryPick cherryPick : cherryPickRequest.getCherryPicks()) {
-          if (cherryPick.isMapped()) {
+        for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
+          if (labCherryPick.isMapped()) {
             throw new BusinessRuleViolationException("cannot deallocate a cherry pick after it is mapped");
           }
-          cherryPick.setAllocated(null);
+          labCherryPick.setAllocated(null);
         }
       }
     });
@@ -128,13 +129,13 @@ public class CherryPickRequestAllocator
   private BigDecimal calculateRemainingVolumeInCopyWell(Copy copy, Well well)
   {
     BigDecimal startingVolume = getStartingVolumeInCopyWell(copy, well);
-    Set<CherryPick> existingCherryPicksForWell = well.getCherryPicks();
+    Set<LabCherryPick> existingLabCherryPicksForWell = well.getLabCherryPicks();
 
     BigDecimal remainingVolume = startingVolume;
-    for (CherryPick existingCherryPick : existingCherryPicksForWell) {
-      if (existingCherryPick.isAllocated()) { // implicitly ignores a cherry pick if it's in the process of being allocated (by caller)
-        if (existingCherryPick.getSourceCopy().equals(copy)) {
-          CherryPickRequest otherCherryPickRequest  = existingCherryPick.getCherryPickRequest();
+    for (LabCherryPick existingLabCherryPick : existingLabCherryPicksForWell) {
+      if (existingLabCherryPick.isAllocated()) { // implicitly ignores a cherry pick if it's in the process of being allocated (by caller)
+        if (existingLabCherryPick.getSourceCopy().equals(copy)) {
+          CherryPickRequest otherCherryPickRequest  = existingLabCherryPick.getCherryPickRequest();
           BigDecimal volumeUsed = otherCherryPickRequest.getMicroliterTransferVolumePerWellApproved();
           if (volumeUsed != null) {
             remainingVolume = remainingVolume.subtract(volumeUsed);

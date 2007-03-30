@@ -36,11 +36,12 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
-import edu.harvard.med.screensaver.model.screens.CherryPick;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -1028,7 +1029,7 @@ public abstract class AbstractEntityInstanceTest extends AbstractSpringTest
   private Map<Class<? extends AbstractEntity>,EntityFactory> _entityFactoryMap =
     new HashMap<Class<? extends AbstractEntity>,EntityFactory>();
   {
-    _entityFactoryMap.put(CherryPick.class, new EntityFactory() 
+    _entityFactoryMap.put(LabCherryPick.class, new EntityFactory() 
     {
       private int testEntrezGeneId = 0;
       public AbstractEntity newInstance()
@@ -1043,7 +1044,8 @@ public abstract class AbstractEntityInstanceTest extends AbstractSpringTest
           Gene gene = new Gene("AAA", ++testEntrezGeneId, "entrezSymbol" + testEntrezGeneId, "Human");
           well.addSilencingReagent(new SilencingReagent(gene, SilencingReagentType.SIRNA, "ATCG"));
         }
-        return new CherryPick(cherryPickRequest, well);
+        return new LabCherryPick(new ScreenerCherryPick(cherryPickRequest, well), 
+                                 well);
       }
     });
   }

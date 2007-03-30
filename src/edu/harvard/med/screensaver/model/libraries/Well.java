@@ -20,13 +20,14 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.EntityIdProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
-import edu.harvard.med.screensaver.model.screens.CherryPick;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
+import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -65,7 +66,8 @@ public class Well extends AbstractEntity implements Comparable
   private String _iccbNumber;
   private String _vendorIdentifier;
   private WellType _wellType = WellType.EXPERIMENTAL;
-  private Set<CherryPick> _cherryPicks = new HashSet<CherryPick>();
+  private Set<ScreenerCherryPick> _screenerCherryPicks = new HashSet<ScreenerCherryPick>();
+  private Set<LabCherryPick> _labCherryPicks = new HashSet<LabCherryPick>();
   private String _smiles;
   private Set<String> _molfile = new HashSet<String>();
   private String _genbankAccessionNumber;
@@ -553,14 +555,25 @@ public class Well extends AbstractEntity implements Comparable
   
 
   /**
-   * Get an unmodifiable copy of the set of cherry picks.
+   * Get an unmodifiable copy of the set of screener cherry picks.
    *
-   * @return the cherry picks
+   * @return the screener cherry picks
+   */
+  @ToManyRelationship(inverseProperty="screenedWell")
+  public Set<ScreenerCherryPick> getScreenerCherryPicks()
+  {
+    return Collections.unmodifiableSet(_screenerCherryPicks);
+  }
+
+  /**
+   * Get an unmodifiable copy of the set of lab cherry picks.
+   *
+   * @return the lab cherry picks
    */
   @ToManyRelationship(inverseProperty="sourceWell")
-  public Set<CherryPick> getCherryPicks()
+  public Set<LabCherryPick> getLabCherryPicks()
   {
-    return Collections.unmodifiableSet(_cherryPicks);
+    return Collections.unmodifiableSet(_labCherryPicks);
   }
 
   /**
@@ -829,34 +842,67 @@ public class Well extends AbstractEntity implements Comparable
   }
   
   /**
-   * Get the cherry picks.
+   * Get the screener cherry picks.
    *
-   * @return the cherry picks
+   * @return the screener cherry picks
    * @hibernate.set
    *   cascade="save-update"
    *   inverse="true"
    *   lazy="true"
    * @hibernate.collection-key
-   *   column="well_id"
+   *   column="screened_well_id"
    * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.CherryPick"
+   *   class="edu.harvard.med.screensaver.model.screens.ScreenerCherryPick"
    * @motivation for hibernate and maintenance of bi-directional relationships
    * public access for cross-package relationship
    */
-  public Set<CherryPick> getHbnCherryPicks()
+  @ToManyRelationship(inverseProperty="screenedWell")
+  public Set<ScreenerCherryPick> getHbnScreenerCherryPicks()
   {
-    return _cherryPicks;
+    return _screenerCherryPicks;
   }
 
   /**
-   * Set the cherry picks.
+   * Set the screener cherry picks.
    *
-   * @param cherryPicks the new cherry picks
+   * @param cherryPicks the new screener cherry picks
    * @motivation for hibernate
    */
-  private void setHbnCherryPicks(Set<CherryPick> cherryPicks)
+  private void setHbnScreenerCherryPicks(Set<ScreenerCherryPick> screenerCherryPicks)
   {
-    _cherryPicks = cherryPicks;
+    _screenerCherryPicks = screenerCherryPicks;
+  }
+
+  /**
+   * Get the lab cherry picks.
+   *
+   * @return the lab cherry picks
+   * @hibernate.set
+   *   cascade="save-update"
+   *   inverse="true"
+   *   lazy="true"
+   * @hibernate.collection-key
+   *   column="source_well_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.LabCherryPick"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   * public access for cross-package relationship
+   */
+  @ToManyRelationship(inverseProperty="sourceWell")
+  public Set<LabCherryPick> getHbnLabCherryPicks()
+  {
+    return _labCherryPicks;
+  }
+
+  /**
+   * Set the lab cherry picks.
+   *
+   * @param labCherryPicks the new lab cherry picks
+   * @motivation for hibernate
+   */
+  private void setHbnLabCherryPicks(Set<LabCherryPick> labCherryPicks)
+  {
+    _labCherryPicks = labCherryPicks;
   }
 
   public int compareTo(Object o)

@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -25,8 +26,9 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.CherryPick;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
+import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 
@@ -322,7 +324,9 @@ public interface DAO
   
   public List<String> findDeveloperECommonsIds();
 
-  public void deleteCherryPick(CherryPick cherryPick);
+  public void deleteScreenerCherryPick(ScreenerCherryPick screenerCherryPick);
+
+  public void deleteLabCherryPick(LabCherryPick labCherryPick);
 
   public void deleteCherryPickRequest(CherryPickRequest cherryPickRequest);
 }

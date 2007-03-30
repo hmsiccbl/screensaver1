@@ -23,7 +23,7 @@ public enum AssayReadoutType implements VocabularyTerm
 
   // the vocabulary
   
-  FACS("Flourescence Activated Cell Sorting"),
+  FACS("Fluorescence Activated Cell Sorting"),
   FLUORESCENCE_INTENSITY("Fluorescence Intensity"),
   FP("FP"),
   FRET("FRET"),

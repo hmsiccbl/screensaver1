@@ -10,8 +10,12 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.beans.IntrospectionException;
+import java.util.Date;
+import java.util.List;
 
+import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.libraries.PlateType;
 
 import org.apache.log4j.Logger;
 
@@ -30,6 +34,30 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest
   public CherryPickRequestTest() throws IntrospectionException
   {
     super(CherryPickRequest.class);
+  }
+  
+  public void testGetActiveCherryPickAssayPlates()
+  {
+    Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
+    CherryPickRequest cherryPickRequest = new RNAiCherryPickRequest(screen, 
+                                                                    screen.getLeadScreener(), 
+                                                                    new Date());
+    for (int plateOrdinal = 0; plateOrdinal < 3; ++plateOrdinal) {
+      for (int attempt = 0; attempt <= plateOrdinal; ++attempt) {
+        new CherryPickAssayPlate(cherryPickRequest,
+                                 plateOrdinal,
+                                 attempt,
+                                 PlateType.EPPENDORF);
+      }
+    }
+    List<CherryPickAssayPlate> activeAssayPlates = cherryPickRequest.getActiveCherryPickAssayPlates();
+    assertEquals(3, activeAssayPlates.size()); 
+    int expectedAttemptOrdinal = 0;
+    for (CherryPickAssayPlate activeAssayPlate : activeAssayPlates) {
+      assertEquals("active assay plate is the last one attempted", 
+                   expectedAttemptOrdinal++, 
+                   activeAssayPlate.getAttemptOrdinal().intValue());
+    }
   }
 
 }

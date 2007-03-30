@@ -70,7 +70,7 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
     });
   }
 
-  public void testFindCherryPickSourceWells()
+  public void testCreateLabCherryPicks()
   {
     schemaUtil.truncateTablesOrCreateSchema();
     // TODO: consider testing same gene in 2 libs, but with different silencing reagents (shared gene, above, also sahres same silencing reagents between the 2 libraries)
@@ -179,18 +179,13 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
     {
       public void runTransaction()
       {
-        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
-        RNAiCherryPickRequest rnaiCherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
-
         // chery pick pool whose gene is both library 1 and 2, but only cherry picked from library 1
         {
-          Set<Well> poolCherryPickWells = new HashSet<Well>();
-          poolCherryPickWells.add(dao.findWell(new WellKey(1, "A01")));
-          Set<Well> actualDuplexCherryPickWells = rnaiCherryPickRequest.findCherryPickSourceWells(poolCherryPickWells);
-          Set<WellKey> actualDuplexCherryPickWellKeys = new TreeSet<WellKey>();
-          for (Well well : actualDuplexCherryPickWells) {
-            actualDuplexCherryPickWellKeys.add(well.getWellKey());
-          }
+          Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
+          screen.setScreenType(ScreenType.RNAI);
+          RNAiCherryPickRequest rnaiCherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
+          Set<WellKey> actualDuplexCherryPickWellKeys = createCherryPicksForWells(rnaiCherryPickRequest, 
+                                                                                  new WellKey(1, "A01"));
           TreeSet<WellKey> expectedDuplexCherryPickWellKeys = new TreeSet<WellKey>();
           expectedDuplexCherryPickWellKeys.add(new WellKey(2, "A01"));
           expectedDuplexCherryPickWellKeys.add(new WellKey(3, "B02"));
@@ -198,18 +193,18 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
           expectedDuplexCherryPickWellKeys.add(new WellKey(5, "D04"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
+          dao.persistEntity(rnaiCherryPickRequest); // avoid hib errors on flush
+          dao.persistEntity(screen); // avoid hib errors on flush
         }
         
         // chery pick pool whose gene is both library 1 and 2, and cherry picked from both libraries
         {
-          Set<Well> poolCherryPickWells = new HashSet<Well>();
-          poolCherryPickWells.add(dao.findWell(new WellKey(1, "A01")));
-          poolCherryPickWells.add(dao.findWell(new WellKey(6, "A01")));
-          Set<Well> actualDuplexCherryPickWells = rnaiCherryPickRequest.findCherryPickSourceWells(poolCherryPickWells);
-          Set<WellKey> actualDuplexCherryPickWellKeys = new TreeSet<WellKey>();
-          for (Well well : actualDuplexCherryPickWells) {
-            actualDuplexCherryPickWellKeys.add(well.getWellKey());
-          }
+          Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(2);
+          screen.setScreenType(ScreenType.RNAI);
+          RNAiCherryPickRequest rnaiCherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
+          Set<WellKey> actualDuplexCherryPickWellKeys = createCherryPicksForWells(rnaiCherryPickRequest, 
+                                                                                  new WellKey(1, "A01"),
+                                                                                  new WellKey(6, "A01"));
           TreeSet<WellKey> expectedDuplexCherryPickWellKeys = new TreeSet<WellKey>();
           expectedDuplexCherryPickWellKeys.add(new WellKey(2, "A01"));
           expectedDuplexCherryPickWellKeys.add(new WellKey(3, "B02"));
@@ -221,17 +216,17 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
           expectedDuplexCherryPickWellKeys.add(new WellKey(10, "D04"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
+          dao.persistEntity(rnaiCherryPickRequest); // avoid hib errors on flush
+          dao.persistEntity(screen); // avoid hib errors on flush
         }
         
-        // chery pick pool whose gene is only library1
+        // chery pick pool whose gene is only in library1
         {
-          Set<Well> poolCherryPickWells = new HashSet<Well>();
-          poolCherryPickWells.add(dao.findWell(new WellKey(1, "B02")));
-          Set<Well> actualDuplexCherryPickWells = rnaiCherryPickRequest.findCherryPickSourceWells(poolCherryPickWells);
-          Set<WellKey> actualDuplexCherryPickWellKeys = new TreeSet<WellKey>();
-          for (Well well : actualDuplexCherryPickWells) {
-            actualDuplexCherryPickWellKeys.add(well.getWellKey());
-          }
+          Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(31);
+          screen.setScreenType(ScreenType.RNAI);
+          RNAiCherryPickRequest rnaiCherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
+          Set<WellKey> actualDuplexCherryPickWellKeys = createCherryPicksForWells(rnaiCherryPickRequest, 
+                                                                                  new WellKey(1, "B02"));
           TreeSet<WellKey> expectedDuplexCherryPickWellKeys = new TreeSet<WellKey>();
           expectedDuplexCherryPickWellKeys.add(new WellKey(2, "A02"));
           expectedDuplexCherryPickWellKeys.add(new WellKey(3, "B03"));
@@ -239,17 +234,17 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
           expectedDuplexCherryPickWellKeys.add(new WellKey(5, "D05"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
+          dao.persistEntity(rnaiCherryPickRequest); // avoid hib errors on flush
+          dao.persistEntity(screen); // avoid hib errors on flush
         }
         
         // chery pick pool whose gene is only in library2
         {
-          Set<Well> poolCherryPickWells = new HashSet<Well>();
-          poolCherryPickWells.add(dao.findWell(new WellKey(6, "B02")));
-          Set<Well> actualDuplexCherryPickWells = rnaiCherryPickRequest.findCherryPickSourceWells(poolCherryPickWells);
-          Set<WellKey> actualDuplexCherryPickWellKeys = new TreeSet<WellKey>();
-          for (Well well : actualDuplexCherryPickWells) {
-            actualDuplexCherryPickWellKeys.add(well.getWellKey());
-          }
+          Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(4);
+          screen.setScreenType(ScreenType.RNAI);
+          RNAiCherryPickRequest rnaiCherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
+          Set<WellKey> actualDuplexCherryPickWellKeys = createCherryPicksForWells(rnaiCherryPickRequest, 
+                                                                                  new WellKey(6, "B02"));
           TreeSet<WellKey> expectedDuplexCherryPickWellKeys = new TreeSet<WellKey>();
           expectedDuplexCherryPickWellKeys.add(new WellKey(7, "A02"));
           expectedDuplexCherryPickWellKeys.add(new WellKey(8, "B03"));
@@ -257,9 +252,27 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
           expectedDuplexCherryPickWellKeys.add(new WellKey(10, "D05"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
+          dao.persistEntity(rnaiCherryPickRequest); // avoid hib errors on flush
+          dao.persistEntity(screen); // avoid hib errors on flush
         }
       }
+
     });
   }
+  
+  private Set<WellKey> createCherryPicksForWells(RNAiCherryPickRequest rnaiCherryPickRequest, WellKey... wellKeys)
+  {
+    for (WellKey wellKey : wellKeys) {
+      new ScreenerCherryPick(rnaiCherryPickRequest, dao.findWell(wellKey));
+    }
+    rnaiCherryPickRequest.createLabCherryPicks();
+    Set<LabCherryPick> actualDuplexCherryPickWells = rnaiCherryPickRequest.getLabCherryPicks();
+    Set<WellKey> actualDuplexCherryPickWellKeys = new TreeSet<WellKey>();
+    for (LabCherryPick labCherryPick : actualDuplexCherryPickWells) {
+      actualDuplexCherryPickWellKeys.add(labCherryPick.getSourceWell().getWellKey());
+    }
+    return actualDuplexCherryPickWellKeys;
+  }
+  
 }
 

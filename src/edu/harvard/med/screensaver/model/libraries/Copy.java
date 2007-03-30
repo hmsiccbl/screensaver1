@@ -18,7 +18,7 @@ import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
-import edu.harvard.med.screensaver.model.screens.CherryPick;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -52,7 +52,7 @@ public class Copy extends AbstractEntity
   private Set<CopyInfo> _copyInfos = new HashSet<CopyInfo>();
   private String _name;
   private CopyUsageType _usageType;
-  private Set<CherryPick> _cherryPicks = new HashSet<CherryPick>();
+  private Set<LabCherryPick> _labCherryPicks = new HashSet<LabCherryPick>();
   
 
   // public constructor
@@ -205,9 +205,9 @@ public class Copy extends AbstractEntity
    */
   @ToManyRelationship(inverseProperty="sourceCopy")
   @DerivedEntityProperty
-  public Set<CherryPick> getCherryPicks()
+  public Set<LabCherryPick> getLabCherryPicks()
   {
-    return Collections.unmodifiableSet(_cherryPicks);
+    return Collections.unmodifiableSet(_labCherryPicks);
   }
 
   
@@ -423,23 +423,23 @@ public class Copy extends AbstractEntity
    * @return the cherry picks
    * @hibernate.set cascade="save-update" inverse="true"
    * @hibernate.collection-key column="copy_id"
-   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screens.CherryPick"
+   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screens.LabCherryPick"
    * @motivation for hibernate and maintenance of bi-directional relationships
    * public access for cross-package relationship
    */
-  public Set<CherryPick> getHbnCherryPicks()
+  public Set<LabCherryPick> getHbnLabCherryPicks()
   {
-    return _cherryPicks;
+    return _labCherryPicks;
   }
 
   /**
    * Set the cherry picks.
    *
-   * @param cherryPicks the new cherry picks
+   * @param labCherryPicks the new cherry picks
    * @motivation for hibernate
    */
-  private void setHbnCherryPicks(Set<CherryPick> cherryPicks)
+  private void setHbnLabCherryPicks(Set<LabCherryPick> labCherryPicks)
   {
-    _cherryPicks = cherryPicks;
+    _labCherryPicks = labCherryPicks;
   }
 }

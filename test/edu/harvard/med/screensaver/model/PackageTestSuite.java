@@ -47,7 +47,8 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(edu.harvard.med.screensaver.model.libraries.WellTest.class);
     addTestSuite(edu.harvard.med.screensaver.model.libraries.CopyInfoTest.class);
     addTestSuite(edu.harvard.med.screensaver.model.screens.AbaseTestsetTest.class);
-    addTestSuite(edu.harvard.med.screensaver.model.screens.CherryPickTest.class);
+    addTestSuite(edu.harvard.med.screensaver.model.screens.ScreenerCherryPickTest.class);
+    addTestSuite(edu.harvard.med.screensaver.model.screens.LabCherryPickTest.class);
     addTestSuite(edu.harvard.med.screensaver.model.screens.ScreenTest.class);
     addTestSuite(edu.harvard.med.screensaver.model.screens.PlatesUsedTest.class);
     //addTestSuite(edu.harvard.med.screensaver.model.screens.CherryPickRequestTest.class);
@@ -56,6 +57,7 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(edu.harvard.med.screensaver.model.screens.BillingInformationTest.class);
     addTestSuite(edu.harvard.med.screensaver.model.screens.PublicationTest.class);
     //addTestSuite(edu.harvard.med.screensaver.model.screens.ScreeningRoomActivityTest.class);
+    addTestSuite(edu.harvard.med.screensaver.model.screens.CherryPickAssayPlateTest.class);
     addTestSuite(edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransferTest.class);
     addTestSuite(edu.harvard.med.screensaver.model.screens.LibraryScreeningTest.class);
     addTestSuite(edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreeningTest.class);

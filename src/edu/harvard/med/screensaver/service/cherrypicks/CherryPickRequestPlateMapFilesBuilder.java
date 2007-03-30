@@ -26,8 +26,8 @@ import java.util.zip.ZipOutputStream;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
-import edu.harvard.med.screensaver.model.screens.CherryPick;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.util.CSVPrintWriter;
 
 import org.apache.commons.collections.Factory;
@@ -99,7 +99,7 @@ public class CherryPickRequestPlateMapFilesBuilder
       ZipEntry zipEntry = new ZipEntry(fileName);
       zipOut.putNextEntry(zipEntry);
       writeHeadersRow(csv);
-      for (CherryPick cherryPick : (SortedSet<CherryPick>) files2CherryPicks.get(fileName)) {
+      for (LabCherryPick cherryPick : (SortedSet<LabCherryPick>) files2CherryPicks.get(fileName)) {
         writeCherryPickRow(csv, cherryPick);
       }
       csv.flush();
@@ -122,13 +122,13 @@ public class CherryPickRequestPlateMapFilesBuilder
   {
     MultiMap assayPlate2SourcePlateTypes = getSourcePlatesTypesForEachAssayPlate(cherryPickRequest);
     
-    MultiMap result = MultiValueMap.decorate(new TreeMap<String,SortedSet<CherryPick>>(),
+    MultiMap result = MultiValueMap.decorate(new TreeMap<String,SortedSet<LabCherryPick>>(),
                                              new Factory() 
     {
-      public Object create() { return new TreeSet<CherryPick>(PlateMappingCherryPickComparator.getInstance()); } 
+      public Object create() { return new TreeSet<LabCherryPick>(PlateMappingCherryPickComparator.getInstance()); } 
     });
-    for (CherryPick cherryPick : cherryPickRequest.getCherryPicks()) {
-      String plateName = cherryPick.getAssayPlateName();
+    for (LabCherryPick cherryPick : cherryPickRequest.getLabCherryPicks()) {
+      String plateName = cherryPick.getAssayPlate().getName();
       if (forPlateNames != null && !forPlateNames.contains(plateName)) {
         continue;
       }
@@ -155,22 +155,22 @@ public class CherryPickRequestPlateMapFilesBuilder
       public Object create() { return new HashSet(); } 
     });
                                                              
-    for (CherryPick cherryPick : cherryPickRequest.getCherryPicks()) {
-      sourcePlate2PlateTypes.put(cherryPick.getAssayPlateName(),
+    for (LabCherryPick cherryPick : cherryPickRequest.getLabCherryPicks()) {
+      sourcePlate2PlateTypes.put(cherryPick.getAssayPlate().getName(),
                                  cherryPick.getSourceCopy().getCopyInfo(cherryPick.getSourceWell().getPlateNumber()).getPlateType());
     }
     return sourcePlate2PlateTypes;
   }
 
 
-  private void writeCherryPickRow(CSVPrintWriter csv, CherryPick cherryPick)
+  private void writeCherryPickRow(CSVPrintWriter csv, LabCherryPick cherryPick)
   {
     csv.print(cherryPick.getSourceWell().getPlateNumber());
     csv.print(cherryPick.getSourceCopy().getName());
     csv.print(cherryPick.getSourceWell().getWellName());
     csv.print(cherryPick.getSourceCopy().getCopyInfo(cherryPick.getSourceWell().getPlateNumber()).getPlateType().getFullName());
     csv.print(cherryPick.getAssayPlateWellName());
-    csv.print(cherryPick.getAssayPlateType().getFullName());
+    csv.print(cherryPick.getAssayPlate().getAssayPlateType().getFullName());
     csv.print(cherryPick.getCherryPickRequest().getRequestedBy().getFullNameFirstLast());
     csv.print(cherryPick.getCherryPickRequest().getMicroliterTransferVolumePerWellApproved());
     csv.println();

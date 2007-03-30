@@ -10,12 +10,15 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -26,7 +29,6 @@ import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
@@ -61,8 +63,11 @@ public abstract class CherryPickRequest extends AbstractEntity
   private boolean _randomizedAssayPlateLayout;
   private Set<Integer> _requestedEmptyColumnsOnAssayPlate = new HashSet<Integer>();
   private String _comments;
-  private Set<CherryPick> _cherryPicks = new HashSet<CherryPick>();
-  private Set<CherryPickLiquidTransfer> _cherryPickLiquidTransfers = new HashSet<CherryPickLiquidTransfer>();
+  private Set<ScreenerCherryPick> _screenerCherryPicks = new HashSet<ScreenerCherryPick>();
+  private Set<LabCherryPick> _labCherryPicks = new HashSet<LabCherryPick>();
+  private SortedSet<CherryPickAssayPlate> _cherryPickAssayPlates = new TreeSet<CherryPickAssayPlate>();
+
+  private transient List<CherryPickAssayPlate> _activeAssayPlates;
 
 
   // public constructor
@@ -118,41 +123,58 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
   
   /**
-   * Get the cherry picks.
+   * Get the screener cherry picks.
    *
-   * @return the cherry picks
+   * @return the screener cherry picks
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="all-delete-orphan"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="cherry_pick_request_id"
    * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.CherryPick"
+   *   class="edu.harvard.med.screensaver.model.screens.ScreenerCherryPick"
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
   @ToManyRelationship(inverseProperty="cherryPickRequest")
-  public Set<CherryPick> getCherryPicks()
+  public Set<ScreenerCherryPick> getScreenerCherryPicks()
   {
-    return _cherryPicks;
+    return _screenerCherryPicks;
+  }
+
+  /**
+   * Get the set lab cherry picks.
+   *
+   * @return the lab cherry picks
+   * @hibernate.set
+   *   cascade="all-delete-orphan"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="cherry_pick_request_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.LabCherryPick"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  @ToManyRelationship(inverseProperty="cherryPickRequest")
+  public Set<LabCherryPick> getLabCherryPicks()
+  {
+    return _labCherryPicks;
   }
 
   /**
    * Get the set of cherry pick liquid transfers for this cherry pick request.
    *
    * @return the cherry pick liquid transfers
-   * @hibernate.set
-   *   cascade="save-update"
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="cherry_pick_request_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  @ToManyRelationship(inverseProperty="cherryPickRequest")
+   * */
+  @DerivedEntityProperty
   public Set<CherryPickLiquidTransfer> getCherryPickLiquidTransfers()
   {
-    return _cherryPickLiquidTransfers;
+    Set<CherryPickLiquidTransfer> cherryPickLiquidTransfers = new HashSet<CherryPickLiquidTransfer>();
+    for (CherryPickAssayPlate assayPlate : _cherryPickAssayPlates) {
+      if (assayPlate.getCherryPickLiquidTransfer() != null) {
+        cherryPickLiquidTransfers.add(assayPlate.getCherryPickLiquidTransfer());
+      }
+    }
+    return cherryPickLiquidTransfers;
   }
   
   /**
@@ -223,7 +245,12 @@ public abstract class CherryPickRequest extends AbstractEntity
   @DerivedEntityProperty
   abstract public PlateType getAssayPlateType();
 
-  abstract public Set<Well> findCherryPickSourceWells(Set<Well> screenedCherryPickWells);
+  public void createLabCherryPicks()
+  {
+    for (ScreenerCherryPick screenerCherryPick : _screenerCherryPicks) {
+      new LabCherryPick(screenerCherryPick, screenerCherryPick.getScreenedWell());
+    }
+  }
   
   /**
    * Get the requested microliterTransferVolumePerWell.
@@ -348,36 +375,45 @@ public abstract class CherryPickRequest extends AbstractEntity
     _comments = comments;
   }
 
-  @DerivedEntityProperty
-  public Set<CherryPick> getCherryPicksForAssayPlate(String assayPlateName)
-  {
-    Set<CherryPick> cherryPicksForPlate = new HashSet<CherryPick>();
-
-    for (CherryPick cherryPick : _cherryPicks) {
-      if (cherryPick.isMapped() && cherryPick.getAssayPlateName().equals(assayPlateName)) {
-        cherryPicksForPlate.add(cherryPick);
-      }
-    }
-    return cherryPicksForPlate;
-  }
-  
-  @DerivedEntityProperty
-  public Set<CherryPickLiquidTransfer> getCherryPickLiquidTransfersForAssayPlate(String assayPlateName)
-  {
-    Iterator<CherryPick> iter = getCherryPicksForAssayPlate(assayPlateName).iterator();
-    if (iter.hasNext()) {
-      return iter.next().getCherryPickLiquidTransfers();
-    }
-    return new TreeSet<CherryPickLiquidTransfer>();
-  }
-
+  /**
+   * Get whether the lab cherry picks have been allocated. If at least one lab
+   * cherry pick has been allocated the entire cherry pick request is considered
+   * allocated.
+   */
   @DerivedEntityProperty
   public boolean isAllocated()
   {
-    // TODO: this is not efficient, but it's 2007 and we've got cycles to burn, right?
-    Iterator<CherryPick> cherryPickIter = getCherryPicks().iterator();
-    while (cherryPickIter.hasNext()) {
-      if (cherryPickIter.next().isAllocated()) {
+    // this is not efficient, but it's 2007 and we've got cycles to burn, right?
+    for (LabCherryPick labCherryPick : _labCherryPicks) {
+      if (labCherryPick.isAllocated()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Get whether the lab cherry picks have been at least partially allocated. If
+   * at least one lab cherry pick has been allocated and at least one has not
+   * been allocated, the cherry pick request is considered partially allocated.
+   * 
+   * @motivation to warn the user that not all cherry picks could fulfilled (a
+   *             cherry pick request that is only partially allocated does not
+   *             impact subsequent workflow options)
+   */
+  @DerivedEntityProperty
+  public boolean isOnlyPartiallyAllocated()
+  {
+    boolean atLeastOneIsAllocated = false;
+    boolean atLeastOneIsNotAllocated = false;
+    for (LabCherryPick labCherryPick : _labCherryPicks) {
+      if (labCherryPick.isAllocated()) {
+        atLeastOneIsAllocated = true;
+      }
+      else {
+        atLeastOneIsNotAllocated = true;
+      }
+      if (atLeastOneIsAllocated && atLeastOneIsNotAllocated) {
         return true;
       }
     }
@@ -387,10 +423,9 @@ public abstract class CherryPickRequest extends AbstractEntity
   @DerivedEntityProperty
   public boolean isMapped()
   {
-    // TODO: this is not efficient, but it's 2007 and we've got cycles to burn, right?
-    Iterator<CherryPick> cherryPickIter = getCherryPicks().iterator();
-    while (cherryPickIter.hasNext()) {
-      if (cherryPickIter.next().isMapped()) {
+    // this is not efficient, but it's 2007 and we've got cycles to burn, right?
+    for (CherryPickAssayPlate plate : _cherryPickAssayPlates) {
+      if (plate.isMapped()) {
         return true;
       }
     }
@@ -400,19 +435,52 @@ public abstract class CherryPickRequest extends AbstractEntity
   @DerivedEntityProperty
   public boolean isPlated()
   {
-    return _cherryPickLiquidTransfers.size() > 0;
+    return getCherryPickLiquidTransfers().size() > 0;
+  }
+
+  /**
+   * 
+   * @return
+   * @hibernate.set
+   *   sort="natural"
+   *   cascade="save-update"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="cherry_pick_request_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  @ToManyRelationship(inverseProperty="cherryPickRequest")
+  public SortedSet<CherryPickAssayPlate> getCherryPickAssayPlates()
+  {
+    return /*Collections.unmodifiableSortedSet(*/_cherryPickAssayPlates/*)*/;
+  }
+  
+  public boolean addCherryPickAssayPlate(CherryPickAssayPlate assayPlate)
+  {
+    _activeAssayPlates = null;
+    return _cherryPickAssayPlates.add(assayPlate);
   }
 
   @DerivedEntityProperty
-  public SortedSet<String> getAssayPlates()
+  public List<CherryPickAssayPlate> getActiveCherryPickAssayPlates()
   {
-    SortedSet<String> assayPlates = new TreeSet<String>();
-    for (CherryPick cherryPick : getCherryPicks()) {
-      if (cherryPick.isMapped()) {
-        assayPlates.add(cherryPick.getAssayPlateName());
+    if (_activeAssayPlates == null) {
+      Map<Integer,CherryPickAssayPlate> plateOrdinalToActiveAssayPlate = new TreeMap<Integer,CherryPickAssayPlate>();
+      for (CherryPickAssayPlate assayPlate : _cherryPickAssayPlates) {
+        if (!plateOrdinalToActiveAssayPlate.containsKey(assayPlate.getPlateOrdinal()) ||
+          assayPlate.getAttemptOrdinal() > plateOrdinalToActiveAssayPlate.get(assayPlate.getPlateOrdinal()).getAttemptOrdinal()) {
+          plateOrdinalToActiveAssayPlate.put(assayPlate.getPlateOrdinal(),
+                                             assayPlate);
+        }
+      }
+      _activeAssayPlates = new ArrayList<CherryPickAssayPlate>();
+      for (Integer plateOrdinal : plateOrdinalToActiveAssayPlate.keySet()) {
+        _activeAssayPlates.add(plateOrdinalToActiveAssayPlate.get(plateOrdinal));
       }
     }
-    return assayPlates;
+    return _activeAssayPlates;
   }
   
 
@@ -467,7 +535,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   
-  // protected constructor
+  // protected methods
 
   /**
    * Construct an uninitialized <code>CherryPickRequest</code> object.
@@ -522,23 +590,36 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
-   * Set the cherry picks.
+   * Set the screener cherry picks.
    *
-   * @param cherryPicks the new cherry picks
+   * @param cherryPicks the new screener cherry picks
    * @motivation for hibernate
    */
-  private void setCherryPicks(Set<CherryPick> cherryPicks)
+  private void setScreenerCherryPicks(Set<ScreenerCherryPick> screenerCherryPicks)
   {
-    _cherryPicks = cherryPicks;
+    _screenerCherryPicks = screenerCherryPicks;
   }
   
   /**
-   * Set the set of cherry pick liquid transfers.
-   * @param cherryPickLiquidTransfer the new cherry pick liquid transfer
+   * Set the lab cherry picks.
+   *
+   * @param cherryPicks the new lab cherry picks
+   * @motivation for hibernate
    */
-  private void setCherryPickLiquidTransfers(Set<CherryPickLiquidTransfer> cherryPickLiquidTransfers)
+  private void setLabCherryPicks(Set<LabCherryPick> labCherryPicks)
   {
-    _cherryPickLiquidTransfers = cherryPickLiquidTransfers;
+    _labCherryPicks = labCherryPicks;
+  }
+  
+  /**
+   * Set the cherry pick assay plates.
+   *
+   * @param cherryPicks the new cherry pick assay plates
+   * @motivation for hibernate
+   */
+  private void setCherryPickAssayPlates(SortedSet<CherryPickAssayPlate> cherryPickAssayPlates)
+  {
+    _cherryPickAssayPlates = cherryPickAssayPlates;
   }
   
   /**
@@ -557,7 +638,6 @@ public abstract class CherryPickRequest extends AbstractEntity
   {
     return _requestedBy;
   }
-
 
   /**
    * Set the user that requested the cherry pick.

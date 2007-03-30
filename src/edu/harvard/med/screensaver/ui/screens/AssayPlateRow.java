@@ -13,10 +13,10 @@ import java.util.Map;
 
 public class AssayPlateRow
 {
-  public Map<String,String> values;
+  public Map<String,Comparable> values;
   public boolean selected = true;
 
-  public AssayPlateRow(Map<String,String> values)
+  public AssayPlateRow(Map<String,Comparable> values)
   {
     this.values = values;
   }
@@ -30,12 +30,12 @@ public class AssayPlateRow
     this.selected = selected;
   }
 
-  public Map<String,String> getValues()
+  public Map<String,Comparable> getValues()
   {
     return values;
   }
 
-  public void setValues(Map<String,String> values)
+  public void setValues(Map<String,Comparable> values)
   {
     this.values = values;
   }

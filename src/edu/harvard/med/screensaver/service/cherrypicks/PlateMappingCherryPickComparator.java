@@ -12,9 +12,9 @@ package edu.harvard.med.screensaver.service.cherrypicks;
 import java.util.Comparator;
 
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.screens.CherryPick;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 
-public class PlateMappingCherryPickComparator implements Comparator<CherryPick>
+public class PlateMappingCherryPickComparator implements Comparator<LabCherryPick>
 {
   private static PlateMappingCherryPickComparator _instance = new PlateMappingCherryPickComparator();
   
@@ -23,7 +23,7 @@ public class PlateMappingCherryPickComparator implements Comparator<CherryPick>
     return _instance;
   }
 
-  public int compare(CherryPick cp1, CherryPick cp2)
+  public int compare(LabCherryPick cp1, LabCherryPick cp2)
   {
     Well well1 = cp1.getSourceWell();
     Well well2 = cp2.getSourceWell();

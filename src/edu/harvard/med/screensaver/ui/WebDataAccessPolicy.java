@@ -28,24 +28,26 @@ import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
-import edu.harvard.med.screensaver.model.screens.CherryPick;
+import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.StatusItem;
+import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
+import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
 
 import org.apache.log4j.Logger;
 
@@ -128,7 +130,22 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.CherryPick)
    */
-  public boolean visit(CherryPick entity)
+  public boolean visit(ScreenerCherryPick entity)
+  {
+    return true;
+  }
+
+  public boolean visit(LabCherryPick entity)
+  {
+    return true;
+  }
+
+  public boolean visit(CherryPickAssayPlate entity)
+  {
+    return true;
+  }
+
+  public boolean visit(CherryPickLiquidTransfer entity)
   {
     return true;
   }
@@ -276,6 +293,9 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
   public boolean visit(Screen screen)
   {
     ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
+    if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
+      return true;
+    }
     if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE) && 
       user.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER)) {
       return true;
@@ -284,7 +304,7 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
       user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER)) {
       return true;
     }
-    return true;
+    return false;
   }
 
   /* (non-Javadoc)

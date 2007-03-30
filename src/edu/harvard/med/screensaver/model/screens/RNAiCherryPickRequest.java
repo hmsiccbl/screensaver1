@@ -137,26 +137,28 @@ public class RNAiCherryPickRequest extends CherryPickRequest
    * silencing.
    */
   @Override
-  public Set<Well> findCherryPickSourceWells(Set<Well> poolCherryPickWells)
+  public void createLabCherryPicks()
   {
     // TODO: currently assumes that all RNAi cherry picks are from Dharmacon
     // libraries, which are split into pool and duplex libraries
     
-    // TODO: report anomalies, i.e., when exactly 4 duplexes are not found (and,
-    // most importantly, when 0 duplexes are found).
+    // note: anomalies (i.e., when exactly 4 duplexes are not found, nd,
+    // most importantly, when 0 duplexes are found) are implicitly recorded in
+    // our data model; a UI can handle notification of these cases as desired,
+    // simply by finding ScreenerCherryPicks that do not have a sufficient
+    // number of LabCherryPicks
     
-    Set<Well> duplexWells = new HashSet<Well>(poolCherryPickWells.size() * 4 /*duplexes per pool*/);
-    for (Well poolCherryPickWell : poolCherryPickWells) {
-      String duplexLibraryName = getDuplexLibraryNameForPoolLibrary(poolCherryPickWell.getLibrary());
-      for (SilencingReagent silencingReagent : poolCherryPickWell.getSilencingReagents()) {
+    for (ScreenerCherryPick screenerCherryPick : getScreenerCherryPicks()) {
+      Well poolWell = screenerCherryPick.getScreenedWell();
+      String duplexLibraryName = getDuplexLibraryNameForPoolLibrary(poolWell.getLibrary());
+      for (SilencingReagent silencingReagent : poolWell.getSilencingReagents()) {
         for (Well candidateCherryPickSourceWell : silencingReagent.getWells()) {
           if (candidateCherryPickSourceWell.getLibrary().getLibraryName().equals(duplexLibraryName)) {
-            duplexWells.add(candidateCherryPickSourceWell);
+            new LabCherryPick(screenerCherryPick, candidateCherryPickSourceWell);
           }
         }
       }
     }
-    return duplexWells;
   }
 
 

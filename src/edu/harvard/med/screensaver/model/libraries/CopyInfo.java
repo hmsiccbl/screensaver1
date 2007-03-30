@@ -46,7 +46,7 @@ public class CopyInfo extends AbstractEntity
   private Integer _plateNumber;
   private String _location;
   private PlateType _plateType;
-  private BigDecimal _volume;
+  private BigDecimal _volume; // TODO: rename to make units explicit (nL)
   private String _comments;
   private Date _datePlated;
   private Date _dateRetired;

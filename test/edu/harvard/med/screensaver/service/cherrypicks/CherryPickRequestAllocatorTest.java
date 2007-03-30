@@ -31,11 +31,12 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.libraries.WellType;
-import edu.harvard.med.screensaver.model.screens.CherryPick;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
@@ -62,7 +63,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         // each assertion (below), since we can set the starting volume each
         // plate independently
         
-        Library library = makeRNAiLibrary("library1", 1, 6, 1);
+        Library library = makeRNAiDuplexLibrary("library1", 1, 6, 1);
         dao.persistEntity(library);
 
         Copy copy1 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
@@ -97,15 +98,16 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
       public void runTransaction() {
         CherryPickRequest cherryPickRequest = createCherryPickRequest(1, 11);
 
-        CherryPick cherryPick1 = new CherryPick(cherryPickRequest, dao.findWell(new WellKey(1, "A01")));
-        CherryPick cherryPick2 = new CherryPick(cherryPickRequest, dao.findWell(new WellKey(2, "A01")));
-        CherryPick cherryPick3 = new CherryPick(cherryPickRequest, dao.findWell(new WellKey(3, "A01")));
-        CherryPick cherryPick4 = new CherryPick(cherryPickRequest, dao.findWell(new WellKey(4, "A01")));
-        CherryPick cherryPick5 = new CherryPick(cherryPickRequest, dao.findWell(new WellKey(5, "A01")));
-        CherryPick cherryPick6 = new CherryPick(cherryPickRequest, dao.findWell(new WellKey(6, "A01")));
+        ScreenerCherryPick dummyScreenerCherryPick = new ScreenerCherryPick(cherryPickRequest, dao.findWell(new WellKey(1, "A01")));
+        LabCherryPick cherryPick1 = new LabCherryPick(dummyScreenerCherryPick, dao.findWell(new WellKey(1, "A01")));
+        LabCherryPick cherryPick2 = new LabCherryPick(dummyScreenerCherryPick, dao.findWell(new WellKey(2, "A01")));
+        LabCherryPick cherryPick3 = new LabCherryPick(dummyScreenerCherryPick, dao.findWell(new WellKey(3, "A01")));
+        LabCherryPick cherryPick4 = new LabCherryPick(dummyScreenerCherryPick, dao.findWell(new WellKey(4, "A01")));
+        LabCherryPick cherryPick5 = new LabCherryPick(dummyScreenerCherryPick, dao.findWell(new WellKey(5, "A01")));
+        LabCherryPick cherryPick6 = new LabCherryPick(dummyScreenerCherryPick, dao.findWell(new WellKey(6, "A01")));
         dao.persistEntity(cherryPickRequest.getScreen());
 
-        Set<CherryPick> unfulfillableCherryPicks = cherryPickRequestAllocator.allocate(cherryPickRequest);
+        Set<LabCherryPick> unfulfillableCherryPicks = cherryPickRequestAllocator.allocate(cherryPickRequest);
 
         assertEquals("sufficient volume in copy 1", "D", cherryPick1.getSourceCopy().getName());
         assertEquals("exact sufficient volume in copy 1", "D", cherryPick2.getSourceCopy().getName());
@@ -114,7 +116,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         assertFalse("insufficient volume in any copy; not allocated", cherryPick5.isAllocated());
         assertFalse("insufficient volume in any copy due to retired plate; not allocated", cherryPick6.isAllocated());
         
-        Set<CherryPick> expectedUnfulfillableCherryPicks = new HashSet<CherryPick>();
+        Set<LabCherryPick> expectedUnfulfillableCherryPicks = new HashSet<LabCherryPick>();
         expectedUnfulfillableCherryPicks.add(cherryPick5);
         expectedUnfulfillableCherryPicks.add(cherryPick6);
         assertEquals("unfulfillable cherry picks", expectedUnfulfillableCherryPicks, unfulfillableCherryPicks);
@@ -126,7 +128,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
   {
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        Library library = makeRNAiLibrary("library", 1, 1, 384);
+        Library library = makeRNAiDuplexLibrary("library", 1, 1, 384);
         dao.persistEntity(library);
 
         Copy copy1 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
@@ -136,31 +138,31 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
       }
     });
     
-    doTestCheryPickRequestAllocation(1, 
+    doTestCherryPickRequestAllocation(1, 
                                      new String[] {"A01"}, 
                                      new String[] {});
-    doTestCheryPickRequestAllocation(2,
+    doTestCherryPickRequestAllocation(2,
                                      new String[] {"A01", "B02"}, 
                                      new String[] {});
-    doTestCheryPickRequestAllocation(3,
+    doTestCherryPickRequestAllocation(3,
                                      new String[] {"A01", "B02", "C03"}, 
                                      new String[] {});
-    doTestCheryPickRequestAllocation(4,
+    doTestCherryPickRequestAllocation(4,
                                      new String[] {"A01", "B02", "C03", "D04"}, 
                                      new String[] {"A01"});
-    doTestCheryPickRequestAllocation(5,
+    doTestCherryPickRequestAllocation(5,
                                      new String[] {"A01", "B02", "C03", "D04", "E05"}, 
                                      new String[] {"A01", "B02"});
-    doTestCheryPickRequestAllocation(6,
+    doTestCherryPickRequestAllocation(6,
                                      new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
                                      new String[] {"A01", "B02", "C03"});
-    doTestCheryPickRequestAllocation(7,
+    doTestCherryPickRequestAllocation(7,
                                      new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
                                      new String[] {"A01", "B02", "C03", "D04"});
-    doTestCheryPickRequestAllocation(8,
+    doTestCherryPickRequestAllocation(8,
                                      new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
                                      new String[] {"A01", "B02", "C03", "D04", "E05"});
-    doTestCheryPickRequestAllocation(9,
+    doTestCherryPickRequestAllocation(9,
                                      new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
                                      new String[] {"A01", "B02", "C03", "D04", "E05", "F06"});
    
@@ -172,7 +174,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
   
   // static util methods
   
-  static Library makeRNAiLibrary(String name, int startPlate, int endPlate, int wellsPerPlate)
+  static Library makeRNAiDuplexLibrary(String name, int startPlate, int endPlate, int wellsPerPlate)
   {
     Library library = new Library(name, name, ScreenType.RNAI, LibraryType.COMMERCIAL, startPlate, endPlate);
     NEXT_PLATE:
@@ -206,49 +208,64 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
   
   public static Well makeRNAiWell(Library library, int plateNumber, WellName wellName)
   {
-    Well well = new Well(library, new WellKey(plateNumber, wellName), WellType.EXPERIMENTAL);
     Gene gene = new Gene("gene" + plateNumber + wellName,
                          new WellKey(plateNumber, wellName).hashCode(),
                          "entrezGeneSymbol" + wellName,
                          "Human");
-    well.addSilencingReagent(new SilencingReagent(gene,
-                                                  SilencingReagentType.SIRNA,
-                                                  "ATCG"));
-    return well;
+    SilencingReagent silencingReagent = new SilencingReagent(gene,
+                         SilencingReagentType.SIRNA,
+                         "ATCG");
+    return makeRNAiWell(library, plateNumber, wellName, silencingReagent);
+  }
+  
+  private static Well makeRNAiWell(Library library, int plateNumber, WellName wellName, SilencingReagent siReagent)
+  {
+    Well well1 = new Well(library, new WellKey(plateNumber, wellName), WellType.EXPERIMENTAL);
+    well1.addSilencingReagent(siReagent);
+    return well1;
+  }
+  
+  public static Set<Well> makeRNAiDuplexWellForPoolWell(Library duplexLibrary, Well poolWell, int plateNumber, WellName wellName)
+  {
+    Set<Well> duplexWells = new HashSet<Well>();
+    for (SilencingReagent silencingReagent : poolWell.getGene().getSilencingReagents()) {
+      duplexWells.add(makeRNAiWell(duplexLibrary,
+                                   plateNumber++,
+                                   wellName,
+                                   silencingReagent));
+    }
+    return duplexWells;
   }
 
   
   // private methods
 
-  private void doTestCheryPickRequestAllocation(final int screenNumber,
-                                                final String[] cherryPickWellNames, 
-                                                final String[] expectedUnfillableCherryPickWellNames)
+  private void doTestCherryPickRequestAllocation(final int screenNumber,
+                                                 final String[] cherryPickWellNames, 
+                                                 final String[] expectedUnfillableCherryPickWellNames)
   {
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
         CherryPickRequest cherryPickRequest = createCherryPickRequest(screenNumber, 6);
-        Set<CherryPick> cherryPicks = new HashSet<CherryPick>();
-        Set<CherryPick> expectedUnfulfillableCherryPicks = new HashSet<CherryPick>();
+        Set<LabCherryPick> expectedUnfulfillableCherryPicks = new HashSet<LabCherryPick>();
         Set<String> expectedUnfillableCherryPickWellNamesSet = new HashSet<String>(Arrays.asList(expectedUnfillableCherryPickWellNames));
+        ScreenerCherryPick dummyScreenerCherryPick = new ScreenerCherryPick(cherryPickRequest, dao.findWell(new WellKey(1, new WellName(cherryPickWellNames[0]))));
         for (String cherryPickWellName : cherryPickWellNames) {
-          CherryPick cherryPick = new CherryPick(cherryPickRequest,
-                                                 dao.findWell(new WellKey(1,
-                                                                          cherryPickWellName)));
-          cherryPicks.add(cherryPick);
-          if (expectedUnfillableCherryPickWellNamesSet.contains(cherryPickWellName)) {
-            expectedUnfulfillableCherryPicks.add(cherryPick);
+          LabCherryPick labCherryPick = new LabCherryPick(dummyScreenerCherryPick, 
+                                                          dao.findWell(new WellKey(1, 
+                                                                                   new WellName(cherryPickWellName))));
+          if (expectedUnfillableCherryPickWellNamesSet.contains(labCherryPick.getSourceWell().getWellName())) {
+            expectedUnfulfillableCherryPicks.add(labCherryPick);
           }
         }
         dao.persistEntity(cherryPickRequest.getScreen());
-        Set<CherryPick> unfulfillableCherryPicks = cherryPickRequestAllocator.allocate(cherryPickRequest);
+        Set<LabCherryPick> unfulfillableCherryPicks = cherryPickRequestAllocator.allocate(cherryPickRequest);
         assertEquals("unfulfillable cherry picks for requested " + Arrays.asList(cherryPickWellNames),
                      expectedUnfulfillableCherryPicks,
                      unfulfillableCherryPicks);
       }
     });
   }
-  
-  
 }
 

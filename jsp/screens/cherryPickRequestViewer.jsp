@@ -11,7 +11,7 @@
 <%-- 
 TODO:
  - add lead screener, lab head to Screen Summary
- - paged, sortable cherry pick table
+ - paged, sortable cherry pick tables
 --%>
 
 <f:subview id="cherryPickRequestViewer">
@@ -176,11 +176,11 @@ TODO:
 		</t:panelGrid>
 
 		<t:div styleClass="sectionHeader">
-			<t:outputText value="Cherry Picks" styleClass="sectionHeader" />
+			<t:outputText value="Screener Cherry Picks" styleClass="sectionHeader" />
 		</t:div>
 
-		<t:panelStack id="cherryPicksPanelStack"
-			selectedPanel="#{empty cherryPickRequestViewer.cherryPickRequest.cherryPicks ? (cherryPickRequestViewer.editable ? \"addCherryPicks\" : \"noCherryPicks\") : \"viewCherryPicks\"}">
+		<t:panelStack id="screenerCherryPicksPanelStack"
+			selectedPanel="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks ? (cherryPickRequestViewer.editable ? \"addCherryPicks\" : \"noCherryPicks\") : \"viewCherryPicks\"}">
 
 			<t:panelGroup id="noCherryPicks">
 				<t:outputText value="Cherry picks have not yet been specified." />
@@ -194,22 +194,59 @@ TODO:
 				<t:inputTextarea id="cherryPicksInput" rows="20"
 					value="#{cherryPickRequestViewer.cherryPicksInput}"
 					styleClass="inputText" />
-				<t:commandButton id="addCherryPicksCommand" value="Add Cherry Picks"
-					action="#{cherryPickRequestViewer.addCherryPicks}"
+				<%--t:commandButton id="addCherryPicksCommand" value="Add Cherry Picks"
+					action="#{cherryPickRequestViewer.addCompoundCherryPicks}"
+					rendered="#{cherryPickRequestViewer.cherryPickRequest.screenType == ScreenType.SMALL_COMPOUND}"
+					styleClass="command" /--%>
+				<t:commandButton id="addPoolCherryPicksCommand" value="Add Cherry Picks (Pool Wells)"
+					action="#{cherryPickRequestViewer.addPoolCherryPicks}"
+					styleClass="command" />
+				<t:commandButton id="addDuplexCherryPicksCommand" value="Add Cherry Picks (Duplex Wells)"
+					action="#{cherryPickRequestViewer.addDuplexCherryPicks}"
 					styleClass="command" />
 			</t:panelGrid>
 
 			<t:panelGrid id="viewCherryPicks" columns="1">
 
-				<t:panelGroup id="cherryPicksCommandPanel"
+				<t:panelGroup id="screenerCherryPicksCommandPanel"
 					rendered="#{cherryPickRequestViewer.editable}">
 					<t:commandButton id="deleteCherryPicks" value="Delete All"
 						action="#{cherryPickRequestViewer.deleteAllCherryPicks}"
 						disabled="#{cherryPickRequestViewer.cherryPickRequest.allocated}"
 						styleClass="command" />
+				</t:panelGroup>
+
+				<t:dataTable id="screenerCherryPicksTable" var="cherryPickRow"
+					value="#{cherryPickRequestViewer.screenerCherryPicksDataModel}"
+					styleClass="standardTable" columnClasses="column"
+					rowClasses="row1,row2" headerClass="tableHeader"
+					sortColumn="#{cherryPickRequestViewer.screenerCherryPicksSortManager.currentSortColumnName}"
+					sortAscending="#{cherryPickRequestViewer.screenerCherryPicksSortManager.sortAscending}">
+					<t:columns
+						value="#{cherryPickRequestViewer.screenerCherryPicksSortManager.columnModel}"
+						var="columnName" styleClass="column">
+						<f:facet name="header">
+							<t:commandSortHeader columnName="#{columnName}" arrow="false">
+								<f:facet name="ascending">
+									<t:graphicImage value="/images/ascending-arrow.gif"
+										rendered="true" border="0" />
+								</f:facet>
+								<f:facet name="descending">
+									<t:graphicImage value="/images/descending-arrow.gif"
+										rendered="true" border="0" />
+								</f:facet>
+								<h:outputText value="#{columnName}" />
+							</t:commandSortHeader>
+						</f:facet>
+						<t:outputText value="#{cherryPickRow[columnName]}" />
+					</t:columns>
+				</t:dataTable>
+
+				<t:panelGroup id="labCherryPicksCommandPanel"
+					rendered="#{cherryPickRequestViewer.editable}">
 					<t:commandButton id="allocateCherryPicks" value="Reserve #{cherryPickRequestViewer.liquidTerm}"
 						action="#{cherryPickRequestViewer.allocateCherryPicks}"
-						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.cherryPicks || cherryPickRequestViewer.cherryPickRequest.allocated}"
+						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks || cherryPickRequestViewer.cherryPickRequest.allocated}"
 						styleClass="command" />
 					<t:commandButton id="deallocateCherryPicks"
 						value="Cancel Reservation"
@@ -220,20 +257,20 @@ TODO:
 						action="#{cherryPickRequestViewer.plateMapCherryPicks}"
 						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated || cherryPickRequestViewer.cherryPickRequest.mapped}"
 						styleClass="command" />
-					<h:commandButton id="createCherryPickRequestForUnfulfillable" value="New Cherry Pick Request for Unfulfilled"
+					<h:commandButton id="createCherryPickRequestForUnfulfilled" value="New Cherry Pick Request for Unfulfilled"
 						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated}"
-						action="#{cherryPickRequestViewer.createCherryPickRequestForUnfulfilledCherryPicks}"
+						action="#{cherryPickRequestViewer.createNewCherryPickRequestForUnfulfilledCherryPicks}"
 						styleClass="command" />
 				</t:panelGroup>
 
-				<t:dataTable id="cherryPicksTable" var="cherryPickRow"
-					value="#{cherryPickRequestViewer.cherryPicksDataModel}"
+				<t:dataTable id="labCherryPicksTable" var="cherryPickRow"
+					value="#{cherryPickRequestViewer.labCherryPicksDataModel}"
 					styleClass="standardTable" columnClasses="column"
 					rowClasses="row1,row2" headerClass="tableHeader"
-					sortColumn="#{cherryPickRequestViewer.cherryPicksSortManager.currentSortColumnName}"
-					sortAscending="#{cherryPickRequestViewer.cherryPicksSortManager.sortAscending}">
+					sortColumn="#{cherryPickRequestViewer.labCherryPicksSortManager.currentSortColumnName}"
+					sortAscending="#{cherryPickRequestViewer.labCherryPicksSortManager.sortAscending}">
 					<t:columns
-						value="#{cherryPickRequestViewer.cherryPicksSortManager.columnModel}"
+						value="#{cherryPickRequestViewer.labCherryPicksSortManager.columnModel}"
 						var="columnName" styleClass="column">
 						<f:facet name="header">
 							<t:commandSortHeader columnName="#{columnName}" arrow="false">
@@ -275,13 +312,13 @@ TODO:
 				disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 				styleClass="command" />
 			<t:commandButton id="recordLiquidTransfer"
-				value="Record #{cherryPickRequestViewer.liquidTerm} Transfer"
+				value="Created"
 				action="#{cherryPickRequestViewer.recordLiquidTransferForSelectedAssayPlates}"
 				disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 				styleClass="command" />
-			<h:commandButton id="duplicateCherryPickRequestForAssayPlates" value="Duplicate"
+			<h:commandButton id="recordFailureOfAssayPlates" value="Failed"
 				disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
-				action="#{cherryPickRequestViewer.createDuplicateCherryPickRequestForSelectedAssayPlates}"
+				action="#{cherryPickRequestViewer.recordFailureOfAssayPlates}"
 				styleClass="command" />
 		</t:panelGroup>
 
@@ -310,27 +347,6 @@ TODO:
 			action="#{cherryPickRequestViewer.selectAllAssayPlates}"
 			rendered="#{cherryPickRequestViewer.cherryPickRequest.mapped}"
 			style="display:none" />
-
-		<t:div styleClass="sectionHeader">
-			<t:outputText value="#{cherryPickRequestViewer.liquidTerm} Transfers" styleClass="sectionHeader" />
-		</t:div>
-
-		<t:dataTable id="liquidTransferTable" var="liquidTransferRow"
-			value="#{cherryPickRequestViewer.liquidTransferDataModel}"
-			styleClass="standardTable" columnClasses="column"
-			rowClasses="row1,row2" headerClass="tableHeader"
-			rendered="#{!empty cherryPickRequestViewer.cherryPickRequest.cherryPickLiquidTransfers}">
-			<t:columns
-				value="#{cherryPickRequestViewer.liquidTransferColumnModel}"
-				var="columnName" styleClass="column">
-				<f:facet name="header">
-					<t:outputText value="#{columnName}" />
-				</f:facet>
-				<t:outputText value="#{liquidTransferRow[columnName]}" />
-			</t:columns>
-		</t:dataTable>
-		<t:outputText value="<none>" styleClass="label"
-			rendered="#{empty cherryPickRequestViewer.cherryPickRequest.cherryPickLiquidTransfers}" />
 
 	</h:form>
 

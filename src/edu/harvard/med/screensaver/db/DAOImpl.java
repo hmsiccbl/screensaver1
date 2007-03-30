@@ -25,6 +25,27 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
+import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
+import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
+import edu.harvard.med.screensaver.util.StringUtils;
+
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.FetchMode;
@@ -39,25 +60,6 @@ import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.type.CollectionType;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
-
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
-import edu.harvard.med.screensaver.model.libraries.Gene;
-import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.libraries.WellType;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.CherryPick;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
-import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
-import edu.harvard.med.screensaver.util.StringUtils;
 
 
 /**
@@ -412,20 +414,36 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     }
   }
   
-  public void deleteCherryPick(CherryPick cherryPick)
+  public void deleteScreenerCherryPick(ScreenerCherryPick screenerCherryPick)
   {
-    if (cherryPick.isAllocated()) {
-      throw new BusinessRuleViolationException("cannot delete a cherry pick that has been allocated");
+    if (screenerCherryPick.getCherryPickRequest().isAllocated()) {
+      throw new BusinessRuleViolationException("cannot delete a screener cherry pick for a cherry pick request that has been allocated");
     }
 
     // disassociate from related entities
-    cherryPick.getCherryPickRequest().getCherryPicks().remove(cherryPick);
-    if (cherryPick.getSourceCopy() != null) {
-      cherryPick.getSourceCopy().getHbnCherryPicks().remove(cherryPick);
+    screenerCherryPick.getCherryPickRequest().getScreenerCherryPicks().remove(screenerCherryPick);
+    screenerCherryPick.getScreenedWell().getHbnScreenerCherryPicks().remove(screenerCherryPick);
+    for (LabCherryPick cherryPick : new ArrayList<LabCherryPick>(screenerCherryPick.getLabCherryPicks())) {
+      deleteLabCherryPick(cherryPick);
     }
-    cherryPick.getSourceWell().getHbnCherryPicks().remove(cherryPick);
 
-    getHibernateTemplate().delete(cherryPick);
+    getHibernateTemplate().delete(screenerCherryPick);
+  }
+  
+  public void deleteLabCherryPick(LabCherryPick labCherryPick)
+  {
+    if (labCherryPick.getCherryPickRequest().isAllocated()) {
+      throw new BusinessRuleViolationException("cannot delete a lab cherry pick for a cherry pick request that has been allocated");
+    }
+
+    // disassociate from related entities
+    labCherryPick.getCherryPickRequest().getLabCherryPicks().remove(labCherryPick);
+    if (labCherryPick.getSourceCopy() != null) {
+      labCherryPick.getSourceCopy().getHbnLabCherryPicks().remove(labCherryPick);
+    }
+    labCherryPick.getSourceWell().getHbnLabCherryPicks().remove(labCherryPick);
+
+    getHibernateTemplate().delete(labCherryPick);
   }
   
   public void deleteCherryPickRequest(final CherryPickRequest cherryPickRequestIn)
@@ -435,10 +453,17 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     if (cherryPickRequestIn.isAllocated()) {
       throw new BusinessRuleViolationException("cannot delete a cherry pick request that has been allocated");
     }
+    if (cherryPickRequestIn.getCherryPickAssayPlates().size() > 0) {
+      throw new DataModelViolationException("an unallocated cherry pick request should not have any cherry pick assay plates");
+    }
 
     // disassociate from related entities
-    for (CherryPick cherryPick : new ArrayList<CherryPick>(cherryPickRequest.getCherryPicks())) {
-      deleteCherryPick(cherryPick);
+    
+    // TODO: we're having to delete the {screener,lab}CherryPicks explicitly,
+    // though I would have expected the cascade="all-delete-orphan" would have
+    // taken care of this
+    for (ScreenerCherryPick cherryPick : new ArrayList<ScreenerCherryPick>(cherryPickRequest.getScreenerCherryPicks())) {
+      deleteScreenerCherryPick(cherryPick);
     }
     cherryPickRequest.getRequestedBy().getHbnCherryPickRequests().remove(cherryPickRequest);
     cherryPickRequest.getScreen().getCherryPickRequests().remove(cherryPickRequest);

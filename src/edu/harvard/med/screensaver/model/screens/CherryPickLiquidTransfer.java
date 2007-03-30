@@ -9,32 +9,27 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
-import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
-import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
+import org.apache.log4j.Logger;
+
 /**
- * Tracks the event whereby a set (or subset) of cherry picks have been plated
- * for a given CherryPickRequest. This corresponds to an actual transfer of
- * liquid from cherry pick copy plates to cherry pick assay plates. Note that
- * plated cherry picks occur on a per-destination-plate basis and so must be
- * specified via {@link #addPlatedCherryPicksForPlate(String)} or
- * {@link #addPlatedCherryPicksForPlates(Set)}.  Note that this allows
- * for the case where only a subset of cherry pick requests have been plated.  
+ * Tracks the event whereby a set of CherryPickAssayPlates have been plated for
+ * a given CherryPickRequest. This signfies an actual transfer of liquid from
+ * cherry pick copy plates to cherry pick assay plates. 
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.joined-subclass table="cherry_pick_liquid_transfer"
- *                            lazy="false"
+ * @hibernate.joined-subclass table="cherry_pick_liquid_transfer" lazy="false"
  * @hibernate.joined-subclass-key column="screening_room_activity_id"
  */
 public class CherryPickLiquidTransfer extends ScreeningRoomActivity
@@ -48,8 +43,7 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
 
   // instance data members
 
-  private CherryPickRequest _cherryPickRequest;
-  private Set<CherryPick> _platedCherryPicks = new HashSet<CherryPick>();
+  private Set<CherryPickAssayPlate> _cherryPickAssayPlates = new HashSet<CherryPickAssayPlate>();
 
 
   // public constructors and methods
@@ -59,10 +53,7 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
                                   Date dateOfActivity,
                                   CherryPickRequest cherryPickRequest) throws DuplicateEntityException
   {
-    
     super(cherryPickRequest.getScreen(), performedBy, dateCreated, dateOfActivity);
-    _cherryPickRequest = cherryPickRequest;
-    _cherryPickRequest.getCherryPickLiquidTransfers().add(this);
   }
 
   @Override
@@ -73,64 +64,21 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
     return "Fulfill Cherry Pick";
   }
 
-  /**
-   * Get the set of cherry pick request.
-   *
-   * @return the cherry pick request
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.CherryPickRequest"
-   *   column="cherry_pick_request_id"
-   *   not-null="true"
-   *   foreign-key="fk_cherry_pick_liquid_transfer_to_cherry_pick_request"
-   *   cascade="save-update"
-   * @motivation for hibernate
-   */
-  @ToOneRelationship(nullable=false)
-  public CherryPickRequest getCherryPickRequest()
+  @ToManyRelationship(inverseProperty="cherryPickLiquidTransfers")
+  public Set<CherryPickAssayPlate> getCherryPickAssayPlates() 
   {
-    return _cherryPickRequest;
-  }
-
-  /**
-   * Enforces constraint that plated cherry picks can only be specified as a
-   * group, on a per-destiation-plate basis (note the lack of a
-   * addPlatedCherryPick() method).
-   * 
-   * @param plateName
-   */
-  public void addPlatedCherryPicksForPlate(String cherryPickDestinationPlateName)
-  {
-    for (CherryPick cherryPick : _cherryPickRequest.getCherryPicksForAssayPlate(cherryPickDestinationPlateName)) {
-      cherryPick.addCherryPickLiquidTransfer(this);
-    }
-  }
-
-  /**
-   * Enforces constraint that plated cherry picks can only be specified as a
-   * group, on a per-destiation-plate basis (note the lack of a
-   * addPlatedCherryPicks() method).
-   * 
-   * @param plateName
-   */
-  public void addPlatedCherryPicksForPlates(Set<String> cherryPickDestinationPlateNames) 
-  {
-    for (String cherryPickDestinationPlateName : cherryPickDestinationPlateNames) {
-      addPlatedCherryPicksForPlate(cherryPickDestinationPlateName);
-    }
+    return Collections.unmodifiableSet(_cherryPickAssayPlates);
   }
   
-  @DerivedEntityProperty
-  public Set<String> getAssayPlates() 
+  public boolean addCherryPickAssayPlate(CherryPickAssayPlate assayPlate)
   {
-    Set<String> assayPlates = new HashSet<String>();
-    for (CherryPick platedCherryPick : _platedCherryPicks) {
-      if (platedCherryPick.getCherryPickLiquidTransfers().contains(this)) {
-        assayPlates.add(platedCherryPick.getAssayPlateName());
-      }
+    if (assayPlate.getCherryPickLiquidTransfer() != null && !assayPlate.getCherryPickLiquidTransfer().equals(this)) {
+      throw new BusinessRuleViolationException("cherry pick assay plate can only be associated with one cherry pick liquid transfer");
     }
-    return assayPlates;
+    boolean result = _cherryPickAssayPlates.add(assayPlate);
+    assayPlate.setCherryPickLiquidTransfer(this);
+    return result;
   }
-
 
   
   // private methods
@@ -140,31 +88,24 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
    */
   private CherryPickLiquidTransfer() {}
 
-  private void setCherryPickRequest(CherryPickRequest cherryPickRequest)
-  {
-    _cherryPickRequest = cherryPickRequest;
-  }
-  
   /**
    * @hibernate.set
-   *   table="cherry_pick_liquid_transfer_cherry_pick_link"
    *   cascade="save-update"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="cherry_pick_liquid_transfer_id"
-   * @hibernate.collection-many-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.CherryPick"
-   *   column="cherry_pick_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate"
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
   @ToManyRelationship(inverseProperty="cherryPickLiquidTransfers")
-  private Set<CherryPick> getHbnPlatedCherryPicks()
+  Set<CherryPickAssayPlate> getHbnCherryPickAssayPlates()
   {
-    return _platedCherryPicks;
+    return _cherryPickAssayPlates;
   }
 
-  private void setHbnPlatedCherryPicks(Set<CherryPick> platedCherryPicks)
+  private void setHbnCherryPickAssayPlates(Set<CherryPickAssayPlate> cherryPickAssayPlates)
   {
-    _platedCherryPicks = platedCherryPicks;
+    _cherryPickAssayPlates = cherryPickAssayPlates;
   }
 }
