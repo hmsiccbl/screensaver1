@@ -325,9 +325,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean
         rows.add(row);
       }
       Collections.sort(rows, 
-                       new CherryPickTableRowComparator(getSortColumns(_screenerCherryPicksSortManager,
+                       new CherryPickTableRowComparator(getSortColumns(getScreenerCherryPicksSortManager(),
                                                                        SCREENER_CHERRY_PICKS_TABLE_SECONDARY_SORT), 
-                                                        _screenerCherryPicksSortManager.getCurrentSortDirection()));
+                                                        getScreenerCherryPicksSortManager().getCurrentSortDirection()));
       _screenerCherryPicksDataModel = new ListDataModel(rows);
     }
     return _screenerCherryPicksDataModel;
@@ -380,9 +380,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean
         rows.add(row);
       }
       Collections.sort(rows, 
-                       new CherryPickTableRowComparator(getSortColumns(_labCherryPicksSortManager,
+                       new CherryPickTableRowComparator(getSortColumns(getLabCherryPicksSortManager(),
                                                                        LAB_CHERRY_PICKS_TABLE_SECONDARY_SORT),
-                                                        _labCherryPicksSortManager.getCurrentSortDirection()));
+                                                        getLabCherryPicksSortManager().getCurrentSortDirection()));
       _labCherryPicksDataModel = new ListDataModel(rows);
     }
     return _labCherryPicksDataModel;
