@@ -129,24 +129,37 @@ public class CherryPickRequestPlateMapFilesBuilder
       public Object create() { return new TreeSet<LabCherryPick>(PlateMappingCherryPickComparator.getInstance()); } 
     });
     for (LabCherryPick cherryPick : cherryPickRequest.getLabCherryPicks()) {
-      CherryPickAssayPlate assayPlate = cherryPick.getAssayPlate();
-      if (forPlates != null && !forPlates.contains(assayPlate)) {
-        continue;
+      if (cherryPick.isAllocated()) {
+        CherryPickAssayPlate assayPlate = cherryPick.getAssayPlate();
+        if (forPlates != null && !forPlates.contains(assayPlate)) {
+          continue;
+        }
+        Set<PlateType> sourcePlateTypes = (Set<PlateType>) assayPlate2SourcePlateTypes.get(assayPlate.getName());
+        String fileName = makeFilename(cherryPick, sourcePlateTypes.size());
+        result.put(fileName, cherryPick);
       }
-      Set<PlateType> sourcePlateTypes = (Set<PlateType>) assayPlate2SourcePlateTypes.get(assayPlate.getName());
-      String fileName;
-      if (sourcePlateTypes.size() > 1) {
-        fileName = assayPlate.getName() + "_" + 
-          cherryPick.getSourceCopy().getCopyInfo(cherryPick.getSourceWell().getPlateNumber()).getPlateType().toString();
-      }
-      else {
-        fileName = assayPlate.getName();
-      }
-      result.put(fileName, cherryPick);
     }
     return result;
   }
 
+  private String makeFilename(LabCherryPick cherryPick, int sourcePlates)
+  {
+    StringBuilder fileName = new StringBuilder(cherryPick.getAssayPlate().getName());
+    
+    if (sourcePlates > 1) {
+      fileName.append(' ');
+      fileName.append(cherryPick.getSourceCopy().getCopyInfo(cherryPick.getSourceWell().getPlateNumber()).getPlateType().toString());
+    }
+    
+    int attempt = cherryPick.getAssayPlate().getAttemptOrdinal() + 1;
+    if (attempt > 0) {
+      fileName.append( " (Run").append(attempt).append(")");
+    }
+    
+    fileName.append(".CSV");
+    
+    return fileName.toString();
+  }
 
   private MultiMap getSourcePlatesTypesForEachAssayPlate(CherryPickRequest cherryPickRequest)
   {
@@ -157,8 +170,10 @@ public class CherryPickRequestPlateMapFilesBuilder
     });
                                                              
     for (LabCherryPick cherryPick : cherryPickRequest.getLabCherryPicks()) {
-      sourcePlate2PlateTypes.put(cherryPick.getAssayPlate().getName(),
-                                 cherryPick.getSourceCopy().getCopyInfo(cherryPick.getSourceWell().getPlateNumber()).getPlateType());
+      if (cherryPick.isAllocated()) {
+        sourcePlate2PlateTypes.put(cherryPick.getAssayPlate().getName(),
+                                   cherryPick.getSourceCopy().getCopyInfo(cherryPick.getSourceWell().getPlateNumber()).getPlateType());
+      }
     }
     return sourcePlate2PlateTypes;
   }

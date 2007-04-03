@@ -10,13 +10,13 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.EntityIdProperty;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
@@ -46,6 +46,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   private Integer _screeningRoomActivityId;
   private Integer _version;
   private Screen _screen;
+  private Integer _ordinal;
   private ScreensaverUser _performedBy;
   private Set<EquipmentUsed> _equipmentUsed = new HashSet<EquipmentUsed>();
   private BigDecimal _microliterVolumeTransferedPerWell;
@@ -77,7 +78,9 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
     _screen = screen;
     _performedBy = performedBy;
     _dateCreated = truncateDate(dateCreated);
-    _dateOfActivity = normalizeDate(dateOfActivity);
+    _dateOfActivity = truncateDate(dateOfActivity);
+    // TODO: protect against race condition
+    _ordinal = _screen.getScreeningRoomActivities().size();
     if (!_screen.getScreeningRoomActivities().add(this)) {
       throw new DuplicateEntityException(_screen, this);
     }
@@ -126,6 +129,21 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   public Screen getScreen()
   {
     return _screen;
+  }
+
+  /**
+   * @hibernate.property type="integer" not-null="true"
+   * @return
+   */
+  @EntityIdProperty
+  public Integer getOrdinal()
+  {
+    return _ordinal;
+  }
+
+  public void setOrdinal(Integer ordinal)
+  {
+    _ordinal = ordinal;
   }
 
   /**
@@ -275,25 +293,10 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
     {
       return _screen;
     }
-    
-    /**
-     * Get the user that performed the activity.
-     *
-     * @return the user that performed the activity
-     */
-    public ScreensaverUser getPerformedBy()
+
+    public Integer getOrdinal()
     {
-      return _performedBy;
-    }
-    
-    /**
-     * Get the date the activity was performed
-     *
-     * @return the date the activity was performed
-     */
-    public Date getDateOfActivity()
-    {
-      return _dateOfActivity;
+      return _ordinal;
     }
     
     @Override
@@ -305,8 +308,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
       BusinessKey that = (BusinessKey) object;
       return
         this.getScreen().equals(that.getScreen()) &&
-        this.getPerformedBy().equals(that.getPerformedBy()) &&
-        this.getDateOfActivity().equals(that.getDateOfActivity());
+        this.getOrdinal().equals(that.getOrdinal());
     }
 
     @Override
@@ -314,14 +316,13 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
     {
       return
         this.getScreen().hashCode() +
-        17 * this.getPerformedBy().hashCode() +
-        163 * this.getDateOfActivity().hashCode();
+        163 * this.getOrdinal().hashCode();
     }
 
     @Override
     public String toString()
     {
-      return getScreen() + ":" + getPerformedBy() + ":" + getDateOfActivity();
+      return this.getScreen() + ":" + this.getOrdinal();
     }
   }
 
@@ -408,7 +409,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
    */
   private void setDateOfActivity(Date dateOfActivity)
   {
-    _dateOfActivity = normalizeDate(dateOfActivity);
+    _dateOfActivity = truncateDate(dateOfActivity);
   }
 
   /**
@@ -442,19 +443,4 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   private void setVersion(Integer version) {
     _version = version;
   }
-  
-  /**
-   * Ensures that all Date types (including subclasses, such as Timestamp) are
-   * stored as just Date types.
-   * 
-   * @motivation a Timestamp is a subclass of Date, but has different equals()
-   *             and compareTo() semantics (!) than its Date superclass. Causes
-   *             problems when comparing Date types to Timestamp types where we
-   *             need to consider the hour/min/sec resolution.
-   */
-  private Date normalizeDate(Date date)
-  {
-    return new Date(date.getTime());
-  }
-
 }

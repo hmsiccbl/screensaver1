@@ -316,10 +316,10 @@ public class CherryPickRequestViewer extends AbstractBackingBean
         }
         else {
           // TODO: handle compound screens
-          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], "");
-          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], "");
-          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], "");
-          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], "");
+          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
+          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
+          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
+          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
         }
         
         rows.add(row);
@@ -360,10 +360,10 @@ public class CherryPickRequestViewer extends AbstractBackingBean
         }
         else {
           // TODO: handle compound screens
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], "");
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], "");
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], "");
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], "");
+          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
+          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
+          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
+          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
         }
         
         if (cherryPick.isMapped()) {
@@ -372,9 +372,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getAssayPlateWellName());
         }
         else {
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], "");
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], "");
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], "");
+          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
+          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
+          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
         }
         
         rows.add(row);
@@ -618,7 +618,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       CherryPickAssayPlate assayPlate = (CherryPickAssayPlate) iter.next();
       if (validationType.equals(VALIDATE_SELECTED_PLATES_FOR_DOWNLOAD)) {
         if (assayPlate.isFailed()) {
-          showMessage("cherryPicks.downloadActiveMappedPlatesOnly");
+          showMessageForComponent("cherryPicks.downloadActiveMappedPlatesOnly", 
+                                  "assayPlatesTable", 
+                                  assayPlate.getName());
           iter.remove();
           adjustSelection = true;
         }
@@ -627,12 +629,16 @@ public class CherryPickRequestViewer extends AbstractBackingBean
         if (assayPlate.getLabCherryPicks().size() == 0) {
           // this can happen if an assay plate failed, was re-run, but no lab cherry picks could be allocated for the new plate 
           iter.remove();
-          showMessage("cherryPicks.assayPlateEmpty", "assayPlatesTable", assayPlate.getName());
+          showMessageForComponent("cherryPicks.assayPlateEmpty", 
+                                  "assayPlatesTable", 
+                                  assayPlate.getName());
           adjustSelection = true;
         }
         else if (assayPlate.isPlated() || assayPlate.isFailed()) {
           iter.remove();
-          showMessage("cherryPicks.assayPlateAlreadyPlated", "assayPlatesTable", assayPlate.getName());
+          showMessageForComponent("cherryPicks.assayPlateAlreadyPlated", 
+                                  "assayPlatesTable", 
+                                  assayPlate.getName());
           adjustSelection = true;
         }
       }

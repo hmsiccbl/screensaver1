@@ -55,6 +55,20 @@ public class CherryPickTableRowComparator implements Comparator<Map>
     int result = 0;
     boolean first = true;
     for (String sortKey : _sortKeys) {
+      Comparable value1 = (Comparable) row1.get(sortKey);
+      Comparable value2 = (Comparable) row2.get(sortKey);
+      
+      // handle null values
+      if (value1 == null) {
+        if (value2 == null) {
+          return 0;
+        }
+        return -1;
+      }
+      else if (value2 == null) {
+        return 1;
+      }
+
       result = ((Comparable) row1.get(sortKey)).compareTo((Comparable) row2.get(sortKey));
       if (first && _sortDirection.equals(SortDirection.DESCENDING)) {
         result = result * -1;
