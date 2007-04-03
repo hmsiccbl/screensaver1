@@ -648,11 +648,4 @@ public abstract class CherryPickRequest extends AbstractEntity
   {
     _ordinal = ordinal;
   }
-
-
-  public Object getUnfulfilledLabCherryPicks()
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
 }

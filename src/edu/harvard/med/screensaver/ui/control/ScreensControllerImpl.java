@@ -1118,10 +1118,43 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   }
 
   @UIControllerMethod
-  public String createNewCherryPickRequestForUnfulfilledCherryPicks(CherryPickRequest cherryPickRequest)
+  public String createNewCherryPickRequestForUnfulfilledCherryPicks(final CherryPickRequest cherryPickRequestIn)
   {
-    // TODO:
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    logUserActivity("createNewCherryPickRequestForUnfulfilledCherryPicks for " + cherryPickRequestIn);
+
+    final CherryPickRequest[] result = new CherryPickRequest[1];
+    try {
+      _dao.doInTransaction(new DAOTransaction() 
+      {
+        public void runTransaction()
+        {
+          CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
+          CherryPickRequest newCherryPickRequest = cherryPickRequest.getScreen().createCherryPickRequest();
+          newCherryPickRequest.setComments("Created for unfulfilled cherry picks in Cherry Pick Request " + cherryPickRequest.getEntityId());
+          // TODO: this might be better done in a copy constructor
+          newCherryPickRequest.setMicroliterTransferVolumePerWellApproved(cherryPickRequest.getMicroliterTransferVolumePerWellApproved());
+          newCherryPickRequest.setMicroliterTransferVolumePerWellRequested(cherryPickRequest.getMicroliterTransferVolumePerWellRequested());
+          newCherryPickRequest.setDateRequested(new Date());
+          newCherryPickRequest.setRandomizedAssayPlateLayout(cherryPickRequest.isRandomizedAssayPlateLayout());
+          newCherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(new HashSet<Integer>(cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate()));
+          newCherryPickRequest.setRequestedBy(cherryPickRequest.getRequestedBy());
+          for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
+            if (!labCherryPick.isAllocated()) {
+              ScreenerCherryPick newScreenerCherryPick = new ScreenerCherryPick(newCherryPickRequest,
+                                                                                labCherryPick.getSourceWell());
+              new LabCherryPick(newScreenerCherryPick, labCherryPick.getSourceWell());
+            }
+          }
+          _dao.persistEntity(newCherryPickRequest);
+          result[0] = newCherryPickRequest;
+        }
+      });
+      return viewCherryPickRequest(result[0]);
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
   }
 
   @UIControllerMethod

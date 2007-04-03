@@ -341,7 +341,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    *          ":formId:subviewId:fieldId").
    * @return the FacesMessage that was set
    */
-  protected FacesMessage showMessage(String messageKey, String componentId)
+  protected FacesMessage showMessageForComponent(String messageKey, String componentId)
   {
     return showMessage(messageKey, componentId, new Object[] {});
   }
@@ -355,7 +355,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    */
   protected FacesMessage showMessage(String messageKey)
   {
-    return showMessage(messageKey, (String) null, new Object[] {});
+    return showMessage(messageKey, new Object[] {});
   }
   
   /**
@@ -371,7 +371,14 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   protected FacesMessage showMessage(String messageKey, 
                                      Object... messageArgs)
   {
-    return showMessage(messageKey, null, messageArgs);
+    FacesMessage msg = _messages.setFacesMessageForComponent(messageKey, null, messageArgs);
+    if (msg == null) {
+      log.error("no message exists for key '" + messageKey + "'");
+    } 
+    else {
+      log.debug(msg.getDetail());
+    }
+    return msg;
   }
   
   /**
@@ -388,9 +395,9 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    *          ":formId:subviewId:fieldId").
    * @return the FacesMessage that was set
    */
-  protected FacesMessage showMessage(String messageKey,
-                                     String componentId, 
-                                     Object... messageArgs)
+  protected FacesMessage showMessageForComponent(String messageKey,
+                                                 String componentId, 
+                                                 Object... messageArgs)
   {
     FacesMessage msg = _messages.setFacesMessageForComponent(messageKey, componentId, messageArgs);
     if (msg == null) {
