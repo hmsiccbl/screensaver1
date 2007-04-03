@@ -63,7 +63,7 @@
       <f:facet name="fastrewind">
         <t:graphicImage url="/images/arrow-fastrewind.png" border="0" title="Back 10 pages" />
       </f:facet>
-      <t:outputText value="Showing error #{fromRow} to #{toRow} of #{rowCount}" styleClass="label" />
+      <t:outputText value="Showing error #{fromRow}..#{toRow} of #{rowCount}" styleClass="label" />
     </t:dataScroller>
 
   </h:form>

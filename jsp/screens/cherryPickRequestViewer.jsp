@@ -1,3 +1,4 @@
+
 <%-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
 <%-- The core taglib contains all the logic, validation, controller, and other tags specific to JSF. --%>
@@ -11,7 +12,6 @@
 <%-- 
 TODO:
  - add lead screener, lab head to Screen Summary
- - paged, sortable cherry pick tables
 --%>
 
 <f:subview id="cherryPickRequestViewer">
@@ -193,8 +193,9 @@ TODO:
 						rows="10" cols="80"
 						displayValueOnly="#{!cherryPickRequestViewer.editMode}"
 						styleClass="inputText" displayValueOnlyStyleClass="dataText" />
-						
-					<t:outputText value="Screener&nbsp;cherry&nbsp;picks" escape="false" />
+
+					<t:outputText value="Screener&nbsp;cherry&nbsp;picks"
+						escape="false" />
 					<t:outputText id="screenCherryPickCount"
 						value="#{cherryPickRequestViewer.screenerCherryPickCount}"
 						styleClass="dataText" />
@@ -209,7 +210,7 @@ TODO:
 						value="#{cherryPickRequestViewer.assayPlatesDataModel.rowCount}"
 						styleClass="dataText" />
 
-						
+
 
 				</t:panelGrid>
 			</t:panelGrid>
@@ -267,9 +268,51 @@ TODO:
 						styleClass="command" />
 				</t:panelGroup>
 
+				<t:panelGrid columns="2">
+					<t:dataScroller id="screenerCherryPicksDataScroller"
+						for="screenerCherryPicksTable" firstRowIndexVar="fromRow"
+						lastRowIndexVar="toRow" rowsCountVar="rowCount" paginator="true"
+						paginatorMaxPages="10" fastStep="10"
+						renderFacetsIfSinglePage="false" styleClass="scroller"
+						pageCountVar="pages"
+						paginatorActiveColumnClass="scroller_activePage">
+						<f:facet name="first">
+							<t:graphicImage url="/images/arrow-first.png" border="0"
+								title="First page" />
+						</f:facet>
+						<f:facet name="last">
+							<t:graphicImage url="/images/arrow-last.png" border="0"
+								title="Last page" />
+						</f:facet>
+						<f:facet name="previous">
+							<t:graphicImage url="/images/arrow-previous.png" border="0"
+								title="Previous page" />
+						</f:facet>
+						<f:facet name="next">
+							<t:graphicImage url="/images/arrow-next.png" border="0"
+								title="Next page" />
+						</f:facet>
+						<f:facet name="fastforward">
+							<t:graphicImage url="/images/arrow-fastforward.png" border="0"
+								title="Forward 10 pages" />
+						</f:facet>
+						<f:facet name="fastrewind">
+							<t:graphicImage url="/images/arrow-fastrewind.png" border="0"
+								title="Back 10 pages" />
+						</f:facet>
+					</t:dataScroller>
+					<t:dataScroller id="screenerCherryPicksDataScroller2"
+						for="screenerCherryPicksTable" firstRowIndexVar="fromRow"
+						lastRowIndexVar="toRow" rowsCountVar="rowCount"
+						pageCountVar="pages">
+						<t:outputText value="#{fromRow}..#{toRow} of #{rowCount}"
+							styleClass="label" rendered="#{pages > 1}" />
+					</t:dataScroller>
+				</t:panelGrid>
+
 				<t:dataTable id="screenerCherryPicksTable" var="cherryPickRow"
 					value="#{cherryPickRequestViewer.screenerCherryPicksDataModel}"
-					styleClass="standardTable" columnClasses="column"
+					styleClass="standardTable" columnClasses="column" rows="20"
 					rowClasses="row1,row2" headerClass="tableHeader"
 					sortColumn="#{cherryPickRequestViewer.screenerCherryPicksSortManager.currentSortColumnName}"
 					sortAscending="#{cherryPickRequestViewer.screenerCherryPicksSortManager.sortAscending}">
@@ -347,9 +390,50 @@ TODO:
 						styleClass="command" />
 				</t:panelGroup>
 
+				<t:panelGrid columns="2">
+					<t:dataScroller id="labCherryPicksDataScroller"
+						for="labCherryPicksTable" firstRowIndexVar="fromRow"
+						lastRowIndexVar="toRow" rowsCountVar="rowCount" paginator="true"
+						paginatorMaxPages="10" fastStep="10" pageCountVar="pages"
+						renderFacetsIfSinglePage="false" styleClass="scroller"
+						paginatorActiveColumnClass="scroller_activePage">
+						<f:facet name="first">
+							<t:graphicImage url="/images/arrow-first.png" border="0"
+								title="First page" />
+						</f:facet>
+						<f:facet name="last">
+							<t:graphicImage url="/images/arrow-last.png" border="0"
+								title="Last page" />
+						</f:facet>
+						<f:facet name="previous">
+							<t:graphicImage url="/images/arrow-previous.png" border="0"
+								title="Previous page" />
+						</f:facet>
+						<f:facet name="next">
+							<t:graphicImage url="/images/arrow-next.png" border="0"
+								title="Next page" />
+						</f:facet>
+						<f:facet name="fastforward">
+							<t:graphicImage url="/images/arrow-fastforward.png" border="0"
+								title="Forward 10 pages" />
+						</f:facet>
+						<f:facet name="fastrewind">
+							<t:graphicImage url="/images/arrow-fastrewind.png" border="0"
+								title="Back 10 pages" />
+						</f:facet>
+					</t:dataScroller>
+					<t:dataScroller id="labCherryPicksDataScroller2"
+						for="labCherryPicksTable" firstRowIndexVar="fromRow"
+						lastRowIndexVar="toRow" rowsCountVar="rowCount"
+						pageCountVar="pages">
+						<t:outputText value="#{fromRow}..#{toRow} of #{rowCount}"
+							styleClass="label" rendered="#{pages > 1}" />
+					</t:dataScroller>
+				</t:panelGrid>
+
 				<t:dataTable id="labCherryPicksTable" var="cherryPickRow"
 					value="#{cherryPickRequestViewer.labCherryPicksDataModel}"
-					styleClass="standardTable" columnClasses="column"
+					styleClass="standardTable" columnClasses="column" rows="20"
 					rowClasses="row1,row2" headerClass="tableHeader"
 					sortColumn="#{cherryPickRequestViewer.labCherryPicksSortManager.currentSortColumnName}"
 					sortAscending="#{cherryPickRequestViewer.labCherryPicksSortManager.sortAscending}"
@@ -397,7 +481,8 @@ TODO:
 					rendered="#{!cherryPickRequestViewer.cherryPickRequest.mapped}" />
 
 				<t:message for="assayPlatesTable" styleClass="errorMessage" />
-				<t:dataTable id="assayPlatesTable" forceId="true" var="assayPlateRow"
+				<t:dataTable id="assayPlatesTable" forceId="true"
+					var="assayPlateRow"
 					value="#{cherryPickRequestViewer.assayPlatesDataModel}"
 					styleClass="standardTable" columnClasses="column"
 					rowClasses="row1,row2" headerClass="tableHeader"
@@ -416,17 +501,18 @@ TODO:
 						<f:facet name="header">
 							<t:outputText value="#{columnName}" />
 						</f:facet>
-						<t:outputText value="#{assayPlateRow.columnName2Value[columnName]}" />
+						<t:outputText
+							value="#{assayPlateRow.columnName2Value[columnName]}" />
 					</t:columns>
 				</t:dataTable>
 
 				<t:panelGrid id="selectedAssayPlatesCommandPanel" columns="1"
 					styleClass="commandPanel"
 					rendered="#{cherryPickRequestViewer.editable && cherryPickRequestViewer.cherryPickRequest.mapped}">
-					
+
 					<t:panelGroup>
-						<t:outputLabel for="showFailedAssayPlates" value="Show all failed plates:"
-							styleClass="label" />
+						<t:outputLabel for="showFailedAssayPlates"
+							value="Show all failed plates:" styleClass="label" />
 						<t:selectBooleanCheckbox id="showFailedAssayPlates"
 							value="#{cherryPickRequestViewer.showFailedAssayPlates}"
 							onchange="javascript:document.getElementById('updateShowFailedCommand').click()"
@@ -438,11 +524,10 @@ TODO:
 						action="#{cherryPickRequestViewer.downloadPlateMappingFilesForSelectedAssayPlates}"
 						disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 						styleClass="command" />
-						
+
 					<t:panelGrid columns="2">
-						<t:outputLabel
-							for="liquidTransferPerformedBy" value="Performed by:"
-							styleClass="label" />
+						<t:outputLabel for="liquidTransferPerformedBy"
+							value="Performed by:" styleClass="label" />
 						<t:selectOneMenu id="liquidTransferPerformedBy"
 							value="#{cherryPickRequestViewer.liquidTransferPerformedBy.value}"
 							rendered="#{cherryPickRequestViewer.editable}"
@@ -450,16 +535,14 @@ TODO:
 							<f:selectItems
 								value="#{cherryPickRequestViewer.liquidTransferPerformedBy.selectItems}" />
 						</t:selectOneMenu>
-						<t:outputLabel
-							for="dateOfLiquidTransfer" value="Date:"
+						<t:outputLabel for="dateOfLiquidTransfer" value="Date:"
 							styleClass="label" />
 						<t:inputDate id="dateOfLiquidTransfer"
 							value="#{cherryPickRequestViewer.dateOfLiquidTransfer}"
 							popupCalendar="true"
 							rendered="#{cherryPickRequestViewer.editable}"
 							styleClass="inputText" />
-						<t:outputLabel for="comments" value="Comments:"
-							styleClass="label" />
+						<t:outputLabel for="comments" value="Comments:" styleClass="label" />
 						<t:inputText id="comments"
 							value="#{cherryPickRequestViewer.liquidTransferComments}"
 							rendered="#{cherryPickRequestViewer.editable}"
