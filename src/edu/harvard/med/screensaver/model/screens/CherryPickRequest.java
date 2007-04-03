@@ -423,13 +423,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   @DerivedEntityProperty
   public boolean isMapped()
   {
-    // this is not efficient, but it's 2007 and we've got cycles to burn, right?
-    for (CherryPickAssayPlate plate : _cherryPickAssayPlates) {
-      if (plate.isMapped()) {
-        return true;
-      }
-    }
-    return false;
+    return _cherryPickAssayPlates.size() > 0;
   }
 
   @DerivedEntityProperty
@@ -653,5 +647,12 @@ public abstract class CherryPickRequest extends AbstractEntity
   private void setOrdinal(Integer ordinal)
   {
     _ordinal = ordinal;
+  }
+
+
+  public Object getUnfulfilledLabCherryPicks()
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

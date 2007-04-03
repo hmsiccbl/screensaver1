@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,7 +20,7 @@ import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
 
@@ -45,7 +46,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   private Integer _screeningRoomActivityId;
   private Integer _version;
   private Screen _screen;
-  private ScreeningRoomUser _performedBy;
+  private ScreensaverUser _performedBy;
   private Set<EquipmentUsed> _equipmentUsed = new HashSet<EquipmentUsed>();
   private BigDecimal _microliterVolumeTransferedPerWell;
   private Date _dateCreated;
@@ -66,7 +67,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
    */
   public ScreeningRoomActivity(
     Screen screen,
-    ScreeningRoomUser performedBy,
+    ScreensaverUser performedBy,
     Date dateCreated,
     Date dateOfActivity) throws DuplicateEntityException
   {
@@ -76,7 +77,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
     _screen = screen;
     _performedBy = performedBy;
     _dateCreated = truncateDate(dateCreated);
-    _dateOfActivity = truncateDate(dateOfActivity);
+    _dateOfActivity = normalizeDate(dateOfActivity);
     if (!_screen.getScreeningRoomActivities().add(this)) {
       throw new DuplicateEntityException(_screen, this);
     }
@@ -133,7 +134,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
    * @return the user that performed the activity
    */
   @ToOneRelationship(nullable=false, inverseProperty="screeningRoomActivitiesPerformed")
-  public ScreeningRoomUser getPerformedBy()
+  public ScreensaverUser getPerformedBy()
   {
     return _performedBy;
   }
@@ -143,7 +144,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
    *
    * @param performedBy the new user that performed the activity
    */
-  public void setPerformedBy(ScreeningRoomUser performedBy)
+  public void setPerformedBy(ScreensaverUser performedBy)
   {
     _performedBy.getHbnScreeningRoomActivitiesPerformed().remove(this);
     _performedBy = performedBy;
@@ -280,7 +281,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
      *
      * @return the user that performed the activity
      */
-    public ScreeningRoomUser getPerformedBy()
+    public ScreensaverUser getPerformedBy()
     {
       return _performedBy;
     }
@@ -364,14 +365,14 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
    *
    * @return the user that performed the activity
    * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser"
+   *   class="edu.harvard.med.screensaver.model.users.ScreensaverUser"
    *   column="performed_by_id"
    *   not-null="true"
    *   foreign-key="fk_screening_room_activity_to_performed_by"
    *   cascade="save-update"
    * @motivation for hibernate
    */
-  private ScreeningRoomUser getHbnPerformedBy()
+  private ScreensaverUser getHbnPerformedBy()
   {
     return _performedBy;
   }
@@ -382,7 +383,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
    * @param performedBy the new user that performed the activity
    * @motivation for hibernate
    */
-  private void setHbnPerformedBy(ScreeningRoomUser performedBy)
+  private void setHbnPerformedBy(ScreensaverUser performedBy)
   {
     _performedBy = performedBy;
   }
@@ -407,7 +408,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
    */
   private void setDateOfActivity(Date dateOfActivity)
   {
-    _dateOfActivity = truncateDate(dateOfActivity);
+    _dateOfActivity = normalizeDate(dateOfActivity);
   }
 
   /**
@@ -441,4 +442,19 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   private void setVersion(Integer version) {
     _version = version;
   }
+  
+  /**
+   * Ensures that all Date types (including subclasses, such as Timestamp) are
+   * stored as just Date types.
+   * 
+   * @motivation a Timestamp is a subclass of Date, but has different equals()
+   *             and compareTo() semantics (!) than its Date superclass. Causes
+   *             problems when comparing Date types to Timestamp types where we
+   *             need to consider the hour/min/sec resolution.
+   */
+  private Date normalizeDate(Date date)
+  {
+    return new Date(date.getTime());
+  }
+
 }

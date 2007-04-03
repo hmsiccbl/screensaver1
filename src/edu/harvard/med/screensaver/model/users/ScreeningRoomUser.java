@@ -17,10 +17,9 @@ import java.util.Set;
 import edu.harvard.med.screensaver.model.CollectionElementName;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 
 import org.apache.log4j.Logger;
 
@@ -49,7 +48,6 @@ public class ScreeningRoomUser extends ScreensaverUser
   private Set<Screen> _screensLed = new HashSet<Screen>();
   private Set<Screen> _screensHeaded = new HashSet<Screen>();
   private Set<Screen> _screensCollaborated = new HashSet<Screen>();
-  private Set<ScreeningRoomActivity> _screeningRoomActivitiesPerformed = new HashSet<ScreeningRoomActivity>();
   private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
   private ScreeningRoomUser _labHead;
   private Set<ScreeningRoomUser> _labMembers = new HashSet<ScreeningRoomUser>();
@@ -213,33 +211,6 @@ public class ScreeningRoomUser extends ScreensaverUser
   {
     if (getHbnScreensCollaborated().remove(screenCollaborated)) {
       return screenCollaborated.getHbnCollaborators().remove(this);
-    }
-    return false;
-  }
-
-  /**
-   * Get an unmodifiable copy of the set of screening room activities performed by this user.
-   *
-   * @return the screening room activities performed
-   */
-  @ToManyRelationship(inverseProperty="performedBy")
-  @CollectionElementName("screeningRoomActivityPerformed")
-  public Set<ScreeningRoomActivity> getScreeningRoomActivitiesPerformed()
-  {
-    return Collections.unmodifiableSet(_screeningRoomActivitiesPerformed);
-  }
-
-  /**
-   * Add a screening room activity that was performed by this user.
-   *
-   * @param screeningRoomActivityPerformed the new screening room activity that was performed by this user
-   * @return true iff the screening room user did not perform the screening room activity
-   */
-  public boolean addScreeningRoomActivityPerformed(ScreeningRoomActivity screeningRoomActivityPerformed)
-  {
-    if (getHbnScreeningRoomActivitiesPerformed().add(screeningRoomActivityPerformed)) {
-      screeningRoomActivityPerformed.setPerformedBy(this);
-      return true;
     }
     return false;
   }
@@ -580,27 +551,6 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Get the screening room activities performed.
-   *
-   * @return the screening room activities performed
-   * @hibernate.set
-   *   cascade="save-update"
-   *   inverse="true"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="performed_by_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   * this method is public only because the bi-directional relationship
-   * is cross-package.
-   */
-  public Set<ScreeningRoomActivity> getHbnScreeningRoomActivitiesPerformed()
-  {
-    return _screeningRoomActivitiesPerformed;
-  }
-
-  /**
    * Get the cherry pick requests made by this user.
    *
    * @return the cherry pick requests made by this user
@@ -674,17 +624,6 @@ public class ScreeningRoomUser extends ScreensaverUser
   private void setHbnScreensCollaborated(Set<Screen> screensCollaborated)
   {
     _screensCollaborated = screensCollaborated;
-  }
-
-  /**
-   * Set the screening room screening room activities performed by this user.
-   *
-   * @param screeningRoomActivitiesPerformed the screening room activities performed by this user
-   * @motivation for hibernate
-   */
-  private void setHbnScreeningRoomActivitiesPerformed(Set<ScreeningRoomActivity> screeningRoomActivitiesPerformed)
-  {
-    _screeningRoomActivitiesPerformed = screeningRoomActivitiesPerformed;
   }
 
   /**

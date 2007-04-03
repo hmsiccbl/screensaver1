@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.users;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,7 +18,10 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.CollectionElementName;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import edu.harvard.med.screensaver.model.ToManyRelationship;
+import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 
 
@@ -62,6 +66,7 @@ public class ScreensaverUser extends AbstractEntity
   private String _digestedPassword;
   private String _eCommonsId;
   private String _harvardId;
+  private Set<ScreeningRoomActivity> _screeningRoomActivitiesPerformed = new HashSet<ScreeningRoomActivity>();
 
 
   // public constructors
@@ -526,6 +531,54 @@ public class ScreensaverUser extends AbstractEntity
     _harvardId = harvardId;
   }
 
+  /**
+   * Get an unmodifiable copy of the set of screening room activities performed by this user.
+   *
+   * @return the screening room activities performed
+   */
+  @ToManyRelationship(inverseProperty="performedBy")
+  @CollectionElementName("screeningRoomActivityPerformed")
+  public Set<ScreeningRoomActivity> getScreeningRoomActivitiesPerformed()
+  {
+    return Collections.unmodifiableSet(_screeningRoomActivitiesPerformed);
+  }
+
+  /**
+   * Add a screening room activity that was performed by this user.
+   *
+   * @param screeningRoomActivityPerformed the new screening room activity that was performed by this user
+   * @return true iff the screening room user did not perform the screening room activity
+   */
+  public boolean addScreeningRoomActivityPerformed(ScreeningRoomActivity screeningRoomActivityPerformed)
+  {
+    if (getHbnScreeningRoomActivitiesPerformed().add(screeningRoomActivityPerformed)) {
+      screeningRoomActivityPerformed.setPerformedBy(this);
+      return true;
+    }
+    return false;
+  }
+
+
+  /**
+   * Get the screening room activities performed.
+   *
+   * @return the screening room activities performed
+   * @hibernate.set
+   *   cascade="save-update"
+   *   inverse="true"
+   *   lazy="true"
+   * @hibernate.collection-key
+   *   column="performed_by_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   * this method is public only because the bi-directional relationship
+   * is cross-package.
+   */
+  public Set<ScreeningRoomActivity> getHbnScreeningRoomActivitiesPerformed()
+  {
+    return _screeningRoomActivitiesPerformed;
+  }
 
   // package methods
 
@@ -590,4 +643,15 @@ public class ScreensaverUser extends AbstractEntity
   {
     _roles = roles;
   }  
+
+  /**
+   * Set the screening room screening room activities performed by this user.
+   *
+   * @param screeningRoomActivitiesPerformed the screening room activities performed by this user
+   * @motivation for hibernate
+   */
+  private void setHbnScreeningRoomActivitiesPerformed(Set<ScreeningRoomActivity> screeningRoomActivitiesPerformed)
+  {
+    _screeningRoomActivitiesPerformed = screeningRoomActivitiesPerformed;
+  }
 }

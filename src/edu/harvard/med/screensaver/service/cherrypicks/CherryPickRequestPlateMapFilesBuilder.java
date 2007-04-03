@@ -26,6 +26,7 @@ import java.util.zip.ZipOutputStream;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.util.CSVPrintWriter;
@@ -77,10 +78,10 @@ public class CherryPickRequestPlateMapFilesBuilder
   // public constructors and methods
 
   public InputStream buildZip(final CherryPickRequest cherryPickRequestIn,
-                              final Set<String> plateNames) throws IOException
+                              final Set<CherryPickAssayPlate> plates) throws IOException
   {
     CherryPickRequest cherryPickRequest = (CherryPickRequest) dao.reattachEntity(cherryPickRequestIn);
-    return doBuildZip(cherryPickRequest, plateNames);
+    return doBuildZip(cherryPickRequest, plates);
   }
 
   
@@ -88,12 +89,12 @@ public class CherryPickRequestPlateMapFilesBuilder
 
   @SuppressWarnings("unchecked")
   private InputStream doBuildZip(CherryPickRequest cherryPickRequest,
-                                 Set<String> forPlateNames) throws IOException
+                                 Set<CherryPickAssayPlate> forPlates) throws IOException
   {
     ByteArrayOutputStream zipOutRaw = new ByteArrayOutputStream();
     ZipOutputStream zipOut = new ZipOutputStream(zipOutRaw);
     CSVPrintWriter csv = new CSVPrintWriter(new OutputStreamWriter(zipOut));
-    MultiMap/*<String,SortedSet<CherryPick>>*/ files2CherryPicks = buildCherryPickFiles(cherryPickRequest, forPlateNames);
+    MultiMap/*<String,SortedSet<CherryPick>>*/ files2CherryPicks = buildCherryPickFiles(cherryPickRequest, forPlates);
     for (Iterator iter = files2CherryPicks.keySet().iterator(); iter.hasNext();) {
       String fileName = (String) iter.next();
       ZipEntry zipEntry = new ZipEntry(fileName);
@@ -118,7 +119,7 @@ public class CherryPickRequestPlateMapFilesBuilder
    * ordering both the file names and cherry picks for each file.
    */
   private MultiMap/*<String,SortedSet<CherryPick>>*/ buildCherryPickFiles(CherryPickRequest cherryPickRequest,
-                                                                          Set<String> forPlateNames)
+                                                                          Set<CherryPickAssayPlate> forPlates)
   {
     MultiMap assayPlate2SourcePlateTypes = getSourcePlatesTypesForEachAssayPlate(cherryPickRequest);
     
@@ -128,18 +129,18 @@ public class CherryPickRequestPlateMapFilesBuilder
       public Object create() { return new TreeSet<LabCherryPick>(PlateMappingCherryPickComparator.getInstance()); } 
     });
     for (LabCherryPick cherryPick : cherryPickRequest.getLabCherryPicks()) {
-      String plateName = cherryPick.getAssayPlate().getName();
-      if (forPlateNames != null && !forPlateNames.contains(plateName)) {
+      CherryPickAssayPlate assayPlate = cherryPick.getAssayPlate();
+      if (forPlates != null && !forPlates.contains(assayPlate)) {
         continue;
       }
-      Set<PlateType> sourcePlateTypes = (Set<PlateType>) assayPlate2SourcePlateTypes.get(plateName);
+      Set<PlateType> sourcePlateTypes = (Set<PlateType>) assayPlate2SourcePlateTypes.get(assayPlate.getName());
       String fileName;
       if (sourcePlateTypes.size() > 1) {
-        fileName = plateName + "_" + 
+        fileName = assayPlate.getName() + "_" + 
           cherryPick.getSourceCopy().getCopyInfo(cherryPick.getSourceWell().getPlateNumber()).getPlateType().toString();
       }
       else {
-        fileName = plateName;
+        fileName = assayPlate.getName();
       }
       result.put(fileName, cherryPick);
     }

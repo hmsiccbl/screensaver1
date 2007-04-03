@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.control;
 
+import java.util.Date;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -16,6 +17,7 @@ import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
+import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
@@ -23,6 +25,7 @@ import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 
 import org.apache.myfaces.custom.fileupload.UploadedFile;
@@ -116,7 +119,7 @@ public interface ScreensController
 
   @UIControllerMethod
   public String downloadCherryPickRequestPlateMappingFiles(CherryPickRequest cherryPickRequest,
-                                                           Set<String> plateNames);
+                                                           Set<CherryPickAssayPlate> plateNames);
 
   @UIControllerMethod
   public String createCherryPickRequest(Screen screen);
@@ -156,4 +159,22 @@ public interface ScreensController
 
   @UIControllerMethod
   public String deleteCherryPickRequest(CherryPickRequest cherryPickRequest);
+
+  @UIControllerMethod
+  public String recordLiquidTransferForAssayPlates(CherryPickRequest cherryPickRequest, 
+                                                   Set<CherryPickAssayPlate> selectedAssayPlates,
+                                                   ScreensaverUser performedBy,
+                                                   Date dateOfLiquidTransfer,
+                                                   String comments);
+                                  
+
+  @UIControllerMethod
+  public String createNewCherryPickRequestForUnfulfilledCherryPicks(CherryPickRequest cherryPickRequest);
+
+  @UIControllerMethod
+  public String recordFailureOfAssayPlates(CherryPickRequest cherryPickRequest, 
+                                           Set<CherryPickAssayPlate> selectedAssayPlates, 
+                                           ScreensaverUser performedBy, 
+                                           Date dateOfLiquidTransfer, 
+                                           String comments);
 }

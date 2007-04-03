@@ -69,29 +69,34 @@ public class CherryPickRequestAllocator
       public void runTransaction() 
       {
         CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
-        BigDecimal volume = cherryPickRequest.getMicroliterTransferVolumePerWellApproved();
-        if (volume == null) {
-          throw new BusinessRuleViolationException("cannot allocate cherry picks unless the approved transfer volume has been specified in the cherry pick request");
-        }
-        // TODO: this check should be done in CherryPickRequest instead
-        if (volume.compareTo(BigDecimal.ZERO) <= 0) {
-          throw new DataModelViolationException("cherry pick request approved transfer volume must be positive");
-        }
+        validateAllocationBusinessRules(cherryPickRequest);
+        final Set<LabCherryPick> unfulfillableLabCherryPicks = new HashSet<LabCherryPick>();
         for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
-          Copy copy = selectCopy(labCherryPick.getSourceWell(),
-                                 cherryPickRequest.getMicroliterTransferVolumePerWellApproved());
-          if (copy == null) {
+          if (!doAllocate(labCherryPick)) {
             unfulfillableLabCherryPicks.add(labCherryPick);
-          }
-          else {
-            labCherryPick.setAllocated(copy);
           }
         }
       }
     });
     return unfulfillableLabCherryPicks;
   }
-  
+
+  public boolean allocate(final LabCherryPick labCherryPickIn)
+  {
+    final boolean[] result = new boolean[1];
+    // TODO: handle concurrency; perform appropriate locking to prevent race conditions (overdrawing well) among multiple allocate() calls
+    _dao.doInTransaction(new DAOTransaction() 
+    {
+      public void runTransaction() 
+      {
+        LabCherryPick labCherryPick = (LabCherryPick) _dao.reattachEntity(labCherryPickIn);
+        validateAllocationBusinessRules(labCherryPick.getCherryPickRequest());
+        result[0] = doAllocate(labCherryPick);
+      }
+    });
+    return result[0];
+  }
+
   public void deallocate(final CherryPickRequest cherryPickRequestIn)
   {
     _dao.doInTransaction(new DAOTransaction() 
@@ -108,7 +113,6 @@ public class CherryPickRequestAllocator
       }
     });
   }
-
   
   // private methods
   
@@ -163,5 +167,30 @@ public class CherryPickRequestAllocator
     }
     BigDecimal startingVolume = plateCopyInfo.getVolume();
     return startingVolume;
+  }
+  
+  private void validateAllocationBusinessRules(CherryPickRequest cherryPickRequest)
+  {
+    BigDecimal volume = cherryPickRequest.getMicroliterTransferVolumePerWellApproved();
+    if (volume == null) {
+      throw new BusinessRuleViolationException("cannot allocate cherry picks unless the approved transfer volume has been specified in the cherry pick request");
+    }
+    // TODO: this check should be done in CherryPickRequest instead
+    if (volume.compareTo(BigDecimal.ZERO) <= 0) {
+      throw new DataModelViolationException("cherry pick request approved transfer volume must be positive");
+    }
+  }
+
+  private boolean doAllocate(LabCherryPick labCherryPick)
+  {
+    Copy copy = selectCopy(labCherryPick.getSourceWell(),
+                           labCherryPick.getCherryPickRequest().getMicroliterTransferVolumePerWellApproved());
+    if (copy == null) {
+      return false;
+    }
+    else {
+      labCherryPick.setAllocated(copy);
+    }
+    return true;
   }
 }

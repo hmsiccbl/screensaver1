@@ -343,7 +343,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    */
   protected FacesMessage showMessage(String messageKey, String componentId)
   {
-    return showMessage(messageKey, null, componentId);
+    return showMessage(messageKey, componentId, new Object[] {});
   }
   
   /**
@@ -355,7 +355,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    */
   protected FacesMessage showMessage(String messageKey)
   {
-    return showMessage(messageKey, (String) null);
+    return showMessage(messageKey, (String) null, new Object[] {});
   }
   
   /**

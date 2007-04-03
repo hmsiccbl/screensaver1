@@ -202,7 +202,7 @@ TODO:
 			<t:outputText value="<none>" styleClass="dataText"
 				rendered="#{empty screenViewer.screen.screeningRoomActivities}" />
 			<t:dataTable id="activityItems" var="activityItem"
-				value="#{screenViewer.activitiesDataModel}"
+				value="#{screenViewer.screeningRoomActivitiesDataModel}"
 				preserveDataModel="false"
 				rendered="#{!empty screenViewer.screen.screeningRoomActivities}"
 				styleClass="standardTable" rowClasses="row1,row2"

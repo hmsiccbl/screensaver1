@@ -25,7 +25,7 @@ import org.apache.log4j.Logger;
 
 
 /**
- * A Hibernate entity bean representing a cherry pick.
+ * A Hibernate entity bean representing a lab cherry pick.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -200,6 +200,12 @@ public class LabCherryPick extends AbstractEntity
    */
   public void setAllocated(Copy sourceCopy)
   {
+    if (sourceCopy != null && isAllocated()) {
+      throw new BusinessRuleViolationException("cannot allocate a cherry pick from more than one source copy");
+    }
+    if (sourceCopy == null && !isAllocated()) {
+      throw new BusinessRuleViolationException("cannot deallocate a cherry pick that has not been allocated");
+    }
     if (isPlated()) {
       throw new BusinessRuleViolationException("cannot allocate or deallocate cherry picks after they have been plated");
     }
@@ -225,8 +231,11 @@ public class LabCherryPick extends AbstractEntity
                         int assayPlateRow,
                         int assayPlateColumn)
   {
-    if (!isAllocated()) {
-      throw new BusinessRuleViolationException("cannot map a cherry pick to an assay plate before it has been allocated");
+//    if (!isAllocated()) {
+//      throw new BusinessRuleViolationException("cannot map a cherry pick to an assay plate before it has been allocated");
+//    }
+    if (isMapped() || isPlated()) {
+      throw new BusinessRuleViolationException("cannot map a cherry pick to an assay plate if it has already been mapped or plated");
     }
     _assayPlate = assayPlate;
     _assayPlate.addLabCherryPick(this);
@@ -331,6 +340,11 @@ public class LabCherryPick extends AbstractEntity
   public boolean isPlated()
   {
     return _assayPlate != null && _assayPlate.isPlated();
+  }
+
+  public boolean isFailed()
+  {
+    return _assayPlate != null && _assayPlate.isFailed();
   }
 
   /**

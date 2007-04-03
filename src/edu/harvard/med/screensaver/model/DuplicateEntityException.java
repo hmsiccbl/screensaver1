@@ -10,7 +10,7 @@
 package edu.harvard.med.screensaver.model;
 
 
-public class DuplicateEntityException extends Exception
+public class DuplicateEntityException extends DataModelViolationException
 {
   /**
    * 

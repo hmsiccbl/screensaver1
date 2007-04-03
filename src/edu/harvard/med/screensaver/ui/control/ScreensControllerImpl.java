@@ -1,11 +1,11 @@
-// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml $
-// $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
-//
-// Copyright 2006 by the President and Fellows of Harvard College.
-// 
-// Screensaver is an open-source project developed by the ICCB-L and NSRB labs
-// at Harvard Medical School. This software is distributed under the terms of
-// the GNU General Public License.
+//$HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml $
+//$Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
+
+//Copyright 2006 by the President and Fellows of Harvard College.
+
+//Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+//at Harvard Medical School. This software is distributed under the terms of
+//the GNU General Public License.
 
 package edu.harvard.med.screensaver.ui.control;
 
@@ -30,6 +30,8 @@ import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
+import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.InvalidCherryPickWellException;
@@ -42,6 +44,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper;
@@ -70,18 +73,18 @@ import org.springframework.dao.DataAccessException;
  */
 public class ScreensControllerImpl extends AbstractUIController implements ScreensController
 {
-  
+
   // private static final fields
-  
+
   private static final Logger log = Logger.getLogger(ScreensController.class);
   private static final String BROWSE_SCREENS = "browseScreens";
   private static final String VIEW_SCREEN = "viewScreen";
   private static String VIEW_SCREEN_RESULT_IMPORT_ERRORS = "viewScreenResultImportErrors";
   private static String VIEW_SCREEN_RESULT = "viewScreenResult";
 
-  
+
   // private instance fields
-  
+
   private DAO _dao;
   private LibrariesController _librariesController;
   private ScreensBrowser _screensBrowser;
@@ -96,40 +99,40 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   private CherryPickRequestAllocator _cherryPickRequestAllocator;
   private CherryPickRequestPlateMapper _cherryPickRequestPlateMapper;
   private CherryPickRequestPlateMapFilesBuilder _cherryPickRequestPlateMapFilesBuilder;
-  
+
 
   // public getters and setters
-  
+
   public DAO getDao()
   {
     return _dao;
   }
-  
+
   public void setDao(DAO dao)
   {
     _dao = dao;
   }
-  
+
   public void setLibrariesController(LibrariesController librariesController)
   {
     _librariesController = librariesController;
   }
-  
+
   public ScreensBrowser getScreensBrowser()
   {
     return _screensBrowser;
   }
-  
+
   public void setScreensBrowser(ScreensBrowser screensBrowser)
   {
     _screensBrowser = screensBrowser;
   }
-  
+
   public void setScreenViewer(ScreenViewer screenViewer)
   {
     _screenViewer = screenViewer;
   }
-  
+
   public void setScreenResultViewer(ScreenResultViewer screenResultViewer)
   {
     _screenResultViewer = screenResultViewer;
@@ -160,7 +163,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     _screenResultExporter = screenResultExporter;
   }
 
- 
+
   // public controller methods
 
   public void setCherryPickRequestAllocator(CherryPickRequestAllocator cherryPickRequestAllocator)
@@ -196,7 +199,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                     // TODO: only need this for screensAdmin or
                     // readEverythingAdmin; query would be faster if not
                     // requested
-                    "statusItems"); 
+          "statusItems"); 
         }
         _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens,
                                                                        ScreensControllerImpl.this, 
@@ -205,7 +208,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     });
     return BROWSE_SCREENS;
   }
-  
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#browseMyScreens()
    */
@@ -230,7 +233,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
           else {
             for (Screen screen : screens) {
               _dao.need(screen, 
-                        "screenResult");
+              "screenResult");
             }
             _screensBrowser.setScreenSearchResults(new ScreenSearchResults(new ArrayList<Screen>(screens),
                                                                            ScreensControllerImpl.this, 
@@ -246,7 +249,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     });
     return result[0];
   }
-  
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#viewScreen(edu.harvard.med.screensaver.model.screens.Screen, edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults)
    */
@@ -254,7 +257,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public String viewScreen(final Screen screenIn, ScreenSearchResults screenSearchResults)
   {
     logUserActivity("viewScreen " + screenIn);
-    
+
     _screenViewer.setDao(_dao);
 
     _screenResultImporter.setDao(_dao);
@@ -290,13 +293,13 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                     "hbnCollaborators",
                     "hbnLabHead",
                     "hbnLabHead.hbnLabMembers",
-                    "hbnLeadScreener");
+          "hbnLeadScreener");
           _dao.need(screen.getScreenResult(),
                     "plateNumbers",
                     "hbnResultValueTypes",
                     "hbnResultValueTypes.hbnDerivedTypes",
-                    "hbnResultValueTypes.hbnTypesDerivedFrom");
-          
+          "hbnResultValueTypes.hbnTypesDerivedFrom");
+
           ScreenResult permissionsAwareScreenResult = 
             _dao.findEntityById(ScreenResult.class, 
                                 screen.getScreenResult() == null ? -1 : 
@@ -318,7 +321,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       showMessage("databaseOperationFailed", e.getMessage());
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-      
+
     return VIEW_SCREEN;
   }
 
@@ -471,7 +474,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     }
     return viewScreen(cherryPickRequest.getScreen(), null);
   }
-  
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#viewLastScreen()
    */
@@ -482,7 +485,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     return viewScreen(_currentScreen, 
                       _screensBrowser.getScreenSearchResults());
   }
-    
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#viewScreenResultImportErrors()
    */
@@ -513,7 +516,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     }
     return VIEW_SCREEN;
   }
-  
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#deleteStatusItem(edu.harvard.med.screensaver.model.screens.Screen, edu.harvard.med.screensaver.model.screens.StatusItem)
    */
@@ -524,7 +527,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     screen.getStatusItems().remove(statusItem);
     return VIEW_SCREEN;
   }
-  
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#addPublication(edu.harvard.med.screensaver.model.screens.Screen)
    */
@@ -540,7 +543,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     }
     return VIEW_SCREEN;
   }
-  
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#deletePublication(edu.harvard.med.screensaver.model.screens.Screen, edu.harvard.med.screensaver.model.screens.Publication)
    */
@@ -551,7 +554,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     screen.getPublications().remove(publication);
     return VIEW_SCREEN;
   }
-  
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#addLetterOfSupport(edu.harvard.med.screensaver.model.screens.Screen)
    */
@@ -568,7 +571,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     }
     return VIEW_SCREEN;
   }
-  
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#deleteLetterOfSupport(edu.harvard.med.screensaver.model.screens.Screen, edu.harvard.med.screensaver.model.screens.LetterOfSupport)
    */
@@ -579,7 +582,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     screen.getLettersOfSupport().remove(letterOfSupport);
     return VIEW_SCREEN;
   }
-  
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#addAttachedFile(edu.harvard.med.screensaver.model.screens.Screen)
    */
@@ -595,7 +598,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     }
     return VIEW_SCREEN;
   }
-  
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#deleteAttachedFile(edu.harvard.med.screensaver.model.screens.Screen, edu.harvard.med.screensaver.model.screens.AttachedFile)
    */
@@ -606,7 +609,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     screen.getAttachedFiles().remove(attachedFile);
     return VIEW_SCREEN;
   }
-  
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#addFundingSupport(edu.harvard.med.screensaver.model.screens.Screen, edu.harvard.med.screensaver.model.screens.FundingSupport)
    */
@@ -622,7 +625,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     }
     return VIEW_SCREEN;
   }
-  
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#deleteFundingSupport(edu.harvard.med.screensaver.model.screens.Screen, edu.harvard.med.screensaver.model.screens.FundingSupport)
    */
@@ -633,7 +636,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     screen.getFundingSupports().remove(fundingSupport);
     return VIEW_SCREEN;
   }
-  
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#addKeyword(edu.harvard.med.screensaver.model.screens.Screen, java.lang.String)
    */
@@ -649,7 +652,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     }
     return VIEW_SCREEN;
   }
-  
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#deleteKeyword(edu.harvard.med.screensaver.model.screens.Screen, java.lang.String)
    */
@@ -780,15 +783,15 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
 
   @UIControllerMethod
   public String downloadCherryPickRequestPlateMappingFiles(final CherryPickRequest cherryPickRequestIn,
-                                                           final Set<String> plateNames)
+                                                           final Set<CherryPickAssayPlate> plateNames)
   {
     logUserActivity("downloadScreenResult " + cherryPickRequestIn);
-    
+
     if (plateNames.size() == 0) {
-      showMessage("cherryPicks.noPlatesSelected");
+      showMessage("cherryPicks.noPlatesSelected", "assayPlatesTable");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    
+
     try {
       _dao.doInTransaction(new DAOTransaction() 
       {
@@ -801,7 +804,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
               JSFUtils.handleUserDownloadRequest(getFacesContext(),
                                                  zipStream,
                                                  "CherryPickRequest" + cherryPickRequest.getEntityId() + "_PlateMapFiles.zip",
-                                                 "application/zip");
+              "application/zip");
             }
           }
           catch (IOException e)
@@ -823,7 +826,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public String createCherryPickRequest(final Screen screenIn)
   {
     logUserActivity("createCherryPickRequest " + screenIn);
-    
+
     final CherryPickRequest[] result = new CherryPickRequest[1];
     try {
       _dao.doInTransaction(new DAOTransaction() 
@@ -845,9 +848,9 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public String viewCherryPickRequest(final CherryPickRequest cherryPickRequestIn)
   {
     logUserActivity("viewCherryPickRequest " + cherryPickRequestIn);
-    
+
     _cherryPickRequestViewer.setDao(_dao);
-    
+
     try {
       _dao.doInTransaction(new DAOTransaction() 
       {
@@ -861,7 +864,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                     "screen.hbnCollaborators",
                     "hbnRequestedBy",
                     "cherryPickAssayPlates",
-                    "cherryPickAssayPlates.hbnCherryPickLiquidTransfers");
+          "cherryPickAssayPlates.hbnCherryPickLiquidTransfers");
           if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI)) {
             _dao.need(cherryPickRequest,
                       "screenerCherryPicks",
@@ -869,28 +872,28 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                       "screenerCherryPicks.screenedWell",
                       "screenerCherryPicks.screenedWell.hbnSilencingReagents",
                       "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene",
-                      "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene.genbankAccessionNumbers");
+            "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene.genbankAccessionNumbers");
             _dao.need(cherryPickRequest,
                       "labCherryPicks",
                       "labCherryPicks.sourceWell",
                       "labCherryPicks.sourceWell.hbnSilencingReagents",
                       "labCherryPicks.sourceWell.hbnSilencingReagents.gene",
-                      "labCherryPicks.sourceWell.hbnSilencingReagents.gene.genbankAccessionNumbers");
+            "labCherryPicks.sourceWell.hbnSilencingReagents.gene.genbankAccessionNumbers");
           }
           else if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
             _dao.need(cherryPickRequest,
                       "screenCherryPicks",
                       "screenerCherryPicks.labCherryPicks",
                       "screenCherryPicks.screenedWell",
-                      "screenCherryPicks.screenedWell.hbnCompounds");
+            "screenCherryPicks.screenedWell.hbnCompounds");
             _dao.need(cherryPickRequest,
                       "labCherryPicks",
                       "labCherryPicks.sourceWell",
-                      "labCherryPicks.sourceWell.hbnCompound");
+            "labCherryPicks.sourceWell.hbnCompound");
           }
 
-                                        
-          
+
+
           _cherryPickRequestViewer.setCherryPickRequest(cherryPickRequest);
         }
       });
@@ -898,10 +901,10 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     catch (DataAccessException e) {
       showMessage("databaseOperationFailed", e.getMessage());
     }
-    
+
     return VIEW_CHERRY_PICK_REQUEST_ACTION_RESULT;
   }
-  
+
   private String addCherryPicksForWells(final CherryPickRequest cherryPickRequestIn,
                                         final Set<Well> cherryPickCompoundWells)
   {
@@ -915,7 +918,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
             throw new BusinessRuleViolationException("cherry picks cannot be added to a cherry pick request that has already been allocated");
           }
           // TODO: enforce cherry pick size limits
-          
+
           // note: if combine these two loops, we get Hibernate "dup obj in session" exceptions...
           for (Well well : cherryPickCompoundWells) {
             _dao.reattachEntity(well);
@@ -924,7 +927,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
             new ScreenerCherryPick(cherryPickRequest, well);
           }
           cherryPickRequest.createLabCherryPicks();
-          
+
           // TODO: warn if the expected number of lab cherry picks was not created for the screener cherry picks
         }
       });
@@ -959,13 +962,13 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     return addCherryPicksForWells(cherryPickRequestIn,
                                   cherryPickPoolWells);
   }
-  
+
   @UIControllerMethod
   public String addCherryPicksForDuplexWells(final CherryPickRequest cherryPickRequestIn,
                                              final Set<Well> duplexCherryPickWells)
   {
     logUserActivity("addCherryPicksForDuplexWells to " + cherryPickRequestIn);
-    
+
     try {
       _dao.doInTransaction(new DAOTransaction() 
       {
@@ -1004,7 +1007,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public String deleteAllScreenerCherryPicks(final CherryPickRequest cherryPickRequestIn)
   {
     logUserActivity("deleteAllCherryPicks from " + cherryPickRequestIn);
-    
+
     try {
       _dao.doInTransaction(new DAOTransaction() 
       {
@@ -1012,9 +1015,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
         {
           CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reloadEntity(cherryPickRequestIn);
           if (cherryPickRequest.isAllocated()) {
-            String message = "Cherry picks cannot be deleted once a cherry pick request has been allocated";
-            showMessage("businessError", message);
-            throw new DAOTransactionRollbackException(message);
+            throw new BusinessRuleViolationException("cherry picks cannot be deleted once a cherry pick request has been allocated");
           }
           Set<ScreenerCherryPick> cherryPicksToDelete = new HashSet<ScreenerCherryPick>(cherryPickRequest.getScreenerCherryPicks());
           for (ScreenerCherryPick cherryPick : cherryPicksToDelete) {
@@ -1026,18 +1027,15 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     catch (DataAccessException e) {
       showMessage("databaseOperationFailed", e.getMessage());
     }
-    catch (DAOTransactionRollbackException e) {
-      // already handled
-    }
-    
+
     return viewCherryPickRequest(cherryPickRequestIn);
   }
-  
+
   @UIControllerMethod
   public String allocateCherryPicks(final CherryPickRequest cherryPickRequestIn)
   {
     logUserActivity("allocateCherryPicks for " + cherryPickRequestIn);
-    
+
     if (cherryPickRequestIn.getMicroliterTransferVolumePerWellApproved() == null) {
       showMessage("cherryPicks.approvedCherryPickVolumeRequired");
       return REDISPLAY_PAGE_ACTION_RESULT;
@@ -1064,7 +1062,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public String deallocateCherryPicks(final CherryPickRequest cherryPickRequestIn)
   {
     logUserActivity("deallocateCherryPicks for " + cherryPickRequestIn);
-    
+
     try {
       _cherryPickRequestAllocator.deallocate(cherryPickRequestIn);
     }
@@ -1081,7 +1079,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public String plateMapCherryPicks(final CherryPickRequest cherryPickRequestIn)
   {
     logUserActivity("plateMapCherryPicks for " + cherryPickRequestIn);
-    
+
     try {
       _cherryPickRequestPlateMapper.generatePlateMapping(cherryPickRequestIn);
     }
@@ -1094,7 +1092,106 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     return viewCherryPickRequest(cherryPickRequestIn);
   }
 
-  
+
+  @UIControllerMethod
+  public String recordLiquidTransferForAssayPlates(final CherryPickRequest cherryPickRequestIn, 
+                                                   final Set<CherryPickAssayPlate> selectedAssayPlates,
+                                                   final ScreensaverUser performedByIn,
+                                                   final Date dateOfLiquidTransfer,
+                                                   final String comments)
+  {
+    logUserActivity("recordLiquidTransferForAssayPlates for " + cherryPickRequestIn);
+
+    try {
+      doRecordLiquidTransferForAssayPlates(cherryPickRequestIn,
+                                           selectedAssayPlates,
+                                           performedByIn,
+                                           dateOfLiquidTransfer,
+                                           comments,
+                                           true);
+      return viewCherryPickRequest(cherryPickRequestIn);
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  public String createNewCherryPickRequestForUnfulfilledCherryPicks(CherryPickRequest cherryPickRequest)
+  {
+    // TODO:
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  public String recordFailureOfAssayPlates(final CherryPickRequest cherryPickRequestIn, 
+                                           final Set<CherryPickAssayPlate> selectedAssayPlates,
+                                           final ScreensaverUser performedByIn,
+                                           final Date dateOfLiquidTransfer,
+                                           final String comments)
+  {
+    // create new assay plates, duplicating plate name, lab cherry picks with same layout but new copy selection, incrementing attempt ordinal
+    logUserActivity("recordFailureOfAssayPlates for " + selectedAssayPlates);
+
+    try {
+      _dao.doInTransaction(new DAOTransaction() 
+      {
+        public void runTransaction()
+        {
+          doRecordLiquidTransferForAssayPlates(cherryPickRequestIn,
+                                               selectedAssayPlates,
+                                               performedByIn,
+                                               dateOfLiquidTransfer,
+                                               comments,
+                                               false);
+
+          boolean someCherryPicksUnfulfillable = false;
+          for (CherryPickAssayPlate assayPlate : selectedAssayPlates) {
+            _dao.reattachEntity(assayPlate);
+
+            // Construct a CherryPickAssayPlate from an existing one, preserving the
+            // plate ordinal and plate type, but incrementing the attempt ordinal. The new
+            // assay plate will have a new set of lab cherry picks that duplicate the
+            // original plate's lab cherry picks, preserving their original well layout,
+            // and allocated anew.
+            // TODO: protect against race condition (should enforce at schema level)
+            CherryPickAssayPlate newAssayPlate = new CherryPickAssayPlate(assayPlate.getCherryPickRequest(),
+                                                                          assayPlate.getPlateOrdinal(), 
+                                                                          assayPlate.getAttemptOrdinal() + 1,
+                                                                          assayPlate.getAssayPlateType());
+            for (LabCherryPick labCherryPick : assayPlate.getLabCherryPicks()) {
+              LabCherryPick newLabCherryPick = new LabCherryPick(labCherryPick.getScreenerCherryPick(),
+                                                                 labCherryPick.getSourceWell());
+              _dao.persistEntity(newLabCherryPick);
+              if (!_cherryPickRequestAllocator.allocate(newLabCherryPick)) {
+                someCherryPicksUnfulfillable  = true;
+              } else {
+                newLabCherryPick.setMapped(newAssayPlate,
+                                           labCherryPick.getAssayPlateRow(),
+                                           labCherryPick.getAssayPlateColumn());
+              }
+            }
+          }
+          if (someCherryPicksUnfulfillable) {
+            showMessage("cherryPicks.someCherryPicksUnfulfillable");
+          }
+        }
+      });
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    if (selectedAssayPlates.size() == 0) {
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    else {
+      return viewCherryPickRequest(selectedAssayPlates.iterator().next().getCherryPickRequest());
+    }
+  }
+
+
   // private methods
 
   /**
@@ -1107,6 +1204,39 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     // etc.; right now, we just clear the search result, causing it be recreated
     // entirely when browseScreens() is called
     _screensBrowser.setScreenSearchResults(null);
+  }
+
+  private void doRecordLiquidTransferForAssayPlates(final CherryPickRequest cherryPickRequestIn, 
+                                                    final Set<CherryPickAssayPlate> selectedAssayPlates,
+                                                    final ScreensaverUser performedByIn,
+                                                    final Date dateOfLiquidTransfer,
+                                                    final String comments,
+                                                    final boolean success)
+  {
+    _dao.doInTransaction(new DAOTransaction() 
+    {
+      public void runTransaction()
+      {
+        CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
+        ScreensaverUser performedBy = (ScreensaverUser) _dao.reloadEntity(performedByIn);
+        CherryPickLiquidTransfer liquidTransfer = new CherryPickLiquidTransfer(performedBy,
+                                                                               new Date(),
+                                                                               dateOfLiquidTransfer,
+                                                                               cherryPickRequest,
+                                                                               success);
+        liquidTransfer.setComments(comments);
+        for (CherryPickAssayPlate assayPlate : selectedAssayPlates) {
+          if (!assayPlate.getCherryPickRequest().equals(cherryPickRequest)) {
+            throw new IllegalArgumentException("all assay plates must be from the specified cherry pick request");
+          }
+          if (assayPlate.isPlated()) {
+            throw new BusinessRuleViolationException("cannot record successful liquid transfer more than once for a cherry pick assay plate");
+          }
+          assayPlate.setCherryPickLiquidTransfer(liquidTransfer);
+        }
+        _dao.persistEntity(liquidTransfer); // necessary?
+      }
+    });
   }
 }
 

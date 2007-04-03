@@ -193,6 +193,23 @@ TODO:
 						rows="10" cols="80"
 						displayValueOnly="#{!cherryPickRequestViewer.editMode}"
 						styleClass="inputText" displayValueOnlyStyleClass="dataText" />
+						
+					<t:outputText value="Screener&nbsp;cherry&nbsp;picks" escape="false" />
+					<t:outputText id="screenCherryPickCount"
+						value="#{cherryPickRequestViewer.screenerCherryPickCount}"
+						styleClass="dataText" />
+
+					<t:outputText value="Lab&nbsp;cherry&nbsp;picks" escape="false" />
+					<t:outputText id="labCherryPickCount"
+						value="#{cherryPickRequestViewer.labCherryPickCount}"
+						styleClass="dataText" />
+
+					<t:outputText value="Cherry&nbsp;Pick&nbsp;Plates" escape="false" />
+					<t:outputText id="assayPlatesCount"
+						value="#{cherryPickRequestViewer.assayPlatesDataModel.rowCount}"
+						styleClass="dataText" />
+
+						
 
 				</t:panelGrid>
 			</t:panelGrid>
@@ -317,10 +334,16 @@ TODO:
 						action="#{cherryPickRequestViewer.plateMapCherryPicks}"
 						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated || cherryPickRequestViewer.cherryPickRequest.mapped}"
 						styleClass="command" />
-					<h:commandButton id="createCherryPickRequestForUnfulfilled"
+					<t:commandButton id="createCherryPickRequestForUnfulfilled"
 						value="New Cherry Pick Request for Unfulfilled"
 						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated}"
 						action="#{cherryPickRequestViewer.createNewCherryPickRequestForUnfulfilledCherryPicks}"
+						styleClass="command" />
+					<t:outputLabel for="showFailedLabCherryPicks" value="Show failed:"
+						styleClass="label" />
+					<t:selectBooleanCheckbox id="showFailedLabCherryPicks"
+						value="#{cherryPickRequestViewer.showFailedLabCherryPicks}"
+						onchange="javascript:document.getElementById('updateShowFailedCommand').click()"
 						styleClass="command" />
 				</t:panelGroup>
 
@@ -344,7 +367,7 @@ TODO:
 									<t:graphicImage value="/images/descending-arrow.gif"
 										rendered="true" border="0" />
 								</f:facet>
-								<h:outputText value="#{columnName}" />
+								<t:outputText value="#{columnName}" />
 							</t:commandSortHeader>
 						</f:facet>
 						<t:outputText value="#{cherryPickRow[columnName]}" />
@@ -364,7 +387,7 @@ TODO:
 						<h:graphicImage
 							value="#{state ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
-						<h:outputText value="#{title}" styleClass="sectionHeader" />
+						<t:outputText value="#{title}" styleClass="sectionHeader" />
 					</t:headerLink>
 				</t:div>
 			</f:facet>
@@ -373,40 +396,12 @@ TODO:
 				<t:outputText value="<none>" styleClass="label"
 					rendered="#{!cherryPickRequestViewer.cherryPickRequest.mapped}" />
 
-				<t:panelGroup id="selectedAssayPlatesCommandPanel"
-					styleClass="commandPanel"
-					rendered="#{cherryPickRequestViewer.editable && cherryPickRequestViewer.cherryPickRequest.mapped}">
-					<t:div>
-						<t:outputText styleClass="label" value="For selected plates:" />
-					</t:div>
-					<t:commandButton id="downloadPlateMappingFiles"
-						value="Download Files"
-						action="#{cherryPickRequestViewer.downloadPlateMappingFilesForSelectedAssayPlates}"
-						disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
-						styleClass="command" />
-					<t:commandButton id="recordLiquidTransfer" value="Created"
-						action="#{cherryPickRequestViewer.recordLiquidTransferForSelectedAssayPlates}"
-						disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
-						styleClass="command" />
-					<h:commandButton id="recordFailureOfAssayPlates" value="Failed"
-						disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
-						action="#{cherryPickRequestViewer.recordFailureOfAssayPlates}"
-						styleClass="command" />
-				</t:panelGroup>
-
-				<t:dataTable id="assayPlatesTable" var="assayPlateRow"
+				<t:message for="assayPlatesTable" styleClass="errorMessage" />
+				<t:dataTable id="assayPlatesTable" forceId="true" var="assayPlateRow"
 					value="#{cherryPickRequestViewer.assayPlatesDataModel}"
 					styleClass="standardTable" columnClasses="column"
 					rowClasses="row1,row2" headerClass="tableHeader"
 					rendered="#{cherryPickRequestViewer.cherryPickRequest.mapped}">
-					<t:columns
-						value="#{cherryPickRequestViewer.assayPlatesColumnModel}"
-						var="columnName" styleClass="column">
-						<f:facet name="header">
-							<t:outputText value="#{columnName}" />
-						</f:facet>
-						<t:outputText value="#{assayPlateRow.values[columnName]}" />
-					</t:columns>
 					<t:column>
 						<f:facet name="header">
 							<t:selectBooleanCheckbox id="selectAll"
@@ -415,11 +410,82 @@ TODO:
 						</f:facet>
 						<t:selectBooleanCheckbox value="#{assayPlateRow.selected}" />
 					</t:column>
+					<t:columns
+						value="#{cherryPickRequestViewer.assayPlatesColumnModel}"
+						var="columnName" styleClass="column">
+						<f:facet name="header">
+							<t:outputText value="#{columnName}" />
+						</f:facet>
+						<t:outputText value="#{assayPlateRow.columnName2Value[columnName]}" />
+					</t:columns>
 				</t:dataTable>
+
+				<t:panelGrid id="selectedAssayPlatesCommandPanel" columns="1"
+					styleClass="commandPanel"
+					rendered="#{cherryPickRequestViewer.editable && cherryPickRequestViewer.cherryPickRequest.mapped}">
+					
+					<t:panelGroup>
+						<t:outputLabel for="showFailedAssayPlates" value="Show all failed plates:"
+							styleClass="label" />
+						<t:selectBooleanCheckbox id="showFailedAssayPlates"
+							value="#{cherryPickRequestViewer.showFailedAssayPlates}"
+							onchange="javascript:document.getElementById('updateShowFailedCommand').click()"
+							styleClass="command" />
+					</t:panelGroup>
+
+					<t:commandButton id="downloadPlateMappingFiles"
+						value="Download Files for Selected Plates"
+						action="#{cherryPickRequestViewer.downloadPlateMappingFilesForSelectedAssayPlates}"
+						disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
+						styleClass="command" />
+						
+					<t:panelGrid columns="2">
+						<t:outputLabel
+							for="liquidTransferPerformedBy" value="Performed by:"
+							styleClass="label" />
+						<t:selectOneMenu id="liquidTransferPerformedBy"
+							value="#{cherryPickRequestViewer.liquidTransferPerformedBy.value}"
+							rendered="#{cherryPickRequestViewer.editable}"
+							styleClass="inputText">
+							<f:selectItems
+								value="#{cherryPickRequestViewer.liquidTransferPerformedBy.selectItems}" />
+						</t:selectOneMenu>
+						<t:outputLabel
+							for="dateOfLiquidTransfer" value="Date:"
+							styleClass="label" />
+						<t:inputDate id="dateOfLiquidTransfer"
+							value="#{cherryPickRequestViewer.dateOfLiquidTransfer}"
+							popupCalendar="true"
+							rendered="#{cherryPickRequestViewer.editable}"
+							styleClass="inputText" />
+						<t:outputLabel for="comments" value="Comments:"
+							styleClass="label" />
+						<t:inputText id="comments"
+							value="#{cherryPickRequestViewer.liquidTransferComments}"
+							rendered="#{cherryPickRequestViewer.editable}"
+							styleClass="inputText" />
+					</t:panelGrid>
+
+					<t:panelGroup>
+						<t:commandButton id="recordLiquidTransfer"
+							value="Record Selected Plates as Created"
+							action="#{cherryPickRequestViewer.recordLiquidTransferForSelectedAssayPlates}"
+							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
+							styleClass="command" />
+						<t:commandButton id="recordFailureOfAssayPlates"
+							value="Record Selected Plates as Failed"
+							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
+							action="#{cherryPickRequestViewer.recordFailureOfAssayPlates}"
+							styleClass="command" />
+					</t:panelGroup>
+				</t:panelGrid>
 
 				<t:commandButton id="selectAllAssayPlatesButton" forceId="true"
 					action="#{cherryPickRequestViewer.selectAllAssayPlates}"
 					rendered="#{cherryPickRequestViewer.cherryPickRequest.mapped}"
+					style="display:none" />
+				<t:commandButton id="updateShowFailedCommand" forceId="true"
+					action="#{cherryPickRequestViewer.updateShowFailed}"
 					style="display:none" />
 
 			</t:panelGrid>

@@ -7,34 +7,29 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model.screens;
+package edu.harvard.med.screensaver.service.cherrypicks;
 
-import java.beans.IntrospectionException;
-
-import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
 
-public class CherryPickAssayPlateTest extends AbstractEntityInstanceTest
+public class CherryPickRequestPlateMapFilesBuilderTest extends TestCase
 {
   // static members
 
-  private static Logger log = Logger.getLogger(CherryPickAssayPlateTest.class);
+  private static Logger log = Logger.getLogger(CherryPickRequestPlateMapFilesBuilderTest.class);
+
+  public void testBuildZip()
+  {
+    fail("Not yet implemented");
+  }
 
 
   // instance data members
 
-  
   // public constructors and methods
 
-  public CherryPickAssayPlateTest() throws IntrospectionException
-  {
-    super(CherryPickAssayPlate.class);
-  }
-  
-  public void testIsFailed()
-  {
-    fail("not implemented");
-  }
+  // private methods
+
 }
 

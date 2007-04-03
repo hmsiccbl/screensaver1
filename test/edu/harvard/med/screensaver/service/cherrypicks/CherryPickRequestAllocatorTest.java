@@ -171,6 +171,12 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     // allocation 3 is fulfillable (again) by copy 1
   }
   
+  public void testAllocateSingleAssayPlate()
+  {
+    fail("not implemented");
+//    cherryPickRequestAllocator.allocate(assayPlate);
+  }
+  
   
   // static util methods
   

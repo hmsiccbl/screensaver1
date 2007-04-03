@@ -18,7 +18,7 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
 
@@ -43,17 +43,28 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
 
   // instance data members
 
+  private boolean _successful;
   private Set<CherryPickAssayPlate> _cherryPickAssayPlates = new HashSet<CherryPickAssayPlate>();
 
 
   // public constructors and methods
 
-  public CherryPickLiquidTransfer(ScreeningRoomUser performedBy,
+  public CherryPickLiquidTransfer(ScreensaverUser performedBy,
+                                  Date dateCreated,
+                                  Date dateOfActivity,
+                                  CherryPickRequest cherryPickRequest,
+                                  boolean successful) throws DuplicateEntityException
+  {
+    super(cherryPickRequest.getScreen(), performedBy, dateCreated, dateOfActivity);
+    _successful = successful;
+  }
+
+  public CherryPickLiquidTransfer(ScreensaverUser performedBy,
                                   Date dateCreated,
                                   Date dateOfActivity,
                                   CherryPickRequest cherryPickRequest) throws DuplicateEntityException
   {
-    super(cherryPickRequest.getScreen(), performedBy, dateCreated, dateOfActivity);
+    this(performedBy, dateCreated, dateOfActivity, cherryPickRequest, true);
   }
 
   @Override
@@ -62,6 +73,16 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
   {
     // name provided by ces6
     return "Fulfill Cherry Pick";
+  }
+
+  /**
+   * @hibernate.property type="boolean" not-null="true"
+   * @return
+   */
+  @ImmutableProperty
+  public boolean isSuccessful()
+  {
+    return _successful;
   }
 
   @ToManyRelationship(inverseProperty="cherryPickLiquidTransfers")
@@ -102,6 +123,11 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
   Set<CherryPickAssayPlate> getHbnCherryPickAssayPlates()
   {
     return _cherryPickAssayPlates;
+  }
+
+  private void setSuccessful(Boolean successful)
+  {
+    _successful = successful;
   }
 
   private void setHbnCherryPickAssayPlates(Set<CherryPickAssayPlate> cherryPickAssayPlates)

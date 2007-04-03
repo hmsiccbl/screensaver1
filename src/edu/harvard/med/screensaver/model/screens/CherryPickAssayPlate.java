@@ -183,20 +183,14 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   }
 
   @DerivedEntityProperty
-  public boolean isMapped()
-  {
-    for (LabCherryPick labCherryPick : _labCherryPicks) {
-      if (labCherryPick.isMapped()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  @DerivedEntityProperty
   public boolean isPlated()
   {
-    return _cherryPickLiquidTransfer != null;
+    return _cherryPickLiquidTransfer != null && _cherryPickLiquidTransfer.isSuccessful();
+  }
+
+  public boolean isFailed()
+  {
+    return _cherryPickLiquidTransfer != null && !_cherryPickLiquidTransfer.isSuccessful();
   }
 
   /**
