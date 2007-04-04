@@ -286,8 +286,6 @@ public class ScreensaverUser extends AbstractEntity
    * @return the email
    * @hibernate.property
    *   type="text"
-   *   not-null="true"
-   *   unique="true"
    */
   public String getEmail()
   {
@@ -585,7 +583,8 @@ public class ScreensaverUser extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    return getEmail();
+    // TODO: make this into a real biz key inner class
+    return getFirstName() + " " + getLastName() + " " + getDateCreated();
   }
 
   

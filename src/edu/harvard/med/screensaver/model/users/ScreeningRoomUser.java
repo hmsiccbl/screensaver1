@@ -323,31 +323,45 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Set the email, updating this entity's membership in any related entity sets
+   * Set the date created, updating this entity's membership in any related entity sets
    * that it already is a member of.
    * 
-   * @param email the new email
+   * @param dateCreated the new date created
    */
   @Override
-  public void setEmail(String email)
+  public void setDateCreated(Date dateCreated)
   {
-    if (_screensCollaborated != null) {
-      for (Screen screenCollaborated : _screensCollaborated) {
-        screenCollaborated.getHbnCollaborators().remove(this);
-      }
-    }
-    if (_labHead != null) {
-      _labHead.getHbnLabMembers().remove(this);
-    }
-    super.setEmail(email);
-    if (_screensCollaborated != null) {
-      for (Screen screenCollaborated : _screensCollaborated) {
-        screenCollaborated.getHbnCollaborators().add(this);
-      }
-    }
-    if (_labHead != null) {
-      _labHead.getHbnLabMembers().add(this);
-    } 
+    preModifyBusinessKey();
+    super.setDateCreated(dateCreated);
+    postModifyBusinessKey();
+  }
+
+  /**
+   * Set the first name, updating this entity's membership in any related entity sets
+   * that it already is a member of.
+   * 
+   * @param firstName the new first name
+   */
+  @Override
+  public void setFirstName(String firstName)
+  {
+    preModifyBusinessKey();
+    super.setFirstName(firstName);
+    postModifyBusinessKey();
+  }
+
+  /**
+   * Set the last name, updating this entity's membership in any related entity sets
+   * that it already is a member of.
+   * 
+   * @param lastName the new last name
+   */
+  @Override
+  public void setLastName(String lastName)
+  {
+    preModifyBusinessKey();
+    super.setLastName(lastName);
+    postModifyBusinessKey(); 
   }
 
   /**
@@ -717,5 +731,29 @@ public class ScreeningRoomUser extends ScreensaverUser
   private void setHbnLabAffiliation(LabAffiliation labAffiliation)
   {
     _labAffiliation = labAffiliation;
+  }
+
+
+  private void preModifyBusinessKey() {
+    if (_screensCollaborated != null) {
+      for (Screen screenCollaborated : _screensCollaborated) {
+        screenCollaborated.getHbnCollaborators().remove(this);
+      }
+    }
+    if (_labHead != null) {
+      _labHead.getHbnLabMembers().remove(this);
+    }
+  }
+
+
+  private void postModifyBusinessKey() {
+    if (_screensCollaborated != null) {
+      for (Screen screenCollaborated : _screensCollaborated) {
+        screenCollaborated.getHbnCollaborators().add(this);
+      }
+    }
+    if (_labHead != null) {
+      _labHead.getHbnLabMembers().add(this);
+    }
   }
 }
