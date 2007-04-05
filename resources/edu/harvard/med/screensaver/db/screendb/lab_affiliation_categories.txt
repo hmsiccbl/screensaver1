@@ -90,6 +90,7 @@ Other	University of California Riverside, Botany and Developmental Biology
 Other	University of California Riverside, Center for Plant Cell Biology
 Other	University of California Riverside, Center for Plant Biology
 Other	University of Chicago
+Other	University of Colorado Health Sciences Center
 Other	University of Illinois at Urbana-Champaign
 Other	University of Massachusetts Medical School
 Other	University of Massachusetts, Dartmouth
