@@ -18,6 +18,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -37,7 +39,9 @@ public class ScreenDBLibraryScreeningSynchronizer
   // static members
 
   private static Logger log = Logger.getLogger(ScreenDBLibraryScreeningSynchronizer.class);
-
+  private static Pattern _numericalVolumeTransferredPattern =
+    Pattern.compile(".*?([\\d.]+)(([nu][lL])?\\s*(x|X|and)\\s*(\\d+))?.*");
+  
 
   // instance data members
   
@@ -100,7 +104,6 @@ public class ScreenDBLibraryScreeningSynchronizer
       "SELECT v.*, s.screen_type, s.user_id AS lead_screener_id FROM visits v, screens s " +
       "WHERE v.screen_id = s.id AND visit_type IN ('Library', 'Special')");
     while (resultSet.next()) {
-      log.info("resultSet");
       LibraryScreening screening = findOrCreateLibraryScreening(resultSet);
       screening.setComments(resultSet.getString("comments"));
       screening.setAssayProtocol(resultSet.getString("assay_protocol"));
@@ -112,7 +115,7 @@ public class ScreenDBLibraryScreeningSynchronizer
       synchronizeEstimatedFinalScreenConcentration(resultSet, screening);
       synchronizeAssayProtocolType(resultSet, screening);
       
-      log.info("libraryScreening = " + screening);
+      //log.info("libraryScreening = " + screening);
       
       _screenDBVisitIdToLibraryScreeningMap.put(resultSet.getInt("id"), screening);
       _dao.persistEntity(screening);
@@ -183,8 +186,6 @@ public class ScreenDBLibraryScreeningSynchronizer
     return screening;
   }
 
-  // TODO: synchronize volume transferred properly
-  //
   // FROM GROUP DISCUSSION:
   //   2. Units for Volume of Compound Transferred: For one RNAi Screen (612), 
   //   I have unitless values "11" that I will take as "11 uL". For the rest, I 
@@ -215,11 +216,85 @@ public class ScreenDBLibraryScreeningSynchronizer
   //
   //   I will also meet with Katrina the week after next to look these over. (I 
   //   am going to be on vacation next week.)
-  private void synchronizeVolumeTransferredPerWell(ResultSet resultSet, LibraryScreening screening) throws SQLException
+  private void synchronizeVolumeTransferredPerWell(
+    ResultSet resultSet, LibraryScreening screening)
+  throws SQLException, ScreenDBSynchronizationException
   {
     String volumeTransferredString = resultSet.getString("vol_of_compd_transf");  
     BigDecimal microliterVolumeTransferedPerWell = null;
+    if (volumeTransferredString != null &&
+      ! volumeTransferredString.equals("") &&
+      ! volumeTransferredString.equals("0")) {
+      
+      // get the numerical portion of the volume transferred string
+      float numericalVolumeTransferred =
+        getNumericalVolumeTransferred(volumeTransferredString);
+      
+      // units are either nL or uL - figure out which
+      boolean unitsAreNanoliters = areVolumeTransferredUnitsNanoliters(
+        resultSet, volumeTransferredString, numericalVolumeTransferred);
+      
+      if (unitsAreNanoliters) {
+        microliterVolumeTransferedPerWell =
+          new BigDecimal(numericalVolumeTransferred / 1000);
+      }
+      else {
+        microliterVolumeTransferedPerWell = new BigDecimal(numericalVolumeTransferred);
+      }
+    }
     screening.setMicroliterVolumeTransferedPerWell(microliterVolumeTransferedPerWell);
+  }
+
+  private float getNumericalVolumeTransferred(String volumeTransferredString)
+  throws ScreenDBSynchronizationException {
+    float numericalVolumeTransferred;
+    Matcher numericalVolumeTransferredMatcher =
+      _numericalVolumeTransferredPattern.matcher(volumeTransferredString);
+    if (! numericalVolumeTransferredMatcher.matches()) {
+      throw new ScreenDBSynchronizationException(
+        "no match found for volume transferred \"" + volumeTransferredString + "\"!");
+    }
+    String leftOperandString = numericalVolumeTransferredMatcher.group(1);
+    String operator = numericalVolumeTransferredMatcher.group(4);
+    String rightOperandString = numericalVolumeTransferredMatcher.group(5);
+    float leftOperand = Float.parseFloat(leftOperandString);
+    if (operator == null) {
+      numericalVolumeTransferred = leftOperand;
+    }
+    else {
+      float rightOperand = Float.parseFloat(rightOperandString);
+      if (operator.equalsIgnoreCase("x")) {
+        numericalVolumeTransferred = leftOperand * rightOperand;
+      }
+      else {
+        assert(operator.equals("and"));
+        numericalVolumeTransferred = leftOperand + rightOperand;
+      }
+    }
+    return numericalVolumeTransferred;
+  }
+
+  private boolean areVolumeTransferredUnitsNanoliters(
+    ResultSet resultSet,
+    String volumeTransferredString,
+    float numericalVolumeTransferred) throws SQLException {
+    // RNAi screens are always microliters
+    if (resultSet.getString("screen_type").equals("RNAi")) {
+      return false;
+    }
+    if (volumeTransferredString.contains("nl")) {
+      return true;
+    }
+    if (volumeTransferredString.contains("nL")) {
+      return true;
+    }
+    if (volumeTransferredString.contains("ul")) {
+      return false;
+    }
+    if (volumeTransferredString.contains("uL")) {
+      return false;
+    }
+    return numericalVolumeTransferred > 10;
   }
 
   // FROM GROUP DISCUSSION:
@@ -232,11 +307,13 @@ public class ScreenDBLibraryScreeningSynchronizer
   {
     String estimatedFinalScreenConcentrationString = resultSet.getString("est_final_screen_conc");
     BigDecimal estimatedFinalScreenConcentration = null;
-    if (estimatedFinalScreenConcentrationString.contains("13")) {
-      estimatedFinalScreenConcentration = new BigDecimal(13);
-    }
-    else if (estimatedFinalScreenConcentrationString.contains("20")) {
-      estimatedFinalScreenConcentration = new BigDecimal(20);
+    if (estimatedFinalScreenConcentrationString != null) {
+      if (estimatedFinalScreenConcentrationString.contains("13")) {
+        estimatedFinalScreenConcentration = new BigDecimal(13);
+      }
+      else if (estimatedFinalScreenConcentrationString.contains("20")) {
+        estimatedFinalScreenConcentration = new BigDecimal(20);
+      }
     }
     screening.setEstimatedFinalScreenConcentrationInMoles(
       estimatedFinalScreenConcentration);
