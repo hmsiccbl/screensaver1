@@ -192,6 +192,10 @@ public class ScreenDBLibraryScreeningSynchronizer
   //   have uL as unit. The report includes a worksheet with all visits with 
   //   unitless values.
   //
+  //   FURTHER COMMENT FROM SU: If it helps, you can also use the rule that RNAi
+  //   screens are always going to be uL quantities, because transfers are always
+  //   done with tips and not pin arrays. 
+  //
   //   3. Products and Sums for Volume of Compound Transferred: For the 
   //   products, such as "2 X 40nL", 8 out of 28 have a "Number of Replicates" 
   //   that matches the unitless multiplicand. This is not a great match, so I 
@@ -218,18 +222,24 @@ public class ScreenDBLibraryScreeningSynchronizer
     screening.setMicroliterVolumeTransferedPerWell(microliterVolumeTransferedPerWell);
   }
 
-  // TODO: synchronize est final screen concentration properly
-  //
   // FROM GROUP DISCUSSION:
   //   1. Estimated Final Screen Concentration: For the 4 sensible values that 
   //   we have, I will move these two the comments section (with date, 
   //   initials, and an explanation of what happened.) I will take the units to 
   //   be nM (for values 13 and 20).
-  private void synchronizeEstimatedFinalScreenConcentration(ResultSet resultSet, LibraryScreening screening) throws SQLException
+  private void synchronizeEstimatedFinalScreenConcentration(
+    ResultSet resultSet, LibraryScreening screening) throws SQLException
   {
     String estimatedFinalScreenConcentrationString = resultSet.getString("est_final_screen_conc");
     BigDecimal estimatedFinalScreenConcentration = null;
-    screening.setEstimatedFinalScreenConcentrationInMoles(estimatedFinalScreenConcentration);
+    if (estimatedFinalScreenConcentrationString.contains("13")) {
+      estimatedFinalScreenConcentration = new BigDecimal(13);
+    }
+    else if (estimatedFinalScreenConcentrationString.contains("20")) {
+      estimatedFinalScreenConcentration = new BigDecimal(20);
+    }
+    screening.setEstimatedFinalScreenConcentrationInMoles(
+      estimatedFinalScreenConcentration);
   }
 
   private void synchronizeAssayProtocolType(ResultSet resultSet, LibraryScreening screening) throws SQLException
