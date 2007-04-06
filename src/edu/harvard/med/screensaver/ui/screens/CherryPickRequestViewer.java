@@ -89,6 +89,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     "Library Plate", 
     "Source Well", 
     "Source Copy", 
+    "Vendor ID",
     "Gene", 
     "Entrez ID", 
     "Entrez Symbol", 
@@ -100,6 +101,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     { "Library Plate", "Source Well" }, 
     { "Source Well" }, 
     { "Library Plate" }, 
+    { "Library Plate", "Source Well" }, 
     { "Library Plate", "Source Well" }, 
     { "Library Plate", "Source Well" }, 
     { "Library Plate", "Source Well" }, 
@@ -354,6 +356,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
         row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getSourceWell().getPlateNumber().toString());
         row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getSourceWell().getWellName());
         row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getSourceCopy() != null ? cherryPick.getSourceCopy().getName() : "");
+        row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getSourceWell().getVendorIdentifier());
         Gene gene = cherryPick.getSourceWell().getGene();
         if (gene != null) {
           row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], gene.getGeneName());
