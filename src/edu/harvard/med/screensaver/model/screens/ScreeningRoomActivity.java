@@ -80,6 +80,9 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
     _dateCreated = truncateDate(dateCreated);
     _dateOfActivity = truncateDate(dateOfActivity);
     // TODO: protect against race condition
+    //   one way we could do this is by adding a screeningRoomActivityCount to Screen. then two
+    //   concurrent threads adding SRAs would modify the Screen, the Screen version would not
+    //   match, and you would get your ConcurrentModException. -s
     _ordinal = _screen.getScreeningRoomActivities().size();
     if (!_screen.getScreeningRoomActivities().add(this)) {
       throw new DuplicateEntityException(_screen, this);
