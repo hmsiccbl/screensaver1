@@ -259,6 +259,11 @@ TODO:
 			<t:panelGrid id="viewScreenerCherryPicks" columns="1"
 				rendered="#{!empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks}">
 
+				<t:outputText
+					value="WARNING: Cherry pick allowance has been exceeded! (#{cherryPickRequestViewer.cherryPickRequest.cherryPickAllowanceUsed} > #{cherryPickRequestViewer.cherryPickRequest.cherryPickAllowance})"
+					rendered="#{!cherryPickRequestViewer.cherryPickRequest.mapped && cherryPickRequestViewer.cherryPickRequest.cherryPickAllowanceUsed > cherryPickRequestViewer.cherryPickRequest.cherryPickAllowance}"
+					styleClass="errorMessage" />
+
 				<t:panelGroup id="screenerCherryPicksCommandPanel"
 					styleClass="commandPanel"
 					rendered="#{cherryPickRequestViewer.editable}">

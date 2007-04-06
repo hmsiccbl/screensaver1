@@ -276,12 +276,12 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   {
     return _cherryPickRequest.getScreenerCherryPicks().size();
   }
-
+  
   public int getLabCherryPickCount()
   {
     return _cherryPickRequest.getLabCherryPicks().size();
   }
-
+  
   public TableSortManager getLabCherryPicksSortManager()
   {
     if (_labCherryPicksSortManager == null) {

@@ -26,6 +26,7 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
 
 import org.apache.log4j.Logger;
 
@@ -184,7 +185,7 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
           Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
           screen.setScreenType(ScreenType.RNAI);
           RNAiCherryPickRequest rnaiCherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
-          Set<WellKey> actualDuplexCherryPickWellKeys = createCherryPicksForWells(rnaiCherryPickRequest, 
+          Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest, 
                                                                                   new WellKey(1, "A01"));
           TreeSet<WellKey> expectedDuplexCherryPickWellKeys = new TreeSet<WellKey>();
           expectedDuplexCherryPickWellKeys.add(new WellKey(2, "A01"));
@@ -202,7 +203,7 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
           Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(2);
           screen.setScreenType(ScreenType.RNAI);
           RNAiCherryPickRequest rnaiCherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
-          Set<WellKey> actualDuplexCherryPickWellKeys = createCherryPicksForWells(rnaiCherryPickRequest, 
+          Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest, 
                                                                                   new WellKey(1, "A01"),
                                                                                   new WellKey(6, "A01"));
           TreeSet<WellKey> expectedDuplexCherryPickWellKeys = new TreeSet<WellKey>();
@@ -225,7 +226,7 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
           Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(31);
           screen.setScreenType(ScreenType.RNAI);
           RNAiCherryPickRequest rnaiCherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
-          Set<WellKey> actualDuplexCherryPickWellKeys = createCherryPicksForWells(rnaiCherryPickRequest, 
+          Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest, 
                                                                                   new WellKey(1, "B02"));
           TreeSet<WellKey> expectedDuplexCherryPickWellKeys = new TreeSet<WellKey>();
           expectedDuplexCherryPickWellKeys.add(new WellKey(2, "A02"));
@@ -243,7 +244,7 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
           Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(4);
           screen.setScreenType(ScreenType.RNAI);
           RNAiCherryPickRequest rnaiCherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
-          Set<WellKey> actualDuplexCherryPickWellKeys = createCherryPicksForWells(rnaiCherryPickRequest, 
+          Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest, 
                                                                                   new WellKey(6, "B02"));
           TreeSet<WellKey> expectedDuplexCherryPickWellKeys = new TreeSet<WellKey>();
           expectedDuplexCherryPickWellKeys.add(new WellKey(7, "A02"));
@@ -260,7 +261,45 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
     });
   }
   
-  private Set<WellKey> createCherryPicksForWells(RNAiCherryPickRequest rnaiCherryPickRequest, WellKey... wellKeys)
+  /**
+   * Note that we're test w/o creating assay plates for the lab cherry picks.  This is intentional.
+   */
+  public void testCherryPickAllowance()
+  {
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
+        screen.setScreenType(ScreenType.RNAI);
+        RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
+        dao.persistEntity(CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, 384));
+
+        for (int plateOrdinal = 0; plateOrdinal < 6; ++plateOrdinal) {
+          for (int attempt = 0; attempt <= plateOrdinal; ++attempt) {
+            WellKey[] allWellsOnPlate = new WellKey[Well.PLATE_COLUMNS * Well.PLATE_ROWS];
+            int i = 0;
+            for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
+              for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
+                WellKey wellKey = new WellKey(plateOrdinal + 50001, iRow, iCol);
+                Well well = dao.findWell(wellKey);
+                new ScreenerCherryPick(cherryPickRequest, well);
+                allWellsOnPlate[i++] = wellKey;
+              }
+            }
+          }
+        }
+        dao.persistEntity(cherryPickRequest); // avoid hib errors on flush
+        dao.persistEntity(screen); // avoid hib errors on flush
+
+        assertEquals("cherry pick allowance used", 384 * 6, cherryPickRequest.getCherryPickAllowanceUsed());
+      }
+    });
+  }
+  
+  
+  
+  private Set<WellKey> createLabCherryPicksForPoolWells(RNAiCherryPickRequest rnaiCherryPickRequest, WellKey... wellKeys)
   {
     for (WellKey wellKey : wellKeys) {
       new ScreenerCherryPick(rnaiCherryPickRequest, dao.findWell(wellKey));

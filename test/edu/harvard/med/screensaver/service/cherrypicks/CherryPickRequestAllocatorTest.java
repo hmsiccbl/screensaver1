@@ -185,7 +185,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
   
   // static util methods
   
-  static Library makeRNAiDuplexLibrary(String name, int startPlate, int endPlate, int wellsPerPlate)
+  public static Library makeRNAiDuplexLibrary(String name, int startPlate, int endPlate, int wellsPerPlate)
   {
     Library library = new Library(name, name, ScreenType.RNAI, LibraryType.COMMERCIAL, startPlate, endPlate);
     NEXT_PLATE:

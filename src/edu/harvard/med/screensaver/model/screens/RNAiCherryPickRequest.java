@@ -51,6 +51,7 @@ public class RNAiCherryPickRequest extends CherryPickRequest
                                          Well.MAX_WELL_ROW));
 
   private static final PlateType RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.EPPENDORF;
+  private static final int CHERRY_PICK_SILENCING_AGENT_ALLOWANCE = 500 * 4;
 
 
   // instance data members
@@ -95,6 +96,22 @@ public class RNAiCherryPickRequest extends CherryPickRequest
     return RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE;
   }
 
+  @DerivedEntityProperty
+  public int getCherryPickAllowance()
+  {
+    return CHERRY_PICK_SILENCING_AGENT_ALLOWANCE;
+  }
+  
+  @DerivedEntityProperty
+  public int getCherryPickAllowanceUsed()
+  {
+    int silencingAgentsUsed = 0;
+    for (ScreenerCherryPick screenerCherryPick : getScreenerCherryPicks()) {
+      silencingAgentsUsed += screenerCherryPick.getScreenedWell().getSilencingReagents().size();
+    }
+    return silencingAgentsUsed;
+  }
+  
   /**
    * Get the set of RNAi cherry pick assay
    *
