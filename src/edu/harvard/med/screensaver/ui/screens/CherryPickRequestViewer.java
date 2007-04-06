@@ -55,19 +55,22 @@ import org.apache.log4j.Logger;
 
 public class CherryPickRequestViewer extends AbstractBackingBean
 {
-  private static final String VALIDATE_SELECTED_PLATES_FOR_LIQUID_TRANSFER = "for_liquid_transfer";
 
 
-  private static final String VALIDATE_SELECTED_PLATES_FOR_DOWNLOAD = "for_download";
+  // static members
 
+  private static Logger log = Logger.getLogger(CherryPickRequestViewer.class);
 
   private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.CHERRY_PICK_ADMIN;
 
+  private static final String VALIDATE_SELECTED_PLATES_FOR_LIQUID_TRANSFER = "for_liquid_transfer";
+  private static final String VALIDATE_SELECTED_PLATES_FOR_DOWNLOAD = "for_download";
 
   private static final String[] SCREENER_CHERRY_PICKS_TABLE_COLUMNS = { 
     "Library Plate", 
     "Screened Well", 
     "Source Wells",
+    "Vendor ID",
     "Gene", 
     "Entrez ID", 
     "Entrez Symbol", 
@@ -76,6 +79,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     { "Screened Well" }, 
     { "Library Plate" }, 
     { "Library Plate", "Screened Well" }, 
+    {},
     {}, 
     {}, 
     {}, 
@@ -112,12 +116,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     }
   }
 
-
-  // static members
-
-  private static Logger log = Logger.getLogger(CherryPickRequestViewer.class);
-
-
+  
   // instance data members
   
   private DAO _dao;
@@ -144,8 +143,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private UISelectOneEntityBean<ScreensaverUser> _liquidTransferPerformedBy;
   private Date _dateOfLiquidTransfer;
   private String _liquidTransferComments;
-
-
 
   
   // public constructors and methods
@@ -307,6 +304,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
         row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getScreenedWell().getPlateNumber());
         row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getScreenedWell().getWellName());
         row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getLabCherryPicks().size());
+        row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getScreenedWell().getVendorIdentifier());
         Gene gene = cherryPick.getScreenedWell().getGene();
         if (gene != null) {
           row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], gene.getGeneName());
