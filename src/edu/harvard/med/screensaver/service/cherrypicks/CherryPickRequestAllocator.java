@@ -70,7 +70,6 @@ public class CherryPickRequestAllocator
       {
         CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
         validateAllocationBusinessRules(cherryPickRequest);
-        final Set<LabCherryPick> unfulfillableLabCherryPicks = new HashSet<LabCherryPick>();
         for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
           if (!doAllocate(labCherryPick)) {
             unfulfillableLabCherryPicks.add(labCherryPick);

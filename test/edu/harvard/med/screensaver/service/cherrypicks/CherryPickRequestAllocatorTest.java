@@ -60,7 +60,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         // note: as a test-writing convenience, we create a library plate for
-        // each assertion (below), since we can set the starting volume each
+        // each assertion (below), since we can set the starting volume of each
         // plate independently
         
         Library library = makeRNAiDuplexLibrary("library1", 1, 6, 1);
@@ -171,10 +171,15 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     // allocation 3 is fulfillable (again) by copy 1
   }
   
-  public void testAllocateSingleAssayPlate()
+  public void testAllocateSingleLabCherryPick()
   {
     fail("not implemented");
-//    cherryPickRequestAllocator.allocate(assayPlate);
+    // cherryPickRequestAllocator.allocate(labCherryPick);
+  }
+  
+  public void testDeallocate()
+  {
+    fail("not implemented");
   }
   
   

@@ -14,9 +14,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -57,6 +59,9 @@ public class CherryPickRequestPlateMapFilesBuilder
     "Volume"};
 
 
+  private static final String INSTRUCTIONS_FILE_NAME = "Instructions.txt";
+
+
   // static members
 
   private static Logger log = Logger.getLogger(CherryPickRequestPlateMapFilesBuilder.class);
@@ -95,6 +100,7 @@ public class CherryPickRequestPlateMapFilesBuilder
     ZipOutputStream zipOut = new ZipOutputStream(zipOutRaw);
     CSVPrintWriter csv = new CSVPrintWriter(new OutputStreamWriter(zipOut));
     MultiMap/*<String,SortedSet<CherryPick>>*/ files2CherryPicks = buildCherryPickFiles(cherryPickRequest, forPlates);
+    buildInstructions(cherryPickRequest, zipOut);
     for (Iterator iter = files2CherryPicks.keySet().iterator(); iter.hasNext();) {
       String fileName = (String) iter.next();
       ZipEntry zipEntry = new ZipEntry(fileName);
@@ -110,6 +116,88 @@ public class CherryPickRequestPlateMapFilesBuilder
   }
 
   @SuppressWarnings("unchecked")
+  private void buildInstructions(CherryPickRequest cherryPickRequest,
+                                 ZipOutputStream zipOut) 
+    throws IOException
+  {
+
+    ZipEntry zipEntry = new ZipEntry(INSTRUCTIONS_FILE_NAME);
+    zipOut.putNextEntry(zipEntry);
+    PrintWriter writer = new PrintWriter(zipOut);
+
+    writer.println("This zip file contains plate mappings for Cherry Pick Request " + cherryPickRequest.getEntityId());
+    writer.println();
+
+    {
+      StringBuilder buf = new StringBuilder();
+      for (CherryPickAssayPlate assayPlate : cherryPickRequest.getCherryPickAssayPlates()) {
+        if (!assayPlate.isPlated() && !assayPlate.isFailed()) {
+          buf.append('\t').
+          append(assayPlate.getName()).
+          append("\n");
+        }
+      }
+      if (buf.length() > 0) {
+        writer.println("The following cherry pick plates HAVE NOT YET been created:");
+        writer.print(buf.toString());
+        writer.println();
+      }
+    }      
+
+    if (cherryPickRequest.isPlated()) {
+      StringBuilder buf = new StringBuilder();
+      for (CherryPickAssayPlate assayPlate : cherryPickRequest.getCherryPickAssayPlates()) {
+        if (assayPlate.isPlated()) {
+          buf.append('\t').
+          append(assayPlate.getName()).
+          append(": created on ").
+          append(assayPlate.getCherryPickLiquidTransfer().getDateOfActivity()).
+          append(" by ").
+          append(assayPlate.getCherryPickLiquidTransfer().getPerformedBy().getFullNameFirstLast()).
+          append('\n');
+        }
+      }
+      if (buf.length() > 0) {
+        writer.println("The following cherry pick plates HAVE ALREADY been created:");
+        writer.print(buf.toString());
+        writer.println();
+      }
+    }
+    
+    Map<CherryPickAssayPlate,Integer> platesRequiringReload = 
+      cherryPickRequest.getAssayPlatesRequiringSourcePlateReload();
+    if (platesRequiringReload.size() > 0) {
+      writer.println("WARNING: Some cherry pick plates will be created from the same source plate!");
+      writer.println("You will need to reload one or more source plates for each of the following cherry pick plates:");
+      for (CherryPickAssayPlate assayPlate : platesRequiringReload.keySet()) {
+        writer.println("\tCherry pick plate '" + assayPlate.getName() + 
+                       "' requires reload of source plate " + platesRequiringReload.get(assayPlate));
+      }
+      writer.println();
+    }
+    
+    {
+      StringBuilder buf = new StringBuilder();
+      MultiMap sourcePlateTypesForEachAssayPlate = getSourcePlateTypesForEachAssayPlate(cherryPickRequest);
+      for (CherryPickAssayPlate assayPlate : cherryPickRequest.getActiveCherryPickAssayPlates()) {
+        Set<PlateType> sourcePlateTypes = (Set<PlateType>) sourcePlateTypesForEachAssayPlate.get(assayPlate.getName());
+        if (sourcePlateTypes.size() > 1) {
+          buf.append(assayPlate.getName()).append("\n");
+        }
+      }
+      if (buf.length() > 0) {
+        writer.println("WARNING: Some cherry pick plates will be created from multiple source plates of non-uniform plate types!");
+        writer.println("The following cherry pick plates are specified across multiple files:");
+        writer.print(buf.toString());
+        writer.println();
+      }
+    }
+    
+    writer.flush();
+  }
+
+
+  @SuppressWarnings("unchecked")
   /**
    * Normally, we create 1 file per assay plate. However, in the case where an
    * assay plate is comprised of wells from library copy plates that have
@@ -121,7 +209,7 @@ public class CherryPickRequestPlateMapFilesBuilder
   private MultiMap/*<String,SortedSet<CherryPick>>*/ buildCherryPickFiles(CherryPickRequest cherryPickRequest,
                                                                           Set<CherryPickAssayPlate> forPlates)
   {
-    MultiMap assayPlate2SourcePlateTypes = getSourcePlatesTypesForEachAssayPlate(cherryPickRequest);
+    MultiMap assayPlate2SourcePlateTypes = getSourcePlateTypesForEachAssayPlate(cherryPickRequest);
     
     MultiMap result = MultiValueMap.decorate(new TreeMap<String,SortedSet<LabCherryPick>>(),
                                              new Factory() 
@@ -132,6 +220,7 @@ public class CherryPickRequestPlateMapFilesBuilder
       if (cherryPick.isAllocated()) {
         CherryPickAssayPlate assayPlate = cherryPick.getAssayPlate();
         if (forPlates != null && !forPlates.contains(assayPlate)) {
+          // skip plates not requested
           continue;
         }
         Set<PlateType> sourcePlateTypes = (Set<PlateType>) assayPlate2SourcePlateTypes.get(assayPlate.getName());
@@ -142,11 +231,11 @@ public class CherryPickRequestPlateMapFilesBuilder
     return result;
   }
 
-  private String makeFilename(LabCherryPick cherryPick, int sourcePlates)
+  private String makeFilename(LabCherryPick cherryPick, int distinctSourcePlateTypes)
   {
     StringBuilder fileName = new StringBuilder(cherryPick.getAssayPlate().getName());
     
-    if (sourcePlates > 1) {
+    if (distinctSourcePlateTypes > 1) {
       fileName.append(' ');
       fileName.append(cherryPick.getSourceCopy().getCopyInfo(cherryPick.getSourceWell().getPlateNumber()).getPlateType().toString());
     }
@@ -161,7 +250,7 @@ public class CherryPickRequestPlateMapFilesBuilder
     return fileName.toString();
   }
 
-  private MultiMap getSourcePlatesTypesForEachAssayPlate(CherryPickRequest cherryPickRequest)
+  private MultiMap getSourcePlateTypesForEachAssayPlate(CherryPickRequest cherryPickRequest)
   {
     MultiMap sourcePlate2PlateTypes = MultiValueMap.decorate(new HashMap(),
                                                              new Factory() 

@@ -49,7 +49,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   private Integer _ordinal;
   private ScreensaverUser _performedBy;
   private Set<EquipmentUsed> _equipmentUsed = new HashSet<EquipmentUsed>();
-  private BigDecimal _microliterVolumeTransferedPerWell;
+  private BigDecimal _microliterVolumeTransferedPerWell; // spelling error! "transferred"
   private Date _dateCreated;
   private Date _dateOfActivity;
   private String _comments;

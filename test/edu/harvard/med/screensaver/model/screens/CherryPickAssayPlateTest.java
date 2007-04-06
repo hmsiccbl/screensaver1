@@ -31,10 +31,5 @@ public class CherryPickAssayPlateTest extends AbstractEntityInstanceTest
   {
     super(CherryPickAssayPlate.class);
   }
-  
-  public void testIsFailed()
-  {
-    fail("not implemented");
-  }
 }
 

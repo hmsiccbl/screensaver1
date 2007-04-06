@@ -188,6 +188,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
     return _cherryPickLiquidTransfer != null && _cherryPickLiquidTransfer.isSuccessful();
   }
 
+  @DerivedEntityProperty
   public boolean isFailed()
   {
     return _cherryPickLiquidTransfer != null && !_cherryPickLiquidTransfer.isSuccessful();
@@ -256,6 +257,16 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   public PlateType getAssayPlateType()
   {
     return _plateType;
+  }
+  
+  @DerivedEntityProperty
+  public Set<Integer> getSourcePlates()
+  {
+    Set<Integer> sourcePlates = new HashSet<Integer>();
+    for (LabCherryPick labCherryPick : _labCherryPicks) {
+      sourcePlates.add(labCherryPick.getSourceWell().getPlateNumber());
+    }
+    return sourcePlates;
   }
 
   public int compareTo(CherryPickAssayPlate that)

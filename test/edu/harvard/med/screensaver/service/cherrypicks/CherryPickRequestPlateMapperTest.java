@@ -107,6 +107,45 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
             assertColumnIsEmpty(cherryPickRequest, lastPlate, iCol);
           }
         }
+        
+        assertFalse(cherryPickRequest.isSourcePlateReloadRequired());
+      }
+    });
+  }
+  
+  /**
+   * Tests the case where the wells from a single source plate are too numerous
+   * to fit on even an empty assay plate (in which case we must map these wells
+   * to two or more assay plates)
+   */
+  public void testTooManySourcePlateWellsForAssayPlate()
+  {
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction() {
+        Library duplexLibrary = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes library", 1, 1, 384);
+        makeLibraryCopy(duplexLibrary, "C", 10);
+        dao.persistEntity(duplexLibrary);
+
+        CherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createCherryPickRequest(1, 10);
+        ScreenerCherryPick dummyScreenerCherryPick = new ScreenerCherryPick(cherryPickRequest, 
+                                                                            dao.findWell(new WellKey(1, "A01")));
+        cherryPickRequest.setRandomizedAssayPlateLayout(false);
+        Set<Integer> emptyColumns = new HashSet<Integer>();
+        emptyColumns.addAll(Arrays.asList(4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22));
+        cherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(emptyColumns);
+        addLabCherryPicks(dummyScreenerCherryPick, 1, "A01", "B04"); // enough to fill 2 assay plates completely, plus a 3rd, partially
+        assertEquals(28, cherryPickRequest.getLabCherryPicks().size());
+        dao.persistEntity(cherryPickRequest.getScreen());
+        cherryPickRequestAllocator.allocate(cherryPickRequest);
+        cherryPickRequestPlateMapper.generatePlateMapping(cherryPickRequest);
+
+        assertEquals("assay plates count", 3, cherryPickRequest.getCherryPickAssayPlates().size());
+        assertLabCherryPicksOnAssayPlate(cherryPickRequest, 0, 11, 0);
+        assertLabCherryPicksOnAssayPlate(cherryPickRequest, 12, 23, 1);
+        assertLabCherryPicksOnAssayPlate(cherryPickRequest, 24, 27, 2);
+        
+        assertTrue(cherryPickRequest.isSourcePlateReloadRequired());
       }
     });
   }

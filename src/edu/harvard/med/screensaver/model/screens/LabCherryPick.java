@@ -342,6 +342,7 @@ public class LabCherryPick extends AbstractEntity
     return _assayPlate != null && _assayPlate.isPlated();
   }
 
+  @DerivedEntityProperty
   public boolean isFailed()
   {
     return _assayPlate != null && _assayPlate.isFailed();

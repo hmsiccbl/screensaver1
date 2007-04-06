@@ -9,11 +9,11 @@
 
 package edu.harvard.med.screensaver.service.cherrypicks;
 
-import junit.framework.TestCase;
+import edu.harvard.med.screensaver.AbstractSpringTest;
 
 import org.apache.log4j.Logger;
 
-public class CherryPickRequestPlateMapFilesBuilderTest extends TestCase
+public class CherryPickRequestPlateMapFilesBuilderTest extends AbstractSpringTest
 {
   // static members
 

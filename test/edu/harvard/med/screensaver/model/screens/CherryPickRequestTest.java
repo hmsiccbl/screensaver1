@@ -59,6 +59,11 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest
                    activeAssayPlate.getAttemptOrdinal().intValue());
     }
   }
+  
+  public void testAssayPlateRequiringSourcePlateReload()
+  {
+    fail("not implemented");
+  }
 
 }
 

@@ -82,13 +82,12 @@ public class CherryPickRequestPlateMapper
     int plateIndex = 0;
     CherryPickAssayPlate assayPlate = null;
 
-    List<LabCherryPick> nextIndivisibleBlock;
+    List<LabCherryPick> nextIndivisibleBlock = new ArrayList<LabCherryPick>();
     while (toBeMapped.size() > 0) {
       int toBeMappedCount = toBeMapped.size();
-      nextIndivisibleBlock = findNextIndivisibleBlock(toBeMapped);
-      if (nextIndivisibleBlock.size() > availableWellNamesMaster.size() ){
-        throw new BusinessRuleViolationException("there are more cherry picks from " + 
-                                                 "a single source plate than can fit on a single assay plate");
+
+      if (nextIndivisibleBlock.size() == 0) {
+        nextIndivisibleBlock = findNextIndivisibleBlock(toBeMapped, availableWellNamesMaster.size());
       }
 
       // create next plate, if necessary
@@ -113,9 +112,15 @@ public class CherryPickRequestPlateMapper
                           nextIndivisibleBlock,
                           availableWellNamesWorking);
     }
-
   }
 
+  /**
+   * Side-effects: nextIndivisibleBlock and availableWellNames are modified!
+   * @param assayPlate
+   * @param nextIndivisibleBlock
+   * @param availableWellNames
+   * @return
+   */
   private Map<LabCherryPick,Pair<Integer,WellName>> plateMapCherryPicks(CherryPickAssayPlate assayPlate,
                                                                         List<LabCherryPick> nextIndivisibleBlock,
                                                                         List<WellName> availableWellNames)
@@ -124,22 +129,31 @@ public class CherryPickRequestPlateMapper
     Map<LabCherryPick,Pair<Integer,WellName>> plateWellMapping = new HashMap<LabCherryPick,Pair<Integer,WellName>>();
     assert availableWellNames.size() >= nextIndivisibleBlock.size();
     Iterator<WellName> availableWellNamesIter = availableWellNames.iterator();
-    for (LabCherryPick cherryPick : nextIndivisibleBlock) {
+    for (Iterator nextIndivisibleBlockIter = nextIndivisibleBlock.iterator(); nextIndivisibleBlockIter.hasNext();) {
+      LabCherryPick cherryPick = (LabCherryPick) nextIndivisibleBlockIter.next();
+      
+      if (!availableWellNamesIter.hasNext()) {
+        // this can happen if there are more wells from a given source plate than can fit on a single assay plate;
+        // we have to split the source plate wells across multiple assay plates
+        break;
+      }
+      
       WellName assayWellName = availableWellNamesIter.next();
       cherryPick.setMapped(assayPlate,
                            assayWellName.getRowIndex(),
                            assayWellName.getColumnIndex());
       availableWellNamesIter.remove();
+      nextIndivisibleBlockIter.remove();
     }
     return plateWellMapping;
   }
 
-  private List<LabCherryPick> findNextIndivisibleBlock(SortedSet<LabCherryPick> toBeMapped)
+  private List<LabCherryPick> findNextIndivisibleBlock(SortedSet<LabCherryPick> toBeMapped, int maxSize)
   {
     List<LabCherryPick> block = new ArrayList<LabCherryPick>();
     Integer plateNumber = null;
     String copyName = null;
-    for (Iterator<LabCherryPick> iter = toBeMapped.iterator(); iter.hasNext();) {
+    for (Iterator<LabCherryPick> iter = toBeMapped.iterator(); iter.hasNext() && maxSize-- > 0;) {
       LabCherryPick cherryPick = (LabCherryPick) iter.next();
       if (plateNumber == null) {
         plateNumber = cherryPick.getSourceWell().getPlateNumber();

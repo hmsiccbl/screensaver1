@@ -29,7 +29,7 @@ public class PackageTestSuite extends TestSuite
   {
     addTestSuite(edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest.class);
     addTestSuite(edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapperTest.class);
-    addTestSuite(edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder.class);
+    addTestSuite(edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilderTest.class);
   }
 
 }

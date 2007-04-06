@@ -480,6 +480,11 @@ TODO:
 				<t:outputText value="<none>" styleClass="label"
 					rendered="#{!cherryPickRequestViewer.cherryPickRequest.mapped}" />
 
+				<t:outputText
+					value="WARNING: Some cherry pick plates will be created from the same source plate!  Be aware that you will need to reload one or more source plates."
+					rendered="#{cherryPickRequestViewer.cherryPickRequest.sourcePlateReloadRequired}"
+					styleClass="errorMessage" />
+
 				<t:message for="assayPlatesTable" styleClass="errorMessage" />
 				<t:dataTable id="assayPlatesTable" forceId="true"
 					var="assayPlateRow"
