@@ -38,6 +38,7 @@ import edu.harvard.med.screensaver.model.screens.InvalidCherryPickWellException;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
 import edu.harvard.med.screensaver.model.screens.Publication;
+import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
@@ -48,6 +49,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper;
+import edu.harvard.med.screensaver.service.libraries.rnai.LibraryPoolToDuplexWellMapper;
 import edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
@@ -99,6 +101,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   private CherryPickRequestAllocator _cherryPickRequestAllocator;
   private CherryPickRequestPlateMapper _cherryPickRequestPlateMapper;
   private CherryPickRequestPlateMapFilesBuilder _cherryPickRequestPlateMapFilesBuilder;
+  private LibraryPoolToDuplexWellMapper _libraryPoolToDuplexWellMapper;
 
 
   // public getters and setters
@@ -179,6 +182,11 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public void setCherryPickRequestPlateMapFilesBuilder(CherryPickRequestPlateMapFilesBuilder cherryPickRequestPlateMapFilesBuilder)
   {
     _cherryPickRequestPlateMapFilesBuilder = cherryPickRequestPlateMapFilesBuilder;
+  }
+
+  public void setLibraryPoolToDuplexWellMapper(LibraryPoolToDuplexWellMapper libraryPoolToDuplexWellMapper)
+  {
+    _libraryPoolToDuplexWellMapper = libraryPoolToDuplexWellMapper;
   }
 
   /* (non-Javadoc)
@@ -905,53 +913,14 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     return VIEW_CHERRY_PICK_REQUEST_ACTION_RESULT;
   }
 
-  private String addCherryPicksForWells(final CherryPickRequest cherryPickRequestIn,
-                                        final Set<Well> cherryPickCompoundWells)
-  {
-    try {
-      _dao.doInTransaction(new DAOTransaction() 
-      {
-        public void runTransaction()
-        {
-          CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
-          if (cherryPickRequest.isAllocated()) {
-            throw new BusinessRuleViolationException("cherry picks cannot be added to a cherry pick request that has already been allocated");
-          }
-          // TODO: enforce cherry pick size limits
-
-          // note: if combine these two loops, we get Hibernate "dup obj in session" exceptions...
-          for (Well well : cherryPickCompoundWells) {
-            _dao.reattachEntity(well);
-          }
-          for (Well well : cherryPickCompoundWells) {
-            new ScreenerCherryPick(cherryPickRequest, well);
-          }
-          cherryPickRequest.createLabCherryPicks();
-
-          // TODO: warn if the expected number of lab cherry picks was not created for the screener cherry picks
-        }
-      });
-      return viewCherryPickRequest(cherryPickRequestIn);
-    }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
-    }
-    catch (BusinessRuleViolationException e) {
-      showMessage("businessError", e.getMessage());
-    }
-    catch (InvalidCherryPickWellException e) {
-      showMessage("cherryPicks.invalidWell", e.getWell());
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
   @UIControllerMethod
-  public String addCherryPicksForCompoundWells(final CherryPickRequest cherryPickRequestIn,
-                                               final Set<Well> cherryPickCompoundWells)
+  public String addCherryPicksForWells(CherryPickRequest cherryPickRequest,
+                                       final Set<Well> cherryPickWells)
   {
-    logUserActivity("addCherryPicksForCompoundWells to " + cherryPickRequestIn);
-    return addCherryPicksForWells(cherryPickRequestIn, 
-                                  cherryPickCompoundWells);
+    logUserActivity("addCherryPicksForWells to " + cherryPickRequest);
+    return doAddCherryPicksForWells(cherryPickRequest,
+                                    cherryPickWells,
+                                    false);
   }
 
   @UIControllerMethod
@@ -959,48 +928,9 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                                            final Set<Well> cherryPickPoolWells)
   {
     logUserActivity("addCherryPicksForPoolWells to " + cherryPickRequestIn);
-    return addCherryPicksForWells(cherryPickRequestIn,
-                                  cherryPickPoolWells);
-  }
-
-  @UIControllerMethod
-  public String addCherryPicksForDuplexWells(final CherryPickRequest cherryPickRequestIn,
-                                             final Set<Well> duplexCherryPickWells)
-  {
-    logUserActivity("addCherryPicksForDuplexWells to " + cherryPickRequestIn);
-
-    try {
-      _dao.doInTransaction(new DAOTransaction() 
-      {
-        public void runTransaction()
-        {
-          CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reloadEntity(cherryPickRequestIn);
-          if (cherryPickRequest.isAllocated()) {
-            throw new BusinessRuleViolationException("cherry picks cannot be added to a cherry pick request that has already been allocated");
-          }
-          // note: if combine these two loops, we get Hibernate "dup obj in session" exceptions...
-          for (Well well : duplexCherryPickWells) {
-            _dao.reattachEntity(well);
-          }
-          for (Well well : duplexCherryPickWells) {
-            ScreenerCherryPick screenerCherryPick = new ScreenerCherryPick(cherryPickRequest, well);
-            new LabCherryPick(screenerCherryPick, well);
-          }
-          // TODO: enforce cherry pick size limits
-        }
-      });
-      return viewCherryPickRequest(cherryPickRequestIn);
-    }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
-    }
-    catch (BusinessRuleViolationException e) {
-      showMessage("businessError", e.getMessage());
-    }
-    catch (InvalidCherryPickWellException e) {
-      showMessage("cherryPicks.invalidWell", e.getWell());
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return doAddCherryPicksForWells(cherryPickRequestIn,
+                                    cherryPickPoolWells,
+                                    true);
   }
 
   @UIControllerMethod
@@ -1270,6 +1200,48 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
         _dao.persistEntity(liquidTransfer); // necessary?
       }
     });
+  }
+  
+  private String doAddCherryPicksForWells(final CherryPickRequest cherryPickRequestIn,
+                                          final Set<Well> cherryPickWells,
+                                          final boolean arePoolWells)
+  {
+    assert !arePoolWells || cherryPickRequestIn.getScreen().getScreenType().equals(ScreenType.RNAI);
+                                                                                   
+    try {
+      _dao.doInTransaction(new DAOTransaction() 
+      {
+        public void runTransaction()
+        {
+          CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
+          if (cherryPickRequest.isAllocated()) {
+            throw new BusinessRuleViolationException("cherry picks cannot be added to a cherry pick request that has already been allocated");
+          }
+
+          for (Well well : cherryPickWells) {
+            well = (Well) _dao.reloadEntity(well);
+            ScreenerCherryPick screenerCherryPick = new ScreenerCherryPick(cherryPickRequest, well);
+            if (!arePoolWells) {
+              new LabCherryPick(screenerCherryPick, well);
+            }
+          }
+          if (arePoolWells) {
+            _libraryPoolToDuplexWellMapper.map((RNAiCherryPickRequest) cherryPickRequest);
+          }
+        }
+      });
+      return viewCherryPickRequest(cherryPickRequestIn);
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    catch (BusinessRuleViolationException e) {
+      showMessage("businessError", e.getMessage());
+    }
+    catch (InvalidCherryPickWellException e) {
+      showMessage("cherryPicks.invalidWell", e.getWell());
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 }
 

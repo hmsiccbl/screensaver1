@@ -673,11 +673,9 @@ public class ComplexDAOTest extends AbstractSpringTest
         Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(screenNumber); 
         screen.setScreenType(ScreenType.RNAI);
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
-        new ScreenerCherryPick(cherryPickRequest, poolWell1);
-        new ScreenerCherryPick(cherryPickRequest, poolWell2);
-        cherryPickRequest.createLabCherryPicks();
-        assertEquals("created lab cherry picks", 2, cherryPickRequest.getLabCherryPicks().size());
-        dao.persistEntity(cherryPickRequest); // why do we need this, if we're also persisting the screen?!
+        new LabCherryPick(new ScreenerCherryPick(cherryPickRequest, poolWell1), poolWell1);
+        new LabCherryPick(new ScreenerCherryPick(cherryPickRequest, poolWell2), poolWell2);
+        dao.persistEntity(cherryPickRequest); // TODO: why do we need this, if we're also persisting the screen?!
         dao.persistEntity(screen);
         result[0] = cherryPickRequest;
       }
@@ -1060,8 +1058,4 @@ public class ComplexDAOTest extends AbstractSpringTest
       }
     });
   }
-  
-  
-
 }
-

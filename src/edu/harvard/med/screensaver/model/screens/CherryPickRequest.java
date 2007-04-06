@@ -30,7 +30,6 @@ import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.cherrypicks.LabCherryPickColumnMajorOrderingComparator;
 
@@ -247,13 +246,6 @@ public abstract class CherryPickRequest extends AbstractEntity
 
   @DerivedEntityProperty
   abstract public PlateType getAssayPlateType();
-
-  public void createLabCherryPicks()
-  {
-    for (ScreenerCherryPick screenerCherryPick : _screenerCherryPicks) {
-      new LabCherryPick(screenerCherryPick, screenerCherryPick.getScreenedWell());
-    }
-  }
   
   @DerivedEntityProperty
   abstract public int getCherryPickAllowance();

@@ -294,6 +294,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return _labCherryPicksSortManager;
   }
   
+  public boolean isRnaiScreen()
+  {
+    return _cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI);
+  }
+  
   public DataModel getScreenerCherryPicksDataModel()
   {
     if (_screenerCherryPicksDataModel == null) {
@@ -482,7 +487,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return _screensController.viewScreen(_cherryPickRequest.getScreen(), null);
   }
   
-  public String addCompoundCherryPicks()
+  public String addCherryPicks()
   {
     PlateWellListParserResult result = _plateWellListParser.lookupWellsFromPlateWellList(_cherryPicksInput);
     // TODO: handle errors properly
@@ -493,8 +498,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       showMessage("cherryPicks.parseError");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    return _screensController.addCherryPicksForCompoundWells(_cherryPickRequest,
-                                                             result.getWells());
+    return _screensController.addCherryPicksForWells(_cherryPickRequest,
+                                                     result.getWells());
   }
   
   public String addPoolCherryPicks()
@@ -510,21 +515,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     }
     return _screensController.addCherryPicksForPoolWells(_cherryPickRequest,
                                                          result.getWells());
-  }
-  
-  public String addDuplexCherryPicks()
-  {
-    PlateWellListParserResult result = _plateWellListParser.lookupWellsFromPlateWellList(_cherryPicksInput);
-    // TODO: handle errors properly
-    if (result.getFatalErrors().size() > 0 ||
-      result.getSyntaxErrors().size() > 0 ||
-      result.getWellsNotFound().size() > 0 ||
-      result.getWells().size() == 0) {
-      showMessage("cherryPicks.parseError");
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    return _screensController.addCherryPicksForDuplexWells(_cherryPickRequest,
-                                                           result.getWells());
   }
   
   public String deleteCherryPickRequest()

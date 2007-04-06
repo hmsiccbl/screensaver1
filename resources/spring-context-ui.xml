@@ -319,6 +319,9 @@
     <property
       name="cherryPickRequestPlateMapFilesBuilder"
       ref="cherryPickRequestPlateMapFilesBuilder"/>
+    <property
+      name="libraryPoolToDuplexWellMapper"
+      ref="libraryPoolToDuplexWellMapper"/>
     <aop:scoped-proxy/>
   </bean>
 

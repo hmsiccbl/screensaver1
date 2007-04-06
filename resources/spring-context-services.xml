@@ -109,4 +109,12 @@
     <constructor-arg ref="dao"/>
   </bean>
   
+  <bean
+    id="libraryPoolToDuplexWellMapper"
+    class="edu.harvard.med.screensaver.service.libraries.rnai.LibraryPoolToDuplexWellMapper"
+    scope="singleton">
+    <constructor-arg ref="dao"/>
+  </bean>
+  
+  
 </beans>

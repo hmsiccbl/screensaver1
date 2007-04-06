@@ -134,16 +134,12 @@ public interface ScreensController
   public String viewCherryPickRequest(CherryPickRequest cherryPickRequestIn);
 
   @UIControllerMethod
-  public String addCherryPicksForCompoundWells(CherryPickRequest cherryPickRequest,
-                                               Set<Well> screenerCherryPickWells);
+  public String addCherryPicksForWells(CherryPickRequest cherryPickRequest,
+                                             Set<Well> labCherryPickWells);
 
   @UIControllerMethod
   public String addCherryPicksForPoolWells(CherryPickRequest cherryPickRequest,
                                            Set<Well> labCherryPickWells);
-
-  @UIControllerMethod
-  public String addCherryPicksForDuplexWells(CherryPickRequest cherryPickRequest,
-                                             Set<Well> labCherryPickWells);
 
   @UIControllerMethod
   public String deleteAllScreenerCherryPicks(CherryPickRequest cherryPickRequest);

@@ -239,20 +239,17 @@ TODO:
 				<t:outputLabel for="cherryPicksInput"
 					value="Specify cherry picks as plate/well pairs:"
 					styleClass="label" />
-				<t:inputTextarea id="cherryPicksInput" rows="20"
+				<t:inputTextarea id="cherryPicksInput" rows="20" cols="30"
 					value="#{cherryPickRequestViewer.cherryPicksInput}"
 					styleClass="inputText" />
-				<%--t:commandButton id="addCherryPicksCommand" value="Add Cherry Picks"
-					action="#{cherryPickRequestViewer.addCompoundCherryPicks}"
-					rendered="#{cherryPickRequestViewer.cherryPickRequest.screenType == ScreenType.SMALL_COMPOUND}"
-					styleClass="command" /--%>
 				<t:commandButton id="addPoolCherryPicksCommand"
 					value="Add Cherry Picks (Pool Wells)"
 					action="#{cherryPickRequestViewer.addPoolCherryPicks}"
+					rendered="#{cherryPickRequestViewer.rnaiScreen}"
 					styleClass="command" />
-				<t:commandButton id="addDuplexCherryPicksCommand"
-					value="Add Cherry Picks (Duplex Wells)"
-					action="#{cherryPickRequestViewer.addDuplexCherryPicks}"
+				<t:commandButton id="addCherryPicksCommand"
+					value="Add Cherry Picks"
+					action="#{cherryPickRequestViewer.addCherryPicks}"
 					styleClass="command" />
 			</t:panelGrid>
 

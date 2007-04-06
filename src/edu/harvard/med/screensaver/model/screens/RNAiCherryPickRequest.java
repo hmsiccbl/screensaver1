@@ -17,9 +17,7 @@ import java.util.Set;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
-import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
@@ -147,37 +145,6 @@ public class RNAiCherryPickRequest extends CherryPickRequest
     return REQUIRED_EMPTY_ROWS;
   }
 
-  /**
-   * Maps cherry pick wells from a Dharmacon SMARTPool library to the respective
-   * wells in the related Dharmacon duplex library. The mapping is keyed on the
-   * SilencingReagents contained in the pool well, <i>not</i> the gene they are
-   * silencing.
-   */
-  @Override
-  public void createLabCherryPicks()
-  {
-    // TODO: currently assumes that all RNAi cherry picks are from Dharmacon
-    // libraries, which are split into pool and duplex libraries
-    
-    // note: anomalies (i.e., when exactly 4 duplexes are not found, nd,
-    // most importantly, when 0 duplexes are found) are implicitly recorded in
-    // our data model; a UI can handle notification of these cases as desired,
-    // simply by finding ScreenerCherryPicks that do not have a sufficient
-    // number of LabCherryPicks
-    
-    for (ScreenerCherryPick screenerCherryPick : getScreenerCherryPicks()) {
-      Well poolWell = screenerCherryPick.getScreenedWell();
-      String duplexLibraryName = getDuplexLibraryNameForPoolLibrary(poolWell.getLibrary());
-      for (SilencingReagent silencingReagent : poolWell.getSilencingReagents()) {
-        for (Well candidateCherryPickSourceWell : silencingReagent.getWells()) {
-          if (candidateCherryPickSourceWell.getLibrary().getLibraryName().equals(duplexLibraryName)) {
-            new LabCherryPick(screenerCherryPick, candidateCherryPickSourceWell);
-          }
-        }
-      }
-    }
-  }
-
 
   // private methods
   
@@ -186,19 +153,6 @@ public class RNAiCherryPickRequest extends CherryPickRequest
    */
   private RNAiCherryPickRequest()
   {
-  }
-  
-  private String getDuplexLibraryNameForPoolLibrary(Library library)
-  {
-    // Note: this mapping relies upon our library naming convention
-    String duplexLibraryName = library.getLibraryName()
-                                      .replace("Pools", "Duplexes");
-    if (!duplexLibraryName.contains("Duplexes")) {
-      throw new IllegalArgumentException("Dharmacon pool library '"
-                                         + library.getLibraryName()
-                                         + "' cannot be mapped to a duplex library name");
-    }
-    return duplexLibraryName;
   }
 }
 
