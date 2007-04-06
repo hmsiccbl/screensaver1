@@ -66,7 +66,12 @@
   <property name="deploy.dir" location="${appserver.dir}/webapps/${app.name}"/>
   <property name="appserver.start.cmd" value="${appserver.dir}/bin/catalina.sh"/>
   <property name="appserver.stop.cmd" value="${appserver.dir}/bin/shutdown.sh"/>
-  <property name="appserver.java.opts" value="-Xmx800M"/>
+  <condition 
+    property="appserver.java.opts" 
+    value="-Xmx800M -XX:MaxPermSize=256M"
+    else="-Xmx800M">
+    <istrue value="${debug}"/>
+  </condition>
   <condition 
     property="appserver.start.cmd.options" 
     value="jpda start"
@@ -85,6 +90,10 @@
   <property name="deployed.loginmodule.config.file" location="${appserver.dir}/conf/${loginmodule.config.filename}"/>
   <property name="dev.loginmodule.config.file" location="web/tomcat/conf/${loginmodule.config.filename}"/>
   <property name="svnversion.cmd" value="svnversion"/>
+  <property name="web.dev.fast.auth" 
+    value="false" 
+    description="If true, web application will use BASIC HTTP authentication, allowing for UI testing w/o requiring re-login, as browser can cache user name and password and re-issue between web server restarts."/>
+
   
   <!-- file sets -->
 
@@ -208,14 +217,21 @@
     <antcall target="exploded.war">
       <param name="exploded.war.dir" location="${deploy.dir}"/>
     </antcall>
-
+    <antcall target="do.web.dev.fast.auth"> 
+      <param name="exploded.war.dir" location="${deploy.dir}"/>
+    </antcall>
   </target>
 
   <!-- an alias for deploy-local target -->
   <target name="deploy" depends="deploy-local"/>
   
+  <target name="do.web.dev.fast.auth" if="web.dev.fast.auth">
+    <replace file="${exploded.war.dir}/WEB-INF/web.xml" token="FORM" value="BASIC"/>
+  </target>
+  
+  
   <target name="deploy-jsp">
-    <description>External target top deploy just the JSP files, for quick testing of JSP edits during development cycle.</description>
+    <description>External target to deploy just the JSP files, for quick testing of JSP edits during development cycle.</description>
     <antcall target="copy-jsp">
       <param name="exploded.war.dir" location="${deploy.dir}"/>
     </antcall>
