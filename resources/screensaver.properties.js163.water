@@ -4,7 +4,7 @@
 
 ### build-time properties
 
-appserver.dir=/usr/local/tomcat
+appserver.dir=/usr/local/jakarta-tomcat
 log4j.properties.resource=log4j.properties.debug
 svnversion.cmd=/usr/bin/svnversion
 
