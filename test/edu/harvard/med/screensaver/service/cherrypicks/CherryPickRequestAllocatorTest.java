@@ -67,30 +67,30 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         dao.persistEntity(library);
 
         Copy copy1 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
-        new CopyInfo(copy1, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(12.0));
-        new CopyInfo(copy1, 2, "loc1", PlateType.EPPENDORF, new BigDecimal(11.0));
-        new CopyInfo(copy1, 3, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
-        new CopyInfo(copy1, 4, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
-        new CopyInfo(copy1, 5, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
-        new CopyInfo(copy1, 6, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
+        new CopyInfo(copy1, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(12).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        new CopyInfo(copy1, 2, "loc1", PlateType.EPPENDORF, new BigDecimal(11).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        new CopyInfo(copy1, 3, "loc1", PlateType.EPPENDORF, new BigDecimal(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        new CopyInfo(copy1, 4, "loc1", PlateType.EPPENDORF, new BigDecimal(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        new CopyInfo(copy1, 5, "loc1", PlateType.EPPENDORF, new BigDecimal(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        new CopyInfo(copy1, 6, "loc1", PlateType.EPPENDORF, new BigDecimal(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
         
         Copy copy2 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "E");
-        new CopyInfo(copy2, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(22.0));
-        new CopyInfo(copy2, 2, "loc1", PlateType.EPPENDORF, new BigDecimal(22.0));
-        new CopyInfo(copy2, 3, "loc1", PlateType.EPPENDORF, new BigDecimal(12.0));
-        new CopyInfo(copy2, 4, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
-        new CopyInfo(copy2, 5, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
+        new CopyInfo(copy2, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(22).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        new CopyInfo(copy2, 2, "loc1", PlateType.EPPENDORF, new BigDecimal(22).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        new CopyInfo(copy2, 3, "loc1", PlateType.EPPENDORF, new BigDecimal(12).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        new CopyInfo(copy2, 4, "loc1", PlateType.EPPENDORF, new BigDecimal(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        new CopyInfo(copy2, 5, "loc1", PlateType.EPPENDORF, new BigDecimal(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
         CopyInfo retiredPlateCopyInfo = 
-        new CopyInfo(copy2, 6, "loc1", PlateType.EPPENDORF, new BigDecimal(22.0));
+        new CopyInfo(copy2, 6, "loc1", PlateType.EPPENDORF, new BigDecimal(22).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
         retiredPlateCopyInfo.setDateRetired(new Date());
 
         Copy copy3 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "F");
-        new CopyInfo(copy3, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(22.0));
-        new CopyInfo(copy3, 2, "loc1", PlateType.EPPENDORF, new BigDecimal(22.0));
-        new CopyInfo(copy3, 3, "loc1", PlateType.EPPENDORF, new BigDecimal(22.0));
-        new CopyInfo(copy3, 4, "loc1", PlateType.EPPENDORF, new BigDecimal(12.0));
-        new CopyInfo(copy3, 5, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
-        new CopyInfo(copy3, 6, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
+        new CopyInfo(copy3, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(22).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        new CopyInfo(copy3, 2, "loc1", PlateType.EPPENDORF, new BigDecimal(22).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        new CopyInfo(copy3, 3, "loc1", PlateType.EPPENDORF, new BigDecimal(22).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        new CopyInfo(copy3, 4, "loc1", PlateType.EPPENDORF, new BigDecimal(12).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        new CopyInfo(copy3, 5, "loc1", PlateType.EPPENDORF, new BigDecimal(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        new CopyInfo(copy3, 6, "loc1", PlateType.EPPENDORF, new BigDecimal(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
       }
     });
 
@@ -132,9 +132,9 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         dao.persistEntity(library);
 
         Copy copy1 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
-        new CopyInfo(copy1, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(10.0));
+        new CopyInfo(copy1, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
         Copy copy2 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
-        new CopyInfo(copy2, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(12.0));
+        new CopyInfo(copy2, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(12).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
       }
     });
     

@@ -38,6 +38,17 @@ import org.springframework.dao.DataAccessException;
  */
 public class CherryPickRequestAllocator
 {
+  /**
+   * The amount of microliter volume in a source copy well at which the well
+   * should be considered depleted. By setting this to a positive value, we
+   * account for real-world inaccuracies that might otherwise cause a source
+   * well to be overdrawn. (A theoretically better approach might be to base the
+   * inaccurracy on the number of times the well was drawn from, but the above
+   * strategy is considered sufficient by the lab).
+   */
+  static final BigDecimal MINIMUM_SOURCE_WELL_VOLUME = new BigDecimal(1);
+
+
   // static members
 
   private static Logger log = Logger.getLogger(CherryPickRequestAllocator.class);
@@ -122,7 +133,7 @@ public class CherryPickRequestAllocator
 
     for (Copy copy : copies) {
       BigDecimal wellCopyVolumeRemaining = calculateRemainingVolumeInCopyWell(copy, well);
-      if (wellCopyVolumeRemaining.compareTo(volumeNeeded) >= 0) {
+      if (wellCopyVolumeRemaining.subtract(volumeNeeded).compareTo(MINIMUM_SOURCE_WELL_VOLUME) >= 0) {
         return copy;
       }
     }
