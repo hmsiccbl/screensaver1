@@ -90,10 +90,11 @@
   <property name="deployed.loginmodule.config.file" location="${appserver.dir}/conf/${loginmodule.config.filename}"/>
   <property name="dev.loginmodule.config.file" location="web/tomcat/conf/${loginmodule.config.filename}"/>
   <property name="svnversion.cmd" value="svnversion"/>
+  <!-- uncomment/comment this to turn on/off BASIC HTTP authentication
   <property name="web.dev.fast.auth" 
-    value="false" 
+    value="true" 
     description="If true, web application will use BASIC HTTP authentication, allowing for UI testing w/o requiring re-login, as browser can cache user name and password and re-issue between web server restarts."/>
-
+  -->
   
   <!-- file sets -->
 
