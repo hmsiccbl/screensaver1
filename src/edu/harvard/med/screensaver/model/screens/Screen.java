@@ -58,6 +58,7 @@ public class Screen extends AbstractEntity
   private Set<StatusItem> _statusItems = new HashSet<StatusItem>();
   private transient SortedSet<StatusItem> _sortedStatusItems;
   private Set<ScreeningRoomActivity> _screeningRoomActivities = new HashSet<ScreeningRoomActivity>();
+  private int _allTimeScreeningRoomActivityCount = 0;
   private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
   private Set<AbaseTestset> _abaseTestsets = new HashSet<AbaseTestset>();
   private Set<Publication> _publications = new HashSet<Publication>();
@@ -373,16 +374,36 @@ public class Screen extends AbstractEntity
     return _screeningRoomActivities;
   }
 
+  @SuppressWarnings("unchecked")
   @DerivedEntityProperty
-  public Set<ScreeningRoomActivity> getScreeningRoomActivitiesOfType(Class<? extends ScreeningRoomActivity> clazz)
+  public <E extends ScreeningRoomActivity> Set<E> getScreeningRoomActivitiesOfType(Class<E> clazz)
   {
-    Set<ScreeningRoomActivity> result = new TreeSet<ScreeningRoomActivity>();
+    Set<E> result = new TreeSet<E>();
     for (ScreeningRoomActivity screeningRoomActivity : _screeningRoomActivities) {
       if (clazz.isAssignableFrom(screeningRoomActivity.getClass())) {
-        result.add(screeningRoomActivity);
+        result.add((E) screeningRoomActivity);
       }
     }
     return result;
+  }
+
+  /**
+   * Get the allTimeScreeningRoomActivityCount.
+   * @return the allTimeScreeningRoomActivityCount
+   * @hibernate.property not-null="true"
+   */
+  public int getAllTimeScreeningRoomActivityCount()
+  {
+    return _allTimeScreeningRoomActivityCount;
+  }
+
+  /**
+   * Set the allTimeScreeningRoomActivityCount.
+   * @param allTimeScreeningRoomActivityCount the allTimeScreeningRoomActivityCount
+   */
+  public void setAllTimeScreeningRoomActivityCount(int allTimeScreeningRoomActivityCount)
+  {
+    _allTimeScreeningRoomActivityCount = allTimeScreeningRoomActivityCount;
   }
 
   /**
