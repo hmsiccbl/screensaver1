@@ -118,7 +118,9 @@ public class CherryPickRequestAllocator
           if (labCherryPick.isMapped()) {
             throw new BusinessRuleViolationException("cannot deallocate a cherry pick after it is mapped");
           }
-          labCherryPick.setAllocated(null);
+          if (labCherryPick.isAllocated()) {
+            labCherryPick.setAllocated(null);
+          }
         }
       }
     });
