@@ -59,7 +59,7 @@ public class PlatesUsed extends AbstractEntity
     Integer endPlate,
     String copy)
   {
-    if (libraryScreening== null) {
+    if (libraryScreening == null) {
       throw new NullPointerException();
     }
     _libraryScreening = libraryScreening;

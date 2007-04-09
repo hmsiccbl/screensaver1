@@ -133,7 +133,6 @@ public class EquipmentUsed extends AbstractEntity
    * @return the protocol
    * @hibernate.property
    *   type="text"
-   *   not-null="true"
    */
   public String getProtocol()
   {
@@ -156,7 +155,6 @@ public class EquipmentUsed extends AbstractEntity
    * @return the description
    * @hibernate.property
    *   type="text"
-   *   not-null="true"
    */
   public String getDescription()
   {

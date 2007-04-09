@@ -85,7 +85,7 @@ public class LibraryScreening extends Screening
    *
    * @return the plates used
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="all-delete-orphan"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="library_screening_id"

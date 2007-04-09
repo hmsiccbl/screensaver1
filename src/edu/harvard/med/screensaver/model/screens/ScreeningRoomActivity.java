@@ -242,7 +242,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
    *
    * @return the equipment used
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="all-delete-orphan"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="screening_room_activity_id"
