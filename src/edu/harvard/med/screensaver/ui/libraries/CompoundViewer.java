@@ -9,10 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -20,8 +17,6 @@ import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.namevaluetable.CompoundNameValueTable;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
-
-import org.apache.log4j.Logger;
 
 public class CompoundViewer extends AbstractBackingBean
 {
