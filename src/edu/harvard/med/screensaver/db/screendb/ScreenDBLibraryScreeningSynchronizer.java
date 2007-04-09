@@ -75,6 +75,7 @@ public class ScreenDBLibraryScreeningSynchronizer
       public void runTransaction()
       {
         try {
+          deleteOldLibraryScreenings();
           synchronizeLibraryScreeningsProper();
           // TODO: get the plates used
           // TODO: get the equipment used
@@ -97,12 +98,19 @@ public class ScreenDBLibraryScreeningSynchronizer
 
   // private instance methods
   
+  private void deleteOldLibraryScreenings() {
+    for (LibraryScreening libraryScreening : _dao.findAllEntitiesWithType(LibraryScreening.class)) {
+      libraryScreening.getScreen().getScreeningRoomActivities().remove(libraryScreening);
+      libraryScreening.getPerformedBy().getHbnScreeningRoomActivitiesPerformed().remove(libraryScreening);
+    }
+  }
+
   private void synchronizeLibraryScreeningsProper() throws SQLException, ScreenDBSynchronizationException
   {
     Statement statement = _connection.createStatement();
     ResultSet resultSet = statement.executeQuery(
       "SELECT v.*, s.screen_type, s.user_id AS lead_screener_id FROM visits v, screens s " +
-      "WHERE v.screen_id = s.id AND visit_type IN ('Library', 'Special')");
+      "WHERE v.screen_id = s.id AND visit_type IN ('Library', 'Special', 'Preliminary')");
     while (resultSet.next()) {
       LibraryScreening screening = findOrCreateLibraryScreening(resultSet);
       screening.setComments(resultSet.getString("comments"));
@@ -115,8 +123,6 @@ public class ScreenDBLibraryScreeningSynchronizer
       synchronizeEstimatedFinalScreenConcentration(resultSet, screening);
       synchronizeAssayProtocolType(resultSet, screening);
       
-      //log.info("libraryScreening = " + screening);
-      
       _screenDBVisitIdToLibraryScreeningMap.put(resultSet.getInt("id"), screening);
       _dao.persistEntity(screening);
     }
@@ -124,8 +130,8 @@ public class ScreenDBLibraryScreeningSynchronizer
   }
 
   /**
-   * Find an existing, or create a new, {@link LibraryScreening} object for the given result set.
-   * The returned <code>LibraryScreening</code> has exactly the following properties synchronized:
+   * Create a new {@link LibraryScreening} object for the given result set.
+   * The returned <code>LibraryScreening</code> has exactly the following properties initialized:
    * <ul>
    * <li><code>screen</code>
    * <li><code>performedBy</code>
@@ -133,9 +139,9 @@ public class ScreenDBLibraryScreeningSynchronizer
    * <li><code>dateOfVisit</code>
    * </ul>
    * 
-   * @param resultSet the SQL result set to get the needed information to find an existing, or
-   * create a new, LibraryScreening
-   * @return the new or existing LibraryScreening
+   * @param resultSet the SQL result set to get the needed information to 
+   * create a new LibraryScreening
+   * @return the new LibraryScreening
    * @throws SQLException
    * @throws ScreenDBSynchronizationException
    */
@@ -146,22 +152,15 @@ public class ScreenDBLibraryScreeningSynchronizer
     Date dateOfActivity = resultSet.getDate("date_of_visit");
     Screen screen = _screenSynchronizer.getScreenForScreenNumber(screenNumber);
     ScreeningRoomUser performedBy = getPerformedBy(resultSet);
-    LibraryScreening screening = lookupExistingLibraryScreening(screen, performedBy, dateOfActivity);
-    if (screening == null) {
-      try {
-        screening = new LibraryScreening(screen, performedBy, dateCreated, dateOfActivity);
-      }
-      catch (DuplicateEntityException e) {
-        // TODO: handle this case. merge multiple LibraryScreenings when multiples occur in
-        // ScreenDB
-        throw new ScreenDBSynchronizationException(
-          "duplicate library screening for screen number " + screenNumber, e);
-      }
+    try {
+      return new LibraryScreening(screen, performedBy, dateCreated, dateOfActivity);
     }
-    else {
-      screening.setPerformedBy(performedBy);
+    catch (DuplicateEntityException e) {
+      // TODO: handle this case. merge multiple LibraryScreenings when multiples occur in
+      // ScreenDB
+      throw new ScreenDBSynchronizationException(
+        "duplicate library screening for screen number " + screenNumber, e);
     }
-    return screening;
   }
 
   private ScreeningRoomUser getPerformedBy(ResultSet resultSet) throws SQLException {
