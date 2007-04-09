@@ -17,7 +17,6 @@ import java.sql.Statement;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +24,6 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
@@ -77,8 +75,8 @@ public class ScreenDBLibraryScreeningSynchronizer
         try {
           deleteOldLibraryScreenings();
           synchronizeLibraryScreeningsProper();
-          // TODO: get the plates used
-          // TODO: get the equipment used
+          synchronizePlatesUsed();
+          synchronizeEquipmentUsed();
         }
         catch (SQLException e) {
           _synchronizationException = new ScreenDBSynchronizationException(
@@ -152,15 +150,7 @@ public class ScreenDBLibraryScreeningSynchronizer
     Date dateOfActivity = resultSet.getDate("date_of_visit");
     Screen screen = _screenSynchronizer.getScreenForScreenNumber(screenNumber);
     ScreeningRoomUser performedBy = getPerformedBy(resultSet);
-    try {
-      return new LibraryScreening(screen, performedBy, dateCreated, dateOfActivity);
-    }
-    catch (DuplicateEntityException e) {
-      // TODO: handle this case. merge multiple LibraryScreenings when multiples occur in
-      // ScreenDB
-      throw new ScreenDBSynchronizationException(
-        "duplicate library screening for screen number " + screenNumber, e);
-    }
+    return new LibraryScreening(screen, performedBy, dateCreated, dateOfActivity);
   }
 
   private ScreeningRoomUser getPerformedBy(ResultSet resultSet) throws SQLException {
@@ -338,12 +328,6 @@ public class ScreenDBLibraryScreeningSynchronizer
 
   private void synchronizePlatesUsed() throws SQLException
   {
-    // synchronizing requires emptying out all old PlatesUsed
-    for (LibraryScreening screening : _screenDBVisitIdToLibraryScreeningMap.values()) {
-      Set<PlatesUsed> platesUsed = screening.getPlatesUsed();
-      platesUsed.removeAll(platesUsed);
-    }
-    
     Statement statement = _connection.createStatement();
     ResultSet resultSet = statement.executeQuery("SELECT * FROM plate_used");
     while (resultSet.next()) {
@@ -352,6 +336,12 @@ public class ScreenDBLibraryScreeningSynchronizer
       Integer endPlate = resultSet.getInt("end_plate");
       String copy = resultSet.getString("copy");
       LibraryScreening screening = _screenDBVisitIdToLibraryScreeningMap.get(visitId);
+      
+      // ScreenDB has plate_used records unconnected to a visits[sic] record
+      if (screening == null) {
+        continue;
+      }
+      
       new PlatesUsed(screening, startPlate, endPlate, copy);
     }
     statement.close();
@@ -359,14 +349,8 @@ public class ScreenDBLibraryScreeningSynchronizer
 
   private void synchronizeEquipmentUsed() throws SQLException
   {
-    // synchronizing requires emptying out all old EquipmentUsed
-    for (LibraryScreening screening : _screenDBVisitIdToLibraryScreeningMap.values()) {
-      Set<EquipmentUsed> equipmentUsed = screening.getEquipmentUsed();
-      equipmentUsed.removeAll(equipmentUsed);
-    }
-    
     Statement statement = _connection.createStatement();
-    ResultSet resultSet = statement.executeQuery("SELECT * FROM plate_used");
+    ResultSet resultSet = statement.executeQuery("SELECT * FROM equip_used");
     while (resultSet.next()) {
       Integer visitId = resultSet.getInt("visit_id");
       String equipment = resultSet.getString("equipment");
