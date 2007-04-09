@@ -243,7 +243,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     logUserActivity("findWell " + plateNumber + ":" + wellName);
     Well well = _plateWellListParser.lookupWell(plateNumber, wellName);
     if (well == null) {
-      showMessage("libraries.noSuchWell", "searchResults");
+      showMessage("libraries.noSuchWell", plateNumber, wellName);
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     return viewWell(well, null);
@@ -439,7 +439,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
           _dao.need(gene,
                     "genbankAccessionNumbers",
                     "hbnSilencingReagents",
-          "hbnSilencingReagents.hbnWells");
+                    "hbnSilencingReagents.hbnWells");
           _geneViewer.setGene(gene);
           _geneViewer.setGeneNameValueTable(new GeneNameValueTable(LibrariesControllerImpl.this, gene));
         }

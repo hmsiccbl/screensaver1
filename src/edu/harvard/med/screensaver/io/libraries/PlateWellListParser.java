@@ -157,8 +157,15 @@ public class PlateWellListParser
     Well well = _dao.findWell(wellKey); 
     if (well != null) {
       // force initialization of persistent collections needed by search result viewer
-      well.getGenes().size();
-      well.getCompounds().size();
+      _dao.need(well,
+        "hbnSilencingReagents",
+        "hbnSilencingReagents.gene",
+        "hbnSilencingReagents.gene.genbankAccessionNumbers",
+        "hbnCompounds",
+        "hbnCompounds.compoundNames",
+        "hbnCompounds.pubchemCids",
+        "hbnCompounds.nscNumbers",
+        "hbnCompounds.casNumbers");
     }
     return well;
   }
