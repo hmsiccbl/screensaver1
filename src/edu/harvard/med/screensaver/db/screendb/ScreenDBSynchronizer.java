@@ -44,7 +44,6 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
  * <li>ScreeningRoomUsers are looked up by firstName, lastName
  * <li>Libraries are looked up by startPlate
  * <li>Screns are looked up by screenNumber
- * <li>LibraryScreenings are looked up by screen, performedBy, and dateOfActivity
  * <li>TODO: fill in this list as more types are synchronized
  * </ul>
  *
