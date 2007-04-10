@@ -110,7 +110,7 @@ public class ScreenDBLibraryScreeningSynchronizer
       "SELECT v.*, s.screen_type, s.user_id AS lead_screener_id FROM visits v, screens s " +
       "WHERE v.screen_id = s.id AND visit_type IN ('Library', 'Special', 'Preliminary')");
     while (resultSet.next()) {
-      LibraryScreening screening = findOrCreateLibraryScreening(resultSet);
+      LibraryScreening screening = createLibraryScreening(resultSet);
       screening.setComments(resultSet.getString("comments"));
       screening.setAssayProtocol(resultSet.getString("assay_protocol"));
       screening.setAssayProtocolLastModifiedDate(resultSet.getDate("assay_date"));
@@ -143,7 +143,7 @@ public class ScreenDBLibraryScreeningSynchronizer
    * @throws SQLException
    * @throws ScreenDBSynchronizationException
    */
-  private LibraryScreening findOrCreateLibraryScreening(ResultSet resultSet)
+  private LibraryScreening createLibraryScreening(ResultSet resultSet)
   throws SQLException, ScreenDBSynchronizationException {
     Integer screenNumber = resultSet.getInt("screen_id");
     Date dateCreated = resultSet.getDate("date_created");
@@ -158,21 +158,7 @@ public class ScreenDBLibraryScreeningSynchronizer
     if (screenDBUserId == null || screenDBUserId.equals(0)) {
       screenDBUserId = resultSet.getInt("lead_screener_id");
     }
-    ScreeningRoomUser performedBy = _userSynchronizer.getScreeningRoomUserForScreenDBUserId(screenDBUserId);
-    return performedBy;
-  }
-
-  private LibraryScreening lookupExistingLibraryScreening(
-    Screen screen,
-    ScreeningRoomUser performedBy,
-    Date dateOfActivity)
-  {
-    Map<String,Object> libraryScreeningLookupProperties = new HashMap<String,Object>();
-    libraryScreeningLookupProperties.put("screen", screen);
-    libraryScreeningLookupProperties.put("hbnPerformedBy", performedBy);
-    libraryScreeningLookupProperties.put("dateOfActivity", dateOfActivity);
-    LibraryScreening screening = _dao.findEntityByProperties(LibraryScreening.class, libraryScreeningLookupProperties);
-    return screening;
+    return _userSynchronizer.getScreeningRoomUserForScreenDBUserId(screenDBUserId);
   }
 
   // FROM GROUP DISCUSSION:
