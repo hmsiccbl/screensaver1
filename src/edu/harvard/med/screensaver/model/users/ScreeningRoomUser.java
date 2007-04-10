@@ -252,7 +252,9 @@ public class ScreeningRoomUser extends ScreensaverUser
       _labHead.getHbnLabMembers().remove(this);
     }
     _labHead = labHead;
-    _labHead.getHbnLabMembers().add(this);
+    if (_labHead != null) {
+      _labHead.getHbnLabMembers().add(this);
+    }
   }
 
   // note: cannot name this method "isLabHead", as this is ambiguous with "getLabHead", 
