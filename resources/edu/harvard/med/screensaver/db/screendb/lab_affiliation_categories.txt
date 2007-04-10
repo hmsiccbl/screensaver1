@@ -43,6 +43,7 @@ Harvard FAS	Harvard University, Chemistry and Chemical Biology Department
 Harvard FAS	Harvard University, Molecular and Cellular Biology Department
 Harvard FAS	Harvard University, Organismic and Evolutionary Biology Department
 Other	Hubrecht Laboratory for Developmental Biology
+Other	Integral Molecular
 Other	L2 Diagnostics
 HMS Affiliated Hospital	Massachusetts Eye and Ear Institute
 HMS Affiliated Hospital	Massachusetts General Hospital
