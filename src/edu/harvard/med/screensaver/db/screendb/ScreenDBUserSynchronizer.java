@@ -359,6 +359,9 @@ public class ScreenDBUserSynchronizer
       if (head != null && head != member) {
         member.setLabHead(head);
       }
+      else {
+        member.setLabHead(null);
+      }
     }
   }
   
