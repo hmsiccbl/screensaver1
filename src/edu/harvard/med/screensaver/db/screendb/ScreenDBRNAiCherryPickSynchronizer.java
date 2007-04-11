@@ -15,8 +15,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
@@ -27,7 +25,6 @@ import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
-import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -47,8 +44,6 @@ public class ScreenDBRNAiCherryPickSynchronizer
   private DAO _dao;
   private ScreenDBUserSynchronizer _userSynchronizer;
   private ScreenDBScreenSynchronizer _screenSynchronizer;
-  private Map<Integer,LibraryScreening> _screenDBVisitIdToLibraryScreeningMap =
-    new HashMap<Integer,LibraryScreening>();
   private ScreenDBSynchronizationException _synchronizationException = null;
 
   
