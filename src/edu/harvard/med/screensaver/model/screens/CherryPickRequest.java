@@ -198,7 +198,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * Get the set of cherry pick liquid transfers for this cherry pick request.
    *
    * @return the cherry pick liquid transfers
-   * */
+   */
   @DerivedEntityProperty
   public Set<CherryPickLiquidTransfer> getCherryPickLiquidTransfers()
   {
