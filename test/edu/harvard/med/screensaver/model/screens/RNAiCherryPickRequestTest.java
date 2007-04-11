@@ -11,24 +11,17 @@ package edu.harvard.med.screensaver.model.screens;
 
 import java.beans.IntrospectionException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
+
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
-import edu.harvard.med.screensaver.model.libraries.Gene;
-import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
-
-import org.apache.log4j.Logger;
 
 public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
 {

@@ -64,6 +64,15 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   {
     super(screen, requestedBy, dateRequested);
   }
+  
+  public RNAiCherryPickRequest(Screen screen,
+                               ScreeningRoomUser requestedBy,
+                               Date dateRequested,
+                               Integer cherryPickRequestNumber)
+  {
+    super(screen, requestedBy, dateRequested, cherryPickRequestNumber);
+  }
+  
 
   // public constructors and methods
   
@@ -85,6 +94,8 @@ public class RNAiCherryPickRequest extends CherryPickRequest
    */
   public String getAssayProtocol()
   {
+    // TODO: is assayProtocol needed here any more? i think the only assay protocol for cherry
+    // pick requests would end up in the RNAiCherryPickScreening
     return _assayProtocol;
   }
   

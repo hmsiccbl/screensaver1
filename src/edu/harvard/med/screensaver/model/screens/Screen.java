@@ -60,6 +60,7 @@ public class Screen extends AbstractEntity
   private Set<ScreeningRoomActivity> _screeningRoomActivities = new HashSet<ScreeningRoomActivity>();
   private int _allTimeScreeningRoomActivityCount = 0;
   private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
+  private int _allTimeCherryPickRequestCount = 0;
   private Set<AbaseTestset> _abaseTestsets = new HashSet<AbaseTestset>();
   private Set<Publication> _publications = new HashSet<Publication>();
   private Set<LetterOfSupport> _lettersOfSupport = new HashSet<LetterOfSupport>();
@@ -424,6 +425,25 @@ public class Screen extends AbstractEntity
   public Set<CherryPickRequest> getCherryPickRequests()
   {
     return _cherryPickRequests;
+  }
+
+  /**
+   * Get the allTimeCherryPickRequestCount.
+   * @return the allTimeCherryPickRequestCount
+   * @hibernate.property not-null="true"
+   */
+  public int getAllTimeCherryPickRequestCount()
+  {
+    return _allTimeCherryPickRequestCount;
+  }
+
+  /**
+   * Set the allTimeCherryPickRequestCount.
+   * @param allTimeCherryPickRequestCount the allTimeCherryPickRequestCount
+   */
+  public void setAllTimeCherryPickRequestCount(int allTimeCherryPickRequestCount)
+  {
+    _allTimeCherryPickRequestCount = allTimeCherryPickRequestCount;
   }
 
   /**

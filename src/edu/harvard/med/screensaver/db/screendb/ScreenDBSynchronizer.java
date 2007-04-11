@@ -186,7 +186,9 @@ public class ScreenDBSynchronizer
       libraryScreeningSynchronizer.synchronizeLibraryScreenings();
       // TODO: 'Liquid Handling only' Visits to LiquidHandling
       // TODO: 'Cherry Pick' Visits to Compound CherryPickRequest
-      // TODO: 'RNAi Cherry Pick' Visits to RNAi CherryPickRequest
+      ScreenDBRNAiCherryPickSynchronizer rnaiCherryPickSynchronizer =
+        new ScreenDBRNAiCherryPickSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
+      rnaiCherryPickSynchronizer.synchronizeRNAiCherryPicks();
     }
     catch (ScreenDBSynchronizationException e) {
       // TODO: report error message as well

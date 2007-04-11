@@ -445,16 +445,28 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
 
     getHibernateTemplate().delete(labCherryPick);
   }
+
+  public void deleteCherryPickRequest(CherryPickRequest cherryPickRequest)
+  {
+    deleteCherryPickRequest(cherryPickRequest, false);
+  }
   
-  public void deleteCherryPickRequest(final CherryPickRequest cherryPickRequestIn)
+  public void deleteCherryPickRequest(
+    final CherryPickRequest cherryPickRequestIn,
+    boolean bypassBusinessRuleViolationChecks)
   {
     CherryPickRequest cherryPickRequest = (CherryPickRequest) reattachEntity(cherryPickRequestIn);  
 
-    if (cherryPickRequestIn.isAllocated()) {
-      throw new BusinessRuleViolationException("cannot delete a cherry pick request that has been allocated");
+    if (bypassBusinessRuleViolationChecks) {
+
     }
-    if (cherryPickRequestIn.getCherryPickAssayPlates().size() > 0) {
-      throw new DataModelViolationException("an unallocated cherry pick request should not have any cherry pick assay plates");
+    else {
+      if (cherryPickRequestIn.isAllocated()) {
+        throw new BusinessRuleViolationException("cannot delete a cherry pick request that has been allocated");
+      }
+      if (cherryPickRequestIn.getCherryPickAssayPlates().size() > 0) {
+        throw new DataModelViolationException("an unallocated cherry pick request should not have any cherry pick assay plates");
+      }
     }
 
     // disassociate from related entities
