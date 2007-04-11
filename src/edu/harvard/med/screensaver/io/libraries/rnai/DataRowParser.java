@@ -46,7 +46,7 @@ public class DataRowParser
   private RNAiLibraryContentsParser _parser;
   private RNAiLibraryColumnHeaders _columnHeaders;
   private HSSFRow _dataRow;
-  private short _rowIndex;
+  private int _rowIndex;
   private Factory _cellFactory;
   private Map<RequiredRNAiLibraryColumn,String> _dataRowContents;
   
@@ -65,7 +65,7 @@ public class DataRowParser
     RNAiLibraryContentsParser parser,
     RNAiLibraryColumnHeaders columnHeaders,
     HSSFRow dataRow,
-    short rowIndex,
+    int rowIndex,
     Factory cellFactory)
   {
     _parser = parser;
@@ -113,7 +113,7 @@ public class DataRowParser
     if (plateWellAbbreviation == null) {
       return;
     }
-    log.debug("loading data for plate-well " + plateWellAbbreviation);
+    //log.debug("loading data for plate-well " + plateWellAbbreviation);
     
     // get the well last, so that if we encounter any errors, we dont end up with a bogus
     // well in the library

@@ -235,7 +235,7 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
     if (columnHeaders == null) {
       return;
     }
-    for (short i = 1; i <= hssfSheet.getLastRowNum(); i++) {
+    for (int i = 1; i <= hssfSheet.getLastRowNum(); i++) {
       if (hssfSheet.getRow(i) != null) {
         DataRowParser dataRowParser = new DataRowParser(
           this,

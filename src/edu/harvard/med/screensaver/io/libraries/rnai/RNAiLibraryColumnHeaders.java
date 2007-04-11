@@ -134,12 +134,12 @@ class RNAiLibraryColumnHeaders
    * @param rowIndex the index of the data row in the sheet
    * @return a map from required columns to the contents of the row for that column
    */
-  Map<RequiredRNAiLibraryColumn,String> getDataRowContents(HSSFRow dataRow, short rowIndex)
+  Map<RequiredRNAiLibraryColumn,String> getDataRowContents(HSSFRow dataRow, int rowIndex)
   {
     Map<RequiredRNAiLibraryColumn,String> dataRowContents =
       new HashMap<RequiredRNAiLibraryColumn,String>();
     for (RequiredRNAiLibraryColumn column : RequiredRNAiLibraryColumn.values()) {
-      Cell cell = _cellFactory.getCell(getColumnIndex(column), (short) rowIndex);
+      Cell cell = _cellFactory.getCell(getColumnIndex(column), rowIndex);
       dataRowContents.put(column, cell.getAsString());      
     }
     return dataRowContents;
@@ -170,7 +170,7 @@ class RNAiLibraryColumnHeaders
   private boolean populateColumnIndexes() {
     boolean hasNoDuplicateHeaders = true;
     for (short i = _columnHeaderRow.getFirstCellNum(); i <= _columnHeaderRow.getLastCellNum(); i++) {
-      Cell cell = _cellFactory.getCell(i, (short) 0);
+      Cell cell = _cellFactory.getCell(i, 0);
       String columnHeader = cell.getString();
       if (columnHeader == null) {
         continue;
