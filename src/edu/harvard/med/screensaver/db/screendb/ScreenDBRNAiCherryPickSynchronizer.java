@@ -98,7 +98,6 @@ public class ScreenDBRNAiCherryPickSynchronizer
 
   private void synchronizeRNAiCherryPicksProper() throws SQLException, ScreenDBSynchronizationException
   {
-    log.info("hi from synchRNAiCPR");
     Statement statement = _connection.createStatement();
     ResultSet resultSet = statement.executeQuery(
       "SELECT * FROM visits v WHERE visit_type = 'RNAi Cherry Pick'");
@@ -114,7 +113,6 @@ public class ScreenDBRNAiCherryPickSynchronizer
       if (cherryPickScreeningHappened(resultSet)) {
         createCherryPickScreening(resultSet, volumeTransferred, request);
       }
-      log.info("created cp request: " + request);
       _dao.persistEntity(request);
     }
     statement.close();
