@@ -203,8 +203,11 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
    *                        column="cherry_pick_liquid_transfer_id"
    *                        not-null="false"
    *                        foreign-key="fk_cherry_pick_assay_plate_to_cherry_pick_liquid_transfer"
-   *                        cascade="save-update"
+   *                        cascade="all-delete-orphan"
    */
+  // TODO: is it kosher to have this cascade be all-delete-orphan? it seems that if you delete
+  // all the assay plates in a liquid transfer, then you probably want to delete the liquid
+  // transfer as well
   @ToOneRelationship(nullable = true)
   private CherryPickLiquidTransfer getHbnCherryPickLiquidTransfer()
   {
