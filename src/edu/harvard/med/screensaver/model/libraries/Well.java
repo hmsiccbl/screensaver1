@@ -20,14 +20,14 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.EntityIdProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -55,6 +55,12 @@ public class Well extends AbstractEntity implements Comparable
   public static int PLATE_ROWS = (MAX_WELL_ROW - MIN_WELL_ROW) + 1;
   public static int PLATE_COLUMNS = (MAX_WELL_COLUMN - MIN_WELL_COLUMN) + 1;
   public static int PLATE_NUMBER_LEN = 5;
+  
+  public static boolean isValidWellName(String wellName)
+  {
+    return _wellParsePattern.matcher(wellName).matches();
+  }
+  
   
   // instance fields
 
