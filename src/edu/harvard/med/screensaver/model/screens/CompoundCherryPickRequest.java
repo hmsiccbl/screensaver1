@@ -54,6 +54,14 @@ public class CompoundCherryPickRequest extends CherryPickRequest
     super(screen, requestedBy, dateRequested);
   }
 
+  public CompoundCherryPickRequest(Screen screen,
+                                   ScreeningRoomUser requestedBy,
+                                   Date dateRequested,
+                                   Integer cherryPickRequestNumber)
+  {
+    super(screen, requestedBy, dateRequested, cherryPickRequestNumber);
+  }
+
   @DerivedEntityProperty
   public PlateType getAssayPlateType()
   {
