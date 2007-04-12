@@ -108,7 +108,7 @@ public class ScreenDBLibraryScreeningSynchronizer
     Statement statement = _connection.createStatement();
     ResultSet resultSet = statement.executeQuery(
       "SELECT v.*, s.screen_type, s.user_id AS lead_screener_id FROM visits v, screens s " +
-      "WHERE v.screen_id = s.id AND visit_type IN ('Library', 'Special', 'Preliminary')");
+      "WHERE v.screen_id = s.id AND visit_type IN ('Library', 'Special', 'Preliminary', 'Liquid Handling only')");
     while (resultSet.next()) {
       LibraryScreening screening = createLibraryScreening(resultSet);
       screening.setComments(resultSet.getString("comments"));
@@ -116,7 +116,7 @@ public class ScreenDBLibraryScreeningSynchronizer
       screening.setAssayProtocolLastModifiedDate(resultSet.getDate("assay_date"));
       screening.setNumberOfReplicates(resultSet.getInt("no_replicate_screen"));
       screening.setAbaseTestsetId(resultSet.getString("abase_testset_id"));
-      screening.setIsSpecial(resultSet.getString("visit_type").equals("Special"));
+      screening.setIsSpecial(getIsSpecial(resultSet));
       synchronizeVolumeTransferredPerWell(resultSet, screening);
       synchronizeEstimatedFinalScreenConcentration(resultSet, screening);
       synchronizeAssayProtocolType(resultSet, screening);
@@ -270,6 +270,12 @@ public class ScreenDBLibraryScreeningSynchronizer
       return false;
     }
     return numericalVolumeTransferred > 10;
+  }
+
+  private boolean getIsSpecial(ResultSet resultSet) throws SQLException
+  {
+    String visitType = resultSet.getString("visit_type");
+    return visitType.equals("Special") || visitType.equals("Liquid Handling only");
   }
 
   // FROM GROUP DISCUSSION:
