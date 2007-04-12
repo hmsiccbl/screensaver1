@@ -39,7 +39,6 @@ public class Gene extends AbstractEntity
 
   // instance fields
 
-  private String _geneId;
   private Integer _version;
   private Set<SilencingReagent> _silencingReagents = new HashSet<SilencingReagent>();
   private String _geneName;
@@ -413,7 +412,6 @@ public class Gene extends AbstractEntity
    */
   private void setGeneId(String geneId)
   {
-    _geneId = geneId;
   }
 
   /**
