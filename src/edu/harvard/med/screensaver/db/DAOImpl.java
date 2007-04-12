@@ -416,7 +416,15 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   
   public void deleteScreenerCherryPick(ScreenerCherryPick screenerCherryPick)
   {
-    if (screenerCherryPick.getCherryPickRequest().isAllocated()) {
+    deleteScreenerCherryPick(screenerCherryPick, false);
+  }
+
+  private void deleteScreenerCherryPick(
+    ScreenerCherryPick screenerCherryPick,
+    boolean bypassBusinessRuleViolationChecks)
+  {
+    if (! bypassBusinessRuleViolationChecks &&
+        screenerCherryPick.getCherryPickRequest().isAllocated()) {
       throw new BusinessRuleViolationException("cannot delete a screener cherry pick for a cherry pick request that has been allocated");
     }
 
@@ -424,15 +432,22 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     screenerCherryPick.getCherryPickRequest().getScreenerCherryPicks().remove(screenerCherryPick);
     screenerCherryPick.getScreenedWell().getHbnScreenerCherryPicks().remove(screenerCherryPick);
     for (LabCherryPick cherryPick : new ArrayList<LabCherryPick>(screenerCherryPick.getLabCherryPicks())) {
-      deleteLabCherryPick(cherryPick);
+      deleteLabCherryPick(cherryPick, bypassBusinessRuleViolationChecks);
     }
 
     getHibernateTemplate().delete(screenerCherryPick);
   }
-  
+
   public void deleteLabCherryPick(LabCherryPick labCherryPick)
   {
-    if (labCherryPick.getCherryPickRequest().isAllocated()) {
+    deleteLabCherryPick(labCherryPick, false);
+  }
+  
+  public void deleteLabCherryPick(
+    LabCherryPick labCherryPick,
+    boolean bypassBusinessRuleViolationChecks)
+  {
+    if (! bypassBusinessRuleViolationChecks && labCherryPick.getCherryPickRequest().isAllocated()) {
       throw new BusinessRuleViolationException("cannot delete a lab cherry pick for a cherry pick request that has been allocated");
     }
 
@@ -475,14 +490,15 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     // though I would have expected the cascade="all-delete-orphan" would have
     // taken care of this
     for (ScreenerCherryPick cherryPick : new ArrayList<ScreenerCherryPick>(cherryPickRequest.getScreenerCherryPicks())) {
-      deleteScreenerCherryPick(cherryPick);
+      deleteScreenerCherryPick(cherryPick, bypassBusinessRuleViolationChecks);
     }
     cherryPickRequest.getRequestedBy().getHbnCherryPickRequests().remove(cherryPickRequest);
     cherryPickRequest.getScreen().getCherryPickRequests().remove(cherryPickRequest);
     getHibernateTemplate().delete(cherryPickRequest);
   }
 
-  public Well findWell(WellKey wellKey) {
+  public Well findWell(WellKey wellKey)
+  {
     return findEntityById(Well.class, wellKey.getKey());
   }
 
