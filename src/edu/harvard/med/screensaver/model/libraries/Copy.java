@@ -46,7 +46,6 @@ public class Copy extends AbstractEntity
 
   // instance fields
 
-  private Integer _copyId;
   private Integer _version;
   private Library _library;
   private Set<CopyInfo> _copyInfos = new HashSet<CopyInfo>();
@@ -78,7 +77,7 @@ public class Copy extends AbstractEntity
   // public methods
 
   @Override
-  public Integer getEntityId()
+  public String getEntityId()
   {
     return getCopyId();
   }
@@ -87,12 +86,11 @@ public class Copy extends AbstractEntity
    * Get the id for the copy.
    *
    * @return the id for the copy
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="copy_id_seq"
+   * @hibernate.id generator-class="assigned"
    */
-  public Integer getCopyId()
+  public String getCopyId()
   {
-    return _copyId;
+    return getBusinessKey().toString();
   }
 
   /**
@@ -262,7 +260,7 @@ public class Copy extends AbstractEntity
     @Override
     public String toString()
     {
-      return this.getLibrary() + ":" + this.getName();
+      return this.getLibrary().getShortName() + ":" + this.getName();
     }
   }
 
@@ -328,8 +326,8 @@ public class Copy extends AbstractEntity
    * @param copyId the new id for the copy
    * @motivation for hibernate
    */
-  private void setCopyId(Integer copyId) {
-    _copyId = copyId;
+  private void setCopyId(String copyId)
+  {
   }
 
   /**
