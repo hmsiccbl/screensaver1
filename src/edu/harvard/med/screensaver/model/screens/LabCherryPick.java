@@ -12,6 +12,8 @@ package edu.harvard.med.screensaver.model.screens;
 
 import java.math.BigDecimal;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
@@ -19,9 +21,6 @@ import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
-import edu.harvard.med.screensaver.model.libraries.WellType;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -82,13 +81,18 @@ public class LabCherryPick extends AbstractEntity
       throw new NullPointerException();
   }
   _cherryPickRequest = screenerCherryPick.getCherryPickRequest();
-  if (!sourceWell.getWellType().equals(WellType.EXPERIMENTAL)) {
-    throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (not experimental)");
-  }
-  if (_cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE) && 
-      sourceWell.getCompounds().size() == 0) {
-    throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (does not contain a compound)");
-  }
+  
+  // TODO: turn the following business rules back on once we have some means of setting the well
+  // type for experimental wells in natural products libraries. (see rt#72830)
+  //
+  //  if (!sourceWell.getWellType().equals(WellType.EXPERIMENTAL)) {
+  //    throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (not experimental)");
+  //  }
+  //  if (_cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE) && 
+  //      sourceWell.getCompounds().size() == 0) {
+  //    throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (does not contain a compound)");
+  //  }
+  
   if (_cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI) && 
     sourceWell.getSilencingReagents().size() == 0) {
     throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (does not contain any reagents)");
@@ -386,6 +390,9 @@ public class LabCherryPick extends AbstractEntity
         return false;
       }
       BusinessKey that = (BusinessKey) object;
+      if ((this.getAssayPlate() == null) != (that.getAssayPlate() == null)) {
+        return false;
+      }
       return
         this.getCherryPickRequest().equals(that.getCherryPickRequest()) &&
         this.getSourceWell().equals(that.getSourceWell()) &&
