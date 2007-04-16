@@ -111,7 +111,7 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
 
   /**
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="none"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="cherry_pick_liquid_transfer_id"

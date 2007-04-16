@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
-import edu.harvard.med.screensaver.db.screendb.ScreenDBRNAiCherryPickSynchronizer;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -245,7 +244,12 @@ public interface DAO
     Class<E> entityClass,
     String propertyName,
     String propertyPattern);
-
+  
+  public <E extends AbstractEntity> List<E> findEntitiesByHql(
+    Class<E> entityClass,
+    String hql,
+    Object [] hqlParameters);
+  
   /**
    * Find all the screening room users that are lab heads.
    * @return a List of {@link ScreeningRoomUsers}s.
@@ -333,7 +337,7 @@ public interface DAO
   
   /**
    * @motivation Bypassing business rule violation checks is present for the purpose of the
-   * {@link ScreenDBRNAiCherryPickSynchronizer} only. This is a special-case situation where
+   * {@link ScreenDBRnaiCherryPickSynchronizer} only. This is a special-case situation where
    * data needs to be loaded from multiple sources - the ScreenDB synchronizer, and
    * to-be-written code to import data from the AllCherryPicks.xls file and the cherry
    * pick request .csv files themselves. The data may well lead to busines rule violations, as

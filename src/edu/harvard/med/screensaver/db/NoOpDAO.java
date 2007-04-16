@@ -103,7 +103,13 @@ public class NoOpDAO implements DAO
   {
     return null;
   }
-
+  
+  public <E extends AbstractEntity> List<E> findEntitiesByHql(Class<E> entityClass, String hql,
+    Object [] hqlParameters)
+  {
+    return null;
+  }
+  
   public <E extends AbstractEntity> E findEntityById(Class<E> entityClassController,
                                                      Serializable idController)
   {

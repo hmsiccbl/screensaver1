@@ -72,7 +72,7 @@ public class RNAiCherryPickScreening extends Screening
    *   column="cherry_pick_request_id"
    *   not-null="true"
    *   foreign-key="fk_rnai_cherry_pick_screening_to_rnai_cherry_pick_request"
-   *   cascade="save-update"
+   *   cascade="none"
    * @motivation for hibernate
    */
   @ToOneRelationship(nullable=false, inverseProperty="rnaiCherryPickScreening")

@@ -180,7 +180,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    *
    * @return the lab cherry picks
    * @hibernate.set
-   *   cascade="all-delete-orphan"
+   *   cascade="none"
    *   inverse="true"
    * @hibernate.collection-key
    *   column="cherry_pick_request_id"
@@ -220,7 +220,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    *   column="screen_id"
    *   not-null="true"
    *   foreign-key="fk_cherry_pick_request_to_screen"
-   *   cascade="save-update"
+   *   cascade="none"
    */
   @ToOneRelationship(nullable=false, inverseProperty="cherryPickRequests")
   public Screen getScreen()
@@ -696,7 +696,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    *   column="requested_by_id"
    *   not-null="true"
    *   foreign-key="fk_cherry_pick_request_to_requested_by"
-   *   cascade="save-update"
+   *   cascade="none"
    */
   @ToOneRelationship(nullable=false)
   private ScreeningRoomUser getHbnRequestedBy()

@@ -571,7 +571,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    *
    * @return the cherry pick requests made by this user
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="none"
    *   inverse="true"
    *   lazy="true"
    * @hibernate.collection-key

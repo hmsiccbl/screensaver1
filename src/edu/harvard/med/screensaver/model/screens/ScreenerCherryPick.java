@@ -104,7 +104,7 @@ public class ScreenerCherryPick extends AbstractEntity
    *   column="cherry_pick_request_id"
    *   not-null="true"
    *   foreign-key="fk_screener_cherry_pick_to_cherry_pick_request"
-   *   cascade="save-update"
+   *   cascade="none"
    * @motivation for hibernate
    */
   @ToOneRelationship(nullable=false)
@@ -123,7 +123,7 @@ public class ScreenerCherryPick extends AbstractEntity
    * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.libraries.Well"
    *                        column="screened_well_id" not-null="true"
    *                        foreign-key="fk_screener_cherry_pick_to_screened_well"
-   *                        cascade="save-update"
+   *                        cascade="none"
    * @motivation for hibernate
    */
   @ToOneRelationship(nullable=false)
@@ -134,7 +134,7 @@ public class ScreenerCherryPick extends AbstractEntity
 
   /**
    * @return
-   * @hibernate.set cascade="save-update" lazy="true" inverse="true"
+   * @hibernate.set cascade="all-delete-orphan" lazy="true" inverse="true"
    * @hibernate.collection-key column="screener_cherry_pick_id"
    * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screens.LabCherryPick"
    * @motivation for hibernate and maintenance of bi-directional relationships

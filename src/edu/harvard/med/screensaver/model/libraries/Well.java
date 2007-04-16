@@ -884,7 +884,7 @@ public class Well extends AbstractEntity implements Comparable
    *
    * @return the lab cherry picks
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="none"
    *   inverse="true"
    *   lazy="true"
    * @hibernate.collection-key

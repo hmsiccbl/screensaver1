@@ -92,7 +92,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
    * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screens.CherryPickRequest"
    *                        column="cherry_pick_request_id" not-null="true"
    *                        foreign-key="fk_cherry_pick_assay_plate_to_cherry_pick_request"
-   *                        cascade="save-update"
+   *                        cascade="none"
    * @return
    */
   @ToOneRelationship(nullable = false)
@@ -161,7 +161,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   }
 
   /**
-   * @hibernate.set cascade="save-update" inverse="true"
+   * @hibernate.set cascade="none" inverse="true"
    * @hibernate.collection-key column="cherry_pick_assay_plate_id"
    * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screens.LabCherryPick"
    * @motivation for hibernate and maintenance of bi-directional relationships
@@ -203,11 +203,8 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
    *                        column="cherry_pick_liquid_transfer_id"
    *                        not-null="false"
    *                        foreign-key="fk_cherry_pick_assay_plate_to_cherry_pick_liquid_transfer"
-   *                        cascade="all-delete-orphan"
+   *                        cascade="all"
    */
-  // TODO: is it kosher to have this cascade be all-delete-orphan? it seems that if you delete
-  // all the assay plates in a liquid transfer, then you probably want to delete the liquid
-  // transfer as well
   @ToOneRelationship(nullable = true)
   private CherryPickLiquidTransfer getHbnCherryPickLiquidTransfer()
   {

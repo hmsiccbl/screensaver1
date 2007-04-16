@@ -123,7 +123,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
    *   column="screen_id"
    *   not-null="true"
    *   foreign-key="fk_screening_room_activity_to_screen"
-   *   cascade="save-update"
+   *   cascade="none"
    */
   @ToOneRelationship(nullable=false, inverseProperty="screeningRoomActivities")
   public Screen getScreen()
@@ -370,7 +370,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
    *   column="performed_by_id"
    *   not-null="true"
    *   foreign-key="fk_screening_room_activity_to_performed_by"
-   *   cascade="save-update"
+   *   cascade="none"
    * @motivation for hibernate
    */
   private ScreensaverUser getHbnPerformedBy()

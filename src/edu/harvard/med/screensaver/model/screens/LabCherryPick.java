@@ -132,7 +132,7 @@ public class LabCherryPick extends AbstractEntity
    *   column="cherry_pick_request_id"
    *   not-null="true"
    *   foreign-key="fk_cherry_pick_to_cherry_pick_request"
-   *   cascade="save-update"
+   *   cascade="none"
    * @motivation for hibernate
    */
   @ToOneRelationship(nullable=false)
@@ -145,7 +145,7 @@ public class LabCherryPick extends AbstractEntity
    * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screens.ScreenerCherryPick"
    *                        column="screener_cherry_pick_id" not-null="true"
    *                        foreign-key="fk_lab_cherry_pick_to_screener_cherry_pick"
-   *                        cascade="save-update"
+   *                        cascade="none"
    */
   @ToOneRelationship(nullable=false)
   public ScreenerCherryPick getScreenerCherryPick()
@@ -166,7 +166,7 @@ public class LabCherryPick extends AbstractEntity
    *                        column="source_well_id" 
    *                        not-null="true"
    *                        foreign-key="fk_lab_cherry_pick_to_source_well"
-   *                        cascade="save-update"
+   *                        cascade="none"
    * @motivation for hibernate
    */
   @ToOneRelationship(nullable=false)
@@ -186,7 +186,7 @@ public class LabCherryPick extends AbstractEntity
    *   column="copy_id"
    *   not-null="false"
    *   foreign-key="fk_lab_cherry_pick_to_copy"
-   *   cascade="save-update"
+   *   cascade="none"
    * @motivation for hibernate
    */
   @ToOneRelationship(nullable=true)
@@ -272,7 +272,7 @@ public class LabCherryPick extends AbstractEntity
    *   column="cherry_pick_assay_plate_id"
    *   not-null="false"
    *   foreign-key="fk_lab_cherry_pick_to_cherry_pick_assay_plate"
-   *   cascade="save-update"
+   *   cascade="none"
    */
   @ToOneRelationship(nullable=true)
   @DerivedEntityProperty

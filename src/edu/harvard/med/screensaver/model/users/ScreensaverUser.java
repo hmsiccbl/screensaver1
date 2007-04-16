@@ -562,7 +562,7 @@ public class ScreensaverUser extends AbstractEntity
    *
    * @return the screening room activities performed
    * @hibernate.set
-   *   cascade="save-update"
+   *   cascade="none"
    *   inverse="true"
    *   lazy="true"
    * @hibernate.collection-key

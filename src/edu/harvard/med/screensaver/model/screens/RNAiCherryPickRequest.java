@@ -128,7 +128,7 @@ public class RNAiCherryPickRequest extends CherryPickRequest
    * @hibernate.one-to-one
    *   class="edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening"
    *   property-ref="rnaiCherryPickRequest"
-   *   cascade="save-update"
+   *   cascade="all"
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
   @ToOneRelationship(inverseProperty="rnaiCherryPickRequest")

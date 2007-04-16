@@ -25,6 +25,21 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+import org.hibernate.Criteria;
+import org.hibernate.FetchMode;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
+import org.hibernate.TransientObjectException;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.engine.SessionFactoryImplementor;
+import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.type.CollectionType;
+import org.springframework.orm.hibernate3.HibernateCallback;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -45,21 +60,6 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.StringUtils;
-
-import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.FetchMode;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.ScrollableResults;
-import org.hibernate.Session;
-import org.hibernate.TransientObjectException;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.engine.SessionFactoryImplementor;
-import org.hibernate.metadata.ClassMetadata;
-import org.hibernate.type.CollectionType;
-import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 
 /**
@@ -352,6 +352,15 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     return (List<E>) getHibernateTemplate().find(hql, propertyPattern);
   }
   
+  @SuppressWarnings("unchecked")
+  public <E extends AbstractEntity> List<E> findEntitiesByHql(
+    Class<E> entityClass,
+    String hql,
+    Object [] hqlParameters)
+  {
+    return (List<E>) getHibernateTemplate().find(hql, hqlParameters);
+  }
+  
   
   // public special-case data access methods
   
@@ -416,15 +425,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   
   public void deleteScreenerCherryPick(ScreenerCherryPick screenerCherryPick)
   {
-    deleteScreenerCherryPick(screenerCherryPick, false);
-  }
-
-  private void deleteScreenerCherryPick(
-    ScreenerCherryPick screenerCherryPick,
-    boolean bypassBusinessRuleViolationChecks)
-  {
-    if (! bypassBusinessRuleViolationChecks &&
-        screenerCherryPick.getCherryPickRequest().isAllocated()) {
+    if (screenerCherryPick.getCherryPickRequest().isAllocated()) {
       throw new BusinessRuleViolationException("cannot delete a screener cherry pick for a cherry pick request that has been allocated");
     }
 
@@ -432,7 +433,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     screenerCherryPick.getCherryPickRequest().getScreenerCherryPicks().remove(screenerCherryPick);
     screenerCherryPick.getScreenedWell().getHbnScreenerCherryPicks().remove(screenerCherryPick);
     for (LabCherryPick cherryPick : new ArrayList<LabCherryPick>(screenerCherryPick.getLabCherryPicks())) {
-      deleteLabCherryPick(cherryPick, bypassBusinessRuleViolationChecks);
+      deleteLabCherryPick(cherryPick);
     }
 
     getHibernateTemplate().delete(screenerCherryPick);
@@ -440,14 +441,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
 
   public void deleteLabCherryPick(LabCherryPick labCherryPick)
   {
-    deleteLabCherryPick(labCherryPick, false);
-  }
-  
-  public void deleteLabCherryPick(
-    LabCherryPick labCherryPick,
-    boolean bypassBusinessRuleViolationChecks)
-  {
-    if (! bypassBusinessRuleViolationChecks && labCherryPick.getCherryPickRequest().isAllocated()) {
+    if (labCherryPick.getCherryPickRequest().isAllocated()) {
       throw new BusinessRuleViolationException("cannot delete a lab cherry pick for a cherry pick request that has been allocated");
     }
 
@@ -457,6 +451,9 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
       labCherryPick.getSourceCopy().getHbnLabCherryPicks().remove(labCherryPick);
     }
     labCherryPick.getSourceWell().getHbnLabCherryPicks().remove(labCherryPick);
+    if (labCherryPick.getAssayPlate() != null) {
+      labCherryPick.getAssayPlate().getLabCherryPicks().remove(labCherryPick);
+    }
 
     getHibernateTemplate().delete(labCherryPick);
   }
@@ -472,10 +469,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   {
     CherryPickRequest cherryPickRequest = (CherryPickRequest) reattachEntity(cherryPickRequestIn);  
 
-    if (bypassBusinessRuleViolationChecks) {
-
-    }
-    else {
+    if (! bypassBusinessRuleViolationChecks) {
       if (cherryPickRequestIn.isAllocated()) {
         throw new BusinessRuleViolationException("cannot delete a cherry pick request that has been allocated");
       }
@@ -486,14 +480,8 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
 
     // disassociate from related entities
     
-    // TODO: we're having to delete the {screener,lab}CherryPicks explicitly,
-    // though I would have expected the cascade="all-delete-orphan" would have
-    // taken care of this
-    for (ScreenerCherryPick cherryPick : new ArrayList<ScreenerCherryPick>(cherryPickRequest.getScreenerCherryPicks())) {
-      deleteScreenerCherryPick(cherryPick, bypassBusinessRuleViolationChecks);
-    }
     cherryPickRequest.getRequestedBy().getHbnCherryPickRequests().remove(cherryPickRequest);
-    cherryPickRequest.getScreen().getCherryPickRequests().remove(cherryPickRequest);
+    cherryPickRequest.getScreen().getCherryPickRequests().remove(cherryPickRequest);    
     getHibernateTemplate().delete(cherryPickRequest);
   }
 

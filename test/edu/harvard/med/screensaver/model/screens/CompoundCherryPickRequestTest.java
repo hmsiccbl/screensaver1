@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
@@ -24,8 +26,6 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-
-import org.apache.log4j.Logger;
 
 public class CompoundCherryPickRequestTest extends AbstractEntityInstanceTest
 {
@@ -88,6 +88,5 @@ public class CompoundCherryPickRequestTest extends AbstractEntityInstanceTest
       }
     });
   }
-
 }
 

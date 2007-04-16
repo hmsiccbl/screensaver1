@@ -419,7 +419,7 @@ public class Copy extends AbstractEntity
    * Get the cherry picks.
    * 
    * @return the cherry picks
-   * @hibernate.set cascade="save-update" inverse="true"
+   * @hibernate.set cascade="none" inverse="true"
    * @hibernate.collection-key column="copy_id"
    * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screens.LabCherryPick"
    * @motivation for hibernate and maintenance of bi-directional relationships

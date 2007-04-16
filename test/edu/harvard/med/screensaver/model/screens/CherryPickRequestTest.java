@@ -13,9 +13,17 @@ import java.beans.IntrospectionException;
 import java.util.Date;
 import java.util.List;
 
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 
 import org.apache.log4j.Logger;
 
@@ -65,5 +73,69 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest
     fail("not implemented");
   }
 
+  public void testDeleteCompoundCherryPick()
+  {
+    schemaUtil.recreateSchema();
+    final Integer cherryPickRequestNumber = 2504;
+    final Integer screenNumber = 900;
+    dao.doInTransaction(new DAOTransaction()
+    {
+      // create
+      public void runTransaction()
+      {
+        Library library = new Library("name", "short", ScreenType.SMALL_MOLECULE, LibraryType.DOS,
+          5, 5);
+        dao.persistEntity(library);
+        dao.loadOrCreateWellsForLibrary(library);
+        Well well = library.getWells().iterator().next();
+        ScreeningRoomUser user = new ScreeningRoomUser(
+          new Date(), "joe", "user",  "email", "phone", "addr", "comments", "ecommons",
+          "harvardId", ScreeningRoomUserClassification.GRADUATE_STUDENT, false);
+        dao.persistEntity(user);
+        Screen screen = new Screen(user, user, screenNumber, new Date(), ScreenType.SMALL_MOLECULE, "title");
+        dao.persistEntity(screen);
+        
+        CompoundCherryPickRequest request =
+          new CompoundCherryPickRequest(screen, user, new Date(), cherryPickRequestNumber);
+        CherryPickAssayPlate plate = new CherryPickAssayPlate(request, 1, 0 , PlateType.ABGENE);
+        ScreenerCherryPick screenerCherryPick = new ScreenerCherryPick(request, well);
+        LabCherryPick labCherryPick = new LabCherryPick(screenerCherryPick, well);
+        labCherryPick.setAllocated(new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "A"));
+        labCherryPick.setMapped(plate, 0, 0);
+        
+        CherryPickLiquidTransfer transfer =
+          new CherryPickLiquidTransfer(user, new Date(), new Date(), request);
+        transfer.addCherryPickAssayPlate(plate);
+
+        dao.persistEntity(request);
+      }
+    });
+    
+    // delete
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        CompoundCherryPickRequest request =
+          dao.findEntityByProperty(CompoundCherryPickRequest.class, "cherryPickRequestNumber", cherryPickRequestNumber);
+        dao.deleteCherryPickRequest(request, true);
+      }
+    });
+
+    // test that its gone
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        CompoundCherryPickRequest request =
+          dao.findEntityByProperty(CompoundCherryPickRequest.class, "cherryPickRequestNumber", cherryPickRequestNumber);
+        assertNull("cherry pick request is deleted", request);
+        
+        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+        assertNotNull("screen is not deleted", screen);
+        assertEquals("screen has no activities", 0, screen.getScreeningRoomActivities().size());
+      }
+    });
+  }
 }
 
