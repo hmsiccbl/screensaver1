@@ -24,7 +24,6 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -68,7 +67,7 @@ public class ScreenDBRNAiCherryPickSynchronizer
       public void runTransaction()
       {
         try {
-          deleteOldCherryPickRequests();
+          deleteOldRNAiCherryPickRequests();
           synchronizeRNAiCherryPicksProper();
         }
         catch (SQLException e) {
@@ -89,11 +88,13 @@ public class ScreenDBRNAiCherryPickSynchronizer
 
   // private instance methods
   
-  private void deleteOldCherryPickRequests()
+  private void deleteOldRNAiCherryPickRequests()
   {
-    for (CherryPickRequest request : _dao.findAllEntitiesWithType(CherryPickRequest.class)) {
-      _dao.deleteCherryPickRequest(request, true);
-    }
+    // NOTE: this is now done in ScreenDBSynchronizer.deleteOldCherryPickRequests. see comment
+    // there for details
+//    for (CherryPickRequest request : _dao.findAllEntitiesWithType(RNAiCherryPickRequest.class)) {
+//      _dao.deleteCherryPickRequest(request, true);
+//    }
   }
 
   private void synchronizeRNAiCherryPicksProper() throws SQLException, ScreenDBSynchronizationException
@@ -174,7 +175,7 @@ public class ScreenDBRNAiCherryPickSynchronizer
       // TODO: is EPPENDORF the correct plate type here?
       CherryPickAssayPlate assayPlate =
         new CherryPickAssayPlate(request, plateOrdinal, 0, PlateType.EPPENDORF);
-      assayPlate.setComments("ScreenDB filename for this assay plate is \"" + filename + "\"");
+      assayPlate.setComments("ScreenDB filename for this assay plate is \"" + filename + "\".");
       assayPlate.setCherryPickLiquidTransfer(liquidTransfer);
       plateOrdinal ++;
     }

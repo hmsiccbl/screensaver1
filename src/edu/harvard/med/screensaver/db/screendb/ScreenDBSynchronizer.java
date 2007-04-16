@@ -23,6 +23,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 
 /**
  * Synchronizes the Screensaver database to the latest contents of ScreenDB. For every ScreenDB
@@ -44,7 +45,6 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
  * <li>ScreeningRoomUsers are looked up by firstName, lastName
  * <li>Libraries are looked up by startPlate
  * <li>Screns are looked up by screenNumber
- * <li>TODO: fill in this list as more types are synchronized
  * </ul>
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -89,13 +89,7 @@ public class ScreenDBSynchronizer
       commandLine.getOptionValue("P"),
       (DAO) context.getBean("dao"));
     synchronizer.synchronize();
-    String errorMessageKey = synchronizer.getErrorMessageKey();
-    if (errorMessageKey != null) {
-      log.error("synchronization error: " + errorMessageKey);
-    }
-    else {
-      log.info("successfully synchronized with ScreenDB.");
-    }
+    log.info("successfully synchronized with ScreenDB.");
   }
   
 
@@ -107,7 +101,8 @@ public class ScreenDBSynchronizer
   private String _password;
   private Connection _connection;
   private DAO _dao;
-  private String _errorMessageKey;
+  private ScreenDBCompoundCherryPickSynchronizer compoundCherryPickSynchronizer;
+  //private ScreenDBRnaiCherryPickSynchronizer rnRnaiCherryPickSynchronizer;
   
 
   // public constructors and methods
@@ -122,36 +117,19 @@ public class ScreenDBSynchronizer
   }
   
   /**
-   * Attempt to synchronize Screensaver with ScreenDB. Return true when successful. When
-   * unsuccessul, set the error message key, and return false. It is expected that this method
-   * is only called once per ScreenDBSynchronizer connection.
-   * @return true whenever the synchronization was successful
+   * Synchronize Screensaver with ScreenDB.
+   * @throws ScreenDBSynchronizationException whenever there is a problem synchronizing
    */
-  public boolean synchronize()
+  public void synchronize() throws ScreenDBSynchronizationException
   {
-    _dao.doInTransaction(new DAOTransaction() {
-      public void runTransaction()
-      {
-        synchronizeInTransaction();
-      }
-    });
-    return _errorMessageKey == null;
+    initializeConnection();
+    deleteOldCherryPickRequests();
+    synchronizeLibraries();
+    synchronizeNonLibraries();
+    closeConnection();
   }
 
-  /**
-   * Get the message key for the error that occurred. It is expected that this method is only
-   * called after {@link #synchronize()}, and only when that method returned <code>false</code>.
-   * @return the message key for the error that occurred
-   */
-  public String getErrorMessageKey()
-  {
-    return _errorMessageKey;
-  }
-  
-  
-  // private methods
-
-  private boolean initializeConnection()
+  private void initializeConnection() throws ScreenDBSynchronizationException
   {
     try {
       _connection = DriverManager.getConnection(
@@ -160,48 +138,78 @@ public class ScreenDBSynchronizer
         _password);
     }
     catch (SQLException e) {
-      log.error("could not connect to ScreenDB database: " + e.getMessage());
-      e.printStackTrace();
-      return false;
+      throw new ScreenDBSynchronizationException("could not connect to ScreenDB database", e);
     }
-    return true;
   }
 
-  private void synchronizeInTransaction() {
-    if (! initializeConnection()) {
-      _errorMessageKey = "screenDBSynchronizer.couldNotConnect";
-      return;
-    }
+  /**
+   * Delete the old compound cherry pick requests in a separate transaction.
+   * 
+   * @motivation This should really be part of
+   *             {@link ScreenDBCompoundCherryPickSynchronizer} and
+   *             {@link ScreenDBRnaiCherryPickSynchronizer}, but I need to run
+   *             it in a separate transaction or I get hibernate exceptions
+   *             about deleted entities that would be resaved by cascade. I
+   *             probably should refactor things a bit so I can call
+   *             "deleteOldCherryPickRequests" methods in the two
+   *             above-mentioned synchronizers, in separate transactions.
+   */
+  private void deleteOldCherryPickRequests()
+  {
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        for (CherryPickRequest request : _dao.findAllEntitiesWithType(CherryPickRequest.class)) {
+          _dao.deleteCherryPickRequest(request, true);
+        }
+      }
+    });
+  }
+
+  private void synchronizeLibraries() throws ScreenDBSynchronizationException
+  {
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        ScreenDBLibrarySynchronizer librarySynchronizer =
+          new ScreenDBLibrarySynchronizer(_connection, _dao);
+        librarySynchronizer.synchronizeLibraries();
+      }
+    });
+  }
+
+  private void synchronizeNonLibraries() throws ScreenDBSynchronizationException
+  {
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        ScreenDBUserSynchronizer userSynchronizer = new ScreenDBUserSynchronizer(_connection, _dao);
+        userSynchronizer.synchronizeUsers();
+        ScreenDBScreenSynchronizer screenSynchronizer =
+          new ScreenDBScreenSynchronizer(_connection, _dao, userSynchronizer);
+        screenSynchronizer.synchronizeScreens();
+        ScreenDBLibraryScreeningSynchronizer libraryScreeningSynchronizer =
+          new ScreenDBLibraryScreeningSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
+        libraryScreeningSynchronizer.synchronizeLibraryScreenings();
+        ScreenDBCompoundCherryPickSynchronizer compoundCherryPickSynchronizer =
+          new ScreenDBCompoundCherryPickSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
+        compoundCherryPickSynchronizer.synchronizeRNAiCherryPicks();
+        ScreenDBRNAiCherryPickSynchronizer rnaiCherryPickSynchronizer =
+          new ScreenDBRNAiCherryPickSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
+        rnaiCherryPickSynchronizer.synchronizeRNAiCherryPicks();
+      }
+    });
+  }
+
+  private void closeConnection()
+  {
     try {
-      ScreenDBUserSynchronizer userSynchronizer = new ScreenDBUserSynchronizer(_connection, _dao);
-      userSynchronizer.synchronizeUsers();
-      ScreenDBLibrarySynchronizer librarySynchronizer =
-        new ScreenDBLibrarySynchronizer(_connection, _dao);
-      librarySynchronizer.synchronizeLibraries();
-      ScreenDBScreenSynchronizer screenSynchronizer =
-        new ScreenDBScreenSynchronizer(_connection, _dao, userSynchronizer);
-      screenSynchronizer.synchronizeScreens();
-      ScreenDBLibraryScreeningSynchronizer libraryScreeningSynchronizer =
-        new ScreenDBLibraryScreeningSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
-      libraryScreeningSynchronizer.synchronizeLibraryScreenings();
-      // TODO: 'Liquid Handling only' Visits to LiquidHandling
-      // TODO: 'Cherry Pick' Visits to Compound CherryPickRequest
-      ScreenDBRNAiCherryPickSynchronizer rnaiCherryPickSynchronizer =
-        new ScreenDBRNAiCherryPickSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
-      rnaiCherryPickSynchronizer.synchronizeRNAiCherryPicks();
+      _connection.close();
     }
-    catch (ScreenDBSynchronizationException e) {
-      // TODO: report error message as well
-      log.error(e);
-      _errorMessageKey = "screenDBSynchronizer.synchronizationException";
-      return;
-    }
-    finally {
-      try {
-        _connection.close();
-      }
-      catch (SQLException e) {
-      }
+    catch (SQLException e) {
     }
   }
 }

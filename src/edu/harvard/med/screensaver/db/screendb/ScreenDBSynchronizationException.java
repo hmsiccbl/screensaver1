@@ -11,7 +11,7 @@ package edu.harvard.med.screensaver.db.screendb;
 
 import org.apache.log4j.Logger;
 
-public class ScreenDBSynchronizationException extends Exception
+public class ScreenDBSynchronizationException extends RuntimeException
 {
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(ScreenDBSynchronizationException.class);

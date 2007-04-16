@@ -131,13 +131,7 @@ public class SchemaManager extends AbstractBackingBean
       _screenDBUsername,
       _screenDBPassword,
       _dao);
-    if (screenDBSynchronizer.synchronize()) {
-      showMessage("screenDBSynchronizer.screenDBSynchronized");
-    }
-    else {
-      log.error("errorMessageKey = " + screenDBSynchronizer.getErrorMessageKey());
-      showMessage(screenDBSynchronizer.getErrorMessageKey());
-    }
+    screenDBSynchronizer.synchronize();
+    showMessage("screenDBSynchronizer.screenDBSynchronized");
   }
-
 }
