@@ -93,7 +93,7 @@ public abstract class CherryPickRequest extends AbstractEntity
                            Date dateRequested)
   {
     int cherryPickRequestNumber =
-      _screen.getAllTimeCherryPickRequestCount() + CHERRY_PICK_REQUEST_NUMBER_GENERATION_OFFSET;
+      screen.getAllTimeCherryPickRequestCount() + CHERRY_PICK_REQUEST_NUMBER_GENERATION_OFFSET;
     initialize(screen, requestedBy, dateRequested, cherryPickRequestNumber);
   }
 
@@ -696,7 +696,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    *   column="requested_by_id"
    *   not-null="true"
    *   foreign-key="fk_cherry_pick_request_to_requested_by"
-   *   cascade="none"
+   *   cascade="save-update"
    */
   @ToOneRelationship(nullable=false)
   private ScreeningRoomUser getHbnRequestedBy()
