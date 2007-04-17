@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -48,10 +49,8 @@ import edu.harvard.med.screensaver.ui.namevaluetable.CompoundNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.GeneNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.LibraryNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
-import edu.harvard.med.screensaver.ui.searchresults.LibraryContentsWellSearchResultsCriteria;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.WellFinderWellSearchResultsCriteria;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.Pair;
@@ -274,9 +273,9 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
       return viewWell(result.getWells().first(), null);
     }
     else {
-      WellSearchResults searchResults = new WellSearchResults(
-        new WellFinderWellSearchResultsCriteria(_dao, result),
-        this);
+      WellSearchResults searchResults =
+        new WellSearchResults(new ArrayList<Well>(result.getWells()),
+                              this);
       return viewWellSearchResults(searchResults);
     }
   }
@@ -336,13 +335,26 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
    * @see edu.harvard.med.screensaver.ui.control.LibrariesController#viewLibraryContents(edu.harvard.med.screensaver.model.libraries.Library)
    */
   @UIControllerMethod
-  public String viewLibraryContents(Library library)
+  public String viewLibraryContents(final Library libraryIn)
   {
-    logUserActivity("viewLibraryContents " + library);
-    WellSearchResults wellSearchResults = new WellSearchResults(
-      new LibraryContentsWellSearchResultsCriteria(_dao, library),
-      LibrariesControllerImpl.this);
-    _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
+    logUserActivity("viewLibraryContents " + libraryIn);
+    final Library[] libraryOut = new Library[1];
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Library library = (Library) _dao.reloadEntity(libraryIn);
+        _dao.need(library,
+                  "hbnWells",
+                  "hbnWells.hbnSilencingReagents",
+                  "hbnWells.hbnCompounds");
+        WellSearchResults wellSearchResults = 
+          new WellSearchResults(new ArrayList<Well>(library.getWells()),
+                                LibrariesControllerImpl.this);
+        _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
+        libraryOut[0] = library;
+      }
+    });
+
     return "viewWellSearchResults";
   }
   
