@@ -391,6 +391,15 @@
         token="&lt;/class&gt;" 
         property="ResultValueType.indexes"/>
     </replace>
+  	
+  	<!-- an index for well_molfile -->
+    <replace 
+      file="resources/edu/harvard/med/screensaver/model/libraries/Well.hbm.xml" 
+      propertyFile="resources/edu/harvard/med/screensaver/model/libraries/Well.replace.properties">
+      <replacefilter 
+        token="&lt;/class&gt;" 
+        property="Well.indexes"/>
+    </replace>
     
   </target>
 
