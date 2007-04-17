@@ -626,7 +626,7 @@ public class Well extends AbstractEntity implements Comparable
    */
   public void writeToSDFile(PrintWriter sdFilePrintWriter)
   {
-    if (_molfile == null) {
+    if (getMolfile() == null) {
       return;
     }
     sdFilePrintWriter.println(getMolfile());

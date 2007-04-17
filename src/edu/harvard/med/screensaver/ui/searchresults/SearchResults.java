@@ -134,6 +134,11 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
     doSort();
     return _currentSort;
   }
+  
+  protected void setCurrentSort(List<E> currentSort)
+  {
+    _currentSort = currentSort;
+  }
 
   /**
    * Get the data table.

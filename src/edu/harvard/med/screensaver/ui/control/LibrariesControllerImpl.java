@@ -13,9 +13,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.dao.DataAccessException;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -44,17 +48,13 @@ import edu.harvard.med.screensaver.ui.namevaluetable.CompoundNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.GeneNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.LibraryNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
+import edu.harvard.med.screensaver.ui.searchresults.LibraryContentsWellSearchResultsCriteria;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.WellFinderWellSearchResultsCriteria;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.Pair;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.springframework.dao.DataAccessException;
 
 /**
  * 
@@ -274,9 +274,9 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
       return viewWell(result.getWells().first(), null);
     }
     else {
-      WellSearchResults searchResults =
-        new WellSearchResults(new ArrayList<Well>(result.getWells()),
-                              this);
+      WellSearchResults searchResults = new WellSearchResults(
+        new WellFinderWellSearchResultsCriteria(_dao, result),
+        this);
       return viewWellSearchResults(searchResults);
     }
   }
@@ -336,26 +336,13 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
    * @see edu.harvard.med.screensaver.ui.control.LibrariesController#viewLibraryContents(edu.harvard.med.screensaver.model.libraries.Library)
    */
   @UIControllerMethod
-  public String viewLibraryContents(final Library libraryIn)
+  public String viewLibraryContents(Library library)
   {
-    logUserActivity("viewLibraryContents " + libraryIn);
-    final Library[] libraryOut = new Library[1];
-    _dao.doInTransaction(new DAOTransaction() {
-      public void runTransaction()
-      {
-        Library library = (Library) _dao.reloadEntity(libraryIn);
-        _dao.need(library,
-                  "hbnWells",
-                  "hbnWells.hbnSilencingReagents",
-                  "hbnWells.hbnCompounds");
-        WellSearchResults wellSearchResults = 
-          new WellSearchResults(new ArrayList<Well>(library.getWells()),
-                                LibrariesControllerImpl.this);
-        _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
-        libraryOut[0] = library;
-      }
-    });
-
+    logUserActivity("viewLibraryContents " + library);
+    WellSearchResults wellSearchResults = new WellSearchResults(
+      new LibraryContentsWellSearchResultsCriteria(_dao, library),
+      LibrariesControllerImpl.this);
+    _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
     return "viewWellSearchResults";
   }
   
@@ -642,7 +629,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.LibrariesController#downloadWellSearchResults(edu.harvard.med.screensaver.ui.searchresults.WellSearchResults)
    */
-  public String downloadWellSearchResults(final WellSearchResults searchResultsIn)
+  public String downloadWellSearchResults(final WellSearchResults searchResults)
   {
     logUserActivity("downloadWellSearchResults");
     _dao.doInTransaction(new DAOTransaction() 
@@ -650,24 +637,14 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
       @SuppressWarnings("unchecked")
       public void runTransaction() 
       {
-        // reload the search result wells into the current hibernate session
-        List<Well> reloadedWells = new ArrayList<Well>(searchResultsIn.getResultsSize());
-        // TODO: optimize, as reattachment is slow, for large sets of wells
-        for (Iterator iter = ((List<Well>) searchResultsIn.getDataModel().getWrappedData()).iterator(); iter.hasNext();) {
-          Well well = (Well) iter.next();
-          reloadedWells.add((Well) _dao.reattachEntity(well));
-        }
-        WellSearchResults searchResults = new WellSearchResults(reloadedWells, LibrariesControllerImpl.this);
-
-        
         File searchResultsFile = null;
         PrintWriter searchResultsPrintWriter = null;
         FileOutputStream searchResultsFileOutputStream = null;
         try {
           searchResultsFile = File.createTempFile(
             "searchResults.",
-            searchResultsIn.getDownloadFormat().equals(SearchResults.SD_FILE) ? ".sdf" : ".xls");
-          if (searchResultsIn.getDownloadFormat().equals(SearchResults.SD_FILE)) {
+            searchResults.getDownloadFormat().equals(SearchResults.SD_FILE) ? ".sdf" : ".xls");
+          if (searchResults.getDownloadFormat().equals(SearchResults.SD_FILE)) {
             searchResultsPrintWriter = new PrintWriter(searchResultsFile);
             searchResults.writeSDFileSearchResults(searchResultsPrintWriter);
             searchResultsPrintWriter.close();
@@ -682,7 +659,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
           JSFUtils.handleUserFileDownloadRequest(
             getFacesContext(),
             searchResultsFile,
-            searchResultsIn.getDownloadFormat().equals(SearchResults.SD_FILE) ? "chemical/x-mdl-sdfile" : Workbook.MIME_TYPE);
+            searchResults.getDownloadFormat().equals(SearchResults.SD_FILE) ? "chemical/x-mdl-sdfile" : Workbook.MIME_TYPE);
         }
         catch (IOException e)
         {

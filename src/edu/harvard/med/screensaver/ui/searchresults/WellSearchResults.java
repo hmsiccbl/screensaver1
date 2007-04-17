@@ -41,29 +41,32 @@ public class WellSearchResults extends SearchResults<Well>
   
   private static final Logger log = Logger.getLogger(WellSearchResults.class);
 
-  private static final String LIBRARY   = "Library";
-  private static final String PLATE     = "Plate";
-  private static final String WELL      = "Well";
-  private static final String WELL_TYPE = "Well Type";
-  private static final String CONTENTS  = "Contents";
+  static final String LIBRARY   = "Library";
+  static final String PLATE     = "Plate";
+  static final String WELL      = "Well";
+  static final String WELL_TYPE = "Well Type";
+  static final String CONTENTS  = "Contents";
   
   
   // instance fields
   
   private LibrariesController _librariesController;
+  private WellSearchResultsCriteria _wellSearchResultsCriteria;
   
   
   // public constructor
   
   /**
    * Construct a new <code>WellSearchResultsViewer</code> object.
-   * @param wells the list of wells
+   * @param wellSearchResultsCriteria
+   * @param librariesController
    */
   public WellSearchResults(
-    List<Well> unsortedResults,
+    WellSearchResultsCriteria wellSearchResultsCriteria,
     LibrariesController librariesController)
   {
-    super(unsortedResults);
+    super(wellSearchResultsCriteria.getResults());
+    _wellSearchResultsCriteria = wellSearchResultsCriteria;
     _librariesController = librariesController;
   }
 
@@ -231,7 +234,7 @@ public class WellSearchResults extends SearchResults<Well>
 
   public void writeSDFileSearchResults(PrintWriter searchResultsPrintWriter)
   {
-    for (Well well : getCurrentSort()) {
+    for (Well well : _wellSearchResultsCriteria.reloadResults()) {
       well.writeToSDFile(searchResultsPrintWriter);
     }
   }
@@ -245,7 +248,7 @@ public class WellSearchResults extends SearchResults<Well>
     searchResultsWorkbook.setSheetName(1, "Compounds");
     int rnaiSheetRow = 1;
     int compoundSheetRow = 1;
-    for (Well well : getCurrentSort()) {
+    for (Well well : _wellSearchResultsCriteria.reloadResults()) {
       if (writeWellToRNAiSheet(well, rnaiSheet, rnaiSheetRow)) {
         rnaiSheetRow ++;
       }
