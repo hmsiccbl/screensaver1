@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,11 +31,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.io.workbook.Cell;
@@ -54,10 +50,16 @@ import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueTypeNumericalnessException;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
+
+import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
 
 /**
  * Parses data from a workbook files (a.k.a. Excel spreadsheets) necessary for
@@ -556,7 +558,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @throws IOException 
    * @throws UnrecoverableScreenResultParseException 
    */
-  private void parseData(
+  void parseData(
     Workbook workbook,
     ScreenResult screenResult) 
     throws ExtantLibraryException, IOException, UnrecoverableScreenResultParseException
@@ -564,25 +566,26 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     int dataSheetsParsed = 0;
     int totalSheets = workbook.getWorkbook().getNumberOfSheets();
     int totalDataSheets = totalSheets - FIRST_DATA_SHEET_INDEX;
-    for (int i = FIRST_DATA_SHEET_INDEX; i < totalSheets; ++i) {
-      String sheetName = workbook.getWorkbook().getSheetName(i);
+    for (int iSheet = FIRST_DATA_SHEET_INDEX; iSheet < totalSheets; ++iSheet) {
+      String sheetName = workbook.getWorkbook().getSheetName(iSheet);
       log.info("parsing sheet " + (dataSheetsParsed + 1) + " of " + totalDataSheets + ", " + sheetName);
-      final HSSFSheet sheet = initializeDataSheet(workbook, workbook.findSheetIndex(sheetName));
-      for (int iRow = RAWDATA_FIRST_DATA_ROW_INDEX; iRow <= sheet.getLastRowNum(); ++iRow) {
-        if (ignoreRow(sheet, iRow)) {
-          continue;
-        }
-
-        Well well = findWell(iRow);
-        if (well == null) {
-          continue;
-        }
+      final HSSFSheet sheet = initializeDataSheet(workbook, iSheet);
+      DataRowIterator rowIter = new DataRowIterator(workbook, iSheet);
+      
+      int iDataHeader = 0;
+      for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+        determineNumericalnessOfDataHeader(rvt, workbook, iSheet, iDataHeader++);
+      }
+      
+      while (rowIter.hasNext()) {
+        Integer iRow = rowIter.next();
+        Well well = rowIter.getWell();
 
         // TODO: should verify with Library Well Type, if not specific to AssayWellType
         AssayWellType assayWellType = _assayWellTypeParser.parse(dataCell(iRow, DataColumn.ASSAY_WELL_TYPE));
 
         List<ResultValueType> wellExcludes = _excludeParser.parseList(dataCell(iRow, DataColumn.EXCLUDE));
-        int iDataHeader = 0;
+        iDataHeader = 0;
         for (ResultValueType rvt : screenResult.getResultValueTypes()) {
           Cell cell = dataCell(iRow, iDataHeader);
           boolean isExclude = (wellExcludes != null && wellExcludes.contains(rvt));
@@ -597,7 +600,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                 else {
                   value = _booleanParser.parse(cell).toString();
                 }
-
                 resultValueAdded = 
                   rvt.addResultValue(well,
                                      assayWellType,
@@ -621,11 +623,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
               }
             }
             else { // not assay activity indicator
-              // TODO: avoid the subtle bug of implicitly flagging a
-              // ResultValueType as non-numeric if an initial set of values are blank, but are
-              // then followed by (valid) numeric data
-              if ((!rvt.isNumericalnessDetermined() && cell.isNumeric()) || 
-                rvt.isNumericalnessDetermined() && rvt.isNumeric()) {
+              if (rvt.isNumeric()) {
                 resultValueAdded = 
                   rvt.addResultValue(well,
                                      assayWellType,
@@ -645,7 +643,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
               _errors.addError("duplicate well", cell);
             }
           }
-          catch (IllegalArgumentException e) {
+          catch (ResultValueTypeNumericalnessException e) {
             // inconsistency in numeric or string types in RVT's result values
             _errors.addError(e.getMessage(), cell);
           }
@@ -661,6 +659,143 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       _errors.addError(NO_DATA_SHEETS_FOUND_ERROR);
     } else {
       log.info("done parsing " + dataSheetsParsed + " data sheet(s) " + workbook.getWorkbookFile().getName());
+    }
+  }
+
+  /**
+   * Determines if a data header contains numeric or non-numeric data, by
+   * reading ahead and making the determination based upon the first non-empty
+   * cell in the column for the specified data header. Note that the test may be
+   * inconclusive for a given worksheet (if the entire column contains empty
+   * cells), but that a later worksheet may used to make the determination.
+   */
+  private void determineNumericalnessOfDataHeader(ResultValueType rvt, 
+                                                  Workbook workbook, 
+                                                  int iSheet, 
+                                                  int iDataHeader)
+  {
+    if (!rvt.isNumericalnessDetermined()) {
+      if (rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL) {
+        rvt.setNumeric(true);
+      } 
+      else {
+        DataRowIterator rowIter = new DataRowIterator(workbook, iSheet);
+        while (rowIter.hasNext()) {
+          Cell cell = dataCell(rowIter.next(), iDataHeader);
+          if (cell.isEmpty()) {
+            continue;
+          }
+          if (cell.isNumeric()) {
+            rvt.setNumeric(true);
+          }
+          else if (cell.isBoolean()) {
+            rvt.setNumeric(false);
+          }
+          else {
+            rvt.setNumeric(false);
+          }
+          break;
+        }
+      }
+    }
+  }
+  
+  private class DataRowIterator implements Iterator<Integer>
+  {
+    private HSSFSheet _sheet;
+    private int _iRow;
+    private Well _well;
+    private int _lastRowNum;
+
+    public DataRowIterator(Workbook workbook,
+                           int sheetIndex)
+    {
+      _sheet = workbook.getWorkbook().getSheetAt(sheetIndex);
+      _iRow = RAWDATA_FIRST_DATA_ROW_INDEX - 1;
+      _lastRowNum = _sheet.getLastRowNum();
+    }
+    
+    public DataRowIterator(DataRowIterator rowIter)
+    {
+      _sheet = rowIter._sheet;
+      _iRow = rowIter._iRow;
+      _well = rowIter._well;
+      _lastRowNum = rowIter._lastRowNum;
+    }
+
+    public boolean hasNext()
+    {
+      return findNextRow() != _iRow;
+    }
+
+    public Integer next()
+    {
+      int nextRow = findNextRow();
+      if (nextRow != _iRow) {
+        _iRow = nextRow;
+        _well = findWell(_iRow);
+        return getRowIndex();
+      }
+      else {
+        _well = null;
+        return null;
+      }
+    }
+    
+    public Integer getRowIndex()
+    {
+      return new Integer(_iRow);
+    }
+    
+    public Well getWell()
+    {
+      return _well;
+    }
+    
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    private int findNextRow()
+    {
+      int iRow = _iRow;
+      while (++iRow <= _lastRowNum) {
+        if (!ignoreRow(_sheet, iRow)) {
+          if (findWell(iRow) != null) {
+            return iRow;
+          }
+        }
+      }
+      return _iRow;
+    }
+
+    private Well findWell(int iRow)
+    {
+      // TODO: dataCell() call assumes initializeDataSheet() has been called before this iterator object is used! (bad!)
+      Integer plateNumber = _plateNumberParser.parse(dataCell(iRow,
+                                                              DataColumn.STOCK_PLATE_ID,
+                                                              true));
+      Cell wellNameCell = dataCell(iRow,
+                                   DataColumn.WELL_NAME,
+                                   true);
+      String wellName = _wellNameParser.parse(wellNameCell);
+      if (wellName.equals("")) {
+        return null;
+      }
+      Library library = findLibraryWithPlate(plateNumber);
+      if (library == null) {
+        _errors.addError(NO_SUCH_LIBRARY_WITH_PLATE + ": " + plateNumber, wellNameCell);
+        return null;
+      }
+      preloadLibraryWells(library);
+      
+      Well well = _dao.findWell(new WellKey(plateNumber, wellName));
+      if (well == null) {
+        _errors.addError(NO_SUCH_WELL + ": " + plateNumber + ":" + wellName, wellNameCell);
+      }
+
+      return well;
     }
   }
 
@@ -694,35 +829,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       return true;
     }
     return false;
-  }
-
-  private Well findWell(int iRow) throws UnrecoverableScreenResultParseException
-  {
-    Integer plateNumber = _plateNumberParser.parse(dataCell(iRow,
-                                                            DataColumn.STOCK_PLATE_ID,
-                                                            true));
-    Cell wellNameCell = dataCell(iRow,
-                                 DataColumn.WELL_NAME,
-                                 true);
-    String wellName = _wellNameParser.parse(wellNameCell);
-    if (wellName.equals("")) {
-      return null;
-    }
-    Library library = findLibraryWithPlate(plateNumber);
-    if (library == null) {
-      _errors.addError(NO_SUCH_LIBRARY_WITH_PLATE + ": " + plateNumber, wellNameCell);
-      return null;
-    }
-    preloadLibraryWells(library);
-    
-    Well well = _dao.findWell(new WellKey(plateNumber, wellName));
-    if (well == null) {
-      throw new UnrecoverableScreenResultParseException(
-        NO_SUCH_WELL + ": " + plateNumber + ":" + wellName,
-        wellNameCell);
-    }
-
-    return well;
   }
 
   /**

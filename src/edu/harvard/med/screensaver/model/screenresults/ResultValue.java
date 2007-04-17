@@ -88,13 +88,12 @@ public class ResultValue
    * Constructs an initialized <code>ResultValue</code> object.
    * <p>
    * Warning: to add a ResultValue to the model, call
-   * {@link ResultValueType#addResultValue}. This constructor is package
-   * protected so that ResultValueType can use it, otherwise it would be
-   * private.
+   * {@link ResultValueType#addResultValue}.
    * 
    * @param assayWellType the AssayWellType of the new ResultValue
    * @param value the value of the new ResultValue
-   * @param decimalPrecision the number of digits to appear after the decimal point, when displayed
+   * @param decimalPrecision the number of digits to appear after the decimal
+   *          point, when displayed
    * @param exclude the exclude flag of the new ResultValue
    */
   public ResultValue(AssayWellType assayWellType,

@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.io.screenresults;
 
 import java.io.PrintWriter;
+import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -46,6 +47,7 @@ public class ScreenResultPrinter
       printer.println("\tordinal=" + rvt.getOrdinal());
       printer.println("\tname=" + rvt.getName());
       printer.println("\tdescription="+rvt.getDescription());
+      printer.println("\tisNumeric=" + rvt.isNumeric());
       printer.println("\treplicateOrdinal=" + rvt.getReplicateOrdinal());
       printer.println("\ttimePoint=" + rvt.getTimePoint());
       printer.println("\tassayPhenotype=" + rvt.getAssayPhenotype());
@@ -58,7 +60,6 @@ public class ScreenResultPrinter
       printer.println("\tindicator cutoff=" + rvt.getIndicatorCutoff());
       printer.println("\tindicator direction=" + rvt.getIndicatorDirection());
       printer.println("\tisFollowupData=" + rvt.isFollowUpData());
-      
       printer.println("\tcomments="+rvt.getComments());
 
       int nResultValues = rvt.getResultValues().size();
@@ -66,7 +67,7 @@ public class ScreenResultPrinter
       int n = 0;
       boolean ellipsesOnce = false;
       
-      for (WellKey wellKey : rvt.getResultValues().keySet()) {
+      for (WellKey wellKey : new TreeSet<WellKey>(rvt.getResultValues().keySet())) {
         if (maxResultValuesToPrint != null) {
           if (n < maxResultValuesToPrint / 2 || n >= nResultValues - maxResultValuesToPrint / 2) {
             printer.println("\t\t" + wellKey + 

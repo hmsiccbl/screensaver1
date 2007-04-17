@@ -17,6 +17,7 @@ import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.CollectionElementName;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -242,7 +243,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
       setNumeric(false);
     }
     else if (isNumeric() != false) {
-      throw new IllegalArgumentException("cannot add a non-numeric value to a numeric ResultValueType");
+      throw new ResultValueTypeNumericalnessException("cannot add a non-numeric value to a numeric ResultValueType");
     }
     ResultValue rv = new ResultValue(assayWellType,
                                      value,
@@ -279,7 +280,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
       setNumeric(true);
     }
     else if (!isNumeric()) {
-      throw new IllegalArgumentException("cannot add a numeric value to a non-numeric ResultValueType");
+      throw new DataModelViolationException("cannot add a numeric value to a non-numeric ResultValueType");
     }
     ResultValue rv = new ResultValue(assayWellType,
                                      numericValue,
