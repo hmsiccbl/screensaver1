@@ -236,7 +236,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     return well1;
   }
   
-  public static Set<Well> makeRNAiDuplexWellForPoolWell(Library duplexLibrary, Well poolWell, int plateNumber, WellName wellName)
+  public static Set<Well> makeRNAiDuplexWellsForPoolWell(Library duplexLibrary, Well poolWell, int plateNumber, WellName wellName)
   {
     Set<Well> duplexWells = new HashSet<Well>();
     for (SilencingReagent silencingReagent : poolWell.getGene().getSilencingReagents()) {

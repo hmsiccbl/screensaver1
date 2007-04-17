@@ -630,6 +630,16 @@ public class ComplexDAOTest extends AbstractSpringTest
   {
     final int screenNumber = 1;
     final CherryPickRequest cherryPickRequest = makeCherryPickRequest(screenNumber);
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+        assertEquals("screen has 1 cherry pick request before deleting cherry pick request",
+                     1,
+                     screen.getCherryPickRequests().size());
+      }
+    });
     dao.deleteCherryPickRequest(cherryPickRequest);
     dao.doInTransaction(new DAOTransaction()
     {
@@ -666,16 +676,16 @@ public class ComplexDAOTest extends AbstractSpringTest
                                             LibraryType.COMMERCIAL,
                                             3,
                                             4);
-        CherryPickRequestAllocatorTest.makeRNAiDuplexWellForPoolWell(duplexLibrary, poolWell1, 3, new WellName("A01"));
-        CherryPickRequestAllocatorTest.makeRNAiDuplexWellForPoolWell(duplexLibrary, poolWell2, 4, new WellName("P24"));
+        Set<Well> pool1DuplexWells = CherryPickRequestAllocatorTest.makeRNAiDuplexWellsForPoolWell(duplexLibrary, poolWell1, 3, new WellName("A01"));
+        Set<Well> pool2DuplexWells = CherryPickRequestAllocatorTest.makeRNAiDuplexWellsForPoolWell(duplexLibrary, poolWell2, 4, new WellName("P24"));
         dao.persistEntity(duplexLibrary);
         
         Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(screenNumber); 
         screen.setScreenType(ScreenType.RNAI);
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
-        new LabCherryPick(new ScreenerCherryPick(cherryPickRequest, poolWell1), poolWell1);
-        new LabCherryPick(new ScreenerCherryPick(cherryPickRequest, poolWell2), poolWell2);
-        dao.persistEntity(cherryPickRequest); // TODO: why do we need this, if we're also persisting the screen?!
+        new LabCherryPick(new ScreenerCherryPick(cherryPickRequest, poolWell1), pool1DuplexWells.iterator().next());
+        new LabCherryPick(new ScreenerCherryPick(cherryPickRequest, poolWell2), pool2DuplexWells.iterator().next());
+        //dao.persistEntity(cherryPickRequest); // TODO: why do we need this, if we're also persisting the screen?!
         dao.persistEntity(screen);
         result[0] = cherryPickRequest;
       }
