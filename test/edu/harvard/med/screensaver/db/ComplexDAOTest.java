@@ -640,7 +640,15 @@ public class ComplexDAOTest extends AbstractSpringTest
                      screen.getCherryPickRequests().size());
       }
     });
-    dao.deleteCherryPickRequest(cherryPickRequest);
+    
+    // note: we reload to test under condition of having an entity that has not
+    // had any of its lazy relationships initialized (e.g. UI reloads the
+    // cherryPickRequest anew when navigating to the CherryPickRequestViewer,
+    // and so screen.cherryPickRequests collection is not initialized, but is
+    // needed by deleteCherryPickRequest()).
+    CherryPickRequest reloadedCherryPickRequest = (CherryPickRequest) dao.reloadEntity(cherryPickRequest);
+    dao.deleteCherryPickRequest(reloadedCherryPickRequest);
+    
     dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()

@@ -467,7 +467,12 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     final CherryPickRequest cherryPickRequestIn,
     boolean bypassBusinessRuleViolationChecks)
   {
-    CherryPickRequest cherryPickRequest = (CherryPickRequest) reattachEntity(cherryPickRequestIn);  
+    CherryPickRequest cherryPickRequest = (CherryPickRequest) reattachEntity(cherryPickRequestIn);
+    // note: the cherryPickRequest.screen child-to-parent relationship is not cascaded, so although
+    // screen entity *will* be available (it never loaded as a proxy), the screen's
+    // relationships will not be reattached and will thus be inaccessible; in
+    // particular, screen.cherryPickRequests (needed below)
+    reattachEntity(cherryPickRequestIn.getScreen());
 
     if (! bypassBusinessRuleViolationChecks) {
       if (cherryPickRequestIn.isAllocated()) {
