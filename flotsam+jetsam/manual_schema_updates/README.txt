@@ -9,5 +9,13 @@ for us, since there are no extant databases in need of revisions to bring up-to-
 that. The oldest extant database was probably created a number of revisions back from that, but 1109
 is most likely the first svn revision with schema changes of any significance.
 
+NOTE: Every SQL file (since rev 1279) should update the screensaver_revision table
+by including the below SQL statement.  Replace "####" with the current
+screensaver revision number.  The screensaver_revision value indicates
+the minimum Subversion-assigned revision number of the Screensaver project
+that will work with the current schema.
+
+  UPDATE screensaver_revision (screensaver_revision) VALUES (###);
+
 WARNING: make sure you run these database updates as the appropriate user! (Normally the web user.)
 Otherwise you will run into permissions problems.
