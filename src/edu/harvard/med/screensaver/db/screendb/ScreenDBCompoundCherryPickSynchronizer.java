@@ -51,7 +51,6 @@ public class ScreenDBCompoundCherryPickSynchronizer
   private DAO _dao;
   private ScreenDBUserSynchronizer _userSynchronizer;
   private ScreenDBScreenSynchronizer _screenSynchronizer;
-  private ScreenDBSynchronizationException _synchronizationException = null;
 
   
   // public constructors and methods
@@ -75,37 +74,19 @@ public class ScreenDBCompoundCherryPickSynchronizer
       public void runTransaction()
       {
         try {
-          log.info("start delete old cprs..");
-          deleteOldCherryPickRequests();
-          log.info("finish delete old cprs");
           synchronizeCompounCherryPicksProper();
         }
         catch (SQLException e) {
-          _synchronizationException = new ScreenDBSynchronizationException(
+          throw new ScreenDBSynchronizationException(
             "Encountered an SQL exception while synchonrizing library screenings: " + e.getMessage(),
             e);
         }
-        catch (ScreenDBSynchronizationException e) {
-          _synchronizationException = e;
-        }
       }
     });
-    if (_synchronizationException != null) {
-      throw _synchronizationException;
-    }
   }
 
 
   // private instance methods
-  
-  private void deleteOldCherryPickRequests()
-  {
-    // NOTE: this is now done in ScreenDBSynchronizer.deleteOldCherryPickRequests. see comment
-    // there for details
-//    for (CherryPickRequest request : _dao.findAllEntitiesWithType(CompoundCherryPickRequest.class)) {
-//      _dao.deleteCherryPickRequest(request, true);
-//    }
-  }
 
   private void synchronizeCompounCherryPicksProper() throws SQLException, ScreenDBSynchronizationException
   {
