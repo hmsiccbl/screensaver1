@@ -111,3 +111,4 @@ Other	Vanderbilt University Medical Center, Departments of Microbiology and Immu
 Other	Wadsworth Center
 Other	Washington University School of Medicine
 Other	Yale University
+Other	University of Northern Colorado
