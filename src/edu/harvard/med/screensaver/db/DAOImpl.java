@@ -120,6 +120,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
    * @param entity the entity to be reloaded;
    * @return a new Hibernate-managed instance of the specified entity
    */
+  @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> E reloadEntity(E entity)
   {
     if (entity != null) {
