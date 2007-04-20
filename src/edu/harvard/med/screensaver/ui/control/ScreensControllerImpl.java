@@ -285,7 +285,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       {
         public void runTransaction()
         {
-          Screen screen = _currentScreen = (Screen) _dao.reloadEntity(screenIn);
+          Screen screen = _currentScreen = _dao.reloadEntity(screenIn);
           // we call _dao.need() twice, since the method is not smart enough to know that the resulting SQL would be too horrendous
           _dao.need(screen, 
                     "abaseTestsets",
@@ -707,7 +707,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       {
         public void runTransaction()
         {
-          Screen screen = (Screen) _dao.reloadEntity(screenIn);
+          Screen screen = _dao.reloadEntity(screenIn);
           log.info("starting import of ScreenResult for Screen " + screen);
 
           try {
@@ -754,7 +754,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       {
         public void runTransaction()
         {
-          ScreenResult screenResult = (ScreenResult) _dao.reloadEntity(screenResultIn);
+          ScreenResult screenResult = _dao.reloadEntity(screenResultIn);
           File exportedWorkbookFile = null;
           FileOutputStream out = null;
           try {
@@ -805,7 +805,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       {
         public void runTransaction()
         {
-          CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reloadEntity(cherryPickRequestIn);
+          CherryPickRequest cherryPickRequest = _dao.reloadEntity(cherryPickRequestIn);
           try {
             if (cherryPickRequest != null) {
               InputStream zipStream = _cherryPickRequestPlateMapFilesBuilder.buildZip(cherryPickRequest, plateNames);  
@@ -841,7 +841,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       {
         public void runTransaction()
         {
-          Screen screen = (Screen) _dao.reloadEntity(screenIn);
+          Screen screen = _dao.reloadEntity(screenIn);
           result[0] =  screen.createCherryPickRequest();
         }
       });
@@ -864,7 +864,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       {
         public void runTransaction()
         {
-          CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reloadEntity(cherryPickRequestIn);
+          CherryPickRequest cherryPickRequest = _dao.reloadEntity(cherryPickRequestIn);
           _dao.need(cherryPickRequest, 
                     "screen",
                     "screen.hbnLabHead",
@@ -943,7 +943,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       {
         public void runTransaction()
         {
-          CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reloadEntity(cherryPickRequestIn);
+          CherryPickRequest cherryPickRequest = _dao.reloadEntity(cherryPickRequestIn);
           if (cherryPickRequest.isAllocated()) {
             throw new BusinessRuleViolationException("cherry picks cannot be deleted once a cherry pick request has been allocated");
           }
@@ -1181,7 +1181,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       public void runTransaction()
       {
         CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
-        ScreensaverUser performedBy = (ScreensaverUser) _dao.reloadEntity(performedByIn);
+        ScreensaverUser performedBy = _dao.reloadEntity(performedByIn);
         CherryPickLiquidTransfer liquidTransfer = new CherryPickLiquidTransfer(performedBy,
                                                                                new Date(),
                                                                                dateOfLiquidTransfer,
@@ -1219,7 +1219,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
           }
 
           for (Well well : cherryPickWells) {
-            well = (Well) _dao.reloadEntity(well);
+            well = _dao.reloadEntity(well);
             ScreenerCherryPick screenerCherryPick = new ScreenerCherryPick(cherryPickRequest, well);
             if (!arePoolWells) {
               new LabCherryPick(screenerCherryPick, well);
