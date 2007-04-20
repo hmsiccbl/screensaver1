@@ -17,17 +17,16 @@ import java.sql.Statement;
 import java.util.Date;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.apache.log4j.Logger;
 
 public class ScreenDBRNAiCherryPickSynchronizer
 {
@@ -70,7 +69,7 @@ public class ScreenDBRNAiCherryPickSynchronizer
         }
         catch (SQLException e) {
           throw new ScreenDBSynchronizationException(
-            "Encountered an SQL exception while synchonrizing library screenings: " + e.getMessage(),
+            "Encountered an SQL exception while synchronizing library screenings: " + e.getMessage(),
             e);
         }
       }
@@ -155,9 +154,10 @@ public class ScreenDBRNAiCherryPickSynchronizer
       if (filename.endsWith("\r")) {
         filename = filename.substring(0, filename.length() - 1);
       }
-      // TODO: is EPPENDORF the correct plate type here?
-      CherryPickAssayPlate assayPlate =
-        new CherryPickAssayPlate(request, plateOrdinal, 0, PlateType.EPPENDORF);
+      CherryPickAssayPlate assayPlate = new CherryPickAssayPlate(request, 
+                                                                 plateOrdinal, 
+                                                                 0,
+                                                                 RNAiCherryPickRequest.RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE);
       assayPlate.setComments("ScreenDB filename for this assay plate is \"" + filename + "\".");
       assayPlate.setCherryPickLiquidTransfer(liquidTransfer);
       plateOrdinal ++;

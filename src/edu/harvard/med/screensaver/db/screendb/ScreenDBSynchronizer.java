@@ -196,7 +196,7 @@ public class ScreenDBSynchronizer
         libraryScreeningSynchronizer.synchronizeLibraryScreenings();
         ScreenDBCompoundCherryPickSynchronizer compoundCherryPickSynchronizer =
           new ScreenDBCompoundCherryPickSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
-        compoundCherryPickSynchronizer.synchronizeRNAiCherryPicks();
+        compoundCherryPickSynchronizer.synchronizeCompoundCherryPicks();
         ScreenDBRNAiCherryPickSynchronizer rnaiCherryPickSynchronizer =
           new ScreenDBRNAiCherryPickSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
         rnaiCherryPickSynchronizer.synchronizeRNAiCherryPicks();

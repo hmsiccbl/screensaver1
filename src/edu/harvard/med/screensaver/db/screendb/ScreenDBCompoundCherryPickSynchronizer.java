@@ -17,8 +17,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -36,6 +34,8 @@ import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.apache.log4j.Logger;
 
 public class ScreenDBCompoundCherryPickSynchronizer
 {
@@ -67,18 +67,18 @@ public class ScreenDBCompoundCherryPickSynchronizer
     _screenSynchronizer = screenSynchronizer;
   }
 
-  public void synchronizeRNAiCherryPicks() throws ScreenDBSynchronizationException
+  public void synchronizeCompoundCherryPicks() throws ScreenDBSynchronizationException
   {
     _dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
         try {
-          synchronizeCompounCherryPicksProper();
+          synchronizeCompoundCherryPicksProper();
         }
         catch (SQLException e) {
           throw new ScreenDBSynchronizationException(
-            "Encountered an SQL exception while synchonrizing library screenings: " + e.getMessage(),
+            "Encountered an SQL exception while synchronizing library screenings: " + e.getMessage(),
             e);
         }
       }
@@ -88,7 +88,7 @@ public class ScreenDBCompoundCherryPickSynchronizer
 
   // private instance methods
 
-  private void synchronizeCompounCherryPicksProper() throws SQLException, ScreenDBSynchronizationException
+  private void synchronizeCompoundCherryPicksProper() throws SQLException, ScreenDBSynchronizationException
   {
     Statement statement = _connection.createStatement();
     ResultSet resultSet = statement.executeQuery(
