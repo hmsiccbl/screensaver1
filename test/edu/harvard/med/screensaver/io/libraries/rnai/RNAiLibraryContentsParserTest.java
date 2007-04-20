@@ -504,4 +504,76 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
       }
     });
   }
+  
+  public void testWellErrors()
+  {
+    Library library = new Library(
+      "Human1",
+      "Human1",
+      ScreenType.SMALL_MOLECULE,
+      LibraryType.SIRNA,
+      50001,
+      50001);
+    //dao.persistEntity(library);
+    Library otherLibrary = new Library(
+      "Human2",
+      "Human2",
+      ScreenType.SMALL_MOLECULE,
+      LibraryType.SIRNA,
+      50002,
+      50002);
+    dao.loadOrCreateWellsForLibrary(otherLibrary);
+    //dao.persistEntity(otherLibrary);
+    
+    String filename = "well errors.xls";
+    File file = new File(TEST_INPUT_FILE_DIR, filename);
+    InputStream stream = null;
+    try {
+      stream = new FileInputStream(file);
+    }
+    catch (FileNotFoundException e) {
+      fail("file not found: " + filename);
+    }
+    library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+    List<ParseError> errors = rnaiLibraryContentsParser.getErrors();
+    
+    for (ParseError error : errors) {
+      log.info("error message: " + error.getMessage());
+      log.info("error cell: " + error.getCell());
+    }
+    
+    assertEquals("workbook has 2 errors", 2, errors.size());
+    ParseError error;
+    
+    // error 0
+    error = errors.get(0);
+    assertEquals(
+      "error text for error 0",
+      "SD record specifies a well from the wrong library: Human2",
+      error.getMessage());
+    assertNotNull("error 0 has cell", error.getCell());
+    assertEquals(
+      "cell for error 0",
+      "Human Kinases:(B,2)",
+      error.getCell().toString());
+  
+    // error 1
+    error = errors.get(1);
+    assertEquals(
+      "error text for error 1",
+      "specified well does not exist. this is probably due to an erroneous plate number.",
+      error.getMessage());
+    assertNotNull("error 1 has cell", error.getCell());
+    assertEquals(
+      "cell for error 1",
+      "Human Kinases:(B,3)",
+      error.getCell().toString());
+
+    // if any minor changes in the error formatting break this test, you can uncomment this code,
+    // see what it prints, and correct the hardcoded tests above:
+    // for (ParseError error1 : errors) {
+    //   log.info("error: " + error1.getMessage());
+    //   log.info("cell:  " + error1.getCell());
+    // }
+  }
 }

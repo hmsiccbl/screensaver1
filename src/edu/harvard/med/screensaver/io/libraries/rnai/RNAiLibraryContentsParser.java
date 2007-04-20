@@ -243,7 +243,12 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
           hssfSheet.getRow(i),
           i,
           cellFactory);
-        dataRowParser.parseDataRow();
+        try {
+          dataRowParser.parseDataRow();
+        }
+        catch (DataRowParserException e) {
+          _errorManager.addError(e.getMessage(), e.getCell());
+        }
       }
       if (i % 100 == 0) {
         log.info("parsed " + i + " for library " + _library.getLibraryName());

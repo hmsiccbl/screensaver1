@@ -77,8 +77,9 @@ public class DataRowParser
   
   /**
    * Parse the data row.
+   * @throws DataRowParserException 
    */
-  void parseDataRow()
+  void parseDataRow() throws DataRowParserException
   {
     DataRowType dataRowType = _columnHeaders.getDataRowType(_dataRow);
     if (dataRowType.equals(DataRowType.EMPTY)) {
@@ -106,8 +107,9 @@ public class DataRowParser
   
   /**
    * Parse the data row content
+   * @throws DataRowParserException 
    */
-  private void parseDataRowContent()
+  private void parseDataRowContent() throws DataRowParserException
   {
     String plateWellAbbreviation = getPlateWellAbbreviation();
     if (plateWellAbbreviation == null) {
@@ -146,8 +148,9 @@ public class DataRowParser
   /**
    * Parse the well. Assume an empty plate-well is a control. (This is true for the
    * Excel files I've been handling so far, but it is pretty ad-hoc. -s)
+   * @throws DataRowParserException 
    */
-  private void parseWell()
+  private void parseWell() throws DataRowParserException
   {
     String plateWellAbbreviation = getPlateWellAbbreviation();
     if (plateWellAbbreviation == null) {
@@ -160,8 +163,9 @@ public class DataRowParser
   /**
    * Build and return the {@link Well} represented by this data row.
    * @return the well represented by this data row
+   * @throws DataRowParserException 
    */
-  private Well getWell(boolean isControl)
+  private Well getWell(boolean isControl) throws DataRowParserException
   {
     Integer plateNumber = _parser.getPlateNumberParser().parse(_cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.PLATE),
@@ -177,8 +181,19 @@ public class DataRowParser
     }
     Well well = _parser.getDAO().findWell(new WellKey(plateNumber, wellName));
     if (well == null) {
-      log.error("well does not exist, but should");
-      return null;
+      throw new DataRowParserException(
+        "specified well does not exist. this is probably due to an erroneous plate number.",
+        _cellFactory.getCell(
+          _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.WELL),
+          _rowIndex));
+    }
+    if (! well.getLibrary().equals(_parser.getLibrary())) {
+      throw new DataRowParserException(
+          "SD record specifies a well from the wrong library: " +
+          well.getLibrary().getLibraryName(),
+          _cellFactory.getCell(
+            _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.WELL),
+            _rowIndex));
     }
     if (isControl) {
       well.setWellType(WellType.LIBRARY_CONTROL);
