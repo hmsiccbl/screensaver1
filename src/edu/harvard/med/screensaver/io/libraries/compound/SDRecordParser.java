@@ -15,6 +15,7 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
@@ -32,6 +33,7 @@ class SDRecordParser
   
   private BufferedReader _sdFileReader;
   private SDFileCompoundLibraryContentsParser _parser;
+  private Library _library;
   private String _nextLine;
   private int _sdRecordNumber = 0;
   private SDRecordData _sdRecordData;
@@ -54,6 +56,7 @@ class SDRecordParser
   {
     _sdFileReader = sdFileReader;
     _parser = libraryContentsParser;
+    _library = _parser.getLibrary();
     prepareNextRecord();
   }
 
@@ -83,6 +86,13 @@ class SDRecordParser
     
     Well well = getWell();
     if (well != null && _molfileToSmiles != null && _molfileToSmiles.getSmiles() != null) {
+      if (! _library.equals(well.getLibrary())) {
+        reportError(
+          "SD record specifies a well from the wrong library: " +
+          well.getLibrary().getLibraryName());
+        return;
+      }
+      
       addSmilesToWell(_molfileToSmiles.getPrimaryCompoundSmiles(), well, true);
       for (String secondaryCompoundSmiles : _molfileToSmiles.getSecondaryCompoundsSmiles()) {
         addSmilesToWell(secondaryCompoundSmiles, well, false);
@@ -214,7 +224,8 @@ class SDRecordParser
     return well;
   }
 
-  private void reportError(String errorMessage) {
+  private void reportError(String errorMessage)
+  {
     _parser.getErrors().add(new SDFileParseError(
       errorMessage,
       _parser.getSdFile(),
@@ -246,6 +257,10 @@ class SDRecordParser
       String casNumber = _sdRecordData.getCasNumber();
       if (casNumber != null) {
         compound.addCasNumber(casNumber);
+      }
+      String inchi = _openBabelClient.convertMolfileToInchi(_sdRecordData.getMolfile());
+      for (String pubchemCid : _pubchemCidListProvider.getPubchemCidListForInchi(inchi)) {
+        compound.addPubchemCid(pubchemCid);
       }
     }
     well.addCompound(compound);
