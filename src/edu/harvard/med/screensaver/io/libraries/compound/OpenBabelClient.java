@@ -47,6 +47,11 @@ public class OpenBabelClient
     return convertMolecule("mol", "smi", molfile);
   }
 
+  public String convertMolfileToInchi(String molfile)
+  {
+    return convertMolecule("mol", "inchi", molfile);
+  }
+
   public String convertSmilesToInchi(String smiles)
   {
     return convertMolecule("smi", "inchi", smiles);
