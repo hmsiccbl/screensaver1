@@ -127,7 +127,7 @@ public interface LibrariesController
                                           final SilencingReagentType silencingReagentType);
 
   @UIControllerMethod
-  public String unloadLibraryContents(final Library libraryIn);
+  public String unloadLibraryContents(final Library libraryIn, final LibrarySearchResults results);
 
   // TODO: refactor code in WellSearchResults that exports well search results to our io.libraries.{compound,rnai} packages, and call directly
   @UIControllerMethod

@@ -319,7 +319,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Library library = (Library) _dao.reloadEntity(libraryIn);
+        Library library = _dao.reloadEntity(libraryIn);
         _libraryViewer.setLibrary(library);
         _libraryViewer.setLibrarySize(
           _dao.relationshipSize(library, "hbnWells", "wellType", "experimental"));
@@ -342,7 +342,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Library library = (Library) _dao.reloadEntity(libraryIn);
+        Library library = _dao.reloadEntity(libraryIn);
         _dao.need(library,
                   "hbnWells",
                   "hbnWells.hbnSilencingReagents",
@@ -404,7 +404,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
         public void runTransaction()
         {
           // TODO: try outer join HQL query instead of iteration, for performance improvement
-          Well well = (Well) _dao.reloadEntity(wellIn);
+          Well well = _dao.reloadEntity(wellIn);
           _dao.need(well,
                     "hbnSilencingReagents",
                     "hbnSilencingReagents.gene",
@@ -434,7 +434,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
       public void runTransaction()
       {
         if (geneIn != null) {
-          Gene gene = (Gene) _dao.reloadEntity(geneIn);
+          Gene gene = _dao.reloadEntity(geneIn);
           _dao.need(gene,
                     "genbankAccessionNumbers",
                     "hbnSilencingReagents",
@@ -468,7 +468,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
       public void runTransaction()
       {
         if (compoundIn != null) {
-          Compound compound = (Compound) _dao.reloadEntity(compoundIn);
+          Compound compound = _dao.reloadEntity(compoundIn);
           _dao.need(compound,
                     "compoundNames",
                     "pubchemCids",
@@ -524,7 +524,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
         public void runTransaction()
         {
           try {
-            Library library = (Library) _dao.reloadEntity(libraryIn);
+            Library library = _dao.reloadEntity(libraryIn);
             _compoundLibraryContentsParser.parseLibraryContents(library,
                                                                 new File(uploadedFile.getName()),
                                                                 uploadedFile.getInputStream());
@@ -588,7 +588,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
         public void runTransaction()
         {
           try {
-            Library library = (Library) _dao.reloadEntity(libraryIn);
+            Library library = _dao.reloadEntity(libraryIn);
             _rnaiLibraryContentsParser.setSilencingReagentType(silencingReagentType);
             _rnaiLibraryContentsParser.parseLibraryContents(library,
                                                             new File(uploadedFile.getName()), 
@@ -622,19 +622,19 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
    * @see edu.harvard.med.screensaver.ui.control.LibrariesController#unloadLibraryContents(edu.harvard.med.screensaver.model.libraries.Library)
    */
   @UIControllerMethod
-  public String unloadLibraryContents(final Library libraryIn)
+  public String unloadLibraryContents(final Library libraryIn, final LibrarySearchResults results)
   {
     logUserActivity("unloadLibraryContents " + libraryIn);
     _dao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction() 
       {
-        Library library = (Library) _dao.reloadEntity(libraryIn);
+        Library library = _dao.reloadEntity(libraryIn);
         _dao.deleteLibraryContents(library);
       }
     });
     showMessage("libraries.unloadedLibraryContents", "libraryViewer");
-    return "viewLibrary";
+    return viewLibrary(libraryIn, results);
   }
   
   // TODO: refactor code in WellSearchResults that exports well search results to our io.libraries.{compound,rnai} packages, and call directly

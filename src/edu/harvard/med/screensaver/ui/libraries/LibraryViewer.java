@@ -119,6 +119,6 @@ public class LibraryViewer extends AbstractBackingBean
   
   public String unloadLibraryContents()
   {
-    return _librariesController.unloadLibraryContents(_library);
+    return _librariesController.unloadLibraryContents(_library, _librarySearchResults);
   }
 }
