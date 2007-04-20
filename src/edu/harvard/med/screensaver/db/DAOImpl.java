@@ -124,7 +124,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   {
     if (entity != null) {
       log.debug("reloading entity " + entity);
-      return findEntityById(entity.getClass(), entity.getEntityId());
+      return (E) findEntityById(entity.getClass(), entity.getEntityId());
     }
     return null;
   }
