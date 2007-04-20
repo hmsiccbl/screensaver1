@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -56,6 +57,10 @@ public abstract class CherryPickRequest extends AbstractEntity
    * needs to be bigger than the largest ScreenDB visit_id for Cherry Pick Visits.
    */
   private static final int CHERRY_PICK_REQUEST_NUMBER_GENERATION_OFFSET = 10000;
+  /**
+   * The number of decimal places used when recording volume values.
+   */
+  public static final int VOLUME_SCALE = 2;
 
 
   // instance fields
@@ -304,7 +309,12 @@ public abstract class CherryPickRequest extends AbstractEntity
    */
   public void setMicroliterTransferVolumePerWellRequested(BigDecimal microliterTransferVolumePerWell)
   {
-    _microliterTransferVolumePerWellRequested = microliterTransferVolumePerWell;
+    if (microliterTransferVolumePerWell == null) {
+      _microliterTransferVolumePerWellRequested = null;
+    } 
+    else {
+      _microliterTransferVolumePerWellRequested = microliterTransferVolumePerWell.setScale(VOLUME_SCALE, RoundingMode.HALF_UP);
+    }
   }
 
   /**
@@ -326,7 +336,12 @@ public abstract class CherryPickRequest extends AbstractEntity
    */
   public void setMicroliterTransferVolumePerWellApproved(BigDecimal microliterTransferVolumePerWell)
   {
-    _microliterTransferVolumePerWellApproved = microliterTransferVolumePerWell;
+    if (microliterTransferVolumePerWell == null) {
+      _microliterTransferVolumePerWellApproved = null;
+    } 
+    else {
+      _microliterTransferVolumePerWellApproved = microliterTransferVolumePerWell.setScale(VOLUME_SCALE, RoundingMode.HALF_UP);
+    }
   }
 
   /**

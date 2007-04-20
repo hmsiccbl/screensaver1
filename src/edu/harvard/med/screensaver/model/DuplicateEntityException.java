@@ -12,9 +12,6 @@ package edu.harvard.med.screensaver.model;
 
 public class DuplicateEntityException extends DataModelViolationException
 {
-  /**
-   * 
-   */
   private static final long serialVersionUID = 4834277126994099526L;
 
   public DuplicateEntityException(AbstractEntity parentEntity,
@@ -22,6 +19,5 @@ public class DuplicateEntityException extends DataModelViolationException
   {
     super(parentEntity + " already contains " + duplicatedChildEntity);
   }
-
 }
 

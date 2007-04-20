@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
@@ -33,6 +34,11 @@ public abstract class Screening extends ScreeningRoomActivity
   private static final long serialVersionUID = 1L;
   
   private static Logger log = Logger.getLogger(Screening.class);
+  
+  /**
+   * The number of decimal places used when recording volume values.
+   */
+  public static int VOLUME_SCALE = 2;
 
 
   // instance data members
@@ -154,7 +160,12 @@ public abstract class Screening extends ScreeningRoomActivity
   public void setEstimatedFinalScreenConcentrationInMoles(
     BigDecimal estimatedFinalScreenConcentrationInMoles)
   {
-    _estimatedFinalScreenConcentrationInMoles = estimatedFinalScreenConcentrationInMoles;
+    if (estimatedFinalScreenConcentrationInMoles == null) {
+      _estimatedFinalScreenConcentrationInMoles = null;
+    }
+    else {
+      _estimatedFinalScreenConcentrationInMoles = estimatedFinalScreenConcentrationInMoles.setScale(VOLUME_SCALE, RoundingMode.HALF_UP);
+    }
   }
 
 

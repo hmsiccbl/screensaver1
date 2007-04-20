@@ -42,7 +42,7 @@ public class Copy extends AbstractEntity
 
   private static final Logger log = Logger.getLogger(Copy.class);
   private static final long serialVersionUID = 0L;
-
+  
 
   // instance fields
 

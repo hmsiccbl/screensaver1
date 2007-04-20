@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -79,30 +80,36 @@ public class LabCherryPick extends AbstractEntity
   {
     if (screenerCherryPick == null || sourceWell == null) {
       throw new NullPointerException();
-  }
-  _cherryPickRequest = screenerCherryPick.getCherryPickRequest();
-  
-  // TODO: turn the following business rules back on once we have some means of setting the well
-  // type for experimental wells in natural products libraries. (see rt#72830)
-  //
-  //  if (!sourceWell.getWellType().equals(WellType.EXPERIMENTAL)) {
-  //    throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (not experimental)");
-  //  }
-  //  if (_cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE) && 
-  //      sourceWell.getCompounds().size() == 0) {
-  //    throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (does not contain a compound)");
-  //  }
-  
-  if (_cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI) && 
-    sourceWell.getSilencingReagents().size() == 0) {
-    throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (does not contain any reagents)");
-  }
+    }
+    _cherryPickRequest = screenerCherryPick.getCherryPickRequest();
 
-  _sourceWell = sourceWell;
-  _screenerCherryPick = screenerCherryPick;
-  _screenerCherryPick.getLabCherryPicks().add(this);
-  _sourceWell.getHbnLabCherryPicks().add(this);
-  _cherryPickRequest.getLabCherryPicks().add(this);
+    // TODO: turn the following business rules back on once we have some means of setting the well
+    // type for experimental wells in natural products libraries. (see rt#72830)
+    //
+    //  if (!sourceWell.getWellType().equals(WellType.EXPERIMENTAL)) {
+    //    throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (not experimental)");
+    //  }
+    //  if (_cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE) && 
+    //      sourceWell.getCompounds().size() == 0) {
+    //    throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (does not contain a compound)");
+    //  }
+
+    if (_cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI) && 
+      sourceWell.getSilencingReagents().size() == 0) {
+      throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (does not contain any reagents)");
+    }
+
+    _sourceWell = sourceWell;
+    _screenerCherryPick = screenerCherryPick;
+    if (!_screenerCherryPick.getLabCherryPicks().add(this)) {
+      throw new DuplicateEntityException(_screenerCherryPick, this);
+    }
+    if (!_sourceWell.getHbnLabCherryPicks().add(this)) {
+      throw new DuplicateEntityException(_sourceWell, this);
+    }
+    if (!_cherryPickRequest.getLabCherryPicks().add(this)) {
+      throw new DuplicateEntityException(_cherryPickRequest, this);
+    }
   }
 
     @Override

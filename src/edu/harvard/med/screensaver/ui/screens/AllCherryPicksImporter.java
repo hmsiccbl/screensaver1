@@ -9,8 +9,10 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 
+import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 
@@ -26,6 +28,14 @@ public class AllCherryPicksImporter extends AbstractBackingBean
   // static data
   
   private static final Logger log = Logger.getLogger(AllCherryPicksImporter.class);
+  
+  // static methods
+  
+  public static void main(String[] args) throws ParseException
+  {
+    CommandLineApplication app = new CommandLineApplication(args);
+    app.processOptions(true, true);
+  }
 
   
   // instance data
@@ -61,7 +71,7 @@ public class AllCherryPicksImporter extends AbstractBackingBean
   public String importAllCherryPicks()
   {
     try {
-      _allCherryPicksImporter.importCherryPickCopies(_uploadedFile.getInputStream());
+      _allCherryPicksImporter.importCherryPickCopiesAndRnaiCherryPicks(_uploadedFile.getInputStream());
       showMessage("cherryPicks.importedAllCherryPicksFile");
     }
     catch (Exception e) {

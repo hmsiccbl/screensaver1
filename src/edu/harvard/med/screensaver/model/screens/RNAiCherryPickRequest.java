@@ -48,7 +48,8 @@ public class RNAiCherryPickRequest extends CherryPickRequest
                                          new Character((char) (Well.MAX_WELL_ROW - 1)),
                                          Well.MAX_WELL_ROW));
 
-  private static final PlateType RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.EPPENDORF;
+  /* Currently (2007-04-20), all RNAi cherry pick assay plates use EPPENDORF plate types. */
+  public static final PlateType RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.EPPENDORF;
   private static final int CHERRY_PICK_SILENCING_AGENT_ALLOWANCE = 500 * 4;
 
 

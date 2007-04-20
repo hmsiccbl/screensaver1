@@ -11,7 +11,9 @@ package edu.harvard.med.screensaver.io.cherrypicks;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -20,9 +22,14 @@ import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.SchemaUtil;
+import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
+import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 import org.apache.log4j.Logger;
@@ -37,6 +44,7 @@ public class AllCherryPicksImporterTest extends AbstractSpringTest
 
   private static Logger log = Logger.getLogger(AllCherryPicksImporterTest.class);
 
+  private static MathContext _mathContext  = new MathContext(4);
 
   // instance data members
 
@@ -79,8 +87,7 @@ public class AllCherryPicksImporterTest extends AbstractSpringTest
         assertEquals("lib2 copies count", 2, _lib2.getCopies().size());
         assertEquals("lib3 copies count", 2, _lib3.getCopies().size());
         Iterator<Copy> iter;
-        BigDecimal expectedVolume = new BigDecimal(22);
-        expectedVolume.setScale(2);
+        BigDecimal expectedVolume = new BigDecimal("22.00");
 
         iter = _lib1.getCopies().iterator();
         Copy copy1 = iter.next();
@@ -113,6 +120,57 @@ public class AllCherryPicksImporterTest extends AbstractSpringTest
         assertEquals("lib3 copy2 copyinfo count", 115, copy2.getCopyInfos().size());
       }
     });
+  }
+  
+  public void testImportCherryPickRequests() throws Exception
+  {
+    dao.doInTransaction(new DAOTransaction() 
+    {
+      public void runTransaction() 
+      {
+        try {
+          testImportCherryPickCopies(); // setup the database with the library copies
+          
+          Screen screen1 = MockDaoForScreenResultImporter.makeDummyScreen(1);
+          Screen screen2 = MockDaoForScreenResultImporter.makeDummyScreen(1);
+          RNAiCherryPickRequest cpr1 = new RNAiCherryPickRequest(screen1, screen1.getLeadScreener(), new Date(), 4710);
+          RNAiCherryPickRequest cpr2 = new RNAiCherryPickRequest(screen2, screen2.getLeadScreener(), new Date(), 4711);
+          cpr1.setMicroliterTransferVolumePerWellApproved(new BigDecimal("12"));
+          cpr2.setMicroliterTransferVolumePerWellApproved(new BigDecimal("3"));
+          dao.persistEntity(screen1);
+          dao.persistEntity(screen2);
+
+          _lib1 = (Library) dao.reloadEntity(_lib1);
+          dao.loadOrCreateWellsForLibrary(_lib1);
+          _lib2 = (Library) dao.reloadEntity(_lib2);
+          dao.loadOrCreateWellsForLibrary(_lib2);
+          _lib3 = (Library) dao.reloadEntity(_lib3);
+          dao.loadOrCreateWellsForLibrary(_lib3);
+        }
+        catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
+    
+    allCherryPicksImporter.importRnaiCherryPicks(new File(TEST_INPUT_FILE_DIR, ALL_CHERRY_PICKS_TEST_FILE));
+
+    CherryPickRequest cpr1 = dao.findEntityByProperty(CherryPickRequest.class, "cherryPickRequestNumber", 4710);
+    assertNotNull("CPR 4710 exists", cpr1);
+    assertEquals("CPR 4710 screener cherry pick count", 528, cpr1.getScreenerCherryPicks().size());
+    assertEquals("CPR 4710 lab cherry pick count", 528, cpr1.getLabCherryPicks().size());
+    for (LabCherryPick labCherryPick : cpr1.getLabCherryPicks()) {
+      assertTrue("CPR 4710 lab cherry pick allocated " + labCherryPick, labCherryPick.isAllocated());
+    }
+    
+    CherryPickRequest cpr2 = dao.findEntityByProperty(CherryPickRequest.class, "cherryPickRequestNumber", 4711);
+    assertNotNull("CPR 4711 exists", cpr2);
+    assertEquals("CPR 4711 screener cherry pick count", 124, cpr2.getScreenerCherryPicks().size());
+    assertEquals("CPR 4711 lab cherry pick count", 124, cpr2.getLabCherryPicks().size());
+    for (LabCherryPick labCherryPick : cpr2.getLabCherryPicks()) {
+      assertTrue("CPR 4711 lab cherry pick allocated " + labCherryPick, labCherryPick.isAllocated());
+    }
+    
   }
 
   // private methods

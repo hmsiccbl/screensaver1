@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -40,7 +41,12 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   private static final Logger log = Logger.getLogger(ScreeningRoomActivity.class);
   private static final long serialVersionUID = 0L;
 
+  /**
+   * The number of decimal places used when recording volume values.
+   */
+  public static int VOLUME_SCALE = 2;
 
+  
   // instance fields
 
   private Integer _screeningRoomActivityId;
@@ -186,7 +192,12 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
   public void setMicroliterVolumeTransferedPerWell(
     BigDecimal microliterVolumeTransferedPerWell)
   {
-    _microliterVolumeTransferedPerWell = microliterVolumeTransferedPerWell;
+    if (microliterVolumeTransferedPerWell == null) {
+      _microliterVolumeTransferedPerWell = null;
+    } 
+    else {
+      _microliterVolumeTransferedPerWell = microliterVolumeTransferedPerWell.setScale(VOLUME_SCALE, RoundingMode.HALF_UP);
+    }
   }
 
   /**

@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.model.libraries;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -36,7 +37,12 @@ public class CopyInfo extends AbstractEntity
   private static final Logger log = Logger.getLogger(CopyInfo.class);
   private static final long serialVersionUID = 0L;
 
+  /**
+   * The number of decimal places used when recording volume values.
+   */
+  public static int VOLUME_SCALE = 2;
 
+  
   // instance fields
 
   private Integer _copyInfoId;
@@ -74,7 +80,7 @@ public class CopyInfo extends AbstractEntity
     _plateNumber = plateNumber;
     _location = location;
     _plateType = plateType;
-    _volume = volume;
+    setVolume(volume);
     _copy.getHbnCopyInfos().add(this);
   }
 
@@ -234,7 +240,12 @@ public class CopyInfo extends AbstractEntity
    */
   public void setVolume(BigDecimal volume)
   {
-    _volume = volume;
+    if (volume == null) {
+      _volume = null;
+    }
+    else {
+      _volume = volume.setScale(VOLUME_SCALE, RoundingMode.HALF_UP);
+    }
   }
 
   /**
