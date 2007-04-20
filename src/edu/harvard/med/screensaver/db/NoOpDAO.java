@@ -146,7 +146,7 @@ public class NoOpDAO implements DAO
     return null;
   }
 
-  public AbstractEntity reattachEntity(AbstractEntity entity)
+  public <E extends AbstractEntity> E reattachEntity(E entity)
   {
     return null;
   }
@@ -209,7 +209,7 @@ public class NoOpDAO implements DAO
   {
   }
 
-  public AbstractEntity reloadEntity(AbstractEntity entity)
+  public <E extends AbstractEntity> E reloadEntity(E entity)
   {
     return null;
   }

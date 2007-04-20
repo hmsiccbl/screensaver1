@@ -100,7 +100,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     getHibernateTemplate().saveOrUpdate(entity);
   }
   
-  public AbstractEntity reattachEntity(AbstractEntity entity)
+  public <E extends AbstractEntity> E reattachEntity(E entity)
   {
     // TODO: use lock(), instead of cascade(), after updating Hibernate entity model to cascade locks (as needed)
 //    // lock() does cascade, but we haven't configured our entities to cascade on locks (we're using cascade="save-update" currently)
@@ -120,7 +120,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
    * @param entity the entity to be reloaded;
    * @return a new Hibernate-managed instance of the specified entity
    */
-  public AbstractEntity reloadEntity(AbstractEntity entity)
+  public <E extends AbstractEntity> E reloadEntity(E entity)
   {
     if (entity != null) {
       log.debug("reloading entity " + entity);

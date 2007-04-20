@@ -75,9 +75,9 @@ public interface DAO
     Class<E> entityClass,
     Object... constructorArguments);
   
-  public AbstractEntity reattachEntity(AbstractEntity entity);
+  public <E extends AbstractEntity> E reattachEntity(E entity);
   
-  public AbstractEntity reloadEntity(AbstractEntity entity);
+  public <E extends AbstractEntity> E reloadEntity(E entity);
   
   /**
    * Initializes (pre-loads) the relationships of an entity.
