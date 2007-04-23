@@ -128,13 +128,15 @@ public class AllCherryPicksImporter
     try {
       CommandLineApplication app = new CommandLineApplication(args);
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("workbook file").withLongOpt("input-file").create("f"));
-      app.addCommandLineOption(OptionBuilder.hasArg().withArgName("row#").withLongOpt("from-row").create("r"));
-      app.addCommandLineOption(OptionBuilder.hasArg(false).withLongOpt("fail-fast").create("x"));
+      app.addCommandLineOption(OptionBuilder.hasArg().withArgName("cherry pick request number").withLongOpt("cpr-number").withDescription("for debugging").create("n"));
+      app.addCommandLineOption(OptionBuilder.hasArg().withArgName("row#").withLongOpt("from-row").withDescription("for debugging").create("r"));
+      app.addCommandLineOption(OptionBuilder.hasArg(false).withLongOpt("fail-fast").withDescription("for debugging").create("x"));
       if (!app.processOptions(true, true)) {
         System.exit(1);
       }
       AllCherryPicksImporter importer = (AllCherryPicksImporter) app.getSpringBean("allCherryPicksImporter");
       importer.setFromRow(app.getCommandLineOptionValue("r", Integer.class));
+      importer.setCherryPickRequestNumber(app.getCommandLineOptionValue("n", Integer.class));
       File workbookFile = app.getCommandLineOptionValue("f", File.class);
       BufferedInputStream bis = new BufferedInputStream(new FileInputStream(workbookFile));
       importer.importCherryPickCopiesAndRnaiCherryPicks(bis);
@@ -148,13 +150,15 @@ public class AllCherryPicksImporter
     }
   }
 
-
+  
   // instance data members
   
   private DAO _dao;
   private Library _cachedLibrary;
-  private Boolean _failFast;
-  private Integer _fromRow;
+  private Boolean _failFast; // for debugging
+  private Integer _fromRow; // for debugging
+  private Integer _cherryPickRequestNumber; // for debugging
+
 
 
   // public constructors and methods
@@ -162,6 +166,11 @@ public class AllCherryPicksImporter
   public AllCherryPicksImporter(DAO dao)
   {
     _dao = dao;
+  }
+
+  private void setCherryPickRequestNumber(Integer cherryPickRequestNumber)
+  {
+    _cherryPickRequestNumber = cherryPickRequestNumber;
   }
 
   public void setFromRow(Integer fromRow)
@@ -329,6 +338,12 @@ public class AllCherryPicksImporter
               visitId = (int) visitIdCell.getValue();
             
               CherryPickRequest cherryPickRequest = visitId2CherryPickRequest.get(visitId);
+
+              // for debugging: only import the cherry pick of the specified cherry pick request number
+              if (_cherryPickRequestNumber != null &&
+                !cherryPickRequest.getCherryPickRequestNumber().equals(_cherryPickRequestNumber)) {
+                continue;
+              }
 
               if (cherryPickRequest != lastCherryPickRequest) {
                 log.info("importing cherry picks for Cherry Pick Request " + cherryPickRequest.getCherryPickRequestNumber());

@@ -128,8 +128,9 @@ public class CherryPickRequestAllocator
   
   // private methods
   
-  private Copy selectCopy(Well well, BigDecimal volumeNeeded)
+  private Copy selectCopy(Well wellIn, BigDecimal volumeNeeded)
   {
+    Well well = _dao.findWell(wellIn.getWellKey()); // necessary, since LabCherryPick.sourceell is not cascaded
     List<Copy> copies = new ArrayList<Copy>(well.getLibrary().getCopies());
     Collections.sort(copies, SourceCopyComparator.getInstance());
 

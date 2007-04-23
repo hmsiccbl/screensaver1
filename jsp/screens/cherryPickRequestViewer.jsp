@@ -98,15 +98,20 @@ TODO:
 						rendered="#{cherryPickRequestViewer.editMode}"
 						action="#{cherryPickRequestViewer.cancelEdit}" immediate="true"
 						styleClass="command" />
+					<t:commandButton id="downloadCherryPickRequestCommand"
+						value="Download"
+						action="#{cherryPickRequestViewer.downloadCherryPickRequest}"
+						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks}"
+						styleClass="command" />
 				</t:panelGroup>
 
 				<t:panelGrid id="cherryPickRequestInfoTable" columns="2"
 					styleClass="standardTable" rowClasses="row1,row2"
 					columnClasses="keyColumn,column">
 
-					<t:outputText value="Cherry Pick Request ID" />
-					<t:outputText id="cherryPickRequestEntityId"
-						value="#{cherryPickRequestViewer.cherryPickRequest.entityId}"
+					<t:outputText value="Cherry Pick Request #" />
+					<t:outputText id="cherryPickRequestEntityNumber"
+						value="#{cherryPickRequestViewer.cherryPickRequest.cherryPickRequestNumber}"
 						styleClass="dataText" />
 
 					<t:outputText value="Date Requested" />

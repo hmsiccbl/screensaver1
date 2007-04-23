@@ -594,6 +594,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean
                                                          getDateOfLiquidTransfer(),
                                                          getLiquidTransferComments());
   }
+  
+  public String downloadCherryPickRequest()
+  {
+    return _screensController.downloadCherryPickRequest(_cherryPickRequest);
+  }
 
   @SuppressWarnings("unchecked")
   private boolean validateSelectedAssayPlates(String validationType)

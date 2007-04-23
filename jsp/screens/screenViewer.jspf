@@ -260,10 +260,10 @@ TODO:
 				columnClasses="column" headerClass="tableHeader">
 				<t:column>
 					<f:facet name="header">
-						<t:outputText value="ID" />
+						<t:outputText value="#" />
 					</f:facet>
-					<t:outputText id="cherryPickId"
-						value="#{cherryPickRequest.entityId}"
+					<t:outputText id="cherryPickRequestNumber"
+						value="#{cherryPickRequest.cherryPickRequestNumber}"
 						styleClass="dataText" />
 				</t:column>
 				<t:column>

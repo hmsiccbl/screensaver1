@@ -322,6 +322,9 @@
     <property
       name="libraryPoolToDuplexWellMapper"
       ref="libraryPoolToDuplexWellMapper"/>
+    <property
+      name="cherryPickRequestExporter"
+      ref="cherryPickRequestExporter"/>
     <aop:scoped-proxy/>
   </bean>
 

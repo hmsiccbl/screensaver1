@@ -22,9 +22,11 @@ import java.util.Set;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
+import edu.harvard.med.screensaver.io.cherrypicks.CherryPickRequestExporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
+import edu.harvard.med.screensaver.io.workbook2.Workbook2Utils;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -102,6 +104,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   private CherryPickRequestPlateMapper _cherryPickRequestPlateMapper;
   private CherryPickRequestPlateMapFilesBuilder _cherryPickRequestPlateMapFilesBuilder;
   private LibraryPoolToDuplexWellMapper _libraryPoolToDuplexWellMapper;
+  private CherryPickRequestExporter _cherryPickRequestExporter;
 
 
   // public getters and setters
@@ -187,6 +190,11 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public void setLibraryPoolToDuplexWellMapper(LibraryPoolToDuplexWellMapper libraryPoolToDuplexWellMapper)
   {
     _libraryPoolToDuplexWellMapper = libraryPoolToDuplexWellMapper;
+  }
+
+  public void setCherryPickRequestExporter(CherryPickRequestExporter cherryPickRequestExporter)
+  {
+    _cherryPickRequestExporter = cherryPickRequestExporter;
   }
 
   /* (non-Javadoc)
@@ -831,6 +839,27 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   }
 
   @UIControllerMethod
+  public String downloadCherryPickRequest(CherryPickRequest cherryPickRequest)
+  {
+    if (cherryPickRequest instanceof RNAiCherryPickRequest) {
+      try {
+        jxl.Workbook workbook = _cherryPickRequestExporter.exportRNAiCherryPickRequest((RNAiCherryPickRequest) cherryPickRequest);
+        JSFUtils.handleUserDownloadRequest(getFacesContext(),
+                                           Workbook2Utils.toInputStream(workbook),
+                                           cherryPickRequest.getClass().getSimpleName() + "-" + cherryPickRequest.getCherryPickRequestNumber() + ".xls",
+                                           Workbook.MIME_TYPE);
+      }
+      catch (Exception e) {
+        reportSystemError(e);
+      }
+    }
+    else {
+      showMessage("systemError", "downloading of compound cherry pick requests is not yet implemented");
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
   public String createCherryPickRequest(final Screen screenIn)
   {
     logUserActivity("createCherryPickRequest " + screenIn);
@@ -872,7 +901,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                     "screen.hbnCollaborators",
                     "hbnRequestedBy",
                     "cherryPickAssayPlates",
-          "cherryPickAssayPlates.hbnCherryPickLiquidTransfers");
+                    "cherryPickAssayPlates.hbnCherryPickLiquidTransfer");
           if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI)) {
             _dao.need(cherryPickRequest,
                       "screenerCherryPicks",
@@ -880,24 +909,24 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                       "screenerCherryPicks.screenedWell",
                       "screenerCherryPicks.screenedWell.hbnSilencingReagents",
                       "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene",
-            "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene.genbankAccessionNumbers");
+                      "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene.genbankAccessionNumbers");
             _dao.need(cherryPickRequest,
                       "labCherryPicks",
                       "labCherryPicks.sourceWell",
                       "labCherryPicks.sourceWell.hbnSilencingReagents",
                       "labCherryPicks.sourceWell.hbnSilencingReagents.gene",
-            "labCherryPicks.sourceWell.hbnSilencingReagents.gene.genbankAccessionNumbers");
+                      "labCherryPicks.sourceWell.hbnSilencingReagents.gene.genbankAccessionNumbers");
           }
           else if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
             _dao.need(cherryPickRequest,
                       "screenCherryPicks",
                       "screenerCherryPicks.labCherryPicks",
                       "screenCherryPicks.screenedWell",
-            "screenCherryPicks.screenedWell.hbnCompounds");
+                      "screenCherryPicks.screenedWell.hbnCompounds");
             _dao.need(cherryPickRequest,
                       "labCherryPicks",
                       "labCherryPicks.sourceWell",
-            "labCherryPicks.sourceWell.hbnCompound");
+                      "labCherryPicks.sourceWell.hbnCompound");
           }
 
 

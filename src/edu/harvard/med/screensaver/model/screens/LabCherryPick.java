@@ -271,15 +271,14 @@ public class LabCherryPick extends AbstractEntity
   // HACK: annotating as DerivedEntityProperty to prevent unit tests from
   // expecting a setter method (setAllocated() updates this property's value)
   /**
-   * Get the cherry pick assay plate.
+   * Get the cherry pick assay plate. Can be null, if the lab cherry pick has
+   * not been mapped to an assay plate.
    * 
    * @return
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate"
-   *   column="cherry_pick_assay_plate_id"
-   *   not-null="false"
-   *   foreign-key="fk_lab_cherry_pick_to_cherry_pick_assay_plate"
-   *   cascade="none"
+   * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate"
+   *                        column="cherry_pick_assay_plate_id" not-null="false"
+   *                        foreign-key="fk_lab_cherry_pick_to_cherry_pick_assay_plate"
+   *                        cascade="none"
    */
   @ToOneRelationship(nullable=true)
   @DerivedEntityProperty
@@ -315,7 +314,11 @@ public class LabCherryPick extends AbstractEntity
   @DerivedEntityProperty
   public String getAssayPlateWellName()
   {
-    return WellName.toString(_assayPlateRow, _assayPlateColumn);
+    if (_assayPlateRow != null && 
+      _assayPlateColumn != null) {
+      return WellName.toString(_assayPlateRow, _assayPlateColumn);
+    }
+    return null;
   }
   
   /**

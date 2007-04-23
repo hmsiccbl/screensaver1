@@ -173,4 +173,6 @@ public interface ScreensController
                                            ScreensaverUser performedBy, 
                                            Date dateOfLiquidTransfer, 
                                            String comments);
+
+  public String downloadCherryPickRequest(CherryPickRequest cherryPickRequest);
 }
