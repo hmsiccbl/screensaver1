@@ -9,7 +9,11 @@
 
 package edu.harvard.med.screensaver.service.libraries.rnai;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -152,7 +156,7 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
     {
       public void runTransaction()
       {
-        // chery pick pool whose gene is both library 1 and 2, but only cherry picked from library 1
+        // cherry pick pool whose gene is in both library 1 and 2, but only cherry picked from library 1
         {
           Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
           screen.setScreenType(ScreenType.RNAI);
@@ -166,11 +170,10 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           expectedDuplexCherryPickWellKeys.add(new WellKey(5, "D04"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
-          dao.persistEntity(rnaiCherryPickRequest); // avoid hib errors on flush
           dao.persistEntity(screen); // avoid hib errors on flush
         }
         
-        // chery pick pool whose gene is both library 1 and 2, and cherry picked from both libraries
+        // cherry pick pool whose gene is in both library 1 and 2, and cherry picked from both libraries
         {
           Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(2);
           screen.setScreenType(ScreenType.RNAI);
@@ -189,11 +192,10 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           expectedDuplexCherryPickWellKeys.add(new WellKey(10, "D04"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
-          dao.persistEntity(rnaiCherryPickRequest); // avoid hib errors on flush
           dao.persistEntity(screen); // avoid hib errors on flush
         }
         
-        // chery pick pool whose gene is only in library1
+        // cherry pick pool whose gene is only in library1
         {
           Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(31);
           screen.setScreenType(ScreenType.RNAI);
@@ -207,17 +209,16 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           expectedDuplexCherryPickWellKeys.add(new WellKey(5, "D05"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
-          dao.persistEntity(rnaiCherryPickRequest); // avoid hib errors on flush
           dao.persistEntity(screen); // avoid hib errors on flush
         }
         
-        // chery pick pool whose gene is only in library2
+        // cherry pick pool whose gene is only in library2
         {
           Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(4);
           screen.setScreenType(ScreenType.RNAI);
           RNAiCherryPickRequest rnaiCherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
           Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest, 
-                                                                                  new WellKey(6, "B02"));
+                                                                                         new WellKey(6, "B02"));
           TreeSet<WellKey> expectedDuplexCherryPickWellKeys = new TreeSet<WellKey>();
           expectedDuplexCherryPickWellKeys.add(new WellKey(7, "A02"));
           expectedDuplexCherryPickWellKeys.add(new WellKey(8, "B03"));
@@ -225,8 +226,30 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           expectedDuplexCherryPickWellKeys.add(new WellKey(10, "D05"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
-          dao.persistEntity(rnaiCherryPickRequest); // avoid hib errors on flush
           dao.persistEntity(screen); // avoid hib errors on flush
+        }
+        
+        // test reverse lookup, from duplex to pool
+        {
+          // TODO: this test code is relying upon state created above, which is not great practice; should make this into an independent test
+          List<Well> duplexWells = Arrays.asList(dao.findWell(new WellKey(2, "A02")),
+                                                 dao.findWell(new WellKey(3, "B03")),
+                                                 dao.findWell(new WellKey(4, "C04")),
+                                                 dao.findWell(new WellKey(5, "D05")),
+                                                 dao.findWell(new WellKey(7, "A02")),
+                                                 dao.findWell(new WellKey(8, "B03")),
+                                                 dao.findWell(new WellKey(9, "C04")),
+                                                 dao.findWell(new WellKey(10, "D05")));
+          Map<Well,Well> poolWells = libraryPoolToDuplexWellMapper.mapDuplexWellsToPoolWells(new HashSet<Well>(duplexWells));
+          int i = 0;
+          assertEquals("duplex-to-pool lookup", poolWells.get(duplexWells.get(i++)), dao.findWell(new WellKey(1, "B02")));
+          assertEquals("duplex-to-pool lookup", poolWells.get(duplexWells.get(i++)), dao.findWell(new WellKey(1, "B02")));
+          assertEquals("duplex-to-pool lookup", poolWells.get(duplexWells.get(i++)), dao.findWell(new WellKey(1, "B02")));
+          assertEquals("duplex-to-pool lookup", poolWells.get(duplexWells.get(i++)), dao.findWell(new WellKey(1, "B02")));
+          assertEquals("duplex-to-pool lookup", poolWells.get(duplexWells.get(i++)), dao.findWell(new WellKey(6, "B02")));
+          assertEquals("duplex-to-pool lookup", poolWells.get(duplexWells.get(i++)), dao.findWell(new WellKey(6, "B02")));
+          assertEquals("duplex-to-pool lookup", poolWells.get(duplexWells.get(i++)), dao.findWell(new WellKey(6, "B02")));
+          assertEquals("duplex-to-pool lookup", poolWells.get(duplexWells.get(i++)), dao.findWell(new WellKey(6, "B02")));
         }
       }
 
@@ -242,7 +265,7 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
       Well poolWell = dao.findWell(wellKey);
       new ScreenerCherryPick(rnaiCherryPickRequest, poolWell);
     }
-    libraryPoolToDuplexWellMapper.map(rnaiCherryPickRequest);
+    libraryPoolToDuplexWellMapper.createDuplexLabCherryPicksforPoolScreenerCherryPicks(rnaiCherryPickRequest);
     Set<LabCherryPick> actualDuplexCherryPickWells = rnaiCherryPickRequest.getLabCherryPicks();
     Set<WellKey> actualDuplexCherryPickWellKeys = new TreeSet<WellKey>();
     for (LabCherryPick labCherryPick : actualDuplexCherryPickWells) {

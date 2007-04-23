@@ -1255,7 +1255,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
             }
           }
           if (arePoolWells) {
-            _libraryPoolToDuplexWellMapper.map((RNAiCherryPickRequest) cherryPickRequest);
+            _libraryPoolToDuplexWellMapper.createDuplexLabCherryPicksforPoolScreenerCherryPicks((RNAiCherryPickRequest) cherryPickRequest);
           }
         }
       });

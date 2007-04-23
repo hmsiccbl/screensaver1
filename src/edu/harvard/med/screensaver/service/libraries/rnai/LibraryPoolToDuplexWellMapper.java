@@ -9,10 +9,13 @@
 
 package edu.harvard.med.screensaver.service.libraries.rnai;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -52,7 +55,7 @@ public class LibraryPoolToDuplexWellMapper
    * SilencingReagents contained in the pool well, <i>not</i> the gene they are
    * silencing.
    */
-  public Set<LabCherryPick> map(RNAiCherryPickRequest cherryPickRequest)
+  public Set<LabCherryPick> createDuplexLabCherryPicksforPoolScreenerCherryPicks(RNAiCherryPickRequest cherryPickRequest)
   {
     // TODO: currently assumes that all RNAi cherry picks are from Dharmacon
     // libraries, which are split into pool and duplex libraries
@@ -62,7 +65,6 @@ public class LibraryPoolToDuplexWellMapper
     // our data model; a UI can handle notification of these cases as desired,
     // simply by finding ScreenerCherryPicks that do not have a sufficient
     // number of LabCherryPicks
-    
     
     Set<LabCherryPick> labCherryPicks = new HashSet<LabCherryPick>(cherryPickRequest.getScreenerCherryPicks().size() * 4);
     for (ScreenerCherryPick screenerCherryPick : cherryPickRequest.getScreenerCherryPicks()) {
@@ -77,6 +79,36 @@ public class LibraryPoolToDuplexWellMapper
       }
     }
     return labCherryPicks;
+  }
+  
+  public Map<Well,Well> mapDuplexWellsToPoolWells(Set<Well> duplexWells)
+  {
+    Map<Well,Well> result = new HashMap<Well,Well>();
+    for (Well duplexWell : duplexWells) {
+      result.put(duplexWell, mapDuplexWellToPoolWell(duplexWell));
+    }
+    return result;
+  }
+
+  public Well mapDuplexWellToPoolWell(Well duplexWell)
+  {
+    if (duplexWell.getSilencingReagents().size() != 1) {
+      throw new BusinessRuleViolationException("to map duplex well to pool well, duplex well must have exactly 1 silencing reagent");
+    }
+    Well poolWell = null;
+    SilencingReagent silencingReagent = duplexWell.getSilencingReagents().iterator().next();
+    String poolLibraryName = getPoolLibraryNameForDuplexLibrary(duplexWell.getLibrary());
+    for (Well candidatePoolWell : silencingReagent.getWells()) {
+      if (candidatePoolWell.getLibrary().getLibraryName().equals(poolLibraryName)) {
+        if (poolWell == null) {
+          poolWell = candidatePoolWell;
+        }
+        else {
+          throw new BusinessRuleViolationException("duplex well " + duplexWell.getWellKey() + " maps to multiple pool wells");
+        }
+      }
+    }
+    return poolWell;
   }
 
 
@@ -94,5 +126,19 @@ public class LibraryPoolToDuplexWellMapper
     }
     return duplexLibraryName;
   }
+  
+  private String getPoolLibraryNameForDuplexLibrary(Library library)
+  {
+    // Note: this mapping relies upon our library naming convention
+    String poolLibraryName = library.getLibraryName()
+                                      .replace("Duplexes", "Pools");
+    if (!poolLibraryName.contains("Pools")) {
+      throw new IllegalArgumentException("Dharmacon duplex library '"
+                                         + library.getLibraryName()
+                                         + "' cannot be mapped to a pool library name");
+    }
+    return poolLibraryName;
+  }
+  
 }
 
