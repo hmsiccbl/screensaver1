@@ -16,9 +16,14 @@ public class FatalParseException extends Exception
 
   private static final long serialVersionUID = 1L;
 
-  public FatalParseException(Throwable arg0)
+  public FatalParseException(Throwable t)
   {
-    super(arg0);
+    super(t);
+  }
+
+  public FatalParseException(String s)
+  {
+    super(s);
   }
 }
 

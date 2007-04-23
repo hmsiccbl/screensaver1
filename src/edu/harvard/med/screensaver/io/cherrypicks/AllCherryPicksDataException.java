@@ -31,10 +31,5 @@ public class AllCherryPicksDataException extends RuntimeException
   {
     super("cell (" + Cell.columnIndexToLabel(col) + "" + (row + 1) + "): " + arg0);
   }
-
-  public AllCherryPicksDataException(String s)
-  {
-    super(s);
-  }
 }
 

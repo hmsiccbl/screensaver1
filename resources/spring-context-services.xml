@@ -86,6 +86,7 @@
     class="edu.harvard.med.screensaver.io.cherrypicks.AllCherryPicksImporter"
     scope="singleton">
     <constructor-arg ref="unrestrictedDao"/>
+    <constructor-arg ref="libraryPoolToDuplexWellMapper"/>
   </bean>
   
   <bean
