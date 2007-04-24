@@ -110,6 +110,9 @@ public interface ScreensController
   public String findScreen(Integer screenNumber);
 
   @UIControllerMethod
+  public String findCherryPickRequest(Integer cherryPickRequestNumber);
+
+  @UIControllerMethod
   public String importScreenResult(Screen screen,
                                    UploadedFile uploadedFile,
                                    ScreenResultParser parser);

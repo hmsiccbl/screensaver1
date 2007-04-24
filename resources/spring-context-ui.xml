@@ -302,6 +302,9 @@
       name="screenFinder"
       ref="screenFinder" />
     <property
+      name="cherryPickRequestFinder"
+      ref="cherryPickRequestFinder" />
+    <property
       name="heatMapViewer"
       ref="heatMapViewer" />
     <property
@@ -394,6 +397,15 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.screens.ScreenFinder">
     <description>Screen Finder</description>
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="cherryPickRequestFinder"
+    parent="screensUiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screens.CherryPickRequestFinder">
+    <description>CherryPickRequest Finder</description>
     <aop:scoped-proxy/>
   </bean>
 

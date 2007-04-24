@@ -55,6 +55,7 @@ import edu.harvard.med.screensaver.service.libraries.rnai.LibraryPoolToDuplexWel
 import edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
+import edu.harvard.med.screensaver.ui.screens.CherryPickRequestFinder;
 import edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenFinder;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
@@ -96,6 +97,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   private ScreenResultViewer _screenResultViewer;
   private CherryPickRequestViewer _cherryPickRequestViewer;
   private ScreenFinder _screenFinder;
+  private CherryPickRequestFinder _cherryPickRequestFinder;
   private HeatMapViewer _heatMapViewer;
   private ScreenResultImporter _screenResultImporter;
   private ScreenResultExporter _screenResultExporter;
@@ -152,6 +154,11 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public void setScreenFinder(ScreenFinder screenFinder)
   {
     _screenFinder = screenFinder;
+  }
+
+  public void setCherryPickRequestFinder(CherryPickRequestFinder cherryPickRequestFinder)
+  {
+    _cherryPickRequestFinder = cherryPickRequestFinder;
   }
 
   public void setHeatMapViewer(HeatMapViewer heatMapViewer) 
@@ -687,16 +694,41 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   {
     logUserActivity("findScreen " + screenNumber);
     if (screenNumber != null) {
-      Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+      Screen screen = _dao.findEntityByProperty(Screen.class, 
+                                                "hbnScreenNumber", 
+                                                screenNumber);
       if (screen != null) {
         return viewScreen(screen, null);
       }
       else {
-        showMessage("screens.noSuchScreenNumber", screenNumber);
+        showMessage("screens.noSuchEntity", 
+                    "Screen" + screenNumber);
       }
     }
     else {
       showMessage("screens.screenNumberRequired", screenNumber);
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  public String findCherryPickRequest(Integer cherryPickRequestNumber)
+  {
+    logUserActivity("findCherryPickRequest " + cherryPickRequestNumber);
+    if (cherryPickRequestNumber != null) {
+      CherryPickRequest cherryPickRequest = _dao.findEntityByProperty(CherryPickRequest.class, 
+                                                                      "cherryPickRequestNumber", 
+                                                                      cherryPickRequestNumber);
+      if (cherryPickRequest != null) {
+        return viewCherryPickRequest(cherryPickRequest);
+      }
+      else {
+        showMessage("screens.noSuchEntity", 
+                    "Cherry Pick Request " + cherryPickRequestNumber);
+      }
+    }
+    else {
+      showMessage("cherryPickRequests.cherryPickRequestNumberRequired", 
+                  cherryPickRequestNumber);
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }

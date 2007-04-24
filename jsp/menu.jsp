@@ -120,6 +120,19 @@
 			</t:panelGrid>
 		</h:form>
     
+    <h:form id="quickFindCherryPickRequest">
+			<t:panelGrid columns="1"
+				rendered="#{menu.authenticatedUser}">
+				<t:outputLabel id="cherryPickRequestNumberLabel" for="cherryPickRequestNumber"
+					value="CPR #" styleClass="menuItem label" />
+				<t:inputText id="cherryPickRequestNumber" value="#{cherryPickRequestFinder.cherryPickRequestNumber}"
+					size="5" styleClass="inputText" />
+				<t:commandButton action="#{cherryPickRequestFinder.findCherryPickRequest}"
+					id="quickFindCherryPickRequestSubmit" value="Go"
+					rendered="#{menu.authenticatedUser}" styleClass="command" />
+			</t:panelGrid>
+		</h:form>
+    
   </t:panelGrid>
 </f:subview>
 
