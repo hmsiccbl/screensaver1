@@ -90,7 +90,7 @@ public class ScreenDBScreenSynchronizer
 
   public Screen getScreenForScreenNumber(Integer screenNumber)
   {
-    return _dao.reloadEntity(_screenNumberToScreenMap.get(screenNumber));
+    return _screenNumberToScreenMap.get(screenNumber);
   }
   
 

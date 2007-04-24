@@ -195,37 +195,9 @@ public class ScreenDBSynchronizer
       public void runTransaction()
       {
         userSynchronizer.synchronizeUsers();
-      }
-    });
-
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
         screenSynchronizer.synchronizeScreens();
-      }
-    });
-
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
         libraryScreeningSynchronizer.synchronizeLibraryScreenings();
-      }
-    });
-
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
         compoundCherryPickSynchronizer.synchronizeCompoundCherryPicks();
-      }
-    });
-
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
         rnaiCherryPickSynchronizer.synchronizeRNAiCherryPicks();
       }
     });
