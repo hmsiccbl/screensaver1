@@ -1121,7 +1121,8 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
         {
           CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
           CherryPickRequest newCherryPickRequest = cherryPickRequest.getScreen().createCherryPickRequest();
-          newCherryPickRequest.setComments("Created for unfulfilled cherry picks in Cherry Pick Request " + cherryPickRequest.getEntityId());
+          newCherryPickRequest.setComments("Created for unfulfilled cherry picks in Cherry Pick Request " + 
+                                           cherryPickRequest.getCherryPickRequestNumber());
           // TODO: this might be better done in a copy constructor
           newCherryPickRequest.setMicroliterTransferVolumePerWellApproved(cherryPickRequest.getMicroliterTransferVolumePerWellApproved());
           newCherryPickRequest.setMicroliterTransferVolumePerWellRequested(cherryPickRequest.getMicroliterTransferVolumePerWellRequested());
@@ -1132,7 +1133,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
           for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
             if (!labCherryPick.isAllocated()) {
               ScreenerCherryPick newScreenerCherryPick = new ScreenerCherryPick(newCherryPickRequest,
-                                                                                labCherryPick.getSourceWell());
+                                                                                labCherryPick.getScreenerCherryPick().getScreenedWell());
               new LabCherryPick(newScreenerCherryPick, labCherryPick.getSourceWell());
             }
           }

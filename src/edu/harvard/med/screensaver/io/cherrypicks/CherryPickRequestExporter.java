@@ -279,11 +279,13 @@ public class CherryPickRequestExporter
                             "Sequences",
                             "Vendor IDs");
     int resultValueCol = 0;
-    for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-      Workbook2Utils.writeCell(sheet,
-                               0,
-                               6 + resultValueCol++,
-                               rvt.getName());
+    if (screenResult != null) {
+      for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+        Workbook2Utils.writeCell(sheet,
+                                 0,
+                                 6 + resultValueCol++,
+                                 rvt.getName());
+      }
     }
   }
 }

@@ -130,8 +130,11 @@ public class CherryPickRequestAllocator
   
   private Copy selectCopy(Well wellIn, BigDecimal volumeNeeded)
   {
-    Well well = _dao.findWell(wellIn.getWellKey()); // necessary, since LabCherryPick.sourceell is not cascaded
+    Well well = _dao.findWell(wellIn.getWellKey()); // necessary, since LabCherryPick.sourceWell is not cascaded
     List<Copy> copies = new ArrayList<Copy>(well.getLibrary().getCopies());
+    if (copies.size() == 0) {
+      throw new DataModelViolationException("library " + well.getLibrary() + " has no Copies, so cannot allocate liquid");
+    }
     Collections.sort(copies, SourceCopyComparator.getInstance());
 
     for (Copy copy : copies) {
