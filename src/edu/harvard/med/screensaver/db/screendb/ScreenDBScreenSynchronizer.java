@@ -50,7 +50,6 @@ public class ScreenDBScreenSynchronizer
   private Connection _connection;
   private DAO _dao;
   private ScreenDBUserSynchronizer _userSynchronizer;
-  private ScreenDBSynchronizationException _synchronizationException = null;
   private ScreenType.UserType _screenUserType = new ScreenType.UserType();
   private StatusValue.UserType _statusValueUserType = new StatusValue.UserType();
   private FundingSupport.UserType _fundingSupportUserType = new FundingSupport.UserType();
@@ -81,23 +80,17 @@ public class ScreenDBScreenSynchronizer
           synchronizePublications();
         }
         catch (SQLException e) {
-          _synchronizationException = new ScreenDBSynchronizationException(
+          throw new ScreenDBSynchronizationException(
             "Encountered an SQL exception while synchonrizing screens: " + e.getMessage(),
             e);
         }
-        catch (ScreenDBSynchronizationException e) {
-          _synchronizationException = e;
-        }
       }
     });
-    if (_synchronizationException != null) {
-      throw _synchronizationException;
-    }
   }
 
   public Screen getScreenForScreenNumber(Integer screenNumber)
   {
-    return _screenNumberToScreenMap.get(screenNumber);
+    return _dao.reloadEntity(_screenNumberToScreenMap.get(screenNumber));
   }
   
 
