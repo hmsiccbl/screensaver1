@@ -139,10 +139,10 @@ public class AllCherryPicksImporter
       AllCherryPicksImporter importer = (AllCherryPicksImporter) app.getSpringBean("allCherryPicksImporter");
       importer.setFromRow(app.getCommandLineOptionValue("r", Integer.class));
       importer.setCherryPickRequestNumber(app.getCommandLineOptionValue("n", Integer.class));
+      importer.setFailFast(app.isCommandLineFlagSet("x"));
       File workbookFile = app.getCommandLineOptionValue("f", File.class);
       BufferedInputStream bis = new BufferedInputStream(new FileInputStream(workbookFile));
       importer.importCherryPickCopiesAndRnaiCherryPicks(bis);
-      importer.setFailFast(app.getCommandLineOptionValue("x", Boolean.class));
     }
     catch (Exception e) {
       e.printStackTrace();
@@ -220,7 +220,7 @@ public class AllCherryPicksImporter
   }
   
   public Set<Copy> importCherryPickCopies(File workbookFile) 
-    throws AllCherryPicksDataException, FatalParseException
+    throws CherryPickCopiesDataException, FatalParseException
   {
     BufferedInputStream bis = null;
     try {
@@ -240,7 +240,7 @@ public class AllCherryPicksImporter
   }
 
   public void importRnaiCherryPicks(File workbookFile) 
-  throws AllCherryPicksDataException, FatalParseException
+    throws CherryPicksDataException, FatalParseException
   {
     BufferedInputStream bis = null;
     try {
@@ -260,7 +260,7 @@ public class AllCherryPicksImporter
   }
 
   public Set<Copy> importCherryPickCopies(Workbook workbook) 
-    throws AllCherryPicksDataException
+    throws CherryPickCopiesDataException
   {
 
     final Sheet sheet = workbook.getSheet(CHERRY_PICK_COPIES_SHEET_NAME);
@@ -286,12 +286,12 @@ public class AllCherryPicksImporter
             volume = new BigDecimal(((NumberCell) sheet.getCell(COPY_VOLUME_COLUMN_INDEX, iRow)).getValue());
           }
           catch (Exception e) {
-            throw new AllCherryPicksDataException("illegal data type: "  + e.getMessage(), iRow, iCol);
+            throw new CherryPickCopiesDataException("illegal data type: "  + e.getMessage(), iRow, iCol);
           }
 
           Library library = _dao.findLibraryWithPlate(plate);
           if (library == null) {
-            throw new AllCherryPicksDataException("invalid plate number (no library for plate)", iRow);
+            throw new CherryPickCopiesDataException("invalid plate number (no library for plate)", iRow);
           }
           Copy copy = library.getCopy(copyName);
           if (copy == null) {
@@ -306,7 +306,7 @@ public class AllCherryPicksImporter
           if (copyInfo2Volume.containsKey(copyInfo)) {
             Integer expectedVolume = copyInfo2Volume.get(copyInfo);
             if (!volume.equals(expectedVolume)) {
-              throw new AllCherryPicksDataException("volume not consistent for plate " + plate, iRow);
+              throw new CherryPickCopiesDataException("volume not consistent for plate " + plate, iRow);
             }
           }
           copies.add(copy);
@@ -318,7 +318,7 @@ public class AllCherryPicksImporter
   }
   
   public void importRnaiCherryPicks(Workbook workbook)
-    throws AllCherryPicksDataException
+  throws CherryPicksDataException, FatalParseException
   {
     final Sheet sheet = workbook.getSheet(CHERRY_PICK_REQUESTS_SHEET_NAME);
     _dao.doInTransaction(new DAOTransaction() 
@@ -327,125 +327,128 @@ public class AllCherryPicksImporter
       {
         int iRow = 0;
         boolean encounteredErrors = false;
-        try {
-          Map<Integer,CherryPickRequest> visitId2CherryPickRequest = buildVisitIdToCherryPickRequestMap();
-          CherryPickRequest cherryPickRequest = null;
-          CherryPickRequest lastCherryPickRequest = null;
-          Collection<CherryPickRequest> touchedCherryPickRequests = new HashSet<CherryPickRequest>();
+        Map<Integer,CherryPickRequest> visitId2CherryPickRequest = buildVisitIdToCherryPickRequestMap();
+        CherryPickRequest cherryPickRequest = null;
+        Collection<CherryPickRequest> touchedCherryPickRequests = new HashSet<CherryPickRequest>();
 
-          for (iRow = getFromRow(); iRow < sheet.getRows(); iRow++) {
-            if (isRowBlank(sheet, iRow)) {
-              break;
-            }
-            Integer visitId = null;
-            Well labCherryPickWell = null;
-            try {
-              NumberCell visitIdCell = (NumberCell) sheet.getCell(VISIT_ID_COLUMN_INDEX, iRow);
-              NumberCell plateNumberCell = (NumberCell) sheet.getCell(PLATE_NUMBER_COLUMN_INDEX, iRow);
-              Cell wellNameCell = sheet.getCell(WELL_NAME_COLUMN_INDEX, iRow);
-              Cell sourceCopyCell = sheet.getCell(SOURCE_COPY_COLUMN_INDEX, iRow);
-              visitId = (int) visitIdCell.getValue();
-            
-              cherryPickRequest = visitId2CherryPickRequest.get(visitId);
-              
-              // for debugging: only import the cherry pick of the specified cherry pick request number
-              if (_cherryPickRequestNumber != null &&
-                !cherryPickRequest.getCherryPickRequestNumber().equals(_cherryPickRequestNumber)) {
-                continue;
-              }
-
-              if (cherryPickRequest != lastCherryPickRequest) {
-                log.info("importing cherry picks for Cherry Pick Request " + cherryPickRequest.getCherryPickRequestNumber());
-                lastCherryPickRequest = cherryPickRequest;
-              }
-              
-              if (cherryPickRequest.getScreenerCherryPicks().size() > 0 && 
-                !touchedCherryPickRequests.contains(cherryPickRequest)) {
-                  throw new AllCherryPicksDataException("cherry pick request " + cherryPickRequest.getCherryPickRequestNumber() + " already has cherry picks", iRow);
-              }
-
-              if (cherryPickRequest.getMicroliterTransferVolumePerWellApproved() == null) {
-                if (cherryPickRequest.getMicroliterTransferVolumePerWellRequested() == null) {
-                  throw new AllCherryPicksDataException("both requested and approved volumes are null for cherry pick request " + cherryPickRequest.getCherryPickRequestNumber(), iRow);
-                }
-                else {
-                  // set (missing) approved volume to requested volume, which is
-                  // okay to do, since we know the volume was approved by virtue
-                  // of the cherry pick (visit) being included in the
-                  // AllCherryPicks.xls file
-                  log.info("setting cherry pick request approved volume to requested volume: " + 
-                           cherryPickRequest.getMicroliterTransferVolumePerWellRequested());
-                  cherryPickRequest.setMicroliterTransferVolumePerWellApproved(cherryPickRequest.getMicroliterTransferVolumePerWellRequested());
-                }
-              }
-
-              // TODO: for now, we'll use the duplex well also as the requested
-              // well, rather than the pool well, which will require a reverse
-              // lookup
-              WellKey wellKey = new WellKey((int) plateNumberCell.getValue(),
-                                            wellNameCell.getContents());
-              labCherryPickWell = _dao.findWell(wellKey);
-              if (labCherryPickWell == null) {
-                throw new AllCherryPicksDataException("no such well: " + wellKey,
-                                                      iRow, WELL_NAME_COLUMN_INDEX);
-              }
-              Well screenerCherryPickWell = _libraryPoolToDuplexWellMapper.mapDuplexWellToPoolWell(labCherryPickWell);
-              if (screenerCherryPickWell == null) {
-                if (labCherryPickWell.getSilencingReagents().size() > 1) {
-                  log.warn("cherry pick well " + labCherryPickWell + " appears to be a pool well: screenerCherryPick will be same as labCherryPick");
-                  screenerCherryPickWell = labCherryPickWell;
-                }
-                else {
-                  throw new AllCherryPicksDataException("cherry pick well " + labCherryPickWell + " cannot be mapped to a pool well and does not appear to be a pool well itself", iRow);
-                }
-              }
-              ScreenerCherryPick screenerCherryPick = new ScreenerCherryPick(cherryPickRequest, screenerCherryPickWell);
-              LabCherryPick labCherryPick = new LabCherryPick(screenerCherryPick, labCherryPickWell);
-              // note: we validate volume *after* creating the lab cherry pick,
-              // only because the potential DuplicateEntityException is the more
-              // critical error to report, in case both volume-validation and
-              // duplicate-lab-cherrry-pick errors are triggered for the same
-              // row
-              validateLabCherryPickVolumeMatchesCherryPickRequestVolume(cherryPickRequest,
-                                                                        sheet,
-                                                                        iRow);
-              labCherryPick.setAllocated(findCopy((int) plateNumberCell.getValue(),
-                                                  sourceCopyCell.getContents(),
-                                                  iRow));
-              // TODO: labCherryPick.setMapped().  Will require knowing the plate each cherry pick was mapped to.
-            }
-            catch (AllCherryPicksDataException e) {
-              log.error(e.getMessage());
-              encounteredErrors = true;
-            }
-            catch (DuplicateEntityException e) {
-              log.error("cherry pick visit " + visitId + " should have been split into multiple visits, since there are duplicate cherry picks from well " + labCherryPickWell);
-              encounteredErrors = true;
-            }
-            catch (BusinessRuleViolationException e) {
-              log.error("could not create a lab cherry pick for well " + labCherryPickWell + ": " + e.getMessage());
-              encounteredErrors = true;
-            }
-            finally {
-              touchedCherryPickRequests.add(cherryPickRequest);
-            }
-            if (encounteredErrors && isFailFast()) {
-              break;
-            }
+        for (iRow = getFromRow(); iRow < sheet.getRows(); iRow++) {
+          if (isRowBlank(sheet, iRow)) {
+            break;
           }
-          
-          if (encounteredErrors) {
-            throw new FatalParseException("import failed due to errors (see log); database remains unchanged");
+          Integer visitId = null;
+          Well labCherryPickWell = null;
+          try {
+            NumberCell visitIdCell = (NumberCell) sheet.getCell(VISIT_ID_COLUMN_INDEX, iRow);
+            NumberCell plateNumberCell = (NumberCell) sheet.getCell(PLATE_NUMBER_COLUMN_INDEX, iRow);
+            Cell wellNameCell = sheet.getCell(WELL_NAME_COLUMN_INDEX, iRow);
+            Cell sourceCopyCell = sheet.getCell(SOURCE_COPY_COLUMN_INDEX, iRow);
+            visitId = (int) visitIdCell.getValue();
+
+            cherryPickRequest = visitId2CherryPickRequest.get(visitId);
+
+            // for debugging: only import the cherry pick of the specified cherry pick request number
+            if (_cherryPickRequestNumber != null &&
+              !cherryPickRequest.getCherryPickRequestNumber().equals(_cherryPickRequestNumber)) {
+              continue;
+            }
+
+            if (cherryPickRequest.getScreenerCherryPicks().size() > 0 && 
+              !touchedCherryPickRequests.contains(cherryPickRequest)) {
+              throw new CherryPicksDataException("cherry pick request " + 
+                                                 cherryPickRequest.getCherryPickRequestNumber() + 
+                                                 " already has cherry picks", 
+                                                 visitId,
+                                                 iRow);
+            }
+
+            if (cherryPickRequest.getMicroliterTransferVolumePerWellApproved() == null) {
+              if (cherryPickRequest.getMicroliterTransferVolumePerWellRequested() == null) {
+                throw new CherryPicksDataException("both requested and approved volumes are null for cherry pick request " + 
+                                                   cherryPickRequest.getCherryPickRequestNumber(), 
+                                                   visitId,
+                                                   iRow);
+              }
+              else {
+                // set (missing) approved volume to requested volume, which is
+                // okay to do, since we know the volume was approved by virtue
+                // of the cherry pick (visit) being included in the
+                // AllCherryPicks.xls file
+                log.info("CPR " + visitId + " setting cherry pick request approved volume to requested volume: " + 
+                         cherryPickRequest.getMicroliterTransferVolumePerWellRequested());
+                cherryPickRequest.setMicroliterTransferVolumePerWellApproved(cherryPickRequest.getMicroliterTransferVolumePerWellRequested());
+              }
+            }
+
+            // TODO: for now, we'll use the duplex well also as the requested
+            // well, rather than the pool well, which will require a reverse
+            // lookup
+            WellKey wellKey = new WellKey((int) plateNumberCell.getValue(),
+                                          wellNameCell.getContents());
+            labCherryPickWell = _dao.findWell(wellKey);
+            if (labCherryPickWell == null) {
+              throw new CherryPicksDataException("no such well: " + wellKey,
+                                                 visitId,
+                                                 iRow, 
+                                                 WELL_NAME_COLUMN_INDEX);
+            }
+            Well screenerCherryPickWell = _libraryPoolToDuplexWellMapper.mapDuplexWellToPoolWell(labCherryPickWell);
+            if (screenerCherryPickWell == null) {
+              if (labCherryPickWell.getSilencingReagents().size() > 1) {
+                log.warn("CPR " + visitId + " cherry pick well " + labCherryPickWell + 
+                         " appears to be a pool well: screenerCherryPick will be same as labCherryPick");
+                screenerCherryPickWell = labCherryPickWell;
+              }
+              else {
+                throw new CherryPicksDataException("cherry pick well " + labCherryPickWell + 
+                                                   " cannot be mapped to a pool well and does not appear to be a pool well itself", 
+                                                   visitId,
+                                                   iRow);
+              }
+            }
+            ScreenerCherryPick screenerCherryPick = new ScreenerCherryPick(cherryPickRequest, screenerCherryPickWell);
+            LabCherryPick labCherryPick = new LabCherryPick(screenerCherryPick, labCherryPickWell);
+            // note: we validate volume *after* creating the lab cherry pick,
+            // only because the potential DuplicateEntityException is the more
+            // critical error to report, in case both volume-validation and
+            // duplicate-lab-cherrry-pick errors are triggered for the same
+            // row
+            validateLabCherryPickVolumeMatchesCherryPickRequestVolume(cherryPickRequest,
+                                                                      sheet,
+                                                                      iRow);
+            labCherryPick.setAllocated(findCopy((int) plateNumberCell.getValue(),
+                                                sourceCopyCell.getContents(),
+                                                iRow));
+            // TODO: labCherryPick.setMapped().  Will require knowing the plate each cherry pick was mapped to.
           }
-          else {
-            log.info("imported cherry pick requests");
+          catch (CherryPicksDataException e) {
+            log.error(e.getMessage());
+            encounteredErrors = true;
+          }
+          catch (DuplicateEntityException e) {
+            log.error("CPR " + visitId + " should have been split into multiple visits, since there are duplicate cherry picks from well " + labCherryPickWell);
+            encounteredErrors = true;
+          }
+          catch (BusinessRuleViolationException e) {
+            log.error("CPR " + visitId + " could not create a lab cherry pick for well " + labCherryPickWell + ": " + e.getMessage());
+            encounteredErrors = true;
+          }
+          catch (Exception e) {
+            log.error("CPR " + visitId + "unexpected error at row " + iRow + ":" + e.toString());
+            encounteredErrors = true;
+          }
+          finally {
+            touchedCherryPickRequests.add(cherryPickRequest);
+          }
+          if (encounteredErrors && isFailFast()) {
+            break;
           }
         }
-        catch (AllCherryPicksDataException e) {
-          throw e;
+
+        if (encounteredErrors) {
+          throw new FatalParseException("import failed due to errors (see log); database remains unchanged");
         }
-        catch (Exception e) {
-          throw new AllCherryPicksDataException(e.toString(), iRow);
+        else {
+          log.info("imported cherry pick requests");
         }
       }
     });
@@ -458,20 +461,22 @@ public class AllCherryPicksImporter
     Cell volumeCell = sheet.getCell(VOLUME_COLUMN_INDEX, iRow);
     BigDecimal cprVolume = cherryPickRequest.getMicroliterTransferVolumePerWellApproved();
     if (cprVolume == null) {
-      throw new AllCherryPicksDataException("cherry pick request " + cherryPickRequest.getCherryPickRequestNumber() +
-                                            " does not have an approved volume, so we cannot validate that " +
-                                            "the imported cherry pick volume is correct",
-                                            iRow,
-                                            VOLUME_COLUMN_INDEX);
+      throw new CherryPicksDataException("cherry pick request " + cherryPickRequest.getCherryPickRequestNumber() +
+                                         " does not have an approved volume, so we cannot validate that " +
+                                         "the imported cherry pick volume is correct",
+                                         cherryPickRequest.getCherryPickRequestNumber(),
+                                         iRow,
+                                         VOLUME_COLUMN_INDEX);
     }
 
     BigDecimal labCherryPickVolume = new BigDecimal(volumeCell.getContents()).setScale(CherryPickRequest.VOLUME_SCALE);
     if (!labCherryPickVolume.equals(cprVolume)) {
-      throw new AllCherryPicksDataException("cherry pick volume (" + volumeCell.getContents() + 
-                                            ") does not match the cherry pick request approved volume (" + 
-                                            cprVolume + ")",
-                                            iRow,
-                                            VOLUME_COLUMN_INDEX);
+      throw new CherryPicksDataException("cherry pick volume (" + volumeCell.getContents() + 
+                                         ") does not match the cherry pick request approved volume (" + 
+                                         cprVolume + ")",
+                                         cherryPickRequest.getCherryPickRequestNumber(),
+                                         iRow,
+                                         VOLUME_COLUMN_INDEX);
     }
   }
     
@@ -480,12 +485,12 @@ public class AllCherryPicksImporter
     if (_cachedLibrary == null || !_cachedLibrary.containsPlate(plateNumber)) {
       _cachedLibrary = _dao.findLibraryWithPlate(plateNumber);
       if (_cachedLibrary == null) {
-        throw new AllCherryPicksDataException("no library for plate " + plateNumber, iRow);
+        throw new CherryPickCopiesDataException("no library for plate " + plateNumber, iRow);
       }
     }
     Copy copy = _cachedLibrary.getCopy(copyName);
     if (copy == null) {
-      throw new AllCherryPicksDataException("no such copy " + copyName, iRow);
+      throw new CherryPickCopiesDataException("no such copy " + copyName, iRow);
     }
     return copy;
   }

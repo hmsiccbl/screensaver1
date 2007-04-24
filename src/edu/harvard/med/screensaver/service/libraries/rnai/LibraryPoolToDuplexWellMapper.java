@@ -93,7 +93,8 @@ public class LibraryPoolToDuplexWellMapper
   public Well mapDuplexWellToPoolWell(Well duplexWell)
   {
     if (duplexWell.getSilencingReagents().size() != 1) {
-      throw new BusinessRuleViolationException("to map duplex well to pool well, duplex well must have exactly 1 silencing reagent");
+      throw new BusinessRuleViolationException("to map duplex well to pool well, duplex well must have exactly 1 silencing reagent, " +
+          "but has " + duplexWell.getSilencingReagents().size());
     }
     Well poolWell = null;
     SilencingReagent silencingReagent = duplexWell.getSilencingReagents().iterator().next();

@@ -9,21 +9,27 @@
 
 package edu.harvard.med.screensaver.io.cherrypicks;
 
+import edu.harvard.med.screensaver.io.workbook.Cell;
 
-public class FatalParseException extends RuntimeException
+import org.apache.log4j.Logger;
+
+public class CherryPickCopiesDataException extends RuntimeException
 {
-  // static members
-
   private static final long serialVersionUID = 1L;
+  private static Logger log = Logger.getLogger(CherryPickCopiesDataException.class);
 
-  public FatalParseException(Throwable t)
+  public CherryPickCopiesDataException()
   {
-    super(t);
   }
 
-  public FatalParseException(String s)
+  public CherryPickCopiesDataException(String s, int row)
   {
-    super(s);
+    super("row " + (row + 1) + ": " + s);
+  }
+  
+  public CherryPickCopiesDataException(String s, int row, int col)
+  {
+    super("cell (" + Cell.columnIndexToLabel(col) + "" + (row + 1) + "): " + s);
   }
 }
 

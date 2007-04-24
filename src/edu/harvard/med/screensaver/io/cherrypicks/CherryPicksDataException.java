@@ -13,23 +13,23 @@ import edu.harvard.med.screensaver.io.workbook.Cell;
 
 import org.apache.log4j.Logger;
 
-public class AllCherryPicksDataException extends RuntimeException
+public class CherryPicksDataException extends RuntimeException
 {
   private static final long serialVersionUID = 1L;
-  private static Logger log = Logger.getLogger(AllCherryPicksDataException.class);
+  private static Logger log = Logger.getLogger(CherryPicksDataException.class);
 
-  public AllCherryPicksDataException()
+  public CherryPicksDataException()
   {
   }
 
-  public AllCherryPicksDataException(String arg0, int row)
+  public CherryPicksDataException(String s, int cherryPickRequestNumber, int row)
   {
-    super("row " + (row + 1) + ": " + arg0);
+    super("CPR " + cherryPickRequestNumber + " row " + (row + 1) + ": " + s);
   }
   
-  public AllCherryPicksDataException(String arg0, int row, int col)
+  public CherryPicksDataException(String s, int cherryPickRequestNumber, int row, int col)
   {
-    super("cell (" + Cell.columnIndexToLabel(col) + "" + (row + 1) + "): " + arg0);
+    super("CPR " + cherryPickRequestNumber + " cell (" + Cell.columnIndexToLabel(col) + "" + (row + 1) + "): " + s);
   }
 }
 
