@@ -296,12 +296,12 @@ public class AllCherryPicksImporter
           Copy copy = library.getCopy(copyName);
           if (copy == null) {
             copy = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, copyName);
-            log.info("created Copy " + copy + " for library " + library.getLibraryName());
+            log.info("created " + copy + " for library " + library.getLibraryName());
           }
           CopyInfo copyInfo = copy.getCopyInfo(plate);
           if (copyInfo == null) {
-            new CopyInfo(copy, plate, "<unknown>", PlateType.EPPENDORF, volume);
-            log.info("created CopyInfo " + copyInfo + " for Copy " + copy);
+            copyInfo = new CopyInfo(copy, plate, "<unknown>", PlateType.EPPENDORF, volume);
+            log.info("created " + copyInfo + " for " + copy);
           }
           if (copyInfo2Volume.containsKey(copyInfo)) {
             Integer expectedVolume = copyInfo2Volume.get(copyInfo);
@@ -345,6 +345,10 @@ public class AllCherryPicksImporter
             visitId = (int) visitIdCell.getValue();
 
             cherryPickRequest = visitId2CherryPickRequest.get(visitId);
+            
+            if (cherryPickRequest == null) {
+              throw new CherryPicksDataException("no such cherry pick request", visitId, iRow);
+            }
 
             // for debugging: only import the cherry pick of the specified cherry pick request number
             if (_cherryPickRequestNumber != null &&
