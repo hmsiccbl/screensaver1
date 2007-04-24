@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -432,7 +433,6 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
 
     // disassociate from related entities
     screenerCherryPick.getCherryPickRequest().getScreenerCherryPicks().remove(screenerCherryPick);
-    screenerCherryPick.getScreenedWell().getHbnScreenerCherryPicks().remove(screenerCherryPick);
     for (LabCherryPick cherryPick : new ArrayList<LabCherryPick>(screenerCherryPick.getLabCherryPicks())) {
       deleteLabCherryPick(cherryPick);
     }
@@ -451,7 +451,6 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     if (labCherryPick.getSourceCopy() != null) {
       labCherryPick.getSourceCopy().getHbnLabCherryPicks().remove(labCherryPick);
     }
-    labCherryPick.getSourceWell().getHbnLabCherryPicks().remove(labCherryPick);
     if (labCherryPick.getAssayPlate() != null) {
       labCherryPick.getAssayPlate().getLabCherryPicks().remove(labCherryPick);
     }
@@ -491,6 +490,17 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     getHibernateTemplate().delete(cherryPickRequest);
   }
 
+  public void deleteAllCherryPickRequests()
+  {
+    // TODO: want to do the following, as in Spring 2.0 API:
+    // http://www.springframework.org/docs/api/org/springframework/orm/hibernate/HibernateTemplate.html#delete(java.lang.String)
+    // but it doesn't work - it ends up treating the String as an entity, and fails.
+    // are we not at Spring 2.0 for this one yet? look into upgrading to be able to use the
+    // (hopefully) faster approach
+    //getHibernateTemplate().delete("from CherryPickRequest");
+    getHibernateTemplate().deleteAll(getHibernateTemplate().find("from CherryPickRequest"));
+  }
+  
   public Well findWell(WellKey wellKey)
   {
     return findEntityById(Well.class, wellKey.getKey());
@@ -605,6 +615,20 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   {
     return new TreeSet<Well>(getHibernateTemplate().find("from Well where plateNumber = ?", plate));
   }
+
+  @SuppressWarnings("unchecked")
+  public Set<LabCherryPick> findLabCherryPicksForWell(Well well)
+  {
+    return new HashSet<LabCherryPick>(
+      getHibernateTemplate().find("from LabCherryPick where sourceWell = ?", well));
+  }
+
+  @SuppressWarnings("unchecked")
+  public Set<ScreenerCherryPick> findScreenerCherryPicksForWell(Well well)
+  {
+    return new HashSet<ScreenerCherryPick>(
+      getHibernateTemplate().find("from ScreenerCherryPick where screenedWell = ?", well));
+  }
   
   @SuppressWarnings("unchecked")
   public void loadOrCreateWellsForLibrary(Library library)
@@ -638,10 +662,13 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
             library,
             new WellKey(iPlate, iRow, iCol),
             WellType.EMPTY);
-          persistEntity(well);
+          // TODO: because of the cascade from library to well, we could just call persist on
+          // the library. this might save a bunch of time
+          //persistEntity(well);
         }
       }
     }
+    persistEntity(library);
     log.info("created wells for library " + library.getLibraryName());
   }
   

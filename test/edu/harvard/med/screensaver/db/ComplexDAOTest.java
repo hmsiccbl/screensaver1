@@ -715,8 +715,8 @@ public class ComplexDAOTest extends AbstractSpringTest
         assertEquals("screener cherry picks exist before delete",
                      2, 
                      cherryPickRequest.getScreenerCherryPicks().size());
-        assertEquals("screener cherry picks exist for well1 before delete", 1, dao.findWell(new WellKey(1, "A01")).getScreenerCherryPicks().size());
-        assertEquals("screener cherry picks exist for well2 before delete", 1, dao.findWell(new WellKey(2, "P24")).getScreenerCherryPicks().size());
+        assertEquals("screener cherry picks exist for well1 before delete", 1, dao.findScreenerCherryPicksForWell(dao.findWell(new WellKey(1, "A01"))).size());
+        assertEquals("screener cherry picks exist for well2 before delete", 1, dao.findScreenerCherryPicksForWell(dao.findWell(new WellKey(2, "P24"))).size());
         Set<ScreenerCherryPick> cherryPicksToDelete = new HashSet<ScreenerCherryPick>(cherryPickRequest.getScreenerCherryPicks());
         for (ScreenerCherryPick cherryPick : cherryPicksToDelete) {
           dao.deleteScreenerCherryPick(cherryPick);
@@ -731,8 +731,8 @@ public class ComplexDAOTest extends AbstractSpringTest
         Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
         assertEquals("screener cherry picks deleted from cherry pick request", 0, cherryPickRequest.getScreenerCherryPicks().size());
-        assertEquals("screener cherry picks deleted from well1", 0, dao.findWell(new WellKey(1, "A01")).getScreenerCherryPicks().size());
-        assertEquals("screener cherry picks deleted from well2", 0, dao.findWell(new WellKey(2, "P24")).getScreenerCherryPicks().size());
+        assertEquals("screener cherry picks deleted from well1", 0, dao.findScreenerCherryPicksForWell(dao.findWell(new WellKey(1, "A01"))).size());
+        assertEquals("screener cherry picks deleted from well2", 0, dao.findScreenerCherryPicksForWell(dao.findWell(new WellKey(2, "P24"))).size());
       }
     });
   }
@@ -751,8 +751,8 @@ public class ComplexDAOTest extends AbstractSpringTest
         assertEquals("lab cherry picks exist before delete",
                      2, 
                      cherryPickRequest.getLabCherryPicks().size());
-        assertEquals("lab cherry picks exist in well1 before delete", 1, dao.findWell(new WellKey(3, "A01")).getLabCherryPicks().size());
-        assertEquals("lab cherry picks exist in well2 before delete", 1, dao.findWell(new WellKey(4, "P24")).getLabCherryPicks().size());
+        assertEquals("lab cherry picks exist in well1 before delete", 1, dao.findLabCherryPicksForWell(dao.findWell(new WellKey(3, "A01"))).size());
+        assertEquals("lab cherry picks exist in well2 before delete", 1, dao.findLabCherryPicksForWell(dao.findWell(new WellKey(4, "P24"))).size());
         Set<LabCherryPick> cherryPicksToDelete = new HashSet<LabCherryPick>(cherryPickRequest.getLabCherryPicks());
         for (LabCherryPick cherryPick : cherryPicksToDelete) {
           dao.deleteLabCherryPick(cherryPick);
@@ -767,8 +767,8 @@ public class ComplexDAOTest extends AbstractSpringTest
         Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
         assertEquals("lab cherry picks deleted from cherry pick request", 0, cherryPickRequest.getLabCherryPicks().size());
-        assertEquals("lab cherry picks deleted from well1", 0, dao.findWell(new WellKey(3, "A01")).getLabCherryPicks().size());
-        assertEquals("lab cherry picks deleted from well2", 0, dao.findWell(new WellKey(4, "P24")).getLabCherryPicks().size());
+        assertEquals("lab cherry picks deleted from well1", 0, dao.findLabCherryPicksForWell(dao.findWell(new WellKey(3, "A01"))).size());
+        assertEquals("lab cherry picks deleted from well2", 0, dao.findLabCherryPicksForWell(dao.findWell(new WellKey(4, "P24"))).size());
       }
     });
   }

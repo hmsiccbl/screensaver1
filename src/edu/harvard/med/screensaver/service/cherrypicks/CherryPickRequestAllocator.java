@@ -146,7 +146,7 @@ public class CherryPickRequestAllocator
   private BigDecimal calculateRemainingVolumeInCopyWell(Copy copy, Well well)
   {
     BigDecimal startingVolume = getStartingVolumeInCopyWell(copy, well);
-    Set<LabCherryPick> existingLabCherryPicksForWell = well.getLabCherryPicks();
+    Set<LabCherryPick> existingLabCherryPicksForWell = _dao.findLabCherryPicksForWell(well);
 
     BigDecimal remainingVolume = startingVolume;
     for (LabCherryPick existingLabCherryPick : existingLabCherryPicksForWell) {

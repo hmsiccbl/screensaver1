@@ -32,7 +32,8 @@ public class WellKey implements Comparable
 
   // TODO: merge with LibrariesController._wellNamePattern
   private static Pattern keyPattern = Pattern.compile("(\\d+):(.*)");
-
+  private static final String wellKeyFormat =
+    "%0" + Well.PLATE_NUMBER_LEN + "d:%s";
   
   // instance data members
   private int _plateNumber;
@@ -121,7 +122,7 @@ public class WellKey implements Comparable
   
   public String toString()
   {
-    return String.format("%0" + Well.PLATE_NUMBER_LEN + "d:%s", _plateNumber, getWellName());
+    return String.format(wellKeyFormat, _plateNumber, getWellName());
   }
   
   public int compareTo(Object o)

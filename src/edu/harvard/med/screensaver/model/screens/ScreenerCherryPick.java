@@ -74,7 +74,6 @@ public class ScreenerCherryPick extends AbstractEntity
     _cherryPickRequest = cherryPickRequest;
     _screenedWell = screenedWell;
     _cherryPickRequest.getScreenerCherryPicks().add(this);
-    _screenedWell.getHbnScreenerCherryPicks().add(this);
   }
 
   @Override
@@ -139,7 +138,7 @@ public class ScreenerCherryPick extends AbstractEntity
    * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screens.LabCherryPick"
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
-  @ToManyRelationship
+  @ToManyRelationship(unidirectional=true)
   public Set<LabCherryPick> getLabCherryPicks()
   {
     return _labCherryPicks;

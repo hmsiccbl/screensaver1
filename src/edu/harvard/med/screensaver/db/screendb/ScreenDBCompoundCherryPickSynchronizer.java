@@ -16,6 +16,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -34,8 +38,6 @@ import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
-import org.apache.log4j.Logger;
 
 public class ScreenDBCompoundCherryPickSynchronizer
 {
@@ -74,6 +76,7 @@ public class ScreenDBCompoundCherryPickSynchronizer
       public void runTransaction()
       {
         try {
+          loadOrCreateWellsForCherryPicks();
           synchronizeCompoundCherryPicksProper();
         }
         catch (SQLException e) {
@@ -85,6 +88,25 @@ public class ScreenDBCompoundCherryPickSynchronizer
     });
   }
 
+
+  private void loadOrCreateWellsForCherryPicks() throws SQLException
+  {
+    Set<Library> librariesToLoadOrCreateWellsFor = new HashSet<Library>();
+    Statement statement = _connection.createStatement();
+    ResultSet resultSet = statement.executeQuery(
+      "SELECT DISTINCT plate FROM cherry_pick WHERE plate IS NOT NULL ORDER BY plate");
+    while (resultSet.next()) {
+      Integer sourcePlateNumber = resultSet.getInt("plate");
+      Library library = _dao.findLibraryWithPlate(sourcePlateNumber);
+      assert(library != null);
+      if (library != null) {
+        librariesToLoadOrCreateWellsFor.add(library);
+      }
+    }
+    for (Library library : librariesToLoadOrCreateWellsFor) {
+      _dao.loadOrCreateWellsForLibrary(library);
+    }
+  }
 
   // private instance methods
 
@@ -225,9 +247,6 @@ public class ScreenDBCompoundCherryPickSynchronizer
         continue;
       }
       
-      Library library = _dao.findLibraryWithPlate(sourcePlateNumber);
-      assert(library != null);
-      _dao.loadOrCreateWellsForLibrary(library);
       Well sourceWell = _dao.findWell(new WellKey(sourcePlateNumber, sourceWellName));
       if (sourceWell == null) {
         log.error(

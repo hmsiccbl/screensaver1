@@ -318,6 +318,10 @@ public interface DAO
 
   public Set<Well> findWellsForPlate(int plate);
   
+  public Set<LabCherryPick> findLabCherryPicksForWell(Well well);
+  
+  public Set<ScreenerCherryPick> findScreenerCherryPicksForWell(Well well);
+  
   public void loadOrCreateWellsForLibrary(Library library);
 
   
@@ -334,6 +338,12 @@ public interface DAO
   public void deleteLabCherryPick(LabCherryPick labCherryPick);
 
   public void deleteCherryPickRequest(CherryPickRequest cherryPickRequest);
+  
+  /**
+   * @motivation for {@link ScreenDBSynchronizer}, for efficient removal of cherry pick
+   * requests.
+   */
+  public void deleteAllCherryPickRequests();
   
   /**
    * @motivation Bypassing business rule violation checks is present for the purpose of the

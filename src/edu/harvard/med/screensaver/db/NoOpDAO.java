@@ -179,6 +179,16 @@ public class NoOpDAO implements DAO
     return null;
   }
 
+  public Set<LabCherryPick> findLabCherryPicksForWell(Well well)
+  {
+    return null;
+  }
+
+  public Set<ScreenerCherryPick> findScreenerCherryPicksForWell(Well well)
+  {
+    return null;
+  }
+  
   public void loadOrCreateWellsForLibrary(Library library)
   {
   }
@@ -244,6 +254,10 @@ public class NoOpDAO implements DAO
   }
   
   public void deleteCherryPickRequest(CherryPickRequest cherryPickRequest, boolean bypassBusinessRuleViolationChecks)
+  {
+  }
+
+  public void deleteAllCherryPickRequests()
   {
   }
 }

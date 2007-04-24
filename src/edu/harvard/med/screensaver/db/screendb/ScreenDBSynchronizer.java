@@ -23,7 +23,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 
 /**
  * Synchronizes the Screensaver database to the latest contents of ScreenDB. For every ScreenDB
@@ -160,9 +159,7 @@ public class ScreenDBSynchronizer
     {
       public void runTransaction()
       {
-        for (CherryPickRequest request : _dao.findAllEntitiesWithType(CherryPickRequest.class)) {
-          _dao.deleteCherryPickRequest(request, true);
-        }
+        _dao.deleteAllCherryPickRequests();
       }
     });
   }
@@ -182,23 +179,53 @@ public class ScreenDBSynchronizer
 
   private void synchronizeNonLibraries() throws ScreenDBSynchronizationException
   {
+    final ScreenDBUserSynchronizer userSynchronizer =
+      new ScreenDBUserSynchronizer(_connection, _dao);
+    final ScreenDBScreenSynchronizer screenSynchronizer =
+      new ScreenDBScreenSynchronizer(_connection, _dao, userSynchronizer);
+    final ScreenDBLibraryScreeningSynchronizer libraryScreeningSynchronizer =
+      new ScreenDBLibraryScreeningSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
+    final ScreenDBCompoundCherryPickSynchronizer compoundCherryPickSynchronizer =
+      new ScreenDBCompoundCherryPickSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
+    final ScreenDBRNAiCherryPickSynchronizer rnaiCherryPickSynchronizer =
+      new ScreenDBRNAiCherryPickSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
+    
     _dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
-        ScreenDBUserSynchronizer userSynchronizer = new ScreenDBUserSynchronizer(_connection, _dao);
         userSynchronizer.synchronizeUsers();
-        ScreenDBScreenSynchronizer screenSynchronizer =
-          new ScreenDBScreenSynchronizer(_connection, _dao, userSynchronizer);
+      }
+    });
+
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
         screenSynchronizer.synchronizeScreens();
-        ScreenDBLibraryScreeningSynchronizer libraryScreeningSynchronizer =
-          new ScreenDBLibraryScreeningSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
+      }
+    });
+
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
         libraryScreeningSynchronizer.synchronizeLibraryScreenings();
-        ScreenDBCompoundCherryPickSynchronizer compoundCherryPickSynchronizer =
-          new ScreenDBCompoundCherryPickSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
+      }
+    });
+
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
         compoundCherryPickSynchronizer.synchronizeCompoundCherryPicks();
-        ScreenDBRNAiCherryPickSynchronizer rnaiCherryPickSynchronizer =
-          new ScreenDBRNAiCherryPickSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
+      }
+    });
+
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
         rnaiCherryPickSynchronizer.synchronizeRNAiCherryPicks();
       }
     });

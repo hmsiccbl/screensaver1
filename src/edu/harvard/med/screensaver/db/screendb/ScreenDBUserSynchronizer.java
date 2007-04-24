@@ -131,7 +131,7 @@ public class ScreenDBUserSynchronizer
   
   public ScreeningRoomUser getScreeningRoomUserForScreenDBUserId(Integer userId)
   {
-    return _screenDBUserIdToScreeningRoomUserMap.get(userId);
+    return _dao.reloadEntity(_screenDBUserIdToScreeningRoomUserMap.get(userId));
   }
   
   

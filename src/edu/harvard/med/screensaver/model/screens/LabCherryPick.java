@@ -104,9 +104,6 @@ public class LabCherryPick extends AbstractEntity
     if (!_screenerCherryPick.getLabCherryPicks().add(this)) {
       throw new DuplicateEntityException(_screenerCherryPick, this);
     }
-    if (!_sourceWell.getHbnLabCherryPicks().add(this)) {
-      throw new DuplicateEntityException(_sourceWell, this);
-    }
     if (!_cherryPickRequest.getLabCherryPicks().add(this)) {
       throw new DuplicateEntityException(_cherryPickRequest, this);
     }
@@ -176,7 +173,7 @@ public class LabCherryPick extends AbstractEntity
    *                        cascade="none"
    * @motivation for hibernate
    */
-  @ToOneRelationship(nullable=false)
+  @ToOneRelationship(nullable=false, unidirectional=true)
   public Well getSourceWell()
   {
     return _sourceWell;
