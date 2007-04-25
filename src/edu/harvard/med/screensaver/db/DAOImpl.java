@@ -658,11 +658,10 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     for (int iPlate = library.getStartPlate(); iPlate <= library.getEndPlate(); ++iPlate) {
       for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
         for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
-          new Well(library, new WellKey(iPlate, iRow, iCol), WellType.EMPTY);
+          persistEntity(new Well(library, new WellKey(iPlate, iRow, iCol), WellType.EMPTY));
         }
       }
     }
-    persistEntity(library);
     log.info("created wells for library " + library.getLibraryName());
   }
   
