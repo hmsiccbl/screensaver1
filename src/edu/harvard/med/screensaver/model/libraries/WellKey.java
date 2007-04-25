@@ -31,9 +31,9 @@ public class WellKey implements Comparable
   private static Logger log = Logger.getLogger(WellKey.class);
 
   // TODO: merge with LibrariesController._wellNamePattern
-  private static Pattern keyPattern = Pattern.compile("(\\d+):(.*)");
-  private static final String wellKeyFormat =
-    "%0" + Well.PLATE_NUMBER_LEN + "d:%s";
+  private static final Pattern keyPattern = Pattern.compile("(\\d+):(.*)");
+  private static final String wellKeyFormat = "%0" + Well.PLATE_NUMBER_LEN + "d:%s";
+  
   
   // instance data members
   private int _plateNumber;
