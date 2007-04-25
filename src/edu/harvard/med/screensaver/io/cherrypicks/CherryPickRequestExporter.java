@@ -258,12 +258,12 @@ public class CherryPickRequestExporter
   {
     Workbook2Utils.writeRow(sheet,
                             0,
+                            "Cherry Pick Plate #",
+                            "Cherry Pick Plate Well",
                             "Entrez Gene Symbol",
                             "Entrez Gene ID",
                             "Genbank Acc. No.",
                             "Gene Name",
-                            "Plate #",
-                            "Well",
                             "Sequence",
                             "Vendor ID");
   }
