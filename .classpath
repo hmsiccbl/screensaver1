@@ -57,5 +57,6 @@
 	<classpathentry kind="lib" path="lib/springframework-2.0.2/dev/spring-mock.jar"/>
 	<classpathentry kind="lib" path="lib/poi-2.5.1/poi-hacked.jar"/>
 	<classpathentry kind="lib" path="lib/poi-2.5.1/poi-contrib-2.5.1-final-20040804.jar"/>
+	<classpathentry kind="lib" path="lib/jexcel-2.6.3/jxl.jar"/>
 	<classpathentry kind="output" path=".eclipse.classes"/>
 </classpath>
