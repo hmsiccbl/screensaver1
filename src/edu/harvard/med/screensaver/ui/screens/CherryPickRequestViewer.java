@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.faces.component.UIInput;
+import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.ArrayDataModel;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
@@ -52,6 +54,7 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.datascroller.HtmlDataScroller;
 
 public class CherryPickRequestViewer extends AbstractBackingBean
 {
@@ -145,6 +148,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private UISelectOneEntityBean<ScreensaverUser> _liquidTransferPerformedBy;
   private Date _dateOfLiquidTransfer;
   private String _liquidTransferComments;
+  
+  private HtmlDataScroller _screenerCherryPicksTableDataScroller1;
+  private HtmlDataScroller _screenerCherryPicksTableDataScroller2;
 
   
   // public constructors and methods
@@ -226,6 +232,26 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return _collapsiblePanelsState;
   }
   
+  public HtmlDataScroller getScreenerCherryPicksTableDataScroller1()
+  {
+    return _screenerCherryPicksTableDataScroller1;
+  }
+
+  public void setScreenerCherryPicksTableDataScroller1(HtmlDataScroller screenerCherryPicksTableDataScroller1)
+  {
+    this._screenerCherryPicksTableDataScroller1 = screenerCherryPicksTableDataScroller1;
+  }
+
+  public HtmlDataScroller getScreenerCherryPicksTableDataScroller2()
+  {
+    return _screenerCherryPicksTableDataScroller2;
+  }
+
+  public void setScreenerCherryPicksTableDataScroller2(HtmlDataScroller screenerCherryPicksTableDataScroller2)
+  {
+    this._screenerCherryPicksTableDataScroller2 = screenerCherryPicksTableDataScroller2;
+  }
+
   public String getCherryPicksInput()
   {
     return _cherryPicksInput;
@@ -433,6 +459,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
   public void setShowFailedAssayPlates(boolean showFailedAssayPlates)
   {
+    if (showFailedAssayPlates != _showFailedAssayPlates) {
+      _assayPlatesDataModel = null; // force regen
+    }
     _showFailedAssayPlates = showFailedAssayPlates;
   }
 
@@ -443,7 +472,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
   public void setShowFailedLabCherryPicks(boolean showFailedLabCherryPicks)
   {
+    if (showFailedLabCherryPicks != _showFailedLabCherryPicks) {
+      _labCherryPicksDataModel = null; // force regen
+    }
     _showFailedLabCherryPicks = showFailedLabCherryPicks;
+
   }
 
   public Date getDateOfLiquidTransfer()
@@ -481,6 +514,29 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     }
     return "Liquid";
   }
+  
+  /*
+   * JSF Listeners
+   */
+
+  public void toggleShowFailedLabCherryPicks(ValueChangeEvent event)
+  {
+    _showFailedLabCherryPicks = (Boolean) event.getNewValue();
+    // avoid having JSF set backing bean property with the submitted value
+    ((UIInput) event.getComponent()).setLocalValueSet(false);
+    // force regen of data model
+    _labCherryPicksDataModel = null;
+  }
+  
+  public void toggleShowFailedAssayPlates(ValueChangeEvent event)
+  {
+    _showFailedAssayPlates = (Boolean) event.getNewValue();
+    // avoid having JSF set backing bean property with the submitted value
+    ((UIInput) event.getComponent()).setLocalValueSet(false);
+    // force regen of data model
+    _assayPlatesDataModel = null;
+  }
+  
 
   
   /* JSF Application methods */
@@ -552,13 +608,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     for (AssayPlateRow row : data) {
       row.setSelected(_selectAllAssayPlates);
     }
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-  
-  public String updateShowFailed()
-  {
-    _assayPlatesDataModel = null;
-    _labCherryPicksDataModel = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   

@@ -275,9 +275,36 @@ TODO:
 						styleClass="command" />
 				</t:panelGroup>
 
+				<t:dataTable id="screenerCherryPicksTable" var="cherryPickRow"
+					value="#{cherryPickRequestViewer.screenerCherryPicksDataModel}"
+					styleClass="standardTable" columnClasses="column" rows="20"
+					rowClasses="row1,row2" headerClass="tableHeader"
+					sortColumn="#{cherryPickRequestViewer.screenerCherryPicksSortManager.currentSortColumnName}"
+					sortAscending="#{cherryPickRequestViewer.screenerCherryPicksSortManager.sortAscending}">
+					<t:columns
+						value="#{cherryPickRequestViewer.screenerCherryPicksSortManager.columnModel}"
+						var="columnName" styleClass="column">
+						<f:facet name="header">
+							<t:commandSortHeader columnName="#{columnName}" arrow="false">
+								<f:facet name="ascending">
+									<t:graphicImage value="/images/ascending-arrow.gif"
+										rendered="true" border="0" />
+								</f:facet>
+								<f:facet name="descending">
+									<t:graphicImage value="/images/descending-arrow.gif"
+										rendered="true" border="0" />
+								</f:facet>
+								<h:outputText value="#{columnName}" />
+							</t:commandSortHeader>
+						</f:facet>
+						<t:outputText value="#{cherryPickRow[columnName]}" />
+					</t:columns>
+				</t:dataTable>
+
 				<t:panelGrid columns="2">
 					<t:dataScroller id="screenerCherryPicksDataScroller"
-						for="screenerCherryPicksTable" firstRowIndexVar="fromRow"
+						for="screenerCherryPicksTable" binding="#{cherryPickRequestViewer.screenerCherryPicksTableDataScroller1}"
+						firstRowIndexVar="fromRow"
 						lastRowIndexVar="toRow" rowsCountVar="rowCount" paginator="true"
 						paginatorMaxPages="10" fastStep="10"
 						renderFacetsIfSinglePage="false" styleClass="scroller"
@@ -308,40 +335,15 @@ TODO:
 								title="Back 10 pages" />
 						</f:facet>
 					</t:dataScroller>
-					<t:dataScroller id="screenerCherryPicksDataScroller2"
-						for="screenerCherryPicksTable" firstRowIndexVar="fromRow"
+					<t:dataScroller id="screenerCherryPicksDataScroller2" 
+						for="screenerCherryPicksTable" binding="#{cherryPickRequestViewer.screenerCherryPicksTableDataScroller2}"
+						firstRowIndexVar="fromRow"
 						lastRowIndexVar="toRow" rowsCountVar="rowCount"
 						pageCountVar="pages">
 						<t:outputText value="#{fromRow}..#{toRow} of #{rowCount}"
 							styleClass="label" rendered="#{pages > 1}" />
 					</t:dataScroller>
 				</t:panelGrid>
-
-				<t:dataTable id="screenerCherryPicksTable" var="cherryPickRow"
-					value="#{cherryPickRequestViewer.screenerCherryPicksDataModel}"
-					styleClass="standardTable" columnClasses="column" rows="20"
-					rowClasses="row1,row2" headerClass="tableHeader"
-					sortColumn="#{cherryPickRequestViewer.screenerCherryPicksSortManager.currentSortColumnName}"
-					sortAscending="#{cherryPickRequestViewer.screenerCherryPicksSortManager.sortAscending}">
-					<t:columns
-						value="#{cherryPickRequestViewer.screenerCherryPicksSortManager.columnModel}"
-						var="columnName" styleClass="column">
-						<f:facet name="header">
-							<t:commandSortHeader columnName="#{columnName}" arrow="false">
-								<f:facet name="ascending">
-									<t:graphicImage value="/images/ascending-arrow.gif"
-										rendered="true" border="0" />
-								</f:facet>
-								<f:facet name="descending">
-									<t:graphicImage value="/images/descending-arrow.gif"
-										rendered="true" border="0" />
-								</f:facet>
-								<h:outputText value="#{columnName}" />
-							</t:commandSortHeader>
-						</f:facet>
-						<t:outputText value="#{cherryPickRow[columnName]}" />
-					</t:columns>
-				</t:dataTable>
 
 			</t:panelGrid>
 
@@ -393,10 +395,44 @@ TODO:
 						styleClass="label" />
 					<t:selectBooleanCheckbox id="showFailedLabCherryPicks"
 						value="#{cherryPickRequestViewer.showFailedLabCherryPicks}"
-						onchange="javascript:document.getElementById('updateShowFailedCommand').click()"
+						valueChangeListener="#{cherryPickRequestViewer.toggleShowFailedLabCherryPicks}"
+						onchange="javascript:document.getElementById('toggleShowFailedLabCherryPicksCommand').click()"
+						immediate="true"
 						styleClass="command" />
+					<t:commandButton id="toggleShowFailedLabCherryPicksCommand"
+						immediate="true"
+						forceId="true" style="display:none" />
+
 				</t:panelGroup>
 
+				<t:dataTable id="labCherryPicksTable" var="cherryPickRow"
+					value="#{cherryPickRequestViewer.labCherryPicksDataModel}"
+					styleClass="standardTable" columnClasses="column" rows="20"
+					rowClasses="row1,row2" headerClass="tableHeader"
+					sortColumn="#{cherryPickRequestViewer.labCherryPicksSortManager.currentSortColumnName}"
+					sortAscending="#{cherryPickRequestViewer.labCherryPicksSortManager.sortAscending}"
+					rendered="#{!empty cherryPickRequestViewer.cherryPickRequest.labCherryPicks}">
+					<t:columns
+						value="#{cherryPickRequestViewer.labCherryPicksSortManager.columnModel}"
+						var="columnName" styleClass="column">
+						<f:facet name="header">
+							<t:commandSortHeader columnName="#{columnName}" arrow="false">
+								<f:facet name="ascending">
+									<t:graphicImage value="/images/ascending-arrow.gif"
+										rendered="true" border="0" />
+								</f:facet>
+								<f:facet name="descending">
+									<t:graphicImage value="/images/descending-arrow.gif"
+										rendered="true" border="0" />
+								</f:facet>
+								<t:outputText value="#{columnName}" />
+							</t:commandSortHeader>
+						</f:facet>
+						<t:outputText value="#{cherryPickRow[columnName]}" />
+					</t:columns>
+				</t:dataTable>
+
+				<%-- TODO: These dataScrollers don't get updated on the same request when the 'show Failed Lab Cherry Picks' command is invoked.  Their state lags behind.  Unless the DataScrollers appear AFTER the data table! I'm not getting any younger, and I don't have the time or patience to deal with this kind of JSF MyFaces buggy nonsense, so the data scrollers are now BELOW the data table.  Enjoy the UI inconsistency!  Thanks MyFaces!  We love you! --%>
 				<t:panelGrid columns="2">
 					<t:dataScroller id="labCherryPicksDataScroller"
 						for="labCherryPicksTable" firstRowIndexVar="fromRow"
@@ -437,33 +473,6 @@ TODO:
 							styleClass="label" rendered="#{pages > 1}" />
 					</t:dataScroller>
 				</t:panelGrid>
-
-				<t:dataTable id="labCherryPicksTable" var="cherryPickRow"
-					value="#{cherryPickRequestViewer.labCherryPicksDataModel}"
-					styleClass="standardTable" columnClasses="column" rows="20"
-					rowClasses="row1,row2" headerClass="tableHeader"
-					sortColumn="#{cherryPickRequestViewer.labCherryPicksSortManager.currentSortColumnName}"
-					sortAscending="#{cherryPickRequestViewer.labCherryPicksSortManager.sortAscending}"
-					rendered="#{!empty cherryPickRequestViewer.cherryPickRequest.labCherryPicks}">
-					<t:columns
-						value="#{cherryPickRequestViewer.labCherryPicksSortManager.columnModel}"
-						var="columnName" styleClass="column">
-						<f:facet name="header">
-							<t:commandSortHeader columnName="#{columnName}" arrow="false">
-								<f:facet name="ascending">
-									<t:graphicImage value="/images/ascending-arrow.gif"
-										rendered="true" border="0" />
-								</f:facet>
-								<f:facet name="descending">
-									<t:graphicImage value="/images/descending-arrow.gif"
-										rendered="true" border="0" />
-								</f:facet>
-								<t:outputText value="#{columnName}" />
-							</t:commandSortHeader>
-						</f:facet>
-						<t:outputText value="#{cherryPickRow[columnName]}" />
-					</t:columns>
-				</t:dataTable>
 
 			</t:panelGrid>
 
@@ -527,8 +536,14 @@ TODO:
 							value="Show all failed plates:" styleClass="label" />
 						<t:selectBooleanCheckbox id="showFailedAssayPlates"
 							value="#{cherryPickRequestViewer.showFailedAssayPlates}"
-							onchange="javascript:document.getElementById('updateShowFailedCommand').click()"
+							valueChangeListener="#{cherryPickRequestViewer.toggleShowFailedAssayPlates}"
+							onchange="javascript:document.getElementById('toggleShowFailedAssayPlatesCommand').click()"
+							immediate="true"
 							styleClass="command" />
+						<t:commandButton id="toggleShowFailedAssayPlatesCommand"
+							forceId="true"
+							immediate="true"
+							style="display:none" />
 					</t:panelGroup>
 
 					<t:commandButton id="downloadPlateMappingFiles"
@@ -578,9 +593,6 @@ TODO:
 				<t:commandButton id="selectAllAssayPlatesButton" forceId="true"
 					action="#{cherryPickRequestViewer.selectAllAssayPlates}"
 					rendered="#{cherryPickRequestViewer.cherryPickRequest.mapped}"
-					style="display:none" />
-				<t:commandButton id="updateShowFailedCommand" forceId="true"
-					action="#{cherryPickRequestViewer.updateShowFailed}"
 					style="display:none" />
 
 			</t:panelGrid>
