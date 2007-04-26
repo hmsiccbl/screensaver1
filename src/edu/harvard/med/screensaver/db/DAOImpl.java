@@ -26,24 +26,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.FetchMode;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.ScrollableResults;
-import org.hibernate.Session;
-import org.hibernate.TransientObjectException;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.engine.SessionFactoryImplementor;
-import org.hibernate.metadata.ClassMetadata;
-import org.hibernate.type.CollectionType;
-import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -61,6 +45,21 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.StringUtils;
+
+import org.apache.log4j.Logger;
+import org.hibernate.Criteria;
+import org.hibernate.FetchMode;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
+import org.hibernate.TransientObjectException;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.engine.SessionFactoryImplementor;
+import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.type.CollectionType;
+import org.springframework.orm.hibernate3.HibernateCallback;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 
 /**
@@ -477,9 +476,6 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     if (! bypassBusinessRuleViolationChecks) {
       if (cherryPickRequestIn.isAllocated()) {
         throw new BusinessRuleViolationException("cannot delete a cherry pick request that has been allocated");
-      }
-      if (cherryPickRequestIn.getCherryPickAssayPlates().size() > 0) {
-        throw new DataModelViolationException("an unallocated cherry pick request should not have any cherry pick assay plates");
       }
     }
 
