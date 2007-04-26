@@ -369,21 +369,10 @@ public class AllCherryPicksImporter
             }
 
             if (cherryPickRequest.getMicroliterTransferVolumePerWellApproved() == null) {
-              if (cherryPickRequest.getMicroliterTransferVolumePerWellRequested() == null) {
-                throw new CherryPicksDataException("both requested and approved volumes are null for cherry pick request " + 
-                                                   cherryPickRequest.getCherryPickRequestNumber(), 
-                                                   visitId,
-                                                   iRow);
-              }
-              else {
-                // set (missing) approved volume to requested volume, which is
-                // okay to do, since we know the volume was approved by virtue
-                // of the cherry pick (visit) being included in the
-                // AllCherryPicks.xls file
-                log.info("CPR " + visitId + " setting cherry pick request approved volume to requested volume: " + 
-                         cherryPickRequest.getMicroliterTransferVolumePerWellRequested());
-                cherryPickRequest.setMicroliterTransferVolumePerWellApproved(cherryPickRequest.getMicroliterTransferVolumePerWellRequested());
-              }
+              throw new CherryPicksDataException("approved volume is null for cherry pick request " + 
+                                                 cherryPickRequest.getCherryPickRequestNumber(), 
+                                                 visitId,
+                                                 iRow);
             }
 
             WellKey wellKey = new WellKey((int) plateNumberCell.getValue(),

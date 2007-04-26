@@ -89,7 +89,6 @@ public class ScreenDBRNAiCherryPickSynchronizer
       RNAiCherryPickRequest request = createRNAiCherryPickRequest(resultSet, volumeTransferred);
       CherryPickLiquidTransfer liquidTransfer = null;
       if (liquidTransferHappened(resultSet)) {
-        request.setMicroliterTransferVolumePerWellApproved(volumeTransferred);
         liquidTransfer = createCherryPickLiquidTransfer(resultSet, volumeTransferred, request);
       }
       createCherryPickAssayPlates(resultSet, request, liquidTransfer);
@@ -111,7 +110,7 @@ public class ScreenDBRNAiCherryPickSynchronizer
     Integer visitId = resultSet.getInt("id");
     RNAiCherryPickRequest request =
       new RNAiCherryPickRequest(screen, requestedBy, dateRequested, visitId);
-    request.setMicroliterTransferVolumePerWellRequested(volumeTransferred);
+    request.setMicroliterTransferVolumePerWellApproved(volumeTransferred);
     request.setComments(resultSet.getString("comments"));
     return request;
   }
