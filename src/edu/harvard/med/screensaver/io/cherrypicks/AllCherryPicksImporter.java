@@ -424,6 +424,8 @@ public class AllCherryPicksImporter
           }
         }
 
+        encounteredErrors |=  validateAllCherryPickRequestsWithAssayPlatesHaveCherryPicks();
+
         if (encounteredErrors) {
           throw new FatalParseException("import failed due to errors (see log); database remains unchanged");
         }
@@ -431,13 +433,37 @@ public class AllCherryPicksImporter
           log.info("imported cherry pick requests");
         }
       }
-
     });
   }
   
   
   // private methods
   
+  /**
+   * Validate the state of the all RnaiCherryPickRequests after the import. We
+   * want to make sure that all RnaiCPR that had CPAssayPlates (created by the
+   * ScreenDBSynchronizer) now have allocated LabCherryPicks, otherwise the data
+   * model is being violated.
+   */
+  private boolean validateAllCherryPickRequestsWithAssayPlatesHaveCherryPicks()
+  {
+    boolean encounteredErrors = false;
+    List<RNAiCherryPickRequest> cprs = _dao.findAllEntitiesWithType(RNAiCherryPickRequest.class);
+    for (RNAiCherryPickRequest cpr : cprs) {
+      if (cpr.getCherryPickAssayPlates().size() > 0) {
+        if (cpr.getLabCherryPicks().size() == 0) {
+          encounteredErrors = true;
+          log.error("after import " + cpr + " had not LabCherryPicks imported, although it has CherryPickAssayPlates");
+        }
+        if (!cpr.isAllocated()) {
+          encounteredErrors = true;
+          log.error("after import " + cpr + " had LabCherryPicks imported, but did not have reagent allocated");
+        }
+      }
+    }
+    return encounteredErrors;
+  }
+    
   private void addImportCommentsToCherryPickRequest(CherryPickRequest cherryPickRequest)
   {
     StringBuilder s = new StringBuilder();
