@@ -25,7 +25,8 @@
 				styleClass="menuItem title" />
 			<t:htmlTag value="br"/>
 			<t:outputText id="version" value="#{appInfo.applicationVersion}"
-				styleClass="menuItem label" />
+				styleClass="menuItem label"
+				title="The current version of Screensaver" />
 		</h:form>
 
   </t:panelGrid>

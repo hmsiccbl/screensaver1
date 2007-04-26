@@ -14,12 +14,15 @@
 
 		<h:form id="titleForm">
 			<t:commandLink id="menuTitle" action="#{mainController.viewMain}"
-				value="#{menu.applicationName}" styleClass="menuItem title" />
+				value="#{menu.applicationName}" styleClass="menuItem title"
+				title="Go to the Screensaver main page" />
 			<t:htmlTag value="br"/>
 			<t:outputText id="version" value="#{menu.applicationVersion}"
-				styleClass="menuItem label" />
+				styleClass="menuItem label"
+				title="The current version of Screensaver" />
 			<t:outputText id="buildNumber" value="(#{menu.applicationBuildNumber})"
-				styleClass="menuItem label" visibleOnUserRole="developer" />
+				styleClass="menuItem label" visibleOnUserRole="developer"
+				title="The build number" />
 		</h:form>
 
 		<t:htmlTag id="menuSectionSeparator0" value="hr" 
@@ -29,12 +32,14 @@
 			<h:form id="userForm">
 				<%--t:outputText value="User " styleClass="label"/--%>
 				<t:outputText id="userName" 
-					value="#{menu.screensaverUser.fullNameFirstLast}" styleClass="menuItem userName" />
+					value="#{menu.screensaverUser.fullNameFirstLast}" styleClass="menuItem userName"
+					title="The name of the logged in user" />
 					<t:div/>
 				<%-- t:commandLink id="account" action="goMyAccount" value="#{\"Edit\"}" styleClass="menuItem" />
 				<t:outputText value="|" styleClass="spacer" /--%>
 				<t:commandLink id="logout" action="#{mainController.logout}"
-					value="#{\"Logout\"}" styleClass="menuItem" />
+					value="#{\"Logout\"}" styleClass="menuItem"
+					title="Click here to log out" />
 			</h:form>
 		</t:panelGroup>
   
@@ -46,28 +51,36 @@
 				separatorClass="navSeparator" rendered="#{menu.authenticatedUser}">
 				<t:commandNavigation2 action="#{librariesController.findWells}"
 					value="Find Wells"
-					accesskey="W" />
+					accesskey="W"
+					title="Look up one or more library wells by plate number and well name" />
 				<t:commandNavigation2
 					action="#{librariesController.browseLibraries}"
 					value="Browse Libraries"
-					accesskey="L" />
+					accesskey="L"
+					title="Browse the currently available libraries" />
 				<t:commandNavigation2 action="#{screensController.browseScreens}"
 					value="Browse Screens"
-					accesskey="S" />
+					accesskey="S"
+					title="Browse the screens currently available and accessible to you" />
 				<t:commandNavigation2 action="#{screensController.browseMyScreens}" value="My Screens"
-					accesskey="M" />
+					accesskey="M"
+					title="Browse the screens that you headed, led and collaborated on" />
 				<t:commandNavigation2 />
 				<t:commandNavigation2 action="#{mainController.viewDownloads}"
 					value="Data Downloads"
-					accesskey="D" />
+					accesskey="D"
+					title="Download SD Files for small molecule libraries" />
 				<t:commandNavigation2 action="#{mainController.viewInstructions}"
 					value="Instructions"
-					accesskey="H" />
+					accesskey="H"
+					title="View the Screensaver help page" />
 				<t:commandNavigation2 />
 				<t:commandNavigation2 action="goEnvironmentInfo" value="Environment"
-					visibleOnUserRole="developer" />
+					visibleOnUserRole="developer"
+					title="Access information about the environment that Screensaver is running in" />
 				<t:commandNavigation2 action="goSchemaManager"
-					value="Schema Manager" visibleOnUserRole="developer" />
+					value="Schema Manager" visibleOnUserRole="developer"
+					title="Various utilities for managing the database" />
 			</t:panelNavigation2>
 		</h:form>
 
@@ -75,7 +88,8 @@
 			rendered="#{menu.authenticatedUser}" />
 
 		<h:form id="quickFindWellForm">
-      <t:panelGrid columns="2" rendered="#{menu.authenticatedUser}">
+      <t:panelGrid columns="2" rendered="#{menu.authenticatedUser}"
+        title="Look up a library well by plate number and well name">
         <t:outputLabel
           id="plateNumberLabel"
           for="plateNumber"
@@ -107,7 +121,7 @@
 			</t:panelGrid>
 		</h:form>
     
-    <h:form id="quickFindScreenForm">
+    <h:form id="quickFindScreenForm" title="Look up a screen by screen number">
 			<t:panelGrid columns="1"
 				rendered="#{menu.authenticatedUser}">
 				<t:outputLabel id="screenNumberLabel" for="screenNumber"
@@ -120,7 +134,9 @@
 			</t:panelGrid>
 		</h:form>
     
-    <h:form id="quickFindCherryPickRequest">
+    <h:form id="quickFindCherryPickRequest"
+      title="Look up a cherry pick request by cherry pick request number"
+    >
 			<t:panelGrid columns="1"
 				rendered="#{menu.authenticatedUser}">
 				<t:outputLabel id="cherryPickRequestNumberLabel" for="cherryPickRequestNumber"
