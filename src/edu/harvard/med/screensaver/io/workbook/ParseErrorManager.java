@@ -53,7 +53,6 @@ public class ParseErrorManager
   {
     ParseError error = new ParseError(errorMessage);
     _errors.add(error);
-    //log.info("parse error: " + error);
 
     // annotate workbook with non-cell-specific error by appending to a specially created "errors" sheet
     if (_errorsWorkbook != null) {
@@ -82,7 +81,6 @@ public class ParseErrorManager
     _errors.add(error);
     cell.annotateWithError(error);
     _workbooksWithErrors.add(cell.getWorkbook());
-//    log.info("parse error: " + error);
   }
   
   /**
@@ -101,6 +99,7 @@ public class ParseErrorManager
    */
   public boolean getHasErrors()
   {
+    log.info("RLCI.getHasErrors: " + _errors.size());
     return _errors.size() > 0;
   }
 
@@ -108,5 +107,4 @@ public class ParseErrorManager
   {
     return Collections.unmodifiableSet(_workbooksWithErrors);
   }
-
 }

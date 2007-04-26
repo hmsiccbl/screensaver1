@@ -242,7 +242,8 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
           columnHeaders,
           hssfSheet.getRow(i),
           i,
-          cellFactory);
+          cellFactory,
+          _errorManager);
         try {
           dataRowParser.parseDataRow();
         }

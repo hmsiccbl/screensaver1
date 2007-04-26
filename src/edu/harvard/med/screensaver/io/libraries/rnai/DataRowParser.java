@@ -12,9 +12,15 @@ package edu.harvard.med.screensaver.io.libraries.rnai;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFRow;
 
 import edu.harvard.med.screensaver.io.libraries.DataRowType;
 import edu.harvard.med.screensaver.io.workbook.Cell;
+import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -23,9 +29,6 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.util.eutils.NCBIGeneInfo;
-
-import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFRow;
 
 
 /**
@@ -39,6 +42,7 @@ public class DataRowParser
   // private static data
   
   private static final Logger log = Logger.getLogger(DataRowParser.class);
+  private static final Pattern entrezgeneLocPattern = Pattern.compile("LOC(\\d+)");
 
   
   // private instance data
@@ -48,6 +52,7 @@ public class DataRowParser
   private HSSFRow _dataRow;
   private int _rowIndex;
   private Factory _cellFactory;
+  private ParseErrorManager _errorManager;
   private Map<RequiredRNAiLibraryColumn,String> _dataRowContents;
   
   
@@ -66,13 +71,15 @@ public class DataRowParser
     RNAiLibraryColumnHeaders columnHeaders,
     HSSFRow dataRow,
     int rowIndex,
-    Factory cellFactory)
+    Factory cellFactory,
+    ParseErrorManager errorManager)
   {
     _parser = parser;
     _columnHeaders = columnHeaders;
     _dataRow = dataRow;
     _rowIndex = rowIndex;
     _cellFactory = cellFactory;
+    _errorManager = errorManager;
   }
   
   /**
@@ -244,9 +251,6 @@ public class DataRowParser
       _rowIndex,
       true);
     Integer entrezgeneId = entrezgeneIdCell.getInteger();
-    if (entrezgeneId == 0) {
-      return null;
-    }
     
     // entrezgeneSymbol
     Cell entrezgeneSymbolCell = _cellFactory.getCell(
@@ -255,15 +259,32 @@ public class DataRowParser
       true);
     String entrezgeneSymbol = entrezgeneSymbolCell.getAsString();
     if (entrezgeneSymbol.equals("")) {
+      _errorManager.addError("missing EntrezGene Symbol", entrezgeneSymbolCell);
       return null;
     }
     
+    // sometimes Locus ID is 0, but Gene Symbol is LOC(\d+) with $1 being the EntrezGene ID
+    if (entrezgeneId == 0) {
+      Matcher entrezgeneLocMatcher = entrezgeneLocPattern.matcher(entrezgeneSymbol);
+      if (entrezgeneLocMatcher.matches()) {
+        entrezgeneId = Integer.parseInt(entrezgeneLocMatcher.group(1));
+      }
+      else {
+        _errorManager.addError(
+          "missing or 0 for EntrezGene ID (with no LOC\\d+ EntrezGene Symbol)",
+          entrezgeneIdCell);
+        return null;
+      }
+    }
+    
     // genbankAccessionNumber
-    String genbankAccessionNumber = _cellFactory.getCell(
+    Cell genbankAccessionNumberCell = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.GENBANK_ACCESSION_NUMBER),
       _rowIndex,
-      true).getString();
+      true);
+    String genbankAccessionNumber = genbankAccessionNumberCell.getString();
     if (genbankAccessionNumber.equals("")) {
+      _errorManager.addError("missing GenBank Accession Number", genbankAccessionNumberCell);
       return null;
     }
     
@@ -271,6 +292,7 @@ public class DataRowParser
     NCBIGeneInfo geneInfo =
       _parser.getGeneInfoProvider().getGeneInfoForEntrezgeneId(entrezgeneId, entrezgeneIdCell);
     if (geneInfo == null) {
+      // errors in this case are handled by the NCBIGeneInfoProvider
       return null;
     }
     
