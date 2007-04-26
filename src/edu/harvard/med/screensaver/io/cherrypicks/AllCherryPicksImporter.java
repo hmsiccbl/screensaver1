@@ -15,7 +15,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -345,6 +347,7 @@ public class AllCherryPicksImporter
             visitId = (int) visitIdCell.getValue();
 
             cherryPickRequest = visitId2CherryPickRequest.get(visitId);
+            addImportCommentsToCherryPickRequest(cherryPickRequest);
             
             if (cherryPickRequest == null) {
               throw new CherryPicksDataException("no such cherry pick request", visitId, iRow);
@@ -383,9 +386,6 @@ public class AllCherryPicksImporter
               }
             }
 
-            // TODO: for now, we'll use the duplex well also as the requested
-            // well, rather than the pool well, which will require a reverse
-            // lookup
             WellKey wellKey = new WellKey((int) plateNumberCell.getValue(),
                                           wellNameCell.getContents());
             labCherryPickWell = _dao.findWell(wellKey);
@@ -395,20 +395,7 @@ public class AllCherryPicksImporter
                                                  iRow, 
                                                  WELL_NAME_COLUMN_INDEX);
             }
-            Well screenerCherryPickWell = _libraryPoolToDuplexWellMapper.mapDuplexWellToPoolWell(labCherryPickWell);
-            if (screenerCherryPickWell == null) {
-              if (labCherryPickWell.getSilencingReagents().size() > 1) {
-                log.warn("CPR " + visitId + " cherry pick well " + labCherryPickWell + 
-                         " appears to be a pool well: screenerCherryPick will be same as labCherryPick");
-                screenerCherryPickWell = labCherryPickWell;
-              }
-              else {
-                throw new CherryPicksDataException("cherry pick well " + labCherryPickWell + 
-                                                   " cannot be mapped to a pool well and does not appear to be a pool well itself", 
-                                                   visitId,
-                                                   iRow);
-              }
-            }
+            Well screenerCherryPickWell = findScreenerCherryPickWell(iRow, visitId, labCherryPickWell);
             ScreenerCherryPick screenerCherryPick = new ScreenerCherryPick(cherryPickRequest, screenerCherryPickWell);
             LabCherryPick labCherryPick = new LabCherryPick(screenerCherryPick, labCherryPickWell);
             // note: we validate volume *after* creating the lab cherry pick,
@@ -455,9 +442,46 @@ public class AllCherryPicksImporter
           log.info("imported cherry pick requests");
         }
       }
+
     });
   }
   
+  
+  // private methods
+  
+  private void addImportCommentsToCherryPickRequest(CherryPickRequest cherryPickRequest)
+  {
+    StringBuilder s = new StringBuilder();
+    s.append(cherryPickRequest.getComments()).append('\n');
+    s.append(DateFormat.getDateInstance(DateFormat.SHORT).format(new Date())).append(": ");
+    s.append("Imported cherry picks from AllCherryPicks.xls.  " +
+        "Note that Screener Cherry Picks reflect duplex wells, and not pool wells.  " +
+        "Also note that the mapping of Lab Cherry Picks to their respective Cherry Pick Plates has not been imported.");
+  }
+
+  private Well findScreenerCherryPickWell(int iRow, Integer visitId, Well labCherryPickWell)
+  {
+    // ant 2007-04-26: for imported cherry picks, decision is that it's okay to just use the duplex
+    // well in the screener cherry pick, rather than trying to determine the pool well, which 
+    // requires a reverse lookup and sometimes fails
+    return labCherryPickWell;
+    //  Well screenerCherryPickWell = _libraryPoolToDuplexWellMapper.mapDuplexWellToPoolWell(labCherryPickWell);
+    //  if (screenerCherryPickWell == null) {
+    //  if (labCherryPickWell.getSilencingReagents().size() > 1) {
+    //  log.warn("CPR " + visitId + " cherry pick well " + labCherryPickWell + 
+    //  " appears to be a pool well: screenerCherryPick will be same as labCherryPick");
+    //  screenerCherryPickWell = labCherryPickWell;
+    //  }
+    //  else {
+    //  throw new CherryPicksDataException("cherry pick well " + labCherryPickWell + 
+    //  " cannot be mapped to a pool well and does not appear to be a pool well itself", 
+    //  visitId,
+    //  iRow);
+    //  }
+    //  }
+    //  return screenerCherryPickWell;
+  }
+
   private void validateLabCherryPickVolumeMatchesCherryPickRequestVolume(CherryPickRequest cherryPickRequest,
                                                                          Sheet sheet,
                                                                          int iRow)
