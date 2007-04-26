@@ -125,7 +125,8 @@ public class CherryPickRequestPlateMapFilesBuilder
     zipOut.putNextEntry(zipEntry);
     PrintWriter writer = new PrintWriter(zipOut);
 
-    writer.println("This zip file contains plate mappings for Cherry Pick Request " + cherryPickRequest.getEntityId());
+    writer.println("This zip file contains plate mappings for Cherry Pick Request " + 
+                   cherryPickRequest.getCherryPickRequestNumber());
     writer.println();
 
     {
