@@ -28,6 +28,7 @@ import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -610,6 +611,16 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   public Set<Well> findWellsForPlate(int plate)
   {
     return new TreeSet<Well>(getHibernateTemplate().find("from Well where plateNumber = ?", plate));
+  }
+
+  public CherryPickRequest findCherryPickRequestByNumber(int cherryPickRequestNumber)
+  {
+    CherryPickRequest cherryPickRequest = findEntityByProperty(CherryPickRequest.class, "legacyCherryPickRequestNumber", cherryPickRequestNumber);
+    if (cherryPickRequest == null) {
+      int cherryPickRequestId = cherryPickRequestNumber;
+      cherryPickRequest = findEntityById(CherryPickRequest.class, cherryPickRequestId);
+    }
+    return cherryPickRequest;
   }
 
   @SuppressWarnings("unchecked")

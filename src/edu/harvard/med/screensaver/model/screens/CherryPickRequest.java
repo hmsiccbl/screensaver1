@@ -23,9 +23,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
@@ -34,6 +33,8 @@ import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.cherrypicks.LabCherryPickColumnMajorOrderingComparator;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -52,7 +53,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   private static final long serialVersionUID = 0L;
   
   /**
-   * When the {@link #_cherryPickRequestNumber} is not provided to the constructor, add this
+   * When the {@link #_legacyCherryPickRequestNumber} is not provided to the constructor, add this
    * offset number to {@link #_ordinal} to determine the cherry pick request number. This value
    * needs to be bigger than the largest ScreenDB visit_id for Cherry Pick Visits.
    */
@@ -66,9 +67,10 @@ public abstract class CherryPickRequest extends AbstractEntity
   // instance fields
 
   private Integer _cherryPickRequestId;
+  private Integer _ordinal; // for business key only
   private Integer _version;
   private Screen _screen;
-  private Integer _cherryPickRequestNumber; // ScreenDB visits.id
+  private Integer _legacyCherryPickRequestNumber; // ScreenDB visits.id
   private ScreeningRoomUser _requestedBy;
   private Date _dateRequested;
   private BigDecimal _microliterTransferVolumePerWellRequested;
@@ -97,9 +99,7 @@ public abstract class CherryPickRequest extends AbstractEntity
                            ScreeningRoomUser requestedBy,
                            Date dateRequested)
   {
-    int cherryPickRequestNumber =
-      screen.getAllTimeCherryPickRequestCount() + CHERRY_PICK_REQUEST_NUMBER_GENERATION_OFFSET;
-    initialize(screen, requestedBy, dateRequested, cherryPickRequestNumber);
+    initialize(screen, requestedBy, dateRequested);
   }
 
   /**
@@ -109,26 +109,27 @@ public abstract class CherryPickRequest extends AbstractEntity
    * @param requestedBy the user that made the request
    * @param dateRequested the date created
    * @throws DuplicateEntityException
+   * @motivation for creating CherryPickRequests from legacy ScreenDB cherry pick visits
    */
   public CherryPickRequest(Screen screen,
                            ScreeningRoomUser requestedBy,
                            Date dateRequested,
-                           Integer cherryPickRequestNumber)
+                           Integer legacyId)
   {
-    initialize(screen, requestedBy, dateRequested, cherryPickRequestNumber);
+    setLegacyCherryPickRequestNumber(legacyId);
+    initialize(screen, requestedBy, dateRequested);
   }
 
   private void initialize(
     Screen screen,
     ScreeningRoomUser requestedBy,
-    Date dateRequested,
-    Integer cherryPickRequestNumber)
+    Date dateRequested)
   {
     _screen = screen;
+    _ordinal = screen.getAllTimeCherryPickRequestCount();
+    _screen.setAllTimeCherryPickRequestCount(_screen.getAllTimeCherryPickRequestCount() + 1);
     _requestedBy = requestedBy;
     _dateRequested = truncateDate(dateRequested);
-    _screen.setAllTimeCherryPickRequestCount(_screen.getAllTimeCherryPickRequestCount() + 1);
-    _cherryPickRequestNumber = cherryPickRequestNumber;
     requestedBy.getHbnCherryPickRequests().add(this);
     screen.getCherryPickRequests().add(this);
   }
@@ -140,21 +141,28 @@ public abstract class CherryPickRequest extends AbstractEntity
   {
     return getCherryPickRequestId();
   }
-
-  /**
-   * @hibernate.property type="integer" not-null="true"
-   */
-  public Integer getCherryPickRequestNumber()
-  {
-    return _cherryPickRequestNumber;
-  }
   
   /**
+   * Get CherryPickRequest's number. If this entity was imported from a legacy
+   * system, this is the ID assigned by the legacy system. Otherwise, it is the
+   * entity ID, as assigned by the Screensaver system.
+   */
+  @DerivedEntityProperty
+  public Integer getCherryPickRequestNumber()
+  {
+    if (_legacyCherryPickRequestNumber != null) {
+      return _legacyCherryPickRequestNumber;
+    }
+    return _cherryPickRequestId;
+  }
+
+  /**
    * Get the id for the cherry pick request.
-   *
+   * TODO: initial-value=10000 is not being used by Hibernate, so we have 00_initialize_sequence_start_values.sql
    * @return the id for the cherry pick request
    * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="cherry_pick_request_id_seq"
+   * @hibernate.generator-param name="sequence" value="cherry_pick_request_id_seq" 
+   * @hibernate.generator-param name="initial-value" value="10000" 
    */
   public Integer getCherryPickRequestId()
   {
@@ -576,9 +584,9 @@ public abstract class CherryPickRequest extends AbstractEntity
       return _screen;
     }
     
-    public Integer getCherryPickRequestNumber()
+    public Integer getOrdinal()
     {
-      return _cherryPickRequestNumber;
+      return _ordinal;
     }
         
     @Override
@@ -588,23 +596,20 @@ public abstract class CherryPickRequest extends AbstractEntity
         return false;
       }
       BusinessKey that = (BusinessKey) object;
-      return
-        this.getScreen().equals(that.getScreen()) &&
-        this.getCherryPickRequestNumber().equals(that.getCherryPickRequestNumber());
+      return this.getScreen().equals(that.getScreen()) &&
+      this.getOrdinal().equals(that.getOrdinal());
     }
 
     @Override
     public int hashCode()
     {
-      return
-        this.getScreen().hashCode() +
-        this.getCherryPickRequestNumber().hashCode();
+      return this.getScreen().hashCode() * 17 + this.getOrdinal() * 29;
     }
 
     @Override
     public String toString()
     {
-      return this.getScreen() + ":#" + this.getCherryPickRequestNumber();
+      return this.getScreen() + ":#" + this.getOrdinal();
     }
   }
 
@@ -634,6 +639,11 @@ public abstract class CherryPickRequest extends AbstractEntity
    */
   private void setCherryPickRequestId(Integer cherryPickRequestId)
   {
+    if (cherryPickRequestId < CHERRY_PICK_REQUEST_NUMBER_GENERATION_OFFSET) {
+      throw new DataModelViolationException("new cherry pick request entity ID " + cherryPickRequestId + 
+                                            " must be >= " + 
+                                            CHERRY_PICK_REQUEST_NUMBER_GENERATION_OFFSET );
+    }
     _cherryPickRequestId = cherryPickRequestId;
   }
 
@@ -642,7 +652,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    *
    * @return the version for the cherry pick request
    * @motivation for hibernate
-   * @hibernate.version
+   * @hibernate.version 
    */
   private Integer getVersion() {
     return _version;
@@ -659,6 +669,24 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
+   * @hibernate.property type="integer"
+   */
+  private Integer getLegacyCherryPickRequestNumber()
+  {
+    return _legacyCherryPickRequestNumber;
+  }
+  
+  private void setLegacyCherryPickRequestNumber(Integer cherryPickRequestNumber)
+  {
+    if (cherryPickRequestNumber != null &&
+      cherryPickRequestNumber >= CHERRY_PICK_REQUEST_NUMBER_GENERATION_OFFSET) {
+      throw new DataModelViolationException("legacy cherry pick request numbers must be < " + 
+                                            CHERRY_PICK_REQUEST_NUMBER_GENERATION_OFFSET);
+    }
+    _legacyCherryPickRequestNumber = cherryPickRequestNumber;
+  }
+  
+  /**
    * Set the screen.
    *
    * @param the screen
@@ -667,6 +695,19 @@ public abstract class CherryPickRequest extends AbstractEntity
   private void setScreen(Screen screen)
   {
     _screen = screen;
+  }
+
+  /**
+   * @hibernate.property type="integer" not-null="true"
+   */
+  private Integer getOrdinal()
+  {
+    return _ordinal;
+  }
+
+  private void setOrdinal(Integer ordinal)
+  {
+    _ordinal = ordinal;
   }
 
   /**
@@ -728,10 +769,5 @@ public abstract class CherryPickRequest extends AbstractEntity
   private void setHbnRequestedBy(ScreeningRoomUser requestedBy)
   {
     _requestedBy = requestedBy;
-  }
-  
-  private void setCherryPickRequestNumber(Integer cherryPickRequestNumber)
-  {
-    _cherryPickRequestNumber = cherryPickRequestNumber;
   }
 }

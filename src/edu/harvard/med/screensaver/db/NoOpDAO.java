@@ -260,4 +260,9 @@ public class NoOpDAO implements DAO
   public void deleteAllCherryPickRequests()
   {
   }
+
+  public CherryPickRequest findCherryPickRequestByNumber(int cherryPickRequestNumber)
+  {
+    return null;
+  }
 }

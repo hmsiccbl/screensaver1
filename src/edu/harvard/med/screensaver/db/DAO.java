@@ -357,4 +357,6 @@ public interface DAO
   public void deleteCherryPickRequest(
     CherryPickRequest cherryPickRequest,
     boolean bypassBusinessRuleViolationChecks);
+
+  public CherryPickRequest findCherryPickRequestByNumber(int cherryPickRequestNumber);
 }

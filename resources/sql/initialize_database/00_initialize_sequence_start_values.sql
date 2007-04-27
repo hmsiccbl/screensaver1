@@ -1,0 +1,3 @@
+BEGIN;
+ALTER SEQUENCE cherry_pick_request_id_seq RESTART WITH 10000;
+COMMIT;

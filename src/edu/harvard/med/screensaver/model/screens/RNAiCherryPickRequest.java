@@ -69,9 +69,9 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   public RNAiCherryPickRequest(Screen screen,
                                ScreeningRoomUser requestedBy,
                                Date dateRequested,
-                               Integer cherryPickRequestNumber)
+                               Integer legacyCherryPickRequestNumber)
   {
-    super(screen, requestedBy, dateRequested, cherryPickRequestNumber);
+    super(screen, requestedBy, dateRequested, legacyCherryPickRequestNumber);
   }
   
 

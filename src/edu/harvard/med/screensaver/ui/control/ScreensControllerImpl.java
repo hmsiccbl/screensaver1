@@ -715,9 +715,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   {
     logUserActivity("findCherryPickRequest " + cherryPickRequestNumber);
     if (cherryPickRequestNumber != null) {
-      CherryPickRequest cherryPickRequest = _dao.findEntityByProperty(CherryPickRequest.class, 
-                                                                      "cherryPickRequestNumber", 
-                                                                      cherryPickRequestNumber);
+      CherryPickRequest cherryPickRequest = _dao.findCherryPickRequestByNumber(cherryPickRequestNumber);
       if (cherryPickRequest != null) {
         return viewCherryPickRequest(cherryPickRequest);
       }
