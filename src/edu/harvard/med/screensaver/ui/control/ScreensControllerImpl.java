@@ -924,6 +924,10 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
         public void runTransaction()
         {
           CherryPickRequest cherryPickRequest = _dao.reloadEntity(cherryPickRequestIn);
+          if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+            throw new UnsupportedOperationException("Sorry, but viewing compound cherry pick requests is not yet implemented.");
+          }
+          
           _dao.need(cherryPickRequest, 
                     "screen",
                     "screen.hbnLabHead",
@@ -958,18 +962,18 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                       "labCherryPicks.sourceWell",
                       "labCherryPicks.sourceWell.hbnCompound");
           }
-
-
-
           _cherryPickRequestViewer.setCherryPickRequest(cherryPickRequest);
         }
       });
+      return VIEW_CHERRY_PICK_REQUEST_ACTION_RESULT;
     }
     catch (DataAccessException e) {
       showMessage("databaseOperationFailed", e.getMessage());
     }
-
-    return VIEW_CHERRY_PICK_REQUEST_ACTION_RESULT;
+    catch (UnsupportedOperationException e) {
+      reportApplicationError(e);
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   @UIControllerMethod

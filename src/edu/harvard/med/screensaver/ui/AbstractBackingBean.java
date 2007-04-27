@@ -470,7 +470,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    */
   protected void reportSystemError(String errorMessage)
   {
-    showMessage("systemError", null, errorMessage, "");
+    showMessage("systemError", errorMessage);
     log.error(errorMessage);
   }
 
@@ -487,7 +487,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   protected void reportSystemError(Throwable throwable) 
   {
     throwable.printStackTrace();
-    showMessage("systemError", null, throwable.getClass().getName(), throwable.getMessage());
+    showMessage("systemError", throwable.toString());
     log.error(throwable.toString());
   }
   
@@ -502,12 +502,12 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    */
   protected void reportApplicationError(String errorMessage)
   {
-    showMessage("systemError", null, "Application Error", errorMessage);
+    showMessage("applicationError", errorMessage);
   }
   
   protected void reportApplicationError(Throwable t)
   {
-    showMessage("systemError", null, t.getClass().getName(), t.getMessage());
+    showMessage("applicationError", t.getMessage());
   }
 
   protected void closeHttpSession()
