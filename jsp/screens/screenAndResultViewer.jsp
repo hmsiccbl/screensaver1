@@ -252,6 +252,7 @@
 								styleClass="label" />
 							<t:selectOneMenu id="hitsForDataHeaderList"
 								value="#{screenResultViewer.hitsForDataHeader.value}"
+								displayValueOnly="#{screenResultViewer.hitsForDataHeader.size <= 1}"
 								onchange="javascript:document.getElementById('updateDataTableRowsButton').click()"
 								immediate="true" styleClass="inputText">
 								<f:selectItems id="hitsForDataHeader"
