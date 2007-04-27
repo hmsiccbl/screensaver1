@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.DateFormat;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -215,6 +214,7 @@ public class AllCherryPicksImporter
           importRnaiCherryPicks(workbook);
         }
       });
+      validateProcessedCherryPickRequestsWithAssayPlatesHaveCherryPicks();
     }
     catch (Exception e) {
       throw new FatalParseException(e);
@@ -329,9 +329,9 @@ public class AllCherryPicksImporter
       {
         int iRow = 0;
         boolean encounteredErrors = false;
-        Map<Integer,CherryPickRequest> visitId2CherryPickRequest = buildVisitIdToCherryPickRequestMap();
-        CherryPickRequest cherryPickRequest = null;
-        Collection<CherryPickRequest> touchedCherryPickRequests = new HashSet<CherryPickRequest>();
+        Map<Integer,RNAiCherryPickRequest> visitId2CherryPickRequest = buildVisitIdToCherryPickRequestMap();
+        RNAiCherryPickRequest cherryPickRequest = null;
+        Set<RNAiCherryPickRequest> touchedCherryPickRequests = new HashSet<RNAiCherryPickRequest>();
 
         for (iRow = getFromRow(); iRow < sheet.getRows(); iRow++) {
           if (isRowBlank(sheet, iRow)) {
@@ -347,8 +347,6 @@ public class AllCherryPicksImporter
             visitId = (int) visitIdCell.getValue();
 
             cherryPickRequest = visitId2CherryPickRequest.get(visitId);
-            addImportCommentsToCherryPickRequest(cherryPickRequest);
-            
             if (cherryPickRequest == null) {
               throw new CherryPicksDataException("no such cherry pick request", visitId, iRow);
             }
@@ -359,13 +357,15 @@ public class AllCherryPicksImporter
               continue;
             }
 
-            if (cherryPickRequest.getScreenerCherryPicks().size() > 0 && 
-              !touchedCherryPickRequests.contains(cherryPickRequest)) {
-              throw new CherryPicksDataException("cherry pick request " + 
-                                                 cherryPickRequest.getCherryPickRequestNumber() + 
-                                                 " already has cherry picks", 
-                                                 visitId,
-                                                 iRow);
+            if (!touchedCherryPickRequests.contains(cherryPickRequest)) {
+              if (cherryPickRequest.getScreenerCherryPicks().size() > 0) {
+                throw new CherryPicksDataException("cherry pick request " + 
+                                                   cherryPickRequest.getCherryPickRequestNumber() + 
+                                                   " already has cherry picks", 
+                                                   visitId,
+                                                   iRow);
+              }
+              touchedCherryPickRequests.add(cherryPickRequest);
             }
 
             if (cherryPickRequest.getMicroliterTransferVolumePerWellApproved() == null) {
@@ -398,7 +398,8 @@ public class AllCherryPicksImporter
             labCherryPick.setAllocated(findCopy((int) plateNumberCell.getValue(),
                                                 sourceCopyCell.getContents(),
                                                 iRow));
-            // TODO: labCherryPick.setMapped().  Will require knowing the plate each cherry pick was mapped to.
+            
+            addImportCommentsToCherryPickRequest(cherryPickRequest);
           }
           catch (CherryPicksDataException e) {
             log.error(e.getMessage());
@@ -413,18 +414,13 @@ public class AllCherryPicksImporter
             encounteredErrors = true;
           }
           catch (Exception e) {
-            log.error("CPR " + visitId + "unexpected error at row " + iRow + ":" + e.toString());
+            log.error("CPR " + visitId + " unexpected error at row " + iRow + ":" + e.toString());
             encounteredErrors = true;
-          }
-          finally {
-            touchedCherryPickRequests.add(cherryPickRequest);
           }
           if (encounteredErrors && isFailFast()) {
             break;
           }
         }
-
-        encounteredErrors |=  validateAllCherryPickRequestsWithAssayPlatesHaveCherryPicks();
 
         if (encounteredErrors) {
           throw new FatalParseException("import failed due to errors (see log); database remains unchanged");
@@ -445,19 +441,19 @@ public class AllCherryPicksImporter
    * ScreenDBSynchronizer) now have allocated LabCherryPicks, otherwise the data
    * model is being violated.
    */
-  private boolean validateAllCherryPickRequestsWithAssayPlatesHaveCherryPicks()
+  private boolean validateProcessedCherryPickRequestsWithAssayPlatesHaveCherryPicks()
   {
     boolean encounteredErrors = false;
-    List<RNAiCherryPickRequest> cprs = _dao.findAllEntitiesWithType(RNAiCherryPickRequest.class);
-    for (RNAiCherryPickRequest cpr : cprs) {
+    List<RNAiCherryPickRequest> cherryPickRequests = _dao.findAllEntitiesWithType(RNAiCherryPickRequest.class);
+    for (RNAiCherryPickRequest cpr : cherryPickRequests) {
       if (cpr.getCherryPickAssayPlates().size() > 0) {
         if (cpr.getLabCherryPicks().size() == 0) {
           encounteredErrors = true;
-          log.error("after import " + cpr + " had not LabCherryPicks imported, although it has CherryPickAssayPlates");
+          log.warn("after import " + cpr + " had no LabCherryPicks imported, although it has CherryPickAssayPlates");
         }
-        if (!cpr.isAllocated()) {
+        else if (!cpr.isAllocated()) {
           encounteredErrors = true;
-          log.error("after import " + cpr + " had LabCherryPicks imported, but did not have reagent allocated");
+          log.warn("after import " + cpr + " had LabCherryPicks imported, but none had reagent allocated");
         }
       }
     }
@@ -472,6 +468,7 @@ public class AllCherryPicksImporter
     s.append("Imported cherry picks from AllCherryPicks.xls.  " +
         "Note that Screener Cherry Picks reflect duplex wells, and not pool wells.  " +
         "Also note that the mapping of Lab Cherry Picks to their respective Cherry Pick Plates has not been imported.");
+    cherryPickRequest.setComments(s.toString());
   }
 
   private Well findScreenerCherryPickWell(int iRow, Integer visitId, Well labCherryPickWell)
@@ -545,9 +542,9 @@ public class AllCherryPicksImporter
     return sheet.getCell(0, row).getType().equals(CellType.EMPTY);
   }
 
-  private Map<Integer,CherryPickRequest> buildVisitIdToCherryPickRequestMap()
+  private Map<Integer,RNAiCherryPickRequest> buildVisitIdToCherryPickRequestMap()
   {
-    Map<Integer,CherryPickRequest> visit2CherryPickRequest = new HashMap<Integer,CherryPickRequest>();
+    Map<Integer,RNAiCherryPickRequest> visit2CherryPickRequest = new HashMap<Integer,RNAiCherryPickRequest>();
     List<RNAiCherryPickRequest> cherryPickRequests = _dao.findAllEntitiesWithType(RNAiCherryPickRequest.class);
     for (RNAiCherryPickRequest cherryPickRequest : cherryPickRequests) {
       visit2CherryPickRequest.put(cherryPickRequest.getCherryPickRequestNumber(),
