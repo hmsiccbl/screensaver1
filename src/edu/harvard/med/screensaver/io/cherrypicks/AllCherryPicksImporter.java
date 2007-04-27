@@ -365,6 +365,7 @@ public class AllCherryPicksImporter
                                                    visitId,
                                                    iRow);
               }
+              addImportCommentsToCherryPickRequest(cherryPickRequest);
               touchedCherryPickRequests.add(cherryPickRequest);
             }
 
@@ -399,7 +400,6 @@ public class AllCherryPicksImporter
                                                 sourceCopyCell.getContents(),
                                                 iRow));
             
-            addImportCommentsToCherryPickRequest(cherryPickRequest);
           }
           catch (CherryPicksDataException e) {
             log.error(e.getMessage());
@@ -441,29 +441,34 @@ public class AllCherryPicksImporter
    * ScreenDBSynchronizer) now have allocated LabCherryPicks, otherwise the data
    * model is being violated.
    */
-  private boolean validateProcessedCherryPickRequestsWithAssayPlatesHaveCherryPicks()
+  private void validateProcessedCherryPickRequestsWithAssayPlatesHaveCherryPicks()
   {
-    boolean encounteredErrors = false;
-    List<RNAiCherryPickRequest> cherryPickRequests = _dao.findAllEntitiesWithType(RNAiCherryPickRequest.class);
-    for (RNAiCherryPickRequest cpr : cherryPickRequests) {
-      if (cpr.getCherryPickAssayPlates().size() > 0) {
-        if (cpr.getLabCherryPicks().size() == 0) {
-          encounteredErrors = true;
-          log.warn("after import " + cpr + " had no LabCherryPicks imported, although it has CherryPickAssayPlates");
-        }
-        else if (!cpr.isAllocated()) {
-          encounteredErrors = true;
-          log.warn("after import " + cpr + " had LabCherryPicks imported, but none had reagent allocated");
+    _dao.doInTransaction(new DAOTransaction() 
+    {
+      public void runTransaction()
+      {
+        List<RNAiCherryPickRequest> cherryPickRequests = _dao.findAllEntitiesWithType(RNAiCherryPickRequest.class);
+        for (RNAiCherryPickRequest cpr : cherryPickRequests) {
+          if (cpr.getCherryPickAssayPlates().size() > 0) {
+            if (cpr.getLabCherryPicks().size() == 0) {
+              log.warn("after import " + cpr + " had no LabCherryPicks imported, although it has CherryPickAssayPlates");
+            }
+            else if (!cpr.isAllocated()) {
+              log.warn("after import " + cpr + " had LabCherryPicks imported, but none had reagent allocated");
+            }
+          }
         }
       }
-    }
-    return encounteredErrors;
+    });
   }
     
   private void addImportCommentsToCherryPickRequest(CherryPickRequest cherryPickRequest)
   {
     StringBuilder s = new StringBuilder();
-    s.append(cherryPickRequest.getComments()).append('\n');
+    String existingComments = cherryPickRequest.getComments();
+    if (existingComments != null && existingComments.length() > 0) {
+      s.append(existingComments).append('\n');
+    }
     s.append(DateFormat.getDateInstance(DateFormat.SHORT).format(new Date())).append(": ");
     s.append("Imported cherry picks from AllCherryPicks.xls.  " +
         "Note that Screener Cherry Picks reflect duplex wells, and not pool wells.  " +
