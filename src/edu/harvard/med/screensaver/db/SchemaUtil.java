@@ -239,6 +239,7 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
   {
     dropSchema();
     createSchema();
+    initializeDatabase();
   }
   
   /**
