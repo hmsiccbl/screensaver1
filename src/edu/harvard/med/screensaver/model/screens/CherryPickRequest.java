@@ -176,6 +176,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * @hibernate.set
    *   cascade="all-delete-orphan"
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="cherry_pick_request_id"
    * @hibernate.collection-one-to-many
@@ -195,6 +196,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * @hibernate.set
    *   cascade="none"
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="cherry_pick_request_id"
    * @hibernate.collection-one-to-many
@@ -360,7 +362,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * 
    * @see #getRequiredEmptyRowsOnAssayPlate()
    * @return
-   * @hibernate.set table="cherry_pick_request_requested_empty_columns"
+   * @hibernate.set table="cherry_pick_request_requested_empty_columns" lazy="true"
    * @hibernate.collection-key column="cherry_pick_request_id"
    * @hibernate.collection-element type="integer" not-null="true"
    */
@@ -495,6 +497,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    *   sort="natural"
    *   cascade="all-delete-orphan"
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="cherry_pick_request_id"
    * @hibernate.collection-one-to-many
