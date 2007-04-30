@@ -1,8 +1,8 @@
 BEGIN;
 
-UPDATE screensaver_revision SET screensaver_revision=1325;
+UPDATE screensaver_revision SET screensaver_revision=1326;
 
-/* since all of this data is currently imported via ScreenDBSynchronizer, 
+/* since all of this data is currently imported via ScreenDBSynchronizer, */
 /* its okay to just delete it all, and this is the easiest way to update the schema */
 DELETE FROM lab_cherry_pick;
 DELETE FROM screener_cherry_pick;
@@ -12,7 +12,7 @@ DELETE FROM compound_cherry_pick_request;
 DELETE FROM cherry_pick_request;
 DELETE FROM plates_used;
 DELETE FROM library_screening;
-DELETE FROM rna_cherry_pick_screening;
+DELETE FROM rnai_cherry_pick_screening;
 DELETE FROM screening;
 DELETE FROM equipment_used;
 DELETE FROM cherry_pick_liquid_transfer;
