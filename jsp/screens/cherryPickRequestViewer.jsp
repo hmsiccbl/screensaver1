@@ -300,7 +300,8 @@ TODO:
 
 				<t:dataTable id="screenerCherryPicksTable" var="cherryPickRow"
 					value="#{cherryPickRequestViewer.screenerCherryPicksDataModel}"
-					styleClass="standardTable" columnClasses="column" rows="20"
+					styleClass="standardTable" columnClasses="column"
+					rows="#{cherryPickRequestViewer.screenerCherryPicksPerPage.selection}"
 					rowClasses="row1,row2" headerClass="tableHeader"
 					sortColumn="#{cherryPickRequestViewer.screenerCherryPicksSortManager.currentSortColumnName}"
 					sortAscending="#{cherryPickRequestViewer.screenerCherryPicksSortManager.sortAscending}">
@@ -324,7 +325,7 @@ TODO:
 					</t:columns>
 				</t:dataTable>
 
-				<t:panelGrid columns="2">
+				<t:panelGrid columns="4">
 					<t:dataScroller id="screenerCherryPicksDataScroller"
 						for="screenerCherryPicksTable" binding="#{cherryPickRequestViewer.screenerCherryPicksTableDataScroller1}"
 						firstRowIndexVar="fromRow"
@@ -366,6 +367,19 @@ TODO:
 						<t:outputText value="#{fromRow}..#{toRow} of #{rowCount}"
 							styleClass="label" rendered="#{pages > 1}" />
 					</t:dataScroller>
+
+					<t:selectOneMenu id="screenerCherryPicksPerPage"
+						value="#{cherryPickRequestViewer.screenerCherryPicksPerPage.value}"
+						onchange="document.getElementById('updateScreenerCherryPicksPerPage').click();"
+						styleClass="data">
+						<f:selectItems
+							value="#{cherryPickRequestViewer.screenerCherryPicksPerPage.selectItems}" />
+					</t:selectOneMenu>
+					<t:outputText value=" per page" styleClass="label" />
+					<t:commandButton id="updateScreenerCherryPicksPerPage"
+						forceId="true" value="update screener cherry picks per page"
+						style="display: none" />
+
 				</t:panelGrid>
 
 			</t:panelGrid>
@@ -430,7 +444,8 @@ TODO:
 
 				<t:dataTable id="labCherryPicksTable" var="cherryPickRow"
 					value="#{cherryPickRequestViewer.labCherryPicksDataModel}"
-					styleClass="standardTable" columnClasses="column" rows="20"
+					styleClass="standardTable" columnClasses="column"
+					rows="#{cherryPickRequestViewer.labCherryPicksPerPage.selection}"
 					rowClasses="row1,row2" headerClass="tableHeader"
 					sortColumn="#{cherryPickRequestViewer.labCherryPicksSortManager.currentSortColumnName}"
 					sortAscending="#{cherryPickRequestViewer.labCherryPicksSortManager.sortAscending}"
@@ -456,7 +471,7 @@ TODO:
 				</t:dataTable>
 
 				<%-- TODO: These dataScrollers don't get updated on the same request when the 'show Failed Lab Cherry Picks' command is invoked.  Their state lags behind.  Unless the DataScrollers appear AFTER the data table! I'm not getting any younger, and I don't have the time or patience to deal with this kind of JSF MyFaces buggy nonsense, so the data scrollers are now BELOW the data table.  Enjoy the UI inconsistency!  Thanks MyFaces!  We love you! --%>
-				<t:panelGrid columns="2">
+				<t:panelGrid columns="4">
 					<t:dataScroller id="labCherryPicksDataScroller"
 						for="labCherryPicksTable" firstRowIndexVar="fromRow"
 						lastRowIndexVar="toRow" rowsCountVar="rowCount" paginator="true"
@@ -495,6 +510,19 @@ TODO:
 						<t:outputText value="#{fromRow}..#{toRow} of #{rowCount}"
 							styleClass="label" rendered="#{pages > 1}" />
 					</t:dataScroller>
+
+					<t:selectOneMenu id="labCherryPicksPerPage"
+						value="#{cherryPickRequestViewer.labCherryPicksPerPage.value}"
+						onchange="document.getElementById('updateLabCherryPicksPerPage').click();"
+						styleClass="data">
+						<f:selectItems
+							value="#{cherryPickRequestViewer.labCherryPicksPerPage.selectItems}" />
+					</t:selectOneMenu>
+					<t:outputText value=" per page" styleClass="label" />
+					<t:commandButton id="updateLabCherryPicksPerPage" forceId="true"
+						value="update lab cherry picks per page"
+						style="display: none" />
+					
 				</t:panelGrid>
 
 			</t:panelGrid>

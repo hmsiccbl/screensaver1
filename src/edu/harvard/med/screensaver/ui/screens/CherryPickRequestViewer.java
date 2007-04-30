@@ -51,6 +51,7 @@ import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.TableSortManager;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
+import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -154,6 +155,10 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private HtmlDataScroller _screenerCherryPicksTableDataScroller1;
   private HtmlDataScroller _screenerCherryPicksTableDataScroller2;
 
+  private UISelectOneBean<Integer> _labCherryPicksPerPage;
+  private UISelectOneBean<Integer> _screenerCherryPicksPerPage;
+
+
   
   // public constructors and methods
   
@@ -165,6 +170,13 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     _collapsiblePanelsState.put("screenerCherryPicks", false);
     _collapsiblePanelsState.put("labCherryPicks", false);
     _collapsiblePanelsState.put("cherryPickAssayPlates", false);
+    
+    _labCherryPicksPerPage = new UISelectOneBean<Integer>(new ArrayList<Integer>(Arrays.asList(10, 20, 50, 100, -1))) {
+      protected String getLabel(Integer t) { if (t == -1) return "All"; else return super.getLabel(t); }
+    };
+    _screenerCherryPicksPerPage = new UISelectOneBean<Integer>(new ArrayList<Integer>(Arrays.asList(10, 20, 50, 100, -1))) {
+      protected String getLabel(Integer t) { if (t == -1) return "All"; else return super.getLabel(t); }
+    };
   }
 
   public void setDao(DAO dao)
@@ -261,6 +273,16 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   public void setScreenerCherryPicksTableDataScroller2(HtmlDataScroller screenerCherryPicksTableDataScroller2)
   {
     this._screenerCherryPicksTableDataScroller2 = screenerCherryPicksTableDataScroller2;
+  }
+
+  public UISelectOneBean<Integer> getLabCherryPicksPerPage()
+  {
+    return _labCherryPicksPerPage;
+  }
+
+  public UISelectOneBean<Integer> getScreenerCherryPicksPerPage()
+  {
+    return _screenerCherryPicksPerPage;
   }
 
   public String getCherryPicksInput()
@@ -559,7 +581,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   }
   
 
-  
   /* JSF Application methods */
   
   public String viewScreen()
@@ -763,6 +784,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       }
     });
   }
+  
 
   // protected methods
 
