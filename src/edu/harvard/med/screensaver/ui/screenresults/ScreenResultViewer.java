@@ -710,7 +710,8 @@ public class ScreenResultViewer extends AbstractBackingBean
         WellKey wellKey = entry.getKey();
         tableData.add(buildRow(wellKey,
                                entry.getValue().get(0).getAssayWellType(),
-                               entry.getValue()));
+                               entry.getValue(),
+                               _selectedResultValueTypes.getSelections()));
       }
       _rawDataModel = new ListDataModel(tableData);
     }
@@ -721,7 +722,8 @@ public class ScreenResultViewer extends AbstractBackingBean
    */
   private Map<String,String> buildRow(WellKey wellKey,
                                       AssayWellType assayWellType,
-                                      List<ResultValue> resultValues)
+                                      List<ResultValue> resultValues, 
+                                      List<ResultValueType> resultValueTypes)
   {
     List<String> columnNames = getSortManager().getColumnNames();
     int i = 0;
@@ -730,9 +732,13 @@ public class ScreenResultViewer extends AbstractBackingBean
     cellValues.put(columnNames.get(i++), wellKey.getWellName());
     cellValues.put(columnNames.get(i++), assayWellType.toString());
     List<Boolean> excludedResultValuesRow = new ArrayList<Boolean>();
+    Iterator<ResultValueType> rvtIter = resultValueTypes.iterator();
     for (ResultValue rv : resultValues) {
+      ResultValueType rvt = rvtIter.next();
       excludedResultValuesRow.add(rv.isExclude());
-      cellValues.put(columnNames.get(i++), rv.getValue());
+      Object typedValue = ResultValue.getTypedValue(rv, rvt);
+      cellValues.put(columnNames.get(i++),
+                     typedValue == null ? null : typedValue.toString());
     }
     _excludedResultValues.add(excludedResultValuesRow);
     return cellValues;

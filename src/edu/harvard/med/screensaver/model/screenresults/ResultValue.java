@@ -284,7 +284,7 @@ public class ResultValue
    * <li> Not an Activity Indicator: returns String
    * <li> ActivityIndicatorType.BOOLEAN: returns Boolean
    * <li> ActivityIndicatorType.NUMERICAL: returns Double
-   * <li> ActivityIndicatorType.PARTITION: returns PartitionedValue
+   * <li> ActivityIndicatorType.PARTITION: returns String (PartitionedValue.getDisplayValue())
    * </ul>
    * 
    * @return a Boolean, Double, or String
@@ -317,15 +317,8 @@ public class ResultValue
         }
       }
       else if (activityIndicatorType.equals(ActivityIndicatorType.PARTITION)) {
-        for (PartitionedValue pv: PartitionedValue.values()) {
-          if (pv.getValue().equals(rv.getValue())) {
-            return pv;
-          }
-        }
-        assert false : "not a PartitionValue in ResultValue.generateTypedValue()";
-        /* return PartitionedValue.valueOf(rv.getValue());*/
+        return PartitionedValue.lookupByValue(rv.getValue()).getDisplayValue();
       }
-      assert false : "unhandled ActivityIndicatorType in ResultValue.generateTypedValue()";
     }
     return rv.getValue();
   }

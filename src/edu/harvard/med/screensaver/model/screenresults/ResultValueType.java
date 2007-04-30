@@ -381,9 +381,9 @@ public class ResultValueType extends AbstractEntity implements Comparable
         }
       }
       else if (getActivityIndicatorType().equals(ActivityIndicatorType.PARTITION)) {
-        String partitionValue = rv.getValue();
-        for (PartitionedValue pvType : PartitionedValue.values()) {
-          if (!pvType.equals(PartitionedValue.NONE) && pvType.getValue().equals(partitionValue)) {
+        String resultValue = rv.getValue();
+        for (PartitionedValue pv : PartitionedValue.values()) {
+          if (!pv.equals(PartitionedValue.NONE) && pv.getValue().equals(resultValue)) {
             isHit = true;
             break;
           }
@@ -1082,4 +1082,5 @@ public class ResultValueType extends AbstractEntity implements Comparable
       ++_hits;
     }
   }
+
 }

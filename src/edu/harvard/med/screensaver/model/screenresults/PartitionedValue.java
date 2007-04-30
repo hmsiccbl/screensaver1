@@ -9,6 +9,9 @@
 
 package edu.harvard.med.screensaver.model.screenresults;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
@@ -24,10 +27,10 @@ public enum PartitionedValue implements VocabularyTerm
   
   // the vocabulary
   
-  STRONG("S"),
-  MEDIUM("M"),
-  WEAK("W"),
-  NONE(""),
+  STRONG("3", "S"),
+  MEDIUM("2", "M"),
+  WEAK("1", "W"),
+  NONE("0", ""),
   ;
   
   // static inner class
@@ -43,18 +46,37 @@ public enum PartitionedValue implements VocabularyTerm
     }
   }
 
+  private static Map<String,PartitionedValue> _value2Enum;
+  static {
+    _value2Enum = new HashMap<String,PartitionedValue>();
+    for (PartitionedValue pv : values()) {
+      _value2Enum.put(pv.getValue(), pv);
+    }
+  }
+  
+  public static PartitionedValue lookupByValue(String value)
+  {
+    PartitionedValue result = _value2Enum.get(value);
+    if (result == null) {
+      throw new IllegalArgumentException("no PartitioonedValue enum for '" + value + "'");
+    }
+    return result;
+  }
+
 
   // private instance field and constructor
 
   private String _value;
+  private String _displayValue;
 
   /**
    * Constructs a <code>PartitionedValue</code> vocabulary term.
    * @param value The value of the term.
    */
-  private PartitionedValue(String value)
+  private PartitionedValue(String value, String displayValue)
   {
     _value = value;
+    _displayValue = displayValue;
   }
 
 
@@ -68,6 +90,11 @@ public enum PartitionedValue implements VocabularyTerm
   {
     return _value;
   }
+  
+  public String getDisplayValue()
+  { 
+    return _displayValue;
+  }
 
   /* (non-Javadoc)
    * @see java.lang.Object#toString()
@@ -77,5 +104,4 @@ public enum PartitionedValue implements VocabularyTerm
   {
     return getValue();
   }
-  
 }
