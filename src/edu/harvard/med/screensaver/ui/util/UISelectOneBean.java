@@ -58,7 +58,8 @@ public class UISelectOneBean<T> extends UISelectBean<T>
     // TODO: linear search! yuck!
     int i = 0;
     for (SelectItem selectItem : getSelectItems()) {
-      if (selectItem.getValue().equals(selectionKey)) {
+        if ((selectItem.getValue() == null && selectionKey == null) ||
+          selectItem.getValue().equals(selectionKey)) {
         _selectionIndex = i;
         break;
       }

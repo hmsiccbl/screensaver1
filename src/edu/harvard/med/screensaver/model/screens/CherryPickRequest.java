@@ -31,6 +31,7 @@ import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.cherrypicks.LabCherryPickColumnMajorOrderingComparator;
 
@@ -75,6 +76,8 @@ public abstract class CherryPickRequest extends AbstractEntity
   private Date _dateRequested;
   private BigDecimal _microliterTransferVolumePerWellRequested;
   private BigDecimal _microliterTransferVolumePerWellApproved;
+  private AdministratorUser _volumeApprovedBy;
+  private Date _dateVolumeApproved;
   private boolean _randomizedAssayPlateLayout;
   private Set<Integer> _requestedEmptyColumnsOnAssayPlate = new HashSet<Integer>();
   private String _comments;
@@ -352,6 +355,41 @@ public abstract class CherryPickRequest extends AbstractEntity
     else {
       _microliterTransferVolumePerWellApproved = microliterTransferVolumePerWell.setScale(VOLUME_SCALE, RoundingMode.HALF_UP);
     }
+  }
+
+  /**
+   * @hibernate.property not-null="false"
+   */
+  public Date getDateVolumeApproved()
+  {
+    return _dateVolumeApproved;
+  }
+
+  public void setDateVolumeApproved(Date dateVolumeApproved)
+  {
+    _dateVolumeApproved = truncateDate(dateVolumeApproved);
+  }
+
+  /**
+   * Get the user that approved the volume.
+   *
+   * @return the user that approved the volume
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.users.AdministratorUser"
+   *   column="volume_approved_by_id"
+   *   not-null="false"
+   *   foreign-key="fk_cherry_pick_request_to_volume_approved_by"
+   *   cascade="save-update"
+   */
+  @ToOneRelationship(nullable=true, unidirectional=true)
+  public AdministratorUser getVolumeApprovedBy()
+  {
+    return _volumeApprovedBy;
+  }
+
+  public void setVolumeApprovedBy(AdministratorUser volumeApprovedBy)
+  {
+    _volumeApprovedBy = volumeApprovedBy;
   }
 
   /**

@@ -9,11 +9,10 @@
 
 package edu.harvard.med.screensaver.ui.util;
 
-import java.util.Comparator;
-
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.util.NullSafeComparator;
 
-public class ScreensaverUserComparator implements Comparator<ScreensaverUser>
+public class ScreensaverUserComparator extends NullSafeComparator<ScreensaverUser>
 {
   private static ScreensaverUserComparator _instance = new ScreensaverUserComparator();
   
@@ -22,7 +21,8 @@ public class ScreensaverUserComparator implements Comparator<ScreensaverUser>
     return _instance;
   }
   
-  public int compare(ScreensaverUser o1, ScreensaverUser o2)
+  @Override
+  protected int doCompare(ScreensaverUser o1, ScreensaverUser o2)
   {
     return o1.getFullNameLastFirst().compareTo(o2.getFullNameLastFirst());
   }

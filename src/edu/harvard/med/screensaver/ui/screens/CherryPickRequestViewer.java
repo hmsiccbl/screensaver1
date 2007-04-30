@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -133,6 +134,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private Map<String,Boolean> _collapsiblePanelsState;
   private String _cherryPicksInput;
   private UISelectOneEntityBean<ScreeningRoomUser> _requestedBy;
+  private UISelectOneEntityBean<AdministratorUser> _volumeApprovedBy;
   private UISelectManyBean<Integer> _emptyColumnsOnAssayPlate;
 
   private TableSortManager _screenerCherryPicksSortManager;
@@ -192,9 +194,18 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     candidateRequestors.add(_cherryPickRequest.getScreen().getLeadScreener());
     candidateRequestors.addAll(_cherryPickRequest.getScreen().getCollaborators());
     _requestedBy = new UISelectOneEntityBean<ScreeningRoomUser>(candidateRequestors,
-      _cherryPickRequest.getScreen().getLeadScreener(),
+      _cherryPickRequest.getRequestedBy(),
       _dao) { 
       protected String getLabel(ScreeningRoomUser u) { return u.getFullNameLastFirst(); } 
+    };
+
+    SortedSet<AdministratorUser> candidateVolumeApprovers = new TreeSet<AdministratorUser>(ScreensaverUserComparator.getInstance());
+    candidateVolumeApprovers.add(null);
+    candidateVolumeApprovers.addAll(_dao.findAllEntitiesWithType(AdministratorUser.class)); // TODO: filter out all but CherryPickAdmins
+    _volumeApprovedBy = new UISelectOneEntityBean<AdministratorUser>(candidateVolumeApprovers, 
+      _cherryPickRequest.getVolumeApprovedBy(),
+      _dao) { 
+      protected String getLabel(AdministratorUser a) { return a == null ? super.getLabel(a) : a.getFullNameLastFirst(); } 
     };
       
     SortedSet<ScreensaverUser> candidatePreparers = new TreeSet<ScreensaverUser>(ScreensaverUserComparator.getInstance());
@@ -265,6 +276,16 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   public UISelectOneEntityBean<ScreeningRoomUser> getRequestedBy()
   {
     return _requestedBy;
+  }
+
+  public UISelectOneEntityBean<AdministratorUser> getVolumeApprovedBy()
+  {
+    return _volumeApprovedBy;
+  }
+  
+  public String getDateVolumeApproved()
+  {
+    return DateFormat.getDateInstance(DateFormat.SHORT).format(_cherryPickRequest.getDateVolumeApproved());
   }
 
   public UISelectOneEntityBean<ScreensaverUser> getLiquidTransferPerformedBy()
@@ -737,6 +758,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       public void runTransaction() 
       {
         _cherryPickRequest.setRequestedBy(_requestedBy.getSelection());
+        _cherryPickRequest.setVolumeApprovedBy(_volumeApprovedBy.getSelection());
         _cherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(new HashSet<Integer>(_emptyColumnsOnAssayPlate.getSelections()));
       }
     });

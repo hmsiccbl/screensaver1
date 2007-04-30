@@ -158,11 +158,34 @@ TODO:
 
 					<t:outputText value="Approved&nbsp;Volume&nbsp;(&#181;L)"
 						escape="false" />
-					<t:inputText id="approvedVolume"
+					<t:outputText
 						value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellApproved}"
-						displayValueOnly="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.allocated}"
-						size="5" styleClass="inputText"
-						displayValueOnlyStyleClass="dataText" />
+						rendered="#{!cherryPickRequestViewer.editMode && empty cherryPickRequestViewer.cherryPickRequest.volumeApprovedBy}"
+						styleClass="dataText" />
+					<t:outputText
+						value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellApproved} (approved by #{cherryPickRequestViewer.cherryPickRequest.volumeApprovedBy.fullNameFirstLast} on #{cherryPickRequestViewer.dateVolumeApproved})"
+						rendered="#{!cherryPickRequestViewer.editMode && !empty cherryPickRequestViewer.cherryPickRequest.volumeApprovedBy}"
+						styleClass="dataText" />
+					<t:panelGroup
+						rendered="#{cherryPickRequestViewer.editMode && !cherryPickRequestViewer.cherryPickRequest.allocated}">
+						<t:inputText id="approvedVolume"
+							value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellApproved}"
+							size="5" styleClass="inputText" />
+						<t:outputText value="Approved&nbsp;By" escape="false"
+							styleClass="label keyColumn" />
+						<t:selectOneMenu id="volumeApprovedByEditable"
+							value="#{cherryPickRequestViewer.volumeApprovedBy.value}"
+							rendered="#{cherryPickRequestViewer.editMode}"
+							styleClass="inputText">
+							<f:selectItems
+								value="#{cherryPickRequestViewer.volumeApprovedBy.selectItems}" />
+						</t:selectOneMenu>
+						<t:outputText value="Date Approved" styleClass="label keyColumn" />
+						<t:inputDate id="dateVolumeApprovedEditable"
+							value="#{cherryPickRequestViewer.cherryPickRequest.dateVolumeApproved}"
+							popupCalendar="true"
+							styleClass="inputText" />
+					</t:panelGroup>
 
 					<t:outputText value="Cherry&nbsp;Pick&nbsp;Plate&nbsp;Type"
 						escape="false" />

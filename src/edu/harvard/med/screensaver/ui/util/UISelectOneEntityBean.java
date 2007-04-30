@@ -47,6 +47,9 @@ public class UISelectOneEntityBean<E extends AbstractEntity> extends UISelectOne
   public E getSelection()
   {
     AbstractEntity entity = super.getSelection();
+    if (entity == null) {
+      return null;
+    }
     // can't do this, cuz entity may have already been loaded into the current session, causing NonUniqueObjectException
     //_dao.persistEntity(entity); 
     return (E) _dao.findEntityById(entity.getClass(), entity.getEntityId());
