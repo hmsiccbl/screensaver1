@@ -23,11 +23,17 @@
       >
         <h:outputText
           value="#{nameValueTable.cellValue}"
+          title="#{nameValueTable.nameDescription}"
+          rendered="#{nameValueTable.isNameColumn}"
+          escape="false"
+        />
+        <h:outputText
+          value="#{nameValueTable.cellValue}"
           rendered="#{nameValueTable.isTextValue}"
         />
         <h:outputText
           value="#{nameValueTable.cellValue}"
-          rendered="#{nameValueTable.isNameOrUnescapedTextValue}"
+          rendered="#{nameValueTable.isUnescapedTextValue}"
           escape="false"
         />
         <h:commandLink

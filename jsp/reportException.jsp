@@ -16,13 +16,16 @@
 		<t:panelGrid>
 			<t:outputText
 				value="A mysterious and untoward error has occurred, which was not your fault."
-				styleClass="errorMessage" />
+				styleClass="errorMessage"
+				title="You are blameless" />
 			<t:outputText
 				value="(On second thought, YOU are a developer, so it probably WAS your fault.  Back to work!)"
-				visibleOnUserRole="developer" />
+				visibleOnUserRole="developer"
+				title="You can't do anything right" />
 			<t:outputText
 				value="You may go back and try again, though the error will probably reoccur.  If it does, we recommend you click the &quot;Login Again&quot; button, below, and then retry the operation.  We sincerely apologize for the inconvenience."
-				escape="true" />
+				escape="true"
+				title="If you are really upset about it, try the 'Feedback' link down at the very bottom" />
 			<h:panelGroup>
 				<h:commandButton id="tryAgain" value="Back"
 					style="font-size: large; font-weight: bold"

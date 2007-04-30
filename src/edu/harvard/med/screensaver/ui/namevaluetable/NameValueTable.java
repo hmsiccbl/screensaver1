@@ -127,6 +127,11 @@ abstract public class NameValueTable extends AbstractBackingBean
     return isNameColumn() ? "keyColumn" : "textColumn";
   }
 
+  public String getNameDescription()
+  {
+    return getDescription(getRowIndex());
+  }
+  
   public Object getCellValue()
   {
     if (isNameColumn()) {
@@ -135,14 +140,19 @@ abstract public class NameValueTable extends AbstractBackingBean
     return getValue(getRowIndex());
   }
 
+  public boolean getIsNameColumn()
+  {
+    return isNameColumn();
+  }
+
   public boolean getIsTextValue()
   {
     return ! isNameColumn() && getValueType(getRowIndex()).equals(ValueType.TEXT);
   }
   
-  public boolean getIsNameOrUnescapedTextValue()
+  public boolean getIsUnescapedTextValue()
   {
-    return isNameColumn() || getValueType(getRowIndex()).equals(ValueType.UNESCAPED_TEXT);
+    return ! isNameColumn() && getValueType(getRowIndex()).equals(ValueType.UNESCAPED_TEXT);
   }
 
   public boolean getIsCommandValue()
@@ -199,6 +209,13 @@ abstract public class NameValueTable extends AbstractBackingBean
    * @return the number of rows in the table
    */
   abstract public int getNumRows();
+  
+  /**
+   * Get the description for the row with the given index. Used for mouse-over help-text.
+   * @param index the index of the table row
+   * @return the description for the row
+   */
+  abstract public String getDescription(int index);
   
   /**
    * Get the name (left-column value) for the row with the given index.

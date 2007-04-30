@@ -45,6 +45,7 @@ public class LibraryNameValueTable extends NameValueTable
   
   // private instance fields
   
+  private List<String> _descriptions = new ArrayList<String>();
   private List<String> _names = new ArrayList<String>();
   private List<String> _values = new ArrayList<String>();
   
@@ -60,7 +61,13 @@ public class LibraryNameValueTable extends NameValueTable
   {
     return _names.size();
   }
-
+  
+  @Override
+  public String getDescription(int index)
+  {
+    return _descriptions.get(index);
+  }
+  
   @Override
   public String getName(int index)
   {
@@ -101,25 +108,26 @@ public class LibraryNameValueTable extends NameValueTable
    * Initialize the lists {@link #_names} and {@link #_values}.
    */
   private void initializeLists(Library library, int librarySize) {
-    addItem(LIBRARY_NAME, library.getLibraryName());
-    addItem(SHORT_NAME, library.getShortName());
-    addItem(SCREEN_TYPE, library.getScreenType().getValue());
-    addItem(LIBRARY_TYPE, library.getLibraryType().getValue());
-    addItem(START_PLATE, Integer.toString(library.getStartPlate()));
-    addItem(END_PLATE, Integer.toString(library.getEndPlate()));
+    addItem(LIBRARY_NAME, library.getLibraryName(), "The full name of the library");
+    addItem(SHORT_NAME, library.getShortName(), "The abbreviated name for the library");
+    addItem(SCREEN_TYPE, library.getScreenType().getValue(), "'RNAi' or 'Small Molecule'");
+    addItem(LIBRARY_TYPE, library.getLibraryType().getValue(), "The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc.");
+    addItem(START_PLATE, Integer.toString(library.getStartPlate()), "The plate number for the first plate in the library");
+    addItem(END_PLATE, Integer.toString(library.getEndPlate()), "The plate number for the last plate in the library");
     if (library.getVendor() != null) {
-      addItem(VENDOR, library.getVendor());
+      addItem(VENDOR, library.getVendor(), "The name of the library vendor");
     }
     if (library.getDescription() != null) {
-      addItem(DESCRIPTION, library.getDescription());
+      addItem(DESCRIPTION, library.getDescription(), "A description of the library");
     }
-    addItem(NUMBER_OF_WELLS, Integer.toString(librarySize));
+    addItem(NUMBER_OF_WELLS, Integer.toString(librarySize), "The number of wells in the library with well type 'Experimental'");
   }
 
-  private void addItem(String name, String value)
+  private void addItem(String name, String value, String description)
   {
     _names.add(name);
     _values.add(value);
+    _descriptions.add(description);
   }
 }
 

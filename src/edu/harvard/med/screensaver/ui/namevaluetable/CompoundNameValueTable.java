@@ -59,6 +59,7 @@ public class CompoundNameValueTable extends NameValueTable
   private List<String> _names = new ArrayList<String>();
   private List<Object> _values = new ArrayList<Object>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
+  private List<String> _descriptions = new ArrayList<String>();
   
   
   // public constructor and implementations of NameValueTable abstract methods
@@ -77,6 +78,12 @@ public class CompoundNameValueTable extends NameValueTable
     return _names.size();
   }
 
+  @Override
+  public String getDescription(int index)
+  {
+    return _descriptions.get(index);
+  }
+  
   @Override
   public String getName(int index)
   {
@@ -135,34 +142,35 @@ public class CompoundNameValueTable extends NameValueTable
    * @param compound
    */
   private void initializeLists(Compound compound) {
-    addItem(STRUCTURE, compound.getSmiles(), ValueType.IMAGE);
-    addItem(SMILES, compound.getSmiles(), ValueType.COMMAND);
-    addItem(INCHI, compound.getInchi(), ValueType.TEXT);
+    addItem(STRUCTURE, compound.getSmiles(), ValueType.IMAGE, "A 2D structure image of the compound");
+    addItem(SMILES, compound.getSmiles(), ValueType.COMMAND, "The SMILES string for the compound");
+    addItem(INCHI, compound.getInchi(), ValueType.TEXT, "The InChI string for the compound");
     if (compound.getNumCompoundNames() > 0) {
-      addItem(COMPOUND_NAMES, compound.getCompoundNames(),  ValueType.TEXT_LIST);
+      addItem(COMPOUND_NAMES, compound.getCompoundNames(),  ValueType.TEXT_LIST, "The various names the compound goes by");
     }
-    addItem(MOLECULAR_MASS, compound.getMolecularMass(), ValueType.TEXT);
-    addItem(MOLECULAR_FORMULA, compound.getMolecularFormula(), ValueType.UNESCAPED_TEXT);
+    addItem(MOLECULAR_MASS, compound.getMolecularMass(), ValueType.TEXT, "The molecular mass for the compound");
+    addItem(MOLECULAR_FORMULA, compound.getMolecularFormula(), ValueType.UNESCAPED_TEXT, "The molecular formula for the compound");
     if (compound.getNumPubchemCids() > 0) {
-      addItem(PUBCHEM_CIDS, compound.getPubchemCids(), ValueType.LINK_LIST);
+      addItem(PUBCHEM_CIDS, compound.getPubchemCids(), ValueType.LINK_LIST, "The PubChem Compound Identifiers");
     }
     if (compound.getChembankId() != null) {
-      addItem(CHEMBANK_IDS, compound.getChembankId(), ValueType.TEXT);
+      addItem(CHEMBANK_IDS, compound.getChembankId(), ValueType.TEXT, "The ChemBank ID for the compound");
     }
-    addItem(IS_SALT, compound.isSalt(), ValueType.TEXT);
+    addItem(IS_SALT, compound.isSalt(), ValueType.TEXT, "Typically, this indicates a non-bioactive solvent in the well");
     if (compound.getNumNscNumbers() > 0) {
-      addItem(NSC_NUMBERS, compound.getNscNumbers(), ValueType.TEXT_LIST);
+      addItem(NSC_NUMBERS, compound.getNscNumbers(), ValueType.TEXT_LIST, "NSC numbers for the compound");
     }
     if (compound.getNumCasNumbers() > 0) {
-      addItem(CAS_NUMBERS, compound.getCasNumbers(), ValueType.TEXT_LIST);
+      addItem(CAS_NUMBERS, compound.getCasNumbers(), ValueType.TEXT_LIST, "CAS numbers for the compound");
     }
   }
 
-  private void addItem(String name, Object value, ValueType valueType)
+  private void addItem(String name, Object value, ValueType valueType, String description)
   {
     _names.add(name);
     _values.add(value);
     _valueTypes.add(valueType);
+    _descriptions.add(description);
   }
 }
 

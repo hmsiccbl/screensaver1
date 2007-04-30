@@ -7,7 +7,7 @@
 
   <h:form id="viewLibraryForm">
 	<t:panelGroup>
-      <t:outputText value="Library:" styleClass="spacer" />
+      <t:outputText value="Library:" styleClass="spacer" title="The library for which to import contents"/>
       <t:commandLink
         action="#{rnaiLibraryContentsImporter.viewLibrary}"
       	value="#{rnaiLibraryContentsImporter.library.libraryName}"
@@ -17,7 +17,7 @@
   </h:form>
 
   <h:form id="uploadLibraryContentsForm" enctype="multipart/form-data">
-    <t:panelGrid columns="2">
+    <t:panelGrid columns="2" title="Select the silencing reagent for the library contents to import">
       <t:outputLabel
         for="silencingReagentType"
         value="Silencing reagent type:"
@@ -36,6 +36,7 @@
       <t:outputLabel
         for="uploadRNAiLibraryContentsFile"
         value="Import RNAi Library Contents file:"
+        title="The Excel spreadsheet containing the library contents to import"
       />
       <t:inputFileUpload
         id="uploadRNAiLibraryContentsFile"
@@ -52,6 +53,7 @@
         value="Import"
         action="#{rnaiLibraryContentsImporter.importRNAiLibraryContents}"
         styleClass="command"
+        title="After selecting an Excel spreadsheet, click this button to start the import"
       />
 
     </t:panelGrid>

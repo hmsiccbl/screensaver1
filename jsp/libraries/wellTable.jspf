@@ -18,7 +18,7 @@
     >
       <t:column>
         <f:facet name="header">
-          <t:outputText value="Library" />
+          <t:outputText value="Library" title="The library containing the well" />
         </f:facet>
         <t:commandLink
           action="#{librariesController.viewLibrary}"
@@ -29,13 +29,13 @@
       </t:column>
       <h:column>
         <f:facet name="header">
-          <t:outputText value="Plate" />
+          <t:outputText value="Plate" title="The number of the plate the well is located on"/>
         </f:facet>
         <h:outputText value="#{well.plateNumber}" />
       </h:column>
       <h:column>
         <f:facet name="header">
-          <t:outputText value="Well" />
+          <t:outputText value="Well" title="The plate coordinates of the well" />
         </f:facet>
         <t:commandLink
           action="#{librariesController.viewWell}"
@@ -46,13 +46,13 @@
       </h:column>
       <h:column>
         <f:facet name="header">
-          <t:outputText value="ICCB Number" />
+          <t:outputText value="ICCB Number" title="The ICCB number for the well contents"/>
         </f:facet>
         <h:outputText value="#{well.iccbNumber}" />
       </h:column>
       <h:column>
         <f:facet name="header">
-          <t:outputText value="Vendor Identifier" />
+          <t:outputText value="Vendor Identifier" title="The vendor identifier (reorder number) for the well contents" />
         </f:facet>
         <h:outputText value="#{well.fullVendorIdentifier}" />
       </h:column>

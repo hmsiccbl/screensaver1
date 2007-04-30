@@ -16,23 +16,27 @@
   <t:panelGroup>
     <h:form id="libraryContentsForm">
 			<h:commandButton value="View Library Contents"
-				action="#{libraryViewer.viewLibraryContents}" styleClass="command" />
+				action="#{libraryViewer.viewLibraryContents}" styleClass="command"
+				title="View a list of all the wells in the library" />
 
 			<h:commandButton value="Import Library Contents"
 				action="#{libraryViewer.importRNAiLibraryContents}"
 				rendered="#{libraryViewer.editable && libraryViewer.isRNAiLibrary}"
-			    styleClass="command" />
+			    styleClass="command"
+			    title="Import the contents of library wells from an Excel spreadsheet" />
 
 			<h:commandButton value="Import Library Contents"
 				action="#{libraryViewer.importCompoundLibraryContents}"
 				rendered="#{libraryViewer.editable && libraryViewer.isCompoundLibrary}"
-			    styleClass="command" />
+			    styleClass="command"
+			    title="Import the contents of library wells from an SD File" />
 
 			<h:commandButton value="Unload Library Contents"
 				action="#{libraryViewer.unloadLibraryContents}"
 				onclick="javascript: return confirm('Are you sure you want to unload the contents of this library?');"
 				rendered="#{libraryViewer.editable && libraryViewer.librarySize > 0}"
-				styleClass="command" />
+				styleClass="command"
+				title="Mostly useful for reloading data if a problem occurred on a previous laod" />
 		</h:form>
   </t:panelGroup>
 

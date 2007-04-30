@@ -7,7 +7,8 @@
 
 	<h:form id="loginAgainForm">
 		<t:commandButton id="loginAgain" action="#{mainController.viewMain}"
-			value="Login again" style="command" />
+			value="Login again" style="command"
+			title="Click this button to return to the login page" />
 	</h:form>
 
 </f:subview>

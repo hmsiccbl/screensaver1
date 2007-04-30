@@ -51,6 +51,7 @@ public class GeneNameValueTable extends NameValueTable
   private List<String> _names = new ArrayList<String>();
   private List<Object> _values = new ArrayList<Object>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
+  private List<String> _descriptions = new ArrayList<String>();
   
   
   // public constructor and implementations of NameValueTable abstract methods
@@ -69,6 +70,12 @@ public class GeneNameValueTable extends NameValueTable
     return _names.size();
   }
 
+  @Override
+  public String getDescription(int index)
+  {
+    return _descriptions.get(index);
+  }
+  
   @Override
   public String getName(int index)
   {
@@ -119,19 +126,21 @@ public class GeneNameValueTable extends NameValueTable
    * Initialize the lists {@link #_names}, {@link #_values}, and {@link #_valueTypes}. Don't
    * add rows for missing values.
    */
-  private void initializeLists(Gene gene) {
-    addItem(GENE_NAME, gene.getGeneName(), ValueType.COMMAND);
-    addItem(ENTREZGENE_ID, Integer.toString(gene.getEntrezgeneId()), ValueType.LINK);
-    addItem(ENTREZGENE_SYMBOL, gene.getEntrezgeneSymbol(), ValueType.TEXT);
-    addItem(GENBANK_ACCESSION_NUMBERS, gene.getGenbankAccessionNumbers(), ValueType.LINK_LIST);
-    addItem(SPECIES_NAME, gene.getSpeciesName(), ValueType.TEXT);
+  private void initializeLists(Gene gene)
+  {
+    addItem(GENE_NAME, gene.getGeneName(), ValueType.COMMAND, "The name of the gene, as labelled in EntrezGene");
+    addItem(ENTREZGENE_ID, Integer.toString(gene.getEntrezgeneId()), ValueType.LINK, "The EntrezGene ID, a.k.a. Locus ID");
+    addItem(ENTREZGENE_SYMBOL, gene.getEntrezgeneSymbol(), ValueType.TEXT, "The EntrezGene Gene Symbol");
+    addItem(GENBANK_ACCESSION_NUMBERS, gene.getGenbankAccessionNumbers(), ValueType.LINK_LIST, "The GenBank Accession Numbers for the gene");
+    addItem(SPECIES_NAME, gene.getSpeciesName(), ValueType.TEXT, "The species this gene is found in");
   }
 
-  private void addItem(String name, Object value, ValueType valueType)
+  private void addItem(String name, Object value, ValueType valueType, String description)
   {
     _names.add(name);
     _values.add(value);
     _valueTypes.add(valueType);
+    _descriptions.add(description);
   }
 }
 

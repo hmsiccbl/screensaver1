@@ -51,6 +51,7 @@ public class WellDetailsNameValueTable extends NameValueTable
   private Well _well;
   private List<String> _names = new ArrayList<String>();
   private List<Object> _values = new ArrayList<Object>();
+  private List<String> _descriptions = new ArrayList<String>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
   
   
@@ -70,6 +71,12 @@ public class WellDetailsNameValueTable extends NameValueTable
     return _names.size();
   }
 
+  @Override
+  public String getDescription(int index)
+  {
+    return _descriptions.get(index);
+  }
+  
   @Override
   public String getName(int index)
   {
@@ -114,19 +121,20 @@ public class WellDetailsNameValueTable extends NameValueTable
    * add rows for missing values.
    */
   private void initializeLists(Well well) {
-    addItem(LIBRARY, well.getLibrary().getLibraryName(), ValueType.COMMAND);
-    addItem(PLATE, Integer.toString(well.getPlateNumber()), ValueType.TEXT);
-    addItem(WELL, well.getWellName(), ValueType.TEXT);
-    addItem(WELL_TYPE, well.getWellType(), ValueType.TEXT);
-    addItem(ICCB_NUMBER, well.getIccbNumber(), ValueType.TEXT);
-    addItem(VENDOR_IDENTIFIER, well.getVendorIdentifier(), ValueType.TEXT);
+    addItem(LIBRARY, well.getLibrary().getLibraryName(), ValueType.COMMAND, "The library containing the well");
+    addItem(PLATE, Integer.toString(well.getPlateNumber()), ValueType.TEXT, "The number of the plate the well is located on");
+    addItem(WELL, well.getWellName(), ValueType.TEXT, "The plate coordinates of the well");
+    addItem(WELL_TYPE, well.getWellType(), ValueType.TEXT, "The type of well, e.g., 'Experimental', 'Control', 'Empty', etc.");
+    addItem(ICCB_NUMBER, well.getIccbNumber(), ValueType.TEXT, "The ICCB number for the well contents");
+    addItem(VENDOR_IDENTIFIER, well.getVendorIdentifier(), ValueType.TEXT, "The vendor identifier (reorder number) for the well contents");
   }
 
-  private void addItem(String name, Object value, ValueType valueType)
+  private void addItem(String name, Object value, ValueType valueType, String description)
   {
     _names.add(name);
     _values.add(value);
     _valueTypes.add(valueType);
+    _descriptions.add(description);
   }
 }
 

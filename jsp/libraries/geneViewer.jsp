@@ -9,15 +9,21 @@
     <%@ include file="../searchResultsNavPanel.jspf" %>
   </t:aliasBean>
 
-	<t:panelGroup rendered="#{! empty geneViewer.gene}">
+	<t:panelGrid rendered="#{! empty geneViewer.gene}" columns="1">
 		<t:aliasBean alias="#{nameValueTable}" value="#{geneViewer.geneNameValueTable}">
 			<%@ include file="../nameValueTable.jspf" %>
 		</t:aliasBean>
 
-		<t:aliasBean alias="#{wells}" value="#{geneViewer.gene.wells}">
-			<%@ include file="wellTable.jspf" %>
-		</t:aliasBean>
-	</t:panelGroup>
+		<t:div />
+		<t:div />
+		
+		<t:panelGroup>
+			<t:outputText value="Wells in which silencing reagents for this gene are found:" />
+			<t:aliasBean alias="#{wells}" value="#{geneViewer.gene.wells}">
+				<%@ include file="wellTable.jspf" %>
+			</t:aliasBean>
+		</t:panelGroup>
+	</t:panelGrid>
 
 	<t:panelGroup rendered="#{empty geneViewer.gene}">
 		<t:outputText

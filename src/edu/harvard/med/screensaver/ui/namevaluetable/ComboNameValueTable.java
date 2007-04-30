@@ -91,6 +91,17 @@ abstract public class ComboNameValueTable extends NameValueTable
   }
 
   @Override
+  public String getDescription(int rowIndex)
+  {
+    int childTableIndex = _rowIndexToChildTableIndex[rowIndex];
+    if (childTableIndex == -1) {
+      return "&nbsp;";
+    }
+    int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
+    return _childTables[childTableIndex].getDescription(childTableRowIndex);
+  }
+
+  @Override
   public String getName(int rowIndex)
   {
     int childTableIndex = _rowIndexToChildTableIndex[rowIndex];
