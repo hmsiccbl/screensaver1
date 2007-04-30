@@ -102,6 +102,36 @@ public class ScreenSearchResults extends SearchResults<Screen>
   {
     return false;
   }
+
+  @Override
+  protected String getColumnDescription(String columnName)
+  {
+    if (columnName.equals(SCREEN_NUMBER)) {
+      return "The screen number";
+    }
+    if (columnName.equals(SCREEN_TYPE)) {
+      return "'RNAi' or 'Small Molecule'";
+    }
+    if (columnName.equals(SCREEN_STATUS)) {
+      return "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.";
+    }
+    if (columnName.equals(SCREEN_STATUS_DATE)) {
+      return "The date of the most recent change of status for the screen";
+    }
+    if (columnName.equals(TITLE)) {
+      return "The title of the screen";
+    }
+    if (columnName.equals(LAB_HEAD)) {
+      return "The head of the lab performing the screen";
+    }
+    if (columnName.equals(LEAD_SCREENER)) {
+      return "The scientist primarily responsible for running the screen";
+    }
+    if (columnName.equals(SCREEN_RESULT)) {
+      return "'Available' if the screen result is loaded into Screensaver; otherwise blank";
+    }
+    return null;
+  }
   
   @Override
   protected Object getCellValue(Screen screen, String columnName)

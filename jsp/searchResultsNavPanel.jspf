@@ -26,7 +26,7 @@
 					title="Last page" />
 			</t:panelGroup>
 
-			<t:panelGroup>
+			<t:panelGroup title="The range of the results currently displayed">
 				<t:outputText rendered="#{navigator.summaryView}"
 					value="#{navigator.firstIndex}..#{navigator.lastIndex} out of #{navigator.resultsSize}"
 					styleClass="searchResultNavPanelStatus" />
@@ -35,7 +35,7 @@
 					styleClass="searchResultNavPanelStatus" />
 			</t:panelGroup>
 
-			<t:panelGroup>
+			<t:panelGroup title="The sort column and direction">
 				<t:outputLabel for="sortOrderMenu" value="Sort by"
 					styleClass="label" />
 				<t:commandButton id="updateSortOrder" value="update sort order"
@@ -55,7 +55,8 @@
 			</t:panelGroup>
 
 			<t:panelGroup style="float: right"
-				rendered="#{navigator.summaryView}">
+				rendered="#{navigator.summaryView}"
+				title="The number of results displayed per page">
 				<t:commandButton id="updateItemsPerPage"
 					value="update items per page"
 					action="#{navigator.updateItemsPerPage}" style="display: none" />
@@ -69,7 +70,8 @@
 			</t:panelGroup>
 
 			<t:panelGroup style="float: right"
-				rendered="#{! navigator.summaryView}">
+				rendered="#{! navigator.summaryView}"
+				title="Return to the search results page">
 				<t:commandButton id="summaryView" value="Results Summary"
 					action="#{navigator.showSummaryView}" styleClass="command" />
 			</t:panelGroup>

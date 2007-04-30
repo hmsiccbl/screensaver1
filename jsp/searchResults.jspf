@@ -30,7 +30,8 @@
 				<t:columns value="#{searchResults.dataHeaderColumnModel}"
 					var="columnName" styleClass="column">
 					<f:facet name="header">
-						<t:commandSortHeader columnName="#{columnName}" arrow="false">
+						<t:commandSortHeader columnName="#{columnName}" arrow="false"
+                          title="#{searchResults.columnDescription}">
 							<f:facet name="ascending">
 								<t:graphicImage value="/images/ascending-arrow.gif"
 									rendered="true" border="0" />
@@ -74,6 +75,7 @@
       columns="1"
       width="100%"
       rendered="#{searchResults.isDownloadable}"
+      title="Download search results to Excel spreadsheet or SD File"
     >
       <h:form
         id="searchResultsDownloadForm"

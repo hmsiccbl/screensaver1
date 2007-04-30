@@ -201,6 +201,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public String getColumnName()
   {
+    
     return (String) getDataHeaderColumnModel().getRowData();
   }
   
@@ -226,6 +227,16 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   public boolean getIsCommandLinkList()
   {
     return isCommandLinkList(getColumnName());
+  }
+  
+  /**
+   * Get the descriptive text for the current column. Used for mouse-over quick-help.
+   * 
+   * @return the descriptive text for the current column
+   */
+  public String getColumnDescription()
+  {
+    return getColumnDescription(getColumnName());
   }
   
   /**
@@ -657,6 +668,15 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    * @return the value to be displayed for the current cell
    */
   abstract protected Object getCellValue(E entity, String columnName);
+  
+  /**
+   * Get the descriptive text for the column with the specified column name. Used for
+   * mouse-over quick-help.
+   * 
+   * @param columnName The name of the column to return descriptive text for
+   * @return the descriptive text for the column
+   */
+  abstract protected String getColumnDescription(String columnName);
   
   /**
    * Perform the action for clicking on the current cell. Return the navigation rule to go

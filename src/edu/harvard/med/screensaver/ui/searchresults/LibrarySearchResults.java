@@ -97,6 +97,30 @@ public class LibrarySearchResults extends SearchResults<Library>
   }
   
   @Override
+  protected String getColumnDescription(String columnName)
+  {
+    if (columnName.equals(SHORT_NAME)) {
+      return "The abbreviated name for the library";
+    }
+    if (columnName.equals(LIBRARY_NAME)) {
+      return "The full name of the library";
+    }
+    if (columnName.equals(SCREEN_TYPE)) {
+      return "'RNAi' or 'Small Molecule'";
+    }
+    if (columnName.equals(LIBRARY_TYPE)) {
+      return "The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc."; 
+    }
+    if (columnName.equals(START_PLATE)) {
+      return "The plate number for the first plate in the library";
+    }
+    if (columnName.equals(END_PLATE)) {
+      return "The plate number for the last plate in the library";
+    }
+    return null;
+  }
+  
+  @Override
   protected Object getCellValue(Library library, String columnName)
   {
     if (columnName.equals(SHORT_NAME)) {

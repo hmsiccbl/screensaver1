@@ -118,6 +118,27 @@ public class WellSearchResults extends SearchResults<Well>
   {
     return columnName.equals(CONTENTS) && getContentsCount(getEntity()) > 1;
   }
+
+  @Override
+  protected String getColumnDescription(String columnName)
+  {
+    if (columnName.equals(LIBRARY)) {
+      return "The library containing the well";
+    }
+    if (columnName.equals(PLATE)) {
+      return "The number of the plate the well is located on";
+    }
+    if (columnName.equals(WELL)) {
+      return "The plate coordinates of the well";
+    }
+    if (columnName.equals(WELL_TYPE)) {
+      return "The type of well, e.g., 'Experimental', 'Control', 'Empty', etc.";
+    }
+    if (columnName.equals(CONTENTS)) {
+      return "The gene name for the silencing reagent, or SMILES for the compound, in the well";
+    }
+    return null;
+  }
   
   @Override
   protected Object getCellValue(Well well, String columnName)
