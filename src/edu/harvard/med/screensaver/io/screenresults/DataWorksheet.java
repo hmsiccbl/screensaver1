@@ -20,6 +20,8 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -80,6 +82,13 @@ public class DataWorksheet implements ScreenResultWorkbookSpecification
                                    RAWDATA_FIRST_DATA_HEADER_COLUMN_INDEX);
             Object typedValue = ResultValue.getTypedValue(rv, rvt);
             Cell.setTypedCellValue(workbook, cell, typedValue);
+            // TODO: set numeric format
+//            if (rvt.isNumeric()) {
+//              HSSFDataFormat dataFormat = workbook.createDataFormat();
+//              short format = dataFormat.getFormat("#.##");
+//              HSSFCellStyle cellStyle = workbook.createCellStyle();
+//              cellStyle.setDataFormat(format);
+//            }
           }
         }
         writeWell(row, 
