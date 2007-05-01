@@ -70,6 +70,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
   private static final String VALIDATE_SELECTED_PLATES_FOR_LIQUID_TRANSFER = "for_liquid_transfer";
   private static final String VALIDATE_SELECTED_PLATES_FOR_DOWNLOAD = "for_download";
+  private static final String VALIDATE_SELECTED_PLATES_FOR_DEALLOCATION = "for_deallocaton";
 
   private static final String[] SCREENER_CHERRY_PICKS_TABLE_COLUMNS = { 
     "Library Plate", 
@@ -117,6 +118,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     { "Cherry Pick Plate #", "Attempt #" } };
 
   private static final Collection<Integer> PLATE_COLUMNS_LIST = new ArrayList<Integer>();
+
   static {
     for (int i = Well.MIN_WELL_COLUMN; i <= Well.MAX_WELL_COLUMN; i++) {
       PLATE_COLUMNS_LIST.add(i);
@@ -420,8 +422,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean
         row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], 
                 cherryPick.isPlated() ? "plated" : 
                   cherryPick.isFailed() ? "failed" :
-                    cherryPick.isMapped() ? "mapped" : 
-                      cherryPick.isAllocated() ? "reserved" : "unfulfilled");
+                    cherryPick.isCanceled() ? "canceled" :
+                        cherryPick.isMapped() ? "mapped" : 
+                          cherryPick.isAllocated() ? "reserved" : "unfulfilled");
         row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getSourceWell().getPlateNumber().toString());
         row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getSourceWell().getWellName());
         row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getSourceCopy() != null ? cherryPick.getSourceCopy().getName() : "");
@@ -638,6 +641,15 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return _screensController.deallocateCherryPicks(_cherryPickRequest);
   }
   
+  public String deallocateCherryPicksByPlate()
+  {
+    if (!validateSelectedAssayPlates(VALIDATE_SELECTED_PLATES_FOR_DEALLOCATION)) {
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    return _screensController.deallocateCherryPicksByPlate(_cherryPickRequest,
+                                                           getSelectedAssayPlates());
+  }
+  
   public String plateMapCherryPicks()
   {
     return _screensController.plateMapCherryPicks(_cherryPickRequest);
@@ -703,7 +715,16 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     boolean adjustSelection = false;
     for (Iterator iter = selectedAssayPlates.iterator(); iter.hasNext();) {
       CherryPickAssayPlate assayPlate = (CherryPickAssayPlate) iter.next();
-      if (validationType.equals(VALIDATE_SELECTED_PLATES_FOR_DOWNLOAD)) {
+      if (validationType.equals(VALIDATE_SELECTED_PLATES_FOR_DEALLOCATION)) {
+        if (assayPlate.isFailed() || assayPlate.isPlated() || assayPlate.isCanceled()) {
+          showMessageForComponent("cherryPicks.deallocateActiveMappedPlatesOnly", 
+                                  "assayPlatesTable", 
+                                  assayPlate.getName());
+          iter.remove();
+          adjustSelection = true;
+        }
+      }
+      else if (validationType.equals(VALIDATE_SELECTED_PLATES_FOR_DOWNLOAD)) {
         if (assayPlate.isFailed()) {
           showMessageForComponent("cherryPicks.downloadActiveMappedPlatesOnly", 
                                   "assayPlatesTable", 
@@ -721,9 +742,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean
                                   assayPlate.getName());
           adjustSelection = true;
         }
-        else if (assayPlate.isPlated() || assayPlate.isFailed()) {
+        else if (assayPlate.isPlated() || assayPlate.isFailed() || assayPlate.isCanceled()) {
           iter.remove();
-          showMessageForComponent("cherryPicks.assayPlateAlreadyPlated", 
+          showMessageForComponent("cherryPicks.assayPlateAlreadyPlatedFailedCanceled", 
                                   "assayPlatesTable", 
                                   assayPlate.getName());
           adjustSelection = true;

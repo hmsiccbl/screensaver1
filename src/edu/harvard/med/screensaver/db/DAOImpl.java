@@ -28,7 +28,6 @@ import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -448,9 +447,9 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
 
     // disassociate from related entities
     labCherryPick.getCherryPickRequest().getLabCherryPicks().remove(labCherryPick);
-    if (labCherryPick.getSourceCopy() != null) {
-      labCherryPick.getSourceCopy().getHbnLabCherryPicks().remove(labCherryPick);
-    }
+//    if (labCherryPick.getSourceCopy() != null) {
+//      labCherryPick.getSourceCopy().getHbnLabCherryPicks().remove(labCherryPick);
+//    }
     if (labCherryPick.getAssayPlate() != null) {
       labCherryPick.getAssayPlate().getLabCherryPicks().remove(labCherryPick);
     }

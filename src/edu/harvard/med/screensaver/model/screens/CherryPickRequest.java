@@ -472,16 +472,21 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
-   * Get whether the lab cherry picks have been allocated. If at least one lab
-   * cherry pick has been allocated the entire cherry pick request is considered
-   * allocated.
+   * Get whether the lab cherry picks have <i>ever</i> been allocated,
+   * including the case where they were allocated, mapped, and then deallocated
+   * (i.e., canceled). If at least one lab cherry pick has been allocated the
+   * entire cherry pick request is considered allocated. 
+   * <p>
+   * TODO: it might be
+   * better to rename this method to 'wasAllocated', or something similar to
+   * indicate that it also covers canceled lab cherry picks.
    */
   @DerivedEntityProperty
   public boolean isAllocated()
   {
     // this is not efficient, but it's 2007 and we've got cycles to burn, right?
     for (LabCherryPick labCherryPick : _labCherryPicks) {
-      if (labCherryPick.isAllocated()) {
+      if (labCherryPick.isAllocated() || labCherryPick.isCanceled()) {
         return true;
       }
     }
@@ -493,7 +498,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * at least one lab cherry pick has been allocated and at least one has not
    * been allocated, the cherry pick request is considered partially allocated.
    * 
-   * @motivation to warn the user that not all cherry picks could fulfilled (a
+   * @motivation to warn the user that not all cherry picks could be fulfilled (a
    *             cherry pick request that is only partially allocated does not
    *             impact subsequent workflow options)
    */

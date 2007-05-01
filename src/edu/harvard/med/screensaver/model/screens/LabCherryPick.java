@@ -193,7 +193,7 @@ public class LabCherryPick extends AbstractEntity
    *   cascade="none"
    * @motivation for hibernate
    */
-  @ToOneRelationship(nullable=true)
+  @ToOneRelationship(nullable=true, unidirectional=true)
   @DerivedEntityProperty
   public Copy getSourceCopy()
   {
@@ -209,22 +209,25 @@ public class LabCherryPick extends AbstractEntity
   public void setAllocated(Copy sourceCopy)
   {
     if (sourceCopy != null && isAllocated()) {
-      throw new BusinessRuleViolationException("cannot allocate a cherry pick from more than one source copy");
+      throw new BusinessRuleViolationException("cannot (re)allocate a cherry pick that has already been allocated");
+    }
+    if (sourceCopy != null && isCanceled()) {
+      throw new BusinessRuleViolationException("cannot (re)allocate a cherry pick that has been canceled");
     }
     if (sourceCopy == null && !isAllocated()) {
       throw new BusinessRuleViolationException("cannot deallocate a cherry pick that has not been allocated");
     }
     if (isPlated()) {
-      throw new BusinessRuleViolationException("cannot allocate or deallocate cherry picks after they have been plated");
+      throw new BusinessRuleViolationException("cannot allocate or deallocate a cherry pick after it has been plated");
     }
     
-    if (_sourceCopy != null) {
-      _sourceCopy.getHbnLabCherryPicks().remove(this);
-    }
+//    if (_sourceCopy != null) {
+//      _sourceCopy.getHbnLabCherryPicks().remove(this);
+//    }
     _sourceCopy = sourceCopy;
-    if (_sourceCopy != null) {
-      _sourceCopy.getHbnLabCherryPicks().add(this);
-    }
+//    if (_sourceCopy != null) {
+//      _sourceCopy.getHbnLabCherryPicks().add(this);
+//    }
   }
   
   /**
@@ -331,7 +334,8 @@ public class LabCherryPick extends AbstractEntity
   }
   
   /**
-   * Get whether this cherry pick has been mapped to an assay plate well.
+   * Get whether this cherry pick has been mapped to an assay plate well. A
+   * mapped lab cherry pick can be either allocated or unallocated.
    * 
    * @return true, if this cherry pick has been mapped to an assay plate well
    */
@@ -342,6 +346,17 @@ public class LabCherryPick extends AbstractEntity
   }
   
   /**
+   * Get whether this cherry pick has been canceled. A canceled lab cherry pick
+   * is one that was allocated, then mapped, and later deallocated (due to its
+   * entire cherry pick assay plate having been canceled).
+   */
+  @DerivedEntityProperty
+  public boolean isCanceled()
+  {
+    return isMapped() && !isAllocated();
+  }
+
+  /**
    * Get whether liquid volume for this cherry pick has been transferred from a
    * source copy plate to a cherry pick assay plate.
    * 
@@ -350,13 +365,13 @@ public class LabCherryPick extends AbstractEntity
   @DerivedEntityProperty
   public boolean isPlated()
   {
-    return _assayPlate != null && _assayPlate.isPlated();
+    return isAllocated() && isMapped() && _assayPlate.isPlated();
   }
 
   @DerivedEntityProperty
   public boolean isFailed()
   {
-    return _assayPlate != null && _assayPlate.isFailed();
+    return isAllocated() && isMapped() && _assayPlate.isFailed();
   }
 
   /**

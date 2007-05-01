@@ -132,7 +132,7 @@ public class CherryPickRequestPlateMapFilesBuilder
     {
       StringBuilder buf = new StringBuilder();
       for (CherryPickAssayPlate assayPlate : cherryPickRequest.getCherryPickAssayPlates()) {
-        if (!assayPlate.isPlated() && !assayPlate.isFailed()) {
+        if (!assayPlate.isPlated() && !assayPlate.isFailed() && !assayPlate.isCanceled()) {
           buf.append('\t').
           append(assayPlate.getName()).
           append("\n");
@@ -182,7 +182,7 @@ public class CherryPickRequestPlateMapFilesBuilder
       MultiMap sourcePlateTypesForEachAssayPlate = getSourcePlateTypesForEachAssayPlate(cherryPickRequest);
       for (CherryPickAssayPlate assayPlate : cherryPickRequest.getActiveCherryPickAssayPlates()) {
         Set<PlateType> sourcePlateTypes = (Set<PlateType>) sourcePlateTypesForEachAssayPlate.get(assayPlate.getName());
-        if (sourcePlateTypes.size() > 1) {
+        if (sourcePlateTypes != null && sourcePlateTypes.size() > 1) {
           buf.append(assayPlate.getName()).append("\n");
         }
       }
@@ -253,19 +253,19 @@ public class CherryPickRequestPlateMapFilesBuilder
 
   private MultiMap getSourcePlateTypesForEachAssayPlate(CherryPickRequest cherryPickRequest)
   {
-    MultiMap sourcePlate2PlateTypes = MultiValueMap.decorate(new HashMap(),
+    MultiMap assayPlateName2PlateTypes = MultiValueMap.decorate(new HashMap(),
                                                              new Factory() 
     {
       public Object create() { return new HashSet(); } 
     });
                                                              
     for (LabCherryPick cherryPick : cherryPickRequest.getLabCherryPicks()) {
-      if (cherryPick.isAllocated()) {
-        sourcePlate2PlateTypes.put(cherryPick.getAssayPlate().getName(),
-                                   cherryPick.getSourceCopy().getCopyInfo(cherryPick.getSourceWell().getPlateNumber()).getPlateType());
+      if (cherryPick.isAllocated() && cherryPick.isMapped()) {
+        assayPlateName2PlateTypes.put(cherryPick.getAssayPlate().getName(),
+                                      cherryPick.getSourceCopy().getCopyInfo(cherryPick.getSourceWell().getPlateNumber()).getPlateType());
       }
     }
-    return sourcePlate2PlateTypes;
+    return assayPlateName2PlateTypes;
   }
 
 

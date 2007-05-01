@@ -1069,6 +1069,25 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   }
 
   @UIControllerMethod
+  public String deallocateCherryPicksByPlate(CherryPickRequest cherryPickRequest,
+                                             Set<CherryPickAssayPlate> assayPlates)
+  {
+    logUserActivity("deallocateCherryPicksByPlate for " + cherryPickRequest + 
+                    " for plates " + assayPlates);
+
+    try {
+      _cherryPickRequestAllocator.deallocateByPlate(cherryPickRequest, assayPlates);
+    }
+    catch (ConcurrencyFailureException e) {
+      showMessage("concurrentModificationConflict");
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return viewCherryPickRequest(cherryPickRequest);
+  }
+
+  @UIControllerMethod
   public String plateMapCherryPicks(final CherryPickRequest cherryPickRequestIn)
   {
     logUserActivity("plateMapCherryPicks for " + cherryPickRequestIn);
@@ -1133,7 +1152,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
           newCherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(new HashSet<Integer>(cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate()));
           newCherryPickRequest.setRequestedBy(cherryPickRequest.getRequestedBy());
           for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
-            if (!labCherryPick.isAllocated()) {
+            if (!labCherryPick.isAllocated() && !labCherryPick.isCanceled()) {
               ScreenerCherryPick newScreenerCherryPick = new ScreenerCherryPick(newCherryPickRequest,
                                                                                 labCherryPick.getScreenerCherryPick().getScreenedWell());
               new LabCherryPick(newScreenerCherryPick, labCherryPick.getSourceWell());
@@ -1292,6 +1311,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
           if (arePoolWells) {
             _libraryPoolToDuplexWellMapper.createDuplexLabCherryPicksforPoolScreenerCherryPicks((RNAiCherryPickRequest) cherryPickRequest);
           }
+          
         }
       });
       return viewCherryPickRequest(cherryPickRequestIn);

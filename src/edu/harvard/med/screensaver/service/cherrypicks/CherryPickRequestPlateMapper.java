@@ -189,13 +189,16 @@ public class CherryPickRequestPlateMapper
   private SortedSet<LabCherryPick> findLabCherryPicksToBeMapped(CherryPickRequest cherryPickRequest)
   {
     SortedSet<LabCherryPick> toBeMapped = new TreeSet<LabCherryPick>(PlateMappingCherryPickComparator.getInstance());
-    for (Iterator iter = cherryPickRequest.getLabCherryPicks().iterator(); iter.hasNext();) {
+    for (Iterator iter = cherryPickRequest.getLabCherryPicks()
+                                          .iterator(); iter.hasNext();) {
       LabCherryPick cherryPick = (LabCherryPick) iter.next();
       if (cherryPick.isMapped() || cherryPick.isPlated()) {
         // no cherry picks may be plated at this time
-        throw new BusinessRuleViolationException("cannot generate assay plate mapping if any cherry pick has already been plated");
+        throw new BusinessRuleViolationException("cannot generate assay plate mapping if any cherry pick has already been mapped or plated");
       }
-      // note: some cherry picks may have been unfulfillable, and therefore not allocated
+      // note: some cherry picks may have been unfulfillable, and therefore not
+      // allocated; this is acceptable and we simply plate map only those that
+      // are allocated
       if (cherryPick.isAllocated()) {
         toBeMapped.add(cherryPick);
       }

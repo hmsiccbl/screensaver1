@@ -597,11 +597,18 @@ TODO:
 							style="display:none" />
 					</t:panelGroup>
 
-					<t:commandButton id="downloadPlateMappingFiles"
-						value="Download Files for Selected Plates"
-						action="#{cherryPickRequestViewer.downloadPlateMappingFilesForSelectedAssayPlates}"
-						disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
-						styleClass="command" />
+					<t:panelGroup>
+						<t:commandButton id="downloadPlateMappingFiles"
+							value="Download Files for Selected Plates"
+							action="#{cherryPickRequestViewer.downloadPlateMappingFilesForSelectedAssayPlates}"
+							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
+							styleClass="command" />
+						<t:commandButton id="cancelAssayPlates"
+							value="Cancel Reservations for Selected Plates"
+							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
+							action="#{cherryPickRequestViewer.deallocateCherryPicksByPlate}"
+							styleClass="command" />
+					</t:panelGroup>
 
 					<t:panelGrid columns="2">
 						<t:outputLabel for="liquidTransferPerformedBy"
@@ -639,6 +646,7 @@ TODO:
 							action="#{cherryPickRequestViewer.recordFailureOfAssayPlates}"
 							styleClass="command" />
 					</t:panelGroup>
+
 				</t:panelGrid>
 
 				<t:commandButton id="selectAllAssayPlatesButton" forceId="true"

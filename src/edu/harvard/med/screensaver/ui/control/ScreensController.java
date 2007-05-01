@@ -154,6 +154,10 @@ public interface ScreensController
   public String deallocateCherryPicks(CherryPickRequest cherryPickRequest);
 
   @UIControllerMethod
+  public String deallocateCherryPicksByPlate(CherryPickRequest cherryPickRequest,
+                                             Set<CherryPickAssayPlate> assayPlates);
+
+  @UIControllerMethod
   public String plateMapCherryPicks(CherryPickRequest cherryPickRequest);
 
   @UIControllerMethod

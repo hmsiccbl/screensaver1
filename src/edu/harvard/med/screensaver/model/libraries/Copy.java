@@ -14,11 +14,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
-import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
-import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -51,7 +48,7 @@ public class Copy extends AbstractEntity
   private Set<CopyInfo> _copyInfos = new HashSet<CopyInfo>();
   private String _name;
   private CopyUsageType _usageType;
-  private Set<LabCherryPick> _labCherryPicks = new HashSet<LabCherryPick>();
+//  private Set<LabCherryPick> _labCherryPicks = new HashSet<LabCherryPick>();
   
 
   // public constructor
@@ -192,21 +189,21 @@ public class Copy extends AbstractEntity
     _library.getHbnCopies().add(this);
   }
 
-  // HACK: This property is marked as derived for unit testing purposes
-  // only! It is in fact a real hibernate relationship, though it is unique in that it can only be
-  // modified from the other side (via CherryPick.setAllocated()). Our unit tests do
-  // not yet handle this case.
-  /**
-   * Get an unmodifiable copy of the set of cherry picks.
-   *
-   * @return the cherry picks
-   */
-  @ToManyRelationship(inverseProperty="sourceCopy")
-  @DerivedEntityProperty
-  public Set<LabCherryPick> getLabCherryPicks()
-  {
-    return Collections.unmodifiableSet(_labCherryPicks);
-  }
+//  // HACK: This property is marked as derived for unit testing purposes
+//  // only! It is in fact a real hibernate relationship, though it is unique in that it can only be
+//  // modified from the other side (via CherryPick.setAllocated()). Our unit tests do
+//  // not yet handle this case.
+//  /**
+//   * Get an unmodifiable copy of the set of cherry picks.
+//   *
+//   * @return the cherry picks
+//   */
+//  @ToManyRelationship(inverseProperty="sourceCopy")
+//  @DerivedEntityProperty
+//  public Set<LabCherryPick> getLabCherryPicks()
+//  {
+//    return Collections.unmodifiableSet(_labCherryPicks);
+//  }
 
   
   // protected methods
@@ -416,29 +413,29 @@ public class Copy extends AbstractEntity
   }
   
 
-  /**
-   * Get the cherry picks.
-   * 
-   * @return the cherry picks
-   * @hibernate.set cascade="none" inverse="true" lazy="true"
-   * @hibernate.collection-key column="copy_id"
-   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screens.LabCherryPick"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   * public access for cross-package relationship
-   */
-  public Set<LabCherryPick> getHbnLabCherryPicks()
-  {
-    return _labCherryPicks;
-  }
-
-  /**
-   * Set the cherry picks.
-   *
-   * @param labCherryPicks the new cherry picks
-   * @motivation for hibernate
-   */
-  private void setHbnLabCherryPicks(Set<LabCherryPick> labCherryPicks)
-  {
-    _labCherryPicks = labCherryPicks;
-  }
+//  /**
+//   * Get the cherry picks.
+//   * 
+//   * @return the cherry picks
+//   * @hibernate.set cascade="none" inverse="true" lazy="true"
+//   * @hibernate.collection-key column="copy_id"
+//   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screens.LabCherryPick"
+//   * @motivation for hibernate and maintenance of bi-directional relationships
+//   * public access for cross-package relationship
+//   */
+//  public Set<LabCherryPick> getHbnLabCherryPicks()
+//  {
+//    return _labCherryPicks;
+//  }
+//
+//  /**
+//   * Set the cherry picks.
+//   *
+//   * @param labCherryPicks the new cherry picks
+//   * @motivation for hibernate
+//   */
+//  private void setHbnLabCherryPicks(Set<LabCherryPick> labCherryPicks)
+//  {
+//    _labCherryPicks = labCherryPicks;
+//  }
 }

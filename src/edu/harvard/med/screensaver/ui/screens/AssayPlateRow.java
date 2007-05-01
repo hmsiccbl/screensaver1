@@ -63,17 +63,21 @@ public class AssayPlateRow
                           _assayPlate.getAttemptOrdinal() + 1);
     _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[2], 
                   _assayPlate.getName());
-    if (!_assayPlate.isFailed() && !_assayPlate.isPlated()) {
+    if (!_assayPlate.isFailed() && !_assayPlate.isPlated() && !_assayPlate.isCanceled()) {
       _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[3], "not created");
       _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[4], "");
       _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[5], "");
     }
     else {
-      _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[3], _assayPlate.isFailed() ? "failed" : "created");
-      _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[4], 
-                            _assayPlate.getCherryPickLiquidTransfer().getDateOfActivity());
-      _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[5], 
-                            _assayPlate.getCherryPickLiquidTransfer().getPerformedBy().getFullNameLastFirst());
+      _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[3], 
+                            _assayPlate.isCanceled() ? "canceled" : 
+                              _assayPlate.isFailed() ? "failed" : "created");
+      if (_assayPlate.getCherryPickLiquidTransfer() != null) {
+        _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[4], 
+                              _assayPlate.getCherryPickLiquidTransfer().getDateOfActivity());
+        _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[5], 
+                              _assayPlate.getCherryPickLiquidTransfer().getPerformedBy().getFullNameLastFirst());
+      }
     }
     _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[6], 
                           _assayPlate.getCherryPickLiquidTransfer() == null ? null :

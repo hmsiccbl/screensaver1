@@ -23,6 +23,7 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 
@@ -75,6 +76,8 @@ public class CherryPickRequestAllocator
   {
     // TODO: handle concurrency; perform appropriate locking to prevent race conditions (overdrawing well) among multiple allocate() calls
     final Set<LabCherryPick> unfulfillableLabCherryPicks = new HashSet<LabCherryPick>();
+    // TODO: new, non-nested txn should be required here, or if not possible, should perform a flush; this ensures that any LabCherryPicks allocated in an enclosing Hibernate session will be flushed to the database, ensuring that our dao.findLabCherryPicksForWell() will return non-stale results
+    _dao.flush();
     _dao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction() 
@@ -116,7 +119,9 @@ public class CherryPickRequestAllocator
         CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
         for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
           if (labCherryPick.isMapped()) {
-            throw new BusinessRuleViolationException("cannot deallocate a cherry pick after it is mapped");
+            // note: for safety, we do not allow wholesale deallocation of cherry picks once they have been mapped to plates;
+            // we do allow this to occur on a per-plate basis, however, which requires the user to be more explicit about his intent/action
+            throw new BusinessRuleViolationException("cannot deallocate all cherry picks (at once) after request has mapped plates");
           }
           if (labCherryPick.isAllocated()) {
             labCherryPick.setAllocated(null);
@@ -126,6 +131,32 @@ public class CherryPickRequestAllocator
     });
   }
   
+  public void deallocateByPlate(final CherryPickRequest cherryPickRequestIn,
+                                final Set<CherryPickAssayPlate> assayPlates)
+  {
+    _dao.doInTransaction(new DAOTransaction() 
+    {
+      public void runTransaction() 
+      {
+        // TODO: this is crashing with LazyInitEx, since cherryPickRequest.labCherryPicks.sourceWell is not cascaded; ultimately it is the sourceWell.library.copy that has not been initialized.
+        CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
+        for (CherryPickAssayPlate assayPlate : cherryPickRequest.getActiveCherryPickAssayPlates()) {
+          if (assayPlates.contains(assayPlate)) {
+            for (LabCherryPick labCherryPick : assayPlate.getLabCherryPicks()) {
+              if (labCherryPick.isPlated()) {
+                throw new BusinessRuleViolationException("cannot deallocate a cherry pick after it is plated");
+              }
+              if (labCherryPick.isAllocated()) {
+                labCherryPick.setAllocated(null);
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+  
+
   // private methods
   
   private Copy selectCopy(Well wellIn, BigDecimal volumeNeeded)
