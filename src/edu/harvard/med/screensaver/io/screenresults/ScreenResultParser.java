@@ -155,10 +155,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     booleanMap.put("1", true);
 
     for (PartitionedValue pv : PartitionedValue.values()) {
-      partitionedValueMap.put(pv.getValue()
-                                .toLowerCase(), pv);
-      partitionedValueMap.put(pv.getValue()
-                                .toUpperCase(), pv);
+      partitionedValueMap.put(pv.getDisplayValue().toLowerCase(), pv);
+      partitionedValueMap.put(pv.getDisplayValue().toUpperCase(), pv);
+      partitionedValueMap.put(pv.getValue(), pv);
     }
 
     assayWellTypeMap.put(AssayWellType.EXPERIMENTAL.getAbbreviation(), AssayWellType.EXPERIMENTAL);
