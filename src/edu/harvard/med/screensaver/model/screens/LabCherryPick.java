@@ -25,7 +25,8 @@ import edu.harvard.med.screensaver.model.libraries.WellName;
 
 
 /**
- * A Hibernate entity bean representing a lab cherry pick.
+ * A Hibernate entity bean representing a lab cherry pick. See
+ * {@link #CherryPickRequest} for explanation.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -321,6 +322,11 @@ public class LabCherryPick extends AbstractEntity
     return null;
   }
   
+  public boolean isUnfulfilled()
+  {
+    return !isAllocated() && !isCanceled();
+  }
+
   /**
    * Get whether liquid volume for this cherry pick has been allocated from a
    * source plate well.
@@ -353,7 +359,7 @@ public class LabCherryPick extends AbstractEntity
   @DerivedEntityProperty
   public boolean isCanceled()
   {
-    return isMapped() && !isAllocated();
+    return isMapped() && _assayPlate.isCanceled();
   }
 
   /**

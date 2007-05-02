@@ -39,7 +39,52 @@ import org.apache.log4j.Logger;
 
 
 /**
- * A Hibernate entity bean representing a cherry pick request.
+ * A Hibernate entity bean representing a cherry pick request ("CPR"). A CPR
+ * provides an abstraction for managing the workflow of producing a cherry pick
+ * screening in response to the cherry picks ("CP") requsted by the screener.
+ * Two types of cherry picks are managed: "screener" cherry picks (@{link
+ * #ScreenerCherryPick}) and "lab" cherry picks (@{link #LabCherryPick}). The
+ * screener CPs represent the wells from the original screen that are to be
+ * screened again (for validation purposes). The LabCPs represent the wells from
+ * which "liquid" is physically drawn from and that is transferred to one or
+ * more cherry pick assay plates ("assay plates"). Note that the source wells of
+ * LabCPs are usually different than the screener CP wells, as the lab maintains
+ * separate sets of plates ("library copies") for use in the production of
+ * cherry pick assay plates. It is also possible that screener CP wells will be
+ * "mapped" to <i>multiple</i> LabCP wells, as is the case with RNAi SMARTPool
+ * libraries (from Dharmacon). Finally, LabCPs may be "repeated", in case the
+ * creation of an assay plate fails (in the lab). The lab will need to
+ * re-attempt creation of the plate and thus all LabCPs for that plate will be
+ * duplicated. Lab CPs are instrumental in determining how much liquid volume
+ * remains in the wells of a library copy, and therefore the reliable tracking
+ * of LabCPs is critical feature of Screensaver.
+ * <p>
+ * Lab CPs and the associated assay plates each progress through a range of
+ * states, as a CPR is processed by the lab. Lab CPs can have the following
+ * states:
+ * <ul>
+ * <li>unfulfilled: initial state; liquid has not yet been allocated for the
+ * LabCP; workflow rules only allow an unfulfilled LabCP to move to the
+ * allocated state
+ * <li>allocated: liquid has been allocated for the LabCP; its "source well"
+ * has been assigned; an allocated LabCP;
+ * <li>mapped: the LabCP has been assigned (mapped) to a particular well on a
+ * particular assay plate; it <i>is</i> possible for a LabCP to be mapped but
+ * not allocated, as this can occur if a lab cherry pick was created for a
+ * subsequent creation attempt of an assay plate, but for which there was
+ * insufficient volume in any library copy.
+ * <li>failed: the LabCP was allocated and mapped, but the plate it was
+ * assigned to was later marked as failed (workflow rules dictate that LabCPs
+ * can only be canceled on a per-plate basis); this is a terminal, unalterable
+ * state
+ * <li>canceled: the LabCP was previously allocated and mapped, but the plate
+ * it was assigned to was later canceled (workflow rules dictate that LabCPs can
+ * only be canceled on a per-plate basis); its "source well" be unassigned; this
+ * is a terminal, unalterable state
+ * <li>plated: the LabCP has been allocated and mapped, and the assay plate it
+ * belongs to was marked as "plated"; this is an terminal, unalterable state
+ * </ul>
+ * <p>
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>

@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.EntityIdProperty;
@@ -54,6 +55,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
 
   private transient int _logicalAssayPlateCount;
   private transient String _name;
+  private boolean _isCanceled;
 
   // public constructors and methods
 
@@ -181,18 +183,35 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
     labCherryPick.setAssayPlate(this);
     return _labCherryPicks.add(labCherryPick);
   }
-
-  @DerivedEntityProperty
-  public boolean isCanceled()
+  
+  public void cancel()
   {
-    for (LabCherryPick labCherryPick : _labCherryPicks) {
-      if (labCherryPick.isCanceled()) {
-        return true;
-      }
+    if (isPlated()) {
+      throw new BusinessRuleViolationException("cannot cancel an assay plate that has been plated");
     }
-    return false;
+    if (isFailed()) {
+      throw new BusinessRuleViolationException("cannot cancel an assay plate that has been marked as failed");
+    }
+    for (LabCherryPick labCherryPick : getLabCherryPicks()) {
+      labCherryPick.setAllocated(null);
+    }
+    _isCanceled = true;
+  }
+  
+  @DerivedEntityProperty
+  public String getStatusLabel() 
+  {
+    return isPlated() ? "Created" : isFailed() ? "Failed" : isCanceled() ? "Canceled" : "Not Created";
   }
 
+  /**
+   * @hibernate.property type="boolean" not-null="true"
+   */
+  public boolean isCanceled()
+  {
+    return _isCanceled;
+  }
+  
   @DerivedEntityProperty
   public boolean isPlated()
   {
@@ -410,6 +429,11 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   private void setAssayPlateType(PlateType plateType)
   {
     _plateType = plateType;
+  }
+
+  private void setCanceled(boolean isCanceled)
+  {
+    _isCanceled = isCanceled;
   }
 }
 

@@ -1076,7 +1076,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                     " for plates " + assayPlates);
 
     try {
-      _cherryPickRequestAllocator.deallocateByPlate(cherryPickRequest, assayPlates);
+      _cherryPickRequestAllocator.deallocateAssayPlates(cherryPickRequest, assayPlates);
     }
     catch (ConcurrencyFailureException e) {
       showMessage("concurrentModificationConflict");

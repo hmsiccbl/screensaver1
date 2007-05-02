@@ -131,35 +131,21 @@ public class CherryPickRequestPlateMapFilesBuilder
 
     {
       StringBuilder buf = new StringBuilder();
-      for (CherryPickAssayPlate assayPlate : cherryPickRequest.getCherryPickAssayPlates()) {
-        if (!assayPlate.isPlated() && !assayPlate.isFailed() && !assayPlate.isCanceled()) {
-          buf.append('\t').
-          append(assayPlate.getName()).
-          append("\n");
-        }
-      }
-      if (buf.length() > 0) {
-        writer.println("The following cherry pick plates HAVE NOT YET been created:");
-        writer.print(buf.toString());
-        writer.println();
-      }
-    }      
-
-    if (cherryPickRequest.isPlated()) {
-      StringBuilder buf = new StringBuilder();
-      for (CherryPickAssayPlate assayPlate : cherryPickRequest.getCherryPickAssayPlates()) {
+      for (CherryPickAssayPlate assayPlate : cherryPickRequest.getActiveCherryPickAssayPlates()) {
+        buf.
+        append(assayPlate.getName()).
+        append("\t").append(assayPlate.getStatusLabel());
         if (assayPlate.isPlated()) {
-          buf.append('\t').
-          append(assayPlate.getName()).
-          append(": created on ").
+          buf.append("\t(").
           append(assayPlate.getCherryPickLiquidTransfer().getDateOfActivity()).
           append(" by ").
           append(assayPlate.getCherryPickLiquidTransfer().getPerformedBy().getFullNameFirstLast()).
-          append('\n');
+          append(')');
         }
+        buf.append('\n');
       }
       if (buf.length() > 0) {
-        writer.println("The following cherry pick plates HAVE ALREADY been created:");
+        writer.println("Cherry pick plates:");
         writer.print(buf.toString());
         writer.println();
       }

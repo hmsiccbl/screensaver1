@@ -131,25 +131,17 @@ public class CherryPickRequestAllocator
     });
   }
   
-  public void deallocateByPlate(final CherryPickRequest cherryPickRequestIn,
-                                final Set<CherryPickAssayPlate> assayPlates)
+  public void deallocateAssayPlates(final CherryPickRequest cherryPickRequestIn,
+                                    final Set<CherryPickAssayPlate> assayPlates)
   {
     _dao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction() 
       {
-        // TODO: this is crashing with LazyInitEx, since cherryPickRequest.labCherryPicks.sourceWell is not cascaded; ultimately it is the sourceWell.library.copy that has not been initialized.
         CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
         for (CherryPickAssayPlate assayPlate : cherryPickRequest.getActiveCherryPickAssayPlates()) {
           if (assayPlates.contains(assayPlate)) {
-            for (LabCherryPick labCherryPick : assayPlate.getLabCherryPicks()) {
-              if (labCherryPick.isPlated()) {
-                throw new BusinessRuleViolationException("cannot deallocate a cherry pick after it is plated");
-              }
-              if (labCherryPick.isAllocated()) {
-                labCherryPick.setAllocated(null);
-              }
-            }
+            assayPlate.cancel();
           }
         }
       }

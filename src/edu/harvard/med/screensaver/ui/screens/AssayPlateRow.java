@@ -63,15 +63,12 @@ public class AssayPlateRow
                           _assayPlate.getAttemptOrdinal() + 1);
     _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[2], 
                   _assayPlate.getName());
+    _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[3], _assayPlate.getStatusLabel());
     if (!_assayPlate.isFailed() && !_assayPlate.isPlated() && !_assayPlate.isCanceled()) {
-      _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[3], "not created");
       _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[4], "");
       _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[5], "");
     }
     else {
-      _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[3], 
-                            _assayPlate.isCanceled() ? "canceled" : 
-                              _assayPlate.isFailed() ? "failed" : "created");
       if (_assayPlate.getCherryPickLiquidTransfer() != null) {
         _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[4], 
                               _assayPlate.getCherryPickLiquidTransfer().getDateOfActivity());
