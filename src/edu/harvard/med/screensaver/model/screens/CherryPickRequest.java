@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
  * provides an abstraction for managing the workflow of producing a cherry pick
  * screening in response to the cherry picks ("CP") requsted by the screener.
  * Two types of cherry picks are managed: "screener" cherry picks ({@link
- * #ScreenerCherryPick}) and "lab" cherry picks ({@link #LabCherryPick}). The
+ * ScreenerCherryPick}) and "lab" cherry picks ({@link LabCherryPick}). The
  * ScreenerCPs represent the wells from the original screen that are to be
  * screened again (for validation purposes). The LabCPs represent the wells from
  * which "liquid" is physically drawn from and that is transferred to one or
