@@ -193,7 +193,11 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
       throw new BusinessRuleViolationException("cannot cancel an assay plate that has been marked as failed");
     }
     for (LabCherryPick labCherryPick : getLabCherryPicks()) {
-      labCherryPick.setAllocated(null);
+      // note: it is okay to cancel a plate that has some (or all) lab cherry
+      // picks that are unallocated
+      if (labCherryPick.isAllocated()) {
+        labCherryPick.setAllocated(null);
+      }
     }
     _isCanceled = true;
   }
@@ -201,7 +205,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   @DerivedEntityProperty
   public String getStatusLabel() 
   {
-    return isPlated() ? "Created" : isFailed() ? "Failed" : isCanceled() ? "Canceled" : "Not Created";
+    return isPlated() ? "Plated" : isFailed() ? "Failed" : isCanceled() ? "Canceled" : "Not Plated";
   }
 
   /**

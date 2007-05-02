@@ -42,9 +42,9 @@ import org.apache.log4j.Logger;
  * A Hibernate entity bean representing a cherry pick request ("CPR"). A CPR
  * provides an abstraction for managing the workflow of producing a cherry pick
  * screening in response to the cherry picks ("CP") requsted by the screener.
- * Two types of cherry picks are managed: "screener" cherry picks (@{link
- * #ScreenerCherryPick}) and "lab" cherry picks (@{link #LabCherryPick}). The
- * screener CPs represent the wells from the original screen that are to be
+ * Two types of cherry picks are managed: "screener" cherry picks ({@link
+ * #ScreenerCherryPick}) and "lab" cherry picks ({@link #LabCherryPick}). The
+ * ScreenerCPs represent the wells from the original screen that are to be
  * screened again (for validation purposes). The LabCPs represent the wells from
  * which "liquid" is physically drawn from and that is transferred to one or
  * more cherry pick assay plates ("assay plates"). Note that the source wells of
@@ -62,28 +62,120 @@ import org.apache.log4j.Logger;
  * Lab CPs and the associated assay plates each progress through a range of
  * states, as a CPR is processed by the lab. Lab CPs can have the following
  * states:
- * <ul>
- * <li>unfulfilled: initial state; liquid has not yet been allocated for the
- * LabCP; workflow rules only allow an unfulfilled LabCP to move to the
- * allocated state
- * <li>allocated: liquid has been allocated for the LabCP; its "source well"
- * has been assigned; an allocated LabCP;
- * <li>mapped: the LabCP has been assigned (mapped) to a particular well on a
- * particular assay plate; it <i>is</i> possible for a LabCP to be mapped but
- * not allocated, as this can occur if a lab cherry pick was created for a
- * subsequent creation attempt of an assay plate, but for which there was
- * insufficient volume in any library copy.
- * <li>failed: the LabCP was allocated and mapped, but the plate it was
- * assigned to was later marked as failed (workflow rules dictate that LabCPs
- * can only be canceled on a per-plate basis); this is a terminal, unalterable
- * state
- * <li>canceled: the LabCP was previously allocated and mapped, but the plate
- * it was assigned to was later canceled (workflow rules dictate that LabCPs can
- * only be canceled on a per-plate basis); its "source well" be unassigned; this
- * is a terminal, unalterable state
- * <li>plated: the LabCP has been allocated and mapped, and the assay plate it
- * belongs to was marked as "plated"; this is an terminal, unalterable state
- * </ul>
+ * <p>
+ * <table border="1">
+ * <tr>
+ * <td>State</td>
+ * <td>Description</td>
+ * <td>State Type</td>
+ * <td>Valid Transition(s)</td>
+ * <td>Affected Properties/Relationships</td>
+ * </tr>
+ * <tr>
+ * <td>Unfulfilled</td>
+ * <td>Liquid has not yet been allocated for the LabCP</td>
+ * <td>Initial</td>
+ * <td>Allocated</td>
+ * <td></td>
+ * </tr>
+ * <tr>
+ * <td>Allocated</td>
+ * <td>Liquid has been allocated for the LabCP</td>
+ * <td>Intermediate</td>
+ * <td>Mapped+Allocated</td>
+ * <td>sourceWell</td>
+ * </tr>
+ * <tr>
+ * <td>Mapped+Unallocated</td>
+ * <td>The LabCP has been assigned (mapped) to a particular well on a
+ * particular assay plate, but has not been allocated. This occurs if a lab
+ * cherry pick was created for a subsequent creation attempt of an assay plate,
+ * but for which there was insufficient volume in any library copy.</td>
+ * <td>Initial</td>
+ * <td>Map+Allocated, Canceled</td>
+ * <td>assayPlate, assayPlateRow, assayPlateColumn</td>
+ * </tr>
+ * <tr>
+ * <td>Mapped+Allocated</td>
+ * <td>The allocated LabCP has been assigned (mapped) to a particular well on a
+ * particular assay plate.
+ * <td>Intermediate</td>
+ * <td>Failed, Canceled, Plated</td>
+ * <td>assayPlate, assayPlateRow, assayPlateColumn</td>
+ * </tr>
+ * <tr>
+ * <td>Failed</td>
+ * <td>The LabCP was allocated and mapped, but the plate it was assigned to was
+ * later marked as failed (workflow rules dictate that LabCPs can only be
+ * canceled on a per-plate basis)</td>
+ * <td>Terminal</td>
+ * <td></td>
+ * <td>assayPlate.cherryPickLiquidTransfer.isSuccessful</td>
+ * </tr>
+ * <tr>
+ * <td>Canceled</td>
+ * <td>The LabCP was previously allocated and mapped, but the plate it was
+ * assigned to was later canceled (workflow rules dictate that LabCPs can only
+ * be canceled on a per-plate basis)</td>
+ * <td>Terminal</td>
+ * <td></td>
+ * <td>sourceWell, assayPlate.isCanceled</td>
+ * </tr>
+ * <tr>
+ * <td>Plated</td>
+ * <td>The LabCP has been allocated and mapped, and the assay plate it belongs
+ * to was marked as "plated"</td>
+ * <td>Terminal</td>
+ * <td></td>
+ * <td>assayPlate.cherryPickLiquidTransfer.isSuccessful</td>
+ * </tr>
+ * </table>
+ * <p>
+ * A CP Assay Plate also progresses through a range of states, as a CPR is
+ * processed by the lab. CP Assay Plates can have the following states:
+ * <p>
+ * <table border="1">
+ * <tr>
+ * <td>State</td>
+ * <td>Description</td>
+ * <td>State Type</td>
+ * <td>Valid Transition(s)</td>
+ * <td>Affected Properties/Relationships</td>
+ * </tr>
+ * <tr>
+ * <td>Not Plated</td>
+ * <td>The assay plate has not yet been physically created in the lab.</td>
+ * <td>Initial</td>
+ * <td>Plated, Failed, Canceled</td>
+ * <td></td>
+ * </tr>
+ * <tr>
+ * <td>Plated</td>
+ * <td>The assay plate has been physically created in the lab.</td>
+ * <td>Final</td>
+ * <td></td>
+ * <td>cherryPickAssayPlate</td>
+ * </tr>
+ * <tr>
+ * <td>Failed</td>
+ * <td>The physical creation of the assay plate in the lab was attempted, but
+ * failed. Liquid for each of its LabCPs was consumed in the failed attempt.</td>
+ * <td>Final</td>
+ * <td></td>
+ * <td>cherryPickAssayPlate</td>
+ * </tr>
+ * <tr>
+ * <td>Canceled</td>
+ * <td>The assay plate has not yet been physically created in the lab.</td>
+ * <td>Final</td>
+ * <td></td>
+ * <td>isCanceled</td>
+ * </tr>
+ * </table>
+ * <p>
+ * Note that business rules dictate that an assay plate is always created with
+ * the set of lab cherry picks that are assigned to it, so there is no need for,
+ * say, a "New" status.
  * <p>
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>

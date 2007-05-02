@@ -21,11 +21,9 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import org.apache.log4j.Logger;
 
 
-// TODO: for performance, we may have to make CherryPick into a Hibernate value
-// type, rather than an entity type, as we did with ResultValue (this would mean
-// eliminating the navigability to CherryPickRequest)
 /**
- * A Hibernate entity bean representing a cherry pick.
+ * A Hibernate entity bean representing a cherry pick. See
+ * {@link #CherryPickRequest} for explanation.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
