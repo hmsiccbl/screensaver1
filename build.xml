@@ -66,7 +66,13 @@
   <property name="deploy.dir" location="${appserver.dir}/webapps/${app.name}"/>
   <property name="appserver.start.cmd" value="${appserver.dir}/bin/catalina.sh"/>
   <property name="appserver.stop.cmd" value="${appserver.dir}/bin/shutdown.sh"/>
-  <condition 
+  <condition
+    property="appserver.jprofiler.opts"
+	  value="-agentlib:jprofilerti -Xbootclasspath/a:/usr/local/jprofiler4/bin/agent.jar"	
+  	else="">	
+    <istrue value="${profile}"/>
+   </condition>
+   <condition 
     property="appserver.java.opts" 
     value="-Xmx800M -XX:MaxPermSize=256M"
     else="-Xmx800M">
@@ -90,11 +96,15 @@
   <property name="deployed.loginmodule.config.file" location="${appserver.dir}/conf/${loginmodule.config.filename}"/>
   <property name="dev.loginmodule.config.file" location="web/tomcat/conf/${loginmodule.config.filename}"/>
   <property name="svnversion.cmd" value="svnversion"/>
-  <!-- uncomment/comment this to turn on/off BASIC HTTP authentication
-  <property name="web.dev.fast.auth" 
-    value="true" 
-    description="If true, web application will use BASIC HTTP authentication, allowing for UI testing w/o requiring re-login, as browser can cache user name and password and re-issue between web server restarts."/>
-  -->
+	<!-- Whether web application will use BASIC HTTP authentication, allowing for UI testing w/o requiring re-login, as browser can cache user name and password and re-issue between web server restarts." -->    
+	<condition 
+	  property="web.dev.fast.auth" 	
+    value="true">
+  	<istrue value="${debug}"/>
+  </condition>
+  
+  	
+
   
   <!-- file sets -->
 
@@ -472,7 +482,7 @@
     depends="deploy"
   >
     <exec executable="${appserver.start.cmd}">
-      <env key="JAVA_OPTS" value="${appserver.java.opts}"/>
+      <env key="JAVA_OPTS" value="${appserver.java.opts} ${appserver.jprofiler.opts}"/>
       <arg line="${appserver.start.cmd.options}"/>
     </exec>
 
