@@ -299,12 +299,6 @@
       name="cherryPickRequestViewer"
       ref="cherryPickRequestViewer" />
     <property
-      name="screenFinder"
-      ref="screenFinder" />
-    <property
-      name="cherryPickRequestFinder"
-      ref="cherryPickRequestFinder" />
-    <property
       name="heatMapViewer"
       ref="heatMapViewer" />
     <property

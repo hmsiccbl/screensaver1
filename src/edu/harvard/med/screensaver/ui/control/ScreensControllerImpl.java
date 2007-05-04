@@ -85,7 +85,6 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   private static final String BROWSE_SCREENS = "browseScreens";
   private static final String VIEW_SCREEN = "viewScreen";
   private static String VIEW_SCREEN_RESULT_IMPORT_ERRORS = "viewScreenResultImportErrors";
-  private static String VIEW_SCREEN_RESULT = "viewScreenResult";
 
 
   // private instance fields
@@ -96,8 +95,6 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   private ScreenViewer _screenViewer;
   private ScreenResultViewer _screenResultViewer;
   private CherryPickRequestViewer _cherryPickRequestViewer;
-  private ScreenFinder _screenFinder;
-  private CherryPickRequestFinder _cherryPickRequestFinder;
   private HeatMapViewer _heatMapViewer;
   private ScreenResultImporter _screenResultImporter;
   private ScreenResultExporter _screenResultExporter;
@@ -149,16 +146,6 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public void setCherryPickRequestViewer(CherryPickRequestViewer cherryPickRequestViewer)
   {
     _cherryPickRequestViewer = cherryPickRequestViewer;
-  }
-
-  public void setScreenFinder(ScreenFinder screenFinder)
-  {
-    _screenFinder = screenFinder;
-  }
-
-  public void setCherryPickRequestFinder(CherryPickRequestFinder cherryPickRequestFinder)
-  {
-    _cherryPickRequestFinder = cherryPickRequestFinder;
   }
 
   public void setHeatMapViewer(HeatMapViewer heatMapViewer) 
@@ -316,12 +303,12 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                     "hbnCollaborators",
                     "hbnLabHead",
                     "hbnLabHead.hbnLabMembers",
-          "hbnLeadScreener");
+                    "hbnLeadScreener");
           _dao.need(screen.getScreenResult(),
                     "plateNumbers",
                     "hbnResultValueTypes",
                     "hbnResultValueTypes.hbnDerivedTypes",
-          "hbnResultValueTypes.hbnTypesDerivedFrom");
+                    "hbnResultValueTypes.hbnTypesDerivedFrom");
 
           ScreenResult permissionsAwareScreenResult = 
             _dao.findEntityById(ScreenResult.class, 
@@ -702,7 +689,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       }
       else {
         showMessage("screens.noSuchEntity", 
-                    "Screen" + screenNumber);
+                    "Screen " + screenNumber);
       }
     }
     else {
