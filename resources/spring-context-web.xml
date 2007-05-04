@@ -10,9 +10,7 @@
 
   <bean id="dataAccessPolicy"
    class="edu.harvard.med.screensaver.ui.WebDataAccessPolicy">
-   <property
-     name="currentScreensaverUser"
-     ref="currentScreensaverUser" />
+   <constructor-arg ref="currentScreensaverUser" />
   </bean>
 
   <import resource="spring-context-persistence.xml"/>

@@ -119,14 +119,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   private ScreensController _screensController;
   private LibrariesController _librariesController;
   private DAO _dao;
-  private Screen _screen;
   private ScreenResultExporter _screenResultExporter;
-  /**
-   * HACK: we maintain a screenResult reference, distinct from
-   * screen.getScreenResult(), since data access permissions may dictate that
-   * screenResult is not accessible, even though screen.getScreenResult() will
-   * give it to us w/o respecting data access permisisions
-   */
   private ScreenResult _screenResult;
   private Map<String,Boolean> _collapsablePanelsState;
   
@@ -184,18 +177,6 @@ public class ScreenResultViewer extends AbstractBackingBean
     _librariesController = librariesController;
   }
 
-  public void setScreen(Screen screen) 
-  {
-    _screen = screen;
-    resetView();
-  }
-  
-  public Screen getScreen()
-  {
-    return _screen;
-  }
-  
-  // TODO: HACK: to make screenResult be data-access-permissions aware 
   public void setScreenResult(ScreenResult screenResult)
   {
     _screenResult = screenResult;
@@ -501,7 +482,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   public String download()
   {
-    return _screensController.downloadScreenResult(_screenResult);
+    return _screensController.downloadScreenResult(getScreenResult());
   }
   
   public String delete()
@@ -523,7 +504,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   public String saveScreenResult()
   {
     // note: saving the parent screen will save its screenResult
-    return _screensController.saveScreen(getScreen(), null);
+    return _screensController.saveScreen(_screenResult.getScreen(), null);
   }
   
   public String updateDataHeaders()

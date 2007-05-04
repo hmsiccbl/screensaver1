@@ -9,7 +9,7 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import edu.harvard.med.screensaver.db.DataAccessPolicy;
+import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.derivatives.Derivative;
 import edu.harvard.med.screensaver.model.derivatives.DerivativeScreenResult;
@@ -74,7 +74,7 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
   
   // public methods
 
-  public void setCurrentScreensaverUser(CurrentScreensaverUser user)
+  public WebDataAccessPolicy(CurrentScreensaverUser user)
   {
     _currentScreensaverUser = user;
   }
@@ -313,10 +313,7 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
   public boolean visit(ScreenResult screenResult)
   {
     ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
-    if (user == null) {
-      // non-web context, allow all permissions
-      return true;
-    }
+    assert user != null : "WebDataAccessPolicy should only be used when a current user can be determined";
     if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
       return true;
     }
@@ -359,10 +356,7 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
   public boolean visit(ScreensaverUser screensaverUser)
   {
     ScreensaverUser loggedInUser = _currentScreensaverUser.getScreensaverUser();
-    if (loggedInUser == null) {
-      // non-web context, allow all permissions
-      return true;
-    }
+    assert loggedInUser != null : "WebDataAccessPolicy should only be used when a current user can be determined";
     if (loggedInUser.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
       return true;
     }
@@ -413,10 +407,7 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
   public boolean visit(ScreeningRoomActivity visit)
   {
     ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
-    if (user == null) {
-      // non-web context, allow all permissions
-      return true;
-    }
+    assert user != null : "WebDataAccessPolicy should only be used when a current user can be determined";
     if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
       return true;
     }

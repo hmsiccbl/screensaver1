@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.db;
 
 import java.io.File;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
@@ -27,6 +28,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
+import edu.harvard.med.screensaver.ui.WebDataAccessPolicy;
 
 import org.apache.log4j.Logger;
 
@@ -49,16 +51,15 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
   
   protected DAO dao;
   protected SchemaUtil schemaUtil;
-  protected DataAccessPolicy dataAccessPolicy;
   protected CurrentScreensaverUser currentScreensaverUser;
   protected ScreenResultParser screenResultParser;
-
+  
   // public constructors and methods
   
   @Override
   protected String[] getConfigLocations()
   {
-    return new String[] { "spring-context-test-authentication.xml" };
+    return new String[] { "spring-context-test-security.xml" };
   }
   
   @Override
@@ -92,35 +93,75 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
     } );
     
     currentScreensaverUser.setScreensaverUser(users[1]);
-    List<ScreeningRoomUser> filterUsers = dao.findAllEntitiesWithType(ScreeningRoomUser.class);
-    assertTrue("user can view own account ", filterUsers.contains(users[1]));
-    assertTrue("user can view account of user in same lab", filterUsers.contains(users[2]));
-    assertTrue("user can view account of lab head", filterUsers.contains(users[0]));
-    assertFalse("user cannot view account of user not in same lab", filterUsers.contains(users[3]));
+    List<ScreeningRoomUser> filteredUsers = dao.findAllEntitiesWithType(ScreeningRoomUser.class);
+    for (Iterator iter = filteredUsers.iterator(); iter.hasNext();) {
+      ScreeningRoomUser user = (ScreeningRoomUser) iter.next();
+      if (user.isRestricted()) {
+        iter.remove();
+      }
+    }
+    assertTrue("user can view own account ", filteredUsers.contains(users[1]));
+    assertTrue("user can view account of user in same lab", filteredUsers.contains(users[2]));
+    assertTrue("user can view account of lab head", filteredUsers.contains(users[0]));
+    assertFalse("user cannot view account of user not in same lab", filteredUsers.contains(users[3]));
     
     currentScreensaverUser.setScreensaverUser(users[0]);
-    filterUsers = dao.findAllEntitiesWithType(ScreeningRoomUser.class);
-    assertTrue("lab head can view own account", filterUsers.contains(users[0]));
-    assertTrue("lab head can view account of user in same lab", filterUsers.contains(users[1]));
-    assertTrue("lab head can view account of user in same lab", filterUsers.contains(users[2]));
-    assertFalse("lab head cannot view account of user not in same lab", filterUsers.contains(users[3]));
+    filteredUsers = dao.findAllEntitiesWithType(ScreeningRoomUser.class);
+    for (Iterator iter = filteredUsers.iterator(); iter.hasNext();) {
+      ScreeningRoomUser user = (ScreeningRoomUser) iter.next();
+      if (user.isRestricted()) {
+        iter.remove();
+      }
+    }
+    assertTrue("lab head can view own account", filteredUsers.contains(users[0]));
+    assertTrue("lab head can view account of user in same lab", filteredUsers.contains(users[1]));
+    assertTrue("lab head can view account of user in same lab", filteredUsers.contains(users[2]));
+    assertFalse("lab head cannot view account of user not in same lab", filteredUsers.contains(users[3]));
   }
 
   public void testScreenResultUserPermissionsByUserType()
   {
-    schemaUtil.initializeDatabase();
+    ScreeningRoomUser rnaiUser = makeUserWithRoles(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
+    ScreeningRoomUser compoundUser = makeUserWithRoles(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
 
-    ScreensaverUser rnaiUser = makeUserWithRoles(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
-    doTestScreenResultUserPermissions(ScreenType.RNAI, rnaiUser);
+    Screen rnaiScreen = MockDaoForScreenResultImporter.makeDummyScreen(1);
+    rnaiScreen.setScreenType(ScreenType.RNAI);
+    ScreenResult screenResult1 = new ScreenResult(rnaiScreen, new Date());
+    screenResult1.setShareable(true);
+    Screen compoundScreen = MockDaoForScreenResultImporter.makeDummyScreen(2);
+    compoundScreen.setScreenType(ScreenType.RNAI);
+    ScreenResult screenResult2 = new ScreenResult(compoundScreen, new Date());
+    screenResult2.setShareable(true);
     
-    ScreensaverUser compoundUser = makeUserWithRoles(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
-    doTestScreenResultUserPermissions(ScreenType.SMALL_MOLECULE, compoundUser);
+    rnaiScreen.setLeadScreener(rnaiUser);
+    compoundScreen.setLeadScreener(compoundUser);
+    
+    dao.persistEntity(rnaiScreen);
+    dao.persistEntity(compoundScreen);
+
+    List<Screen> screens = dao.findAllEntitiesWithType(Screen.class);
+    assertEquals("screens count", 2, screens.size());
+    for (Screen screen : screens) {
+      if (screen.getScreenType().equals(ScreenType.RNAI)) {
+        currentScreensaverUser.setScreensaverUser(rnaiUser);
+        assertTrue("rnai user is not restricted from rnai screen results", !screen.isRestricted());
+        currentScreensaverUser.setScreensaverUser(compoundUser);
+        assertTrue("compound user is restricted from rnai screen results", screen.isRestricted());
+      } 
+      else if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+        currentScreensaverUser.setScreensaverUser(rnaiUser);
+        assertTrue("rnai user is restricted from compound screen results", screen.isRestricted());
+        currentScreensaverUser.setScreensaverUser(compoundUser);
+        assertTrue("compound user is not restricted from compound screen results", !screen.isRestricted());
+      }
+      else {
+        fail("unknown screen type" + screen.getScreenType());
+      }
+    }
   }
   
-  public void testScreenResultPermissions()
+  public void testRestrictedEntityTest()
   {
-//    schemaUtil.initializeDatabase();
-
     final ScreeningRoomUser[] users = new ScreeningRoomUser[5];
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
@@ -165,70 +206,57 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
         screen116.getScreenResult().setShareable(true);
         assertEquals("screenresult import successful", 0, screenResultParser.getErrors().size());
         screen116.setLeadScreener(users[4]);
+        
+        dao.persistEntity(screen115);
+        dao.persistEntity(screen116);
       }
     } );
     
-
     Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 115);
 
     currentScreensaverUser.setScreensaverUser(users[0]);
     ScreenResult screenResult1 = dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
-    assertNotNull("lead screener can view private screen result", screenResult1);
+    assertFalse("lead screener can view private screen result", screenResult1.isRestricted());
 
     currentScreensaverUser.setScreensaverUser(users[1]);
     ScreenResult screenResult2 = dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
-    assertNotNull("screen collobarator can view private screen result", screenResult2);
+    assertFalse("screen collobarator can view private screen result", screenResult2.isRestricted());
     
     currentScreensaverUser.setScreensaverUser(users[2]);
     ScreenResult screenResult3 = dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
-    assertNull("lab member cannot view private screen result, if not also lead screener or collaborator", screenResult3);
+    assertTrue("lab member cannot view private screen result, if not also lead screener or collaborator", screenResult3.isRestricted());
 
     currentScreensaverUser.setScreensaverUser(users[3]);
     ScreenResult screenResult4 = dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
-    assertNull("lab head cannot view private screen result, if not also lead screener or collaborator", screenResult4);
+    assertTrue("lab head cannot view private screen result, if not also lead screener or collaborator", screenResult4.isRestricted());
 
     Screen screen116 = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 116);
 
     currentScreensaverUser.setScreensaverUser(users[0]);
     ScreenResult screenResult5 = dao.findEntityById(ScreenResult.class, screen116.getScreenResult().getEntityId());
-    assertNotNull("compound screener with deposited data can view shareable screen result", screenResult5);
+    assertFalse("compound screener with deposited data can view shareable screen result", screenResult5.isRestricted());
     
     currentScreensaverUser.setScreensaverUser(users[2]);
     ScreenResult screenResult6 = dao.findEntityById(ScreenResult.class, screen116.getScreenResult().getEntityId());
-    assertNull("compound screener without deposited data cannot view shareable screen result", screenResult6);
+    assertTrue("compound screener without deposited data cannot view shareable screen result", screenResult6.isRestricted());
     
     currentScreensaverUser.setScreensaverUser(users[4]);
     ScreenResult screenResult7 = dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
-    assertNull("compound screener without deposited data cannot view private screen result", screenResult7);
+    assertTrue("compound screener without deposited data cannot view private screen result", screenResult7.isRestricted());
   }
   
-  public void testVisitsPermissions() 
-  {
-    // TODO
-  }
-
 
   // private methods
   
-  private void doTestScreenResultUserPermissions(ScreenType screenType, ScreensaverUser user)
-  {
-    currentScreensaverUser.setScreensaverUser(user);
-    List<Screen> screens = dao.findAllEntitiesWithType(Screen.class);
-    assertTrue("non-empty screens list", screens.size() > 0);
-    for (Screen screen : screens) {
-      assertEquals("user access to only " + screenType + " screens", screenType, screen.getScreenType());
-    }
-  }
-  
+ 
   private ScreeningRoomUser makeUserWithRoles(ScreensaverUserRole... roles)
   {
     Date created = new Date();
     Object object = new Object();
     ScreeningRoomUser user = new ScreeningRoomUser(created,
                                                    "first",
-                                                   "last",
-                                                   "email" + object.hashCode() 
-                                                     + "@hms.harvard.edu",
+                                                   "last" + object.hashCode(),
+                                                   "email@hms.harvard.edu",
                                                    "",
                                                    "",
                                                    "",

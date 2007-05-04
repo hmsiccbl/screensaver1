@@ -21,6 +21,7 @@ import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
+import edu.harvard.med.screensaver.util.NullSafeComparator;
 
 
 /**
@@ -128,7 +129,8 @@ public class ScreenSearchResults extends SearchResults<Screen>
       return "The scientist primarily responsible for running the screen";
     }
     if (columnName.equals(SCREEN_RESULT)) {
-      return "'Available' if the screen result is loaded into Screensaver; otherwise blank";
+      return "'available' if the screen result is loaded into Screensaver and viewable by the current user;" +
+          " 'not shared' if loaded but not viewable by the current user; otherwise 'none'";
     }
     return null;
   }
@@ -168,14 +170,15 @@ public class ScreenSearchResults extends SearchResults<Screen>
       return screen.getLeadScreener().getFullNameLastFirst();
     }
     if (columnName.equals(SCREEN_RESULT)) {
-      if (screen.getScreenResult() != null) {
-//        return "available";
-        // HACK: be data-access-permissions aware, until we can do this behind the scenes
-        if (_dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId()) != null) {
-          return "available";
-        }
+      if (screen.getScreenResult() == null) {
+        return "none";
       }
-      return null;
+      else if (screen.getScreenResult().isRestricted()) {
+        return "not shared";
+      }
+      else {
+        return "available";
+      }
     }
     return null;
   }
@@ -268,24 +271,25 @@ public class ScreenSearchResults extends SearchResults<Screen>
     }
     if (columnName.equals(SCREEN_RESULT)) {
       return new Comparator<Screen>() {
+
+        private NullSafeComparator<ScreenResult> _srComparator = new NullSafeComparator<ScreenResult>()
+        {
+          @Override
+          protected int doCompare(ScreenResult sr1, ScreenResult sr2)
+          {
+            if (!sr1.isRestricted() && sr2.isRestricted()) {
+              return -1;
+            }
+            if (sr1.isRestricted() && !sr2.isRestricted()) {
+              return 1;
+            }
+            return sr1.getScreen().getScreenNumber().compareTo(sr2.getScreen().getScreenNumber());
+          }
+        };
+        
         public int compare(Screen s1, Screen s2) {
-          ScreenResult sr1 = null;
-          ScreenResult sr2 = null;
-          // HACK: be data-access-permissions aware, until we can do this behind the scenes
-          if (s1.getScreenResult() != null) {
-            sr1 = _dao.findEntityById(ScreenResult.class, s1.getScreenResult().getEntityId());
-          }
-          if (s2.getScreenResult() != null) {
-            sr2 = _dao.findEntityById(ScreenResult.class, s2.getScreenResult().getEntityId());
-          }
-          // note: we want "available" screen results to appear first when sorting ascending
-          if (sr1 == null && sr2 != null) {
-            return 1;
-          }
-          if (sr1 != null && sr2 == null) {
-            return -1;
-          }
-          return s1.getScreenNumber().compareTo(s2.getScreenNumber());
+          return _srComparator.compare(s1.getScreenResult(),
+                                      s2.getScreenResult());
         }
       };
     }

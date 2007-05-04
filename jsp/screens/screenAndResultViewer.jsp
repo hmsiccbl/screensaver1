@@ -40,16 +40,16 @@
 
 				<f:facet name="closedContent">
 					<t:panelGrid columns="1">
-						<t:outputText value="#{screenResultViewer.screen.screenNumber}: \"#{screenResultViewer.screen.title}\""
+						<t:outputText value="#{screenResultViewer.screenResult.screen.screenNumber}: \"#{screenResultViewer.screenResult.screen.title}\""
 							styleClass="dataText" />
 						<t:div>
 							<t:outputText value="Lab:" styleClass="label"/>
-							<t:commandLink value="#{screenViewer.screen.labHead.labName}"
+							<t:commandLink value="#{screenViewer.screenResult.screen.labHead.labName}"
 								action="#{screenViewer.viewLabHead}"
 								styleClass="dataText entityLink" />
 							<t:outputText value="&nbsp;&nbsp;Screener:" styleClass="label" escape="false"/>
 							<t:commandLink
-								value="#{screenViewer.screen.leadScreener.fullNameLastFirst}"
+								value="#{screenViewer.screenResult.screen.leadScreener.fullNameLastFirst}"
 								action="#{screenViewer.viewLeadScreener}"
 								styleClass="dataText entityLink" />
 						</t:div>
@@ -62,7 +62,7 @@
 			<t:collapsiblePanel id="screenResultPanel"
 				value="#{screenResultViewer.collapsablePanelsState['screenResultSummary']}"
 				title="Screen Result Summary" var="state" titleVar="title"
-				rendered="#{!empty screenResultViewer.screenResult}">
+				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted}">
 				<f:facet name="header">
 					<t:div styleClass="sectionHeader">
 						<t:headerLink immediate="true" styleClass="sectionHeader">
@@ -78,13 +78,11 @@
 				<t:panelGroup>
 					<t:commandButton action="#{screenResultViewer.download}"
 						value="Download"
-						rendered="#{!empty screenResultViewer.screenResult}"
 						styleClass="command" />
 					<t:commandButton action="#{screenResultViewer.delete}"
-					value="Delete"
-					onclick="javascript: return confirm('Delete this screen result permanently?');"
-					styleClass="command"
-					rendered="#{!screenResultViewer.readOnly && !empty screenResultViewer.screenResult}" />
+						value="Delete"
+						onclick="javascript: return confirm('Delete this screen result permanently?');"
+						styleClass="command" rendered="#{!screenResultViewer.readOnly}" />
 				</t:panelGroup>
 
 				<t:panelGrid columns="2" styleClass="standardTable"
@@ -136,7 +134,7 @@
 			</t:collapsiblePanel>
 
 			<t:panelGrid columns="1"
-				rendered="#{!empty screenResultViewer.screenResult && !(screenResultViewer.collapsablePanelsState['dataHeadersTable'] && screenResultViewer.collapsablePanelsState['dataTable'])}">
+				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted && !(screenResultViewer.collapsablePanelsState['dataHeadersTable'] && screenResultViewer.collapsablePanelsState['dataTable'])}">
 				<t:outputLabel for="dataHeadersList"
 					value="Show selected data headers:" styleClass="label" />
 				<t:selectManyCheckbox id="dataHeadersList" layout="pageDirection" layoutWidth="6" 
@@ -160,7 +158,7 @@
 			<t:collapsiblePanel id="dataHeadersPanel"
 				value="#{screenResultViewer.collapsablePanelsState['dataHeadersTable']}"
 				title="Data Headers" var="state" titleVar="title"
-				rendered="#{!empty screenResultViewer.screenResult}">
+				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted}">
 				<f:facet name="header">
 					<t:div styleClass="sectionHeader">
 						<t:headerLink immediate="true" styleClass="sectionHeader">
@@ -195,7 +193,7 @@
 			<t:collapsiblePanel id="dataTablePanel"
 				value="#{screenResultViewer.collapsablePanelsState['dataTable']}"
 				title="Data" var="state" titleVar="title"
-				rendered="#{!empty screenResultViewer.screenResult}">
+				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted}">
 				<f:facet name="header">
 					<t:div styleClass="sectionHeader">
 						<t:headerLink immediate="true" styleClass="sectionHeader">
@@ -298,7 +296,7 @@
 			<t:collapsiblePanel id="heatMapsPanel"
 				value="#{screenResultViewer.collapsablePanelsState['heatMaps']}"
 				title="Heat Maps" var="state" titleVar="title"
-				rendered="#{!empty screenResultViewer.screenResult}">
+				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted}">
 				<f:facet name="header">
 					<t:div styleClass="sectionHeader">
 						<t:headerLink immediate="true" styleClass="sectionHeader">

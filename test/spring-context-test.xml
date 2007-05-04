@@ -8,7 +8,7 @@
 <beans>
 
   <bean id="dataAccessPolicy"
-   class="edu.harvard.med.screensaver.db.UnrestrictedDataAccessPolicy">
+   class="edu.harvard.med.screensaver.db.accesspolicy.UnrestrictedDataAccessPolicy">
   </bean>
 
   <import resource="spring-context-persistence.xml"/>

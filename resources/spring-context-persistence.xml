@@ -38,7 +38,13 @@
   
 
   <!-- Hibernate configuration -->
-
+  
+  <bean
+  	id="dataAccessPolicyInjectorPostLoadEventListener"
+  	class="edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicyInjectorPostLoadEventListener">
+    <constructor-arg ref="dataAccessPolicy"/>
+  </bean>
+  
   <bean
     id="hibernateSessionFactory"
     class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
@@ -46,8 +52,7 @@
     <property
       name="configLocation"
       value="classpath:hibernate.cfg.xml" />
-    <!-- Specify the DataSource.  Overrides the datasource found in
-    hibernate.cfg.xml.  -->
+    <!-- Specify the DataSource.  Overrides the datasource found in hibernate.cfg.xml.  -->
     <property
       name="dataSource"
       ref="screensaverDataSource" />
@@ -57,10 +62,15 @@
         id="org.hibernate.cfg.ImprovedNamingStrategy.INSTANCE"
         class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean" />
     </property>
-    <!-- Release database connections after a transaction completes.  This is critical for us, since we use long-conversation Hibernate sessions, which span numerous HTTP requests; so we can't keep database connections tied up indefinitely.  -->
+    <!-- Release database connections after a transaction completes.  -->
     <property name="hibernateProperties">
       <props><prop key="hibernate.connection.release_mode">after_transaction</prop></props>
     </property>
+    <property name="eventListeners">
+			<map>	
+				<entry key="post-load" value-ref="dataAccessPolicyInjectorPostLoadEventListener"/>
+			</map>
+		</property>
   </bean>
 
   <!-- The bean through which our application will access Hibernate, and thus our persistent data.
@@ -110,7 +120,6 @@
       specifying other AOP advice -->
   </bean>
 
-  <!-- unrestricted data access dao; special case DAO only for Login JSF backing bean -->
   <bean
     id="transactionalDao"
     parent="screensaverTransactionalBeanBaseDefinition">
@@ -121,17 +130,8 @@
   </bean>
   
   <alias name="transactionalDao" alias="unrestrictedDao" />
+  <alias name="transactionalDao" alias="dao" />
 
-  <!-- restricted data access dao; this is the top-level DAO proxy, to be used by the application -->
-  <bean
-    id="dao"
-    parent="screensaverTransactionalBeanBaseDefinition">
-    <!-- The class/interface to be imbued with transactional qualities -->
-    <property
-      name="target"
-      ref="restrictedAccessDao" />
-  </bean>
-  
   <!-- The following (alternate) configuration allows for auto-proxying beans whose source code contains 
   JDK 1.5 @Transactional annotation. It enables automatic detection of Spring's @Transactional 
   annotation, leading to implicit proxies for beans containing that annotation. 
@@ -162,72 +162,7 @@
   
   <!-- end of transactional support configuration -->
   
-  <!-- Restricted Access DAO proxy configuration -->
-  
-  <bean id="restrictedAccessCollectionDaoMethodInterceptor"
-   class="edu.harvard.med.screensaver.db.RestrictedAccessCollectionDaoMethodInterceptor">
-   <property
-     name="dataAccessPolicy"
-     ref="dataAccessPolicy" />
-  </bean>
-
-  <bean id="restrictedAccessEntityDaoMethodInterceptor"
-   class="edu.harvard.med.screensaver.db.RestrictedAccessEntityDaoMethodInterceptor">
-   <property
-     name="dataAccessPolicy"
-     ref="dataAccessPolicy" />
-  </bean>
-
-  <bean id="restrictedAccessCollectionDaoAdvisor"
-   class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
-   <property name="advice">
-    <ref local="restrictedAccessCollectionDaoMethodInterceptor" />
-   </property>
-   <property name="perl5" value="true"/>
-   <property name="patterns">
-    <list>
-     <value>.*DAO.find.*Entities.*</value>
-     <value>.*DAO.findAll.*</value>
-     <value>.*DAO.findCandidateCollaborators</value>
-     <value>.*DAO.findWellsForPlate</value>
-     <value>.*DAO.findLibraries.*</value>
-    </list>
-   </property>
-  </bean>
-  
-  <bean id="restrictedAccessEntityDaoAdvisor"
-   class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
-   <property name="advice">
-    <ref local="restrictedAccessEntityDaoMethodInterceptor" />
-   </property>
-   <property name="perl5" value="true"/>
-   <property name="patterns">
-    <list>
-     <value>.*DAO.delete.*</value>
-     <value>.*DAO.findEntity.*</value>
-     <value>.*DAO.findWell</value>
-     <value>.*DAO.findSilencingReagent</value>
-     <value>.*DAO.findLibraryWithPlate</value>
-    </list>
-   </property>
-  </bean>
-  
-  <bean id="restrictedAccessDao"
-    class="org.springframework.aop.framework.ProxyFactoryBean">
-    <property name="proxyInterfaces" value="edu.harvard.med.screensaver.db.DAO"/>
-    <property name="target" ref="daoImpl"/>
-    <property name="interceptorNames">
-      <list>
-        <value>restrictedAccessCollectionDaoAdvisor</value>
-        <value>restrictedAccessEntityDaoAdvisor</value>
-      </list>
-    </property>
-  </bean>
-
-  <!-- end of Restricted Access DAO proxy configuration -->
-  
-  
-  
+ 
   
   <bean id="schemaUtil" class="edu.harvard.med.screensaver.db.SchemaUtil">
     <property name="sessionFactoryBeanId">

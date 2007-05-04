@@ -72,7 +72,7 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
   
   @Override
   protected String[] getConfigLocations() {
-    return new String[] { "spring-context-test-authentication.xml" } ;
+    return new String[] { "spring-context-test-security.xml" } ;
   }
 
   @Override

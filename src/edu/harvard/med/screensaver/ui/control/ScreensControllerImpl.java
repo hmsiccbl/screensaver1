@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -203,13 +204,22 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       public void runTransaction()
       {
         List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
-        for (Screen screen : screens) {
-          _dao.need(screen, 
-                    "screenResult", 
-                    // TODO: only need this for screensAdmin or
-                    // readEverythingAdmin; query would be faster if not
-                    // requested
-          "statusItems"); 
+        for (Iterator iter = screens.iterator(); iter.hasNext();) {
+          Screen screen = (Screen) iter.next();
+          // note: it would be odd if the data access policy restricted
+          // access to the screens we've determined to be "my screens",
+          // above, but we'll filter anyway, just to be safe.
+          if (screen.isRestricted()) {
+            iter.remove();
+          }
+          else {
+            _dao.need(screen, 
+                      "screenResult", 
+                      // TODO: only need this for screensAdmin or
+                      // readEverythingAdmin users; query would be faster if not
+                      // requested
+                      "statusItems"); 
+          }
         }
         _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens,
                                                                        ScreensControllerImpl.this, 
@@ -241,9 +251,17 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
             showMessage("screens.noScreensForUser");
           }
           else {
-            for (Screen screen : screens) {
-              _dao.need(screen, 
-              "screenResult");
+            for (Iterator iter = screens.iterator(); iter.hasNext();) {
+              Screen screen = (Screen) iter.next();
+              // note: it would be odd if the data access policy restricted
+              // access to the screens we've determined to be "my screens",
+              // above, but we'll filter anyway, just to be safe.
+              if (screen.isRestricted()) {
+                iter.remove();
+              }
+              else {
+                _dao.need(screen, "screenResult");
+              }
             }
             _screensBrowser.setScreenSearchResults(new ScreenSearchResults(new ArrayList<Screen>(screens),
                                                                            ScreensControllerImpl.this, 
@@ -310,19 +328,13 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                     "hbnResultValueTypes.hbnDerivedTypes",
                     "hbnResultValueTypes.hbnTypesDerivedFrom");
 
-          ScreenResult permissionsAwareScreenResult = 
-            _dao.findEntityById(ScreenResult.class, 
-                                screen.getScreenResult() == null ? -1 : 
-                                  screen.getScreenResult().getEntityId());
-
           _screenViewer.setScreen(screen);
           _screenResultImporter.setScreen(screen);
-          _screenResultViewer.setScreen(screen);
-          _heatMapViewer.setScreenResult(permissionsAwareScreenResult);
-          _screenResultViewer.setScreenResult(permissionsAwareScreenResult);
-          if (permissionsAwareScreenResult != null &&
-            permissionsAwareScreenResult.getResultValueTypes().size() > 0) {
-            _screenResultViewer.setScreenResultSize(permissionsAwareScreenResult.getResultValueTypesList().get(0).getResultValues().size());
+          ScreenResult screenResult = screen.getScreenResult();
+          _heatMapViewer.setScreenResult(screenResult);
+          _screenResultViewer.setScreenResult(screenResult);
+          if (screenResult != null && screenResult.getResultValueTypes().size() > 0) {
+            _screenResultViewer.setScreenResultSize(screenResult.getResultValueTypesList().get(0).getResultValues().size());
           }
         }
       });

@@ -140,16 +140,6 @@ public class ScreenViewer extends AbstractBackingBean
     _screen.getCollaborators().contains(user);
   }
 
-  public ScreenResult getScreenResult()
-  {
-//    return _screen.getScreenResult();
-    if (_screen.getScreenResult() != null) {
-      // TODO: HACK: data-access-permissions aware
-      return _dao.findEntityById(ScreenResult.class, _screen.getScreenResult().getEntityId());
-    }
-    return null;
-  }
-
   public AssayReadoutType getNewAssayReadoutType()
   {
     return _newAssayReadoutType;

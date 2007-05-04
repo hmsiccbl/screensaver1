@@ -17,9 +17,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
+import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
+import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicyInjectorPostLoadEventListener;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 
@@ -306,6 +309,34 @@ public abstract class AbstractEntity implements Serializable
 //      log.debug("concrete entity class " + this.getClass().getSimpleName() + " not instrumented for visitor pattern!");
 //    }
     return null;
+  }
+  
+  private DataAccessPolicy _dataAccessPolicy;
+
+  /**
+   * Get whether this entity is restricted, based upon the data access policy
+   * that was provided (if any). It is up to the controller and/or UI layers to
+   * check for and determine how to handle restricted entities. In general, a
+   * restricted entity is one whose data cannot be displayed to the current
+   * user. However, the semantics of "restricted" is really defined by the data
+   * access policy that was set.
+   * @see DataAccessPolicyInjectorPostLoadEventListener 
+   */
+  public boolean isRestricted()
+  {
+    if (_dataAccessPolicy == null) {
+      return false;
+    }
+    Boolean isAllowed = (Boolean) acceptVisitor(_dataAccessPolicy);
+    return isAllowed == null ? true : !isAllowed;
+  }
+  
+  /**
+   * @see DataAccessPolicyInjectorPostLoadEventListener 
+   */
+  public void setDataAccessPolicy(DataAccessPolicy dataAccessPolicy) 
+  {
+    _dataAccessPolicy = dataAccessPolicy;
   }
 
   
