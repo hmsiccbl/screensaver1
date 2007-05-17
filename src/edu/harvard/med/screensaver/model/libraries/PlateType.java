@@ -23,15 +23,6 @@ public enum PlateType implements VocabularyTerm
 
   // the vocabulary
   
-  ABGENE("ABgene", 384, "CB", "PP"),
-  COSTAR("Costar", 96, "RB", "PS"),
-  EPPENDORF("Eppendorf", 384, "CB", "PP"),
-  GENETIX("Genetix", 384, "CB", "PP"),
-  MARSH("Marsh", 384, "VB", "PP"),
-  NUNC("Nunc", 96, "VB", "PS"),
-  ;
-  
-  // TODO: consider enums for auxiliary attributes
   // Legend:
   //
   //  RB - Round Bottom
@@ -40,6 +31,23 @@ public enum PlateType implements VocabularyTerm
   //
   //  PP - Polypropylene
   //  PS - Polystyrene
+
+  /*
+   * [2007-03-15] David Fletcher writes, "At one point for a very short while we
+   * were using ABgene conical bottom plates. Unfortunately when the plate type
+   * was changed to V bottomed plates, the old name carried over. Therefore
+   * ABgene 384 CB PP is the name we use in the software for our current
+   * V-bottomed plates."
+   */
+  ABGENE("ABgene", 384, "CB", "PP"), 
+  COSTAR("Costar", 96, "RB", "PS"),
+  EPPENDORF("Eppendorf", 384, "CB", "PP"),
+  GENETIX("Genetix", 384, "CB", "PP"),
+  MARSH("Marsh", 384, "VB", "PP"),
+  NUNC("Nunc", 96, "VB", "PS"),
+  ;
+  
+  // TODO: consider enums for auxiliary attributes
 
  
   // static inner class
