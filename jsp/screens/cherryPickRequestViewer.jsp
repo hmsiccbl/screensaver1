@@ -160,11 +160,11 @@ TODO:
 						escape="false" />
 					<t:outputText
 						value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellApproved}"
-						rendered="#{!cherryPickRequestViewer.editMode && empty cherryPickRequestViewer.cherryPickRequest.volumeApprovedBy}"
+						rendered="#{(!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.allocated) && empty cherryPickRequestViewer.cherryPickRequest.volumeApprovedBy}"
 						styleClass="dataText" />
 					<t:outputText
 						value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellApproved} (approved by #{cherryPickRequestViewer.cherryPickRequest.volumeApprovedBy.fullNameFirstLast} on #{cherryPickRequestViewer.dateVolumeApproved})"
-						rendered="#{!cherryPickRequestViewer.editMode && !empty cherryPickRequestViewer.cherryPickRequest.volumeApprovedBy}"
+						rendered="#{(!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.allocated) && !empty cherryPickRequestViewer.cherryPickRequest.volumeApprovedBy}"
 						styleClass="dataText" />
 					<t:panelGroup
 						rendered="#{cherryPickRequestViewer.editMode && !cherryPickRequestViewer.cherryPickRequest.allocated}">
