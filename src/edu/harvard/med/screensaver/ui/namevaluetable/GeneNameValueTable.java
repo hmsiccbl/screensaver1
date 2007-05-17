@@ -48,6 +48,7 @@ public class GeneNameValueTable extends NameValueTable
   
   private LibrariesController _librariesController;
   private Gene _gene;
+  private boolean _isEmbedded;
   private List<String> _names = new ArrayList<String>();
   private List<Object> _values = new ArrayList<Object>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
@@ -58,12 +59,18 @@ public class GeneNameValueTable extends NameValueTable
   
   public GeneNameValueTable(LibrariesController librariesController, Gene gene)
   {
+    this(librariesController, gene, false);
+  }
+
+  public GeneNameValueTable(LibrariesController librariesController, Gene gene, boolean isEmbedded)
+  {
     _librariesController = librariesController;
     _gene = gene;
+    _isEmbedded = isEmbedded;
     initializeLists(gene);
     setDataModel(new ListDataModel(_values));
   }
-
+  
   @Override
   public int getNumRows()
   {
@@ -97,9 +104,12 @@ public class GeneNameValueTable extends NameValueTable
   @Override
   public String getAction(int index, String value)
   {
-    String name = getName(index);
-    if (name.equals(GENE_NAME)) {
-      return _librariesController.viewGene(_gene, null);
+    // only link from gene name to gene viewer page when embedded in the well viewer
+    if (_isEmbedded) {
+      String name = getName(index);
+      if (name.equals(GENE_NAME)) {
+        return _librariesController.viewGene(_gene, null);
+      }
     }
     // other fields do not have actions
     return null;
@@ -128,7 +138,7 @@ public class GeneNameValueTable extends NameValueTable
    */
   private void initializeLists(Gene gene)
   {
-    addItem(GENE_NAME, gene.getGeneName(), ValueType.COMMAND, "The name of the gene, as labelled in EntrezGene");
+    addItem(GENE_NAME, gene.getGeneName(), _isEmbedded ? ValueType.COMMAND : ValueType.TEXT, "The name of the gene, as labelled in EntrezGene");
     addItem(ENTREZGENE_ID, Integer.toString(gene.getEntrezgeneId()), ValueType.LINK, "The EntrezGene ID, a.k.a. Locus ID");
     addItem(ENTREZGENE_SYMBOL, gene.getEntrezgeneSymbol(), ValueType.TEXT, "The EntrezGene Gene Symbol");
     addItem(GENBANK_ACCESSION_NUMBERS, gene.getGenbankAccessionNumbers(), ValueType.LINK_LIST, "The GenBank Accession Numbers for the gene");

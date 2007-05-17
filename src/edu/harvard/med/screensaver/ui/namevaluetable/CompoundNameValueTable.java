@@ -56,6 +56,7 @@ public class CompoundNameValueTable extends NameValueTable
   
   private LibrariesController _librariesController;
   private Compound _compound;
+  private boolean _isEmbedded;
   private List<String> _names = new ArrayList<String>();
   private List<Object> _values = new ArrayList<Object>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
@@ -66,11 +67,21 @@ public class CompoundNameValueTable extends NameValueTable
   
   public CompoundNameValueTable(LibrariesController librariesController, Compound compound)
   {
+    this(librariesController, compound, false);
+  }
+  
+  public CompoundNameValueTable(
+    LibrariesController librariesController,
+    Compound compound,
+    boolean isEmbedded)
+  {
     _librariesController = librariesController;
     _compound = compound;
+    _isEmbedded = isEmbedded;
     initializeLists(compound);
     setDataModel(new ListDataModel(_values));
   }
+  
 
   @Override
   public int getNumRows()
@@ -105,9 +116,12 @@ public class CompoundNameValueTable extends NameValueTable
   @Override
   public String getAction(int index, String value)
   {
-    String name = getName(index);
-    if (name.equals(SMILES)) {
-      return _librariesController.viewCompound(_compound, null);
+    // only link to the compound viewer page from the smiles when embedded in the well viewer
+    if (_isEmbedded) {
+      String name = getName(index);
+      if (name.equals(SMILES)) {
+        return _librariesController.viewCompound(_compound, null);
+      }
     }
     // other fields do not have actions
     return null;
@@ -143,7 +157,7 @@ public class CompoundNameValueTable extends NameValueTable
    */
   private void initializeLists(Compound compound) {
     addItem(STRUCTURE, compound.getSmiles(), ValueType.IMAGE, "A 2D structure image of the compound");
-    addItem(SMILES, compound.getSmiles(), ValueType.COMMAND, "The SMILES string for the compound");
+    addItem(SMILES, compound.getSmiles(), _isEmbedded ? ValueType.LINK : ValueType.TEXT, "The SMILES string for the compound");
     addItem(INCHI, compound.getInchi(), ValueType.TEXT, "The InChI string for the compound");
     if (compound.getNumCompoundNames() > 0) {
       addItem(COMPOUND_NAMES, compound.getCompoundNames(),  ValueType.TEXT_LIST, "The various names the compound goes by");
