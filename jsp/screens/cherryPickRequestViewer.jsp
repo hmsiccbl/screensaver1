@@ -520,18 +520,20 @@ TODO:
 							styleClass="label" rendered="#{pages > 1}" />
 					</t:dataScroller>
 
-					<t:selectOneMenu id="labCherryPicksPerPage"
-						value="#{cherryPickRequestViewer.labCherryPicksPerPage.value}"
-						onchange="document.getElementById('updateLabCherryPicksPerPage').click();"
-						styleClass="data">
-						<f:selectItems
-							value="#{cherryPickRequestViewer.labCherryPicksPerPage.selectItems}" />
-					</t:selectOneMenu>
-					<t:outputText value=" per page" styleClass="label" />
-					<t:commandButton id="updateLabCherryPicksPerPage" forceId="true"
-						value="update lab cherry picks per page"
-						style="display: none" />
-					
+					<t:panelGroup
+						rendered="#{!empty cherryPickRequestViewer.cherryPickRequest.labCherryPicks}">
+						<t:selectOneMenu id="labCherryPicksPerPage"
+							value="#{cherryPickRequestViewer.labCherryPicksPerPage.value}"
+							onchange="document.getElementById('updateLabCherryPicksPerPage').click();"
+							styleClass="data">
+							<f:selectItems
+								value="#{cherryPickRequestViewer.labCherryPicksPerPage.selectItems}" />
+						</t:selectOneMenu>
+						<t:outputText value=" per page" styleClass="label" />
+						<t:commandButton id="updateLabCherryPicksPerPage" forceId="true"
+							value="update lab cherry picks per page" style="display: none" />
+					</t:panelGroup>
+
 				</t:panelGrid>
 
 				<t:div>
