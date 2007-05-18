@@ -116,6 +116,7 @@ public class CompoundNameValueTable extends NameValueTable
   @Override
   public String getAction(int index, String value)
   {
+    log.error("hi from CNV.getAction: " + index + ":" + value);
     // only link to the compound viewer page from the smiles when embedded in the well viewer
     if (_isEmbedded) {
       String name = getName(index);
@@ -157,7 +158,7 @@ public class CompoundNameValueTable extends NameValueTable
    */
   private void initializeLists(Compound compound) {
     addItem(STRUCTURE, compound.getSmiles(), ValueType.IMAGE, "A 2D structure image of the compound");
-    addItem(SMILES, compound.getSmiles(), _isEmbedded ? ValueType.LINK : ValueType.TEXT, "The SMILES string for the compound");
+    addItem(SMILES, compound.getSmiles(), _isEmbedded ? ValueType.COMMAND : ValueType.TEXT, "The SMILES string for the compound");
     addItem(INCHI, compound.getInchi(), ValueType.TEXT, "The InChI string for the compound");
     if (compound.getNumCompoundNames() > 0) {
       addItem(COMPOUND_NAMES, compound.getCompoundNames(),  ValueType.TEXT_LIST, "The various names the compound goes by");
