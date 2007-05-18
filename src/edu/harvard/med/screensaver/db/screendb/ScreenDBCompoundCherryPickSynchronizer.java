@@ -35,6 +35,7 @@ import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.CompoundCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
+import edu.harvard.med.screensaver.model.screens.LegacyCherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -199,13 +200,7 @@ public class ScreenDBCompoundCherryPickSynchronizer
   {
     String filename = getCherryPickFilename(visitId);
     // TODO: is EPPENDORF the correct plate type here?
-    CherryPickAssayPlate assayPlate = new CherryPickAssayPlate(request, 1, 0, PlateType.EPPENDORF);
-    if (filename == null) {
-      assayPlate.setComments("ScreenDB did not have a filename for this assay plate.");
-    }
-    else {
-      assayPlate.setComments("ScreenDB filename for this assay plate is \"" + filename + "\".");
-    }
+    LegacyCherryPickAssayPlate assayPlate = new LegacyCherryPickAssayPlate(request, 1, 0, PlateType.EPPENDORF, filename);
     assayPlate.setCherryPickLiquidTransfer(liquidTransfer);
     return assayPlate;
   }

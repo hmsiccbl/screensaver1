@@ -28,7 +28,8 @@ import org.apache.log4j.Logger;
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- * @hibernate.class lazy="false"
+ * @hibernate.class lazy="false" discriminator-value="false"
+ * @hibernate.discriminator column="is_legacy" type="boolean" not-null="true"
  */
 public class CherryPickAssayPlate extends AbstractEntity implements Comparable<CherryPickAssayPlate>
 {
@@ -50,7 +51,6 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   // *library*; we shall enforce at the business tier, rather than the
   // schema-level (this design is denormalized)
   private PlateType _plateType;
-  private String _comments;
   private CherryPickLiquidTransfer _cherryPickLiquidTransfer;
 
   private transient int _logicalAssayPlateCount;
@@ -147,19 +147,6 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
       _logicalAssayPlateCount = logicalAssayPlates;
     }
     return _name;
-  }
-
-  /**
-   * @hibernate.property type="text"
-   */
-  public String getComments()
-  {
-    return _comments;
-  }
-
-  public void setComments(String comments)
-  {
-    _comments = comments;
   }
 
   /**
@@ -296,7 +283,17 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
           this._attemptOrdinal > that._attemptOrdinal ? 1 : 0;
   }
 
-
+  @Override
+  public Object clone() 
+  {
+    return 
+    new CherryPickAssayPlate(getCherryPickRequest(),
+                             getPlateOrdinal(), 
+                             getAttemptOrdinal() + 1,
+                             getAssayPlateType());
+  }
+  
+  
   // protected methods
 
   @Override
@@ -358,7 +355,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   /**
    * @motivation for hibernate
    */
-  private CherryPickAssayPlate()
+  protected CherryPickAssayPlate()
   {}
 
   /**
@@ -419,5 +416,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   {
     _plateType = plateType;
   }
+
+  
 }
 

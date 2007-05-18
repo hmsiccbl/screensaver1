@@ -640,12 +640,12 @@ TODO:
 
 					<t:panelGroup>
 						<t:commandButton id="recordLiquidTransfer"
-							value="Record Selected Plates as Created"
+							value="Record Selected Plates as 'Plated'"
 							action="#{cherryPickRequestViewer.recordLiquidTransferForSelectedAssayPlates}"
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 							styleClass="command" />
 						<t:commandButton id="recordFailureOfAssayPlates"
-							value="Record Selected Plates as Failed"
+							value="Record Selected Plates as 'Failed'"
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 							action="#{cherryPickRequestViewer.recordFailureOfAssayPlates}"
 							styleClass="command" />

@@ -39,6 +39,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
+import edu.harvard.med.screensaver.model.screens.LegacyCherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -737,7 +738,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean
         }
       }
       else if (validationType.equals(VALIDATE_SELECTED_PLATES_FOR_LIQUID_TRANSFER)) {
-        if (assayPlate.getLabCherryPicks().size() == 0) {
+        if (assayPlate.getLabCherryPicks().size() == 0 && 
+          !(assayPlate instanceof LegacyCherryPickAssayPlate)) {
           // this can happen if an assay plate failed, was re-run, but no lab cherry picks could be allocated for the new plate 
           iter.remove();
           showMessageForComponent("cherryPicks.assayPlateEmpty", 

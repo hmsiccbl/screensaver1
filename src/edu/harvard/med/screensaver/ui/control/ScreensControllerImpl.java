@@ -1207,10 +1207,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
             // original plate's lab cherry picks, preserving their original well layout,
             // and allocated anew.
             // TODO: protect against race condition (should enforce at schema level)
-            CherryPickAssayPlate newAssayPlate = new CherryPickAssayPlate(assayPlate.getCherryPickRequest(),
-                                                                          assayPlate.getPlateOrdinal(), 
-                                                                          assayPlate.getAttemptOrdinal() + 1,
-                                                                          assayPlate.getAssayPlateType());
+            CherryPickAssayPlate newAssayPlate = (CherryPickAssayPlate) assayPlate.clone();
             for (LabCherryPick labCherryPick : assayPlate.getLabCherryPicks()) {
               LabCherryPick newLabCherryPick = new LabCherryPick(labCherryPick.getScreenerCherryPick(),
                                                                  labCherryPick.getSourceWell());

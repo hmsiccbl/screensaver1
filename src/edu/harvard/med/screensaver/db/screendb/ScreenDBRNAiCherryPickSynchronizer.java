@@ -19,8 +19,8 @@ import java.util.StringTokenizer;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
+import edu.harvard.med.screensaver.model.screens.LegacyCherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -152,11 +152,11 @@ public class ScreenDBRNAiCherryPickSynchronizer
       if (filename.endsWith("\r")) {
         filename = filename.substring(0, filename.length() - 1);
       }
-      CherryPickAssayPlate assayPlate = new CherryPickAssayPlate(request, 
-                                                                 plateOrdinal, 
-                                                                 0,
-                                                                 RNAiCherryPickRequest.RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE);
-      assayPlate.setComments("ScreenDB filename for this assay plate is \"" + filename + "\".");
+      LegacyCherryPickAssayPlate assayPlate = new LegacyCherryPickAssayPlate(request, 
+                                                                             plateOrdinal, 
+                                                                             0,
+                                                                             RNAiCherryPickRequest.RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE,
+                                                                             filename);
       assayPlate.setCherryPickLiquidTransfer(liquidTransfer);
       plateOrdinal ++;
     }
