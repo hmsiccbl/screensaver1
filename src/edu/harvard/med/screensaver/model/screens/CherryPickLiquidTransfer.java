@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
@@ -43,7 +44,7 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
 
   // instance data members
 
-  private boolean _successful;
+  private CherryPickLiquidTransferStatus _status;
   private Set<CherryPickAssayPlate> _cherryPickAssayPlates = new HashSet<CherryPickAssayPlate>();
 
 
@@ -53,10 +54,13 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
                                   Date dateCreated,
                                   Date dateOfActivity,
                                   CherryPickRequest cherryPickRequest,
-                                  boolean successful) throws DuplicateEntityException
+                                  CherryPickLiquidTransferStatus status) throws DuplicateEntityException
   {
     super(cherryPickRequest.getScreen(), performedBy, dateCreated, dateOfActivity);
-    _successful = successful;
+    if (status == null) {
+      throw new NullPointerException("status is required");
+    }
+    _status = status;
   }
 
   public CherryPickLiquidTransfer(ScreensaverUser performedBy,
@@ -64,7 +68,7 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
                                   Date dateOfActivity,
                                   CherryPickRequest cherryPickRequest) throws DuplicateEntityException
   {
-    this(performedBy, dateCreated, dateOfActivity, cherryPickRequest, true);
+    this(performedBy, dateCreated, dateOfActivity, cherryPickRequest, CherryPickLiquidTransferStatus.SUCCESSFUL);
   }
 
   @Override
@@ -76,13 +80,32 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
   }
 
   /**
-   * @hibernate.property type="boolean" not-null="true"
-   * @return
+   * @hibernate.property
+   *   type="edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransferStatus$UserType"
+   *   not-null="true"
    */
   @ImmutableProperty
+  public CherryPickLiquidTransferStatus getStatus()
+  {
+    return _status;
+  }
+
+  @DerivedEntityProperty
   public boolean isSuccessful()
   {
-    return _successful;
+    return _status.equals(CherryPickLiquidTransferStatus.SUCCESSFUL);
+  }
+
+  @DerivedEntityProperty
+  public boolean isFailed()
+  {
+    return _status.equals(CherryPickLiquidTransferStatus.FAILED);
+  }
+
+  @DerivedEntityProperty
+  public boolean isCanceled()
+  {
+    return _status.equals(CherryPickLiquidTransferStatus.CANCELED);
   }
 
   @ToManyRelationship(inverseProperty="cherryPickLiquidTransfers")
@@ -125,9 +148,9 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
     return _cherryPickAssayPlates;
   }
 
-  private void setSuccessful(Boolean successful)
+  private void setStatus(CherryPickLiquidTransferStatus status)
   {
-    _successful = successful;
+    _status = status;
   }
 
   private void setHbnCherryPickAssayPlates(Set<CherryPickAssayPlate> cherryPickAssayPlates)

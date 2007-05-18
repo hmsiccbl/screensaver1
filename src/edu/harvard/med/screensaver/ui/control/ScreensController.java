@@ -154,10 +154,6 @@ public interface ScreensController
   public String deallocateCherryPicks(CherryPickRequest cherryPickRequest);
 
   @UIControllerMethod
-  public String deallocateCherryPicksByPlate(CherryPickRequest cherryPickRequest,
-                                             Set<CherryPickAssayPlate> assayPlates);
-
-  @UIControllerMethod
   public String plateMapCherryPicks(CherryPickRequest cherryPickRequest);
 
   @UIControllerMethod
@@ -170,6 +166,12 @@ public interface ScreensController
                                                    Date dateOfLiquidTransfer,
                                                    String comments);
                                   
+  @UIControllerMethod
+  public String cancelAndDeallocateCherryPicksByPlate(CherryPickRequest cherryPickRequest,
+                                                      Set<CherryPickAssayPlate> assayPlates,
+                                                      ScreensaverUser performedBy,
+                                                      Date dateOfLiquidTransfer,
+                                                      String comments);
 
   @UIControllerMethod
   public String createNewCherryPickRequestForUnfulfilledCherryPicks(CherryPickRequest cherryPickRequest);

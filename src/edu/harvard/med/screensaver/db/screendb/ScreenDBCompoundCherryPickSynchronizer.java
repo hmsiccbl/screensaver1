@@ -186,8 +186,7 @@ public class ScreenDBCompoundCherryPickSynchronizer
       _userSynchronizer.getScreeningRoomUserForScreenDBUserId(resultSet.getInt("performed_by")),
       resultSet.getDate("date_created"),
       resultSet.getDate("date_of_visit"), // date_of_visit => CPLiquidTransfer.dateOfActivity
-      request,
-      true);
+      request);
     liquidTransfer.setMicroliterVolumeTransferedPerWell(volumeTransferred);
     return liquidTransfer;
   }

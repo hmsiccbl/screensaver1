@@ -48,7 +48,7 @@ form {
 
 .footer {
 	text-align: center;
- 	color: graytext;
+	color: graytext;
 	font-size: small;
 }
 
@@ -98,6 +98,12 @@ hr {
 /* for panelGroup containing horizontal sequence of command buttons (and possibly input controls) */
 .commandPanel {
 	float: left;
+}
+
+/* for panelGrid that is being used to visually associate a set of related components */
+.groupingPanel {
+	border-style: groove;
+	border-width: 2px;
 }
 
 .searchResultsCommandPanel {
@@ -237,6 +243,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 .menuAndContent {
 	/* using fixed table layout prevents horiz scrollbar to appear on IE when content column width is at minimum */
 	/*	table-layout: fixed;*/
+	
 }
 
 .menuColumn,.contentColumn {
@@ -263,7 +270,8 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	font-weight: bold;
 }
 
-a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited 	{
+a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited
+	{
 	color: white;
 	text-decoration: none;
 	vertical-align: bottom;

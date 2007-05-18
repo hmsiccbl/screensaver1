@@ -561,6 +561,24 @@ TODO:
 				<t:outputText value="<none>" styleClass="label"
 					rendered="#{!cherryPickRequestViewer.cherryPickRequest.mapped}" />
 
+				<t:panelGroup styleClass="commandPanel"
+					rendered="#{cherryPickRequestViewer.editable && cherryPickRequestViewer.cherryPickRequest.mapped}">
+					<t:commandButton id="downloadPlateMappingFiles"
+						value="Download Files for Selected Plates"
+						action="#{cherryPickRequestViewer.downloadPlateMappingFilesForSelectedAssayPlates}"
+						disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
+						styleClass="command" />
+					<t:outputLabel for="showFailedAssayPlates"
+						value="Show all failed plates:" styleClass="label" />
+					<t:selectBooleanCheckbox id="showFailedAssayPlates"
+						value="#{cherryPickRequestViewer.showFailedAssayPlates}"
+						valueChangeListener="#{cherryPickRequestViewer.toggleShowFailedAssayPlates}"
+						onchange="javascript:document.getElementById('toggleShowFailedAssayPlatesCommand').click()"
+						immediate="true" styleClass="command" />
+					<t:commandButton id="toggleShowFailedAssayPlatesCommand"
+						forceId="true" immediate="true" style="display:none" />
+				</t:panelGroup>
+
 				<t:outputText
 					value="WARNING: Some cherry pick plates will be created from the same source plate!  Be aware that you will need to reload one or more source plates."
 					rendered="#{cherryPickRequestViewer.cherryPickRequest.sourcePlateReloadRequired}"
@@ -592,39 +610,11 @@ TODO:
 					</t:columns>
 				</t:dataTable>
 
-				<t:panelGrid id="selectedAssayPlatesCommandPanel" columns="1"
-					styleClass="commandPanel"
+				<t:panelGrid id="createCherryPickLiquidTransferCommandPanel"
+					columns="1" styleClass="commandPanel groupingPanel"
 					rendered="#{cherryPickRequestViewer.editable && cherryPickRequestViewer.cherryPickRequest.mapped}">
 
 					<t:panelGroup>
-						<t:outputLabel for="showFailedAssayPlates"
-							value="Show all failed plates:" styleClass="label" />
-						<t:selectBooleanCheckbox id="showFailedAssayPlates"
-							value="#{cherryPickRequestViewer.showFailedAssayPlates}"
-							valueChangeListener="#{cherryPickRequestViewer.toggleShowFailedAssayPlates}"
-							onchange="javascript:document.getElementById('toggleShowFailedAssayPlatesCommand').click()"
-							immediate="true"
-							styleClass="command" />
-						<t:commandButton id="toggleShowFailedAssayPlatesCommand"
-							forceId="true"
-							immediate="true"
-							style="display:none" />
-					</t:panelGroup>
-
-					<t:panelGroup>
-						<t:commandButton id="downloadPlateMappingFiles"
-							value="Download Files for Selected Plates"
-							action="#{cherryPickRequestViewer.downloadPlateMappingFilesForSelectedAssayPlates}"
-							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
-							styleClass="command" />
-						<t:commandButton id="cancelAssayPlates"
-							value="Cancel Reservations for Selected Plates"
-							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
-							action="#{cherryPickRequestViewer.deallocateCherryPicksByPlate}"
-							styleClass="command" />
-					</t:panelGroup>
-
-					<t:panelGrid columns="2">
 						<t:outputLabel for="liquidTransferPerformedBy"
 							value="Performed by:" styleClass="label" />
 						<t:selectOneMenu id="liquidTransferPerformedBy"
@@ -636,17 +626,17 @@ TODO:
 						</t:selectOneMenu>
 						<t:outputLabel for="dateOfLiquidTransfer" value="Date:"
 							styleClass="label" />
-						<t:inputDate id="dateOfLiquidTransfer"
+						<t:inputDate id="dateOfLiquidTransfer" 
 							value="#{cherryPickRequestViewer.dateOfLiquidTransfer}"
 							popupCalendar="true"
-							rendered="#{cherryPickRequestViewer.editable}"
+							rendered="#{cherryPickRequestViewer.editable}" 
 							styleClass="inputText" />
 						<t:outputLabel for="comments" value="Comments:" styleClass="label" />
 						<t:inputText id="comments"
 							value="#{cherryPickRequestViewer.liquidTransferComments}"
 							rendered="#{cherryPickRequestViewer.editable}"
 							styleClass="inputText" />
-					</t:panelGrid>
+					</t:panelGroup>
 
 					<t:panelGroup>
 						<t:commandButton id="recordLiquidTransfer"
@@ -658,6 +648,11 @@ TODO:
 							value="Record Selected Plates as Failed"
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 							action="#{cherryPickRequestViewer.recordFailureOfAssayPlates}"
+							styleClass="command" />
+						<t:commandButton id="cancelAssayPlates"
+							value="Cancel Selected Plates"
+							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
+							action="#{cherryPickRequestViewer.deallocateCherryPicksByPlate}"
 							styleClass="command" />
 					</t:panelGroup>
 

@@ -55,8 +55,8 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
 
   private transient int _logicalAssayPlateCount;
   private transient String _name;
-  private boolean _isCanceled;
 
+  
   // public constructors and methods
 
   public CherryPickAssayPlate(CherryPickRequest cherryPickRequest,
@@ -184,36 +184,16 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
     return _labCherryPicks.add(labCherryPick);
   }
   
-  public void cancel()
-  {
-    if (isPlated()) {
-      throw new BusinessRuleViolationException("cannot cancel an assay plate that has been plated");
-    }
-    if (isFailed()) {
-      throw new BusinessRuleViolationException("cannot cancel an assay plate that has been marked as failed");
-    }
-    for (LabCherryPick labCherryPick : getLabCherryPicks()) {
-      // note: it is okay to cancel a plate that has some (or all) lab cherry
-      // picks that are unallocated
-      if (labCherryPick.isAllocated()) {
-        labCherryPick.setAllocated(null);
-      }
-    }
-    _isCanceled = true;
-  }
-  
   @DerivedEntityProperty
   public String getStatusLabel() 
   {
     return isPlated() ? "Plated" : isFailed() ? "Failed" : isCanceled() ? "Canceled" : "Not Plated";
   }
 
-  /**
-   * @hibernate.property type="boolean" not-null="true"
-   */
+  @DerivedEntityProperty
   public boolean isCanceled()
   {
-    return _isCanceled;
+    return _cherryPickLiquidTransfer != null && _cherryPickLiquidTransfer.isCanceled();
   }
   
   @DerivedEntityProperty
@@ -225,7 +205,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   @DerivedEntityProperty
   public boolean isFailed()
   {
-    return _cherryPickLiquidTransfer != null && !_cherryPickLiquidTransfer.isSuccessful();
+    return _cherryPickLiquidTransfer != null && _cherryPickLiquidTransfer.isFailed();
   }
 
   /**
@@ -263,10 +243,15 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
 
   public void setCherryPickLiquidTransfer(CherryPickLiquidTransfer cherryPickLiquidTransfer)
   {
-    if (_cherryPickLiquidTransfer != null
-        && _cherryPickLiquidTransfer.equals(cherryPickLiquidTransfer)) {
-      // already set to the specified cherryPickLiquidTransfer
-      return;
+    if (_cherryPickLiquidTransfer != null) {
+      if (_cherryPickLiquidTransfer.equals(cherryPickLiquidTransfer)) {
+        // already set to the specified cherryPickLiquidTransfer
+        return;
+      }
+      String requestedStatus = cherryPickLiquidTransfer.getStatus().getValue().toLowerCase();
+      throw new BusinessRuleViolationException("cannot mark assay plate as '" + 
+                                               requestedStatus + "' since it is already " +
+                                               getStatusLabel());
     }
     if (_cherryPickLiquidTransfer != null) {
       _cherryPickLiquidTransfer.getHbnCherryPickAssayPlates()
@@ -433,11 +418,6 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   private void setAssayPlateType(PlateType plateType)
   {
     _plateType = plateType;
-  }
-
-  private void setCanceled(boolean isCanceled)
-  {
-    _isCanceled = isCanceled;
   }
 }
 

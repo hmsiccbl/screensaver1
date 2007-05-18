@@ -646,8 +646,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     if (!validateSelectedAssayPlates(VALIDATE_SELECTED_PLATES_FOR_DEALLOCATION)) {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    return _screensController.deallocateCherryPicksByPlate(_cherryPickRequest,
-                                                           getSelectedAssayPlates());
+    return _screensController.cancelAndDeallocateCherryPicksByPlate(_cherryPickRequest,
+                                                                    getSelectedAssayPlates(),
+                                                                    getLiquidTransferPerformedBy().getSelection(),
+                                                                    getDateOfLiquidTransfer(),
+                                                                    getLiquidTransferComments());
   }
   
   public String plateMapCherryPicks()

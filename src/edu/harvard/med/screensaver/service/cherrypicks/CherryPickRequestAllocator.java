@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.service.cherrypicks;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,8 +25,11 @@ import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
+import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransferStatus;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
@@ -131,17 +135,37 @@ public class CherryPickRequestAllocator
     });
   }
   
-  public void deallocateAssayPlates(final CherryPickRequest cherryPickRequestIn,
-                                    final Set<CherryPickAssayPlate> assayPlates)
+  public void cancelAndDeallocateAssayPlates(final CherryPickRequest cherryPickRequestIn,
+                                             final Set<CherryPickAssayPlate> assayPlates,
+                                             final ScreensaverUser performedByIn,
+                                             final Date dateOfLiquidTransfer,
+                                             final String comments)
   {
     _dao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction() 
       {
         CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
+        ScreensaverUser performedBy = _dao.reloadEntity(performedByIn);
+        CherryPickLiquidTransfer cplt = new CherryPickLiquidTransfer(performedBy,
+                                                                     new Date(),
+                                                                     dateOfLiquidTransfer,
+                                                                     cherryPickRequest,
+                                                                     CherryPickLiquidTransferStatus.CANCELED);
+        cplt.setComments(comments);
+        // note: by iterating through cherryPickRequest's active assay plates, rather than the 
+        // method assayPlates method arg, we are manipulating Hibernate-managed persistent entities, 
+        // rather than deatch entities 
         for (CherryPickAssayPlate assayPlate : cherryPickRequest.getActiveCherryPickAssayPlates()) {
           if (assayPlates.contains(assayPlate)) {
-            assayPlate.cancel();
+            for (LabCherryPick labCherryPick : assayPlate.getLabCherryPicks()) {
+              // note: it is okay to cancel a plate that has some (or all) lab cherry
+              // picks that are unallocated
+              if (labCherryPick.isAllocated()) {
+                labCherryPick.setAllocated(null);
+              }
+            }
+            assayPlate.setCherryPickLiquidTransfer(cplt);
           }
         }
       }

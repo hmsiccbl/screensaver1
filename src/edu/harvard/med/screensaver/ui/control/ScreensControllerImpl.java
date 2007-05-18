@@ -35,6 +35,7 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
+import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransferStatus;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.InvalidCherryPickWellException;
@@ -56,9 +57,7 @@ import edu.harvard.med.screensaver.service.libraries.rnai.LibraryPoolToDuplexWel
 import edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
-import edu.harvard.med.screensaver.ui.screens.CherryPickRequestFinder;
 import edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer;
-import edu.harvard.med.screensaver.ui.screens.ScreenFinder;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreensBrowser;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
@@ -1068,14 +1067,21 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   }
 
   @UIControllerMethod
-  public String deallocateCherryPicksByPlate(CherryPickRequest cherryPickRequest,
-                                             Set<CherryPickAssayPlate> assayPlates)
+  public String cancelAndDeallocateCherryPicksByPlate(CherryPickRequest cherryPickRequest,
+                                                      Set<CherryPickAssayPlate> assayPlates,
+                                                      ScreensaverUser performedBy,
+                                                      Date dateOfLiquidTransfer,
+                                                      String comments)
   {
     logUserActivity("deallocateCherryPicksByPlate for " + cherryPickRequest + 
                     " for plates " + assayPlates);
 
     try {
-      _cherryPickRequestAllocator.deallocateAssayPlates(cherryPickRequest, assayPlates);
+      _cherryPickRequestAllocator.cancelAndDeallocateAssayPlates(cherryPickRequest,
+                                                                 assayPlates,
+                                                                 performedBy,
+                                                                 dateOfLiquidTransfer,
+                                                                 comments);
     }
     catch (ConcurrencyFailureException e) {
       showMessage("concurrentModificationConflict");
@@ -1268,7 +1274,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                                                                                new Date(),
                                                                                dateOfLiquidTransfer,
                                                                                cherryPickRequest,
-                                                                               success);
+                                                                               success ? CherryPickLiquidTransferStatus.SUCCESSFUL : CherryPickLiquidTransferStatus.FAILED);
         liquidTransfer.setComments(comments);
         for (CherryPickAssayPlate assayPlate : selectedAssayPlates) {
           if (!assayPlate.getCherryPickRequest().equals(cherryPickRequest)) {
