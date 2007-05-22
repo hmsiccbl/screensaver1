@@ -18,8 +18,16 @@ import java.util.Map;
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
+import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -221,17 +229,93 @@ public class SimpleDAOTest extends AbstractSpringTest
     assertNull(compound2);
   }
   
-  public void testFindEntitiesByPropertyPattern()
+//  public void testFindEntitiesByPropertyPattern()
+//  {
+//    dao.defineEntity(Library.class, "npln1", "sn1", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 1, 50);
+//    dao.defineEntity(Library.class, "npln2", "sn2", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 51, 100);
+//    dao.defineEntity(Library.class, "ln3", "sn3", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 101, 150);
+//    dao.defineEntity(Library.class, "npln4", "sn4", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 151, 200);
+//    dao.defineEntity(Library.class, "ln5", "sn5", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 201, 250);
+//    
+//    assertEquals(3, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "npln*").size());
+//    assertEquals(2, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "ln*").size());
+//    assertEquals(5, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "*ln*").size());
+//    assertEquals(0, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "ZZZZZZZZZ*").size());
+//  }
+  
+  public void testFindEntitiesByPropertyWithInflation()
   {
-    dao.defineEntity(Library.class, "npln1", "sn1", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 1, 50);
-    dao.defineEntity(Library.class, "npln2", "sn2", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 51, 100);
-    dao.defineEntity(Library.class, "ln3", "sn3", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 101, 150);
-    dao.defineEntity(Library.class, "npln4", "sn4", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 151, 200);
-    dao.defineEntity(Library.class, "ln5", "sn5", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 201, 250);
-    
-    assertEquals(3, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "npln*").size());
-    assertEquals(2, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "ln*").size());
-    assertEquals(5, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "*ln*").size());
-    assertEquals(0, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "ZZZZZZZZZ*").size());
+    final Library[] expectedLibrary = new Library[1];
+
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        expectedLibrary[0] = new Library(
+          "ln1",
+          "sn1",
+          ScreenType.SMALL_MOLECULE,
+          LibraryType.NATURAL_PRODUCTS,
+          1,
+          50);
+        Well well1 = new Well(expectedLibrary[0], new WellKey(1, "A1"), WellType.EXPERIMENTAL);
+        Gene gene1 = new Gene("ANT1", 1, "ENTREZ-ANT1", "Human");
+        gene1.addGenbankAccessionNumber("GBAN1");
+        SilencingReagent siReagent1 = new SilencingReagent(gene1, SilencingReagentType.SIRNA, "ATCG");
+        well1.addSilencingReagent(siReagent1);
+        Gene gene2 = new Gene("ANT2", 2, "ENTREZ-ANT2", "Human");
+        gene2.addGenbankAccessionNumber("GBAN2");
+        SilencingReagent siReagent2 = new SilencingReagent(gene2, SilencingReagentType.SIRNA, "ATCT");
+        Well well2 = new Well(expectedLibrary[0], new WellKey(2, "A1"), WellType.EXPERIMENTAL);
+        well2.addSilencingReagent(siReagent2);
+        Gene gene3 = new Gene("ANT3", 3, "ENTREZ-ANT3", "Human");
+        gene3.addGenbankAccessionNumber("GBAN3");
+        SilencingReagent siReagent3 = new SilencingReagent(gene3, SilencingReagentType.SIRNA, "ATCC");
+        Well well3 = new Well(expectedLibrary[0], new WellKey(3, "A1"), WellType.EXPERIMENTAL);
+        well3.addSilencingReagent(siReagent3);
+        new Copy(expectedLibrary[0], CopyUsageType.FOR_LIBRARY_SCREENING, "copy1"); 
+        new Copy(expectedLibrary[0], CopyUsageType.FOR_LIBRARY_SCREENING, "copy2"); 
+        new Copy(expectedLibrary[0], CopyUsageType.FOR_LIBRARY_SCREENING, "copy3"); 
+        dao.persistEntity(expectedLibrary[0]);
+      }
+    });
+
+    final Library[] actualLibrary = new Library[1];
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        actualLibrary[0] = dao.findEntityByProperty(Library.class, 
+                                                    "startPlate", 
+                                                    1, 
+                                                    false, 
+                                                    "hbnWells", 
+                                                    "hbnWells.hbnSilencingReagents", 
+                                                    "hbnWells.hbnSilencingReagents.gene"
+                                                    /*"hbnWells.hbnSilencingReagents.gene.genbankAccessionNumbers"*/);
+        assertEquals(expectedLibrary[0], actualLibrary[0]);
+      }
+    });
+    try {
+      assertEquals("inflated wells", 3, actualLibrary[0].getWells().size());
+      int i = 1;
+      for (Well well : actualLibrary[0].getWells()) {
+         assertEquals("inflated well", "A01", well.getWellName());
+         //assertEquals("inflated silencing reagent", , well.getSilencingReagents().iterator().next());
+         assertEquals("inflated gene", "ANT" + i, well.getSilencingReagents().iterator().next().getGene().getGeneName());
+         assertEquals("inflated genbankAccessionNumbers", "GBAN" + i, well.getSilencingReagents().iterator().next().getGene().getGenbankAccessionNumbers().iterator().next());
+         ++i;
+      }
+    }
+    catch (Exception e) {
+      fail("inflation failed");
+    }
+    try {
+      actualLibrary[0].getCopies().iterator();
+      fail("copies inflated unexpectedly");
+    }
+    catch (Exception e) {
+      // pass
+    }
   }
 }

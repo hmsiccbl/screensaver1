@@ -292,6 +292,7 @@ public class Gene extends AbstractEntity
     return _oldEntrezgeneSymbols.remove(oldEntrezgeneSymbol);
   }
 
+  // TODO: we make non-lazy for now, until we resolve bug in DAOImpl.inflate() [ant: 2007-05-22]
   /**
    * Get the GenBank accession numbers.
    *
@@ -300,7 +301,7 @@ public class Gene extends AbstractEntity
    *   order-by="genbank_accession_number"
    *   table="gene_genbank_accession_number"
    *   cascade="delete"
-   *   lazy="true"
+   *   lazy="false"
    * @hibernate.collection-key
    *   column="gene_id"
    *   foreign-key="fk_gene_genbank_accession_number_to_gene"

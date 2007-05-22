@@ -44,12 +44,12 @@
 							styleClass="dataText" />
 						<t:div>
 							<t:outputText value="Lab:" styleClass="label"/>
-							<t:commandLink value="#{screenViewer.screenResult.screen.labHead.labName}"
+							<t:commandLink value="#{screenResultViewer.screenResult.screen.labHead.labName}"
 								action="#{screenViewer.viewLabHead}"
 								styleClass="dataText entityLink" />
 							<t:outputText value="&nbsp;&nbsp;Screener:" styleClass="label" escape="false"/>
 							<t:commandLink
-								value="#{screenViewer.screenResult.screen.leadScreener.fullNameLastFirst}"
+								value="#{screenResultViewer.screenResult.screen.leadScreener.fullNameLastFirst}"
 								action="#{screenViewer.viewLeadScreener}"
 								styleClass="dataText entityLink" />
 						</t:div>

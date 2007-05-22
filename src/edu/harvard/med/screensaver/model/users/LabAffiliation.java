@@ -25,7 +25,7 @@ import org.apache.log4j.Logger;
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.class lazy="false"
+ * @hibernate.class lazy="true"
  */
 public class LabAffiliation extends AbstractEntity
 {
@@ -79,6 +79,7 @@ public class LabAffiliation extends AbstractEntity
   
   public boolean addScreeningRoomUser(ScreeningRoomUser screeningRoomUser)
   {
+    assert screeningRoomUser.isLabHead() : "only lab heads (since they represent the lab as a whole) can have a lab affiliation";
     boolean result = _screeningRoomUsers.add(screeningRoomUser);
     if (!this.equals(screeningRoomUser.getLabAffiliation())) {
       screeningRoomUser.setLabAffiliation(this);
@@ -165,7 +166,7 @@ public class LabAffiliation extends AbstractEntity
    *
    * @motivation for hibernate
    */
-  private LabAffiliation() {}
+  LabAffiliation() {}
 
 
   // private methods
@@ -217,7 +218,7 @@ public class LabAffiliation extends AbstractEntity
    * Get the screening room users with this affiliation.
    * 
    * @return the screening room users with this affiliation
-   * @hibernate.set inverse="true" cascade="save-update"
+   * @hibernate.set inverse="true" cascade="save-update" lazy="true"
    * @hibernate.collection-key column="lab_affiliation_id"
    * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser"
    * @motivation for hibernate and maintenance of bi-directional relationships;

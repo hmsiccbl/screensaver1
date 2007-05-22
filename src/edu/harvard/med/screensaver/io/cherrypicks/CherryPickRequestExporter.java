@@ -247,10 +247,11 @@ public class CherryPickRequestExporter
     List<Map<WellKey,ResultValue>> resultValueMaps = getResultValuesForDataHeaders(screenerCherryPick);
     int resultValueCol = 0;
     for (Map<WellKey,ResultValue> resultValues : resultValueMaps) {
+      ResultValue resultValue = resultValues.get(screenedWell.getWellKey());
       Workbook2Utils.writeCell(sheet,
                                iRow,
                                6 + resultValueCol++,
-                               resultValues.get(screenedWell.getWellKey()).getValue());
+                               resultValue == null ? "" : resultValue.getValue());
     }
   }
 

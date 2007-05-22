@@ -419,6 +419,7 @@ public class BillingInformation extends AbstractEntity
    * @hibernate.set
    *   cascade="save-update"
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="billing_information_id"
    * @hibernate.collection-one-to-many

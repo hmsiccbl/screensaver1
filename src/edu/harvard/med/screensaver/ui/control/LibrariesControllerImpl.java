@@ -408,7 +408,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
           _dao.need(well,
                     "hbnSilencingReagents",
                     "hbnSilencingReagents.gene",
-                    "hbnSilencingReagents.gene.genbankAccessionNumbers",
+                    /*"hbnSilencingReagents.gene.genbankAccessionNumbers",*/
                     "hbnCompounds",
                     "hbnCompounds.compoundNames",
                     "hbnCompounds.pubchemCids",

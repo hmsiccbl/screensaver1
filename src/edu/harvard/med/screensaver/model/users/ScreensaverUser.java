@@ -377,7 +377,7 @@ public class ScreensaverUser extends AbstractEntity
    *   order-by="screensaver_user_role"
    *   table="screensaver_user_role_type"
    *   cascade="delete"
-   *   lazy="false"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="screensaver_user_id"
    *   foreign-key="fk_screensaver_user_role_type_to_screensaver_user"

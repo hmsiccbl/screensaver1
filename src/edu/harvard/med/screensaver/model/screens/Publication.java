@@ -253,7 +253,7 @@ public class Publication extends AbstractEntity
    * @param pubmedId the new pubmed id
    * @motivation for hibernate
    */
-  private void setPubmedId(String pubmedId)
+  public void setPubmedId(String pubmedId)
   {
     _pubmedId = pubmedId;
   }
@@ -262,7 +262,7 @@ public class Publication extends AbstractEntity
    * Set the year published.
    * @param yearPublished the new year published
    */
-  private void setYearPublished(String yearPublished)
+  public void setYearPublished(String yearPublished)
   {
     _yearPublished = yearPublished;
   }
@@ -272,7 +272,7 @@ public class Publication extends AbstractEntity
    * @param authors the new authors
    * @motivation for hibernate
    */
-  private void setAuthors(String authors)
+  public void setAuthors(String authors)
   {
     _authors = authors;
   }
@@ -282,7 +282,7 @@ public class Publication extends AbstractEntity
    * @param title the new title
    * @motivation for hibernate
    */
-  private void setTitle(String title)
+  public void setTitle(String title)
   {
     _title = title;
   }

@@ -202,7 +202,13 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     {
       public void runTransaction()
       {
-        List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class);
+        List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class, 
+                                                            true, 
+                                                            "screenResult", 
+                                                            "hbnLabHead", 
+                                                            "hbnLeadScreener", 
+                                                            "billingInformation", 
+                                                            "statusItems");
         for (Iterator iter = screens.iterator(); iter.hasNext();) {
           Screen screen = (Screen) iter.next();
           // note: it would be odd if the data access policy restricted
@@ -210,14 +216,6 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
           // above, but we'll filter anyway, just to be safe.
           if (screen.isRestricted()) {
             iter.remove();
-          }
-          else {
-            _dao.need(screen, 
-                      "screenResult", 
-                      // TODO: only need this for screensAdmin or
-                      // readEverythingAdmin users; query would be faster if not
-                      // requested
-                      "statusItems"); 
           }
         }
         _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens,
@@ -259,7 +257,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                 iter.remove();
               }
               else {
-                _dao.need(screen, "screenResult");
+                _dao.needReadOnly(screen, "screenResult");
               }
             }
             _screensBrowser.setScreenSearchResults(new ScreenSearchResults(new ArrayList<Screen>(screens),
@@ -304,28 +302,25 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       {
         public void runTransaction()
         {
-          Screen screen = _currentScreen = _dao.reloadEntity(screenIn);
-          // we call _dao.need() twice, since the method is not smart enough to know that the resulting SQL would be too horrendous
-          _dao.need(screen, 
-                    "abaseTestsets",
-                    "attachedFiles",
-                    "billingInformation",
-                    "fundingSupports",
-                    "keywords",
-                    "lettersOfSupport",
-                    "publications",
-                    "statusItems",
-                    "screeningRoomActivities",
-                    "cherryPickRequests",
-                    "hbnCollaborators",
-                    "hbnLabHead",
-                    "hbnLabHead.hbnLabMembers",
-                    "hbnLeadScreener");
-          _dao.need(screen.getScreenResult(),
-                    "plateNumbers",
-                    "hbnResultValueTypes",
-                    "hbnResultValueTypes.hbnDerivedTypes",
-                    "hbnResultValueTypes.hbnTypesDerivedFrom");
+          Screen screen = _currentScreen = _dao.reloadEntity(screenIn,
+                                                             true,
+                                                             "hbnLabHead",
+                                                             "hbnLabHead.hbnLabMembers",
+                                                             "hbnLeadScreener",
+                                                             "billingInformation");
+          _dao.needReadOnly(screen, 
+                            "hbnCollaborators",
+                            "hbnCollaborators.hbnLabAffiliation");
+          _dao.needReadOnly(screen, "screeningRoomActivities");
+          _dao.needReadOnly(screen, "abaseTestsets", "attachedFiles", "fundingSupports", "keywords", "lettersOfSupport", "publications");
+          _dao.needReadOnly(screen, "statusItems");
+          _dao.needReadOnly(screen, "cherryPickRequests");
+          _dao.needReadOnly(screen, "hbnCollaborators", "hbnCollaborators");
+          _dao.needReadOnly(screen.getScreenResult(), "plateNumbers");
+          _dao.needReadOnly(screen.getScreenResult(), 
+                            "hbnResultValueTypes",
+                            "hbnResultValueTypes.hbnDerivedTypes",
+                            "hbnResultValueTypes.hbnTypesDerivedFrom");
 
           _screenViewer.setScreen(screen);
           _screenResultImporter.setScreen(screen);
@@ -743,7 +738,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       {
         public void runTransaction()
         {
-          Screen screen = _dao.reloadEntity(screenIn);
+          Screen screen = _dao.reloadEntity(screenIn); // TODO: this should be reattachEntity, since we're editing it
           log.info("starting import of ScreenResult for Screen " + screen);
 
           try {
@@ -921,45 +916,46 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       {
         public void runTransaction()
         {
-          CherryPickRequest cherryPickRequest = _dao.reloadEntity(cherryPickRequestIn);
+          CherryPickRequest cherryPickRequest = _dao.reloadEntity(cherryPickRequestIn, 
+                                                                  true, 
+                                                                  "hbnRequestedBy",
+                                                                  "screen", 
+                                                                  "screen.hbnLabHead", 
+                                                                  "screen.hbnLeadScreener",
+                                                                  "screen.hbnCollaborators");
           if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
             throw new UnsupportedOperationException("Sorry, but viewing compound cherry pick requests is not yet implemented.");
           }
           
-          _dao.need(cherryPickRequest, 
-                    "screen",
-                    "screen.hbnLabHead",
-                    "screen.hbnLeadScreener",
-                    "screen.hbnCollaborators",
-                    "hbnRequestedBy",
-                    "cherryPickAssayPlates",
-                    "cherryPickAssayPlates.hbnCherryPickLiquidTransfer");
+          _dao.needReadOnly(cherryPickRequest, 
+                            "cherryPickAssayPlates",
+                            "cherryPickAssayPlates.hbnCherryPickLiquidTransfer");
           if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI)) {
-            _dao.need(cherryPickRequest,
-                      "screenerCherryPicks",
-                      "screenerCherryPicks.labCherryPicks",
-                      "screenerCherryPicks.screenedWell",
-                      "screenerCherryPicks.screenedWell.hbnSilencingReagents",
-                      "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene",
-                      "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene.genbankAccessionNumbers");
-            _dao.need(cherryPickRequest,
-                      "labCherryPicks",
-                      "labCherryPicks.sourceWell",
-                      "labCherryPicks.sourceWell.hbnSilencingReagents",
-                      "labCherryPicks.sourceWell.hbnSilencingReagents.gene",
-                      "labCherryPicks.sourceWell.hbnSilencingReagents.gene.genbankAccessionNumbers");
+            _dao.needReadOnly(cherryPickRequest,
+                              "screenerCherryPicks",
+                              "screenerCherryPicks.labCherryPicks");
+            _dao.needReadOnly(cherryPickRequest,
+                              "screenerCherryPicks",
+                              "screenerCherryPicks.screenedWell",
+                              "screenerCherryPicks.screenedWell.hbnSilencingReagents",
+                              "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene"/*,
+                              "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene.genbankAccessionNumbers"*/);
+            _dao.needReadOnly(cherryPickRequest,
+                              "labCherryPicks",
+                              "labCherryPicks.sourceWell");
+            _dao.needReadOnly(cherryPickRequest,
+                              "labCherryPicks",
+                              "labCherryPicks.sourceWell",
+                              "labCherryPicks.sourceWell.hbnSilencingReagents",
+                              "labCherryPicks.sourceWell.hbnSilencingReagents.gene"/*,
+                              "labCherryPicks.sourceWell.hbnSilencingReagents.gene.genbankAccessionNumbers"*/);
           }
-          else if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-            _dao.need(cherryPickRequest,
-                      "screenCherryPicks",
-                      "screenerCherryPicks.labCherryPicks",
-                      "screenCherryPicks.screenedWell",
-                      "screenCherryPicks.screenedWell.hbnCompounds");
-            _dao.need(cherryPickRequest,
-                      "labCherryPicks",
-                      "labCherryPicks.sourceWell",
-                      "labCherryPicks.sourceWell.hbnCompound");
-          }
+//          else if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+//            // TODO: inflate, as needed
+//            _dao.needReadOnly(cherryPickRequest,
+//                              "screenerCherryPicks",
+//                              "screenerCherryPicks.labCherryPicks");
+//          }
           _cherryPickRequestViewer.setCherryPickRequest(cherryPickRequest);
         }
       });

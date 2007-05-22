@@ -16,10 +16,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,14 +49,11 @@ import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.FetchMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.TransientObjectException;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.type.CollectionType;
@@ -123,75 +122,53 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> E reloadEntity(E entity)
   {
+    return reloadEntity(entity, false);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public <E extends AbstractEntity> E reloadEntity(E entity, boolean readOnly, String... relationships)
+  {
     if (entity != null) {
       log.debug("reloading entity " + entity);
-      return (E) findEntityById(entity.getClass(), entity.getEntityId());
+      return (E) findEntityById(entity.getClass(), entity.getEntityId(), readOnly, relationships);
     }
     return null;
   }
   
-  public void need(final AbstractEntity entity,
-                   final String... relationships)
+  public void need(AbstractEntity entity,
+                   String... relationships)
   {
     if (entity == null) {
       return;
     }
+    inflate(entity, false, relationships);
+  }
+  
+  public void needReadOnly(AbstractEntity entity,
+                           String... relationships)
+  {
+    if (entity == null) {
+      return;
+    }
+    inflate(entity, true, relationships);
+  }
+  
+  @SuppressWarnings("unchecked")
+  private <T> void inflate(final AbstractEntity entity,
+                           boolean readOnly,
+                           final String... relationships)
+  {
     long start = 0;
     if (entityInflatorLog.isDebugEnabled()) {
       entityInflatorLog.debug("inflating " + entity + " for relationships: " + relationships);
       start = System.currentTimeMillis();
     }
-    getHibernateTemplate().execute(new HibernateCallback() 
-    {
-      public Object doInHibernate(Session session) throws HibernateException, SQLException
-      {
-        Criteria criteria = session.createCriteria(entity.getClass());
-        criteria.add(Restrictions.idEq(entity.getEntityId()));
-        for (String relationship : relationships) {
-          if (log.isDebugEnabled()) {
-            verifyEntityRelationshipExists(session, entity.getClass(), relationship);
-          }
-          criteria.setFetchMode(relationship, FetchMode.JOIN);
-        }
-        return criteria.list();
-      }
-
-      private boolean verifyEntityRelationshipExists(Session session, Class entityClass, String relationship)
-      {
-        ClassMetadata metadata = session.getSessionFactory().getClassMetadata(entityClass);
-        if (relationship.contains(".")) {
-          int next = relationship.indexOf(".");
-          String nextRelationship = relationship.substring(next + 1);
-          relationship = relationship.substring(0, next);
-          if (!verifyEntityRelationshipExists(session, entityClass, relationship)) {
-            return false;
-          }
-          
-          org.hibernate.type.Type nextType = metadata.getPropertyType(relationship);
-          if (nextType.isCollectionType()) {
-            nextType = ((CollectionType) nextType).getElementType((SessionFactoryImplementor) session.getSessionFactory());
-          }
-          Class nextEntityClass = nextType.getReturnedClass();
-          return verifyEntityRelationshipExists(session, 
-                                                nextEntityClass,
-                                                nextRelationship);
-        }
-        else {
-          if (!Arrays.asList(metadata.getPropertyNames()).contains(relationship)) {
-            // TODO: this should probably be a Java assert instead of just a log error msg
-            log.error("relationship does not exist: " + entityClass.getSimpleName() + "." + relationship);
-            return false;
-          }
-          return true;
-        }
-      }
-      
-    });
+    findEntityById(entity.getClass(), entity.getEntityId(), readOnly, relationships);
     if (entityInflatorLog.isDebugEnabled()) {
       entityInflatorLog.debug("inflating " + entity + " took " + (System.currentTimeMillis() - start) / 1000.0 + " seconds");
     }
   }
-  
+
   public int relationshipSize(final Object persistentCollection)
   {
     return (Integer) getHibernateTemplate().execute(new HibernateCallback() 
@@ -252,52 +229,132 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
   }
 
   @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> List<E> findAllEntitiesWithType(
-    Class<E> entityClass)
+  public <E extends AbstractEntity> List<E> findAllEntitiesWithType(Class<E> entityClass)
   {
     return (List<E>) getHibernateTemplate().loadAll(entityClass);
   }
 
   @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> E findEntityById(
-    Class<E> entityClass,
-    Serializable id)
+  public <E extends AbstractEntity> List<E> findAllEntitiesWithType(Class<E> entityClass,
+                                                                    boolean readOnly,
+                                                                    String... relationships)
+  {
+    return (List<E>) findEntitiesByProperties(entityClass, null, readOnly, relationships);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass, Serializable id)
   {
     return (E) getHibernateTemplate().get(entityClass, id);
   }
 
   @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> List<E> findEntitiesByProperties(
-    Class<E> entityClass,
-    Map<String,Object> name2Value)
+  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass,
+                                                     Serializable id,
+                                                     boolean readOnly,
+                                                     String... relationships)
+  {
+    return findEntityByProperty(entityClass, "id", id, readOnly, relationships);
+  }
+
+  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, 
+                                                                     Map<String,Object> name2Value)
+  {
+    return findEntitiesByProperties(entityClass, name2Value, false);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass,
+                                                                     Map<String,Object> name2Value,
+                                                                     final boolean readOnly,
+                                                                     String... relationships)
   {
     String entityName = entityClass.getSimpleName();
-    StringBuffer hql = new StringBuffer();
-    boolean first = true;
+    final StringBuffer hql = new StringBuffer();
+    
+    Map<String,String> path2Alias = makeAliases(relationships);
+    String entityAlias = "x";
+    hql.append("select distinct x from ").append(entityName).append(' ').append(entityAlias);
+    for (String relationship : relationships) {
+      int finalPathSeparatorPos = relationship.lastIndexOf('.');
+      String fromAlias = null;
+      String association = null;
+      if (finalPathSeparatorPos < 0) {
+        fromAlias = "x";
+        association = relationship;
+      }
+      else {
+        String pathToRel = relationship.substring(0, finalPathSeparatorPos);
+        if (!path2Alias.containsKey(pathToRel)) {
+          throw new IllegalArgumentException("relationship " + relationship + " requires previous intermediate relationship " + pathToRel);
+        }
+        fromAlias = path2Alias.get(pathToRel);
+        association = relationship.substring(finalPathSeparatorPos + 1);
+      }
+      String asAlias = path2Alias.get(relationship);
+      hql.append(" left join fetch ").append(fromAlias).append(".").append(association).append(' ').append(asAlias);
+    }
+    
+    boolean first = true;    
+    if (name2Value == null) {
+      name2Value = Collections.EMPTY_MAP;
+    }
+    final Object[] values = new Object[name2Value.size()];
+    int i = 0;
     for (String propertyName : name2Value.keySet()) {
       if (first) {
-        hql.append("from " + entityName + " x where ");
+        hql.append(" where ");
         first = false;
       }
       else {
         hql.append(" and ");
       }
-      hql.append("x.")
-         .append(propertyName)
-         .append(" = ?");
+      hql.append("x.").append(propertyName).append(" = ?");
+      values[i++]= name2Value.get(propertyName);
     }
-    return (List<E>) getHibernateTemplate().find(hql.toString(),
-                                                 name2Value.values()
-                                                           .toArray());
+    
+    if (log.isDebugEnabled()) {
+      log.debug(hql.toString());
+    }
+    
+    List<E> result = (List<E>) getHibernateTemplate().execute(new HibernateCallback() 
+    {
+      public Object doInHibernate(Session session) throws HibernateException, SQLException 
+      {
+        Query query = session.createQuery(hql.toString());
+        query.setReadOnly(readOnly);
+        int pos = 0;
+        for (Object arg : values) {
+          query.setParameter(pos++, arg);
+        }
+        return query.list();
+      }
+    });
+    LinkedHashSet<E> distinctResult = new LinkedHashSet<E>(result);
+    if (result.size() > distinctResult.size()) {
+      return new ArrayList<E>(distinctResult);
+    }
+    return result;
   }
   
-  public <E extends AbstractEntity> E findEntityByProperties(
-    Class<E> entityClass,
-    Map<String,Object> name2Value)
+  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, 
+                                                             Map<String,Object> name2Value)
+  {
+    return findEntityByProperties(entityClass,
+                                  name2Value,
+                                  false);
+  }
+
+  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass,
+                                                             Map<String,Object> name2Value,
+                                                             boolean readOnly,
+                                                             String... relationships)
   {
     List<E> entities = findEntitiesByProperties(
       entityClass,
-      name2Value);
+      name2Value,
+      readOnly,
+      relationships);
     if (entities.size() == 0) {
       return null;
     }
@@ -308,29 +365,47 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     return entities.get(0);
   }
   
-  @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> List<E> findEntitiesByProperty(
-    Class<E> entityClass,
-    String propertyName,
-    Object propertyValue)
+  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass, 
+                                                                   String propertyName, 
+                                                                   Object propertyValue)
   {
-    // note: could delegate this method body to findEntitiesByProperties, but
-    // this would require wrapping up property{Name,Value} into a Map object,
-    // for no good reason other than (minimal) code sharing
-    String entityName = entityClass.getSimpleName();
-    String hql = "from " + entityName + " x where x." + propertyName + " = ?";
-    return (List<E>) getHibernateTemplate().find(hql, propertyValue);
+    return findEntitiesByProperty(entityClass, propertyName, propertyValue, false);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass,
+                                                                   String propertyName,
+                                                                   Object propertyValue,
+                                                                   boolean readOnly,
+                                                                   String... relationships)
+  {
+    Map<String,Object> props = new HashMap<String,Object>();
+    props.put(propertyName, propertyValue);
+    return findEntitiesByProperties(entityClass, props, readOnly, relationships);
   }
   
-  public <E extends AbstractEntity> E findEntityByProperty(
-    Class<E> entityClass,
-    String propertyName,
-    Object propertyValue)
+  public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass,
+                                                           String propertyName,
+                                                           Object propertyValue)
+  {
+    return findEntityByProperty(entityClass,
+                                propertyName,
+                                propertyValue,
+                                false);
+  }
+                                                           
+  public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass,
+                                                           String propertyName,
+                                                           Object propertyValue,
+                                                           boolean readOnly,
+                                                           String... relationships)
   {
     List<E> entities = findEntitiesByProperty(
       entityClass,
       propertyName,
-      propertyValue);
+      propertyValue,
+      readOnly,
+      relationships);
     if (entities.size() == 0) {
       return null;
     }
@@ -341,17 +416,17 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     return entities.get(0);
   }
   
-  @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> List<E> findEntitiesByPropertyPattern(
-    Class<E> entityClass,
-    String propertyName,
-    String propertyPattern)
-  {
-    String entityName = entityClass.getSimpleName();
-    String hql = "from " + entityName + " x where x." + propertyName + " like ?";
-    propertyPattern = propertyPattern.replaceAll( "\\*", "%" );
-    return (List<E>) getHibernateTemplate().find(hql, propertyPattern);
-  }
+//  @SuppressWarnings("unchecked")
+//  public <E extends AbstractEntity> List<E> findEntitiesByPropertyPattern(
+//    Class<E> entityClass,
+//    String propertyName,
+//    String propertyPattern)
+//  {
+//    String entityName = entityClass.getSimpleName();
+//    String hql = "from " + entityName + " x where x." + propertyName + " like ?";
+//    propertyPattern = propertyPattern.replaceAll( "\\*", "%" );
+//    return (List<E>) getHibernateTemplate().find(hql, propertyPattern);
+//  }
   
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> List<E> findEntitiesByHql(
@@ -762,7 +837,7 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
       throw new IllegalArgumentException(e);
     }
   }
-  
+
   private Query buildQueryForSortedResultValueTypeTableByRange(Session session,
                                                                List<ResultValueType> selectedRvts,
                                                                int sortBy,
@@ -859,5 +934,46 @@ public class DAOImpl extends HibernateDaoSupport implements DAO
     }
     return result;
   }
+
+  private boolean verifyEntityRelationshipExists(Session session, Class entityClass, String relationship)
+  {
+    ClassMetadata metadata = session.getSessionFactory().getClassMetadata(entityClass);
+    if (relationship.contains(".")) {
+      int next = relationship.indexOf(".");
+      String nextRelationship = relationship.substring(next + 1);
+      relationship = relationship.substring(0, next);
+      if (!verifyEntityRelationshipExists(session, entityClass, relationship)) {
+        return false;
+      }
+      
+      org.hibernate.type.Type nextType = metadata.getPropertyType(relationship);
+      if (nextType.isCollectionType()) {
+        nextType = ((CollectionType) nextType).getElementType((SessionFactoryImplementor) session.getSessionFactory());
+      }
+      Class nextEntityClass = nextType.getReturnedClass();
+      return verifyEntityRelationshipExists(session, 
+                                            nextEntityClass,
+                                            nextRelationship);
+    }
+    else {
+      if (!Arrays.asList(metadata.getPropertyNames()).contains(relationship)) {
+        // TODO: this should probably be a Java assert instead of just a log error msg
+        log.error("relationship does not exist: " + entityClass.getSimpleName() + "." + relationship);
+        return false;
+      }
+      return true;
+    }
+  }
   
+  private Map<String,String> makeAliases(String[] relationships)
+  {
+    int nextAlias = 1;
+    Map<String,String> path2Alias = new HashMap<String,String>(); 
+    for (String relationship : relationships) {
+      if (!path2Alias.containsKey(relationship)) {
+        path2Alias.put(relationship, "x" + nextAlias++);
+      }
+    }
+    return path2Alias;
+  }
 }

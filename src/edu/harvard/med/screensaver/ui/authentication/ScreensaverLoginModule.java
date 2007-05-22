@@ -339,11 +339,13 @@ public class ScreensaverLoginModule implements LoginModule
    * @return a {@link ScreensaverUser} or <code>null</code> if no user found
    *         with userId for given userIdField
    */
-  private ScreensaverUser findUser(String userId, String userIdField)
+  private ScreensaverUser findUser(final String userId, final String userIdField)
   {
     ScreensaverUser user = _dao.findEntityByProperty(ScreensaverUser.class, 
                                                      userIdField,
-                                                     userId);
+                                                     userId,
+                                                     true,
+                                                     "screensaverUserRoles");
     if (user != null) {
       log.debug("found user '" + userId + "' in database using field '" + userIdField +"'" );
     }

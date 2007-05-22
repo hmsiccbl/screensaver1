@@ -69,6 +69,13 @@ public class NoOpDAO implements DAO
     daoTransaction.runTransaction();
   }
 
+  public void doInReadOnlyTransaction(DAOTransaction daoTransaction)
+  {
+    // As a courtesy to the caller, we'll run it's callback code, even though
+    // we're technically a "No Op" DAO.  We're just *too* nice...
+    daoTransaction.runTransaction();
+  }
+
   public <E extends AbstractEntity> List<E> findAllEntitiesWithType(Class<E> entityClassController)
   {
     return null;
@@ -80,12 +87,6 @@ public class NoOpDAO implements DAO
   }
 
   public SortedSet<ScreeningRoomUser> findCandidateCollaborators()
-  {
-    return null;
-  }
-
-  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClassController,
-                                                                     Map<String,Object> name2ValueController)
   {
     return null;
   }
@@ -112,12 +113,6 @@ public class NoOpDAO implements DAO
   
   public <E extends AbstractEntity> E findEntityById(Class<E> entityClassController,
                                                      Serializable idController)
-  {
-    return null;
-  }
-
-  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClassController,
-                                                             Map<String,Object> name2ValueController)
   {
     return null;
   }
@@ -207,6 +202,15 @@ public class NoOpDAO implements DAO
   {
   }
   
+  public void needReadOnly(AbstractEntity entity, String... relationships)
+  {
+  }
+  
+  public <T> List<T> needAll(Class<T> entityClass, String... relationships) 
+  {
+    return null;
+  }
+
   public void need(AbstractEntity entity)
   {
   }
@@ -263,6 +267,60 @@ public class NoOpDAO implements DAO
 
   public CherryPickRequest findCherryPickRequestByNumber(int cherryPickRequestNumber)
   {
+    return null;
+  }
+
+  public <E extends AbstractEntity> List<E> findAllEntitiesWithType(Class<E> entityClass, boolean readOnly, String... relationships)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationships)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass, String propertyName, Object propertyValue, boolean readOnly, String... relationships)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass, Serializable id, boolean readOnly, String... relationships)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationships)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass, String propertyName, Object propertyValue, boolean readOnly, String... relationships)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> E reloadEntity(E entity, boolean readOnly, String... relationships)
+  {
+    // TODO Auto-generated method stub
     return null;
   }
 }

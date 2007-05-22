@@ -22,7 +22,6 @@ import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicyInjectorPostL
 import edu.harvard.med.screensaver.model.libraries.Compound;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 
@@ -322,6 +321,7 @@ public abstract class AbstractEntity implements Serializable
    * access policy that was set.
    * @see DataAccessPolicyInjectorPostLoadEventListener 
    */
+  @DerivedEntityProperty
   public boolean isRestricted()
   {
     if (_dataAccessPolicy == null) {
@@ -337,6 +337,16 @@ public abstract class AbstractEntity implements Serializable
   public void setDataAccessPolicy(DataAccessPolicy dataAccessPolicy) 
   {
     _dataAccessPolicy = dataAccessPolicy;
+  }
+  
+  /**
+   * @see DataAccessPolicyInjectorPostLoadEventListener
+   *  
+   */
+  @DerivedEntityProperty
+  public DataAccessPolicy getDataAccessPolicy()
+  {
+    return _dataAccessPolicy;
   }
 
   

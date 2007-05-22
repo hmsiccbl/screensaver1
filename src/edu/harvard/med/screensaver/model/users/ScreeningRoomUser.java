@@ -55,6 +55,7 @@ public class ScreeningRoomUser extends ScreensaverUser
   private boolean _isNonScreeningUser;
   private String _comsCrhbaPermitNumber;
   private String _comsCrhbaPermitPrincipalInvestigator;
+  private String _labName; // optimization
 
 
   // public constructors
@@ -235,7 +236,7 @@ public class ScreeningRoomUser extends ScreensaverUser
   @ToOneRelationship(inverseProperty="labMembers")
   public ScreeningRoomUser getLabHead()
   {
-    if (_labHead == null) {
+    if (isLabHead()) {
       return this;
     }
     return _labHead;
@@ -317,10 +318,12 @@ public class ScreeningRoomUser extends ScreensaverUser
     }
     if (_labAffiliation != null) {
       _labAffiliation.getHbnScreeningRoomUsers().remove(this);
+      _labName = null;
     }
     _labAffiliation = labAffiliation;
     if (_labAffiliation != null) {
       _labAffiliation.getHbnScreeningRoomUsers().add(this);
+      _labName = makeLabName();
     }
   }
 
@@ -472,18 +475,22 @@ public class ScreeningRoomUser extends ScreensaverUser
   {
     return getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
   }
-  
-  @DerivedEntityProperty
+
+  @DerivedEntityProperty(isPersistent=true)
   public String getLabName() 
   {
-    StringBuilder labName = new StringBuilder(getLabHead().getFullNameLastFirst());
-    String labAffiliation = getLabAffiliationName();
-    if (labAffiliation.length() > 0) {
-      labName.append(" - ").append(labAffiliation);
+    if (isLabHead()) {
+      return getHbnLabName();
     }
-    return labName.toString();
+    return getLabHead().getLabName();
   }
-  
+
+  @DerivedEntityProperty
+  public boolean isLabHead()
+  {
+    return _labHead == null;
+  }
+
   @DerivedEntityProperty
   public String getLabAffiliationName()
   {
@@ -682,6 +689,20 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
+   * @hibernate.property type="text" column="lab_name"
+   * @return
+   */
+  private String getHbnLabName() 
+  {
+    return _labName;
+  }
+
+  private void setHbnLabName(String labName)
+  {
+    _labName = labName;
+  }
+
+    /**
    * Get the lab members.
    *
    * @return the lab members
@@ -724,6 +745,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    *   column="lab_affiliation_id"
    *   foreign-key="fk_screening_room_user_to_lab_affiliation"
    *   cascade="save-update"
+   *   lazy="proxy"
    */
   private LabAffiliation getHbnLabAffiliation()
   {
@@ -757,5 +779,19 @@ public class ScreeningRoomUser extends ScreensaverUser
     if (_labHead != null) {
       _labHead.getHbnLabMembers().add(this);
     }
+  }
+  
+  private String makeLabName()
+  {
+    if (!isLabHead()) {
+      // only the lab head will have a derived lab name property
+      return null; 
+    }
+    StringBuilder labName = new StringBuilder(getLabHead().getFullNameLastFirst());
+    String labAffiliation = getLabAffiliationName();
+    if (labAffiliation.length() > 0) {
+      labName.append(" - ").append(labAffiliation);
+    }
+    return labName.toString();
   }
 }

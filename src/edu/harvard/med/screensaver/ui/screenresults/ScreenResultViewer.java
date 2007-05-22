@@ -178,6 +178,7 @@ public class ScreenResultViewer extends AbstractBackingBean
 
   public void setScreenResult(ScreenResult screenResult)
   {
+    resetView();
     _screenResult = screenResult;
   }
 

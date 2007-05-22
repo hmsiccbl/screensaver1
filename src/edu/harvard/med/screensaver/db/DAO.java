@@ -78,6 +78,7 @@ public interface DAO
   public <E extends AbstractEntity> E reattachEntity(E entity);
   
   public <E extends AbstractEntity> E reloadEntity(E entity);
+  public <E extends AbstractEntity> E reloadEntity(E entity, boolean readOnly, String... relationships);
   
   /**
    * Initializes (pre-loads) the relationships of an entity.
@@ -96,6 +97,7 @@ public interface DAO
    *          relationship paths as independent arguments.
    */
   public void need(AbstractEntity entity, String... relationships);
+  public void needReadOnly(AbstractEntity entity, String... relationships);
   
   public int relationshipSize(final Object persistentCollection);
 
@@ -141,6 +143,7 @@ public interface DAO
    */
   @Transactional(readOnly = true)
   public <E extends AbstractEntity> List<E> findAllEntitiesWithType(Class<E> entityClass);
+  public <E extends AbstractEntity> List<E> findAllEntitiesWithType(Class<E> entityClass, boolean readOnly, String... relationships);
 
   /**
    * Retrieve and return an entity by its id (primary key).
@@ -152,9 +155,8 @@ public interface DAO
    *         null if there is no such entity.
    */
   @Transactional(readOnly = true)
-  public <E extends AbstractEntity> E findEntityById(
-    Class<E> entityClass,
-    Serializable id);
+  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass, Serializable id);
+  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass, Serializable id, boolean readOnly, String... relationships);
 
   /**
    * Retrieve and return the entity that has a specific value for the
@@ -168,9 +170,8 @@ public interface DAO
    *         set of properties
    */
   @Transactional(readOnly = true)
-  public <E extends AbstractEntity> List<E> findEntitiesByProperties(
-    Class<E> entityClass,
-    Map<String,Object> name2Value);
+  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value);
+  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationships);
   
   /**
    * Retrieve and return the entity that has a specific values for the specified
@@ -188,10 +189,9 @@ public interface DAO
    *              the specified values for the set of properties
    */
   @Transactional(readOnly = true)
-  public <E extends AbstractEntity> E findEntityByProperties(
-    Class<E> entityClass,
-    Map<String,Object> name2Value);
-
+  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value);
+  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationships);
+  
   /**
    * Retrieve and return a list of entities that have a specific value for the
    * specified property.
@@ -204,10 +204,8 @@ public interface DAO
    *         property
    */
   @Transactional(readOnly = true)
-  public <E extends AbstractEntity> List<E> findEntitiesByProperty(
-    Class<E> entityClass,
-    String propertyName,
-    Object propertyValue);
+  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass, String propertyName, Object propertyValue);
+  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass, String propertyName, Object propertyValue, boolean readOnly, String... relationships);
   
   /**
    * Retrieve and return the entity that has a specific value for the specified
@@ -224,26 +222,22 @@ public interface DAO
    *    than one entity with the specified value for the property
    */
   @Transactional(readOnly = true)
-  public <E extends AbstractEntity> E findEntityByProperty(
-    Class<E> entityClass,
-    String propertyName,
-    Object propertyValue);
+  public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass, String propertyName, Object propertyValue);
+  public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass, String propertyName, Object propertyValue, boolean readOnly, String... relationships);
 
-  /**
-   * Retrieve and return a list of entities that match a pattern for the specified text property.
-   * Patterns are specified by using the '*' character as a wildcard.
-   * 
-   * @param <E> the type of the entity to retrieve
-   * @param entityClass the class of the entity to retrieve
-   * @param propertyName the name of the text property to query against
-   * @param propertyPattern the pattern to match
-   * @return a list of entities that have the specified value for the specified property
-   */
-  @Transactional(readOnly = true)
-  public <E extends AbstractEntity> List<E> findEntitiesByPropertyPattern(
-    Class<E> entityClass,
-    String propertyName,
-    String propertyPattern);
+//  /**
+//   * Retrieve and return a list of entities that match a pattern for the specified text property.
+//   * Patterns are specified by using the '*' character as a wildcard.
+//   * 
+//   * @param <E> the type of the entity to retrieve
+//   * @param entityClass the class of the entity to retrieve
+//   * @param propertyName the name of the text property to query against
+//   * @param propertyPattern the pattern to match
+//   * @return a list of entities that have the specified value for the specified property
+//   */
+//  @Transactional(readOnly = true)
+//  public <E extends AbstractEntity> List<E> findEntitiesByPropertyPattern(Class<E> entityClass, String propertyName, String propertyPattern);
+//  public <E extends AbstractEntity> List<E> findEntitiesByPropertyPattern(Class<E> entityClass, String propertyName, String propertyPattern, boolean readOnly, String... relationships);
   
   public <E extends AbstractEntity> List<E> findEntitiesByHql(
     Class<E> entityClass,
@@ -359,4 +353,5 @@ public interface DAO
     boolean bypassBusinessRuleViolationChecks);
 
   public CherryPickRequest findCherryPickRequestByNumber(int cherryPickRequestNumber);
+
 }

@@ -199,6 +199,9 @@ public class ScreenDBUserSynchronizer
       user.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
     }
 
+    // TODO: in Screensaver data model, only the lab head (whose entity also
+    // represents the "lab" as a whole), should have the lab affiliation;
+    // non-lab heads' labAffiliation properties are ignored.
     user.setLabAffiliation(getLabAffiliation(affiliationName));
     
     user.setComsCrhbaPermitNumber(comsCrhbaPermitNumber);

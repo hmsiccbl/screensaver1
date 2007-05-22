@@ -36,10 +36,12 @@ public class WellKey implements Comparable
   
   
   // instance data members
+  
   private int _plateNumber;
 
   private transient WellName _wellName;
   private transient int _hashCode = -1;
+  private transient String _asString;
 
 
   // public constructors and methods
@@ -99,6 +101,7 @@ public class WellKey implements Comparable
   private void resetDerivedValues()
   {
     _hashCode = -1;
+    _asString = null;
   }
 
   public boolean equals(Object o)
@@ -122,7 +125,10 @@ public class WellKey implements Comparable
   
   public String toString()
   {
-    return String.format(wellKeyFormat, _plateNumber, getWellName());
+    if (_asString == null) {
+      _asString = String.format(wellKeyFormat, _plateNumber, getWellName());
+    }
+    return _asString;
   }
   
   public int compareTo(Object o)

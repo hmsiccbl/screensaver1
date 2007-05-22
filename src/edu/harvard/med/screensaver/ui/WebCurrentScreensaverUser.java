@@ -16,6 +16,7 @@ import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.authentication.ScreensaverLoginModule;
 
@@ -129,14 +130,18 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
                                           eCommonsIdOrLoginId);
         }
         if (user != null) {
-          // HACK: fetch relationships needed by data access policy
+          // semi-HACK: fetch relationships needed by data access policy
           _dao.need(user,
-                   "hbnScreensLed",
-                   "hbnScreensHeaded",
-                   "hbnScreensCollaborated",
-                   "hbnLabHead",
-                   "hbnLabHead.hbnLabMembers",
-          "hbnLabMembers");
+                    "screensaverUserRoles");
+          if (user instanceof ScreeningRoomUser) {
+            _dao.need(user,
+                      "hbnScreensLed",
+                      "hbnScreensHeaded",
+                      "hbnScreensCollaborated",
+                      "hbnLabHead",
+                      "hbnLabHead.hbnLabMembers",
+                      "hbnLabMembers");
+          }
         }
         result[0] = user;
       }
