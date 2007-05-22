@@ -23,3 +23,13 @@ log4j.logger.org.springframework=warn
 ### User Activity logger
 
 log4j.logger.userActivity=info, userActivityLog
+
+# log just the SQL - set this to "debug" to get all the SQL stmts
+#log4j.logger.org.hibernate.SQL=debug
+# log JDBC bind parameters ###
+#log4j.logger.org.hibernate.type=trace
+
+log4j.logger.edu.harvard.med.screensaver.db.DAOImpl=debug
+#log4j.logger.edu.harvard.med.screensaver.db.DAOImpl.EntityInflator=debug
+
+
