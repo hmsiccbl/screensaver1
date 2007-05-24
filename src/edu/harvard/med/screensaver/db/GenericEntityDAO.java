@@ -33,8 +33,37 @@ import org.hibernate.type.CollectionType;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
 /**
- * GenericEntityDAO that provides basic data access methods that are applicable to all
- * AbstractEntity types.
+ * GenericEntityDAO that provides basic data access methods that are applicable
+ * to all AbstractEntity types.
+ * <p>
+ * Each of the find* methods has two overloaded versions: a simple version that
+ * takes only the basic arguments need to find the entity (or entities), and an
+ * "advanced" version that takes an additional <code>readOnly</code> flag
+ * parameter and a <code>relationships</code> (var arg) array of Strings.
+ * <p>
+ * The relationships specify what related data should be loaded from the
+ * database at the same the entity itself is being loaded (i.e., within a single
+ * SQL call). Each relationship is specified as a dot-separated path of
+ * relationship property names, relative to the root entity. For example, if
+ * loading a Parent entity, one might specify the following (hypothetical)
+ * relationships: "children.toys", "children.friends.toys". <i>Warning</i>:
+ * specifying more than a single to-many relationship will generate an SQL query
+ * whose result will be the cross-product of all the relationships' entities.
+ * This can grow quite large, quickly! Unless you are sure that the multiple
+ * to-many relationships only contain a small number of entities, you should
+ * retrieve each of the root entity's additional to-many relationships via
+ * subsequent calls to {@link #need} or {@link #needReadOnly}.
+ * <p>
+ * If <code>readOnly</code> is true, the entities that are loaded by Hibernate
+ * will not be "managed". This means that they will not be dirty-checked at
+ * flush time, and modifications made to the objects will not be persisted. This
+ * is beneficial for performance, but of course only makes sense if the client
+ * code does not intend to make modifications that need to be persisted. Note
+ * that this does not in any way make the loaded entity instancesimmutable, so
+ * if any of these entity instances happen to have already been loaded into the
+ * Hibernate session as managed (read-write) entities, changes to them <i>will<i>
+ * be persisted! So the best practice is for the client code to never modify
+ * entities loaded as read-only.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -144,9 +173,11 @@ public class GenericEntityDAO extends AbstractDAO
    * </p>
    * 
    * @param <E>
-   * @param entity
-   * @param readOnly
-   * @param relationships
+   * @param entity the entity to be reloaded
+   * @param readOnly see class-level documentation of {@link GenericEntityDAO} 
+   * @param relationships the relationships to loaded, relative to the root
+   *          entity, specified as a dot-separated path of relationship property
+   *          names; see class-level documentation of {@link GenericEntityDAO}
    * @return a new Hibernate-managed instance of the specified entity
    */
   @SuppressWarnings("unchecked")
@@ -165,8 +196,9 @@ public class GenericEntityDAO extends AbstractDAO
    * Hibernate session.
    * 
    * @param entity the root entity
-   * @param relationships the relationships, relative to the root entity,
-   *          specified as a dot-separated path of relationship property names.
+   * @param relationships the relationships to loaded, relative to the root
+   *          entity, specified as a dot-separated path of relationship property
+   *          names; see class-level documentation of {@link GenericEntityDAO}
    */
   public void need(AbstractEntity entity,
                    String... relationships)
@@ -180,21 +212,13 @@ public class GenericEntityDAO extends AbstractDAO
   /**
    * Loads the specified relationships of a given entity, allowing these
    * relationships to be navigated after the entity is dettached from the
-   * Hibernate session.
-   * <p>
-   * All entities that are loaded for the specified relationships will be loaded
-   * as read-only, which is beneficial for performance. Note that this does not
-   * make the loaded entities immutable, but only that Hibernate will not
-   * attempt to persist any changes made to these loaded entities. However, if
-   * any of these entities happen to have already been loaded into the Hibernate
-   * session as read-write entities, changes to them <i>will<i> be persisted,
-   * so best practice is for the client code to never modify entities loaded by
-   * this method.
-   * </p>
+   * Hibernate session. See class-level documentation of
+   * {@link GenericEntityDAO} for issues related to loading read-only entities.
    * 
    * @param entity the root entity
-   * @param relationships the relationships, relative to the root entity,
-   *          specified as a dot-separated path of relationship property names.
+   * @param relationships the relationships to loaded, relative to the root
+   *          entity, specified as a dot-separated path of relationship property
+   *          names; see class-level documentation of {@link GenericEntityDAO}
    */
   public void needReadOnly(AbstractEntity entity,
                            String... relationships)
@@ -287,6 +311,15 @@ public class GenericEntityDAO extends AbstractDAO
     return (List<E>) getHibernateTemplate().loadAll(entityClass);
   }
 
+  /**
+   * 
+   * @param <E>
+   * @param readOnly see class-level documentation of {@link GenericEntityDAO}
+   * @param relationships the relationships to loaded, relative to the root
+   *          entity, specified as a dot-separated path of relationship property
+   *          names; see class-level documentation of {@link GenericEntityDAO}
+   * @return
+   */
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> List<E> findAllEntitiesOfType(Class<E> entityClass,
                                                                   boolean readOnly,
@@ -310,6 +343,13 @@ public class GenericEntityDAO extends AbstractDAO
     return (E) getHibernateTemplate().get(entityClass, id);
   }
 
+  /**
+   * See @{@link #findEntityById(Class, Serializable)}.
+   * @param readOnly see class-level documentation of {@link GenericEntityDAO}
+   * @param relationships the relationships to loaded, relative to the root
+   *          entity, specified as a dot-separated path of relationship property
+   *          names; see class-level documentation of {@link GenericEntityDAO}
+   */
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> E findEntityById(Class<E> entityClass,
                                                      Serializable id,
@@ -320,10 +360,9 @@ public class GenericEntityDAO extends AbstractDAO
   }
 
   /**
-   * Retrieve and return the entity that has a specific values for the specified
+   * Retrieve and return the entity that has specific values for the specified
    * properties. Return <code>null</code> if no entity has that value for that
-   * set of properties. Throw an <code>InvalidArgumentException</code> if
-   * there is more than one entity with the specified values.
+   * set of properties. 
    * 
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
@@ -331,8 +370,6 @@ public class GenericEntityDAO extends AbstractDAO
    *          property/value pair to query against
    * @return the entity that has the specified values for the specified
    *         set of properties
-   * @exception InvalidArgumentException when there is more than one entity with
-   *              the specified values for the set of properties
    */
   public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, 
                                                                      Map<String,Object> name2Value)
@@ -340,6 +377,13 @@ public class GenericEntityDAO extends AbstractDAO
     return findEntitiesByProperties(entityClass, name2Value, false);
   }
 
+  /**
+   * See @{@link #findEntitiesByProperties(Class, Map)}.
+   * @param readOnly see class-level documentation of {@link GenericEntityDAO}
+   * @param relationships the relationships to loaded, relative to the root
+   *          entity, specified as a dot-separated path of relationship property
+   *          names; see class-level documentation of {@link GenericEntityDAO}
+   */
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass,
                                                                      Map<String,Object> name2Value,
@@ -415,8 +459,8 @@ public class GenericEntityDAO extends AbstractDAO
   }
   
   /**
-   * Retrieve and return a list of entities that have a specific value for the
-   * specified property.
+   * Retrieve and return a list of entities that have specific values for the
+   * specified properties.
    * 
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
@@ -435,6 +479,13 @@ public class GenericEntityDAO extends AbstractDAO
                                   false);
   }
 
+  /**
+   * See @{@link #findEntityByProperties(Class, Map)}.
+   * @param readOnly see class-level documentation of {@link GenericEntityDAO}
+   * @param relationships the relationships to loaded, relative to the root
+   *          entity, specified as a dot-separated path of relationship property
+   *          names; see class-level documentation of {@link GenericEntityDAO}
+   */
   public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass,
                                                              Map<String,Object> name2Value,
                                                              boolean readOnly,
@@ -455,6 +506,17 @@ public class GenericEntityDAO extends AbstractDAO
     return entities.get(0);
   }
   
+  /**
+   * Retrieve and return the entities that have a specific value for the
+   * specified property. Return empty list if no entity has that value for that
+   * property.
+   * 
+   * @param <E> the type of the entity to retrieve
+   * @param entityClass the class of the entity to retrieve
+   * @param propertyName the name of the property to query against
+   * @param propertyValue the value of the property to query for
+   * @return the entity that has the specified value for the specified property
+   */
   public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass, 
                                                                    String propertyName, 
                                                                    Object propertyValue)
@@ -462,6 +524,13 @@ public class GenericEntityDAO extends AbstractDAO
     return findEntitiesByProperty(entityClass, propertyName, propertyValue, false);
   }
 
+  /**
+   * See @{@link #findEntitiesByProperty(Class, String, Object)}.
+   * @param readOnly see class-level documentation of {@link GenericEntityDAO}
+   * @param relationships the relationships to loaded, relative to the root
+   *          entity, specified as a dot-separated path of relationship property
+   *          names; see class-level documentation of {@link GenericEntityDAO}
+   */
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass,
                                                                    String propertyName,
@@ -498,6 +567,13 @@ public class GenericEntityDAO extends AbstractDAO
                                 false);
   }
                                                            
+  /**
+   * See @{@link #findEntityByProperty(Class, String, Object)}.
+   * @param readOnly see class-level documentation of {@link GenericEntityDAO}
+   * @param relationships the relationships to loaded, relative to the root
+   *          entity, specified as a dot-separated path of relationship property
+   *          names; see class-level documentation of {@link GenericEntityDAO}
+   */
   public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass,
                                                            String propertyName,
                                                            Object propertyValue,
