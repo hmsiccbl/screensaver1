@@ -20,8 +20,9 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -46,7 +47,8 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
   // instance fields
   
   protected RNAiLibraryContentsParser rnaiLibraryContentsParser;
-  protected DAO dao;
+  protected GenericEntityDAO genericEntityDao;
+  protected LibrariesDAO librariesDao;
   protected SchemaUtil schemaUtil;
   
   
@@ -364,7 +366,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
   */
   public void testUseOfExistingEntities()
   {
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
@@ -375,7 +377,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
           LibraryType.SIRNA,
           50001,
           50001);
-        dao.persistEntity(library);
+        genericEntityDao.persistEntity(library);
   
         // parse the first spreadsheet
         String filename = "existing entities 1.xls";
@@ -393,7 +395,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
         assertEquals("library has all wells", 384, library.getWells().size());
   
         // persist the new well/sr/genes, so the next
-        dao.persistEntity(library);
+        genericEntityDao.persistEntity(library);
   
         // parse the second spreadsheet
         filename = "existing entities 2.xls";
@@ -469,7 +471,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
 
   public void IGNORE_testHuman1()
   {
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
@@ -495,7 +497,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
         List<ParseError> errors = rnaiLibraryContentsParser.getErrors();
         assertEquals("workbook has no errors", 0, errors.size());
 
-        dao.persistEntity(library);
+        genericEntityDao.persistEntity(library);
         
         // this library has 779 wells according to
         // http://iccb.med.harvard.edu/screening/RNAi%20Libraries/index.htm
@@ -514,7 +516,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
       LibraryType.SIRNA,
       50001,
       50001);
-    //dao.persistEntity(library);
+    //genericEntityDao.persistEntity(library);
     Library otherLibrary = new Library(
       "Human2",
       "Human2",
@@ -522,8 +524,8 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
       LibraryType.SIRNA,
       50002,
       50002);
-    dao.loadOrCreateWellsForLibrary(otherLibrary);
-    //dao.persistEntity(otherLibrary);
+    librariesDao.loadOrCreateWellsForLibrary(otherLibrary);
+    //genericEntityDao.persistEntity(otherLibrary);
     
     String filename = "well errors.xls";
     File file = new File(TEST_INPUT_FILE_DIR, filename);

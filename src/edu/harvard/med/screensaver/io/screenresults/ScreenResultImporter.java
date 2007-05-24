@@ -20,9 +20,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
+import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -90,7 +91,8 @@ public class ScreenResultImporter
       ScreenResultParser screenResultParser = null;
       screenResultParser = (ScreenResultParser) app.getSpringBean("screenResultParser");
       
-      final DAO dao = (DAO) app.getSpringBean("dao");
+      final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+      final ScreenResultsDAO screenResultsDao = (ScreenResultsDAO) app.getSpringBean("screenResultsDao");
 
       final Integer wellsToPrint = app.getCommandLineOptionValue(WELLS_OPTION[SHORT_OPTION],
                                                                  Integer.class);
@@ -103,7 +105,7 @@ public class ScreenResultImporter
 
           if (finalScreen.getScreenResult() != null) {
             log.info("deleting existing screen result for " + finalScreen);
-            dao.deleteScreenResult(finalScreen.getScreenResult());
+            screenResultsDao.deleteScreenResult(finalScreen.getScreenResult());
           }
 
           ScreenResult screenResult = finalScreenResultParser.parse(finalScreen,
@@ -152,7 +154,7 @@ public class ScreenResultImporter
   private static Screen findScreenOrExit(CommandLineApplication app) throws ParseException
   {
     int screenNumber = Integer.parseInt(app.getCommandLineOptionValue(SCREEN_OPTION[SHORT_OPTION]));
-    DAO dao = (DAO) app.getSpringBean("dao");
+    GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
     Screen screen = dao.findEntityByProperty(Screen.class, 
                                               "hbnScreenNumber",
                                               screenNumber);

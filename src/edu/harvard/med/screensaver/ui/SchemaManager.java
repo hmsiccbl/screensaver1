@@ -9,19 +9,23 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import org.apache.log4j.Logger;
-
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.db.screendb.ScreenDBSynchronizer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
+
+import org.apache.log4j.Logger;
 
 public class SchemaManager extends AbstractBackingBean
 {
   private static Logger log = Logger.getLogger(ScreenViewer.class);
   
   private SchemaUtil _schemaUtil;
-  private DAO _dao;
+  private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
+  private CherryPickRequestDAO _cherryPickRequestDao;
 
   private String _screenDBServer = "localhost";
   private String _screenDBDatabase = "screendb";
@@ -41,14 +45,19 @@ public class SchemaManager extends AbstractBackingBean
     _schemaUtil = schemaUtil;
   }
 
-  public DAO getDao()
-  {
-    return _dao;
-  }
-
-  public void setDao(DAO dao)
+  public void setDao(GenericEntityDAO dao)
   {
     _dao = dao;
+  }
+
+  public void setLibrariesDao(LibrariesDAO dao)
+  {
+    _librariesDao = dao;
+  }
+
+  public void setCherryPickRequestDao(CherryPickRequestDAO dao)
+  {
+    _cherryPickRequestDao = dao;
   }
 
   public String getScreenDBServer()
@@ -130,7 +139,9 @@ public class SchemaManager extends AbstractBackingBean
       _screenDBDatabase,
       _screenDBUsername,
       _screenDBPassword,
-      _dao);
+      _dao,
+      _librariesDao,
+      _cherryPickRequestDao);
     screenDBSynchronizer.synchronize();
     showMessage("screenDBSynchronizer.screenDBSynchronized");
   }

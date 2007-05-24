@@ -21,7 +21,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -36,7 +36,7 @@ import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 
 /**
  * Tests the efficiency of accessing ResultValues via Hibernate scrollable
- * queries as used in DAO.findSortedResultValueTableByRange(), comparing to
+ * queries as used in ScreenResultsDAO.findSortedResultValueTableByRange(), comparing to
  * conventional model-based access via ResultValuType.getResultValues().
  * <i>These tests always pass, as they have not asserts. They are intended only
  * to produce timing output, for review (and interpretation) by a developer. For
@@ -64,7 +64,8 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
   /**
    * Bean property, for database access via Spring and Hibernate.
    */
-  protected DAO dao;
+  protected GenericEntityDAO genericEntityDao;
+  protected ScreenResultsDAO screenResultsDao;
 
   /**
    * For schema-related test setup tasks.
@@ -85,11 +86,11 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
   {
     super.onSetUp();
     schemaUtil.truncateTablesOrCreateSchema();
-    dao.doInTransaction(new DAOTransaction() 
+    genericEntityDao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction()
       {
-        final Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1); 
+        final Screen screen = MakeDummyEntities.makeDummyScreen(1); 
         ScreenResult screenResult = new ScreenResult(screen, new Date());
         ResultValueType rvt = new ResultValueType(screenResult, "rvt");
         Library library = new Library(
@@ -107,16 +108,16 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
             rvt.addResultValue(well, value);
           }
         }
-        dao.persistEntity(screen);
+        genericEntityDao.persistEntity(screen);
       }
     });
 
-    dao.doInTransaction(new DAOTransaction() 
+    genericEntityDao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction()
       {
         // preload parent entities to minimize one-time caching impact
-        Screen preloadedScreen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        Screen preloadedScreen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
         ScreenResult preloadedScreenResult = preloadedScreen.getScreenResult();
         rvt = preloadedScreenResult.getResultValueTypesList().get(0);
       }
@@ -140,46 +141,46 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
   {
 
     Map<WellKey,List<ResultValue>> result = 
-      dao.findSortedResultValueTableByRange(Arrays.asList(rvt),
-                                            0, 
-                                            SortDirection.ASCENDING,
-                                            0, 
-                                            1,
-                                            null);
+      screenResultsDao.findSortedResultValueTableByRange(Arrays.asList(rvt),
+                                                         0, 
+                                                         SortDirection.ASCENDING,
+                                                         0, 
+                                                         1,
+                                                         null);
     assertEquals(1, result.size());
   }
 
   public void testOnlyLastResultValue()
   {
     Map<WellKey,List<ResultValue>> result = 
-      dao.findSortedResultValueTableByRange(Arrays.asList(rvt), 
-                                            0, 
-                                            SortDirection.ASCENDING,
-                                            expectedFullResultSize - 1,
-                                            1,
-                                            null);
+      screenResultsDao.findSortedResultValueTableByRange(Arrays.asList(rvt), 
+                                                         0, 
+                                                         SortDirection.ASCENDING,
+                                                         expectedFullResultSize - 1,
+                                                         1,
+                                                         null);
     assertEquals(1, result.size());
   }
 
   public void testFullResultValueSet()
   {
     Map<WellKey,List<ResultValue>> result = 
-      dao.findSortedResultValueTableByRange(Arrays.asList(rvt), 
-                                            0, 
-                                            SortDirection.ASCENDING,
-                                            0,
-                                            expectedFullResultSize,
-                                            null);
+      screenResultsDao.findSortedResultValueTableByRange(Arrays.asList(rvt), 
+                                                         0, 
+                                                         SortDirection.ASCENDING,
+                                                         0,
+                                                         expectedFullResultSize,
+                                                         null);
     assertEquals(expectedFullResultSize, result.size());
   }
 
   public void testFullResultValueSetViaEntityAccessorWithoutTableInitialization()
   {
-    dao.doInTransaction(new DAOTransaction() 
+    genericEntityDao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction()
       {
-        dao.persistEntity(rvt); // reattach to Hibernate sesssion
+        genericEntityDao.persistEntity(rvt); // reattach to Hibernate sesssion
         Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
         for (Map.Entry<WellKey,ResultValue> entry: resultValues.entrySet()) {
           entry.getValue().getValue();
@@ -191,11 +192,11 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
 
   public void testFullResultValueSetViaEntityAccessorWithTableInitialization()
   {
-    dao.doInTransaction(new DAOTransaction() 
+    genericEntityDao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction()
       {
-        dao.persistEntity(rvt); // reattach to Hibernate sesssion
+        genericEntityDao.persistEntity(rvt); // reattach to Hibernate sesssion
         Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
         Map<WellKey,List<ResultValue>> table = new HashMap<WellKey,List<ResultValue>>();
         List<ResultValue> values = new ArrayList<ResultValue>(1);

@@ -17,8 +17,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -61,14 +63,20 @@ public class CherryPickRequestAllocator
 
   // instance data members
   
-  private DAO _dao;
+  private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
+  private CherryPickRequestDAO _cherryPickRequestDao;
 
 
   // public constructors and methods
 
-  public CherryPickRequestAllocator(DAO dao)
+  public CherryPickRequestAllocator(GenericEntityDAO dao,
+                                    LibrariesDAO librariesDao,
+                                    CherryPickRequestDAO cherryPickRequestDao)
   {
     _dao = dao;
+    _librariesDao = librariesDao;
+    _cherryPickRequestDao = cherryPickRequestDao;
   }
   
   /**
@@ -80,7 +88,7 @@ public class CherryPickRequestAllocator
   {
     // TODO: handle concurrency; perform appropriate locking to prevent race conditions (overdrawing well) among multiple allocate() calls
     final Set<LabCherryPick> unfulfillableLabCherryPicks = new HashSet<LabCherryPick>();
-    // TODO: new, non-nested txn should be required here, or if not possible, should perform a flush; this ensures that any LabCherryPicks allocated in an enclosing Hibernate session will be flushed to the database, ensuring that our dao.findLabCherryPicksForWell() will return non-stale results
+    // TODO: new, non-nested txn should be required here, or if not possible, should perform a flush; this ensures that any LabCherryPicks allocated in an enclosing Hibernate session will be flushed to the database, ensuring that our genericEntityDao.findLabCherryPicksForWell() will return non-stale results
     _dao.flush();
     _dao.doInTransaction(new DAOTransaction() 
     {
@@ -177,7 +185,7 @@ public class CherryPickRequestAllocator
   
   private Copy selectCopy(Well wellIn, BigDecimal volumeNeeded)
   {
-    Well well = _dao.findWell(wellIn.getWellKey()); // necessary, since LabCherryPick.sourceWell is not cascaded
+    Well well = _librariesDao.findWell(wellIn.getWellKey()); // necessary, since LabCherryPick.sourceWell is not cascaded
     List<Copy> copies = new ArrayList<Copy>(well.getLibrary().getCopies());
     if (copies.size() == 0) {
       throw new DataModelViolationException("library " + well.getLibrary() + " has no Copies, so cannot allocate liquid");
@@ -196,7 +204,7 @@ public class CherryPickRequestAllocator
   private BigDecimal calculateRemainingVolumeInCopyWell(Copy copy, Well well)
   {
     BigDecimal startingVolume = getStartingVolumeInCopyWell(copy, well);
-    Set<LabCherryPick> existingLabCherryPicksForWell = _dao.findLabCherryPicksForWell(well);
+    Set<LabCherryPick> existingLabCherryPicksForWell = _cherryPickRequestDao.findLabCherryPicksForWell(well);
 
     BigDecimal remainingVolume = startingVolume;
     for (LabCherryPick existingLabCherryPick : existingLabCherryPicksForWell) {

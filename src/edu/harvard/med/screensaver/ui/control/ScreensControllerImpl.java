@@ -20,9 +20,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.io.cherrypicks.CherryPickRequestExporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
@@ -89,7 +92,10 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
 
   // private instance fields
 
-  private DAO _dao;
+  private GenericEntityDAO _dao;
+  private ScreenResultsDAO _screenResultsDao;
+  private LibrariesDAO _librariesDao;
+  private CherryPickRequestDAO _cherryPickRequestDao;
   private LibrariesController _librariesController;
   private ScreensBrowser _screensBrowser;
   private ScreenViewer _screenViewer;
@@ -108,14 +114,24 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
 
   // public getters and setters
 
-  public DAO getDao()
-  {
-    return _dao;
-  }
-
-  public void setDao(DAO dao)
+  public void setGenericEntityDao(GenericEntityDAO dao)
   {
     _dao = dao;
+  }
+
+  public void setScreenResultsDao(ScreenResultsDAO screenResultsDao)
+  {
+    _screenResultsDao = screenResultsDao;
+  }
+
+  public void setLibrariesDao(LibrariesDAO libariesDao)
+  {
+    _librariesDao = libariesDao;
+  }
+
+  public void setCherryPickRequestDao(CherryPickRequestDAO cherryPickRequestDao)
+  {
+    _cherryPickRequestDao = cherryPickRequestDao;
   }
 
   public void setLibrariesController(LibrariesController librariesController)
@@ -202,13 +218,13 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     {
       public void runTransaction()
       {
-        List<Screen> screens = _dao.findAllEntitiesWithType(Screen.class, 
-                                                            true, 
-                                                            "screenResult", 
-                                                            "hbnLabHead", 
-                                                            "hbnLeadScreener", 
-                                                            "billingInformation", 
-                                                            "statusItems");
+        List<Screen> screens = _dao.findAllEntitiesOfType(Screen.class, 
+                                                          true, 
+                                                          "screenResult", 
+                                                          "hbnLabHead", 
+                                                          "hbnLeadScreener", 
+                                                          "billingInformation",
+                                                          "statusItems");
         for (Iterator iter = screens.iterator(); iter.hasNext();) {
           Screen screen = (Screen) iter.next();
           // note: it would be odd if the data access policy restricted
@@ -283,18 +299,10 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   {
     logUserActivity("viewScreen " + screenIn);
 
-    _screenViewer.setDao(_dao);
-
-    _screenResultImporter.setDao(_dao);
-    _screenResultImporter.setScreenResultParser(new ScreenResultParser(_dao));
-
-    _screenResultViewer.setDao(_dao);
+    _screenResultImporter.setScreenResultParser(new ScreenResultParser(_librariesDao));
     _screenResultViewer.setScreenResultExporter(_screenResultExporter);
     _screenResultViewer.setLibrariesController(_librariesController);
-
     _screensBrowser.setScreenSearchResults(screenSearchResults);
-
-    _heatMapViewer.setDao(_dao);
     _heatMapViewer.setLibrariesController(_librariesController);
 
     try {
@@ -354,7 +362,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
         public void runTransaction()
         {
           _dao.reattachEntity(screen); // checks if up-to-date
-          _dao.need(screen, "hbnLabHead.hbnLabMembers");
+          _dao.need(screen, "hbnLabHead", "hbnLabHead.hbnLabMembers");
         }
       });
       return REDISPLAY_PAGE_ACTION_RESULT;
@@ -460,7 +468,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     logUserActivity("deleteScreenResult " + screenResult);
     if (screenResult != null) {
       try {
-        _dao.deleteScreenResult(screenResult);
+        _screenResultsDao.deleteScreenResult(screenResult);
       }
       catch (ConcurrencyFailureException e) {
         showMessage("concurrentModificationConflict");
@@ -479,7 +487,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     logUserActivity("deleteCherryPickRequest " + cherryPickRequest);
     if (cherryPickRequest != null) {
       try {
-        _dao.deleteCherryPickRequest(cherryPickRequest);
+        _cherryPickRequestDao.deleteCherryPickRequest(cherryPickRequest);
       }
       catch (ConcurrencyFailureException e) {
         showMessage("concurrentModificationConflict");
@@ -708,7 +716,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   {
     logUserActivity("findCherryPickRequest " + cherryPickRequestNumber);
     if (cherryPickRequestNumber != null) {
-      CherryPickRequest cherryPickRequest = _dao.findCherryPickRequestByNumber(cherryPickRequestNumber);
+      CherryPickRequest cherryPickRequest = _cherryPickRequestDao.findCherryPickRequestByNumber(cherryPickRequestNumber);
       if (cherryPickRequest != null) {
         return viewCherryPickRequest(cherryPickRequest);
       }
@@ -909,8 +917,6 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   {
     logUserActivity("viewCherryPickRequest " + cherryPickRequestIn);
 
-    _cherryPickRequestViewer.setDao(_dao);
-
     try {
       _dao.doInTransaction(new DAOTransaction() 
       {
@@ -1006,7 +1012,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
           }
           Set<ScreenerCherryPick> cherryPicksToDelete = new HashSet<ScreenerCherryPick>(cherryPickRequest.getScreenerCherryPicks());
           for (ScreenerCherryPick cherryPick : cherryPicksToDelete) {
-            _dao.deleteScreenerCherryPick(cherryPick);
+            _cherryPickRequestDao.deleteScreenerCherryPick(cherryPick);
           }
         }
       });

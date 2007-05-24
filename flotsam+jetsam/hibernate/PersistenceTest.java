@@ -12,7 +12,7 @@ package edu.harvard.med.screensaver.model;
 import java.util.Date;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -27,7 +27,7 @@ public class PersistenceTest
   public static void main(String[] args)
   {
     CommandLineApplication app = new CommandLineApplication(args);
-    final DAO dao = (DAO) app.getSpringBean("dao");
+    final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
     SchemaUtil schemaUtil = (SchemaUtil) app.getSpringBean("schemaUtil");
     final int screenNumber = 9999;
     

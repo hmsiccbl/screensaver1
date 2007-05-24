@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -34,7 +34,7 @@ public class UniqueDataHeaderNamesTest extends AbstractSpringTest
     expectedUniqueNames.add("FI (2)");
     expectedUniqueNames.add("Assay Indicator");
 
-    Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(115);
+    Screen screen = MakeDummyEntities.makeDummyScreen(115);
     ScreenResult screenResult = new ScreenResult(screen, new Date());
     new ResultValueType(screenResult, "Luminescence");
     new ResultValueType(screenResult, "Luminescence");

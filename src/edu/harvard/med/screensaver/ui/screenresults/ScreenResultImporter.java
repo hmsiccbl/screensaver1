@@ -17,7 +17,7 @@ import javax.faces.event.ActionEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -45,7 +45,7 @@ public class ScreenResultImporter extends AbstractBackingBean
   
   // instance data
 
-  private DAO _dao;
+  private GenericEntityDAO _dao;
   private Screen _screen;
   private ScreensController _screensController;
   private UploadedFile _uploadedFile;
@@ -54,7 +54,7 @@ public class ScreenResultImporter extends AbstractBackingBean
 
   // backing bean property getter and setter methods
 
-  public void setDao(DAO dao) {
+  public void setDao(GenericEntityDAO dao) {
     _dao = dao;
   }
 

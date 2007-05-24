@@ -13,16 +13,18 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import edu.harvard.med.screensaver.CommandLineApplication;
+import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.db.DAO;
-import edu.harvard.med.screensaver.db.DAOTransaction;
 
 /**
  * Synchronizes the Screensaver database to the latest contents of ScreenDB. For every ScreenDB
@@ -86,7 +88,9 @@ public class ScreenDBSynchronizer
       commandLine.getOptionValue("D"),
       commandLine.getOptionValue("U"),
       commandLine.getOptionValue("P"),
-      (DAO) context.getBean("dao"));
+      (GenericEntityDAO) context.getBean("genericEntityDao"),
+      (LibrariesDAO) context.getBean("librariesDao"),
+      (CherryPickRequestDAO) context.getBean("cherryPickRequestDao"));
     synchronizer.synchronize();
     log.info("successfully synchronized with ScreenDB.");
   }
@@ -99,20 +103,30 @@ public class ScreenDBSynchronizer
   private String _username;
   private String _password;
   private Connection _connection;
-  private DAO _dao;
+  private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
+  private CherryPickRequestDAO _cherryPickRequestDao;
   private ScreenDBCompoundCherryPickSynchronizer compoundCherryPickSynchronizer;
   //private ScreenDBRnaiCherryPickSynchronizer rnRnaiCherryPickSynchronizer;
   
 
   // public constructors and methods
 
-  public ScreenDBSynchronizer(String server, String database, String username, String password, DAO dao)
+  public ScreenDBSynchronizer(String server, 
+                              String database, 
+                              String username, 
+                              String password, 
+                              GenericEntityDAO dao,
+                              LibrariesDAO librariesDao,
+                              CherryPickRequestDAO cherryPickRequestDao)
   {
     _server = server;
     _database = database;
     _username = username;
     _password = password;
     _dao = dao;
+    _librariesDao = librariesDao;
+    _cherryPickRequestDao = cherryPickRequestDao;
   }
   
   /**
@@ -159,7 +173,7 @@ public class ScreenDBSynchronizer
     {
       public void runTransaction()
       {
-        _dao.deleteAllCherryPickRequests();
+        _cherryPickRequestDao.deleteAllCherryPickRequests();
       }
     });
   }
@@ -171,7 +185,7 @@ public class ScreenDBSynchronizer
       public void runTransaction()
       {
         ScreenDBLibrarySynchronizer librarySynchronizer =
-          new ScreenDBLibrarySynchronizer(_connection, _dao);
+          new ScreenDBLibrarySynchronizer(_connection, _dao, _librariesDao);
         librarySynchronizer.synchronizeLibraries();
       }
     });
@@ -184,9 +198,9 @@ public class ScreenDBSynchronizer
     final ScreenDBScreenSynchronizer screenSynchronizer =
       new ScreenDBScreenSynchronizer(_connection, _dao, userSynchronizer);
     final ScreenDBLibraryScreeningSynchronizer libraryScreeningSynchronizer =
-      new ScreenDBLibraryScreeningSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
+      new ScreenDBLibraryScreeningSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
     final ScreenDBCompoundCherryPickSynchronizer compoundCherryPickSynchronizer =
-      new ScreenDBCompoundCherryPickSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
+      new ScreenDBCompoundCherryPickSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
     final ScreenDBRNAiCherryPickSynchronizer rnaiCherryPickSynchronizer =
       new ScreenDBRNAiCherryPickSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
     

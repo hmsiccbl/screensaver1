@@ -15,8 +15,9 @@ import java.io.StringReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -47,13 +48,16 @@ public class PlateWellListParser
 
   // instance data members
   
-  private DAO _dao;
+  private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
 
   // public constructors and methods
   
-  public PlateWellListParser(DAO dao)
+  public PlateWellListParser(GenericEntityDAO dao,
+                             LibrariesDAO librariesDao)
   {  
     _dao = dao;
+    _librariesDao = librariesDao;
   }
 
   /**
@@ -146,7 +150,7 @@ public class PlateWellListParser
   // private methods
 
   /**
-   * Lookup the well from the dao by plate number and well name.
+   * Lookup the well from the genericEntityDao by plate number and well name.
    * @param plateNumber the parsed plate number
    * @param wellName the parse well name
    * @return
@@ -154,7 +158,7 @@ public class PlateWellListParser
   private Well lookupWell(final Integer plateNumber, final String wellName) 
   {
     WellKey wellKey = new WellKey(plateNumber, wellName);
-    Well well = _dao.findWell(wellKey); 
+    Well well = _librariesDao.findWell(wellKey); 
     if (well != null) {
       // force initialization of persistent collections needed by search result viewer
       _dao.need(well,

@@ -18,8 +18,9 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
@@ -52,7 +53,8 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
   
   // private instance fields
   
-  private DAO _dao;
+  private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
   private Library _library;
   private Workbook _workbook;
   private ParseErrorManager _errorManager;
@@ -66,11 +68,13 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
   
   /**
    * Construct a new <code>RNAiLibraryContentsParser</code> object.
-   * @param dao the data access object
+   * @param genericEntityDao the data access object
    */
-  public RNAiLibraryContentsParser(DAO dao)
+  public RNAiLibraryContentsParser(GenericEntityDAO dao,
+                                   LibrariesDAO librariesDao)
   {
     _dao = dao;
+    _librariesDao = librariesDao;
   }
 
   /**
@@ -153,12 +157,17 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
   // package getters, for the DataRowParser
 
   /**
-   * Get the {@link DAO data access object}.
+   * Get the {@link GenericEntityDAO data access object}.
    * @return the data access object
    */
-  DAO getDAO()
+  GenericEntityDAO getDAO()
   {
     return _dao;
+  }
+  
+  LibrariesDAO getLibrariesDAO()
+  {
+    return _librariesDao;
   }
   
   /**
@@ -217,7 +226,7 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
 
     // load all of the library's wells in the Hibernate session, which avoids the need
     // to make database queries when checking for existence of wells
-    _dao.loadOrCreateWellsForLibrary(library);
+    _librariesDao.loadOrCreateWellsForLibrary(library);
   }
   
 

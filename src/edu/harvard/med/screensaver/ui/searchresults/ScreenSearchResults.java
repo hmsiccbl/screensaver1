@@ -14,7 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.SortedSet;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
@@ -48,7 +48,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
   // instance fields
   
   private ScreensController _screensController;
-  private DAO _dao;
+  private GenericEntityDAO _dao;
   
   // public constructor
   
@@ -56,9 +56,11 @@ public class ScreenSearchResults extends SearchResults<Screen>
    * Construct a new <code>ScreenSearchResult</code> object.
    * @param unsortedResults the unsorted list of the results, as they are returned from the
    * database
-   * @param dao 
+   * @param genericEntityDao 
    */
-  public ScreenSearchResults(List<Screen> unsortedResults, ScreensController screensController, DAO dao)
+  public ScreenSearchResults(List<Screen> unsortedResults, 
+                             ScreensController screensController, 
+                             GenericEntityDAO dao)
   {
     super(unsortedResults);
     _screensController = screensController;

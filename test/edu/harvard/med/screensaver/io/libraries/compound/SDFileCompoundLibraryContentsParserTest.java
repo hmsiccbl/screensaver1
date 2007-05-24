@@ -18,7 +18,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -38,7 +38,7 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
   // instance fields
   
   protected SDFileCompoundLibraryContentsParser compoundLibraryContentsParser;
-  protected DAO dao;
+  protected GenericEntityDAO genericEntityDao;
   protected SchemaUtil schemaUtil;
   
   
@@ -73,6 +73,6 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
     }
     assertEquals("workbook has no errors", 0, errors.size());
     //ParseError error;
-    dao.persistEntity(library);
+    genericEntityDao.persistEntity(library);
   }
 }

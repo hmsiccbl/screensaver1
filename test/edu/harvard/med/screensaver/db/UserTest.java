@@ -37,7 +37,7 @@ public class UserTest extends AbstractSpringTest
   /**
    * Bean property, for database access via Spring and Hibernate.
    */
-  protected DAO dao;
+  protected GenericEntityDAO genericEntityDao;
 
   /**
    * For schema-related test setup tasks.
@@ -58,19 +58,19 @@ public class UserTest extends AbstractSpringTest
   
   public void testUserDigestedPassword()
   {
-    dao.doInTransaction(new DAOTransaction() {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        ScreensaverUser user = dao.defineEntity(ScreensaverUser.class, "First", "Last", "first_last@hms.harvard.edu");
+        ScreensaverUser user = genericEntityDao.defineEntity(ScreensaverUser.class, "First", "Last", "first_last@hms.harvard.edu");
         user.setLoginId("myLoginId");
         user.updateScreensaverPassword("myPassword");
       }
     });
     
-    dao.doInTransaction(new DAOTransaction() {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        ScreensaverUser user = dao.findEntityByProperty(ScreensaverUser.class, "loginId", "myLoginId");
+        ScreensaverUser user = genericEntityDao.findEntityByProperty(ScreensaverUser.class, "loginId", "myLoginId");
         assertNotNull(user);
         assertEquals(CryptoUtils.digest("myPassword"),
                      user.getDigestedPassword());
@@ -84,24 +84,24 @@ public class UserTest extends AbstractSpringTest
     final String userEmail1 = "first_last1@hms.harvard.edu";
     final String userEmail2 = "first_last2@hms.harvard.edu";
 
-    dao.doInTransaction(new DAOTransaction() {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        ScreensaverUser user1 = dao.defineEntity(ScreensaverUser.class, "First1", "Last1", userEmail1);
+        ScreensaverUser user1 = genericEntityDao.defineEntity(ScreensaverUser.class, "First1", "Last1", userEmail1);
         user1.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
-        ScreensaverUser user2 = dao.defineEntity(ScreensaverUser.class, "First2", "Last2", userEmail2);
+        ScreensaverUser user2 = genericEntityDao.defineEntity(ScreensaverUser.class, "First2", "Last2", userEmail2);
         user2.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
       }
     });
     
-    dao.doInTransaction(new DAOTransaction() {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        ScreensaverUser user1 = dao.findEntityByProperty(ScreensaverUser.class, "email", userEmail1);
+        ScreensaverUser user1 = genericEntityDao.findEntityByProperty(ScreensaverUser.class, "email", userEmail1);
         assertEquals(user1.getScreensaverUserRoles().size(), 1);
         assertTrue(user1.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER));
         
-        ScreensaverUser user2 = dao.findEntityByProperty(ScreensaverUser.class, "email", userEmail2);
+        ScreensaverUser user2 = genericEntityDao.findEntityByProperty(ScreensaverUser.class, "email", userEmail2);
         assertEquals(user2.getScreensaverUserRoles().size(), 1);
         assertTrue(user2.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER));
         

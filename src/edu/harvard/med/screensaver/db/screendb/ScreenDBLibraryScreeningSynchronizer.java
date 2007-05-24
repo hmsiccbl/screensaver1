@@ -20,16 +20,17 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
-
-import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.apache.log4j.Logger;
 
 public class ScreenDBLibraryScreeningSynchronizer
 {
@@ -44,7 +45,8 @@ public class ScreenDBLibraryScreeningSynchronizer
   // instance data members
   
   private Connection _connection;
-  private DAO _dao;
+  private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
   private ScreenDBUserSynchronizer _userSynchronizer;
   private ScreenDBScreenSynchronizer _screenSynchronizer;
   private Map<Integer,LibraryScreening> _screenDBVisitIdToLibraryScreeningMap =
@@ -56,12 +58,14 @@ public class ScreenDBLibraryScreeningSynchronizer
 
   public ScreenDBLibraryScreeningSynchronizer(
     Connection connection,
-    DAO dao,
+    GenericEntityDAO dao,
+    LibrariesDAO librariesDao,
     ScreenDBUserSynchronizer userSynchronizer,
     ScreenDBScreenSynchronizer screenSynchronizer)
   {
     _connection = connection;
     _dao = dao;
+    _librariesDao = librariesDao;
     _userSynchronizer = userSynchronizer;
     _screenSynchronizer = screenSynchronizer;
   }
@@ -97,7 +101,7 @@ public class ScreenDBLibraryScreeningSynchronizer
   // private instance methods
   
   private void deleteOldLibraryScreenings() {
-    for (LibraryScreening libraryScreening : _dao.findAllEntitiesWithType(LibraryScreening.class)) {
+    for (LibraryScreening libraryScreening : _dao.findAllEntitiesOfType(LibraryScreening.class)) {
       libraryScreening.getScreen().getScreeningRoomActivities().remove(libraryScreening);
       libraryScreening.getPerformedBy().getHbnScreeningRoomActivitiesPerformed().remove(libraryScreening);
     }

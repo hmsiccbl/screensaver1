@@ -17,8 +17,9 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -36,6 +37,8 @@ public class CompoundCherryPickRequestTest extends AbstractEntityInstanceTest
 
   // instance data members
 
+  protected LibrariesDAO librariesDao;
+
   
   // public constructors and methods
 
@@ -46,12 +49,12 @@ public class CompoundCherryPickRequestTest extends AbstractEntityInstanceTest
   
   public void testCherryPickAllowance()
   {
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
         Library library = new Library("Compound Library", "clib", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 10);
-        dao.loadOrCreateWellsForLibrary(library);
+        librariesDao.loadOrCreateWellsForLibrary(library);
         int iSmiles = 0;
         List<Well> wells = new ArrayList<Well>(library.getWells());
         Compound compound = null;
@@ -63,9 +66,9 @@ public class CompoundCherryPickRequestTest extends AbstractEntityInstanceTest
           }
           well.addCompound(compound);
         }
-        dao.persistEntity(library);
+        genericEntityDao.persistEntity(library);
         
-        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
+        Screen screen = MakeDummyEntities.makeDummyScreen(1);
         screen.setScreenType(ScreenType.SMALL_MOLECULE);
         
         ScreenResult screenResult = new ScreenResult(screen, new Date());
@@ -82,8 +85,8 @@ public class CompoundCherryPickRequestTest extends AbstractEntityInstanceTest
         assertEquals((int) ((10 * 384) / 2 * 0.003), cherryPickRequest.getCherryPickAllowance());
         assertEquals(200, cherryPickRequest.getCherryPickAllowanceUsed());
         
-        dao.persistEntity(cherryPickRequest);
-        dao.persistEntity(screen);
+        genericEntityDao.persistEntity(cherryPickRequest);
+        genericEntityDao.persistEntity(screen);
         
       }
     });

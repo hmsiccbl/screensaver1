@@ -69,7 +69,7 @@ import edu.harvard.med.authentication.AuthenticationRequestException;
 import edu.harvard.med.authentication.AuthenticationResponseException;
 import edu.harvard.med.authentication.AuthenticationResult;
 import edu.harvard.med.authentication.Credentials;
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 
@@ -82,7 +82,7 @@ import org.apache.log4j.Logger;
  * <p>
  * If user is successfully authenticated, a set <code>Principal</code>s will
  * added to the login Subject, which will be subsequently removed when the user
- * is logged out.  The Principals are obtained from a database, via a DAO object.
+ * is logged out.  The Principals are obtained from a database, via a GenericEntityDAO object.
  */
 public class ScreensaverLoginModule implements LoginModule
 {
@@ -95,7 +95,7 @@ public class ScreensaverLoginModule implements LoginModule
 
   private static final String FOUND_ECOMMONS_USER = "Found eCommons user";
   
-  private DAO _dao;
+  private GenericEntityDAO _dao;
   private AuthenticationClient _authenticationClient;
 
   // initial state
@@ -134,12 +134,12 @@ public class ScreensaverLoginModule implements LoginModule
     _authenticationClient = authenticationClient;
   }
 
-  public DAO getDao()
+  public GenericEntityDAO getDao()
   {
     return _dao;
   }
 
-  public void setDao(DAO dao)
+  public void setDao(GenericEntityDAO dao)
   {
     _dao = dao;
   }

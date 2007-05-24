@@ -14,7 +14,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 
 /**
@@ -26,9 +26,9 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 public abstract class AbstractEntityConverter<E extends AbstractEntity> implements Converter
 {
   
-  private DAO _dao;
+  private GenericEntityDAO _dao;
 
-  public void setDao(DAO dao)
+  public void setDao(GenericEntityDAO dao)
   {
     _dao = dao;
   }
@@ -39,9 +39,9 @@ public abstract class AbstractEntityConverter<E extends AbstractEntity> implemen
   {
     if (_dao == null) {
       FacesContext facesCtx = FacesContext.getCurrentInstance();
-      _dao = (DAO) facesCtx.getApplication()
+      _dao = (GenericEntityDAO) facesCtx.getApplication()
                            .getVariableResolver()
-                           .resolveVariable(facesCtx, "dao");
+                           .resolveVariable(facesCtx, "genericEntityDao");
     }
     try {
       E entity = _dao.findEntityById(getEntityClass(),

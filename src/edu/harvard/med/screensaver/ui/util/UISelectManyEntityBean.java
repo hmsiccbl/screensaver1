@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 
 import org.apache.log4j.Logger;
@@ -28,17 +28,17 @@ public class UISelectManyEntityBean<E extends AbstractEntity> extends UISelectMa
 
   // instance data members
 
-  private DAO _dao;
+  private GenericEntityDAO _dao;
 
   
   // public constructors and methods
 
-  public UISelectManyEntityBean(Collection<E> entities, DAO dao)
+  public UISelectManyEntityBean(Collection<E> entities, GenericEntityDAO dao)
   {
     this(entities, null, dao);
   }
   
-  public UISelectManyEntityBean(Collection<E> entities, Collection<E> defaultSelections, DAO dao)
+  public UISelectManyEntityBean(Collection<E> entities, Collection<E> defaultSelections, GenericEntityDAO dao)
   {
     super(entities, defaultSelections);
     _dao = dao;

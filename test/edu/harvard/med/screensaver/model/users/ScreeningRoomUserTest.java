@@ -37,22 +37,22 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest
   public void testDerivedLabName()
   {
     schemaUtil.truncateTablesOrCreateSchema();
-    dao.doInTransaction(new DAOTransaction() 
+    genericEntityDao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction() 
       {
         ScreeningRoomUser labMember = new ScreeningRoomUser(new Date(), "Lab", "Member", "lab_member@hms.harvard.edu", "", "","", "", "", ScreeningRoomUserClassification.ICCBL_NSRB_STAFF, false);
-        dao.persistEntity(labMember);
+        genericEntityDao.persistEntity(labMember);
         assertNull("lab member without lab head", labMember.getLabName());
 
         ScreeningRoomUser labHead = new ScreeningRoomUser(new Date(), "Lab", "Head", "lab_head@hms.harvard.edu", "", "","", "", "", ScreeningRoomUserClassification.ICCBL_NSRB_STAFF, false);
         labHead.setLabAffiliation(new LabAffiliation("LabAffiliation", AffiliationCategory.HMS));
         labMember.setLabHead(labHead);
-        dao.persistEntity(labHead);
+        genericEntityDao.persistEntity(labHead);
       }
     });
     
-    ScreeningRoomUser labMember = dao.findEntityByProperty(ScreeningRoomUser.class, "lastName", "Member");
+    ScreeningRoomUser labMember = genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "lastName", "Member");
     ScreeningRoomUser labHead = labMember.getLabHead();
     assertEquals("lab member with lab head", "Head, Lab - LabAffiliation", labMember.getLabName());
     assertEquals("lab head", "Head, Lab - LabAffiliation", labHead.getLabName());

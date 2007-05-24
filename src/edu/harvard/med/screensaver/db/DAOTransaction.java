@@ -20,7 +20,7 @@ public interface DAOTransaction
 
   /**
    * Run a transactional section of code. Intended to be called by
-   * {@link DAO#doInTransaction}.
+   * {@link AbstractDAO#doInTransaction}.
    */
   public void runTransaction();
 }

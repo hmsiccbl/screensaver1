@@ -20,9 +20,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -138,16 +139,22 @@ public class BulkScreenResultImporter
   // instance data
   
   private ScreenResultParser _parser;
-  private DAO _dao;
+  private GenericEntityDAO _dao;
+  private ScreenResultsDAO _screenResultsDao;
+  
   private HibernateTemplate _hibernateTemplate;
   
 
   // public constructors and methods
   
-  public BulkScreenResultImporter(ScreenResultParser parser, DAO dao, HibernateTemplate hibernateTemplate)
+  public BulkScreenResultImporter(ScreenResultParser parser, 
+                                  GenericEntityDAO dao, 
+                                  ScreenResultsDAO screenResultsDao, 
+                                  HibernateTemplate hibernateTemplate)
   {
     _parser = parser;
     _dao = dao;
+    _screenResultsDao = screenResultsDao;
     _hibernateTemplate = hibernateTemplate;
   }
 
@@ -195,7 +202,7 @@ public class BulkScreenResultImporter
               }
               if (screen.getScreenResult() != null) {
                 log.info("deleting existing screen result for screen " + screenNumber);
-                _dao.deleteScreenResult(screen.getScreenResult());
+                _screenResultsDao.deleteScreenResult(screen.getScreenResult());
               }
             };
           });

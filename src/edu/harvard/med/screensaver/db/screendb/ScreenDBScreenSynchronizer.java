@@ -19,10 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
-import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.BillingInfoToBeRequested;
@@ -37,6 +35,8 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.util.eutils.PublicationInfo;
 import edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider;
 
+import org.apache.log4j.Logger;
+
 public class ScreenDBScreenSynchronizer
 {
 
@@ -48,7 +48,7 @@ public class ScreenDBScreenSynchronizer
   // instance data members
   
   private Connection _connection;
-  private DAO _dao;
+  private GenericEntityDAO _dao;
   private ScreenDBUserSynchronizer _userSynchronizer;
   private ScreenType.UserType _screenUserType = new ScreenType.UserType();
   private StatusValue.UserType _statusValueUserType = new StatusValue.UserType();
@@ -59,7 +59,9 @@ public class ScreenDBScreenSynchronizer
   
   // public constructors and methods
 
-  public ScreenDBScreenSynchronizer(Connection connection, DAO dao, ScreenDBUserSynchronizer userSynchronizer)
+  public ScreenDBScreenSynchronizer(Connection connection, 
+                                    GenericEntityDAO dao, 
+                                    ScreenDBUserSynchronizer userSynchronizer)
   {
     _connection = connection;
     _dao = dao;

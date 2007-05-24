@@ -17,8 +17,9 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
@@ -29,6 +30,7 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
 
   private static Logger log = Logger.getLogger(RNAiCherryPickRequestTest.class);
 
+  protected LibrariesDAO librariesDao;
 
   public RNAiCherryPickRequestTest() throws IntrospectionException
   {
@@ -40,24 +42,24 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
     schemaUtil.truncateTablesOrCreateSchema();
 
     final Set<Integer> requestedEmptyColumns = new HashSet<Integer>(Arrays.asList(3, 7, 11));
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction() 
       {
-        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
+        Screen screen = MakeDummyEntities.makeDummyScreen(1);
         screen.setScreenType(ScreenType.RNAI);
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
         cherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(requestedEmptyColumns);
-        dao.persistEntity(cherryPickRequest); // why do we need this, if we're also persisting the screen?!
-        dao.persistEntity(screen);
+        genericEntityDao.persistEntity(cherryPickRequest); // why do we need this, if we're also persisting the screen?!
+        genericEntityDao.persistEntity(screen);
       }
     });
     
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction() 
       {
-        Screen screen2 = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        Screen screen2 = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
         assertEquals(requestedEmptyColumns,
                      screen2.getCherryPickRequests().iterator().next().getRequestedEmptyColumnsOnAssayPlate());
       }
@@ -69,14 +71,14 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
    */
   public void testCherryPickAllowance()
   {
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
-        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
+        Screen screen = MakeDummyEntities.makeDummyScreen(1);
         screen.setScreenType(ScreenType.RNAI);
         RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
-        dao.persistEntity(CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, 384));
+        genericEntityDao.persistEntity(CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, 384));
 
         for (int plateOrdinal = 0; plateOrdinal < 6; ++plateOrdinal) {
           for (int attempt = 0; attempt <= plateOrdinal; ++attempt) {
@@ -85,15 +87,15 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
             for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
               for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
                 WellKey wellKey = new WellKey(plateOrdinal + 50001, iRow, iCol);
-                Well well = dao.findWell(wellKey);
+                Well well = librariesDao.findWell(wellKey);
                 new ScreenerCherryPick(cherryPickRequest, well);
                 allWellsOnPlate[i++] = wellKey;
               }
             }
           }
         }
-        dao.persistEntity(cherryPickRequest); // avoid hib errors on flush
-        dao.persistEntity(screen); // avoid hib errors on flush
+        genericEntityDao.persistEntity(cherryPickRequest); // avoid hib errors on flush
+        genericEntityDao.persistEntity(screen); // avoid hib errors on flush
 
         assertEquals("cherry pick allowance used", 384 * 6, cherryPickRequest.getCherryPickAllowanceUsed());
       }

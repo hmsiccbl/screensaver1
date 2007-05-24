@@ -23,7 +23,7 @@ import org.apache.log4j.Logger;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -67,14 +67,14 @@ public class BulkCompoundLibraryLoader
 
   // instance data members
   
-  private DAO _dao;
+  private GenericEntityDAO _dao;
   private SDFileCompoundLibraryContentsParser _parser;
 
   
   // public constructors and methods
 
   public BulkCompoundLibraryLoader(
-    DAO dao,
+    GenericEntityDAO dao,
     SDFileCompoundLibraryContentsParser parser)
   {
     _dao = dao;

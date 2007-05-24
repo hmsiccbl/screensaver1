@@ -16,8 +16,8 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -34,7 +34,7 @@ public class HeatMapCellTest extends AbstractSpringTest
 
   public void testHeatMapCell()
   {
-    Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(115);
+    Screen screen = MakeDummyEntities.makeDummyScreen(115);
     ScreenResult screenResult = new ScreenResult(screen, new Date());
     ResultValueType rvt = new ResultValueType(screenResult, "rvt1");
     Library library = new Library("library 1", "lib1", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 1);

@@ -9,13 +9,13 @@
 
 package edu.harvard.med.screensaver;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 
 import org.apache.log4j.Logger;
 
 /**
- * Extends AbstractSpringTest by automatically providing a DAO object and
+ * Extends AbstractSpringTest by automatically providing a GenericEntityDAO object and
  * truncating the test database during test setup.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -30,7 +30,7 @@ public class AbstractSpringPersistenceTest extends AbstractSpringTest
 
   // instance data members
 
-  protected DAO dao;
+  protected GenericEntityDAO genericEntityDao;
   protected SchemaUtil schemaUtil;
   
   @Override

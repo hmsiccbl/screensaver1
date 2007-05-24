@@ -13,7 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -29,7 +30,8 @@ public class PlateWellListParserTest extends AbstractSpringTest
   private static Logger log = Logger.getLogger(PlateWellListParserTest.class);
 
   protected PlateWellListParser plateWellListParser;
-  protected DAO dao;
+  protected GenericEntityDAO genericEntityDao;
+  protected LibrariesDAO librariesDao;
   protected SchemaUtil schemaUtil;
 
   private Library _library1;
@@ -46,11 +48,11 @@ public class PlateWellListParserTest extends AbstractSpringTest
     schemaUtil.truncateTablesOrCreateSchema();
 
     _library1 = new Library("Test Library 1", "testlib1", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 10);
-    dao.persistEntity(_library1);
-    dao.loadOrCreateWellsForLibrary(_library1);
+    genericEntityDao.persistEntity(_library1);
+    librariesDao.loadOrCreateWellsForLibrary(_library1);
     _library2 = new Library("Test Library 2", "testlib2", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 21, 30);
-    dao.persistEntity(_library2);
-    dao.loadOrCreateWellsForLibrary(_library2);
+    genericEntityDao.persistEntity(_library2);
+    librariesDao.loadOrCreateWellsForLibrary(_library2);
   }
   
   public void testPlateWelListParserOnSingleLineInput()

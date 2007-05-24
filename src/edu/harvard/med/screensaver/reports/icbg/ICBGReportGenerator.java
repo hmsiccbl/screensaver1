@@ -21,7 +21,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -57,7 +57,7 @@ public class ICBGReportGenerator
     ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { 
       CommandLineApplication.DEFAULT_SPRING_CONFIG,
     });
-    DAO dao = (DAO) context.getBean("dao");
+    GenericEntityDAO dao = (GenericEntityDAO) context.getBean("genericEntityDao");
     ICCBLPlateWellToINBioLQMapper mapper =
       new ICCBLPlateWellToINBioLQMapper();
     ICBGReportGenerator generator = new ICBGReportGenerator(
@@ -79,7 +79,7 @@ public class ICBGReportGenerator
   
   // instance fields
 
-  private DAO _dao;
+  private GenericEntityDAO _dao;
   private ICCBLPlateWellToINBioLQMapper _mapper;
   private ScreenDBProxy _screenDBProxy;
   private HSSFWorkbook _report;
@@ -90,7 +90,7 @@ public class ICBGReportGenerator
   // public constructor and instance methods
   
   public ICBGReportGenerator(
-    DAO dao,
+    GenericEntityDAO dao,
     ICCBLPlateWellToINBioLQMapper mapper,
     ScreenDBProxy screenDBProxy)
   {
@@ -258,7 +258,7 @@ public class ICBGReportGenerator
   {
     _dao.doInTransaction(new DAOTransaction () {
       public void runTransaction() {
-        List<ScreenResult> screenResults = _dao.findAllEntitiesWithType(ScreenResult.class);
+        List<ScreenResult> screenResults = _dao.findAllEntitiesOfType(ScreenResult.class);
         for (ScreenResult screenResult : screenResults) {
           parseScreenResult(screenResult);
 

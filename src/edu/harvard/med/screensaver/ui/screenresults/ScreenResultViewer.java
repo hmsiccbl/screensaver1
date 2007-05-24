@@ -26,7 +26,8 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -117,7 +118,8 @@ public class ScreenResultViewer extends AbstractBackingBean
 
   private ScreensController _screensController;
   private LibrariesController _librariesController;
-  private DAO _dao;
+  private ScreenResultsDAO _screenResultsDao;
+  private LibrariesDAO _librariesDao;
   private ScreenResultExporter _screenResultExporter;
   private ScreenResult _screenResult;
   private Map<String,Boolean> _collapsablePanelsState;
@@ -161,9 +163,14 @@ public class ScreenResultViewer extends AbstractBackingBean
     _collapsablePanelsState.put("heatMaps", true);
   }
 
-  public void setDao(DAO dao)
+  public void setLibrariesDao(LibrariesDAO librariesDao)
   {
-    _dao = dao;
+    _librariesDao = librariesDao;
+  }
+
+  public void setScreenResultsDao(ScreenResultsDAO screenResultsDao)
+  {
+    _screenResultsDao = screenResultsDao;
   }
 
   public void setScreensController(ScreensController screensController) 
@@ -497,7 +504,7 @@ public class ScreenResultViewer extends AbstractBackingBean
     
     Integer plateNumber = Integer.valueOf((String) ((Map) _rawDataModel.getRowData()).get(DATA_TABLE_FIXED_COLUMN_HEADERS.get(0)));
     String wellName = (String) ((Map) _rawDataModel.getRowData()).get(DATA_TABLE_FIXED_COLUMN_HEADERS.get(1));
-    Well well = _dao.findWell(new WellKey(plateNumber, wellName));
+    Well well = _librariesDao.findWell(new WellKey(plateNumber, wellName));
     return _librariesController.viewWell(well, null);
   }
   
@@ -671,19 +678,19 @@ public class ScreenResultViewer extends AbstractBackingBean
       int sortByArg;
       switch (getSortManager().getCurrentSortColumnIndex())
       {
-      case 0: sortByArg = DAO.SORT_BY_PLATE_WELL; break;
-      case 1: sortByArg = DAO.SORT_BY_WELL_PLATE; break;
-      case 2: sortByArg = DAO.SORT_BY_ASSAY_WELL_TYPE; break;
+      case 0: sortByArg = ScreenResultsDAO.SORT_BY_PLATE_WELL; break;
+      case 1: sortByArg = ScreenResultsDAO.SORT_BY_WELL_PLATE; break;
+      case 2: sortByArg = ScreenResultsDAO.SORT_BY_ASSAY_WELL_TYPE; break;
       default:
           sortByArg = getSortManager().getCurrentSortColumnIndex() - DATA_TABLE_FIXED_COLUMNS;
       }
       Map<WellKey,List<ResultValue>> rvData = 
-        _dao.findSortedResultValueTableByRange(_selectedResultValueTypes.getSelections(),
-                                               sortByArg,
-                                               getSortManager().getCurrentSortDirection(),
-                                               _firstResultValueIndex,
-                                               getDataTable().getRows(),
-                                               isShowHitsOnly() ? getHitsForDataHeader().getSelection() : null);
+        _screenResultsDao.findSortedResultValueTableByRange(_selectedResultValueTypes.getSelections(),
+                                                            sortByArg,
+                                                            getSortManager().getCurrentSortDirection(),
+                                                            _firstResultValueIndex,
+                                                            getDataTable().getRows(),
+                                                            isShowHitsOnly() ? getHitsForDataHeader().getSelection() : null);
       
       List<Map<String,String>> tableData = new ArrayList<Map<String,String>>();
       _excludedResultValues = new ArrayList<List<Boolean>>();

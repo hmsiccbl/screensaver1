@@ -25,7 +25,7 @@
     class="edu.harvard.med.screensaver.ui.authentication.ScreensaverLoginModule"
     scope="prototype">
     <description>JAAS LoginModule implementation that can be used to authenticate and authorize a user.  In our case, the Tomcat app server will make calls to this bean.  Maintains state between method calls, so cannot be a singleton.</description>
-    <property name="dao" ref="unrestrictedDao"/>
+    <property name="dao" ref="genericEntityDao"/>
     <property name="authenticationClient" ref="eCommonsAuthenticationClient"/>
   </bean>
   

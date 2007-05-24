@@ -21,7 +21,7 @@ import org.hibernate.engine.EntityKey;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -41,7 +41,7 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
 
   // instance data members
   
-  protected DAO dao;
+  protected GenericEntityDAO genericEntityDao;
   protected SchemaUtil schemaUtil;
   //protected HibernateSessionFactory hibernateSessionFactory;
   protected HibernateTemplate hibernateTemplate;
@@ -57,23 +57,23 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
 
   public void testScreenToScreenResultLazyInit()
   {
-    dao.doInTransaction(new DAOTransaction() {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(107);
+        Screen screen = MakeDummyEntities.makeDummyScreen(107);
         ScreenResult screenResult = new ScreenResult(screen, new Date());
         new ResultValueType(screenResult, "Luminescence");
         new ResultValueType(screenResult, "FI");
-        dao.persistEntity(screen);
+        genericEntityDao.persistEntity(screen);
       }
     });
 
-    dao.doInTransaction(new DAOTransaction() {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
         Session session = hibernateTemplate.getSessionFactory().getCurrentSession();
         assertEquals("session initially empty", 0, session.getStatistics().getEntityCount());
-        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 107);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 107);
         assertNotNull("screen in session", screen);
         for (Object key : session.getStatistics().getEntityKeys()) {
           EntityKey entityKey = (EntityKey) key;
@@ -86,10 +86,10 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
 
   public void testResultValueTypeToResultValueExtraLazyInit()
   {
-    dao.doInTransaction(new DAOTransaction() {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(107);
+        Screen screen = MakeDummyEntities.makeDummyScreen(107);
         ScreenResult screenResult = new ScreenResult(screen, new Date());
         ResultValueType rvt = new ResultValueType(screenResult, "Luminescence");
         Library library = new Library(
@@ -101,19 +101,19 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
           1);
         for (int i = 1; i < 10; ++i) {
           Well well = new Well(library, i, "A01");
-          dao.persistEntity(well);
+          genericEntityDao.persistEntity(well);
           rvt.addResultValue(well, Integer.toString(i));
         }
-        dao.persistEntity(screen);
+        genericEntityDao.persistEntity(screen);
       }
     });
 
-    dao.doInTransaction(new DAOTransaction() {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
         Session session = hibernateTemplate.getSessionFactory().getCurrentSession();
         assertEquals("session initially empty", 0, session.getStatistics().getEntityCount());
-        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 107);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 107);
         List<ResultValueType> rvts = screen.getScreenResult().getResultValueTypesList();
         ResultValueType rvt = rvts.get(0);
         

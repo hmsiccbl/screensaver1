@@ -55,7 +55,7 @@ public class SimpleDAOTest extends AbstractSpringTest
   /**
    * Bean property, for database access via Spring and Hibernate.
    */
-  protected DAO dao;
+  protected GenericEntityDAO genericEntityDao;
 
   /**
    * For schema-related test setup tasks.
@@ -76,11 +76,11 @@ public class SimpleDAOTest extends AbstractSpringTest
   
   public void testCreateEntity()
   {
-    Compound compound = dao.defineEntity(Compound.class, "smiles");
+    Compound compound = genericEntityDao.defineEntity(Compound.class, "smiles");
     assertEquals("smiles", compound.getSmiles(), "smiles");
     
     try {
-      dao.defineEntity(Compound.class, "foo", "bar");
+      genericEntityDao.defineEntity(Compound.class, "foo", "bar");
       fail("no error on create entity with bad args");
     }
     catch (IllegalArgumentException e) {
@@ -94,8 +94,8 @@ public class SimpleDAOTest extends AbstractSpringTest
   {
     Compound compound = new Compound("smiles");
     compound.setSalt(true);
-    dao.persistEntity(compound);
-    List<Compound> compounds = dao.findAllEntitiesWithType(Compound.class);
+    genericEntityDao.persistEntity(compound);
+    List<Compound> compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
     assertEquals("one compound in the machine", compounds.size(), 1);
     assertEquals("names match", compounds.get(0).getSmiles(), "smiles");
     assertEquals("salty match", compounds.get(0).isSalt(), true);
@@ -103,58 +103,58 @@ public class SimpleDAOTest extends AbstractSpringTest
   
   public void testFindAllEntitiesWithType()
   {
-    List<Compound> compounds = dao.findAllEntitiesWithType(Compound.class);
+    List<Compound> compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
     assertEquals("no compounds in an empty database", 0, compounds.size());
     
-    dao.defineEntity(Compound.class, "smiles");
-    compounds = dao.findAllEntitiesWithType(Compound.class);
+    genericEntityDao.defineEntity(Compound.class, "smiles");
+    compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
     assertEquals("one compound in the machine", compounds.size(), 1);
     assertEquals("smiles match", "smiles", compounds.get(0).getSmiles());
   }
   
   public void testFindEntityById()
   {
-    Compound compound = dao.defineEntity(Compound.class, "smilesZ");
+    Compound compound = genericEntityDao.defineEntity(Compound.class, "smilesZ");
     Serializable id = compound.getCompoundId();
 
-    Compound compound2 = dao.findEntityById(Compound.class, id);
+    Compound compound2 = genericEntityDao.findEntityById(Compound.class, id);
 
     assertEquals(compound, compound2);
-    compound2 = dao.findEntityById(Compound.class, id + "'");
+    compound2 = genericEntityDao.findEntityById(Compound.class, id + "'");
     assertEquals(null, compound2);
   }
   
   public void testFindEntitiesByProperties()
   {
     final ResultValueType[] rvts = new ResultValueType[4];
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
                         {
       public void runTransaction()
       {
         ScreenResult screenResult = ScreenResultParserTest.makeScreenResult(new Date());
-        rvts[0] = dao.defineEntity(ResultValueType.class, screenResult, "rvt0");
+        rvts[0] = genericEntityDao.defineEntity(ResultValueType.class, screenResult, "rvt0");
         rvts[0].setDerived(true);
         rvts[0].setAssayPhenotype("Mouse");
-        rvts[1] = dao.defineEntity(ResultValueType.class, screenResult, "rvt1");
+        rvts[1] = genericEntityDao.defineEntity(ResultValueType.class, screenResult, "rvt1");
         rvts[1].setDerived(false);
         rvts[1].setAssayPhenotype("Mouse");
-        rvts[2] = dao.defineEntity(ResultValueType.class, screenResult, "rvt2");
+        rvts[2] = genericEntityDao.defineEntity(ResultValueType.class, screenResult, "rvt2");
         rvts[2].setDerived(true);
         rvts[2].setAssayPhenotype("Mouse");
-        rvts[3] = dao.defineEntity(ResultValueType.class, screenResult, "rvt3");
+        rvts[3] = genericEntityDao.defineEntity(ResultValueType.class, screenResult, "rvt3");
         rvts[3].setDerived(true);
         rvts[3].setAssayPhenotype("Human");
       }
                         });
     
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
                         {
       public void runTransaction()
       {
         Map<String,Object> queryProperties = new HashMap<String,Object>();
         queryProperties.put("derived", true);
         queryProperties.put("assayPhenotype", "Mouse");
-        List<ResultValueType> entities = dao.findEntitiesByProperties(ResultValueType.class,
+        List<ResultValueType> entities = genericEntityDao.findEntitiesByProperties(ResultValueType.class,
                                                                       queryProperties);
         assertTrue(entities.contains(rvts[0]));
         assertTrue(entities.contains(rvts[2]));
@@ -167,11 +167,11 @@ public class SimpleDAOTest extends AbstractSpringTest
   public void testFindEntityByProperties()
   {
     final Library[] expectedLibrary = new Library[1];
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
-        expectedLibrary[0] = dao.defineEntity(Library.class,
+        expectedLibrary[0] = genericEntityDao.defineEntity(Library.class,
           "ln1",
           "sn1",
           ScreenType.SMALL_MOLECULE,
@@ -180,14 +180,14 @@ public class SimpleDAOTest extends AbstractSpringTest
           50);
       }
     });
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
         Map<String,Object> props = new HashMap<String,Object>();
         props.put("startPlate", 1);
         props.put("endPlate", 50);
-        Library actualLibrary = dao.findEntityByProperties(Library.class, props);
+        Library actualLibrary = genericEntityDao.findEntityByProperties(Library.class, props);
         assertEquals(expectedLibrary[0], actualLibrary);
       }
     });
@@ -195,59 +195,59 @@ public class SimpleDAOTest extends AbstractSpringTest
 
   public void testFindEntitiesByProperty1()
   {
-    Compound compound = dao.defineEntity(Compound.class, "spaz");
+    Compound compound = genericEntityDao.defineEntity(Compound.class, "spaz");
     
-    List<Compound> compounds = dao.findEntitiesByProperty(Compound.class, "smiles", "spaz");
+    List<Compound> compounds = genericEntityDao.findEntitiesByProperty(Compound.class, "smiles", "spaz");
     assertEquals(1, compounds.size());
     assertEquals(compound, compounds.get(0));
 
-    compounds = dao.findEntitiesByProperty(Compound.class, "smiles", "something other than spaz");
+    compounds = genericEntityDao.findEntitiesByProperty(Compound.class, "smiles", "something other than spaz");
     assertEquals(0, compounds.size());
   }
   
   public void testFindEntitiesByProperty2()
   {
-    dao.defineEntity(Library.class, "ln1", "sn1", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 1, 50);
-    dao.defineEntity(Library.class, "ln2", "sn2", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 51, 100);
-    dao.defineEntity(Library.class, "ln3", "sn3", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 101, 150);
-    dao.defineEntity(Library.class, "ln4", "sn4", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 151, 200);
-    dao.defineEntity(Library.class, "ln5", "sn5", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 201, 250);
+    genericEntityDao.defineEntity(Library.class, "ln1", "sn1", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 1, 50);
+    genericEntityDao.defineEntity(Library.class, "ln2", "sn2", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 51, 100);
+    genericEntityDao.defineEntity(Library.class, "ln3", "sn3", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 101, 150);
+    genericEntityDao.defineEntity(Library.class, "ln4", "sn4", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 151, 200);
+    genericEntityDao.defineEntity(Library.class, "ln5", "sn5", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 201, 250);
     
-    assertEquals(3, dao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.NATURAL_PRODUCTS).size());
-    assertEquals(2, dao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.DISCRETE).size());
-    assertEquals(0, dao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.COMMERCIAL).size());
+    assertEquals(3, genericEntityDao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.NATURAL_PRODUCTS).size());
+    assertEquals(2, genericEntityDao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.DISCRETE).size());
+    assertEquals(0, genericEntityDao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.COMMERCIAL).size());
   }
 
   public void testFindEntitybyProperty()
   {
-    Compound compound = dao.defineEntity(Compound.class, "spaz");
+    Compound compound = genericEntityDao.defineEntity(Compound.class, "spaz");
     
-    Compound compound2 = dao.findEntityByProperty(Compound.class, "smiles", "spaz");
+    Compound compound2 = genericEntityDao.findEntityByProperty(Compound.class, "smiles", "spaz");
     assertEquals(compound, compound2);
 
-    compound2 = dao.findEntityByProperty(Compound.class, "smiles", "something other than spaz");
+    compound2 = genericEntityDao.findEntityByProperty(Compound.class, "smiles", "something other than spaz");
     assertNull(compound2);
   }
   
 //  public void testFindEntitiesByPropertyPattern()
 //  {
-//    dao.defineEntity(Library.class, "npln1", "sn1", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 1, 50);
-//    dao.defineEntity(Library.class, "npln2", "sn2", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 51, 100);
-//    dao.defineEntity(Library.class, "ln3", "sn3", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 101, 150);
-//    dao.defineEntity(Library.class, "npln4", "sn4", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 151, 200);
-//    dao.defineEntity(Library.class, "ln5", "sn5", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 201, 250);
+//    genericEntityDao.defineEntity(Library.class, "npln1", "sn1", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 1, 50);
+//    genericEntityDao.defineEntity(Library.class, "npln2", "sn2", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 51, 100);
+//    genericEntityDao.defineEntity(Library.class, "ln3", "sn3", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 101, 150);
+//    genericEntityDao.defineEntity(Library.class, "npln4", "sn4", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 151, 200);
+//    genericEntityDao.defineEntity(Library.class, "ln5", "sn5", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 201, 250);
 //    
-//    assertEquals(3, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "npln*").size());
-//    assertEquals(2, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "ln*").size());
-//    assertEquals(5, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "*ln*").size());
-//    assertEquals(0, dao.findEntitiesByPropertyPattern(Library.class, "libraryName", "ZZZZZZZZZ*").size());
+//    assertEquals(3, genericEntityDao.findEntitiesByPropertyPattern(Library.class, "libraryName", "npln*").size());
+//    assertEquals(2, genericEntityDao.findEntitiesByPropertyPattern(Library.class, "libraryName", "ln*").size());
+//    assertEquals(5, genericEntityDao.findEntitiesByPropertyPattern(Library.class, "libraryName", "*ln*").size());
+//    assertEquals(0, genericEntityDao.findEntitiesByPropertyPattern(Library.class, "libraryName", "ZZZZZZZZZ*").size());
 //  }
   
   public void testFindEntitiesByPropertyWithInflation()
   {
     final Library[] expectedLibrary = new Library[1];
 
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
@@ -276,16 +276,16 @@ public class SimpleDAOTest extends AbstractSpringTest
         new Copy(expectedLibrary[0], CopyUsageType.FOR_LIBRARY_SCREENING, "copy1"); 
         new Copy(expectedLibrary[0], CopyUsageType.FOR_LIBRARY_SCREENING, "copy2"); 
         new Copy(expectedLibrary[0], CopyUsageType.FOR_LIBRARY_SCREENING, "copy3"); 
-        dao.persistEntity(expectedLibrary[0]);
+        genericEntityDao.persistEntity(expectedLibrary[0]);
       }
     });
 
     final Library[] actualLibrary = new Library[1];
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
-        actualLibrary[0] = dao.findEntityByProperty(Library.class, 
+        actualLibrary[0] = genericEntityDao.findEntityByProperty(Library.class, 
                                                     "startPlate", 
                                                     1, 
                                                     false, 

@@ -14,7 +14,7 @@ import java.security.Principal;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpSession;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -46,12 +46,12 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
 
   // instance data members
 
-  private DAO _dao;
+  private GenericEntityDAO _dao;
 
 
   // public constructors and methods
 
-  public void setDao(DAO dao)
+  public void setDao(GenericEntityDAO dao)
   {
     _dao = dao;
   }

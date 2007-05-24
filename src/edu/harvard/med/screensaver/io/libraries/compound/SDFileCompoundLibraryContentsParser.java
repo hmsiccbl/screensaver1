@@ -16,8 +16,9 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -55,7 +56,8 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
   
   // private instance data
   
-  private DAO _dao;
+  private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
   private Library _library;
   private File _sdFile;
   private BufferedReader _sdFileReader;
@@ -67,11 +69,13 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
   
   /**
    * Construct a new <code>SDFileCompoundLibraryContentsParser</code> object.
-   * @param dao the data access object
+   * @param genericEntityDao the data access object
    */
-  public SDFileCompoundLibraryContentsParser(DAO dao)
+  public SDFileCompoundLibraryContentsParser(GenericEntityDAO dao,
+                                             LibrariesDAO librariesDao)
   {
     _dao = dao;
+    _librariesDao = librariesDao;
   }
 
   /**
@@ -130,10 +134,10 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
   // package getters, for the SDRecordParser
 
   /**
-   * Get the {@link DAO data access object}.
+   * Get the {@link GenericEntityDAO data access object}.
    * @return the data access object
    */
-  DAO getDAO()
+  GenericEntityDAO getDAO()
   {
     return _dao;
   }
@@ -173,7 +177,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
    */
   Well getWell(WellKey key)
   {
-    return _dao.findWell(key);
+    return _librariesDao.findWell(key);
   }
 
   /**
@@ -226,6 +230,6 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
 
     // load all of the library's wells in the Hibernate session, which avoids the need
     // to make database queries when checking for existence of wells
-    _dao.loadOrCreateWellsForLibrary(library);
+    _librariesDao.loadOrCreateWellsForLibrary(library);
   }
 }

@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
-    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
-<beans>
+<beans
+  xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xmlns:tx="http://www.springframework.org/schema/tx"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd 
+                      http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+                      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
   <!-- Data sources -->
 
@@ -10,34 +15,53 @@
   <bean
     id="screensaverDataSource"
     class="org.apache.commons.dbcp.BasicDataSource">
-    <description>DataSource used for running web application and utility programs</description>
-    <property name="driverClassName" value="org.postgresql.Driver"/>
-    <property name="url" value="jdbc:postgresql://${SCREENSAVER_PGSQL_SERVER}/${SCREENSAVER_PGSQL_DB}"/>
-    <property name="username" value="${SCREENSAVER_PGSQL_USER}"/>
-    <property name="password" value="${SCREENSAVER_PGSQL_PASSWORD}"/>
-    <property name="minIdle" value="0"/>
+    <description>
+      DataSource used for running web application and utility programs
+    </description>
+    <property
+      name="driverClassName"
+      value="org.postgresql.Driver" />
+    <property
+      name="url"
+      value="jdbc:postgresql://${SCREENSAVER_PGSQL_SERVER}/${SCREENSAVER_PGSQL_DB}" />
+    <property
+      name="username"
+      value="${SCREENSAVER_PGSQL_USER}" />
+    <property
+      name="password"
+      value="${SCREENSAVER_PGSQL_PASSWORD}" />
+    <property
+      name="minIdle"
+      value="0" />
   </bean>
 
   <bean
     id="dataSourceConfigurer"
-    class="edu.harvard.med.screensaver.db.OrchestraPropertyPlaceholderConfigurer"
-  >
-    <property name="location" value="classpath:screensaver.properties"/>
-    <property name="ignoreResourceNotFound" value="true"/>
+    class="edu.harvard.med.screensaver.db.OrchestraPropertyPlaceholderConfigurer">
+    <property
+      name="location"
+      value="classpath:screensaver.properties" />
+    <property
+      name="ignoreResourceNotFound"
+      value="true" />
     <!-- if datasource settings are available as environment variables, use them instead of screensaver.properties file -->
-    <property name="searchSystemEnvironment" value="true"/>
-    <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+    <property
+      name="searchSystemEnvironment"
+      value="true" />
+    <property
+      name="systemPropertiesModeName"
+      value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
   </bean>
-  
+
 
   <!-- Hibernate configuration -->
-  
+
   <bean
-  	id="dataAccessPolicyInjectorPostLoadEventListener"
-  	class="edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicyInjectorPostLoadEventListener">
-    <constructor-arg ref="dataAccessPolicy"/>
+    id="dataAccessPolicyInjectorPostLoadEventListener"
+    class="edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicyInjectorPostLoadEventListener">
+    <constructor-arg ref="dataAccessPolicy" />
   </bean>
-  
+
   <bean
     id="hibernateSessionFactory"
     class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
@@ -57,13 +81,19 @@
     </property>
     <!-- Release database connections after a transaction completes.  -->
     <property name="hibernateProperties">
-      <props><prop key="hibernate.connection.release_mode">after_transaction</prop></props>
+      <props>
+        <prop key="hibernate.connection.release_mode">
+          after_transaction
+        </prop>
+      </props>
     </property>
     <property name="eventListeners">
-			<map>	
-				<entry key="post-load" value-ref="dataAccessPolicyInjectorPostLoadEventListener"/>
-			</map>
-		</property>
+      <map>
+        <entry
+          key="post-load"
+          value-ref="dataAccessPolicyInjectorPostLoadEventListener" />
+      </map>
+    </property>
   </bean>
 
   <!-- The bean through which our application will access Hibernate, and thus our persistent data.
@@ -74,16 +104,16 @@
     <property
       name="sessionFactory"
       ref="hibernateSessionFactory" />
-    <property name="flushModeName" value="FLUSH_COMMIT" />
+    <property
+      name="flushModeName"
+      value="FLUSH_COMMIT" />
   </bean>
-  
+
 
   <!-- Transactional support -->
 
-  <!-- Configuration for explicit, declarative transactions in Spring (uses AOP), 
-  where every bean needing transactional capabilities explicitly has a proxy defined for it -->
-  <!-- Common practice is to specify a parent TransactionProxyFactoryBean, with default config, and set child beans' "parent" attribute to this parent bean. -->
-  <!-- (Can also use the more AOP-generic and more flexible, but more verbose, approach of specifying ProxyFactoryBean and a TransactionInterceptor beans -->
+  <!-- enable the configuration of transactional behavior based on annotations -->
+  <tx:annotation-driven transaction-manager="txnManager" proxy-target-class="true" />
 
   <bean
     id="txnManager"
@@ -92,102 +122,91 @@
       name="sessionFactory"
       ref="hibernateSessionFactory" />
     <property
-      name="nestedTransactionAllowed" 
-      value="true"/>
+      name="nestedTransactionAllowed"
+      value="true" />
   </bean>
 
-  <!-- The beans that are to be wrapped by transactional proxies -->
-
-  <bean
-    id="screensaverTransactionalBeanBaseDefinition"
-    abstract="true"
-    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-    <property
-      name="transactionManager"
-      ref="txnManager" />
-    <!-- Use JDK5 annotation-based transaction declarations -->
-    <property name="transactionAttributeSource">
-      <bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource" />
-    </property>
-    <!-- Note: can also specify preInterceptors and postInterceptors properties for
-      specifying other AOP advice -->
-  </bean>
-
-  <bean
-    id="transactionalDao"
-    parent="screensaverTransactionalBeanBaseDefinition">
-    <!-- The class/interface to be imbued with transactional qualities -->
-    <property
-      name="target"
-      ref="daoImpl" />
-  </bean>
-  
-  <alias name="transactionalDao" alias="unrestrictedDao" />
-  <alias name="transactionalDao" alias="dao" />
-
-  <!-- The following (alternate) configuration allows for auto-proxying beans whose source code contains 
-  JDK 1.5 @Transactional annotation. It enables automatic detection of Spring's @Transactional 
-  annotation, leading to implicit proxies for beans containing that annotation. 
-  [See Spring 1.2.x reference docs, section 6.10.2., "Using metadata-driven auto-proxying"] 
-
-  <!- - Creates AOP proxies based on all candidate Advisors in the current Spring context.   
-  Allows us to apply the same advice consistently to many business objects. - ->
-  <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
-
-  <bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor">
-    <property
-      name="transactionInterceptor"
-      ref="transactionInterceptor" />
-  </bean>
-  
-  <bean
-    id="transactionInterceptor"
-    class="org.springframework.transaction.interceptor.TransactionInterceptor">
-    <property
-      name="transactionManager"
-      ref="txnManager" />
-    <property name="transactionAttributeSource">/
-      <bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource" />
-    </property>
-  </bean>
-  
-  -->
-  
   <!-- end of transactional support configuration -->
-  
- 
-  
-  <bean id="schemaUtil" class="edu.harvard.med.screensaver.db.SchemaUtil">
+
+
+
+  <bean
+    id="schemaUtil"
+    class="edu.harvard.med.screensaver.db.SchemaUtil">
     <property name="sessionFactoryBeanId">
-      <idref bean="hibernateSessionFactory"/>
+      <idref bean="hibernateSessionFactory" />
     </property>
-    <property name="hibernateTemplate" ref="hibernateTemplate" />
-    <property name="dao" ref="dao" />
+    <property
+      name="hibernateTemplate"
+      ref="hibernateTemplate" />
+    <property
+      name="usersDao"
+      ref="usersDao" />
   </bean>
 
 
   <!-- Data Access Object (DAO) beans -->
 
   <bean
-    id="daoImpl"
-    class="edu.harvard.med.screensaver.db.DAOImpl"
-  >
+    id="genericEntityDao"
+    class="edu.harvard.med.screensaver.db.GenericEntityDAO">
     <property
       name="hibernateTemplate"
-      ref="hibernateTemplate"
-    />
+      ref="hibernateTemplate" />
   </bean>
-  
-  
+
+  <bean
+    id="usersDao"
+    class="edu.harvard.med.screensaver.db.UsersDAO">
+    <property
+      name="hibernateTemplate"
+      ref="hibernateTemplate" />
+  </bean>
+
+  <bean
+    id="librariesDao"
+    class="edu.harvard.med.screensaver.db.LibrariesDAOImpl">
+    <constructor-arg ref="genericEntityDao" />
+    <property
+      name="hibernateTemplate"
+      ref="hibernateTemplate" />
+  </bean>
+
+  <bean
+    id="screenResultsDao"
+    class="edu.harvard.med.screensaver.db.ScreenResultsDAO">
+    <property
+      name="hibernateTemplate"
+      ref="hibernateTemplate" />
+  </bean>
+
+  <bean
+    id="cherryPickRequestDao"
+    class="edu.harvard.med.screensaver.db.CherryPickRequestDAO">
+    <constructor-arg ref="genericEntityDao" />
+    <property
+      name="hibernateTemplate"
+      ref="hibernateTemplate" />
+  </bean>
+
+
   <!-- Development/Debug related beans -->
-  
+
   <bean
     id="envInfo"
     class="edu.harvard.med.screensaver.ui.Environment">
-    <property name="host" value="${SCREENSAVER_PGSQL_SERVER}"/>
-    <property name="db" value="${SCREENSAVER_PGSQL_DB}"/>
-    <property name="user" value="${SCREENSAVER_PGSQL_USER}"/>
-    <property name="url" value="jdbc:postgresql://${SCREENSAVER_PGSQL_SERVER}/${SCREENSAVER_PGSQL_DB}"/>
+    <property
+      name="host"
+      value="${SCREENSAVER_PGSQL_SERVER}" />
+    <property
+      name="db"
+      value="${SCREENSAVER_PGSQL_DB}" />
+    <property
+      name="user"
+      value="${SCREENSAVER_PGSQL_USER}" />
+    <property
+      name="url"
+      value="jdbc:postgresql://${SCREENSAVER_PGSQL_SERVER}/${SCREENSAVER_PGSQL_DB}" />
   </bean>
 
 

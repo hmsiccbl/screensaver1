@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -39,14 +38,10 @@ public class LibraryPoolToDuplexWellMapper
   // instance data members
 
 
-  private DAO _dao;
-
-
   // public constructors and methods
 
-  public LibraryPoolToDuplexWellMapper(DAO dao)
+  public LibraryPoolToDuplexWellMapper()
   {
-    _dao = dao;
   }
   
   /**

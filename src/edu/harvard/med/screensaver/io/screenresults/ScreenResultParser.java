@@ -32,7 +32,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.CellValueParser;
 import edu.harvard.med.screensaver.io.workbook.CellVocabularyParser;
@@ -194,7 +194,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private PlateNumberParser _plateNumberParser;
   private WellNameParser _wellNameParser;
 
-  private DAO _dao;
+  private LibrariesDAO _librariesDao;
   private Factory _metadataCellParserFactory;
   private Factory _dataCellParserFactory;
   private Map<Integer,Short> _dataHeaderIndex2DataHeaderColumn;
@@ -205,12 +205,13 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    */
   private Library _lastLibrary;
 
+
   
   // public methods and constructors
 
-  public ScreenResultParser(DAO dao) 
+  public ScreenResultParser(LibrariesDAO librariesDao) 
   {
-    _dao = dao;
+    _librariesDao = librariesDao;
   }
   
   /**
@@ -789,7 +790,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       }
       preloadLibraryWells(library);
       
-      Well well = _dao.findWell(new WellKey(plateNumber, wellName));
+      Well well = _librariesDao.findWell(new WellKey(plateNumber, wellName));
       if (well == null) {
         _errors.addError(NO_SUCH_WELL + ": " + plateNumber + ":" + wellName, wellNameCell);
       }
@@ -837,7 +838,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   {
     if (_lastLibrary == null ||
       !_lastLibrary.containsPlate(plateNumber)) {
-      _lastLibrary = _dao.findLibraryWithPlate(plateNumber); 
+      _lastLibrary = _librariesDao.findLibraryWithPlate(plateNumber); 
     }
     return _lastLibrary;
   }
@@ -848,7 +849,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private void preloadLibraryWells(Library library)
   {
     if (!_preloadedLibraries.contains(library)) {
-      _dao.loadOrCreateWellsForLibrary(library);
+      _librariesDao.loadOrCreateWellsForLibrary(library);
       _preloadedLibraries.add(library);
       //log.debug("flushing hibernate session after loading library");
       //releaseMemory(new Runnable() { public void run() { _dao.flush(); } });

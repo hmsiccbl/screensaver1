@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -46,14 +46,14 @@ public class CherryPickRequestPlateMapper
 
   // instance data members
   
-  private DAO dao;
+  private GenericEntityDAO genericEntityDao;
 
 
   // public constructors and methods
 
-  public CherryPickRequestPlateMapper(DAO dao)
+  public CherryPickRequestPlateMapper(GenericEntityDAO dao)
   {
-    this.dao = dao;
+    this.genericEntityDao = dao;
   }
 
 
@@ -61,11 +61,11 @@ public class CherryPickRequestPlateMapper
 
   public void generatePlateMapping(final CherryPickRequest cherryPickRequestIn)
   {
-    dao.doInTransaction(new DAOTransaction() 
+    genericEntityDao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction() 
       {
-        CherryPickRequest cherryPickRequest = (CherryPickRequest) dao.reattachEntity(cherryPickRequestIn);
+        CherryPickRequest cherryPickRequest = (CherryPickRequest) genericEntityDao.reattachEntity(cherryPickRequestIn);
         doGeneratePlateMapping(cherryPickRequest);
       }
     });

@@ -186,7 +186,7 @@ public class DataRowParser
     if (wellName.equals("")) {
       return null;
     }
-    Well well = _parser.getDAO().findWell(new WellKey(plateNumber, wellName));
+    Well well = _parser.getLibrariesDAO().findWell(new WellKey(plateNumber, wellName));
     if (well == null) {
       throw new DataRowParserException(
         "specified well does not exist. this is probably due to an erroneous plate number.",
@@ -367,7 +367,7 @@ public class DataRowParser
     boolean isPoolOfUnknownSequences)
   {
     SilencingReagent silencingReagent =
-      _parser.getDAO().findSilencingReagent(gene, silencingReagentType, sequence);
+      _parser.getLibrariesDAO().findSilencingReagent(gene, silencingReagentType, sequence);
     if (silencingReagent == null) {
       silencingReagent = new SilencingReagent(
         gene,

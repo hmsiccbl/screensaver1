@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -54,13 +54,13 @@ public class BulkRNAiLibraryLoader
 
   // instance data members
   
-  private DAO _dao;
+  private GenericEntityDAO _dao;
   private RNAiLibraryContentsParser _parser;
   
   
   // public constructors and methods
 
-  public BulkRNAiLibraryLoader(DAO dao, RNAiLibraryContentsParser parser)
+  public BulkRNAiLibraryLoader(GenericEntityDAO dao, RNAiLibraryContentsParser parser)
   {
     _dao = dao;
     _parser = parser;

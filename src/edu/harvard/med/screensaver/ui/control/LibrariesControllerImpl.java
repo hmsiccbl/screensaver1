@@ -16,15 +16,10 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.springframework.dao.DataAccessException;
-
-import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
 import edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser;
@@ -55,6 +50,12 @@ import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.Pair;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.dao.DataAccessException;
+
 /**
  * 
  *
@@ -71,7 +72,8 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   
   // instance variables
   
-  private DAO _dao;
+  private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
   private WellFinder _wellFinder;
   private LibrariesBrowser _librariesBrowser;
   private LibraryViewer _libraryViewer;
@@ -87,16 +89,16 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   
   // public getters and setters
   
-  public DAO getDao()
-  {
-    return _dao;
-  }
-  
-  public void setDao(DAO dao)
+  public void setGenericEntityDao(GenericEntityDAO dao)
   {
     _dao = dao;
   }
   
+  public void setLibrariesDao(LibrariesDAO librariesDao)
+  {
+    _librariesDao = librariesDao;
+  }
+
   public WellFinder getWellFinder()
   {
     return _wellFinder;
@@ -288,8 +290,8 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   {
     logUserActivity("browseLibraries");
     if (getLibrariesBrowser().getLibrarySearchResults() == null) {
-      //List<Library> libraries = _dao.findAllEntitiesWithType(Library.class);
-      List<Library> libraries = _dao.findLibrariesDisplayedInLibrariesBrowser();
+      //List<Library> libraries = _dao.findAllEntitiesOfType(Library.class);
+      List<Library> libraries = _librariesDao.findLibrariesDisplayedInLibrariesBrowser();
       _librariesBrowser.setLibrarySearchResults(new LibrarySearchResults(libraries, this));
     }
     return "browseLibraries";
@@ -630,7 +632,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
       public void runTransaction() 
       {
         Library library = _dao.reloadEntity(libraryIn);
-        _dao.deleteLibraryContents(library);
+        _librariesDao.deleteLibraryContents(library);
       }
     });
     showMessage("libraries.unloadedLibraryContents", "libraryViewer");

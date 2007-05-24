@@ -25,9 +25,9 @@ import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.workbook2.Workbook2Utils;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -106,17 +106,17 @@ public class CherryPickRequestExporter
 
   // instance data members
   
-  private DAO _dao;
+  private GenericEntityDAO _dao;
   
 
   // public constructors and methods
 
-  public CherryPickRequestExporter(DAO dao)
+  public CherryPickRequestExporter(GenericEntityDAO dao)
   {
     this._dao = dao;
   }
 
-  public DAO getDao()
+  public GenericEntityDAO getDao()
   {
     return _dao;
   }

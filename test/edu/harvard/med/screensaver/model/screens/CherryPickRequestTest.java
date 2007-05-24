@@ -13,9 +13,11 @@ import java.beans.IntrospectionException;
 import java.util.Date;
 import java.util.List;
 
+import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -36,6 +38,8 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest
 
   // instance data members
 
+  protected CherryPickRequestDAO cherryPickRequestDao;
+  protected LibrariesDAO librariesDao;
   
   // public constructors and methods
 
@@ -46,7 +50,7 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest
   
   public void testGetActiveCherryPickAssayPlates()
   {
-    Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
+    Screen screen = MakeDummyEntities.makeDummyScreen(1);
     CherryPickRequest cherryPickRequest = new RNAiCherryPickRequest(screen, 
                                                                     screen.getLeadScreener(), 
                                                                     new Date());
@@ -78,22 +82,22 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest
     schemaUtil.truncateTablesOrCreateSchema();
     final Integer cherryPickRequestNumber = 2504;
     final Integer screenNumber = 900;
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       // create
       public void runTransaction()
       {
         Library library = new Library("name", "short", ScreenType.SMALL_MOLECULE, LibraryType.DOS,
           5, 5);
-        dao.persistEntity(library);
-        dao.loadOrCreateWellsForLibrary(library);
+        genericEntityDao.persistEntity(library);
+        librariesDao.loadOrCreateWellsForLibrary(library);
         Well well = library.getWells().iterator().next();
         ScreeningRoomUser user = new ScreeningRoomUser(
           new Date(), "joe", "user",  "email", "phone", "addr", "comments", "ecommons",
           "harvardId", ScreeningRoomUserClassification.GRADUATE_STUDENT, false);
-        dao.persistEntity(user);
+        genericEntityDao.persistEntity(user);
         Screen screen = new Screen(user, user, screenNumber, new Date(), ScreenType.SMALL_MOLECULE, "title");
-        dao.persistEntity(screen);
+        genericEntityDao.persistEntity(screen);
         
         CompoundCherryPickRequest request =
           new CompoundCherryPickRequest(screen, user, new Date(), cherryPickRequestNumber);
@@ -107,31 +111,31 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest
           new CherryPickLiquidTransfer(user, new Date(), new Date(), request);
         transfer.addCherryPickAssayPlate(plate);
 
-        dao.persistEntity(request);
+        genericEntityDao.persistEntity(request);
       }
     });
     
     // delete
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
         CompoundCherryPickRequest request =
-          dao.findEntityByProperty(CompoundCherryPickRequest.class, "legacyCherryPickRequestNumber", cherryPickRequestNumber);
-        dao.deleteCherryPickRequest(request, true);
+          genericEntityDao.findEntityByProperty(CompoundCherryPickRequest.class, "legacyCherryPickRequestNumber", cherryPickRequestNumber);
+        cherryPickRequestDao.deleteCherryPickRequest(request, true);
       }
     });
 
     // test that its gone
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
         CompoundCherryPickRequest request =
-          dao.findEntityByProperty(CompoundCherryPickRequest.class, "legacyCherryPickRequestNumber", cherryPickRequestNumber);
+          genericEntityDao.findEntityByProperty(CompoundCherryPickRequest.class, "legacyCherryPickRequestNumber", cherryPickRequestNumber);
         assertNull("cherry pick request is deleted", request);
         
-        Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
         assertNotNull("screen is not deleted", screen);
         assertEquals("screen has no activities", 0, screen.getScreeningRoomActivities().size());
       }
@@ -140,21 +144,21 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest
   
   public void testLegacyCherryPickNumber()
   {
-    Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
+    Screen screen = MakeDummyEntities.makeDummyScreen(1);
     CherryPickRequest cherryPickRequest = new RNAiCherryPickRequest(screen, 
                                                                     screen.getLeadScreener(), 
                                                                     new Date(),
                                                                     4000);
-    dao.persistEntity(cherryPickRequest);
+    genericEntityDao.persistEntity(cherryPickRequest);
     
-    CherryPickRequest cherryPickRequest2 = dao.findEntityById(CherryPickRequest.class, cherryPickRequest.getEntityId());
+    CherryPickRequest cherryPickRequest2 = genericEntityDao.findEntityById(CherryPickRequest.class, cherryPickRequest.getEntityId());
     assertEquals("cherryPickRequestNumber", new Integer(4000), cherryPickRequest2.getCherryPickRequestNumber());
   }
   
   public void testFindCherryPickRequestByNumber()
   {
     schemaUtil.truncateTablesOrCreateSchema();
-    Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(1);
+    Screen screen = MakeDummyEntities.makeDummyScreen(1);
     CherryPickRequest cherryPickRequest1 = new RNAiCherryPickRequest(screen, 
                                                                      screen.getLeadScreener(), 
                                                                      new Date(),
@@ -162,16 +166,16 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest
     CherryPickRequest cherryPickRequest2 = new RNAiCherryPickRequest(screen, 
                                                                      screen.getLeadScreener(), 
                                                                      new Date());
-    dao.persistEntity(screen);
+    genericEntityDao.persistEntity(screen);
 
     CherryPickRequest foundCherryPickRequest1 = 
-      dao.findCherryPickRequestByNumber(4000);
+      cherryPickRequestDao.findCherryPickRequestByNumber(4000);
     assertEquals("found legacy cherryPickRequest", 
                  cherryPickRequest1.getCherryPickRequestNumber(), 
                  foundCherryPickRequest1.getCherryPickRequestNumber());
 
     CherryPickRequest foundCherryPickRequest2 = 
-      dao.findCherryPickRequestByNumber(cherryPickRequest2.getCherryPickRequestNumber());
+      cherryPickRequestDao.findCherryPickRequestByNumber(cherryPickRequest2.getCherryPickRequestNumber());
     assertEquals("found legacy cherryPickRequest", 
                  cherryPickRequest2.getCherryPickRequestNumber(), 
                  foundCherryPickRequest2.getCherryPickRequestNumber());

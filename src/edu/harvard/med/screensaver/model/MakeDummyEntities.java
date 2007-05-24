@@ -1,0 +1,63 @@
+// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml $
+// $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
+//
+// Copyright 2006 by the President and Fellows of Harvard College.
+// 
+// Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+// at Harvard Medical School. This software is distributed under the terms of
+// the GNU General Public License.
+
+package edu.harvard.med.screensaver.model;
+
+import java.util.Date;
+
+import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
+
+import org.apache.log4j.Logger;
+
+public class MakeDummyEntities
+{
+  // static members
+
+  private static Logger log = Logger.getLogger(MakeDummyEntities.class);
+
+  public static ScreeningRoomUser makeDummyUser(int screenNumber, String first, String last)
+  {
+    return new ScreeningRoomUser(new Date(),
+                                 first,
+                                 last,
+                                 first.toLowerCase() + "_" + last.toLowerCase() + "_" + screenNumber + "@hms.harvard.edu",
+                                 "",
+                                 "",
+                                 "",
+                                 "",
+                                 "",
+                                 ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
+                                 true);
+  }
+
+  public static Screen makeDummyScreen(int screenNumber)
+  {
+    ScreeningRoomUser labHead = makeDummyUser(screenNumber, "Lab", "Head");
+    ScreeningRoomUser leadScreener = makeDummyUser(screenNumber, "Lead", "Screener");
+    Screen screen = new Screen(labHead,
+                               leadScreener,
+                               screenNumber,
+                               new Date(),
+                               ScreenType.SMALL_MOLECULE,
+                               "Dummy screen");
+    return screen;
+  }
+
+
+  // instance data members
+
+  // public constructors and methods
+
+  // private methods
+
+}
+

@@ -9,7 +9,7 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
@@ -26,19 +26,19 @@ public class HibernateSessionTest extends AbstractBackingBean
   // instance data members
 
   private HibernateTemplate _hibernateTemplate;
-  private DAO _dao;
+  private GenericEntityDAO _dao;
   private Integer _userId;
   private ScreensaverUser _user;
 
 
   // public constructors and methods
 
-  public DAO getDao()
+  public GenericEntityDAO getDao()
   {
     return _dao;
   }
 
-  public void setDao(DAO dao)
+  public void setDao(GenericEntityDAO dao)
   {
     _dao = dao;
   }

@@ -19,10 +19,11 @@ import java.util.Iterator;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
-import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -48,7 +49,8 @@ public class AllCherryPicksImporterTest extends AbstractSpringTest
 
   // instance data members
 
-  protected DAO dao;
+  protected GenericEntityDAO genericEntityDao;
+  protected LibrariesDAO librariesDao;
   protected SchemaUtil schemaUtil;
   protected AllCherryPicksImporter allCherryPicksImporter;
 
@@ -67,21 +69,21 @@ public class AllCherryPicksImporterTest extends AbstractSpringTest
     _lib1 = new Library("library1", "lib1", ScreenType.RNAI, LibraryType.SIRNA, 50093, 50208);
     _lib2 = new Library("library2", "lib2", ScreenType.RNAI, LibraryType.SIRNA, 50209, 50323);
     _lib3 = new Library("library3", "lib3", ScreenType.RNAI, LibraryType.SIRNA, 50324, 50438);
-    dao.persistEntity(_lib1);
-    dao.persistEntity(_lib2);
-    dao.persistEntity(_lib3);
+    genericEntityDao.persistEntity(_lib1);
+    genericEntityDao.persistEntity(_lib2);
+    genericEntityDao.persistEntity(_lib3);
   }
 
   public void testImportCherryPickCopies() throws Exception
   {
     final Set<Copy> copies = allCherryPicksImporter.importCherryPickCopies(new File(TEST_INPUT_FILE_DIR, ALL_CHERRY_PICKS_TEST_FILE));
-    dao.doInTransaction(new DAOTransaction() 
+    genericEntityDao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction() 
       {
-        _lib1 = (Library) dao.reloadEntity(_lib1);
-        _lib2 = (Library) dao.reloadEntity(_lib2);
-        _lib3 = (Library) dao.reloadEntity(_lib3);
+        _lib1 = (Library) genericEntityDao.reloadEntity(_lib1);
+        _lib2 = (Library) genericEntityDao.reloadEntity(_lib2);
+        _lib3 = (Library) genericEntityDao.reloadEntity(_lib3);
         assertEquals("copies count", 6, copies.size());
         assertEquals("lib1 copies count", 2, _lib1.getCopies().size());
         assertEquals("lib2 copies count", 2, _lib2.getCopies().size());
@@ -124,28 +126,28 @@ public class AllCherryPicksImporterTest extends AbstractSpringTest
   
   public void testImportCherryPickRequests() throws Exception
   {
-    dao.doInTransaction(new DAOTransaction() 
+    genericEntityDao.doInTransaction(new DAOTransaction() 
     {
       public void runTransaction() 
       {
         try {
           testImportCherryPickCopies(); // setup the database with the library copies
           
-          Screen screen1 = MockDaoForScreenResultImporter.makeDummyScreen(1);
-          Screen screen2 = MockDaoForScreenResultImporter.makeDummyScreen(1);
+          Screen screen1 = MakeDummyEntities.makeDummyScreen(1);
+          Screen screen2 = MakeDummyEntities.makeDummyScreen(1);
           RNAiCherryPickRequest cpr1 = new RNAiCherryPickRequest(screen1, screen1.getLeadScreener(), new Date(), 4710);
           RNAiCherryPickRequest cpr2 = new RNAiCherryPickRequest(screen2, screen2.getLeadScreener(), new Date(), 4711);
           cpr1.setMicroliterTransferVolumePerWellApproved(new BigDecimal("12"));
           cpr2.setMicroliterTransferVolumePerWellApproved(new BigDecimal("3"));
-          dao.persistEntity(screen1);
-          dao.persistEntity(screen2);
+          genericEntityDao.persistEntity(screen1);
+          genericEntityDao.persistEntity(screen2);
 
-          _lib1 = (Library) dao.reloadEntity(_lib1);
-          dao.loadOrCreateWellsForLibrary(_lib1);
-          _lib2 = (Library) dao.reloadEntity(_lib2);
-          dao.loadOrCreateWellsForLibrary(_lib2);
-          _lib3 = (Library) dao.reloadEntity(_lib3);
-          dao.loadOrCreateWellsForLibrary(_lib3);
+          _lib1 = (Library) genericEntityDao.reloadEntity(_lib1);
+          librariesDao.loadOrCreateWellsForLibrary(_lib1);
+          _lib2 = (Library) genericEntityDao.reloadEntity(_lib2);
+          librariesDao.loadOrCreateWellsForLibrary(_lib2);
+          _lib3 = (Library) genericEntityDao.reloadEntity(_lib3);
+          librariesDao.loadOrCreateWellsForLibrary(_lib3);
         }
         catch (Exception e) {
           throw new RuntimeException(e);
@@ -155,7 +157,12 @@ public class AllCherryPicksImporterTest extends AbstractSpringTest
     
     allCherryPicksImporter.importRnaiCherryPicks(new File(TEST_INPUT_FILE_DIR, ALL_CHERRY_PICKS_TEST_FILE));
 
-    CherryPickRequest cpr1 = dao.findEntityByProperty(CherryPickRequest.class, "cherryPickRequestNumber", 4710);
+    CherryPickRequest cpr1 = genericEntityDao.findEntityByProperty(CherryPickRequest.class, 
+                                                                   "legacyCherryPickRequestNumber", 
+                                                                   4710,
+                                                                   true,
+                                                                   "screenerCherryPicks",
+                                                                   "labCherryPicks");
     assertNotNull("CPR 4710 exists", cpr1);
     assertEquals("CPR 4710 screener cherry pick count", 528, cpr1.getScreenerCherryPicks().size());
     assertEquals("CPR 4710 lab cherry pick count", 528, cpr1.getLabCherryPicks().size());
@@ -163,7 +170,12 @@ public class AllCherryPicksImporterTest extends AbstractSpringTest
       assertTrue("CPR 4710 lab cherry pick allocated " + labCherryPick, labCherryPick.isAllocated());
     }
     
-    CherryPickRequest cpr2 = dao.findEntityByProperty(CherryPickRequest.class, "cherryPickRequestNumber", 4711);
+    CherryPickRequest cpr2 = genericEntityDao.findEntityByProperty(CherryPickRequest.class, 
+                                                                   "legacyCherryPickRequestNumber", 
+                                                                   4711,
+                                                                   true,
+                                                                   "screenerCherryPicks",
+                                                                   "labCherryPicks");
     assertNotNull("CPR 4711 exists", cpr2);
     assertEquals("CPR 4711 screener cherry pick count", 124, cpr2.getScreenerCherryPicks().size());
     assertEquals("CPR 4711 lab cherry pick count", 124, cpr2.getLabCherryPicks().size());

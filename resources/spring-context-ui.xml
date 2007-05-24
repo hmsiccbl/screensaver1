@@ -38,7 +38,7 @@
     scope="session">
     <property
       name="dao"
-      ref="unrestrictedDao" />
+      ref="genericEntityDao" />
     <aop:scoped-proxy />
   </bean>
 
@@ -117,7 +117,7 @@
     class="edu.harvard.med.screensaver.ui.SchemaManager">
     <description>Schema Manager</description>
     <property name="schemaUtil" ref="schemaUtil" />
-    <property name="dao" ref="dao" />
+    <property name="dao" ref="genericEntityDao" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -131,8 +131,11 @@
     class="edu.harvard.med.screensaver.ui.control.LibrariesControllerImpl">
     <description>Libraries Controller Bean</description>
     <property
-      name="dao"
-      ref="dao" />
+      name="genericEntityDao"
+      ref="genericEntityDao" />
+    <property
+      name="librariesDao"
+      ref="librariesDao" />
     <property
       name="wellFinder"
       ref="wellFinder" />
@@ -281,8 +284,17 @@
     class="edu.harvard.med.screensaver.ui.control.ScreensControllerImpl">
     <description>Screens Controller</description>
     <property
-      name="dao"
-      ref="dao" />
+      name="genericEntityDao"
+      ref="genericEntityDao" />
+    <property
+      name="screenResultsDao"
+      ref="screenResultsDao" />
+    <property
+      name="librariesDao"
+      ref="librariesDao" />
+    <property
+      name="cherryPickRequestDao"
+      ref="cherryPickRequestDao" />
     <property
       name="librariesController"
       ref="librariesController" />
@@ -343,7 +355,6 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.screens.ScreensBrowser">
-    <description>Screens Browser</description>
     <aop:scoped-proxy/>
   </bean>
 
@@ -352,7 +363,10 @@
     parent="screensUiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.screens.ScreenViewer">
-    <description>Screen Viewer</description>
+    <property
+      name="dao" ref="genericEntityDao"/>
+    <property
+      name="usersDao" ref="usersDao"/>
     <aop:scoped-proxy/>
   </bean>
 
@@ -361,8 +375,10 @@
     parent="screensUiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer">
-    <description>Screen Result Viewer</description>
-    <aop:scoped-proxy/>
+    <property
+      name="screenResultsDao" ref="screenResultsDao"/>
+    <property name="librariesDao" ref="librariesDao"/>
+    <aop:scoped-proxy />
   </bean>
 
   <bean
@@ -370,7 +386,7 @@
     parent="screensUiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter">
-    <description>Screen Result Importer</description>
+    <property name="dao" ref="genericEntityDao"/>
   </bean>
 
   <bean
@@ -378,10 +394,8 @@
     parent="screensUiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer">
-    <description>Cherry Pick Request Viewer</description>
-    <property
-      name="plateWellListParser"
-      ref="plateWellListParser" />
+    <property name="dao" ref="genericEntityDao"/>
+    <property name="plateWellListParser" ref="plateWellListParser" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -390,7 +404,6 @@
     parent="screensUiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.screens.ScreenFinder">
-    <description>Screen Finder</description>
     <aop:scoped-proxy/>
   </bean>
 
@@ -399,7 +412,6 @@
     parent="screensUiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.screens.CherryPickRequestFinder">
-    <description>CherryPickRequest Finder</description>
     <aop:scoped-proxy/>
   </bean>
 
@@ -408,7 +420,9 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer">
-    <description>Heat Map Viewer</description>
+    <property name="genericEntityDao" ref="genericEntityDao"/>
+    <property name="screenResultsDao" ref="screenResultsDao"/>
+    <property name="librariesDao" ref="librariesDao"/>
     <aop:scoped-proxy/>
   </bean>
   
@@ -417,11 +431,10 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.screens.AllCherryPicksImporter">
-    <description>AllCherryPicks Importer</description>
     <property
       name="allCherryPicksImporter"
       ref="allCherryPicksImporter" />
-    <aop:scoped-proxy />
+    <aop:scoped-proxy/>
   </bean>
 
 </beans>

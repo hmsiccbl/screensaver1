@@ -15,9 +15,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -47,7 +47,8 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
 
   // instance data members
   
-  protected DAO dao;
+  protected GenericEntityDAO genericEntityDao;
+  protected LibrariesDAO librariesDao;
   protected SchemaUtil schemaUtil;
   protected CurrentScreensaverUser currentScreensaverUser;
   protected ScreenResultParser screenResultParser;
@@ -78,7 +79,7 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
   public void testScreensaverUserAccountPermissions()
   {
     final ScreeningRoomUser[] users = new ScreeningRoomUser[4];
-    dao.doInTransaction(new DAOTransaction() {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
         users[0] = makeUserWithRoles(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
@@ -91,7 +92,7 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
     } );
     
     currentScreensaverUser.setScreensaverUser(users[1]);
-    List<ScreeningRoomUser> filteredUsers = dao.findAllEntitiesWithType(ScreeningRoomUser.class);
+    List<ScreeningRoomUser> filteredUsers = genericEntityDao.findAllEntitiesOfType(ScreeningRoomUser.class);
     for (Iterator iter = filteredUsers.iterator(); iter.hasNext();) {
       ScreeningRoomUser user = (ScreeningRoomUser) iter.next();
       if (user.isRestricted()) {
@@ -104,7 +105,7 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
     assertFalse("user cannot view account of user not in same lab", filteredUsers.contains(users[3]));
     
     currentScreensaverUser.setScreensaverUser(users[0]);
-    filteredUsers = dao.findAllEntitiesWithType(ScreeningRoomUser.class);
+    filteredUsers = genericEntityDao.findAllEntitiesOfType(ScreeningRoomUser.class);
     for (Iterator iter = filteredUsers.iterator(); iter.hasNext();) {
       ScreeningRoomUser user = (ScreeningRoomUser) iter.next();
       if (user.isRestricted()) {
@@ -122,11 +123,11 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
     ScreeningRoomUser rnaiUser = makeUserWithRoles(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
     ScreeningRoomUser compoundUser = makeUserWithRoles(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
 
-    Screen rnaiScreen = MockDaoForScreenResultImporter.makeDummyScreen(1);
+    Screen rnaiScreen = MakeDummyEntities.makeDummyScreen(1);
     rnaiScreen.setScreenType(ScreenType.RNAI);
     ScreenResult screenResult1 = new ScreenResult(rnaiScreen, new Date());
     screenResult1.setShareable(true);
-    Screen compoundScreen = MockDaoForScreenResultImporter.makeDummyScreen(2);
+    Screen compoundScreen = MakeDummyEntities.makeDummyScreen(2);
     compoundScreen.setScreenType(ScreenType.RNAI);
     ScreenResult screenResult2 = new ScreenResult(compoundScreen, new Date());
     screenResult2.setShareable(true);
@@ -134,10 +135,10 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
     rnaiScreen.setLeadScreener(rnaiUser);
     compoundScreen.setLeadScreener(compoundUser);
     
-    dao.persistEntity(rnaiScreen);
-    dao.persistEntity(compoundScreen);
+    genericEntityDao.persistEntity(rnaiScreen);
+    genericEntityDao.persistEntity(compoundScreen);
 
-    List<Screen> screens = dao.findAllEntitiesWithType(Screen.class);
+    List<Screen> screens = genericEntityDao.findAllEntitiesOfType(Screen.class);
     assertEquals("screens count", 2, screens.size());
     for (Screen screen : screens) {
       if (screen.getScreenType().equals(ScreenType.RNAI)) {
@@ -161,7 +162,7 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
   public void testRestrictedEntityTest()
   {
     final ScreeningRoomUser[] users = new ScreeningRoomUser[5];
-    dao.doInTransaction(new DAOTransaction() {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
         users[0] = makeUserWithRoles(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER); // lead screener for screen 115
@@ -182,11 +183,11 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
           LibraryType.COMMERCIAL,
           1,
           3);
-        dao.loadOrCreateWellsForLibrary(library);
-        dao.persistEntity(library);
-        dao.flush();
+        librariesDao.loadOrCreateWellsForLibrary(library);
+        genericEntityDao.persistEntity(library);
+        genericEntityDao.flush();
 
-        Screen screen115 = MockDaoForScreenResultImporter.makeDummyScreen(115);
+        Screen screen115 = MakeDummyEntities.makeDummyScreen(115);
         screenResultParser.parse(screen115, new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
                                                      ScreenResultParserTest.SCREEN_RESULT_115_TEST_WORKBOOK_FILE));
 
@@ -198,48 +199,48 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
         screen115.setLeadScreener(users[0]);
         screen115.addCollaborator(users[1]);
         
-        Screen screen116 = MockDaoForScreenResultImporter.makeDummyScreen(116);
+        Screen screen116 = MakeDummyEntities.makeDummyScreen(116);
         screenResultParser.parse(screen116, new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
                                                      ScreenResultParserTest.SCREEN_RESULT_116_TEST_WORKBOOK_FILE));
         screen116.getScreenResult().setShareable(true);
         assertEquals("screenresult import successful", 0, screenResultParser.getErrors().size());
         screen116.setLeadScreener(users[4]);
         
-        dao.persistEntity(screen115);
-        dao.persistEntity(screen116);
+        genericEntityDao.persistEntity(screen115);
+        genericEntityDao.persistEntity(screen116);
       }
     } );
     
-    Screen screen = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 115);
+    Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 115);
 
     currentScreensaverUser.setScreensaverUser(users[0]);
-    ScreenResult screenResult1 = dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
+    ScreenResult screenResult1 = genericEntityDao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
     assertFalse("lead screener can view private screen result", screenResult1.isRestricted());
 
     currentScreensaverUser.setScreensaverUser(users[1]);
-    ScreenResult screenResult2 = dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
+    ScreenResult screenResult2 = genericEntityDao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
     assertFalse("screen collobarator can view private screen result", screenResult2.isRestricted());
     
     currentScreensaverUser.setScreensaverUser(users[2]);
-    ScreenResult screenResult3 = dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
+    ScreenResult screenResult3 = genericEntityDao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
     assertTrue("lab member cannot view private screen result, if not also lead screener or collaborator", screenResult3.isRestricted());
 
     currentScreensaverUser.setScreensaverUser(users[3]);
-    ScreenResult screenResult4 = dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
+    ScreenResult screenResult4 = genericEntityDao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
     assertTrue("lab head cannot view private screen result, if not also lead screener or collaborator", screenResult4.isRestricted());
 
-    Screen screen116 = dao.findEntityByProperty(Screen.class, "hbnScreenNumber", 116);
+    Screen screen116 = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 116);
 
     currentScreensaverUser.setScreensaverUser(users[0]);
-    ScreenResult screenResult5 = dao.findEntityById(ScreenResult.class, screen116.getScreenResult().getEntityId());
+    ScreenResult screenResult5 = genericEntityDao.findEntityById(ScreenResult.class, screen116.getScreenResult().getEntityId());
     assertFalse("compound screener with deposited data can view shareable screen result", screenResult5.isRestricted());
     
     currentScreensaverUser.setScreensaverUser(users[2]);
-    ScreenResult screenResult6 = dao.findEntityById(ScreenResult.class, screen116.getScreenResult().getEntityId());
+    ScreenResult screenResult6 = genericEntityDao.findEntityById(ScreenResult.class, screen116.getScreenResult().getEntityId());
     assertTrue("compound screener without deposited data cannot view shareable screen result", screenResult6.isRestricted());
     
     currentScreensaverUser.setScreensaverUser(users[4]);
-    ScreenResult screenResult7 = dao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
+    ScreenResult screenResult7 = genericEntityDao.findEntityById(ScreenResult.class, screen.getScreenResult().getEntityId());
     assertTrue("compound screener without deposited data cannot view private screen result", screenResult7.isRestricted());
   }
   
@@ -265,7 +266,7 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
     for (ScreensaverUserRole role : roles) {
       user.addScreensaverUserRole(role);
     }
-    dao.persistEntity(user);
+    genericEntityDao.persistEntity(user);
     return user;
   }
   

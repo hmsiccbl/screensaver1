@@ -21,8 +21,9 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -51,7 +52,8 @@ public class ScreenDBCompoundCherryPickSynchronizer
   // instance data members
   
   private Connection _connection;
-  private DAO _dao;
+  private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
   private ScreenDBUserSynchronizer _userSynchronizer;
   private ScreenDBScreenSynchronizer _screenSynchronizer;
 
@@ -60,12 +62,14 @@ public class ScreenDBCompoundCherryPickSynchronizer
 
   public ScreenDBCompoundCherryPickSynchronizer(
     Connection connection,
-    DAO dao,
+    GenericEntityDAO dao,
+    LibrariesDAO librariesDao,
     ScreenDBUserSynchronizer userSynchronizer,
     ScreenDBScreenSynchronizer screenSynchronizer)
   {
     _connection = connection;
     _dao = dao;
+    _librariesDao = librariesDao;
     _userSynchronizer = userSynchronizer;
     _screenSynchronizer = screenSynchronizer;
   }
@@ -98,14 +102,14 @@ public class ScreenDBCompoundCherryPickSynchronizer
       "SELECT DISTINCT plate FROM cherry_pick WHERE plate IS NOT NULL ORDER BY plate");
     while (resultSet.next()) {
       Integer sourcePlateNumber = resultSet.getInt("plate");
-      Library library = _dao.findLibraryWithPlate(sourcePlateNumber);
+      Library library = _librariesDao.findLibraryWithPlate(sourcePlateNumber);
       assert(library != null);
       if (library != null) {
         librariesToLoadOrCreateWellsFor.add(library);
       }
     }
     for (Library library : librariesToLoadOrCreateWellsFor) {
-      _dao.loadOrCreateWellsForLibrary(library);
+      _librariesDao.loadOrCreateWellsForLibrary(library);
     }
   }
 
@@ -241,7 +245,7 @@ public class ScreenDBCompoundCherryPickSynchronizer
         continue;
       }
       
-      Well sourceWell = _dao.findWell(new WellKey(sourcePlateNumber, sourceWellName));
+      Well sourceWell = _librariesDao.findWell(new WellKey(sourcePlateNumber, sourceWellName));
       if (sourceWell == null) {
         log.error(
           "couldn't find well with plate number " + sourcePlateNumber + " and well name " + sourceWellName);

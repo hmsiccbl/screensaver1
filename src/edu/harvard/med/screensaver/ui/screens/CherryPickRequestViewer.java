@@ -30,7 +30,7 @@ import javax.faces.model.ArrayDataModel;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
@@ -129,7 +129,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   
   // instance data members
   
-  private DAO _dao;
+  private GenericEntityDAO _dao;
   private ScreensController _screensController;
   private PlateWellListParser _plateWellListParser;
 
@@ -182,7 +182,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     };
   }
 
-  public void setDao(DAO dao)
+  public void setDao(GenericEntityDAO dao)
   {
     _dao = dao;
   }
@@ -216,7 +216,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
     SortedSet<AdministratorUser> candidateVolumeApprovers = new TreeSet<AdministratorUser>(ScreensaverUserComparator.getInstance());
     candidateVolumeApprovers.add(null);
-    candidateVolumeApprovers.addAll(_dao.findAllEntitiesWithType(AdministratorUser.class)); // TODO: filter out all but CherryPickAdmins
+    candidateVolumeApprovers.addAll(_dao.findAllEntitiesOfType(AdministratorUser.class)); // TODO: filter out all but CherryPickAdmins
     _volumeApprovedBy = new UISelectOneEntityBean<AdministratorUser>(candidateVolumeApprovers, 
       _cherryPickRequest.getVolumeApprovedBy(),
       _dao) { 
@@ -224,7 +224,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     };
       
     SortedSet<ScreensaverUser> candidatePreparers = new TreeSet<ScreensaverUser>(ScreensaverUserComparator.getInstance());
-    candidatePreparers.addAll(_dao.findAllEntitiesWithType(AdministratorUser.class));
+    candidatePreparers.addAll(_dao.findAllEntitiesOfType(AdministratorUser.class));
     _liquidTransferPerformedBy = new UISelectOneEntityBean<ScreensaverUser>(candidatePreparers,
       candidatePreparers.contains(getScreensaverUser()) ? getScreensaverUser() : candidatePreparers.first(),
                                                         _dao) { 

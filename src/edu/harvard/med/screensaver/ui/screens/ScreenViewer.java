@@ -22,8 +22,9 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
-import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
@@ -60,7 +61,8 @@ public class ScreenViewer extends AbstractBackingBean
   // instance data
 
   private ScreensController _screensController;
-  private DAO _dao;
+  private GenericEntityDAO _dao;
+  private UsersDAO _usersDao;
   private Screen _screen;
   private UISelectOneEntityBean<ScreeningRoomUser> _labName;
   private UISelectOneEntityBean<ScreeningRoomUser> _leadScreener;
@@ -80,9 +82,14 @@ public class ScreenViewer extends AbstractBackingBean
     _screensController = screensController;
   }
   
-  public void setDao(DAO dao)
+  public void setDao(GenericEntityDAO dao)
   {
     _dao = dao;
+  }
+
+  public void setUsersDao(UsersDAO usersDao)
+  {
+    _usersDao = usersDao;
   }
 
   public Screen getScreen() 
@@ -307,7 +314,7 @@ public class ScreenViewer extends AbstractBackingBean
   public UISelectOneBean<ScreeningRoomUser> getLabName()
   {
     if (_labName == null) {
-      _labName = new UISelectOneEntityBean<ScreeningRoomUser>(_dao.findAllLabHeads(), _screen.getLabHead(), _dao) { 
+      _labName = new UISelectOneEntityBean<ScreeningRoomUser>(_usersDao.findAllLabHeads(), _screen.getLabHead(), _dao) { 
         protected String getLabel(ScreeningRoomUser t) { return t.getLabName(); } 
       };
     }
@@ -321,7 +328,7 @@ public class ScreenViewer extends AbstractBackingBean
   {
     if (_collaborators == null) {
       _collaborators =
-        new UISelectManyEntityBean<ScreeningRoomUser>(_dao.findCandidateCollaborators(),
+        new UISelectManyEntityBean<ScreeningRoomUser>(_usersDao.findCandidateCollaborators(),
                                                       _screen.getCollaborators(),
                                                       _dao)
         {

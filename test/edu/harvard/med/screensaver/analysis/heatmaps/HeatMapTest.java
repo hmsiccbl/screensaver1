@@ -20,9 +20,10 @@ import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.analysis.ChainedFilter;
 import edu.harvard.med.screensaver.analysis.IdentityFunction;
 import edu.harvard.med.screensaver.analysis.ZScoreFunction;
-import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
+import edu.harvard.med.screensaver.io.screenresults.MockLibrariesDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -41,8 +42,9 @@ public class HeatMapTest extends AbstractSpringTest
   @Override
   protected void onSetUp() throws Exception
   {
-    Screen screen = MockDaoForScreenResultImporter.makeDummyScreen(107);
-    _parser = new ScreenResultParser(new MockDaoForScreenResultImporter());
+    Screen screen = MakeDummyEntities.makeDummyScreen(107);
+    MockLibrariesDaoForScreenResultImporter librarieDao = new MockLibrariesDaoForScreenResultImporter();
+    _parser = new ScreenResultParser(librarieDao);
     _screenResult = _parser.parse(screen,
                                   new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "ScreenResultHeatmapTest107.xls"));
     if (_parser.getHasErrors()) {

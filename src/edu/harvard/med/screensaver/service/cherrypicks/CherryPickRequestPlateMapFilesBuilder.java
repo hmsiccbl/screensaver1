@@ -26,7 +26,7 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
@@ -69,14 +69,14 @@ public class CherryPickRequestPlateMapFilesBuilder
 
   // instance data members
   
-  private DAO dao;
+  private GenericEntityDAO genericEntityDao;
 
 
   // public constructors and methods
 
-  public CherryPickRequestPlateMapFilesBuilder(DAO dao)
+  public CherryPickRequestPlateMapFilesBuilder(GenericEntityDAO dao)
   {
-    this.dao = dao;
+    this.genericEntityDao = dao;
   }
 
 
@@ -85,7 +85,7 @@ public class CherryPickRequestPlateMapFilesBuilder
   public InputStream buildZip(final CherryPickRequest cherryPickRequestIn,
                               final Set<CherryPickAssayPlate> plates) throws IOException
   {
-    CherryPickRequest cherryPickRequest = (CherryPickRequest) dao.reattachEntity(cherryPickRequestIn);
+    CherryPickRequest cherryPickRequest = (CherryPickRequest) genericEntityDao.reattachEntity(cherryPickRequestIn);
     return doBuildZip(cherryPickRequest, plates);
   }
 

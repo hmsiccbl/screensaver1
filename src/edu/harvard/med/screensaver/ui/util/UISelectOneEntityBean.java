@@ -11,7 +11,7 @@ package edu.harvard.med.screensaver.ui.util;
 
 import java.util.Collection;
 
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 
 import org.apache.log4j.Logger;
@@ -26,17 +26,17 @@ public class UISelectOneEntityBean<E extends AbstractEntity> extends UISelectOne
 
   // instance data members
 
-  private DAO _dao;
+  private GenericEntityDAO _dao;
 
   
   // public constructors and methods
 
-  public UISelectOneEntityBean(Collection<E> entities, DAO dao)
+  public UISelectOneEntityBean(Collection<E> entities, GenericEntityDAO dao)
   {
     this(entities, null, dao);
   }
   
-  public UISelectOneEntityBean(Collection<E> entities, E defaultSelection, DAO dao)
+  public UISelectOneEntityBean(Collection<E> entities, E defaultSelection, GenericEntityDAO dao)
   {
     super(entities, defaultSelection);
     _dao = dao;

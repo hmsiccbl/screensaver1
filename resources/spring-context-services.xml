@@ -8,7 +8,7 @@
     id="screenResultParser"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
     scope="prototype">
-    <constructor-arg index="0" ref="dao"/>
+    <constructor-arg index="0" ref="librariesDao"/>
   </bean>
 
   <!-- TODO: place this in a spring-context-testing.xml file, or something similar -->  
@@ -18,7 +18,7 @@
     scope="prototype">
     <description>A ScreenResultParser that does not need access to a database.  Used for testing.</description>
     <constructor-arg index="0" >
-      <bean class="edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter"/>
+      <bean class="edu.harvard.med.screensaver.io.screenresults.MockLibrariesDaoForScreenResultImporter"/>
     </constructor-arg>
   </bean>
 
@@ -33,7 +33,8 @@
     class="edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser"
     scope="singleton"
   >
-    <constructor-arg ref="dao"/>
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="librariesDao"/>
   </bean>
 
   <bean 
@@ -41,14 +42,15 @@
     class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser"
     scope="singleton"
   >
-    <constructor-arg ref="dao"/>
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="librariesDao"/>
   </bean>
 
   <bean 
     id="bulkCompoundLibraryLoader"
     class="edu.harvard.med.screensaver.io.libraries.compound.BulkCompoundLibraryLoader"
     scope="singleton">
-    <constructor-arg ref="unrestrictedDao"/>
+    <constructor-arg ref="genericEntityDao"/>
     <constructor-arg ref="compoundLibraryContentsParser"/>
   </bean>
   
@@ -56,7 +58,7 @@
     id="bulkRNAiLibraryLoader"
     class="edu.harvard.med.screensaver.io.libraries.rnai.BulkRNAiLibraryLoader"
     scope="singleton">
-    <constructor-arg ref="unrestrictedDao"/>
+    <constructor-arg ref="genericEntityDao"/>
     <constructor-arg ref="rnaiLibraryContentsParser"/>
   </bean>
   
@@ -67,10 +69,11 @@
     <constructor-arg>
      <bean
       class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser">
-      <constructor-arg ref="unrestrictedDao" />
+      <constructor-arg ref="librariesDao" />
      </bean>
     </constructor-arg>
-    <constructor-arg ref="unrestrictedDao"/>
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="screenResultsDao"/>
     <constructor-arg ref="hibernateTemplate"/>
   </bean>
   
@@ -78,14 +81,16 @@
     id="plateWellListParser"
     class="edu.harvard.med.screensaver.io.libraries.PlateWellListParser"
     scope="singleton">
-    <constructor-arg ref="dao"/>
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="librariesDao"/>
   </bean>
   
   <bean
     id="allCherryPicksImporter"
     class="edu.harvard.med.screensaver.io.cherrypicks.AllCherryPicksImporter"
     scope="singleton">
-    <constructor-arg ref="unrestrictedDao"/>
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="librariesDao"/>
     <constructor-arg ref="libraryPoolToDuplexWellMapper"/>
   </bean>
   
@@ -93,35 +98,36 @@
     id="cherryPickRequestAllocator"
     class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator"
     scope="singleton">
-    <constructor-arg ref="dao"/>
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="librariesDao"/>
+    <constructor-arg ref="cherryPickRequestDao"/>
   </bean>
 
   <bean
     id="cherryPickRequestPlateMapper"
     class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper"
     scope="singleton">
-    <constructor-arg ref="dao"/>
+    <constructor-arg ref="genericEntityDao"/>
   </bean>
 
   <bean
     id="cherryPickRequestPlateMapFilesBuilder"
     class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder"
     scope="singleton">
-    <constructor-arg ref="dao"/>
+    <constructor-arg ref="genericEntityDao"/>
   </bean>
   
   <bean
     id="libraryPoolToDuplexWellMapper"
     class="edu.harvard.med.screensaver.service.libraries.rnai.LibraryPoolToDuplexWellMapper"
     scope="singleton">
-    <constructor-arg ref="dao"/>
   </bean>
 
   <bean
     id="cherryPickRequestExporter"
     class="edu.harvard.med.screensaver.io.cherrypicks.CherryPickRequestExporter"
     scope="singleton">
-    <constructor-arg ref="dao"/>
+    <constructor-arg ref="genericEntityDao"/>
   </bean>
 
 </beans>

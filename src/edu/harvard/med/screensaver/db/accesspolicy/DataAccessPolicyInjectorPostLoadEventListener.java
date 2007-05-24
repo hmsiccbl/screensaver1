@@ -10,9 +10,6 @@
 package edu.harvard.med.screensaver.db.accesspolicy;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.RestrictedEntityPredicate;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.Screen;
 
 import org.apache.log4j.Logger;
 import org.hibernate.event.PostLoadEvent;

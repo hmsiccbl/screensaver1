@@ -33,8 +33,9 @@ import jxl.WorkbookSettings;
 import jxl.read.biff.BiffException;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -156,7 +157,8 @@ public class AllCherryPicksImporter
   
   // instance data members
   
-  private DAO _dao;
+  private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
   private LibraryPoolToDuplexWellMapper _libraryPoolToDuplexWellMapper;
   private Library _cachedLibrary;
   private Boolean _failFast; // for debugging
@@ -167,10 +169,12 @@ public class AllCherryPicksImporter
 
   // public constructors and methods
   
-  public AllCherryPicksImporter(DAO dao,
+  public AllCherryPicksImporter(GenericEntityDAO dao,
+                                LibrariesDAO librariesDao,
                                 LibraryPoolToDuplexWellMapper libraryPoolToDuplexWellMapper)
   {
     _dao = dao;
+    _librariesDao = librariesDao;
     _libraryPoolToDuplexWellMapper = libraryPoolToDuplexWellMapper;
   }
 
@@ -291,7 +295,7 @@ public class AllCherryPicksImporter
             throw new CherryPickCopiesDataException("illegal data type: "  + e.getMessage(), iRow, iCol);
           }
 
-          Library library = _dao.findLibraryWithPlate(plate);
+          Library library = _librariesDao.findLibraryWithPlate(plate);
           if (library == null) {
             throw new CherryPickCopiesDataException("invalid plate number (no library for plate)", iRow);
           }
@@ -378,7 +382,7 @@ public class AllCherryPicksImporter
 
             WellKey wellKey = new WellKey((int) plateNumberCell.getValue(),
                                           wellNameCell.getContents());
-            labCherryPickWell = _dao.findWell(wellKey);
+            labCherryPickWell = _librariesDao.findWell(wellKey);
             if (labCherryPickWell == null) {
               throw new CherryPicksDataException("no such well: " + wellKey,
                                                  visitId,
@@ -447,7 +451,7 @@ public class AllCherryPicksImporter
     {
       public void runTransaction()
       {
-        List<RNAiCherryPickRequest> cherryPickRequests = _dao.findAllEntitiesWithType(RNAiCherryPickRequest.class);
+        List<RNAiCherryPickRequest> cherryPickRequests = _dao.findAllEntitiesOfType(RNAiCherryPickRequest.class);
         for (RNAiCherryPickRequest cpr : cherryPickRequests) {
           if (cpr.getCherryPickAssayPlates().size() > 0) {
             if (cpr.getLabCherryPicks().size() == 0) {
@@ -528,7 +532,7 @@ public class AllCherryPicksImporter
   private Copy findCopy(int plateNumber, String copyName, int iRow)
   {
     if (_cachedLibrary == null || !_cachedLibrary.containsPlate(plateNumber)) {
-      _cachedLibrary = _dao.findLibraryWithPlate(plateNumber);
+      _cachedLibrary = _librariesDao.findLibraryWithPlate(plateNumber);
       if (_cachedLibrary == null) {
         throw new CherryPickCopiesDataException("no library for plate " + plateNumber, iRow);
       }
@@ -550,7 +554,7 @@ public class AllCherryPicksImporter
   private Map<Integer,RNAiCherryPickRequest> buildVisitIdToCherryPickRequestMap()
   {
     Map<Integer,RNAiCherryPickRequest> visit2CherryPickRequest = new HashMap<Integer,RNAiCherryPickRequest>();
-    List<RNAiCherryPickRequest> cherryPickRequests = _dao.findAllEntitiesWithType(RNAiCherryPickRequest.class);
+    List<RNAiCherryPickRequest> cherryPickRequests = _dao.findAllEntitiesOfType(RNAiCherryPickRequest.class);
     for (RNAiCherryPickRequest cherryPickRequest : cherryPickRequests) {
       visit2CherryPickRequest.put(cherryPickRequest.getCherryPickRequestNumber(),
                                   cherryPickRequest);

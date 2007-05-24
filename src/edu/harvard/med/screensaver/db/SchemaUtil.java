@@ -22,6 +22,8 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 
+import edu.harvard.med.screensaver.CommandLineApplication;
+
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
@@ -32,9 +34,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
-import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
-
-import edu.harvard.med.screensaver.CommandLineApplication;
 
 /**
  * Utility for manipulating schemas, via Spring+Hibernate.
@@ -42,7 +41,7 @@ import edu.harvard.med.screensaver.CommandLineApplication;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class SchemaUtil extends HibernateDaoSupport implements ApplicationContextAware
+public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
 {
   
   // static fields
@@ -127,7 +126,7 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
 
   private String _sessionFactoryBeanId;
   
-  private DAO _dao;
+  private UsersDAO _usersDao;
 
   
   public void setSessionFactoryBeanId(String sessionFactoryBeanId)
@@ -149,9 +148,9 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
     _appCtx = applicationContext;
   }
   
-  public void setDao(DAO dao)
+  public void setUsersDao(UsersDAO usersDao)
   {
-    _dao = dao;
+    _usersDao = usersDao;
   }
 
   /**
@@ -301,7 +300,7 @@ public class SchemaUtil extends HibernateDaoSupport implements ApplicationContex
         return;
       }
       String sql = "GRANT ALL ON " + tableList + " TO ";
-      List<String> developerECommonsIds = _dao.findDeveloperECommonsIds();
+      List<String> developerECommonsIds = _usersDao.findDeveloperECommonsIds();
       if (developerECommonsIds.size() == 0) {
         return;
       }

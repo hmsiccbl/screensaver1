@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.libraries.Compound;
@@ -67,7 +67,7 @@ public abstract class AbstractEntityInstanceTest extends AbstractSpringTest
    */
   protected SessionFactory hibernateSessionFactory;
   protected HibernateTemplate hibernateTemplate;
-  protected DAO dao;
+  protected GenericEntityDAO genericEntityDao;
   protected SchemaUtil schemaUtil;
 
   private Class<? extends AbstractEntity> entityClass;
@@ -649,7 +649,7 @@ public abstract class AbstractEntityInstanceTest extends AbstractSpringTest
   private void createPersistentBeanForTest()
   {
     schemaUtil.truncateTablesOrCreateSchema();
-    dao.persistEntity(bean);
+    genericEntityDao.persistEntity(bean);
   }
   
   private void doTestBidirectionalityOfOneSideOfRelationship(AbstractEntity bean,
@@ -1353,7 +1353,7 @@ public abstract class AbstractEntityInstanceTest extends AbstractSpringTest
   private void doTestBean(final AbstractEntity bean,
                           final BeanTester tester)
   {
-    dao.doInTransaction(new DAOTransaction()
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
@@ -1367,7 +1367,7 @@ public abstract class AbstractEntityInstanceTest extends AbstractSpringTest
                                 final AbstractEntity relatedBean,
                                 final RelatedBeansTester tester)
   {
-    dao.doInTransaction(new DAOTransaction() {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
         AbstractEntity localBean = getPersistedEntity(bean);

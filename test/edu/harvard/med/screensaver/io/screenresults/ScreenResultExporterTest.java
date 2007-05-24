@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -46,7 +47,7 @@ public class ScreenResultExporterTest extends AbstractSpringTest
   public void testScreenResultExporter() throws Exception
   {
     ScreenResult originalScreenResult = 
-      mockScreenResultParser.parse(MockDaoForScreenResultImporter.makeDummyScreen(115), 
+      mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115), 
                                          new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
                                                   ScreenResultParserTest.SCREEN_RESULT_115_TEST_WORKBOOK_FILE));
     addDummyCollaboratorsToScreen(originalScreenResult);
@@ -55,7 +56,7 @@ public class ScreenResultExporterTest extends AbstractSpringTest
     HSSFWorkbook workbook = exporter.build(originalScreenResult);
     File exportedFile = File.createTempFile(ScreenResultParserTest.SCREEN_RESULT_115_TEST_WORKBOOK_FILE, ".exported.xls");
     workbook.write(new FileOutputStream(exportedFile));
-    ScreenResult exportedScreenResult  = mockScreenResultParser.parse(MockDaoForScreenResultImporter.makeDummyScreen(115), 
+    ScreenResult exportedScreenResult  = mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115), 
                                                                       exportedFile);
     if (mockScreenResultParser.getHasErrors()) {
       // okay, so I'm using our unit test to help with debugging...sue me!

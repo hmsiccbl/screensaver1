@@ -28,7 +28,9 @@ import edu.harvard.med.screensaver.analysis.heatmaps.ControlWellsFilter;
 import edu.harvard.med.screensaver.analysis.heatmaps.DefaultMultiColorGradient;
 import edu.harvard.med.screensaver.analysis.heatmaps.EdgeWellsFilter;
 import edu.harvard.med.screensaver.analysis.heatmaps.HeatMap;
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
@@ -96,7 +98,9 @@ public class HeatMapViewer extends AbstractBackingBean
   
   // instance data members
 
-  private DAO _dao;
+  private GenericEntityDAO _dao;
+  private ScreenResultsDAO _screenResultsDao;
+  private LibrariesDAO _librariesDao;
   private LibrariesController _librariesController;
 
   private ScreenResult _screenResult;
@@ -112,9 +116,19 @@ public class HeatMapViewer extends AbstractBackingBean
   
   // bean property methods
   
-  public void setDao(DAO dao)
+  public void setGenericEntityDao(GenericEntityDAO dao)
   {
     _dao = dao;
+  }
+
+  public void setScreenResultsDao(ScreenResultsDAO dao)
+  {
+    _screenResultsDao = dao;
+  }
+
+  public void setLibrariesDao(LibrariesDAO librariesDao)
+  {
+    _librariesDao = librariesDao;
   }
 
   public void setLibrariesController(LibrariesController librariesController) {
@@ -271,8 +285,8 @@ public class HeatMapViewer extends AbstractBackingBean
       if (heatMapConfig.getDataHeaders().getSelection() != null &&
         _plateNumber.getSelection() != null) {
         Map<WellKey,ResultValue> resultValues = 
-          _dao.findResultValuesByPlate(_plateNumber.getSelection(), 
-                                       heatMapConfig.getDataHeaders().getSelection());
+          _screenResultsDao.findResultValuesByPlate(_plateNumber.getSelection(), 
+                                                    heatMapConfig.getDataHeaders().getSelection());
         HeatMap heatMap = new HeatMap(_plateNumber.getSelection(),
                                       resultValues,
                                       new ChainedFilter<Pair<WellKey,ResultValue>>(
@@ -381,7 +395,7 @@ public class HeatMapViewer extends AbstractBackingBean
   public String viewWell()
   {
     HeatMapCell heatMapCell = getHeatMapCell();
-    Well well = _dao.findWell(heatMapCell.getWellKey());
+    Well well = _librariesDao.findWell(heatMapCell.getWellKey());
     return _librariesController.viewWell(well, null);
   }
   

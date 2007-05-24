@@ -20,10 +20,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
-import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemType;
@@ -31,6 +29,8 @@ import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+
+import org.apache.log4j.Logger;
 
 /**
  * Assumes first/last doesn't change, that it is safe to use a business key across the two
@@ -83,7 +83,7 @@ public class ScreenDBUserSynchronizer
   // instance data members
   
   private Connection _connection;
-  private DAO _dao;
+  private GenericEntityDAO _dao;
 
   private Map<Integer,Integer> _screenDBUserIdToLabHeadIdMap = new HashMap<Integer,Integer>();
   private Map<Integer,ScreeningRoomUser> _screenDBUserIdToScreeningRoomUserMap =
@@ -97,7 +97,7 @@ public class ScreenDBUserSynchronizer
   
   // public constructors and methods
 
-  public ScreenDBUserSynchronizer(Connection connection, DAO dao)
+  public ScreenDBUserSynchronizer(Connection connection, GenericEntityDAO dao)
   {
     _connection = connection;
     _dao = dao;

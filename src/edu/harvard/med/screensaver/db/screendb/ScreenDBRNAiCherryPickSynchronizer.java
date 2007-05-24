@@ -17,8 +17,8 @@ import java.sql.Statement;
 import java.util.Date;
 import java.util.StringTokenizer;
 
-import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screens.LegacyCherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
@@ -39,7 +39,7 @@ public class ScreenDBRNAiCherryPickSynchronizer
   // instance data members
   
   private Connection _connection;
-  private DAO _dao;
+  private GenericEntityDAO _dao;
   private ScreenDBUserSynchronizer _userSynchronizer;
   private ScreenDBScreenSynchronizer _screenSynchronizer;
 
@@ -48,7 +48,7 @@ public class ScreenDBRNAiCherryPickSynchronizer
 
   public ScreenDBRNAiCherryPickSynchronizer(
     Connection connection,
-    DAO dao,
+    GenericEntityDAO dao,
     ScreenDBUserSynchronizer userSynchronizer,
     ScreenDBScreenSynchronizer screenSynchronizer)
   {

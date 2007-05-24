@@ -10,7 +10,7 @@
 package edu.harvard.med.screensaver.db.screendb;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.db.DAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 
 /**
@@ -18,7 +18,7 @@ import edu.harvard.med.screensaver.db.SchemaUtil;
  */
 public class TestScreenDBSynchronizer extends AbstractSpringTest
 {
-  protected DAO dao;
+  protected GenericEntityDAO genericEntityDao;
   protected SchemaUtil schemaUtil;
   protected void onSetUp() throws Exception
   {
@@ -31,12 +31,12 @@ public class TestScreenDBSynchronizer extends AbstractSpringTest
   /*
   public void testSynchronizer()
   {
-    new ScreenDBSynchronizer("localhost", "screendb", "s", "", dao).synchronize();
+    new ScreenDBSynchronizer("localhost", "screendb", "s", "", genericEntityDao).synchronize();
   }
   public void testSynchronizer2x()
   {
-    new ScreenDBSynchronizer("localhost", "screendb", "s", "", dao).synchronize();
-    new ScreenDBSynchronizer("localhost", "screendb", "s", "", dao).synchronize();
+    new ScreenDBSynchronizer("localhost", "screendb", "s", "", genericEntityDao).synchronize();
+    new ScreenDBSynchronizer("localhost", "screendb", "s", "", genericEntityDao).synchronize();
   }
   */
 }

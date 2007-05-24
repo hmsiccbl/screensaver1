@@ -14,13 +14,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.log4j.Logger;
-
-import edu.harvard.med.screensaver.db.DAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+
+import org.apache.log4j.Logger;
 
 /**
  * Assumes the start plate of a library never changes, that it is safe to use as business key
@@ -40,17 +41,21 @@ public class ScreenDBLibrarySynchronizer
   // instance data members
   
   private Connection _connection;
-  private DAO _dao;
+  private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
   private ScreenDBSynchronizationException _synchronizationException = null;
   private LibraryType.UserType _libraryTypeUserType = new LibraryType.UserType();
   
   
   // public constructors and methods
 
-  public ScreenDBLibrarySynchronizer(Connection connection, DAO dao)
+  public ScreenDBLibrarySynchronizer(Connection connection, 
+                                     GenericEntityDAO dao,
+                                     LibrariesDAO librariesDao)
   {
     _connection = connection;
     _dao = dao;
+    _librariesDao = librariesDao;
   }
 
   public void synchronizeLibraries() throws ScreenDBSynchronizationException
@@ -75,7 +80,7 @@ public class ScreenDBLibrarySynchronizer
             LibraryType libraryType = getLibraryType(resultSet);
             Integer startPlate = resultSet.getInt("start_plate");
             Integer endPlate = resultSet.getInt("end_plate");
-            Library library = _dao.findLibraryWithPlate(startPlate);
+            Library library = _librariesDao.findLibraryWithPlate(startPlate);
             if (library == null) {
               library = new Library(
                 libraryName,
