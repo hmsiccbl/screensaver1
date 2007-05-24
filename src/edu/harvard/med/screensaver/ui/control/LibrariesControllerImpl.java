@@ -321,7 +321,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Library library = _dao.reloadEntity(libraryIn);
+        Library library = _dao.reloadEntity(libraryIn, true);
         _libraryViewer.setLibrary(library);
         _libraryViewer.setLibrarySize(
           _dao.relationshipSize(library, "hbnWells", "wellType", "experimental"));
@@ -344,11 +344,13 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Library library = _dao.reloadEntity(libraryIn);
-        _dao.need(library,
-                  "hbnWells",
-                  "hbnWells.hbnSilencingReagents",
-                  "hbnWells.hbnCompounds");
+        Library library = _dao.reloadEntity(libraryIn, true);
+        _dao.needReadOnly(library,
+                          "hbnWells",
+                          "hbnWells.hbnSilencingReagents",
+                          "hbnWells.hbnSilencingReagents.gene",
+                          /*"hbnWells.hbnSilencingReagents.gene.genbankAccessionNumbers",*/
+                          "hbnWells.hbnCompounds");
         WellSearchResults wellSearchResults = 
           new WellSearchResults(new ArrayList<Well>(library.getWells()),
                                 LibrariesControllerImpl.this);
@@ -406,16 +408,16 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
         public void runTransaction()
         {
           // TODO: try outer join HQL query instead of iteration, for performance improvement
-          Well well = _dao.reloadEntity(wellIn);
-          _dao.need(well,
-                    "hbnSilencingReagents",
-                    "hbnSilencingReagents.gene",
-                    /*"hbnSilencingReagents.gene.genbankAccessionNumbers",*/
-                    "hbnCompounds",
-                    "hbnCompounds.compoundNames",
-                    "hbnCompounds.pubchemCids",
-                    "hbnCompounds.nscNumbers",
-                    "hbnCompounds.casNumbers");
+          Well well = _dao.reloadEntity(wellIn, true);
+          _dao.needReadOnly(well,
+                            "hbnSilencingReagents",
+                            "hbnSilencingReagents.gene",
+                            /*"hbnSilencingReagents.gene.genbankAccessionNumbers",*/
+                            "hbnCompounds",
+                            "hbnCompounds.compoundNames",
+                            "hbnCompounds.pubchemCids",
+                            "hbnCompounds.nscNumbers",
+                            "hbnCompounds.casNumbers");
           _wellViewer.setWell(well);
           _wellViewer.setWellNameValueTable(new WellNameValueTable(LibrariesControllerImpl.this, well));
         }
@@ -436,11 +438,11 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
       public void runTransaction()
       {
         if (geneIn != null) {
-          Gene gene = _dao.reloadEntity(geneIn);
-          _dao.need(gene,
-                    "genbankAccessionNumbers",
-                    "hbnSilencingReagents",
-                    "hbnSilencingReagents.hbnWells");
+          Gene gene = _dao.reloadEntity(geneIn, false);
+          _dao.needReadOnly(gene,
+                            /*"genbankAccessionNumbers",*/
+                            "hbnSilencingReagents",
+                            "hbnSilencingReagents.hbnWells");
           _geneViewer.setGene(gene);
           _geneViewer.setGeneNameValueTable(new GeneNameValueTable(LibrariesControllerImpl.this, gene));
         }
@@ -470,13 +472,13 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
       public void runTransaction()
       {
         if (compoundIn != null) {
-          Compound compound = _dao.reloadEntity(compoundIn);
-          _dao.need(compound,
-                    "compoundNames",
-                    "pubchemCids",
-                    "casNumbers",
-                    "nscNumbers",
-          "hbnWells");
+          Compound compound = _dao.reloadEntity(compoundIn, true);
+          _dao.needReadOnly(compound,
+                            "compoundNames",
+                            "pubchemCids",
+                            "casNumbers",
+                            "nscNumbers",
+                            "hbnWells");
           _compoundViewer.setCompound(compound);
           _compoundViewer.setCompoundNameValueTable(
             new CompoundNameValueTable(LibrariesControllerImpl.this, compound));
