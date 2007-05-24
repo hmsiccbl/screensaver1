@@ -37,8 +37,8 @@ import org.springframework.orm.hibernate3.HibernateCallback;
  * to all AbstractEntity types.
  * <p>
  * Each of the find* methods has two overloaded versions: a simple version that
- * takes only the basic arguments need to find the entity (or entities), and an
- * "advanced" version that takes an additional <code>readOnly</code> flag
+ * takes only the basic arguments needed to find the entity (or entities), and
+ * an "advanced" version that takes an additional <code>readOnly</code> flag
  * parameter and a <code>relationships</code> (var arg) array of Strings.
  * <p>
  * The relationships specify what related data should be loaded from the
@@ -59,7 +59,7 @@ import org.springframework.orm.hibernate3.HibernateCallback;
  * flush time, and modifications made to the objects will not be persisted. This
  * is beneficial for performance, but of course only makes sense if the client
  * code does not intend to make modifications that need to be persisted. Note
- * that this does not in any way make the loaded entity instancesimmutable, so
+ * that this does not in any way make the loaded entity instances immutable, so
  * if any of these entity instances happen to have already been loaded into the
  * Hibernate session as managed (read-write) entities, changes to them <i>will<i>
  * be persisted! So the best practice is for the client code to never modify
