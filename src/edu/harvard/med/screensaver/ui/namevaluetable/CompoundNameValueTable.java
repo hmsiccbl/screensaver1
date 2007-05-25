@@ -116,7 +116,6 @@ public class CompoundNameValueTable extends NameValueTable
   @Override
   public String getAction(int index, String value)
   {
-    log.error("hi from CNV.getAction: " + index + ":" + value);
     // only link to the compound viewer page from the smiles when embedded in the well viewer
     if (_isEmbedded) {
       String name = getName(index);
