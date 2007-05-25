@@ -46,7 +46,7 @@ public class MainControllerImpl extends AbstractUIController implements MainCont
   @UIControllerMethod
   public String viewMain()
   {
-    logUserActivity("viewMain");
+    logUserActivity(VIEW_MAIN);
     return VIEW_MAIN;
   }
 
@@ -54,10 +54,10 @@ public class MainControllerImpl extends AbstractUIController implements MainCont
    * @see edu.harvard.med.screensaver.ui.control.MainController#viewInstructions()
    */
   @UIControllerMethod
-  public String viewInstructions()
+  public String viewHelp()
   {
-    logUserActivity("viewInstructions");
-    return VIEW_INSTRUCTIONS;
+    logUserActivity(VIEW_HELP);
+    return VIEW_HELP;
   }
   
   /* (non-Javadoc)
@@ -66,7 +66,7 @@ public class MainControllerImpl extends AbstractUIController implements MainCont
   @UIControllerMethod
   public String viewDownloads()
   {
-    logUserActivity("viewDownloads");
+    logUserActivity(VIEW_DOWNLOADS);
     return VIEW_DOWNLOADS;
   }
   

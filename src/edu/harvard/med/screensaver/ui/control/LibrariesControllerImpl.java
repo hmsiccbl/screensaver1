@@ -232,7 +232,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   public String findWells()
   {
     logUserActivity("open findWells");
-    return "findWells";
+    return FIND_WELLS;
   }
 
   /* (non-Javadoc)
@@ -256,7 +256,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String findWells(String plateWellList)
   {
-    logUserActivity("findWells");
+    logUserActivity(FIND_WELLS);
     PlateWellListParserResult result = _plateWellListParser.lookupWellsFromPlateWellList(plateWellList);
     if (result.getFatalErrors().size() > 0) {
       showMessage("libraries.unexpectedErrorReadingPlateWellList", "searchResults");
@@ -288,13 +288,13 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String browseLibraries()
   {
-    logUserActivity("browseLibraries");
+    logUserActivity(BROWSE_LIBRARIES);
     if (getLibrariesBrowser().getLibrarySearchResults() == null) {
       //List<Library> libraries = _dao.findAllEntitiesOfType(Library.class);
       List<Library> libraries = _librariesDao.findLibrariesDisplayedInLibrariesBrowser();
       _librariesBrowser.setLibrarySearchResults(new LibrarySearchResults(libraries, this));
     }
-    return "browseLibraries";
+    return BROWSE_LIBRARIES;
   }
   
   /* (non-Javadoc)
@@ -315,7 +315,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String viewLibrary(final Library libraryIn, LibrarySearchResults librarySearchResults)
   {
-    logUserActivity("viewLibrary " + libraryIn);
+    logUserActivity(VIEW_LIBRARY + " " + libraryIn);
     _libraryViewer.setLibrarySearchResults(librarySearchResults);
 
     _dao.doInTransaction(new DAOTransaction() {
@@ -330,7 +330,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
       }
     });
 
-    return "viewLibrary";
+    return VIEW_LIBRARY;
   }
   
   /* (non-Javadoc)
@@ -339,7 +339,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String viewLibraryContents(final Library libraryIn)
   {
-    logUserActivity("viewLibraryContents " + libraryIn);
+    logUserActivity(VIEW_WELL_SEARCH_RESULTS + " for libraryContents " + libraryIn);
     final Library[] libraryOut = new Library[1];
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
@@ -359,7 +359,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
       }
     });
 
-    return "viewWellSearchResults";
+    return VIEW_WELL_SEARCH_RESULTS;
   }
   
   /* (non-Javadoc)
@@ -368,9 +368,9 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String viewWellSearchResults(WellSearchResults wellSearchResults)
   {
-    logUserActivity("viewWellSearchResults");
+    logUserActivity(VIEW_WELL_SEARCH_RESULTS);
     _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
-    return "viewWellSearchResults";
+    return VIEW_WELL_SEARCH_RESULTS;
   }
   
   /* (non-Javadoc)
@@ -394,7 +394,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
    */
   public String viewWell(final Well wellIn, WellSearchResults wellSearchResults)
   {
-    logUserActivity("viewWell " + wellIn);
+    logUserActivity(VIEW_WELL + " " + wellIn);
     // TODO: we should consider replicating this null-condition handling in our
     // other view*() methods (and in all controllers)
     if (wellIn == null) {
@@ -423,7 +423,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
         }
       });
 
-      return "viewWell";
+      return VIEW_WELL;
     }
   }
 
@@ -433,7 +433,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String viewGene(final Gene geneIn, WellSearchResults wellSearchResults)
   {
-    logUserActivity("viewGene " + geneIn);
+    logUserActivity(VIEW_GENE + " " + geneIn);
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
@@ -457,7 +457,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     Well parentWellOfInterest = wellSearchResults == null ? null : wellSearchResults.getCurrentRowDataObject();
     _geneViewer.setParentWellOfInterest(parentWellOfInterest);
 
-    return "viewGene";
+    return VIEW_GENE;
   }
 
   /* (non-Javadoc)
@@ -467,7 +467,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   public String viewCompound(final Compound compoundIn,
                              final WellSearchResults wellSearchResults)
   {
-    logUserActivity("viewCompound " + compoundIn);
+    logUserActivity(VIEW_COMPOUND + " " + compoundIn);
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
@@ -494,7 +494,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     Well parentWellOfInterest = wellSearchResults == null ? null : wellSearchResults.getCurrentRowDataObject();
     _compoundViewer.setParentWellOfInterest(parentWellOfInterest);
     
-    return "viewCompound";
+    return VIEW_COMPOUND;
   }
 
   /* (non-Javadoc)
@@ -503,12 +503,12 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String importCompoundLibraryContents(Library library)
   {
-    logUserActivity("importCompoundLibraryContents " + library);
+    logUserActivity(IMPORT_COMPOUND_LIBRARY_CONTENTS + " " + library);
     _compoundLibraryContentsImporter.setLibrary(library);
     _compoundLibraryContentsImporter.setUploadedFile(null);
     _compoundLibraryContentsImporter.setCompoundLibraryContentsParser(_compoundLibraryContentsParser);
     _compoundLibraryContentsParser.clearErrors();
-    return "importCompoundLibraryContents";
+    return IMPORT_COMPOUND_LIBRARY_CONTENTS;
   }
   
   /* (non-Javadoc)
@@ -517,11 +517,11 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String importCompoundLibraryContents(final Library libraryIn, final UploadedFile uploadedFile)
   {
-    logUserActivity("importCompoundLibraryContents " + libraryIn + " " + uploadedFile.getName() + " " + uploadedFile.getSize());
+    logUserActivity(IMPORT_COMPOUND_LIBRARY_CONTENTS + " " + libraryIn + " " + uploadedFile.getName() + " " + uploadedFile.getSize());
     try {
       if (uploadedFile == null || uploadedFile.getInputStream().available() == 0) {
         showMessage("badUploadedFile", uploadedFile.getName());
-        return "importCompoundLibraryContents";
+        return IMPORT_COMPOUND_LIBRARY_CONTENTS;
       }
       _dao.doInTransaction(new DAOTransaction() 
       {
@@ -540,7 +540,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
         }
       });
       if (_compoundLibraryContentsParser.getHasErrors()) {
-        return "importCompoundLibraryContents";
+        return IMPORT_COMPOUND_LIBRARY_CONTENTS;
       }
       else {
         showMessage("libraries.importedLibraryContents", "libraryViewer");
@@ -551,11 +551,11 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     catch (DataAccessException e) {
       // TODO: should reload library and goto library viewer
       reportSystemError(e);
-      return "importCompoundLibraryContents";
+      return IMPORT_COMPOUND_LIBRARY_CONTENTS;
     }
     catch (Exception e) {
       reportSystemError(e);
-      return "importCompoundLibraryContents";
+      return IMPORT_COMPOUND_LIBRARY_CONTENTS;
     }
   }
 
@@ -565,11 +565,11 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String importRNAiLibraryContents(Library library)
   {
-    logUserActivity("importRNAiLibraryContents " + library);
+    logUserActivity(IMPORT_RNAI_LIBRARY_CONTENTS + " " + library);
     _rnaiLibraryContentsImporter.setLibrary(library);
     _rnaiLibraryContentsImporter.setUploadedFile(null);
     _rnaiLibraryContentsParser.clearErrors();
-    return "importRNAiLibraryContents";
+    return IMPORT_RNAI_LIBRARY_CONTENTS;
   }
   
   /* (non-Javadoc)
@@ -581,11 +581,11 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     final UploadedFile uploadedFile,
     final SilencingReagentType silencingReagentType)
   {
-    logUserActivity("importRNAiLibraryContents " + libraryIn + " " + uploadedFile.getName() + " " + uploadedFile.getSize());
+    logUserActivity(IMPORT_RNAI_LIBRARY_CONTENTS + " " + libraryIn + " " + uploadedFile.getName() + " " + uploadedFile.getSize());
     try {
       if (uploadedFile == null || uploadedFile.getInputStream().available() == 0) {
         showMessage("badUploadedFile", uploadedFile.getName());
-        return "importRNAiLibraryContents";
+        return IMPORT_RNAI_LIBRARY_CONTENTS;
       }
       _dao.doInTransaction(new DAOTransaction() 
       {
@@ -605,7 +605,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
         }
       });
       if (_rnaiLibraryContentsParser.getHasErrors()) {
-        return "importRNAiLibraryContents";
+        return IMPORT_RNAI_LIBRARY_CONTENTS;
       }
       showMessage("libraries.importedLibraryContents", "libraryViewer");
       // TODO: to be correct, we should regen the search results, though I don't think anything in the results would actually be different after this import
@@ -614,11 +614,11 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     catch (DataAccessException e) {
       // TODO: should reload library and goto library viewer
       reportSystemError(e);
-      return "importRNAiLibraryContents";
+      return IMPORT_RNAI_LIBRARY_CONTENTS;
     }
     catch (Exception e) {
       reportApplicationError(e);
-      return "importRNAiLibraryContents";
+      return IMPORT_RNAI_LIBRARY_CONTENTS;
     }
   }
 
@@ -694,8 +694,4 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     });
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-
-  
-  // private instance methods
-    
 }

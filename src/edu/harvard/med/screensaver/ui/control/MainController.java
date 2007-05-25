@@ -26,7 +26,7 @@ public interface MainController
   public String viewMain();
 
   @UIControllerMethod
-  public String viewInstructions();
+  public String viewHelp();
 
   @UIControllerMethod
   public String viewDownloads();
