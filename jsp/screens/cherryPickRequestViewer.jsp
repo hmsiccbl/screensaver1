@@ -216,7 +216,7 @@ TODO:
 					</t:selectManyListbox>
 
 					<t:outputText value="Comments" escape="false" />
-					<t:inputTextarea id="comments"
+					<t:inputTextarea id="cherryPickRequestComments"
 						value="#{cherryPickRequestViewer.cherryPickRequest.comments}"
 						rows="10" cols="80"
 						displayValueOnly="#{!cherryPickRequestViewer.editMode}"
@@ -633,8 +633,8 @@ TODO:
 							popupCalendar="true"
 							rendered="#{cherryPickRequestViewer.editable}" 
 							styleClass="inputText" />
-						<t:outputLabel for="comments" value="Comments:" styleClass="label" />
-						<t:inputText id="comments"
+						<t:outputLabel for="liquidTransferComments" value="Comments:" styleClass="label" />
+						<t:inputText id="liquidTransferComments"
 							value="#{cherryPickRequestViewer.liquidTransferComments}"
 							rendered="#{cherryPickRequestViewer.editable}"
 							styleClass="inputText" />
