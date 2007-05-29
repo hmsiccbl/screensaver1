@@ -122,7 +122,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   private LibrariesDAO _librariesDao;
   private ScreenResultExporter _screenResultExporter;
   private ScreenResult _screenResult;
-  private Map<String,Boolean> _collapsablePanelsState;
+  private Map<String,Boolean> _isPanelCollapsedMap;
   
   // data members for data headers table
   private UniqueDataHeaderNames _uniqueDataHeaderNames;
@@ -155,12 +155,12 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   public ScreenResultViewer()
   {
-    _collapsablePanelsState = new HashMap<String,Boolean>();
-    _collapsablePanelsState.put("screenSummary", false);
-    _collapsablePanelsState.put("screenResultSummary", false);
-    _collapsablePanelsState.put("dataHeadersTable", true);
-    _collapsablePanelsState.put("dataTable", true);
-    _collapsablePanelsState.put("heatMaps", true);
+    _isPanelCollapsedMap = new HashMap<String,Boolean>();
+    _isPanelCollapsedMap.put("screenSummary", false);
+    _isPanelCollapsedMap.put("screenResultSummary", false);
+    _isPanelCollapsedMap.put("dataHeadersTable", true);
+    _isPanelCollapsedMap.put("dataTable", true);
+    _isPanelCollapsedMap.put("heatMaps", true);
   }
 
   public void setLibrariesDao(LibrariesDAO librariesDao)
@@ -204,9 +204,9 @@ public class ScreenResultViewer extends AbstractBackingBean
     _screenResultExporter = screenResultExporter;
   }
 
-  public Map getCollapsablePanelsState()
+  public Map getIsPanelCollapsedMap()
   {
-    return _collapsablePanelsState;
+    return _isPanelCollapsedMap;
   }
   
   public UISelectMany getDataHeadersSelectMany()

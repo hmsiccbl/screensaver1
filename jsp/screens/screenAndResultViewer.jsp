@@ -22,18 +22,18 @@
 	<h:form id="dataForm">
 		<t:panelGrid columns="1" width="100%">
 			<t:collapsiblePanel id="screenPanel"
-				value="#{screenResultViewer.collapsablePanelsState['screenSummary']}"
-				title="Screen Summary" var="state" titleVar="title">
+				value="#{screenResultViewer.isPanelCollapsedMap['screenSummary']}"
+				title="Screen Summary" var="isCollapsed" titleVar="title">
 				<f:facet name="header">
 					<t:div styleClass="sectionHeader">
 						<t:headerLink immediate="true" styleClass="sectionHeader">
 							<h:graphicImage
-								value="#{state ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+								value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 								styleClass="icon" />
 							<h:outputText value="Screen Summary" styleClass="sectionHeader"
-								rendered="#{state}" />
+								rendered="#{isCollapsed}" />
 							<h:outputText value="Screen Details" styleClass="sectionHeader"
-								rendered="#{!state}" />
+								rendered="#{!isCollapsed}" />
 						</t:headerLink>
 					</t:div>
 				</f:facet>
@@ -60,14 +60,14 @@
 			</t:collapsiblePanel>
 
 			<t:collapsiblePanel id="screenResultPanel"
-				value="#{screenResultViewer.collapsablePanelsState['screenResultSummary']}"
-				title="Screen Result Summary" var="state" titleVar="title"
+				value="#{screenResultViewer.isPanelCollapsedMap['screenResultSummary']}"
+				title="Screen Result Summary" var="isCollapsed" titleVar="title"
 				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted}">
 				<f:facet name="header">
 					<t:div styleClass="sectionHeader">
 						<t:headerLink immediate="true" styleClass="sectionHeader">
 							<h:graphicImage
-								value="#{state ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+								value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 								styleClass="icon" />
 							<h:outputText value="Screen Result Summary"
 								styleClass="sectionHeader" />
@@ -134,7 +134,7 @@
 			</t:collapsiblePanel>
 
 			<t:panelGrid columns="1"
-				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted && !(screenResultViewer.collapsablePanelsState['dataHeadersTable'] && screenResultViewer.collapsablePanelsState['dataTable'])}">
+				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted && !(screenResultViewer.isPanelCollapsedMap['dataHeadersTable'] && screenResultViewer.isPanelCollapsedMap['dataTable'])}">
 				<t:outputLabel for="dataHeadersList"
 					value="Show selected data headers:" styleClass="label" />
 				<t:selectManyCheckbox id="dataHeadersList" layout="pageDirection" layoutWidth="6" 
@@ -156,14 +156,14 @@
 			</t:panelGrid>
 
 			<t:collapsiblePanel id="dataHeadersPanel"
-				value="#{screenResultViewer.collapsablePanelsState['dataHeadersTable']}"
-				title="Data Headers" var="state" titleVar="title"
+				value="#{screenResultViewer.isPanelCollapsedMap['dataHeadersTable']}"
+				title="Data Headers" var="isCollapsed" titleVar="title"
 				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted}">
 				<f:facet name="header">
 					<t:div styleClass="sectionHeader">
 						<t:headerLink immediate="true" styleClass="sectionHeader">
 							<h:graphicImage
-								value="#{state ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+								value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 								styleClass="icon" />
 							<h:outputText value="#{title}" styleClass="sectionHeader" />
 						</t:headerLink>
@@ -172,13 +172,13 @@
 
 				<t:dataTable id="dataHeadersTable"
 					value="#{screenResultViewer.dataHeaders}" var="row"
-					styleClass="standardTable" headerClass="tableHeader"
-					rowClasses="row1,row2">
+					rendered="#{!isCollapsed}" styleClass="standardTable"
+					headerClass="tableHeader" rowClasses="row1,row2">
 					<t:column styleClass="keyColumn">
 						<f:facet name="header">
 							<t:outputText value="Property" />
 						</f:facet>
-						<t:outputText value="#{row.rowLabel}" escape="false"/>
+						<t:outputText value="#{row.rowLabel}" escape="false" />
 					</t:column>
 					<t:columns value="#{screenResultViewer.dataHeadersColumnModel}"
 						var="columnName" styleClass="column">
@@ -190,22 +190,22 @@
 				</t:dataTable>
 			</t:collapsiblePanel>
 
-			<t:collapsiblePanel id="dataTablePanel"
-				value="#{screenResultViewer.collapsablePanelsState['dataTable']}"
-				title="Data" var="state" titleVar="title"
+			<t:collapsiblePanel id="dataTablePanel"	
+				value="#{screenResultViewer.isPanelCollapsedMap['dataTable']}"
+				title="Data" var="isCollapsed" titleVar="title"
 				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted}">
 				<f:facet name="header">
 					<t:div styleClass="sectionHeader">
 						<t:headerLink immediate="true" styleClass="sectionHeader">
 							<h:graphicImage
-								value="#{state ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+								value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 								styleClass="icon" />
 							<h:outputText value="#{title}" styleClass="sectionHeader" />
 						</t:headerLink>
 					</t:div>
 				</f:facet>
 
-				<t:panelGrid columns="1" style="width: 100%">
+				<t:panelGrid columns="1" style="width: 100%" rendered="#{!isCollapsed}">
 					<t:panelGroup id="dataTableCommandPanel" styleClass="commandPanel">
 						<h:commandButton id="firstPageCommand"
 							action="#{screenResultViewer.firstPage}" value="First"
@@ -294,20 +294,22 @@
 			</t:collapsiblePanel>
 
 			<t:collapsiblePanel id="heatMapsPanel"
-				value="#{screenResultViewer.collapsablePanelsState['heatMaps']}"
-				title="Heat Maps" var="state" titleVar="title"
+				value="#{screenResultViewer.isPanelCollapsedMap['heatMaps']}"
+				title="Heat Maps" var="isCollapsed" titleVar="title"
 				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted}">
 				<f:facet name="header">
 					<t:div styleClass="sectionHeader">
 						<t:headerLink immediate="true" styleClass="sectionHeader">
 							<h:graphicImage
-								value="#{state ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+								value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 								styleClass="icon" />
 							<h:outputText value="#{title}" styleClass="sectionHeader" />
 						</t:headerLink>
 					</t:div>
 				</f:facet>
-				<%@ include file="screenresults/heatMapViewer.jspf"%>
+				<t:panelGroup rendered="#{!isCollapsed}">
+					<%@ include file="screenresults/heatMapViewer.jspf"%>
+				</t:panelGroup>
 			</t:collapsiblePanel>
 
 		</t:panelGrid>
