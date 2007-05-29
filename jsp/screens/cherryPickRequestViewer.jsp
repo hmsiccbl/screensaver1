@@ -20,13 +20,13 @@ TODO:
 
 		<%-- following screen summary should be shared with screenAndResultViewer.jspf --%>
 		<t:collapsiblePanel id="screenSummaryPanel"
-			value="#{cherryPickRequestViewer.collapsiblePanelsState['screenSummary']}"
-			title="Screen Summary" var="state" titleVar="title">
+			value="#{cherryPickRequestViewer.isPanelCollapsedMap['screenSummary']}"
+			title="Screen Summary" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
 				<t:div styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
 						<h:graphicImage
-							value="#{state ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
 						<h:outputText value="#{title}" styleClass="sectionHeader" />
 					</t:headerLink>
@@ -64,13 +64,13 @@ TODO:
 		</t:collapsiblePanel>
 
 		<t:collapsiblePanel id="cherryPickRequestPanel"
-			value="#{cherryPickRequestViewer.collapsiblePanelsState['cherryPickRequest']}"
-			title="Cherry Pick Request" var="state" titleVar="title">
+			value="#{cherryPickRequestViewer.isPanelCollapsedMap['cherryPickRequest']}"
+			title="Cherry Pick Request" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
 				<t:div styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
 						<h:graphicImage
-							value="#{state ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
 						<h:outputText value="#{title}" styleClass="sectionHeader" />
 					</t:headerLink>
@@ -245,13 +245,13 @@ TODO:
 		</t:collapsiblePanel>
 
 		<t:collapsiblePanel id="screenerCherryPicksPanel"
-			value="#{cherryPickRequestViewer.collapsiblePanelsState['screenerCherryPicks']}"
-			title="Screener Cherry Picks" var="state" titleVar="title">
+			value="#{cherryPickRequestViewer.isPanelCollapsedMap['screenerCherryPicks']}"
+			title="Screener Cherry Picks" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
 				<t:div styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
 						<h:graphicImage
-							value="#{state ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
 						<h:outputText value="#{title}" styleClass="sectionHeader" />
 					</t:headerLink>
@@ -394,13 +394,13 @@ TODO:
 		</t:collapsiblePanel>
 
 		<t:collapsiblePanel id="labCherryPicksPanel"
-			value="#{cherryPickRequestViewer.collapsiblePanelsState['labCherryPicks']}"
-			title="Lab Cherry Picks" var="state" titleVar="title">
+			value="#{cherryPickRequestViewer.isPanelCollapsedMap['labCherryPicks']}"
+			title="Lab Cherry Picks" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
 				<t:div styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
 						<h:graphicImage
-							value="#{state ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
 						<h:outputText value="#{title}" styleClass="sectionHeader" />
 					</t:headerLink>
@@ -546,13 +546,13 @@ TODO:
 		</t:collapsiblePanel>
 
 		<t:collapsiblePanel id="cherryPickPlatesPanel"
-			value="#{cherryPickRequestViewer.collapsiblePanelsState['cherryPickPlates']}"
-			title="Cherry Pick Plates" var="state" titleVar="title">
+			value="#{cherryPickRequestViewer.isPanelCollapsedMap['cherryPickPlates']}"
+			title="Cherry Pick Plates" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
 				<t:div styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
 						<h:graphicImage
-							value="#{state ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
 						<t:outputText value="#{title}" styleClass="sectionHeader" />
 					</t:headerLink>

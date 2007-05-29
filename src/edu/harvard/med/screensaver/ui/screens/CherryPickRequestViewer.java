@@ -135,7 +135,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
   private CherryPickRequest _cherryPickRequest;
   private boolean _isEditMode = false;
-  private Map<String,Boolean> _collapsiblePanelsState;
+  private Map<String,Boolean> _isPanelCollapsedMap;
   private String _cherryPicksInput;
   private UISelectOneEntityBean<ScreeningRoomUser> _requestedBy;
   private UISelectOneEntityBean<AdministratorUser> _volumeApprovedBy;
@@ -167,12 +167,12 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   
   public CherryPickRequestViewer()
   {
-    _collapsiblePanelsState = new HashMap<String,Boolean>();
-    _collapsiblePanelsState.put("screenSummary", true);
-    _collapsiblePanelsState.put("cherryPickRequest", false);
-    _collapsiblePanelsState.put("screenerCherryPicks", false);
-    _collapsiblePanelsState.put("labCherryPicks", false);
-    _collapsiblePanelsState.put("cherryPickAssayPlates", false);
+    _isPanelCollapsedMap = new HashMap<String,Boolean>();
+    _isPanelCollapsedMap.put("screenSummary", true);
+    _isPanelCollapsedMap.put("cherryPickRequest", false);
+    _isPanelCollapsedMap.put("screenerCherryPicks", false);
+    _isPanelCollapsedMap.put("labCherryPicks", false);
+    _isPanelCollapsedMap.put("cherryPickPlates", false);
     
     _labCherryPicksPerPage = new UISelectOneBean<Integer>(new ArrayList<Integer>(Arrays.asList(10, 20, 50, 100, -1))) {
       protected String getLabel(Integer t) { if (t == -1) return "All"; else return super.getLabel(t); }
@@ -241,6 +241,10 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     _screenerCherryPicksDataModel = null;
     _labCherryPicksDataModel = null;
     _assayPlatesDataModel = null;
+    
+    // set "Cherry Pick Plates" panel to initially expanded, if cherry pick plates have been created
+    boolean hasCherryPickPlates = _cherryPickRequest.getCherryPickAssayPlates().size() > 0;
+    _isPanelCollapsedMap.put("cherryPickPlates", !hasCherryPickPlates);
   }
 
   public CherryPickRequest getCherryPickRequest()
@@ -253,9 +257,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return _isEditMode;
   }
 
-  public Map getCollapsiblePanelsState()
+  public Map getIsPanelCollapsedMap()
   {
-    return _collapsiblePanelsState;
+    return _isPanelCollapsedMap;
   }
   
   public HtmlDataScroller getScreenerCherryPicksTableDataScroller1()
