@@ -29,12 +29,13 @@ log4j.logger.userActivity=info
 ### Screensaver application
 
 log4j.logger.edu.harvard.med.screensaver=debug
+log4j.logger.edu.harvard.med.screensaver.io.ScreenResultParser=info
 
 # filter out debug output that is especially verbose and common
 log4j.logger.edu.harvard.med.screensaver.db.RestrictedAccessCollectionDaoMethodInterceptor=warn
 log4j.logger.edu.harvard.med.screensaver.db.RestrictedAccessEntityDaoMethodInterceptor=warn
 log4j.logger.edu.harvard.med.screensaver.db.SchemaUtil=debug
-log4j.logger.edu.harvard.med.screensaver.db.DAOImpl.EntityInflator=warn
+log4j.logger.edu.harvard.med.screensaver.db.GenericHibernateDAO.EntityInflator=warn
 
 ### Tomcat
 
@@ -120,8 +121,6 @@ log4j.logger.org.hibernate.impl.SessionImpl=warn
 
 
 ### log JDBC bind parameters ###
-### WARNING: this setting does not work with our current configuration, where spring dynamically
-### reconfigures the logging
 #log4j.logger.org.hibernate.type=trace
 
 ### log schema export/update ###
