@@ -6,7 +6,7 @@ insert into screening_room_user (screensaver_user_id, user_classification, non_s
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'screeningRoomUser';
 insert into screensaver_user_role_type (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'compoundScreeningRoomUser';
 
-insert into screen (screen_id, version, date_created, screen_type, title, summary, lead_screener_id, lab_head_id, screen_number) select 999, 0, now(), 'Small Molecule', 'Test screen', 'For use with Compound Screener account', currval('screensaver_user_id_seq'), currval('screensaver_user_id_seq'), 999;
+insert into screen (screen_id, version, date_created, screen_type, title, summary, lead_screener_id, lab_head_id, screen_number, all_time_screening_room_activity_count, all_time_cherry_pick_request_count) select 999, 0, now(), 'Small Molecule', 'Test screen', 'For use with Compound Screener account', currval('screensaver_user_id_seq'), currval('screensaver_user_id_seq'), 999, 0, 0;
 
 /* password=secure */
 insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Joe', 'Admin', 'joe_admin@hms.harvard.edu', 'jadmin', 'd015cc465bdb4e51987df7fb870472d3fb9a3505'); 
