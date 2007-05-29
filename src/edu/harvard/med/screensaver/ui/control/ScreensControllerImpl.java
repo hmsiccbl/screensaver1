@@ -312,21 +312,17 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
         {
           Screen screen = _currentScreen = _dao.reloadEntity(screenIn,
                                                              true,
-                                                             "hbnLabHead",
                                                              "hbnLabHead.hbnLabMembers",
                                                              "hbnLeadScreener",
                                                              "billingInformation");
-          _dao.needReadOnly(screen, 
-                            "hbnCollaborators",
-                            "hbnCollaborators.hbnLabAffiliation");
+          _dao.needReadOnly(screen, "hbnCollaborators.hbnLabAffiliation");
           _dao.needReadOnly(screen, "screeningRoomActivities");
           _dao.needReadOnly(screen, "abaseTestsets", "attachedFiles", "fundingSupports", "keywords", "lettersOfSupport", "publications");
           _dao.needReadOnly(screen, "statusItems");
           _dao.needReadOnly(screen, "cherryPickRequests");
-          _dao.needReadOnly(screen, "hbnCollaborators", "hbnCollaborators");
+          _dao.needReadOnly(screen, "hbnCollaborators");
           _dao.needReadOnly(screen.getScreenResult(), "plateNumbers");
           _dao.needReadOnly(screen.getScreenResult(), 
-                            "hbnResultValueTypes",
                             "hbnResultValueTypes.hbnDerivedTypes",
                             "hbnResultValueTypes.hbnTypesDerivedFrom");
 
@@ -362,7 +358,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
         public void runTransaction()
         {
           _dao.reattachEntity(screen); // checks if up-to-date
-          _dao.need(screen, "hbnLabHead", "hbnLabHead.hbnLabMembers");
+          _dao.need(screen, "hbnLabHead.hbnLabMembers");
         }
       });
       return REDISPLAY_PAGE_ACTION_RESULT;
@@ -925,7 +921,6 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
           CherryPickRequest cherryPickRequest = _dao.reloadEntity(cherryPickRequestIn, 
                                                                   true, 
                                                                   "hbnRequestedBy",
-                                                                  "screen", 
                                                                   "screen.hbnLabHead", 
                                                                   "screen.hbnLeadScreener",
                                                                   "screen.hbnCollaborators");
@@ -934,25 +929,16 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
           }
           
           _dao.needReadOnly(cherryPickRequest, 
-                            "cherryPickAssayPlates",
                             "cherryPickAssayPlates.hbnCherryPickLiquidTransfer");
           if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI)) {
             _dao.needReadOnly(cherryPickRequest,
-                              "screenerCherryPicks",
                               "screenerCherryPicks.labCherryPicks");
             _dao.needReadOnly(cherryPickRequest,
-                              "screenerCherryPicks",
-                              "screenerCherryPicks.screenedWell",
-                              "screenerCherryPicks.screenedWell.hbnSilencingReagents",
                               "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene"/*,
                               "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene.genbankAccessionNumbers"*/);
             _dao.needReadOnly(cherryPickRequest,
-                              "labCherryPicks",
                               "labCherryPicks.sourceWell");
             _dao.needReadOnly(cherryPickRequest,
-                              "labCherryPicks",
-                              "labCherryPicks.sourceWell",
-                              "labCherryPicks.sourceWell.hbnSilencingReagents",
                               "labCherryPicks.sourceWell.hbnSilencingReagents.gene"/*,
                               "labCherryPicks.sourceWell.hbnSilencingReagents.gene.genbankAccessionNumbers"*/);
           }

@@ -995,7 +995,7 @@ public class ComplexDAOTest extends AbstractSpringTest
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
         genericEntityDao.need(screen, 
                               "keywords", 
-                              "hbnLabHead",
+                              //"hbnLabHead", // intermediate relationships should be inferred 
                               "hbnLabHead.hbnLabMembers");
         screenOut[0] = screen;
       }

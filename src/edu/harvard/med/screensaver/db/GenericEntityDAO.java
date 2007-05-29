@@ -46,7 +46,13 @@ import org.springframework.orm.hibernate3.HibernateCallback;
  * SQL call). Each relationship is specified as a dot-separated path of
  * relationship property names, relative to the root entity. For example, if
  * loading a Parent entity, one might specify the following (hypothetical)
- * relationships: "children.toys", "children.friends.toys". <i>Warning</i>:
+ * relationships: <code>"children.toys"</code>,
+ * <code>"children.friends.toys"</code>. Intermediate relationships do not
+ * need to be specified independently, so that, for example,
+ * <code>"children.friends.toys"</code> is sufficient and <code>{"children",
+ * "children.friends", "children.friends.toys"}</code>
+ * is unnecessary. relationships that are more than 1 level deep, all
+ * intermediate relationships will be loaded (as one would expect). <i>Warning</i>:
  * specifying more than a single to-many relationship will generate an SQL query
  * whose result will be the cross-product of all the relationships' entities.
  * This can grow quite large, quickly! Unless you are sure that the multiple
@@ -388,11 +394,12 @@ public class GenericEntityDAO extends AbstractDAO
   public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass,
                                                                      Map<String,Object> name2Value,
                                                                      final boolean readOnly,
-                                                                     String... relationships)
+                                                                     String... relationshipsIn)
   {
     String entityName = entityClass.getSimpleName();
     final StringBuffer hql = new StringBuffer();
     
+    List<String> relationships = expandRelationships(relationshipsIn); 
     Map<String,String> path2Alias = makeAliases(relationships);
     String entityAlias = "x";
     hql.append("select distinct x from ").append(entityName).append(' ').append(entityAlias);
@@ -740,7 +747,7 @@ public class GenericEntityDAO extends AbstractDAO
     }
   }
 
-  private Map<String,String> makeAliases(String[] relationships)
+  private Map<String,String> makeAliases(List<String> relationships)
   {
     int nextAlias = 1;
     Map<String,String> path2Alias = new HashMap<String,String>(); 
@@ -752,5 +759,31 @@ public class GenericEntityDAO extends AbstractDAO
     return path2Alias;
   }
 
+  /**
+   * Returns an ordered set of the relationships, expanded to include all
+   * implicit, intermediate relationships. For example, if input is { "w", "x.y.z", },
+   * output will be { "w", "x", "x.y", "x.y.z" }.
+   * 
+   * @param relationships
+   * @return
+   */
+  private List<String> expandRelationships(String[] relationships)
+  {
+    LinkedHashSet<String> expandedRelationships = new LinkedHashSet<String>();
+    for (String relationship : relationships) {
+      int pos = -1;
+      do {
+        pos = relationship.indexOf('.', pos + 1);
+        if (pos < 0) {
+          expandedRelationships.add(relationship);
+        }
+        else if (pos > 0 && pos < relationship.length()) {
+          expandedRelationships.add(relationship.substring(0, pos));
+        }
+      } while (pos >= 0);
+    }
+     return new ArrayList<String>(expandedRelationships);
+  }
+   
 }
 

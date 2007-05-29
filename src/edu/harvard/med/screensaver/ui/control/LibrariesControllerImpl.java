@@ -346,8 +346,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
       {
         Library library = _dao.reloadEntity(libraryIn, true);
         _dao.needReadOnly(library,
-                          "hbnWells",
-                          "hbnWells.hbnSilencingReagents",
                           "hbnWells.hbnSilencingReagents.gene",
                           /*"hbnWells.hbnSilencingReagents.gene.genbankAccessionNumbers",*/
                           "hbnWells.hbnCompounds");
@@ -410,10 +408,8 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
           // TODO: try outer join HQL query instead of iteration, for performance improvement
           Well well = _dao.reloadEntity(wellIn, true);
           _dao.needReadOnly(well,
-                            "hbnSilencingReagents",
                             "hbnSilencingReagents.gene",
                             /*"hbnSilencingReagents.gene.genbankAccessionNumbers",*/
-                            "hbnCompounds",
                             "hbnCompounds.compoundNames",
                             "hbnCompounds.pubchemCids",
                             "hbnCompounds.nscNumbers",
@@ -441,7 +437,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
           Gene gene = _dao.reloadEntity(geneIn, false);
           _dao.needReadOnly(gene,
                             /*"genbankAccessionNumbers",*/
-                            "hbnSilencingReagents",
                             "hbnSilencingReagents.hbnWells");
           _geneViewer.setGene(gene);
           _geneViewer.setGeneNameValueTable(new GeneNameValueTable(LibrariesControllerImpl.this, gene));
