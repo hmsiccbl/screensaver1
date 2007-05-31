@@ -263,7 +263,7 @@ public class GenericEntityDAO extends AbstractDAO
    */
   public int relationshipSize(final AbstractEntity entity, final String relationship)
   {
-    return (Integer) getHibernateTemplate().execute(new HibernateCallback() 
+    Number size = (Number) getHibernateTemplate().execute(new HibernateCallback() 
     {
       public Object doInHibernate(Session session) throws HibernateException, SQLException
       {
@@ -274,6 +274,7 @@ public class GenericEntityDAO extends AbstractDAO
         return query.list().get(0);
       }
     });
+    return size.intValue();
   }
 
   public int relationshipSize(
@@ -282,7 +283,7 @@ public class GenericEntityDAO extends AbstractDAO
     final String relationshipProperty,
     final String relationshipPropertyValue)
   {
-    return (Integer) getHibernateTemplate().execute(new HibernateCallback() 
+    Number size = (Number) getHibernateTemplate().execute(new HibernateCallback() 
     {
       public Object doInHibernate(Session session) throws HibernateException, SQLException
       {
@@ -297,6 +298,7 @@ public class GenericEntityDAO extends AbstractDAO
         return query.list().get(0);
       }
     });
+    return size.intValue();
   }
   
   public void deleteEntity(AbstractEntity entity)
@@ -619,7 +621,7 @@ public class GenericEntityDAO extends AbstractDAO
   public <E extends AbstractEntity> List<E> findEntitiesByHql(
     Class<E> entityClass,
     String hql,
-    Object [] hqlParameters)
+    Object... hqlParameters)
   {
     return (List<E>) getHibernateTemplate().find(hql, hqlParameters);
   }
