@@ -32,6 +32,8 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
+import org.apache.log4j.Logger;
+
 
 /**
  * Tests the {@link DAOImpl} in some simple, straightfoward ways.
@@ -41,6 +43,8 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
  */
 public class SimpleDAOTest extends AbstractSpringTest
 {
+  
+  private static final Logger log = Logger.getLogger(SimpleDAOTest.class);
   
   // public static methods
   
@@ -258,20 +262,20 @@ public class SimpleDAOTest extends AbstractSpringTest
           LibraryType.NATURAL_PRODUCTS,
           1,
           50);
-        Well well1 = new Well(expectedLibrary[0], new WellKey(1, "A1"), WellType.EXPERIMENTAL);
+        Well well1 = new Well(expectedLibrary[0], new WellKey(1, "A01"), WellType.EXPERIMENTAL);
         Gene gene1 = new Gene("ANT1", 1, "ENTREZ-ANT1", "Human");
         gene1.addGenbankAccessionNumber("GBAN1");
-        SilencingReagent siReagent1 = new SilencingReagent(gene1, SilencingReagentType.SIRNA, "ATCG");
+        SilencingReagent siReagent1 = new SilencingReagent(gene1, SilencingReagentType.SIRNA, "AAAA");
         well1.addSilencingReagent(siReagent1);
         Gene gene2 = new Gene("ANT2", 2, "ENTREZ-ANT2", "Human");
         gene2.addGenbankAccessionNumber("GBAN2");
-        SilencingReagent siReagent2 = new SilencingReagent(gene2, SilencingReagentType.SIRNA, "ATCT");
-        Well well2 = new Well(expectedLibrary[0], new WellKey(2, "A1"), WellType.EXPERIMENTAL);
+        SilencingReagent siReagent2 = new SilencingReagent(gene2, SilencingReagentType.SIRNA, "CCCC");
+        Well well2 = new Well(expectedLibrary[0], new WellKey(2, "A01"), WellType.EXPERIMENTAL);
         well2.addSilencingReagent(siReagent2);
         Gene gene3 = new Gene("ANT3", 3, "ENTREZ-ANT3", "Human");
         gene3.addGenbankAccessionNumber("GBAN3");
-        SilencingReagent siReagent3 = new SilencingReagent(gene3, SilencingReagentType.SIRNA, "ATCC");
-        Well well3 = new Well(expectedLibrary[0], new WellKey(3, "A1"), WellType.EXPERIMENTAL);
+        SilencingReagent siReagent3 = new SilencingReagent(gene3, SilencingReagentType.SIRNA, "TTTT");
+        Well well3 = new Well(expectedLibrary[0], new WellKey(3, "A01"), WellType.EXPERIMENTAL);
         well3.addSilencingReagent(siReagent3);
         new Copy(expectedLibrary[0], CopyUsageType.FOR_LIBRARY_SCREENING, "copy1"); 
         new Copy(expectedLibrary[0], CopyUsageType.FOR_LIBRARY_SCREENING, "copy2"); 
@@ -286,13 +290,13 @@ public class SimpleDAOTest extends AbstractSpringTest
       public void runTransaction()
       {
         actualLibrary[0] = genericEntityDao.findEntityByProperty(Library.class, 
-                                                    "startPlate", 
-                                                    1, 
-                                                    false, 
-                                                    "hbnWells", 
-                                                    "hbnWells.hbnSilencingReagents", 
-                                                    "hbnWells.hbnSilencingReagents.gene"
-                                                    /*"hbnWells.hbnSilencingReagents.gene.genbankAccessionNumbers"*/);
+                                                                 "startPlate", 
+                                                                 1, 
+                                                                 false, 
+                                                                 //"hbnWells", // implicit
+                                                                 //"hbnWells.hbnSilencingReagents", // implicit
+                                                                 "hbnWells.hbnSilencingReagents.gene", // implicit
+                                                                 "hbnWells.hbnSilencingReagents.gene.genbankAccessionNumbers");
         assertEquals(expectedLibrary[0], actualLibrary[0]);
       }
     });
@@ -301,9 +305,15 @@ public class SimpleDAOTest extends AbstractSpringTest
       int i = 1;
       for (Well well : actualLibrary[0].getWells()) {
          assertEquals("inflated well", "A01", well.getWellName());
-         //assertEquals("inflated silencing reagent", , well.getSilencingReagents().iterator().next());
-         assertEquals("inflated gene", "ANT" + i, well.getSilencingReagents().iterator().next().getGene().getGeneName());
-         assertEquals("inflated genbankAccessionNumbers", "GBAN" + i, well.getSilencingReagents().iterator().next().getGene().getGenbankAccessionNumbers().iterator().next());
+         assertEquals("inflated silencing reagent", 
+                      new String[] { "AAAA", "CCCC", "TTTT" }[i - 1], 
+                      well.getSilencingReagents().iterator().next().getSequence());
+         assertEquals("inflated gene", 
+                      "ANT" + i, 
+                      well.getSilencingReagents().iterator().next().getGene().getGeneName());
+         assertEquals("inflated genbankAccessionNumbers", 
+                      "GBAN" + i, 
+                      well.getSilencingReagents().iterator().next().getGene().getGenbankAccessionNumbers().iterator().next());
          ++i;
       }
     }

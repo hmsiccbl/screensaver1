@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -292,6 +293,7 @@ public class Gene extends AbstractEntity
     return _oldEntrezgeneSymbols.remove(oldEntrezgeneSymbol);
   }
 
+  // TODO: we make non-lazy for now, until we resolve bug in DAOImpl.inflate() [ant: 2007-05-22]
   /**
    * Get the GenBank accession numbers.
    *
@@ -313,6 +315,38 @@ public class Gene extends AbstractEntity
   public Set<String> getGenbankAccessionNumbers()
   {
     return _genbankAccessionNumbers;
+  }
+
+  
+  private Set<String> _simpleChildren = new HashSet<String>();
+  /**
+   * @hibernate.set table="simple_child" lazy="true"
+   * @hibernate.collection-element type="text" column="value"
+   * @hibernate.collection-key column="gene_id"
+   */
+  public Set<String> getSimpleChildren()
+  {
+    return _simpleChildren;
+  }
+  
+  public void setSimpleChildren(Set<String> simpleChildren)
+  {
+    _simpleChildren = simpleChildren;
+  }
+
+  private Set<Child> _children = new HashSet<Child>();
+  /**
+   * @hibernate.set cascade="all-delete-orphan" lazy="true"
+   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.libraries.Child"
+   * @hibernate.collection-key column="gene_id"
+   */
+  public Set<Child> getChildren()
+  {
+    return _children;
+  }
+  
+  public void setChildren(Set<Child> children) {
+    _children = children;
   }
 
   /**

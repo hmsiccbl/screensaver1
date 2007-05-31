@@ -790,7 +790,7 @@ public class Well extends AbstractEntity implements Comparable
    *   not-null="true"
    *   foreign-key="fk_well_to_library"
    *   cascade="save-update"
-   *   lazy="true"
+   *   lazy="proxy"
    */
   private Library getHbnLibrary()
   {

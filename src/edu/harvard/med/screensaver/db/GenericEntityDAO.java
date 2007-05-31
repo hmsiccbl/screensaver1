@@ -244,13 +244,14 @@ public class GenericEntityDAO extends AbstractDAO
    */
   public int relationshipSize(final Object persistentCollection)
   {
-    return (Integer) getHibernateTemplate().execute(new HibernateCallback() 
+    Number size = (Number) getHibernateTemplate().execute(new HibernateCallback() 
     {
       public Object doInHibernate(Session session) throws HibernateException, SQLException
       {
         return ((Integer) session.createFilter(persistentCollection, "select count(*)" ).list().get(0)).intValue();
       }
     });
+    return size.intValue();
   }
   
   /**

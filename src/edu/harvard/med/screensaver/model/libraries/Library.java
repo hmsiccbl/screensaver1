@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.class lazy="false"
+ * @hibernate.class lazy="true"
  */
 public class Library extends AbstractEntity
 {
@@ -909,14 +909,14 @@ public class Library extends AbstractEntity
   }
 
 
-  // private constructor
+  // protected constructor
 
   /**
    * Construct an uninitialized <code>Library</code> object.
    *
    * @motivation for hibernate
    */
-  private Library() {}
+  protected Library() {}
 
 
   // private methods

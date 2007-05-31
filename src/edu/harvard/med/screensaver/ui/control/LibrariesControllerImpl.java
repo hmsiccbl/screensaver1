@@ -346,8 +346,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
       {
         Library library = _dao.reloadEntity(libraryIn, true);
         _dao.needReadOnly(library,
-                          "hbnWells.hbnSilencingReagents.gene",
-                          /*"hbnWells.hbnSilencingReagents.gene.genbankAccessionNumbers",*/
+                          "hbnWells.hbnSilencingReagents.gene.genbankAccessionNumbers",
                           "hbnWells.hbnCompounds");
         WellSearchResults wellSearchResults = 
           new WellSearchResults(new ArrayList<Well>(library.getWells()),
@@ -378,7 +377,9 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   public String viewWell()
   {
     String wellId = (String) getRequestParameter("wellId");
-    Well well = _dao.findEntityById(Well.class, wellId);
+    Well well = _dao.findEntityById(Well.class, 
+                                    wellId,
+                                    true);
     return viewWell(well, null);
   }
   
@@ -406,14 +407,14 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
         public void runTransaction()
         {
           // TODO: try outer join HQL query instead of iteration, for performance improvement
-          Well well = _dao.reloadEntity(wellIn, true);
-          _dao.needReadOnly(well,
-                            "hbnSilencingReagents.gene",
-                            /*"hbnSilencingReagents.gene.genbankAccessionNumbers",*/
-                            "hbnCompounds.compoundNames",
-                            "hbnCompounds.pubchemCids",
-                            "hbnCompounds.nscNumbers",
-                            "hbnCompounds.casNumbers");
+          Well well = _dao.reloadEntity(wellIn, 
+                                        true,
+                                        "hbnLibrary",
+                                        "hbnSilencingReagents.gene.genbankAccessionNumbers",
+                                        "hbnCompounds.compoundNames",
+                                        "hbnCompounds.pubchemCids",
+                                        "hbnCompounds.nscNumbers",
+                                        "hbnCompounds.casNumbers");
           _wellViewer.setWell(well);
           _wellViewer.setWellNameValueTable(new WellNameValueTable(LibrariesControllerImpl.this, well));
         }
@@ -436,8 +437,8 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
         if (geneIn != null) {
           Gene gene = _dao.reloadEntity(geneIn, false);
           _dao.needReadOnly(gene,
-                            /*"genbankAccessionNumbers",*/
-                            "hbnSilencingReagents.hbnWells");
+                            "genbankAccessionNumbers",
+                            "hbnSilencingReagents.hbnWells.hbnLibrary");
           _geneViewer.setGene(gene);
           _geneViewer.setGeneNameValueTable(new GeneNameValueTable(LibrariesControllerImpl.this, gene));
         }
