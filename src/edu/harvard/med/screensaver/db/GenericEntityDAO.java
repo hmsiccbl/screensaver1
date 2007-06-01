@@ -42,8 +42,14 @@ import org.springframework.orm.hibernate3.HibernateCallback;
  * parameter and a <code>relationships</code> (var arg) array of Strings.
  * <p>
  * The relationships specify what related data should be loaded from the
- * database at the same the entity itself is being loaded (i.e., within a single
- * SQL call). Each relationship is specified as a dot-separated path of
+ * database at the same time the entity itself is being loaded (i.e., within a
+ * single SQL call). This is useful in cases where the returned entity (or
+ * entities) will be used outside of a Hibernate session (i.e., "dettached").
+ * This is also useful for minimizing the number of SQL calls that are used to
+ * fetch data for each of the relationships that will be traversed while using
+ * the entity within an active Hibernate session. This or reduce or eliminate
+ * the "N+1 selects" performance problem, as discussed in Hibernate
+ * documentation. Each relationship is specified as a dot-separated path of
  * relationship property names, relative to the root entity. For example, if
  * loading a Parent entity, one might specify the following (hypothetical)
  * relationships: <code>"children.toys"</code>,
