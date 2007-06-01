@@ -74,18 +74,28 @@ sub report {
     my $n = 1;
     foreach my $sql (@sql_stmts) {
       print "\t#$n: ";
-      $sql =~ / from (.*)/;
-      my $from_clause = $1;
+      my $from_clause = ($sql =~ / from (.*)( where )?/)[0];
+      my $where_clause = ($sql =~ / where (.*)/)[0];
+      #my $primary_table_alias = ($where_clause =~ /(.*?)\..*?=\?/)[0];
+
       my %tables;
       my $table_order = 0;
+      #my %alias_to_table;
       foreach my $join_clause (split(/ join /, $from_clause)) {
-        $join_clause =~ /^(\w+)/;
+        $join_clause =~ /^(\w+) (\w+)/;
         my $table = $1;
+        #my $table_alias = $2;
+        #$alias_to_table{$table_alias} = $table;
         $tables{$table} = $table_order unless exists $tables{$table};
         ++$table_order;
       }
+      #my $primary_table = $primary_table_alias ? $alias_to_table{$primary_table_alias} : "";
       my @sorted_tables = sort { $tables{$a} <=> $tables{$b} } keys %tables;
-      print join(", ", @sorted_tables), "\n";
+      #map {$_ . ($_ eq $primary_table ? "(*)" : "")}*/
+      print join(", ", @sorted_tables), "";
+      print " (NO WHERE CLAUSE!)" unless $where_clause;
+      print "\n";
+
       ++$n;
     }
   }
