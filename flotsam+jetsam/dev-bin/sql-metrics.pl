@@ -74,6 +74,7 @@ sub report {
     my $n = 1;
     foreach my $sql (@sql_stmts) {
       print "\t#$n: ";
+      my $sql_op = ($sql =~ /^(\w+)/)[0];
       my $from_clause = ($sql =~ / from (.*)( where )?/)[0];
       my $where_clause = ($sql =~ / where (.*)/)[0];
       #my $primary_table_alias = ($where_clause =~ /(.*?)\..*?=\?/)[0];
@@ -81,19 +82,29 @@ sub report {
       my %tables;
       my $table_order = 0;
       #my %alias_to_table;
-      foreach my $join_clause (split(/ join /, $from_clause)) {
-        $join_clause =~ /^(\w+) (\w+)/;
-        my $table = $1;
-        #my $table_alias = $2;
-        #$alias_to_table{$table_alias} = $table;
-        $tables{$table} = $table_order unless exists $tables{$table};
-        ++$table_order;
+      if ($sql_op eq "select" && $from_clause) {
+        foreach my $join_clause (split(/ join /, $from_clause)) {
+          $join_clause =~ /^(\w+) (\w+)/;
+          my $table = $1;
+          #my $table_alias = $2;
+          #$alias_to_table{$table_alias} = $table;
+          $tables{$table} = $table_order unless exists $tables{$table};
+          ++$table_order;
+        }
       }
+
       #my $primary_table = $primary_table_alias ? $alias_to_table{$primary_table_alias} : "";
-      my @sorted_tables = sort { $tables{$a} <=> $tables{$b} } keys %tables;
+      my @sorted_tables;
+      if ($sql_op eq "select") {
+        @sorted_tables = sort { $tables{$a} <=> $tables{$b} } keys %tables;
+      }
+      elsif (!($sql_op eq "select")) {
+        push @sorted_tables, ($sql =~ /^\w+ (into |from )?(\S+)/)[1];
+      }
       #map {$_ . ($_ eq $primary_table ? "(*)" : "")}*/
-      print join(", ", @sorted_tables), "";
-      print " (NO WHERE CLAUSE!)" unless $where_clause;
+      print "[$sql_op] ";
+      print join(", ", @sorted_tables);
+      print " (NO WHERE CLAUSE!)" if $sql_op eq "select" && !$where_clause;
       print "\n";
 
       ++$n;
