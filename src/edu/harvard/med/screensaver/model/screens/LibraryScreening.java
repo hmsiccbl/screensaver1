@@ -87,6 +87,7 @@ public class LibraryScreening extends Screening
    * @hibernate.set
    *   cascade="all-delete-orphan"
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="library_screening_id"
    * @hibernate.collection-one-to-many

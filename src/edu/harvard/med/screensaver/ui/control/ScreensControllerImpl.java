@@ -929,16 +929,16 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
           }
           
           _dao.needReadOnly(cherryPickRequest, 
-                            "cherryPickAssayPlates.hbnCherryPickLiquidTransfer");
+                            "cherryPickAssayPlates.hbnCherryPickLiquidTransfer",
+                            "cherryPickAssayPlates.labCherryPicks.sourceWell");
           if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI)) {
             _dao.needReadOnly(cherryPickRequest,
-                              "screenerCherryPicks.labCherryPicks");
-            _dao.needReadOnly(cherryPickRequest,
-                              "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene.genbankAccessionNumbers");
-            _dao.needReadOnly(cherryPickRequest,
-                              "labCherryPicks.sourceWell");
-            _dao.needReadOnly(cherryPickRequest,
                               "labCherryPicks.sourceWell.hbnSilencingReagents.gene.genbankAccessionNumbers");
+            _dao.needReadOnly(cherryPickRequest,
+                              "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene.genbankAccessionNumbers",
+                              "screenerCherryPicks.RNAiKnockdownConfirmation");
+            _dao.needReadOnly(cherryPickRequest,
+                              "screenerCherryPicks.labCherryPicks");
           }
 //          else if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
 //            // TODO: inflate, as needed

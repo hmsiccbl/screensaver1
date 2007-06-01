@@ -27,7 +27,7 @@ import org.apache.log4j.Logger;
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.class lazy="false"
+ * @hibernate.class lazy="true"
  */
 public class ScreenerCherryPick extends AbstractEntity
 {
@@ -282,14 +282,14 @@ public class ScreenerCherryPick extends AbstractEntity
   }
 
 
-  // private constructor
+  // protected constructor
 
   /**
    * Construct an uninitialized <code>CherryPick</code> object.
    *
-   * @motivation for hibernate
+   * @motivation for hibernate and CGLIB2
    */
-  private ScreenerCherryPick() {}
+  protected ScreenerCherryPick() {}
 
 
   // private methods

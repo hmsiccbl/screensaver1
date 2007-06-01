@@ -150,7 +150,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   }
 
   /**
-   * @hibernate.set cascade="none" inverse="true"
+   * @hibernate.set cascade="none" inverse="true" lazy="true"
    * @hibernate.collection-key column="cherry_pick_assay_plate_id"
    * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screens.LabCherryPick"
    * @motivation for hibernate and maintenance of bi-directional relationships

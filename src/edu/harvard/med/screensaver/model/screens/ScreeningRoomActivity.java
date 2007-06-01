@@ -255,6 +255,7 @@ public abstract class ScreeningRoomActivity extends AbstractEntity implements Co
    * @hibernate.set
    *   cascade="all-delete-orphan"
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="screening_room_activity_id"
    * @hibernate.collection-one-to-many

@@ -474,7 +474,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
                             "pubchemCids",
                             "casNumbers",
                             "nscNumbers",
-                            "hbnWells");
+                            "hbnWells.hbnLibrary");
           _compoundViewer.setCompound(compound);
           _compoundViewer.setCompoundNameValueTable(
             new CompoundNameValueTable(LibrariesControllerImpl.this, compound));

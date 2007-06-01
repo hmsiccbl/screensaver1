@@ -21,7 +21,7 @@ import edu.harvard.med.screensaver.model.ToOneRelationship;
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.class lazy="false"
+ * @hibernate.class lazy="true"
  */
 public class RNAiKnockdownConfirmation extends AbstractEntity
 {
@@ -224,14 +224,14 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
   }
 
 
-  // private constructor
+  // protected constructor
 
   /**
    * Construct an uninitialized <code>RNAiKnockdownConfirmation</code> object.
    *
-   * @motivation for hibernate
+   * @motivation for hibernate and CGLIB2
    */
-  private RNAiKnockdownConfirmation() {}
+  protected RNAiKnockdownConfirmation() {}
 
 
   // private methods

@@ -303,7 +303,6 @@ public class Gene extends AbstractEntity
    *   lazy="true"
    * @hibernate.collection-key
    *   column="gene_id"
-   *   foreign-key="fk_gene_genbank_accession_number_to_gene"
    * @hibernate.collection-element
    *   type="text"
    *   column="genbank_accession_number"
