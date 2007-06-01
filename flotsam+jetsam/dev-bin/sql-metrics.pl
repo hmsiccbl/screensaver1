@@ -16,27 +16,37 @@ use strict;
 
 my $state = "in_request";
 my $request_url;
-my $start_time;
-my $end_time;
-my $user_activity;
-my @sql_stmts;
+my $activity;
+my $time_stamp;
+my @ordered_activities;
+my %start_time_by_activity;
+my %end_time_by_activity;
+my %sql_stmts_by_activity;
 
 while (<>) {
   chomp;
-  if (/^(\d+:\d+:\d+,\d+).*>>>>.* @ (\S+)/) {
+  if (/^(\d+:\d+:\d+,\d+)/) {
+    $time_stamp = $1;
+  }
+  if (/>>>>.* @ (\S+)/) {
     init();
-    $start_time = $1;
-    $request_url = $2;
+    $start_time_by_activity{$activity} = $time_stamp;
+    $request_url = $1;
     $state = "processing_request";
   }
   elsif ($state eq "processing_request" && /userActivity.*\) (.*)/) {
-    $user_activity = $1;
+    $end_time_by_activity{$activity} = $time_stamp;
+    $activity = $1;
+    $start_time_by_activity{$activity} = $time_stamp;
   }
   elsif ($state eq "processing_request" && /org\.hibernate\.SQL:\d+ - (.*)/) {
-    push @sql_stmts, $1 if $1;
+    if (!exists $sql_stmts_by_activity{$activity}) {
+      push @ordered_activities, $activity;
+    }
+    push @{$sql_stmts_by_activity{$activity}}, $1 if $1;
   }
-  elsif ($state eq "processing_request" && /^(\d+:\d+:\d+,\d+).*<<<</) {
-    $end_time = $1;
+  elsif ($state eq "processing_request" && /<<<</) {
+    $end_time_by_activity{$activity} = $time_stamp;
     report();
     $state = "awaiting_request";
   }
@@ -44,34 +54,40 @@ while (<>) {
 
 sub init {
   $request_url = undef;
-  $user_activity = undef;
-  @sql_stmts = ();
-  $start_time = undef;
-  $end_time = undef;
+  $activity = "system activity";
+  @ordered_activities = ();
+  %sql_stmts_by_activity = ();
+  %start_time_by_activity = ();
+  %end_time_by_activity = ();
 }
 
 sub report {
-  my $activity = $request_url;
-  $activity .= " (" . $user_activity . ")" if $user_activity;
-  print "\n$activity took " . elapsed_seconds($start_time, $end_time) . "\n";
-  print "\tSQL statements: " . scalar(@sql_stmts) . "\n";
-  my $n = 1;
-  foreach my $sql (@sql_stmts) {
-    #print "\t\tsql: $sql\n";
-    print "\t#$n: ";
-    $sql =~ / from (.*)/;
-    my $from_clause = $1;
-    my %tables;
-    my $table_order = 0;
-    foreach my $join_clause (split(/ join /, $from_clause)) {
-      $join_clause =~ /^(\w+)/;
-      my $table = $1;
-      $tables{$table} = $table_order unless exists $tables{$table};
-      ++$table_order;
+  return unless @ordered_activities;
+
+  print "\n", '=' x 80, "\n";
+  foreach my $activity (@ordered_activities) {
+    my $activity_desc = $activity . " [" . $request_url . "]";
+    print '-' x 80, "\n";
+    print elapsed_seconds($start_time_by_activity{$activity}, $end_time_by_activity{$activity}) . "s: $activity_desc\n";
+    my @sql_stmts = @{$sql_stmts_by_activity{$activity}};
+    print "\tSQL statements: " . scalar(@sql_stmts) . "\n";
+    my $n = 1;
+    foreach my $sql (@sql_stmts) {
+      print "\t#$n: ";
+      $sql =~ / from (.*)/;
+      my $from_clause = $1;
+      my %tables;
+      my $table_order = 0;
+      foreach my $join_clause (split(/ join /, $from_clause)) {
+        $join_clause =~ /^(\w+)/;
+        my $table = $1;
+        $tables{$table} = $table_order unless exists $tables{$table};
+        ++$table_order;
+      }
+      my @sorted_tables = sort { $tables{$a} <=> $tables{$b} } keys %tables;
+      print join(", ", @sorted_tables), "\n";
+      ++$n;
     }
-    my @sorted_tables = sort { $tables{$a} <=> $tables{$b} } keys %tables;
-    print join(", ", @sorted_tables), "\n";
-    ++$n;
   }
 }
 
