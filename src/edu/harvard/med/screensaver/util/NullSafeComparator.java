@@ -21,16 +21,27 @@ import java.util.Comparator;
  */
 public abstract class NullSafeComparator<T> implements Comparator<T>
 {
+  private boolean _nullsLast = false;
+
+  public NullSafeComparator()
+  {
+  }
+  
+  public NullSafeComparator(boolean nullsLast)
+  {
+    _nullsLast = nullsLast; 
+  }
+  
   final public int compare(T o1, T o2)
   {
     if (o1 == null) {
       if (o2 == null) {
         return 0;
       }
-      return -1;
+      return _nullsLast ? 1 : -1;
     }
     if (o2 == null) {
-      return 1;
+      return _nullsLast ? -1 : 1;
     }
     return doCompare(o1, o2);
   }

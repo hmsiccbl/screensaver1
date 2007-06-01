@@ -274,7 +274,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
     if (columnName.equals(SCREEN_RESULT)) {
       return new Comparator<Screen>() {
 
-        private NullSafeComparator<ScreenResult> _srComparator = new NullSafeComparator<ScreenResult>()
+        private NullSafeComparator<ScreenResult> _srComparator = new NullSafeComparator<ScreenResult>(true)
         {
           @Override
           protected int doCompare(ScreenResult sr1, ScreenResult sr2)
