@@ -71,7 +71,7 @@ public class Pair<F,S>
   public int hashCode()
   {
     final int PRIME = 31;
-    return PRIME * getFirst().hashCode() + getSecond().hashCode();
+    return PRIME * (_first == null ? 0 : _first.hashCode()) + (_second == null ? 0 : _second.hashCode()); 
   }
 
   @Override
@@ -85,7 +85,7 @@ public class Pair<F,S>
     }
     final Pair that = (Pair) object;
     return
-      getFirst().equals(that.getFirst()) &&
-      getSecond().equals(that.getSecond());
+    (_first == null ? that.getFirst() == null : _first.equals(that.getFirst())) &&
+    (_second == null ? that.getSecond() == null : _second.equals(that.getSecond()));
   }
 }

@@ -177,13 +177,13 @@ public class CherryPickRequestExporter
     Well sourceWell = labCherryPick.getSourceWell();
     Gene gene = sourceWell.getGene();
     Workbook2Utils.writeRow(sheet,
-                            iRow, 
+                            iRow,
+                            (labCherryPick.getAssayPlate() == null ? null : labCherryPick.getAssayPlate().getPlateOrdinal() + 1),
+                            (labCherryPick.getAssayPlateWellName() == null ? null : labCherryPick.getAssayPlateWellName()),
                             (gene == null ? null : gene.getEntrezgeneSymbol()),
                             (gene == null ? null : gene.getEntrezgeneId()),
                             (gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(), LIST_OF_VALUES_DELIMITER)),
                             (gene == null ? null : gene.getGeneName()),
-                            (labCherryPick.getAssayPlate() == null ? null : labCherryPick.getAssayPlate().getPlateOrdinal() + 1),
-                            (labCherryPick.getAssayPlateWellName() == null ? null : labCherryPick.getAssayPlateWellName()),
                             StringUtils.makeListString(CollectionUtils.
                                                        collect(sourceWell.getSilencingReagents(),
                                                                              new Transformer() 
@@ -227,7 +227,7 @@ public class CherryPickRequestExporter
     Well screenedWell = screenerCherryPick.getScreenedWell();
     Gene gene = screenedWell.getGene();
     Workbook2Utils.writeRow(sheet,
-                            iRow, 
+                            iRow,
                             (gene == null ? null : gene.getEntrezgeneSymbol()),
                             (gene == null ? null : gene.getEntrezgeneId()),
                             (gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(), 

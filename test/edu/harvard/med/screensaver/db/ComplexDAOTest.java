@@ -1042,7 +1042,7 @@ public class ComplexDAOTest extends AbstractSpringTest
         }
         ScreeningRoomUser collab1 = new ScreeningRoomUser(new Date(),
                                                           "Col",
-                                                          "Laborator",
+                                                          "Laborator1",
                                                           "collab1@hms.harvard.edu",
                                                           "",
                                                           "",
@@ -1053,7 +1053,7 @@ public class ComplexDAOTest extends AbstractSpringTest
                                                           false);
         ScreeningRoomUser collab2 = new ScreeningRoomUser(new Date(),
                                                           "Col",
-                                                          "Laborator",
+                                                          "Laborator2",
                                                           "collab2@hms.harvard.edu",
                                                           "",
                                                           "",
