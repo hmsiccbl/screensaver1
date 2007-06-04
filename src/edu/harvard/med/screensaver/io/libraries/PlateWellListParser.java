@@ -16,7 +16,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -61,74 +60,62 @@ public class PlateWellListParser
   }
 
   /**
-   * Parse and return the list of wells from the plate-well list.
+   * Parse and return the list of well keys from the plate-well list.
    * Helper method for {@link #findWells(String)}.
    * @param plateWellList the plate-well list
    * @throws IOException
    * @return the list of wells
    */
-  public PlateWellListParserResult lookupWellsFromPlateWellList(final String plateWellList) 
+  public PlateWellListParserResult parseWellsFromPlateWellList(String plateWellList)
   {
-    final PlateWellListParserResult result = new PlateWellListParserResult();
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        BufferedReader plateWellListReader = new BufferedReader(new StringReader(plateWellList));
-        try {
-          int lineNumber = 0;
-          for (
-            String line = plateWellListReader.readLine();
-            line != null;
-            line = plateWellListReader.readLine()) {
+    PlateWellListParserResult result = new PlateWellListParserResult();
+    BufferedReader plateWellListReader = new BufferedReader(new StringReader(plateWellList));
+    try {
+      int lineNumber = 0;
+      for (
+        String line = plateWellListReader.readLine();
+        line != null;
+        line = plateWellListReader.readLine()) {
 
-            ++lineNumber;
-            
-            // skip lines that say "Plate Well"
-            Matcher matcher = _plateWellHeaderLinePattern.matcher(line);
-            if (matcher.matches()) {
-              continue;
-            }
+        ++lineNumber;
 
-            // separate initial plate and well with a space if necessary
-            line = splitInitialPlateWell(line);
-
-            // split the line into tokens; should be one plate, then one or more wells
-            String [] tokens = line.split("[\\s;,]+");
-            if (tokens.length == 0) {
-              continue;
-            }
-
-            Integer plateNumber = parsePlateNumber(tokens[0]);
-            if (plateNumber == null) {
-              result.addSyntaxError(lineNumber, "invalid plate number " + tokens[0]);
-              continue;
-            }
-            for (int i = 1; i < tokens.length; i ++) {
-              String wellName = parseWellName(tokens[i]);
-              if (wellName == null) {
-                result.addSyntaxError(lineNumber, "invalid well name " + tokens[i]);
-                continue;
-              }
-              Well well = lookupWell(plateNumber, wellName);
-              if (well == null) {
-                result.addWellNotFound(new WellKey(plateNumber, wellName));
-                continue;
-              }
-              else {
-                result.addWell(well);
-              }
-            }
-          }
+        // skip lines that say "Plate Well"
+        Matcher matcher = _plateWellHeaderLinePattern.matcher(line);
+        if (matcher.matches()) {
+          continue;
         }
-        catch (IOException e) {
-          result.addSyntaxError(0, "internal error");
+
+        // separate initial plate and well with a space if necessary
+        line = splitInitialPlateWell(line);
+
+        // split the line into tokens; should be one plate, then one or more wells
+        String [] tokens = line.split("[\\s;,]+");
+        if (tokens.length == 0) {
+          continue;
+        }
+
+        Integer plateNumber = parsePlateNumber(tokens[0]);
+        if (plateNumber == null) {
+          result.addError(lineNumber, "invalid plate number " + tokens[0]);
+          continue;
+        }
+        for (int i = 1; i < tokens.length; i ++) {
+          String wellName = parseWellName(tokens[i]);
+          if (wellName == null) {
+            result.addError(lineNumber, "invalid well name " + tokens[i] + " (plate " + plateNumber + ")");
+            continue;
+          }
+          result.addParsedWellKey(new WellKey(plateNumber, wellName));
         }
       }
-    });
+    }
+    catch (IOException e) {
+      result.addError(0, "internal error: could not read plateWellList");
+    }
     return result;
   }
   
+
   /**
    * Parse and return the well for the plate number and well name.
    * Helper method for {@link #findWell(Integer, String)}.
@@ -143,35 +130,12 @@ public class PlateWellListParser
     if (plateNumber == null || wellName == null) {
       return null;
     }
-    return lookupWell(plateNumber, wellName);
+    return _librariesDao.findWell(new WellKey(plateNumber, wellName));
   }
 
   
   // private methods
 
-  /**
-   * Lookup the well from the genericEntityDao by plate number and well name.
-   * @param plateNumber the parsed plate number
-   * @param wellName the parse well name
-   * @return
-   */
-  private Well lookupWell(final Integer plateNumber, final String wellName) 
-  {
-    WellKey wellKey = new WellKey(plateNumber, wellName);
-    Well well = _librariesDao.findWell(wellKey); 
-    if (well != null) {
-      // force initialization of persistent collections needed by search result viewer
-      _dao.need(well,
-                "hbnSilencingReagents.gene.genbankAccessionNumbers",
-                "hbnCompounds",
-                "hbnCompounds.compoundNames",
-                "hbnCompounds.pubchemCids",
-                "hbnCompounds.nscNumbers",
-                "hbnCompounds.casNumbers");
-    }
-    return well;
-  }
-  
   /**
    * Insert a space between the first plate number and well name if there is no
    * space there already.

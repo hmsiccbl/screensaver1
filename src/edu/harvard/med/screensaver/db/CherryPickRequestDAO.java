@@ -9,8 +9,10 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.screendb.ScreenDBSynchronizer;
@@ -19,6 +21,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 
@@ -145,10 +148,25 @@ public class CherryPickRequestDAO extends AbstractDAO
   }
 
   @SuppressWarnings("unchecked")
-  public Set<LabCherryPick> findLabCherryPicksForWell(Well well)
+  public Set<Pair<LabCherryPick,BigDecimal>> findLabCherryPicksWithVolumeForWell(Well well)
   {
-    return new HashSet<LabCherryPick>(
-      getHibernateTemplate().find("from LabCherryPick where sourceWell = ?", well));
+    List<LabCherryPick> labCherryPicks = 
+      _dao.findEntitiesByProperty(LabCherryPick.class, 
+                                  "sourceWell", 
+                                  well, 
+                                  false, 
+                                  "sourceWell", 
+                                  "cherryPickRequest", // TODO: causes cherryPickRequest.screen.{...} to be loaded
+                                  "assayPlate");
+    HashSet<Pair<LabCherryPick,BigDecimal>> result = new HashSet<Pair<LabCherryPick,BigDecimal>>(labCherryPicks.size());
+    for (LabCherryPick labCherryPick : labCherryPicks) {
+      result.add(new Pair<LabCherryPick,BigDecimal>(
+        labCherryPick, 
+        // TODO: this is want we'd like to optimize, to avoid loading the entire cherryPickRequest, which currently causes the screen (and on, on) to be loaded;
+        // only becomes a big problem once we have lots of cherry pick requests picking the same well(s)
+        labCherryPick.getCherryPickRequest().getMicroliterTransferVolumePerWellApproved()));
+    }
+    return result;
   }
 
   @SuppressWarnings("unchecked")

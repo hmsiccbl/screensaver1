@@ -14,7 +14,7 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
-import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
@@ -138,11 +138,11 @@ public interface ScreensController
 
   @UIControllerMethod
   public String addCherryPicksForWells(CherryPickRequest cherryPickRequest,
-                                             Set<Well> labCherryPickWells);
+                                       Set<WellKey> labCherryPickWells);
 
   @UIControllerMethod
   public String addCherryPicksForPoolWells(CherryPickRequest cherryPickRequest,
-                                           Set<Well> labCherryPickWells);
+                                           Set<WellKey> labCherryPickWells);
 
   @UIControllerMethod
   public String deleteAllScreenerCherryPicks(CherryPickRequest cherryPickRequest);

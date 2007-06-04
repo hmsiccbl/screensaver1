@@ -755,8 +755,8 @@ public class ComplexDAOTest extends AbstractSpringTest
         assertEquals("lab cherry picks exist before delete",
                      2, 
                      cherryPickRequest.getLabCherryPicks().size());
-        assertEquals("lab cherry picks exist in well1 before delete", 1, cherryPickRequestDao.findLabCherryPicksForWell(librariesDao.findWell(new WellKey(3, "A01"))).size());
-        assertEquals("lab cherry picks exist in well2 before delete", 1, cherryPickRequestDao.findLabCherryPicksForWell(librariesDao.findWell(new WellKey(4, "P24"))).size());
+        assertEquals("lab cherry picks exist in well1 before delete", 1, cherryPickRequestDao.findLabCherryPicksWithVolumeForWell(librariesDao.findWell(new WellKey(3, "A01"))).size());
+        assertEquals("lab cherry picks exist in well2 before delete", 1, cherryPickRequestDao.findLabCherryPicksWithVolumeForWell(librariesDao.findWell(new WellKey(4, "P24"))).size());
         Set<LabCherryPick> cherryPicksToDelete = new HashSet<LabCherryPick>(cherryPickRequest.getLabCherryPicks());
         for (LabCherryPick cherryPick : cherryPicksToDelete) {
           cherryPickRequestDao.deleteLabCherryPick(cherryPick);
@@ -771,8 +771,8 @@ public class ComplexDAOTest extends AbstractSpringTest
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
         assertEquals("lab cherry picks deleted from cherry pick request", 0, cherryPickRequest.getLabCherryPicks().size());
-        assertEquals("lab cherry picks deleted from well1", 0, cherryPickRequestDao.findLabCherryPicksForWell(librariesDao.findWell(new WellKey(3, "A01"))).size());
-        assertEquals("lab cherry picks deleted from well2", 0, cherryPickRequestDao.findLabCherryPicksForWell(librariesDao.findWell(new WellKey(4, "P24"))).size());
+        assertEquals("lab cherry picks deleted from well1", 0, cherryPickRequestDao.findLabCherryPicksWithVolumeForWell(librariesDao.findWell(new WellKey(3, "A01"))).size());
+        assertEquals("lab cherry picks deleted from well2", 0, cherryPickRequestDao.findLabCherryPicksWithVolumeForWell(librariesDao.findWell(new WellKey(4, "P24"))).size());
       }
     });
   }

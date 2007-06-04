@@ -239,47 +239,56 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
    * @see edu.harvard.med.screensaver.ui.control.LibrariesController#findWell(java.lang.String, java.lang.String)
    */
   @UIControllerMethod
-  public String findWell(String plateNumber, String wellName)
+  public String findWell(final String plateNumber, final String wellName)
   {
     logUserActivity("findWell " + plateNumber + ":" + wellName);
-    Well well = _plateWellListParser.lookupWell(plateNumber, wellName);
-    if (well == null) {
-      showMessage("libraries.noSuchWell", plateNumber, wellName);
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    return viewWell(well, null);
+    return viewWell(_plateWellListParser.lookupWell(plateNumber, wellName), null);
   }
   
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.LibrariesController#findWells(java.lang.String)
    */
   @UIControllerMethod
-  public String findWells(String plateWellList)
+  public String findWells(final String plateWellList)
   {
     logUserActivity(FIND_WELLS);
-    PlateWellListParserResult result = _plateWellListParser.lookupWellsFromPlateWellList(plateWellList);
-    if (result.getFatalErrors().size() > 0) {
-      showMessage("libraries.unexpectedErrorReadingPlateWellList", "searchResults");
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    
-    // display errors before proceeding with successfully parsed wells
-    for (Pair<Integer,String> error : result.getSyntaxErrors()) {
-      showMessage("libraries.plateWellListParseError", error.getSecond());
-    }
-    for (WellKey wellKey : result.getWellsNotFound()) {
-      showMessage("libraries.noSuchWell", wellKey.getPlateNumber(), wellKey.getWellName());
-    }
-    
-    if (result.getWells().size() == 1) {
-      return viewWell(result.getWells().first(), null);
-    }
-    else {
-      WellSearchResults searchResults =
-        new WellSearchResults(new ArrayList<Well>(result.getWells()),
-                              this);
-      return viewWellSearchResults(searchResults);
-    }
+    final String[] result = new String[1];
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        PlateWellListParserResult parseResult = _plateWellListParser.parseWellsFromPlateWellList(plateWellList);
+        if (parseResult.getParsedWellKeys().size() == 1) {
+          result[0] = viewWell(parseResult.getParsedWellKeys().first(), null);
+          return;
+        }
+
+        // display parse errors before proceeding with successfully parsed wells
+        for (Pair<Integer,String> error : parseResult.getErrors()) {
+          showMessage("libraries.plateWellListParseError", error.getSecond());
+        }
+
+        List<Well> foundWells = new ArrayList<Well>();
+        for (WellKey wellKey : parseResult.getParsedWellKeys()) {
+          Well well = _dao.findEntityById(Well.class,
+                                          wellKey.toString(),
+                                          true,
+                                          "hbnLibrary",
+                                          "hbnSilencingReagents.gene",
+                                          "hbnCompounds");
+          if (well == null) {
+            showMessage("libraries.noSuchWell", wellKey.getPlateNumber(), wellKey.getWellName());
+          }
+          else {
+            foundWells.add(well);
+          }
+        }
+        WellSearchResults searchResults =
+          new WellSearchResults(foundWells, LibrariesControllerImpl.this);
+        result[0] = viewWellSearchResults(searchResults);
+      }
+    });
+    return result[0];
   }
   
   /* (non-Javadoc)
@@ -376,38 +385,35 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String viewWell()
   {
-    String wellId = (String) getRequestParameter("wellId");
-    Well well = _dao.findEntityById(Well.class, 
-                                    wellId,
-                                    true);
-    return viewWell(well, null);
+    WellKey wellKey = new WellKey((String) getRequestParameter("wellId"));
+    return viewWell(wellKey, null);
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#viewWell(edu.harvard.med.screensaver.model.libraries.Well, edu.harvard.med.screensaver.ui.searchresults.WellSearchResults)
-   */
-  @UIControllerMethod
-  /**
-   * @param wellSearchResults <code>null</code> if well was not found within
-   *          the context of a search result
-   */
-  public String viewWell(final Well wellIn, WellSearchResults wellSearchResults)
+  public String viewWell(Well well, WellSearchResults wellSearchResults)
   {
-    logUserActivity(VIEW_WELL + " " + wellIn);
-    // TODO: we should consider replicating this null-condition handling in our
-    // other view*() methods (and in all controllers)
-    if (wellIn == null) {
-      showMessage("libraries.noSuchWell", wellIn.getPlateNumber(), wellIn.getWellName());
+    if (well == null) {
+      showMessage("libraries.noSuchWell", well.getPlateNumber(), well.getWellName());
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    else {
-      _wellViewer.setWellSearchResults(wellSearchResults);
-      
-      _dao.doInTransaction(new DAOTransaction() {
-        public void runTransaction()
-        {
-          // TODO: try outer join HQL query instead of iteration, for performance improvement
-          Well well = _dao.reloadEntity(wellIn, 
+    return viewWell(well.getWellKey(), wellSearchResults);
+  }
+
+    /**
+     * @param wellSearchResults <code>null</code> if well was not found within
+     *          the context of a search result
+     */
+    @UIControllerMethod
+  public String viewWell(final WellKey wellKey, WellSearchResults wellSearchResults)
+  {
+    logUserActivity(VIEW_WELL + " " + wellKey);
+    _wellViewer.setWellSearchResults(wellSearchResults);
+    
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        // TODO: try outer join HQL query instead of iteration, for performance improvement
+        Well well = _dao.findEntityById(Well.class,
+                                        wellKey.toString(),
                                         true,
                                         "hbnLibrary",
                                         "hbnSilencingReagents.gene.genbankAccessionNumbers",
@@ -415,13 +421,12 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
                                         "hbnCompounds.pubchemCids",
                                         "hbnCompounds.nscNumbers",
                                         "hbnCompounds.casNumbers");
-          _wellViewer.setWell(well);
-          _wellViewer.setWellNameValueTable(new WellNameValueTable(LibrariesControllerImpl.this, well));
-        }
-      });
-
-      return VIEW_WELL;
-    }
+        _wellViewer.setWell(well);
+        _wellViewer.setWellNameValueTable(new WellNameValueTable(LibrariesControllerImpl.this, well));
+      }
+    });
+    
+    return VIEW_WELL;
   }
 
   /* (non-Javadoc)

@@ -630,34 +630,6 @@ public abstract class CherryPickRequest extends AbstractEntity
     return false;
   }
 
-  /**
-   * Get whether the lab cherry picks have been at least partially allocated. If
-   * at least one lab cherry pick has been allocated and at least one has not
-   * been allocated, the cherry pick request is considered partially allocated.
-   * 
-   * @motivation to warn the user that not all cherry picks could be fulfilled (a
-   *             cherry pick request that is only partially allocated does not
-   *             impact subsequent workflow options)
-   */
-  @DerivedEntityProperty
-  public boolean isOnlyPartiallyAllocated()
-  {
-    boolean atLeastOneIsAllocated = false;
-    boolean atLeastOneIsNotAllocated = false;
-    for (LabCherryPick labCherryPick : _labCherryPicks) {
-      if (labCherryPick.isAllocated()) {
-        atLeastOneIsAllocated = true;
-      }
-      else {
-        atLeastOneIsNotAllocated = true;
-      }
-      if (atLeastOneIsAllocated && atLeastOneIsNotAllocated) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   @DerivedEntityProperty
   public boolean isMapped()
   {

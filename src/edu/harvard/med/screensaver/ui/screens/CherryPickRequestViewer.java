@@ -598,32 +598,26 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   
   public String addCherryPicks()
   {
-    PlateWellListParserResult result = _plateWellListParser.lookupWellsFromPlateWellList(_cherryPicksInput);
-    // TODO: handle errors properly
-    if (result.getFatalErrors().size() > 0 ||
-      result.getSyntaxErrors().size() > 0 ||
-      result.getWellsNotFound().size() > 0 ||
-      result.getWells().size() == 0) {
+    PlateWellListParserResult result = _plateWellListParser.parseWellsFromPlateWellList(_cherryPicksInput);
+    // TODO: report errors
+    if (result.getErrors().size() > 0) {
       showMessage("cherryPicks.parseError");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     return _screensController.addCherryPicksForWells(_cherryPickRequest,
-                                                     result.getWells());
+                                                     result.getParsedWellKeys());
   }
   
   public String addPoolCherryPicks()
   {
-    PlateWellListParserResult result = _plateWellListParser.lookupWellsFromPlateWellList(_cherryPicksInput);
-    // TODO: handle errors properly
-    if (result.getFatalErrors().size() > 0 ||
-      result.getSyntaxErrors().size() > 0 ||
-      result.getWellsNotFound().size() > 0 ||
-      result.getWells().size() == 0) {
+    PlateWellListParserResult result = _plateWellListParser.parseWellsFromPlateWellList(_cherryPicksInput);
+    // TODO: report errors
+    if (result.getErrors().size() > 0) {
       showMessage("cherryPicks.parseError");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     return _screensController.addCherryPicksForPoolWells(_cherryPickRequest,
-                                                         result.getWells());
+                                                         result.getParsedWellKeys());
   }
   
   public String deleteCherryPickRequest()

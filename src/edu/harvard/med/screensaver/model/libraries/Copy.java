@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.EntityIdProperty;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 
@@ -96,6 +97,7 @@ public class Copy extends AbstractEntity
    * @return the library
    */
   @ToOneRelationship(nullable=false, inverseProperty="copies")
+  @EntityIdProperty
   public Library getLibrary()
   {
     return _library;

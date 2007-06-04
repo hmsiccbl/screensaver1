@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -32,6 +32,7 @@ import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransferStatus;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
@@ -94,7 +95,12 @@ public class CherryPickRequestAllocator
     {
       public void runTransaction() 
       {
-        CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
+        // TODO: we really want to call reattachEntity(), to warn user of concurrent modification,
+        // but we get LazyInitEx, apparently due to Library being a Hib proxy and not getting reattached to current session 
+        CherryPickRequest cherryPickRequest = (CherryPickRequest) 
+        _dao.reloadEntity(cherryPickRequestIn,
+                          false,
+                          "labCherryPicks.sourceWell.hbnLibrary.hbnCopies.hbnCopyInfos");
         validateAllocationBusinessRules(cherryPickRequest);
         for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
           if (!doAllocate(labCherryPick)) {
@@ -183,9 +189,8 @@ public class CherryPickRequestAllocator
 
   // private methods
   
-  private Copy selectCopy(Well wellIn, BigDecimal volumeNeeded)
+  private Copy selectCopy(Well well, BigDecimal volumeNeeded)
   {
-    Well well = _librariesDao.findWell(wellIn.getWellKey()); // necessary, since LabCherryPick.sourceWell is not cascaded
     List<Copy> copies = new ArrayList<Copy>(well.getLibrary().getCopies());
     if (copies.size() == 0) {
       throw new DataModelViolationException("library " + well.getLibrary() + " has no Copies, so cannot allocate liquid");
@@ -204,14 +209,13 @@ public class CherryPickRequestAllocator
   private BigDecimal calculateRemainingVolumeInCopyWell(Copy copy, Well well)
   {
     BigDecimal startingVolume = getStartingVolumeInCopyWell(copy, well);
-    Set<LabCherryPick> existingLabCherryPicksForWell = _cherryPickRequestDao.findLabCherryPicksForWell(well);
-
+    Set<Pair<LabCherryPick,BigDecimal>> existingLabCherryPicksForWell = _cherryPickRequestDao.findLabCherryPicksWithVolumeForWell(well);
     BigDecimal remainingVolume = startingVolume;
-    for (LabCherryPick existingLabCherryPick : existingLabCherryPicksForWell) {
+    for (Pair<LabCherryPick,BigDecimal> existingLabCherryPickWithVolume : existingLabCherryPicksForWell) {
+      LabCherryPick existingLabCherryPick = existingLabCherryPickWithVolume.getFirst();
       if (existingLabCherryPick.isAllocated()) { // implicitly ignores a cherry pick if it's in the process of being allocated (by caller)
         if (existingLabCherryPick.getSourceCopy().equals(copy)) {
-          CherryPickRequest otherCherryPickRequest  = existingLabCherryPick.getCherryPickRequest();
-          BigDecimal volumeUsed = otherCherryPickRequest.getMicroliterTransferVolumePerWellApproved();
+          BigDecimal volumeUsed = existingLabCherryPickWithVolume.getSecond();
           if (volumeUsed != null) {
             remainingVolume = remainingVolume.subtract(volumeUsed);
             if (remainingVolume.compareTo(BigDecimal.ZERO) <= 0) {

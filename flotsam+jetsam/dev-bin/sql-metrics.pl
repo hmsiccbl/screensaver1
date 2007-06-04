@@ -14,6 +14,8 @@
 
 use strict;
 
+$| = 1;
+
 my $state = "in_request";
 my $request_url;
 my $activity;

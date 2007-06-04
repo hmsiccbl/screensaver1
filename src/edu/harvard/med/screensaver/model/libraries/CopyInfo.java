@@ -405,6 +405,7 @@ public class CopyInfo extends AbstractEntity
    * @hibernate.set
    *   cascade="save-update"
    *   inverse="true"
+   *   lazy="true"
    * @hibernate.collection-key
    *   column="copy_info_id"
    * @hibernate.collection-one-to-many

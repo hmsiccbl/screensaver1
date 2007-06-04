@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,10 +25,11 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class WellKey implements Comparable
+public class WellKey implements Comparable, Serializable
 {
   // static members
 
+  private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(WellKey.class);
 
   // TODO: merge with LibrariesController._wellNamePattern

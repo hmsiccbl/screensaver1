@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.util.Pair;
 
@@ -30,10 +29,8 @@ public class PlateWellListParserResult
   
   // instance data members
   
-  private List<String> _fatalErrors = new ArrayList<String>();
-  private List<Pair<Integer,String>> _syntaxErrors = new ArrayList<Pair<Integer,String>>();
-  private SortedSet<WellKey> _notFound = new TreeSet<WellKey>();
-  private SortedSet<Well> _found = new TreeSet<Well>();
+  private List<Pair<Integer,String>> _errors = new ArrayList<Pair<Integer,String>>();
+  private SortedSet<WellKey> _parsedWellKeys = new TreeSet<WellKey>();
 
   
   // public constructors and methods
@@ -42,44 +39,41 @@ public class PlateWellListParserResult
   {
   }
   
-  public void addWellNotFound(WellKey wellKey) 
+  public void addParsedWellKey(WellKey wellKey)
   {
-    _notFound.add(wellKey);
+    _parsedWellKeys.add(wellKey);
   }
   
-  public void addWell(Well well)
+  public void addError(int line, String error)
   {
-    _found.add(well);
+    _errors.add(new Pair<Integer,String>(line, error));
   }
   
-  public void addFatalError(String error)
+  /**
+   * Return true if either syntax or fatal errors were found. Specified wells
+   * that do not exist in the database are not considered errors (see
+   * {@link #getWellsNotFound()}).
+   * 
+   * @return true if errors were found while parsing and/or looking up wells in
+   *         the database.
+   */
+  public boolean hasErrors()
   {
-    _fatalErrors.add(error);
-  }
-  
-  public void addSyntaxError(int line, String error)
-  {
-    _syntaxErrors.add(new Pair<Integer,String>(line, error));
-  }
-  
-  public List<String> getFatalErrors()
-  {
-    return _fatalErrors;
-  }
+    return _errors.size() > 0; 
+  }    
 
-  public List<Pair<Integer,String>> getSyntaxErrors()
+  public List<Pair<Integer,String>> getErrors()
   {
-    return _syntaxErrors;
+    return _errors;
   }
   
-  public SortedSet<WellKey> getWellsNotFound()
+  /**
+   * Get the list of well keys parsed from the input (whether or not they exist
+   * in the database).
+   */
+  public SortedSet<WellKey> getParsedWellKeys()
   {
-    return _notFound;
-  }    
-   
-  public SortedSet<Well> getWells()
-  {
-    return _found;
-  }    
+    return _parsedWellKeys; 
+  }
 }
 

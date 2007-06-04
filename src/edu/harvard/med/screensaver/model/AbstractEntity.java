@@ -268,9 +268,10 @@ public abstract class AbstractEntity implements Serializable
     if (object == null) {
       return false;
     }
-    if (! getClass().equals(object.getClass())) {
-      return false;
-    }
+    // can't do this now that we're using CGLIB2 proxies for (some of) our Hibernate entities...two proxied instances of the same entity can have different classes, since the proxy classes are generated dynamically! 
+//    if (! getClass().equals(object.getClass())) {
+//      return false;
+//    }
     AbstractEntity that = (AbstractEntity) object;
     return getBusinessKey().equals(that.getBusinessKey());
   }
