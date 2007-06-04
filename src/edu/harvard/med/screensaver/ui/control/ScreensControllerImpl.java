@@ -1119,12 +1119,11 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                                            dateOfLiquidTransfer,
                                            comments,
                                            true);
-      return viewCherryPickRequest(cherryPickRequestIn);
     }
     catch (DataAccessException e) {
       showMessage("databaseOperationFailed", e.getMessage());
     }
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return viewCherryPickRequest(cherryPickRequestIn);
   }
 
   @UIControllerMethod
@@ -1149,11 +1148,19 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
           newCherryPickRequest.setRandomizedAssayPlateLayout(cherryPickRequest.isRandomizedAssayPlateLayout());
           newCherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(new HashSet<Integer>(cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate()));
           newCherryPickRequest.setRequestedBy(cherryPickRequest.getRequestedBy());
-          for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
-            if (!labCherryPick.isAllocated() && !labCherryPick.isCanceled()) {
-              ScreenerCherryPick newScreenerCherryPick = new ScreenerCherryPick(newCherryPickRequest,
-                                                                                labCherryPick.getScreenerCherryPick().getScreenedWell());
-              new LabCherryPick(newScreenerCherryPick, labCherryPick.getSourceWell());
+          // note: we can only instantiate one new ScreenerCherryPick per *set*
+          // of LabCherryPicks from the same screenedWell, otherwise we'll
+          // (approriately) get a DuplicateEntityException
+          for (ScreenerCherryPick screenerCherryPick : cherryPickRequest.getScreenerCherryPicks()) {
+            ScreenerCherryPick newScreenerCherryPick = null;
+            for (LabCherryPick labCherryPick : screenerCherryPick.getLabCherryPicks()) {
+              if (!labCherryPick.isAllocated() && !labCherryPick.isCanceled()) {
+                if (newScreenerCherryPick == null) {
+                  newScreenerCherryPick = new ScreenerCherryPick(newCherryPickRequest,
+                                                                 labCherryPick.getScreenerCherryPick().getScreenedWell());
+                }
+                new LabCherryPick(newScreenerCherryPick, labCherryPick.getSourceWell());
+              }
             }
           }
           _dao.persistEntity(newCherryPickRequest);
@@ -1177,7 +1184,6 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   {
     // create new assay plates, duplicating plate name, lab cherry picks with same layout but new copy selection, incrementing attempt ordinal
     logUserActivity("recordFailureOfAssayPlates for " + selectedAssayPlates);
-
     try {
       _dao.doInTransaction(new DAOTransaction() 
       {
@@ -1206,7 +1212,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                                                                  labCherryPick.getSourceWell());
               _dao.persistEntity(newLabCherryPick);
               if (!_cherryPickRequestAllocator.allocate(newLabCherryPick)) {
-                someCherryPicksUnfulfillable  = true;
+                someCherryPicksUnfulfillable = true;
               } else {
                 newLabCherryPick.setMapped(newAssayPlate,
                                            labCherryPick.getAssayPlateRow(),
@@ -1222,14 +1228,8 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     }
     catch (DataAccessException e) {
       showMessage("databaseOperationFailed", e.getMessage());
-      return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    if (selectedAssayPlates.size() == 0) {
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    else {
-      return viewCherryPickRequest(selectedAssayPlates.iterator().next().getCherryPickRequest());
-    }
+    return viewCherryPickRequest(cherryPickRequestIn);
   }
 
 

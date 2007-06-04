@@ -95,12 +95,13 @@ public class CherryPickRequestAllocator
     {
       public void runTransaction() 
       {
-        // TODO: we really want to call reattachEntity(), to warn user of concurrent modification,
-        // but we get LazyInitEx, apparently due to Library being a Hib proxy and not getting reattached to current session 
-        CherryPickRequest cherryPickRequest = (CherryPickRequest) 
-        _dao.reloadEntity(cherryPickRequestIn,
-                          false,
-                          "labCherryPicks.sourceWell.hbnLibrary.hbnCopies.hbnCopyInfos");
+//        // TODO: we really want to call reattachEntity(), to warn user of concurrent modification,
+//        // but we get LazyInitEx, due to labCherryPicks.sourceWell not being cascaded
+//        CherryPickRequest cherryPickRequest = (CherryPickRequest) 
+//        _dao.reloadEntity(cherryPickRequestIn,
+//                          false,
+//                          "labCherryPicks.sourceWell.hbnLibrary.hbnCopies.hbnCopyInfos");
+      CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
         validateAllocationBusinessRules(cherryPickRequest);
         for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
           if (!doAllocate(labCherryPick)) {
@@ -258,7 +259,11 @@ public class CherryPickRequestAllocator
 
   private boolean doAllocate(LabCherryPick labCherryPick)
   {
-    Copy copy = selectCopy(labCherryPick.getSourceWell(),
+    // note: we reload sourceWell, since lack of 'update' cascade for
+    // labCherryPick.sourceWell will prevent sourceWell (or further transitive
+    // relationships, such as libraries.copies) from being reattached in calling code
+    Well sourceWell = _dao.reloadEntity(labCherryPick.getSourceWell(), true, "hbnLibrary.hbnCopies.hbnCopyInfos");
+    Copy copy = selectCopy(sourceWell,
                            labCherryPick.getCherryPickRequest().getMicroliterTransferVolumePerWellApproved());
     if (copy == null) {
       return false;

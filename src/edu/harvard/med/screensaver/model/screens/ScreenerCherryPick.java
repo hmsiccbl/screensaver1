@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -71,7 +72,10 @@ public class ScreenerCherryPick extends AbstractEntity
 
     _cherryPickRequest = cherryPickRequest;
     _screenedWell = screenedWell;
-    _cherryPickRequest.getScreenerCherryPicks().add(this);
+    boolean added = _cherryPickRequest.getScreenerCherryPicks().add(this);
+    if (!added) {
+      throw new DuplicateEntityException(cherryPickRequest, this);
+    }
   }
 
   @Override
