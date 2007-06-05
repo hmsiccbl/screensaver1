@@ -40,16 +40,16 @@
 
 				<f:facet name="closedContent">
 					<t:panelGrid columns="1">
-						<t:outputText value="#{screenResultViewer.screenResult.screen.screenNumber}: \"#{screenResultViewer.screenResult.screen.title}\""
+						<t:outputText value="#{screenViewer.screen.screenNumber}: \"#{screenViewer.screen.title}\""
 							styleClass="dataText" />
 						<t:div>
 							<t:outputText value="Lab:" styleClass="label"/>
-							<t:commandLink value="#{screenResultViewer.screenResult.screen.labHead.labName}"
+							<t:commandLink value="#{screenViewer.screen.labHead.labName}"
 								action="#{screenViewer.viewLabHead}"
 								styleClass="dataText entityLink" />
 							<t:outputText value="&nbsp;&nbsp;Screener:" styleClass="label" escape="false"/>
 							<t:commandLink
-								value="#{screenResultViewer.screenResult.screen.leadScreener.fullNameLastFirst}"
+								value="#{screenViewer.screen.leadScreener.fullNameLastFirst}"
 								action="#{screenViewer.viewLeadScreener}"
 								styleClass="dataText entityLink" />
 						</t:div>
