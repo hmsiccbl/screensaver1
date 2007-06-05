@@ -141,7 +141,8 @@
 			</t:collapsiblePanel>
 
 			<t:panelGrid columns="1"
-				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted && !(screenResultViewer.isPanelCollapsedMap['dataHeadersTable'] && screenResultViewer.isPanelCollapsedMap['dataTable'])}">
+				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted && !(screenResultViewer.isPanelCollapsedMap['dataHeadersTable'] && screenResultViewer.isPanelCollapsedMap['dataTable'])}"
+				title="Select the data headers to display in the Data Headers and Data tables below">
 				<t:outputLabel for="dataHeadersList"
 					value="Show selected data headers:" styleClass="label" />
 				<t:selectManyCheckbox id="dataHeadersList" layout="pageDirection" layoutWidth="6" 
@@ -155,10 +156,12 @@
 				<t:panelGroup>
 					<t:commandButton id="updateDataHeadersButton" forceId="true"
 						value="Update" action="#{screenResultViewer.updateDataHeaders}"
-						styleClass="command" />
+						styleClass="command"
+						title="Update the data headers selection" />
 					<t:commandButton id="allDataHeadersButton" value="All"
 						action="#{screenResultViewer.showAllDataHeaders}"
-						styleClass="command" />
+						styleClass="command"
+						title="Select all of the data headers" />
 				</t:panelGroup>
 			</t:panelGrid>
 
@@ -185,7 +188,7 @@
 						<f:facet name="header">
 							<t:outputText value="Property" />
 						</f:facet>
-						<t:outputText value="#{row.rowLabel}" escape="false" />
+						<t:outputText value="#{row.rowLabel}" escape="false" title="#{row.rowTitle}" />
 					</t:column>
 					<t:columns value="#{screenResultViewer.dataHeadersColumnModel}"
 						var="columnName" styleClass="column">

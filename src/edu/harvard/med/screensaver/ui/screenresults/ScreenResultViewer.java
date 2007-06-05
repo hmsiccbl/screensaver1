@@ -69,13 +69,13 @@ public class ScreenResultViewer extends AbstractBackingBean
   private static final DataModel EMPTY_RAW_DATA_MODEL = new ListDataModel(new ArrayList<Map<String,String>>());
   private static final List<String> DATA_TABLE_FIXED_COLUMN_HEADERS = Arrays.asList("Plate", "Well", "Type");
   private static final DataHeaderRowDefinition[] DATA_HEADER_ATTRIBUTES = new DataHeaderRowDefinition[] {
-    new DataHeaderRowDefinition("description", "Description"),
-    new DataHeaderRowDefinition("replicateOrdinal", "Replicate Number"),
-    new DataHeaderRowDefinition("assayReadoutType", "Assay Readout Type"),
-    new DataHeaderRowDefinition("timePoint", "Time Point"),
-    new DataHeaderRowDefinition("derived", "Derived"),
-    new DataHeaderRowDefinition("howDerived", "How Derived"),
-    new DataHeaderRowDefinition("typesDerivedFrom", "Types Derived From") 
+    new DataHeaderRowDefinition("description", "Description", "A description of the data header"),
+    new DataHeaderRowDefinition("replicateOrdinal", "Replicate Number", "Which replicate this data header refers to"),
+    new DataHeaderRowDefinition("assayReadoutType", "Assay Readout Type", "The type of readout used to calculate these values"),
+    new DataHeaderRowDefinition("timePoint", "Time Point", "The time point the readout was taken"),
+    new DataHeaderRowDefinition("derived", "Derived", "True when this column is derived from other data headers"),
+    new DataHeaderRowDefinition("howDerived", "How Derived", "How this column was derived from other data headers"),
+    new DataHeaderRowDefinition("typesDerivedFrom", "Types Derived From", "The data headers from which this column was derived") 
     { 
       @Override
       public String formatValue(ResultValueType rvt)
@@ -90,15 +90,15 @@ public class ScreenResultViewer extends AbstractBackingBean
         return typesDerivedFromText.toString();
       }
     },
-    new DataHeaderRowDefinition("activityIndicator", "Positive Indicator"),
-    new DataHeaderRowDefinition("activityIndicatorType", "Positive Indicator Type"),
-    new DataHeaderRowDefinition("indicatorDirection", "Indicator Direction"),
-    new DataHeaderRowDefinition("indicatorCutoff", "Indicator Cutoff"),
-    new DataHeaderRowDefinition("followUpData", "Follow Up Data"),
-    new DataHeaderRowDefinition("assayPhenotype", "Assay Phenotype"),
-    new DataHeaderRowDefinition("comments", "Comments"),
-    new DataHeaderRowDefinition("hits", "Hits"),
-    new DataHeaderRowDefinition("hitRatio", "Hit %")
+    new DataHeaderRowDefinition("activityIndicator", "Positive Indicator", "True if this data header is used to indicate hits"),
+    new DataHeaderRowDefinition("activityIndicatorType", "Positive Indicator Type", "'Numerical', 'Boolean', or 'Partition'"),
+    new DataHeaderRowDefinition("indicatorDirection", "Indicator Direction", "For numerical indicators, whether high or low values are hits"),
+    new DataHeaderRowDefinition("indicatorCutoff", "Indicator Cutoff", "The numerical score demarking hits from non-hits"),
+    new DataHeaderRowDefinition("followUpData", "Follow Up Data", "Primary or follow up screen data"),
+    new DataHeaderRowDefinition("assayPhenotype", "Assay Phenotype", "The phenotype being tested for"),
+    new DataHeaderRowDefinition("comments", "Comments", "Data header comments"),
+    new DataHeaderRowDefinition("hits", "Hits", "The number of hits, if this is a Positive Indicator"),
+    new DataHeaderRowDefinition("hitRatio", "Hit %", "The percent of experimental wells in the results that were hits")
     {
       @Override
       public String formatValue(ResultValueType rvt)
@@ -747,13 +747,16 @@ public class ScreenResultViewer extends AbstractBackingBean
   {
     private String _propertyName;
     private String _displayName;
+    private String _description;
 
     public DataHeaderRowDefinition(String propertyName, 
-                                   String displayName)
+                                   String displayName,
+                                   String description)
     {
       _propertyName = propertyName;
       // TODO: HACK: nbsp replacement; right place to do this?
       _displayName = displayName.replaceAll(" ", "&nbsp;");
+      _description = description;
     }
 
     public String getDisplayName()
@@ -764,6 +767,11 @@ public class ScreenResultViewer extends AbstractBackingBean
     public String getPropertyName()
     {
       return _propertyName;
+    }
+    
+    public String getDescription()
+    {
+      return _description;
     }
     
     /**
@@ -824,6 +832,11 @@ public class ScreenResultViewer extends AbstractBackingBean
     public String getRowLabel()
     {
       return _dataHeaderRowDefinition.getDisplayName();
+    }
+    
+    public String getRowTitle()
+    {
+      return _dataHeaderRowDefinition.getDescription();
     }
     
     public Map getDataHeaderSinglePropertyValues()
