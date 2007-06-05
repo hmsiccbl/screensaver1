@@ -60,7 +60,7 @@
   <navigation-rule>
     <from-view-id>*</from-view-id>
 
-    <!-- === top-level wildcard navigation rules === -->
+    <!-- === top-level navigation rules === -->
     <navigation-case>
       <from-outcome>viewMain</from-outcome>
       <to-view-id>/main</to-view-id>
@@ -92,7 +92,7 @@
       <redirect/>
     </navigation-case>
     
-    <!-- === libraries wildcard navigation rules === -->
+    <!-- === libraries navigation rules === -->
     <navigation-case>
       <from-outcome>findWells</from-outcome>
       <to-view-id>/libraries/wellFinder</to-view-id>
@@ -139,7 +139,7 @@
       <redirect/>
     </navigation-case>
     
-    <!-- === screens wildcard navigation rules === -->    
+    <!-- === screens navigation rules === -->    
     <navigation-case>
       <from-outcome>browseScreens</from-outcome>
       <to-view-id>/screens/screensBrowser</to-view-id>
@@ -156,12 +156,12 @@
       <redirect/>
     </navigation-case>
 
-    <!-- === screenresults wildcard navigation rules === --> 
+    <!-- === screenresults navigation rules === --> 
     <navigation-case>
       <from-outcome>viewScreenResultImportErrors</from-outcome>
       <to-view-id>/screens/screenresults/admin/screenResultImporter</to-view-id>
       <redirect/>
-    </navigation-case>   
+    </navigation-case>
 
   </navigation-rule>
   

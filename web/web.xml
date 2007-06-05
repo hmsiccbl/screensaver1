@@ -376,6 +376,7 @@
       <url-pattern>/libraries/*</url-pattern>
       <url-pattern>/screens/*</url-pattern>
       <url-pattern>/screens/screenresults/*</url-pattern>
+      <url-pattern>/help/*</url-pattern>
     </web-resource-collection>
 
     <auth-constraint>

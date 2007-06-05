@@ -4,8 +4,6 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 
 <f:subview id="wellTable">
-
-  <t:outputText value="&nbsp;" escape="false" />
     
   <h:form id="wellTableForm">
     <t:dataTable
@@ -15,6 +13,7 @@
       styleClass="standardTable"
       headerClass="tableHeader"
       rowClasses="row1,row2"
+      style="margin-top: 5px;"
     >
       <t:column>
         <f:facet name="header">

@@ -26,13 +26,18 @@
 --%>
 
 <%-- Push component attributes defined in Tiles definitions into request context (scope="request" required for JSF integration) --%>
-<tiles:importAttribute scope="request" name="pageTitle" />
+<tiles:importAttribute scope="request" name="pageTitle" ignore="true" />
+<tiles:importAttribute scope="request" name="pageHelpURL" ignore="true" />
 <tiles:importAttribute scope="request" name="inputFocusId" />
 
 <f:view>
   <t:document>
     <t:documentHead>
 			<t:stylesheet path="/css/screensaver.css"/>
+			<t:htmlTag value="title">
+        <h:outputText value="#{appInfo.applicationTitle}"/>
+			  <t:outputText value=" - #{pageTitle}" rendered="#{! empty pageTitle}"/>
+			</t:htmlTag>
     </t:documentHead>
 
     <t:documentBody>
@@ -44,27 +49,7 @@
           <tiles:insert attribute="body" flush="false" />
         </t:panelGrid>
       </t:panelGrid>
-
-      <t:div styleClass="footer">
-        <t:htmlTag value="hr"/>
-        <h:outputText value="#{appInfo.applicationTitle} | "/>
-        <h:outputLink value="http://iccb.med.harvard.edu" target="_blank"
-          title="The ICCB-L. Without their support, Screensaver wouldn't be here!"
-        >
-          <h:outputText value="HMS: ICCB-Longwood" />
-        </h:outputLink>
-        <h:outputText value=" | "/>
-        <h:outputLink value="http://nsrb.med.harvard.edu/" target="_blank"
-          title="The NSRB. Without their support, Screensaver wouldn't be here!"
-        >
-          <h:outputText value="HMS: NSRB" />
-        </h:outputLink>
-        <h:outputText value=" | "/>
-        <h:outputLink value="#{appInfo.feedbackUrl}" title="Let us know what you think!">
-          <h:outputText value="Feedback" />
-        </h:outputLink>
-      </t:div>
-
+      <tiles:insert attribute="footer" flush="false" />
     </t:documentBody>
     
 			<%-- HACK: provide a generic mechanism for setting the input element to have the initial focus --%>

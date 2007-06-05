@@ -26,7 +26,7 @@
 		</h:form>
 
 		<t:htmlTag id="menuSectionSeparator0" value="hr" 
-			rendered="#{menu.authenticatedUser}" />
+			rendered="#{menu.authenticatedUser}"/>
 
 		<t:panelGroup rendered="#{menu.authenticatedUser}">
 			<h:form id="userForm">
@@ -42,7 +42,7 @@
 					title="Click here to log out" />
 			</h:form>
 		</t:panelGroup>
-  
+    
     <t:htmlTag id="menuSectionSeparator1" value="hr"/>
 
     <h:form id="navForm">
@@ -62,7 +62,8 @@
 					value="Browse Screens"
 					accesskey="S"
 					title="Browse the screens currently available and accessible to you" />
-				<t:commandNavigation2 action="#{screensController.browseMyScreens}" value="My Screens"
+				<t:commandNavigation2 action="#{screensController.browseMyScreens}"
+					value="My Screens"
 					accesskey="M"
 					title="Browse the screens that you headed, led and collaborated on" />
 				<t:commandNavigation2 />
@@ -70,8 +71,8 @@
 					value="Data Downloads"
 					accesskey="D"
 					title="Download SD Files for small molecule libraries" />
-				<t:commandNavigation2 action="#{mainController.viewInstructions}"
-					value="Instructions"
+				<t:commandNavigation2 action="#{mainController.viewHelp}"
+					value="View Help"
 					accesskey="H"
 					title="View the Screensaver help page" />
 				<t:commandNavigation2 />
@@ -148,7 +149,7 @@
 					rendered="#{menu.authenticatedUser}" styleClass="command" />
 			</t:panelGrid>
 		</h:form>
-    
+
   </t:panelGrid>
 </f:subview>
 

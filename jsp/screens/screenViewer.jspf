@@ -22,17 +22,20 @@ TODO:
 		<h:commandButton id="viewAdminOnlyFieldsCommand"
 			value="#{screenViewer.adminViewMode ? \"Hide Admin\" : \"Show Admin\"}"
 			rendered="#{(screenViewer.editable || screenViewer.readOnlyAdmin) && !screenViewer.editMode}"
-			action="#{screenViewer.toggleAdminViewMode}" styleClass="command" />
+			action="#{screenViewer.toggleAdminViewMode}" styleClass="command"
+			title="Show or hide administrative fields for the screen" />
 		<h:commandButton id="editCommand" value="Edit"
 			rendered="#{screenViewer.editable && !screenViewer.editMode}"
-			action="#{screenViewer.editScreen}" styleClass="command" />
+			action="#{screenViewer.editScreen}" styleClass="command"
+			title="Enter edit mode for screen details" />
 		<t:commandButton id="saveCommand" value="Save"
 			action="#{screenViewer.saveScreen}" styleClass="command"
-			rendered="#{screenViewer.editMode}" />
+			rendered="#{screenViewer.editMode}"
+			title="Save your changes and leave edit mode" />
 		<h:commandButton id="cancelEditCommand" value="Cancel"
 			rendered="#{screenViewer.editMode}"
 			action="#{screenViewer.cancelEdit}" immediate="true"
-			styleClass="command" />
+			styleClass="command" title="Discard your changes and leave edit mode" />
 	</t:panelGroup>
 
 	<t:panelGrid id="labelsAndDataColumns" columns="2"
@@ -40,20 +43,22 @@ TODO:
 		columnClasses="keyColumn,column">
 
 		<t:outputLabel for="screenId" value="Screen ID"
-			visibleOnUserRole="developer"/>
+			visibleOnUserRole="developer"
+			title="The database ID for the screen. This is an implementation-level detail displayed only for development purposes" />
 		<t:outputText id="screenId" value="#{screenViewer.screen.screenId}"
 			styleClass="dataText" visibleOnUserRole="developer" />
 
-		<t:outputLabel for="screenNumber" value="Screen Number"/>
+		<t:outputLabel for="screenNumber" value="Screen Number"
+		  title="The number used to uniquely identify the screen" />
 		<t:outputText id="screenNumber"
 			value="#{screenViewer.screen.screenNumber}" styleClass="dataText" />
 
-		<t:outputLabel for="title" value="Title" />
+		<t:outputLabel for="title" value="Title" title="The title of the screen" />
 		<t:inputText id="title" value="#{screenViewer.screen.title}"
 			displayValueOnly="#{!screenViewer.editMode}" size="80"
 			styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 
-		<t:outputLabel for="screenType" value="Screen Type" />
+		<t:outputLabel for="screenType" value="Screen Type" title="'Small Molecule' or 'RNAi'" />
 		<t:selectOneMenu id="screenType"
 			value="#{screenViewer.screen.screenType}"
 			converter="ScreenTypeConverter"
@@ -63,7 +68,8 @@ TODO:
 		</t:selectOneMenu>
 
 		<%-- "lab name" == last name of "lab head", but former is required for UI, latter is for internal design --%>
-		<t:outputLabel for="labNameEditable" value="Lab Name" />
+		<t:outputLabel for="labNameEditable" value="Lab Name"
+		  title="The name of the lab carrying out the screen" />
 		<h:panelGroup rendered="#{!screenViewer.editMode}">
 			<t:commandLink id="labName"
 				value="#{screenViewer.screen.labHead.labName}"
@@ -83,7 +89,8 @@ TODO:
 			<f:selectItems value="#{screenViewer.labName.selectItems}" />
 		</t:selectOneMenu>
 
-		<t:outputLabel for="leadScreenerEditable" value="Lead Screener" />
+		<t:outputLabel for="leadScreenerEditable" value="Lead Screener"
+		  title="The scientist primarily responsible for carrying out the screen" />
 		<h:panelGroup rendered="#{!screenViewer.editMode}">
 			<t:commandLink id="leadScreener"
 				value="#{screenViewer.screen.leadScreener.fullNameLastFirst}"
@@ -104,7 +111,8 @@ TODO:
 			<f:selectItems value="#{screenViewer.leadScreener.selectItems}" />
 		</t:selectOneMenu>
 
-		<t:outputLabel for="collaboratorsEditable" value="Collaborators" />
+		<t:outputLabel for="collaboratorsEditable" value="Collaborators"
+		  title="Other scientists involved in carrying out the screen" />
 		<t:panelGrid columns="1" styleClass="layoutPanel"
 			rendered="#{!screenViewer.editMode}">
 			<t:outputText value="<none>" styleClass="dataText"
@@ -131,7 +139,8 @@ TODO:
 		</t:selectManyListbox>
 
 		<t:outputLabel for="dateCreatedEditable" value="Created"
-			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}" />
+			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+			title="The date the screen was originally created in the database (either ScreenDB or Screensaver)" />
 		<t:inputDate id="dateCreatedEditable"
 			value="#{screenViewer.screen.dateCreated}" popupCalendar="true"
 			rendered="#{screenViewer.editMode}" styleClass="inputText" />
@@ -141,7 +150,8 @@ TODO:
 
 		<t:outputLabel for="dateOfApplicationEditable"
 			value="Application Date"
-			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}" />
+			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+			title="The date the application for the screen was submitted" />
 		<t:inputDate id="dateOfApplicationEditable"
 			value="#{screenViewer.screen.dateOfApplication}" popupCalendar="true"
 			rendered="#{screenViewer.editMode}" styleClass="inputText" />
@@ -151,7 +161,8 @@ TODO:
 
 		<t:outputLabel for="dateDataMeetingScheduledEditable"
 			value="Data Meeting Scheduled"
-			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}" />
+			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+			title="The date the data meeting was scheduled" />
 		<t:inputDate id="dateDataMeetingScheduledEditable"
 			value="#{screenViewer.screen.dataMeetingScheduled}"
 			popupCalendar="true" rendered="#{screenViewer.editMode}"
@@ -162,7 +173,8 @@ TODO:
 
 		<t:outputLabel for="dateDataMeetingCompletedEditable"
 			value="Data Meeting Completed"
-			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}" />
+			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+			title="The date the data meeting was completed" />
 		<t:inputDate id="dateDataMeetingCompletedEditable"
 			value="#{screenViewer.screen.dataMeetingComplete}"
 			popupCalendar="true" rendered="#{screenViewer.editMode}"
@@ -172,7 +184,8 @@ TODO:
 			rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
 
 		<t:outputLabel for="publishableProtocol" value="Publishable Protocol"
-			rendered="#{screenViewer.userAssociatedWithScreen}" />
+			rendered="#{screenViewer.userAssociatedWithScreen}"
+			title="A publication-quality description of the protocol used for this screen" />
 		<t:inputTextarea id="publishableProtocol" rows="3" cols="80"
 			value="#{screenViewer.screen.publishableProtocol}"
 			displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
@@ -180,7 +193,8 @@ TODO:
 			rendered="#{screenViewer.userAssociatedWithScreen}" />
 
 		<t:outputLabel for="summary" value="Summary"
-			rendered="#{screenViewer.userAssociatedWithScreen}" />
+			rendered="#{screenViewer.userAssociatedWithScreen}"
+			title="A summary of the screen" />
 		<t:inputTextarea id="summary" rows="3" cols="80"
 			value="#{screenViewer.screen.summary}"
 			displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
@@ -188,7 +202,8 @@ TODO:
 			rendered="#{screenViewer.userAssociatedWithScreen}" />
 
 		<t:outputLabel for="comments" value="Comments"
-			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}" />
+			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+			title="Administrative comments" />
 		<t:inputTextarea id="comments" rows="3" cols="80"
 			value="#{screenViewer.screen.comments}"
 			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
@@ -196,7 +211,8 @@ TODO:
 			displayValueOnlyStyleClass="dataText" />
 
 		<t:outputLabel for="activityItems" value="Screening Room Activities"
-			rendered="#{screenViewer.userAssociatedWithScreen}" />
+			rendered="#{screenViewer.userAssociatedWithScreen}"
+			title="Activities carried out in the screening room, such as performing an assay or using a plate reader" />
 		<t:panelGrid columns="1"
 			rendered="#{screenViewer.userAssociatedWithScreen}">
 			<t:outputText value="<none>" styleClass="dataText"
@@ -247,7 +263,8 @@ TODO:
 		</t:panelGrid>
 
 		<t:outputLabel for="cherryPickRequests" value="Cherry Pick Requests"
-			rendered="#{screenViewer.userAssociatedWithScreen}" />
+			rendered="#{screenViewer.userAssociatedWithScreen}"
+			title="The cherry pick requests for this screen" />
 		<t:panelGrid columns="1"
 			rendered="#{screenViewer.userAssociatedWithScreen}">
 			<t:outputText value="<none>" styleClass="dataText"
@@ -301,7 +318,8 @@ TODO:
 		</t:panelGrid>
 
 		<t:outputLabel for="statusItems" value="Status Items"
-			rendered="#{screenViewer.userAssociatedWithScreen}" />
+			rendered="#{screenViewer.userAssociatedWithScreen}"
+			title="A record of the status of the screen, such as when it was accepted, and whether it is ongoing, completed or dropped" />
 		<t:panelGrid columns="1"
 			rendered="#{screenViewer.userAssociatedWithScreen}">
 			<t:outputText value="<none>" styleClass="dataText"
@@ -347,7 +365,8 @@ TODO:
 			</t:panelGroup>
 		</t:panelGrid>
 
-		<t:outputLabel for="publications" value="Publications" />
+		<t:outputLabel for="publications" value="Publications"
+		  title="Publications reporting results of the screen" />
 		<t:panelGrid columns="1">
 			<t:outputText value="<none>" styleClass="dataText"
 				rendered="#{empty screenViewer.screen.publications}" />
@@ -410,7 +429,8 @@ TODO:
 		</t:panelGrid>
 
 		<t:outputLabel for="lettersOfSupport" value="Letters of Support"
-			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}" />
+			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+			title="Letters of support written by screening room staff for those associated with the screen" />
 		<t:panelGrid columns="1"
 			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}">
 			<t:outputText value="<none>" styleClass="dataText"
@@ -453,7 +473,8 @@ TODO:
 		</t:panelGrid>
 
 		<t:outputLabel for="attachedFiles" value="Attached Files"
-			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}" />
+			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+			title="Downloadable files associated with the screen" />
 		<t:panelGrid columns="1"
 			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}">
 			<t:outputText value="<none>" styleClass="dataText"
@@ -494,8 +515,9 @@ TODO:
 			</t:panelGroup>
 		</t:panelGrid>
 
-		<t:outputLabel for="fundingSupports" value="Funding Supports"
-			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}" />
+		<t:outputLabel for="fundingSupports" value="Funding Support"
+			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+			title="The sources of funding support for the screen" />
 		<t:panelGrid columns="1"
 			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}">
 			<t:outputText value="<none>" styleClass="dataText"
@@ -530,13 +552,15 @@ TODO:
 		</t:panelGrid>
 
 		<t:outputLabel for="assayReadoutTypes" value="Assay Readout Types"
-			rendered="#{screenViewer.userAssociatedWithScreen}" />
+			rendered="#{screenViewer.userAssociatedWithScreen}"
+			title="The assay readout types used" />
 		<t:outputText id="assayReadoutTypes"
 			value="#{empty screenViewer.screen.assayReadoutTypes ? \"<none>\" : screenViewer.screen.assayReadoutTypesString}"
 			styleClass="dataText"
 			rendered="#{screenViewer.userAssociatedWithScreen}" />
 
-		<t:outputLabel for="keywords" value="Keywords" />
+		<t:outputLabel for="keywords" value="Keywords"
+		  title="A set of keywords associated with the screen" />
 		<t:outputText value="<none>" styleClass="dataText"
 			rendered="#{!screenViewer.editMode && empty screenViewer.screen.keywords}" />
 		<t:outputText value="#{screenViewer.keywords}"
@@ -567,7 +591,8 @@ TODO:
 		</t:panelGrid>
 
 		<t:outputLabel for="Abase" value="Abase"
-			rendered="#{screenViewer.adminViewMode}" />
+			rendered="#{screenViewer.adminViewMode}"
+			title="Abase stuff" />
 		<t:panelGroup rendered="#{screenViewer.adminViewMode}">
 			<t:outputLabel for="abaseStudyId" value="Study ID: "
 				rendered="#{screenViewer.adminViewMode}" styleClass="label" />
@@ -589,7 +614,8 @@ TODO:
 		</t:panelGroup>
 
 		<t:outputLabel value="Billing Information" styleClass="label"
-			visibleOnUserRole="billingAdmin" />
+			visibleOnUserRole="billingAdmin"
+			title="Information for tracking billing from ICCB-L to the lab performing the screen" />
 		<t:commandButton id="viewBillingInformation"
 			value="#{screenViewer.editMode ? \"Edit...\" : \"View...\"}"
 			action="#{screenViewer.viewBillingInformation}" styleClass="command"

@@ -15,15 +15,18 @@
 			<%@ include file="../nameValueTable.jspf" %>
 		</t:aliasBean>
 
-		<t:div />
-		<t:div />
-				
-		<t:panelGroup>
-			<t:outputText value="Wells in which this compound is found:" style="textColumn" />
-			<t:aliasBean alias="#{wells}" value="#{compoundViewer.compound.wells}">
-				<%@ include file="wellTable.jspf" %>
-			</t:aliasBean>
-		</t:panelGroup>
+    <t:div style="margin-top: 15px; margin-left: 20px;">
+      <t:panelGrid columns="1">
+        <t:outputText
+          styleClass="subsectionHeader"
+          value="Wells in which this Compound is Found"
+        />
+			  <t:aliasBean alias="#{wells}" value="#{compoundViewer.compound.wells}">
+				  <%@ include file="wellTable.jspf" %>
+		  	</t:aliasBean>
+			</t:panelGrid>
+		</t:div>
+
 	</t:panelGrid>
 	
 	<t:panelGroup rendered="#{empty compoundViewer.compound}">

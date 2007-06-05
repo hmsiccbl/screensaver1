@@ -78,11 +78,13 @@
 				<t:panelGroup>
 					<t:commandButton action="#{screenResultViewer.download}"
 						value="Download"
-						styleClass="command" />
+						styleClass="command"
+						title="Download the screen results in an Excel file format" />
 					<t:commandButton action="#{screenResultViewer.delete}"
 						value="Delete"
 						onclick="javascript: return confirm('Delete this screen result permanently?');"
-						styleClass="command" rendered="#{!screenResultViewer.readOnly}" />
+						styleClass="command" rendered="#{!screenResultViewer.readOnly}"
+						title="Delete the screen results for this screen" />
 				</t:panelGroup>
 
 				<t:panelGrid columns="2" styleClass="standardTable"
@@ -96,12 +98,14 @@
 						value="#{screenResultViewer.screenResult.dateCreated}"
 						styleClass="dataText" /--%>
 
-					<t:outputLabel for="screenResultLastImported" value="Last Imported" />
+					<t:outputLabel for="screenResultLastImported" value="Last Imported"
+					  title="The date the current screen results were loaded into the database" />
 					<t:outputText id="screenResultLastImported"
 						value="#{screenResultViewer.screenResult.dateLastImported}"
 						styleClass="dataText" />
 
-					<t:outputLabel for="screenResultIsShareable" value="Shareable" />
+					<t:outputLabel for="screenResultIsShareable" value="Shareable"
+					  title="True when the results are shareable with scientists outside the lab" />
 					<t:div>
 						<t:selectBooleanCheckbox id="screenResultIsShareable"
 							value="#{screenResultViewer.screenResult.shareable}"
@@ -114,18 +118,21 @@
 							styleClass="hiddenCommand" />
 					</t:div>
 
-					<t:outputLabel for="screenResultPlateCount" value="Plates" />
+					<t:outputLabel for="screenResultPlateCount" value="Plates"
+					  title="The number of plates for which we have results" />
 					<t:outputText id="screenResultPlateCount"
 						value="#{screenResultViewer.screenResult.plateNumberCount}"
 						styleClass="dataText" />
 
-					<t:outputLabel for="screenResultReplicateCount" value="Replicates" />
+					<t:outputLabel for="screenResultReplicateCount" value="Replicates"
+					  title="The number of replicates screened" />
 					<t:outputText id="screenResultReplicateCount"
 						value="#{screenResultViewer.screenResult.replicateCount}"
 						styleClass="dataText" />
 
 					<t:outputLabel for="screenResultExperimentalWellCount"
-						value="Experimental Wells" />
+						value="Experimental Wells"
+					  title="The number of experimental wells for which we have results" />
 					<t:outputText id="screenResultExperimentalWellCount"
 						value="#{screenResultViewer.screenResult.experimentalWellCount}"
 						styleClass="dataText" />

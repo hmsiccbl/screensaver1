@@ -111,6 +111,15 @@
   </bean>
 
   <bean
+    id="helpViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.HelpViewer">
+    <description>Backing bean for the Help Viewer page.</description>
+    <aop:scoped-proxy/>
+  </bean>
+  
+  <bean
     id="schemaManager"
     parent="uiBean"
     scope="session"
