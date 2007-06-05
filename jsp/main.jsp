@@ -9,20 +9,12 @@
 <%-- Tiles --%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
-<%-- TODO: use ScreensaverConstants.FEEDBACK_URL here --%>
-
 <f:subview id="main">
-  <t:outputText value="Welcome #{menu.screensaverUser.fullNameFirstLast}!" styleClass="title"/>
+  <t:outputText value="Welcome to Screensaver, #{menu.screensaverUser.fullNameFirstLast}!" styleClass="title"/>
   <t:div/>
   <f:verbatim escape="false">
-    <p>Thanks for trying out Screensaver!</p>
     <p>To get started, try clicking some of the items in the left menu
-		bar. For a detailed description of what you can do, see the <a href="helpViewer.jsf">Instructions</a>.</p>
-		<p>Please note that this is a <i>beta</i> release of Screensaver, and
-		is intended to elicit your feedback. Your input will directly
-		influence the order in which functionality is added, improved, and
-		fixed!</p>
-		<p>Please send your comments to <a
-			href="mailto:john_sullivan@hms.harvard.edu,andrew_tolopko@hms_harvard.edu">john_sullivan@hms.harvard.edu,andrew_tolopko@hms.harvard.edu</a>.</p>
+		bar. For a detailed description of what you can do, see our <a href="helpViewer.jsf">help</a> page.</p>
+		<p>Your questions and feedback are welcome!  Please use the feedback link at bottom of the page to contact us.</p>
 	</f:verbatim>
 </f:subview>
