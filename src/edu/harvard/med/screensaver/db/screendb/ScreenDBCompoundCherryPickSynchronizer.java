@@ -239,6 +239,7 @@ public class ScreenDBCompoundCherryPickSynchronizer
       Integer sourcePlateNumber = resultSet.getInt("plate");
       String destinationWell = resultSet.getString("map");
       String copyName = resultSet.getString("copy");
+      // TODO: need to capture ScreenDB comments here as well!
       
       // i cant do shit if the source well name is null or not valid
       if (sourceWellName == null || ! Well.isValidWellName(sourceWellName)) {
