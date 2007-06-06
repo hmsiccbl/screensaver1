@@ -27,7 +27,7 @@ particular, there are no structures available for natural product extracts.
 <p>
 A collection of libraries currently available for screening, containing:
 Asinex1; ActiMolTimTec1; BiomolICCB1-2; Bionet1-2;
-CBMicro; CEREP; ChemBridge3; ChemDiv1-5; ChemDivAM; Enamine1; IFLab1-2;
+CBMicro; CEREP; ChemBridge3; ChemDiv1-5; ChemDivAM; Enamine1-2; IFLab1-2;
 Maybridge1-5; MixCom1-5; NINDS1-2; Peakdale1-2; Prestwick1.
 </p>
 <ul>
