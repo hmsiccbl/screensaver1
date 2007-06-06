@@ -28,7 +28,7 @@ h2,.sectionHeader {
 }
 
 h3,.subsectionHeader {
-	font-weight: bold;
+	font-weight: normal;
 	font-variant: small-caps;
 	font-size: medium;
 	color: white;

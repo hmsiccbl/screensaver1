@@ -70,7 +70,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   private static final List<String> DATA_TABLE_FIXED_COLUMN_HEADERS = Arrays.asList("Plate", "Well", "Type");
   private static final DataHeaderRowDefinition[] DATA_HEADER_ATTRIBUTES = new DataHeaderRowDefinition[] {
     new DataHeaderRowDefinition("description", "Description", "A description of the data header"),
-    new DataHeaderRowDefinition("replicateOrdinal", "Replicate Number", "Which replicate this data header refers to"),
+    new DataHeaderRowDefinition("replicateOrdinal", "Replicate Number", "To which replicate this data header refers"),
     new DataHeaderRowDefinition("assayReadoutType", "Assay Readout Type", "The type of readout used to calculate these values"),
     new DataHeaderRowDefinition("timePoint", "Time Point", "The time point the readout was taken"),
     new DataHeaderRowDefinition("derived", "Derived", "True when this column is derived from other data headers"),
@@ -95,7 +95,7 @@ public class ScreenResultViewer extends AbstractBackingBean
     new DataHeaderRowDefinition("indicatorDirection", "Indicator Direction", "For numerical indicators, whether high or low values are hits"),
     new DataHeaderRowDefinition("indicatorCutoff", "Indicator Cutoff", "The numerical score demarking hits from non-hits"),
     new DataHeaderRowDefinition("followUpData", "Follow Up Data", "Primary or follow up screen data"),
-    new DataHeaderRowDefinition("assayPhenotype", "Assay Phenotype", "The phenotype being tested for"),
+    new DataHeaderRowDefinition("assayPhenotype", "Assay Phenotype", "The phenotype being monitored"),
     new DataHeaderRowDefinition("comments", "Comments", "Data header comments"),
     new DataHeaderRowDefinition("hits", "Hits", "The number of hits, if this is a Positive Indicator"),
     new DataHeaderRowDefinition("hitRatio", "Hit %", "The percent of experimental wells in the results that were hits")

@@ -22,7 +22,7 @@ Please note that we do not have SD Files for every ICCB-L Compound Library. In
 particular, there are no structures available for natural product extracts.
 </p>
 
-<div style="margin-left: 20px;">
+<div style="margin-left: 30px;">
 <h3>Actively Screened Compound Libraries</h3>
 <p>
 A collection of libraries currently available for screening, containing:
@@ -42,7 +42,7 @@ A zip of a single SD File containing all the libraries.
 </ul>
 </div>
 
-<div style="margin-left: 20px;">
+<div style="margin-left: 30px;">
 <h3>Complete Compound Library Set</h3>
 <p>
 A collection of all ICCB-L libaries. This includes all the active screening libraries
@@ -61,7 +61,7 @@ A zip of a single SD File containing all the libraries.
 </ul>
 </div>
 
-<div style="margin-left: 20px;">
+<div style="margin-left: 30px;">
 <h3>Instructions for Similarity Searching using ChemFinder</h3>
 
 <p>

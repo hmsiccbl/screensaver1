@@ -25,7 +25,7 @@
         </f:facet>
         <%@ include file="help/libraries/wellFinderHelp.jsp" %>
 
-        <t:div style="margin-left: 20px">
+        <t:div style="margin-left: 30px">
           <t:collapsiblePanel
             value="#{helpViewer.isPanelCollapsedMap['wellFinderInputHelp']}"
             var="isCollapsed"
@@ -193,7 +193,7 @@
           <%@ include file="help/screens/screenAndResultViewerHelp.jsp" %>
         </t:aliasBean>
 
-        <t:div style="margin-left: 20px">
+        <t:div style="margin-left: 30px">
 
           <t:collapsiblePanel
             value="#{helpViewer.isPanelCollapsedMap['screenDetailsHelp']}"
