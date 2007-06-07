@@ -23,7 +23,7 @@ import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 
 /**
  * Parses the Column Headers in an RNAi Library Contents worksheet. Maintains a mapping between
- * the {@link RequiredRNAiLibraryColumn required columns} and the column indexes in the sheet.
+ * the {@link ParsedRNAiLibraryColumn required columns} and the column indexes in the sheet.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -34,20 +34,21 @@ class RNAiLibraryColumnHeaders
   
   private static Logger log = Logger.getLogger(RNAiLibraryColumnHeaders.class);
   
-  private static final Map<String,RequiredRNAiLibraryColumn> _columnHeaders =
-    new HashMap<String,RequiredRNAiLibraryColumn>();
+  private static final Map<String,ParsedRNAiLibraryColumn> _columnHeaders =
+    new HashMap<String,ParsedRNAiLibraryColumn>();
   static {
-    for (RequiredRNAiLibraryColumn rnaiColumn : RequiredRNAiLibraryColumn.values()) {
+    for (ParsedRNAiLibraryColumn rnaiColumn : ParsedRNAiLibraryColumn.values()) {
       _columnHeaders.put(rnaiColumn.getDefaultColumnHeader().toLowerCase(), rnaiColumn);
     }
     // some accepted synonyms:
-    _columnHeaders.put("384 plate",      RequiredRNAiLibraryColumn.PLATE);
-    _columnHeaders.put("384 well",       RequiredRNAiLibraryColumn.WELL);
-    _columnHeaders.put("catalog number", RequiredRNAiLibraryColumn.VENDOR_IDENTIFIER);
-    _columnHeaders.put("gene symbol",    RequiredRNAiLibraryColumn.ENTREZGENE_SYMBOL);
-    _columnHeaders.put("locus id",       RequiredRNAiLibraryColumn.ENTREZGENE_ID);
-    _columnHeaders.put("accession",      RequiredRNAiLibraryColumn.GENBANK_ACCESSION_NUMBER);
-    _columnHeaders.put("sequence",       RequiredRNAiLibraryColumn.SEQUENCES);
+    _columnHeaders.put("384 plate",      ParsedRNAiLibraryColumn.PLATE);
+    _columnHeaders.put("384 well",       ParsedRNAiLibraryColumn.WELL);
+    _columnHeaders.put("catalog number", ParsedRNAiLibraryColumn.VENDOR_IDENTIFIER);
+    _columnHeaders.put("gene symbol",    ParsedRNAiLibraryColumn.ENTREZGENE_SYMBOL);
+    _columnHeaders.put("locus id",       ParsedRNAiLibraryColumn.ENTREZGENE_ID);
+    _columnHeaders.put("accession",      ParsedRNAiLibraryColumn.GENBANK_ACCESSION_NUMBER);
+    _columnHeaders.put("sequence",       ParsedRNAiLibraryColumn.SEQUENCES);
+    _columnHeaders.put("old locus ids",  ParsedRNAiLibraryColumn.OLD_ENTREZGENE_IDS);
   }
 
   
@@ -57,8 +58,8 @@ class RNAiLibraryColumnHeaders
   private ParseErrorManager _errorManager;
   private Cell.Factory _cellFactory;
   private String _sheetName;
-  private Map<RequiredRNAiLibraryColumn,Integer> _columnIndexes =
-    new HashMap<RequiredRNAiLibraryColumn,Integer>();
+  private Map<ParsedRNAiLibraryColumn,Integer> _columnIndexes =
+    new HashMap<ParsedRNAiLibraryColumn,Integer>();
   
   
   // package constructor and methods
@@ -100,17 +101,17 @@ class RNAiLibraryColumnHeaders
     boolean hasPlate = false;
     boolean hasWell = false;
     boolean hasOther = false;
-    for (RequiredRNAiLibraryColumn column : RequiredRNAiLibraryColumn.values()) {
+    for (ParsedRNAiLibraryColumn column : ParsedRNAiLibraryColumn.values()) {
       short columnIndex = getColumnIndex(column);
       HSSFCell cell = dataRow.getCell(columnIndex);
       if (cell                != null                      &&
           cell.getCellType()  != HSSFCell.CELL_TYPE_BLANK  &&
           (cell.getCellType() != HSSFCell.CELL_TYPE_STRING ||
            ! cell.getStringCellValue().equals("")          )) {
-        if (column.equals(RequiredRNAiLibraryColumn.PLATE)) {
+        if (column.equals(ParsedRNAiLibraryColumn.PLATE)) {
           hasPlate = true;
         }
-        else if (column.equals(RequiredRNAiLibraryColumn.WELL)) {
+        else if (column.equals(ParsedRNAiLibraryColumn.WELL)) {
           hasWell = true;
         }
         else {
@@ -128,29 +129,36 @@ class RNAiLibraryColumnHeaders
   }
   
   /**
-   * Build and return a map from {@link RequiredRNAiLibraryColumn required columns} to the
+   * Build and return a map from {@link ParsedRNAiLibraryColumn required columns} to the
    * contents of the row for that column.
    * @param dataRow the data row to build the map for
    * @param rowIndex the index of the data row in the sheet
    * @return a map from required columns to the contents of the row for that column
    */
-  Map<RequiredRNAiLibraryColumn,String> getDataRowContents(HSSFRow dataRow, int rowIndex)
+  Map<ParsedRNAiLibraryColumn,String> getDataRowContents(HSSFRow dataRow, int rowIndex)
   {
-    Map<RequiredRNAiLibraryColumn,String> dataRowContents =
-      new HashMap<RequiredRNAiLibraryColumn,String>();
-    for (RequiredRNAiLibraryColumn column : RequiredRNAiLibraryColumn.values()) {
-      Cell cell = _cellFactory.getCell(getColumnIndex(column), rowIndex);
-      dataRowContents.put(column, cell.getAsString());      
+    Map<ParsedRNAiLibraryColumn,String> dataRowContents =
+      new HashMap<ParsedRNAiLibraryColumn,String>();
+    for (ParsedRNAiLibraryColumn column : ParsedRNAiLibraryColumn.values()) {
+      String contents = "";
+      try {
+        Cell cell = _cellFactory.getCell(getColumnIndex(column), rowIndex);
+        contents = cell.getAsString();
+      }
+      catch (IndexOutOfBoundsException e) {
+        // missing column must be an optional column, gets contents "" by convention
+      }
+      dataRowContents.put(column, contents);      
     }
     return dataRowContents;
   }
  
   /**
-   * Return the column index for the {@link RequiredRNAiLibraryColumn required library column}.
+   * Return the column index for the {@link ParsedRNAiLibraryColumn required library column}.
    * @param column the required library column to return an index for
    * @return the column index
    */
-  short getColumnIndex(RequiredRNAiLibraryColumn column)
+  short getColumnIndex(ParsedRNAiLibraryColumn column)
   {
     Integer index = _columnIndexes.get(column);
     if (index == null) {
@@ -164,8 +172,8 @@ class RNAiLibraryColumnHeaders
   
   /**
    * Parse the column headers, populating the {@link #_columnIndexes}. Return false whenever two
-   * columns refer to the same {@link RequiredRNAiLibraryColumn}.
-   * @return false whenever two columns refer to the same RequiredRNAiLibraryColumn
+   * columns refer to the same {@link ParsedRNAiLibraryColumn}.
+   * @return false whenever two columns refer to the same ParsedRNAiLibraryColumn
    */
   private boolean populateColumnIndexes() {
     boolean hasNoDuplicateHeaders = true;
@@ -175,7 +183,7 @@ class RNAiLibraryColumnHeaders
       if (columnHeader == null) {
         continue;
       }
-      RequiredRNAiLibraryColumn column = _columnHeaders.get(columnHeader.toLowerCase());
+      ParsedRNAiLibraryColumn column = _columnHeaders.get(columnHeader.toLowerCase());
       if (column == null) {
         continue;
       }
@@ -199,8 +207,8 @@ class RNAiLibraryColumnHeaders
   private boolean checkRequiredHeaders()
   {
     boolean hasRequiredHeaders = true;
-    for (RequiredRNAiLibraryColumn column : RequiredRNAiLibraryColumn.values()) {
-      if (_columnIndexes.get(column) == null) {
+    for (ParsedRNAiLibraryColumn column : ParsedRNAiLibraryColumn.values()) {
+      if (column.isRequired() && _columnIndexes.get(column) == null) {
         _errorManager.addError(
           "required column \"" + column.getDefaultColumnHeader() +
           "\" does not match any column headers in sheet: " + _sheetName);

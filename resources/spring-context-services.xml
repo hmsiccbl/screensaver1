@@ -63,6 +63,14 @@
   </bean>
   
   <bean 
+    id="rnaiLibraryContentsFileLoader"
+    class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsFileLoader"
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="rnaiLibraryContentsParser"/>
+  </bean>
+  
+  <bean 
     id="bulkScreenResultImporter"
     class="edu.harvard.med.screensaver.io.screenresults.BulkScreenResultImporter"
     scope="singleton">

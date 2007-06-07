@@ -271,7 +271,7 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
    * @param columnHeaderRow the row containing the column headers
    * @param sheetName the name of the worksheet
    * @param cellFactory the cell factory 
-   * @return the RequiredRNAiLibraryColumn
+   * @return the ParsedRNAiLibraryColumn
    */
   private RNAiLibraryColumnHeaders parseColumnHeaders(
     HSSFRow columnHeaderRow,

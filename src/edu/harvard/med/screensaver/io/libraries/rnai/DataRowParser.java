@@ -53,7 +53,7 @@ public class DataRowParser
   private int _rowIndex;
   private Factory _cellFactory;
   private ParseErrorManager _errorManager;
-  private Map<RequiredRNAiLibraryColumn,String> _dataRowContents;
+  private Map<ParsedRNAiLibraryColumn,String> _dataRowContents;
   
   
   // package constructor and instance method
@@ -144,7 +144,7 @@ public class DataRowParser
 
   private void addGenbankAccessionNumberToWell(Well well) {
     String genbankAccessionNumber = _cellFactory.getCell(
-      _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.GENBANK_ACCESSION_NUMBER),
+      _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.GENBANK_ACCESSION_NUMBER),
       _rowIndex,
       true).getString();
     if (! genbankAccessionNumber.equals("")) {
@@ -175,13 +175,13 @@ public class DataRowParser
   private Well getWell(boolean isControl) throws DataRowParserException
   {
     Integer plateNumber = _parser.getPlateNumberParser().parse(_cellFactory.getCell(
-      _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.PLATE),
+      _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.PLATE),
       _rowIndex));
     if (plateNumber == -1) {
       return null;
     }
     String wellName = _parser.getWellNameParser().parse(_cellFactory.getCell(
-      _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.WELL),
+      _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.WELL),
       _rowIndex));
     if (wellName.equals("")) {
       return null;
@@ -191,7 +191,7 @@ public class DataRowParser
       throw new DataRowParserException(
         "specified well does not exist. this is probably due to an erroneous plate number.",
         _cellFactory.getCell(
-          _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.WELL),
+          _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.WELL),
           _rowIndex));
     }
     if (! well.getLibrary().equals(_parser.getLibrary())) {
@@ -199,7 +199,7 @@ public class DataRowParser
           "SD record specifies a well from the wrong library: " +
           well.getLibrary().getLibraryName(),
           _cellFactory.getCell(
-            _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.WELL),
+            _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.WELL),
             _rowIndex));
     }
     if (isControl) {
@@ -209,7 +209,7 @@ public class DataRowParser
       well.setWellType(WellType.EXPERIMENTAL);
     }
     String vendorIdentifier = _cellFactory.getCell(
-      _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.VENDOR_IDENTIFIER),
+      _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.VENDOR_IDENTIFIER),
       _rowIndex).getString();
     if (! (vendorIdentifier == null || vendorIdentifier.equals(""))) {
       well.setVendorIdentifier(vendorIdentifier);
@@ -224,13 +224,13 @@ public class DataRowParser
   private String getPlateWellAbbreviation()
   {
     Integer plateNumber = _parser.getPlateNumberParser().parse(_cellFactory.getCell(
-      _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.PLATE),
+      _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.PLATE),
       _rowIndex));
     if (plateNumber == -1) {
       return null;
     }
     String wellName = _parser.getWellNameParser().parse(_cellFactory.getCell(
-      _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.WELL),
+      _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.WELL),
       _rowIndex));
     if (wellName.equals("")) {
       return null;
@@ -247,14 +247,14 @@ public class DataRowParser
 
     // entrezgeneId
     Cell entrezgeneIdCell = _cellFactory.getCell(
-      _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.ENTREZGENE_ID),
+      _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.ENTREZGENE_ID),
       _rowIndex,
       true);
     Integer entrezgeneId = entrezgeneIdCell.getInteger();
     
     // entrezgeneSymbol
     Cell entrezgeneSymbolCell = _cellFactory.getCell(
-      _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.ENTREZGENE_SYMBOL),
+      _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.ENTREZGENE_SYMBOL),
       _rowIndex,
       true);
     String entrezgeneSymbol = entrezgeneSymbolCell.getAsString();
@@ -279,7 +279,7 @@ public class DataRowParser
     
     // genbankAccessionNumber
     Cell genbankAccessionNumberCell = _cellFactory.getCell(
-      _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.GENBANK_ACCESSION_NUMBER),
+      _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.GENBANK_ACCESSION_NUMBER),
       _rowIndex,
       true);
     String genbankAccessionNumber = genbankAccessionNumberCell.getString();
@@ -319,7 +319,7 @@ public class DataRowParser
         geneInfo.getSpeciesName());
       _parser.getDAO().persistEntity(gene);
     }
-
+    addOldEntrezgeneIds(gene);
     return gene;
   }
   
@@ -338,6 +338,29 @@ public class DataRowParser
   }
 
   /**
+   * Add the Old EntrezGene IDs to the gene.
+   */
+  private void addOldEntrezgeneIds(Gene gene)
+  {
+    Cell oldEntrezgeneIdsCell = _cellFactory.getCell(
+      _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.OLD_ENTREZGENE_IDS),
+      _rowIndex);
+    String sequences = oldEntrezgeneIdsCell.getString();
+    if (sequences != null && ! sequences.equals("")) {
+      for (String oldEntrezgeneIdString : sequences.split("[,;]")) {
+        try {
+          gene.addOldEntrezgeneId(new Integer(oldEntrezgeneIdString));
+        }
+        catch (NumberFormatException e) {
+          _errorManager.addError(
+            "encountered a non-integer Old EntrezGene ID: " + oldEntrezgeneIdString,
+            oldEntrezgeneIdsCell);
+        }
+      }
+    }
+  }
+  
+  /**
    * Build and return the set of {@link SilencingReagent SilencingReagents} represented
    * by this data row.
    * @return the set of silencing reagents represented by this data row
@@ -347,7 +370,7 @@ public class DataRowParser
     SilencingReagentType silencingReagentType = _parser.getSilencingReagentType();
     Set<SilencingReagent> silencingReagents = new HashSet<SilencingReagent>();
     String sequences = _cellFactory.getCell(
-      _columnHeaders.getColumnIndex(RequiredRNAiLibraryColumn.SEQUENCES),
+      _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.SEQUENCES),
       _rowIndex).getString();
     if (sequences == null || sequences.equals("")) {
       silencingReagents.add(getSilencingReagent(gene, silencingReagentType, "", true));
