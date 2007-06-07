@@ -94,7 +94,9 @@ public class DataRowParser
     }
     populateDataRowContents();
     if (dataRowType.equals(DataRowType.PLATE_WELL_ONLY)) {
-      parseWell();
+      
+      // when the data row has Plate, Well, and no gene information, we assume it is a control well
+      parseControlWell();
     }
     else {
       parseDataRowContent();
@@ -157,13 +159,13 @@ public class DataRowParser
    * Excel files I've been handling so far, but it is pretty ad-hoc. -s)
    * @throws DataRowParserException 
    */
-  private void parseWell() throws DataRowParserException
+  private void parseControlWell() throws DataRowParserException
   {
     String plateWellAbbreviation = getPlateWellAbbreviation();
     if (plateWellAbbreviation == null) {
       return;
     }
-    log.debug("loading empty plate-well " + plateWellAbbreviation);
+    log.debug("loading control well " + plateWellAbbreviation);
     getWell(true);
   }
 
