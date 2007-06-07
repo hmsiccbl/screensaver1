@@ -140,37 +140,84 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
       }
     });
     
-    doTestCherryPickRequestAllocation(1, 
-                                     new String[] {"A01"}, 
-                                     new String[] {});
+
+    int requestVolume = 6;
+    doTestCherryPickRequestAllocation(1,
+                                      requestVolume,
+                                      new String[] {"A01"}, 
+                                      new String[] {});
     doTestCherryPickRequestAllocation(2,
-                                     new String[] {"A01", "B02"}, 
-                                     new String[] {});
+                                      requestVolume,
+                                      new String[] {"A01", "B02"}, 
+                                      new String[] {});
     doTestCherryPickRequestAllocation(3,
-                                     new String[] {"A01", "B02", "C03"}, 
-                                     new String[] {});
+                                      requestVolume,
+                                      new String[] {"A01", "B02", "C03"}, 
+                                      new String[] {});
     doTestCherryPickRequestAllocation(4,
-                                     new String[] {"A01", "B02", "C03", "D04"}, 
-                                     new String[] {"A01"});
+                                      requestVolume,
+                                      new String[] {"A01", "B02", "C03", "D04"}, 
+                                      new String[] {"A01"});
     doTestCherryPickRequestAllocation(5,
-                                     new String[] {"A01", "B02", "C03", "D04", "E05"}, 
-                                     new String[] {"A01", "B02"});
+                                      requestVolume,
+                                      new String[] {"A01", "B02", "C03", "D04", "E05"}, 
+                                      new String[] {"A01", "B02"});
     doTestCherryPickRequestAllocation(6,
-                                     new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
-                                     new String[] {"A01", "B02", "C03"});
+                                      requestVolume,
+                                      new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
+                                      new String[] {"A01", "B02", "C03"});
     doTestCherryPickRequestAllocation(7,
-                                     new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
-                                     new String[] {"A01", "B02", "C03", "D04"});
+                                      requestVolume,
+                                      new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
+                                      new String[] {"A01", "B02", "C03", "D04"});
     doTestCherryPickRequestAllocation(8,
-                                     new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
-                                     new String[] {"A01", "B02", "C03", "D04", "E05"});
+                                      requestVolume,
+                                      new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
+                                      new String[] {"A01", "B02", "C03", "D04", "E05"});
     doTestCherryPickRequestAllocation(9,
-                                     new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
-                                     new String[] {"A01", "B02", "C03", "D04", "E05", "F06"});
+                                      requestVolume,
+                                      new String[] {"A01", "B02", "C03", "D04", "E05", "F06"}, 
+                                      new String[] {"A01", "B02", "C03", "D04", "E05", "F06"});
    
     // TODO: it would be good to test the case where allocation 1 is fulfilled
     // by copy 1, allocation 2 is only fullfillable by copy 2, but then
     // allocation 3 is fulfillable (again) by copy 1
+  }
+  
+  public void testCherryPickRequestAllocatorWithNonStandardWellVolumesOnPlate()
+  {
+    final int requestVolume = 6;
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        Library library = makeRNAiDuplexLibrary("library", 1, 1, 384);
+        Copy copy1 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
+        CopyInfo copyInfo1 = new CopyInfo(copy1, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        Copy copy2 = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
+        CopyInfo copyInfo2 = new CopyInfo(copy2, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(12).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copyInfo1.setMicroliterWellVolume(new WellKey(1, "A01"), new BigDecimal(requestVolume - 1).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copyInfo2.setMicroliterWellVolume(new WellKey(1, "A01"), new BigDecimal(requestVolume - 1).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copyInfo1.setMicroliterWellVolume(new WellKey(1, "B02"), new BigDecimal(requestVolume).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copyInfo2.setMicroliterWellVolume(new WellKey(1, "B02"), new BigDecimal(requestVolume - 1).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        genericEntityDao.persistEntity(library);
+      }
+    });
+
+    doTestCherryPickRequestAllocation(1, 
+                                      requestVolume,
+                                      new String[] {"A01", "B02", "C03"}, 
+                                      new String[] {"A01"});
+    doTestCherryPickRequestAllocation(2,
+                                      requestVolume,
+                                      new String[] {"A01", "B02", "C03"}, 
+                                      new String[] {"A01", "B02"});
+    doTestCherryPickRequestAllocation(3,
+                                      requestVolume,
+                                      new String[] {"A01", "B02", "C03"}, 
+                                      new String[] {"A01", "B02"});
+    doTestCherryPickRequestAllocation(3,
+                                      requestVolume,
+                                      new String[] {"A01", "B02", "C03"}, 
+                                      new String[] {"A01", "B02", "C03"});
   }
   
   public void testAllocateSingleLabCherryPick()
@@ -259,13 +306,14 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
   // private methods
 
   private void doTestCherryPickRequestAllocation(final int screenNumber,
+                                                 final int requestVolume,
                                                  final String[] cherryPickWellNames, 
                                                  final String[] expectedUnfillableCherryPickWellNames)
   {
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        CherryPickRequest cherryPickRequest = createCherryPickRequest(screenNumber, 6);
+        CherryPickRequest cherryPickRequest = createCherryPickRequest(screenNumber, requestVolume);
         Set<LabCherryPick> expectedUnfulfillableCherryPicks = new HashSet<LabCherryPick>();
         Set<String> expectedUnfillableCherryPickWellNamesSet = new HashSet<String>(Arrays.asList(expectedUnfillableCherryPickWellNames));
         ScreenerCherryPick dummyScreenerCherryPick = new ScreenerCherryPick(cherryPickRequest, librariesDao.findWell(new WellKey(1, new WellName(cherryPickWellNames[0]))));

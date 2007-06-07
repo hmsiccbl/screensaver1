@@ -13,13 +13,15 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-
-import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -52,7 +54,16 @@ public class CopyInfo extends AbstractEntity
   private Integer _plateNumber;
   private String _location;
   private PlateType _plateType;
-  private BigDecimal _volume; // TODO: rename to make units explicit (nL)
+  /**
+   * The default volume (microliters) for a well on this copy plate.
+   */
+  private BigDecimal _microliterWellVolume;
+  /**
+   * Sparse map of non-standard well volumes. If well is not represented in the
+   * map, the well's volume is CopyInfo._microliterWellVolume.
+   */
+  // TODO: map should really be Map<WellName,BigDecimal>, but this is transient code so not going to fix...
+  private Map<WellKey,BigDecimal> _microliterWellVolumes = new HashMap<WellKey,BigDecimal>();
   private String _comments;
   private Date _datePlated;
   private Date _dateRetired;
@@ -80,7 +91,7 @@ public class CopyInfo extends AbstractEntity
     _plateNumber = plateNumber;
     _location = location;
     _plateType = plateType;
-    setVolume(volume);
+    setMicroliterWellVolume(volume);
     _copy.getHbnCopyInfos().add(this);
   }
 
@@ -221,31 +232,34 @@ public class CopyInfo extends AbstractEntity
   }
 
   /**
-   * Get the volume.
-   *
-   * @return the volume
-   * @hibernate.property
-   *   type="big_decimal"
-   *   not-null="true"
+   * Use {@link #getMicroliterWellVolume(WellKey)}.
    */
-  public BigDecimal getVolume()
+  @DerivedEntityProperty
+  public BigDecimal getDefaultMicroliterWellVolume()
   {
-    return _volume;
+    return _microliterWellVolume;
   }
 
   /**
-   * Set the volume.
-   *
-   * @param volume the new volume
+   * Get the initially available volume (microliters) for a well on this copy
+   * plate.
+   * 
+   * @param wellKey
+   * @return the initially available volume (microliters) the specified well
+   * @motivation Some wells will differ from the plate-specified volume
    */
-  public void setVolume(BigDecimal volume)
+  @DerivedEntityProperty
+  public BigDecimal getMicroliterWellVolume(WellKey wellKey)
   {
-    if (volume == null) {
-      _volume = null;
+    if (_microliterWellVolumes.containsKey(wellKey)) {
+      return _microliterWellVolumes.get(wellKey);
     }
-    else {
-      _volume = volume.setScale(VOLUME_SCALE, RoundingMode.HALF_UP);
-    }
+    return _microliterWellVolume;
+  }
+  
+  public void setMicroliterWellVolume(WellKey wellKey, BigDecimal microliterVolume)
+  {
+    _microliterWellVolumes.put(wellKey, microliterVolume.setScale(VOLUME_SCALE));
   }
 
   /**
@@ -512,5 +526,45 @@ public class CopyInfo extends AbstractEntity
   private void setHbnPlateNumber(Integer plateNumber)
   {
     _plateNumber = plateNumber;
+  }
+
+  /**
+   * Get the default volume (microliters) for wells on this copy plate.  
+   * 
+   * @return the volume
+   * @hibernate.property type="big_decimal" not-null="true"
+   */
+  private BigDecimal getMicroliterWellVolume()
+  {
+    return _microliterWellVolume;
+  }
+  
+  /**
+   * Set the volume.
+   *
+   * @param volume the new volume
+   */
+  private void setMicroliterWellVolume(BigDecimal volume)
+  {
+    if (volume == null) {
+      _microliterWellVolume = null;
+    }
+    else {
+      _microliterWellVolume = volume.setScale(VOLUME_SCALE, RoundingMode.HALF_UP);
+    }
+  }
+
+  /*
+   * Note: Hibernate mapping is in hibernate-properties-CopyInfo.xml. Could be
+   * done via XDoclet, but this is transient code, so not going to fix it.
+   */
+  private Map<WellKey,BigDecimal> getMicroliterWellVolumes()
+  {
+    return _microliterWellVolumes;
+  }
+
+  private void setMicroliterWellVolumes(Map<WellKey,BigDecimal> microliterWellVolumes)
+  {
+    _microliterWellVolumes = microliterWellVolumes;
   }
 }

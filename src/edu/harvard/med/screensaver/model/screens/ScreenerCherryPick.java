@@ -73,8 +73,11 @@ public class ScreenerCherryPick extends AbstractEntity
     _cherryPickRequest = cherryPickRequest;
     _screenedWell = screenedWell;
     boolean added = _cherryPickRequest.getScreenerCherryPicks().add(this);
-    if (!added) {
-      throw new DuplicateEntityException(cherryPickRequest, this);
+    // TODO: remove relaxed constraint for CompoundCherryPickRequest after #79682 is fixed
+    if (!(cherryPickRequest instanceof CompoundCherryPickRequest)) {
+      if (!added) {
+        throw new DuplicateEntityException(cherryPickRequest, this);
+      }
     }
   }
 

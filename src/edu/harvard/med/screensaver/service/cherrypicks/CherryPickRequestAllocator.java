@@ -54,7 +54,7 @@ public class CherryPickRequestAllocator
    * inaccurracy on the number of times the well was drawn from, but the above
    * strategy is considered sufficient by the lab).
    */
-  static final BigDecimal MINIMUM_SOURCE_WELL_VOLUME = new BigDecimal(1);
+   public static final BigDecimal MINIMUM_SOURCE_WELL_VOLUME = new BigDecimal(1);
 
 
   // static members
@@ -241,7 +241,7 @@ public class CherryPickRequestAllocator
       // if plate has been retired, it has no usable volume
       return BigDecimal.ZERO;
     }
-    BigDecimal startingVolume = plateCopyInfo.getVolume();
+    BigDecimal startingVolume = plateCopyInfo.getMicroliterWellVolume(well.getWellKey());
     return startingVolume;
   }
   
