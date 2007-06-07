@@ -299,7 +299,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   {
     logUserActivity(BROWSE_LIBRARIES);
     if (getLibrariesBrowser().getLibrarySearchResults() == null) {
-      //List<Library> libraries = _dao.findAllEntitiesOfType(Library.class);
       List<Library> libraries = _librariesDao.findLibrariesDisplayedInLibrariesBrowser();
       _librariesBrowser.setLibrarySearchResults(new LibrarySearchResults(libraries, this));
     }
