@@ -214,6 +214,12 @@ public class DataRowParser
     if (! (vendorIdentifier == null || vendorIdentifier.equals(""))) {
       well.setVendorIdentifier(vendorIdentifier);
     }
+    
+    // remove any old silencing reagents from the well. if they are there, then they are from an
+    // old import, and they no longer belong there if the gene and/or silencing reagents in the well
+    // in the new import file are different. (if they are the same, they will be re-added anyway.)
+    well.removeSilencingReagents();
+    
     return well;
   }
 
