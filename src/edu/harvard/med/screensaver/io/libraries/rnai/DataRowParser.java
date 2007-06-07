@@ -351,9 +351,9 @@ public class DataRowParser
     Cell oldEntrezgeneIdsCell = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.OLD_ENTREZGENE_IDS),
       _rowIndex);
-    String sequences = oldEntrezgeneIdsCell.getString();
-    if (sequences != null && ! sequences.equals("")) {
-      for (String oldEntrezgeneIdString : sequences.split("[,;]")) {
+    String oldEntrezgeneIds = oldEntrezgeneIdsCell.getAsString();
+    if (oldEntrezgeneIds != null && ! oldEntrezgeneIds.equals("")) {
+      for (String oldEntrezgeneIdString : oldEntrezgeneIds.split("[,;]")) {
         try {
           gene.addOldEntrezgeneId(new Integer(oldEntrezgeneIdString));
         }
