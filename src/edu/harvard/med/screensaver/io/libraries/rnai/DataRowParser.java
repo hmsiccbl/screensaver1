@@ -356,6 +356,13 @@ public class DataRowParser
     String oldEntrezgeneIds = oldEntrezgeneIdsCell.getAsString();
     if (oldEntrezgeneIds != null && ! oldEntrezgeneIds.equals("")) {
       for (String oldEntrezgeneIdString : oldEntrezgeneIds.split("[,;]")) {
+        
+        // hack to work around quirkiness with HSSF spreadsheet parsing library
+        if (oldEntrezgeneIdString.endsWith(".0")) {
+          oldEntrezgeneIdString =
+            oldEntrezgeneIdString.substring(0, oldEntrezgeneIdString.length() - 2);
+        }
+        
         try {
           gene.addOldEntrezgeneId(new Integer(oldEntrezgeneIdString));
         }
