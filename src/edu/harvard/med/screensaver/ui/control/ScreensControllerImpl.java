@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
@@ -66,6 +67,7 @@ import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreensBrowser;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -1144,6 +1146,8 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
           // TODO: this might be better done in a copy constructor
           newCherryPickRequest.setMicroliterTransferVolumePerWellApproved(cherryPickRequest.getMicroliterTransferVolumePerWellApproved());
           newCherryPickRequest.setMicroliterTransferVolumePerWellRequested(cherryPickRequest.getMicroliterTransferVolumePerWellRequested());
+          newCherryPickRequest.setVolumeApprovedBy(cherryPickRequest.getVolumeApprovedBy());
+          newCherryPickRequest.setDateVolumeApproved(cherryPickRequest.getDateVolumeApproved());
           newCherryPickRequest.setDateRequested(new Date());
           newCherryPickRequest.setRandomizedAssayPlateLayout(cherryPickRequest.isRandomizedAssayPlateLayout());
           newCherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(new HashSet<Integer>(cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate()));
@@ -1303,29 +1307,68 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                                             // needed by libraryPoolToDuplexWellMapper, below
                                             "hbnSilencingReagents.hbnWells.hbnSilencingReagents.gene",
                                             "hbnSilencingReagents.gene");
-            ScreenerCherryPick screenerCherryPick = new ScreenerCherryPick(cherryPickRequest, well);
-            if (!arePoolWells) {
-              new LabCherryPick(screenerCherryPick, well);
+            if (well == null) {
+              throw new InvalidCherryPickWellException(wellKey, "no such well");
+            } 
+            else {
+              ScreenerCherryPick screenerCherryPick = new ScreenerCherryPick(cherryPickRequest, well);
+              if (!arePoolWells) {
+                new LabCherryPick(screenerCherryPick, well);
+              }
             }
           }
+          
           if (arePoolWells) {
             _libraryPoolToDuplexWellMapper.createDuplexLabCherryPicksforPoolScreenerCherryPicks((RNAiCherryPickRequest) cherryPickRequest);
           }
           
+          
         }
       });
-      return viewCherryPickRequest(cherryPickRequestIn);
+      
+      doWarnOnInvalidPoolWellScreenerCherryPicks(cherryPickRequestIn);
+      doWarnOnDuplicateScreenerCherryPicks(cherryPickRequestIn);
+      
+      
     }
     catch (DataAccessException e) {
       showMessage("databaseOperationFailed", e.getMessage());
     }
+    catch (InvalidCherryPickWellException e) {
+      showMessage("cherryPicks.invalidWell", e.getWellKey());
+    }
     catch (BusinessRuleViolationException e) {
       showMessage("businessError", e.getMessage());
     }
-    catch (InvalidCherryPickWellException e) {
-      showMessage("cherryPicks.invalidWell", e.getWell());
+    return viewCherryPickRequest(cherryPickRequestIn);
+  }
+
+  private void doWarnOnInvalidPoolWellScreenerCherryPicks(CherryPickRequest cherryPickRequestIn)
+  {
+    int n = 0;
+    for (ScreenerCherryPick screenerCherryPick : cherryPickRequestIn.getScreenerCherryPicks()) {
+      if (screenerCherryPick.getLabCherryPicks().size() == 0) {
+        ++n;
+      }
     }
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    if (n > 0) {
+      showMessage("cherryPicks.poolWellsWithoutDuplexWells", Integer.toString(n));
+    }
+  }
+
+  private void doWarnOnDuplicateScreenerCherryPicks(final CherryPickRequest cherryPickRequestIn)
+  {
+    Map<WellKey,Number> duplicateScreenerCherryPickWellKeysMap = _cherryPickRequestDao.findDuplicateCherryPicksForScreen(cherryPickRequestIn.getScreen());
+    Set<WellKey> duplicateScreenerCherryPickWellKeys = duplicateScreenerCherryPickWellKeysMap.keySet();
+    Set<WellKey> ourScreenerCherryPickWellsKeys = new HashSet<WellKey>();
+    for (ScreenerCherryPick screenerCherryPick : cherryPickRequestIn.getScreenerCherryPicks()) {
+      ourScreenerCherryPickWellsKeys.add(screenerCherryPick.getScreenedWell().getWellKey());
+    }
+    duplicateScreenerCherryPickWellKeys.retainAll(ourScreenerCherryPickWellsKeys);
+    if (duplicateScreenerCherryPickWellKeysMap.size() > 0) {
+      String duplicateWellsList = StringUtils.makeListString(duplicateScreenerCherryPickWellKeys, ", ");
+      showMessage("cherryPicks.duplicateCherryPicksInScreen", cherryPickRequestIn.getScreen().getScreenNumber(), duplicateWellsList);
+    }
   }
 }
 

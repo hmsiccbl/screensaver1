@@ -10,20 +10,30 @@
 package edu.harvard.med.screensaver.db;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.screendb.ScreenDBSynchronizer;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.springframework.orm.hibernate3.HibernateCallback;
 
 public class CherryPickRequestDAO extends AbstractDAO
 {
@@ -174,6 +184,29 @@ public class CherryPickRequestDAO extends AbstractDAO
   {
     return new HashSet<ScreenerCherryPick>(
       getHibernateTemplate().find("from ScreenerCherryPick where screenedWell = ?", well));
+  }
+  
+  @SuppressWarnings("unchecked")
+  public Map<WellKey,Number> findDuplicateCherryPicksForScreen(final Screen screen)
+  {
+    return (Map<WellKey,Number>) getHibernateTemplate().execute(new HibernateCallback() {
+      public Object doInHibernate(Session session) throws HibernateException, SQLException
+      {
+        Query query = session.createQuery("select sw.wellId, count(*) " +
+                            "from Screen s left join s.cherryPickRequests cpr left join cpr.screenerCherryPicks scp join scp.screenedWell sw " +
+                            "where s.hbnScreenNumber = :screenNumber " +
+                            "group by sw.wellId " +
+                            "having count(*) > 1");
+        query.setReadOnly(true);
+        query.setParameter("screenNumber", screen.getScreenNumber());
+        Map<WellKey,Number> result = new HashMap<WellKey,Number>();
+        for (Iterator iter = query.list().iterator(); iter.hasNext();) {
+          Object[] row = (Object[]) iter.next();
+          result.put(new WellKey(row[0].toString()), (Number) row[1]);
+        }
+        return result;
+      }
+    });
   }
   
   // private methods

@@ -12,8 +12,6 @@ package edu.harvard.med.screensaver.model.screens;
 
 import java.math.BigDecimal;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
@@ -22,6 +20,8 @@ import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -97,7 +97,7 @@ public class LabCherryPick extends AbstractEntity
 
     if (_cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI) && 
       sourceWell.getSilencingReagents().size() == 0) {
-      throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (does not contain any reagents)");
+      throw new InvalidCherryPickWellException(sourceWell.getWellKey(), "does not contain any reagents");
     }
 
     _sourceWell = sourceWell;

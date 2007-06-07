@@ -4,17 +4,17 @@
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
-// at Harvard Medical School. This software is distributed under the terms of
+ // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.model.screens;
 
-import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 
 import org.apache.log4j.Logger;
 
-public class InvalidCherryPickWellException extends DataModelViolationException
+public class InvalidCherryPickWellException extends BusinessRuleViolationException
 {
   // static members
 
@@ -23,19 +23,19 @@ public class InvalidCherryPickWellException extends DataModelViolationException
   
   // instance data
   
-  private Well _well;
+  private WellKey _wellKey;
 
   // public constructors and methods
 
-  public InvalidCherryPickWellException(String message, Well well)
+  public InvalidCherryPickWellException(WellKey wellKey, String message)
   {
     super(message);
-    _well = well;
+    _wellKey = wellKey;
   }
   
-  public Well getWell()
+  public WellKey getWellKey()
   {
-    return _well;
+    return _wellKey;
   }
 }
 

@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -697,7 +698,6 @@ public class ComplexDAOTest extends AbstractSpringTest
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
         new LabCherryPick(new ScreenerCherryPick(cherryPickRequest, poolWell1), pool1DuplexWells.iterator().next());
         new LabCherryPick(new ScreenerCherryPick(cherryPickRequest, poolWell2), pool2DuplexWells.iterator().next());
-        //genericEntityDao.persistEntity(cherryPickRequest); // TODO: why do we need this, if we're also persisting the screen?!
         genericEntityDao.persistEntity(screen);
         result[0] = cherryPickRequest;
       }
@@ -1022,7 +1022,20 @@ public class ComplexDAOTest extends AbstractSpringTest
   
   public void testEntityInflationInvalidRelationship()
   {
-    // TODO: implement, but requires that DAOImpl.need() throws an exception or assertion failure on an invalid relationship request
+    Library library = new Library("library 1",
+                                  "lib1",
+                                  ScreenType.SMALL_MOLECULE,
+                                  LibraryType.COMMERCIAL,
+                                  1,
+                                  1);
+    new Well(library, 1, "A01"); 
+    genericEntityDao.persistEntity(library);
+    try {
+      // oops...should've been "hbnWells"! 
+      genericEntityDao.need(library, "wells");
+      fail("invalid relationship name was not detected!");
+    }
+    catch (Exception e) {}
   }
   
   public void testRelationshipSize()
@@ -1079,5 +1092,35 @@ public class ComplexDAOTest extends AbstractSpringTest
         assertEquals("collaborators size", 2, genericEntityDao.relationshipSize(screen.getHbnCollaborators()));
       }
     });
+  }
+  
+  public void testFindDuplicateCherryPicksForScreen()
+  {
+    CherryPickRequest cherryPickRequest1 = makeCherryPickRequest(1);
+    Screen screen = cherryPickRequest1.getScreen();
+
+    CherryPickRequest cherryPickRequest2 = screen.createCherryPickRequest();
+    Iterator<ScreenerCherryPick> scpIter = cherryPickRequest1.getScreenerCherryPicks().iterator();
+    ScreenerCherryPick duplicateScreenerCherryPick1 = scpIter.next();
+    new LabCherryPick(new ScreenerCherryPick(cherryPickRequest2, duplicateScreenerCherryPick1.getScreenedWell()),
+                      duplicateScreenerCherryPick1.getLabCherryPicks().iterator().next().getSourceWell());
+    genericEntityDao.persistEntity(screen);
+    Map<WellKey,Number> duplicateCherryPickWells = cherryPickRequestDao.findDuplicateCherryPicksForScreen(screen);
+    assertEquals("duplicate cherry picks count", 1, duplicateCherryPickWells.size());
+    assertEquals("duplicate cherry pick well keys", 
+                 new HashSet<WellKey>(Arrays.asList(duplicateScreenerCherryPick1.getScreenedWell().getWellKey())),
+                 duplicateCherryPickWells.keySet());
+    
+    CherryPickRequest cherryPickRequest3 = screen.createCherryPickRequest();
+    ScreenerCherryPick duplicateScreenerCherryPick2 = scpIter.next();
+    new LabCherryPick(new ScreenerCherryPick(cherryPickRequest3, duplicateScreenerCherryPick2.getScreenedWell()),
+                      duplicateScreenerCherryPick2.getLabCherryPicks().iterator().next().getSourceWell());
+    genericEntityDao.persistEntity(screen);
+    duplicateCherryPickWells = cherryPickRequestDao.findDuplicateCherryPicksForScreen(screen);
+    assertEquals("duplicate cherry picks count", 2, duplicateCherryPickWells.size());
+    assertEquals("duplicate cherry pick well keys", 
+                 new HashSet<WellKey>(Arrays.asList(duplicateScreenerCherryPick1.getScreenedWell().getWellKey(), duplicateScreenerCherryPick2.getScreenedWell().getWellKey())),
+                 duplicateCherryPickWells.keySet());
+    
   }
 }
