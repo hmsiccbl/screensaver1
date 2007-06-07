@@ -46,6 +46,7 @@
         <h:outputLink
           value="#{nameValueTable.link[nameValueTable.cellValue]}"
           rendered="#{nameValueTable.isLinkValue}"
+          target="_blank"
         >
           <h:outputText value="#{nameValueTable.cellValue}" />
         </h:outputLink>
@@ -74,7 +75,10 @@
           rendered="#{nameValueTable.isLinkListValue}"
           rowIndexVar="eltIndex"
           rowCountVar="eltCount">
-          <h:outputLink value="#{nameValueTable.link[eltValue]}">
+          <h:outputLink
+            value="#{nameValueTable.link[eltValue]}"
+            target="_blank"          
+          >
             <h:outputText value="#{eltValue}" />
           </h:outputLink>
           <h:outputText value=";" rendered="#{eltIndex < eltCount - 1}" />
