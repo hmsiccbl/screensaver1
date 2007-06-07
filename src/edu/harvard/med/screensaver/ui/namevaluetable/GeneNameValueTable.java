@@ -40,6 +40,7 @@ public class GeneNameValueTable extends NameValueTable
   private static final String GENE_NAME = "Gene&nbsp;Name";
   private static final String ENTREZGENE_ID = "EntrezGene&nbsp;ID";
   private static final String ENTREZGENE_SYMBOL = "EntrezGene&nbsp;Symbol";
+  private static final String OLD_ENTREZGENE_IDS = "Old&nbsp;EntrezGene&nbsp;IDs";
   private static final String GENBANK_ACCESSION_NUMBERS = "GenBank&nbsp;Accession&nbsp;Numbers";
   private static final String SPECIES_NAME = "Species&nbsp;Name";
 
@@ -119,7 +120,8 @@ public class GeneNameValueTable extends NameValueTable
   public String getLink(int index, String value)
   {
     String name = getName(index);
-    if (name.equals(ENTREZGENE_ID)) {
+    if (name.equals(ENTREZGENE_ID) || name.equals(OLD_ENTREZGENE_IDS)) {
+      log.info("LINK TO " + ENTREZGENE_ID_LOOKUP_URL_PREFIX + value);
       return ENTREZGENE_ID_LOOKUP_URL_PREFIX + value;
     }
     if (name.equals(GENBANK_ACCESSION_NUMBERS)) {
@@ -139,8 +141,11 @@ public class GeneNameValueTable extends NameValueTable
   private void initializeLists(Gene gene)
   {
     addItem(GENE_NAME, gene.getGeneName(), _isEmbedded ? ValueType.COMMAND : ValueType.TEXT, "The name of the gene, as labelled in EntrezGene");
-    addItem(ENTREZGENE_ID, Integer.toString(gene.getEntrezgeneId()), ValueType.LINK, "The EntrezGene ID, a.k.a. Locus ID");
+    addItem(ENTREZGENE_ID, gene.getEntrezgeneId(), ValueType.LINK, "The EntrezGene ID, a.k.a. Locus ID");
     addItem(ENTREZGENE_SYMBOL, gene.getEntrezgeneSymbol(), ValueType.TEXT, "The EntrezGene Gene Symbol");
+    if (! gene.getOldEntrezgeneIds().isEmpty()) {
+      addItem(OLD_ENTREZGENE_IDS, gene.getOldEntrezgeneIds(), ValueType.LINK_LIST, "Old EntrezGene IDs that refer to the same gene");      
+    }
     addItem(GENBANK_ACCESSION_NUMBERS, gene.getGenbankAccessionNumbers(), ValueType.LINK_LIST, "The GenBank Accession Numbers for the gene");
     addItem(SPECIES_NAME, gene.getSpeciesName(), ValueType.TEXT, "The species this gene is found in");
   }

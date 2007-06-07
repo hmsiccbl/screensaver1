@@ -54,7 +54,16 @@ abstract public class NameValueTable extends AbstractBackingBean
     private static final long serialVersionUID = 1L;
     public String get(Object key)
     {
-      String linkValue = (String) key;
+      String linkValue;
+      if (key instanceof String) {
+        linkValue = (String) key;        
+      }
+      else if (key instanceof Integer) {
+        linkValue = ((Integer) key).toString();
+      }
+      else {
+        throw new RuntimeException("expected String or Integer value for key");
+      }
       return getLink(getRowIndex(), linkValue);
     }
   };
