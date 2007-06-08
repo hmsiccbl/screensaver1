@@ -139,6 +139,16 @@ public class DataRowParser
       return;
     }
     addGenbankAccessionNumberToWell(well);
+    
+    // remove any silencing reagents that were in the well from a previous import. but be careful
+    // to not remove any that you are planning to add back in, or you might get a
+    // org.hibernate.ObjectDeletedException
+    for (SilencingReagent silencingReagent : well.getSilencingReagents()) {
+      if (! silencingReagents.contains(silencingReagent)) {
+        well.removeSilencingReagent(silencingReagent);
+      }
+    }
+    
     for (SilencingReagent silencingReagent : silencingReagents) {
       well.addSilencingReagent(silencingReagent);
     }
@@ -216,11 +226,6 @@ public class DataRowParser
     if (! (vendorIdentifier == null || vendorIdentifier.equals(""))) {
       well.setVendorIdentifier(vendorIdentifier);
     }
-    
-    // remove any old silencing reagents from the well. if they are there, then they are from an
-    // old import, and they no longer belong there if the gene and/or silencing reagents in the well
-    // in the new import file are different. (if they are the same, they will be re-added anyway.)
-    well.removeSilencingReagents();
     
     return well;
   }
