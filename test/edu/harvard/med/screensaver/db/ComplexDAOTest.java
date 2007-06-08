@@ -693,8 +693,7 @@ public class ComplexDAOTest extends AbstractSpringTest
         Set<Well> pool2DuplexWells = CherryPickRequestAllocatorTest.makeRNAiDuplexWellsForPoolWell(duplexLibrary, poolWell2, 4, new WellName("P24"));
         genericEntityDao.persistEntity(duplexLibrary);
         
-        Screen screen = MakeDummyEntities.makeDummyScreen(screenNumber); 
-        screen.setScreenType(ScreenType.RNAI);
+        Screen screen = MakeDummyEntities.makeDummyScreen(screenNumber, ScreenType.RNAI);
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
         new LabCherryPick(new ScreenerCherryPick(cherryPickRequest, poolWell1), pool1DuplexWells.iterator().next());
         new LabCherryPick(new ScreenerCherryPick(cherryPickRequest, poolWell2), pool2DuplexWells.iterator().next());

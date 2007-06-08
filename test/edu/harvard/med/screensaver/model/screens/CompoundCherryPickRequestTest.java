@@ -69,7 +69,6 @@ public class CompoundCherryPickRequestTest extends AbstractEntityInstanceTest
         genericEntityDao.persistEntity(library);
         
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
-        screen.setScreenType(ScreenType.SMALL_MOLECULE);
         
         ScreenResult screenResult = new ScreenResult(screen, new Date());
         ResultValueType resultValueType = new ResultValueType(screenResult, "values");

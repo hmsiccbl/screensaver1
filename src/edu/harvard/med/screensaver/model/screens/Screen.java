@@ -21,6 +21,7 @@ import java.util.TreeSet;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -594,19 +595,10 @@ public class Screen extends AbstractEntity
    *   type="edu.harvard.med.screensaver.model.screens.ScreenType$UserType"
    *   not-null="true"
    */
+  @ImmutableProperty
   public ScreenType getScreenType()
   {
     return _screenType;
-  }
-
-  /**
-   * Set the screen type.
-   *
-   * @param screenType the new screen type
-   */
-  public void setScreenType(ScreenType screenType)
-  {
-    _screenType = screenType;
   }
 
   /**
@@ -1089,6 +1081,16 @@ public class Screen extends AbstractEntity
    */
   private void setVersion(Integer version) {
     _version = version;
+  }
+
+  /**
+   * Set the screen type.
+   *
+   * @param screenType the new screen type
+   */
+  private void setScreenType(ScreenType screenType)
+  {
+    _screenType = screenType;
   }
 
   /**

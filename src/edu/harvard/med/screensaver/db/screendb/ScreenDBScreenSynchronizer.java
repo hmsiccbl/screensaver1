@@ -126,10 +126,12 @@ public class ScreenDBScreenSynchronizer
           abaseProtocolId);
       }
       else {
+        if (!screen.getScreenType().equals(screenType)) {
+          throw new ScreenDBSynchronizationException("screen type has changed in ScreenDB data for Screen " + screen.getScreenNumber() + " but changing screen type in Screensaver is prohibited");
+        }
         screen.setLeadScreener(leadScreener);
         screen.setLabHead(labHead);
         screen.setDateCreated(dateCreated);
-        screen.setScreenType(screenType);
         screen.setTitle(screenTitle);
         screen.setDataMeetingScheduled(dataMeetingScheduled);
         screen.setDataMeetingComplete(dataMeetingComplete);

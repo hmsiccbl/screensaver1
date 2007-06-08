@@ -59,13 +59,10 @@ TODO:
 			styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 
 		<t:outputLabel for="screenType" value="Screen Type" title="'Small Molecule' or 'RNAi'" />
-		<t:selectOneMenu id="screenType"
+		<t:outputText id="screenType"
 			value="#{screenViewer.screen.screenType}"
 			converter="ScreenTypeConverter"
-			displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
-			displayValueOnlyStyleClass="dataText">
-			<f:selectItems value="#{screenViewer.screenTypeSelectItems}" />
-		</t:selectOneMenu>
+			styleClass="dataText" />
 
 		<%-- "lab name" == last name of "lab head", but former is required for UI, latter is for internal design --%>
 		<t:outputLabel for="labNameEditable" value="Lab Name"

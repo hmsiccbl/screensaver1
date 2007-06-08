@@ -46,8 +46,7 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
     {
       public void runTransaction() 
       {
-        Screen screen = MakeDummyEntities.makeDummyScreen(1);
-        screen.setScreenType(ScreenType.RNAI);
+        Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
         cherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(requestedEmptyColumns);
         genericEntityDao.persistEntity(cherryPickRequest); // why do we need this, if we're also persisting the screen?!
@@ -75,8 +74,7 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
     {
       public void runTransaction()
       {
-        Screen screen = MakeDummyEntities.makeDummyScreen(1);
-        screen.setScreenType(ScreenType.RNAI);
+        Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
         RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
         genericEntityDao.persistEntity(CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, 384));
 

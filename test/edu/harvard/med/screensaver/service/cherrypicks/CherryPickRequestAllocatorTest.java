@@ -259,8 +259,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
 
   static CherryPickRequest createCherryPickRequest(int screenNumber, int volume)
   {
-    Screen screen = MakeDummyEntities.makeDummyScreen(screenNumber);
-    screen.setScreenType(ScreenType.RNAI);
+    Screen screen = MakeDummyEntities.makeDummyScreen(screenNumber, ScreenType.RNAI);
     // Note: if we use screen.getLeadScreener() as requestor, Hibernate complains!
     ScreeningRoomUser cherryPickRequestor =
       MakeDummyEntities.makeDummyUser(screenNumber, "Cherry", "Picker");

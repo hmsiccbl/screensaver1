@@ -160,8 +160,7 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
       {
         // cherry pick pool whose gene is in both library 1 and 2, but only cherry picked from library 1
         {
-          Screen screen = MakeDummyEntities.makeDummyScreen(1);
-          screen.setScreenType(ScreenType.RNAI);
+          Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
           RNAiCherryPickRequest rnaiCherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
           Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest, 
                                                                                          new WellKey(1, "A01"));
@@ -177,8 +176,7 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
         
         // cherry pick pool whose gene is in both library 1 and 2, and cherry picked from both libraries
         {
-          Screen screen = MakeDummyEntities.makeDummyScreen(2);
-          screen.setScreenType(ScreenType.RNAI);
+          Screen screen = MakeDummyEntities.makeDummyScreen(2, ScreenType.RNAI);
           RNAiCherryPickRequest rnaiCherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
           Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest, 
                                                                                   new WellKey(1, "A01"),
@@ -199,8 +197,7 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
         
         // cherry pick pool whose gene is only in library1
         {
-          Screen screen = MakeDummyEntities.makeDummyScreen(31);
-          screen.setScreenType(ScreenType.RNAI);
+          Screen screen = MakeDummyEntities.makeDummyScreen(31, ScreenType.RNAI);
           RNAiCherryPickRequest rnaiCherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
           Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest, 
                                                                                   new WellKey(1, "B02"));
@@ -216,8 +213,7 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
         
         // cherry pick pool whose gene is only in library2
         {
-          Screen screen = MakeDummyEntities.makeDummyScreen(4);
-          screen.setScreenType(ScreenType.RNAI);
+          Screen screen = MakeDummyEntities.makeDummyScreen(4, ScreenType.RNAI);
           RNAiCherryPickRequest rnaiCherryPickRequest = new RNAiCherryPickRequest(screen, screen.getLeadScreener(), new Date());
           Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest, 
                                                                                          new WellKey(6, "B02"));

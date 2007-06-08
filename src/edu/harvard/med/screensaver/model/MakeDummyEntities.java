@@ -39,7 +39,7 @@ public class MakeDummyEntities
                                  true);
   }
 
-  public static Screen makeDummyScreen(int screenNumber)
+  public static Screen makeDummyScreen(int screenNumber, ScreenType screenType)
   {
     ScreeningRoomUser labHead = makeDummyUser(screenNumber, "Lab", "Head");
     ScreeningRoomUser leadScreener = makeDummyUser(screenNumber, "Lead", "Screener");
@@ -47,9 +47,14 @@ public class MakeDummyEntities
                                leadScreener,
                                screenNumber,
                                new Date(),
-                               ScreenType.SMALL_MOLECULE,
+                               screenType,
                                "Dummy screen");
     return screen;
+  }
+
+  public static Screen makeDummyScreen(int screenNumber)
+  {
+    return makeDummyScreen(screenNumber, ScreenType.SMALL_MOLECULE);
   }
 
 

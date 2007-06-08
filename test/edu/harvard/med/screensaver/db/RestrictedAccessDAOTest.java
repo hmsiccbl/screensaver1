@@ -123,12 +123,10 @@ public class RestrictedAccessDAOTest extends AbstractSpringTest
     ScreeningRoomUser rnaiUser = makeUserWithRoles(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
     ScreeningRoomUser compoundUser = makeUserWithRoles(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
 
-    Screen rnaiScreen = MakeDummyEntities.makeDummyScreen(1);
-    rnaiScreen.setScreenType(ScreenType.RNAI);
+    Screen rnaiScreen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
     ScreenResult screenResult1 = new ScreenResult(rnaiScreen, new Date());
     screenResult1.setShareable(true);
-    Screen compoundScreen = MakeDummyEntities.makeDummyScreen(2);
-    compoundScreen.setScreenType(ScreenType.RNAI);
+    Screen compoundScreen = MakeDummyEntities.makeDummyScreen(2, ScreenType.RNAI);
     ScreenResult screenResult2 = new ScreenResult(compoundScreen, new Date());
     screenResult2.setShareable(true);
     
