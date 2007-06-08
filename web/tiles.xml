@@ -255,7 +255,7 @@
   
   <definition name="/help/screens/cherryPickRequestViewer/cherryPickRequestDetailsHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Cherry Pick Request Viewer: Details Help" />
-    <put name="body" value="/help/screens/cherryPickRequestViewer/screenSummaryHelp.jsp" />
+    <put name="body" value="/help/screens/cherryPickRequestViewer/cherryPickRequestDetailsHelp.jsp" />
   </definition>
   
   <definition name="/help/screens/cherryPickRequestViewer/screenerCherryPicksHelp.tiles" extends=".pageHelpBase">
