@@ -70,7 +70,6 @@ Other	Princeton University, Chemistry Department
 Other	Samuel Lunenfield Research Institute/Mount Sinai Hospital
 Broad/ICG	Broad Institute and Harvard University
 Other	St. Andrew's University, Scotland
-Other	State University of New York, Stonybrook
 Other	Stony Brook University
 Other	Texas A&M University
 Other	The Molecular Sciences Institute
