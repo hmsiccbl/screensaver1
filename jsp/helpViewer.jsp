@@ -302,7 +302,102 @@
             </t:headerLink>
           </t:div>
         </f:facet>
-        <%@ include file="help/screens/cherryPickRequestViewerHelp.jsp" %>
+        <t:aliasBean alias="#{inHelpViewer}" value="true">
+          <%@ include file="help/screens/cherryPickRequestViewerHelp.jsp" %>
+        </t:aliasBean>
+
+        <t:div style="margin-left: 30px">
+
+          <t:collapsiblePanel
+            value="#{helpViewer.isPanelCollapsedMap['cprvScreenSummaryHelp']}"
+            var="isCollapsed"
+          >
+            <f:facet name="header">
+              <t:div styleClass="subsectionHeader">
+                <t:headerLink immediate="true" styleClass="subsectionHeader">
+                  <h:graphicImage
+                    value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+                    styleClass="icon"
+                  />
+                  <h:outputText value="Screen Summary" styleClass="subsectionHeader" />
+                </t:headerLink>
+              </t:div>
+            </f:facet>
+            <%@ include file="help/screens/cherryPickRequestViewer/screenSummaryHelp.jsp" %>
+          </t:collapsiblePanel>
+
+          <t:collapsiblePanel
+            value="#{helpViewer.isPanelCollapsedMap['cherryPickRequestSummaryHelp']}"
+            var="isCollapsed"
+          >
+            <f:facet name="header">
+              <t:div styleClass="subsectionHeader">
+                <t:headerLink immediate="true" styleClass="subsectionHeader">
+                  <h:graphicImage
+                    value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+                    styleClass="icon"
+                  />
+                  <h:outputText value="Cherry Pick Request Details" styleClass="subsectionHeader" />
+                </t:headerLink>
+              </t:div>
+            </f:facet>
+            <%@ include file="help/screens/cherryPickRequestViewer/cherryPickRequestDetailsHelp.jsp" %>
+          </t:collapsiblePanel>
+
+          <t:collapsiblePanel
+            value="#{helpViewer.isPanelCollapsedMap['screenerCherryPicksHelp']}"
+            var="isCollapsed"
+          >
+            <f:facet name="header">
+              <t:div styleClass="subsectionHeader">
+                <t:headerLink immediate="true" styleClass="subsectionHeader">
+                  <h:graphicImage
+                    value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+                    styleClass="icon"
+                  />
+                  <h:outputText value="Screener Cherry Picks" styleClass="subsectionHeader" />
+                </t:headerLink>
+              </t:div>
+            </f:facet>
+            <%@ include file="help/screens/cherryPickRequestViewer/screenerCherryPicksHelp.jsp" %>
+					</t:collapsiblePanel>
+
+          <t:collapsiblePanel
+            value="#{helpViewer.isPanelCollapsedMap['labCherryPicksHelp']}"
+            var="isCollapsed"
+          >
+            <f:facet name="header">
+              <t:div styleClass="subsectionHeader">
+                <t:headerLink immediate="true" styleClass="subsectionHeader">
+                  <h:graphicImage
+                    value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+                    styleClass="icon"
+                  />
+                  <h:outputText value="Lab Cherry Picks" styleClass="subsectionHeader" />
+                </t:headerLink>
+              </t:div>
+            </f:facet>
+            <%@ include file="help/screens/cherryPickRequestViewer/labCherryPicksHelp.jsp" %>
+          </t:collapsiblePanel>
+
+          <t:collapsiblePanel
+            value="#{helpViewer.isPanelCollapsedMap['cherryPickPlatesHelp']}"
+            var="isCollapsed"
+          >
+            <f:facet name="header">
+              <t:div styleClass="subsectionHeader">
+                <t:headerLink immediate="true" styleClass="subsectionHeader">
+                  <h:graphicImage
+                    value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+                    styleClass="icon"
+                  />
+                  <h:outputText value="Cherry Pick Plates" styleClass="subsectionHeader" />
+                </t:headerLink>
+              </t:div>
+            </f:facet>
+            <%@ include file="help/screens/cherryPickRequestViewer/cherryPickPlatesHelp.jsp" %>
+          </t:collapsiblePanel>
+        </t:div>
       </t:collapsiblePanel>
 
     </t:panelGrid>

@@ -63,9 +63,9 @@ TODO:
 			</t:panelGrid>
 		</t:collapsiblePanel>
 
-		<t:collapsiblePanel id="cherryPickRequestPanel"
-			value="#{cherryPickRequestViewer.isPanelCollapsedMap['cherryPickRequest']}"
-			title="Cherry Pick Request" var="isCollapsed" titleVar="title">
+		<t:collapsiblePanel id="cherryPickRequestDetailsPanel"
+			value="#{cherryPickRequestViewer.isPanelCollapsedMap['cherryPickRequestDetails']}"
+			title="Cherry Pick Request Details" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
 				<t:div styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
@@ -78,7 +78,7 @@ TODO:
 			</f:facet>
 
 			<t:panelGrid columns="1">
-				<t:panelGroup id="cherryPickRequstCommandPanel"
+				<t:panelGroup id="cherryPickRequestCommandPanel"
 					rendered="#{cherryPickRequestViewer.editable}"
 					styleClass="commandPanel">
 					<t:commandButton id="editCommand" value="Edit"
@@ -200,7 +200,7 @@ TODO:
 						displayValueOnly="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.mapped}"
 						styleClass="command" displayValueOnlyStyleClass="dataText" />
 
-					<t:outputText value="Empty&nbsp;columns&nbsp;on&nbsp;plate"
+					<t:outputText value="Screener-requested&nbsp;empty columns&nbsp;on&nbsp;plate"
 						escape="false" />
 					<t:outputText
 						value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlateAsString}"
@@ -262,23 +262,27 @@ TODO:
 				styleClass="label"
 				rendered="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks && !cherryPickRequestViewer.editable}" />
 
-			<t:panelGrid id="addCherryPicks" columns="1"
+			<t:panelGrid id="addCherryPicksAndHelpPanels" columns="2"
+				columnClasses="column"
 				rendered="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks && cherryPickRequestViewer.editable}">
-				<t:outputLabel for="cherryPicksInput"
-					value="Specify cherry picks as plate/well pairs:"
-					styleClass="label" />
-				<t:inputTextarea id="cherryPicksInput" rows="20" cols="30"
-					value="#{cherryPickRequestViewer.cherryPicksInput}"
-					styleClass="inputText" />
-				<t:commandButton id="addPoolCherryPicksCommand"
-					value="Add Cherry Picks (Pool Wells)"
-					action="#{cherryPickRequestViewer.addPoolCherryPicks}"
-					rendered="#{cherryPickRequestViewer.rnaiScreen}"
-					styleClass="command" />
-				<t:commandButton id="addCherryPicksCommand"
-					value="Add Cherry Picks"
-					action="#{cherryPickRequestViewer.addCherryPicks}"
-					styleClass="command" />
+				<t:panelGrid id="addCherryPicksPanel" columns="1">
+					<t:outputLabel for="cherryPicksInput"
+						value="Specify cherry picks as plate/well pairs:"
+						styleClass="label" />
+					<t:inputTextarea id="cherryPicksInput" rows="30" cols="30"
+						value="#{cherryPickRequestViewer.cherryPicksInput}"
+						styleClass="inputText" />
+					<t:commandButton id="addPoolCherryPicksCommand"
+						value="Add Cherry Picks (Pool Wells)"
+						action="#{cherryPickRequestViewer.addPoolCherryPicks}"
+						rendered="#{cherryPickRequestViewer.rnaiScreen}"
+						styleClass="command" />
+					<t:commandButton id="addCherryPicksCommand"
+						value="Add Cherry Picks"
+						action="#{cherryPickRequestViewer.addCherryPicks}"
+						styleClass="command" />
+				</t:panelGrid>
+				<%@ include file="../help/libraries/wellFinderInputHelp.jsp"%>
 			</t:panelGrid>
 
 			<t:panelGrid id="viewScreenerCherryPicks" columns="1"

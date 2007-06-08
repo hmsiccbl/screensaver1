@@ -248,4 +248,29 @@
     <put name="body" value="/help/screens/cherryPickRequestViewerHelp.jsp" />
   </definition>
 
+  <definition name="/help/screens/cherryPickRequestViewer/screenSummaryHelp.tiles" extends=".pageHelpBase">
+    <put name="pageTitle" value="Cherry Pick Request Viewer: Screen Summary Help" />
+    <put name="body" value="/help/screens/cherryPickRequestViewer/screenSummaryHelp.jsp" />
+  </definition>
+  
+  <definition name="/help/screens/cherryPickRequestViewer/cherryPickRequestDetailsHelp.tiles" extends=".pageHelpBase">
+    <put name="pageTitle" value="Cherry Pick Request Viewer: Details Help" />
+    <put name="body" value="/help/screens/cherryPickRequestViewer/screenSummaryHelp.jsp" />
+  </definition>
+  
+  <definition name="/help/screens/cherryPickRequestViewer/screenerCherryPicksHelp.tiles" extends=".pageHelpBase">
+    <put name="pageTitle" value="Cherry Pick Request Viewer: Screener Cherry Picks Help" />
+    <put name="body" value="/help/screens/cherryPickRequestViewer/screenerCherryPicksHelp.jsp" />
+  </definition>
+  
+  <definition name="/help/screens/cherryPickRequestViewer/labCherryPicksHelp.tiles" extends=".pageHelpBase">
+    <put name="pageTitle" value="Cherry Pick Request Viewer: Lab Cherry Picks Help" />
+    <put name="body" value="/help/screens/cherryPickRequestViewer/labCherryPicksHelp.jsp" />
+  </definition>
+  
+  <definition name="/help/screens/cherryPickRequestViewer/cherryPickPlatesHelp.tiles" extends=".pageHelpBase">
+    <put name="pageTitle" value="Cherry Pick Request Viewer: Cherry Pick Plates Help" />
+    <put name="body" value="/help/screens/cherryPickRequestViewer/cherryPickPlatesHelp.jsp" />
+  </definition>
+  
 </tiles-definitions>
