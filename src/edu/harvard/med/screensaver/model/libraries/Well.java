@@ -312,6 +312,7 @@ public class Well extends AbstractEntity implements Comparable
       silencingReagent.getHbnWells().contains(this)) :
         "asymmetric compound/well association encountered";
     if (getHbnSilencingReagents().remove(silencingReagent)) {
+      silencingReagent.getGene().getHbnSilencingReagents().remove(silencingReagent);
       return silencingReagent.getHbnWells().remove(this);
     }
     return false;
