@@ -6,25 +6,43 @@
 <f:subview id="heatMapsHelpText">
   <f:verbatim escape="false">
     <p>
-      Heat Maps help is currently under construction. Check back soon!
-    </p>
-    <p>
-      TODO: rework the following material:
+      The Heat Maps section of the Screen Viewer page allows you to look at heat maps for the
+      assay plates. Each well on the plate is colored from blue to red to indicate the range of the
+      value from low to high. The legend on the right side of the chart tells you what colors are
+      used for what values, and also provides various plate-level statistics. You can customize your
+      heat maps in many ways:
       <ul>
-          <li>
-            Be sure to try the "Add Heat Map" button to view two heat maps for different data headers
-            side by side;
-          </li>
-          <li>
-            You can exclude control wells and edge wells from Z-score normalization calculations and
-            color scaling by checking the "Control wells" and "Edge wells" checkboxes to the left
-            of the heat map.
-          </li>
-          <li>
-          	Clicking on a heat map cell will take to the Well Viewer.  Hovering your the mouse cursor 
-          	over the cell will popup some information about the cell.
-          </li>
-        </ul>
+        <li>
+          Select a plate number to view in the pulldown menu at the top left
+          labelled "Plate". Or use the blue arrow buttons to scroll through the plates.
+        </li>
+        <li>
+          Click on the checkbox next to "Show values" to show or hide the numerical values in the
+          cells. Change the number format for numerical values by selecting from the
+          "Numeric format" pulldown menu to the left of the heat map, and clicking the "Update"
+          button below.
+        </li>
+        <li>
+          View values for a different data header by making a selection from the
+          "Data header" pulldown menu to the left of the heat map, and clicking the "Update" button
+          below.
+        </li>
+        <li>
+          Normalize values using a z-score by selecting from the "Scoring" pulldown menu to the left
+          of the heat map. Click on the checkboxes next to "Control wells" and "Edge wells" to
+          exclude those values from your normalization. Be sure to click the "Update" button
+          to redisplay the results.
+        </li>
+        <li>
+          Click the "Add Heat Map" button at the top to compare two or more heat maps simultaneously.
+          You can compare two different columns of data by selecting different data headers for the
+          each heat map.
+        </li>
+        <li>
+        	Click on any heat map cell to view that well in the Well Viewer page. You can also hover
+         the mouse cursor over the cell to get cell coordinates and data value.
+        </li>
+      </ul>
     </p>
   </f:verbatim>
 </f:subview>

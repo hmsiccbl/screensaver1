@@ -23,8 +23,8 @@
         </li>
         <li>
           Click the checkbox next to "Show only hits for positives" to filter out all non-hit data.
-          If there are multiple Data Headers that indicate positives, you can select which positive
-          indicator you want to filter by in the pulldown menu.
+          If there are multiple data headers that indicate positives, you can select which positive
+          indicator you want to filter on in the pulldown menu.
         </li>
         <li>
           Change the sort order by clicking on any of the column headers. Clicking once will do a
