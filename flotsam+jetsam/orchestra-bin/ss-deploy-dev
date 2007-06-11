@@ -5,6 +5,5 @@
 
 cd ${SCREENSAVER_ROOT:-$HOME/screensaver} 
 ant \
--Dscreensaver.properties.file=resources/screensaver.properties.orchestra.dev \
--Ddebug=true \
-deploy
+-Dscreensaver.properties.file=resources/screensaver.properties.orchestra.dev deploy
+
