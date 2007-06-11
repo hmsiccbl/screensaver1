@@ -38,12 +38,14 @@ TODO:
 				columnClasses="keyColumn,column">
 
 				<t:outputText value="Screen&nbsp;ID" escape="false"
-					visibleOnUserRole="developer" />
+					visibleOnUserRole="developer"
+          title="The database ID for the screen. This is an implementation-level detail displayed only for development purposes" />
 				<t:outputText id="screenId"
 					value="#{cherryPickRequestViewer.cherryPickRequest.screen.screenId}"
 					styleClass="dataText" visibleOnUserRole="developer" />
 
-				<t:outputText value="Screen&nbsp;Number" escape="false" />
+				<t:outputText value="Screen&nbsp;Number" escape="false"
+          title="The number used to uniquely identify the screen" />
 				<t:commandLink id="screenCommand"
 					action="#{cherryPickRequestViewer.viewScreen}">
 					<t:outputText id="screenNumber"
@@ -51,12 +53,12 @@ TODO:
 						styleClass="dataText" />
 				</t:commandLink>
 
-				<t:outputText value="Title" escape="false" />
+				<t:outputText value="Title" escape="false" title="The title of the screen" />
 				<t:outputText id="title"
 					value="#{cherryPickRequestViewer.cherryPickRequest.screen.title}"
 					styleClass="dataText" />
 
-				<t:outputText value="Screen&nbsp;Type" escape="false" />
+				<t:outputText value="Screen&nbsp;Type" escape="false" title="'Small Molecule' or 'RNAi'" />
 				<t:outputText id="screenType"
 					value="#{cherryPickRequestViewer.cherryPickRequest.screen.screenType}"
 					converter="ScreenTypeConverter" styleClass="dataText" />
@@ -84,37 +86,41 @@ TODO:
 					<t:commandButton id="editCommand" value="Edit"
 						action="#{cherryPickRequestViewer.setEditMode}"
 						styleClass="command"
-						rendered="#{!cherryPickRequestViewer.editMode}" />
+						rendered="#{!cherryPickRequestViewer.editMode}"
+						title="Enter edit mode for the cherry pick request" />
 					<t:commandButton id="deleteCommand" value="Delete"
 						action="#{cherryPickRequestViewer.deleteCherryPickRequest}"
 						onclick="javascript: return confirm('Delete this cherry pick request and all of its cherry picks permanently?');"
 						styleClass="command"
 						rendered="#{cherryPickRequestViewer.editable && !cherryPickRequestViewer.editMode}"
-						disabled="#{cherryPickRequestViewer.cherryPickRequest.allocated}" />
+						disabled="#{cherryPickRequestViewer.cherryPickRequest.allocated}"
+						title="Delete this cherry pick request" />
 					<t:commandButton id="saveCommand" value="Save"
 						action="#{cherryPickRequestViewer.save}" styleClass="command"
-						rendered="#{cherryPickRequestViewer.editMode}" />
+						rendered="#{cherryPickRequestViewer.editMode}"
+						title="Save your changes and leave edit mode" />
 					<h:commandButton id="cancelEditCommand" value="Cancel"
 						rendered="#{cherryPickRequestViewer.editMode}"
 						action="#{cherryPickRequestViewer.cancelEdit}" immediate="true"
-						styleClass="command" />
+						styleClass="command" title="Discard your changes and leave edit mode" />
 					<t:commandButton id="downloadCherryPickRequestCommand"
 						value="Download"
 						action="#{cherryPickRequestViewer.downloadCherryPickRequest}"
 						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks}"
-						styleClass="command" />
+						styleClass="command" title="Download the cherry pick request to a file"/>
 				</t:panelGroup>
 
 				<t:panelGrid id="cherryPickRequestInfoTable" columns="2"
 					styleClass="standardTable" rowClasses="row1,row2"
 					columnClasses="keyColumn,column">
 
-					<t:outputText value="Cherry Pick Request #" />
+					<t:outputText value="Cherry Pick Request #" title="The cherry pick request number" />
 					<t:outputText id="cherryPickRequestEntityNumber"
 						value="#{cherryPickRequestViewer.cherryPickRequest.cherryPickRequestNumber}"
 						styleClass="dataText" />
 
-					<t:outputText value="Date Requested" />
+					<t:outputText value="Date Requested"
+					  title="The date the cherry pick request was made by the screener" />
 					<t:inputDate id="dateRequestedEditable"
 						value="#{cherryPickRequestViewer.cherryPickRequest.dateRequested}"
 						popupCalendar="true"
@@ -125,7 +131,8 @@ TODO:
 						rendered="#{!cherryPickRequestViewer.editMode}"
 						styleClass="dataText" />
 
-					<t:outputText value="Requested&nbsp;By" escape="false" />
+					<t:outputText value="Requested&nbsp;By" escape="false"
+					  title="The screener that made the request" />
 					<h:panelGroup rendered="#{!cherryPickRequestViewer.editMode}">
 						<t:commandLink id="requestedBy"
 							value="#{cherryPickRequestViewer.cherryPickRequest.requestedBy.fullNameLastFirst}"
@@ -149,7 +156,7 @@ TODO:
 					</t:selectOneMenu>
 
 					<t:outputText value="Requested&nbsp;Volume&nbsp;(&#181;L)"
-						escape="false" />
+						escape="false" title="The volume per well that the screener requested" />
 					<t:inputText id="requestedVolume"
 						value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellRequested}"
 						displayValueOnly="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.allocated}"
@@ -157,7 +164,7 @@ TODO:
 						displayValueOnlyStyleClass="dataText" />
 
 					<t:outputText value="Approved&nbsp;Volume&nbsp;(&#181;L)"
-						escape="false" />
+						escape="false" title="The volume per well approved by the screening room" />
 					<t:outputText
 						value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellApproved}"
 						rendered="#{(!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.allocated) && empty cherryPickRequestViewer.cherryPickRequest.volumeApprovedBy}"
@@ -172,7 +179,8 @@ TODO:
 							value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellApproved}"
 							size="5" styleClass="inputText" />
 						<t:outputText value="Approved&nbsp;By" escape="false"
-							styleClass="label keyColumn" />
+							styleClass="label keyColumn"
+							title="The screening room staff member that approved this volume" />
 						<t:selectOneMenu id="volumeApprovedByEditable"
 							value="#{cherryPickRequestViewer.volumeApprovedBy.value}"
 							rendered="#{cherryPickRequestViewer.editMode}"
@@ -180,7 +188,8 @@ TODO:
 							<f:selectItems
 								value="#{cherryPickRequestViewer.volumeApprovedBy.selectItems}" />
 						</t:selectOneMenu>
-						<t:outputText value="Date Approved" styleClass="label keyColumn" />
+						<t:outputText value="Date Approved" styleClass="label keyColumn"
+						  title="The date the cherry pick volume was approved" />
 						<t:inputDate id="dateVolumeApprovedEditable"
 							value="#{cherryPickRequestViewer.cherryPickRequest.dateVolumeApproved}"
 							popupCalendar="true"
@@ -188,20 +197,21 @@ TODO:
 					</t:panelGroup>
 
 					<t:outputText value="Cherry&nbsp;Pick&nbsp;Plate&nbsp;Type"
-						escape="false" />
+						escape="false" title="The plate type, e.g., 'Eppendorf', 'Genetix', etc." />
 					<t:outputText
 						value="#{cherryPickRequestViewer.cherryPickRequest.assayPlateType}"
 						styleClass="dataText" />
 
 					<t:outputText value="Random&nbsp;plate&nbsp;well&nbsp;layout"
-						escape="false" />
+						escape="false"
+						title="True when screener requested a random layout for the cherry pick plates" />
 					<t:selectBooleanCheckbox
 						value="#{cherryPickRequestViewer.cherryPickRequest.randomizedAssayPlateLayout}"
 						displayValueOnly="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.mapped}"
 						styleClass="command" displayValueOnlyStyleClass="dataText" />
 
 					<t:outputText value="Screener-requested&nbsp;empty columns&nbsp;on&nbsp;plate"
-						escape="false" />
+						escape="false" title="The columns the screener requested to leave empty" />
 					<t:outputText
 						value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlateAsString}"
 						rendered="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.mapped}"
@@ -215,7 +225,7 @@ TODO:
 							value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlate.selectItems}" />
 					</t:selectManyListbox>
 
-					<t:outputText value="Comments" escape="false" />
+					<t:outputText value="Comments" escape="false" title="Comments made by screening room staff" />
 					<t:inputTextarea id="cherryPickRequestComments"
 						value="#{cherryPickRequestViewer.cherryPickRequest.comments}"
 						rows="10" cols="80"
@@ -223,17 +233,19 @@ TODO:
 						styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 
 					<t:outputText value="Screener&nbsp;cherry&nbsp;picks"
-						escape="false" />
+						escape="false" title="The number of screener cherry picks" />
 					<t:outputText id="screenCherryPickCount"
 						value="#{cherryPickRequestViewer.screenerCherryPickCount}"
 						styleClass="dataText" />
 
-					<t:outputText value="Lab&nbsp;cherry&nbsp;picks" escape="false" />
+					<t:outputText value="Lab&nbsp;cherry&nbsp;picks" escape="false"
+					  title="The number of lab cherry picks" />
 					<t:outputText id="labCherryPickCount"
 						value="#{cherryPickRequestViewer.labCherryPickCount}"
 						styleClass="dataText" />
 
-					<t:outputText value="Cherry&nbsp;Pick&nbsp;Plates" escape="false" />
+					<t:outputText value="Cherry&nbsp;Pick&nbsp;Plates" escape="false"
+					  title="The number of cherry pick plates" />
 					<t:outputText id="assayPlatesCount"
 						value="#{cherryPickRequestViewer.assayPlatesDataModel.rowCount}"
 						styleClass="dataText" />
@@ -260,7 +272,8 @@ TODO:
 
 			<t:outputText value="Cherry picks have not yet been specified."
 				styleClass="label"
-				rendered="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks && !cherryPickRequestViewer.editable}" />
+				rendered="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks && !cherryPickRequestViewer.editable}"
+				title="Yes, that's right, the cherry picks have not yet been specified" />
 
 			<t:panelGrid id="addCherryPicksAndHelpPanels" columns="2"
 				columnClasses="column"
