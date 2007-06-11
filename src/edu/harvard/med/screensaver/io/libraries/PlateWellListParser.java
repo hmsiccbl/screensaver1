@@ -32,10 +32,10 @@ public class PlateWellListParser
   
   // TODO: consider moving these to WellKey
   private static final Pattern _plateWellHeaderLinePattern = Pattern.compile(
-    "^\\s*plate\\s+well\\s*$",
+    "^\\s*((((stock|384)\\s+)?plate)\\s+(((stock|384)\\s+)?well)|(stock_id\\s+row))\\s*$",
     Pattern.CASE_INSENSITIVE);
   private static final Pattern _plateWellPattern = Pattern.compile(
-    "^\\s*((PL[-_]?)?(\\d+))[A-P](0?[1-9]|1[0-9]|2[0-4]).*",
+    "^\\s*((PL[-_]?)?(\\d+))([:;,])?[A-P](0?[1-9]|1[0-9]|2[0-4]).*",
     Pattern.CASE_INSENSITIVE);
   private static final Pattern _plateNumberPattern = Pattern.compile(
     "^\\s*(PL[-_]?)?(\\d+)\\s*$",
@@ -82,6 +82,12 @@ public class PlateWellListParser
         // skip lines that say "Plate Well"
         Matcher matcher = _plateWellHeaderLinePattern.matcher(line);
         if (matcher.matches()) {
+          continue;
+        }
+
+        // trim leading and trailing whitespace, and skip blank lines
+        line = line.trim();
+        if (line.equals("")) {
           continue;
         }
 
@@ -146,8 +152,13 @@ public class PlateWellListParser
   {
     Matcher matcher = _plateWellPattern.matcher(line);
     if (matcher.matches()) {
-      int spliceIndex = matcher.group(1).length();
-      line = line.substring(0, spliceIndex) + " " + line.substring(spliceIndex);
+      int spliceStartIndex = matcher.group(1).length();
+      int spliceEndIndex = spliceStartIndex;
+      if (matcher.group(4) != null) {
+        spliceEndIndex ++;
+      }
+      line = line.substring(0, spliceStartIndex) + " " + line.substring(spliceEndIndex);
+      log.info("spliced line = " + line);
     }
     return line;
   }
