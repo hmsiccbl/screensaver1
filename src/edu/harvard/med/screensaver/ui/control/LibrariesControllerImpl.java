@@ -391,40 +391,48 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   public String viewWell(Well well, WellSearchResults wellSearchResults)
   {
     if (well == null) {
-      showMessage("libraries.noSuchWell", well.getPlateNumber(), well.getWellName());
+      reportApplicationError("attempted to view an unknown well (not in database)");
       return REDISPLAY_PAGE_ACTION_RESULT;
+      
     }
     return viewWell(well.getWellKey(), wellSearchResults);
   }
 
-    /**
-     * @param wellSearchResults <code>null</code> if well was not found within
-     *          the context of a search result
-     */
-    @UIControllerMethod
+  /**
+   * @param wellSearchResults <code>null</code> if well was not found within
+   *          the context of a search result
+   */
+  @UIControllerMethod
   public String viewWell(final WellKey wellKey, WellSearchResults wellSearchResults)
   {
     logUserActivity(VIEW_WELL + " " + wellKey);
-    _wellViewer.setWellSearchResults(wellSearchResults);
-    
-    _dao.doInTransaction(new DAOTransaction() {
-      public void runTransaction()
-      {
-        // TODO: try outer join HQL query instead of iteration, for performance improvement
-        Well well = _dao.findEntityById(Well.class,
-                                        wellKey.toString(),
-                                        true,
-                                        "hbnLibrary",
-                                        "hbnSilencingReagents.gene.genbankAccessionNumbers",
-                                        "hbnCompounds.compoundNames",
-                                        "hbnCompounds.pubchemCids",
-                                        "hbnCompounds.nscNumbers",
-                                        "hbnCompounds.casNumbers");
-        _wellViewer.setWell(well);
-        _wellViewer.setWellNameValueTable(new WellNameValueTable(LibrariesControllerImpl.this, well));
-      }
-    });
-    
+   
+    try {
+      _dao.doInTransaction(new DAOTransaction() {
+        public void runTransaction()
+        {
+          Well well = _dao.findEntityById(Well.class,
+                                          wellKey.toString(),
+                                          true,
+                                          "hbnLibrary",
+                                          "hbnSilencingReagents.gene.genbankAccessionNumbers",
+                                          "hbnCompounds.compoundNames",
+                                          "hbnCompounds.pubchemCids",
+                                          "hbnCompounds.nscNumbers",
+                                          "hbnCompounds.casNumbers");
+          if (well == null) {
+            throw new IllegalArgumentException("no such well");
+          }
+          _wellViewer.setWell(well);
+          _wellViewer.setWellNameValueTable(new WellNameValueTable(LibrariesControllerImpl.this, well));
+        }
+      });
+      _wellViewer.setWellSearchResults(wellSearchResults);
+    }
+    catch (IllegalArgumentException e) {
+      showMessage("libraries.noSuchWell", wellKey.getPlateNumber(), wellKey.getWellName());
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
     return VIEW_WELL;
   }
 
