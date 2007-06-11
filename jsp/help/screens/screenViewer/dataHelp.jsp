@@ -19,7 +19,7 @@
         </li>
         <li>
           To the right of the blue navigation buttons, you can enter in a data row number and click
-          "Go" to get view that data.
+          "Go" to view that data.
         </li>
         <li>
           Click the checkbox next to "Show only hits for positives" to filter out all non-hit data.
