@@ -427,8 +427,7 @@ public class ScreenResultViewer extends AbstractBackingBean
     try {
       int tmpFirstResultValueIndex = (pageIndex * getDataTable().getRows());
       if (tmpFirstResultValueIndex >= 0 &&
-        tmpFirstResultValueIndex < getScreenResult().getResultValueTypes().first().getResultValues().size()) {
-        // update the plate selection list to the current plate
+        tmpFirstResultValueIndex < getRawDataSize()) {
         if (getRawData() != EMPTY_RAW_DATA_MODEL) {
           _firstResultValueIndex = tmpFirstResultValueIndex;
         }
@@ -519,11 +518,11 @@ public class ScreenResultViewer extends AbstractBackingBean
     // clear state of our data headers model, forcing lazy initialization when needed
     _dataHeadersColumnModel = null;
     updateHitsForDataHeaderSelections();
-    updateDataTableRows();
+    updateDataTableContent();
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
-  public String updateDataTableRows()
+  public String updateDataTableContent()
   {
     setFirstResultValueIndex(0);
     return REDISPLAY_PAGE_ACTION_RESULT;

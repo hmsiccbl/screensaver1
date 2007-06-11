@@ -11,7 +11,8 @@
 
 <f:subview id="screenAndResultViewer">
 
-	<t:aliasBean alias="#{navigator}" value="#{screensBrowser.screenSearchResults}">
+	<t:aliasBean alias="#{navigator}"
+		value="#{screensBrowser.screenSearchResults}">
 		<%@ include file="../searchResultsNavPanel.jspf"%>
 	</t:aliasBean>
 
@@ -19,8 +20,9 @@
 		<%@ include file="screenresults/admin/cherryPickUploader.jspf">
 	</t:panelGroup--%>
 
-	<h:form id="dataForm">
-		<t:panelGrid columns="1" width="100%">
+	<t:panelGrid columns="1" width="100%">
+
+		<h:form id="screenPanelForm">
 			<t:collapsiblePanel id="screenPanel"
 				value="#{screenResultViewer.isPanelCollapsedMap['screenSummary']}"
 				title="Screen Summary" var="isCollapsed" titleVar="title">
@@ -40,14 +42,16 @@
 
 				<f:facet name="closedContent">
 					<t:panelGrid columns="1">
-						<t:outputText value="#{screenViewer.screen.screenNumber}: \"#{screenViewer.screen.title}\""
+						<t:outputText value="#{screenViewer.screen.screenNumber}: \"
+							#{screenViewer.screen.title}\""
 							styleClass="dataText" />
 						<t:div>
-							<t:outputText value="Lab:" styleClass="label"/>
+							<t:outputText value="Lab:" styleClass="label" />
 							<t:commandLink value="#{screenViewer.screen.labHead.labName}"
 								action="#{screenViewer.viewLabHead}"
 								styleClass="dataText entityLink" />
-							<t:outputText value="&nbsp;&nbsp;Screener:" styleClass="label" escape="false"/>
+							<t:outputText value="&nbsp;&nbsp;Screener:" styleClass="label"
+								escape="false" />
 							<t:commandLink
 								value="#{screenViewer.screen.leadScreener.fullNameLastFirst}"
 								action="#{screenViewer.viewLeadScreener}"
@@ -58,7 +62,9 @@
 
 				<%@ include file="../screens/screenViewer.jspf"%>
 			</t:collapsiblePanel>
+		</h:form>
 
+		<h:form id="screenResultPanelForm">
 			<t:collapsiblePanel id="screenResultPanel"
 				value="#{screenResultViewer.isPanelCollapsedMap['screenResultSummary']}"
 				title="Screen Result Summary" var="isCollapsed" titleVar="title"
@@ -77,8 +83,7 @@
 
 				<t:panelGroup>
 					<t:commandButton action="#{screenResultViewer.download}"
-						value="Download"
-						styleClass="command"
+						value="Download" styleClass="command"
 						title="Download the screen results in an Excel file format" />
 					<t:commandButton action="#{screenResultViewer.delete}"
 						value="Delete"
@@ -99,13 +104,13 @@
 						styleClass="dataText" /--%>
 
 					<t:outputLabel for="screenResultLastImported" value="Last Imported"
-					  title="The date the current screen results were loaded into the database" />
+						title="The date the current screen results were loaded into the database" />
 					<t:outputText id="screenResultLastImported"
 						value="#{screenResultViewer.screenResult.dateLastImported}"
 						styleClass="dataText" />
 
 					<t:outputLabel for="screenResultIsShareable" value="Shareable"
-					  title="True when the results are shareable with scientists outside the lab" />
+						title="True when the results are shareable with scientists outside the lab" />
 					<t:div>
 						<t:selectBooleanCheckbox id="screenResultIsShareable"
 							value="#{screenResultViewer.screenResult.shareable}"
@@ -119,52 +124,55 @@
 					</t:div>
 
 					<t:outputLabel for="screenResultPlateCount" value="Plates"
-					  title="The number of plates for which we have results" />
+						title="The number of plates for which we have results" />
 					<t:outputText id="screenResultPlateCount"
 						value="#{screenResultViewer.screenResult.plateNumberCount}"
 						styleClass="dataText" />
 
 					<t:outputLabel for="screenResultReplicateCount" value="Replicates"
-					  title="The number of replicates screened" />
+						title="The number of replicates screened" />
 					<t:outputText id="screenResultReplicateCount"
 						value="#{screenResultViewer.screenResult.replicateCount}"
 						styleClass="dataText" />
 
 					<t:outputLabel for="screenResultExperimentalWellCount"
 						value="Experimental Wells"
-					  title="The number of experimental wells for which we have results" />
+						title="The number of experimental wells for which we have results" />
 					<t:outputText id="screenResultExperimentalWellCount"
 						value="#{screenResultViewer.screenResult.experimentalWellCount}"
 						styleClass="dataText" />
 
 				</t:panelGrid>
 			</t:collapsiblePanel>
+		</h:form>
 
+		<h:form id="dataHeadersSelectionForm">
 			<t:panelGrid columns="1"
 				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted && !(screenResultViewer.isPanelCollapsedMap['dataHeadersTable'] && screenResultViewer.isPanelCollapsedMap['dataTable'])}"
 				title="Select the data headers to display in the Data Headers and Data tables below">
 				<t:outputLabel for="dataHeadersList"
 					value="Show selected data headers:" styleClass="label" />
-				<t:selectManyCheckbox id="dataHeadersList" layout="pageDirection" layoutWidth="6" 
-					value="#{screenResultViewer.selectedResultValueTypes.value}" 
+				<t:selectManyCheckbox id="dataHeadersList" layout="pageDirection"
+					layoutWidth="6"
+					value="#{screenResultViewer.selectedResultValueTypes.value}"
 					valueChangeListener="#{screenResultViewer.resultValueTypesChangeListener}"
 					binding="#{screenResultViewer.dataHeadersSelectMany}"
 					styleClass="label" style="vertical-align: top">
-					<f:selectItems id="dataHeaders" 
+					<f:selectItems id="dataHeaders"
 						value="#{screenResultViewer.selectedResultValueTypes.selectItems}" />
 				</t:selectManyCheckbox>
 				<t:panelGroup>
 					<t:commandButton id="updateDataHeadersButton" forceId="true"
 						value="Update" action="#{screenResultViewer.updateDataHeaders}"
-						styleClass="command"
-						title="Update the data headers selection" />
+						styleClass="command" title="Update the data headers selection" />
 					<t:commandButton id="allDataHeadersButton" value="All"
 						action="#{screenResultViewer.showAllDataHeaders}"
-						styleClass="command"
-						title="Select all of the data headers" />
+						styleClass="command" title="Select all of the data headers" />
 				</t:panelGroup>
 			</t:panelGrid>
+		</h:form>
 
+		<h:form id="dataHeadersPanelForm">
 			<t:collapsiblePanel id="dataHeadersPanel"
 				value="#{screenResultViewer.isPanelCollapsedMap['dataHeadersTable']}"
 				title="Data Headers" var="isCollapsed" titleVar="title"
@@ -188,7 +196,8 @@
 						<f:facet name="header">
 							<t:outputText value="Property" />
 						</f:facet>
-						<t:outputText value="#{row.rowLabel}" escape="false" title="#{row.rowTitle}" />
+						<t:outputText value="#{row.rowLabel}" escape="false"
+							title="#{row.rowTitle}" />
 					</t:column>
 					<t:columns value="#{screenResultViewer.dataHeadersColumnModel}"
 						var="columnName" styleClass="column">
@@ -199,8 +208,16 @@
 					</t:columns>
 				</t:dataTable>
 			</t:collapsiblePanel>
+		</h:form>
 
-			<t:collapsiblePanel id="dataTablePanel"	
+		<h:form id="dataTablePanelForm">
+			<%-- we want updateDataTablePositionButton to be first command button so that it hitting Enter in 'row' field defaults to this command --%>%
+			<t:commandButton id="updateDataTablePositionButton" forceId="true"
+				styleClass="hiddenCommand" />
+			<t:commandButton id="updateDataTableContentButton" forceId="true"
+				action="#{screenResultViewer.updateDataTableContent}" 
+				styleClass="hiddenCommand" />
+			<t:collapsiblePanel id="dataTablePanel"
 				value="#{screenResultViewer.isPanelCollapsedMap['dataTable']}"
 				title="Data" var="isCollapsed" titleVar="title"
 				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted}">
@@ -215,26 +232,33 @@
 					</t:div>
 				</f:facet>
 
-				<t:panelGrid columns="1" style="width: 100%" rendered="#{!isCollapsed}">
+				<t:panelGrid columns="1" style="width: 100%"
+					rendered="#{!isCollapsed}">
 					<t:panelGroup id="dataTableCommandPanel" styleClass="commandPanel">
 						<h:commandButton id="firstPageCommand"
 							action="#{screenResultViewer.firstPage}" value="First"
-							image="/images/arrow-first.png" styleClass="command" title="First page" />
+							image="/images/arrow-first.png" styleClass="command"
+							title="First page" />
 						<t:commandButton id="prevPageCommand"
 							action="#{screenResultViewer.prevPlate}" value="Prev Plate"
-							image="/images/arrow-fastrewind.png" styleClass="command" title="Previous plate"/>
+							image="/images/arrow-fastrewind.png" styleClass="command"
+							title="Previous plate" />
 						<t:commandButton id="prevPlateCommand"
-							action="#{screenResultViewer.prevPage}" value="Prev" 
-							image="/images/arrow-previous.png" styleClass="command" title="Previous page"/>
+							action="#{screenResultViewer.prevPage}" value="Prev"
+							image="/images/arrow-previous.png" styleClass="command"
+							title="Previous page" />
 						<t:commandButton id="nextPageCommand"
 							action="#{screenResultViewer.nextPage}" value="Next"
-							image="/images/arrow-next.png" styleClass="command" title="Next page"/>
+							image="/images/arrow-next.png" styleClass="command"
+							title="Next page" />
 						<t:commandButton id="nextPlateCommand"
 							action="#{screenResultViewer.nextPlate}" value="Next Plate"
-							image="/images/arrow-fastforward.png" styleClass="command" title="Next plate" />
+							image="/images/arrow-fastforward.png" styleClass="command"
+							title="Next plate" />
 						<h:commandButton id="lastPageCommand"
 							action="#{screenResultViewer.lastPage}" value="Last"
-							image="/images/arrow-last.png" styleClass="command" title="Last page" />
+							image="/images/arrow-last.png" styleClass="command"
+							title="Last page" />
 
 						<t:outputLabel id="rowRange"
 							value="#{screenResultViewer.rowRangeText}" for="rowNumber"
@@ -247,21 +271,21 @@
 							<%--f:validateLongRange minimum="1"
 						maximum="#{screenResultViewer.rawDataSize}" /--%>
 						</t:inputText>
-						<t:commandButton id="updateDataTableRowsButton" forceId="true"
-							value="Go" action="#{screenResultViewer.updateDataTableRows}"
+						<%-- note: no 'action' attribute necessary, as 'rowNumber' inputText component, above, invokes update logic via valueChangeListener --%>
+						<t:commandButton id="updateDataTablePositionButton2" value="Go"
 							styleClass="command" />
 
 						<t:panelGroup id="showHitsOnlyCommandPanel"
 							rendered="#{!empty screenResultViewer.hitsForDataHeader.selectItems}">
 							<t:selectBooleanCheckbox id="showHitsOnly" styleClass="label"
 								value="#{screenResultViewer.showHitsOnly}" immediate="true"
-								onclick="javascript:document.getElementById('updateDataTableRowsButton').click()" />
+								onclick="javascript:document.getElementById('updateDataTableContentButton').click()" />
 							<t:outputLabel value="Show only hits for" for="showHitsOnly"
 								styleClass="label" />
 							<t:selectOneMenu id="hitsForDataHeaderList"
 								value="#{screenResultViewer.hitsForDataHeader.value}"
 								displayValueOnly="#{screenResultViewer.hitsForDataHeader.size <= 1}"
-								onchange="javascript:document.getElementById('updateDataTableRowsButton').click()"
+								onchange="javascript:document.getElementById('updateDataTableContentButton').click()"
 								immediate="true" styleClass="inputText">
 								<f:selectItems id="hitsForDataHeader"
 									value="#{screenResultViewer.hitsForDataHeader.selectItems}" />
@@ -302,7 +326,9 @@
 					</t:dataTable>
 				</t:panelGrid>
 			</t:collapsiblePanel>
+		</h:form>
 
+		<h:form id="heatMapsPanelForm">
 			<t:collapsiblePanel id="heatMapsPanel"
 				value="#{screenResultViewer.isPanelCollapsedMap['heatMaps']}"
 				title="Heat Maps" var="isCollapsed" titleVar="title"
@@ -321,15 +347,17 @@
 					<%@ include file="screenresults/heatMapViewer.jspf"%>
 				</t:panelGroup>
 			</t:collapsiblePanel>
+		</h:form>
+	</t:panelGrid>
 
-		</t:panelGrid>
-	</h:form>
 
-	<%-- Warning: screenResultUploader.jspf must be included outside of h:form elements --%> 
+	<%-- Warning: screenResultUploader.jspf must be included outside of h:form elements --%>
 	<t:panelGroup rendered="#{empty screenResultViewer.screenResult}">
-		<t:outputText value="Screen result not available" styleClass="sectionHeader"/>
+		<t:outputText value="Screen result not available"
+			styleClass="sectionHeader" />
 	</t:panelGroup>
-	<t:panelGroup rendered="#{!screenResultViewer.readOnly && empty screenResultViewer.screenResult}">
+	<t:panelGroup
+		rendered="#{!screenResultViewer.readOnly && empty screenResultViewer.screenResult}">
 		<%@include file="screenresults/admin/screenResultUploader.jspf"%>
 	</t:panelGroup>
 
