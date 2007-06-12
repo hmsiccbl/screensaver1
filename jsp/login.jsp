@@ -24,9 +24,20 @@
       <t:inputSecret id="j_password" forceId="true" styleClass="inputText" />
     </t:panelGrid>
     <t:div/>
+    <f:verbatim>
+			<p><font size="-2">Confidentiality Agreement: The information in
+			this database is confidential and is to be shared only among members
+			of the ICCB-Longwood and NSRB screening communities. By logging into
+			this database, I am agreeing to hold in confidence all information
+			that I learn, download, or print until the information is publicly
+			available. Thus, deposition of information into this database does
+			not constitute a public disclosure and those who deposit information,
+			including myself, can preserve their ability to publish and patent
+			the results of their work if they so choose.</font></p>
+		</f:verbatim>
     <t:panelGroup>
       <t:commandButton value="Login" styleClass="command"
-        title="Once you have entered your username and password, click this button to log in"
+        title="Once you have entered your username and password, and read the Confidentiality Agreement, click this button to log in"
       />
       <%--t:commandLink value="Forgot your ID or password?" immediate="true"
         action="#{mainController.forgotIdOrPassword}" styleClass="command" /--%>
