@@ -4,8 +4,8 @@
 
 ### build-time properties
 
-appserver.dir=/www/dev.screensaver1.med.harvard.edu/tomcat/
-deploy.dir=/www/dev.screensaver1.med.harvard.edu/docroot/screensaver/
+appserver.dir=/www/dev.screensaver.med.harvard.edu/tomcat/
+deploy.dir=/www/dev.screensaver.med.harvard.edu/docroot/screensaver/
 log4j.properties.resource=log4j.properties.orchestra.dev
 
 # uncomment/comment the following line to copy/not copy downloads:

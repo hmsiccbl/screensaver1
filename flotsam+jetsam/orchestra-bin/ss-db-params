@@ -5,7 +5,7 @@
 # If arg 1 is "dev", loads settings for development database,
 # otherwise loads for settings for production database
 
-DB_CXN_FILE=/opt/apache/conf/auth/${1}${1:+.}screensaver1.med.harvard.edu
+DB_CXN_FILE=/opt/apache/conf/auth/${1}${1:+.}screensaver.med.harvard.edu
 HOST=`grep 'SetEnv.*SCREENSAVER_PGSQL_SERVER' $DB_CXN_FILE | awk '{print $3}'`
 DB=`grep 'SetEnv.*SCREENSAVER_PGSQL_DB' $DB_CXN_FILE | awk '{print $3}'`
 USER=`grep 'SetEnv.*SCREENSAVER_PGSQL_USER' $DB_CXN_FILE | awk '{print $3}'`
