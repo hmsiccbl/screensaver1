@@ -37,7 +37,8 @@
       </p>
     </f:verbatim>
   </t:panelGroup>
-  <t:panelGroup visibleOnUserRole="screensAdmin">
+  <%-- TODO: until ScreensAdmins are allowed to edit Screens (once ScreenDB is replaced), we will defer to the security policy of ScreenViewer itself to decide who can see this help; currently just developers! --%>
+  <t:panelGroup rendered="#{screenViewer.editable}">
     <f:verbatim escape="false">
       <p>
         As a <i>Screens Administrator</i>, you can make various screen details editable by
