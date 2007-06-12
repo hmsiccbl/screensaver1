@@ -11,7 +11,7 @@
       or silencing reagents.
     </p>
     <p>
-      <b><i>Please note</i></b> that currently, all of the natural products libraries will
+      <span class="helpNB">Please note</span> that currently, all of the natural products libraries will
       show up as having no experimental wells. Even though we do not know the structures for
       most of the compounds in these libraries, the experimental wells should be properly
       labelled as experimental. We are currently working on fixing this problem. Thank you for
@@ -47,7 +47,7 @@
       stray mouse clicks!
     </p>
     <p>
-      Finally, <b><i>please note</i></b> that you can unload and reload library contents at
+      Finally, <span class="helpNB">please note</span> that you can unload and reload library contents at
       any time without disturbing any other data in the system. The worst that will happen is
       that a screener will see a well or wells as empty between the times when you unload and
       reload the library contents.

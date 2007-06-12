@@ -15,12 +15,12 @@
       compounds.
     </p>
     <p>
-      <b><i>Please note</i></b> we are currently working on getting PubChem IDs for all of
+      <span class="helpNB">Please note</span> we are currently working on getting PubChem IDs for all of
       our compounds. Currently, about 40% of our compounds have PubChem IDs. Thank you for
       your patience!
     </p>
     <p>
-      <b><i>Internet Explorer Tip:</i></b> Are you getting a "Security Information" popup
+      <span class="helpTip">Internet Explorer Tip: </span>Are you getting a "Security Information" popup
       window every time you try to view a well with compounds in it? Here's a workaround:
       <ol>
         <li>Open the Tools menu</li>

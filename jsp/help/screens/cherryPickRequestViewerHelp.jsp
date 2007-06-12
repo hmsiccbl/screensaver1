@@ -10,8 +10,8 @@
 		to view the status of a screener's Cherry Pick Request. It also
 		enables administrators to manage the physical process of creating
 		cherry pick plates for follow-up screenings, as requested by
-		screeners. <i>Currently, the Cherry Pick Request Viewer is only
-		functional for RNAi screens.</i></p>
+		screeners. <span class="helpNB">Please note</span> that the
+		Cherry Pick Request Viewer is currently only functional for RNAi screens.</p>
 
 		<p>The Cherry Pick Request Viewer page is divided into five
 		sections that you can collapse or expand by clicking on their headers.</p>

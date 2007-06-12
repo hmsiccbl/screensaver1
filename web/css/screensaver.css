@@ -315,18 +315,23 @@ a.menuItem:hover,a.menuItemActive:hover {
 }
 
 .helpIcon {
-  border: none;
-  border-width: 0px 0px 0px 0px;
-  padding: 0px 0px 0px 0px;
-  margin: 0px 0px 0px 8px;
-  vertical-align: top;
+	border: none;
+	border-width: 0px 0px 0px 0px;
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 8px;
+	vertical-align: top;
 }
 
 .helpIconHover {
-  border: red;
-  border-style: solid;
-  border-width: 1px 1px 1px 1px;
-  padding: 0px 0px 0px 0px;
-  margin: -1px 0px 0px 7px;
-  vertical-align: top;
+	border: red;
+	border-style: solid;
+	border-width: 1px 1px 1px 1px;
+	padding: 0px 0px 0px 0px;
+	margin: -1px 0px 0px 7px;
+	vertical-align: top;
+}
+
+.helpTip, .helpNB {
+	font-style: italic;
+	font-weight: bold;
 }

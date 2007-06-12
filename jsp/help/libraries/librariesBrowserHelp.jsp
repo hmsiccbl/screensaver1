@@ -17,7 +17,7 @@
           Change the number of libraries displayed on a single page.
           <ul>
             <li>
-              <i>Hint:</i> Try selecting "All per page" to view all the libraries at once.
+              <span class="helpTip">Tip: </span>Try selecting "All per page" to view all the libraries at once.
             </li>
           </ul>
         </li>
@@ -26,7 +26,7 @@
           the Navigation Bar.
           <ul>
             <li>
-              <i>Hint:</i> It can be useful to do a reverse sort on Library Type to
+              <span class="helpTip">Tip: </span>It can be useful to do a reverse sort on Library Type to
               bring the RNAi libraries to the top of the search results.
             </li>
           </ul>

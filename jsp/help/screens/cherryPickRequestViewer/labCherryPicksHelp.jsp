@@ -97,7 +97,7 @@
 				<dt>Cancel Reservation</dt>
 				<dd>This is effectively an "undo" command for the "Reserve
 				Reagent" command.. All Lab Cherry Picks will revert to the
-				"unfulfilled" status. <i>Tip:</i> Use "Cancel Reservation" to allow
+				"unfulfilled" status. <span class="helpTip">Tip: </span>Use "Cancel Reservation" to allow
 				for another attempt at reserving reagent; this makes sense to do if
 				1) new cherry pick library plate copies are created by the lab, or
 				2) another Cherry Pick Request with "reserved" Lab Cherry Picks is
@@ -141,7 +141,7 @@
 					number will be specified).</li>
 				</ul>
 
-				<i>Tip:</i> Wait until the lab has successfully created as many
+				<span class="helpTip">Tip: </span>Wait until the lab has successfully created as many
 				cherry pick plates as possible before invoking this command.
 				Consider that if the creation of one more cherry pick plates fail in
 				the lab, new Lab Cherry Picks will be created by Screensaver, but

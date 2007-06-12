@@ -15,7 +15,7 @@
       Some screen details, such as Screening Room Activities, (e.g., screening library plates
       in the screening room), or Cherry Pick Requests, are too large too display in the same
       page. They are summarized here, and "View" buttons are provided to view these items
-      in a separate page. However, <b><i>please note</i></b> that viewing any Screening Room
+      in a separate page. However, <span class="helpNB">please note</span> that viewing any Screening Room
       Activities, as well as Cherry Pick Requests for Small Molecule screens, is currently
       not implemented. We intend to provide these views in a later release.
     </p>
@@ -32,7 +32,7 @@
         information about the screen by clicking the "Show Admin" button at the top of the
         panel. You can hide it again by clicking "Hide Admin". Administrative information
         administrator comments, as well as important dates such as the original application
-        date. <b><i>Please note</i></b> that a variety of administrator fields, such as
+        date. <span class="helpNB">Please note</span> that a variety of administrator fields, such as
         attached files and billing information, are not yet implemented.
       </p>
     </f:verbatim>
@@ -41,7 +41,7 @@
     <f:verbatim escape="false">
       <p>
         As a <i>Screens Administrator</i>, you can make various screen details editable by
-        clicking the "Edit" button. <b><i>Please note</i></b> that any changes you make here
+        clicking the "Edit" button. <span class="helpNB">Please note</span> that any changes you make here
         will not be permanent. This data is periodically reloaded from the <tt>ScreenDB</tt>
         database, and any changes you make here will be overwritten the next time this reload
         occurs. These editing capabilities are an experimental feature. For the time being,

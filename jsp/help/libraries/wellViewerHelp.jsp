@@ -16,7 +16,7 @@
       These pages display lists of wells containing the same gene or compound.
     </p>
     <p>
-      <b><i>Please note</i></b> that Screensaver currently marks some wells as "empty" that
+      <span class="helpNB">Please note</span> that Screensaver currently marks some wells as "empty" that
       are not actually empty! This happens in two circumstances:
       <ol>
         <li>Some wells that have DMSO or siRNA buffer.</li>
@@ -30,7 +30,7 @@
       We are currently working on fixing both of these problems. Thank you for your patience!
     </p>
     <p>
-      <b><i>Internet Explorer Tip:</i></b> Are you getting a "Security Information" popup
+      <span class="helpTip">Internet Explorer Tip: </span>Are you getting a "Security Information" popup
       window every time you try to view a well with compounds in it? Here's a workaround:
       <ol>
         <li>Open the Tools menu</li>

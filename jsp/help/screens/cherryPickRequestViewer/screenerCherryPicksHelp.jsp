@@ -9,14 +9,14 @@
 		screener has requested for a follow-up screening.</p>
 		<p>In the case of Dharmacon SMARTPool RNAi libraries, Screener
 		Cherry Picks can be requested as either wells from pool library plates
-		or as wells from Duplex library plates. If pool library plate wells
+		or as wells from duplex library plates. If pool library plate wells
 		have been requested, each Screener Cherry Pick will "map" to multiple
 		wells on the associated duplex library plates. The "Source Wells"
 		column in the data table displays how many duplex wells will be cherry
 		picked for a requested pool well. For SMARTPool libraries, this number
 		should always be 4, and other values indicate library anomalies that
 		should be investigated before proceeding with cherry pick plate
-		creation. <i>Tip:</i> sort the "Source Wells" column to verify whether
+		creation. <span class="helpTip">Tip: </span>sort the "Source Wells" column to verify whether
 		such anomalies exist, by viewing the sorted range of values.</p>
 	</f:verbatim>
 	<t:panelGroup visibleOnUserRole="cherryPickAdmin">

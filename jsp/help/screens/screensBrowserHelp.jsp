@@ -36,7 +36,7 @@
       with available screen results to the top of the search results.
     </p>
     <p>
-      <b><i>Note</i></b> that you can get to a specific screen quickly at any time by
+      <span class="helpTip">Tip: </span> You can get to a specific screen quickly at any time by
       entering the screen number in the Screen Quick Finder in the left menu bar.
     </p>
   </f:verbatim>
