@@ -273,7 +273,7 @@ TODO:
 			<t:outputText value="Cherry picks have not yet been specified."
 				styleClass="label"
 				rendered="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks && !cherryPickRequestViewer.editable}"
-				title="Yes, that's right, the cherry picks have not yet been specified" />
+			/>
 
 			<t:panelGrid id="addCherryPicksAndHelpPanels" columns="2"
 				columnClasses="column"
@@ -289,11 +289,13 @@ TODO:
 						value="Add Cherry Picks (Pool Wells)"
 						action="#{cherryPickRequestViewer.addPoolCherryPicks}"
 						rendered="#{cherryPickRequestViewer.rnaiScreen}"
-						styleClass="command" />
+						styleClass="command"
+						title="Add cherry picks, mapping from pool wells to duplex wells" />
 					<t:commandButton id="addCherryPicksCommand"
 						value="Add Cherry Picks"
 						action="#{cherryPickRequestViewer.addCherryPicks}"
-						styleClass="command" />
+						styleClass="command"
+						title="Add cherry picks for the specified wells" />
 				</t:panelGrid>
 				<%@ include file="../help/libraries/wellFinderInputHelp.jsp"%>
 			</t:panelGrid>
@@ -312,7 +314,8 @@ TODO:
 					<t:commandButton id="deleteCherryPicks" value="Delete All"
 						action="#{cherryPickRequestViewer.deleteAllCherryPicks}"
 						disabled="#{cherryPickRequestViewer.cherryPickRequest.allocated}"
-						styleClass="command" />
+						styleClass="command"
+						title="Delete all the screener cherry picks, so you can enter them again" />
 				</t:panelGroup>
 
 				<%-- Render table into a buffer, allowing dataScrollers to be positioned above table. See http://wiki.apache.org/myfaces/Buffer. --%>
@@ -391,7 +394,8 @@ TODO:
 					<t:selectOneMenu id="screenerCherryPicksPerPage"
 						value="#{cherryPickRequestViewer.screenerCherryPicksPerPage.value}"
 						onchange="document.getElementById('updateScreenerCherryPicksPerPage').click();"
-						styleClass="data">
+						styleClass="data"
+						title="Number of screener cherry picks to display per page" >
 						<f:selectItems
 							value="#{cherryPickRequestViewer.screenerCherryPicksPerPage.selectItems}" />
 					</t:selectOneMenu>
@@ -437,29 +441,35 @@ TODO:
 						value="Reserve #{cherryPickRequestViewer.liquidTerm}"
 						action="#{cherryPickRequestViewer.allocateCherryPicks}"
 						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks || cherryPickRequestViewer.cherryPickRequest.allocated}"
-						styleClass="command" />
+						styleClass="command"
+						title="Reserve liquid for the cherry picks from the cherry pick copy plates" />
 					<t:commandButton id="deallocateCherryPicks"
 						value="Cancel Reservation"
 						action="#{cherryPickRequestViewer.deallocateCherryPicks}"
 						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated || cherryPickRequestViewer.cherryPickRequest.mapped}"
-						styleClass="command" />
+						styleClass="command"
+						title="Cancel the liquid reservations from the cherry pick copy plates" />
 					<t:commandButton id="plateMapCherryPicks" value="Map to Plates"
 						action="#{cherryPickRequestViewer.plateMapCherryPicks}"
 						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated || cherryPickRequestViewer.cherryPickRequest.mapped}"
-						styleClass="command" />
+						styleClass="command"
+						title="Choose plate number and destination well for the cherry picks" />
 					<t:commandButton id="createCherryPickRequestForUnfulfilled"
 						value="New Cherry Pick Request for Unfulfilled"
 						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated}"
 						action="#{cherryPickRequestViewer.createNewCherryPickRequestForUnfulfilledCherryPicks}"
-						styleClass="command" />
+						styleClass="command"
+						title="Create a new cherry pick request consisting of unfulfilled cherry picks" />
 					<t:outputLabel for="showFailedLabCherryPicks" value="Show failed:"
-						styleClass="label" />
+						styleClass="label"
+						title="Show or hide failed lab cherry picks" />
 					<t:selectBooleanCheckbox id="showFailedLabCherryPicks"
 						value="#{cherryPickRequestViewer.showFailedLabCherryPicks}"
 						valueChangeListener="#{cherryPickRequestViewer.toggleShowFailedLabCherryPicks}"
 						onchange="javascript:document.getElementById('toggleShowFailedLabCherryPicksCommand').click()"
 						immediate="true"
-						styleClass="command" />
+						styleClass="command"
+						title="Show or hide failed lab cherry picks" />
 					<t:commandButton id="toggleShowFailedLabCherryPicksCommand"
 						immediate="true"
 						forceId="true" style="display:none" />
@@ -542,7 +552,8 @@ TODO:
 						<t:selectOneMenu id="labCherryPicksPerPage"
 							value="#{cherryPickRequestViewer.labCherryPicksPerPage.value}"
 							onchange="document.getElementById('updateLabCherryPicksPerPage').click();"
-							styleClass="data">
+							styleClass="data"
+							title="Number of lab cherry picks to display per page" >
 							<f:selectItems
 								value="#{cherryPickRequestViewer.labCherryPicksPerPage.selectItems}" />
 						</t:selectOneMenu>
@@ -586,14 +597,17 @@ TODO:
 						value="Download Files for Selected Plates"
 						action="#{cherryPickRequestViewer.downloadPlateMappingFilesForSelectedAssayPlates}"
 						disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
-						styleClass="command" />
+						styleClass="command"
+						title="Download the input files for the liquid transfer equipment" />
 					<t:outputLabel for="showFailedAssayPlates"
-						value="Show all failed plates:" styleClass="label" />
+						value="Show all failed plates:" styleClass="label"
+						title="Show or hide the failed assay plates" />
 					<t:selectBooleanCheckbox id="showFailedAssayPlates"
 						value="#{cherryPickRequestViewer.showFailedAssayPlates}"
 						valueChangeListener="#{cherryPickRequestViewer.toggleShowFailedAssayPlates}"
 						onchange="javascript:document.getElementById('toggleShowFailedAssayPlatesCommand').click()"
-						immediate="true" styleClass="command" />
+						immediate="true" styleClass="command"
+						title="Show or hide the failed assay plates" />
 					<t:commandButton id="toggleShowFailedAssayPlatesCommand"
 						forceId="true" immediate="true" style="display:none" />
 				</t:panelGroup>
@@ -635,7 +649,8 @@ TODO:
 
 					<t:panelGroup>
 						<t:outputLabel for="liquidTransferPerformedBy"
-							value="Performed by:" styleClass="label" />
+							value="Performed by:" styleClass="label"
+							title="The screening lab staff member who performed the transfer" />
 						<t:selectOneMenu id="liquidTransferPerformedBy"
 							value="#{cherryPickRequestViewer.liquidTransferPerformedBy.value}"
 							rendered="#{cherryPickRequestViewer.editable}"
@@ -644,13 +659,14 @@ TODO:
 								value="#{cherryPickRequestViewer.liquidTransferPerformedBy.selectItems}" />
 						</t:selectOneMenu>
 						<t:outputLabel for="dateOfLiquidTransfer" value="Date:"
-							styleClass="label" />
+							styleClass="label" title="The date the liquid transfer took place" />
 						<t:inputDate id="dateOfLiquidTransfer" 
 							value="#{cherryPickRequestViewer.dateOfLiquidTransfer}"
 							popupCalendar="true"
 							rendered="#{cherryPickRequestViewer.editable}" 
 							styleClass="inputText" />
-						<t:outputLabel for="liquidTransferComments" value="Comments:" styleClass="label" />
+						<t:outputLabel for="liquidTransferComments" value="Comments:" styleClass="label"
+						  title="Screening room staff comments for the liquid transfer" />
 						<t:inputText id="liquidTransferComments"
 							value="#{cherryPickRequestViewer.liquidTransferComments}"
 							rendered="#{cherryPickRequestViewer.editable}"
@@ -662,17 +678,20 @@ TODO:
 							value="Record Selected Plates as 'Plated'"
 							action="#{cherryPickRequestViewer.recordLiquidTransferForSelectedAssayPlates}"
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
-							styleClass="command" />
+							styleClass="command"
+							title="Record successful liquid transfer" />
 						<t:commandButton id="recordFailureOfAssayPlates"
 							value="Record Selected Plates as 'Failed'"
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 							action="#{cherryPickRequestViewer.recordFailureOfAssayPlates}"
-							styleClass="command" />
+							styleClass="command"
+							title="Record unsuccessful liquid transfer" />
 						<t:commandButton id="cancelAssayPlates"
 							value="Cancel Selected Plates"
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 							action="#{cherryPickRequestViewer.deallocateCherryPicksByPlate}"
-							styleClass="command" />
+							styleClass="command"
+							title="Deallocate cherry picks for selected plates" />
 					</t:panelGroup>
 
 				</t:panelGrid>
