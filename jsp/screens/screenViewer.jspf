@@ -243,7 +243,8 @@ TODO:
 						styleClass="dataText" />
 				</t:column>
 				<t:column>
-					<t:commandButton id="viewActivity"
+				  <%-- rendered="false" until we implement a ScreeningRoomActivity Viewer --%>
+					<t:commandButton id="viewActivity" rendered="false"
 						action="#{screenViewer.viewScreeningRoomActivity}"
 						value="#{screenViewer.editMode ? \"View/Edit...\" : \"View...\"}"
 						styleClass="command" />
@@ -301,16 +302,13 @@ TODO:
 						action="#{screenViewer.viewCherryPickRequest}"
 						value="#{screenViewer.editMode ? \"View/Edit...\" : \"View...\"}"
 						styleClass="command" />
-					<t:commandButton id="duplicateCherryPickRequest"
-						action="#{screenViewer.duplicateCherryPickRequest}"
-						rendered="#{screenViewer.editMode}" value="#{\"Duplicate...\"}"
-						styleClass="command" title="Duplicate" />
 				</t:column>
 			</t:dataTable>
 			<t:panelGroup>
+				<%-- TODO: 'rendered' expression is a bit of a hack --%>
 				<t:commandButton value="Add Cherry Pick Request..."
-					action="#{screenViewer.addCherryPickRequest}"
-					styleClass="command" rendered="#{screenViewer.editMode}" />
+					action="#{screenViewer.addCherryPickRequest}" styleClass="command"
+					rendered="#{cherryPickRequestViewer.editable}" />
 			</t:panelGroup>
 		</t:panelGrid>
 

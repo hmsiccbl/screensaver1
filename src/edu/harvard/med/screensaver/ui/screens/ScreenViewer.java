@@ -53,7 +53,10 @@ import org.apache.log4j.Logger;
 
 public class ScreenViewer extends AbstractBackingBean
 {
-  private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.SCREENS_ADMIN;
+  // TODO: disabling editing until ScreenDB is fully replaced by Screensaver
+  // (otherwise changes made to screens will be overwritten when
+  // ScreenDBSynchronizer is run)
+  private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole./*SCREENS_ADMIN*/DEVELOPER;
 
   private static Logger log = Logger.getLogger(ScreenViewer.class);
   

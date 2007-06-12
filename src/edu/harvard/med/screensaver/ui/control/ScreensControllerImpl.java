@@ -893,6 +893,11 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public String createCherryPickRequest(final Screen screenIn)
   {
     logUserActivity("createCherryPickRequest " + screenIn);
+    
+    if (!screenIn.getScreenType().equals(ScreenType.RNAI)) {
+      showMessage("applicationError", "Cherry Pick Requests can only be created for RNAi screens, currently");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
 
     final CherryPickRequest[] result = new CherryPickRequest[1];
     try {
