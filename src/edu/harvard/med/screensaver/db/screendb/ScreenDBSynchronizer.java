@@ -45,7 +45,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * <ul>
  * <li>ScreeningRoomUsers are looked up by firstName, lastName
  * <li>Libraries are looked up by startPlate
- * <li>Screns are looked up by screenNumber
+ * <li>Screens are looked up by screenNumber
  * </ul>
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -136,7 +136,7 @@ public class ScreenDBSynchronizer
   public void synchronize() throws ScreenDBSynchronizationException
   {
     initializeConnection();
-    deleteOldCherryPickRequests();
+    deleteOldCompoundCherryPickRequests();
     synchronizeLibraries();
     synchronizeNonLibraries();
     closeConnection();
@@ -167,13 +167,13 @@ public class ScreenDBSynchronizer
    *             "deleteOldCherryPickRequests" methods in the two
    *             above-mentioned synchronizers, in separate transactions.
    */
-  private void deleteOldCherryPickRequests()
+  private void deleteOldCompoundCherryPickRequests()
   {
     _dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
-        _cherryPickRequestDao.deleteAllCherryPickRequests();
+        _cherryPickRequestDao.deleteAllCompoundCherryPickRequests();
       }
     });
   }
@@ -201,8 +201,6 @@ public class ScreenDBSynchronizer
       new ScreenDBLibraryScreeningSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
     final ScreenDBCompoundCherryPickSynchronizer compoundCherryPickSynchronizer =
       new ScreenDBCompoundCherryPickSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
-    final ScreenDBRNAiCherryPickSynchronizer rnaiCherryPickSynchronizer =
-      new ScreenDBRNAiCherryPickSynchronizer(_connection, _dao, userSynchronizer, screenSynchronizer);
     
     _dao.doInTransaction(new DAOTransaction()
     {
@@ -212,7 +210,6 @@ public class ScreenDBSynchronizer
         screenSynchronizer.synchronizeScreens();
         libraryScreeningSynchronizer.synchronizeLibraryScreenings();
         compoundCherryPickSynchronizer.synchronizeCompoundCherryPicks();
-        rnaiCherryPickSynchronizer.synchronizeRNAiCherryPicks();
       }
     });
   }
