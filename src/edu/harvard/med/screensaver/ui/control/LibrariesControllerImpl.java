@@ -664,57 +664,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
       @SuppressWarnings("unchecked")
       public void runTransaction() 
       {
-        Set<Library> libraries = new HashSet<Library>();
-        List<Well> wells = searchResults.getContents();
-        List<Well> inflatedWells = new ArrayList<Well>();
-        for (Well well : wells) {
-          libraries.add(well.getLibrary());
-        }
-        if (wells.size() / libraries.size() < 100) {
-          for (Well well : wells) {
-            if (well.getLibrary().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-              inflatedWells.add(_dao.reloadEntity(well,
-                                                  true,
-                                                  "hbnMolfile",
-                                                  "hbnCompounds.compoundNames",
-                                                  "hbnCompounds.casNumbers",
-                                                  "hbnCompounds.nscNumbers",
-                                                  "hbnCompounds.pubchemCids"));
-            }
-            else if (well.getLibrary().getScreenType().equals(ScreenType.RNAI)) {
-              inflatedWells.add(_dao.reloadEntity(well,
-                                                  true,
-                                                  "hbnMolfile",
-                                                  "hbnSilencingReagents.gene.genbankAccessionNumbers",
-                                                  "hbnSilencingReagents.gene.oldEntrezgeneIds",
-                                                  "hbnSilencingReagents.gene.oldEntrezgeneSymbols"));
-            }
-          }
-        }
-        else {
-          for (Library library : libraries) {
-            if (library.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-              _dao.reloadEntity(library,
-                                true,
-                                "hbnWells.hbnMolfile",
-                                "hbnWells.hbnCompounds.compoundNames",
-                                "hbnWells.hbnCompounds.casNumbers",
-                                "hbnWells.hbnCompounds.nscNumbers",
-                                "hbnWells.hbnCompounds.pubchemCids");
-            }
-            else if (library.getScreenType().equals(ScreenType.RNAI)) {
-              _dao.reloadEntity(library,
-                                true,
-                                "hbnWells.hbnMolfile",
-                                "hbnWells.hbnSilencingReagents.gene.genbankAccessionNumbers",
-                                "hbnWells.hbnSilencingReagents.gene.oldEntrezgeneIds",
-                                "hbnWells.hbnSilencingReagents.gene.oldEntrezgeneSymbols");
-            }
-          }
-          for (Well well : wells) {
-            inflatedWells.add(_dao.reloadEntity(well));
-          }
-        }
+        List<Well> inflatedWells = eagerFetchWellsForDownloadWellSearchResults(searchResults);
         
         WellSearchResults inflatedSearchResults = new WellSearchResults(inflatedWells, LibrariesControllerImpl.this);
         File searchResultsFile = null;
@@ -754,6 +704,63 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
             searchResultsFile.delete();
           }
         }
+      }
+
+      private List<Well> eagerFetchWellsForDownloadWellSearchResults(final WellSearchResults searchResults) {
+        // eager fetch all of the data that will be needed to generate the downloaded file 
+        Set<Library> libraries = new HashSet<Library>();
+        List<Well> wells = searchResults.getContents();
+        List<Well> inflatedWells = new ArrayList<Well>();
+        for (Well well : wells) {
+          libraries.add(well.getLibrary());
+        }
+        // optimization: eager fetch full set of wells from each library only if
+        // many wells are retrieved from each library (on average); this is just
+        // a heuristic and the '100' value is quite arbitrary
+        if (wells.size() / libraries.size() < 100) {
+          for (Well well : wells) {
+            if (well.getLibrary().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+              inflatedWells.add(_dao.reloadEntity(well,
+                                                  true,
+                                                  "hbnMolfile",
+                                                  "hbnCompounds.compoundNames",
+                                                  "hbnCompounds.casNumbers",
+                                                  "hbnCompounds.nscNumbers",
+                                                  "hbnCompounds.pubchemCids"));
+            }
+            else if (well.getLibrary().getScreenType().equals(ScreenType.RNAI)) {
+              inflatedWells.add(_dao.reloadEntity(well,
+                                                  true,
+                                                  "hbnSilencingReagents.gene.genbankAccessionNumbers",
+                                                  "hbnSilencingReagents.gene.oldEntrezgeneIds",
+                                                  "hbnSilencingReagents.gene.oldEntrezgeneSymbols"));
+            }
+          }
+        }
+        else {
+          for (Library library : libraries) {
+            if (library.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+              _dao.reloadEntity(library,
+                                true,
+                                "hbnWells.hbnMolfile",
+                                "hbnWells.hbnCompounds.compoundNames",
+                                "hbnWells.hbnCompounds.casNumbers",
+                                "hbnWells.hbnCompounds.nscNumbers",
+                                "hbnWells.hbnCompounds.pubchemCids");
+            }
+            else if (library.getScreenType().equals(ScreenType.RNAI)) {
+              _dao.reloadEntity(library,
+                                true,
+                                "hbnWells.hbnSilencingReagents.gene.genbankAccessionNumbers",
+                                "hbnWells.hbnSilencingReagents.gene.oldEntrezgeneIds",
+                                "hbnWells.hbnSilencingReagents.gene.oldEntrezgeneSymbols");
+            }
+          }
+          for (Well well : wells) {
+            inflatedWells.add(_dao.reloadEntity(well));
+          }
+        }
+        return inflatedWells;
       }
     });
     return REDISPLAY_PAGE_ACTION_RESULT;
