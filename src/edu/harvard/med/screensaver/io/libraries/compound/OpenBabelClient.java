@@ -143,11 +143,7 @@ public class OpenBabelClient
       return null;
     }
     
-    if (false && outputFormat.equals("can") && _output.indexOf('\t') != -1) {
-      // open babel SMILES output is postfixed "\tStructure\d+\n"
-      _output = _output.substring(0, _output.indexOf('\t'));
-    }
-    else if (outputFormat.equals("inchi") && _output.indexOf('\n') != -1) {
+    if ((outputFormat.equals("inchi") || outputFormat.equals("can"))  && _output.indexOf('\n') != -1) {
       // trim useless \n
       _output = _output.substring(0, _output.indexOf('\n'));
     }
