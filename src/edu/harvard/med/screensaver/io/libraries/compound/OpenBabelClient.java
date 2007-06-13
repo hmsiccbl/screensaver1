@@ -44,7 +44,7 @@ public class OpenBabelClient
   
   public String convertMolfileToSmiles(String molfile)
   {
-    return convertMolecule("mol", "smi", molfile);
+    return convertMolecule("mol", "can", molfile);
   }
 
   public String convertMolfileToInchi(String molfile)
@@ -67,11 +67,19 @@ public class OpenBabelClient
     String input)
   {
     try {
-      Process openBabelProcess = Runtime.getRuntime().exec(new String [] {
-        BABEL_EXECUTABLE_PATH,
-        "-i" + inputFormat,
-        "-o" + outputFormat
-      });
+      String [] openBabelArgs = outputFormat.equals("can") ?
+        new String [] {
+          BABEL_EXECUTABLE_PATH,
+          "-xni",
+          "-i" + inputFormat,
+          "-o" + outputFormat
+        } :
+        new String [] {
+          BABEL_EXECUTABLE_PATH,
+          "-i" + inputFormat,
+          "-o" + outputFormat
+        };
+      Process openBabelProcess = Runtime.getRuntime().exec(openBabelArgs);
       OutputStream openBabelInput = openBabelProcess.getOutputStream();
       openBabelInput.write(input.getBytes());
       openBabelInput.close();
@@ -135,7 +143,7 @@ public class OpenBabelClient
       return null;
     }
     
-    if (outputFormat.equals("smi") && _output.indexOf('\t') != -1) {
+    if (false && outputFormat.equals("can") && _output.indexOf('\t') != -1) {
       // open babel SMILES output is postfixed "\tStructure\d+\n"
       _output = _output.substring(0, _output.indexOf('\t'));
     }

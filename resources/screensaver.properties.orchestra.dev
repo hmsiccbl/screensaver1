@@ -16,4 +16,4 @@ copy.downloads.dir=true
 
 # Open Babel executable `babel` - needed for compound loading
 # get Open Babel here: http://openbabel.sourceforge.net/wiki/Main_Page
-babel.executable.path=/home/js163/bin/openbabel-2.0.2/bin/babel
+babel.executable.path=/home/js163/bin/openbabel/bin/babel
