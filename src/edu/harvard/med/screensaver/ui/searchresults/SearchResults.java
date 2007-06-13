@@ -140,6 +140,11 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
     _currentSort = currentSort;
   }
 
+  public List<E> getContents()
+  {
+    return _unsortedResults;
+  }
+  
   /**
    * Get the data table.
    * @return the data table

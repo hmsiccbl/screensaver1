@@ -14,7 +14,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
@@ -31,6 +33,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.libraries.CompoundLibraryContentsImporter;
 import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
@@ -661,6 +664,59 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
       @SuppressWarnings("unchecked")
       public void runTransaction() 
       {
+        Set<Library> libraries = new HashSet<Library>();
+        List<Well> wells = searchResults.getContents();
+        List<Well> inflatedWells = new ArrayList<Well>();
+        for (Well well : wells) {
+          libraries.add(well.getLibrary());
+        }
+        if (wells.size() / libraries.size() < 100) {
+          for (Well well : wells) {
+            if (well.getLibrary().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+              inflatedWells.add(_dao.reloadEntity(well,
+                                                  true,
+                                                  "hbnMolfile",
+                                                  "hbnCompounds.compoundNames",
+                                                  "hbnCompounds.casNumbers",
+                                                  "hbnCompounds.nscNumbers",
+                                                  "hbnCompounds.pubchemCids"));
+            }
+            else if (well.getLibrary().getScreenType().equals(ScreenType.RNAI)) {
+              inflatedWells.add(_dao.reloadEntity(well,
+                                                  true,
+                                                  "hbnMolfile",
+                                                  "hbnSilencingReagents.gene.genbankAccessionNumbers",
+                                                  "hbnSilencingReagents.gene.oldEntrezgeneIds",
+                                                  "hbnSilencingReagents.gene.oldEntrezgeneSymbols"));
+            }
+          }
+        }
+        else {
+          for (Library library : libraries) {
+            if (library.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+              _dao.reloadEntity(library,
+                                true,
+                                "hbnWells.hbnMolfile",
+                                "hbnWells.hbnCompounds.compoundNames",
+                                "hbnWells.hbnCompounds.casNumbers",
+                                "hbnWells.hbnCompounds.nscNumbers",
+                                "hbnWells.hbnCompounds.pubchemCids");
+            }
+            else if (library.getScreenType().equals(ScreenType.RNAI)) {
+              _dao.reloadEntity(library,
+                                true,
+                                "hbnWells.hbnMolfile",
+                                "hbnWells.hbnSilencingReagents.gene.genbankAccessionNumbers",
+                                "hbnWells.hbnSilencingReagents.gene.oldEntrezgeneIds",
+                                "hbnWells.hbnSilencingReagents.gene.oldEntrezgeneSymbols");
+            }
+          }
+          for (Well well : wells) {
+            inflatedWells.add(_dao.reloadEntity(well));
+          }
+        }
+        
+        WellSearchResults inflatedSearchResults = new WellSearchResults(inflatedWells, LibrariesControllerImpl.this);
         File searchResultsFile = null;
         PrintWriter searchResultsPrintWriter = null;
         FileOutputStream searchResultsFileOutputStream = null;
@@ -670,12 +726,12 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
             searchResults.getDownloadFormat().equals(SearchResults.SD_FILE) ? ".sdf" : ".xls");
           if (searchResults.getDownloadFormat().equals(SearchResults.SD_FILE)) {
             searchResultsPrintWriter = new PrintWriter(searchResultsFile);
-            searchResults.writeSDFileSearchResults(searchResultsPrintWriter);
+            inflatedSearchResults.writeSDFileSearchResults(searchResultsPrintWriter);
             searchResultsPrintWriter.close();
           }
           else {
             HSSFWorkbook searchResultsWorkbook = new HSSFWorkbook();
-            searchResults.writeExcelFileSearchResults(searchResultsWorkbook);
+            inflatedSearchResults.writeExcelFileSearchResults(searchResultsWorkbook);
             searchResultsFileOutputStream = new FileOutputStream(searchResultsFile);
             searchResultsWorkbook.write(searchResultsFileOutputStream);
             searchResultsFileOutputStream.close();
