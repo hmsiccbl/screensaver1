@@ -133,16 +133,16 @@ public class CherryPickRequestDAO extends AbstractDAO
   }
 
   /**
-   * @motivation for {@link ScreenDBSynchronizer}, for efficient removal of cherry pick
+   * @motivation for {@link ScreenDBSynchronizer}, for efficient removal of compound cherry pick
    * requests.
    */
-  public void deleteAllCherryPickRequests()
+  public void deleteAllCompoundCherryPickRequests()
   {
     // TODO: want to do the following, as in Spring 2.0 API:
     // http://www.springframework.org/docs/api/org/springframework/orm/hibernate/HibernateTemplate.html#delete(java.lang.String)
     // but it doesn't work - it ends up treating the String as an entity, and fails.
     //getHibernateTemplate().delete("from CherryPickRequest");
-    getHibernateTemplate().deleteAll(getHibernateTemplate().find("from CherryPickRequest"));
+    getHibernateTemplate().deleteAll(getHibernateTemplate().find("from CompoundCherryPickRequest"));
   }
 
   public CherryPickRequest findCherryPickRequestByNumber(int cherryPickRequestNumber)
