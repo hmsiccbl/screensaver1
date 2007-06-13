@@ -70,6 +70,7 @@ public class Well extends AbstractEntity implements Comparable
   private String _vendorIdentifier;
   private WellType _wellType = WellType.EXPERIMENTAL;
   private String _smiles;
+  // TODO: this is alwya either a 0 or 1-element set, so consider changing to a to-one relationship with a proxyable entity; the key is to maintain lazy loading of the molfile data 
   private Set<String> _molfile = new HashSet<String>();
   private String _genbankAccessionNumber;
 
