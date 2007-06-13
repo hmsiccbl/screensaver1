@@ -171,7 +171,7 @@ class SDRecordParser
           recordData.setIccbNumber(line);
         }
         else if (header.equals("CAS_Number") || header.equals("CAS_number")) {
-          recordData.setIccbNumber(line);
+          recordData.setCasNumber(line);
         }
         else if (header.equals("Vendor_ID")) {
           recordData.setVendorIdentifier(line);
