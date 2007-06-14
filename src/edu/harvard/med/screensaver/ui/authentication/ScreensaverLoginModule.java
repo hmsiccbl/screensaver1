@@ -250,7 +250,7 @@ public class ScreensaverLoginModule implements LoginModule
       else {
         String normalizedUsername = username.toLowerCase();
         if (!normalizedUsername.equals(username)) {
-          log.warn("lowercasing eCommons ID '" + username + " to " + normalizedUsername);
+          log.warn("lowercasing eCommons ID '" + username + "' to '" + normalizedUsername + "'");
         }
         _user = findUser(normalizedUsername, "ECommonsId");
         if (_user != null) {
