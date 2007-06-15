@@ -24,7 +24,7 @@
         styleClass="helpIcon"
         onmouseover="getElementById('headerSubviewHelpIcon').className='helpIconHover';"
         onmouseout="getElementById('headerSubviewHelpIcon').className='helpIcon';"
-        onclick="window.open(pageHelpURL,pageHelpURL,'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=1,scrollbars=1,height=450,width=650');"
+        onclick="window.open(pageHelpURL,'kioskHelp','status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=1,scrollbars=1,height=450,width=650');"
         rendered="#{! empty pageHelpURL}"
       />
 
