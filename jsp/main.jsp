@@ -15,6 +15,20 @@
 		styleClass="title" />
 	<t:div />
 	<f:verbatim escape="false">
+          <div id="ie_detection_message" style="display:none; color:red;">
+            The Screensaver development team recommends the
+            <a href="www.mozilla.com">Mozilla Firefox Browser</a> (version 1.5
+            or higher). While we work to support other browsers, it's not
+            always possible for us to test every feature across all browser
+            types.
+          </div>
+          <script type="text/javascript">
+            if (! Array.every) { // if not firefox >=1.5
+              document.getElementById("ie_detection_message").style.display = "block";
+            }
+          </script>
+	</f:verbatim>
+	<f:verbatim escape="false">
 		<p>To get started, try clicking some of the items in the left menu
 		bar. For a detailed description of what you can do, see our <a
 			href="helpViewer.jsf">help</a> page.  Here are a few highlights:</p>
