@@ -423,6 +423,15 @@ public class ScreensaverUser extends AbstractEntity
     }
   }
   
+  @DerivedEntityProperty
+  public boolean isUserInRole(ScreensaverUserRole role) 
+  {
+    if (role == null) {
+      return false;
+    }
+    return _roles.contains(role);
+  }
+
   /**
    * Get the user's Screensaver-managed login ID.
    * 

@@ -29,11 +29,15 @@ import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.CompoundCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
+import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
@@ -88,11 +92,6 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
   }
 
   public boolean visit(ScreenerCherryPick entity)
-  {
-    return true;
-  }
-
-  public boolean visit(CherryPickRequest entity)
   {
     return true;
   }
@@ -182,11 +181,6 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
     return true;
   }
 
-  public boolean visit(ScreeningRoomActivity visit)
-  {
-    return true;
-  }
-
   public boolean visit(ScreenResult screenResult)
   {
     return true;
@@ -218,6 +212,26 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
   }
 
   public boolean visit(CherryPickLiquidTransfer entity)
+  {
+    return true;
+  }
+
+  public boolean visit(CompoundCherryPickRequest entity) 
+  {
+    return true;
+  }
+
+  public boolean visit(LibraryScreening entity) 
+  {
+    return true;
+  }
+
+  public boolean visit(RNAiCherryPickRequest entity) 
+  {
+    return true;
+  }
+
+  public boolean visit(RNAiCherryPickScreening entity) 
   {
     return true;
   }

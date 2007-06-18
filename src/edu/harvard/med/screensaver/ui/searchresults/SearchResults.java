@@ -91,7 +91,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   private String _downloadFormat = "";
   private UIData _dataTable;
   private DataModel _dataModel;
-  private DataModel _dataHeaderColumnModel = new ListDataModel(getColumnHeaders());
+  private DataModel _dataHeaderColumnModel;
   private boolean _isDataModelUpdateNeeded;
   
   
@@ -106,8 +106,6 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   {
     _unsortedResults = unsortedResults;
     _resultsSize = unsortedResults.size();
-    assert getColumnHeaders().size() > 0 : "> 0 column headers required";
-    _currentSortColumnName = getColumnHeaders().get(0);
     setDataModelUpdateNeeded();
   }
 
@@ -188,6 +186,9 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public DataModel getDataHeaderColumnModel()
   {
+    if (_dataHeaderColumnModel == null) {
+      _dataHeaderColumnModel = new ListDataModel(getColumnHeaders());
+    }
     return _dataHeaderColumnModel;
   }
 
@@ -339,6 +340,10 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public String getCurrentSortColumnName()
   {
+    if (_currentSortColumnName == null) {
+      assert getColumnHeaders().size() > 0 : "> 0 column headers required";
+      _currentSortColumnName = getColumnHeaders().get(0);
+    }
     return _currentSortColumnName;
   }
 

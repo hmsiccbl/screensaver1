@@ -230,9 +230,6 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                                                           "statusItems");
         for (Iterator iter = screens.iterator(); iter.hasNext();) {
           Screen screen = (Screen) iter.next();
-          // note: it would be odd if the data access policy restricted
-          // access to the screens we've determined to be "my screens",
-          // above, but we'll filter anyway, just to be safe.
           if (screen.isRestricted()) {
             iter.remove();
           }
@@ -300,8 +297,14 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String viewScreen(final Screen screenIn, ScreenSearchResults screenSearchResults)
   {
-    logUserActivity("viewScreen " + screenIn);
+    // TODO: implement as aspect
+    if (screenIn.isRestricted()) {
+      showMessage("restrictedEntity", "Screen " + screenIn.getScreenNumber());
+      logUserActivity("viewScreen " + screenIn + " (unauthorized)");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
 
+    logUserActivity("viewScreen " + screenIn);
     _screenResultImporter.setScreenResultParser(new ScreenResultParser(_librariesDao));
     _screenResultViewer.setScreenResultExporter(_screenResultExporter);
     _screenResultViewer.setLibrariesController(_librariesController);
@@ -701,7 +704,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
         return viewScreen(screen, null);
       }
       else {
-        showMessage("screens.noSuchEntity", 
+        showMessage("noSuchEntity", 
                     "Screen " + screenNumber);
       }
     }
@@ -720,7 +723,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
         return viewCherryPickRequest(cherryPickRequest);
       }
       else {
-        showMessage("screens.noSuchEntity", 
+        showMessage("noSuchEntity", 
                     "Cherry Pick Request " + cherryPickRequestNumber);
       }
     }
@@ -919,6 +922,13 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   @UIControllerMethod
   public String viewCherryPickRequest(final CherryPickRequest cherryPickRequestIn)
   {
+    // TODO: implement as aspect
+    if (cherryPickRequestIn.isRestricted()) {
+      showMessage("restrictedEntity", "Cherry Pick Request " + cherryPickRequestIn.getCherryPickRequestNumber());
+      logUserActivity("viewCherryPickRequest " + cherryPickRequestIn + " (unauthorized)");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+
     logUserActivity("viewCherryPickRequest " + cherryPickRequestIn);
 
     try {

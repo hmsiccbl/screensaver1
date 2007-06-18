@@ -19,6 +19,8 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
@@ -65,6 +67,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
     super(unsortedResults);
     _screensController = screensController;
     _dao = dao;
+    setCurrentScreensaverUser(((AbstractBackingBean) screensController).getCurrentScreensaverUser());
   }
 
 

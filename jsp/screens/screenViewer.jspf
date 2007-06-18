@@ -81,7 +81,7 @@ TODO:
 		</h:panelGroup>
 		<t:selectOneMenu id="labNameEditable"
 			value="#{screenViewer.labName.value}" onchange="javascript:submit()"
-			immediate="true" valueChangeListener="#{screenViewer.update}"
+			immediate="true" valueChangeListener="#{screenViewerpdate}"
 			rendered="#{screenViewer.editMode}" styleClass="inputText">
 			<f:selectItems value="#{screenViewer.labName.selectItems}" />
 		</t:selectOneMenu>
@@ -181,22 +181,22 @@ TODO:
 			rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
 
 		<t:outputLabel for="publishableProtocol" value="Publishable Protocol"
-			rendered="#{screenViewer.userAssociatedWithScreen}"
+			rendered="#{screenViewer.allowedAccessToScreenDetails}"
 			title="A publication-quality description of the protocol used for this screen" />
 		<t:inputTextarea id="publishableProtocol" rows="3" cols="80"
 			value="#{screenViewer.screen.publishableProtocol}"
 			displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
 			displayValueOnlyStyleClass="dataText"
-			rendered="#{screenViewer.userAssociatedWithScreen}" />
+			rendered="#{screenViewer.allowedAccessToScreenDetails}" />
 
 		<t:outputLabel for="summary" value="Summary"
-			rendered="#{screenViewer.userAssociatedWithScreen}"
+			rendered="#{screenViewer.allowedAccessToScreenDetails}"
 			title="A summary of the screen" />
 		<t:inputTextarea id="summary" rows="3" cols="80"
 			value="#{screenViewer.screen.summary}"
 			displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
 			displayValueOnlyStyleClass="dataText"
-			rendered="#{screenViewer.userAssociatedWithScreen}" />
+			rendered="#{screenViewer.allowedAccessToScreenDetails}" />
 
 		<t:outputLabel for="comments" value="Comments"
 			rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
@@ -208,10 +208,10 @@ TODO:
 			displayValueOnlyStyleClass="dataText" />
 
 		<t:outputLabel for="activityItems" value="Screening Room Activities"
-			rendered="#{screenViewer.userAssociatedWithScreen}"
+			rendered="#{screenViewer.allowedAccessToScreenDetails}"
 			title="Activities carried out in the screening room, such as performing an assay or using a plate reader" />
 		<t:panelGrid columns="1"
-			rendered="#{screenViewer.userAssociatedWithScreen}">
+			rendered="#{screenViewer.allowedAccessToScreenDetails}">
 			<t:outputText value="<none>" styleClass="dataText"
 				rendered="#{empty screenViewer.screen.screeningRoomActivities}" />
 			<t:dataTable id="activityItems" var="activityItem"
@@ -242,16 +242,18 @@ TODO:
 						value="#{activityItem.performedBy.fullNameLastFirst}"
 						styleClass="dataText" />
 				</t:column>
+				<%-- not rendering until we implement a ScreeningRoomActivity Viewer --%>
+				<%--
 				<t:column>
-				  <%-- rendered="false" until we implement a ScreeningRoomActivity Viewer --%>
-					<t:commandButton id="viewActivity" rendered="false"
+					<t:commandButton id="viewActivity"
 						action="#{screenViewer.viewScreeningRoomActivity}"
 						value="#{screenViewer.editMode ? \"View/Edit...\" : \"View...\"}"
 						styleClass="command" />
-					<%-- t:commandButton id="copyScreeningRoomActivity" action="#{screenViewer.copyScreeningRoomActivity}"
+					<%- - t:commandButton id="copyScreeningRoomActivity" action="#{screenViewer.copyScreeningRoomActivity}"
 						rendered="#{screenViewer.editMode}" value="#{\"Copy...\"}"
-						styleClass="command" title="Copy to another screen" --%>
+						styleClass="command" title="Copy to another screen" - -%>
 				</t:column>
+				--%>
 			</t:dataTable>
 			<t:panelGroup>
 				<t:commandButton value="Add Screening Room Activity..."
@@ -261,10 +263,10 @@ TODO:
 		</t:panelGrid>
 
 		<t:outputLabel for="cherryPickRequests" value="Cherry Pick Requests"
-			rendered="#{screenViewer.userAssociatedWithScreen}"
+			rendered="#{screenViewer.allowedAccessToScreenDetails}"
 			title="The cherry pick requests for this screen" />
 		<t:panelGrid columns="1"
-			rendered="#{screenViewer.userAssociatedWithScreen}">
+			rendered="#{screenViewer.allowedAccessToScreenDetails}">
 			<t:outputText value="<none>" styleClass="dataText"
 				rendered="#{empty screenViewer.screen.cherryPickRequests}" />
 			<t:dataTable id="cherryPickRequests" var="cherryPickRequest"
@@ -313,10 +315,10 @@ TODO:
 		</t:panelGrid>
 
 		<t:outputLabel for="statusItems" value="Status Items"
-			rendered="#{screenViewer.userAssociatedWithScreen}"
+			rendered="#{screenViewer.allowedAccessToScreenDetails}"
 			title="A record of the status of the screen, such as when it was accepted, and whether it is ongoing, completed or dropped" />
 		<t:panelGrid columns="1"
-			rendered="#{screenViewer.userAssociatedWithScreen}">
+			rendered="#{screenViewer.allowedAccessToScreenDetails}">
 			<t:outputText value="<none>" styleClass="dataText"
 				rendered="#{empty screenViewer.screen.statusItems}" />
 			<t:dataTable id="statusItems" var="statusItem"
@@ -547,12 +549,12 @@ TODO:
 		</t:panelGrid>
 
 		<t:outputLabel for="assayReadoutTypes" value="Assay Readout Types"
-			rendered="#{screenViewer.userAssociatedWithScreen}"
+			rendered="#{screenViewer.allowedAccessToScreenDetails}"
 			title="The assay readout types used" />
 		<t:outputText id="assayReadoutTypes"
 			value="#{empty screenViewer.screen.assayReadoutTypes ? \"<none>\" : screenViewer.screen.assayReadoutTypesString}"
 			styleClass="dataText"
-			rendered="#{screenViewer.userAssociatedWithScreen}" />
+			rendered="#{screenViewer.allowedAccessToScreenDetails}" />
 
 		<t:outputLabel for="keywords" value="Keywords"
 		  title="A set of keywords associated with the screen" />

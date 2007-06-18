@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
@@ -71,6 +72,12 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
     _cherryPickRequest.addCherryPickAssayPlate(this);
   }
 
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
+  
   @Override
   public Serializable getEntityId()
   {

@@ -70,7 +70,10 @@ import edu.harvard.med.authentication.AuthenticationResponseException;
 import edu.harvard.med.authentication.AuthenticationResult;
 import edu.harvard.med.authentication.Credentials;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 
 import org.apache.log4j.Logger;
@@ -108,8 +111,7 @@ public class ScreensaverLoginModule implements LoginModule
   private AuthenticationResult _authenticationResult;
   private boolean _isAuthenticated = false;
   private boolean _commitSucceeded = false;
-  
-  
+
   /**
    * The Principals, which identify the user and the roles the Subject belongs
    * to, and that were granted by this LoginModule (other LoginModules may grant
@@ -143,8 +145,7 @@ public class ScreensaverLoginModule implements LoginModule
   {
     _dao = dao;
   }
-
-
+  
   // LoginModule interface methods
 
   /**
@@ -198,11 +199,17 @@ public class ScreensaverLoginModule implements LoginModule
     callbacks[1] = new PasswordCallback("password: ", false);
     
     String username;
+    String switchToUsername = null;
     char[] password;
     try {
       _callbackHandler.handle(callbacks);
       // username and password
       username = ((NameCallback) callbacks[0]).getName();
+      if (username.indexOf(':') > 0) {
+        String[] names = username.split(":");
+        username = names[0];
+        switchToUsername = names[1];
+      }
       char[] tmpPassword = ((PasswordCallback) callbacks[1]).getPassword();
       // treat a NULL password as an empty password
       if (tmpPassword == null) {
@@ -222,10 +229,21 @@ public class ScreensaverLoginModule implements LoginModule
     
     log.debug("attempting authentication for user '" + username + "'");
     //log.debug("user entered password: " + new String(password));
-    
+
+    if (authenticateUser(username, password)) {
+      if (switchToUsername != null) {
+        switchUser(_user, switchToUsername);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  private boolean authenticateUser(String username, char[] password) throws LoginException
+  {
     // verify the username/password
     try {
-      _user = findUser(username, "loginId");
+      _user = findUserByLoginId(username);
       if (_user != null) {
         log.info(FOUND_SCREENSAVER_USER + " '" + username + "'");
         if (_user.getDigestedPassword().equals(CryptoUtils.digest(password))) {
@@ -248,30 +266,26 @@ public class ScreensaverLoginModule implements LoginModule
         }
       }
       else {
-        String normalizedUsername = username.toLowerCase();
-        if (!normalizedUsername.equals(username)) {
-          log.warn("lowercasing eCommons ID '" + username + "' to '" + normalizedUsername + "'");
-        }
-        _user = findUser(normalizedUsername, "ECommonsId");
+        _user = findUserByECommonsId(username);
         if (_user != null) {
-          log.info(FOUND_ECOMMONS_USER + " '" + normalizedUsername + "'");
-          _authenticationResult = _authenticationClient.authenticate(new Credentials(normalizedUsername,
+          log.info(FOUND_ECOMMONS_USER + " '" + _user.getECommonsId() + "'");
+          _authenticationResult = _authenticationClient.authenticate(new Credentials(_user.getECommonsId(),
                                                                                      new String(password)));
           _isAuthenticated = _authenticationResult.isAuthenticated();
         }
         else {
-          String message = NO_SUCH_USER + " '" + normalizedUsername + "'";
+          String message = NO_SUCH_USER + " '" + _user.getECommonsId() + "'";
           log.info(message);
           throw new FailedLoginException(message);
         }
       }
-
+      
       if (_isAuthenticated) {
         log.info("authentication succeeded for user '" + username + 
                  "' with status code " + _authenticationResult.getStatusCode() + 
                  " (" + _authenticationResult.getStatusCodeCategory() + ")");
         return true;
-      } 
+      }
       else {
         // authentication failed, clean out state
         log.info("authentication failed for user '" + username + 
@@ -291,7 +305,31 @@ public class ScreensaverLoginModule implements LoginModule
       throw new LoginException(e.getMessage());
     }
   }
-  
+
+  private ScreensaverUser switchUser(ScreensaverUser user, String switchToECommonsId) throws LoginException {
+    if (!user.isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
+      log.info("user " + user + " is not authorized to switch to another user");
+    }
+    else {
+      ScreensaverUser switchToUser = findUserByECommonsId(switchToECommonsId);
+      if (switchToUser == null) {
+        String msg = "cannot switch to user " + switchToECommonsId + ": no such user";
+        log.info(msg);
+        throw new LoginException(msg);
+      } 
+      else if (!(switchToUser instanceof ScreeningRoomUser)) {
+        String msg = "switching to non-screening room user " + switchToUser + " is forbidden";
+        log.info(msg);
+        throw new LoginException(msg);
+      }
+      else {
+        log.info("switching to screening room user " + switchToUser); 
+        _user = switchToUser;
+      }
+    }
+    return _user;
+  }
+
   /**
    * This method is called if the LoginContext's overall authentication
    * succeeded (the relevant REQUIRED, REQUISITE, SUFFICIENT and OPTIONAL
@@ -332,7 +370,19 @@ public class ScreensaverLoginModule implements LoginModule
     }
   }
 
-  /**
+  private ScreensaverUser findUserByLoginId(String username) {
+    return findUser(username, "loginId");
+  }
+
+  private ScreensaverUser findUserByECommonsId(String username) {
+    String normalizedUsername = username.toLowerCase();
+    if (!normalizedUsername.equals(username)) {
+      log.warn("lowercasing eCommons ID '" + username + "' to '" + normalizedUsername + "'");
+    }
+    return findUser(normalizedUsername, "ECommonsId");
+  }
+      
+    /**
    * @param userId the userId
    * @param userIdField the field in {@link ScreensaverUser} entity bean:
    *          "loginId" or "eCommonsId" to lookup the userId in

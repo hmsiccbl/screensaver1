@@ -19,6 +19,7 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.servlet.http.Cookie;
 
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 
 public class Environment extends AbstractBackingBean
@@ -133,9 +134,13 @@ public class Environment extends AbstractBackingBean
     userSecurityItems.add(new Row("remoteUser", getExternalContext().getRemoteUser()));
     Principal principal = getExternalContext().getUserPrincipal();
     userSecurityItems.add(new Row("userPrincipal", principal == null ? "<none>" : principal.getName()));
+    ScreensaverUser screensaverUser = getCurrentScreensaverUser().getScreensaverUser();
+    userSecurityItems.add(new Row("currentScreensaverUser", 
+                                  screensaverUser == null ? "<none>" : screensaverUser.getFullNameFirstLast()));
+                                  
     for (ScreensaverUserRole role : ScreensaverUserRole.values()) {
       userSecurityItems.add(new Row("in role '" + role.toString() + "'",  
-                                    Boolean.toString(getExternalContext().isUserInRole(role.toString()))));
+                                    Boolean.toString(isUserInRole(role))));
     }
     userSecurityItems.add(new Row("authenticationType", getExternalContext().getAuthType()));
     return new ListDataModel(userSecurityItems);

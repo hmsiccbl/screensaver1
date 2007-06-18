@@ -189,25 +189,4 @@
       ref="hibernateTemplate" />
   </bean>
 
-
-  <!-- Development/Debug related beans -->
-
-  <bean
-    id="envInfo"
-    class="edu.harvard.med.screensaver.ui.Environment">
-    <property
-      name="host"
-      value="${SCREENSAVER_PGSQL_SERVER}" />
-    <property
-      name="db"
-      value="${SCREENSAVER_PGSQL_DB}" />
-    <property
-      name="user"
-      value="${SCREENSAVER_PGSQL_USER}" />
-    <property
-      name="url"
-      value="jdbc:postgresql://${SCREENSAVER_PGSQL_SERVER}/${SCREENSAVER_PGSQL_DB}" />
-  </bean>
-
-
 </beans>

@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
@@ -72,7 +73,12 @@ public class LibraryScreening extends Screening
 
   // public methods
 
-
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
+  
   @Override
   @ImmutableProperty
   public String getActivityTypeName()

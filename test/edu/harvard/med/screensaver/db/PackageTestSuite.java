@@ -30,7 +30,7 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(SimpleDAOTest.class);
     addTestSuite(ComplexDAOTest.class);
     addTestSuite(UserTest.class);
-    addTestSuite(RestrictedAccessDAOTest.class);
+    addTestSuite(WebDataAccessPolicyTest.class);
     addTestSuite(ScreenResultLazyInitTest.class);
   }
 

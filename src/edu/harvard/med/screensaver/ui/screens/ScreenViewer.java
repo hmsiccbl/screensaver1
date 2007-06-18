@@ -25,6 +25,7 @@ import javax.faces.model.SelectItem;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
+import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
@@ -38,9 +39,9 @@ import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.WebDataAccessPolicy;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
@@ -66,6 +67,7 @@ public class ScreenViewer extends AbstractBackingBean
   private ScreensController _screensController;
   private GenericEntityDAO _dao;
   private UsersDAO _usersDao;
+  private WebDataAccessPolicy _dataAccessPolicy;
   private Screen _screen;
   private UISelectOneEntityBean<ScreeningRoomUser> _labName;
   private UISelectOneEntityBean<ScreeningRoomUser> _leadScreener;
@@ -93,6 +95,11 @@ public class ScreenViewer extends AbstractBackingBean
   public void setUsersDao(UsersDAO usersDao)
   {
     _usersDao = usersDao;
+  }
+
+  public void setDataAccessPolicy(WebDataAccessPolicy dataAccessPolicy)
+  {
+    _dataAccessPolicy = dataAccessPolicy;
   }
 
   public Screen getScreen() 
@@ -135,18 +142,9 @@ public class ScreenViewer extends AbstractBackingBean
    * Determine if the current user can view the restricted screen fields.
    * @return
    */
-  public boolean isUserAssociatedWithScreen()
+  public boolean isAllowedAccessToScreenDetails()
   {
-    ScreensaverUser user = getCurrentScreensaverUser().getScreensaverUser();
-    Set<ScreensaverUserRole> roles = user.getScreensaverUserRoles();
-    if (roles.contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
-      roles.contains(ScreensaverUserRole.SCREENS_ADMIN)) {
-      return true;
-    }
-    return 
-    _screen.getLeadScreener().equals(user) ||
-    _screen.getLabHead().equals(user) ||
-    _screen.getCollaborators().contains(user);
+    return isReadOnlyAdmin() || _dataAccessPolicy.isScreenerAllowedAccessToScreenDetails(_screen);
   }
 
   public AssayReadoutType getNewAssayReadoutType()

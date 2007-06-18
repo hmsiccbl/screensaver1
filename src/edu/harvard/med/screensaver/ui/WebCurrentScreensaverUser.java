@@ -25,15 +25,16 @@ import org.apache.log4j.Logger;
 /**
  * Like {@link CurrentScreensaverUser}, maintains the current ScreensaverUser
  * entity, but also knows how to find that current user within the context of a
- * web application (using servlet session information). Also, thanks to Spring
- * 2.0's session-scoped bean feature, declare a single bean of type
- * WebCurrentScreensaverUser, inject into other beans (which can be either
- * session-scoped themselves, or even singletons), and they will have access to
- * the current ScreensaverUser (i.e., the user being serviced in the current
- * HTTP request).
+ * web application (using servlet session information), in a lazy fashion.
+ * Also, thanks to Spring 2.0's session-scoped bean feature, we can declare a
+ * single bean of type WebCurrentScreensaverUser and inject it into other UI
+ * Spring beans (which can be either session-scoped themselves, or even
+ * singletons), and they will have access to the current ScreensaverUser (i.e.,
+ * the user being serviced in the current HTTP request). We can't just inject a
+ * ScreensaverUser instance directly, since a user hasn't necessarily
+ * authenticated themselves when Spring session-scoped beans are instantiated.
  * 
  * @see WebDataAccessPolicy
- * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
@@ -61,16 +62,41 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
   {
     ScreensaverUser screensaverUser = super.getScreensaverUser();
     if (screensaverUser == null) {
-      FacesContext facesContext = FacesContext.getCurrentInstance();
-      if (facesContext == null) {
-        throw new IllegalStateException("cannot determine current screensaver user outside of JSF context");
-      }
-      screensaverUser = findScreensaverUserForPrincipal(facesContext.getExternalContext().getUserPrincipal());
-      setScreensaverUser(screensaverUser);
+      _dao.doInTransaction(new DAOTransaction() 
+      {
+        public void runTransaction() 
+        {
+          FacesContext facesContext = FacesContext.getCurrentInstance();
+          if (facesContext == null) {
+            throw new IllegalStateException("cannot determine current screensaver user outside of JSF context");
+          }
+          ScreensaverUser screensaverUser = findScreensaverUserForUsername(facesContext.getExternalContext().getRemoteUser());
+          setScreensaverUser(screensaverUser);
+        }
+      });
       // Spring instantiates this object as a session-scoped bean, the first time a JSF page is requested for a newly logged-in user
       logActivity("login");
     }
-    return screensaverUser;
+    return super.getScreensaverUser();
+  }
+
+  // must be called within a transaction
+  // TODO: annotate as @Transactional(REQUIRED) once we move to annotated txns
+  public void setScreensaverUser(final ScreensaverUser user)
+  {
+    if (user != null) {
+      // semi-HACK: fetch relationships needed by data access policy
+      _dao.need(user, "screensaverUserRoles");
+      if (user instanceof ScreeningRoomUser) {
+        _dao.need(user,
+                  "hbnScreensLed",
+                  "hbnScreensHeaded",
+                  "hbnScreensCollaborated",
+                  "hbnLabHead.hbnLabMembers",
+                  "hbnLabMembers");
+      }
+    }
+    super.setScreensaverUser(user);
   }
   
   @Override
@@ -95,6 +121,7 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
   
   // private methods
 
+  // TODO: make this into a service, and use in ScreensaverLoginModule
   /**
    * Returns a ScreensaverUser object for the specified Principal.
    * 
@@ -110,42 +137,33 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
    *             login ID.
    * @return the ScreensaverUser that is logged in to the current HTTP session
    */
-  private ScreensaverUser findScreensaverUserForPrincipal(final Principal principal)
+  private ScreensaverUser findScreensaverUserForUsername(String username)
   {
-    if (principal == null) {
+    if (username == null) {
       return null;
     }
-    final ScreensaverUser[] result = new ScreensaverUser[1];
-    _dao.doInTransaction(new DAOTransaction() 
-    {
-      public void runTransaction() 
-      {
-        String eCommonsIdOrLoginId = principal.getName();
-        ScreensaverUser user = _dao.findEntityByProperty(ScreensaverUser.class, 
-                                                        "ECommonsId", 
-                                                        eCommonsIdOrLoginId.toLowerCase());
-        if (user == null) {
-          user = _dao.findEntityByProperty(ScreensaverUser.class, 
-                                          "loginId", 
-                                          eCommonsIdOrLoginId);
-        }
-        if (user != null) {
-          // semi-HACK: fetch relationships needed by data access policy
-          _dao.need(user,
-                    "screensaverUserRoles");
-          if (user instanceof ScreeningRoomUser) {
-            _dao.need(user,
-                      "hbnScreensLed",
-                      "hbnScreensHeaded",
-                      "hbnScreensCollaborated",
-                      "hbnLabHead",
-                      "hbnLabHead.hbnLabMembers",
-                      "hbnLabMembers");
-          }
-        }
-        result[0] = user;
+    int switchToUserPos = username.indexOf(':');
+    
+    ScreensaverUser user = null;    
+    if (switchToUserPos > 0) {
+      username = username.substring(switchToUserPos + 1);
+      user = _dao.findEntityByProperty(ScreensaverUser.class, 
+                                       "ECommonsId", 
+                                       username.toLowerCase());
+    }
+    else {
+      user = _dao.findEntityByProperty(ScreensaverUser.class, 
+                                       "loginId", 
+                                       username);
+      if (user == null) {
+        user = _dao.findEntityByProperty(ScreensaverUser.class, 
+                                         "ECommonsId", 
+                                         username.toLowerCase());
       }
-    });
-    return result[0];
+    }
+    if (user == null) {
+      log.warn("could not find a user for username " + username);
+    }
+    return user;
   }
 }

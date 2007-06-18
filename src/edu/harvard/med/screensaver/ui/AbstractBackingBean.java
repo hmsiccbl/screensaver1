@@ -57,9 +57,8 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   // private data members
   
   private Messages _messages;
-
   private CurrentScreensaverUser _currentScreensaverUser;
-
+  
 
   // bean property methods
   
@@ -164,15 +163,6 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   public boolean isReadOnlyAdmin()
   {
     return isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
-  }
-  
-  public String getUserPrincipalName()
-  {
-    Principal principal = getExternalContext().getUserPrincipal();
-    if (principal == null) {
-      return "";
-    }
-    return principal.getName();
   }
   
   // TODO: consider moving to the Login Bean
@@ -566,10 +556,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    */
   protected boolean isUserInRole(ScreensaverUserRole role)
   {
-    if (role == null) {
-      return false;
-    }
-    return getExternalContext().isUserInRole(role.toString());
+    return getCurrentScreensaverUser().getScreensaverUser().isUserInRole(role);
   }
 
 

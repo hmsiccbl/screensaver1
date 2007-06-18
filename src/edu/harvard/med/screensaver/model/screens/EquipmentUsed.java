@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.model.screens;
 
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 
 import org.apache.log4j.Logger;
@@ -71,6 +72,12 @@ public class EquipmentUsed extends AbstractEntity
 
   // public methods
 
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
+  
   @Override
   public Integer getEntityId()
   {

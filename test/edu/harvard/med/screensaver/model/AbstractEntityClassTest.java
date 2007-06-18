@@ -38,6 +38,11 @@ public class AbstractEntityClassTest extends TestCase
       _great = isGreat;
     }
     
+    public Object acceptVisitor(AbstractEntityVisitor visitor)
+    {
+      return null;
+    }
+
     /* (non-Javadoc)
      * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
      */

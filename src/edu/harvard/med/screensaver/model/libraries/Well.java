@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.EntityIdProperty;
 
@@ -106,6 +107,12 @@ public class Well extends AbstractEntity implements Comparable
     this(parentLibrary, new WellKey(plateNumber, wellName), WellType.EXPERIMENTAL);
   }
 
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
+  
   @Override
   public String getEntityId()
   {

@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
@@ -71,6 +72,12 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
     this(performedBy, dateCreated, dateOfActivity, cherryPickRequest, CherryPickLiquidTransferStatus.SUCCESSFUL);
   }
 
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
+  
   @Override
   @ImmutableProperty
   public String getActivityTypeName()

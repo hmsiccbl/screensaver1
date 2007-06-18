@@ -16,6 +16,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.CollectionElementName;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
@@ -120,6 +121,12 @@ public class ResultValueType extends AbstractEntity implements Comparable
     setScreenResult(screenResult);
     setName(name);
     //setReplicateOrdinal(1);
+  }
+  
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
   }
   
   /* (non-Javadoc)

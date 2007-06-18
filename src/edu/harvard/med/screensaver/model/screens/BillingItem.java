@@ -14,6 +14,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 
 
 /**
@@ -71,6 +72,12 @@ public class BillingItem extends AbstractEntity
 
   // public methods
 
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
+  
   @Override
   public Integer getEntityId()
   {

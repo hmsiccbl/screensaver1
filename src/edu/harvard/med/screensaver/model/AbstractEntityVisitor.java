@@ -28,16 +28,18 @@ import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.CompoundCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
+import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
-import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemType;
@@ -52,10 +54,10 @@ public interface AbstractEntityVisitor
   public boolean visit(BillingItem entity);
   public boolean visit(ChecklistItem entity);
   public boolean visit(ChecklistItemType entity);
-  public boolean visit(CherryPickRequest entity);
   public boolean visit(CherryPickAssayPlate entity);
   public boolean visit(CherryPickLiquidTransfer entity);
   public boolean visit(Compound entity);
+  public boolean visit(CompoundCherryPickRequest entity);
   public boolean visit(Copy entity);
   public boolean visit(CopyAction entity);
   public boolean visit(CopyInfo entity);
@@ -67,10 +69,13 @@ public interface AbstractEntityVisitor
   public boolean visit(LabCherryPick entity);
   public boolean visit(LetterOfSupport entity);
   public boolean visit(Library entity);
+  public boolean visit(LibraryScreening entity);
   public boolean visit(PlatesUsed entity);
   public boolean visit(Publication entity);
   public boolean visit(ResultValue entity);
   public boolean visit(ResultValueType entity);
+  public boolean visit(RNAiCherryPickRequest entity);
+  public boolean visit(RNAiCherryPickScreening entity);
   public boolean visit(RNAiKnockdownConfirmation entity);
   public boolean visit(Screen screen);
   public boolean visit(ScreenResult screenResult);
@@ -78,7 +83,6 @@ public interface AbstractEntityVisitor
   public boolean visit(ScreensaverUser screensaverUser);
   public boolean visit(SilencingReagent entity);
   public boolean visit(StatusItem entity);
-  public boolean visit(ScreeningRoomActivity entity);
   public boolean visit(Well entity);
 }
 

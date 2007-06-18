@@ -31,11 +31,15 @@ import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.CompoundCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
+import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -50,9 +54,6 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 
 import org.apache.log4j.Logger;
-
-
-// TODO: add a unit test that ensures all AbstractEntity classes have a corresponding method in this class
 
 // TODO: implement billing permissions
 
@@ -79,57 +80,36 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
     _currentScreensaverUser = user;
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.AbaseTestset)
-   */
   public boolean visit(AbaseTestset entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.AttachedFile)
-   */
   public boolean visit(AttachedFile entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.BillingInformation)
-   */
   public boolean visit(BillingInformation entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.BillingItem)
-   */
   public boolean visit(BillingItem entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.users.ChecklistItem)
-   */
   public boolean visit(ChecklistItem entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.users.ChecklistItemType)
-   */
   public boolean visit(ChecklistItemType entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.CherryPick)
-   */
   public boolean visit(ScreenerCherryPick entity)
   {
     return true;
@@ -150,146 +130,87 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.CherryPickRequest)
-   */
-  public boolean visit(CherryPickRequest entity)
-  {
-    return true;
-  }
-  
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.libraries.Compound)
-   */
   public boolean visit(Compound entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.libraries.Copy)
-   */
   public boolean visit(Copy entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.libraries.CopyAction)
-   */
   public boolean visit(CopyAction entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.libraries.CopyInfo)
-   */
   public boolean visit(CopyInfo entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.derivatives.Derivative)
-   */
   public boolean visit(Derivative entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.derivatives.DerivativeScreenResult)
-   */
   public boolean visit(DerivativeScreenResult entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.EquipmentUsed)
-   */
   public boolean visit(EquipmentUsed entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.libraries.Gene)
-   */
   public boolean visit(Gene entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.users.LabAffiliation)
-   */
   public boolean visit(LabAffiliation entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.LetterOfSupport)
-   */
   public boolean visit(LetterOfSupport entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.libraries.Library)
-   */
   public boolean visit(Library entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.PlatesUsed)
-   */
   public boolean visit(PlatesUsed entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.Publication)
-   */
   public boolean visit(Publication entity)
   {
 
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screenresults.ResultValue)
-   */
   public boolean visit(ResultValue entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screenresults.ResultValueType)
-   */
   public boolean visit(ResultValueType entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation)
-   */
   public boolean visit(RNAiKnockdownConfirmation entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.Screen)
-   */
   public boolean visit(Screen screen)
   {
     ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
@@ -307,9 +228,6 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
     return false;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screenresults.ScreenResult)
-   */
   public boolean visit(ScreenResult screenResult)
   {
     ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
@@ -317,42 +235,22 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
     if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
       return true;
     }
+    if (screenResult.getScreen().isRestricted()) {
+      // if user is restricted from parent Screen, they are restricted from the Screen Result
+      return false;
+    }
     if (user instanceof ScreeningRoomUser) {
       ScreeningRoomUser screener = (ScreeningRoomUser) user;
-      if (screener.getScreensLed().contains(screenResult.getScreen())) {
+      if (isScreenerAllowedAccessToScreenDetails(screenResult.getScreen())) {
         return true;
       }
-      if (screener.getScreensCollaborated().contains(screenResult.getScreen())) {
+      if (screenResult.isShareable() && screenerHasScreenResult(screener)) {
         return true;
-      }
-      if (!screenResult.isShareable()) {
-        return false;
-      }
-      // TODO: do we really want the following to only apply to compound screeners, and not RNAi screeners?
-      if (screener.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER)) {
-        for (Screen screen : screener.getScreensCollaborated()) {
-          if (screen.getScreenResult() != null) {
-            return true;
-          }
-        }
-        for (Screen screen : screener.getScreensLed()) {
-          if (screen.getScreenResult() != null) {
-            return true;
-          }
-        }
-        for (Screen screen : screener.getScreensHeaded()) {
-          if (screen.getScreenResult() != null) {
-            return true;
-          }
-        }
       }
     }
     return false;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.users.ScreensaverUser)
-   */
   public boolean visit(ScreensaverUser screensaverUser)
   {
     ScreensaverUser loggedInUser = _currentScreensaverUser.getScreensaverUser();
@@ -385,52 +283,96 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
     return false;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.libraries.SilencingReagent)
-   */
   public boolean visit(SilencingReagent entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.StatusItem)
-   */
   public boolean visit(StatusItem entity)
   {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity)
-   */
-  public boolean visit(ScreeningRoomActivity visit)
-  {
-    ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
-    assert user != null : "WebDataAccessPolicy should only be used when a current user can be determined";
-    if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
-      return true;
-    }
-    if (user instanceof ScreeningRoomUser) {
-      ScreeningRoomUser screener = (ScreeningRoomUser) user;
-      if (screener.getScreensLed().contains(visit.getScreen())) {
-        return true;
-      }
-      if (screener.getScreensCollaborated().contains(visit.getScreen())) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.db.DataAccessPolicy#visit(edu.harvard.med.screensaver.model.libraries.Well)
-   */
   public boolean visit(Well entity)
   {
     return true;
   }
 
-  // private methods
+  public boolean visit(CompoundCherryPickRequest entity) 
+  {
+    return visit((CherryPickRequest) entity);
+  }
 
+  public boolean visit(RNAiCherryPickRequest entity) 
+  {
+    return visit((CherryPickRequest) entity);
+  }
+
+  public boolean visit(LibraryScreening entity) 
+  {
+    return visit((ScreeningRoomActivity) entity);
+  }
+
+  public boolean visit(RNAiCherryPickScreening entity) 
+  {
+    return visit((ScreeningRoomActivity) entity);
+  }
+
+  public boolean isScreenerAllowedAccessToScreenDetails(Screen screen)
+  {
+    if (isScreenerAssociatedWithScreen(screen) &&
+      // not strictly necessary to check screen.restricted w/current policy, but safer in case policy changes
+      !screen.isRestricted()) {
+      return true;
+    }
+    return false;
+  }
+
+  // private methods
+  
+  private boolean visit(CherryPickRequest entity) {
+    return isReadEverythingAdmin() || isScreenerAllowedAccessToScreenDetails(entity.getScreen());
+  }
+
+  private boolean visit(ScreeningRoomActivity entity)
+  {
+    return isReadEverythingAdmin() || isScreenerAllowedAccessToScreenDetails(entity.getScreen());
+  }
+
+  private boolean isReadEverythingAdmin() 
+  {
+    return _currentScreensaverUser.getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+  }
+  
+  private boolean isScreenerAssociatedWithScreen(Screen screen) 
+  {
+    ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
+    if (user instanceof ScreeningRoomUser) {
+      ScreeningRoomUser screeningUser = (ScreeningRoomUser) user;
+      return 
+      screeningUser.getScreensHeaded().contains(screen) ||
+      screeningUser.getScreensLed().contains(screen) ||
+      screeningUser.getScreensCollaborated().contains(screen);
+    }
+    return false;
+  }
+
+  private boolean screenerHasScreenResult(ScreeningRoomUser screener) {
+    for (Screen screen : screener.getScreensLed()) {
+      if (screen.getScreenResult() != null) {
+        return true;
+      }
+    }
+    for (Screen screen : screener.getScreensHeaded()) {
+      if (screen.getScreenResult() != null) {
+        return true;
+      }
+    }
+    for (Screen screen : screener.getScreensCollaborated()) {
+      if (screen.getScreenResult() != null) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

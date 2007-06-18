@@ -14,6 +14,7 @@ import java.util.Date;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 
 import org.apache.log4j.Logger;
 
@@ -56,6 +57,50 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest
     ScreeningRoomUser labHead = labMember.getLabHead();
     assertEquals("lab member with lab head", "Head, Lab - LabAffiliation", labMember.getLabName());
     assertEquals("lab head", "Head, Lab - LabAffiliation", labHead.getLabName());
+  }
+  
+  public void testAdministrativeRoleNotAllowed() {
+    final ScreeningRoomUser user = new ScreeningRoomUser(new Date(),
+                                                   "first",
+                                                   "last",
+                                                   "first_last@hms.harvard.edu",
+                                                   "",
+                                                   "",
+                                                   "",
+                                                   "ec1",
+                                                   "",
+                                                   ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
+                                                   false);
+    user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
+    genericEntityDao.persistEntity(user);
+    
+    ScreeningRoomUser user2 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
+    assertEquals(1, user2.getScreensaverUserRoles().size());
+    assertEquals(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER, user2.getScreensaverUserRoles().iterator().next());
+
+    try {
+      genericEntityDao.doInTransaction(new DAOTransaction() {
+        public void runTransaction() 
+        {
+          ScreeningRoomUser user2 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
+          user2.getScreensaverUserRoles().add(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+        };
+      });
+      fail("expected DataModelViolationException after adding administrative role to screening room user");
+    }
+    catch (Exception e) {}
+    
+    try {
+      genericEntityDao.doInTransaction(new DAOTransaction() {
+        public void runTransaction() 
+        {
+          ScreeningRoomUser user2 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
+          user2.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+        };
+      });
+      fail("expected DataModelViolationException after adding administrative role to screening room user");
+    }
+    catch (Exception e) {}
   }
 }
 

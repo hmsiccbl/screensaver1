@@ -13,6 +13,7 @@ package edu.harvard.med.screensaver.model.screens;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 
 //TODO: this doesn't need to be a first-class entity; could be just a value-type for a collection in LibraryScreening
@@ -72,6 +73,12 @@ public class PlatesUsed extends AbstractEntity
 
   // public methods
 
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
+  
   @Override
   public Integer getEntityId()
   {

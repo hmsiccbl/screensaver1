@@ -13,6 +13,7 @@ package edu.harvard.med.screensaver.model.screens;
 import java.math.BigDecimal;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
@@ -110,7 +111,13 @@ public class LabCherryPick extends AbstractEntity
     }
   }
 
-    @Override
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
+  
+  @Override
   public Integer getEntityId()
   {
     return getLabCherryPickId();

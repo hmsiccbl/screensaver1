@@ -303,13 +303,7 @@ public abstract class AbstractEntity implements Serializable
    *             currently only have the DataAccessPolicy visitor, which does
    *             not actually need to visit every subclass.
    */
-  public Object acceptVisitor(AbstractEntityVisitor visitor)
-  {
-//    if (log.isDebugEnabled()) {
-//      log.debug("concrete entity class " + this.getClass().getSimpleName() + " not instrumented for visitor pattern!");
-//    }
-    return null;
-  }
+  abstract public Object acceptVisitor(AbstractEntityVisitor visitor);
   
   private DataAccessPolicy _dataAccessPolicy;
 

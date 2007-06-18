@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
@@ -62,6 +63,12 @@ public class CompoundCherryPickRequest extends CherryPickRequest
     super(screen, requestedBy, dateRequested, legacyCherryPickRequestNumber);
   }
 
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
+  
   @DerivedEntityProperty
   public PlateType getAssayPlateType()
   {
