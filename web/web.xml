@@ -313,6 +313,18 @@
     </form-login-config>
   </login-config>
 
+  <!--
+  from the 2.4 Servlet spec (SRV.12.8.1): "A security constraint that
+  does not contain an authorization constraint shall combine with
+  authorization constraints that name or imply roles to allow
+  unauthenticated access. The special case of an authorization
+  constraint that names no roles shall combine with any other
+  constraints to override their affects and cause access to be
+  precluded." so the following constraint combines with any constraint
+  below that has no auth-constraint to allow all access. it will also
+  preclude any possibility of authorized access for any of the HTTP
+  methods listed.
+  -->
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>Precluded Methods</web-resource-name>
@@ -323,7 +335,6 @@
       <http-method>PUT</http-method>
       <http-method>GET</http-method>
     </web-resource-collection>
-
     <auth-constraint />
   </security-constraint>
 
@@ -343,7 +354,6 @@
       <description>Images, stylesheets, etc.  Access via HTTP GET and HEAD methods only.</description>
       <url-pattern>/css/*</url-pattern>
       <url-pattern>/images/*</url-pattern>
-      <url-pattern>/downloads/*</url-pattern>
       <!-- resources provided by Apache MyFaces and by Apache Tomahawk components -->
       <url-pattern>/faces/*</url-pattern>
 
@@ -363,6 +373,17 @@
     <user-data-constraint>
       <transport-guarantee>NONE</transport-guarantee>
     </user-data-constraint>
+  </security-constraint>
+
+  <!-- user-data-constraints seem to gum up .zip file downloads on IE[67] -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>downloads</web-resource-name>
+      <description>Downloads are accessible to all, w/o user data constraints</description>
+      <url-pattern>/downloads/*</url-pattern>
+      <http-method>HEAD</http-method>
+      <http-method>GET</http-method>
+    </web-resource-collection>
   </security-constraint>
 
   <security-constraint>
