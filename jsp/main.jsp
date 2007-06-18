@@ -15,7 +15,7 @@
 		styleClass="title" />
 	<t:div />
 	<f:verbatim escape="false">
-          <div id="ie_detection_message" style="display:none; color:red;">
+          <div id="ie_detection_message" style="display:none; color:fuchsia;">
             The Screensaver development team recommends the
             <a href="www.mozilla.com">Mozilla Firefox Browser</a> (version 1.5
             or higher). While we work to support other browsers, it's not
