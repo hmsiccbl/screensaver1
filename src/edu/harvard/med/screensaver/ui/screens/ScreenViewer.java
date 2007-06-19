@@ -225,7 +225,7 @@ public class ScreenViewer extends AbstractBackingBean
                      new Comparator<CherryPickRequest>() {
       public int compare(CherryPickRequest cpr1, CherryPickRequest cpr2) 
       { 
-        return cpr1.getEntityId().compareTo(cpr2.getEntityId()); 
+        return cpr1.getCherryPickRequestNumber().compareTo(cpr2.getCherryPickRequestNumber()); 
       }
     });
     return new ListDataModel(cherryPickRequests);
