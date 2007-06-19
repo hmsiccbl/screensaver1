@@ -36,7 +36,7 @@
 				onclick="javascript: return confirm('Are you sure you want to unload the contents of this library?');"
 				rendered="#{libraryViewer.editable && libraryViewer.librarySize > 0}"
 				styleClass="command"
-				title="Mostly useful for reloading data if a problem occurred on a previous laod" />
+				title="Mostly useful for reloading data if a problem occurred on a previous load" />
 		</h:form>
   </t:panelGroup>
 
