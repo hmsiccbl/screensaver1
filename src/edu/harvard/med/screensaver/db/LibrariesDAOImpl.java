@@ -83,16 +83,18 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   
   public void deleteLibraryContents(Library library)
   {
-    log.error("call TODO daoImpl.deleteLibraryContents");
     for (Well well : library.getWells()) {
-      well.setGenbankAccessionNumber(null);
-      well.setIccbNumber(null);
-      well.setMolfile(null);
-      well.setSmiles(null);
-      well.removeCompounds();
-      well.removeSilencingReagents();
-      well.setWellType(WellType.EMPTY);
+      if (well.getWellType().equals(WellType.EXPERIMENTAL)) {
+        well.setGenbankAccessionNumber(null);
+        well.setIccbNumber(null);
+        well.setMolfile(null);
+        well.setSmiles(null);
+        well.removeCompounds();
+        well.removeSilencingReagents();
+        well.setWellType(WellType.EMPTY);
+      }
     }
+    log.info("deleted library contents for " + library.getLibraryName());
   }
 
   @SuppressWarnings("unchecked")
