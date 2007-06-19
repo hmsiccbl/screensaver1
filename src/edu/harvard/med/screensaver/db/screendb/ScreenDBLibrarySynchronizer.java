@@ -66,8 +66,6 @@ public class ScreenDBLibrarySynchronizer
       {
         try {
           // TODO: review this, make sure we are not missing anything (e.g., copy info)
-          // TODO: try to figure out some way to grok the vendor for these libraries. we will
-          // need vendor eventually, especially to try looking up compounds in PubChem by vendor id
           Statement statement = _connection.createStatement();
           ResultSet resultSet = statement.executeQuery(
             "SELECT l.*, lt.name AS library_type\n" +
@@ -80,6 +78,7 @@ public class ScreenDBLibrarySynchronizer
             LibraryType libraryType = getLibraryType(resultSet);
             Integer startPlate = resultSet.getInt("start_plate");
             Integer endPlate = resultSet.getInt("end_plate");
+            String vendor = resultSet.getString("vendor");
             Library library = _librariesDao.findLibraryWithPlate(startPlate);
             if (library == null) {
               library = new Library(
@@ -97,6 +96,7 @@ public class ScreenDBLibrarySynchronizer
               library.setLibraryType(libraryType);
             }
             library.setDescription(resultSet.getString("description"));
+            library.setVendor(vendor);
             _dao.persistEntity(library);
           }
         }
