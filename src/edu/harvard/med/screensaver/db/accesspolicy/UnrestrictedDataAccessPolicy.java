@@ -43,9 +43,11 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
@@ -232,6 +234,16 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
   }
 
   public boolean visit(RNAiCherryPickScreening entity) 
+  {
+    return true;
+  }
+
+  public boolean visit(AdministratorUser administratorUser) 
+  {
+    return true;
+  }
+
+  public boolean visit(ScreeningRoomUser screeningRoomUser) 
   {
     return true;
   }

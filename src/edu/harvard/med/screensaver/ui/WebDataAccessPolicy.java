@@ -46,6 +46,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
@@ -56,10 +57,6 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import org.apache.log4j.Logger;
 
 // TODO: implement billing permissions
-
-// TODO: currently, we're assuming that if a user has a specific admin role,
-// more than just readEverythingAdmin, that she also has the readEverythingAdmin
-// role. This assumption is not verified in our data model, so we should be more careful
 
 public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPolicy
 {
@@ -214,7 +211,8 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
   public boolean visit(Screen screen)
   {
     ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
-    if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
+    if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
+      user.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREENS_ADMIN)) {
       return true;
     }
     if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE) && 
@@ -231,8 +229,8 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
   public boolean visit(ScreenResult screenResult)
   {
     ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
-    assert user != null : "WebDataAccessPolicy should only be used when a current user can be determined";
-    if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
+    if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
+      user.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREEN_RESULTS_ADMIN)) {
       return true;
     }
     if (screenResult.getScreen().isRestricted()) {
@@ -251,38 +249,16 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
     return false;
   }
 
-  public boolean visit(ScreensaverUser screensaverUser)
+  public boolean visit(ScreeningRoomUser screeningRoomUser)
   {
-    ScreensaverUser loggedInUser = _currentScreensaverUser.getScreensaverUser();
-    assert loggedInUser != null : "WebDataAccessPolicy should only be used when a current user can be determined";
-    if (loggedInUser.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
-      return true;
-    }
-    if (screensaverUser.equals(loggedInUser)) {
-      return true;
-    }
-    if (loggedInUser instanceof ScreeningRoomUser) {
-      ScreeningRoomUser loggedInScreener = (ScreeningRoomUser) loggedInUser;
-      if (loggedInScreener.isHeadOfLab()) {
-        if (loggedInScreener.getLabMembers().contains(screensaverUser)) {
-          // lab head can view her lab members
-          return true;
-        }
-      }
-      else {
-        if (loggedInScreener.getLabHead().equals(screensaverUser)) {
-          // non-lab head can view his lab head
-          return true;
-        }
-        if (loggedInScreener.getLabHead().getLabMembers().contains(screensaverUser)) {
-          // non-lab head can view his fellow lab members
-          return true;
-        }
-      }
-    }
-    return false;
+    return visit((ScreensaverUser) screeningRoomUser);
   }
-
+  
+  public boolean visit(AdministratorUser administratorUser)
+  {
+    return visit((ScreensaverUser) administratorUser);
+  }
+  
   public boolean visit(SilencingReagent entity)
   {
     return true;
@@ -330,6 +306,38 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
 
   // private methods
   
+  private boolean visit(ScreensaverUser screensaverUser)
+  {
+    ScreensaverUser loggedInUser = _currentScreensaverUser.getScreensaverUser();
+    if (loggedInUser.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
+      loggedInUser.getScreensaverUserRoles().contains(ScreensaverUserRole.USERS_ADMIN)) {
+      return true;
+    }
+    if (screensaverUser.equals(loggedInUser)) {
+      return true;
+    }
+    if (loggedInUser instanceof ScreeningRoomUser) {
+      ScreeningRoomUser loggedInScreener = (ScreeningRoomUser) loggedInUser;
+      if (loggedInScreener.isHeadOfLab()) {
+        if (loggedInScreener.getLabMembers().contains(screensaverUser)) {
+          // lab head can view her lab members
+          return true;
+        }
+      }
+      else {
+        if (loggedInScreener.getLabHead().equals(screensaverUser)) {
+          // non-lab head can view his lab head
+          return true;
+        }
+        if (loggedInScreener.getLabHead().getLabMembers().contains(screensaverUser)) {
+          // non-lab head can view his fellow lab members
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   private boolean visit(CherryPickRequest entity) {
     return isReadEverythingAdmin() || isScreenerAllowedAccessToScreenDetails(entity.getScreen());
   }

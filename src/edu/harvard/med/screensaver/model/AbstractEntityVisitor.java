@@ -41,14 +41,16 @@ import edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 public interface AbstractEntityVisitor
 {
   public boolean visit(AbaseTestset entity);
+  public boolean visit(AdministratorUser administratorUser);
   public boolean visit(AttachedFile entity);
   public boolean visit(BillingInformation entity);
   public boolean visit(BillingItem entity);
@@ -80,7 +82,7 @@ public interface AbstractEntityVisitor
   public boolean visit(Screen screen);
   public boolean visit(ScreenResult screenResult);
   public boolean visit(ScreenerCherryPick entity);
-  public boolean visit(ScreensaverUser screensaverUser);
+  public boolean visit(ScreeningRoomUser screeningRoomUser);
   public boolean visit(SilencingReagent entity);
   public boolean visit(StatusItem entity);
   public boolean visit(Well entity);

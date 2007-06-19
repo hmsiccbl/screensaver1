@@ -14,7 +14,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.CollectionElementName;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
@@ -101,8 +103,13 @@ public class ScreeningRoomUser extends ScreensaverUser
     setNonScreeningUser(isNonScreeningUser);
   }
 
-
+  
   // public methods
+
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
 
   /**
    * Get an unmodifiable copy of the set of checklist items.
@@ -592,6 +599,15 @@ public class ScreeningRoomUser extends ScreensaverUser
   {
     return _cherryPickRequests;
   }
+  
+  
+  // protected methods
+
+  protected boolean validateRole(ScreensaverUserRole role) 
+  {
+    return !role.isAdministrative();
+  }
+  
   
   // private constructor
 

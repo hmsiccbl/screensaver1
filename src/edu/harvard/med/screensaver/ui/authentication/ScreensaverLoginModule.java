@@ -70,6 +70,7 @@ import edu.harvard.med.authentication.AuthenticationResponseException;
 import edu.harvard.med.authentication.AuthenticationResult;
 import edu.harvard.med.authentication.Credentials;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -307,7 +308,7 @@ public class ScreensaverLoginModule implements LoginModule
   }
 
   private ScreensaverUser switchUser(ScreensaverUser user, String switchToECommonsId) throws LoginException {
-    if (!user.isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
+    if (!(user instanceof AdministratorUser && user.isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN))) {
       log.info("user " + user + " is not authorized to switch to another user");
     }
     else {

@@ -85,7 +85,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
     List<String> columnHeaders = new ArrayList<String>();
     columnHeaders.add(SCREEN_NUMBER);
     columnHeaders.add(SCREEN_TYPE);
-    if (isUserInRole(ScreensaverUserRole.SCREEN_RESULTS_ADMIN) ||
+    if (isUserInRole(ScreensaverUserRole.SCREENS_ADMIN) ||
       isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
       columnHeaders.add(SCREEN_STATUS);
       columnHeaders.add(SCREEN_STATUS_DATE);

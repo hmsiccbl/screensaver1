@@ -10,6 +10,8 @@
 package edu.harvard.med.screensaver.model.users;
 
 
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+
 import org.apache.log4j.Logger;
 
 
@@ -65,7 +67,20 @@ public class AdministratorUser extends ScreensaverUser
     updateScreensaverPassword(password);
   }
 
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
 
+
+  // protected methods
+
+  protected boolean validateRole(ScreensaverUserRole role) 
+  {
+    return role.isAdministrative();
+  }
+  
+  
   // private methods
 
   /**

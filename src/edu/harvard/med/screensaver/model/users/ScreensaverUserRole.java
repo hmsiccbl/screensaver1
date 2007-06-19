@@ -31,18 +31,18 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   
   // the vocabulary
   
-  DEVELOPER("developer", "Special users that have permission to invoke development-related functionality and view low-level system information."),
-  READ_EVERYTHING_ADMIN("readEverythingAdmin", "Read-everything administrators will have the ability to view and search over data of all categories, except a screen\'s billing information. In addition, they will have the ability to generate various reports on screens."),
-  LIBRARIES_ADMIN("librariesAdmin", "Administrators that can create and modify libraries."),
-  USERS_ADMIN("usersAdmin", "Administrators that can create and modify user accounts."),
-  SCREENS_ADMIN("screensAdmin", "Administrators that can create and modify screens."),
-  SCREEN_RESULTS_ADMIN("screenResultsAdmin", "Administrators that can create and modify screen results."),
-  CHERRY_PICK_ADMIN("cherryPickAdmin", "Administrators that can create and modify cherry pick requests, including the generation of cherry pick plate mapping files, and the recording of cherry pick liquid transfers."),
-  BILLING_ADMIN("billingAdmin", "Administrators that can view, create, and modify billing information for a screen."),
-  SCREENING_ROOM_USER("screeningRoomUser", "Users that have permission to view and search over non-administrative information for certain data records."),
-  COMPOUND_SCREENING_ROOM_USER("compoundScreeningRoomUser", "Users that have permission to view and search over non-administrative information for all compound screens and any compound screen results which are demarked \'shareable\'."),
-  RNAI_SCREENING_ROOM_USER("rnaiScreeningRoomUser", "Users that have permission to view and search over non-administrative information for all RNAi screens."),
-  MEDICINAL_CHEMIST_USER("medicinalChemistUser", "Users that are medicinal chemists.")
+  DEVELOPER("developer", true, "Special users that have permission to invoke development-related functionality and view low-level system information."),
+  READ_EVERYTHING_ADMIN("readEverythingAdmin", true, "Read-everything administrators will have the ability to view and search over data of all categories, except a screen\'s billing information. In addition, they will have the ability to generate various reports on screens."),
+  LIBRARIES_ADMIN("librariesAdmin", true, "Administrators that can create and modify libraries."),
+  USERS_ADMIN("usersAdmin", true, "Administrators that can create and modify user accounts."),
+  SCREENS_ADMIN("screensAdmin", true, "Administrators that can create and modify screens."),
+  SCREEN_RESULTS_ADMIN("screenResultsAdmin", true, "Administrators that can create and modify screen results."),
+  CHERRY_PICK_ADMIN("cherryPickAdmin", true, "Administrators that can create and modify cherry pick requests, including the generation of cherry pick plate mapping files, and the recording of cherry pick liquid transfers."),
+  BILLING_ADMIN("billingAdmin", true, "Administrators that can view, create, and modify billing information for a screen."),
+  SCREENING_ROOM_USER("screeningRoomUser", false, "Users that have permission to view and search over non-administrative information for certain data records."),
+  COMPOUND_SCREENING_ROOM_USER("compoundScreeningRoomUser", false, "Users that have permission to view and search over non-administrative information for all compound screens and any compound screen results which are demarked \'shareable\'."),
+  RNAI_SCREENING_ROOM_USER("rnaiScreeningRoomUser", false, "Users that have permission to view and search over non-administrative information for all RNAi screens."),
+  MEDICINAL_CHEMIST_USER("medicinalChemistUser", false, "Users that are medicinal chemists.")
   ;                                                                    
 
   // static inner class
@@ -67,16 +67,18 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   // private instance field and constructor
 
   private String _roleName;
+  private boolean _isAdministrative;
   private String _comment;
 
   /**
    * Constructs a <code>ScreensaverUserRole</code> vocabulary term.
    * @param value The value of the term.
    */
-  private ScreensaverUserRole(String roleName, String comment)
+  private ScreensaverUserRole(String roleName, boolean isAdministrative, String comment)
   {
     _roleName = roleName;
     _comment = comment;
+    _isAdministrative = isAdministrative;
   }
 
 
@@ -118,6 +120,11 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   public String getName()
   {
     return getValue();
+  }
+
+
+  public boolean isAdministrative() {
+    return _isAdministrative;
   }
 
 }

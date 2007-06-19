@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.CollectionElementName;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
@@ -41,7 +42,7 @@ import edu.harvard.med.screensaver.util.CryptoUtils;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @hibernate.class lazy="false"
  */
-public class ScreensaverUser extends AbstractEntity
+abstract public class ScreensaverUser extends AbstractEntity
 {
   
   // static fields
@@ -152,11 +153,6 @@ public class ScreensaverUser extends AbstractEntity
 
 
   // public methods
-
-  public Object acceptVisitor(AbstractEntityVisitor visitor)
-  {
-    return visitor.visit(this);
-  }
 
   @Override
   public Integer getEntityId()
@@ -388,6 +384,12 @@ public class ScreensaverUser extends AbstractEntity
    */
   public Set<ScreensaverUserRole> getScreensaverUserRoles()
   {
+    // we cannot prevent client code from adding an illegal role to this
+    // collection after returning, but this validation will 1) prevent
+    // subsequent access to the illegal roles via this method and 2) prevent
+    // illegal administrative roles from being persisted, since Hibernate will
+    // call this method before flushing
+    validateRoles();
     return _roles;
   }
   
@@ -399,7 +401,9 @@ public class ScreensaverUser extends AbstractEntity
    */
   public boolean addScreensaverUserRole(ScreensaverUserRole role)
   {
-    return _roles.add(role);
+    boolean result = _roles.add(role);
+    validateRoles(); // we call validateRoles() instead of just validateRole(role), to throw exception 
+    return result;
   }
   
   /**
@@ -426,7 +430,7 @@ public class ScreensaverUser extends AbstractEntity
   @DerivedEntityProperty
   public boolean isUserInRole(ScreensaverUserRole role) 
   {
-    if (role == null) {
+    if (role == null || !validateRole(role)) {
       return false;
     }
     return _roles.contains(role);
@@ -597,7 +601,7 @@ public class ScreensaverUser extends AbstractEntity
   }
 
   
-  // protected constructor
+  // protected methods
 
   /**
    * Construct an uninitialized <code>ScreeningRoomUser</code> object.
@@ -606,6 +610,7 @@ public class ScreensaverUser extends AbstractEntity
    */
   protected ScreensaverUser() {}
 
+  abstract protected boolean validateRole(ScreensaverUserRole role); 
 
   // private methods
 
@@ -661,5 +666,14 @@ public class ScreensaverUser extends AbstractEntity
   private void setHbnScreeningRoomActivitiesPerformed(Set<ScreeningRoomActivity> screeningRoomActivitiesPerformed)
   {
     _screeningRoomActivitiesPerformed = screeningRoomActivitiesPerformed;
+  }
+  
+  private void validateRoles() 
+  {
+    for (ScreensaverUserRole role : _roles) {
+      if (!validateRole(role)) {
+        throw new DataModelViolationException("user " + this + 
+                                              " has been granted illegal role: " + role);      }
+    }
   }
 }

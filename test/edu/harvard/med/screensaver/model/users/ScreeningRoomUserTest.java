@@ -29,6 +29,10 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest
 
   
   // public constructors and methods
+  
+  protected void onSetUp() {
+    schemaUtil.truncateTablesOrCreateSchema();
+  }
 
   public ScreeningRoomUserTest() throws IntrospectionException
   {
@@ -61,16 +65,16 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest
   
   public void testAdministrativeRoleNotAllowed() {
     final ScreeningRoomUser user = new ScreeningRoomUser(new Date(),
-                                                   "first",
-                                                   "last",
-                                                   "first_last@hms.harvard.edu",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   "ec1",
-                                                   "",
-                                                   ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
-                                                   false);
+                                                         "first",
+                                                         "last",
+                                                         "first_last@hms.harvard.edu",
+                                                         "",
+                                                         "",
+                                                         "",
+                                                         "ec1",
+                                                         "",
+                                                         ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
+                                                         false);
     user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
     genericEntityDao.persistEntity(user);
     
@@ -79,28 +83,43 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest
     assertEquals(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER, user2.getScreensaverUserRoles().iterator().next());
 
     try {
-      genericEntityDao.doInTransaction(new DAOTransaction() {
-        public void runTransaction() 
-        {
-          ScreeningRoomUser user2 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
-          user2.getScreensaverUserRoles().add(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
-        };
-      });
-      fail("expected DataModelViolationException after adding administrative role to screening room user");
+      ScreeningRoomUser user3 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
+      user3.getScreensaverUserRoles().add(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+      user3.getScreensaverUserRoles(); // expected to throw excepted 
+      fail("expected DataModelViolationException when getting administrative role to screening room user");
     }
-    catch (Exception e) {}
+    catch (Exception e) {
+      assertTrue(e instanceof DataModelViolationException);
+    }
     
     try {
       genericEntityDao.doInTransaction(new DAOTransaction() {
         public void runTransaction() 
         {
-          ScreeningRoomUser user2 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
-          user2.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+          ScreeningRoomUser user3 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
+          user3.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
         };
       });
       fail("expected DataModelViolationException after adding administrative role to screening room user");
     }
-    catch (Exception e) {}
+    catch (Exception e) {
+      assertTrue(e instanceof DataModelViolationException);
+    }
+
+    try {
+      genericEntityDao.doInTransaction(new DAOTransaction() {
+        public void runTransaction() 
+        {
+          ScreeningRoomUser user3 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
+          user3.getScreensaverUserRoles().add(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+        };
+      });
+      fail("expected DataModelViolationException during flush after adding administrative role to screening room user");
+    }
+    catch (Exception e) {
+      assertTrue(e.getCause().getCause().getCause() instanceof DataModelViolationException);
+    }
+    
   }
 }
 
