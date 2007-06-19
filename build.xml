@@ -96,11 +96,14 @@
   <property name="deployed.loginmodule.config.file" location="${appserver.dir}/conf/${loginmodule.config.filename}"/>
   <property name="dev.loginmodule.config.file" location="web/tomcat/conf/${loginmodule.config.filename}"/>
   <property name="svnversion.cmd" value="svnversion"/>
-	<!-- Whether web application will use BASIC HTTP authentication, allowing for UI testing w/o requiring re-login, as browser can cache user name and password and re-issue between web server restarts." -->    
+	<!-- The servlet authentication method to use.  If set to BASIC, faciliates UI testing by not requiring re-login, 
+       as browser can cache user name and password and re-issue between web server restarts.  FORM is used for 
+       production deployment.  Defaults to BASIC if debug property is true. -->    
 	<condition 
-	  property="web.dev.fast.auth" 	
-    value="true">
-  	<istrue value="${debug}"/>
+	  property="servlet.authentication.method" 	
+    value="FORM"
+    else="BASIC">
+    <isfalse value="${debug}"/>
   </condition>
   
   	
@@ -228,7 +231,7 @@
     <antcall target="exploded.war">
       <param name="exploded.war.dir" location="${deploy.dir}"/>
     </antcall>
-    <antcall target="do.web.dev.fast.auth"> 
+    <antcall target="set.servlet.authentication.method"> 
       <param name="exploded.war.dir" location="${deploy.dir}"/>
     </antcall>
   </target>
@@ -236,8 +239,8 @@
   <!-- an alias for deploy-local target -->
   <target name="deploy" depends="deploy-local"/>
   
-  <target name="do.web.dev.fast.auth" if="web.dev.fast.auth">
-    <replace file="${exploded.war.dir}/WEB-INF/web.xml" token="FORM" value="BASIC"/>
+  <target name="set.servlet.authentication.method">
+    <replace file="${exploded.war.dir}/WEB-INF/web.xml" token="FORM" value="${servlet.authentication.method}"/>
   </target>
   
   
