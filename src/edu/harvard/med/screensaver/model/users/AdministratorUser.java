@@ -77,7 +77,9 @@ public class AdministratorUser extends ScreensaverUser
 
   protected boolean validateRole(ScreensaverUserRole role) 
   {
-    return role.isAdministrative();
+    // TODO: reinstate once production database has been corrected: some admins have *User roles  
+    //return role.isAdministrative();
+    return true;
   }
   
   
