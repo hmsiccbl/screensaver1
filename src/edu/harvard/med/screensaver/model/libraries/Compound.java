@@ -497,7 +497,7 @@ public class Compound extends AbstractEntity
    *   order-by="well_id"
    *   inverse="true"
    *   table="well_compound_link"
-   *   cascade="all"
+   *   cascade="save-update"
    *   lazy="true"
    * @hibernate.collection-key
    *   column="compound_id"

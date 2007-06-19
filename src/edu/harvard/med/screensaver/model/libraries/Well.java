@@ -712,7 +712,7 @@ public class Well extends AbstractEntity implements Comparable
    *             {@link Compound} and {@link Well}).
    * @hibernate.set
    *   table="well_compound_link"
-   *   cascade="all-delete-orphan"
+   *   cascade="save-update"
    *   lazy="true"
    * @hibernate.collection-key
    *   column="well_id"
@@ -732,7 +732,7 @@ public class Well extends AbstractEntity implements Comparable
    * @return the silencing reagents
    * @hibernate.set
    *   table="well_silencing_reagent_link"
-   *   cascade="all-delete-orphan"
+   *   cascade="save-update"
    *   lazy="true"
    * @hibernate.collection-key
    *   column="well_id"
