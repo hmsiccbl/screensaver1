@@ -373,17 +373,6 @@
     </user-data-constraint>
   </security-constraint>
 
-  <!-- user-data-constraints seem to gum up .zip file downloads on IE[67] -->
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>downloads</web-resource-name>
-      <description>Downloads are accessible to all, w/o user data constraints</description>
-      <url-pattern>/downloads/*</url-pattern>
-      <http-method>HEAD</http-method>
-      <http-method>GET</http-method>
-    </web-resource-collection>
-  </security-constraint>
-
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>unrestricted</web-resource-name>

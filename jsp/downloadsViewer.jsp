@@ -32,11 +32,11 @@ Maybridge1-5; MixCom1-5; NINDS1-2; Peakdale1-2; Prestwick1.
 </p>
 <ul>
 <li>
-<b><a href="downloads/active-compound-libraries.zip">active-compound-libraries.zip</a></b>:
+<b><a href="https://screensaver.med.harvard.edu/downloads/active-compound-libraries.zip">active-compound-libraries.zip</a></b>:
 A zip of a collection of SD Files, broken up by library.
 </li>
 <li>
-<b><a href="downloads/active-compound-libraries-sdf.zip">active-compound-libraries-sdf.zip</a></b>:
+<b><a href="https://screensaver.med.harvard.edu/downloads/active-compound-libraries-sdf.zip">active-compound-libraries-sdf.zip</a></b>:
 A zip of a single SD File containing all the libraries.
 </li>
 </ul>
@@ -51,11 +51,11 @@ CBDivE; CDS1; ICCBBio1; Prestwick_MMRF; Specplus.
 </p>
 <ul>
 <li>
-<b><a href="downloads/complete-compound-libraries.zip">complete-compound-libraries.zip</a></b>:
+<b><a href="https://screensaver.med.harvard.edu/downloads/complete-compound-libraries.zip">complete-compound-libraries.zip</a></b>:
 A zip of a collection of SD Files, broken up by library.
 </li>
 <li>
-<b><a href="downloads/complete-compound-libraries-sdf.zip">complete-compound-libraries-sdf.zip</a></b>:
+<b><a href="https://screensaver.med.harvard.edu/downloads/complete-compound-libraries-sdf.zip">complete-compound-libraries-sdf.zip</a></b>:
 A zip of a single SD File containing all the libraries.
 </li>
 </ul>

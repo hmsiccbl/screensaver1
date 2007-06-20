@@ -12,9 +12,6 @@ appserver.dir=/usr/local/tomcat
 log4j.properties.resource=log4j.properties.web.ant4
 #log4j.properties.resource=log4j.properties.debug
 
-# uncomment/comment the following line to copy/not copy downloads:
-#copy.downloads.dir=true
-
 
 ### run-time properties
 

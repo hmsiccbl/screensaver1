@@ -346,9 +346,13 @@
     
   </target>
 
+  <!--
+  this is only needed for orchestra.prod deploys, since the paths to the downloads files
+  are hardcoded to the production orchestra deployment location
+  --> 
   <target name="copy.downloads.dir" if="copy.downloads.dir">
     <copy
-      todir="${exploded.war.dir}/downloads"
+      todir="${exploded.war.dir}/../downloads"
       verbose="${verbose}"
     >
       <fileset dir="web/downloads"/>

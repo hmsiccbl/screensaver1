@@ -6,9 +6,6 @@
 
 log4j.properties.resource=log4j.properties.distro
 
-# uncomment/comment the following line to copy/not copy downloads:
-#copy.downloads.dir=true
-
 
 ### run-time properties
 
