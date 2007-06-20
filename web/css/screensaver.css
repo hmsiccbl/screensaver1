@@ -323,7 +323,7 @@ a.menuItem:hover,a.menuItemActive:hover {
 }
 
 .helpIconHover {
-	border: red;
+	border: fuchsia;
 	border-style: solid;
 	border-width: 1px 1px 1px 1px;
 	padding: 0px 0px 0px 0px;
