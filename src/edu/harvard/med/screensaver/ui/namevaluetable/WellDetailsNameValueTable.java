@@ -126,10 +126,12 @@ public class WellDetailsNameValueTable extends NameValueTable
     addItem(WELL, well.getWellName(), ValueType.TEXT, "The plate coordinates of the well");
     addItem(WELL_TYPE, well.getWellType(), ValueType.TEXT, "The type of well, e.g., 'Experimental', 'Control', 'Empty', etc.");
     addItem(ICCB_NUMBER, well.getIccbNumber(), ValueType.TEXT, "The ICCB number for the well contents");
-    String vendor = well.getLibrary().getVendor();
-    String vendorIdentifier = vendor == null ?
-      well.getVendorIdentifier() : vendor + " " + well.getVendorIdentifier();
-    addItem(VENDOR_IDENTIFIER, vendorIdentifier, ValueType.TEXT, "The vendor identifier (catalog number; reorder number) for the well contents");
+    if (well.getVendorIdentifier() != null) {
+      String vendor = well.getLibrary().getVendor();
+      String vendorIdentifier = vendor == null ?
+        well.getVendorIdentifier() : vendor + " " + well.getVendorIdentifier();
+      addItem(VENDOR_IDENTIFIER, vendorIdentifier, ValueType.TEXT, "The vendor identifier (catalog number; reorder number) for the well contents");
+    }
   }
 
   private void addItem(String name, Object value, ValueType valueType, String description)
