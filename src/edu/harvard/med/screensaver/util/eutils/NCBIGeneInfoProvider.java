@@ -9,12 +9,16 @@
 
 package edu.harvard.med.screensaver.util.eutils;
 
+import java.io.File;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 import edu.harvard.med.screensaver.io.workbook.Cell;
+import edu.harvard.med.screensaver.io.workbook.ParseError;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
+import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 
 
@@ -37,6 +41,23 @@ public class NCBIGeneInfoProvider extends EutilsQueryPerformer
   private Integer _entrezgeneId;
   private Cell _cell;
 
+  
+  public static void main(String [] args)
+  {
+    ParseErrorManager manager = new ParseErrorManager();
+    Workbook workbook = new Workbook(new File(""), manager);
+    Cell.Factory factory = new Cell.Factory(workbook, 0, manager); 
+    NCBIGeneInfoProvider provider = new NCBIGeneInfoProvider(manager);
+    NCBIGeneInfo info = provider.getGeneInfoForEntrezgeneId(400714, factory.getCell((short) 0, 0));
+    
+    for (ParseError error : manager.getErrors()) {
+      System.out.println("error = " + error);
+    }
+    
+    System.out.println("symbol = " + info.getEntrezgeneSymbol());
+    System.out.println("gene name = " + info.getGeneName());
+    
+  }
   
   // public constructor and instance method
   

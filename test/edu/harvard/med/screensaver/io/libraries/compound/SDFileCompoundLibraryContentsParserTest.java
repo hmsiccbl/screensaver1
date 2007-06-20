@@ -67,7 +67,7 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
     }
     library = compoundLibraryContentsParser.parseLibraryContents(library, file, stream);
     
-    List<SDFileParseError> errors = compoundLibraryContentsParser.getErrors();
+    List<FileParseError> errors = compoundLibraryContentsParser.getErrors();
     if (errors.size() > 0) {
       log.debug(errors);
     }

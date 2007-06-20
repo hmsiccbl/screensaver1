@@ -118,7 +118,7 @@ public class BulkCompoundLibraryLoader
             throw new InternalError("braindamage: " + e.getMessage());
           }
           if (_parser.getHasErrors()) {
-            for (SDFileParseError error : _parser.getErrors()) {
+            for (FileParseError error : _parser.getErrors()) {
               log.error(error.toString());
             }
           }

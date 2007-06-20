@@ -89,6 +89,11 @@
     <put name="body" value="/libraries/admin/compoundLibraryContentsImporter.jsp" />
   </definition>
    
+  <definition name="/libraries/admin/naturalProductsLibraryContentsImporter.tiles" extends=".base">
+    <put name="pageTitle" value="Natural Products Library Contents Importer" />
+    <put name="body" value="/libraries/admin/naturalProductsLibraryContentsImporter.jsp" />
+  </definition>
+   
   <definition name="/libraries/librariesBrowser.tiles" extends=".base">
     <put name="pageTitle" value="Libraries Browser" />
     <put name="pageHelpURL" value="../help/libraries/librariesBrowserHelp.jsf" />

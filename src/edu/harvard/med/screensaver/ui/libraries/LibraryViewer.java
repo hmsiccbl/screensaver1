@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.ui.libraries;
 
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
@@ -81,6 +82,11 @@ public class LibraryViewer extends AbstractBackingBean
     return _library != null && _library.getScreenType().equals(ScreenType.SMALL_MOLECULE);
   }
   
+  public boolean getIsNaturalProductsLibrary()
+  {
+    return _library != null && _library.getLibraryType().equals(LibraryType.NATURAL_PRODUCTS);
+  }
+  
   public int getLibrarySize()
   {
     // note: do not call _library.getWells().size(), as this is very expensive, as it loads all wells
@@ -112,6 +118,11 @@ public class LibraryViewer extends AbstractBackingBean
     return _librariesController.importCompoundLibraryContents(_library);
   }
 
+  public String importNaturalProductsLibraryContents()
+  {
+    return _librariesController.importNaturalProductsLibraryContents(_library);
+  }
+  
   public String importRNAiLibraryContents()
   {
     return _librariesController.importRNAiLibraryContents(_library);

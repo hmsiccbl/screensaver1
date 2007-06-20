@@ -39,6 +39,7 @@ public interface ScreensaverConstants
   public static final String VIEW_GENE = "viewGene";
   public static final String VIEW_COMPOUND = "viewCompound";
   public static final String IMPORT_COMPOUND_LIBRARY_CONTENTS = "importCompoundLibraryContents";
+  public static final String IMPORT_NATURAL_PRODUCTS_LIBRARY_CONTENTS = "importNaturalProductsLibraryContents";
   public static final String IMPORT_RNAI_LIBRARY_CONTENTS = "importRNAiLibraryContents";
   public static final String VIEW_SCREENING_ROOM_USER_ACTION_RESULT = "viewScreeningRoomUser";
   public static final String SHOW_SEARCH_RESULTS_SUMMARY_ACTION = "showSearchResultsSummary";

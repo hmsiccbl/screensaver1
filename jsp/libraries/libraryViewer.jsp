@@ -25,11 +25,17 @@
 			    styleClass="command"
 			    title="Import the contents of library wells from an Excel spreadsheet" />
 
-			<h:commandButton value="Import Library Contents"
-				action="#{libraryViewer.importCompoundLibraryContents}"
-				rendered="#{libraryViewer.editable && libraryViewer.isCompoundLibrary}"
-			    styleClass="command"
-			    title="Import the contents of library wells from an SD File" />
+      <h:commandButton value="Import Library Contents"
+        action="#{libraryViewer.importCompoundLibraryContents}"
+        rendered="#{libraryViewer.editable && libraryViewer.isCompoundLibrary && ! libraryViewer.isNaturalProductsLibrary}"
+        styleClass="command"
+        title="Import the contents of library wells from an SD File" />
+
+      <h:commandButton value="Import Library Contents"
+        action="#{libraryViewer.importNaturalProductsLibraryContents}"
+        rendered="#{libraryViewer.editable && libraryViewer.isNaturalProductsLibrary}"
+        styleClass="command"
+        title="Import contents from a natural products excel file" />
 
 			<h:commandButton value="Unload Library Contents"
 				action="#{libraryViewer.unloadLibraryContents}"

@@ -19,11 +19,11 @@ import org.apache.log4j.Logger;
  * Maintains a list of error messages.
  * @author ant
  */
-public class SDFileParseErrorManager
+public class FileParseErrorManager
 {
-  private static Logger log = Logger.getLogger(SDFileParseErrorManager.class);
+  private static Logger log = Logger.getLogger(FileParseErrorManager.class);
   
-  private List<SDFileParseError> _errors = new ArrayList<SDFileParseError>();
+  private List<FileParseError> _errors = new ArrayList<FileParseError>();
   
   /**
    * Add a simple error.
@@ -32,7 +32,7 @@ public class SDFileParseErrorManager
    */
   public void addError(String errorMessage)
   {
-    SDFileParseError error = new SDFileParseError(errorMessage);
+    FileParseError error = new FileParseError(errorMessage);
     _errors.add(error);
   }
   
@@ -45,17 +45,17 @@ public class SDFileParseErrorManager
    */
   public void addError(String errorMessage, File sdFile, int sdRecordNumber)
   {
-    SDFileParseError error =
-      new SDFileParseError(errorMessage, sdFile, sdRecordNumber);
+    FileParseError error =
+      new FileParseError(errorMessage, sdFile, sdRecordNumber);
     _errors.add(error);
   }
   
   /**
-   * Get the list of <code>SDFileParseError</code> objects.
+   * Get the list of <code>FileParseError</code> objects.
    * 
-   * @return a list of <code>SDFileParseError</code> objects
+   * @return a list of <code>FileParseError</code> objects
    */
-  public List<SDFileParseError> getErrors()
+  public List<FileParseError> getErrors()
   {
     return _errors;
   }

@@ -109,6 +109,23 @@ public interface LibrariesController
                                               final UploadedFile uploadedFile);
 
   /**
+   * Go to the {@link NaturalProductsLibraryContentsImporter} page.
+   * @param library the library to import
+   * @return the control code "importNaturalProductsLibraryContents"
+   */
+  @UIControllerMethod
+  public String importNaturalProductsLibraryContents(Library library);
+
+  /**
+   * Load the natural products library contents from the file, and go to the appropriate next page
+   * depending on the result.
+   * @return the control code for the appropriate next page
+   */
+  @UIControllerMethod
+  public String importNaturalProductsLibraryContents(final Library libraryIn,
+                                                     final UploadedFile uploadedFile);
+  
+  /**
    * Go to the {@link RNAiLibraryContentsImporter} page.
    * @param library the library to import
    * @return the control code "importRNAiLibraryContents"

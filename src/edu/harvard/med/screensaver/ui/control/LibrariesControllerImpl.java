@@ -24,6 +24,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
+import edu.harvard.med.screensaver.io.libraries.compound.NaturalProductsLibraryContentsParser;
 import edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser;
 import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
@@ -39,6 +40,7 @@ import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
 import edu.harvard.med.screensaver.ui.libraries.LibrariesBrowser;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
+import edu.harvard.med.screensaver.ui.libraries.NaturalProductsLibraryContentsImporter;
 import edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporter;
 import edu.harvard.med.screensaver.ui.libraries.WellFinder;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResultsViewer;
@@ -86,6 +88,8 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   private CompoundViewer _compoundViewer;
   private CompoundLibraryContentsImporter _compoundLibraryContentsImporter;
   private SDFileCompoundLibraryContentsParser _compoundLibraryContentsParser;
+  private NaturalProductsLibraryContentsImporter _naturalProductsLibraryContentsImporter;
+  private NaturalProductsLibraryContentsParser _naturalProductsLibraryContentsParser;
   private RNAiLibraryContentsImporter _rnaiLibraryContentsImporter;
   private RNAiLibraryContentsParser _rnaiLibraryContentsParser;
   private PlateWellListParser _plateWellListParser;
@@ -194,6 +198,28 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     _compoundLibraryContentsParser = compoundLibraryContentsParser;
   }
   
+  public NaturalProductsLibraryContentsImporter getNaturalProductsLibraryContentsImporter()
+  {
+    return _naturalProductsLibraryContentsImporter;
+  }
+
+  public void setNaturalProductsLibraryContentsImporter(
+    NaturalProductsLibraryContentsImporter naturalProductsLibraryContentsImporter)
+  {
+    _naturalProductsLibraryContentsImporter = naturalProductsLibraryContentsImporter;
+  }
+
+  public NaturalProductsLibraryContentsParser getNaturalProductsLibraryContentsParser()
+  {
+    return _naturalProductsLibraryContentsParser;
+  }
+
+  public void setNaturalProductsLibraryContentsParser(
+    NaturalProductsLibraryContentsParser naturalProductsLibraryContentsParser)
+  {
+    _naturalProductsLibraryContentsParser = naturalProductsLibraryContentsParser;
+  }
+
   public RNAiLibraryContentsImporter getRnaiLibraryContentsImporter()
   {
     return _rnaiLibraryContentsImporter;
@@ -570,6 +596,69 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     }
   }
 
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#importNaturalProductsLibraryContents(edu.harvard.med.screensaver.model.libraries.Library)
+   */
+  @UIControllerMethod
+  public String importNaturalProductsLibraryContents(Library library)
+  {
+    logUserActivity(IMPORT_NATURAL_PRODUCTS_LIBRARY_CONTENTS+ " " + library);
+    _naturalProductsLibraryContentsImporter.setLibrary(library);
+    _naturalProductsLibraryContentsImporter.setUploadedFile(null);
+    _naturalProductsLibraryContentsImporter.setNaturalProductsLibraryContentsParser(_naturalProductsLibraryContentsParser);
+    _naturalProductsLibraryContentsParser.clearErrors();
+    return IMPORT_NATURAL_PRODUCTS_LIBRARY_CONTENTS;
+  }
+  
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#importNaturalProductsLibraryContents(edu.harvard.med.screensaver.model.libraries.Library, org.apache.myfaces.custom.fileupload.UploadedFile)
+   */
+  @UIControllerMethod
+  public String importNaturalProductsLibraryContents(final Library libraryIn, final UploadedFile uploadedFile)
+  {
+    logUserActivity(IMPORT_NATURAL_PRODUCTS_LIBRARY_CONTENTS + " " + libraryIn + " " + uploadedFile.getName() + " " + uploadedFile.getSize());
+    try {
+      if (uploadedFile == null || uploadedFile.getInputStream().available() == 0) {
+        showMessage("badUploadedFile", uploadedFile.getName());
+        return IMPORT_NATURAL_PRODUCTS_LIBRARY_CONTENTS;
+      }
+      _dao.doInTransaction(new DAOTransaction() 
+      {
+        public void runTransaction()
+        {
+          try {
+            Library library = _dao.reloadEntity(libraryIn);
+            _naturalProductsLibraryContentsParser.parseLibraryContents(
+              library,
+              new File(uploadedFile.getName()),
+              uploadedFile.getInputStream());
+            _dao.persistEntity(library);
+          }
+          catch (IOException e) {
+            throw new DAOTransactionRollbackException("could not access uploaded file", e);
+          }
+        }
+      });
+      if (_naturalProductsLibraryContentsParser.getHasErrors()) {
+        return IMPORT_NATURAL_PRODUCTS_LIBRARY_CONTENTS;
+      }
+      else {
+        showMessage("libraries.importedLibraryContents", "libraryViewer");
+        // TODO: to be correct, we should regen the search results, though I don't think anything in the results would actually be different after this import
+        return viewLibrary(libraryIn, _libraryViewer.getLibrarySearchResults());
+      }
+    }
+    catch (DataAccessException e) {
+      // TODO: should reload library and goto library viewer
+      reportSystemError(e);
+      return IMPORT_NATURAL_PRODUCTS_LIBRARY_CONTENTS;
+    }
+    catch (IOException e) {
+      reportSystemError(e);
+      return IMPORT_NATURAL_PRODUCTS_LIBRARY_CONTENTS;
+    }
+  }
+  
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.LibrariesController#importRNAiLibraryContents(edu.harvard.med.screensaver.model.libraries.Library)
    */

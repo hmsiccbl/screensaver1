@@ -17,41 +17,41 @@ import java.io.File;
  * 
  * @author ant
  */
-public class SDFileParseError
+public class FileParseError
 {
   private String _message;
-  private File _sdFile;
-  private int _sdRecordNumber;
+  private File _file;
+  private int _recordNumber;
   
   /**
-   * Construct a <code>SDFileParseError</code>, containing the error message, the
+   * Construct a <code>FileParseError</code>, containing the error message, the
    * associated SDFile, and the associated SDFile record number.
    * 
    * @param errorMessage the error message
-   * @param sdFile the associated SDFile
-   * @param sdRecordNumber the associated SDFile record number
+   * @param file the associated file
+   * @param recordNumber the associated record number in the file
    */
-  public SDFileParseError(String message, File sdFile, int sdRecordNumber)
+  public FileParseError(String message, File file, int recordNumber)
   {
     _message = message;
-    _sdFile = sdFile;
-    _sdRecordNumber = sdRecordNumber;
+    _file = file;
+    _recordNumber = recordNumber;
   }
   
   /**
-   * Construct a <code>SDFileParseError</code>, containing the error message, but
+   * Construct a <code>FileParseError</code>, containing the error message, but
    * not specific to any SDFile, or SDFile record number.
    * 
    * @param errorMessage the error message
    */
-  public SDFileParseError(String message)
+  public FileParseError(String message)
   {
     _message = message;
   }
   
   public String toString()
   {
-    return _message + " @ " + _sdFile + " (line " + _sdRecordNumber + ")";
+    return _message + " @ " + _file + " (line " + _recordNumber + ")";
   }
   
   public String getMessage() 
@@ -61,12 +61,12 @@ public class SDFileParseError
   
   public File getSDFile()
   {
-    return _sdFile;
+    return _file;
   }
   
   public int getRecordNumber()
   {
-    return _sdRecordNumber;
+    return _recordNumber;
   }
   
   /**
@@ -74,10 +74,10 @@ public class SDFileParseError
    */
   public boolean equals(Object o)
   {
-    if (!(o instanceof SDFileParseError)) {
+    if (!(o instanceof FileParseError)) {
       return false;
     }
-    SDFileParseError that = (SDFileParseError) o;
+    FileParseError that = (FileParseError) o;
     return this.toString().equals(that.toString());
   }
 }

@@ -15,17 +15,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.libraries.Compound;
-import edu.harvard.med.screensaver.model.libraries.Gene;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.control.LibrariesController;
-
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+
+import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.ui.control.LibrariesController;
 
 
 /**
@@ -432,6 +434,13 @@ public class WellSearchResults extends SearchResults<Well>
         smiles.add(compound.getSmiles());
       }
       return smiles;
+    }
+    
+    // at this point we know the well has no compounds or genes in it. but is it empty?
+    
+    if (well.getLibrary().getScreenType().equals(ScreenType.SMALL_MOLECULE) &&
+      well.getWellType().equals(WellType.EXPERIMENTAL)) {
+      return "compound with unknown structure";
     }
     return "empty well";
   }

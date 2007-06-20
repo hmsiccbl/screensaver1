@@ -174,6 +174,12 @@
       name="compoundLibraryContentsParser"
       ref="compoundLibraryContentsParser" />
     <property
+      name="naturalProductsLibraryContentsImporter"
+      ref="naturalProductsLibraryContentsImporter" />
+    <property
+      name="naturalProductsLibraryContentsParser"
+      ref="naturalProductsLibraryContentsParser" />
+    <property
       name="rnaiLibraryContentsImporter"
       ref="rnaiLibraryContentsImporter" />
     <property
@@ -267,6 +273,15 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.CompoundLibraryContentsImporter">
     <description>Compound Library Contents Importer</description>
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="naturalProductsLibraryContentsImporter"
+    parent="librariesUiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.NaturalProductsLibraryContentsImporter">
+    <description>Natural Products Library Contents Importer</description>
     <aop:scoped-proxy/>
   </bean>
 

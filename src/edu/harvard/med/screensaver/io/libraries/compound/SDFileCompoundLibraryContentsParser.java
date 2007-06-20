@@ -61,7 +61,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
   private Library _library;
   private File _sdFile;
   private BufferedReader _sdFileReader;
-  private SDFileParseErrorManager _errorManager;
+  private FileParseErrorManager _errorManager;
   private Map<String,Compound> _compoundCache;
 
   
@@ -110,7 +110,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
     return _library;
   }
   
-  public List<SDFileParseError> getErrors()
+  public List<FileParseError> getErrors()
   {
     return _errorManager.getErrors();
   }
@@ -164,7 +164,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
    * Get the error manager.
    * @return the error manager
    */
-  SDFileParseErrorManager getErrorManager()
+  FileParseErrorManager getErrorManager()
   {
     return _errorManager;
   }
@@ -226,7 +226,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
     _library = library;
     _sdFile = file;
     _sdFileReader = new BufferedReader(new InputStreamReader(stream));
-    _errorManager = new SDFileParseErrorManager();
+    _errorManager = new FileParseErrorManager();
 
     // load all of the library's wells in the Hibernate session, which avoids the need
     // to make database queries when checking for existence of wells

@@ -38,6 +38,15 @@
   </bean>
 
   <bean 
+    id="naturalProductsLibraryContentsParser"
+    class="edu.harvard.med.screensaver.io.libraries.compound.NaturalProductsLibraryContentsParser"
+    scope="singleton"
+  >
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="librariesDao"/>
+  </bean>
+
+  <bean 
     id="rnaiLibraryContentsParser"
     class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser"
     scope="singleton"
