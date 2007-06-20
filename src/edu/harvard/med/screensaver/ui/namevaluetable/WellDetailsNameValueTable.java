@@ -125,7 +125,9 @@ public class WellDetailsNameValueTable extends NameValueTable
     addItem(PLATE, Integer.toString(well.getPlateNumber()), ValueType.TEXT, "The number of the plate the well is located on");
     addItem(WELL, well.getWellName(), ValueType.TEXT, "The plate coordinates of the well");
     addItem(WELL_TYPE, well.getWellType(), ValueType.TEXT, "The type of well, e.g., 'Experimental', 'Control', 'Empty', etc.");
-    addItem(ICCB_NUMBER, well.getIccbNumber(), ValueType.TEXT, "The ICCB number for the well contents");
+    if (well.getIccbNumber() != null) {
+      addItem(ICCB_NUMBER, well.getIccbNumber(), ValueType.TEXT, "The ICCB number for the well contents");
+    }
     if (well.getVendorIdentifier() != null) {
       String vendor = well.getLibrary().getVendor();
       String vendorIdentifier = vendor == null ?
