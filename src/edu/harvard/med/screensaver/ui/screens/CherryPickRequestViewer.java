@@ -452,7 +452,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
         if (cherryPick.isMapped()) {
           row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], new Integer(cherryPick.getAssayPlate().getPlateOrdinal() + 1));
           row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], new Integer(cherryPick.getAssayPlate().getAttemptOrdinal() + 1));
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getAssayPlateWellName());
+          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getAssayPlateWellName().toString());
         }
         else {
           row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], null);

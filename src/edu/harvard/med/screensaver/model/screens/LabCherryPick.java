@@ -320,11 +320,11 @@ public class LabCherryPick extends AbstractEntity
   }
   
   @DerivedEntityProperty
-  public String getAssayPlateWellName()
+  public WellName getAssayPlateWellName()
   {
     if (_assayPlateRow != null && 
       _assayPlateColumn != null) {
-      return WellName.toString(_assayPlateRow, _assayPlateColumn);
+      return new WellName(_assayPlateRow, _assayPlateColumn);
     }
     return null;
   }

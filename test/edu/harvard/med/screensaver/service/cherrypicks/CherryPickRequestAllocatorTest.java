@@ -98,7 +98,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
 
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        CherryPickRequest cherryPickRequest = createCherryPickRequest(1, 11);
+        CherryPickRequest cherryPickRequest = createRNAiCherryPickRequest(1, 11);
 
         ScreenerCherryPick dummyScreenerCherryPick = new ScreenerCherryPick(cherryPickRequest, librariesDao.findWell(new WellKey(1, "A01")));
         LabCherryPick cherryPick1 = new LabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(1, "A01")));
@@ -257,7 +257,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     return library;
   }
 
-  static CherryPickRequest createCherryPickRequest(int screenNumber, int volume)
+  static RNAiCherryPickRequest createRNAiCherryPickRequest(int screenNumber, int volume)
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(screenNumber, ScreenType.RNAI);
     // Note: if we use screen.getLeadScreener() as requestor, Hibernate complains!
@@ -312,7 +312,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        CherryPickRequest cherryPickRequest = createCherryPickRequest(screenNumber, requestVolume);
+        CherryPickRequest cherryPickRequest = createRNAiCherryPickRequest(screenNumber, requestVolume);
         Set<LabCherryPick> expectedUnfulfillableCherryPicks = new HashSet<LabCherryPick>();
         Set<String> expectedUnfillableCherryPickWellNamesSet = new HashSet<String>(Arrays.asList(expectedUnfillableCherryPickWellNames));
         ScreenerCherryPick dummyScreenerCherryPick = new ScreenerCherryPick(cherryPickRequest, librariesDao.findWell(new WellKey(1, new WellName(cherryPickWellNames[0]))));

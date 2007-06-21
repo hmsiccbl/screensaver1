@@ -78,83 +78,99 @@ public class CherryPickRequestPlateMapper
   {
     SortedSet<LabCherryPick> toBeMapped = findLabCherryPicksToBeMapped(cherryPickRequest);
     List<WellName> availableWellNamesMaster = findAvailableWellNames(cherryPickRequest);
-    List<WellName> availableWellNamesWorking = null;
+    List<WellName> availableWellNamesOnCurrentPlate = null;
     int plateIndex = 0;
-    CherryPickAssayPlate assayPlate = null;
-
-    List<LabCherryPick> nextIndivisibleBlock = new ArrayList<LabCherryPick>();
+    CherryPickAssayPlate plate = null;
+    
+    List<LabCherryPick> labCherryPicksAssignedToCurrentPlate = new ArrayList<LabCherryPick>();
     while (toBeMapped.size() > 0) {
-      int toBeMappedCount = toBeMapped.size();
+      plate = new CherryPickAssayPlate(cherryPickRequest, 
+                                       plateIndex++, 
+                                       0, 
+                                       cherryPickRequest.getAssayPlateType());
 
-      if (nextIndivisibleBlock.size() == 0) {
-        nextIndivisibleBlock = findNextIndivisibleBlock(toBeMapped, availableWellNamesMaster.size());
-      }
-
-      // create next plate, if necessary
-      if (assayPlate == null || nextIndivisibleBlock.size() > availableWellNamesWorking.size()) {
-        availableWellNamesWorking = new ArrayList<WellName>(availableWellNamesMaster);
-        
-        if (cherryPickRequest.isRandomizedAssayPlateLayout()) {
-          // only randomize over the left-most set of wells whose size is sufficent
-          // to accommodate the remaining cherry picks to be mapped
-          availableWellNamesWorking.subList(Math.min(toBeMappedCount,
-                                                     availableWellNamesWorking.size()),
-                                            availableWellNamesWorking.size()).clear();
-          Collections.shuffle(availableWellNamesWorking);
+      labCherryPicksAssignedToCurrentPlate.clear();
+      do {
+        List<LabCherryPick> nextIndivisibleBlock = findNextIndivisibleBlock(toBeMapped);
+        if (nextIndivisibleBlock.size() == 0) {
+          break;
         }
-        assayPlate = new CherryPickAssayPlate(cherryPickRequest, 
-                                              plateIndex++, 
-                                              0, 
-                                              cherryPickRequest.getAssayPlateType());
-      }
+        int remainingWellCountOnPlate = availableWellNamesMaster.size() - labCherryPicksAssignedToCurrentPlate.size();
 
-      plateMapCherryPicks(assayPlate,
-                          nextIndivisibleBlock,
-                          availableWellNamesWorking);
+        if (remainingWellCountOnPlate - nextIndivisibleBlock.size() < 0) {
+          // if there were more wells from a given source plate than can fit on a single assay plate;
+          // we have to split the source plate wells across multiple assay plates;
+          // so we take lab cherry picks that wouldn't fit on the plate and add them
+          // back to toBeMapped, for subsequent mapping on the next plate
+          if (labCherryPicksAssignedToCurrentPlate.size() == 0) {
+            // don't map the lab cherry picks that won't fit on this plate; this
+            // is the one case where we are allowed to divide our indivisibleBlock!
+            nextIndivisibleBlock.subList(remainingWellCountOnPlate, nextIndivisibleBlock.size()).clear();
+          }
+          else {
+            break;
+          }
+        }
+        labCherryPicksAssignedToCurrentPlate.addAll(nextIndivisibleBlock);
+        toBeMapped.removeAll(nextIndivisibleBlock);
+      } while (true);
+
+      availableWellNamesOnCurrentPlate = new ArrayList<WellName>(availableWellNamesMaster);
+      if (cherryPickRequest.isRandomizedAssayPlateLayout()) {
+        // only randomize over the left-most set of wells whose size is sufficent
+        // to accommodate the remaining cherry picks to be mapped
+        availableWellNamesOnCurrentPlate.subList(Math.min(labCherryPicksAssignedToCurrentPlate.size(), 
+                                                          availableWellNamesOnCurrentPlate.size()),
+                                                 availableWellNamesOnCurrentPlate.size()).clear();
+        Collections.shuffle(availableWellNamesOnCurrentPlate);
+      }
+      
+      plateMapCherryPicks(plate,
+                          labCherryPicksAssignedToCurrentPlate,
+                          availableWellNamesOnCurrentPlate);
     }
   }
 
   /**
-   * Side-effects: nextIndivisibleBlock and availableWellNames are modified!
    * @param assayPlate
-   * @param nextIndivisibleBlock
+   * @param labCherryPicks
    * @param availableWellNames
    * @return
    */
   private Map<LabCherryPick,Pair<Integer,WellName>> plateMapCherryPicks(CherryPickAssayPlate assayPlate,
-                                                                        List<LabCherryPick> nextIndivisibleBlock,
+                                                                        List<LabCherryPick> labCherryPicks,
                                                                         List<WellName> availableWellNames)
 
   {
+    assert availableWellNames.size() >= labCherryPicks.size() :
+      "cannot plate map cherry picks, since available well count was too small to accommodate all labCherryPicks (calling method has violated contract)";
+
     Map<LabCherryPick,Pair<Integer,WellName>> plateWellMapping = new HashMap<LabCherryPick,Pair<Integer,WellName>>();
-    assert availableWellNames.size() >= nextIndivisibleBlock.size();
     Iterator<WellName> availableWellNamesIter = availableWellNames.iterator();
-    for (Iterator nextIndivisibleBlockIter = nextIndivisibleBlock.iterator(); nextIndivisibleBlockIter.hasNext();) {
+    for (Iterator nextIndivisibleBlockIter = labCherryPicks.iterator(); nextIndivisibleBlockIter.hasNext();) {
       LabCherryPick cherryPick = (LabCherryPick) nextIndivisibleBlockIter.next();
-      
-      if (!availableWellNamesIter.hasNext()) {
-        // this can happen if there are more wells from a given source plate than can fit on a single assay plate;
-        // we have to split the source plate wells across multiple assay plates
-        break;
-      }
       
       WellName assayWellName = availableWellNamesIter.next();
       cherryPick.setMapped(assayPlate,
                            assayWellName.getRowIndex(),
                            assayWellName.getColumnIndex());
-      availableWellNamesIter.remove();
-      nextIndivisibleBlockIter.remove();
+      if (log.isDebugEnabled()) {
+        log.debug(cherryPick + " mapped to " + cherryPick.getAssayPlate().getPlateOrdinal() + ":" + cherryPick.getAssayPlateWellName());
+      }
     }
     return plateWellMapping;
   }
 
-  private List<LabCherryPick> findNextIndivisibleBlock(SortedSet<LabCherryPick> toBeMapped, int maxSize)
+  /**
+   * @param toBeMapped
+   * @return
+   */
+  private List<LabCherryPick> findNextIndivisibleBlock(SortedSet<LabCherryPick> toBeMapped)
   {
     List<LabCherryPick> block = new ArrayList<LabCherryPick>();
     Integer plateNumber = null;
     String copyName = null;
-    for (Iterator<LabCherryPick> iter = toBeMapped.iterator(); iter.hasNext() && maxSize-- > 0;) {
-      LabCherryPick cherryPick = (LabCherryPick) iter.next();
+    for (LabCherryPick cherryPick : toBeMapped) {
       if (plateNumber == null) {
         plateNumber = cherryPick.getSourceWell().getPlateNumber();
         copyName = cherryPick.getSourceCopy().getName();
@@ -164,8 +180,6 @@ public class CherryPickRequestPlateMapper
         !copyName.equals(cherryPick.getSourceCopy().getName())) {
         break;
       }
-
-      iter.remove();
       block.add(cherryPick);
     }
     return block;

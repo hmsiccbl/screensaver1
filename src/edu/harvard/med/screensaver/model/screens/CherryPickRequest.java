@@ -536,7 +536,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * columns that must left empty.
    * 
    * @see #getRequiredEmptyRowsOnAssayPlate()
-   * @return
+   * @return 1-based column numbers that screner has requested be left empty on cherry pick assay plate
    * @hibernate.set table="cherry_pick_request_requested_empty_columns" lazy="true"
    * @hibernate.collection-key column="cherry_pick_request_id"
    * @hibernate.collection-element type="integer" not-null="true"
@@ -552,20 +552,25 @@ public abstract class CherryPickRequest extends AbstractEntity
     _requestedEmptyColumnsOnAssayPlate = requestedEmptyColumnsOnAssayPlate;
   }
 
-  @SuppressWarnings("unchecked")
-  @ImmutableProperty
   /**
    * The union of this method's result with the result of
    * {@link #getEmptyColumnsOnAssayPlate()} determines the full set columns that
    * must left empty.
    * 
+   * @return 1-based column numbers that are required to be left empty on cherry pick assay plate
    * @see #getEmptyRowsOnAssayPlate()
    */
+  @SuppressWarnings("unchecked")
+  @ImmutableProperty
   public Set<Integer> getRequiredEmptyColumnsOnAssayPlate()
   {
     return Collections.EMPTY_SET;
   }
 
+  /**
+   * @return rows that are required to be left empty on cherry pick assay plate
+   * @see #getEmptyRowsOnAssayPlate()
+   */
   @SuppressWarnings("unchecked")
   @ImmutableProperty
   public Set<Character> getRequiredEmptyRowsOnAssayPlate()
