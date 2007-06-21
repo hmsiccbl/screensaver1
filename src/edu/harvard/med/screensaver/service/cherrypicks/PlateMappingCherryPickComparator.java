@@ -32,7 +32,7 @@ public class PlateMappingCherryPickComparator implements Comparator<LabCherryPic
       result = cp1.getSourceCopy().getName().compareTo(cp2.getSourceCopy().getName());
     }
     // ordering by wells is not important w.r.t. plate mapping requirements, but
-    // need to define a total ordering all cherry picks
+    // need to define a total ordering of all LabCherryPicks
     if (result == 0) {
       result = well1.getWellName().compareTo(well2.getWellName());
     }

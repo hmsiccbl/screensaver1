@@ -56,8 +56,8 @@
 			<p>To download the files, select the desired rows in the Cherry Pick
 			Plates data table, and then click "Download Files for Selected
 			Plates". This will download a ZIP file, containing one mapping file
-			per Cherry Pick Plate, plus an additional "instructions.txt" file.
-			The instructions file lists the Cherry Pick Plates, along with their
+			per Cherry Pick Plate, plus an additional "README.txt" file.
+			The README file lists the Cherry Pick Plates, along with their
 			respective statuses. It also indicates whether particular Cherry Pick
 			Plates require special treatment, such as when:<ul>
 				<li>Cherry Pick Plates are to be created from the same source

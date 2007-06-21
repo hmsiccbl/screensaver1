@@ -16,28 +16,29 @@ import java.util.Locale;
 import org.apache.log4j.Logger;
 
 // TODO: implement quoting of string values
-public class CSVPrintWriter extends PrintWriter
+public class CSVPrintWriter extends CustomNewlinePrintWriter
 {
   // static members
 
   private static Logger log = Logger.getLogger(CSVPrintWriter.class);
   private String _delimiter = ",";
-  private boolean _newLine = true;
+  private boolean _isLineEmpty = true;
 
 
   // instance data members
 
   // public constructors and methods
 
-  public CSVPrintWriter(Writer out)
+  public CSVPrintWriter(Writer out, String newline)
   {
-    super(out);
+    super(out, newline);
   }
   
   public CSVPrintWriter(Writer out,
+                        String newline,
                         String delimiter)
   {
-    super(out);
+    super(out, newline);
     _delimiter = delimiter;
   }
   
@@ -100,7 +101,7 @@ public class CSVPrintWriter extends PrintWriter
   public void println()
   {
     super.println();
-    _newLine = true;
+    _isLineEmpty = true;
   }
   
   @Override
@@ -209,11 +210,11 @@ public class CSVPrintWriter extends PrintWriter
 
   private void printDelimiter()
   {
-    if (!_newLine) {
+    if (!_isLineEmpty) {
       super.print(_delimiter);
     }
     else {
-      _newLine = false;
+      _isLineEmpty = false;
     }
   }
 }

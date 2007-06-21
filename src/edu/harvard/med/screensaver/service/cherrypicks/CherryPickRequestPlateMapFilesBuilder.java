@@ -32,6 +32,7 @@ import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.util.CSVPrintWriter;
+import edu.harvard.med.screensaver.util.CustomNewlinePrintWriter;
 
 import org.apache.commons.collections.Factory;
 import org.apache.commons.collections.MultiMap;
@@ -47,6 +48,20 @@ import org.apache.log4j.Logger;
  */
 public class CherryPickRequestPlateMapFilesBuilder
 {
+  
+  /**
+   * File extension for each plate map file in the zip file.
+   * Stewart Rudnicki has indicated that this file extension should lower-case..
+   */
+  private static final String PLATE_MAP_FILE_EXTENSION = ".csv";
+
+  /**
+   * Windows newline must be used! The consumer of the files we're generating is
+   * a machine in the lab that has this requirement, so cross-platform concerns
+   * are not a concern.
+   */
+  private static final String NEWLINE = "\r\n";
+
   private static final String[] CSV_FILE_HEADERS = {
     "Source Plate", 
     "Source Copy", 
@@ -59,7 +74,7 @@ public class CherryPickRequestPlateMapFilesBuilder
     "Volume"};
 
 
-  private static final String INSTRUCTIONS_FILE_NAME = "Instructions.txt";
+  private static final String README_FILE_NAME = "README.txt";
 
 
   // static members
@@ -88,7 +103,7 @@ public class CherryPickRequestPlateMapFilesBuilder
     CherryPickRequest cherryPickRequest = (CherryPickRequest) genericEntityDao.reattachEntity(cherryPickRequestIn);
     return doBuildZip(cherryPickRequest, plates);
   }
-
+  
   
   // private methods
 
@@ -98,32 +113,32 @@ public class CherryPickRequestPlateMapFilesBuilder
   {
     ByteArrayOutputStream zipOutRaw = new ByteArrayOutputStream();
     ZipOutputStream zipOut = new ZipOutputStream(zipOutRaw);
-    CSVPrintWriter csv = new CSVPrintWriter(new OutputStreamWriter(zipOut));
+    PrintWriter out = new CSVPrintWriter(new OutputStreamWriter(zipOut), NEWLINE);
     MultiMap/*<String,SortedSet<CherryPick>>*/ files2CherryPicks = buildCherryPickFiles(cherryPickRequest, forPlates);
-    buildInstructions(cherryPickRequest, zipOut);
+    buildReadme(cherryPickRequest, zipOut);
     for (Iterator iter = files2CherryPicks.keySet().iterator(); iter.hasNext();) {
       String fileName = (String) iter.next();
       ZipEntry zipEntry = new ZipEntry(fileName);
       zipOut.putNextEntry(zipEntry);
-      writeHeadersRow(csv);
+      writeHeadersRow(out);
       for (LabCherryPick cherryPick : (SortedSet<LabCherryPick>) files2CherryPicks.get(fileName)) {
-        writeCherryPickRow(csv, cherryPick);
+        writeCherryPickRow(out, cherryPick);
       }
-      csv.flush();
+      out.flush();
     }
-    csv.close();
+    out.close();
     return new ByteArrayInputStream(zipOutRaw.toByteArray());
   }
 
   @SuppressWarnings("unchecked")
-  private void buildInstructions(CherryPickRequest cherryPickRequest,
-                                 ZipOutputStream zipOut) 
+  private void buildReadme(CherryPickRequest cherryPickRequest,
+                           ZipOutputStream zipOut) 
     throws IOException
   {
 
-    ZipEntry zipEntry = new ZipEntry(INSTRUCTIONS_FILE_NAME);
+    ZipEntry zipEntry = new ZipEntry(README_FILE_NAME);
     zipOut.putNextEntry(zipEntry);
-    PrintWriter writer = new PrintWriter(zipOut);
+    PrintWriter writer = new CustomNewlinePrintWriter(zipOut, NEWLINE);
 
     writer.println("This zip file contains plate mappings for Cherry Pick Request " + 
                    cherryPickRequest.getCherryPickRequestNumber());
@@ -142,7 +157,7 @@ public class CherryPickRequestPlateMapFilesBuilder
           append(assayPlate.getCherryPickLiquidTransfer().getPerformedBy().getFullNameFirstLast()).
           append(')');
         }
-        buf.append('\n');
+        buf.append(NEWLINE);
       }
       if (buf.length() > 0) {
         writer.println("Cherry pick plates:");
@@ -169,7 +184,7 @@ public class CherryPickRequestPlateMapFilesBuilder
       for (CherryPickAssayPlate assayPlate : cherryPickRequest.getActiveCherryPickAssayPlates()) {
         Set<PlateType> sourcePlateTypes = (Set<PlateType>) sourcePlateTypesForEachAssayPlate.get(assayPlate.getName());
         if (sourcePlateTypes != null && sourcePlateTypes.size() > 1) {
-          buf.append(assayPlate.getName()).append("\n");
+          buf.append(assayPlate.getName()).append(NEWLINE);
         }
       }
       if (buf.length() > 0) {
@@ -232,7 +247,7 @@ public class CherryPickRequestPlateMapFilesBuilder
       fileName.append( " (Run").append(attempt).append(")");
     }
     
-    fileName.append(".CSV");
+    fileName.append(PLATE_MAP_FILE_EXTENSION);
     
     return fileName.toString();
   }
@@ -255,25 +270,25 @@ public class CherryPickRequestPlateMapFilesBuilder
   }
 
 
-  private void writeCherryPickRow(CSVPrintWriter csv, LabCherryPick cherryPick)
+  private void writeCherryPickRow(PrintWriter out, LabCherryPick cherryPick)
   {
-    csv.print(cherryPick.getSourceWell().getPlateNumber());
-    csv.print(cherryPick.getSourceCopy().getName());
-    csv.print(cherryPick.getSourceWell().getWellName());
-    csv.print(cherryPick.getSourceCopy().getCopyInfo(cherryPick.getSourceWell().getPlateNumber()).getPlateType().getFullName());
-    csv.print(cherryPick.getAssayPlateWellName());
-    csv.print(cherryPick.getAssayPlate().getAssayPlateType().getFullName());
-    csv.print(cherryPick.getCherryPickRequest().getRequestedBy().getFullNameFirstLast());
-    csv.print(cherryPick.getCherryPickRequest().getScreen().getScreenNumber());
-    csv.print(cherryPick.getCherryPickRequest().getMicroliterTransferVolumePerWellApproved());
-    csv.println();
+    out.print(cherryPick.getSourceWell().getPlateNumber());
+    out.print(cherryPick.getSourceCopy().getName());
+    out.print(cherryPick.getSourceWell().getWellName());
+    out.print(cherryPick.getSourceCopy().getCopyInfo(cherryPick.getSourceWell().getPlateNumber()).getPlateType().getFullName());
+    out.print(cherryPick.getAssayPlateWellName());
+    out.print(cherryPick.getAssayPlate().getAssayPlateType().getFullName());
+    out.print(cherryPick.getCherryPickRequest().getRequestedBy().getFullNameFirstLast());
+    out.print(cherryPick.getCherryPickRequest().getScreen().getScreenNumber());
+    out.print(cherryPick.getCherryPickRequest().getMicroliterTransferVolumePerWellApproved());
+    out.println();
   }
 
-  private void writeHeadersRow(CSVPrintWriter csv)
+  private void writeHeadersRow(PrintWriter out)
   {
     for (String string : CSV_FILE_HEADERS) {
-      csv.print(string);
+      out.print(string);
     }
-    csv.println();
+    out.println();
   }
 }
