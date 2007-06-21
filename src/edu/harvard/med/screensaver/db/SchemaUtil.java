@@ -95,9 +95,9 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
           app.getSpringBean("schemaUtil", SchemaUtil.class).createSchema();
           canInitialize = true;
         }
-      }
-      if (app.isCommandLineFlagSet("initialize") && canInitialize) {
-        app.getSpringBean("schemaUtil", SchemaUtil.class).initializeDatabase();
+        if (app.isCommandLineFlagSet("initialize") && canInitialize) {
+          app.getSpringBean("schemaUtil", SchemaUtil.class).initializeDatabase();
+        }
       }
     }
     catch (DataAccessException e) {
