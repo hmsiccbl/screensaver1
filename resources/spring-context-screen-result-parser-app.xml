@@ -6,16 +6,21 @@
 
 <beans>
 
+   <bean id="genericEntityDao"
+    class="edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter" />
+
+   <bean id="screenResultsDao"
+    class="edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter" />
+
    <bean id="librariesDao"
-    class="edu.harvard.med.screensaver.io.screenresults.MockLibrariesDaoForScreenResultImporter" />
+    class="edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter" />
 
    <bean 
     id="screenResultParser"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
     scope="prototype">
     <description>A ScreenResultParser that does not need access to a database.  Used for testing and for command-line ScreenResultParser (when --no-verify option is specified)</description>
-    <constructor-arg index="0" ref="librariesDao">
-    </constructor-arg>
+    <constructor-arg index="0" ref="librariesDao"/>
   </bean>
 
   <bean 

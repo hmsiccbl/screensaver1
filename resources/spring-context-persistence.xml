@@ -149,7 +149,7 @@
 
   <bean
     id="genericEntityDao"
-    class="edu.harvard.med.screensaver.db.GenericEntityDAO">
+    class="edu.harvard.med.screensaver.db.GenericEntityDAOImpl">
     <property
       name="hibernateTemplate"
       ref="hibernateTemplate" />
@@ -174,7 +174,7 @@
 
   <bean
     id="screenResultsDao"
-    class="edu.harvard.med.screensaver.db.ScreenResultsDAO">
+    class="edu.harvard.med.screensaver.db.ScreenResultsDAOImpl">
     <property
       name="hibernateTemplate"
       ref="hibernateTemplate" />

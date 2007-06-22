@@ -30,7 +30,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
 {
   // static members
 
-  private static Logger log = Logger.getLogger(LibrariesDAO.class);
+  private static Logger log = Logger.getLogger(LibrariesDAOImpl.class);
 
 
   // instance data members

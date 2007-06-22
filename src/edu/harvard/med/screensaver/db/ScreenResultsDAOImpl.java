@@ -33,11 +33,11 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
-public class ScreenResultsDAO extends AbstractDAO
+public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDAO
 {
   // static members
 
-  private static Logger log = Logger.getLogger(ScreenResultsDAO.class);
+  private static Logger log = Logger.getLogger(ScreenResultsDAOImpl.class);
 
   public static int SORT_BY_PLATE_WELL = -3;
   public static int SORT_BY_WELL_PLATE = -2;
@@ -50,7 +50,7 @@ public class ScreenResultsDAO extends AbstractDAO
   /**
    * @motivation for CGLIB dynamic proxy creation
    */
-  public ScreenResultsDAO()
+  public ScreenResultsDAOImpl()
   {
   }
   

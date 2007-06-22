@@ -18,7 +18,7 @@
     scope="prototype">
     <description>A ScreenResultParser that does not need access to a database.  Used for testing.</description>
     <constructor-arg index="0" >
-      <bean class="edu.harvard.med.screensaver.io.screenresults.MockLibrariesDaoForScreenResultImporter"/>
+      <bean class="edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter"/>
     </constructor-arg>
   </bean>
 

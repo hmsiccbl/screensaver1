@@ -20,7 +20,7 @@ import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.analysis.ChainedFilter;
 import edu.harvard.med.screensaver.analysis.IdentityFunction;
 import edu.harvard.med.screensaver.analysis.ZScoreFunction;
-import edu.harvard.med.screensaver.io.screenresults.MockLibrariesDaoForScreenResultImporter;
+import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
@@ -43,7 +43,7 @@ public class HeatMapTest extends AbstractSpringTest
   protected void onSetUp() throws Exception
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(107);
-    MockLibrariesDaoForScreenResultImporter librarieDao = new MockLibrariesDaoForScreenResultImporter();
+    MockDaoForScreenResultImporter librarieDao = new MockDaoForScreenResultImporter();
     _parser = new ScreenResultParser(librarieDao);
     _screenResult = _parser.parse(screen,
                                   new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "ScreenResultHeatmapTest107.xls"));

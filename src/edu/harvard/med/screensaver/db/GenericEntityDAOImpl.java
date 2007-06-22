@@ -80,12 +80,12 @@ import org.springframework.orm.hibernate3.HibernateCallback;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class GenericEntityDAO extends AbstractDAO
+public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDAO 
 {
   // static members
 
-  private static Logger log = Logger.getLogger(GenericEntityDAO.class);
-  private static final Logger entityInflatorLog = Logger.getLogger(GenericEntityDAO.class.getName() + ".EntityInflator");
+  private static Logger log = Logger.getLogger(GenericEntityDAOImpl.class);
+  private static final Logger entityInflatorLog = Logger.getLogger(GenericEntityDAOImpl.class.getName() + ".EntityInflator");
 
 
   // instance data members
@@ -95,7 +95,7 @@ public class GenericEntityDAO extends AbstractDAO
   /**
    * @motivation for CGLIB dynamic proxy creation
    */
-  public GenericEntityDAO()
+  public GenericEntityDAOImpl()
   {
   }
   

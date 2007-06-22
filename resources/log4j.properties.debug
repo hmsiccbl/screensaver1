@@ -35,7 +35,7 @@ log4j.logger.edu.harvard.med.screensaver.io.ScreenResultParser=info
 log4j.logger.edu.harvard.med.screensaver.db.RestrictedAccessCollectionDaoMethodInterceptor=warn
 log4j.logger.edu.harvard.med.screensaver.db.RestrictedAccessEntityDaoMethodInterceptor=warn
 log4j.logger.edu.harvard.med.screensaver.db.SchemaUtil=debug
-log4j.logger.edu.harvard.med.screensaver.db.GenericHibernateDAO.EntityInflator=warn
+log4j.logger.edu.harvard.med.screensaver.db.GenericEntityDAOImpl.EntityInflator=warn
 
 ### Tomcat
 

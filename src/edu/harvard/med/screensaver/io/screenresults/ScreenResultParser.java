@@ -103,7 +103,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   // static data members
   
   private static final Logger log = Logger.getLogger(ScreenResultParser.class);
-
+  private static final Logger memoryDebugLog = Logger.getLogger(ScreenResultParser.class + "memoryDebug");
+  
   private static final String NO_SCREEN_ID_FOUND_ERROR = "Screen ID not found";
   private static final String DATA_HEADER_SHEET_NOT_FOUND_ERROR = "\"Data Headers\" sheet not found";
   private static final String UNKNOWN_ERROR = "unknown error";
@@ -1057,21 +1058,21 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   {
     long freeMem = 0L;
     //long usedMem = Runtime.getRuntime().totalMemory() - freeMem;
-    if (log.isDebugEnabled()) {
+    if (memoryDebugLog.isDebugEnabled()) {
       freeMem = Runtime.getRuntime().freeMemory();
-      //log.debug(String.format("totalMem=%.2fMB", Runtime.getRuntime().totalMemory() / (1024.0*1024.0)));
-      //log.debug(String.format("freeMem=%.2fMB", Runtime.getRuntime().freeMemory() / (1024.0*1024.0)));
+      //memoryDebugLog.debug(String.format("totalMem=%.2fMB", Runtime.getRuntime().totalMemory() / (1024.0*1024.0)));
+      //memoryDebugLog.debug(String.format("freeMem=%.2fMB", Runtime.getRuntime().freeMemory() / (1024.0*1024.0)));
       long availMem = (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) + freeMem;
-      log.debug(String.format("Before GC: avail mem=%.2fMB",  availMem / (1024.0*1024.0)));
+      memoryDebugLog.debug(String.format("Before GC: avail mem=%.2fMB",  availMem / (1024.0*1024.0)));
     }
     runBeforeGarbageCollection.run();
-    if (log.isDebugEnabled()) {
+    if (memoryDebugLog.isDebugEnabled()) {
       Runtime.getRuntime().gc();
-      //log.debug(String.format("freeMem=%.2fMB", Runtime.getRuntime().freeMemory() / (1024.0*1024.0)));
+      //memoryDebugLog.debug(String.format("freeMem=%.2fMB", Runtime.getRuntime().freeMemory() / (1024.0*1024.0)));
       long availMem = (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) + Runtime.getRuntime().freeMemory();
-      log.debug(String.format("After GC:  avail mem=%.2fMB, delta=%.2fMB",  
-                              availMem / (1024.0*1024.0),
-                              (freeMem - Runtime.getRuntime().freeMemory()) / (1024.0*1024.0)));
+      memoryDebugLog.debug(String.format("After GC:  avail mem=%.2fMB, delta=%.2fMB",  
+                                         availMem / (1024.0*1024.0),
+                                         (freeMem - Runtime.getRuntime().freeMemory()) / (1024.0*1024.0)));
     }
   }
 
