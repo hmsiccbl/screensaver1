@@ -4,11 +4,15 @@
     <key-property name="key"/>
    </composite-map-key>
    <composite-element class="edu.harvard.med.screensaver.model.screenresults.ResultValue">
+    <!-- resultValueType.getResultValues().size() is based upon the first property appearing below, 
+      and will not count null values, due to how Hibernate generates its SQL in its implementation 
+      of the size() method for extra-lazy persistent collections (arguably a bug); so we put 
+      'assayWellType' first, since it is a not-null field -->
+    <property name="assayWellType" type="edu.harvard.med.screensaver.model.screenresults.AssayWellType$UserType" not-null="true"/>
     <property name="value" type="string"/>
     <property name="numericValue" type="double"/>
     <property name="numericDecimalPrecision" type="integer"/>
     <property name="exclude" type="boolean"/>
-    <property name="assayWellType" type="edu.harvard.med.screensaver.model.screenresults.AssayWellType$UserType" not-null="true"/>
     <property name="hit" type="boolean"/>
    </composite-element>
   </map>
