@@ -431,6 +431,7 @@ public class ScreenResult extends AbstractEntity
    * Get the screen.
    *
    * @return the screen
+   * TODO: When moving to Hibernate annotations, add unique="true" for this many-to-one. XDoclet generates the unique constraint twice causing an error!  
    * @hibernate.many-to-one
    *   class="edu.harvard.med.screensaver.model.screens.Screen"
    *   column="screen_id"
