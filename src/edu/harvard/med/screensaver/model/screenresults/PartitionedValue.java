@@ -58,7 +58,7 @@ public enum PartitionedValue implements VocabularyTerm
   {
     PartitionedValue result = _value2Enum.get(value);
     if (result == null) {
-      throw new IllegalArgumentException("no PartitioonedValue enum for '" + value + "'");
+      throw new IllegalArgumentException("no PartitionedValue enum for '" + value + "'");
     }
     return result;
   }

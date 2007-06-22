@@ -219,34 +219,40 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     }
     return query;
   }
-
+  
   private Map<WellKey,List<ResultValue>> findRelatedResultValues(Session session,
                                                                  Set<WellKey> wellKeys, 
-                                                                 List<ResultValueType> selectedRvts)
-                                                                 {
+                                                                 List<ResultValueType> selectedRvts) 
+  {
     String wellKeysList = StringUtils.makeListString(StringUtils.wrapStrings(wellKeys, "'", "'"), ",");
-    Map<WellKey,List<ResultValue>> result = new HashMap<WellKey,List<ResultValue>>();
+    List<Number> rvtIds = new ArrayList<Number>();
     for (int i = 0; i < selectedRvts.size(); i++) {
       ResultValueType rvt = selectedRvts.get(i);
+      rvtIds.add(rvt.getEntityId());
+    }
+    String rvtIdsList = StringUtils.makeListString(StringUtils.wrapStrings(rvtIds, "'", "'"), ",");
 
-      StringBuilder hql = new StringBuilder();
-      // TODO: see if we can produce an equivalent HQL query that does not need to use the result_value_type table at all, as result_value_type_result_values.result_value_type_id can be used directly (at least, if we were doing this directly with sql)
-      hql.append("select indices(rv), elements(rv) from ResultValueType rvt join rvt.resultValues rv where rvt.id = " + 
-                 rvt.getEntityId() + " and index(rv) in (" + wellKeysList + ")");
-      Query query = session.createQuery(hql.toString());
-      for (Iterator iter = query.list().iterator(); iter.hasNext();) {
-        Object[] row = (Object[]) iter.next();
-        WellKey wellKey = new WellKey(row[0].toString());
-        List<ResultValue> resultValues = result.get(wellKey);
-        if (resultValues == null) {
-          resultValues = new ArrayList<ResultValue>();
-          result.put(wellKey, resultValues);
-        }
-        resultValues.add((ResultValue) row[1]);
+    StringBuilder hql = new StringBuilder();
+    // TODO: see if we can produce an equivalent HQL query that does not need to use the result_value_type table at all, as result_value_type_result_values.result_value_type_id can be used directly (at least, if we were doing this directly with sql)
+    hql.append("select indices(rv), elements(rv) " +
+               "from ResultValueType rvt join rvt.resultValues rv " +
+               "where rvt.id in (" + 
+               rvtIdsList + ") and index(rv) in (" + wellKeysList + ") " +
+               "order by rvt.ordinal");
+    Map<WellKey,List<ResultValue>> result = new HashMap<WellKey,List<ResultValue>>();
+    Query query = session.createQuery(hql.toString());
+    for (Iterator iter = query.list().iterator(); iter.hasNext();) {
+      Object[] row = (Object[]) iter.next();
+      WellKey wellKey = new WellKey(row[0].toString());
+      List<ResultValue> resultValues = result.get(wellKey);
+      if (resultValues == null) {
+        resultValues = new ArrayList<ResultValue>();
+        result.put(wellKey, resultValues);
       }
+      resultValues.add((ResultValue) row[1]);
     }
     return result;
-                                                                 }
+  }
 
 }
 
