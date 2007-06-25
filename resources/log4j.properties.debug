@@ -20,7 +20,7 @@ log4j.appender.file.append=true
 
 ### Root logger
 
-log4j.rootLogger=info, stdout
+log4j.rootLogger=info, file
 
 ### User Activity logger
 
@@ -30,6 +30,7 @@ log4j.logger.userActivity=info
 
 log4j.logger.edu.harvard.med.screensaver=debug
 log4j.logger.edu.harvard.med.screensaver.io.ScreenResultParser=info
+log4j.logger.edu.harvard.med.screensaver.io.libraries.compound.OpenBabelClient=info
 
 # filter out debug output that is especially verbose and common
 log4j.logger.edu.harvard.med.screensaver.db.RestrictedAccessCollectionDaoMethodInterceptor=warn
