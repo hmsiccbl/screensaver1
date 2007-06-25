@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import java.security.Principal;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -24,14 +23,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.BuildNumber;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.util.Messages;
 import edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter;
-
-import org.apache.log4j.Logger;
 
 /**
  * A base Controller class for JSF backing beans (beans that handle JSF actions
@@ -495,9 +494,11 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
     showMessage("applicationError", errorMessage);
   }
   
-  protected void reportApplicationError(Throwable t)
+  protected void reportApplicationError(Throwable throwable)
   {
-    showMessage("applicationError", t.getMessage());
+    throwable.printStackTrace();
+    showMessage("applicationError", throwable.getMessage());
+    log.error(throwable.toString());
   }
 
   protected void closeHttpSession()
