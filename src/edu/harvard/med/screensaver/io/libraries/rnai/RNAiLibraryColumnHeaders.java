@@ -102,6 +102,10 @@ class RNAiLibraryColumnHeaders
     boolean hasWell = false;
     boolean hasOther = false;
     for (ParsedRNAiLibraryColumn column : ParsedRNAiLibraryColumn.values()) {
+      if (! column.isRequired()) {
+        // skip optional columns - they play no role in determining data row type
+        continue;
+      }
       short columnIndex = getColumnIndex(column);
       HSSFCell cell = dataRow.getCell(columnIndex);
       if (cell                != null                      &&
@@ -155,10 +159,13 @@ class RNAiLibraryColumnHeaders
  
   /**
    * Return the column index for the {@link ParsedRNAiLibraryColumn required library column}.
+   * 
    * @param column the required library column to return an index for
    * @return the column index
+   * @throws IndexOutOfBoundsException when the column is not present (only applies to
+   * optional columns)
    */
-  short getColumnIndex(ParsedRNAiLibraryColumn column)
+  short getColumnIndex(ParsedRNAiLibraryColumn column) throws IndexOutOfBoundsException
   {
     Integer index = _columnIndexes.get(column);
     if (index == null) {
@@ -208,11 +215,16 @@ class RNAiLibraryColumnHeaders
   {
     boolean hasRequiredHeaders = true;
     for (ParsedRNAiLibraryColumn column : ParsedRNAiLibraryColumn.values()) {
-      if (column.isRequired() && _columnIndexes.get(column) == null) {
-        _errorManager.addError(
-          "required column \"" + column.getDefaultColumnHeader() +
-          "\" does not match any column headers in sheet: " + _sheetName);
-        hasRequiredHeaders = false;
+      if (_columnIndexes.get(column) == null) {
+        if (column.isRequired()) {
+          _errorManager.addError(
+            "required column \"" + column.getDefaultColumnHeader() +
+            "\" does not match any column headers in sheet: " + _sheetName);
+          hasRequiredHeaders = false;
+        }
+        else {
+          log.warn("optional column header was not found: " + column.getDefaultColumnHeader()); 
+        }
       }
     }
     return hasRequiredHeaders;

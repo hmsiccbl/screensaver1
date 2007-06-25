@@ -355,9 +355,15 @@ public class DataRowParser
    */
   private void addOldEntrezgeneIds(Gene gene)
   {
-    Cell oldEntrezgeneIdsCell = _cellFactory.getCell(
-      _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.OLD_ENTREZGENE_IDS),
-      _rowIndex);
+    Cell oldEntrezgeneIdsCell;
+    try {
+      oldEntrezgeneIdsCell = _cellFactory.getCell(
+        _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.OLD_ENTREZGENE_IDS),
+        _rowIndex);
+    }
+    catch (IndexOutOfBoundsException e) {
+      return;
+    }
     String oldEntrezgeneIds = oldEntrezgeneIdsCell.getAsString();
     if (oldEntrezgeneIds != null && ! oldEntrezgeneIds.equals("")) {
       for (String oldEntrezgeneIdString : oldEntrezgeneIds.split("[,;]")) {
@@ -389,10 +395,17 @@ public class DataRowParser
   {
     SilencingReagentType silencingReagentType = _parser.getSilencingReagentType();
     Set<SilencingReagent> silencingReagents = new HashSet<SilencingReagent>();
-    String sequences = _cellFactory.getCell(
-      _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.SEQUENCES),
-      _rowIndex).getString();
+    String sequences = null;
+    try {
+      sequences = _cellFactory.getCell(
+        _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.SEQUENCES),
+        _rowIndex).getString();
+    }
+    catch (IndexOutOfBoundsException e) {
+      // leave it as null if optional column "Sequences" is missing
+    }
     if (sequences == null || sequences.equals("")) {
+      // add a silencing reagent with isPoolOfUnknownSequences=true
       silencingReagents.add(getSilencingReagent(gene, silencingReagentType, "", true));
     }
     else {
