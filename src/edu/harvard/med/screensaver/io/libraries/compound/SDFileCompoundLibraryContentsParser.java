@@ -102,7 +102,8 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
           sdRecordParser.parseSDRecord();
           if ((i % 100) == 0) {
             log.info(
-              "loaded " + i + " records into library " + library.getLibraryName());
+              "loaded " + i + " records into library " + library.getLibraryName() +
+              " (" + _sdFile.getName() + ")");
           }
         }
       }
