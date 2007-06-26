@@ -169,6 +169,7 @@ public class ScreenDBSynchronizer
    */
   private void deleteOldCompoundCherryPickRequests()
   {
+    log.info("deleting old compound cherry pick requests..");
     _dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -176,10 +177,12 @@ public class ScreenDBSynchronizer
         _cherryPickRequestDao.deleteAllCompoundCherryPickRequests();
       }
     });
+    log.info("done deleting old compound cherry pick requests.");
   }
 
   private void synchronizeLibraries() throws ScreenDBSynchronizationException
   {
+    log.info("synchronizing libraries..");
     _dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -188,8 +191,9 @@ public class ScreenDBSynchronizer
           new ScreenDBLibrarySynchronizer(_connection, _dao, _librariesDao);
         librarySynchronizer.synchronizeLibraries();
       }
-    });
-  }
+    }); 
+    log.info("done synchronizing libraries.");
+ }
 
   private void synchronizeNonLibraries() throws ScreenDBSynchronizationException
   {
@@ -201,17 +205,27 @@ public class ScreenDBSynchronizer
       new ScreenDBLibraryScreeningSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
     final ScreenDBCompoundCherryPickSynchronizer compoundCherryPickSynchronizer =
       new ScreenDBCompoundCherryPickSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
-    
+
+    log.info("synchronizing non-libraries..");
     _dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
+        log.info("synchronizing users..");
         userSynchronizer.synchronizeUsers();
+        log.info("done synchronizing users.");
+        log.info("synchronizing screens..");
         screenSynchronizer.synchronizeScreens();
+        log.info("done synchronizing screens.");
+        log.info("synchronizing library screenings..");
         libraryScreeningSynchronizer.synchronizeLibraryScreenings();
+        log.info("done synchronizing library screenings.");
+        log.info("synchronizing compound cherry picks..");
         compoundCherryPickSynchronizer.synchronizeCompoundCherryPicks();
+        log.info("done synchronizing compound cherry picks.");
       }
     });
+    log.info("done synchronizing non-libraries.");
   }
 
   private void closeConnection()
