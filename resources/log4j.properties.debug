@@ -20,7 +20,7 @@ log4j.appender.file.append=true
 
 ### Root logger
 
-log4j.rootLogger=info, file
+log4j.rootLogger=info, stdout
 
 ### User Activity logger
 
@@ -29,14 +29,18 @@ log4j.logger.userActivity=info
 ### Screensaver application
 
 log4j.logger.edu.harvard.med.screensaver=debug
-log4j.logger.edu.harvard.med.screensaver.io.ScreenResultParser=info
-log4j.logger.edu.harvard.med.screensaver.io.libraries.compound.OpenBabelClient=info
 
 # filter out debug output that is especially verbose and common
 log4j.logger.edu.harvard.med.screensaver.db.RestrictedAccessCollectionDaoMethodInterceptor=warn
 log4j.logger.edu.harvard.med.screensaver.db.RestrictedAccessEntityDaoMethodInterceptor=warn
 log4j.logger.edu.harvard.med.screensaver.db.SchemaUtil=debug
 log4j.logger.edu.harvard.med.screensaver.db.GenericEntityDAOImpl.EntityInflator=warn
+log4j.logger.edu.harvard.med.screensaver.io.ScreenResultParser=info
+log4j.logger.edu.harvard.med.screensaver.io.libraries.compound.OpenBabelClient=info
+
+# avoid writing database passwords to the log!
+log4j.logger.edu.harvard.med.screensaver.db.OrchestraPropertyPlaceholderConfigurer=info
+
 
 ### Tomcat
 
