@@ -753,43 +753,44 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    * column and direction. If _dataModel has already been initialized,
    * {@link #setDataModelUpdateNeeded()} must have been called previously for
    * this method do perform its work.
-   * 
-   * @param sortColumnName
-   * @param sortDirection
    */
   private void doSort()
   {
     if (!_isDataModelUpdateNeeded && _dataModel != null) {
       return;
     }
-    String sortColumnName = _currentSortColumnName;
-    SortDirection sortDirection = _currentSortDirection;
-
-    // get the forward sort for the specified column, computing it if needed
-    List<E> forwardSort = _forwardSorts.get(sortColumnName);
-    if (forwardSort == null) {
-      forwardSort = new ArrayList<E>(_unsortedResults);
-      Collections.sort(forwardSort, getComparatorForColumnName(sortColumnName));
-      _forwardSorts.put(sortColumnName, forwardSort);
-    }
-    
-    // set the _currentSort variable appropriately
-    if (sortDirection.equals(SortDirection.ASCENDING)) {
-      _currentSort = forwardSort;
+    if (_currentSortColumnName == null) {
+      _currentSort = _unsortedResults;
     }
     else {
+      String sortColumnName = _currentSortColumnName;
+      SortDirection sortDirection = _currentSortDirection;
 
-      // get the reverse sort for the specified column, computing it if needed
-      List<E> reverseSort = _reverseSorts.get(sortColumnName);
-      if (reverseSort == null) {
-        reverseSort = new ArrayList<E>(forwardSort);
-        Collections.reverse(reverseSort);
-        _reverseSorts.put(sortColumnName, reverseSort);
+      // get the forward sort for the specified column, computing it if needed
+      List<E> forwardSort = _forwardSorts.get(sortColumnName);
+      if (forwardSort == null) {
+        forwardSort = new ArrayList<E>(_unsortedResults);
+        Collections.sort(forwardSort, getComparatorForColumnName(sortColumnName));
+        _forwardSorts.put(sortColumnName, forwardSort);
       }
-      
-      _currentSort = reverseSort;
-    }
 
+      // set the _currentSort variable appropriately
+      if (sortDirection.equals(SortDirection.ASCENDING)) {
+        _currentSort = forwardSort;
+      }
+      else {
+
+        // get the reverse sort for the specified column, computing it if needed
+        List<E> reverseSort = _reverseSorts.get(sortColumnName);
+        if (reverseSort == null) {
+          reverseSort = new ArrayList<E>(forwardSort);
+          Collections.reverse(reverseSort);
+          _reverseSorts.put(sortColumnName, reverseSort);
+        }
+
+        _currentSort = reverseSort;
+      }
+    }
     _dataModel = new ListDataModel(_currentSort);
     setDataModelUpdateNeeded(false);
   }
