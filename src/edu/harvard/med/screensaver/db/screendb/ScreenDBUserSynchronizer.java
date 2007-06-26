@@ -221,10 +221,11 @@ public class ScreenDBUserSynchronizer
       AffiliationCategory affiliationCategory =
         _labAffiliationCategoryMapper.getAffiliationCategoryForLabAffiliation(affiliationName);
       if (affiliationCategory == null) {
-        throw new ScreenDBSynchronizationException(
+        log.error(
           "no affiliation category mapping for affiliation name: " + affiliationName + "\n" +
           "To fix this, you probably want to add an entry into " +
           "resources/edu/harvard/med/screensaver/db/screendb/lab_affiliation_categories.txt");
+        return null;
       }
       labAffiliation = new LabAffiliation(
         affiliationName,
