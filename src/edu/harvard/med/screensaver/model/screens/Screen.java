@@ -79,6 +79,8 @@ public class Screen extends AbstractEntity
   private String _comments;
   private String _abaseStudyId;
   private String _abaseProtocolId;
+  private Date _publishableProtocolDateEntered;
+  private String _publishableProtocolEnteredBy;
   private String _publishableProtocol;
   private Date _dateOfApplication;
   private ScreenResult _screenResult;
@@ -874,6 +876,48 @@ public class Screen extends AbstractEntity
       return StringUtils.makeListString(getAssayReadoutTypes(), ", ");
     }
     return "";
+  }
+
+  // TODO: extract PublishableProtocol value-typed collection
+
+  /**
+   * Get the date the publishable protocol was entered.
+   * @return the date the publishable protocol was entered
+   * @hibernate.property
+   */
+  public Date getPublishableProtocolDateEntered()
+  {
+    return _publishableProtocolDateEntered;
+  }
+
+  /**
+   * Set the date the publishable protocol was entered.
+   * @param publishableProtocolDateEntered the new date the publishable protocol was entered
+   */
+  public void setPublishableProtocolDateEntered(
+    Date publishableProtocolDateEntered)
+  {
+    _publishableProtocolDateEntered = publishableProtocolDateEntered;
+  }
+
+  /**
+   * Get the initials of the administrator who entered the publishable protocol.
+   * @return the initials of the administrator who entered the publishable protocol
+   * @hibernate.property type="text"
+   */
+  public String getPublishableProtocolEnteredBy()
+  {
+    return _publishableProtocolEnteredBy;
+  }
+
+  /**
+   * Set the initials of the administrator who entered the publishable protocol.
+   * @param publishableProtocolEnteredBy the new initials of the administrator who
+   * entered the publishable protocol
+   */
+  public void setPublishableProtocolEnteredBy(String publishableProtocolEnteredBy)
+  {
+    _publishableProtocolEnteredBy = publishableProtocolEnteredBy;
   }
 
   /**
