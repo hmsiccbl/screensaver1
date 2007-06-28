@@ -178,7 +178,12 @@ public class Well extends AbstractEntity implements Comparable
     SortedSet<Compound> orderedCompounds = new TreeSet<Compound>(new Comparator<Compound>() {
       public int compare(Compound compound1, Compound compound2)
       {
-        return compound2.getSmiles().length() - compound1.getSmiles().length();
+        int lengthCompare =
+          compound2.getSmiles().length() - compound1.getSmiles().length();
+        if (lengthCompare == 0) {
+          return compound2.getSmiles().compareTo(compound1.getSmiles());
+        }
+        return lengthCompare;
       }
     });
     orderedCompounds.addAll(getHbnCompounds());
