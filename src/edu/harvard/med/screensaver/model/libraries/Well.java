@@ -181,7 +181,7 @@ public class Well extends AbstractEntity implements Comparable
         int lengthCompare =
           compound2.getSmiles().length() - compound1.getSmiles().length();
         if (lengthCompare == 0) {
-          return compound2.getSmiles().compareTo(compound1.getSmiles());
+          return compound1.getSmiles().compareTo(compound2.getSmiles());
         }
         return lengthCompare;
       }
