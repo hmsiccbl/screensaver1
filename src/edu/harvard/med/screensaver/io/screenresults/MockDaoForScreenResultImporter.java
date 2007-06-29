@@ -238,7 +238,18 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
-  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(List<ResultValueType> selectedRvts, int sortBy, SortDirection sortDirection, int fromIndex, int rowsToFetch, ResultValueType hitsOnlyRvt)
+  public Map<WellKey,List<ResultValue>> findResultValuesByPlate(Integer plateNumber, List<ResultValueType> rvt)
+  {
+    return null;
+  }
+
+  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(List<ResultValueType> selectedRvts,
+                                                                          int sortBy,
+                                                                          SortDirection sortDirection,
+                                                                          int fromIndex,
+                                                                          Integer rowsToFetch,
+                                                                          ResultValueType hitsOnlyRvt,
+                                                                          Integer plateNumber)
   {
     return null;
   }

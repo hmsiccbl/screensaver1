@@ -37,14 +37,17 @@ public interface ScreenResultsDAO
   public static int SORT_BY_WELL_PLATE = -2;
   public static int SORT_BY_ASSAY_WELL_TYPE = -1;
   
-  public Map<WellKey,ResultValue> findResultValuesByPlate(Integer plateNumber, ResultValueType rvt);
+  public Map<WellKey,List<ResultValue>> findResultValuesByPlate(Integer plateNumber, List<ResultValueType> rvts);
 
-  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(final List<ResultValueType> selectedRvts,
-                                                                          final int sortBy,
-                                                                          final SortDirection sortDirection,
-                                                                          final int fromIndex,
-                                                                          final int rowsToFetch,
-                                                                          final ResultValueType hitsOnlyRvt);
+  public Map<WellKey,ResultValue> findResultValuesByPlate(Integer plateNumber, ResultValueType rvts);
+
+  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(List<ResultValueType> selectedRvts,
+                                                                          int sortBy,
+                                                                          SortDirection sortDirection,
+                                                                          int fromIndex,
+                                                                          Integer rowsToFetch,
+                                                                          ResultValueType hitsOnlyRvt,
+                                                                          Integer plateNumber);
   public void deleteScreenResult(ScreenResult screenResult);
 }
 

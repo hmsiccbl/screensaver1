@@ -254,7 +254,8 @@ public class ResultValueType extends AbstractEntity implements Comparable
     }
     ResultValue rv = new ResultValue(assayWellType,
                                      value,
-                                     exclude);
+                                     exclude,
+                                     false);
     rv.setHit(isHit(rv));
     return addResultValue(rv, well);
   }
@@ -292,7 +293,8 @@ public class ResultValueType extends AbstractEntity implements Comparable
     ResultValue rv = new ResultValue(assayWellType,
                                      numericValue,
                                      decimalPrecision,
-                                     exclude);
+                                     exclude,
+                                     false);
     rv.setHit(isHit(rv));
     return addResultValue(rv, well);
   }

@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+
 import org.apache.log4j.Logger;
 
 public class UISelectManyBean<T> extends UISelectBean<T>
@@ -54,14 +56,6 @@ public class UISelectManyBean<T> extends UISelectBean<T>
     }
   }
   
-  /**
-   * called by JSF UISelect component
-   */
-  public List<String> getValue()
-  {
-    return _selectionKeys;
-  }
-  
   public void setSelections(Collection<T> selections)
   {
     List<String> selectionKeys = new ArrayList<String>();
@@ -79,7 +73,14 @@ public class UISelectManyBean<T> extends UISelectBean<T>
   {
     return _selections;
   }
-
+  /**
+   * called by JSF UISelect component
+   */
+  public List<String> getValue()
+  {
+    return _selectionKeys;
+  }
+  
   // TODO: setSelectionIndexes()
   // TODO: getSelectionIndexes()
 

@@ -11,6 +11,9 @@ package edu.harvard.med.screensaver.db;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -20,10 +23,13 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
+
+import edu.harvard.med.screensaver.util.CollectionUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
@@ -54,25 +60,44 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
   {
   }
   
-  /*
-  select index(rv), rv.value, rv.assayWellType, rv.exclude from ResultValueType rvt join rvt.resultValues rv where rvt.id=? and substring(index(rv),1,5) = ?
-   */
-  public Map<WellKey,ResultValue> findResultValuesByPlate(Integer plateNumber, ResultValueType rvt)
+  public Map<WellKey,ResultValue> findResultValuesByPlate(Integer plateNumber, ResultValueType rvt )
   {
-    String hql = "select index(rv), elements(rv) " +
-    "from ResultValueType rvt join rvt.resultValues rv " +
-    "where rvt.id=? and substring(index(rv),1," + Well.PLATE_NUMBER_LEN + ") = ?";
-    String paddedPlateNumber = String.format("%0" + Well.PLATE_NUMBER_LEN + "d", plateNumber);
-    List hqlResult = getHibernateTemplate().find(hql.toString(), new Object[] { rvt.getEntityId(), paddedPlateNumber });
-    Map<WellKey,ResultValue> result = new HashMap<WellKey,ResultValue>(hqlResult.size());
-    for (Iterator iter = hqlResult.iterator(); iter.hasNext();) {
-      Object[] row = (Object[]) iter.next();
-      result.put((WellKey) row[0],
-                 (ResultValue) row[1]);
+    Map<WellKey,List<ResultValue>> result1 = findResultValuesByPlate(plateNumber, Arrays.asList(rvt));
+    Map<WellKey,ResultValue> result = new HashMap<WellKey,ResultValue>(result1.size());
+    for (Map.Entry<WellKey,List<ResultValue>> entry : result1.entrySet()) {
+      result.put(entry.getKey(), entry.getValue().get(0));
     }
     return result;
   }
-
+  
+  /*
+  select index(rv), rv.value, rv.assayWellType, rv.exclude from ResultValueType rvt join rvt.resultValues rv where rvt.id in (...) and substring(index(rv),1,5) = ?
+   */
+  public Map<WellKey,List<ResultValue>> findResultValuesByPlate(Integer plateNumber, List<ResultValueType> rvts)
+  {
+    List<Number> rvtIds = new ArrayList<Number>(rvts.size()); 
+    for (ResultValueType rvt : rvts) {
+      rvtIds.add(rvt.getEntityId());
+    }
+    String hql = "select index(rv), elements(rv) " +
+    "from ResultValueType rvt join rvt.resultValues rv " +
+    "where rvt.id in (" + StringUtils.makeListString(rvtIds, ",") + 
+    ") and substring(index(rv),1," + Well.PLATE_NUMBER_LEN + ") = ?";
+    String paddedPlateNumber = String.format("%0" + Well.PLATE_NUMBER_LEN + "d", plateNumber);
+    List hqlResult = getHibernateTemplate().find(hql.toString(), new Object[] { paddedPlateNumber });
+    Map<WellKey,List<ResultValue>> result = new HashMap<WellKey,List<ResultValue>>(hqlResult.size());
+    for (Iterator iter = hqlResult.iterator(); iter.hasNext();) {
+      Object[] row = (Object[]) iter.next();
+      WellKey wellKey = (WellKey) row[0];
+      List<ResultValue> rvsForRvt = result.get(wellKey);
+      if (rvsForRvt == null) {
+        rvsForRvt = new ArrayList<ResultValue>(rvts.size());
+        result.put(wellKey, rvsForRvt);
+      }
+      rvsForRvt.add((ResultValue) row[1]);
+    }
+    return result;
+  }
 
   /*
   For example, sorting on 2nd RVT:
@@ -90,12 +115,13 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
    */
   //TODO: due to denormalized design, this method requires all 384 ResultValues to exist for each ResultValueType
   @SuppressWarnings("unchecked")
-  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(final List<ResultValueType> selectedRvts,
+  public Map<WellKey,List<ResultValue> > findSortedResultValueTableByRange(final List<ResultValueType> selectedRvts,
                                                                           final int sortBy,
                                                                           final SortDirection sortDirection,
                                                                           final int fromIndex,
-                                                                          final int rowsToFetch,
-                                                                          final ResultValueType hitsOnlyRvt)
+                                                                          final Integer rowsToFetch,
+                                                                          final ResultValueType hitsOnlyRvt,
+                                                                          final Integer plateNumber)
                                                                           {
     Map<WellKey,List<ResultValue>> mapResult = (Map<WellKey,List<ResultValue>>)
     getHibernateTemplate().execute(new HibernateCallback() 
@@ -106,27 +132,28 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
                                                                      selectedRvts,
                                                                      sortBy,
                                                                      sortDirection,
-                                                                     hitsOnlyRvt);
+                                                                     hitsOnlyRvt,
+                                                                     plateNumber);
         Map<WellKey,List<ResultValue>> mapResult = new LinkedHashMap<WellKey,List<ResultValue>>();
         ScrollableResults scrollableResults = query.scroll();
-        if (scrollableResults.setRowNumber(fromIndex) && rowsToFetch > 0) {
+        if (scrollableResults.setRowNumber(fromIndex) && (rowsToFetch == null || rowsToFetch > 0)) {
           int rowCount = 0;
           do {
             Object[] valuesArray = scrollableResults.get();
             List<ResultValue> values = new ArrayList<ResultValue>(selectedRvts.size());
             mapResult.put(new WellKey(valuesArray[0].toString()), values);
-          } while (scrollableResults.next() && ++rowCount < rowsToFetch);
-
+          } while (scrollableResults.next() && (rowsToFetch == null || ++rowCount < rowsToFetch));
+        
           // now add the ResultValues 
           Map<WellKey,List<ResultValue>> secondaryMapResult = 
-            findRelatedResultValues(session,
-                                    mapResult.keySet(),
-                                    selectedRvts);
+            findRelatedResultValuesInParts(session,
+                                           mapResult.keySet(),
+                                           selectedRvts);
           for (Map.Entry<WellKey,List<ResultValue>> entry : mapResult.entrySet()) {
             entry.getValue().addAll(secondaryMapResult.get(entry.getKey()));
           }
-
-
+          
+          
         }
         return mapResult;
       }
@@ -155,7 +182,8 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
                                                                List<ResultValueType> selectedRvts,
                                                                int sortBy,
                                                                SortDirection sortDirection,
-                                                               ResultValueType hitsOnlyRvt)
+                                                               ResultValueType hitsOnlyRvt,
+                                                               Integer plateNumber)
   {
     assert selectedRvts.size() > 0;
     assert sortBy < selectedRvts.size();
@@ -182,6 +210,11 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
       whereClauses.add("index(hitsOnlyRv) = index(rv)");
       whereClauses.add("hitsOnlyRvt.id=?");
       args.add(hitsOnlyRvt.getEntityId());
+    }
+    
+    if (plateNumber != null) {
+      whereClauses.add("cast(substring(index(rv),1,5),int)=?");
+      args.add(plateNumber);
     }
 
     String sortDirStr = sortDirection.equals(SortDirection.ASCENDING)? " asc" : " desc";
@@ -220,39 +253,88 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     return query;
   }
   
+  /**
+   * @motivation optimization: querying for too many wellKeys in the same query
+   *             is slower than breaking up the queries into subsets and
+   *             recombining the results in memory.
+   */
+  private Map<WellKey,List<ResultValue>> findRelatedResultValuesInParts(Session session,
+                                                                        Set<WellKey> wellKeys, 
+                                                                        List<ResultValueType> selectedRvts) {
+    Map<WellKey,List<ResultValue>> result = new HashMap<WellKey,List<ResultValue>>();
+    ArrayList<WellKey> wellKeysList = new ArrayList<WellKey>(wellKeys);
+    // the size of each subset probably shouldn't be less than 384, since
+    // performance is okay at this value, and querying for <=384 wellKeys is a
+    // very common (384 well plate size)
+    int subsetSize = 384;
+    int i = 0;
+    while (i * subsetSize < wellKeys.size()) {
+      List<WellKey> wellKeysSubset = 
+        wellKeysList.subList(i * subsetSize,
+                             Math.min((i + 1) * subsetSize, wellKeysList.size()));
+      result.putAll(findRelatedResultValues(session, wellKeysSubset, selectedRvts));
+      ++i;
+    }
+    assert result.size() == wellKeys.size();
+    return result;
+  }
+
   private Map<WellKey,List<ResultValue>> findRelatedResultValues(Session session,
-                                                                 Set<WellKey> wellKeys, 
+                                                                 Collection<WellKey> wellKeys, 
                                                                  List<ResultValueType> selectedRvts) 
   {
+    Map<Number,Integer> rvtId2Pos = new HashMap<Number,Integer>(selectedRvts.size());
     String wellKeysList = StringUtils.makeListString(StringUtils.wrapStrings(wellKeys, "'", "'"), ",");
     List<Number> rvtIds = new ArrayList<Number>();
     for (int i = 0; i < selectedRvts.size(); i++) {
       ResultValueType rvt = selectedRvts.get(i);
       rvtIds.add(rvt.getEntityId());
+      rvtId2Pos.put(rvt.getEntityId(), i);
     }
     String rvtIdsList = StringUtils.makeListString(StringUtils.wrapStrings(rvtIds, "'", "'"), ",");
-
-    StringBuilder hql = new StringBuilder();
-    // TODO: see if we can produce an equivalent HQL query that does not need to use the result_value_type table at all, as result_value_type_result_values.result_value_type_id can be used directly (at least, if we were doing this directly with sql)
-    hql.append("select indices(rv), elements(rv) " +
-               "from ResultValueType rvt join rvt.resultValues rv " +
-               "where rvt.id in (" + 
-               rvtIdsList + ") and index(rv) in (" + wellKeysList + ") " +
-               "order by rvt.ordinal");
+        
+    StringBuilder sql = new StringBuilder();
+    sql.append("select rv.result_value_type_id, rv.key, rv.assay_well_type, rv.value, rv.numeric_value, rv.numeric_decimal_precision, rv.exclude, rv.hit ").
+    append("from result_value_type_result_values rv ").
+    append("where (rv.result_value_type_id in (").append(rvtIdsList).
+    append(")) and (rv.key in (").append(wellKeysList).append("))");
+    
     Map<WellKey,List<ResultValue>> result = new HashMap<WellKey,List<ResultValue>>();
-    Query query = session.createQuery(hql.toString());
+    Query query = session.createSQLQuery(sql.toString());
     for (Iterator iter = query.list().iterator(); iter.hasNext();) {
+      int field = 0;
       Object[] row = (Object[]) iter.next();
-      WellKey wellKey = new WellKey(row[0].toString());
+      Number rvtId = (Number) row[field++];
+      WellKey wellKey = new WellKey(row[field++].toString());
       List<ResultValue> resultValues = result.get(wellKey);
       if (resultValues == null) {
-        resultValues = new ArrayList<ResultValue>();
+        resultValues = new ArrayList<ResultValue>(selectedRvts.size());
+        CollectionUtils.fill(resultValues, null, selectedRvts.size());
         result.put(wellKey, resultValues);
       }
-      resultValues.add((ResultValue) row[1]);
+      AssayWellType assayWellType = AssayWellType.valueOf(((String) row[field++]).toUpperCase().replaceAll(" ", "_"));
+      String textValue = (String) row[field++];
+      Double numValue = (Double) row[field++];
+      Integer numPrecision = row[field++] == null ? -1 : ((Integer) row[field - 1]);
+      boolean exclude = row[field++] == null ? false : ((Boolean) row[field - 1]); 
+      boolean hit = row[field++] == null ? false : ((Boolean) row[field - 1]);
+      
+      ResultValue rv;
+      if (numValue != null) {
+        rv = new ResultValue(assayWellType,
+                             numValue,
+                             numPrecision,
+                             exclude,
+                             hit);
+      }
+      else {
+        rv = new ResultValue(assayWellType,
+                             textValue,
+                             exclude,
+                             hit);
+      }
+      resultValues.set(rvtId2Pos.get(rvtId), rv);
     }
     return result;
   }
-
 }
-

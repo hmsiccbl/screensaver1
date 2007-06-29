@@ -69,7 +69,7 @@ public class ResultValue
    */
   ResultValue(String value)
   {
-    this(AssayWellType.EXPERIMENTAL, value, false);
+    this(AssayWellType.EXPERIMENTAL, value, false, false);
   }
   
   /**
@@ -81,7 +81,7 @@ public class ResultValue
    */
   ResultValue(Double value, int decimalPrecision)
   {
-    this(AssayWellType.EXPERIMENTAL, value, decimalPrecision, false);
+    this(AssayWellType.EXPERIMENTAL, value, decimalPrecision, false, false);
   }
 
   /**
@@ -99,7 +99,8 @@ public class ResultValue
   public ResultValue(AssayWellType assayWellType,
                      Double value,
                      int decimalPrecision,
-                     boolean exclude)
+                     boolean exclude,
+                     boolean isHit)
   {
     setAssayWellType(assayWellType);
     setNumericValue(value);
@@ -108,6 +109,7 @@ public class ResultValue
     } // else null
     setValue(formatNumericValue(decimalPrecision));
     setExclude(exclude);
+    setHit(isHit);
   }
 
   /**
@@ -123,13 +125,15 @@ public class ResultValue
    * @param exclude the exclude flag of the new ResultValue
    * @param isNumeric true, iff ths new ResultValue's value is a number
    */
-  ResultValue(AssayWellType assayWellType,
-              String value,
-              boolean exclude)
+  public ResultValue(AssayWellType assayWellType,
+                     String value,
+                     boolean exclude,
+                     boolean isHit)
   {
     setAssayWellType(assayWellType);
     setValue(value);
     setExclude(exclude);
+    setHit(isHit);
   } 
 
   /**

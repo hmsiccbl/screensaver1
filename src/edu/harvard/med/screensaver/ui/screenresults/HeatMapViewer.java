@@ -86,9 +86,9 @@ public class HeatMapViewer extends AbstractBackingBean
   private static final DataModel HEAT_MAP_CELL_LEGEND_MODEL;
   static {
     List<LegendItem> legendItems = new ArrayList<LegendItem>();
-    legendItems.add(new LegendItem("Experimental", HeatMapCell.getStyle(new ResultValue(AssayWellType.EXPERIMENTAL, 0.0, 0, false), Color.GREEN)));
-    legendItems.add(new LegendItem("Control", HeatMapCell.getStyle(new ResultValue(AssayWellType.ASSAY_CONTROL, 0.0, 0, false), Color.BLUE)));
-    legendItems.add(new LegendItem("Empty/Excluded", HeatMapCell.getStyle(new ResultValue(AssayWellType.EMPTY, 0.0, 0, true), Color.WHITE)));
+    legendItems.add(new LegendItem("Experimental", HeatMapCell.getStyle(new ResultValue(AssayWellType.EXPERIMENTAL, 0.0, 0, false, false), Color.GREEN)));
+    legendItems.add(new LegendItem("Control", HeatMapCell.getStyle(new ResultValue(AssayWellType.ASSAY_CONTROL, 0.0, 0, false, false), Color.BLUE)));
+    legendItems.add(new LegendItem("Empty/Excluded", HeatMapCell.getStyle(new ResultValue(AssayWellType.EMPTY, 0.0, 0, true, false), Color.WHITE)));
     HEAT_MAP_CELL_LEGEND_MODEL = new ListDataModel(legendItems);
   }
 

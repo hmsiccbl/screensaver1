@@ -60,6 +60,15 @@ public abstract class TableSortManager
   {
     return getColumnNames().indexOf(getCurrentSortColumnName());
   }
+  
+  /**
+   * Get the index of the column currently being rendered by JSF.
+   * @return
+   */
+  public int getCurrentColumnIndex()
+  {
+    return _columnModel.getRowIndex();
+  }
 
   /**
    * Set the current sort column name.
