@@ -23,11 +23,10 @@ import org.apache.log4j.Logger;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.util.eutils.PubchemCidListProvider;
 
 /**
  * A bulk loader for the compound libraries that we have SD files for.
@@ -54,16 +53,6 @@ public class BulkCompoundLibraryLoader
     libraryLoader.bulkLoadLibraries();
   }
 
-  private static void patchCompoundFromSmiles(Compound compound)
-  {
-    String smiles = compound.getSmiles();
-    String inchi = new OpenBabelClient().convertSmilesToInchi(smiles);
-    compound.setInchi(inchi);
-    PubchemCidListProvider provider = new PubchemCidListProvider();
-    for (String pubchemCid : provider.getPubchemCidListForInchi(inchi)) {
-      compound.addPubchemCid(pubchemCid);
-    }
-  }
 
   // instance data members
   
