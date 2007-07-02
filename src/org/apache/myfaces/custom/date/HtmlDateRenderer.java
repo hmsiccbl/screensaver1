@@ -83,7 +83,7 @@ public class HtmlDateRenderer extends HtmlRenderer {
         String clientId = uiComponent.getClientId(facesContext);
 
         boolean disabled = isDisabled(facesContext, inputDate);
-		boolean readonly = inputDate.isReadonly();
+        boolean readonly = inputDate.isReadonly();
 
         ResponseWriter writer = facesContext.getResponseWriter();
 
@@ -91,10 +91,15 @@ public class HtmlDateRenderer extends HtmlRenderer {
 
         writer.startElement(HTML.SPAN_ELEM, uiComponent);
         writer.writeAttribute(HTML.ID_ATTR, clientId, null);
+        // [ant 2007-07-02]: always disable wrapping between the date input fields
+        writer.writeAttribute(HTML.STYLE_ATTR,
+                              "white-space: nowrap",
+                              null);
 
         if( ! (type.equals("time") || type.equals("short_time"))){
+          // [ant 2007-07-02]: switched order of month and day, to appease users
+          encodeInputMonth(inputDate, writer, clientId, userData, currentLocale, disabled, readonly);
 	        encodeInputDay(inputDate, writer, clientId, userData, disabled, readonly);
-	        encodeInputMonth(inputDate, writer, clientId, userData, currentLocale, disabled, readonly);
 	        encodeInputYear(inputDate, writer, clientId, userData, disabled, readonly);
 
 	        if( inputDate.isPopupCalendar() && ! disabled && ! readonly )

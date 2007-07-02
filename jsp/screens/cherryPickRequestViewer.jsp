@@ -175,25 +175,30 @@ TODO:
 						styleClass="dataText" />
 					<t:panelGroup
 						rendered="#{cherryPickRequestViewer.editMode && !cherryPickRequestViewer.cherryPickRequest.allocated}">
-						<t:inputText id="approvedVolume"
-							value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellApproved}"
-							size="5" styleClass="inputText" />
-						<t:outputText value="Approved&nbsp;By" escape="false"
-							styleClass="label keyColumn"
-							title="The screening room staff member that approved this volume" />
-						<t:selectOneMenu id="volumeApprovedByEditable"
-							value="#{cherryPickRequestViewer.volumeApprovedBy.value}"
-							rendered="#{cherryPickRequestViewer.editMode}"
-							styleClass="inputText">
-							<f:selectItems
-								value="#{cherryPickRequestViewer.volumeApprovedBy.selectItems}" />
-						</t:selectOneMenu>
-						<t:outputText value="Date Approved" styleClass="label keyColumn"
-						  title="The date the cherry pick volume was approved" />
-						<t:inputDate id="dateVolumeApprovedEditable"
+						<t:div styleClass="nowrap">
+							<t:inputText id="approvedVolume"
+								value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellApproved}"
+								size="5" styleClass="inputText" />
+						</t:div>
+						<t:div styleClass="nowrap">
+							<t:outputText value="Approved&nbsp;By" escape="false"
+								styleClass="label"
+								title="The screening room staff member that approved this volume" />
+							<t:selectOneMenu id="volumeApprovedByEditable"
+								value="#{cherryPickRequestViewer.volumeApprovedBy.value}"
+								rendered="#{cherryPickRequestViewer.editMode}"
+								styleClass="inputText">
+								<f:selectItems
+									value="#{cherryPickRequestViewer.volumeApprovedBy.selectItems}" />
+							</t:selectOneMenu>
+						</t:div>
+						<t:div styleClass="nowrap">
+							<t:outputText value="Date Approved" styleClass="label"
+								title="The date the cherry pick volume was approved" />
+							<t:inputDate id="dateVolumeApprovedEditable"
 							value="#{cherryPickRequestViewer.cherryPickRequest.dateVolumeApproved}"
-							popupCalendar="true"
-							styleClass="inputText" />
+							popupCalendar="true" styleClass="inputText" />
+						</t:div>
 					</t:panelGroup>
 
 					<t:outputText value="Cherry&nbsp;Pick&nbsp;Plate&nbsp;Type"
