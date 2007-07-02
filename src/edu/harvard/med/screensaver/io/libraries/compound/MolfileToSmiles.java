@@ -63,6 +63,12 @@ public class MolfileToSmiles extends OpenBabelClient
     return _molfile;
   }
   
+  /**
+   * Return the SMILES string. Return null if there were any problems converting the
+   * molfile to smiles.
+   * @return the SMILES string. Return null if there were any problems converting the
+   * molfile to smiles.
+   */
   public String getSmiles()
   {
     return _smiles;
@@ -84,7 +90,10 @@ public class MolfileToSmiles extends OpenBabelClient
   private void initialize()
   {
     _smiles = convertMolfileToSmiles(_molfile);
-    if (_smiles == null || _smiles.equals("")) {
+    if (_smiles != null && _smiles.equals("")) {
+      _smiles = null;
+    }
+    if (_smiles == null) {
       log.error("couldnt convert Molfile to SMILES");
       return;
     }
