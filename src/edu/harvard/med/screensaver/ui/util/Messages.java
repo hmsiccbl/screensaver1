@@ -52,7 +52,11 @@ public class Messages extends AbstractBackingBean implements PhaseListener
   private static final Logger log = Logger.getLogger(Messages.class);
   private static final Object [] EMPTY_ARGS = new Object[] {};
   private static final String DEFAULT_MESSAGE = "<UNKNOWN MESSAGE>";
-  private static final String sessionToken = "QUEUED_FACES_MESSAGES";
+  private static final String QUEUED_FACES_MESSAGES_PARAM = "QUEUED_FACES_MESSAGES";
+  /**
+   * Note: must match HtmlRendererUtils.SKIP_AUTO_SCROLL_PARAM value
+   */
+  private static final String SKIP_AUTO_SCROLL_PARAM = "skipAutoScroll";
   
   
   // private instance fields
@@ -102,10 +106,10 @@ public class Messages extends AbstractBackingBean implements PhaseListener
                                                   Object... args)
   {
 
-    List<Pair<String,FacesMessage>> queuedFacesMessages = (List<Pair<String,FacesMessage>>) session.getAttribute(sessionToken);
+    List<Pair<String,FacesMessage>> queuedFacesMessages = (List<Pair<String,FacesMessage>>) session.getAttribute(QUEUED_FACES_MESSAGES_PARAM);
     if (queuedFacesMessages == null) {
       queuedFacesMessages = new ArrayList<Pair<String,FacesMessage>>();
-      session.setAttribute(sessionToken, queuedFacesMessages);
+      session.setAttribute(QUEUED_FACES_MESSAGES_PARAM, queuedFacesMessages);
     }
     FacesMessage message = getFacesMessage(messageKey, args);
     assert message != null : "expected non-null FacesMessage";
@@ -170,10 +174,16 @@ public class Messages extends AbstractBackingBean implements PhaseListener
   {
     Map sessionMap = getFacesContext().getExternalContext().getSessionMap();
     List<Pair<String,FacesMessage>> queuedFacesMessages = 
-      (List<Pair<String,FacesMessage>>) sessionMap.remove(sessionToken);
+      (List<Pair<String,FacesMessage>>) sessionMap.remove(QUEUED_FACES_MESSAGES_PARAM);
     if (queuedFacesMessages == null) {
       return;
     }
+    
+    // communicate to MyFaces that we do not want to autoscroll the page if
+    // messages exist, since these messages may be overlooked by the user if we
+    // scroll them off the top of browser window
+    getRequestMap().put(SKIP_AUTO_SCROLL_PARAM, Boolean.TRUE);
+    
     FacesContext facesContext = getFacesContext();
     for (Pair<String,FacesMessage> queuedFacesMessage : queuedFacesMessages) {
       String clientId = queuedFacesMessage.getFirst();
