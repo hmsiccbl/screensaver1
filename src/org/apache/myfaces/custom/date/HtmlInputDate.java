@@ -37,7 +37,7 @@ import javax.faces.el.ValueBinding;
 
 /**
  * @author Sylvain Vieujot (latest modification by $Author: cagatay $)
- * @version $Revision: 517689 $ $Date: 2007-03-13 14:26:15 +0100 (Di, 13 Mär 2007) $
+ * @version $Revision: 517689 $ $Date: 2007-03-13 14:26:15 +0100 (Di, 13 Mar 2007) $
  */
 public class HtmlInputDate extends UIInput implements UserRoleAware {
     public static final String COMPONENT_TYPE = "org.apache.myfaces.HtmlInputDate";
