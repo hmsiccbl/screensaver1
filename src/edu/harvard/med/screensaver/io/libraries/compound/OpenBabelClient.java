@@ -12,6 +12,8 @@ package edu.harvard.med.screensaver.io.libraries.compound;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -20,6 +22,11 @@ import edu.harvard.med.screensaver.ScreensaverProperties;
 /**
  * Encapsulates the details of locating the Open Babel executable. Converts
  * moleules between input and output types.
+ * <p>
+ * This no longer works with Open Babel 2.0.2. Works with 2.1.0 and 2.1.1., but be
+ * careful, 2.1.0 has a significant bug that causes converting SMILES to InChI to
+ * crash quite regularly. Use 2.1.1 - if it hasn't been officially released yet, get
+ * a snapshot. It's better than 2.1.0.
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -141,6 +148,18 @@ public class OpenBabelClient
     catch (InterruptedException e) {
       log.info("error waiting for Open Babel to complete: " + e.getMessage());
       return null;
+    }
+    
+    // if there was an error in attempting to parse the molfile alias block, then strip
+    // all the alias blocks and retry
+    if (_error.contains("  Error in alias block")) {
+      log.info("encountered an error in alias block: trimming alias block and retrying");
+      Matcher matcher = Pattern.compile(
+        "(.*)(^A\\s+\\d+\\s*^.*?$\\s+^)+(.*)", Pattern.MULTILINE | Pattern.DOTALL).matcher(input);
+      if (matcher.matches()) {
+        input = matcher.group(1) + matcher.group(3);
+        return convertMolecule(inputFormat, outputFormat, input);
+      }
     }
     
     if ((outputFormat.equals("inchi") || outputFormat.equals("can"))  && _output.indexOf('\n') != -1) {
