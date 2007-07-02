@@ -118,7 +118,10 @@ public class ScreenDBScreenSynchronizer
       String abaseProtocolId = resultSet.getString("protocol_id");
       String keywords = resultSet.getString("keywords");
       String fundingSupportString = resultSet.getString("funding_support");
-
+      Date publishableProtocolDateEntered = resultSet.getDate("protocol_date_entered");
+      String publishableProtocolEnteredBy = resultSet.getString("protocol_entered_by");
+      String publishableProtocol = resultSet.getString("protocol");
+      
       Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
       if (screen == null) {
         screen = new Screen(leadScreener, labHead, screenNumber, dateCreated, screenType,
@@ -140,6 +143,10 @@ public class ScreenDBScreenSynchronizer
         screen.setAbaseStudyId(abaseStudyId);
         screen.setAbaseProtocolId(abaseProtocolId);
       }
+      screen.setPublishableProtocolDateEntered(publishableProtocolDateEntered);
+      screen.setPublishableProtocolEnteredBy(publishableProtocolEnteredBy);
+      screen.setPublishableProtocol(publishableProtocol);
+      
       synchronizeKeywords(keywords, screen);
       synchronizeFundingSupports(fundingSupportString, screen);
       _dao.persistEntity(screen);
