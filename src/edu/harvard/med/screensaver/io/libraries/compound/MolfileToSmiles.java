@@ -84,7 +84,7 @@ public class MolfileToSmiles extends OpenBabelClient
   private void initialize()
   {
     _smiles = convertMolfileToSmiles(_molfile);
-    if (_smiles == null) {
+    if (_smiles == null || _smiles.equals("")) {
       log.error("couldnt convert Molfile to SMILES");
       return;
     }
