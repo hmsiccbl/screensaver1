@@ -53,8 +53,12 @@ public abstract class UISelectBean<T>
     _key2Obj = new HashMap<String,T>();
     for (T t : objects) {
       String key = getKey(t);
-      _selectItems.add(new SelectItem(key,
-                                      getLabel(t)));
+      String label = getLabel(t);
+      if (label == null) {
+        log.warn("null label returned for select item of object " + t);
+        label = t.toString();
+      }
+      _selectItems.add(new SelectItem(key, label));
       _key2Obj.put(key, t);
     }
   }
