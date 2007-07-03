@@ -81,7 +81,7 @@ TODO:
 		</h:panelGroup>
 		<t:selectOneMenu id="labNameEditable"
 			value="#{screenViewer.labName.value}" onchange="javascript:submit()"
-			immediate="true" valueChangeListener="#{screenViewerpdate}"
+			immediate="true" valueChangeListener="#{screenViewer.update}"
 			rendered="#{screenViewer.editMode}" styleClass="inputText">
 			<f:selectItems value="#{screenViewer.labName.selectItems}" />
 		</t:selectOneMenu>
