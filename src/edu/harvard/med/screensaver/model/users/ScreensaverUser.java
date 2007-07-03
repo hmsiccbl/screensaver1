@@ -14,16 +14,15 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.CollectionElementName;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
-import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.util.CryptoUtils;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -67,7 +66,7 @@ abstract public class ScreensaverUser extends AbstractEntity
   private String _digestedPassword;
   private String _eCommonsId;
   private String _harvardId;
-  private Set<ScreeningRoomActivity> _screeningRoomActivitiesPerformed = new HashSet<ScreeningRoomActivity>();
+  private Set<Activity> _activitiesPerformed = new HashSet<Activity>();
 
 
   // public constructors
@@ -384,12 +383,12 @@ abstract public class ScreensaverUser extends AbstractEntity
    */
   public Set<ScreensaverUserRole> getScreensaverUserRoles()
   {
-    // we cannot prevent client code from adding an illegal role to this
-    // collection after returning, but this validation will 1) prevent
-    // subsequent access to the illegal roles via this method and 2) prevent
-    // illegal administrative roles from being persisted, since Hibernate will
-    // call this method before flushing
-    validateRoles();
+//    // we cannot prevent client code from adding an illegal role to this
+//    // collection after returning, but this validation will 1) prevent
+//    // subsequent access to the illegal roles via this method and 2) prevent
+//    // illegal administrative roles from being persisted, since Hibernate will
+//    // call this method before flushing
+//    validateRoles();
     return _roles;
   }
   
@@ -543,37 +542,36 @@ abstract public class ScreensaverUser extends AbstractEntity
   }
 
   /**
-   * Get an unmodifiable copy of the set of screening room activities performed by this user.
+   * Get an unmodifiable copy of the set of activities performed by this user.
    *
-   * @return the screening room activities performed
+   * @return the activities performed
    */
   @ToManyRelationship(inverseProperty="performedBy")
-  @CollectionElementName("screeningRoomActivityPerformed")
-  public Set<ScreeningRoomActivity> getScreeningRoomActivitiesPerformed()
+  @CollectionElementName("activityPerformed")
+  public Set<Activity> getActivitiesPerformed()
   {
-    return Collections.unmodifiableSet(_screeningRoomActivitiesPerformed);
+    return Collections.unmodifiableSet(_activitiesPerformed);
   }
 
   /**
-   * Add a screening room activity that was performed by this user.
+   * Add an activity that was performed by this user.
    *
-   * @param screeningRoomActivityPerformed the new screening room activity that was performed by this user
-   * @return true iff the screening room user did not perform the screening room activity
+   * @param activityPerformed the new activity that was performed by this user
+   * @return true iff the user did not already perform the activity
    */
-  public boolean addScreeningRoomActivityPerformed(ScreeningRoomActivity screeningRoomActivityPerformed)
+  public boolean addActivityPerformed(Activity activityPerformed)
   {
-    if (getHbnScreeningRoomActivitiesPerformed().add(screeningRoomActivityPerformed)) {
-      screeningRoomActivityPerformed.setPerformedBy(this);
+    if (getHbnActivitiesPerformed().add(activityPerformed)) {
+      activityPerformed.setPerformedBy(this);
       return true;
     }
     return false;
   }
 
-
   /**
-   * Get the screening room activities performed.
+   * Get the activities performed.
    *
-   * @return the screening room activities performed
+   * @return the activities performed
    * @hibernate.set
    *   cascade="none"
    *   inverse="true"
@@ -581,14 +579,14 @@ abstract public class ScreensaverUser extends AbstractEntity
    * @hibernate.collection-key
    *   column="performed_by_id"
    * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity"
+   *   class="edu.harvard.med.screensaver.model.Activity"
    * @motivation for hibernate and maintenance of bi-directional relationships
    * this method is public only because the bi-directional relationship
    * is cross-package.
    */
-  public Set<ScreeningRoomActivity> getHbnScreeningRoomActivitiesPerformed()
+  public Set<Activity> getHbnActivitiesPerformed()
   {
-    return _screeningRoomActivitiesPerformed;
+    return _activitiesPerformed;
   }
 
   // package methods
@@ -658,14 +656,14 @@ abstract public class ScreensaverUser extends AbstractEntity
   }  
 
   /**
-   * Set the screening room screening room activities performed by this user.
+   * Set the activities performed by this user.
    *
-   * @param screeningRoomActivitiesPerformed the screening room activities performed by this user
+   * @param activitiesPerformed the screening room activities performed by this user
    * @motivation for hibernate
    */
-  private void setHbnScreeningRoomActivitiesPerformed(Set<ScreeningRoomActivity> screeningRoomActivitiesPerformed)
+  private void setHbnActivitiesPerformed(Set<Activity> activitiesPerformed)
   {
-    _screeningRoomActivitiesPerformed = screeningRoomActivitiesPerformed;
+    _activitiesPerformed = activitiesPerformed;
   }
   
   private void validateRoles() 
@@ -673,7 +671,8 @@ abstract public class ScreensaverUser extends AbstractEntity
     for (ScreensaverUserRole role : _roles) {
       if (!validateRole(role)) {
         throw new DataModelViolationException("user " + this + 
-                                              " has been granted illegal role: " + role);      }
-    }
+                                              " has been granted illegal role: " + role);      
+      }
+    }  
   }
 }

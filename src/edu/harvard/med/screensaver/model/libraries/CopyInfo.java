@@ -40,11 +40,6 @@ public class CopyInfo extends AbstractEntity
   private static final Logger log = Logger.getLogger(CopyInfo.class);
   private static final long serialVersionUID = 0L;
 
-  /**
-   * The number of decimal places used when recording volume values.
-   */
-  public static int VOLUME_SCALE = 2;
-
   
   // instance fields
 
@@ -266,7 +261,7 @@ public class CopyInfo extends AbstractEntity
   
   public void setMicroliterWellVolume(WellKey wellKey, BigDecimal microliterVolume)
   {
-    _microliterWellVolumes.put(wellKey, microliterVolume.setScale(VOLUME_SCALE));
+    _microliterWellVolumes.put(wellKey, microliterVolume.setScale(Well.VOLUME_SCALE));
   }
 
   /**
@@ -557,7 +552,7 @@ public class CopyInfo extends AbstractEntity
       _microliterWellVolume = null;
     }
     else {
-      _microliterWellVolume = volume.setScale(VOLUME_SCALE, RoundingMode.HALF_UP);
+      _microliterWellVolume = volume.setScale(Well.VOLUME_SCALE, RoundingMode.HALF_UP);
     }
   }
 

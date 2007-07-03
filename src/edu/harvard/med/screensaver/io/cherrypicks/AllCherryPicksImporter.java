@@ -518,7 +518,7 @@ public class AllCherryPicksImporter
                                          VOLUME_COLUMN_INDEX);
     }
 
-    BigDecimal labCherryPickVolume = new BigDecimal(volumeCell.getContents()).setScale(CherryPickRequest.VOLUME_SCALE);
+    BigDecimal labCherryPickVolume = new BigDecimal(volumeCell.getContents()).setScale(Well.VOLUME_SCALE);
     if (!labCherryPickVolume.equals(cprVolume)) {
       throw new CherryPicksDataException("cherry pick volume (" + volumeCell.getContents() + 
                                          ") does not match the cherry pick request approved volume (" + 

@@ -53,6 +53,10 @@ public class Well extends AbstractEntity implements Comparable
   public static final int PLATE_ROWS = (MAX_WELL_ROW - MIN_WELL_ROW) + 1;
   public static final int PLATE_COLUMNS = (MAX_WELL_COLUMN - MIN_WELL_COLUMN) + 1;
   public static final int PLATE_NUMBER_LEN = 5;
+  /**
+   * The number of decimal places used when recording volume values.
+   */
+  public static final int VOLUME_SCALE = 2;
   
   public static boolean isValidWellName(String wellName)
   {

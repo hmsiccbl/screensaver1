@@ -31,6 +31,7 @@ import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.cherrypicks.LabCherryPickColumnMajorOrderingComparator;
@@ -196,14 +197,6 @@ public abstract class CherryPickRequest extends AbstractEntity
    * needs to be bigger than the largest ScreenDB visit_id for Cherry Pick Visits.
    */
   private static final int CHERRY_PICK_REQUEST_NUMBER_GENERATION_OFFSET = 10000;
-  /**
-   * The number of decimal places used when recording volume values.
-   */
-  public static final int VOLUME_SCALE = 2;
-
-
-  // instance fields
-
   private Integer _cherryPickRequestId;
   private Integer _ordinal; // for business key only
   private Integer _version;
@@ -463,7 +456,7 @@ public abstract class CherryPickRequest extends AbstractEntity
       _microliterTransferVolumePerWellRequested = null;
     } 
     else {
-      _microliterTransferVolumePerWellRequested = microliterTransferVolumePerWell.setScale(VOLUME_SCALE, RoundingMode.HALF_UP);
+      _microliterTransferVolumePerWellRequested = microliterTransferVolumePerWell.setScale(Well.VOLUME_SCALE, RoundingMode.HALF_UP);
     }
   }
 
@@ -490,7 +483,7 @@ public abstract class CherryPickRequest extends AbstractEntity
       _microliterTransferVolumePerWellApproved = null;
     } 
     else {
-      _microliterTransferVolumePerWellApproved = microliterTransferVolumePerWell.setScale(VOLUME_SCALE, RoundingMode.HALF_UP);
+      _microliterTransferVolumePerWellApproved = microliterTransferVolumePerWell.setScale(Well.VOLUME_SCALE, RoundingMode.HALF_UP);
     }
   }
 

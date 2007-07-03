@@ -111,18 +111,6 @@ public class Copy extends AbstractEntity
   }
 
   /**
-   * Set the library.
-   *
-   * @param library the new library
-   */
-  public void setLibrary(Library library)
-  {
-    _library.getHbnCopies().remove(this);
-    _library = library;
-    library.getHbnCopies().add(this);
-  }
-
-  /**
    * Get this copy's usage type.
    * @return the copy's usage type.
    * @hibernate.property type="edu.harvard.med.screensaver.model.libraries.CopyUsageType$UserType"

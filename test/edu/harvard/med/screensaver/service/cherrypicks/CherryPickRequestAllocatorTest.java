@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
@@ -32,6 +33,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
@@ -228,7 +230,47 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
   
   public void testDeallocateAllCherryPicks()
   {
-    fail("not implemented");
+    final int requestVolume = 10;
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        Library library = makeRNAiDuplexLibrary("library", 1, 1, 384);
+        Copy copy = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
+        new CopyInfo(copy, 1, "loc1", PlateType.EPPENDORF, new BigDecimal(requestVolume).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        genericEntityDao.persistEntity(library);
+      }
+    });
+    
+    final RNAiCherryPickRequest cpr = doTestCherryPickRequestAllocation(1,
+                                                                        requestVolume,
+                                                                        new String[] {"A01", "A02", "P23", "P24"}, 
+                                                                        new String[] {});
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        assertTrue("CPR is allocated", cpr.isAllocated());
+        List<WellVolumeAdjustment> wellVolumeAdjustments1 = genericEntityDao.findAllEntitiesOfType(WellVolumeAdjustment.class);
+        assertEquals("wellVolumeAdjustment count after first CPR allocation", 4, wellVolumeAdjustments1.size());
+      }
+    });
+
+    doTestCherryPickRequestAllocation(1,
+                                      requestVolume,
+                                      new String[] {"A01", "A02", "P23", "P24"}, 
+                                      new String[] {"A01", "A02", "P23", "P24"});
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        List<WellVolumeAdjustment> wellVolumeAdjustments2 = genericEntityDao.findAllEntitiesOfType(WellVolumeAdjustment.class);
+        assertEquals("wellVolumeAdjustment count after second CPR allocation", 4, wellVolumeAdjustments2.size());
+      }
+    });
+    
+    cherryPickRequestAllocator.deallocate(cpr);
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        List<WellVolumeAdjustment> wellVolumeAdjustments3 = genericEntityDao.findAllEntitiesOfType(WellVolumeAdjustment.class);
+        assertFalse("CPR is no longer allocated", cpr.isAllocated());
+        assertEquals("wellVolumeAdjustment count after CPR deallocation", 0, wellVolumeAdjustments3.size());
+      }
+    });
   }
   
   public void testCancelAndDeallocateAssayPlates()
@@ -304,15 +346,16 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
   
   // private methods
 
-  private void doTestCherryPickRequestAllocation(final int screenNumber,
-                                                 final int requestVolume,
-                                                 final String[] cherryPickWellNames, 
-                                                 final String[] expectedUnfillableCherryPickWellNames)
+  private RNAiCherryPickRequest doTestCherryPickRequestAllocation(final int screenNumber,
+                                                                  final int requestVolume,
+                                                                  final String[] cherryPickWellNames, 
+                                                                  final String[] expectedUnfillableCherryPickWellNames)
   {
+    final RNAiCherryPickRequest result[] = new RNAiCherryPickRequest[1];
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        CherryPickRequest cherryPickRequest = createRNAiCherryPickRequest(screenNumber, requestVolume);
+        RNAiCherryPickRequest cherryPickRequest = createRNAiCherryPickRequest(screenNumber, requestVolume);
         Set<LabCherryPick> expectedUnfulfillableCherryPicks = new HashSet<LabCherryPick>();
         Set<String> expectedUnfillableCherryPickWellNamesSet = new HashSet<String>(Arrays.asList(expectedUnfillableCherryPickWellNames));
         ScreenerCherryPick dummyScreenerCherryPick = new ScreenerCherryPick(cherryPickRequest, librariesDao.findWell(new WellKey(1, new WellName(cherryPickWellNames[0]))));
@@ -329,8 +372,10 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         assertEquals("unfulfillable cherry picks for requested " + Arrays.asList(cherryPickWellNames),
                      expectedUnfulfillableCherryPicks,
                      unfulfillableCherryPicks);
+        result[0] = cherryPickRequest;
       }
     });
+    return result[0];
   }
 }
 

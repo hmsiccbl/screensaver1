@@ -14,6 +14,7 @@ import java.math.RoundingMode;
 import java.util.Date;
 
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
@@ -24,8 +25,8 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * 
- * @hibernate.joined-subclass table="screening" lazy="false"
- * @hibernate.joined-subclass-key column="screening_room_activity_id"
+ * @hibernate.joined-subclass table="screening" lazy="true"
+ * @hibernate.joined-subclass-key column="activity_id"
  */
 public abstract class Screening extends ScreeningRoomActivity
 {
@@ -35,11 +36,6 @@ public abstract class Screening extends ScreeningRoomActivity
   
   private static Logger log = Logger.getLogger(Screening.class);
   
-  /**
-   * The number of decimal places used when recording volume values.
-   */
-  public static int VOLUME_SCALE = 2;
-
 
   // instance data members
 
@@ -164,7 +160,7 @@ public abstract class Screening extends ScreeningRoomActivity
       _estimatedFinalScreenConcentrationInMoles = null;
     }
     else {
-      _estimatedFinalScreenConcentrationInMoles = estimatedFinalScreenConcentrationInMoles.setScale(VOLUME_SCALE, RoundingMode.HALF_UP);
+      _estimatedFinalScreenConcentrationInMoles = estimatedFinalScreenConcentrationInMoles.setScale(Well.VOLUME_SCALE, RoundingMode.HALF_UP);
     }
   }
 

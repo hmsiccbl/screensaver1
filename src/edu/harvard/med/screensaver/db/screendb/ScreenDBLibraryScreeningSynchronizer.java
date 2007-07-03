@@ -103,7 +103,7 @@ public class ScreenDBLibraryScreeningSynchronizer
   private void deleteOldLibraryScreenings() {
     for (LibraryScreening libraryScreening : _dao.findAllEntitiesOfType(LibraryScreening.class)) {
       libraryScreening.getScreen().getScreeningRoomActivities().remove(libraryScreening);
-      libraryScreening.getPerformedBy().getHbnScreeningRoomActivitiesPerformed().remove(libraryScreening);
+      libraryScreening.getPerformedBy().getHbnActivitiesPerformed().remove(libraryScreening);
     }
   }
 

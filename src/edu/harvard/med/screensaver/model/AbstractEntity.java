@@ -360,12 +360,25 @@ public abstract class AbstractEntity implements Serializable
    */
   protected Date truncateDate(Date originalDate)
   {
+    return truncateDate(originalDate, Calendar.DATE);
+  }
+  
+  /**
+   * Remove the time portion of the date that is less significant than
+   * <code>mostSignificantField</code>.
+   * 
+   * @param originalDate the date to truncate
+   * @param mostSignificantField the field from Calendar
+   * @return the truncated date
+   */
+  protected Date truncateDate(Date originalDate, int mostSignificantField)
+  {
     if (originalDate == null) {
       return null;
     }
-    return DateUtils.round(originalDate, Calendar.DATE);
+    return DateUtils.round(originalDate, mostSignificantField);
   }
-  
+
   
   // private methods
   

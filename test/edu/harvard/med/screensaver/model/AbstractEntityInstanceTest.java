@@ -26,8 +26,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -36,6 +36,7 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
@@ -44,6 +45,8 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.lang.time.DateUtils;
@@ -1016,8 +1019,11 @@ public abstract class AbstractEntityInstanceTest extends AbstractSpringTest
   private static Map<Class<? extends AbstractEntity>,Class<? extends AbstractEntity>> _concreteStandinMap =
       new HashMap<Class<? extends AbstractEntity>,Class<? extends AbstractEntity>>();
   static {
+    _concreteStandinMap.put(ScreensaverUser.class, ScreeningRoomUser.class);
     _concreteStandinMap.put(Screening.class, LibraryScreening.class);
     _concreteStandinMap.put(ScreeningRoomActivity.class, LibraryScreening.class);
+    _concreteStandinMap.put(Activity.class, LibraryScreening.class);
+    _concreteStandinMap.put(AdministrativeActivity.class, WellVolumeCorrectionActivity.class);
     _concreteStandinMap.put(CherryPickRequest.class, RNAiCherryPickRequest.class);
   }
   
@@ -1054,6 +1060,9 @@ public abstract class AbstractEntityInstanceTest extends AbstractSpringTest
     if (Modifier.isAbstract(entityClass.getModifiers())) {
       Class<? extends AbstractEntity> concreteStandin =
         _concreteStandinMap.get(entityClass);
+      if (concreteStandin == null) {
+        fail("missing concrete stand-in class for abstract class " + entityClass.getName() + " in _concreteStandinMap; please update!");
+      }
       return newInstance(concreteStandin);
     }
     

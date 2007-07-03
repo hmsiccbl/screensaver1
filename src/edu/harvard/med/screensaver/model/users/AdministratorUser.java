@@ -10,7 +10,14 @@
 package edu.harvard.med.screensaver.model.users;
 
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.CollectionElementName;
+import edu.harvard.med.screensaver.model.ToManyRelationship;
 
 import org.apache.log4j.Logger;
 
@@ -33,6 +40,8 @@ public class AdministratorUser extends ScreensaverUser
 
 
   // instance fields
+  
+  private Set<AdministrativeActivity> _activitiesApproved = new HashSet<AdministrativeActivity>();
 
   /**
    * Constructs an initialized <code>ScreensaverUser</code> object.
@@ -72,6 +81,54 @@ public class AdministratorUser extends ScreensaverUser
     return visitor.visit(this);
   }
 
+  /**
+   * Get an unmodifiable copy of the set of activities approved by this user.
+   *
+   * @return the activities approved
+   */
+  @ToManyRelationship(inverseProperty="approvedBy")
+  @CollectionElementName("activityApproved")
+  public Set<AdministrativeActivity> getActivitiesApproved()
+  {
+    return Collections.unmodifiableSet(_activitiesApproved);
+  }
+
+  /**
+   * Add an activity that was approved by this user.
+   *
+   * @param activityApproved the new activity that was approved by this user
+   * @return true iff the user did not already approve the activity
+   */
+  public boolean addAdministrativeActivityApproved(AdministrativeActivity activityApproved)
+  {
+    if (getHbnActivitiesApproved().add(activityApproved)) {
+      activityApproved.setApprovedBy(this);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Get the activities approved by this administrator.
+   *
+   * @return the activities approved by this administrator
+   * @hibernate.set
+   *   cascade="none"
+   *   inverse="true"
+   *   lazy="true"
+   * @hibernate.collection-key
+   *   column="approved_by_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.AdministrativeActivity"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   * this method is public only because the bi-directional relationship
+   * is cross-package.
+   */
+  public Set<AdministrativeActivity> getHbnActivitiesApproved()
+  {
+    return _activitiesApproved;
+  }
+
 
   // protected methods
 
@@ -91,4 +148,16 @@ public class AdministratorUser extends ScreensaverUser
    * @motivation for hibernate
    */
   private AdministratorUser() {}
+  
+  /**
+   * Set the activities approved by this user.
+   *
+   * @param activitiesApproved the screening room activities approved by this user
+   * @motivation for hibernate
+   */
+  private void setHbnActivitiesApproved(Set<AdministrativeActivity> activitiesApproved)
+  {
+    _activitiesApproved = activitiesApproved;
+  }
+  
 }

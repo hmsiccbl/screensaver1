@@ -27,8 +27,8 @@ import org.apache.log4j.Logger;
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.joined-subclass table="rnai_cherry_pick_screening" lazy="false"
- * @hibernate.joined-subclass-key column="screening_room_activity_id"
+ * @hibernate.joined-subclass table="rnai_cherry_pick_screening" lazy="true"
+ * @hibernate.joined-subclass-key column="activity_id"
  */
 public class RNAiCherryPickScreening extends Screening
 {
@@ -102,9 +102,12 @@ public class RNAiCherryPickScreening extends Screening
   }
 
 
-  // private methods
+  // protected methods
+  
+  protected RNAiCherryPickScreening() {}
 
-  private RNAiCherryPickScreening() {}
+  
+  // private methods
 
   private void setRnaiCherryPickRequest(RNAiCherryPickRequest rnaiCherryPickRequest)
   {

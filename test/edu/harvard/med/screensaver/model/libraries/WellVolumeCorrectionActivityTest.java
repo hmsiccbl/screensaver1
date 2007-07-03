@@ -7,20 +7,19 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model.screens;
+package edu.harvard.med.screensaver.model.libraries;
 
 import java.beans.IntrospectionException;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
 import org.apache.log4j.Logger;
 
-public class CherryPickLiquidTransferTest extends AbstractEntityInstanceTest
+public class WellVolumeCorrectionActivityTest extends AbstractEntityInstanceTest
 {
   // static members
 
-  private static Logger log = Logger.getLogger(CherryPickLiquidTransferTest.class);
+  private static Logger log = Logger.getLogger(WellVolumeCorrectionActivityTest.class);
 
 
   // instance data members
@@ -28,15 +27,9 @@ public class CherryPickLiquidTransferTest extends AbstractEntityInstanceTest
   
   // public constructors and methods
 
-  public CherryPickLiquidTransferTest() throws IntrospectionException
+  public WellVolumeCorrectionActivityTest() throws IntrospectionException
   {
-    super(CherryPickLiquidTransfer.class);
-  }
-  
-  @Override
-  protected AbstractEntity newInstance(Class<? extends AbstractEntity> entityClass)
-  {
-    return super.newInstance(entityClass);
+    super(WellVolumeCorrectionActivity.class);
   }
 }
 

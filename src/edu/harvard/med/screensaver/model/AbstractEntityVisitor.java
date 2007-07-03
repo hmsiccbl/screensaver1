@@ -19,6 +19,7 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -86,5 +87,6 @@ public interface AbstractEntityVisitor
   public boolean visit(SilencingReagent entity);
   public boolean visit(StatusItem entity);
   public boolean visit(Well entity);
+  public boolean visit(WellVolumeCorrectionActivity entity);
 }
 

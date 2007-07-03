@@ -31,8 +31,8 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.joined-subclass table="library_screening" lazy="false"
- * @hibernate.joined-subclass-key column="screening_room_activity_id"
+ * @hibernate.joined-subclass table="library_screening" lazy="true"
+ * @hibernate.joined-subclass-key column="activity_id"
  */
 public class LibraryScreening extends Screening
 {
@@ -78,7 +78,7 @@ public class LibraryScreening extends Screening
   {
     return visitor.visit(this);
   }
-  
+
   @Override
   @ImmutableProperty
   public String getActivityTypeName()
@@ -144,14 +144,14 @@ public class LibraryScreening extends Screening
   }
 
   
-  // private constructor
+  // protected methods
   
   /**
    * Construct an uninitialized <code>LibraryScreening</code> object.
    *
    * @motivation for hibernate
    */
-  private LibraryScreening() {}
+  protected LibraryScreening() {}
 
 
   // private methods

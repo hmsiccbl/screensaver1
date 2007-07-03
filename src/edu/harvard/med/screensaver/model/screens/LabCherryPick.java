@@ -11,16 +11,20 @@ package edu.harvard.med.screensaver.model.screens;
 
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
+import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 
 import org.apache.log4j.Logger;
 
@@ -49,7 +53,7 @@ public class LabCherryPick extends AbstractEntity
   private CherryPickRequest _cherryPickRequest;
   private ScreenerCherryPick _screenerCherryPick;
   private Well _sourceWell;
-  private Copy _sourceCopy;
+  private Set<WellVolumeAdjustment> _wellVolumeAdjustments = new HashSet<WellVolumeAdjustment>();
   
   private CherryPickAssayPlate _assayPlate;
   private Integer _assayPlateRow;
@@ -171,12 +175,19 @@ public class LabCherryPick extends AbstractEntity
    * the cherry pick assay plate. For compound screens, the screened well will
    * be the same as the source well. For RNAi screens, the screened well will
    * map to a set of source wells (to accommodate pool-to-duplex mapping).
+   * <p>
+   * Note: Since we must allow a LabCherryPick to be plate mapped after
+   * instantation time, we instantiate it with only a sourceWell, but not with a
+   * sourceCopy. This means we cannot create an assocation with a
+   * WellVolumeAdjustment until the sourceCopy is specified via
+   * {@link #setAllocated}. So we must redundantly store the sourceWell in both
+   * the LabCherryPick and, later on, in the related wellVolumeAdjustment
+   * entity.
    * 
    * @return the source well
    * @see ScreenerCherryPick#getScreenedWell()
    * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.libraries.Well"
-   *                        column="source_well_id" 
-   *                        not-null="true"
+   *                        column="source_well_id" not-null="true"
    *                        foreign-key="fk_lab_cherry_pick_to_source_well"
    *                        cascade="none"
    * @motivation for hibernate
@@ -187,25 +198,50 @@ public class LabCherryPick extends AbstractEntity
     return _sourceWell;
   }
 
-  // HACK: annotating as DerivedEntityProperty to prevent unit tests from
-  // expecting a setter method (setAllocated() updates this property's value)
+  /**
+   * Get the well volume adjustments associated with this lab cherry pick.
+   * <p>
+   * Note: Currently, we only allow for 1 WellVolumeAdjustment per
+   * LabCherryPick. However, declaring this relationship as a one-to-many set
+   * allows for:
+   * <ul>
+   * <li>automatic deletion of the associated WellVolumeAdjustment, if removed
+   * from this set</li>
+   * <li>future possibility of allowing multiple WellVolumeAdjustment per
+   * LabCherryPick; e.g., now that we have WellVolumeAdjustment in our data
+   * model, it may be possible to get rid of CherryPickAssayPlate "attempts", so
+   * that if a CherryPickAssayPlate attempt fails, we do not create a new
+   * CherryPickAssayPlate entity with a duplicate set of LabCherryPick; instead
+   * we just add more WellVolumeAdjustments to the plate's set of
+   * LabCherryPicks, as necessary.</li>
+   * <li>it's possible that the lab might (manually) perform a secondary
+   * reagent transfer for a given LabCherryPick, say, if they encountered a
+   * problem; this model would accommodate such an activity</li>
+   * </ul>
+   * 
+   * @hibernate.set cascade="all-delete-orphan" inverse="false" lazy="true"
+   * @hibernate.collection-key column="lab_cherry_pick_id"
+   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment"
+   * @motivation for hibernate and maintenance of bi-directional relationships
+   */
+  @ToManyRelationship(unidirectional=true,inverseProperty="wellVolumeAdjustments")
+  public Set<WellVolumeAdjustment> getWellVolumeAdjustments()
+  {
+    return _wellVolumeAdjustments;
+  }
+
   /**
    * Get the copy.
    *
    * @return the copy
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.libraries.Copy"
-   *   column="copy_id"
-   *   not-null="false"
-   *   foreign-key="fk_lab_cherry_pick_to_copy"
-   *   cascade="none"
-   * @motivation for hibernate
    */
-  @ToOneRelationship(nullable=true, unidirectional=true)
   @DerivedEntityProperty
   public Copy getSourceCopy()
   {
-    return _sourceCopy;
+    if (_wellVolumeAdjustments.size() == 0) {
+      return null;
+    }
+    return _wellVolumeAdjustments.iterator().next().getCopy();
   }
 
   /**
@@ -229,13 +265,14 @@ public class LabCherryPick extends AbstractEntity
       throw new BusinessRuleViolationException("cannot allocate or deallocate a cherry pick after it has been plated");
     }
     
-//    if (_sourceCopy != null) {
-//      _sourceCopy.getHbnLabCherryPicks().remove(this);
-//    }
-    _sourceCopy = sourceCopy;
-//    if (_sourceCopy != null) {
-//      _sourceCopy.getHbnLabCherryPicks().add(this);
-//    }
+    _wellVolumeAdjustments.clear();
+    if (sourceCopy != null) {
+      WellVolumeAdjustment wellVolumeAdjustment = 
+        new WellVolumeAdjustment(sourceCopy,
+                                 getSourceWell(),
+                                 getCherryPickRequest().getMicroliterTransferVolumePerWellApproved());
+      _wellVolumeAdjustments.add(wellVolumeAdjustment);
+    }
   }
   
   /**
@@ -343,7 +380,7 @@ public class LabCherryPick extends AbstractEntity
   @DerivedEntityProperty
   public boolean isAllocated()
   {
-    return _sourceCopy != null;
+    return _wellVolumeAdjustments.size() > 0;
   }
   
   /**
@@ -519,17 +556,6 @@ public class LabCherryPick extends AbstractEntity
     _cherryPickRequest = cherryPickRequest;
   }
 
-//  /**
-//   * Set the screened well.
-//   *
-//   * @param well the new well
-//   * @motivation for hibernate and maintenance of bi-directional relationships
-//   */
-//  private void setScreenerCherryPick(ScreenerCherryPick screenerCherryPick)
-//  {
-//    _screenerCherryPick = screenerCherryPick;
-//  }
-
   /**
    * Set the source well.
    *
@@ -542,14 +568,14 @@ public class LabCherryPick extends AbstractEntity
   }
 
   /**
-   * Set the source copy.
+   * Set the well volume adjustments.
    *
-   * @param copy the new copy
+   * @param wellVolumeAdjustments the well volume adjustments
    * @motivation for hibernate and maintenance of bi-directional relationships.
    */
-  private void setSourceCopy(Copy copy)
+  private void setWellVolumeAdjustments(Set<WellVolumeAdjustment> wellVolumeAdjustments)
   {
-    _sourceCopy = copy;
+    _wellVolumeAdjustments = wellVolumeAdjustments;
   }
 
   void setAssayPlate(CherryPickAssayPlate assayPlate)

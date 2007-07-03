@@ -21,6 +21,7 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -292,6 +293,11 @@ public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPol
   public boolean visit(RNAiCherryPickScreening entity) 
   {
     return visit((ScreeningRoomActivity) entity);
+  }
+
+  public boolean visit(WellVolumeCorrectionActivity entity)
+  {
+    return true;
   }
 
   public boolean isScreenerAllowedAccessToScreenDetails(Screen screen)

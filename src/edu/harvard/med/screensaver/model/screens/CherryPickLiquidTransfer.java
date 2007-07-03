@@ -31,8 +31,8 @@ import org.apache.log4j.Logger;
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.joined-subclass table="cherry_pick_liquid_transfer" lazy="false"
- * @hibernate.joined-subclass-key column="screening_room_activity_id"
+ * @hibernate.joined-subclass table="cherry_pick_liquid_transfer" lazy="true"
+ * @hibernate.joined-subclass-key column="activity_id"
  */
 public class CherryPickLiquidTransfer extends ScreeningRoomActivity
 {
@@ -132,12 +132,15 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
   }
 
   
-  // private methods
+  // protected methods
 
   /**
    * @motivation for hibernate
    */
-  private CherryPickLiquidTransfer() {}
+  protected CherryPickLiquidTransfer() {}
+
+
+  // private methods
 
   /**
    * @hibernate.set
