@@ -78,22 +78,6 @@ public class SimpleDAOTest extends AbstractSpringTest
   
   // public instance methods
   
-  public void testCreateEntity()
-  {
-    Compound compound = genericEntityDao.defineEntity(Compound.class, "smiles");
-    assertEquals("smiles", compound.getSmiles(), "smiles");
-    
-    try {
-      genericEntityDao.defineEntity(Compound.class, "foo", "bar");
-      fail("no error on create entity with bad args");
-    }
-    catch (IllegalArgumentException e) {
-    }
-    catch (Exception e) {
-      fail("bad error on create entity with bad args");
-    }
-  }
-  
   public void testPersistEntity()
   {
     Compound compound = new Compound("smiles");
@@ -110,7 +94,7 @@ public class SimpleDAOTest extends AbstractSpringTest
     List<Compound> compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
     assertEquals("no compounds in an empty database", 0, compounds.size());
     
-    genericEntityDao.defineEntity(Compound.class, "smiles");
+    genericEntityDao.persistEntity(new Compound("smiles"));
     compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
     assertEquals("one compound in the machine", compounds.size(), 1);
     assertEquals("smiles match", "smiles", compounds.get(0).getSmiles());
@@ -118,7 +102,8 @@ public class SimpleDAOTest extends AbstractSpringTest
   
   public void testFindEntityById()
   {
-    Compound compound = genericEntityDao.defineEntity(Compound.class, "smilesZ");
+    Compound compound = new Compound("smilesZ");
+    genericEntityDao.persistEntity(compound);
     Serializable id = compound.getCompoundId();
 
     Compound compound2 = genericEntityDao.findEntityById(Compound.class, id);

@@ -21,7 +21,7 @@ public class CherryPickRequestPlateMapFilesBuilderTest extends AbstractSpringTes
 
   public void testBuildZip()
   {
-    fail("Not yet implemented");
+    fail("not implemented");
   }
 
 

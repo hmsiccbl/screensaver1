@@ -37,7 +37,8 @@ public class CopyInfoTest extends AbstractEntityInstanceTest
   
   public void testMicroliterWellVolume()
   {
-    final BigDecimal defaultWellVolume = new BigDecimal("10.0");
+    schemaUtil.truncateTablesOrCreateSchema();
+    final BigDecimal defaultWellVolume = new BigDecimal("10.00");
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         Library library = new Library("library", "lib", ScreenType.RNAI, LibraryType.COMMERCIAL, 1, 2);
@@ -66,10 +67,10 @@ public class CopyInfoTest extends AbstractEntityInstanceTest
             for (int iCol = 0; iCol < Well.PLATE_COLUMNS; iCol++) {
               WellKey wellKey = new WellKey(copyInfo.getPlateNumber(), iRow, iCol);
               if (wellKey.equals(new WellKey(1, "A01"))) {
-                assertEquals("plate 1, A01 well volume", new BigDecimal("9.0"), copyInfo.getMicroliterWellVolume(wellKey));
+                assertEquals("plate 1, A01 well volume", new BigDecimal("9.00"), copyInfo.getMicroliterWellVolume(wellKey));
               }
               else if (wellKey.equals(new WellKey(2, "P24"))) {
-                assertEquals("plate 1, A01 well volume", new BigDecimal("11.0"), copyInfo.getMicroliterWellVolume(wellKey));
+                assertEquals("plate 1, A01 well volume", new BigDecimal("11.00"), copyInfo.getMicroliterWellVolume(wellKey));
               } 
               else {
                 assertEquals("default well volume", defaultWellVolume, copyInfo.getMicroliterWellVolume(wellKey));

@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.ui.authentication;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 
 import javax.security.auth.Subject;
@@ -29,6 +30,8 @@ import edu.harvard.med.authentication.Credentials;
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 
@@ -141,10 +144,9 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     schemaUtil.truncateTablesOrCreateSchema();
 
     // create a user
-    _validUser = genericEntityDao.defineEntity(ScreensaverUser.class, "Iam", "Authorized", "iam_authorized@unittest.com");
+    _validUser = new ScreeningRoomUser(new Date(), "Iam", "Authorized", "iam_authorized@unittest.com", "", "", "", TEST_VALID_ECOMMONS_USER_LOGIN, "", ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR, false);
     _validUser.setLoginId(TEST_VALID_SCREENSAVER_USER_LOGIN);
     _validUser.updateScreensaverPassword(new String(TEST_VALID_SCREENSAVER_PASSWORD));
-    _validUser.setECommonsId(TEST_VALID_ECOMMONS_USER_LOGIN);
     _validUser.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
     _validUser.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
     genericEntityDao.persistEntity(_validUser);
