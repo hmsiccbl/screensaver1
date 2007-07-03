@@ -9,13 +9,11 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import java.security.Principal;
-
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpSession;
 
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.authentication.ScreensaverLoginModule;

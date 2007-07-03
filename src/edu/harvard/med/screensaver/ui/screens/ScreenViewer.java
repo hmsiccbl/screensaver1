@@ -25,7 +25,6 @@ import javax.faces.model.SelectItem;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
-import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
