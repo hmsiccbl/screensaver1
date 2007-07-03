@@ -74,7 +74,6 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 
 import org.apache.log4j.Logger;
@@ -275,7 +274,7 @@ public class ScreensaverLoginModule implements LoginModule
           _isAuthenticated = _authenticationResult.isAuthenticated();
         }
         else {
-          String message = NO_SUCH_USER + " '" + _user.getECommonsId() + "'";
+          String message = NO_SUCH_USER + " '" + username + "'";
           log.info(message);
           throw new FailedLoginException(message);
         }
