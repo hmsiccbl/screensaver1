@@ -7,11 +7,12 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.util;
+package edu.harvard.med.screensaver.ui.table;
 
 import java.util.EnumSet;
 
-import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
+import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.ui.util.EnumTypeConverter;
 
 public class SortDirectionConverter extends EnumTypeConverter<SortDirection>
 {

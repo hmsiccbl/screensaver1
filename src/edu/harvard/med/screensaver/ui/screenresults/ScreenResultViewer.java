@@ -22,21 +22,17 @@ import java.util.TreeSet;
 
 import javax.faces.component.UIData;
 import javax.faces.component.UIInput;
-import javax.faces.component.UISelectBoolean;
 import javax.faces.component.UISelectMany;
-import javax.faces.component.UISelectOne;
-import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
+import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -44,8 +40,7 @@ import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
-import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
-import edu.harvard.med.screensaver.ui.util.TableSortManager;
+import edu.harvard.med.screensaver.ui.table.TableSortManager;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 

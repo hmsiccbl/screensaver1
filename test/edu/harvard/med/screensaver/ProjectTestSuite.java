@@ -27,7 +27,7 @@ public class ProjectTestSuite extends TestSuite
 
   public ProjectTestSuite()
   {
-    addTest(edu.harvard.med.screensaver.model.PackageTestSuite.suite());
+    //addTest(edu.harvard.med.screensaver.model.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.db.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.io.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.ui.PackageTestSuite.suite());

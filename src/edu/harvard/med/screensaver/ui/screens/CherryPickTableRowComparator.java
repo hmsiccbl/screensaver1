@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
+import edu.harvard.med.screensaver.db.SortDirection;
 
 import org.apache.log4j.Logger;
 

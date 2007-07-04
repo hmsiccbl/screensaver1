@@ -57,7 +57,6 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
-import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
 import org.apache.log4j.Logger;

@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -27,8 +26,6 @@ import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
-
 import edu.harvard.med.screensaver.util.CollectionUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 

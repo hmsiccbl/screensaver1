@@ -14,10 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
-import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
 
 import org.apache.log4j.Logger;
 
@@ -77,8 +77,8 @@ public class EmptyScreenResultDataModel extends ScreenResultDataModel
 
   @Override
   protected Map<WellKey,List<ResultValue>> fetchData(List<ResultValueType> selectedResultValueTypes,
-                                                   int sortBy,
-                                                   SortDirection sortDirection)
+                                                     int sortBy,
+                                                     SortDirection sortDirection)
   {
     return null;
   }

@@ -13,12 +13,12 @@ import java.util.List;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
+import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
-import edu.harvard.med.screensaver.ui.util.TableSortManager;
+import edu.harvard.med.screensaver.ui.table.TableSortManager;
 
 import org.apache.log4j.Logger;
 

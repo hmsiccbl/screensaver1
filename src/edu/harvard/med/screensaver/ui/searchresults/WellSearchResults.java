@@ -178,6 +178,7 @@ public class WellSearchResults extends SearchResults<Well>
       }
       if (getCompoundCount(well) > 0) {
         // commandValue is really a smiles, not a compoundId
+        String smiles1 = getCellValue().toString();
         String smiles = (String) getRequestParameter("commandValue");
         Compound compound = null;
         for (Compound compound2 : well.getCompounds()) {
@@ -311,7 +312,7 @@ public class WellSearchResults extends SearchResults<Well>
     rnaiHeaderRow.createCell((short) 7).setCellValue("EntrezGene Symbol");
     rnaiHeaderRow.createCell((short) 8).setCellValue("GenBank Accession Number");
     rnaiHeaderRow.createCell((short) 9).setCellValue("Gene Name");
-    for (short i = 0; i < 8; i ++) {
+    for (short i = 0; i < 10; i ++) {
       rnaiHeaderRow.getCell(i).setCellStyle(style);      
     }
     return rnaiSheet;

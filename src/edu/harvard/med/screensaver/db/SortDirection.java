@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.searchresults;
+package edu.harvard.med.screensaver.db;
 
 public enum SortDirection {
   ASCENDING("Ascending"),

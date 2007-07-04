@@ -201,7 +201,7 @@
   
   <converter>
     <converter-id>SortDirectionConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.ui.util.SortDirectionConverter</converter-class>
+    <converter-class>edu.harvard.med.screensaver.ui.table.SortDirectionConverter</converter-class>
   </converter>
   
   <converter>

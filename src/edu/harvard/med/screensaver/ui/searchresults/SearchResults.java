@@ -22,8 +22,10 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
+import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.table.TableSortManager;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
@@ -80,8 +82,6 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   
   private List<E> _unsortedResults;
   private List<E> _currentSort;
-  private String _currentSortColumnName;
-  private SortDirection  _currentSortDirection = SortDirection.ASCENDING;
   private Map<String,List<E>> _forwardSorts = new HashMap<String,List<E>>();
   private Map<String,List<E>> _reverseSorts = new HashMap<String,List<E>>();
   private int _resultsSize;
@@ -91,8 +91,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   private String _downloadFormat = "";
   private UIData _dataTable;
   private DataModel _dataModel;
-  private DataModel _dataHeaderColumnModel;
-  private boolean _isDataModelUpdateNeeded;
+  private TableSortManager _sortManager;
   
   
   // public constructor
@@ -106,25 +105,24 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   {
     _unsortedResults = unsortedResults;
     _resultsSize = unsortedResults.size();
-    setDataModelUpdateNeeded();
   }
 
   
   // public getters and setters - used by searchResults.jspf
   
-  protected boolean isDataModelUpdateNeeded()
+  protected TableSortManager getSortManager()
   {
-    return _isDataModelUpdateNeeded;
-  }
-
-  protected void setDataModelUpdateNeeded() 
-  {
-    _isDataModelUpdateNeeded = true;
-  }
-  
-  protected void setDataModelUpdateNeeded(boolean isDataModelUpdateNeeded)
-  {
-    _isDataModelUpdateNeeded = isDataModelUpdateNeeded;
+    if (_sortManager == null) {
+      _sortManager = new TableSortManager(getColumnHeaders()) {
+        @Override
+        protected void sortChanged(String newSortColumnName, SortDirection newSortDirection)
+        {
+          doSort();
+        }
+      };
+    }
+   
+    return _sortManager;
   }
   
   protected List<E> getCurrentSort()
@@ -167,7 +165,9 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public DataModel getDataModel()
   {
-    doSort();
+    if (_dataModel == null) {
+      doSort();
+    }
     return _dataModel;
   }
 
@@ -186,29 +186,16 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public DataModel getDataHeaderColumnModel()
   {
-    if (_dataHeaderColumnModel == null) {
-      _dataHeaderColumnModel = new ListDataModel(getColumnHeaders());
-    }
-    return _dataHeaderColumnModel;
-  }
-
-  /**
-   * Set the data header column model.
-   * @param dataHeaderColumnModel the data header column model
-   */
-  public void setDataHeaderColumnModel(DataModel dataHeaderColumnModel)
-  {
-    _dataHeaderColumnModel = dataHeaderColumnModel;
+    return getSortManager().getColumnModel();
   }
 
   /**
    * Get the name of the current column.
    * @return the name of the current column
    */
-  public String getColumnName()
+  private String getCurrentColumnName()
   {
-    
-    return (String) getDataHeaderColumnModel().getRowData();
+    return (String) getSortManager().getColumnModel().getRowData();
   }
   
   /**
@@ -217,7 +204,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public boolean getIsCommandLink()
   {
-    return isCommandLink(getColumnName());
+    return isCommandLink(getCurrentColumnName());
   }
   
   /**
@@ -232,7 +219,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public boolean getIsCommandLinkList()
   {
-    return isCommandLinkList(getColumnName());
+    return isCommandLinkList(getCurrentColumnName());
   }
   
   /**
@@ -242,7 +229,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public String getColumnDescription()
   {
-    return getColumnDescription(getColumnName());
+    return getColumnDescription(getCurrentColumnName());
   }
   
   /**
@@ -252,7 +239,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   @SuppressWarnings("unchecked")
   public Object getCellValue()
   {
-    return getCellValue(getEntity(), getColumnName());
+    return getCellValue(getEntity(), getCurrentColumnName());
   }
 
   /**
@@ -340,11 +327,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public String getCurrentSortColumnName()
   {
-    if (_currentSortColumnName == null) {
-      assert getColumnHeaders().size() > 0 : "> 0 column headers required";
-      _currentSortColumnName = getColumnHeaders().get(0);
-    }
-    return _currentSortColumnName;
+    return getSortManager().getCurrentSortColumnName();
   }
 
   /**
@@ -356,10 +339,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public void setCurrentSortColumnName(String currentSortColumnName)
   {
-    if (!_currentSortColumnName.equals(currentSortColumnName)) {
-      setDataModelUpdateNeeded();
-      _currentSortColumnName = currentSortColumnName;
-    }
+    getSortManager().setCurrentSortColumnName(currentSortColumnName);
   }
 
   /**
@@ -395,7 +375,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public SortDirection getCurrentSortDirection()
   {
-    return _currentSortDirection;
+    return getSortManager().getCurrentSortDirection();
   }
 
   /**
@@ -407,10 +387,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public void setCurrentSortDirection(SortDirection currentSortDirection)
   {
-    if (currentSortDirection != _currentSortDirection) {
-      setDataModelUpdateNeeded();
-      _currentSortDirection = currentSortDirection;
-    }
+    getSortManager().setCurrentSortDirection(currentSortDirection);
   }
 
   /**
@@ -476,7 +453,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   public Object cellAction()
   {
     _currentEntityIndex = _dataModel.getRowIndex();
-    return cellAction(getEntity(), getColumnName());
+    return cellAction(getEntity(), getCurrentColumnName());
   }
 
   /**
@@ -750,21 +727,16 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
 
   /**
    * Internal method for performing and caching sorted results, by both sort
-   * column and direction. If _dataModel has already been initialized,
-   * {@link #setDataModelUpdateNeeded()} must have been called previously for
-   * this method do perform its work.
+   * column and direction.
    */
   private void doSort()
   {
-    if (!_isDataModelUpdateNeeded && _dataModel != null) {
-      return;
-    }
-    if (_currentSortColumnName == null) {
+    if (getCurrentSortColumnName() == null) {
       _currentSort = _unsortedResults;
     }
     else {
-      String sortColumnName = _currentSortColumnName;
-      SortDirection sortDirection = _currentSortDirection;
+      String sortColumnName = getCurrentSortColumnName();
+      SortDirection sortDirection = getCurrentSortDirection();
 
       // get the forward sort for the specified column, computing it if needed
       List<E> forwardSort = _forwardSorts.get(sortColumnName);
@@ -792,6 +764,5 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
       }
     }
     _dataModel = new ListDataModel(_currentSort);
-    setDataModelUpdateNeeded(false);
   }
 }

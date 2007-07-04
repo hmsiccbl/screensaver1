@@ -9,27 +9,13 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.ui.searchresults.SortDirection;
-
-import org.apache.log4j.Logger;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.ScrollableResults;
-import org.hibernate.Session;
-import org.springframework.orm.hibernate3.HibernateCallback;
 
 public interface ScreenResultsDAO
 {
