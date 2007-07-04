@@ -14,16 +14,17 @@ import java.math.BigDecimal;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 
 import org.apache.log4j.Logger;
 
 /**
  * A Hibernate entity bean representing a well volume adjustment. A well volume
- * adjustment normally occurs when the lab is removes liquid from a library copy
- * plate in order to produce assay plates. Rarely, a well volume adjustment
- * occurs to reconcile any differences detected between the physical volume of a
- * library copy well and the volume reported by the Screensaver database; see
- * {@link WellVolumeCorrectionActivity}.
+ * adjustment normally occurs when the lab removes liquid from a library copy
+ * plate in order to produce assay plates; see {@link LabCherryPick}. Rarely, a
+ * well volume adjustment occurs to reconcile any differences detected between
+ * the physical volume of a library copy well and the volume reported by the
+ * Screensaver database; see {@link WellVolumeCorrectionActivity}.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>

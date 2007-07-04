@@ -9,10 +9,12 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -74,5 +76,7 @@ public interface LibrariesDAO
    */
   @SuppressWarnings("unchecked")
   public List<Library> findLibrariesDisplayedInLibrariesBrowser();
+
+  public BigDecimal findRemainingVolumeInWell(Copy copy, Well well);
 
 }

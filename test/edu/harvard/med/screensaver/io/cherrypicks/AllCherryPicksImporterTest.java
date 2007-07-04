@@ -97,7 +97,7 @@ public class AllCherryPicksImporterTest extends AbstractSpringTest
         assertEquals("lib1 copy names", 
                      new HashSet<String>(Arrays.asList("C", "D")), 
                      new HashSet<String>(Arrays.asList(copy1.getName(), copy2.getName())));
-        assertEquals("lib1 copy1 copy info volume", expectedVolume, copy1.getCopyInfo(_lib1.getStartPlate()).getDefaultMicroliterWellVolume());
+        assertEquals("lib1 copy1 copy info volume", expectedVolume, copy1.getCopyInfo(_lib1.getStartPlate()).getMicroliterWellVolume());
         assertEquals("lib1 copy1 copyinfo count", 116, copy1.getCopyInfos().size());
         assertEquals("lib1 copy2 copyinfo count", 116, copy2.getCopyInfos().size());
 
@@ -107,7 +107,7 @@ public class AllCherryPicksImporterTest extends AbstractSpringTest
         assertEquals("lib2 copy names", 
                      new HashSet<String>(Arrays.asList("C", "D")), 
                      new HashSet<String>(Arrays.asList(copy1.getName(), copy2.getName())));
-        assertEquals("lib2 copy1 copy info volume", expectedVolume, copy1.getCopyInfo(_lib2.getStartPlate()).getDefaultMicroliterWellVolume());
+        assertEquals("lib2 copy1 copy info volume", expectedVolume, copy1.getCopyInfo(_lib2.getStartPlate()).getMicroliterWellVolume());
         assertEquals("lib2 copy1 copyinfo count", 115, copy1.getCopyInfos().size());
         assertEquals("lib2 copy2 copyinfo count", 115, copy2.getCopyInfos().size());
 
@@ -117,7 +117,7 @@ public class AllCherryPicksImporterTest extends AbstractSpringTest
         assertEquals("lib3 copy names", 
                      new HashSet<String>(Arrays.asList("C", "D")), 
                      new HashSet<String>(Arrays.asList(copy1.getName(), copy2.getName())));
-        assertEquals("lib3 copy1 copy info volume", expectedVolume, copy1.getCopyInfo(_lib3.getStartPlate()).getDefaultMicroliterWellVolume());
+        assertEquals("lib3 copy1 copy info volume", expectedVolume, copy1.getCopyInfo(_lib3.getStartPlate()).getMicroliterWellVolume());
         assertEquals("lib3 copy1 copyinfo count", 115, copy1.getCopyInfos().size());
         assertEquals("lib3 copy2 copyinfo count", 115, copy2.getCopyInfos().size());
       }

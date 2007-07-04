@@ -199,52 +199,20 @@ public class CherryPickRequestAllocator
     Collections.sort(copies, SourceCopyComparator.getInstance());
 
     for (Copy copy : copies) {
-      BigDecimal wellCopyVolumeRemaining = calculateRemainingVolumeInCopyWell(copy, well);
+      BigDecimal wellCopyVolumeRemaining = _librariesDao.findRemainingVolumeInWell(copy, well);
+      if (log.isDebugEnabled()) {
+        log.debug("remaining volume in " + well + " " + copy + ": " + wellCopyVolumeRemaining);
+      }
       if (wellCopyVolumeRemaining.subtract(volumeNeeded).compareTo(MINIMUM_SOURCE_WELL_VOLUME) >= 0) {
+        if (log.isDebugEnabled()) {
+          log.debug("selected " + copy + " to satisfy need for volume " + volumeNeeded);
+        }
         return copy;
       }
     }
     return null;
   }
 
-  private BigDecimal calculateRemainingVolumeInCopyWell(Copy copy, Well well)
-  {
-    BigDecimal startingVolume = getStartingVolumeInCopyWell(copy, well);
-    Set<Pair<LabCherryPick,BigDecimal>> existingLabCherryPicksForWell = _cherryPickRequestDao.findLabCherryPicksWithVolumeForWell(well);
-    BigDecimal remainingVolume = startingVolume;
-    for (Pair<LabCherryPick,BigDecimal> existingLabCherryPickWithVolume : existingLabCherryPicksForWell) {
-      LabCherryPick existingLabCherryPick = existingLabCherryPickWithVolume.getFirst();
-      if (existingLabCherryPick.isAllocated()) { // implicitly ignores a cherry pick if it's in the process of being allocated (by caller)
-        if (existingLabCherryPick.getSourceCopy().equals(copy)) {
-          BigDecimal volumeUsed = existingLabCherryPickWithVolume.getSecond();
-          if (volumeUsed != null) {
-            remainingVolume = remainingVolume.subtract(volumeUsed);
-            if (remainingVolume.compareTo(BigDecimal.ZERO) <= 0) {
-              return BigDecimal.ZERO;
-            }
-          }
-        }
-      }
-    }
-    return remainingVolume;
-  }
-
-  private BigDecimal getStartingVolumeInCopyWell(Copy copy, Well well)
-  {
-    CopyInfo plateCopyInfo = copy.getCopyInfo(well.getPlateNumber());
-    if (plateCopyInfo == null) {
-      // the library copy (apparently) does not have a copy for the plate of the requested well;
-      // [ant4: assuming this is a valid state of the data model, otherwise we should throw a DataModelViolationException]
-      return BigDecimal.ZERO;
-    }
-    if (plateCopyInfo.isRetired()) {
-      // if plate has been retired, it has no usable volume
-      return BigDecimal.ZERO;
-    }
-    BigDecimal startingVolume = plateCopyInfo.getMicroliterWellVolume(well.getWellKey());
-    return startingVolume;
-  }
-  
   private void validateAllocationBusinessRules(CherryPickRequest cherryPickRequest)
   {
     BigDecimal volume = cherryPickRequest.getMicroliterTransferVolumePerWellApproved();

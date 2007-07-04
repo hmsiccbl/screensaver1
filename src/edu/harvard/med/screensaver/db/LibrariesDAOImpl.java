@@ -9,12 +9,14 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -144,6 +146,25 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     // TODO: make this HQL type-safe by using LibraryType enum to obtain the values
     return new ArrayList<Library>(getHibernateTemplate().find(
       "from Library where libraryType not in ('Annotation', 'DOS', 'NCI', 'Discrete')")); 
+  }
+
+  public BigDecimal findRemainingVolumeInWell(Copy copy, Well well)
+  {
+    String hql;
+
+    hql = "select ci.microliterWellVolume from CopyInfo ci where ci.hbnCopy=? and ci.hbnPlateNumber=? and ci.dateRetired is null";
+    List result = getHibernateTemplate().find(hql, new Object[] { copy, well.getPlateNumber() });
+    if (result == null || result.size() == 0) {
+      return BigDecimal.ZERO.setScale(Well.VOLUME_SCALE);
+    }
+    BigDecimal initialMicroliterVolume = (BigDecimal) result.get(0);
+
+    hql = "select sum(wva.microliterVolume) from WellVolumeAdjustment wva where wva.copy=? and wva.well=?";
+    BigDecimal deltaMicroliterVolume = (BigDecimal) getHibernateTemplate().find(hql, new Object[] { copy, well }).get(0);
+    if (deltaMicroliterVolume == null) {
+      deltaMicroliterVolume = BigDecimal.ZERO.setScale(Well.VOLUME_SCALE);
+    }
+    return initialMicroliterVolume.add(deltaMicroliterVolume).setScale(Well.VOLUME_SCALE);
   }
   
   

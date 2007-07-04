@@ -24,6 +24,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
@@ -456,6 +457,9 @@ public abstract class CherryPickRequest extends AbstractEntity
       _microliterTransferVolumePerWellRequested = null;
     } 
     else {
+      if (microliterTransferVolumePerWell.compareTo(BigDecimal.ZERO) <= 0) {
+        throw new BusinessRuleViolationException("cherry pick request requested volume must be undefined or > 0"); 
+      }
       _microliterTransferVolumePerWellRequested = microliterTransferVolumePerWell.setScale(Well.VOLUME_SCALE, RoundingMode.HALF_UP);
     }
   }
@@ -483,6 +487,9 @@ public abstract class CherryPickRequest extends AbstractEntity
       _microliterTransferVolumePerWellApproved = null;
     } 
     else {
+      if (microliterTransferVolumePerWell.compareTo(BigDecimal.ZERO) <= 0) {
+        throw new BusinessRuleViolationException("cherry pick request approved volume must be undefined or > 0"); 
+      }
       _microliterTransferVolumePerWellApproved = microliterTransferVolumePerWell.setScale(Well.VOLUME_SCALE, RoundingMode.HALF_UP);
     }
   }

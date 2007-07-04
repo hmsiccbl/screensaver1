@@ -270,7 +270,7 @@ public class LabCherryPick extends AbstractEntity
       WellVolumeAdjustment wellVolumeAdjustment = 
         new WellVolumeAdjustment(sourceCopy,
                                  getSourceWell(),
-                                 getCherryPickRequest().getMicroliterTransferVolumePerWellApproved());
+                                 getCherryPickRequest().getMicroliterTransferVolumePerWellApproved().negate());
       _wellVolumeAdjustments.add(wellVolumeAdjustment);
     }
   }

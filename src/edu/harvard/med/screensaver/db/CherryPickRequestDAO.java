@@ -157,26 +157,11 @@ public class CherryPickRequestDAO extends AbstractDAO
     return cherryPickRequest;
   }
 
-  @SuppressWarnings("unchecked")
-  public Set<Pair<LabCherryPick,BigDecimal>> findLabCherryPicksWithVolumeForWell(Well well)
+  public Set<LabCherryPick> findLabCherryPicksForWell(Well well)
   {
-    List<LabCherryPick> labCherryPicks = 
-      _dao.findEntitiesByProperty(LabCherryPick.class, 
-                                  "sourceWell", 
-                                  well, 
-                                  false, 
-                                  "sourceWell", 
-                                  "cherryPickRequest", // TODO: causes cherryPickRequest.screen.{...} to be loaded
-                                  "assayPlate");
-    HashSet<Pair<LabCherryPick,BigDecimal>> result = new HashSet<Pair<LabCherryPick,BigDecimal>>(labCherryPicks.size());
-    for (LabCherryPick labCherryPick : labCherryPicks) {
-      result.add(new Pair<LabCherryPick,BigDecimal>(
-        labCherryPick, 
-        // TODO: this is want we'd like to optimize, to avoid loading the entire cherryPickRequest, which currently causes the screen (and on, on) to be loaded;
-        // only becomes a big problem once we have lots of cherry pick requests picking the same well(s)
-        labCherryPick.getCherryPickRequest().getMicroliterTransferVolumePerWellApproved()));
-    }
-    return result;
+    return new HashSet<LabCherryPick>(_dao.findEntitiesByProperty(LabCherryPick.class, 
+                                                                  "sourceWell", 
+                                                                  well)); 
   }
 
   @SuppressWarnings("unchecked")

@@ -51,11 +51,9 @@ public class WellVolumeCorrectionActivity extends AdministrativeActivity
   // public constructors and methods
 
   public WellVolumeCorrectionActivity(AdministratorUser performedBy,
-                                      Date datePerformed,
-                                      Set<WellVolumeAdjustment> wellVolumeAdjustments)
+                                      Date datePerformed)
   {
     super(performedBy, datePerformed);
-    _wellVolumeAdjustments = wellVolumeAdjustments;
   }
 
   @Override

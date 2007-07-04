@@ -1,7 +1,0 @@
-  <map name="microliterWellVolumes" lazy="true" cascade="all">
-   <key column="copy_info_id"/>
-   <composite-map-key class="edu.harvard.med.screensaver.model.libraries.WellKey">
-    <key-property name="key" column="well_key"/>
-   </composite-map-key>
-   <element column="microliter_volume" type="big_decimal" scale="2"/>
-  </map>

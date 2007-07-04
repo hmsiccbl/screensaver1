@@ -13,9 +13,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -54,12 +52,6 @@ public class CopyInfo extends AbstractEntity
    * The default volume (microliters) for a well on this copy plate.
    */
   private BigDecimal _microliterWellVolume;
-  /**
-   * Sparse map of non-standard well volumes. If well is not represented in the
-   * map, the well's volume is CopyInfo._microliterWellVolume.
-   */
-  // TODO: map should really be Map<WellName,BigDecimal>, but this is transient code so not going to fix...
-  private Map<WellKey,BigDecimal> _microliterWellVolumes = new HashMap<WellKey,BigDecimal>();
   private String _comments;
   private Date _datePlated;
   private Date _dateRetired;
@@ -234,36 +226,16 @@ public class CopyInfo extends AbstractEntity
   }
 
   /**
-   * Use {@link #getMicroliterWellVolume(WellKey)}.
-   */
-  @DerivedEntityProperty
-  public BigDecimal getDefaultMicroliterWellVolume()
-  {
-    return _microliterWellVolume;
-  }
-
-  /**
-   * Get the initially available volume (microliters) for a well on this copy
-   * plate.
+   * Get the default volume (microliters) for wells on this copy plate.  
    * 
-   * @param wellKey
-   * @return the initially available volume (microliters) the specified well
-   * @motivation Some wells will differ from the plate-specified volume
+   * @return the volume
+   * @hibernate.property type="big_decimal" not-null="true"
    */
-  @DerivedEntityProperty
-  public BigDecimal getMicroliterWellVolume(WellKey wellKey)
+  public BigDecimal getMicroliterWellVolume()
   {
-    if (_microliterWellVolumes.containsKey(wellKey)) {
-      return _microliterWellVolumes.get(wellKey);
-    }
     return _microliterWellVolume;
   }
   
-  public void setMicroliterWellVolume(WellKey wellKey, BigDecimal microliterVolume)
-  {
-    _microliterWellVolumes.put(wellKey, microliterVolume.setScale(Well.VOLUME_SCALE));
-  }
-
   /**
    * Get the comments.
    *
@@ -531,17 +503,6 @@ public class CopyInfo extends AbstractEntity
   }
 
   /**
-   * Get the default volume (microliters) for wells on this copy plate.  
-   * 
-   * @return the volume
-   * @hibernate.property type="big_decimal" not-null="true"
-   */
-  private BigDecimal getMicroliterWellVolume()
-  {
-    return _microliterWellVolume;
-  }
-  
-  /**
    * Set the volume.
    *
    * @param volume the new volume
@@ -554,19 +515,5 @@ public class CopyInfo extends AbstractEntity
     else {
       _microliterWellVolume = volume.setScale(Well.VOLUME_SCALE, RoundingMode.HALF_UP);
     }
-  }
-
-  /*
-   * Note: Hibernate mapping is in hibernate-properties-CopyInfo.xml. Could be
-   * done via XDoclet, but this is transient code, so not going to fix it.
-   */
-  private Map<WellKey,BigDecimal> getMicroliterWellVolumes()
-  {
-    return _microliterWellVolumes;
-  }
-
-  private void setMicroliterWellVolumes(Map<WellKey,BigDecimal> microliterWellVolumes)
-  {
-    _microliterWellVolumes = microliterWellVolumes;
   }
 }
