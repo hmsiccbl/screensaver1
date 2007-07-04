@@ -515,7 +515,7 @@ public class ScreenResultViewer extends AbstractBackingBean
       _dataTableRowsPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(16, 24, 48, 96, 384)); 
     }
     else if (getDataFilter().getSelection() == DATA_TABLE_FILTER_SHOW_HITS) {
-      _dataTableRowsPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, -1));
+      _dataTableRowsPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE));
       _dataTableRowsPerPage.setAllRowsValue(getRawDataSize());
     }
     else { // single plate
