@@ -57,14 +57,14 @@
 			<t:panelGroup style="float: right"
 				rendered="#{navigator.summaryView}"
 				title="The number of results displayed per page">
-				<t:commandButton id="updateItemsPerPage"
+				<t:commandButton id="updateRowsPerPage"
 					value="update items per page"
-					action="#{navigator.updateItemsPerPage}" style="display: none" />
-				<t:selectOneMenu id="itemsPerPage"
-					value="#{navigator.itemsPerPageSelector.value}"
+					action="#{navigator.updateRowsPerPage}" style="display: none" />
+				<t:selectOneMenu id="rowsPerPage"
+					value="#{navigator.rowsPerPageSelector.value}"
 					onchange="this.previousSibling.click();">
 					<f:selectItems
-						value="#{navigator.itemsPerPageSelector.selectItems}" />
+						value="#{navigator.rowsPerPageSelector.selectItems}" />
 				</t:selectOneMenu>
 				<t:outputText value=" per page" styleClass="label" />
 			</t:panelGroup>

@@ -25,9 +25,9 @@ import javax.faces.model.SelectItem;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.screenresults.DataTableRowsPerPageUISelectOneBean;
 import edu.harvard.med.screensaver.ui.table.TableSortManager;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
-import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 import org.apache.log4j.Logger;
 
@@ -54,9 +54,9 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   private static final String EXCEL_FILE = "Excel Spreadsheet";
   private static final String [] DOWNLOAD_FORMATS = { "", EXCEL_FILE, SD_FILE };
 
-  private static final List<String> PAGE_SIZE_SELECTIONS =
-    Arrays.asList("10", "20", "50", "100", "All");
-  private static final String DEFAULT_PAGESIZE = PAGE_SIZE_SELECTIONS.get(1);
+  private static final List<Integer> PAGE_SIZE_SELECTIONS =
+    Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE);
+  private static final Integer DEFAULT_PAGESIZE = PAGE_SIZE_SELECTIONS.get(1);
 
   /**
    * Workaround for JSF suckiness. Two things: first, I need to use the returning a Map trick to
@@ -87,7 +87,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   private int _resultsSize;
   private int _currentPageIndex = 0;
   private int _currentEntityIndex = 0;
-  private UISelectOneBean<String> _itemsPerPage = new UISelectOneBean<String>(PAGE_SIZE_SELECTIONS, DEFAULT_PAGESIZE);
+  private DataTableRowsPerPageUISelectOneBean _rowsPerPage;
   private String _downloadFormat = "";
   private UIData _dataTable;
   private DataModel _dataModel;
@@ -105,6 +105,9 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   {
     _unsortedResults = unsortedResults;
     _resultsSize = unsortedResults.size();
+    _rowsPerPage = new DataTableRowsPerPageUISelectOneBean(PAGE_SIZE_SELECTIONS, 
+                                                           DEFAULT_PAGESIZE);
+    _rowsPerPage.setAllRowsValue(_resultsSize);
   }
 
   
@@ -251,7 +254,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
     if (_resultsSize == 0) {    // special case if results are empty
       return 0;
     }
-    return (_currentPageIndex * getNumItemsPerPage()) + 1;
+    return (_currentPageIndex * _rowsPerPage.getSelection()) + 1;
   }
   
   /**
@@ -260,7 +263,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   public int getLastIndex()
   {
-    int lastIndex = (_currentPageIndex + 1) * getNumItemsPerPage();
+    int lastIndex = (_currentPageIndex + 1) * _rowsPerPage.getSelection();
     if (lastIndex > _resultsSize) {
       lastIndex = _resultsSize;
     }
@@ -304,20 +307,11 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    * Get the number of items currently being displayed on a page.
    * @return the number of items currently being displayed on a page
    */
-  public UISelectOneBean<String> getItemsPerPageSelector()
+  public DataTableRowsPerPageUISelectOneBean getRowsPerPageSelector()
   {
-    return _itemsPerPage;
+    return _rowsPerPage;
   }
   
-  public int getNumItemsPerPage()
-  {
-    String itemsPerPage = _itemsPerPage.getSelection();
-    if (itemsPerPage.equals("All")) {
-      return _resultsSize;
-    }
-    return new Integer(itemsPerPage);
-  }
-
   /**
    * Get the current sort column name.
    * 
@@ -499,7 +493,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   {
     if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
       _currentPageIndex = Math.min(_currentPageIndex + 1,
-                                   Math.max(0, _resultsSize - 1) / getNumItemsPerPage());
+                                   Math.max(0, _resultsSize - 1) / _rowsPerPage.getSelection());
     }
     else {
       _currentEntityIndex = Math.min(_currentEntityIndex + 1,
@@ -517,7 +511,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   public String lastPage()
   {
     if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
-      _currentPageIndex = Math.max(0, _resultsSize - 1) / getNumItemsPerPage();
+      _currentPageIndex = Math.max(0, _resultsSize - 1) / _rowsPerPage.getSelection();
     }
     else {
       _currentEntityIndex = _resultsSize - 1;
@@ -558,9 +552,8 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    * 
    * @return the navigation rule to redisplay the search results
    */
-  public String updateItemsPerPage()
+  public String updateRowsPerPage()
   {
-    getDataTable().setRows(getNumItemsPerPage());
     getDataTable().setFirst(0);
     _currentPageIndex = 0;
     return REDISPLAY_PAGE_ACTION_RESULT;
@@ -572,7 +565,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    * edu.harvard.med.screensaver.ui.searchresults.WellSearchResults}.
    * 
    * @return true whenever the search results are downloadable
-   */
+   */ 
   public boolean getIsDownloadable()
   {
     return false;
@@ -714,7 +707,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   {
     if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
       // update the search results summary table
-      getDataTable().setFirst(_currentPageIndex * getNumItemsPerPage());
+      getDataTable().setFirst(_currentPageIndex * _rowsPerPage.getSelection());
     }
     else {
       // update the entity viewer

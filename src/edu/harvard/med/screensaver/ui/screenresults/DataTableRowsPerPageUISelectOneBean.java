@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.ui.screenresults;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.faces.model.SelectItem;
@@ -23,7 +22,7 @@ public class DataTableRowsPerPageUISelectOneBean extends UISelectOneBean<Integer
 {
   // static members
 
-  private static final Integer SHOW_ALL_VALUE = -1;
+  public static final Integer SHOW_ALL_VALUE = -1;
   private static Logger log = Logger.getLogger(DataTableRowsPerPageUISelectOneBean.class);
   private Integer _allRowsValue;
 
@@ -32,6 +31,11 @@ public class DataTableRowsPerPageUISelectOneBean extends UISelectOneBean<Integer
   public DataTableRowsPerPageUISelectOneBean(List<Integer> values)
   {
     super(values);
+  }
+
+  public DataTableRowsPerPageUISelectOneBean(List<Integer> values, Integer defaultSelection)
+  {
+    super(values, defaultSelection);
   }
 
   // public constructors and methods

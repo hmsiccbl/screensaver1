@@ -19,7 +19,7 @@
         binding="#{searchResults.dataTable}"
         value="#{searchResults.dataModel}"
         var="row"
-        rows="#{searchResults.numItemsPerPage}"
+        rows="#{searchResults.rowsPerPageSelector.selection}"
         rendered="true"
         styleClass="standardTable"
         headerClass="tableHeader"
@@ -50,7 +50,7 @@
 						value="#{searchResults.cellValue}"
 						rendered="#{searchResults.isCommandLink}">
 						<f:param name="commandValue"
-								value="#{searchResults.escapeBackslashes[searchResults.cellValue]}" />
+								value="#{searchResults.escapeBackslashes[searchResults.cellValue]}"/>
 					</h:commandLink>
 					<t:dataList id="commandLinkList" var="commandValue"
 						value="#{searchResults.cellValue}" layout="simple"
