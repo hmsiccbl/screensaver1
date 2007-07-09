@@ -505,11 +505,12 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                             _booleanParser.parse(dataHeadersCell(DataHeaderRow.IS_ASSAY_ACTIVITY_INDICATOR, iDataHeader)),
                             _primaryOrFollowUpParser.parse(dataHeadersCell(DataHeaderRow.PRIMARY_OR_FOLLOWUP, iDataHeader)),
                             dataHeadersCell(DataHeaderRow.ASSAY_PHENOTYPE, iDataHeader).getString());
-      _dataTableColumnLabel2RvtMap.put(dataHeadersCell(DataHeaderRow.COLUMN_IN_DATA_WORKSHEET, iDataHeader, true).getAsString(), rvt);
       rvt.setDescription(dataHeadersCell(DataHeaderRow.DESCRIPTION, iDataHeader).getString());
       rvt.setTimePoint(dataHeadersCell(DataHeaderRow.TIME_POINT, iDataHeader).getString());
       if (rvt.isDerived()) {
-        for (ResultValueType resultValueType : _columnsDerivedFromParser.parseList(dataHeadersCell(DataHeaderRow.COLUMNS_DERIVED_FROM, iDataHeader, true))) {
+        for (ResultValueType resultValueType : _columnsDerivedFromParser.parseList(dataHeadersCell(DataHeaderRow.COLUMNS_DERIVED_FROM, 
+                                                                                                   iDataHeader, 
+                                                                                                   true))) {
           if (resultValueType != null) { // can be null if unparseable value is encountered in list
             rvt.addTypeDerivedFrom(resultValueType);
           }
@@ -529,6 +530,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         // TODO: should warn if these values *are* defined and !isActivityIndicator()
       }
       rvt.setComments(dataHeadersCell(DataHeaderRow.COMMENTS, iDataHeader).getString());
+      _dataTableColumnLabel2RvtMap.put(dataHeadersCell(DataHeaderRow.COLUMN_IN_DATA_WORKSHEET, iDataHeader, true).getAsString(), rvt);
     }
     return dataHeadersParseResult;
   }

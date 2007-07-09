@@ -13,6 +13,8 @@ package edu.harvard.med.screensaver.io.screenresults;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -22,14 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFDataFormat;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.workbook.Cell;
@@ -53,6 +47,15 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.util.DateUtil;
 
+import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.contrib.HSSFCellUtil;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+
 /**
  */
 public class ScreenResultParserTest extends AbstractSpringTest
@@ -65,9 +68,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public static final String SCREEN_RESULT_116_TEST_WORKBOOK_FILE = "ScreenResultTest116.xls";
   public static final String SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE = "ScreenResultTest115_30DataHeaders.xls";
   public static final String SCREEN_RESULT_115_NO_DATE_TEST_WORKBOOK_FILE = "ScreenResultTest115-no-date.xls";
-  public static final String ERRORS_TEST_WORKBOOK_FILE = "NewFormatErrorsTest.xls";
+  public static final String ERRORS_TEST_WORKBOOK_FILE = "ScreenResultErrorsTest.xls";
   public static final String FORMULA_VALUE_TEST_WORKBOOK_FILE = "formula_value.xls";
   public static final String BLANK_ROWS_TEST_WORKBOOK_FILE = "ScreenResultTest115_blank_rows.xls";
+  public static final String HIT_COUNT_TEST_WORKBOOK_FILE = "ScreenResultHitCountTest.xls";
   
   protected ScreenResultParser mockScreenResultParser;
 
@@ -237,23 +241,20 @@ public class ScreenResultParserTest extends AbstractSpringTest
         // test metadata workbook
         assertEquals(5,
                      workbook.getWorkbook().getNumberOfSheets());
-//        HSSFSheet sheet0 = workbook.getWorkbook().getSheetAt(0);
-//        HSSFSheet sheet1 = workbook.getWorkbook().getSheetAt(1);
-//        HSSFSheet sheet3 = workbook.getWorkbook().getSheetAt(3);
+        HSSFSheet sheet1 = workbook.getWorkbook().getSheetAt(1);
         
-        // TODO: implement asserts
-//        assertEquals("ERROR: value required",
-//                     HSSFCellUtil.getCell(sheet0.getRow(8),'F' - 'A').getStringCellValue());
-//        assertEquals("ERROR: value required; unparseable value \"\" (expected one of [E])",
-//                     HSSFCellUtil.getCell(sheet0.getRow(9),'F' - 'A').getStringCellValue());
-//        assertEquals("ERROR: unparseable value \"maybe\" (expected one of [, 0, 1, false, n, no, true, y, yes])",
-//                     HSSFCellUtil.getCell(sheet0.getRow(16),'F' - 'A').getStringCellValue());
-//        assertEquals("ERROR: invalid cell type (expected a date)",
-//                     HSSFCellUtil.getCell(sheet1.getRow(7),'B' - 'A').getStringCellValue());
-//        assertEquals("Parse Errors",
-//                     workbook.getWorkbook().getSheetName(3));
-//        assertEquals("ERROR: unparseable plate number 'PLL-0001'",
-//                     HSSFCellUtil.getCell(sheet0.getRow(3),'A' - 'A').getStringCellValue());
+        assertEquals("ERROR: unparseable value \"sushiraw\" (expected one of [, derived, raw])",
+                     HSSFCellUtil.getCell(sheet1.getRow(6),'C' - 'A').getStringCellValue());
+        assertEquals("ERROR: invalid Data Header column reference 'B' (expected one of [E, F])",
+                     HSSFCellUtil.getCell(sheet1.getRow(8),'D' - 'A').getStringCellValue());
+        assertEquals("ERROR: invalid Data Header column reference 'H' (expected one of [E, F, G])",
+                     HSSFCellUtil.getCell(sheet1.getRow(8),'E' - 'A').getStringCellValue());
+        assertEquals("ERROR: invalid Data Header column reference 'D' (expected one of [E, F, G, H])",
+                     HSSFCellUtil.getCell(sheet1.getRow(8),'F' - 'A').getStringCellValue());
+        assertEquals("ERROR: value required; unparseable value \"\" (expected one of [<, >])",
+                     HSSFCellUtil.getCell(sheet1.getRow(11),'F' - 'A').getStringCellValue());
+        assertEquals("ERROR: unparseable value \"follow-up\" (expected one of [, follow up, primary])",
+                     HSSFCellUtil.getCell(sheet1.getRow(13),'E' - 'A').getStringCellValue());
       }
     }
   }
@@ -433,6 +434,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setNumeric(false);
     expectedResultValueTypes.put(6, rvt);
 
+
     Integer[] expectedPlateNumbers = {1, 1, 1, 1, 1, 1, 1, 1};
 
     String[] expectedWellNames = {"A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08"};
@@ -463,10 +465,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
           { 1294182., 1280934., 1.18, 1.19, 1.185, "0", "false" },
           { 1158888., 1458878., 1.06, 1.35, 1.205, "1", "false" },
           { 1385142., 1383446., 1.26, 1.28, 1.270, "1", "false" },
-          { null, null, null, null, null, "0", false },
+          { null, null, null, null, null, "0", "false" },
           { 1666646., 1154436., 1.52, 1.07, 1.295, "1", "false" },
-          { null, null, null, null, null, "0", false } };
-
+          { null, null, null, null, null, "0", "false" } };
+    
     SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
     int iRvt = 0;
     for (ResultValueType actualRvt : resultValueTypes) {
@@ -517,6 +519,36 @@ public class ScreenResultParserTest extends AbstractSpringTest
         }
       }
       ++iRvt;
+    }
+  }
+  
+  public void testHitCounts() throws Exception
+  {
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, HIT_COUNT_TEST_WORKBOOK_FILE);
+    ScreenResult screenResult = mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115), 
+                                                             workbookFile);
+    assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
+
+    int resultValues = 10;
+    assertEquals("result value count", 
+                 resultValues,
+                 screenResult.getResultValueTypesList().get(0).getResultValues().size());
+    int nonExcludedResultValues = resultValues - 1;
+    List<Integer> expectedHitCount = Arrays.asList(4, 6, 3);
+    List<Double> expectedHitRatio = Arrays.asList(expectedHitCount.get(0) / (double) nonExcludedResultValues, 
+                                                  expectedHitCount.get(1) / (double) nonExcludedResultValues,
+                                                  expectedHitCount.get(2) / (double) nonExcludedResultValues);
+    
+    int iAssayIndicatorRvt = 0;
+    for (ResultValueType rvt : screenResult.getResultValueTypesList()) {
+      if (rvt.isActivityIndicator()) {
+        assertEquals("hit count", expectedHitCount.get(iAssayIndicatorRvt), rvt.getHits());
+        assertEquals("hit ratio", 
+                     expectedHitRatio.get(iAssayIndicatorRvt).doubleValue(), 
+                     rvt.getHitRatio().doubleValue(), 
+                     0.01);
+        ++iAssayIndicatorRvt;
+      }
     }
   }
   
