@@ -178,7 +178,6 @@ public class WellSearchResults extends SearchResults<Well>
       }
       if (getCompoundCount(well) > 0) {
         // commandValue is really a smiles, not a compoundId
-        String smiles1 = getCellValue().toString();
         String smiles = (String) getRequestParameter("commandValue");
         Compound compound = null;
         for (Compound compound2 : well.getCompounds()) {
