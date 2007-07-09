@@ -408,7 +408,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       Collections.sort(rows, 
                        new CherryPickTableRowComparator(getSortColumns(getScreenerCherryPicksSortManager(),
                                                                        SCREENER_CHERRY_PICKS_TABLE_SECONDARY_SORT), 
-                                                        getScreenerCherryPicksSortManager().getCurrentSortDirection()));
+                                                        getScreenerCherryPicksSortManager().getSortDirection()));
       _screenerCherryPicksDataModel = new ListDataModel(rows);
     }
     return _screenerCherryPicksDataModel;
@@ -465,7 +465,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       Collections.sort(rows, 
                        new CherryPickTableRowComparator(getSortColumns(getLabCherryPicksSortManager(),
                                                                        LAB_CHERRY_PICKS_TABLE_SECONDARY_SORT),
-                                                        getLabCherryPicksSortManager().getCurrentSortDirection()));
+                                                        getLabCherryPicksSortManager().getSortDirection()));
       _labCherryPicksDataModel = new ListDataModel(rows);
     }
     return _labCherryPicksDataModel;
@@ -836,9 +836,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean
                                   String[][] secondarySorts)
   {
     // TODO: cache!
-    int primarySortColumnIndex = sortManager.getCurrentSortColumnIndex();
+    int primarySortColumnIndex = sortManager.getSortColumnIndex();
     String[] sortColumns = new String[1 + secondarySorts[primarySortColumnIndex].length];
-    sortColumns[0] = sortManager.getCurrentSortColumnName();
+    sortColumns[0] = sortManager.getSortColumnName();
     for (int i = 0; i < sortColumns.length - 1; ++i) {
       sortColumns[i + 1] = secondarySorts[primarySortColumnIndex][i];
     } 

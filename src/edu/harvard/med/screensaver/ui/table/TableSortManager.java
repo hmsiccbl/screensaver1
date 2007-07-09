@@ -9,19 +9,19 @@
 
 package edu.harvard.med.screensaver.ui.table;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
-import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 import org.apache.log4j.Logger;
 
-public abstract class TableSortManager
+public abstract class TableSortManager implements Observer
 {
   // static members
 
@@ -32,8 +32,8 @@ public abstract class TableSortManager
 
   private List<String> _columnNames;
   private DataModel _columnModel;
-  private String _currentSortColumnName;
-  private SortDirection  _currentSortDirection = SortDirection.ASCENDING;
+  private UISelectOneBean<SortDirection> _sortDirection;
+  private UISelectOneBean<String> _sortColumn;
   
   
   // public constructors and methods
@@ -42,7 +42,6 @@ public abstract class TableSortManager
   {
     _columnNames = columnNames;
     _columnModel = new ListDataModel(_columnNames);
-    _currentSortColumnName = _columnNames.get(0);
   }
 
   /**
@@ -52,14 +51,14 @@ public abstract class TableSortManager
    *             (in addition to clicking on table column headers)
    * @return the current sort column name
    */
-  public String getCurrentSortColumnName()
+  public String getSortColumnName()
   {
-    return _currentSortColumnName;
+    return getSortColumnSelector().getSelection();
   }
 
-  public int getCurrentSortColumnIndex()
+  public int getSortColumnIndex()
   {
-    return getColumnNames().indexOf(getCurrentSortColumnName());
+    return getColumnNames().indexOf(getSortColumnName());
   }
   
   /**
@@ -72,17 +71,25 @@ public abstract class TableSortManager
   }
 
   /**
+   * Get the name of the column currently being rendered by JSF.
+   * @return
+   */
+  public String getCurrentColumnName()
+  {
+    return getColumnNames().get(_columnModel.getRowIndex());
+  }
+
+  /**
    * Set the current sort column name.
    * 
    * @motivation allow sort column to be set from a drop-down list UI component
    *             (in addition to clicking on table column headers)
    * @param currentSortColumnName the new current sort column name
    */
-  public void setCurrentSortColumnName(String currentSortColumnName)
+  public void setSortColumnName(String currentSortColumnName)
   {
-    if (!_currentSortColumnName.equals(currentSortColumnName)) {
-      _currentSortColumnName = currentSortColumnName;
-      sortChanged(_currentSortColumnName, _currentSortDirection);
+    if (!getSortColumnName().equals(currentSortColumnName)) {
+      getSortColumnSelector().setSelection(currentSortColumnName);
     }
   }
 
@@ -93,10 +100,10 @@ public abstract class TableSortManager
   public void setSortAscending(boolean sortAscending)
   {
     if (sortAscending) {
-      setCurrentSortDirection(SortDirection.ASCENDING);
+      setSortDirection(SortDirection.ASCENDING);
     }
     else {
-      setCurrentSortDirection(SortDirection.DESCENDING);
+      setSortDirection(SortDirection.DESCENDING);
     }
   }
   
@@ -106,7 +113,7 @@ public abstract class TableSortManager
    */
   public boolean isSortAscending()
   {
-    return getCurrentSortDirection().equals(SortDirection.ASCENDING);
+    return getSortDirection().equals(SortDirection.ASCENDING);
   }
     
   /**
@@ -116,9 +123,9 @@ public abstract class TableSortManager
    *             component (in addition to clicking on table column headers)
    * @return the current sort column name
    */
-  public SortDirection getCurrentSortDirection()
+  public SortDirection getSortDirection()
   {
-    return _currentSortDirection;
+    return getSortDirectionSelector().getSelection();
   }
 
   /**
@@ -128,45 +135,11 @@ public abstract class TableSortManager
    *             component (in addition to clicking on table column headers)
    * @param currentSortDirection the new current sort direction
    */
-  public void setCurrentSortDirection(SortDirection currentSortDirection)
+  public void setSortDirection(SortDirection currentSortDirection)
   {
-    if (!_currentSortDirection.equals(currentSortDirection)) {
-      _currentSortDirection = currentSortDirection;
-      sortChanged(_currentSortColumnName, _currentSortDirection);
+    if (!getSortDirection().equals(currentSortDirection)) {
+      getSortDirectionSelector().setSelection(currentSortDirection);
     }
-  }
-
-  /**
-   * Get a list of SelectItem objects for the set of columns that can be sorted
-   * on.
-   * 
-   * @return list of SelectItem objects for the set of columns that can be
-   *         sorted on
-   */
-  public List<SelectItem> getSortColumnSelections()
-  {
-    List<String> selections = new ArrayList<String>();
-    for (String columnName : _columnNames) {
-      selections.add(columnName);
-    }
-    return JSFUtils.createUISelectItems(selections);
-  }
-
-  /**
-   * Get a list of SelectItem objects for the set of sort directions (ascending,
-   * descending).
-   * 
-   * @return list of SelectItem objects for the set of sort directions
-   *         (ascending, descending)
-   */
-  public List<SelectItem> getSortDirectionSelections()
-  {
-    List<SelectItem> selections = new ArrayList<SelectItem>();
-    for (SortDirection sortOrder : SortDirection.values()) {
-      selections.add(new SelectItem(sortOrder,
-                                    sortOrder.toString()));
-    }
-    return selections;
   }
 
   /**
@@ -186,10 +159,10 @@ public abstract class TableSortManager
   {
     _columnNames = columnNames;
     _columnModel = new ListDataModel(columnNames);
-    if (!columnNames.contains(_currentSortColumnName)) {
-      _currentSortColumnName = columnNames.get(0);
-      _currentSortDirection = SortDirection.ASCENDING;
-      sortChanged(_currentSortColumnName, _currentSortDirection);
+    if (!columnNames.contains(getSortColumnName())) {
+      getSortColumnSelector().setSelectionIndex(0);
+      getSortDirectionSelector().setSelection(SortDirection.ASCENDING);
+      sortChanged(getSortColumnName(), getSortDirection());
     }
   }
 
@@ -197,12 +170,52 @@ public abstract class TableSortManager
   {
     return _columnNames;
   }
+  
+  /**
+   * Get a list of SelectItem objects for the set of columns that can be sorted
+   * on.
+   * 
+   * @return list of SelectItem objects for the set of columns that can be
+   *         sorted on
+   */
+  public UISelectOneBean<String> getSortColumnSelector()
+  {
+    if (_sortColumn == null) {
+      _sortColumn = new UISelectOneBean<String>(getColumnNames());
+      _sortColumn.addObserver(this);
+    }
+    return _sortColumn;
+  }
 
+  /**
+   * Get a list of SelectItem objects for the set of sort directions (ascending,
+   * descending).
+   * 
+   * @return list of SelectItem objects for the set of sort directions
+   *         (ascending, descending)
+   */
+  public UISelectOneBean<SortDirection> getSortDirectionSelector()
+  {
+    if (_sortDirection == null) {
+      _sortDirection = new SortDirectionSelector();
+      _sortDirection.addObserver(this);
+    }
+    return _sortDirection;
+  }
+  
+  // Observer methods
+
+  public void update(Observable o, Object arg)
+  {
+    sortChanged(getSortColumnName(), getSortDirection());
+  }
   
   // public action command methods & action listeners
 
 
   // abstract methods
+  
+  
 
   abstract protected void sortChanged(String newSortColumnName, SortDirection newSortDirection);
 
@@ -210,4 +223,3 @@ public abstract class TableSortManager
   // private methods
   
 }
-

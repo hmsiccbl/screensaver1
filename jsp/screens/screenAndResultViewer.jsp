@@ -305,7 +305,7 @@
 						rows="#{screenResultViewer.dataTableRowsPerPage.selection}"
 						styleClass="standardTable" headerClass="tableHeader"
 						rowClasses="row1,row2"
-						sortColumn="#{screenResultViewer.sortManager.currentSortColumnName}"
+						sortColumn="#{screenResultViewer.sortManager.sortColumnName}"
 						sortAscending="#{screenResultViewer.sortManager.sortAscending}">
 						<t:columns value="#{screenResultViewer.sortManager.columnModel}"
 							var="columnName"

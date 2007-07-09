@@ -113,7 +113,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   
   // public getters and setters - used by searchResults.jspf
   
-  protected TableSortManager getSortManager()
+  public TableSortManager getSortManager()
   {
     if (_sortManager == null) {
       _sortManager = new TableSortManager(getColumnHeaders()) {
@@ -128,17 +128,6 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
     return _sortManager;
   }
   
-  protected List<E> getCurrentSort()
-  {
-    doSort();
-    return _currentSort;
-  }
-  
-  protected void setCurrentSort(List<E> currentSort)
-  {
-    _currentSort = currentSort;
-  }
-
   public List<E> getContents()
   {
     return _unsortedResults;
@@ -183,24 +172,6 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
     _dataModel = dataModel;
   }
 
-  /**
-   * Get the data header column model.
-   * @return the data header column model
-   */
-  public DataModel getDataHeaderColumnModel()
-  {
-    return getSortManager().getColumnModel();
-  }
-
-  /**
-   * Get the name of the current column.
-   * @return the name of the current column
-   */
-  private String getCurrentColumnName()
-  {
-    return (String) getSortManager().getColumnModel().getRowData();
-  }
-  
   /**
    * Return true whenever the cell values for the current column should be a hyperlink.
    * @return true whenever the cell values for the current column should be a hyperlink
@@ -312,118 +283,13 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
     return _rowsPerPage;
   }
   
-  /**
-   * Get the current sort column name.
-   * 
-   * @motivation allow sort column to be set from a drop-down list UI component
-   *             (in addition to clicking on table column headers)
-   * @return the current sort column name
-   */
-  public String getCurrentSortColumnName()
-  {
-    return getSortManager().getCurrentSortColumnName();
-  }
-
-  /**
-   * Set the current sort column name.
-   * 
-   * @motivation allow sort column to be set from a drop-down list UI component
-   *             (in addition to clicking on table column headers)
-   * @param currentSortColumnName the new current sort column name
-   */
-  public void setCurrentSortColumnName(String currentSortColumnName)
-  {
-    getSortManager().setCurrentSortColumnName(currentSortColumnName);
-  }
-
-  /**
-   * Called by dataTable JSF component.
-   * @param sortAscending true if new sort direction is ascending; false if descending
-   */
-  public void setSortAscending(boolean sortAscending)
-  {
-    if (sortAscending) {
-      setCurrentSortDirection(SortDirection.ASCENDING);
-    }
-    else {
-      setCurrentSortDirection(SortDirection.DESCENDING);
-    }
-  }
-  
-  /**
-   * Called by dataTable JSF component.
-   * @return true if current sort direction is ascending; false if descending
-   */
-  public boolean isSortAscending()
-  {
-    return getCurrentSortDirection().equals(SortDirection.ASCENDING);
-  }
-    
-
-  /**
-   * Get the current sort direction.
-   * 
-   * @motivation allow sort direction to be set from a drop-down list UI
-   *             component (in addition to clicking on table column headers)
-   * @return the current sort column name
-   */
-  public SortDirection getCurrentSortDirection()
-  {
-    return getSortManager().getCurrentSortDirection();
-  }
-
-  /**
-   * Set the current sort direction.
-   * 
-   * @motivation allow sort direction to be set from a drop-down list UI
-   *             component (in addition to clicking on table column headers)
-   * @param currentSortDirection the new current sort direction
-   */
-  public void setCurrentSortDirection(SortDirection currentSortDirection)
-  {
-    getSortManager().setCurrentSortDirection(currentSortDirection);
-  }
-
-  /**
-   * Get a list of SelectItem objects for the set of columns that can be sorted
-   * on.
-   * 
-   * @return list of SelectItem objects for the set of columns that can be
-   *         sorted on
-   */
-  public List<SelectItem> getSortColumnSelections()
-  {
-    List<String> selections = new ArrayList<String>();
-    for (String columnName : getColumnHeaders()) {
-      selections.add(columnName);
-    }
-    return JSFUtils.createUISelectItems(selections);
-  }
-
-  /**
-   * Get a list of SelectItem objects for the set of sort directions (ascending,
-   * descending).
-   * 
-   * @return list of SelectItem objects for the set of sort directions
-   *         (ascending, descending)
-   */
-  public List<SelectItem> getSortDirectionSelections()
-  {
-    List<SelectItem> selections = new ArrayList<SelectItem>();
-    for (SortDirection sortOrder : SortDirection.values()) {
-      selections.add(new SelectItem(sortOrder,
-                                    sortOrder.toString()));
-    }
-    return selections;
-  }
-  
   
   // public action command methods & action listeners
 
   /**
    * Resort the results according to the current column, as selected by the user
    * in a drop-down list (in the UI), and redisplay the page. Sort direction is
-   * determined by last call to {@link #setCurrentSortDirection(SortDirection)}.
+   * determined by last call to {@link #setSortDirection(SortDirection)}.
    * Cache any newly computed sorts of the results for reuse.
    * 
    * @return the navigation rule to redisplay the current page
@@ -696,7 +562,18 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
     return (E) getDataModel().getRowData();
   }
   
- 
+  protected List<E> getCurrentSort()
+  {
+    doSort();
+    return _currentSort;
+  }
+  
+  protected void setCurrentSort(List<E> currentSort)
+  {
+    _currentSort = currentSort;
+  }
+
+
   // private instance methods
   
   /**
@@ -724,12 +601,12 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   private void doSort()
   {
-    if (getCurrentSortColumnName() == null) {
+    String sortColumnName = getSortManager().getSortColumnName();
+    if (sortColumnName == null) {
       _currentSort = _unsortedResults;
     }
     else {
-      String sortColumnName = getCurrentSortColumnName();
-      SortDirection sortDirection = getCurrentSortDirection();
+      SortDirection sortDirection = getSortManager().getSortDirection();
 
       // get the forward sort for the specified column, computing it if needed
       List<E> forwardSort = _forwardSorts.get(sortColumnName);
@@ -757,5 +634,15 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
       }
     }
     _dataModel = new ListDataModel(_currentSort);
+  }
+  
+  /**
+   * Get the name of the current column.
+   * @motivation convenience method
+   * @return the name of the current column
+   */
+  private String getCurrentColumnName()
+  {
+    return (String) getSortManager().getCurrentColumnName();
   }
 }

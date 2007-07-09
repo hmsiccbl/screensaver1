@@ -330,7 +330,7 @@ TODO:
 						styleClass="standardTable" columnClasses="column"
 						rows="#{cherryPickRequestViewer.screenerCherryPicksPerPage.selection}"
 						rowClasses="row1,row2" headerClass="tableHeader"
-						sortColumn="#{cherryPickRequestViewer.screenerCherryPicksSortManager.currentSortColumnName}"
+						sortColumn="#{cherryPickRequestViewer.screenerCherryPicksSortManager.sortColumnName}"
 						sortAscending="#{cherryPickRequestViewer.screenerCherryPicksSortManager.sortAscending}">
 						<t:columns
 							value="#{cherryPickRequestViewer.screenerCherryPicksSortManager.columnModel}"
@@ -488,7 +488,7 @@ TODO:
 						styleClass="standardTable" columnClasses="column"
 						rows="#{cherryPickRequestViewer.labCherryPicksPerPage.selection}"
 						rowClasses="row1,row2" headerClass="tableHeader"
-						sortColumn="#{cherryPickRequestViewer.labCherryPicksSortManager.currentSortColumnName}"
+						sortColumn="#{cherryPickRequestViewer.labCherryPicksSortManager.sortColumnName}"
 						sortAscending="#{cherryPickRequestViewer.labCherryPicksSortManager.sortAscending}"
 						rendered="#{!empty cherryPickRequestViewer.cherryPickRequest.labCherryPicks}">
 						<t:columns

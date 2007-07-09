@@ -42,15 +42,16 @@
 					action="#{navigator.sortOnSelectedColumn}"
 					styleClass="hiddenCommand" />
 				<t:selectOneMenu id="sortOrderMenu"
-					value="#{navigator.currentSortColumnName}"
+					value="#{navigator.sortManager.sortColumnSelector.value}"
 					onchange="this.previousSibling.click();" styleClass="command">
-					<f:selectItems value="#{navigator.sortColumnSelections}" />
+					<f:selectItems value="#{navigator.sortManager.sortColumnSelector.selectItems}" />
 				</t:selectOneMenu>
 				<t:selectOneMenu id="sortDirection"
-					value="#{navigator.currentSortDirection}"
-					converter="SortDirectionConverter" styleClass="command"
+					value="#{navigator.sortManager.sortDirectionSelector.value}"
+					styleClass="command"
 					onchange="this.previousSibling.previousSibling.click();">
-					<f:selectItems value="#{navigator.sortDirectionSelections}" />
+					<f:selectItems
+						value="#{navigator.sortManager.sortDirectionSelector.selectItems}" />
 				</t:selectOneMenu>
 			</t:panelGroup>
 

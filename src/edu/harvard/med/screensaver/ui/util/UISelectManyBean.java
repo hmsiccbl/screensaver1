@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
-
 import org.apache.log4j.Logger;
 
 public class UISelectManyBean<T> extends UISelectBean<T>
@@ -54,6 +52,8 @@ public class UISelectManyBean<T> extends UISelectBean<T>
     for (String key : selectionKeys) {
       _selections.add(_key2Obj.get(key));
     }
+    setChanged();
+    notifyObservers(_selections);
   }
   
   public void setSelections(Collection<T> selections)

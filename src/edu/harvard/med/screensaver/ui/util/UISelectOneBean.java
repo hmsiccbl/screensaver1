@@ -61,10 +61,12 @@ public class UISelectOneBean<T> extends UISelectBean<T>
         if ((selectItem.getValue() == null && selectionKey == null) ||
           selectItem.getValue().equals(selectionKey)) {
         _selectionIndex = i;
+        setChanged();
         break;
       }
       ++i;
     }
+    notifyObservers(_selection);
   }
   
   /**

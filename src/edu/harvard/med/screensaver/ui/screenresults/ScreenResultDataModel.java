@@ -131,20 +131,20 @@ abstract public class ScreenResultDataModel extends DataModel
   {
     log.debug("building ScreenResultDataModel");
     int sortByArg;
-    switch (_sortManager.getCurrentSortColumnIndex())
+    switch (_sortManager.getSortColumnIndex())
     {
     case 0: sortByArg = ScreenResultsDAO.SORT_BY_PLATE_WELL; break;
     case 1: sortByArg = ScreenResultsDAO.SORT_BY_WELL_PLATE; break;
     case 2: sortByArg = ScreenResultsDAO.SORT_BY_ASSAY_WELL_TYPE; break;
     default:
-      sortByArg = _sortManager.getCurrentSortColumnIndex() - ScreenResultViewer.DATA_TABLE_FIXED_COLUMNS;
+      sortByArg = _sortManager.getSortColumnIndex() - ScreenResultViewer.DATA_TABLE_FIXED_COLUMNS;
     }
     _wrappedData = new ArrayList<Map<String,String>>();
     _excludedResultValues = new ArrayList<List<Boolean>>();
     int rowIndex = 0;
     for (Map.Entry<WellKey,List<ResultValue>> entry : fetchData(_selectedResultValueTypes,
                                                                 sortByArg,
-                                                                _sortManager.getCurrentSortDirection()).entrySet()) {
+                                                                _sortManager.getSortDirection()).entrySet()) {
       WellKey wellKey = entry.getKey();
       addRow(rowIndex++, 
              wellKey,

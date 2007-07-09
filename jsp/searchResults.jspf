@@ -24,10 +24,10 @@
         styleClass="standardTable"
         headerClass="tableHeader"
         rowClasses="row1,row2"
-        sortColumn="#{searchResults.currentSortColumnName}"
-        sortAscending="#{searchResults.sortAscending}"
+        sortColumn="#{searchResults.sortManager.sortColumnName}"
+        sortAscending="#{searchResults.sortManager.sortAscending}"
         width="100%">
-				<t:columns value="#{searchResults.dataHeaderColumnModel}"
+				<t:columns value="#{searchResults.sortManager.columnModel}"
 					var="columnName" styleClass="column">
 					<f:facet name="header">
 						<t:commandSortHeader columnName="#{columnName}" arrow="false"
