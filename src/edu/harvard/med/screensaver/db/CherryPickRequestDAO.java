@@ -9,13 +9,11 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,7 +25,6 @@ import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
-import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;

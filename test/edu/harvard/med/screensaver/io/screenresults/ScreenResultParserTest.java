@@ -13,7 +13,6 @@ package edu.harvard.med.screensaver.io.screenresults;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;

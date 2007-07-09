@@ -11,10 +11,7 @@ package edu.harvard.med.screensaver.util;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 
 import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.Transformer;
