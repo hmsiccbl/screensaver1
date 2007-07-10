@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 
@@ -62,6 +63,13 @@ public class LibrarySearchResults extends SearchResults<Library>
 
   
   // implementations of the SearchResults abstract methods
+
+
+  @Override
+  protected List<DataExporter<Library>> getDataExporters()
+  {
+    return new ArrayList<DataExporter<Library>>();
+  }
 
   @Override
   public String showSummaryView()
@@ -197,7 +205,6 @@ public class LibrarySearchResults extends SearchResults<Library>
     }
     return null;
   }
-
 
   @Override
   protected void setEntityToView(Library library)

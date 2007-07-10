@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.ui.searchresults;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,14 +22,15 @@ import java.util.Map;
 import javax.faces.component.UIData;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
-import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.screenresults.DataTableRowsPerPageUISelectOneBean;
 import edu.harvard.med.screensaver.ui.table.TableSortManager;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 import org.apache.log4j.Logger;
 
@@ -50,10 +53,6 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   
   private static final Logger log = Logger.getLogger(SearchResults.class);
   
-  public static final String SD_FILE = "SD File";
-  private static final String EXCEL_FILE = "Excel Spreadsheet";
-  private static final String [] DOWNLOAD_FORMATS = { "", EXCEL_FILE, SD_FILE };
-
   private static final List<Integer> PAGE_SIZE_SELECTIONS =
     Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE);
   private static final Integer DEFAULT_PAGESIZE = PAGE_SIZE_SELECTIONS.get(1);
@@ -88,10 +87,10 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   private int _currentPageIndex = 0;
   private int _currentEntityIndex = 0;
   private DataTableRowsPerPageUISelectOneBean _rowsPerPage;
-  private String _downloadFormat = "";
   private UIData _dataTable;
   private DataModel _dataModel;
   private TableSortManager _sortManager;
+  private UISelectOneBean<DataExporter<E>> _dataExporterSelector;
   
   
   // public constructor
@@ -425,43 +424,37 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  /**
-   * Return true whenever the search results are downloadable. For the time being, the only
-   * downloadable search results are {@link
-   * edu.harvard.med.screensaver.ui.searchresults.WellSearchResults}.
-   * 
-   * @return true whenever the search results are downloadable
-   */ 
-  public boolean getIsDownloadable()
+  public UISelectOneBean<DataExporter<E>> getDataExporterSelector()
   {
-    return false;
-  }
-  
-  public String getDownloadFormat()
-  {
-    return _downloadFormat;
-  }
-
-
-  public void setDownloadFormat(String downloadFormat)
-  {
-    _downloadFormat = downloadFormat;
-  }
-
-  public List<SelectItem> getDownloadFormatSelections()
-  {
-    List<String> selections = new ArrayList<String>();
-    for (String i : DOWNLOAD_FORMATS) {
-      selections.add(i);
+    if (_dataExporterSelector == null) {
+      _dataExporterSelector = new UISelectOneBean<DataExporter<E>>(getDataExporters()) {
+        @Override
+        protected String getLabel(DataExporter<E> dataExporter)
+        {
+          return dataExporter.getFormatName(); 
+        }
+      };
     }
-    return JSFUtils.createUISelectItems(selections);
+    return _dataExporterSelector;
   }
   
-  public String downloadSearchResults()
+  @SuppressWarnings("unchecked")
+  final public String downloadSearchResults()
   {
-    throw new UnsupportedOperationException("This SearchResults (" + this + ") does not know how to download itself.");
+    DataExporter dataExporter = getDataExporterSelector().getSelection();
+    InputStream inputStream = dataExporter.export(getContents());
+    try {
+      JSFUtils.handleUserDownloadRequest(getFacesContext(),
+                                         inputStream,
+                                         dataExporter.getFileName(),
+                                         dataExporter.getMimeType());
+    }
+    catch (IOException e) {
+      reportApplicationError(e.toString());
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
-
+  
   public Map<String,String> getEscapeBackslashes()
   {
     return _backslashEscaper;
@@ -548,6 +541,8 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    * @param entity the entity to be displayed in detail mode
    */
   abstract protected void setEntityToView(E entity);
+  
+  abstract protected List<DataExporter<E>> getDataExporters();
   
   
   // protected instance methods

@@ -74,7 +74,7 @@
       cellspacing="0"
       columns="1"
       width="100%"
-      rendered="#{searchResults.isDownloadable}"
+      rendered="#{searchResults.dataExporterSelector.size > 0}"
       title="Download search results to Excel spreadsheet or SD File"
     >
       <h:form
@@ -84,10 +84,10 @@
           <h:outputText value="download search results to: " />
           <h:selectOneMenu
             id="downloadFormat"
-            value="#{searchResults.downloadFormat}"
+            value="#{searchResults.dataExporterSelector.value}"
             onchange="this.nextSibling.disabled = (this.value == '');"
           >
-            <f:selectItems value="#{searchResults.downloadFormatSelections}" />
+            <f:selectItems value="#{searchResults.dataExporterSelector.selectItems}" />
           </h:selectOneMenu>
           <h:commandButton
             id="downloadSearchResultsCommandButton"

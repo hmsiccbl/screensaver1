@@ -146,8 +146,4 @@ public interface LibrariesController
   @UIControllerMethod
   public String unloadLibraryContents(final Library libraryIn, final LibrarySearchResults results);
 
-  // TODO: refactor code in WellSearchResults that exports well search results to our io.libraries.{compound,rnai} packages, and call directly
-  @UIControllerMethod
-  public String downloadWellSearchResults(final WellSearchResults searchResultsIn);
-
 }

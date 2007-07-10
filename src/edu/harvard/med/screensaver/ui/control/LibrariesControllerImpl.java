@@ -10,31 +10,26 @@
 package edu.harvard.med.screensaver.ui.control;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
 import edu.harvard.med.screensaver.io.libraries.compound.NaturalProductsLibraryContentsParser;
 import edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser;
 import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
-import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.libraries.CompoundLibraryContentsImporter;
 import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
@@ -50,15 +45,11 @@ import edu.harvard.med.screensaver.ui.namevaluetable.GeneNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.LibraryNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.Pair;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.dao.DataAccessException;
 
 /**
@@ -93,6 +84,8 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   private RNAiLibraryContentsImporter _rnaiLibraryContentsImporter;
   private RNAiLibraryContentsParser _rnaiLibraryContentsParser;
   private PlateWellListParser _plateWellListParser;
+  private List<DataExporter<Well>> _wellDataExporters;
+
   
   // public getters and setters
   
@@ -253,6 +246,11 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   {
     _plateWellListParser = plateWellLristParser;
   }
+  
+  public void setWellDataExporters(List<DataExporter<Well>> wellDataExporters)
+  {
+    _wellDataExporters = wellDataExporters;
+  }
 
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.LibrariesController#findWells()
@@ -313,7 +311,9 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
           }
         }
         WellSearchResults searchResults =
-          new WellSearchResults(foundWells, LibrariesControllerImpl.this);
+          new WellSearchResults(foundWells,
+                                LibrariesControllerImpl.this,
+                                _wellDataExporters);
         result[0] = viewWellSearchResults(searchResults);
       }
     });
@@ -387,7 +387,8 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
                           "hbnWells.hbnCompounds");
         WellSearchResults wellSearchResults = 
           new WellSearchResults(new ArrayList<Well>(library.getWells()),
-                                LibrariesControllerImpl.this);
+                                LibrariesControllerImpl.this,
+                                _wellDataExporters);
         _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
         libraryOut[0] = library;
       }
@@ -741,117 +742,4 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return viewLibrary(libraryIn, results);
   }
   
-  // TODO: refactor code in WellSearchResults that exports well search results to our io.libraries.{compound,rnai} packages, and call directly
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#downloadWellSearchResults(edu.harvard.med.screensaver.ui.searchresults.WellSearchResults)
-   */
-  public String downloadWellSearchResults(final WellSearchResults searchResults)
-  {
-    logUserActivity("downloadWellSearchResults");
-    _dao.doInTransaction(new DAOTransaction() 
-    {
-      @SuppressWarnings("unchecked")
-      public void runTransaction() 
-      {
-        List<Well> inflatedWells = eagerFetchWellsForDownloadWellSearchResults(searchResults);
-        
-        WellSearchResults inflatedSearchResults = new WellSearchResults(inflatedWells, LibrariesControllerImpl.this);
-        File searchResultsFile = null;
-        PrintWriter searchResultsPrintWriter = null;
-        FileOutputStream searchResultsFileOutputStream = null;
-        try {
-          searchResultsFile = File.createTempFile(
-            "searchResults.",
-            searchResults.getDownloadFormat().equals(SearchResults.SD_FILE) ? ".sdf" : ".xls");
-          if (searchResults.getDownloadFormat().equals(SearchResults.SD_FILE)) {
-            searchResultsPrintWriter = new PrintWriter(searchResultsFile);
-            inflatedSearchResults.writeSDFileSearchResults(searchResultsPrintWriter);
-            searchResultsPrintWriter.close();
-          }
-          else {
-            HSSFWorkbook searchResultsWorkbook = new HSSFWorkbook();
-            inflatedSearchResults.writeExcelFileSearchResults(searchResultsWorkbook);
-            searchResultsFileOutputStream = new FileOutputStream(searchResultsFile);
-            searchResultsWorkbook.write(searchResultsFileOutputStream);
-            searchResultsFileOutputStream.close();
-          }
-          JSFUtils.handleUserFileDownloadRequest(
-            getFacesContext(),
-            searchResultsFile,
-            searchResults.getDownloadFormat().equals(SearchResults.SD_FILE) ? "chemical/x-mdl-sdfile" : Workbook.MIME_TYPE);
-        }
-        catch (IOException e)
-        {
-          showMessage("systemError");
-          log.error(e.getMessage());
-          throw new DAOTransactionRollbackException("could not create export file", e);
-        }
-        finally {
-          IOUtils.closeQuietly(searchResultsPrintWriter);
-          IOUtils.closeQuietly(searchResultsFileOutputStream);
-          if (searchResultsFile != null && searchResultsFile.exists()) {
-            searchResultsFile.delete();
-          }
-        }
-      }
-
-      private List<Well> eagerFetchWellsForDownloadWellSearchResults(final WellSearchResults searchResults) {
-        // eager fetch all of the data that will be needed to generate the downloaded file 
-        Set<Library> libraries = new HashSet<Library>();
-        List<Well> wells = searchResults.getContents();
-        List<Well> inflatedWells = new ArrayList<Well>();
-        for (Well well : wells) {
-          libraries.add(well.getLibrary());
-        }
-        // optimization: eager fetch full set of wells from each library only if
-        // many wells are retrieved from each library (on average); this is just
-        // a heuristic and the '100' value is quite arbitrary
-        if (wells.size() / libraries.size() < 100) {
-          for (Well well : wells) {
-            if (well.getLibrary().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-              inflatedWells.add(_dao.reloadEntity(well,
-                                                  true,
-                                                  "hbnMolfile",
-                                                  "hbnCompounds.compoundNames",
-                                                  "hbnCompounds.casNumbers",
-                                                  "hbnCompounds.nscNumbers",
-                                                  "hbnCompounds.pubchemCids"));
-            }
-            else if (well.getLibrary().getScreenType().equals(ScreenType.RNAI)) {
-              inflatedWells.add(_dao.reloadEntity(well,
-                                                  true,
-                                                  "hbnSilencingReagents.gene.genbankAccessionNumbers",
-                                                  "hbnSilencingReagents.gene.oldEntrezgeneIds",
-                                                  "hbnSilencingReagents.gene.oldEntrezgeneSymbols"));
-            }
-          }
-        }
-        else {
-          for (Library library : libraries) {
-            if (library.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-              _dao.reloadEntity(library,
-                                true,
-                                "hbnWells.hbnMolfile",
-                                "hbnWells.hbnCompounds.compoundNames",
-                                "hbnWells.hbnCompounds.casNumbers",
-                                "hbnWells.hbnCompounds.nscNumbers",
-                                "hbnWells.hbnCompounds.pubchemCids");
-            }
-            else if (library.getScreenType().equals(ScreenType.RNAI)) {
-              _dao.reloadEntity(library,
-                                true,
-                                "hbnWells.hbnSilencingReagents.gene.genbankAccessionNumbers",
-                                "hbnWells.hbnSilencingReagents.gene.oldEntrezgeneIds",
-                                "hbnWells.hbnSilencingReagents.gene.oldEntrezgeneSymbols");
-            }
-          }
-          for (Well well : wells) {
-            inflatedWells.add(_dao.reloadEntity(well));
-          }
-        }
-        return inflatedWells;
-      }
-    });
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
 }

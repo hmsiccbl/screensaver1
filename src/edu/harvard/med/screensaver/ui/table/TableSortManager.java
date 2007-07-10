@@ -202,6 +202,7 @@ public abstract class TableSortManager implements Observer
     }
     return _sortDirection;
   }
+
   
   // Observer methods
 
@@ -209,13 +210,9 @@ public abstract class TableSortManager implements Observer
   {
     sortChanged(getSortColumnName(), getSortDirection());
   }
+
   
-  // public action command methods & action listeners
-
-
   // abstract methods
-  
-  
 
   abstract protected void sortChanged(String newSortColumnName, SortDirection newSortDirection);
 

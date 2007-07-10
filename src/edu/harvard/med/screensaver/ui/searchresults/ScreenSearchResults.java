@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.SortedSet;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
@@ -72,6 +73,12 @@ public class ScreenSearchResults extends SearchResults<Screen>
 
   // implementations of the SearchResults abstract methods
   
+  @Override
+  protected List<DataExporter<Screen>> getDataExporters()
+  {
+    return new ArrayList<DataExporter<Screen>>();
+  }
+
   @Override
   public String showSummaryView()
   {
@@ -299,7 +306,6 @@ public class ScreenSearchResults extends SearchResults<Screen>
     }
     return null;
   }
-
 
   @Override
   protected void setEntityToView(Screen screen)

@@ -188,6 +188,13 @@
     <property
       name="plateWellListParser"
       ref="plateWellListParser" />
+    <property name="wellDataExporters">
+    <list>
+    <ref bean="sdfWellsDataExporter"/>
+    <ref bean="xlsWellsDataExporter"/>
+    </list>
+    </property>
+      
     <aop:scoped-proxy/>
   </bean>
 
