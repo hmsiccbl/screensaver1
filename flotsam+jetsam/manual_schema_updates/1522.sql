@@ -12,4 +12,4 @@ INSERT INTO well_volume_adjustment (well_volume_adjustment_id, version, copy_id,
 
 DROP TABLE copy_info_microliter_well_volumes;
 
-/*COMMIT;*/
+COMMIT;
