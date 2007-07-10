@@ -189,11 +189,15 @@ public class WellsDataExporter implements DataExporter<Well>
     int rnaiSheetRow = 1;
     int compoundSheetRow = 1;
     for (Well well : wells) {
-      if (writeWellToRNAiSheet(well, rnaiSheet, rnaiSheetRow)) {
-        rnaiSheetRow ++;
+      if (well.getLibrary().getScreenType().equals(ScreenType.RNAI)) {
+        if (writeWellToRNAiSheet(well, rnaiSheet, rnaiSheetRow)) {
+          rnaiSheetRow ++;
+        }
       }
-      if (writeWellToCompoundSheet(well, compoundSheet, compoundSheetRow)) {
-        compoundSheetRow ++;
+      if (well.getLibrary().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+        if (writeWellToCompoundSheet(well, compoundSheet, compoundSheetRow)) {
+          compoundSheetRow ++;
+        }
       }
     }
     // note: remove compounds sheet first, in case genes sheet is also removed
