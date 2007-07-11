@@ -164,7 +164,7 @@ public class WellsDataExporter implements DataExporter<Well>
         }
       }
       for (Well well : wells) {
-        inflatedWells.add(_dao.reloadEntity(well));
+        inflatedWells.add(_dao.findEntityById(Well.class, well.getEntityId()));
       }
     }
     return inflatedWells;
@@ -174,7 +174,9 @@ public class WellsDataExporter implements DataExporter<Well>
                                        List<Well> wells)
   {
     for (Well well : wells) {
-      writeToSDFile(searchResultsPrintWriter, well);
+      if (well.getLibrary().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+        writeToSDFile(searchResultsPrintWriter, well);
+      }
     }
   }
   
