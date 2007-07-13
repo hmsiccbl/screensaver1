@@ -18,7 +18,6 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.ui.table.TableSortManager;
 
 import org.apache.log4j.Logger;
 
@@ -35,12 +34,13 @@ public class SinglePlateScreenResultDataModel extends ScreenResultDataModel
   // public constructors and methods
   
   public SinglePlateScreenResultDataModel(ScreenResult screenResult,
-                                          TableSortManager sortManager,
-                                          List<ResultValueType> selectedResultValueTypes,
+                                          List<ResultValueType> resultValueTypes,
+                                          int sortColumnIndex,
+                                          SortDirection sortDirection,
                                           ScreenResultsDAO dao,
                                           int plateNumber)
   {
-    super(screenResult, sortManager, selectedResultValueTypes, dao);
+    super(screenResult, resultValueTypes, sortColumnIndex, sortDirection, dao);
     _plateNumber = plateNumber;
   }
 
@@ -49,10 +49,10 @@ public class SinglePlateScreenResultDataModel extends ScreenResultDataModel
 
   @Override
   protected Map<WellKey,List<ResultValue>> fetchData(List<ResultValueType> selectedResultValueTypes,
-                                                   int sortBy,
-                                                   SortDirection sortDirection)
+                                                     int sortBy,
+                                                     SortDirection sortDirection)
   {
-    _data = _screenResultsDao.findSortedResultValueTableByRange(_selectedResultValueTypes,
+    _data = _screenResultsDao.findSortedResultValueTableByRange(_resultValueTypes,
                                                                 sortBy,
                                                                 sortDirection,
                                                                 0,

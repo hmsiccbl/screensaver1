@@ -10,14 +10,14 @@
 package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-
-import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.table.TableColumn;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -33,17 +33,11 @@ public class LibrarySearchResults extends SearchResults<Library>
   
   private static final Logger log = Logger.getLogger(LibrarySearchResults.class);
 
-  private static final String SHORT_NAME   = "Short Name";
-  private static final String LIBRARY_NAME = "Library Name";
-  private static final String SCREEN_TYPE  = "Screen Type";
-  private static final String LIBRARY_TYPE = "Library Type";
-  private static final String START_PLATE  = "Start Plate";
-  private static final String END_PLATE    = "End Plate";
-  
-  
+
   // instance fields
   
   private LibrariesController _librariesController;
+  private ArrayList<TableColumn<Library>> _columns;
   
   
   // public contructor
@@ -64,7 +58,6 @@ public class LibrarySearchResults extends SearchResults<Library>
   
   // implementations of the SearchResults abstract methods
 
-
   @Override
   protected List<DataExporter<Library>> getDataExporters()
   {
@@ -79,133 +72,53 @@ public class LibrarySearchResults extends SearchResults<Library>
     return _librariesController.browseLibraries();
   }
   
-  @Override
-  protected List<String> getColumnHeaders()
+  protected List<TableColumn<Library>> getColumns()
   {
-    List<String> columnHeaders = new ArrayList<String>();
-    columnHeaders.add(SHORT_NAME);
-    columnHeaders.add(LIBRARY_NAME);
-    columnHeaders.add(SCREEN_TYPE);
-    columnHeaders.add(LIBRARY_TYPE);
-    columnHeaders.add(START_PLATE);
-    columnHeaders.add(END_PLATE);
-    return columnHeaders;
-  }
-  
-  @Override
-  protected boolean isCommandLink(String columnName)
-  {
-    return columnName.equals(SHORT_NAME);
-  }
-  
-  @Override
-  protected boolean isCommandLinkList(String columnName)
-  {
-    return false;
-  }
-  
-  @Override
-  protected String getColumnDescription(String columnName)
-  {
-    if (columnName.equals(SHORT_NAME)) {
-      return "The abbreviated name for the library";
-    }
-    if (columnName.equals(LIBRARY_NAME)) {
-      return "The full name of the library";
-    }
-    if (columnName.equals(SCREEN_TYPE)) {
-      return "'RNAi' or 'Small Molecule'";
-    }
-    if (columnName.equals(LIBRARY_TYPE)) {
-      return "The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc."; 
-    }
-    if (columnName.equals(START_PLATE)) {
-      return "The plate number for the first plate in the library";
-    }
-    if (columnName.equals(END_PLATE)) {
-      return "The plate number for the last plate in the library";
-    }
-    return null;
-  }
-  
-  @Override
-  protected Object getCellValue(Library library, String columnName)
-  {
-    if (columnName.equals(SHORT_NAME)) {
-      return library.getShortName();
-    }
-    if (columnName.equals(LIBRARY_NAME)) {
-      return library.getLibraryName();
-    }
-    if (columnName.equals(SCREEN_TYPE)) {
-      return library.getScreenType();
-    }
-    if (columnName.equals(LIBRARY_TYPE)) {
-      return library.getLibraryType();
-    }
-    if (columnName.equals(START_PLATE)) {
-      return library.getStartPlate();
-    }
-    if (columnName.equals(END_PLATE)) {
-      return library.getEndPlate();
-    }
-    return null;
-  }
-  
-  @Override
-  protected Object cellAction(Library library, String columnName)
-  {
-    return _librariesController.viewLibrary(library, this);
-  }
-  
-  @Override
-  protected Comparator<Library> getComparatorForColumnName(String columnName)
-  {
-    if (columnName.equals(SHORT_NAME)) {
-      return new Comparator<Library>() {
-        public int compare(Library l1, Library l2) {
-          return l1.getShortName().compareTo(l2.getShortName());
-        }
-      };
-    }
-    if (columnName.equals(LIBRARY_NAME)) {
-      return new Comparator<Library>() {
-        public int compare(Library l1, Library l2) {
-          return l1.getLibraryName().compareTo(l2.getLibraryName());
-        }
-      };
-    }
-    if (columnName.equals(SCREEN_TYPE)) {
-      return new Comparator<Library>() {
-        public int compare(Library l1, Library l2) {
-          return l1.getScreenType().getValue().compareTo(l2.getScreenType().getValue());
-        }
-      };
-    }
-    if (columnName.equals(LIBRARY_TYPE)) {
-      return new Comparator<Library>() {
-        public int compare(Library l1, Library l2) {
-          return l1.getLibraryType().getValue().compareTo(l2.getLibraryType().getValue());
-        }
-      };
-    }
-    if (columnName.equals(START_PLATE)) {
-      return new Comparator<Library>() {
-        public int compare(Library l1, Library l2) {
-          return l1.getStartPlate().compareTo(l2.getStartPlate());
-        }
-      };
-    }
-    if (columnName.equals(END_PLATE)) {
-      return new Comparator<Library>() {
-        public int compare(Library l1, Library l2) {
-          return l1.getEndPlate().compareTo(l2.getEndPlate());
-        }
-      };
-    }
-    return null;
-  }
+    if (_columns == null) {
+      _columns = new ArrayList<TableColumn<Library>>();
+      _columns.add(new TableColumn<Library>("Short Name", "The abbreviated name for the library") {
+        @Override
+        public Object getCellValue(Library library) { return library.getShortName(); }
 
+        @Override
+        public boolean isCommandLink() { return true; }
+
+        @Override
+        public Object cellAction(Library library) { return _librariesController.viewLibrary(library, LibrarySearchResults.this); }
+      });
+      _columns.add(new TableColumn<Library>("Library Name", "The full name of the library") {
+        @Override
+        public Object getCellValue(Library library) { return library.getLibraryName(); }
+      });
+      _columns.add(new TableColumn<Library>("Screen Type", "'RNAi' or 'Small Molecule'") {
+        @Override
+        public Object getCellValue(Library library) { return library.getScreenType(); }
+      });
+      _columns.add(new TableColumn<Library>("Library Type", "The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc.") {
+        @Override
+        public Object getCellValue(Library library) { return library.getLibraryType(); }
+      });
+      _columns.add(new TableColumn<Library>("Start Plate", "The plate number for the first plate in the library", true) {
+        @Override
+        public Object getCellValue(Library library) { return library.getStartPlate(); }
+      });
+      _columns.add(new TableColumn<Library>("End Plate", "The plate number for the last plate in the library", true) {
+        @Override
+        public Object getCellValue(Library library) { return library.getEndPlate(); }
+      });
+    }
+    return _columns;
+  }
+  
+  @Override
+  protected List<Integer[]> getCompoundSorts()
+  {
+    List<Integer[]> compoundSorts = super.getCompoundSorts();
+    compoundSorts.add(new Integer[] {2, 3, 0});
+    compoundSorts.add(new Integer[] {3, 0});
+    return compoundSorts;
+  }
+  
   @Override
   protected void setEntityToView(Library library)
   {

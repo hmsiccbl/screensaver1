@@ -18,7 +18,6 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.ui.table.TableSortManager;
 
 import org.apache.log4j.Logger;
 
@@ -36,12 +35,13 @@ public class HitsOnlyScreenResultDataModel extends ScreenResultDataModel
   // public constructors and methods
   
   public HitsOnlyScreenResultDataModel(ScreenResult screenResult,
-                                          TableSortManager sortManager,
-                                          List<ResultValueType> selectedResultValueTypes,
-                                          ScreenResultsDAO dao,
-                                          ResultValueType hitsOnlyRvt)
+                                       List<ResultValueType> resultValueTypes,
+                                       int sortColumnIndex,
+                                       SortDirection sortDirection,
+                                       ScreenResultsDAO dao,
+                                       ResultValueType hitsOnlyRvt)
   {
-    super(screenResult, sortManager, selectedResultValueTypes, dao);
+    super(screenResult, resultValueTypes, sortColumnIndex, sortDirection, dao);
     _hitsOnlyRvt = hitsOnlyRvt;
   }
 
@@ -53,7 +53,7 @@ public class HitsOnlyScreenResultDataModel extends ScreenResultDataModel
                                                    int sortBy,
                                                    SortDirection sortDirection)
   {
-    _data = _screenResultsDao.findSortedResultValueTableByRange(_selectedResultValueTypes,
+    _data = _screenResultsDao.findSortedResultValueTableByRange(_resultValueTypes,
                                                                 sortBy,
                                                                 sortDirection,
                                                                 0,

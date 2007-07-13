@@ -156,7 +156,7 @@
 					layoutWidth="6"
 					value="#{screenResultViewer.selectedDataHeaders.value}"
 					valueChangeListener="#{screenResultViewer.dataHeadersSelectionListener}"
-					binding="#{screenResultViewer.dataHeadersSelectMany}"
+					binding="#{screenResultViewer.dataHeadersSelectManyUIInput}"
 					styleClass="label" style="vertical-align: top">
 					<f:selectItems id="dataHeaders"
 						value="#{screenResultViewer.selectedDataHeaders.selectItems}" />
@@ -289,7 +289,7 @@
 							styleClass="label" />
 						<t:inputText id="rowNumber"
 							value="#{screenResultViewer.rowNumber}"
-							binding="#{screenResultViewer.rowNumberInput}"
+							binding="#{screenResultViewer.rowNumberUIInput}"
 							valueChangeListener="#{screenResultViewer.rowNumberListener}"
 							size="6" styleClass="inputText">
 						</t:inputText>
@@ -308,10 +308,10 @@
 						sortColumn="#{screenResultViewer.sortManager.sortColumnName}"
 						sortAscending="#{screenResultViewer.sortManager.sortAscending}">
 						<t:columns value="#{screenResultViewer.sortManager.columnModel}"
-							var="columnName"
-							styleClass="#{(columnName==\"Plate\" || columnName==\"Well\") ? \"keyColumn\" : (screenResultViewer.numericColumn ? \"numericColumn\" : \"textColumn\")} #{screenResultViewer.dataTableModel.resultValueCellExcluded ? \"excludedValue\" : \"\"} ">
+							var="column"
+							styleClass="#{(column.name==\"Plate\" || column.name==\"Well\") ? \"keyColumn\" : (column.numeric ? \"numericColumn\" : \"textColumn\")} #{screenResultViewer.resultValueExcluded ? \"excludedValue\" : \"\"} ">
 							<f:facet name="header">
-								<t:commandSortHeader columnName="#{columnName}" arrow="false">
+								<t:commandSortHeader columnName="#{column.name}" arrow="false">
 									<f:facet name="ascending">
 										<t:graphicImage value="/images/ascending-arrow.gif"
 											rendered="true" border="0" />
@@ -320,14 +320,14 @@
 										<t:graphicImage value="/images/descending-arrow.gif"
 											rendered="true" border="0" />
 									</f:facet>
-									<h:outputText value="#{columnName}" />
+									<h:outputText value="#{column.name}" />
 								</t:commandSortHeader>
 							</f:facet>
-							<t:outputText value="#{row[columnName]}"
-								rendered="#{columnName != \"Well\"}" />
-							<t:commandLink action="#{screenResultViewer.viewWell}"
-								rendered="#{columnName == \"Well\"}">
-								<t:outputText value="#{row[columnName]}" />
+							<t:outputText value="#{row[column.name]}"
+								rendered="#{!column.isCommandLink}" />
+							<t:commandLink action="#{screenResultViewer.cellAction}"
+								rendered="#{column.isCommandLink}">
+								<t:outputText value="#{row[column.name]}" />
 							</t:commandLink>
 						</t:columns>
 					</t:dataTable>

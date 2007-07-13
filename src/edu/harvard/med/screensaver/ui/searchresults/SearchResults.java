@@ -14,10 +14,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.faces.component.UIData;
 import javax.faces.model.DataModel;
@@ -28,9 +29,11 @@ import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.screenresults.DataTableRowsPerPageUISelectOneBean;
+import edu.harvard.med.screensaver.ui.table.TableColumn;
 import edu.harvard.med.screensaver.ui.table.TableSortManager;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 
@@ -81,15 +84,14 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   
   private List<E> _unsortedResults;
   private List<E> _currentSort;
-  private Map<String,List<E>> _forwardSorts = new HashMap<String,List<E>>();
-  private Map<String,List<E>> _reverseSorts = new HashMap<String,List<E>>();
+  private Pair<TableColumn<E>,SortDirection> _currentSortType;
   private int _resultsSize;
   private int _currentPageIndex = 0;
   private int _currentEntityIndex = 0;
   private DataTableRowsPerPageUISelectOneBean _rowsPerPage;
   private UIData _dataTable;
   private DataModel _dataModel;
-  private TableSortManager _sortManager;
+  private TableSortManager<E> _sortManager;
   private UISelectOneBean<DataExporter<E>> _dataExporterSelector;
   
   
@@ -112,21 +114,36 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   
   // public getters and setters - used by searchResults.jspf
   
-  public TableSortManager getSortManager()
+  public TableSortManager<E> getSortManager()
   {
     if (_sortManager == null) {
-      _sortManager = new TableSortManager(getColumnHeaders()) {
-        @Override
-        protected void sortChanged(String newSortColumnName, SortDirection newSortDirection)
+      _sortManager = new TableSortManager<E>(getColumns());
+      _sortManager.addObserver(new Observer() {
+        public void update(Observable o, Object obj)
         {
           doSort();
         }
-      };
+      });
+      
+      List<Integer[]> compoundSorts = getCompoundSorts();
+      for (Integer[] compoundSort : compoundSorts) {
+        List<TableColumn<E>> columns = new ArrayList<TableColumn<E>>();
+        for (Integer colIndex : compoundSort) {
+          columns.add(_sortManager.getColumn(colIndex));
+        }
+        _sortManager.addCompoundSortColumns(columns);
+      }
     }
    
     return _sortManager;
   }
   
+  protected List<Integer[]> getCompoundSorts()
+  {
+    return new ArrayList<Integer[]>();
+  }
+
+
   public List<E> getContents()
   {
     return _unsortedResults;
@@ -170,51 +187,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   {
     _dataModel = dataModel;
   }
-
-  /**
-   * Return true whenever the cell values for the current column should be a hyperlink.
-   * @return true whenever the cell values for the current column should be a hyperlink
-   */
-  public boolean getIsCommandLink()
-  {
-    return isCommandLink(getCurrentColumnName());
-  }
   
-  /**
-   * Return true whenever the cell values for the column with the specified name should
-   * be a semicolon-separated list of hyperlinks. In this situation, {@link
-   * #getCellValue()} returns an array of values, and {@link #cellAction()} is
-   * called with a <code>commandValue</code> parameter equal to the results of
-   * {@link #getCellValue(AbstractEntity, String)}.
-   * 
-   * @return true whenever the cell values for the current column should be a list
-   * of hyperlinks
-   */
-  public boolean getIsCommandLinkList()
-  {
-    return isCommandLinkList(getCurrentColumnName());
-  }
-  
-  /**
-   * Get the descriptive text for the current column. Used for mouse-over quick-help.
-   * 
-   * @return the descriptive text for the current column
-   */
-  public String getColumnDescription()
-  {
-    return getColumnDescription(getCurrentColumnName());
-  }
-  
-  /**
-   * Get the value to be displayed for the current cell.
-   * @return the value to be displayed for the current cell
-   */
-  @SuppressWarnings("unchecked")
-  public Object getCellValue()
-  {
-    return getCellValue(getEntity(), getCurrentColumnName());
-  }
-
   /**
    * Get the (1-based) index of the first item displayed on the current page.
    * @return the (1-based) index of the first item displayed on the current page
@@ -302,6 +275,15 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   }
   
   /**
+   * Get the value to be displayed for the current cell.
+   * @return the value to be displayed for the current cell
+   */
+  public Object getCellValue()
+  {
+    return getCurrentColumn().getCellValue(getEntity());
+  }
+  
+  /**
    * Perform the action for clicking on the current cell. Return the navigation rule to go
    * along with the action for clicking on the current cell. This method is only called when
    * {@link #getIsCommandLink()} is true.
@@ -311,8 +293,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   @SuppressWarnings("unchecked")
   public Object cellAction()
   {
-    _currentEntityIndex = _dataModel.getRowIndex();
-    return cellAction(getEntity(), getCurrentColumnName());
+    return getCurrentColumn().cellAction(getEntity());
   }
 
   /**
@@ -474,67 +455,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    * 
    * @return a list of the column headers
    */
-  abstract protected List<String> getColumnHeaders();
-  
-  /**
-   * Return true whenever the cell values for the column with the specified name should
-   * be a hyperlink.
-   * 
-   * @param columnName the name of the column
-   * @return true whenever the cell values for the column with the specified name should
-   * be a hyperlink.
-   */
-  abstract protected boolean isCommandLink(String columnName);
-  
-  /**
-   * Return true whenever the cell values for the column with the specified name should
-   * be a semicolon-separated list of hyperlinks. In this situation, {@link
-   * #getCellValue()} returns an array of values, and {@link #cellAction()} is
-   * called with a <code>commandValue</code> parameter equal to the results of
-   * {@link #getCellValue(AbstractEntity, String)}.
-   * 
-   * @param columnName the name of the column
-   * @return true whenever the cell values for the column with the specified name should
-   * be a list of hyperlinks.
-   */
-  abstract protected boolean isCommandLinkList(String columnName);
-  
-  /**
-   * Get the value to be displayed for the current cell.
-   * 
-   * @param entity the entity displayed in the current cell (the row index)
-   * @param columnName the name of the column for the current cell (the column index)
-   * @return the value to be displayed for the current cell
-   */
-  abstract protected Object getCellValue(E entity, String columnName);
-  
-  /**
-   * Get the descriptive text for the column with the specified column name. Used for
-   * mouse-over quick-help.
-   * 
-   * @param columnName The name of the column to return descriptive text for
-   * @return the descriptive text for the column
-   */
-  abstract protected String getColumnDescription(String columnName);
-  
-  /**
-   * Perform the action for clicking on the current cell. Return the navigation rule to go
-   * along with the action for clicking on the current cell. This method is only called when
-   * {@link #isCommandLink} is true.
-   * 
-   * @param entity the entity displayed in the current cell (the row index)
-   * @param columnName the name of the column for the current cell (the column index)
-   * @return the navigation rule to go along with the action for clicking on the current cell 
-   */
-  abstract protected Object cellAction(E entity, String columnName);
-  
-  /**
-   * Get a comparator for sorting the entities according to the specified column.
-   * 
-   * @param columnName the name of the column
-   * @return a comparator for sorting the entities according to the specified column
-   */
-  abstract protected Comparator<E> getComparatorForColumnName(String columnName);
+  abstract protected List<TableColumn<E>> getColumns();
   
   /**
    * Set the entity to be displayed in detail mode.
@@ -547,25 +468,25 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   
   // protected instance methods
   
+  final protected TableColumn<E> getCurrentColumn()
+  {
+    return getColumns().get(getSortManager().getCurrentColumnIndex());
+  }
+
   /**
    * Get the entity in the current cell.
    * @return the entity in the current cell
    */
   @SuppressWarnings("unchecked")  
-  protected E getEntity()
+  final protected E getEntity()
   {
     return (E) getDataModel().getRowData();
   }
   
-  protected List<E> getCurrentSort()
+  final protected List<E> getCurrentSort()
   {
     doSort();
     return _currentSort;
-  }
-  
-  protected void setCurrentSort(List<E> currentSort)
-  {
-    _currentSort = currentSort;
   }
 
 
@@ -596,48 +517,14 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    */
   private void doSort()
   {
-    String sortColumnName = getSortManager().getSortColumnName();
-    if (sortColumnName == null) {
-      _currentSort = _unsortedResults;
+    // TODO: reinstate cached sort orders by column & direction
+    Pair<TableColumn<E>,SortDirection> newSortType = 
+      new Pair<TableColumn<E>,SortDirection>(getSortManager().getSortColumn(), getSortManager().getSortDirection());
+    if (!newSortType.equals(_currentSortType)) {
+      _currentSort = new ArrayList<E>(_unsortedResults);
+      Collections.sort(_currentSort, getSortManager().getSortColumnComparator());
+      _dataModel = new ListDataModel(_currentSort);
+      _currentSortType = newSortType;
     }
-    else {
-      SortDirection sortDirection = getSortManager().getSortDirection();
-
-      // get the forward sort for the specified column, computing it if needed
-      List<E> forwardSort = _forwardSorts.get(sortColumnName);
-      if (forwardSort == null) {
-        forwardSort = new ArrayList<E>(_unsortedResults);
-        Collections.sort(forwardSort, getComparatorForColumnName(sortColumnName));
-        _forwardSorts.put(sortColumnName, forwardSort);
-      }
-
-      // set the _currentSort variable appropriately
-      if (sortDirection.equals(SortDirection.ASCENDING)) {
-        _currentSort = forwardSort;
-      }
-      else {
-
-        // get the reverse sort for the specified column, computing it if needed
-        List<E> reverseSort = _reverseSorts.get(sortColumnName);
-        if (reverseSort == null) {
-          reverseSort = new ArrayList<E>(forwardSort);
-          Collections.reverse(reverseSort);
-          _reverseSorts.put(sortColumnName, reverseSort);
-        }
-
-        _currentSort = reverseSort;
-      }
-    }
-    _dataModel = new ListDataModel(_currentSort);
-  }
-  
-  /**
-   * Get the name of the current column.
-   * @motivation convenience method
-   * @return the name of the current column
-   */
-  private String getCurrentColumnName()
-  {
-    return (String) getSortManager().getCurrentColumnName();
   }
 }

@@ -47,6 +47,9 @@ public class UISelectManyBean<T> extends UISelectBean<T>
    */
   public void setValue(List<String> selectionKeys)
   {
+    if (_selectionKeys != null && _selectionKeys.equals(selectionKeys)) {
+      return;
+    }
     _selectionKeys = selectionKeys;
     _selections.clear();
     for (String key : selectionKeys) {

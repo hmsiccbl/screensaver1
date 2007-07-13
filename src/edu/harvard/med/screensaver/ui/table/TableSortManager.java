@@ -9,7 +9,11 @@
 
 package edu.harvard.med.screensaver.ui.table;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -21,7 +25,7 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 import org.apache.log4j.Logger;
 
-public abstract class TableSortManager implements Observer
+public class TableSortManager<E> extends Observable implements Observer 
 {
   // static members
 
@@ -30,35 +34,62 @@ public abstract class TableSortManager implements Observer
 
   // instance data members
 
-  private List<String> _columnNames;
   private DataModel _columnModel;
+  private List<TableColumn<E>> _columns;
+  private List<String> _columnNames;
   private UISelectOneBean<SortDirection> _sortDirection;
-  private UISelectOneBean<String> _sortColumn;
+  private UISelectOneBean<TableColumn<E>> _sortColumn;
+  private Map<TableColumn<E>,Map<SortDirection,Comparator<E>>> _comparators = new HashMap<TableColumn<E>,Map<SortDirection,Comparator<E>>>();
   
   
   // public constructors and methods
   
-  public TableSortManager(List<String> columnNames)
+  public TableSortManager(List<TableColumn<E>> columns)
   {
-    _columnNames = columnNames;
-    _columnModel = new ListDataModel(_columnNames);
+    setColumns(columns);
   }
 
   /**
-   * Get the current sort column name.
+   * Get the current sort column.
    * 
    * @motivation allow sort column to be set from a drop-down list UI component
    *             (in addition to clicking on table column headers)
-   * @return the current sort column name
+   * @return the current sort column
    */
-  public String getSortColumnName()
+  public TableColumn<E> getSortColumn()
   {
     return getSortColumnSelector().getSelection();
+  }
+  
+  /**
+   * Get a comparator that can be used to sort rows. If there exists a compound
+   * sorting order for the primary sort column, the comparator will take this
+   * into account.
+   * 
+   * @return the sort columns
+   */
+  public Comparator<E> getSortColumnComparator()
+  {
+    Map<SortDirection,Comparator<E>> comparator = _comparators.get(getSortColumn());
+    if (comparator != null) {
+      // return the compound column sort comparator
+      return comparator.get(getSortDirection());
+    }
+    // return the single-column sort comparator
+    return getSortColumn().getComparator(getSortDirection());
+  }
+  
+  public void addCompoundSortColumns(List<TableColumn<E>> compoundSortColumns)
+  {
+    Map<SortDirection,Comparator<E>> comparators = new HashMap<SortDirection,Comparator<E>>(2);
+    comparators.put(SortDirection.ASCENDING, new CompoundColumnComparator<E>(compoundSortColumns, SortDirection.ASCENDING));
+    comparators.put(SortDirection.DESCENDING, new CompoundColumnComparator<E>(compoundSortColumns, SortDirection.DESCENDING));
+    _comparators.put(compoundSortColumns.get(0), comparators);
   }
 
   public int getSortColumnIndex()
   {
-    return getColumnNames().indexOf(getSortColumnName());
+    return getSortColumnSelector().getSelectionIndex();
   }
   
   /**
@@ -80,21 +111,53 @@ public abstract class TableSortManager implements Observer
   }
 
   /**
-   * Set the current sort column name.
-   * 
-   * @motivation allow sort column to be set from a drop-down list UI component
-   *             (in addition to clicking on table column headers)
-   * @param currentSortColumnName the new current sort column name
+   * Get the column currently being rendered by JSF.
+   * @return
    */
-  public void setSortColumnName(String currentSortColumnName)
+  public TableColumn<E> getCurrentColumn()
   {
-    if (!getSortColumnName().equals(currentSortColumnName)) {
-      getSortColumnSelector().setSelection(currentSortColumnName);
-    }
+    return _columns.get(getCurrentColumnIndex());
+  }
+  
+  public TableColumn<E> getColumn(int i)
+  {
+    return _columns.get(i);
   }
 
   /**
-   * Called by dataTable JSF component.
+   * Set the current sort column.
+   * 
+   * @motivation allow sort column to be set from a drop-down list UI component
+   *             (in addition to clicking on table column headers)
+   * @param currentSortColumn the new current sort column 
+   */
+  public void setSortColumn(TableColumn<E> currentSortColumn)
+  {
+    if (!getSortColumn().equals(currentSortColumn)) {
+      getSortColumnSelector().setSelection(currentSortColumn);
+    }
+  }
+  
+  /**
+   * @motivation for use by dataTable JSF component.
+   * @param sortColumnName the name of the new sort column
+   */
+  public void setSortColumnName(String sortColumnName)
+  {
+    setSortColumn(getColumn(_columnNames.indexOf(sortColumnName)));
+  }
+  
+  /**
+   * @motivation for use by dataTable JSF component.
+   * @return true the name of the current sort column
+   */
+  public String getSortColumnName()
+  {
+    return getSortColumn().getName();
+  }
+
+  /**
+   * @motivation for use by dataTable JSF component.
    * @param sortAscending true if new sort direction is ascending; false if descending
    */
   public void setSortAscending(boolean sortAscending)
@@ -108,7 +171,7 @@ public abstract class TableSortManager implements Observer
   }
   
   /**
-   * Called by dataTable JSF component.
+   * @motivation for use by dataTable JSF component.
    * @return true if current sort direction is ascending; false if descending
    */
   public boolean isSortAscending()
@@ -153,16 +216,22 @@ public abstract class TableSortManager implements Observer
 
   /**
    * Set the data header column model.
-   * @param dataHeaderColumnModel the data header column model
+   * 
+   * @param dataHeaderColumnModel the data header column model, consisting of
+   *          {@link TableColumn} elements
    */
-  public void setColumnNames(List<String> columnNames)
+  public void setColumns(List<TableColumn<E>> columns)
   {
-    _columnNames = columnNames;
-    _columnModel = new ListDataModel(columnNames);
-    if (!columnNames.contains(getSortColumnName())) {
+    _columns = columns;
+    _columnNames = new ArrayList<String>(columns.size());
+    for (TableColumn<E> column : columns) {
+      _columnNames.add(column.getName());
+    }
+    _columnModel = new ListDataModel(columns);
+    // ensure sort column exists in the new set of columns
+    if (!_columns.contains(getSortColumn())) {
       getSortColumnSelector().setSelectionIndex(0);
       getSortDirectionSelector().setSelection(SortDirection.ASCENDING);
-      sortChanged(getSortColumnName(), getSortDirection());
     }
   }
 
@@ -178,10 +247,13 @@ public abstract class TableSortManager implements Observer
    * @return list of SelectItem objects for the set of columns that can be
    *         sorted on
    */
-  public UISelectOneBean<String> getSortColumnSelector()
+  public UISelectOneBean<TableColumn<E>> getSortColumnSelector()
   {
     if (_sortColumn == null) {
-      _sortColumn = new UISelectOneBean<String>(getColumnNames());
+      _sortColumn = new UISelectOneBean<TableColumn<E>>(_columns) {
+        @Override
+        protected String getLabel(TableColumn<E> t) { return t.getName(); }
+      };
       _sortColumn.addObserver(this);
     }
     return _sortColumn;
@@ -208,15 +280,21 @@ public abstract class TableSortManager implements Observer
 
   public void update(Observable o, Object arg)
   {
-    sortChanged(getSortColumnName(), getSortDirection());
+    SortChangedEvent sortChangedEvent = null;
+    if (o == _sortColumn) {
+      sortChangedEvent = new SortChangedEvent<E>(getSortColumn()); 
+      setChanged();
+    }
+    else if (o == _sortDirection) {
+      sortChangedEvent = new SortChangedEvent<E>(getSortDirection()); 
+      setChanged();
+    }
+    if (sortChangedEvent != null) {
+      notifyObservers(sortChangedEvent);
+    }
   }
 
-  
-  // abstract methods
 
-  abstract protected void sortChanged(String newSortColumnName, SortDirection newSortDirection);
-
-  
   // private methods
   
 }

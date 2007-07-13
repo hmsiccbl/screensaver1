@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -29,10 +31,10 @@ import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
-import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -40,9 +42,12 @@ import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
+import edu.harvard.med.screensaver.ui.table.SortChangedEvent;
+import edu.harvard.med.screensaver.ui.table.TableColumn;
 import edu.harvard.med.screensaver.ui.table.TableSortManager;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.log4j.Logger;
@@ -57,7 +62,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class ScreenResultViewer extends AbstractBackingBean
+public class ScreenResultViewer extends AbstractBackingBean implements Observer
 {
 
   // static data members
@@ -66,7 +71,6 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   private static final DataModel EMPTY_DATAHEADERS_MODEL = new ListDataModel(new ArrayList<DataHeaderRow>());
   private static final ScreenResultDataModel EMPTY_RAW_DATA_MODEL = new EmptyScreenResultDataModel();
-  public static final List<String> DATA_TABLE_FIXED_COLUMN_HEADERS = Arrays.asList("Plate", "Well", "Type");
   private static final DataHeaderRowDefinition[] DATA_HEADER_ATTRIBUTES = new DataHeaderRowDefinition[] {
     new DataHeaderRowDefinition("description", "Description", "A description of the data header"),
     new DataHeaderRowDefinition("replicateOrdinal", "Replicate Number", "To which replicate this data header refers"),
@@ -110,10 +114,10 @@ public class ScreenResultViewer extends AbstractBackingBean
     }
   };
 
-  static final int DATA_TABLE_FIXED_COLUMNS = 3;
-
   public static final Integer DATA_TABLE_FILTER_SHOW_ALL = -2;
   public static final Integer DATA_TABLE_FILTER_SHOW_HITS = -1;
+
+  public static final int DATA_TABLE_FIXED_COLUMNS = 3;
 
   
   // instance data members
@@ -128,11 +132,11 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   // data members for data headers table
   private UniqueDataHeaderNames _uniqueDataHeaderNames;
-  private UISelectMany _dataHeadersSelectMany;
+  private UISelectMany _dataHeadersSelectManyUIInput;
   private UISelectManyBean<ResultValueType> _selectedDataHeaders;
   private DataModel _dataHeadersColumnModel;
   private DataModel _dataHeadersModel;
-  private TableSortManager _sortManager;
+  private TableSortManager<Map<String,Object>> _sortManager;
 
   // data members for raw data table 
   /**
@@ -144,7 +148,7 @@ public class ScreenResultViewer extends AbstractBackingBean
    * table's model rowIndex is always 0).
    */
   private UIData _dataTable;
-  private UIInput _rowNumberInput;
+  private UIInput _rowNumberUIInput;
   private UIInput _dataTableRowsPerPageUIInput;
   private UISelectOneBean<Integer> _dataFilter;
   private DataTableRowsPerPageUISelectOneBean _dataTableRowsPerPage;
@@ -211,24 +215,24 @@ public class ScreenResultViewer extends AbstractBackingBean
     return _isPanelCollapsedMap;
   }
   
-  public UISelectMany getDataHeadersSelectMany()
+  public UISelectMany getDataHeadersSelectManyUIInput()
   {
-    return _dataHeadersSelectMany;
+    return _dataHeadersSelectManyUIInput;
   }
 
-  public void setDataHeadersSelectMany(UISelectMany dataHeadersSelectMany)
+  public void setDataHeadersSelectManyUIInput(UISelectMany dataHeadersSelectMany)
   {
-    _dataHeadersSelectMany = dataHeadersSelectMany;
+    _dataHeadersSelectManyUIInput = dataHeadersSelectMany;
   }
 
-  public UIInput getRowNumberInput()
+  public UIInput getRowNumberUIInput()
   {
-    return _rowNumberInput;
+    return _rowNumberUIInput;
   }
 
-  public void setRowNumberInput(UIInput rowNumberInput)
+  public void setRowNumberUIInput(UIInput rowNumberInput)
   {
-    _rowNumberInput = rowNumberInput;
+    _rowNumberUIInput = rowNumberInput;
   }
 
   public UIInput getDataTableRowsPerPageUIInput()
@@ -283,6 +287,11 @@ public class ScreenResultViewer extends AbstractBackingBean
     return _rawDataModel;
   }
   
+  public boolean isResultValueExcluded()
+  {
+    return getDataTableModel().isResultValueCellExcluded(getSortManager().getCurrentColumnIndex());
+  }
+
   public UISelectOneBean<Integer> getDataFilter()
   {
     if (_dataFilter == null) {
@@ -301,14 +310,7 @@ public class ScreenResultViewer extends AbstractBackingBean
 
   public boolean isNumericColumn()
   {
-    int columnIndex = getSortManager().getColumnModel().getRowIndex();
-    // "plate", "well", and "type" columns are non-numeric
-    if (columnIndex < DATA_TABLE_FIXED_COLUMNS) {
-      return false;
-    }
-    // columns based upon ResultValueTypes can be queried directly for numericalness
-    columnIndex -= DATA_TABLE_FIXED_COLUMNS;
-    return getSelectedDataHeaders().getSelections().get(columnIndex).isNumeric();
+    return getSortManager().getCurrentColumn().isNumeric();
   }
   
   public int getRawDataSize()
@@ -329,7 +331,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   public UISelectManyBean<ResultValueType> getSelectedDataHeaders()
   {
     if (_selectedDataHeaders == null) {
-      _selectedDataHeaders = new UISelectManyBean<ResultValueType>(getScreenResult().getResultValueTypes())
+      _selectedDataHeaders = new UISelectManyBean<ResultValueType>(getResultValueTypes())
       {
         @Override
         protected String getLabel(ResultValueType rvt)
@@ -337,7 +339,10 @@ public class ScreenResultViewer extends AbstractBackingBean
           return getUniqueDataHeaderNames().get(rvt);
         }
       };
-      selectAllDataHeaders();
+      // select all data headers, initially
+      _selectedDataHeaders.setSelections(getResultValueTypes());
+      
+      _selectedDataHeaders.addObserver(this);
     }
     return _selectedDataHeaders;
   }
@@ -349,12 +354,7 @@ public class ScreenResultViewer extends AbstractBackingBean
     }
     return _dataHeadersColumnModel;
   }
-
-  private List<String> getSelectedDataHeaderNames()
-  {
-    return getUniqueDataHeaderNames().get(getSelectedDataHeaders().getSelections());
-  }
-
+  
   public UniqueDataHeaderNames getUniqueDataHeaderNames()
   {
     if (_uniqueDataHeaderNames == null) {
@@ -379,19 +379,13 @@ public class ScreenResultViewer extends AbstractBackingBean
     return null;
   }
   
-  public TableSortManager getSortManager()
+  public TableSortManager<Map<String,Object>> getSortManager()
   {
     if (_sortManager == null) {
-      List<String> columnHeaders = new ArrayList<String>(DATA_TABLE_FIXED_COLUMN_HEADERS);
-      columnHeaders.addAll(getUniqueDataHeaderNames().asList());
-      _sortManager = new TableSortManager(columnHeaders) {
-        @Override
-        protected void sortChanged(String sortColumnName, SortDirection sortDirection)
-        {
-          // TODO: full rebuild is only strictly needed by FullScreenResultDataModel, other ScreenResultDataModel classes could have a sortChanged() method called to avoid database calls (they would do their own in-memory sorting)
-          updateDataTableContent();
-        }
-      };
+      List<TableColumn<Map<String,Object>>> columns = getDataTableFixedColumns();
+      columns.addAll(getColumnsForSelectedDataHeaders());
+      _sortManager = new TableSortManager<Map<String,Object>>(columns);
+      _sortManager.addObserver(this);
     }
     return _sortManager;
   }
@@ -420,23 +414,26 @@ public class ScreenResultViewer extends AbstractBackingBean
     } 
     else if (getDataFilter().getSelection() == DATA_TABLE_FILTER_SHOW_ALL) {
       _rawDataModel = new FullScreenResultDataModel(_screenResult,
-                                                    getSortManager(),
                                                     getSelectedDataHeaders().getSelections(),
+                                                    getSortManager().getSortColumnIndex(),
+                                                    getSortManager().getSortDirection(),
                                                     _screenResultsDao,
                                                     getDataTableRowsPerPage().getSelection(),
                                                     _screenResultSize);
     }
     else if (getDataFilter().getSelection() == DATA_TABLE_FILTER_SHOW_HITS) {
       _rawDataModel = new HitsOnlyScreenResultDataModel(_screenResult,
-                                                        getSortManager(),
                                                         getSelectedDataHeaders().getSelections(),
+                                                        getSortManager().getSortColumnIndex(),
+                                                        getSortManager().getSortDirection(),
                                                         _screenResultsDao,
                                                         getShowHitsOnlyForDataHeader().getSelection());
     }
     else if (getDataFilter().getSelection() >= 0) { // plate number
       _rawDataModel = new SinglePlateScreenResultDataModel(_screenResult,
-                                                           getSortManager(),
                                                            getSelectedDataHeaders().getSelections(),
+                                                           getSortManager().getSortColumnIndex(),
+                                                           getSortManager().getSortDirection(),
                                                            _screenResultsDao,
                                                            getDataFilter().getSelection());
     }
@@ -450,16 +447,16 @@ public class ScreenResultViewer extends AbstractBackingBean
   private void updateSortManagerWithSelectedDataHeaders()
   {
     log.debug("updating sort manager with selected data headers");
-    List<String> columnHeaders = new ArrayList<String>(DATA_TABLE_FIXED_COLUMN_HEADERS);
-    columnHeaders.addAll(getSelectedDataHeaderNames());
-    getSortManager().setColumnNames(columnHeaders);
+    List<TableColumn<Map<String,Object>>> columns = getDataTableFixedColumns();
+    columns.addAll(getColumnsForSelectedDataHeaders());
+    getSortManager().setColumns(columns);
   }
 
   private void updateDataHeaderSelectionsForShowHits()
   {
     log.debug("updating data header selections for show hits");
     List<ResultValueType> resultValueTypes = new ArrayList<ResultValueType>();
-    resultValueTypes.addAll(getScreenResult().getResultValueTypes());
+    resultValueTypes.addAll(getResultValueTypes());
     for (Iterator iter = resultValueTypes.iterator(); iter.hasNext();) {
       ResultValueType rvt = (ResultValueType) iter.next();
       if (!rvt.isActivityIndicator()) {
@@ -478,6 +475,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   private void updateDataFilterSelections()
   {
     if (_screenResult == null) {
+      _dataFilter = new UISelectOneBean<Integer>();
       return;
     }
 
@@ -586,15 +584,9 @@ public class ScreenResultViewer extends AbstractBackingBean
     return _screensController.deleteScreenResult(getScreenResult());
   }
   
-  public String viewWell()
+  public String cellAction()
   { 
-    assert DATA_TABLE_FIXED_COLUMN_HEADERS.get(0).equals("Plate");
-    assert DATA_TABLE_FIXED_COLUMN_HEADERS.get(1).equals("Well");
-    
-    Integer plateNumber = Integer.valueOf((String) ((Map) getDataTableModel().getRowData()).get(DATA_TABLE_FIXED_COLUMN_HEADERS.get(0)));
-    String wellName = (String) ((Map) getDataTableModel().getRowData()).get(DATA_TABLE_FIXED_COLUMN_HEADERS.get(1));
-    Well well = _librariesDao.findWell(new WellKey(plateNumber, wellName));
-    return _librariesController.viewWell(well, null);
+    return (String) getSortManager().getCurrentColumn().cellAction(getDataTableModel().getRowData());
   }
   
   public String saveScreenResult()
@@ -605,7 +597,8 @@ public class ScreenResultViewer extends AbstractBackingBean
   
   public String showAllDataHeaders()
   {
-    selectAllDataHeaders();
+    getSelectedDataHeaders().setSelections(getResultValueTypes());
+    _dataHeadersSelectManyUIInput.setValue(getSelectedDataHeaders().getValue());
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
@@ -620,12 +613,10 @@ public class ScreenResultViewer extends AbstractBackingBean
     
     // enforce minimum of 1 selected data header (data table query will break otherwise)
     if (getSelectedDataHeaders().getSelections().size() == 0) {
-      getSelectedDataHeaders().setSelections(getScreenResult().getResultValueTypesList().subList(0,1));
+      getSelectedDataHeaders().setSelections(new ArrayList<ResultValueType>(getResultValueTypes()).subList(0,1));
       // this call shouldn't be necessary, as I would've expected UIInput component to query its model in render phase, but...
-      _dataHeadersSelectMany.setValue(getSelectedDataHeaders().getValue());
+      _dataHeadersSelectManyUIInput.setValue(getSelectedDataHeaders().getValue());
     }
-    updateDataHeadersColumnModel();
-    updateSortManagerWithSelectedDataHeaders();
 
     // skip "update model" JSF phase, to avoid overwriting model values set above
     getFacesContext().renderResponse();
@@ -697,6 +688,71 @@ public class ScreenResultViewer extends AbstractBackingBean
   // private methods
   
   /**
+   * Get ResultValueTypes set, safely, handling case that no screen result
+   * exists.
+   */
+  private List<ResultValueType> getResultValueTypes()
+  {
+    List<ResultValueType> rvts = new ArrayList<ResultValueType>();
+    if (getScreenResult() != null) {
+      rvts.addAll(getScreenResult().getResultValueTypes());
+    }
+    return rvts;
+  }
+
+  private List<String> getSelectedDataHeaderNames()
+  {
+    return getUniqueDataHeaderNames().get(getSelectedDataHeaders().getSelections());
+  }
+
+  private List<TableColumn<Map<String,Object>>> getDataTableFixedColumns()
+  {
+    List<TableColumn<Map<String,Object>>> fixedColumns = new ArrayList<TableColumn<Map<String,Object>>>(3); 
+    fixedColumns.add(new TableColumn<Map<String,Object>>("Plate", "The plate number", true) {
+      @Override
+      public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
+    });
+    fixedColumns.add(new TableColumn<Map<String,Object>>("Well", "The well name") {
+      @Override
+      public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
+      
+      @Override
+      public boolean isCommandLink() { return true; }
+      
+      @Override
+      public Object cellAction(Map<String,Object> row) 
+      {
+        Integer plateNumber = (Integer) getSortManager().getColumn(0).getCellValue(row);
+        String wellName = (String) getSortManager().getColumn(1).getCellValue(row);
+        Well well = _librariesDao.findWell(new WellKey(plateNumber, wellName));
+        return _librariesController.viewWell(well, null);
+      }
+    });
+    fixedColumns.add(new TableColumn<Map<String,Object>>("Type", 
+      StringUtils.makeListString(StringUtils.wrapStrings(Arrays.asList(WellType.values()), "'", "'"), ", ").toLowerCase()) {
+      @Override
+      public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
+    });
+    return fixedColumns;
+  }
+
+  private List<TableColumn<Map<String,Object>>> getColumnsForSelectedDataHeaders()
+  {
+    ArrayList<TableColumn<Map<String,Object>>> result = new ArrayList<TableColumn<Map<String,Object>>>();
+    List<ResultValueType> selectedDataHeaders = getSelectedDataHeaders().getSelections();
+    for (ResultValueType rvt : selectedDataHeaders) {
+      result.add(new TableColumn<Map<String,Object>>(rvt.getUniqueName(), rvt.getDescription(), rvt.isNumeric()) {
+        @Override
+        public Object getCellValue(Map<String,Object> row)
+        {
+          return row.get(getName());
+        }
+      });
+    }
+    return result;
+  }
+
+  /**
    * Generates a standard name for dynamically-added table columns.
    */
   private String makeResultValueTypeColumnName(String name)
@@ -727,7 +783,7 @@ public class ScreenResultViewer extends AbstractBackingBean
     rowIndex = Math.max(0,
                         Math.min(rowIndex,
                                  getRawDataSize() - _dataTable.getRows()));
-    _rowNumberInput.setValue(rowIndex + 1);
+    _rowNumberUIInput.setValue(rowIndex + 1);
     _dataTable.setFirst(rowIndex);
   }
 
@@ -742,7 +798,7 @@ public class ScreenResultViewer extends AbstractBackingBean
       List<DataHeaderRow> tableData = new ArrayList<DataHeaderRow>();
       for (DataHeaderRowDefinition dataHeaderAttribute : DATA_HEADER_ATTRIBUTES) {
         try {
-          tableData.add(new DataHeaderRow(getScreenResult().getResultValueTypes(),
+          tableData.add(new DataHeaderRow(getResultValueTypes(),
                                           getUniqueDataHeaderNames(),
                                           dataHeaderAttribute));
         }
@@ -754,15 +810,6 @@ public class ScreenResultViewer extends AbstractBackingBean
       }
       _dataHeadersModel = new ListDataModel(tableData);
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  private void selectAllDataHeaders()
-  {
-    getSelectedDataHeaders().setSelections(getScreenResult().getResultValueTypes());
-    _dataHeadersSelectMany.setValue(getSelectedDataHeaders().getValue());
-    updateDataHeadersColumnModel();
-    updateSortManagerWithSelectedDataHeaders();
   }
 
 
@@ -827,7 +874,7 @@ public class ScreenResultViewer extends AbstractBackingBean
     /**
      * Array containing the value of the same property for each ResultValueType
      */
-    private Map<String,String> _rvtPropertyValues;    
+    private Map<String,Object> _rvtPropertyValues;    
 
     /**
      * Constructs a DataHeaderRow object.
@@ -847,7 +894,7 @@ public class ScreenResultViewer extends AbstractBackingBean
       throws Exception
     {
       _dataHeaderRowDefinition = dataHeaderRowDefinition;
-      _rvtPropertyValues = new HashMap<String,String>();
+      _rvtPropertyValues = new HashMap<String,Object>();
       for (ResultValueType rvt : rvts) {
         _rvtPropertyValues.put(uniqueNames.get(rvt), 
                                dataHeaderRowDefinition.formatValue(rvt));
@@ -867,6 +914,32 @@ public class ScreenResultViewer extends AbstractBackingBean
     public Map getDataHeaderSinglePropertyValues()
     {
       return _rvtPropertyValues;
+    }
+  }
+
+  public void update(Observable o, Object obj)
+  {
+    if (o == _selectedDataHeaders) {
+      _sortManager.deleteObserver(this); // avoid recursive notifications
+      try {
+      if (log.isDebugEnabled()) {
+        log.debug("data header selection changed: " + getSelectedDataHeaderNames());
+      }
+      updateDataHeadersColumnModel();
+      updateSortManagerWithSelectedDataHeaders();
+      updateDataTableContent();
+      } 
+      finally {
+        _sortManager.addObserver(this);
+      }
+    }
+    else if (obj instanceof SortChangedEvent) {
+      SortChangedEvent event = (SortChangedEvent) obj;
+      if (log.isDebugEnabled()) {
+        log.debug(event.toString());
+      }
+      // TODO: full rebuild is only strictly needed by FullScreenResultDataModel, other ScreenResultDataModel classes could have a callback method called to avoid database calls (they would do their own in-memory sorting)
+      updateDataTableContent();
     }
   }
 }

@@ -24,7 +24,6 @@ import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.ui.table.TableSortManager;
 
 import org.apache.log4j.Logger;
 
@@ -37,30 +36,33 @@ abstract public class ScreenResultDataModel extends DataModel
   // instance data members
 
   protected ScreenResult _screenResult;
-  protected TableSortManager _sortManager;
-  protected List<ResultValueType> _selectedResultValueTypes;
+  protected List<ResultValueType> _resultValueTypes;
+  protected int _sortColumnIndex;
+  protected SortDirection _sortDirection;
   protected ScreenResultsDAO _screenResultsDao;
   protected int _rowIndex;
   
   private List<List<Boolean>> _excludedResultValues;
-  private List<Map<String,String>> _wrappedData;
+  private List<Map<String,Object>> _wrappedData;
 
 
   // public constructors and methods
 
   public ScreenResultDataModel(ScreenResult screenResult,
-                               TableSortManager sortManager,
-                               List<ResultValueType> selectedResultValueTypes,
+                               List<ResultValueType> resultValueTypes,
+                               int sortColumnIndex,
+                               SortDirection sortDirection,
                                ScreenResultsDAO dao)
   {
     _screenResult = screenResult;
-    _sortManager = sortManager;
-    _selectedResultValueTypes = selectedResultValueTypes;
+    _sortColumnIndex = sortColumnIndex;
+    _sortDirection = sortDirection;
+    _resultValueTypes = resultValueTypes;
     _screenResultsDao = dao;
   }
   
   @Override
-  public Map<String,String> getRowData()
+  public Map<String,Object> getRowData()
   {
     return getWrappedData().get(_rowIndex);
   }
@@ -77,7 +79,7 @@ abstract public class ScreenResultDataModel extends DataModel
     return getWrappedData().size();
   }
 
-  public List<Map<String,String>> getWrappedData()
+  public List<Map<String,Object>> getWrappedData()
   {
     if (_wrappedData == null) {
       build();
@@ -103,16 +105,6 @@ abstract public class ScreenResultDataModel extends DataModel
     throw new UnsupportedOperationException();
   }
   
-  public boolean isResultValueCellExcluded()
-  {
-    int columnIndex = _sortManager.getCurrentColumnIndex();
-    if (columnIndex < ScreenResultViewer.DATA_TABLE_FIXED_COLUMNS) {
-      return false;
-    }
-    int dataHeaderIndex = columnIndex - ScreenResultViewer.DATA_TABLE_FIXED_COLUMNS;
-    return isResultValueCellExcluded(_rowIndex, dataHeaderIndex);
-  }
-  
   abstract protected Map<WellKey,List<ResultValue>> fetchData(List<ResultValueType> selectedResultValueTypes,
                                                               int sortBy,
                                                               SortDirection sortDirection);
@@ -131,26 +123,26 @@ abstract public class ScreenResultDataModel extends DataModel
   {
     log.debug("building ScreenResultDataModel");
     int sortByArg;
-    switch (_sortManager.getSortColumnIndex())
+    switch (_sortColumnIndex)
     {
     case 0: sortByArg = ScreenResultsDAO.SORT_BY_PLATE_WELL; break;
     case 1: sortByArg = ScreenResultsDAO.SORT_BY_WELL_PLATE; break;
     case 2: sortByArg = ScreenResultsDAO.SORT_BY_ASSAY_WELL_TYPE; break;
     default:
-      sortByArg = _sortManager.getSortColumnIndex() - ScreenResultViewer.DATA_TABLE_FIXED_COLUMNS;
+      sortByArg = _sortColumnIndex - ScreenResultViewer.DATA_TABLE_FIXED_COLUMNS;
     }
-    _wrappedData = new ArrayList<Map<String,String>>();
+    _wrappedData = new ArrayList<Map<String,Object>>();
     _excludedResultValues = new ArrayList<List<Boolean>>();
     int rowIndex = 0;
-    for (Map.Entry<WellKey,List<ResultValue>> entry : fetchData(_selectedResultValueTypes,
+    for (Map.Entry<WellKey,List<ResultValue>> entry : fetchData(_resultValueTypes,
                                                                 sortByArg,
-                                                                _sortManager.getSortDirection()).entrySet()) {
+                                                                _sortDirection).entrySet()) {
       WellKey wellKey = entry.getKey();
       addRow(rowIndex++, 
              wellKey,
              entry.getValue().get(0).getAssayWellType(),
              entry.getValue(),
-             _selectedResultValueTypes);
+             _resultValueTypes);
     }
   }
   
@@ -163,26 +155,26 @@ abstract public class ScreenResultDataModel extends DataModel
                       List<ResultValue> resultValues, 
                       List<ResultValueType> resultValueTypes)
   {
-    List<String> columnNames = _sortManager.getColumnNames();
     int i = 0;
-    HashMap<String,String> cellValues = new HashMap<String,String>();
-    cellValues.put(columnNames.get(i++), Integer.toString(wellKey.getPlateNumber()));
-    cellValues.put(columnNames.get(i++), wellKey.getWellName());
-    cellValues.put(columnNames.get(i++), assayWellType.toString());
+    HashMap<String,Object> cellValues = new HashMap<String,Object>();
+    // TODO: eliminate hardcoded column name strings
+    cellValues.put("Plate", wellKey.getPlateNumber());
+    cellValues.put("Well", wellKey.getWellName());
+    cellValues.put("Type", assayWellType);
     List<Boolean> excludedResultValuesRow = new ArrayList<Boolean>();
     Iterator<ResultValueType> rvtIter = resultValueTypes.iterator();
     for (ResultValue rv : resultValues) {
       ResultValueType rvt = rvtIter.next();
       excludedResultValuesRow.add(rv.isExclude());
       Object typedValue = ResultValue.getTypedValue(rv, rvt);
-      cellValues.put(columnNames.get(i++),
+      cellValues.put(resultValueTypes.get(i++).getUniqueName(),
                      typedValue == null ? null : typedValue.toString());
     }
     addRowValues(rowIndex, cellValues);
     addRowResultValueExcludes(rowIndex, excludedResultValuesRow);
   }
 
-  protected void addRowValues(int rowIndex, Map<String,String> rowValues)
+  protected void addRowValues(int rowIndex, Map<String,Object> rowValues)
   {
     _wrappedData.add(rowIndex, rowValues);
   }
@@ -192,8 +184,11 @@ abstract public class ScreenResultDataModel extends DataModel
     _excludedResultValues.add(rowIndex, rowExcludes);
   }
   
-  protected boolean isResultValueCellExcluded(int rowIndex, int dataHeaderIndex)
+  public boolean isResultValueCellExcluded(int colIndex)
   {
-    return _excludedResultValues.get(rowIndex).get(dataHeaderIndex);
+    if (colIndex < ScreenResultViewer.DATA_TABLE_FIXED_COLUMNS) {
+      return false;
+    }
+    return _excludedResultValues.get(getRowIndex()).get(colIndex - ScreenResultViewer.DATA_TABLE_FIXED_COLUMNS);
   }
 }

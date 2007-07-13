@@ -19,7 +19,6 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.ui.table.TableSortManager;
 
 import org.apache.log4j.Logger;
 
@@ -34,23 +33,24 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
   private int _preCalculatedSize;
   private int _rowsToFetch;
   private int _firstRowIndexToFetch = -1;
-  private Map<Integer,Map<String,String>> _fetchedRows;
+  private Map<Integer,Map<String,Object>> _fetchedRows;
   private Map<Integer,List<Boolean>> _excludedResultValuesMap;
 
 
   // public constructors and methods
 
   public FullScreenResultDataModel(ScreenResult screenResult,
-                                   TableSortManager sortManager,
-                                   List<ResultValueType> selectedResultValueTypes,
+                                   List<ResultValueType> resultValueTypes,
+                                   int sortColumnIndex,
+                                   SortDirection sortDirection,
                                    ScreenResultsDAO dao,
                                    int rowsToFetch,
                                    int preCalculatedSize)
   {
-    super(screenResult, sortManager, selectedResultValueTypes, dao);
+    super(screenResult, resultValueTypes, sortColumnIndex, sortDirection, dao);
     _rowsToFetch = rowsToFetch;
     _preCalculatedSize = preCalculatedSize;
-    _fetchedRows = new HashMap<Integer,Map<String,String>>();
+    _fetchedRows = new HashMap<Integer,Map<String,Object>>();
     _excludedResultValuesMap = new HashMap<Integer,List<Boolean>>();
   }
 
@@ -61,7 +61,7 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
   }
 
   @Override
-  public Map<String,String> getRowData()
+  public Map<String,Object> getRowData()
   {
     if (!_fetchedRows.containsKey(_rowIndex)) {
       log.debug("row not yet fetched: " + _rowIndex);
@@ -72,7 +72,7 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
   }
   
   @Override
-  public List<Map<String,String>> getWrappedData()
+  public List<Map<String,Object>> getWrappedData()
   {
     throw new UnsupportedOperationException();
   }
@@ -88,7 +88,7 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
                                                    SortDirection sortDirection)
   {
     Map<WellKey,List<ResultValue>> rvData = 
-      _screenResultsDao.findSortedResultValueTableByRange(_selectedResultValueTypes,
+      _screenResultsDao.findSortedResultValueTableByRange(_resultValueTypes,
                                                           sortBy,
                                                           sortDirection,
                                                           _firstRowIndexToFetch,
@@ -102,10 +102,9 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
   }
   
   @Override
-  protected void addRowValues(int rowIndex, Map<String,String> rowValues)
+  protected void addRowValues(int rowIndex, Map<String,Object> rowValues)
   {
     _fetchedRows.put(_firstRowIndexToFetch + rowIndex, rowValues);
-
   }
   
   @Override
@@ -115,9 +114,12 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
   }
   
   @Override
-  protected boolean isResultValueCellExcluded(int rowIndex, int dataHeaderIndex)
+  public boolean isResultValueCellExcluded(int colIndex)
   {
-    return _excludedResultValuesMap.get(rowIndex).get(dataHeaderIndex);
+    if (colIndex < ScreenResultViewer.DATA_TABLE_FIXED_COLUMNS) {
+      return false;
+    }
+    return _excludedResultValuesMap.get(getRowIndex()).get(colIndex - ScreenResultViewer.DATA_TABLE_FIXED_COLUMNS);
   }
 }
 

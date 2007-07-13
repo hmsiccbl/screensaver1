@@ -28,10 +28,10 @@
         sortAscending="#{searchResults.sortManager.sortAscending}"
         width="100%">
 				<t:columns value="#{searchResults.sortManager.columnModel}"
-					var="columnName" styleClass="column">
+					var="column" styleClass="column">
 					<f:facet name="header">
-						<t:commandSortHeader columnName="#{columnName}" arrow="false"
-                          title="#{searchResults.columnDescription}">
+						<t:commandSortHeader columnName="#{column.name}" arrow="false"
+							title="#{column.description}">
 							<f:facet name="ascending">
 								<t:graphicImage value="/images/ascending-arrow.gif"
 									rendered="true" border="0" />
@@ -40,22 +40,22 @@
 								<t:graphicImage value="/images/descending-arrow.gif"
 									rendered="true" border="0" />
 							</f:facet>
-							<h:outputText value="#{columnName}" />
+							<h:outputText value="#{column.name}" />
 						</t:commandSortHeader>
 					</f:facet>
 					<h:outputText value="#{searchResults.cellValue}"
-						rendered="#{! (searchResults.isCommandLink ||
-						   searchResults.isCommandLinkList)}" />
+						rendered="#{! (column.isCommandLink ||
+						   column.isCommandLinkList)}" />
 					<h:commandLink action="#{searchResults.cellAction}"
 						value="#{searchResults.cellValue}"
-						rendered="#{searchResults.isCommandLink}">
+						rendered="#{column.isCommandLink}">
 						<f:param name="commandValue"
-								value="#{searchResults.escapeBackslashes[searchResults.cellValue]}"/>
+							value="#{searchResults.escapeBackslashes[searchResults.cellValue]}" />
 					</h:commandLink>
 					<t:dataList id="commandLinkList" var="commandValue"
 						value="#{searchResults.cellValue}" layout="simple"
-						rendered="#{searchResults.isCommandLinkList}"
-						rowIndexVar="rowIndex" rowCountVar="rowCount">
+						rendered="#{column.isCommandLinkList}" rowIndexVar="rowIndex"
+						rowCountVar="rowCount">
 						<h:commandLink action="#{searchResults.cellAction}"
 							value="#{commandValue}">
 							<f:param name="commandValue"

@@ -14,12 +14,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -32,7 +35,6 @@ import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -49,6 +51,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
+import edu.harvard.med.screensaver.ui.table.TableColumn;
 import edu.harvard.med.screensaver.ui.table.TableSortManager;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
@@ -73,50 +76,226 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private static final String VALIDATE_SELECTED_PLATES_FOR_DOWNLOAD = "for_download";
   private static final String VALIDATE_SELECTED_PLATES_FOR_DEALLOCATION = "for_deallocaton";
 
-  private static final String[] SCREENER_CHERRY_PICKS_TABLE_COLUMNS = { 
-    "Library Plate", 
-    "Screened Well", 
-    "Source Wells",
-    "Vendor ID",
-    "Gene", 
-    "Entrez ID", 
-    "Entrez Symbol", 
-    "Genbank AccNo" };
-  private static final String[][] SCREENER_CHERRY_PICKS_TABLE_SECONDARY_SORT = { 
-    { "Screened Well" }, 
-    { "Library Plate" }, 
-    { "Library Plate", "Screened Well" }, 
-    {},
-    {}, 
-    {}, 
-    {}, 
-    {} };
-  private static final String[] LAB_CHERRY_PICKS_TABLE_COLUMNS = { 
-    "Status", 
-    "Library Plate", 
-    "Source Well", 
-    "Source Copy", 
-    "Vendor ID",
-    "Gene", 
-    "Entrez ID", 
-    "Entrez Symbol", 
-    "Genbank AccNo", 
-    "Cherry Pick Plate #", 
-    "Attempt #", 
-    "Destination Well" };
-  private static final String[][] LAB_CHERRY_PICKS_TABLE_SECONDARY_SORT = { 
-    { "Library Plate", "Source Well" }, 
-    { "Source Well" }, 
-    { "Library Plate" }, 
-    { "Library Plate", "Source Well" }, 
-    { "Library Plate", "Source Well" }, 
-    { "Library Plate", "Source Well" }, 
-    { "Library Plate", "Source Well" }, 
-    { "Library Plate", "Source Well" }, 
-    { "Library Plate", "Source Well" },
-    { "Attempt #", "Destination Well" },
-    { "Cherry Pick Plate #", "Destination Well" },
-    { "Cherry Pick Plate #", "Attempt #" } };
+  private static final List<TableColumn<ScreenerCherryPick>> SCREENER_CHERRY_PICKS_TABLE_COLUMNS = new ArrayList<TableColumn<ScreenerCherryPick>>();
+  private static final List<List<TableColumn<ScreenerCherryPick>>> SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS = new ArrayList<List<TableColumn<ScreenerCherryPick>>>();  
+  static {
+    SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<ScreenerCherryPick>("Library Plate", "The library plate number of the well that was originally screened", true) {
+      @Override
+      public Object getCellValue(ScreenerCherryPick scp) { return scp.getScreenedWell().getPlateNumber(); }
+    });
+    SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<ScreenerCherryPick>("Screened Well", "The name of the well that was originally screened") {
+      @Override
+      public Object getCellValue(ScreenerCherryPick scp) { return scp.getScreenedWell().getWellName(); }
+    });
+    SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<ScreenerCherryPick>("Source Wells", "The number of wells to be cherry picked for the screened well", true) {
+      @Override
+      public Object getCellValue(ScreenerCherryPick scp) { return scp.getLabCherryPicks().size(); }
+    });
+    SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<ScreenerCherryPick>("Vendor ID", "The vendor ID of the screened well") {
+      @Override
+      public Object getCellValue(ScreenerCherryPick scp) { return scp.getScreenedWell().getVendorIdentifier(); }
+    });
+    SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<ScreenerCherryPick>("Gene", "The name of the gene targeted by the screened well") {
+      @Override
+      public Object getCellValue(ScreenerCherryPick scp) 
+      { 
+        Gene gene = scp.getScreenedWell().getGene(); 
+        return gene == null ? null : gene.getGeneName(); 
+      }
+    });
+    SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<ScreenerCherryPick>("Entrez ID", "The Entrez ID of the gene targeted by the screened well") {
+      @Override
+      public Object getCellValue(ScreenerCherryPick scp) 
+      { 
+        Gene gene = scp.getScreenedWell().getGene(); 
+        return gene == null ? null : gene.getEntrezgeneId(); 
+      }
+    });
+    SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<ScreenerCherryPick>("Entrez Symbol", "The Entrez symbol of the gene targeted by the screened well") {
+      @Override
+      public Object getCellValue(ScreenerCherryPick scp) 
+      { 
+        Gene gene = scp.getScreenedWell().getGene(); 
+        return gene == null ? null : gene.getEntrezgeneSymbol(); 
+      }
+    });
+    SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<ScreenerCherryPick>("Genbank AccNo", "The Genbank accession number of the gene targeted by the screened well") {
+      @Override
+      public Object getCellValue(ScreenerCherryPick scp) 
+      { 
+        Gene gene = scp.getScreenedWell().getGene(); 
+        return gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(), "; "); 
+      }
+    });
+
+    // define compound sorts
+    SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<ScreenerCherryPick>>());
+    SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(0).add(SCREENER_CHERRY_PICKS_TABLE_COLUMNS.get(0));
+    SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(0).add(SCREENER_CHERRY_PICKS_TABLE_COLUMNS.get(1));
+
+    SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<ScreenerCherryPick>>());
+    SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(1).add(SCREENER_CHERRY_PICKS_TABLE_COLUMNS.get(1));
+    SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(1).add(SCREENER_CHERRY_PICKS_TABLE_COLUMNS.get(0));
+    
+    SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<ScreenerCherryPick>>());
+    SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(2).add(SCREENER_CHERRY_PICKS_TABLE_COLUMNS.get(2));
+    SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(2).add(SCREENER_CHERRY_PICKS_TABLE_COLUMNS.get(0));
+    SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(2).add(SCREENER_CHERRY_PICKS_TABLE_COLUMNS.get(1));
+  }
+
+  private static final List<TableColumn<LabCherryPick>> LAB_CHERRY_PICKS_TABLE_COLUMNS = new ArrayList<TableColumn<LabCherryPick>>();
+  private static final List<List<TableColumn<LabCherryPick>>> LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS = new ArrayList<List<TableColumn<LabCherryPick>>>();  
+  static {
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Status", "'Unfulfilled', 'Reserved', 'Mapped', 'Canceled', 'Plated', 'Failed'") {
+      @Override
+      public Object getCellValue(LabCherryPick lcp) 
+      { 
+        return lcp.isPlated() ? "plated" : 
+          lcp.isFailed() ? "failed" :
+            lcp.isCanceled() ? "canceled" :
+              lcp.isMapped() ? "mapped" : 
+                lcp.isAllocated() ? "reserved" : "unfulfilled";
+      }
+      
+      @Override
+      protected Comparator<LabCherryPick> getAscendingComparator()
+      {
+        return new Comparator<LabCherryPick>() {
+          private Integer sortValue(LabCherryPick lcp)
+          {
+            return lcp.isPlated() ? 5 : 
+              lcp.isFailed() ? 4 :
+                lcp.isCanceled() ? 3 :
+                  lcp.isMapped() ? 2 : 
+                    lcp.isAllocated() ? 1 : 0;
+          }
+          public int compare(LabCherryPick o1, LabCherryPick o2)
+          {
+            return sortValue(o1).compareTo(sortValue(o2));
+          }
+        };
+      }
+    });
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Library Plate", "The library plate number of the cherry picked well", true) {
+      @Override
+      public Object getCellValue(LabCherryPick lcp) { return lcp.getSourceWell().getPlateNumber(); }
+    });
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Source Well", "The name of the cherry picked well") {
+      @Override
+      public Object getCellValue(LabCherryPick lcp) { return lcp.getSourceWell().getWellName(); }
+    });
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Source Copy", "The library plate copy of the cherry picked well") {
+      @Override
+      public Object getCellValue(LabCherryPick lcp) { return lcp.getSourceCopy() != null ? lcp.getSourceCopy().getName() : ""; }
+    });
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Vendor ID", "The Vendor ID of the of the cherry picked well") {
+      @Override
+      public Object getCellValue(LabCherryPick lcp) { return lcp.getSourceWell().getVendorIdentifier(); }
+    });
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Gene", "The name of the gene targeted by the cherry picked well") {
+      @Override
+      public Object getCellValue(LabCherryPick lcp) 
+      { 
+        Gene gene = lcp.getSourceWell().getGene(); 
+        return gene == null ? null : gene.getGeneName(); 
+      }
+    });
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Entrez ID", "The Entrez ID of the gene targeted by the cherry picked well") {
+      @Override
+      public Object getCellValue(LabCherryPick lcp) 
+      { 
+        Gene gene = lcp.getSourceWell().getGene(); 
+        return gene == null ? null : gene.getEntrezgeneId(); 
+      }
+    });
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Entrez Symbol", "The Entrez symbol of the gene targeted by the cherry picked well") {
+      @Override
+      public Object getCellValue(LabCherryPick lcp) 
+      { 
+        Gene gene = lcp.getSourceWell().getGene(); 
+        return gene == null ? null : gene.getEntrezgeneSymbol(); 
+      }
+    });
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Genbank AccNo", "The Genbank accession number of the gene targeted by the cherry picked well") {
+      @Override
+      public Object getCellValue(LabCherryPick lcp) 
+      { 
+        Gene gene = lcp.getSourceWell().getGene(); 
+        return gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(), "; "); 
+      }
+    });
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Cherry Pick Plate #", "The cherry pick plate number that this cherry pick has been mapped to", true) {
+      @Override
+      public Object getCellValue(LabCherryPick lcp) { return lcp.isMapped() ? new Integer(lcp.getAssayPlate().getPlateOrdinal() + 1) : null; }
+    });
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Attempt #", "The attempt number of the cherry pick plate that this cherry pick has been mapped to", true) {
+      @Override
+      public Object getCellValue(LabCherryPick lcp) { return lcp.isMapped() ? new Integer(lcp.getAssayPlate().getAttemptOrdinal() + 1) : null; }
+    });
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Destination Well", "The name of the well that this cherry pick has been mapped to") {
+      @Override
+      public Object getCellValue(LabCherryPick lcp) { return lcp.isMapped() ? lcp.getAssayPlateWellName().toString() : null; }
+    });
+
+    // define compound sorts
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(0).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(0));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(0).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(0).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
+    
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(1).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(1).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
+    
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(2).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(2).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
+    
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(3).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(3));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(3).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(3).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
+    
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(4).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(4));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(4).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(4).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
+    
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(5).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(5));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(5).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(5).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
+    
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(6).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(6));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(6).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(6).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
+    
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(7).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(7));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(7).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(7).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
+    
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(8).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(8));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(8).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(8).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
+    
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(9).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(9));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(9).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(10));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(9).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(11));
+    
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(10).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(10));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(10).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(9));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(10).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(11));
+    
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(11).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(11));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(11).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(9));
+    LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(11).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(10));
+  }
 
   private static final Collection<Integer> PLATE_COLUMNS_LIST = new ArrayList<Integer>();
 
@@ -141,8 +320,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private UISelectOneEntityBean<AdministratorUser> _volumeApprovedBy;
   private UISelectManyBean<Integer> _emptyColumnsOnAssayPlate;
 
-  private TableSortManager _screenerCherryPicksSortManager;
-  private TableSortManager _labCherryPicksSortManager;
+  private TableSortManager<ScreenerCherryPick> _screenerCherryPicksSortManager;
+  private TableSortManager<LabCherryPick> _labCherryPicksSortManager;
   private DataModel _screenerCherryPicksDataModel;
   private DataModel _labCherryPicksDataModel;
   private DataModel _assayPlatesColumnModel;
@@ -332,17 +511,20 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return StringUtils.makeListString(new TreeSet<Integer>(_cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate()), ", ");
   }
 
-  public TableSortManager getScreenerCherryPicksSortManager()
+  public TableSortManager<ScreenerCherryPick> getScreenerCherryPicksSortManager()
   {
     if (_screenerCherryPicksSortManager == null) {
-      _screenerCherryPicksSortManager = new TableSortManager(Arrays.asList(SCREENER_CHERRY_PICKS_TABLE_COLUMNS))
+      _screenerCherryPicksSortManager = new TableSortManager<ScreenerCherryPick>(SCREENER_CHERRY_PICKS_TABLE_COLUMNS);
+      _screenerCherryPicksSortManager.addObserver(new Observer()
       {
-        @Override
-        protected void sortChanged(String newSortColumnName, SortDirection newSortDirection)
+        public void update(Observable o, Object obj)
         {
           _screenerCherryPicksDataModel = null;
         }
-      };
+      });
+      for (List<TableColumn<ScreenerCherryPick>> compoundSortColumns : SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS) {
+        _screenerCherryPicksSortManager.addCompoundSortColumns(compoundSortColumns);
+      }
     }
     return _screenerCherryPicksSortManager;
   }
@@ -357,17 +539,20 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return _cherryPickRequest.getLabCherryPicks().size();
   }
   
-  public TableSortManager getLabCherryPicksSortManager()
+  public TableSortManager<LabCherryPick> getLabCherryPicksSortManager()
   {
     if (_labCherryPicksSortManager == null) {
-      _labCherryPicksSortManager = new TableSortManager(Arrays.asList(LAB_CHERRY_PICKS_TABLE_COLUMNS))
-      {
-        @Override
-        protected void sortChanged(String newSortColumnName, SortDirection newSortDirection)
+      _labCherryPicksSortManager = new TableSortManager<LabCherryPick>(LAB_CHERRY_PICKS_TABLE_COLUMNS);
+      _labCherryPicksSortManager.addObserver(new Observer() {
+        public void update(Observable o, Object obj)
         {
           _labCherryPicksDataModel = null;
         }
-      };
+      });
+      
+      for (List<TableColumn<LabCherryPick>> compoundSortColumns : LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS) {
+        _labCherryPicksSortManager.addCompoundSortColumns(compoundSortColumns);
+      }
     }
     return _labCherryPicksSortManager;
   }
@@ -380,36 +565,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   public DataModel getScreenerCherryPicksDataModel()
   {
     if (_screenerCherryPicksDataModel == null) {
-      List<Map> rows = new ArrayList<Map>();
-      for (ScreenerCherryPick cherryPick : _cherryPickRequest.getScreenerCherryPicks()) {
-        Map<String,Comparable> row = new HashMap<String,Comparable>();
-        int col = 0;
-        row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getScreenedWell().getPlateNumber());
-        row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getScreenedWell().getWellName());
-        row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getLabCherryPicks().size());
-        row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getScreenedWell().getVendorIdentifier());
-        Gene gene = cherryPick.getScreenedWell().getGene();
-        if (gene != null) {
-          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], gene.getGeneName());
-          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], gene.getEntrezgeneId());
-          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], gene.getEntrezgeneSymbol());
-          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], StringUtils.makeListString(gene.getGenbankAccessionNumbers(), "; "));
-        }
-        else {
-          // TODO: handle compound screens
-          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
-          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
-          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
-          row.put(SCREENER_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
-        }
-        
-        rows.add(row);
-      }
-      Collections.sort(rows, 
-                       new CherryPickTableRowComparator(getSortColumns(getScreenerCherryPicksSortManager(),
-                                                                       SCREENER_CHERRY_PICKS_TABLE_SECONDARY_SORT), 
-                                                        getScreenerCherryPicksSortManager().getSortDirection()));
-      _screenerCherryPicksDataModel = new ListDataModel(rows);
+      
+      List<ScreenerCherryPick> screenerCherryPicks = new ArrayList<ScreenerCherryPick>(_cherryPickRequest.getScreenerCherryPicks());
+      Collections.sort(screenerCherryPicks,
+                       getScreenerCherryPicksSortManager().getSortColumnComparator());
+      _screenerCherryPicksDataModel = new ListDataModel(screenerCherryPicks);
     }
     return _screenerCherryPicksDataModel;
   }
@@ -417,58 +577,29 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   public DataModel getLabCherryPicksDataModel()
   {
     if (_labCherryPicksDataModel == null) {
-      List<Map> rows = new ArrayList<Map>();
+      
+      List<LabCherryPick> labCherryPicks = new ArrayList<LabCherryPick>(_cherryPickRequest.getLabCherryPicks().size());
       for (LabCherryPick cherryPick : _cherryPickRequest.getLabCherryPicks()) {
         if (!_showFailedLabCherryPicks && cherryPick.isFailed()) {
           continue;
         }
-        Map<String,Comparable> row = new HashMap<String,Comparable>();
-        int col = 0;
-        row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], 
-                cherryPick.isPlated() ? "plated" : 
-                  cherryPick.isFailed() ? "failed" :
-                    cherryPick.isCanceled() ? "canceled" :
-                        cherryPick.isMapped() ? "mapped" : 
-                          cherryPick.isAllocated() ? "reserved" : "unfulfilled");
-        row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getSourceWell().getPlateNumber().toString());
-        row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getSourceWell().getWellName());
-        row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getSourceCopy() != null ? cherryPick.getSourceCopy().getName() : "");
-        row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getSourceWell().getVendorIdentifier());
-        Gene gene = cherryPick.getSourceWell().getGene();
-        if (gene != null) {
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], gene.getGeneName());
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], gene.getEntrezgeneId().toString());
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], gene.getEntrezgeneSymbol());
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], StringUtils.makeListString(gene.getGenbankAccessionNumbers(), "; "));
-        }
-        else {
-          // TODO: handle compound screens
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
-        }
-        
-        if (cherryPick.isMapped()) {
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], new Integer(cherryPick.getAssayPlate().getPlateOrdinal() + 1));
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], new Integer(cherryPick.getAssayPlate().getAttemptOrdinal() + 1));
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], cherryPick.getAssayPlateWellName().toString());
-        }
-        else {
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
-          row.put(LAB_CHERRY_PICKS_TABLE_COLUMNS[col++], null);
-        }
-        
-        rows.add(row);
+        labCherryPicks.add(cherryPick);
       }
-      Collections.sort(rows, 
-                       new CherryPickTableRowComparator(getSortColumns(getLabCherryPicksSortManager(),
-                                                                       LAB_CHERRY_PICKS_TABLE_SECONDARY_SORT),
-                                                        getLabCherryPicksSortManager().getSortDirection()));
-      _labCherryPicksDataModel = new ListDataModel(rows);
+      Collections.sort(labCherryPicks,
+                       getLabCherryPicksSortManager().getSortColumnComparator());
+      _labCherryPicksDataModel = new ListDataModel(labCherryPicks);
     }
     return _labCherryPicksDataModel;
+  }
+  
+  public Object getScreenerCherryPicksCellValue()
+  {
+    return getScreenerCherryPicksSortManager().getCurrentColumn().getCellValue((ScreenerCherryPick) getScreenerCherryPicksDataModel().getRowData());
+  }
+  
+  public Object getLabCherryPicksCellValue()
+  {
+    return getLabCherryPicksSortManager().getCurrentColumn().getCellValue((LabCherryPick) getLabCherryPicksDataModel().getRowData());
   }
   
   public DataModel getAssayPlatesColumnModel()
@@ -831,18 +962,4 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     }
     return selectedAssayPlates;
   }
-
-  private String[] getSortColumns(TableSortManager sortManager,
-                                  String[][] secondarySorts)
-  {
-    // TODO: cache!
-    int primarySortColumnIndex = sortManager.getSortColumnIndex();
-    String[] sortColumns = new String[1 + secondarySorts[primarySortColumnIndex].length];
-    sortColumns[0] = sortManager.getSortColumnName();
-    for (int i = 0; i < sortColumns.length - 1; ++i) {
-      sortColumns[i + 1] = secondarySorts[primarySortColumnIndex][i];
-    } 
-    return sortColumns;
-  }
 }
-

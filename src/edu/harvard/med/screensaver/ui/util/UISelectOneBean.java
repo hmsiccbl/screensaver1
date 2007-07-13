@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.faces.model.SelectItem;
@@ -46,27 +47,43 @@ public class UISelectOneBean<T> extends UISelectBean<T>
     setSelection(defaultSelection);
   }
   
+  public UISelectOneBean()
+  {
+    this(new ArrayList<T>());
+  }
+
   /**
    * Get the selected item's key. Called by JSF UISelect component. Naming of
    * this method corresponds to the JSF UISelect component's "value" attribute.
+   * @throws IllegalArgumentException if selectionKey is unknown
    */
   public void setValue(String selectionKey)
   {
+    if (selectionKey != null && !_key2Obj.containsKey(selectionKey))
+    {
+      throw new IllegalArgumentException("unknown selection key " + selectionKey);
+    }
+    
     _selectionKey = selectionKey;
     _selection = _key2Obj.get(selectionKey);
+    
+    int newSelectionIndex = -1;
     
     // TODO: linear search! yuck!
     int i = 0;
     for (SelectItem selectItem : getSelectItems()) {
-        if ((selectItem.getValue() == null && selectionKey == null) ||
-          selectItem.getValue().equals(selectionKey)) {
-        _selectionIndex = i;
-        setChanged();
+      if ((selectItem.getValue() == null && selectionKey == null) ||
+        selectItem.getValue().equals(selectionKey)) {
+        newSelectionIndex = i;
         break;
       }
       ++i;
     }
-    notifyObservers(_selection);
+    if (newSelectionIndex != _selectionIndex) {
+      _selectionIndex = newSelectionIndex;
+      setChanged();
+      notifyObservers(_selection);
+    }
   }
   
   /**

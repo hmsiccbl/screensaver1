@@ -25,13 +25,13 @@ public class EmptyScreenResultDataModel extends ScreenResultDataModel
 {
   // static members
 
-  private static final List<Map<String,String>> EMPTY_RESULT = new ArrayList<Map<String,String>>();
-  private static final Map<String,String> EMTPY_ROW = new HashMap<String,String>(0);
+  private static final List<Map<String,Object>> EMPTY_RESULT = new ArrayList<Map<String,Object>>();
+  private static final Map<String,Object> EMTPY_ROW = new HashMap<String,Object>(0);
   private static Logger log = Logger.getLogger(EmptyScreenResultDataModel.class);
 
   public EmptyScreenResultDataModel()
   {
-    super(null, null, null, null);
+    super(null, null, -1, null, null);
   }
     
   @Override
@@ -41,7 +41,7 @@ public class EmptyScreenResultDataModel extends ScreenResultDataModel
   }
 
   @Override
-  public Map<String,String> getRowData()
+  public Map<String,Object> getRowData()
   {
     return EMTPY_ROW;
   }
@@ -53,15 +53,9 @@ public class EmptyScreenResultDataModel extends ScreenResultDataModel
   }
 
   @Override
-  public List<Map<String,String>> getWrappedData()
+  public List<Map<String,Object>> getWrappedData()
   {
     return EMPTY_RESULT;
-  }
-
-  @Override
-  public boolean isResultValueCellExcluded()
-  {
-    return false;
   }
 
   @Override
@@ -82,9 +76,4 @@ public class EmptyScreenResultDataModel extends ScreenResultDataModel
   {
     return null;
   }
-
-//  @Override
-//  public void sort(String sortColumnName, SortDirection sortDirection)
-//  {
-//  }
 }

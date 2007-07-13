@@ -334,9 +334,9 @@ TODO:
 						sortAscending="#{cherryPickRequestViewer.screenerCherryPicksSortManager.sortAscending}">
 						<t:columns
 							value="#{cherryPickRequestViewer.screenerCherryPicksSortManager.columnModel}"
-							var="columnName" styleClass="column">
+							var="column" styleClass="column">
 							<f:facet name="header">
-								<t:commandSortHeader columnName="#{columnName}" arrow="false">
+								<t:commandSortHeader columnName="#{column.name}" arrow="false">
 									<f:facet name="ascending">
 										<t:graphicImage value="/images/ascending-arrow.gif"
 											rendered="true" border="0" />
@@ -345,10 +345,10 @@ TODO:
 										<t:graphicImage value="/images/descending-arrow.gif"
 											rendered="true" border="0" />
 									</f:facet>
-									<h:outputText value="#{columnName}" />
+									<h:outputText value="#{column.name}" />
 								</t:commandSortHeader>
 							</f:facet>
-							<t:outputText value="#{cherryPickRow[columnName]}" />
+							<t:outputText value="#{cherryPickRequestViewer.screenerCherryPicksCellValue}" />
 						</t:columns>
 					</t:dataTable>
 				</t:buffer>
@@ -392,8 +392,8 @@ TODO:
 						firstRowIndexVar="fromRow"
 						lastRowIndexVar="toRow" rowsCountVar="rowCount"
 						pageCountVar="pages">
-						<t:outputText value="#{fromRow}..#{toRow} of #{rowCount}"
-							styleClass="label" rendered="#{pages > 1}" />
+						<t:outputText value="#{fromRow}..#{toRow < 0 ? rowCount : toRow} of #{rowCount}"
+							styleClass="label" />
 					</t:dataScroller>
 
 					<t:selectOneMenu id="screenerCherryPicksPerPage"
@@ -483,7 +483,7 @@ TODO:
 
 				<%-- Render table into a buffer, allowing dataScrollers to be positioned above table. See http://wiki.apache.org/myfaces/Buffer. --%>
 				<t:buffer into="#{labCherryPicksTableRenderBuffer}">
-					<t:dataTable id="labCherryPicksTable" var="cherryPickRow"
+					<t:dataTable id="labCherryPicksTable" var="row"
 						value="#{cherryPickRequestViewer.labCherryPicksDataModel}"
 						styleClass="standardTable" columnClasses="column"
 						rows="#{cherryPickRequestViewer.labCherryPicksPerPage.selection}"
@@ -493,9 +493,9 @@ TODO:
 						rendered="#{!empty cherryPickRequestViewer.cherryPickRequest.labCherryPicks}">
 						<t:columns
 							value="#{cherryPickRequestViewer.labCherryPicksSortManager.columnModel}"
-							var="columnName" styleClass="column">
+							var="column" styleClass="column">
 							<f:facet name="header">
-								<t:commandSortHeader columnName="#{columnName}" arrow="false">
+								<t:commandSortHeader columnName="#{column.name}" arrow="false">
 									<f:facet name="ascending">
 										<t:graphicImage value="/images/ascending-arrow.gif"
 											rendered="true" border="0" />
@@ -504,10 +504,10 @@ TODO:
 										<t:graphicImage value="/images/descending-arrow.gif"
 											rendered="true" border="0" />
 									</f:facet>
-									<t:outputText value="#{columnName}" />
+									<t:outputText value="#{column.name}" />
 								</t:commandSortHeader>
 							</f:facet>
-							<t:outputText value="#{cherryPickRow[columnName]}" />
+							<t:outputText value="#{cherryPickRequestViewer.labCherryPicksCellValue}" />
 						</t:columns>
 					</t:dataTable>
 				</t:buffer>
@@ -548,8 +548,8 @@ TODO:
 						for="labCherryPicksTable" firstRowIndexVar="fromRow"
 						lastRowIndexVar="toRow" rowsCountVar="rowCount"
 						pageCountVar="pages">
-						<t:outputText value="#{fromRow}..#{toRow} of #{rowCount}"
-							styleClass="label" rendered="#{pages > 1}" />
+						<t:outputText value="#{fromRow}..#{toRow < 0 ? rowCount : toRow} of #{rowCount}"
+							styleClass="label" />
 					</t:dataScroller>
 
 					<t:panelGroup
