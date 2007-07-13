@@ -148,7 +148,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
   
   /**
-   * Reattach a <i>new instance</i> of a previously persistent, but dettached
+   * Reattach a <i>new instance</i> of a previously persistent, but deattached
    * entity to the current Hibernate session, allowing its previously
    * uninitialized lazy relationships to be navigated (without throwing
    * LazyInitializationExceptions). If the entity already exists in the session,
@@ -167,6 +167,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> E reloadEntity(E entity)
   {
+    // TODO: throw exception if entity already exists in the session
     return reloadEntity(entity, false);
   }
   
@@ -195,6 +196,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> E reloadEntity(E entity, boolean readOnly, String... relationships)
   {
+    // TODO: throw exception if entity already exists in the session
     if (entity != null) {
       log.debug("reloading entity " + entity);
       return (E) findEntityById(entity.getClass(), entity.getEntityId(), readOnly, relationships);
