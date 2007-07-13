@@ -117,7 +117,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
                                                                           final SortDirection sortDirection,
                                                                           final int fromIndex,
                                                                           final Integer rowsToFetch,
-                                                                          final ResultValueType hitsOnlyRvt,
+                                                                          final ResultValueType positivesOnlyRvt,
                                                                           final Integer plateNumber)
                                                                           {
     Map<WellKey,List<ResultValue>> mapResult = (Map<WellKey,List<ResultValue>>)
@@ -129,7 +129,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
                                                                      selectedRvts,
                                                                      sortBy,
                                                                      sortDirection,
-                                                                     hitsOnlyRvt,
+                                                                     positivesOnlyRvt,
                                                                      plateNumber);
         Map<WellKey,List<ResultValue>> mapResult = new LinkedHashMap<WellKey,List<ResultValue>>();
         ScrollableResults scrollableResults = query.scroll();
@@ -179,12 +179,12 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
                                                                List<ResultValueType> selectedRvts,
                                                                int sortBy,
                                                                SortDirection sortDirection,
-                                                               ResultValueType hitsOnlyRvt,
+                                                               ResultValueType positivesOnlyRvt,
                                                                Integer plateNumber)
   {
     assert selectedRvts.size() > 0;
     assert sortBy < selectedRvts.size();
-    assert hitsOnlyRvt == null || selectedRvts.contains(hitsOnlyRvt);
+    assert positivesOnlyRvt == null || selectedRvts.contains(positivesOnlyRvt);
 
     StringBuilder hql = new StringBuilder();
     List<String> selectFields = new ArrayList<String>();
@@ -200,13 +200,13 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     whereClauses.add("rvt.id=?");
     args.add(selectedRvts.get(Math.max(0, sortBy)).getEntityId());
 
-    if (hitsOnlyRvt != null) {
+    if (positivesOnlyRvt != null) {
       // TODO: this makes the query quite slow, as it has to join all ResultValues for 2 ResultValueTypes
-      fromClauses.add("ResultValueType hitsOnlyRvt join hitsOnlyRvt.resultValues hitsOnlyRv");
-      whereClauses.add("hitsOnlyRv.hit = true");
-      whereClauses.add("index(hitsOnlyRv) = index(rv)");
-      whereClauses.add("hitsOnlyRvt.id=?");
-      args.add(hitsOnlyRvt.getEntityId());
+      fromClauses.add("ResultValueType positivesOnlyRvt join positivesOnlyRvt.resultValues positivesOnlyRv");
+      whereClauses.add("positivesOnlyRv.positive = true");
+      whereClauses.add("index(positivesOnlyRv) = index(rv)");
+      whereClauses.add("positivesOnlyRvt.id=?");
+      args.add(positivesOnlyRvt.getEntityId());
     }
     
     if (plateNumber != null) {
@@ -291,7 +291,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     String rvtIdsList = StringUtils.makeListString(StringUtils.wrapStrings(rvtIds, "'", "'"), ",");
         
     StringBuilder sql = new StringBuilder();
-    sql.append("select rv.result_value_type_id, rv.key, rv.assay_well_type, rv.value, rv.numeric_value, rv.numeric_decimal_precision, rv.exclude, rv.hit ").
+    sql.append("select rv.result_value_type_id, rv.key, rv.assay_well_type, rv.value, rv.numeric_value, rv.numeric_decimal_precision, rv.exclude, rv.positive ").
     append("from result_value_type_result_values rv ").
     append("where (rv.result_value_type_id in (").append(rvtIdsList).
     append(")) and (rv.key in (").append(wellKeysList).append("))");
@@ -314,7 +314,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
       Double numValue = (Double) row[field++];
       Integer numPrecision = row[field++] == null ? -1 : ((Integer) row[field - 1]);
       boolean exclude = row[field++] == null ? false : ((Boolean) row[field - 1]); 
-      boolean hit = row[field++] == null ? false : ((Boolean) row[field - 1]);
+      boolean positive = row[field++] == null ? false : ((Boolean) row[field - 1]);
       
       ResultValue rv;
       if (numValue != null) {
@@ -322,13 +322,13 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
                              numValue,
                              numPrecision,
                              exclude,
-                             hit);
+                             positive);
       }
       else {
         rv = new ResultValue(assayWellType,
                              textValue,
                              exclude,
-                             hit);
+                             positive);
       }
       resultValues.set(rvtId2Pos.get(rvtId), rv);
     }

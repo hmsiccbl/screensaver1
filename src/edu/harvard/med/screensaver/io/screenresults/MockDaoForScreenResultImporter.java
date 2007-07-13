@@ -250,7 +250,7 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
                                                                           SortDirection sortDirection,
                                                                           int fromIndex,
                                                                           Integer rowsToFetch,
-                                                                          ResultValueType hitsOnlyRvt,
+                                                                          ResultValueType positivesOnlyRvt,
                                                                           Integer plateNumber)
   {
     return null;

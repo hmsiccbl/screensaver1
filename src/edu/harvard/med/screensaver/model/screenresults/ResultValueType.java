@@ -67,16 +67,16 @@ public class ResultValueType extends AbstractEntity implements Comparable
   private String                     _howDerived;
   private SortedSet<ResultValueType> _typesDerivedFrom = new TreeSet<ResultValueType>();
   private SortedSet<ResultValueType> _derivedTypes = new TreeSet<ResultValueType>();
-  private boolean                    _isActivityIndicator;
-  private ActivityIndicatorType      _activityIndicatorType;
-  private IndicatorDirection         _indicatorDirection;
-  private Double                     _indicatorCutoff;
+  private boolean                    _isPositiveIndicator;
+  private PositiveIndicatorType      _positiveIndicatorType;
+  private PositiveIndicatorDirection _positiveIndicatorDirection;
+  private Double                     _positiveIndicatorCutoff;
   private boolean                    _isFollowUpData;
   private String                     _assayPhenotype;
   private String                     _comments;
   private boolean                    _isNumeric;
   private boolean                    _isNumericalnessDetermined = false;
-  private Integer                    _hits;
+  private Integer                    _positivesCount;
 
   
   // public constructors and instance methods
@@ -87,7 +87,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @param name
    * @param replicateOrdinal
    * @param isDerived
-   * @param isActivityIndicator
+   * @param isPositiveIndicator
    * @param isFollowupData
    * @param assayPhenotype
    */
@@ -96,7 +96,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
     String name,
     Integer replicateOrdinal,
     boolean isDerived,
-    boolean isActivityIndicator,
+    boolean isPositiveIndicator,
     boolean isFollowupData,
     String assayPhenotype)
   {
@@ -104,7 +104,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
     setName(name);
     setReplicateOrdinal(replicateOrdinal);
     setDerived(isDerived);
-    setActivityIndicator(isActivityIndicator);
+    setPositiveIndicator(isPositiveIndicator);
     setFollowUpData(isFollowupData);
     setAssayPhenotype(assayPhenotype);
   }
@@ -256,7 +256,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
                                      value,
                                      exclude,
                                      false);
-    rv.setHit(isHit(rv));
+    rv.setPositive(isPositive(rv));
     return addResultValue(rv, well);
   }
 
@@ -295,7 +295,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
                                      decimalPrecision,
                                      exclude,
                                      false);
-    rv.setHit(isHit(rv));
+    rv.setPositive(isPositive(rv));
     return addResultValue(rv, well);
   }
   
@@ -346,8 +346,8 @@ public class ResultValueType extends AbstractEntity implements Comparable
       }
     }
 
-    if (rv.isHit()) {
-      incrementHits();
+    if (rv.isPositive()) {
+      incrementPositivesCount();
     }
 
     getScreenResult().addWell(well);
@@ -356,50 +356,50 @@ public class ResultValueType extends AbstractEntity implements Comparable
   }
 
   /**
-   * Determine whether a result value is to be considered a hit, using its value
-   * and this ResultValueType's definition of what constitutes a hit. Only
-   * applicable for ResultValueTypes that are assay activity indicators.
+   * Determine whether a result value is to be considered a positive, using its
+   * value and this ResultValueType's definition of what constitutes a positive.
+   * Only applicable for ResultValueTypes that are positive indicators.
    * 
    * @param rv
-   * @return true iff ResultValueType is an assay activity indicator, result
+   * @return true iff ResultValueType is a positive indicator, result
    *         value is for an experimental well, result value is not excluded,
-   *         and the value of the result value meets the assay indicator type's
+   *         and the value of the result value meets the positive indicator type's
    *         criteria.
    */
-  private boolean isHit(ResultValue rv)
+  private boolean isPositive(ResultValue rv)
   {
-    boolean isHit = false;
-    if (isActivityIndicator() && rv.isExperimentalWell() && !rv.isExclude()) {
-      if (getActivityIndicatorType().equals(ActivityIndicatorType.BOOLEAN)) {
+    boolean isPositive = false;
+    if (isPositiveIndicator() && rv.isExperimentalWell() && !rv.isExclude()) {
+      if (getPositiveIndicatorType().equals(PositiveIndicatorType.BOOLEAN)) {
         if (Boolean.parseBoolean(rv.getValue())) {
-          isHit = true;
+          isPositive = true;
         }
       }
-      else if (getActivityIndicatorType().equals(ActivityIndicatorType.NUMERICAL)) {
+      else if (getPositiveIndicatorType().equals(PositiveIndicatorType.NUMERICAL)) {
         if (rv.getNumericValue() != null) {
-          if (getIndicatorDirection().equals(IndicatorDirection.HIGH_VALUES_INDICATE)) {
-            if (rv.getNumericValue() >= getIndicatorCutoff()) {
-              isHit = true;
+          if (getPositiveIndicatorDirection().equals(PositiveIndicatorDirection.HIGH_VALUES_INDICATE)) {
+            if (rv.getNumericValue() >= getPositiveIndicatorCutoff()) {
+              isPositive = true;
             }
           }
           else {
-            if (rv.getNumericValue() <= getIndicatorCutoff()) {
-              isHit = true;
+            if (rv.getNumericValue() <= getPositiveIndicatorCutoff()) {
+              isPositive = true;
             }
           }
         }
       }
-      else if (getActivityIndicatorType().equals(ActivityIndicatorType.PARTITION)) {
+      else if (getPositiveIndicatorType().equals(PositiveIndicatorType.PARTITION)) {
         String resultValue = rv.getValue();
         for (PartitionedValue pv : PartitionedValue.values()) {
           if (!pv.equals(PartitionedValue.NONE) && pv.getValue().equals(resultValue)) {
-            isHit = true;
+            isPositive = true;
             break;
           }
         }
       }
     }
-    return isHit;
+    return isPositive;
   }
 
   /**
@@ -454,22 +454,22 @@ public class ResultValueType extends AbstractEntity implements Comparable
   }
   
   /**
-   * Get the Activity Indicator Type.
-   * @return an {@link ActivityIndicatorType} enum
+   * Get the Positive Indicator Type.
+   * @return an {@link PositiveIndicatorType} enum
    * @hibernate.property
-   *   type="edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType$UserType"
+   *   type="edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType$UserType"
    */
-  public ActivityIndicatorType getActivityIndicatorType() {
-    return _activityIndicatorType;
+  public PositiveIndicatorType getPositiveIndicatorType() {
+    return _positiveIndicatorType;
   }
 
   /**
-   * Set the Activity Indicator Type.
-   * @param activityIndicatorType the Activity Indicator Type to set
+   * Set the Positive Indicator Type.
+   * @param positiveIndicatorType the Activity Indicator Type to set
    */
-  public void setActivityIndicatorType(ActivityIndicatorType activityIndicatorType)
+  public void setPositiveIndicatorType(PositiveIndicatorType positiveIndicatorType)
   {
-    _activityIndicatorType = activityIndicatorType;
+    _positiveIndicatorType = positiveIndicatorType;
   }
 
 
@@ -682,59 +682,61 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @return the indicator cutoff
    * @hibernate.property type="double"
    */
-  public Double getIndicatorCutoff() {
-    return _indicatorCutoff;
+  public Double getPositiveIndicatorCutoff() {
+    return _positiveIndicatorCutoff;
   }
 
   /**
    * Set the indicator cutoff
    * @param indicatorCutoff the indicator cutoff
    */
-  public void setIndicatorCutoff(Double indicatorCutoff) {
-    _indicatorCutoff = indicatorCutoff;
+  public void setPositiveIndicatorCutoff(Double indicatorCutoff) {
+    _positiveIndicatorCutoff = indicatorCutoff;
   }
 
   /**
-   * Get the indicator direction, which indicates whether a "hit" exists based
-   * upon whether a numeric result value is above or below the indicator cutoff.
+   * Get the indicator direction, which indicates whether a "positive" exists
+   * based upon whether a numeric result value is above or below the indicator
+   * cutoff.
    * 
-   * @return an {@link IndicatorDirection} enum
-   * @hibernate.property type="edu.harvard.med.screensaver.model.screenresults.IndicatorDirection$UserType"
+   * @return an {@link PositiveIndicatorDirection} enum
+   * @hibernate.property type="edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection$UserType"
    */
-  public IndicatorDirection getIndicatorDirection() {
-    return _indicatorDirection;
+  public PositiveIndicatorDirection getPositiveIndicatorDirection() {
+    return _positiveIndicatorDirection;
   }
 
   /**
-   * Set the indicator direction, which indicates whether a "hit" exists based
-   * upon whether a numeric result value is above or below the indicator cutoff.
+   * Set the indicator direction, which indicates whether a "positive" exists
+   * based upon whether a numeric result value is above or below the indicator
+   * cutoff.
    * 
    * @param indicatorDirection the indicator direction
    */
-  public void setIndicatorDirection(IndicatorDirection indicatorDirection) {
-    _indicatorDirection = indicatorDirection;
+  public void setPositiveIndicatorDirection(PositiveIndicatorDirection indicatorDirection) {
+    _positiveIndicatorDirection = indicatorDirection;
   }
 
   /**
-   * Get whether this <code>ResultValueType</code> is an activity indicator.
+   * Get whether this <code>ResultValueType</code> is an positive indicator.
    * TODO: explain what this is, exactly.
    * 
    * @return <code>true</code> iff this <code>ResultValueType</code> is an
-   *         activity indicator
+   *         positive indicator
    * @hibernate.property type="boolean" not-null="true"
    */
-  public boolean isActivityIndicator() {
-    return _isActivityIndicator;
+  public boolean isPositiveIndicator() {
+    return _isPositiveIndicator;
   }
 
   /**
-   * Set whether this <code>ResultValueType</code> is an activity indicator.
+   * Set whether this <code>ResultValueType</code> is an positive indicator.
    * 
    * @param isActivityIndicator set to <code>true</code> iff this
-   *          <code>ResultValueType</code> is an activity indicator
+   *          <code>ResultValueType</code> is an positive indicator
    */
-  public void setActivityIndicator(boolean isActivityIndicator) {
-    _isActivityIndicator = isActivityIndicator;
+  public void setPositiveIndicator(boolean isActivityIndicator) {
+    _isPositiveIndicator = isActivityIndicator;
   }
 
   /**
@@ -839,24 +841,24 @@ public class ResultValueType extends AbstractEntity implements Comparable
   }
 
   /**
-   * Get the number of ResultValues that are hits, if this is an
+   * Get the number of ResultValues that are positives, if this is an
    * ActivityIndicator ResultValueType.
    * 
-   * @return the number of ResultValues that are hits, if this is an
+   * @return the number of ResultValues that are positives, if this is an
    *         ActivityIndicator ResultValueType; otherwise null
    * @hibernate.property type="integer"
    */
   @DerivedEntityProperty(isPersistent=true)
-  public Integer getHits()
+  public Integer getPositivesCount()
   {
-    return _hits;
+    return _positivesCount;
   }
   
   @DerivedEntityProperty
-  public Double getHitRatio()
+  public Double getPositivesPercentage()
   {
-    if (_hits != null) {
-      return _hits / (double) getScreenResult().getExperimentalWellCount();
+    if (_positivesCount != null) {
+      return _positivesCount / (double) getScreenResult().getExperimentalWellCount();
     }
     return null;
   }
@@ -1075,20 +1077,20 @@ public class ResultValueType extends AbstractEntity implements Comparable
   
   /**
    * @motivation for Hibernate
-   * @param hits
+   * @param positives
    */
-  private void setHits(Integer hits)
+  private void setPositivesCount(Integer positivesCount)
   {
-    _hits = hits;
+    _positivesCount = positivesCount;
   }
   
-  private void incrementHits()
+  private void incrementPositivesCount()
   {
-    if (_hits == null) {
-      _hits = new Integer(1);
+    if (_positivesCount == null) {
+      _positivesCount = new Integer(1);
     }
     else {
-      ++_hits;
+      ++_positivesCount;
     }
   }
 

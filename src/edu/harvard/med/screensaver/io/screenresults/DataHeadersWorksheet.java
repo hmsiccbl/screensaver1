@@ -13,8 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.io.workbook.Cell;
-import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
-import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
+import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
@@ -64,15 +64,15 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
       else {
         columnValues.put(DataHeaderRow.ASSAY_READOUT_TYPE, rvt.getAssayReadoutType().getValue().toLowerCase());
       }
-      columnValues.put(DataHeaderRow.IS_ASSAY_ACTIVITY_INDICATOR, makeYesOrNoString(rvt.isActivityIndicator()));
-      if (rvt.isActivityIndicator()) {
-        columnValues.put(DataHeaderRow.ACTIVITY_INDICATOR_TYPE, rvt.getActivityIndicatorType().getValue().toLowerCase());
-        if (rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL) {
+      columnValues.put(DataHeaderRow.IS_ASSAY_ACTIVITY_INDICATOR, makeYesOrNoString(rvt.isPositiveIndicator()));
+      if (rvt.isPositiveIndicator()) {
+        columnValues.put(DataHeaderRow.ACTIVITY_INDICATOR_TYPE, rvt.getPositiveIndicatorType().getValue().toLowerCase());
+        if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.NUMERICAL) {
           columnValues.put(DataHeaderRow.NUMERICAL_INDICATOR_DIRECTION, 
-                           rvt.getIndicatorDirection().equals(IndicatorDirection.HIGH_VALUES_INDICATE) 
+                           rvt.getPositiveIndicatorDirection().equals(PositiveIndicatorDirection.HIGH_VALUES_INDICATE) 
                            ?  ScreenResultParser.NUMERICAL_INDICATOR_DIRECTION_HIGH_VALUES_INDICATE : 
                              ScreenResultParser.NUMERICAL_INDICATOR_DIRECTION_LOW_VALUES_INDICATE);
-          columnValues.put(DataHeaderRow.NUMERICAL_INDICATOR_CUTOFF, rvt.getIndicatorCutoff());
+          columnValues.put(DataHeaderRow.NUMERICAL_INDICATOR_CUTOFF, rvt.getPositiveIndicatorCutoff());
         }
       }
       columnValues.put(DataHeaderRow.PRIMARY_OR_FOLLOWUP, (rvt.isFollowUpData() ? FOLLOWUP_VALUE : PRIMARY_VALUE).toLowerCase());

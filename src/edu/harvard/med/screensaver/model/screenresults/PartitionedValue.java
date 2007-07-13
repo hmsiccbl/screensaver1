@@ -17,8 +17,8 @@ import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
  * Vocabulary for {@link ResultValue#getValue()} when parent's
- * {@link ResultValueType#getActivityIndicatorType()} is
- * {@link edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType#PARTITION}.
+ * {@link ResultValueType#getPositiveIndicatorType()} is
+ * {@link edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType#PARTITION}.
  * <i>NOT CURRENTLY USED IN THE PERSISTED MODEL.  See {@link ResultValue#generateTypedValue()}.</i>
  * @author ant
  */

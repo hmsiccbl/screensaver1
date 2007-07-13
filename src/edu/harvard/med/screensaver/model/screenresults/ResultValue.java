@@ -56,7 +56,7 @@ public class ResultValue
    * ResultValues to be excluded.
    */
   private boolean _exclude;
-  private boolean _isHit;
+  private boolean _isPositive;
   
 
   // public constructors and instance methods
@@ -100,7 +100,7 @@ public class ResultValue
                      Double value,
                      int decimalPrecision,
                      boolean exclude,
-                     boolean isHit)
+                     boolean isPositive)
   {
     setAssayWellType(assayWellType);
     setNumericValue(value);
@@ -109,7 +109,7 @@ public class ResultValue
     } // else null
     setValue(formatNumericValue(decimalPrecision));
     setExclude(exclude);
-    setHit(isHit);
+    setPositive(isPositive);
   }
 
   /**
@@ -128,12 +128,12 @@ public class ResultValue
   public ResultValue(AssayWellType assayWellType,
                      String value,
                      boolean exclude,
-                     boolean isHit)
+                     boolean isPositive)
   {
     setAssayWellType(assayWellType);
     setValue(value);
     setExclude(exclude);
-    setHit(isHit);
+    setPositive(isPositive);
   } 
 
   /**
@@ -226,9 +226,9 @@ public class ResultValue
     return _exclude;
   }
   
-  public boolean isHit()
+  public boolean isPositive()
   {
-    return _isHit;
+    return _isPositive;
   }
   
   @DerivedEntityProperty
@@ -279,16 +279,16 @@ public class ResultValue
   
   /**
    * Returns the value of this <code>ResultValue</code> as an appropriately
-   * typed object, depending upon {@link ResultValueType#isActivityIndicator()},
+   * typed object, depending upon {@link ResultValueType#isPositiveIndicator()},
    * {@link ResultValueType#isDerived()()}, and
-   * {@link ResultValueType#getActivityIndicatorType()}, as follows:
+   * {@link ResultValueType#getPositiveIndicatorType()}, as follows:
    * <ul>
    * <li> Well type is non-data-producer: returns <code>null</code>
    * <li> Not Derived (Raw): returns Double
    * <li> Not an Activity Indicator: returns String
-   * <li> ActivityIndicatorType.BOOLEAN: returns Boolean
-   * <li> ActivityIndicatorType.NUMERICAL: returns Double
-   * <li> ActivityIndicatorType.PARTITION: returns String (PartitionedValue.getDisplayValue())
+   * <li> PositiveIndicatorType.BOOLEAN: returns Boolean
+   * <li> PositiveIndicatorType.NUMERICAL: returns Double
+   * <li> PositiveIndicatorType.PARTITION: returns String (PartitionedValue.getDisplayValue())
    * </ul>
    * 
    * @return a Boolean, Double, or String
@@ -305,12 +305,12 @@ public class ResultValue
       return rv.getNumericValue();
     }
       
-    if (rvt.isActivityIndicator()) {
-      ActivityIndicatorType activityIndicatorType = rvt.getActivityIndicatorType();
-      if (activityIndicatorType.equals(ActivityIndicatorType.BOOLEAN)) {
+    if (rvt.isPositiveIndicator()) {
+      PositiveIndicatorType activityIndicatorType = rvt.getPositiveIndicatorType();
+      if (activityIndicatorType.equals(PositiveIndicatorType.BOOLEAN)) {
         return Boolean.valueOf(rv.getValue());
       }
-      else if (activityIndicatorType.equals(ActivityIndicatorType.NUMERICAL)) {
+      else if (activityIndicatorType.equals(PositiveIndicatorType.NUMERICAL)) {
         if (rvt.isNumeric()) {
           // should already have been handled above, but we include this case for completeness
           return rv.getNumericValue();
@@ -320,7 +320,7 @@ public class ResultValue
           return rv.getValue();
         }
       }
-      else if (activityIndicatorType.equals(ActivityIndicatorType.PARTITION)) {
+      else if (activityIndicatorType.equals(PositiveIndicatorType.PARTITION)) {
         return PartitionedValue.lookupByValue(rv.getValue()).getDisplayValue();
       }
     }
@@ -331,15 +331,15 @@ public class ResultValue
   // package-protected methods
   
   /**
-   * Set whether this <code>ResultValue</code> is a hit.
+   * Set whether this <code>ResultValue</code> is a positive.
    * 
-   * @param isHit set to <code>true</code> iff this <code>ResultValue</code>
-   *          is a hit
+   * @param isPositive set to <code>true</code> iff this <code>ResultValue</code>
+   *          is a positive
    * @motivation for hibernate and ResultValueType
    */
-  void setHit(boolean isHit)
+  void setPositive(boolean isPositive)
   {
-    _isHit = isHit;
+    _isPositive = isPositive;
   }
 
 

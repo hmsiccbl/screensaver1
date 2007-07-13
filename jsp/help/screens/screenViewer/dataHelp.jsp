@@ -13,18 +13,30 @@
       wells int the library. You can sort and browse the data in many different ways:
       <ul>
         <li>
-          Navigate through the date using the first page, previous plate, previous page, next
-          page, next plate, and last page buttons. Each page displays a single plate row, so
-          scrolling by plate can help you find the data you want quicker.
+          Navigate through the data using the first page, previous page, next
+          page, and last page buttons.
         </li>
+        <li>
+          From the "Show:" menu list, select "All" to browse through all result values.
+        </li>
+        <li>
+          From the "Show:" menu list, select "Positives" to view only
+          result values that have been deemed "positive". If more than one Data
+          Header is a Positive Indicator, a second menu list will appear,
+          allowing you to select the Data Header that will be used to determine
+          the set of positives.</li>
+        <li>
+          From the "Show:" menu list, select a plate number to browse all the result values for a 
+          particular plate.
+        </li>
+        <li>
+          From the "Rows per page", select the number of rows you
+          would like to view on the page. <span class="helpTip">Tip: </span>When
+          viewing by "Positives" or by plate number, you can choose to view
+          "All" available rows.</li>
         <li>
           To the right of the blue navigation buttons, you can enter in a data row number and click
           "Go" to view that data.
-        </li>
-        <li>
-          Click the checkbox next to "Show only hits for positives" to filter out all non-hit data.
-          If there are multiple data headers that indicate positives, you can select which positive
-          indicator you want to filter on in the pulldown menu.
         </li>
         <li>
           Change the sort order by clicking on any of the column headers. Clicking once will do a

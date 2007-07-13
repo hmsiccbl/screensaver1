@@ -39,9 +39,9 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
-import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
-import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
+import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -336,8 +336,8 @@ public class ComplexDAOTest extends AbstractSpringTest
               false,
               "human");
             rvt[i].setAssayReadoutType(i % 2 == 0 ? AssayReadoutType.PHOTOMETRY: AssayReadoutType.FLUORESCENCE_INTENSITY);
-            rvt[i].setActivityIndicatorType(i % 2 == 0 ? ActivityIndicatorType.BOOLEAN: ActivityIndicatorType.PARTITION);
-            rvt[i].setIndicatorDirection(i % 2 == 0 ? IndicatorDirection.LOW_VALUES_INDICATE : IndicatorDirection.HIGH_VALUES_INDICATE);
+            rvt[i].setPositiveIndicatorType(i % 2 == 0 ? PositiveIndicatorType.BOOLEAN: PositiveIndicatorType.PARTITION);
+            rvt[i].setPositiveIndicatorDirection(i % 2 == 0 ? PositiveIndicatorDirection.LOW_VALUES_INDICATE : PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
           }
           
           Library library = new Library(
@@ -406,11 +406,11 @@ public class ComplexDAOTest extends AbstractSpringTest
               iResultValue % 2 == 0 ? AssayReadoutType.PHOTOMETRY : AssayReadoutType.FLUORESCENCE_INTENSITY,
               rvt.getAssayReadoutType());
             assertEquals(
-              iResultValue % 2 == 0 ? ActivityIndicatorType.BOOLEAN: ActivityIndicatorType.PARTITION,
-              rvt.getActivityIndicatorType());
+              iResultValue % 2 == 0 ? PositiveIndicatorType.BOOLEAN: PositiveIndicatorType.PARTITION,
+              rvt.getPositiveIndicatorType());
             assertEquals(
-              iResultValue % 2 == 0 ? IndicatorDirection.LOW_VALUES_INDICATE : IndicatorDirection.HIGH_VALUES_INDICATE,
-              rvt.getIndicatorDirection());
+              iResultValue % 2 == 0 ? PositiveIndicatorDirection.LOW_VALUES_INDICATE : PositiveIndicatorDirection.HIGH_VALUES_INDICATE,
+              rvt.getPositiveIndicatorDirection());
             assertEquals(
               "human",
               rvt.getAssayPhenotype());
@@ -785,7 +785,7 @@ public class ComplexDAOTest extends AbstractSpringTest
   }
 
   /**
-   * A ScreenResult's plateNumbers, wells, experimentWellCount, and hits
+   * A ScreenResult's plateNumbers, wells, experimentWellCount, and positives
    * properties should be updated when a ResultValue is added to a
    * ScreenResult's ResultValueType.
    */
@@ -794,7 +794,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     final SortedSet<Integer> expectedPlateNumbers = new TreeSet<Integer>();
     final SortedSet<Well> expectedWells = new TreeSet<Well>();
     final int[] expectedExperimentalWellCount = new int[1];
-    final int[] expectedHits = new int[1];
+    final int[] expectedPositives = new int[1];
     final double indicatorCutoff = 5.0;
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
@@ -803,10 +803,10 @@ public class ComplexDAOTest extends AbstractSpringTest
         Screen screen = MakeDummyEntities.makeDummyScreen(1); 
         ScreenResult screenResult = new ScreenResult(screen, new Date());
         ResultValueType rvt = new ResultValueType(screenResult, "Raw Value");
-        rvt.setActivityIndicator(true);
-        rvt.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
-        rvt.setIndicatorCutoff(indicatorCutoff);
-        rvt.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);
+        rvt.setPositiveIndicator(true);
+        rvt.setPositiveIndicatorType(PositiveIndicatorType.NUMERICAL);
+        rvt.setPositiveIndicatorCutoff(indicatorCutoff);
+        rvt.setPositiveIndicatorDirection(PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
         Library library = new Library(
           "library 1",
           "lib1",
@@ -825,7 +825,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           if (assayWellType.equals(AssayWellType.EXPERIMENTAL)) {
             expectedExperimentalWellCount[0]++;
             if (!exclude && i >= indicatorCutoff) {
-              ++expectedHits[0];
+              ++expectedPositives[0];
             }
           }
 
@@ -851,8 +851,8 @@ public class ComplexDAOTest extends AbstractSpringTest
     ScreenResult screenResult = new ScreenResult(screen, new Date());
     ResultValueType rvt1 = new ResultValueType(screenResult, "Raw Value");
     ResultValueType rvt2 = new ResultValueType(screenResult, "Derived Value");
-    rvt2.setActivityIndicator(true);
-    rvt2.setActivityIndicatorType(ActivityIndicatorType.PARTITION);
+    rvt2.setPositiveIndicator(true);
+    rvt2.setPositiveIndicatorType(PositiveIndicatorType.PARTITION);
     rvt2.setDerived(true);
     rvt2.setHowDerived("even wells are 'S', otherwise 'W'");
     rvt2.addTypeDerivedFrom(rvt1);

@@ -25,7 +25,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -339,12 +339,12 @@ public class ICBGReportGenerator
     SortedSet<ResultValueType> resultValueTypes =
       screenResult.getResultValueTypes();
     for (ResultValueType rvt : resultValueTypes) {
-      if (! rvt.isActivityIndicator()) {
+      if (! rvt.isPositiveIndicator()) {
         continue;
       }
-      ActivityIndicatorType indicatorType = rvt.getActivityIndicatorType();
-      if (indicatorType.equals(ActivityIndicatorType.BOOLEAN) ||
-          indicatorType.equals(ActivityIndicatorType.PARTITION)) {
+      PositiveIndicatorType indicatorType = rvt.getPositiveIndicatorType();
+      if (indicatorType.equals(PositiveIndicatorType.BOOLEAN) ||
+          indicatorType.equals(PositiveIndicatorType.PARTITION)) {
         rightmostScaledOrBoolean = rvt;
       }
     }
@@ -358,11 +358,11 @@ public class ICBGReportGenerator
     SortedSet<ResultValueType> resultValueTypes =
       screenResult.getResultValueTypes();
     for (ResultValueType rvt : resultValueTypes) {
-      if (! rvt.isActivityIndicator()) {
+      if (! rvt.isPositiveIndicator()) {
         continue;
       }
-      ActivityIndicatorType indicatorType = rvt.getActivityIndicatorType();
-      if (indicatorType.equals(ActivityIndicatorType.NUMERICAL)) {
+      PositiveIndicatorType indicatorType = rvt.getPositiveIndicatorType();
+      if (indicatorType.equals(PositiveIndicatorType.NUMERICAL)) {
         rightmostNumerical = rvt;
       }
     }
@@ -396,7 +396,7 @@ public class ICBGReportGenerator
       row.createCell((short) 6).setCellValue(numericalRVT.getDescription());
     }
     if (scaledOrBooleanRV != null) {
-      if (scaledOrBooleanRVT.getActivityIndicatorType().equals(ActivityIndicatorType.BOOLEAN)) {
+      if (scaledOrBooleanRVT.getPositiveIndicatorType().equals(PositiveIndicatorType.BOOLEAN)) {
         if (scaledOrBooleanRV.getValue().equals("true")) {
           row.createCell((short) 7).setCellValue("A");
         }
@@ -404,7 +404,7 @@ public class ICBGReportGenerator
           row.createCell((short) 7).setCellValue("I");          
         }
       }
-      else if (scaledOrBooleanRVT.getActivityIndicatorType().equals(ActivityIndicatorType.PARTITION)) {
+      else if (scaledOrBooleanRVT.getPositiveIndicatorType().equals(PositiveIndicatorType.PARTITION)) {
         if (scaledOrBooleanRV.getValue().toUpperCase().equals("S") ||
             scaledOrBooleanRV.getValue().toUpperCase().equals("M")) {
           row.createCell((short) 7).setCellValue("A");

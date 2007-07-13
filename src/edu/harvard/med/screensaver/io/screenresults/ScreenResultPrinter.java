@@ -55,10 +55,10 @@ public class ScreenResultPrinter
       printer.println("\tisDerived=" + rvt.isDerived());
       printer.println("\tderivedFrom="+rvt.getTypesDerivedFrom()); // TODO
       printer.println("\thowDerived=" + rvt.getHowDerived());
-      printer.println("\tisActivityIndicator=" + rvt.isActivityIndicator());
-      printer.println("\tactivityIndicatorType=" + rvt.getActivityIndicatorType());
-      printer.println("\tindicator cutoff=" + rvt.getIndicatorCutoff());
-      printer.println("\tindicator direction=" + rvt.getIndicatorDirection());
+      printer.println("\tisActivityIndicator=" + rvt.isPositiveIndicator());
+      printer.println("\tactivityIndicatorType=" + rvt.getPositiveIndicatorType());
+      printer.println("\tindicator cutoff=" + rvt.getPositiveIndicatorCutoff());
+      printer.println("\tindicator direction=" + rvt.getPositiveIndicatorDirection());
       printer.println("\tisFollowupData=" + rvt.isFollowUpData());
       printer.println("\tcomments="+rvt.getComments());
 

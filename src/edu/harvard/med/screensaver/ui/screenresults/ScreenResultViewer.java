@@ -71,6 +71,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   
   private static final DataModel EMPTY_DATAHEADERS_MODEL = new ListDataModel(new ArrayList<DataHeaderRow>());
   private static final ScreenResultDataModel EMPTY_RAW_DATA_MODEL = new EmptyScreenResultDataModel();
+  // TODO: consider replacing DataHeaderRowDefinition with TableColumn<ResultValueType>
   private static final DataHeaderRowDefinition[] DATA_HEADER_ATTRIBUTES = new DataHeaderRowDefinition[] {
     new DataHeaderRowDefinition("description", "Description", "A description of the data header"),
     new DataHeaderRowDefinition("replicateOrdinal", "Replicate Number", "To which replicate this data header refers"),
@@ -93,29 +94,29 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
         return typesDerivedFromText.toString();
       }
     },
-    new DataHeaderRowDefinition("activityIndicator", "Positive Indicator", "True if this data header is used to indicate hits"),
-    new DataHeaderRowDefinition("activityIndicatorType", "Positive Indicator Type", "'Numerical', 'Boolean', or 'Partition'"),
-    new DataHeaderRowDefinition("indicatorDirection", "Indicator Direction", "For numerical indicators, whether high or low values are hits"),
-    new DataHeaderRowDefinition("indicatorCutoff", "Indicator Cutoff", "The numerical score demarking hits from non-hits"),
+    new DataHeaderRowDefinition("positiveIndicator", "Positive Indicator", "True if this data header is used to indicate \"positives\""),
+    new DataHeaderRowDefinition("positiveIndicatorType", "Positive Indicator Type", "'Numerical', 'Boolean', or 'Partition'"),
+    new DataHeaderRowDefinition("positiveIndicatorDirection", "Indicator Direction", "For numerical indicators, whether high or low values are \"positives\""),
+    new DataHeaderRowDefinition("positiveIndicatorCutoff", "Indicator Cutoff", "The numerical score demarking \"positives\" from \"non-positives\""),
     new DataHeaderRowDefinition("followUpData", "Follow Up Data", "Primary or follow up screen data"),
     new DataHeaderRowDefinition("assayPhenotype", "Assay Phenotype", "The phenotype being monitored"),
     new DataHeaderRowDefinition("comments", "Comments", "Data header comments"),
-    new DataHeaderRowDefinition("hits", "Hits", "The number of hits, if this is a Positive Indicator"),
-    new DataHeaderRowDefinition("hitRatio", "Hit %", "The percent of experimental wells in the results that were hits")
+    new DataHeaderRowDefinition("positivesCount", "Positives", "The number of \"positives\", if this is a Positive Indicator"),
+    new DataHeaderRowDefinition("positivesPercentage", "Positive %", "The % of experimental wells in the results that have been deemed \"positive\"")
     {
       @Override
       public String formatValue(ResultValueType rvt)
       {
-        if (rvt.getHitRatio() == null) {
+        if (rvt.getPositivesPercentage() == null) {
           return "";
         }
-        return NumberFormat.getPercentInstance().format(rvt.getHitRatio());
+        return NumberFormat.getPercentInstance().format(rvt.getPositivesPercentage());
       }
     }
   };
 
   public static final Integer DATA_TABLE_FILTER_SHOW_ALL = -2;
-  public static final Integer DATA_TABLE_FILTER_SHOW_HITS = -1;
+  public static final Integer DATA_TABLE_FILTER_SHOW_POSITIVES = -1;
 
   public static final int DATA_TABLE_FIXED_COLUMNS = 3;
 
@@ -152,7 +153,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   private UIInput _dataTableRowsPerPageUIInput;
   private UISelectOneBean<Integer> _dataFilter;
   private DataTableRowsPerPageUISelectOneBean _dataTableRowsPerPage;
-  private UISelectOneBean<ResultValueType> _showHitsOnlyForDataHeader;
+  private UISelectOneBean<ResultValueType> _showPositivesOnlyForDataHeader;
   private int _screenResultSize;
 
 
@@ -390,12 +391,12 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     return _sortManager;
   }
 
-  public UISelectOneBean<ResultValueType> getShowHitsOnlyForDataHeader()
+  public UISelectOneBean<ResultValueType> getShowPositivesOnlyForDataHeader()
   {
-    if (_showHitsOnlyForDataHeader == null) {
-      updateDataHeaderSelectionsForShowHits();
+    if (_showPositivesOnlyForDataHeader == null) {
+      updateDataHeaderSelectionsForShowPositives();
     }
-    return _showHitsOnlyForDataHeader;
+    return _showPositivesOnlyForDataHeader;
   }
   
   // UI update pseudo-event handlers
@@ -421,13 +422,13 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
                                                     getDataTableRowsPerPage().getSelection(),
                                                     _screenResultSize);
     }
-    else if (getDataFilter().getSelection() == DATA_TABLE_FILTER_SHOW_HITS) {
-      _rawDataModel = new HitsOnlyScreenResultDataModel(_screenResult,
-                                                        getSelectedDataHeaders().getSelections(),
-                                                        getSortManager().getSortColumnIndex(),
-                                                        getSortManager().getSortDirection(),
-                                                        _screenResultsDao,
-                                                        getShowHitsOnlyForDataHeader().getSelection());
+    else if (getDataFilter().getSelection() == DATA_TABLE_FILTER_SHOW_POSITIVES) {
+      _rawDataModel = new PositivesOnlyScreenResultDataModel(_screenResult,
+                                                             getSelectedDataHeaders().getSelections(),
+                                                             getSortManager().getSortColumnIndex(),
+                                                             getSortManager().getSortDirection(),
+                                                             _screenResultsDao,
+                                                             getShowPositivesOnlyForDataHeader().getSelection());
     }
     else if (getDataFilter().getSelection() >= 0) { // plate number
       _rawDataModel = new SinglePlateScreenResultDataModel(_screenResult,
@@ -452,18 +453,18 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     getSortManager().setColumns(columns);
   }
 
-  private void updateDataHeaderSelectionsForShowHits()
+  private void updateDataHeaderSelectionsForShowPositives()
   {
-    log.debug("updating data header selections for show hits");
+    log.debug("updating data header selections for show positives");
     List<ResultValueType> resultValueTypes = new ArrayList<ResultValueType>();
     resultValueTypes.addAll(getResultValueTypes());
     for (Iterator iter = resultValueTypes.iterator(); iter.hasNext();) {
       ResultValueType rvt = (ResultValueType) iter.next();
-      if (!rvt.isActivityIndicator()) {
+      if (!rvt.isPositiveIndicator()) {
         iter.remove();
       }
     }
-    _showHitsOnlyForDataHeader = new UISelectOneBean<ResultValueType>(resultValueTypes) {
+    _showPositivesOnlyForDataHeader = new UISelectOneBean<ResultValueType>(resultValueTypes) {
       @Override
       protected String getLabel(ResultValueType t)
       {
@@ -483,8 +484,8 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
     SortedSet<Integer> filters = new TreeSet<Integer>(_screenResult.getPlateNumbers());
     filters.add(DATA_TABLE_FILTER_SHOW_ALL);
-    if (getShowHitsOnlyForDataHeader().getSize() > 0) {
-      filters.add(DATA_TABLE_FILTER_SHOW_HITS);
+    if (getShowPositivesOnlyForDataHeader().getSize() > 0) {
+      filters.add(DATA_TABLE_FILTER_SHOW_POSITIVES);
     }
     _dataFilter = 
       new UISelectOneBean<Integer>(filters, DATA_TABLE_FILTER_SHOW_ALL) {
@@ -494,11 +495,8 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
         if (val == DATA_TABLE_FILTER_SHOW_ALL) {
           return "All";
         }
-        if (val == DATA_TABLE_FILTER_SHOW_HITS) {
-          if (getShowHitsOnlyForDataHeader().getSize() == 1) {
-            return "Hits (" + getShowHitsOnlyForDataHeader().getSelection().getUniqueName() + ")";
-          }
-          return "Hits";
+        if (val == DATA_TABLE_FILTER_SHOW_POSITIVES) {
+          return "Positives";
         }
         return super.getLabel(val);
       }
@@ -512,7 +510,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
       // note: don't allow "show all rows" when not filtering result values (too many!) 
       _dataTableRowsPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(16, 24, 48, 96, 384)); 
     }
-    else if (getDataFilter().getSelection() == DATA_TABLE_FILTER_SHOW_HITS) {
+    else if (getDataFilter().getSelection() == DATA_TABLE_FILTER_SHOW_POSITIVES) {
       _dataTableRowsPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE));
       _dataTableRowsPerPage.setAllRowsValue(getRawDataSize());
     }
@@ -656,10 +654,10 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
    * Called when the set of rows to be displayed in the table needs to be changed (row filtering).
    * @return
    */
-  public void showHitsForDataHeaderListener(ValueChangeEvent event)
+  public void showPositivesForDataHeaderListener(ValueChangeEvent event)
   {
-    log.debug("showHitsForDataHeader changed to " + event.getNewValue());
-    getShowHitsOnlyForDataHeader().setValue((String) event.getNewValue());
+    log.debug("showPositivesForDataHeader changed to " + event.getNewValue());
+    getShowPositivesOnlyForDataHeader().setValue((String) event.getNewValue());
     updateDataTableContent();
 
     // skip "update model" JSF phase, to avoid overwriting model values set above
@@ -770,7 +768,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     _selectedDataHeaders = null;
     _uniqueDataHeaderNames = null;
     _sortManager = null;
-    _showHitsOnlyForDataHeader = null;
+    _showPositivesOnlyForDataHeader = null;
     _screenResultSize = 0;
   }
 

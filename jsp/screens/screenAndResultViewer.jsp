@@ -242,14 +242,14 @@
 								value="#{screenResultViewer.dataFilter.selectItems}" />
 						</t:selectOneMenu>
 
-						<t:selectOneMenu id="showHitsOnlyForDataHeaderList"
-							value="#{screenResultViewer.showHitsOnlyForDataHeader.value}"
-							valueChangeListener="#{screenResultViewer.showHitsForDataHeaderListener}"
-							rendered="#{screenResultViewer.dataFilter.selection == -1 && screenResultViewer.showHitsOnlyForDataHeader.size > 1}"
+						<t:selectOneMenu id="showPositivesOnlyForDataHeaderList"
+							value="#{screenResultViewer.showPositivesOnlyForDataHeader.value}"
+							valueChangeListener="#{screenResultViewer.showPositivesForDataHeaderListener}"
+							rendered="#{screenResultViewer.dataFilter.selection == -1 && screenResultViewer.showPositivesOnlyForDataHeader.size > 1}"
 							onchange="javascript:document.getElementById('updateDataTableButton').click()"
 							styleClass="inputText">
-							<f:selectItems id="hitsForDataHeader"
-								value="#{screenResultViewer.showHitsOnlyForDataHeader.selectItems}" />
+							<f:selectItems id="positivesForDataHeader"
+								value="#{screenResultViewer.showPositivesOnlyForDataHeader.selectItems}" />
 						</t:selectOneMenu>
 
 						<t:selectOneMenu id="dataTableRowsPerPageList"

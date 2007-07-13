@@ -51,6 +51,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
+import edu.harvard.med.screensaver.ui.screenresults.DataTableRowsPerPageUISelectOneBean;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 import edu.harvard.med.screensaver.ui.table.TableSortManager;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
@@ -337,8 +338,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private HtmlDataScroller _screenerCherryPicksTableDataScroller1;
   private HtmlDataScroller _screenerCherryPicksTableDataScroller2;
 
-  private UISelectOneBean<Integer> _labCherryPicksPerPage;
-  private UISelectOneBean<Integer> _screenerCherryPicksPerPage;
+  private DataTableRowsPerPageUISelectOneBean _labCherryPicksPerPage;
+  private DataTableRowsPerPageUISelectOneBean _screenerCherryPicksPerPage;
 
 
   
@@ -353,12 +354,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     _isPanelCollapsedMap.put("labCherryPicks", false);
     _isPanelCollapsedMap.put("cherryPickPlates", false);
     
-    _labCherryPicksPerPage = new UISelectOneBean<Integer>(new ArrayList<Integer>(Arrays.asList(10, 20, 50, 100, -1))) {
-      protected String getLabel(Integer t) { if (t == -1) return "All"; else return super.getLabel(t); }
-    };
-    _screenerCherryPicksPerPage = new UISelectOneBean<Integer>(new ArrayList<Integer>(Arrays.asList(10, 20, 50, 100, -1))) {
-      protected String getLabel(Integer t) { if (t == -1) return "All"; else return super.getLabel(t); }
-    };
+    _labCherryPicksPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE));
+    _screenerCherryPicksPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE));
   }
 
   public void setDao(GenericEntityDAO dao)
@@ -461,12 +458,12 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     this._screenerCherryPicksTableDataScroller2 = screenerCherryPicksTableDataScroller2;
   }
 
-  public UISelectOneBean<Integer> getLabCherryPicksPerPage()
+  public DataTableRowsPerPageUISelectOneBean getLabCherryPicksPerPage()
   {
     return _labCherryPicksPerPage;
   }
 
-  public UISelectOneBean<Integer> getScreenerCherryPicksPerPage()
+  public DataTableRowsPerPageUISelectOneBean getScreenerCherryPicksPerPage()
   {
     return _screenerCherryPicksPerPage;
   }

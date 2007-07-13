@@ -45,9 +45,9 @@ import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
-import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
+import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueTypeNumericalnessException;
@@ -115,8 +115,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private static final int RELOAD_WORKBOOK_AFTER_SHEET_COUNT = 32;
 
   private static SortedMap<String,AssayReadoutType> assayReadoutTypeMap = new TreeMap<String,AssayReadoutType>();
-  private static SortedMap<String,IndicatorDirection> indicatorDirectionMap = new TreeMap<String,IndicatorDirection>();
-  private static SortedMap<String,ActivityIndicatorType> activityIndicatorTypeMap = new TreeMap<String,ActivityIndicatorType>();
+  private static SortedMap<String,PositiveIndicatorDirection> indicatorDirectionMap = new TreeMap<String,PositiveIndicatorDirection>();
+  private static SortedMap<String,PositiveIndicatorType> activityIndicatorTypeMap = new TreeMap<String,PositiveIndicatorType>();
   private static SortedMap<String,Boolean> rawOrDerivedMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,Boolean> primaryOrFollowUpMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,Boolean> booleanMap = new TreeMap<String,Boolean>();
@@ -128,14 +128,14 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                               assayReadoutType);
     }
     
-    indicatorDirectionMap.put(NUMERICAL_INDICATOR_DIRECTION_LOW_VALUES_INDICATE, IndicatorDirection.LOW_VALUES_INDICATE);
-    indicatorDirectionMap.put(NUMERICAL_INDICATOR_DIRECTION_HIGH_VALUES_INDICATE, IndicatorDirection.HIGH_VALUES_INDICATE);
+    indicatorDirectionMap.put(NUMERICAL_INDICATOR_DIRECTION_LOW_VALUES_INDICATE, PositiveIndicatorDirection.LOW_VALUES_INDICATE);
+    indicatorDirectionMap.put(NUMERICAL_INDICATOR_DIRECTION_HIGH_VALUES_INDICATE, PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
 
-    activityIndicatorTypeMap.put("Numeric", ActivityIndicatorType.NUMERICAL);
-    activityIndicatorTypeMap.put("Numerical", ActivityIndicatorType.NUMERICAL);
-    activityIndicatorTypeMap.put("Boolean", ActivityIndicatorType.BOOLEAN);
-    activityIndicatorTypeMap.put("Partitioned", ActivityIndicatorType.PARTITION);
-    activityIndicatorTypeMap.put("Partition", ActivityIndicatorType.PARTITION);
+    activityIndicatorTypeMap.put("Numeric", PositiveIndicatorType.NUMERICAL);
+    activityIndicatorTypeMap.put("Numerical", PositiveIndicatorType.NUMERICAL);
+    activityIndicatorTypeMap.put("Boolean", PositiveIndicatorType.BOOLEAN);
+    activityIndicatorTypeMap.put("Partitioned", PositiveIndicatorType.PARTITION);
+    activityIndicatorTypeMap.put("Partition", PositiveIndicatorType.PARTITION);
 
     rawOrDerivedMap.put("", false);
     rawOrDerivedMap.put(RAW_VALUE, false);
@@ -186,8 +186,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private ColumnLabelsParser _columnsDerivedFromParser;
   private ExcludeParser _excludeParser;
   private CellVocabularyParser<AssayReadoutType> _assayReadoutTypeParser;
-  private CellVocabularyParser<IndicatorDirection> _indicatorDirectionParser;
-  private CellVocabularyParser<ActivityIndicatorType> _activityIndicatorTypeParser;
+  private CellVocabularyParser<PositiveIndicatorDirection> _indicatorDirectionParser;
+  private CellVocabularyParser<PositiveIndicatorType> _activityIndicatorTypeParser;
   private CellVocabularyParser<Boolean> _rawOrDerivedParser;
   private CellVocabularyParser<Boolean> _primaryOrFollowUpParser;
   private CellVocabularyParser<Boolean> _booleanParser;
@@ -289,8 +289,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     _dataTableColumnLabel2RvtMap = new TreeMap<String,ResultValueType>();
     _columnsDerivedFromParser = new ColumnLabelsParser(_dataTableColumnLabel2RvtMap, _errors);
     _excludeParser = new ExcludeParser(_dataTableColumnLabel2RvtMap, _errors);
-    _indicatorDirectionParser = new CellVocabularyParser<IndicatorDirection>(indicatorDirectionMap, _errors);
-    _activityIndicatorTypeParser = new CellVocabularyParser<ActivityIndicatorType>(activityIndicatorTypeMap, ActivityIndicatorType.NUMERICAL, _errors);
+    _indicatorDirectionParser = new CellVocabularyParser<PositiveIndicatorDirection>(indicatorDirectionMap, _errors);
+    _activityIndicatorTypeParser = new CellVocabularyParser<PositiveIndicatorType>(activityIndicatorTypeMap, PositiveIndicatorType.NUMERICAL, _errors);
     _rawOrDerivedParser = new CellVocabularyParser<Boolean>(rawOrDerivedMap, Boolean.FALSE, _errors);
     _primaryOrFollowUpParser = new CellVocabularyParser<Boolean>(primaryOrFollowUpMap, Boolean.FALSE, _errors);
     _booleanParser = new CellVocabularyParser<Boolean>(booleanMap, Boolean.FALSE, _errors);
@@ -521,11 +521,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       else {
         rvt.setAssayReadoutType(_assayReadoutTypeParser.parse(dataHeadersCell(DataHeaderRow.ASSAY_READOUT_TYPE, iDataHeader, true)));
       }
-      if (rvt.isActivityIndicator()) {
-        rvt.setActivityIndicatorType(_activityIndicatorTypeParser.parse(dataHeadersCell(DataHeaderRow.ACTIVITY_INDICATOR_TYPE, iDataHeader, true)));
-        if (rvt.getActivityIndicatorType().equals(ActivityIndicatorType.NUMERICAL)) {
-          rvt.setIndicatorDirection(_indicatorDirectionParser.parse(dataHeadersCell(DataHeaderRow.NUMERICAL_INDICATOR_DIRECTION, iDataHeader, true)));
-          rvt.setIndicatorCutoff(dataHeadersCell(DataHeaderRow.NUMERICAL_INDICATOR_CUTOFF, iDataHeader, true).getDouble());
+      if (rvt.isPositiveIndicator()) {
+        rvt.setPositiveIndicatorType(_activityIndicatorTypeParser.parse(dataHeadersCell(DataHeaderRow.ACTIVITY_INDICATOR_TYPE, iDataHeader, true)));
+        if (rvt.getPositiveIndicatorType().equals(PositiveIndicatorType.NUMERICAL)) {
+          rvt.setPositiveIndicatorDirection(_indicatorDirectionParser.parse(dataHeadersCell(DataHeaderRow.NUMERICAL_INDICATOR_DIRECTION, iDataHeader, true)));
+          rvt.setPositiveIndicatorCutoff(dataHeadersCell(DataHeaderRow.NUMERICAL_INDICATOR_CUTOFF, iDataHeader, true).getDouble());
         }
         // TODO: should warn if these values *are* defined and !isActivityIndicator()
       }
@@ -595,9 +595,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
           boolean isExclude = (wellExcludes != null && wellExcludes.contains(rvt));
           try {
             boolean resultValueAdded = false;
-            if (rvt.isActivityIndicator()) {
+            if (rvt.isPositiveIndicator()) {
               String value;
-              if (rvt.getActivityIndicatorType() == ActivityIndicatorType.BOOLEAN) {
+              if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.BOOLEAN) {
                 if (cell.isBoolean()) {
                   value = cell.getBoolean().toString();
                 } 
@@ -610,14 +610,14 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                      value,
                                      isExclude);
               }
-              else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.PARTITION) {
+              else if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.PARTITION) {
                 resultValueAdded = 
                   rvt.addResultValue(well,
                                      assayWellType,
                                      _partitionedValueParser.parse(cell).toString(),
                                      isExclude);
               }
-              else if (rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL) {
+              else if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.NUMERICAL) {
                 resultValueAdded = 
                   rvt.addResultValue(well,
                                      assayWellType,
@@ -679,7 +679,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                                   int iDataHeader)
   {
     if (!rvt.isNumericalnessDetermined()) {
-      if (rvt.getActivityIndicatorType() == ActivityIndicatorType.NUMERICAL) {
+      if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.NUMERICAL) {
         rvt.setNumeric(true);
       } 
       else {

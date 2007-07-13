@@ -18,26 +18,26 @@ import edu.harvard.med.screensaver.model.VocabularyUserType;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public enum IndicatorDirection implements VocabularyTerm
+public enum PositiveIndicatorDirection implements VocabularyTerm
 {
 
   // the vocabulary
   
-  HIGH_VALUES_INDICATE("High Values Indicate"),
-  LOW_VALUES_INDICATE("Low Values Indicate")
+  HIGH_VALUES_INDICATE("High Values Indicate Positive"),
+  LOW_VALUES_INDICATE("Low Values Indicate Positive")
   ;
 
  
   // static inner class
 
   /**
-   * A Hibernate <code>UserType</code> to map the {@link IndicatorDirection} vocabulary.
+   * A Hibernate <code>UserType</code> to map the {@link PositiveIndicatorDirection} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<IndicatorDirection>
+  public static class UserType extends VocabularyUserType<PositiveIndicatorDirection>
   {
     public UserType()
     {
-      super(IndicatorDirection.values());
+      super(PositiveIndicatorDirection.values());
     }
   }
 
@@ -47,10 +47,10 @@ public enum IndicatorDirection implements VocabularyTerm
   private String _value;
 
   /**
-   * Constructs a <code>IndicatorDirection</code> vocabulary term.
+   * Constructs a <code>PositiveIndicatorDirection</code> vocabulary term.
    * @param value The value of the term.
    */
-  private IndicatorDirection(String value)
+  private PositiveIndicatorDirection(String value)
   {
     _value = value;
   }

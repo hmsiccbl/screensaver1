@@ -18,7 +18,7 @@ import edu.harvard.med.screensaver.model.VocabularyUserType;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public enum ActivityIndicatorType implements VocabularyTerm
+public enum PositiveIndicatorType implements VocabularyTerm
 {
 
   // the vocabulary
@@ -32,13 +32,13 @@ public enum ActivityIndicatorType implements VocabularyTerm
   // static inner class
 
   /**
-   * A Hibernate <code>UserType</code> to map the {@link ActivityIndicatorType} vocabulary.
+   * A Hibernate <code>UserType</code> to map the {@link PositiveIndicatorType} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<ActivityIndicatorType>
+  public static class UserType extends VocabularyUserType<PositiveIndicatorType>
   {
     public UserType()
     {
-      super(ActivityIndicatorType.values());
+      super(PositiveIndicatorType.values());
     }
   }
 
@@ -48,10 +48,10 @@ public enum ActivityIndicatorType implements VocabularyTerm
   private String _value;
 
   /**
-   * Constructs a <code>ActivityIndicatorType</code> vocabulary term.
+   * Constructs a <code>PositiveIndicatorType</code> vocabulary term.
    * @param value The value of the term.
    */
-  private ActivityIndicatorType(String value)
+  private PositiveIndicatorType(String value)
   {
     _value = value;
   }

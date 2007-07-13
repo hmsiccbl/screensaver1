@@ -32,7 +32,7 @@ public interface ScreenResultsDAO
                                                                           SortDirection sortDirection,
                                                                           int fromIndex,
                                                                           Integer rowsToFetch,
-                                                                          ResultValueType hitsOnlyRvt,
+                                                                          ResultValueType positivesOnlyRvt,
                                                                           Integer plateNumber);
   public void deleteScreenResult(ScreenResult screenResult);
 }

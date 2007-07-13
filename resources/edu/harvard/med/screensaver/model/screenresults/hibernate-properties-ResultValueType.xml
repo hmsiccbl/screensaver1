@@ -13,6 +13,6 @@
     <property name="numericValue" type="double"/>
     <property name="numericDecimalPrecision" type="integer"/>
     <property name="exclude" type="boolean"/>
-    <property name="hit" type="boolean"/>
+    <property name="positive" type="boolean"/>
    </composite-element>
   </map>

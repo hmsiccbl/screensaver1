@@ -32,9 +32,9 @@ import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.ActivityIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
-import edu.harvard.med.screensaver.model.screenresults.IndicatorDirection;
+import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -361,7 +361,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setReplicateOrdinal(1);
     rvt.setTimePoint("0:10");
     rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
-    rvt.setActivityIndicator(false);
+    rvt.setPositiveIndicator(false);
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setComments("None");
     rvt.setNumeric(true);
@@ -372,7 +372,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setReplicateOrdinal(2);
     rvt.setTimePoint("0:10");
     rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
-    rvt.setActivityIndicator(false);
+    rvt.setPositiveIndicator(false);
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setFollowUpData(true);
     rvt.setComments("None");
@@ -405,10 +405,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setHowDerived("Average");
     rvt.addTypeDerivedFrom(expectedResultValueTypes.get(2));
     rvt.addTypeDerivedFrom(expectedResultValueTypes.get(3));
-    rvt.setActivityIndicator(true);
-    rvt.setActivityIndicatorType(ActivityIndicatorType.NUMERICAL);
-    rvt.setIndicatorDirection(IndicatorDirection.HIGH_VALUES_INDICATE);
-    rvt.setIndicatorCutoff(1.5);
+    rvt.setPositiveIndicator(true);
+    rvt.setPositiveIndicatorType(PositiveIndicatorType.NUMERICAL);
+    rvt.setPositiveIndicatorDirection(PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
+    rvt.setPositiveIndicatorCutoff(1.5);
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setNumeric(true);
     expectedResultValueTypes.put(4, rvt);
@@ -417,8 +417,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setDerived(true);
     rvt.setHowDerived("W<=1.6, M<=1.7, S<=1.8");
     rvt.addTypeDerivedFrom(expectedResultValueTypes.get(4));
-    rvt.setActivityIndicator(true);
-    rvt.setActivityIndicatorType(ActivityIndicatorType.PARTITION);
+    rvt.setPositiveIndicator(true);
+    rvt.setPositiveIndicatorType(PositiveIndicatorType.PARTITION);
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setNumeric(false);
     expectedResultValueTypes.put(5, rvt);
@@ -427,8 +427,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setDerived(true);
     rvt.setHowDerived("AssayIndicator2 is S");
     rvt.addTypeDerivedFrom(expectedResultValueTypes.get(5));
-    rvt.setActivityIndicator(true);
-    rvt.setActivityIndicatorType(ActivityIndicatorType.BOOLEAN);
+    rvt.setPositiveIndicator(true);
+    rvt.setPositiveIndicatorType(PositiveIndicatorType.BOOLEAN);
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setNumeric(false);
     expectedResultValueTypes.put(6, rvt);
@@ -538,15 +538,15 @@ public class ScreenResultParserTest extends AbstractSpringTest
                                                   expectedHitCount.get(1) / (double) nonExcludedResultValues,
                                                   expectedHitCount.get(2) / (double) nonExcludedResultValues);
     
-    int iAssayIndicatorRvt = 0;
+    int iPositiveIndicatorRvt = 0;
     for (ResultValueType rvt : screenResult.getResultValueTypesList()) {
-      if (rvt.isActivityIndicator()) {
-        assertEquals("hit count", expectedHitCount.get(iAssayIndicatorRvt), rvt.getHits());
+      if (rvt.isPositiveIndicator()) {
+        assertEquals("hit count", expectedHitCount.get(iPositiveIndicatorRvt), rvt.getPositivesCount());
         assertEquals("hit ratio", 
-                     expectedHitRatio.get(iAssayIndicatorRvt).doubleValue(), 
-                     rvt.getHitRatio().doubleValue(), 
+                     expectedHitRatio.get(iPositiveIndicatorRvt).doubleValue(), 
+                     rvt.getPositivesPercentage().doubleValue(), 
                      0.01);
-        ++iAssayIndicatorRvt;
+        ++iPositiveIndicatorRvt;
       }
     }
   }

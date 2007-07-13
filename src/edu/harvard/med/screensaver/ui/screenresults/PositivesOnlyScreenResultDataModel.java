@@ -21,28 +21,28 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.apache.log4j.Logger;
 
-public class HitsOnlyScreenResultDataModel extends ScreenResultDataModel
+public class PositivesOnlyScreenResultDataModel extends ScreenResultDataModel
 {
   // static members
 
-  private static Logger log = Logger.getLogger(HitsOnlyScreenResultDataModel.class);
+  private static Logger log = Logger.getLogger(PositivesOnlyScreenResultDataModel.class);
   private Map<WellKey,List<ResultValue>> _data;
-  private ResultValueType _hitsOnlyRvt;
+  private ResultValueType _positivesOnlyRvt;
 
   
   // instance data members
 
   // public constructors and methods
   
-  public HitsOnlyScreenResultDataModel(ScreenResult screenResult,
+  public PositivesOnlyScreenResultDataModel(ScreenResult screenResult,
                                        List<ResultValueType> resultValueTypes,
                                        int sortColumnIndex,
                                        SortDirection sortDirection,
                                        ScreenResultsDAO dao,
-                                       ResultValueType hitsOnlyRvt)
+                                       ResultValueType positivesOnlyRvt)
   {
     super(screenResult, resultValueTypes, sortColumnIndex, sortDirection, dao);
-    _hitsOnlyRvt = hitsOnlyRvt;
+    _positivesOnlyRvt = positivesOnlyRvt;
   }
 
 
@@ -58,7 +58,7 @@ public class HitsOnlyScreenResultDataModel extends ScreenResultDataModel
                                                                 sortDirection,
                                                                 0,
                                                                 null,
-                                                                _hitsOnlyRvt,
+                                                                _positivesOnlyRvt,
                                                                 null);
     return _data;
   }
