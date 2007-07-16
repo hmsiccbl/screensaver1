@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,7 +62,7 @@ public class WellsDataExporter implements DataExporter<Well>
     _dataFormat = dataFormat;
   }
 
-  public InputStream export(final List<Well> wells)
+  public InputStream export(final Collection<Well> wells)
   {
     // TODO: logUserActivity("downloadWellSearchResults");
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -114,7 +115,7 @@ public class WellsDataExporter implements DataExporter<Well>
 
   // private methods
 
-  private List<Well> eagerFetchWellsForDownloadWellSearchResults(final List<Well> wells) {
+  private List<Well> eagerFetchWellsForDownloadWellSearchResults(final Collection<Well> wells) {
     // eager fetch all of the data that will be needed to generate the downloaded file 
     Set<Library> libraries = new HashSet<Library>();
     List<Well> inflatedWells = new ArrayList<Well>();

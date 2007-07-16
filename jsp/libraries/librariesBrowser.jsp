@@ -5,7 +5,7 @@
 
 <f:subview id="librariesBrowser">
 
-  <t:aliasBean alias="#{searchResults}" value="#{librariesBrowser.librarySearchResults}">
+  <t:aliasBean alias="#{searchResults}" value="#{librariesBrowser.searchResults}">
     <%@include file="../searchResults.jspf"%>
   </t:aliasBean>
 

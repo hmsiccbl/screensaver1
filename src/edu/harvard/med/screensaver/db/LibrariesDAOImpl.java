@@ -12,6 +12,9 @@ package edu.harvard.med.screensaver.db;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -24,6 +27,8 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
+import edu.harvard.med.screensaver.ui.libraries.WellVolume;
 
 import org.apache.log4j.Logger;
 import org.hibernate.TransientObjectException;
@@ -167,8 +172,119 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return initialMicroliterVolume.add(deltaMicroliterVolume).setScale(Well.VOLUME_SCALE);
   }
   
+  @SuppressWarnings("unchecked")
+  public Collection<WellVolume> findWellVolumes(Library libraryIn)
+  {
+    Library library = _dao.reloadEntity(libraryIn, true, "hbnWells");
+    _dao.needReadOnly(library, "hbnCopies.hbnCopyInfos");
+    String hql = "from WellVolumeAdjustment wva where wva.copy.hbnLibrary = ?"; 
+    List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { library });
+    List<WellVolume> result = new ArrayList<WellVolume>();
+    return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(library, result), wellVolumeAdjustments);
+  }
+
+  @SuppressWarnings("unchecked")
+  public Collection<WellVolume> findWellVolumes(Copy copy)
+  {
+    // TODO: eager fetch copies and wells
+    String hql = "from WellVolumeAdjustment wva where wva.copy = ?"; 
+    List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { copy });
+    List<WellVolume> result = new ArrayList<WellVolume>();
+    return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(copy, result), wellVolumeAdjustments);
+  }
+
+  @SuppressWarnings("unchecked")
+  public Collection<WellVolume> findWellVolumes(Copy copy, Integer plateNumber)
+  {
+    // TODO: eager fetch copies and wells
+    String hql = "select wva from WellVolumeAdjustment wva join wva.copy c join c.hbnCopyInfos ci where wva.copy = ? and ci.hbnPlateNumber = ?"; 
+    List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { copy, plateNumber });
+    List<WellVolume> result = new ArrayList<WellVolume>();
+    if (wellVolumeAdjustments.size() == 0) {
+      return result;
+    }
+    return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(copy, plateNumber, result), wellVolumeAdjustments);
+  }
+
+  @SuppressWarnings("unchecked")
+  public Collection<WellVolume> findWellVolumes(Integer plateNumber)
+  {
+    // TODO: eager fetch copies and wells
+    String hql = "select wva from WellVolumeAdjustment wva join wva.copy c join c.hbnCopyInfos ci where ci.hbnPlateNumber = ?"; 
+    List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { plateNumber });
+    List<WellVolume> result = new ArrayList<WellVolume>();
+    if (wellVolumeAdjustments.size() == 0) {
+      return result;
+    }
+    return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(wellVolumeAdjustments.get(0).getCopy(), plateNumber, result), wellVolumeAdjustments);
+  }
+
   
   // private methods
 
-}
+  private List<WellVolume> makeEmptyWellVolumes(Library library, List<WellVolume> wellVolumes)
+  {
+    for (Copy copy : library.getCopies()) {
+      makeEmptyWellVolumes(copy, wellVolumes);
+    }
+    return wellVolumes;
+  }
 
+  private List<WellVolume> makeEmptyWellVolumes(Copy copy, List<WellVolume> wellVolumes)
+  {
+    for (int plateNumber = copy.getLibrary().getStartPlate(); plateNumber <= copy.getLibrary().getEndPlate(); ++plateNumber) {
+      makeEmptyWellVolumes(copy, plateNumber, wellVolumes);
+    }
+    return wellVolumes;
+  }
+
+  private List<WellVolume> makeEmptyWellVolumes(Copy copy, int plateNumber, List<WellVolume> wellVolumes)
+  {
+    for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
+      for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
+        wellVolumes.add(new WellVolume(findWell(new WellKey(plateNumber, iRow, iCol)), copy));
+      }
+    }
+    return wellVolumes;
+  }
+
+  private Collection<WellVolume> aggregateWellVolumeAdjustments(List<WellVolume> allWellVolumes,
+                                                                List<WellVolumeAdjustment> wellVolumeAdjustments)
+  {
+    Collections.sort(allWellVolumes, new Comparator<WellVolume>() {
+      public int compare(WellVolume wv1, WellVolume wv2)
+      {
+        int result = wv1.getWell().compareTo(wv2.getWell());
+        if (result == 0) {
+          result = wv1.getCopy().getName().compareTo(wv2.getCopy().getName());
+        }
+        return result;
+      }
+    });
+    Collections.sort(wellVolumeAdjustments, new Comparator<WellVolumeAdjustment>() {
+      public int compare(WellVolumeAdjustment wva1, WellVolumeAdjustment wva2)
+      {
+        int result = wva1.getWell().compareTo(wva2.getWell());
+        if (result == 0) {
+          result = wva1.getCopy().getName().compareTo(wva2.getCopy().getName());
+        }
+        return result;
+      }
+    });
+    Iterator<WellVolume> wvIter = allWellVolumes.iterator();
+    Iterator<WellVolumeAdjustment> wvaIter = wellVolumeAdjustments.iterator();
+    WellVolume wellVolume = wvIter.next();
+    while (wvaIter.hasNext()) {
+      WellVolumeAdjustment wellVolumeAdjustment = wvaIter.next();
+      while (!wellVolume.getWell().equals(wellVolumeAdjustment.getWell()) ||
+        !wellVolume.getCopy().equals(wellVolumeAdjustment.getCopy())) {
+        if (!wvIter.hasNext()) {
+          throw new IllegalArgumentException("wellVolumeAdjustments exist for wells that are were not in allWellVolumes: " + wellVolumeAdjustment.getWell() + ":" + wellVolumeAdjustment.getCopy().getName());
+        }
+        wellVolume = wvIter.next();
+      }
+      wellVolume.addWellVolumeAdjustment(wellVolumeAdjustment);
+    }
+    return allWellVolumes;
+  }
+}

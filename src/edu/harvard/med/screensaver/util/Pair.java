@@ -88,4 +88,10 @@ public class Pair<F,S>
     (_first == null ? that.getFirst() == null : _first.equals(that.getFirst())) &&
     (_second == null ? that.getSecond() == null : _second.equals(that.getSecond()));
   }
+  
+  @Override
+  public String toString()
+  {
+    return _first.toString() + ":" + _second.toString();
+  }
 }

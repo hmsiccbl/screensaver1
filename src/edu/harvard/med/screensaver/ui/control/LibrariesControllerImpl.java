@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.ui.control;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -40,11 +41,15 @@ import edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporter;
 import edu.harvard.med.screensaver.ui.libraries.WellFinder;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResultsViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
+import edu.harvard.med.screensaver.ui.libraries.WellVolume;
+import edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResults;
+import edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResultsViewer;
 import edu.harvard.med.screensaver.ui.namevaluetable.CompoundNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.GeneNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.LibraryNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.util.Pair;
 
@@ -74,6 +79,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   private LibrariesBrowser _librariesBrowser;
   private LibraryViewer _libraryViewer;
   private WellSearchResultsViewer _wellSearchResultsViewer;
+  private WellVolumeSearchResultsViewer _wellVolumeSearchResultsViewer;
   private WellViewer _wellViewer;
   private GeneViewer _geneViewer;
   private CompoundViewer _compoundViewer;
@@ -99,19 +105,9 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     _librariesDao = librariesDao;
   }
 
-  public WellFinder getWellFinder()
-  {
-    return _wellFinder;
-  }
-  
   public void setWellFinder(WellFinder wellFinder)
   {
     _wellFinder = wellFinder;
-  }
-  
-  public LibrariesBrowser getLibrariesBrowser()
-  {
-    return _librariesBrowser;
   }
   
   public void setLibrariesBrowser(LibrariesBrowser librariesBrowser)
@@ -119,29 +115,19 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     _librariesBrowser = librariesBrowser;
   }
   
-  public LibraryViewer getLibraryViewer()
-  {
-    return _libraryViewer;
-  }
-  
   public void setLibraryViewer(LibraryViewer libraryViewer)
   {
     _libraryViewer = libraryViewer;
   }
 
-  public WellSearchResultsViewer getWellSearchResultsViewer()
-  {
-    return _wellSearchResultsViewer;
-  }
-  
   public void setWellSearchResultsViewer(WellSearchResultsViewer wellSearchResultsViewer)
   {
     _wellSearchResultsViewer = wellSearchResultsViewer;
   }
   
-  public WellViewer getWellViewer()
+  public void setWellVolumeSearchResultsViewer(WellVolumeSearchResultsViewer wellVolumeSearchResultsViewer)
   {
-    return _wellViewer;
+    _wellVolumeSearchResultsViewer = wellVolumeSearchResultsViewer;
   }
   
   public void setWellViewer(WellViewer wellViewer)
@@ -149,19 +135,9 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     _wellViewer = wellViewer;
   }
   
-  public GeneViewer getGeneViewer()
-  {
-    return _geneViewer;
-  }
-  
   public void setGeneViewer(GeneViewer geneViewer)
   {
     _geneViewer = geneViewer;
-  }
-  
-  public CompoundViewer getCompoundViewer()
-  {
-    return _compoundViewer;
   }
   
   public void setCompoundViewer(CompoundViewer compoundViewer)
@@ -327,9 +303,9 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   public String browseLibraries()
   {
     logUserActivity(BROWSE_LIBRARIES);
-    if (getLibrariesBrowser().getLibrarySearchResults() == null) {
+    if (_librariesBrowser.getSearchResults() == null) {
       List<Library> libraries = _librariesDao.findLibrariesDisplayedInLibrariesBrowser();
-      _librariesBrowser.setLibrarySearchResults(new LibrarySearchResults(libraries, this));
+      _librariesBrowser.setSearchResults(new LibrarySearchResults(libraries, this));
     }
     return BROWSE_LIBRARIES;
   }
@@ -350,7 +326,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
    * @see edu.harvard.med.screensaver.ui.control.LibrariesController#viewLibrary(edu.harvard.med.screensaver.model.libraries.Library, edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults)
    */
   @UIControllerMethod
-  public String viewLibrary(final Library libraryIn, LibrarySearchResults librarySearchResults)
+  public String viewLibrary(final Library libraryIn, SearchResults<Library> librarySearchResults)
   {
     logUserActivity(VIEW_LIBRARY + " " + libraryIn);
     _libraryViewer.setLibrarySearchResults(librarySearchResults);
@@ -377,7 +353,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   public String viewLibraryContents(final Library libraryIn)
   {
     logUserActivity(VIEW_WELL_SEARCH_RESULTS + " for libraryContents " + libraryIn);
-    final Library[] libraryOut = new Library[1];
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
@@ -389,14 +364,31 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
           new WellSearchResults(new ArrayList<Well>(library.getWells()),
                                 LibrariesControllerImpl.this,
                                 _wellDataExporters);
-        _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
-        libraryOut[0] = library;
+        _wellSearchResultsViewer.setSearchResults(wellSearchResults);
       }
     });
 
     return VIEW_WELL_SEARCH_RESULTS;
   }
   
+  @UIControllerMethod
+  public String viewLibraryWellVolumes(final Library libraryIn)
+  {
+    logUserActivity(VIEW_WELL_VOLUME_SEARCH_RESULTS + " for library " + libraryIn);
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Collection<WellVolume> wellVolumes = _librariesDao.findWellVolumes(libraryIn);
+        WellVolumeSearchResults wellVolumeSearchResults = 
+          new WellVolumeSearchResults(wellVolumes,
+                                      LibrariesControllerImpl.this);
+        _wellVolumeSearchResultsViewer.setSearchResults(wellVolumeSearchResults);
+      }
+    });
+
+    return VIEW_WELL_VOLUME_SEARCH_RESULTS;
+  }
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.ui.control.LibrariesController#viewWellSearchResults(edu.harvard.med.screensaver.ui.searchresults.WellSearchResults)
    */
@@ -404,7 +396,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   public String viewWellSearchResults(WellSearchResults wellSearchResults)
   {
     logUserActivity(VIEW_WELL_SEARCH_RESULTS);
-    _wellSearchResultsViewer.setWellSearchResults(wellSearchResults);
+    _wellSearchResultsViewer.setSearchResults(wellSearchResults);
     return VIEW_WELL_SEARCH_RESULTS;
   }
   
@@ -533,6 +525,13 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     _compoundViewer.setParentWellOfInterest(parentWellOfInterest);
     
     return VIEW_COMPOUND;
+  }
+
+  public String viewWellVolumeSearchResults(WellVolumeSearchResults wellVolumeSearchResults)
+  {
+    logUserActivity(VIEW_WELL_VOLUME_SEARCH_RESULTS);
+    _wellVolumeSearchResultsViewer.setSearchResults(wellVolumeSearchResults);
+    return VIEW_WELL_VOLUME_SEARCH_RESULTS;
   }
 
   /* (non-Javadoc)
@@ -727,7 +726,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
    * @see edu.harvard.med.screensaver.ui.control.LibrariesController#unloadLibraryContents(edu.harvard.med.screensaver.model.libraries.Library)
    */
   @UIControllerMethod
-  public String unloadLibraryContents(final Library libraryIn, final LibrarySearchResults results)
+  public String unloadLibraryContents(final Library libraryIn, final SearchResults<Library> results)
   {
     logUserActivity("unloadLibraryContents " + libraryIn);
     _dao.doInTransaction(new DAOTransaction() 
@@ -741,5 +740,4 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     showMessage("libraries.unloadedLibraryContents", "libraryViewer");
     return viewLibrary(libraryIn, results);
   }
-  
 }

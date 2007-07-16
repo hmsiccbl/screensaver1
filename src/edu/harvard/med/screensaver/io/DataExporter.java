@@ -10,13 +10,13 @@
 package edu.harvard.med.screensaver.io;
 
 import java.io.InputStream;
-import java.util.List;
+import java.util.Collection;
 
 public interface DataExporter<T>
 {
   public String getFormatName();
   public String getMimeType();
   public String getFileName();
-  public InputStream export(List<T> data);
+  public InputStream export(Collection<T> data);
 }
 

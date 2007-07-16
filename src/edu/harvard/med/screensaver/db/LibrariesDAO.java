@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.db;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.ui.libraries.WellVolume;
 
 public interface LibrariesDAO
 {
@@ -79,4 +81,11 @@ public interface LibrariesDAO
 
   public BigDecimal findRemainingVolumeInWell(Copy copy, Well well);
 
+  public Collection<WellVolume> findWellVolumes(Library library);
+
+  public Collection<WellVolume> findWellVolumes(Copy copy);
+
+  public Collection<WellVolume> findWellVolumes(Integer plateNumber);
+
+  public Collection<WellVolume> findWellVolumes(Copy copy, Integer plateNumber);
 }

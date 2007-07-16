@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +50,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-abstract public class SearchResults<E extends AbstractEntity> extends AbstractBackingBean
+abstract public class SearchResults<E> extends AbstractBackingBean
 {
   
   // public static final data
@@ -82,7 +83,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
 
   // private instance data
   
-  private List<E> _unsortedResults;
+  private Collection<E> _unsortedResults;
   private List<E> _currentSort;
   private Pair<TableColumn<E>,SortDirection> _currentSortType;
   private int _resultsSize;
@@ -102,7 +103,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
    * @param unsortedResults the unsorted list of the results, as they are returned from the
    * database
    */
-  public SearchResults(List<E> unsortedResults)
+  public SearchResults(Collection<E> unsortedResults)
   {
     _unsortedResults = unsortedResults;
     _resultsSize = unsortedResults.size();
@@ -144,7 +145,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
   }
 
 
-  public List<E> getContents()
+  public Collection<E> getContents()
   {
     return _unsortedResults;
   }
@@ -374,7 +375,7 @@ abstract public class SearchResults<E extends AbstractEntity> extends AbstractBa
     // HACK: is there a better way of determining the context in which this controller is being used???
     if (
       getFacesContext().getViewRoot().getViewId().contains("Browser") ||
-      getFacesContext().getViewRoot().getViewId().contains("wellSearchResults")
+      getFacesContext().getViewRoot().getViewId().contains("SearchResults")
     ) {
       return SearchResultsViewMode.SUMMARY;
     }

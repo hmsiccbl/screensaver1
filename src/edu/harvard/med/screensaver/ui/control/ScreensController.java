@@ -26,7 +26,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 
@@ -51,7 +51,7 @@ public interface ScreensController
 
   @UIControllerMethod
   public String viewScreen(final Screen screenIn,
-                           ScreenSearchResults screenSearchResults);
+                           SearchResults<Screen> searchResults);
 
   @UIControllerMethod
   public String editScreen(final Screen screen);

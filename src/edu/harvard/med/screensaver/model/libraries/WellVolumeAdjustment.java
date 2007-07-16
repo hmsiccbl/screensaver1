@@ -146,7 +146,12 @@ public class WellVolumeAdjustment extends AbstractEntity
     return _well.hashCode() * 11 + _copy.hashCode() * 17;
   }
   
-
+  @Override
+  public String toString()
+  {
+    return _well + ":" + _copy.getName() + "=" + _microliterVolume;
+  }
+  
   // private methods
 
   /**

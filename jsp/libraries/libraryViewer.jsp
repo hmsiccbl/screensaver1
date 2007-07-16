@@ -19,6 +19,12 @@
 				action="#{libraryViewer.viewLibraryContents}" styleClass="command"
 				title="View a list of all the wells in the library" />
 
+			<h:commandButton value="View Well Volumes"
+				action="#{libraryViewer.viewLibraryWellVolumes}" 
+				rendered="#{libraryViewer.editable}"
+				styleClass="command"
+				title="View a list of all the wells in the library" />
+
 			<h:commandButton value="Import Library Contents"
 				action="#{libraryViewer.importRNAiLibraryContents}"
 				rendered="#{libraryViewer.editable && libraryViewer.isRNAiLibrary}"

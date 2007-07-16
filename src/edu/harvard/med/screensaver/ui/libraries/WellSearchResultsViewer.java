@@ -9,20 +9,13 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.ui.searchresults.SearchResultsViewer;
 
-public class WellSearchResultsViewer extends AbstractBackingBean
+/**
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ */
+public class WellSearchResultsViewer extends SearchResultsViewer<Well>
 {
-  private WellSearchResults _wellSearchResults;
-  
-  public WellSearchResults getWellSearchResults()
-  {
-    return _wellSearchResults;
-  }
-
-  public void setWellSearchResults(WellSearchResults wellSearchResults)
-  {
-    _wellSearchResults = wellSearchResults;
-  }
 }

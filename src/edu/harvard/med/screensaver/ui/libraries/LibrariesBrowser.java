@@ -9,38 +9,13 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import org.apache.log4j.Logger;
-
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.ui.searchresults.SearchResultsViewer;
 
 /**
- * TODO: add comments
- *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class LibrariesBrowser extends AbstractBackingBean
+public class LibrariesBrowser extends SearchResultsViewer<Library>
 {
-  
-  // private static fields
-  
-  private static Logger log = Logger.getLogger(LibrariesBrowser.class);
-  
-  
-  // private instance fields
-
-  private LibrarySearchResults _librarySearchResults;
-  
-  
-  // public instance methods
-
-  public LibrarySearchResults getLibrarySearchResults()
-  {
-    return _librarySearchResults;
-  }
-
-  public void setLibrarySearchResults(LibrarySearchResults librarySearchResults)
-  {
-    _librarySearchResults = librarySearchResults;
-  }
 }

@@ -112,6 +112,12 @@
     <put name="body" value="/libraries/wellSearchResults.jsp" />
   </definition>
   
+  <definition name="/libraries/wellVolumeSearchResults.tiles" extends=".base">
+    <put name="pageTitle" value="Well Volume Search Results" />
+    <put name="pageHelpURL" value="../help/libraries/wellVolumeSearchResultsHelp.jsf" />
+    <put name="body" value="/libraries/wellVolumeSearchResults.jsp" />
+  </definition>
+  
   <definition name="/libraries/wellViewer.tiles" extends=".base">
     <put name="pageTitle" value="Well Viewer" />
     <put name="pageHelpURL" value="../help/libraries/wellViewerHelp.jsf" />

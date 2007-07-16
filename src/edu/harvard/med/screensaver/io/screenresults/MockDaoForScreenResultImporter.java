@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.io.screenresults;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +38,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.ui.libraries.WellVolume;
 
 import org.apache.log4j.Logger;
 
@@ -131,16 +133,6 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
-  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value)
-  {
-    return null;
-  }
-
-  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationshipsIn)
-  {
-    return null;
-  }
-
   public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass, String propertyName, Object propertyValue)
   {
     return null;
@@ -157,16 +149,6 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   }
 
   public <E extends AbstractEntity> E findEntityById(Class<E> entityClass, Serializable id, boolean readOnly, String... relationships)
-  {
-    return null;
-  }
-
-  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value)
-  {
-    return null;
-  }
-
-  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationships)
   {
     return null;
   }
@@ -259,5 +241,53 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   public BigDecimal findRemainingVolumeInWell(Copy copy, Well well)
   {
     return BigDecimal.ZERO.setScale(Well.VOLUME_SCALE);
+  }
+
+  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationshipsIn)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationships)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public List<WellVolume> findWellVolumes(Library library)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public List<WellVolume> findWellVolumes(Copy copy)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public List<WellVolume> findWellVolumes(Integer plateNumber)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public Collection<WellVolume> findWellVolumes(Copy copy, Integer plateNumber)
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

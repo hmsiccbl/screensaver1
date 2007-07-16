@@ -114,6 +114,11 @@
       <redirect/>
     </navigation-case>
     <navigation-case>
+      <from-outcome>viewWellVolumeSearchResults</from-outcome>
+      <to-view-id>/libraries/wellVolumeSearchResults</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>viewWell</from-outcome>
       <to-view-id>/libraries/wellViewer</to-view-id>
       <redirect/>

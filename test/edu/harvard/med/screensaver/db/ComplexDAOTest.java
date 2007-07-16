@@ -39,9 +39,9 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
-import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
+import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -57,6 +57,7 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
+import edu.harvard.med.screensaver.ui.libraries.WellVolume;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
 import org.apache.log4j.Logger;
@@ -1247,6 +1248,59 @@ public class ComplexDAOTest extends AbstractSpringTest
     assertEquals("G:A01", new BigDecimal("0.00"),  librariesDao.findRemainingVolumeInWell(copyG, wellA01));
     assertEquals("G:B02", new BigDecimal("0.00"),  librariesDao.findRemainingVolumeInWell(copyG, wellB02));
     assertEquals("G:C03", new BigDecimal("0.00"),  librariesDao.findRemainingVolumeInWell(copyG, wellC03));
-
   }
+  
+  public void testFindWellVolumesForLibrary()
+  {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, 384);
+        Copy copyC = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
+        Copy copyD = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
+        new CopyInfo(copyC, 1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
+        new CopyInfo(copyC, 2, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
+        new CopyInfo(copyD, 1, "loc1", PlateType.EPPENDORF, new BigDecimal("20.00"));
+        new CopyInfo(copyD, 2, "loc1", PlateType.EPPENDORF, new BigDecimal("20.00"));
+        genericEntityDao.persistEntity(library);
+        
+        Well plate1WellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
+        Well plate2WellB02 = genericEntityDao.findEntityById(Well.class, "00002:B02");
+        RNAiCherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, 1);
+        ScreenerCherryPick dummyScreenerCherryPick = new ScreenerCherryPick(cherryPickRequest, plate1WellA01);
+        LabCherryPick labCherryPick1 = new LabCherryPick(dummyScreenerCherryPick, plate1WellA01);
+        labCherryPick1.setAllocated(copyC);
+        LabCherryPick labCherryPick2 = new LabCherryPick(dummyScreenerCherryPick, plate2WellB02);
+        labCherryPick2.setAllocated(copyD);
+        genericEntityDao.persistEntity(cherryPickRequest.getScreen());
+      }
+    });
+
+    Library library = genericEntityDao.findEntityByProperty(Library.class, "libraryName", "library"); 
+    Copy copyC = genericEntityDao.findEntityById(Copy.class, "library:C");
+    Copy copyD = genericEntityDao.findEntityById(Copy.class, "library:D");
+    Well plate1WellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
+    Well plate2WellB02 = genericEntityDao.findEntityById(Well.class, "00002:B02");
+
+    Collection<WellVolume> libraryWellVolumes = librariesDao.findWellVolumes(library);
+    assertEquals(Well.PLATE_ROWS * Well.PLATE_COLUMNS * 2 /*plates*/ * 2 /*copies*/, libraryWellVolumes.size());
+    for (WellVolume wellVolume : libraryWellVolumes) {
+      BigDecimal expectedRemainingVolume;
+      if (wellVolume.getWell().equals(plate1WellA01) && wellVolume.getCopy().equals(copyC)) {
+        expectedRemainingVolume = new BigDecimal("9.00");
+      }
+      else if (wellVolume.getWell().equals(plate2WellB02) && wellVolume.getCopy().equals(copyD)) {
+        expectedRemainingVolume =  new BigDecimal("19.00"); 
+      }
+      else if (wellVolume.getCopy().equals(copyC)) {
+        expectedRemainingVolume =  new BigDecimal("10.00");
+      }
+      else {
+        expectedRemainingVolume = new BigDecimal("20.00"); 
+      }
+      assertEquals(wellVolume.getWell() + ":" + wellVolume.getCopy().getName() + " volume",
+                   expectedRemainingVolume,
+                   wellVolume.getRemainingMicroliterVolume());
+    }
+  }
+  
 }

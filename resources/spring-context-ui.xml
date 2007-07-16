@@ -159,6 +159,9 @@
       name="wellSearchResultsViewer"
       ref="wellSearchResultsViewer" />
     <property
+      name="wellVolumeSearchResultsViewer"
+      ref="wellVolumeSearchResultsViewer" />
+    <property
       name="wellViewer"
       ref="wellViewer" />
     <property
@@ -244,6 +247,15 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.WellSearchResultsViewer">
     <description>Well Search Results Viewer</description>
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="wellVolumeSearchResultsViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResultsViewer">
+    <description>Well Volume Search Results Viewer</description>
     <aop:scoped-proxy/>
   </bean>
 

@@ -66,6 +66,7 @@ import edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreensBrowser;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -234,9 +235,9 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
             iter.remove();
           }
         }
-        _screensBrowser.setScreenSearchResults(new ScreenSearchResults(screens,
-                                                                       ScreensControllerImpl.this, 
-                                                                       _dao));
+        _screensBrowser.setSearchResults(new ScreenSearchResults(screens,
+                                                                 ScreensControllerImpl.this, 
+                                                                 _dao));
       }
     });
     return BROWSE_SCREENS;
@@ -276,9 +277,9 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
                 _dao.needReadOnly(screen, "screenResult");
               }
             }
-            _screensBrowser.setScreenSearchResults(new ScreenSearchResults(new ArrayList<Screen>(screens),
-                                                                           ScreensControllerImpl.this, 
-                                                                           _dao));
+            _screensBrowser.setSearchResults(new ScreenSearchResults(new ArrayList<Screen>(screens),
+                                                                     ScreensControllerImpl.this, 
+                                                                     _dao));
             result[0] = BROWSE_SCREENS;
           }
         }
@@ -295,7 +296,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
    * @see edu.harvard.med.screensaver.ui.control.ScreensController#viewScreen(edu.harvard.med.screensaver.model.screens.Screen, edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults)
    */
   @UIControllerMethod
-  public String viewScreen(final Screen screenIn, ScreenSearchResults screenSearchResults)
+  public String viewScreen(final Screen screenIn, SearchResults<Screen> screenSearchResults)
   {
     // TODO: implement as aspect
     if (screenIn.isRestricted()) {
@@ -308,7 +309,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     _screenResultImporter.setScreenResultParser(new ScreenResultParser(_librariesDao));
     _screenResultViewer.setScreenResultExporter(_screenResultExporter);
     _screenResultViewer.setLibrariesController(_librariesController);
-    _screensBrowser.setScreenSearchResults(screenSearchResults);
+    _screensBrowser.setSearchResults(screenSearchResults);
     _heatMapViewer.setLibrariesController(_librariesController);
 
     try {
@@ -509,7 +510,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   {
     logUserActivity("viewLastScreen " + _currentScreen);
     return viewScreen(_currentScreen, 
-                      _screensBrowser.getScreenSearchResults());
+                      _screensBrowser.getSearchResults());
   }
 
   /* (non-Javadoc)
@@ -1263,7 +1264,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     // TODO: should attempt to maintain search result position, sort order,
     // etc.; right now, we just clear the search result, causing it be recreated
     // entirely when browseScreens() is called
-    _screensBrowser.setScreenSearchResults(null);
+    _screensBrowser.setSearchResults(null);
   }
 
   private void doRecordLiquidTransferForAssayPlates(final CherryPickRequest cherryPickRequestIn, 

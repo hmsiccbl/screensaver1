@@ -15,10 +15,12 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.libraries.CompoundLibraryContentsImporter;
+import edu.harvard.med.screensaver.ui.libraries.NaturalProductsLibraryContentsImporter;
 import edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporter;
 import edu.harvard.med.screensaver.ui.libraries.WellFinder;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResultsViewer;
-import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
+import edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 import org.apache.myfaces.custom.fileupload.UploadedFile;
@@ -66,7 +68,7 @@ public interface LibrariesController
 
   @UIControllerMethod
   public String viewLibrary(final Library libraryIn,
-                            LibrarySearchResults librarySearchResults);
+                            SearchResults<Library> librarySearchResults);
 
   @UIControllerMethod
   public String viewLibraryContents(final Library libraryIn);
@@ -144,6 +146,10 @@ public interface LibrariesController
                                           final SilencingReagentType silencingReagentType);
 
   @UIControllerMethod
-  public String unloadLibraryContents(final Library libraryIn, final LibrarySearchResults results);
+  public String unloadLibraryContents(final Library libraryIn, final SearchResults<Library> results);
+
+  public String viewLibraryWellVolumes(Library library);
+
+  public String viewWellVolumeSearchResults(WellVolumeSearchResults wellVolumeSearchResults);
 
 }
