@@ -49,7 +49,7 @@ public class CopyInfo extends AbstractEntity
   private String _location;
   private PlateType _plateType;
   /**
-   * The default volume (microliters) for a well on this copy plate.
+   * The default initial volume (microliters) for a well on this copy plate.
    */
   private BigDecimal _microliterWellVolume;
   private String _comments;

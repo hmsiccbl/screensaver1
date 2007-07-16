@@ -15,7 +15,6 @@ import java.util.Map;
 
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.util.NullSafeComparator;
 
 import org.apache.log4j.Logger;
 

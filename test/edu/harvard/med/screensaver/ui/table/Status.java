@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.table;
 
-import org.apache.log4j.Logger;
 
 public enum Status {
   
