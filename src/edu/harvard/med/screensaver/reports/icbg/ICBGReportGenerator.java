@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.reports.icbg;
 
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -21,14 +22,15 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
 
 
 /**
@@ -58,13 +60,18 @@ public class ICBGReportGenerator
       CommandLineApplication.DEFAULT_SPRING_CONFIG,
     });
     GenericEntityDAO dao = (GenericEntityDAO) context.getBean("genericEntityDao");
-    ICCBLPlateWellToINBioLQMapper mapper =
-      new ICCBLPlateWellToINBioLQMapper();
+    ScreenResultsDAO screenResultsDAO = (ScreenResultsDAO) context.getBean("screenResultsDao");
+    ICCBLPlateWellToINBioLQMapper mapper = new ICCBLPlateWellToINBioLQMapper();
     ICBGReportGenerator generator = new ICBGReportGenerator(
       dao,
+      screenResultsDAO,
       mapper,
-      new ScreenDBProxy());
+      new AssayInfoProducer());
     HSSFWorkbook report = generator.produceReport();
+
+    // TODO: remove the exit after testing the above code through roo lee
+    System.exit(0);
+    
     log.info("writing report..");
     try {
       report.write(new FileOutputStream(REPORT_FILENAME));
@@ -80,8 +87,9 @@ public class ICBGReportGenerator
   // instance fields
 
   private GenericEntityDAO _dao;
+  private ScreenResultsDAO _screenResultsDAO;
   private ICCBLPlateWellToINBioLQMapper _mapper;
-  private ScreenDBProxy _screenDBProxy;
+  private AssayInfoProducer _assayInfoProducer;
   private HSSFWorkbook _report;
   private int _currentBioactivityRow = 1;
   private int _currentProtocolRow = 1;
@@ -91,12 +99,14 @@ public class ICBGReportGenerator
   
   public ICBGReportGenerator(
     GenericEntityDAO dao,
+    ScreenResultsDAO screenResultsDAO,
     ICCBLPlateWellToINBioLQMapper mapper,
-    ScreenDBProxy screenDBProxy)
+    AssayInfoProducer assayInfoProducer)
   {
     _dao = dao;
+    _screenResultsDAO = screenResultsDAO;
     _mapper = mapper;
-    _screenDBProxy = screenDBProxy;
+    _assayInfoProducer = assayInfoProducer;
   }
   
   public HSSFWorkbook produceReport()
@@ -154,34 +164,39 @@ public class ICBGReportGenerator
       public void runTransaction() {
         List<ScreenResult> screenResults = _dao.findAllEntitiesOfType(ScreenResult.class);
         for (ScreenResult screenResult : screenResults) {
-          parseScreenResult(screenResult);
+          boolean printedRows = parseScreenResult(screenResult);
 
           // this is not necessary, but helpful if you want early versions of the results
-          log.info("writing report..");
-          try {
-            _report.write(new FileOutputStream(REPORT_FILENAME));
-            log.info("report written.");
-          }
-          catch (Exception e) {
-            e.printStackTrace();
-            log.error("writing report generated error: " + e.getMessage());
+          if (printedRows) {
+            log.info("writing report..");
+            try {
+              _report.write(new FileOutputStream(REPORT_FILENAME));
+              log.info("report written.");
+            }
+            catch (Exception e) {
+              e.printStackTrace();
+              log.error("writing report generated error: " + e.getMessage());
+            }
           }
         }
       }
     });
   }
   
-  private void parseScreenResult(ScreenResult screenResult)
+  private boolean parseScreenResult(ScreenResult screenResult)
   {
-    Integer screenNumber = screenResult.getScreen().getScreenNumber();
-    log.info("processing screen result for screen " + screenNumber); 
-    AssayInfo assayInfo = _screenDBProxy.getAssayInfoForScreen(screenNumber);
+    Screen screen = screenResult.getScreen();
+    log.info("processing screen result for screen " + screen.getScreenNumber()); 
+    AssayInfo assayInfo = _assayInfoProducer.getAssayInfoForScreen(screen);
 
     // TODO: printBioactivityRows should be called once for each assay phenotype
+    boolean printedRows = false;
     if (printBioactivityRows(assayInfo, screenResult)) {
       log.info("printed bioactivity rows.");
+      printedRows = true;
       printProtocolRow(assayInfo);  
     }
+    return printedRows;
   }
   
   /**
@@ -202,25 +217,33 @@ public class ICBGReportGenerator
     }
     
     boolean printedBioactivityRow = false;
-    Map<WellKey,ResultValue> scaledOrBooleanRVMap = (scaledOrBooleanRVT != null) ?
-      scaledOrBooleanRVT.getResultValues() : null;
-    Map<WellKey,ResultValue> numericalRVMap = (numericalRVT != null) ?
-      numericalRVT.getResultValues() : null;
+    
+    List<ResultValueType> rvts = new ArrayList<ResultValueType>();
+    if (scaledOrBooleanRVT != null) {
+      rvts.add(scaledOrBooleanRVT);
+    }
+    if (numericalRVT != null) {
+      rvts.add(numericalRVT);
+    }
 
-    for (Well well : screenResult.getWells()) {
-      WellKey wellKey = well.getWellKey();
-      ResultValue scaledOrBooleanRV = (scaledOrBooleanRVMap == null) ? null : 
-        scaledOrBooleanRVMap.get(wellKey);
-      ResultValue numericalRV = (numericalRVMap == null) ? null : 
-        numericalRVMap.get(wellKey);
-      if (printBioactivityRow(
-            assayInfo,
-            wellKey,
-            scaledOrBooleanRVT,
-            scaledOrBooleanRV,
-            numericalRVT,
-            numericalRV)) {
-        printedBioactivityRow = true;
+    for (Integer plateNumber : _mapper.getMappedPlates()) {
+      Map<WellKey,List<ResultValue>> wellKeyToResultValuesMap =
+        _screenResultsDAO.findResultValuesByPlate(plateNumber, rvts);
+      for (WellKey wellKey : wellKeyToResultValuesMap.keySet()) {
+        int index = 0;
+        ResultValue scaledOrBooleanRV = (scaledOrBooleanRVT == null) ? null :
+          wellKeyToResultValuesMap.get(wellKey).get(index ++);
+        ResultValue numericalRV = (numericalRVT == null) ? null :
+          wellKeyToResultValuesMap.get(wellKey).get(index ++);
+        if (printBioactivityRow(
+          assayInfo,
+          wellKey,
+          scaledOrBooleanRVT,
+          scaledOrBooleanRV,
+          numericalRVT,
+          numericalRV)) {
+          printedBioactivityRow = true;
+        }
       }
     }
     return printedBioactivityRow;
@@ -299,11 +322,16 @@ public class ICBGReportGenerator
         }
       }
       else if (scaledOrBooleanRVT.getPositiveIndicatorType().equals(PositiveIndicatorType.PARTITION)) {
-        if (scaledOrBooleanRV.getValue().toUpperCase().equals("S") ||
-            scaledOrBooleanRV.getValue().toUpperCase().equals("M")) {
+        String partitionValue = scaledOrBooleanRV.getValue();
+        if (partitionValue == null) {
+          log.info("no partition value for well key " + wellKey);
+          partitionValue = "";
+        }
+        partitionValue = partitionValue.toUpperCase();
+        if (partitionValue.equals("S") || partitionValue.equals("M")) {
           row.createCell((short) 7).setCellValue("A");
         }
-        else if (scaledOrBooleanRV.getValue().toUpperCase().equals("W")) {
+        else if (partitionValue.equals("W")) {
           row.createCell((short) 7).setCellValue("Q");
         }
         else {

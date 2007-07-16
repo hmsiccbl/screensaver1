@@ -9,124 +9,50 @@
 
 package edu.harvard.med.screensaver.reports.icbg;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Date;
 
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.StatusItem;
 
 
 /**
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class ScreenDBProxy
+public class AssayInfoProducer
 {
+  private static Logger log = Logger.getLogger(AssayInfoProducer.class);
   
-  // static stuff
-  
-  private static Logger log = Logger.getLogger(ICBGReportGenerator.class);
-
-  static {
-    try {
-      Class.forName("org.postgresql.Driver");
-    }
-    catch (ClassNotFoundException e) {
-      log.error("couldn't find postgresql driver");
-    }    
-  }
-
-  
-  // instance fields
-  
-  private Connection _connection;
-  
-  public ScreenDBProxy()
-  {
-    try {
-      _connection = DriverManager.getConnection(
-        "jdbc:postgresql://localhost/screendb",
-        "screendbweb",
-        "screendbweb");
-    }
-    catch (SQLException e) {
-      log.error("couldnt connection to database: " + e.getMessage());
-      e.printStackTrace();
-    }
-  }
-  
-  public AssayInfo getAssayInfoForScreen(Integer screenID)
+  public AssayInfo getAssayInfoForScreen(Screen screen)
   {
     AssayInfo assayInfo = new AssayInfo();
-    String sql =
-      "SELECT\n" +
-      "  s.id, s.screen_title, s.summary, h.last, s.keywords, s.summary\n" +
-      "FROM screens s, users l, users h\n" +
-      "WHERE\n" +
-      "  s.id = " + screenID + " AND\n" +
-      "  s.user_id = l.id AND\n" +
-      "  l.lab_name = h.id\n";
-    String sql2 =
-      "SELECT MAX(status_date) FROM screen_status WHERE screen_id = " +
-      screenID;
-    String assayCategoryText = null;
-    try {
-      Statement statement = _connection.createStatement();
-      ResultSet resultSet = statement.executeQuery(sql);
-      resultSet.next();
-      assayInfo.setAssayName(
-        "ICCBL" + resultSet.getString(1));
-      assayInfo.setProtocolDescription(
-        resultSet.getString(2));
-      assayInfo.setPNote(
-        resultSet.getString(3));
-      assayInfo.setInvestigator(
-        resultSet.getString(4).toUpperCase());
+    assayInfo.setAssayName("ICCBL" + screen.getScreenNumber());
+    assayInfo.setProtocolDescription(screen.getTitle());
+    assayInfo.setPNote(screen.getSummary());
+    assayInfo.setInvestigator(screen.getLabHead().getLastName().toUpperCase());
 
-      assayCategoryText = "";
-      String keywords =  resultSet.getString(5);
-      if (keywords != null) {
-        assayCategoryText = keywords.toUpperCase() + " ";
-      }
-      String summary = resultSet.getString(6);
-      if (summary != null) {
-        assayCategoryText += summary.toUpperCase();
-      }
-
-      statement.close();
-
-      statement = _connection.createStatement();
-      resultSet = statement.executeQuery(sql2);
-      resultSet.next();
-      String assayDate = resultSet.getString(1);
-      Pattern assayDatePattern = Pattern.compile("(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)");
-      Matcher assayDateMatcher = assayDatePattern.matcher(assayDate);
-      if (assayDateMatcher.matches()) {
-        String year = assayDateMatcher.group(1);
-        String month = assayDateMatcher.group(2);
-        if (month.startsWith("0")) {
-          month = month.substring(1);
-        }
-        String day = assayDateMatcher.group(3);
-        if (day.startsWith("0")) {
-          day = day.substring(1);
-        }
-        assayInfo.setAssayDate(month + "/" + day + "/" + year);
-      }
-      else {
-        log.error("bad dates: " + assayDate);
-      }
-      statement.close();
+    String assayCategoryText = "";
+    for (String keyword : screen.getKeywords()) {
+      assayCategoryText += keyword.toUpperCase() + " ";
     }
-    catch (SQLException e) {
-      log.error("sql error: " + e.getMessage());
-      e.printStackTrace();
+    assayCategoryText += screen.getSummary().toUpperCase();
+    setAssayCategory(assayInfo, assayCategoryText);
+
+    Date assayDate = null;
+    for (StatusItem statusItem: screen.getStatusItems()) {
+      Date statusItemDate = statusItem.getStatusDate();
+      if (assayDate == null || assayDate.before(statusItemDate)) {
+        assayDate = statusItemDate;
+      }
     }
     
-    setAssayCategory(assayInfo, assayCategoryText);
+    // TODO: replace with non-deprecated
+    assayInfo.setAssayDate(
+      (assayDate.getMonth() + 1) + "/" +
+      assayDate.getDate() + "/" +
+      (assayDate.getYear() + 1900));
+    
     return assayInfo;
   }
 

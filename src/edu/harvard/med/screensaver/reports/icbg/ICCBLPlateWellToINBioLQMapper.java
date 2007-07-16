@@ -15,7 +15,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -47,6 +49,7 @@ public class ICCBLPlateWellToINBioLQMapper
   // instance fields
   
   private HSSFSheet _mappingWorksheet;
+  private Set<Integer> _mappedPlates = new HashSet<Integer>();
   private Map<WellKey,String> _wellKeyToLQMap = new HashMap<WellKey,String>();
   
   
@@ -56,6 +59,11 @@ public class ICCBLPlateWellToINBioLQMapper
   {
     initializeMappingWorksheet();
     populateWellKeyToLQMap();
+  }
+  
+  public Set<Integer> getMappedPlates()
+  {
+    return _mappedPlates;
   }
   
   public String getLQForWellKey(WellKey wellKey)
@@ -86,11 +94,14 @@ public class ICCBLPlateWellToINBioLQMapper
     int lastRowNum = _mappingWorksheet.getLastRowNum();
     for (int i = 1; i <= lastRowNum; i++) {
       HSSFRow row = _mappingWorksheet.getRow(i);
+
       HSSFCell plateNumberCell = row.getCell((short) 0);
-      //int plateNumber = (int) plateNumberCell.getNumericCellValue();
-      int plateNumber = Integer.parseInt(plateNumberCell.getStringCellValue());
+      int plateNumber = (int) plateNumberCell.getNumericCellValue();
+      //int plateNumber = Integer.parseInt(plateNumberCell.getStringCellValue());
+      
       HSSFCell wellNameCell = row.getCell((short) 1);
       String wellName = wellNameCell.getStringCellValue();
+      
       HSSFCell lqCell = row.getCell((short) 3);
       if (lqCell == null) { continue; }
       String lq;
@@ -102,8 +113,10 @@ public class ICCBLPlateWellToINBioLQMapper
       //catch (NullPointerException e) {
       //  continue;
       //}
+      
       _wellKeyToLQMap.put(new WellKey(plateNumber, wellName), lq);
-      log.info("mapped " + plateNumber + wellName + " to " + lq);
+      _mappedPlates.add(plateNumber);
+      //log.info("mapped " + plateNumber + wellName + " to " + lq);
     }
   }
 }
