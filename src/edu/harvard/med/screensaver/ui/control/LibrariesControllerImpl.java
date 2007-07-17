@@ -228,9 +228,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     _wellDataExporters = wellDataExporters;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#findWells()
-   */
   @UIControllerMethod
   public String findWells()
   {
@@ -238,9 +235,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return FIND_WELLS;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#findWell(java.lang.String, java.lang.String)
-   */
   @UIControllerMethod
   public String findWell(final String plateNumber, final String wellName)
   {
@@ -248,9 +242,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return viewWell(_plateWellListParser.lookupWell(plateNumber, wellName), null);
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#findWells(java.lang.String)
-   */
   @UIControllerMethod
   public String findWells(final String plateWellList)
   {
@@ -296,9 +287,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return result[0];
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#browseLibraries()
-   */
   @UIControllerMethod
   public String browseLibraries()
   {
@@ -310,9 +298,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return BROWSE_LIBRARIES;
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#viewLibrary()
-   */
   @UIControllerMethod
   public String viewLibrary()
   {
@@ -322,9 +307,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return viewLibrary(library, null);
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#viewLibrary(edu.harvard.med.screensaver.model.libraries.Library, edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults)
-   */
   @UIControllerMethod
   public String viewLibrary(final Library libraryIn, SearchResults<Library> librarySearchResults)
   {
@@ -346,9 +328,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return VIEW_LIBRARY;
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#viewLibraryContents(edu.harvard.med.screensaver.model.libraries.Library)
-   */
   @UIControllerMethod
   public String viewLibraryContents(final Library libraryIn)
   {
@@ -389,9 +368,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return VIEW_WELL_VOLUME_SEARCH_RESULTS;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#viewWellSearchResults(edu.harvard.med.screensaver.ui.searchresults.WellSearchResults)
-   */
   @UIControllerMethod
   public String viewWellSearchResults(WellSearchResults wellSearchResults)
   {
@@ -400,9 +376,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return VIEW_WELL_SEARCH_RESULTS;
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#viewWell()
-   */
   @UIControllerMethod
   public String viewWell()
   {
@@ -458,9 +431,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return VIEW_WELL;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#viewGene(edu.harvard.med.screensaver.model.libraries.Gene, edu.harvard.med.screensaver.ui.searchresults.WellSearchResults)
-   */
   @UIControllerMethod
   public String viewGene(final Gene geneIn, WellSearchResults wellSearchResults)
   {
@@ -490,9 +460,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return VIEW_GENE;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#viewCompound(edu.harvard.med.screensaver.model.libraries.Compound, edu.harvard.med.screensaver.ui.searchresults.WellSearchResults)
-   */
   @UIControllerMethod
   public String viewCompound(final Compound compoundIn,
                              final WellSearchResults wellSearchResults)
@@ -534,9 +501,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return VIEW_WELL_VOLUME_SEARCH_RESULTS;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#importCompoundLibraryContents(edu.harvard.med.screensaver.model.libraries.Library)
-   */
   @UIControllerMethod
   public String importCompoundLibraryContents(Library library)
   {
@@ -548,9 +512,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return IMPORT_COMPOUND_LIBRARY_CONTENTS;
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#importCompoundLibraryContents(edu.harvard.med.screensaver.model.libraries.Library, org.apache.myfaces.custom.fileupload.UploadedFile)
-   */
   @UIControllerMethod
   public String importCompoundLibraryContents(final Library libraryIn, final UploadedFile uploadedFile)
   {
@@ -596,9 +557,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     }
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#importNaturalProductsLibraryContents(edu.harvard.med.screensaver.model.libraries.Library)
-   */
   @UIControllerMethod
   public String importNaturalProductsLibraryContents(Library library)
   {
@@ -610,9 +568,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return IMPORT_NATURAL_PRODUCTS_LIBRARY_CONTENTS;
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#importNaturalProductsLibraryContents(edu.harvard.med.screensaver.model.libraries.Library, org.apache.myfaces.custom.fileupload.UploadedFile)
-   */
   @UIControllerMethod
   public String importNaturalProductsLibraryContents(final Library libraryIn, final UploadedFile uploadedFile)
   {
@@ -659,9 +614,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     }
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#importRNAiLibraryContents(edu.harvard.med.screensaver.model.libraries.Library)
-   */
   @UIControllerMethod
   public String importRNAiLibraryContents(Library library)
   {
@@ -672,9 +624,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return IMPORT_RNAI_LIBRARY_CONTENTS;
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#importRNAiLibraryContents(edu.harvard.med.screensaver.model.libraries.Library, org.apache.myfaces.custom.fileupload.UploadedFile, edu.harvard.med.screensaver.model.libraries.SilencingReagentType)
-   */
   @UIControllerMethod
   public String importRNAiLibraryContents(
     final Library libraryIn,
@@ -722,9 +671,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     }
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.LibrariesController#unloadLibraryContents(edu.harvard.med.screensaver.model.libraries.Library)
-   */
   @UIControllerMethod
   public String unloadLibraryContents(final Library libraryIn, final SearchResults<Library> results)
   {
