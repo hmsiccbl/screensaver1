@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
@@ -45,7 +46,13 @@ public class WellVolume
   {
     _well = well;
     _copy = copy;
-    _initialMicroliterVolume = _copy.getCopyInfo(_well.getPlateNumber()).getMicroliterWellVolume();
+    CopyInfo copyInfo = _copy.getCopyInfo(_well.getPlateNumber());
+    if (copyInfo == null) {
+      _initialMicroliterVolume = BigDecimal.ZERO.setScale(Well.VOLUME_SCALE);  
+    }
+    else {
+      _initialMicroliterVolume = copyInfo.getMicroliterWellVolume();
+    }
     _remainingMicroliterVolume = _initialMicroliterVolume;
     _wellVolumeAdjustments = new ArrayList<WellVolumeAdjustment>();
     _key = new Pair<WellKey,String>(_well.getWellKey(), copy.getName());

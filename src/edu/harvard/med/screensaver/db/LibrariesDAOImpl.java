@@ -327,17 +327,19 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     });
     Iterator<WellVolume> wvIter = allWellVolumes.iterator();
     Iterator<WellVolumeAdjustment> wvaIter = wellVolumeAdjustments.iterator();
-    WellVolume wellVolume = wvIter.next();
-    while (wvaIter.hasNext()) {
-      WellVolumeAdjustment wellVolumeAdjustment = wvaIter.next();
-      while (!wellVolume.getWell().equals(wellVolumeAdjustment.getWell()) ||
-        !wellVolume.getCopy().equals(wellVolumeAdjustment.getCopy())) {
-        if (!wvIter.hasNext()) {
-          throw new IllegalArgumentException("wellVolumeAdjustments exist for wells that are were not in allWellVolumes: " + wellVolumeAdjustment.getWell() + ":" + wellVolumeAdjustment.getCopy().getName());
+    if (wvIter.hasNext()) {
+      WellVolume wellVolume = wvIter.next();
+      while (wvaIter.hasNext()) {
+        WellVolumeAdjustment wellVolumeAdjustment = wvaIter.next();
+        while (!wellVolume.getWell().equals(wellVolumeAdjustment.getWell()) ||
+          !wellVolume.getCopy().equals(wellVolumeAdjustment.getCopy())) {
+          if (!wvIter.hasNext()) {
+            throw new IllegalArgumentException("wellVolumeAdjustments exist for wells that are were not in allWellVolumes: " + wellVolumeAdjustment.getWell() + ":" + wellVolumeAdjustment.getCopy().getName());
+          }
+          wellVolume = wvIter.next();
         }
-        wellVolume = wvIter.next();
+        wellVolume.addWellVolumeAdjustment(wellVolumeAdjustment);
       }
-      wellVolume.addWellVolumeAdjustment(wellVolumeAdjustment);
     }
     return allWellVolumes;
   }
