@@ -68,7 +68,7 @@ public abstract class ScreeningRoomActivity extends Activity
     Date dateCreated,
     Date dateOfActivity) throws DuplicateEntityException
   {
-    super(performedBy, dateCreated, dateOfActivity);
+    super(performedBy, dateCreated, dateOfActivity, false);
     
     if (screen == null) {
       throw new NullPointerException();
@@ -78,6 +78,9 @@ public abstract class ScreeningRoomActivity extends Activity
     _screen.setAllTimeScreeningRoomActivityCount(_ordinal + 1);
     if (!_screen.getScreeningRoomActivities().add(this)) {
       throw new DuplicateEntityException(_screen, this);
+    }
+    if (!_performedBy.getHbnActivitiesPerformed().add(this)) {
+      throw new DuplicateEntityException(_performedBy, this);
     }
   }
 
@@ -179,6 +182,63 @@ public abstract class ScreeningRoomActivity extends Activity
    * @motivation for hibernate
    */
   protected ScreeningRoomActivity() {}
+
+
+  // protected methods
+  
+  /**
+   * A business key class for the ScreeningRoomActivity.
+   */
+  private class BusinessKey
+  {
+    
+    /**
+     * Get the screen.
+     *
+     * @return the screen
+     */
+    public Screen getScreen()
+    {
+      return _screen;
+    }
+
+    public Integer getOrdinal()
+    {
+      return _ordinal;
+    }
+    
+    @Override
+    public boolean equals(Object object)
+    {
+      if (! (object instanceof BusinessKey)) {
+        return false;
+      }
+      BusinessKey that = (BusinessKey) object;
+      return
+        this.getScreen().equals(that.getScreen()) &&
+        this.getOrdinal().equals(that.getOrdinal());
+    }
+
+    @Override
+    public int hashCode()
+    {
+      return
+        this.getScreen().hashCode() +
+        163 * this.getOrdinal().hashCode();
+    }
+
+    @Override
+    public String toString()
+    {
+      return this.getScreen() + ":" + this.getOrdinal();
+    }
+  }
+
+  @Override
+  protected Object getBusinessKey()
+  {
+    return new BusinessKey();
+  }
 
 
   // private methods

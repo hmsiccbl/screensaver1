@@ -56,14 +56,41 @@ public abstract class Activity extends AbstractEntity implements Comparable
     Date dateCreated,
     Date dateOfActivity) throws DuplicateEntityException
   {
+    this(performedBy, dateCreated, dateOfActivity, true);
+  }
+
+  /**
+   * Constructs an initialized <code>Activity</code> object.
+   *
+   * @param performedBy the user that performed the activity
+   * @param dateCreated the date created
+   * @param dateOfActivity the date the activity took place
+   * @param addToPerformedByActivitiesPerformed true whenever we should add the
+   * activity to the acitivitiesPerformed of the performedBy. This should always
+   * happen, so you shouldn't just call this constructor with a false value here
+   * - if you do so you need to add it yourself. The motivation for this is to
+   * make a (hopefully temporary) hack in ScreeningRoomActivity work. The current
+   * Activity business key does not work for that class due to crazy organizations
+   * in the data the ScreenDBSynchronizer is loading from ScreenDB. So SRA has a
+   * temporary biz key to help mitigate this, and hopefully we will be fixing
+   * all this biz key stuff soon enough.
+   */
+  public Activity(
+    ScreensaverUser performedBy,
+    Date dateCreated,
+    Date dateOfActivity,
+    boolean addToPerformedByActivitiesPerformed) throws DuplicateEntityException
+  {
     if (performedBy == null) {
       throw new NullPointerException();
     }
     _performedBy = performedBy;
     setDateCreated(dateCreated);
     setDateOfActivity(dateOfActivity);
-    if (!_performedBy.getHbnActivitiesPerformed().add(this)) {
-      throw new DuplicateEntityException(_performedBy, this);
+    if (addToPerformedByActivitiesPerformed) {
+      if (!_performedBy.getHbnActivitiesPerformed().add(this)) {
+        throw new DuplicateEntityException(_performedBy, this);
+      }
     }
   }
 
