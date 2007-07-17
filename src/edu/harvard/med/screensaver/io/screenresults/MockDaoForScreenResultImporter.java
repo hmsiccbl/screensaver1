@@ -290,4 +290,10 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     // TODO Auto-generated method stub
     return null;
   }
+
+  public Collection<WellVolume> findWellVolumes(WellKey wellKey)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

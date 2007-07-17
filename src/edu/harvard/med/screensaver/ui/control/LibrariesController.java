@@ -152,4 +152,6 @@ public interface LibrariesController
 
   public String viewWellVolumeSearchResults(WellVolumeSearchResults wellVolumeSearchResults);
 
+  String findWellVolumes(String plateWellList);
+
 }

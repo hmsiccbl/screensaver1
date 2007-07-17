@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 
@@ -25,6 +26,8 @@ public class WellFinder extends AbstractBackingBean
   // private static final fields
   
   private static final Logger log = Logger.getLogger(WellFinder.class);
+
+  private static final ScreensaverUserRole ADMIN_ROLE = ScreensaverUserRole.LIBRARIES_ADMIN;
   
   
   // private instance fields
@@ -76,6 +79,12 @@ public class WellFinder extends AbstractBackingBean
   {
     _plateWellList = plateWellList;
   }
+  
+  @Override
+  protected ScreensaverUserRole getEditableAdminRole()
+  {
+    return ADMIN_ROLE;
+  }
 
   /**
    * Find the well with the specified plate number and well name, and go to the appropriate next
@@ -95,5 +104,15 @@ public class WellFinder extends AbstractBackingBean
   public String findWells()
   {
     return _librariesController.findWells(_plateWellList);
+  }
+
+  /**
+   * Find the wells specified in the plate-well list, and go to the {@link WellSearchResultsViewer}
+   * page.
+   * @return the controler code for the next appropriate page
+   */
+  public String findWellVolumes()
+  {
+    return _librariesController.findWellVolumes(_plateWellList);
   }
 }

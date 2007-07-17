@@ -219,6 +219,29 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(wellVolumeAdjustments.get(0).getCopy(), plateNumber, result), wellVolumeAdjustments);
   }
 
+  @SuppressWarnings("unchecked")
+  public Collection<WellVolume> findWellVolumes(WellKey wellKey)
+  {
+    String hql = "select distinct wva from WellVolumeAdjustment wva left join fetch wva.copy left join fetch wva.well w left join fetch w.hbnLibrary l left join fetch l.hbnCopies where w.id = ?"; 
+    List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { wellKey.toString() });
+    List<WellVolume> result = new ArrayList<WellVolume>();
+    Well well = null;
+    if (wellVolumeAdjustments.size() == 0) {
+      well = findWell(wellKey);
+      if (well == null) {
+        // no such well
+        return result;
+      }
+      // well exists, but just doesn't have any wellVolumeAdjustments (which is
+      // valid); in this case we still want to return a collection that contains
+      // an element for each copy of the well's library
+    } 
+    else {
+      // wel exists, and has wellVolumeAdjustments
+      well = wellVolumeAdjustments.get(0).getWell();
+    }
+    return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(well, result), wellVolumeAdjustments);
+  }
   
   // private methods
 
@@ -246,6 +269,14 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       }
     }
     return wellVolumes;
+  }
+
+  private List<WellVolume> makeEmptyWellVolumes(Well well, List<WellVolume> result)
+  {
+    for (Copy copy : well.getLibrary().getCopies()) {
+      result.add(new WellVolume(well, copy));
+    }
+    return result;
   }
 
   private Collection<WellVolume> aggregateWellVolumeAdjustments(List<WellVolume> allWellVolumes,

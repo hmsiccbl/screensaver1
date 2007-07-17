@@ -88,4 +88,6 @@ public interface LibrariesDAO
   public Collection<WellVolume> findWellVolumes(Integer plateNumber);
 
   public Collection<WellVolume> findWellVolumes(Copy copy, Integer plateNumber);
+
+  public Collection<WellVolume> findWellVolumes(WellKey wellKey);
 }

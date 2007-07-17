@@ -288,6 +288,41 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   }
   
   @UIControllerMethod
+  public String findWellVolumes(final String plateWellList)
+  {
+    logUserActivity(FIND_WELL_VOLUMES);
+    final String[] result = new String[1];
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        PlateWellListParserResult parseResult = _plateWellListParser.parseWellsFromPlateWellList(plateWellList);
+
+        // display parse errors before proceeding with successfully parsed wells
+        for (Pair<Integer,String> error : parseResult.getErrors()) {
+          showMessage("libraries.plateWellListParseError", error.getSecond());
+        }
+
+        List<WellVolume> foundWellVolumes = new ArrayList<WellVolume>();
+        for (WellKey wellKey : parseResult.getParsedWellKeys()) {
+          Collection<WellVolume> wellVolumes = _librariesDao.findWellVolumes(wellKey);
+          if (wellVolumes.size() == 0) {
+            showMessage("libraries.noSuchWell", wellKey.getPlateNumber(), wellKey.getWellName());
+          }
+          else {
+            foundWellVolumes.addAll(wellVolumes);
+          }
+        }
+        WellVolumeSearchResults searchResults =
+          new WellVolumeSearchResults(foundWellVolumes,
+                                      LibrariesControllerImpl.this);
+        result[0] = viewWellVolumeSearchResults(searchResults);
+      }
+    });
+    return result[0];
+  }
+  
+  @UIControllerMethod
   public String browseLibraries()
   {
     logUserActivity(BROWSE_LIBRARIES);
