@@ -79,8 +79,8 @@ public abstract class ScreeningRoomActivity extends Activity
     if (!_screen.getScreeningRoomActivities().add(this)) {
       throw new DuplicateEntityException(_screen, this);
     }
-    if (!_performedBy.getHbnActivitiesPerformed().add(this)) {
-      throw new DuplicateEntityException(_performedBy, this);
+    if (! getPerformedBy().getHbnActivitiesPerformed().add(this)) {
+      throw new DuplicateEntityException(getPerformedBy(), this);
     }
   }
 
