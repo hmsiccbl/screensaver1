@@ -80,7 +80,9 @@ public class AssayInfoProducer
       assayInfo.setAssayCategory("INFLAMMATION");
     }
     else if (
-      assayCategoryText.contains("CYTOTOXIC")) {
+      assayCategoryText.contains("APOPTOSIS") ||
+      assayCategoryText.contains("CYTOTOXIC") ||
+      assayCategoryText.contains("CELL DEATH")) {
       assayInfo.setAssayCategory("CYTOTOXICITY");
     }
     else if (
@@ -99,6 +101,8 @@ public class AssayInfoProducer
       assayCategoryText.contains("CANCER") ||
       assayCategoryText.contains("FANCONI ANEMIA/BRCA PATHWAY") ||
       assayCategoryText.contains("E6-DEPENDENT DEGRADATION OF P53") ||
+      assayCategoryText.contains("NEUROBLASTOMA") ||
+      assayCategoryText.contains("FANCD2") ||
       assayCategoryText.contains("WNT PATHWAY")) {
       assayInfo.setAssayCategory("ANTI-CANCER");
     }
@@ -119,10 +123,13 @@ public class AssayInfoProducer
       assayCategoryText.contains("AERUGINOSA") ||
       assayCategoryText.contains("YERSINIA PESTIS") ||
       assayCategoryText.contains("AMINOARABINOSE") ||
+      assayCategoryText.contains("LEGIONELLA") ||
+      assayCategoryText.contains("A SCREEN FOR COMPOUNDS THAT INHIBIT GROWTH OF E. COLI") ||
       assayCategoryText.contains("BACTERI")) {
       assayInfo.setAssayCategory("ANTI-BACTERIAL");
     }
     else if (
+      assayCategoryText.contains("ANTIVIRAL") ||
       assayCategoryText.contains("INFLUENZA") ||
       assayCategoryText.contains("VACCINIA") ||
       assayCategoryText.contains("WEST NILE") ||
@@ -133,6 +140,10 @@ public class AssayInfoProducer
       assayCategoryText.contains("AIDS") ||
       assayCategoryText.contains("HIV")) {
       assayInfo.setAssayCategory("ANTI-HIV_AIDS");
+    }
+    else if (
+      assayCategoryText.contains("INHIBIT THE ATPASE ACTIVITY")) {
+      assayInfo.setAssayCategory("OTHER - INHIBIT THE ATPASE ACTIVITY");
     }
     else if (
       assayCategoryText.contains("INHIBIT THE RANGTPASE SYSTEM")) {
@@ -161,6 +172,39 @@ public class AssayInfoProducer
     else if (
       assayCategoryText.contains("ADULT ONSET DEAFNESS SYNDROME")) {
       assayInfo.setAssayCategory("OTHER - ADULT ONSET DEAFNESS SYNDROME");
+    }
+    else if (
+      assayCategoryText.contains("S. CEREVISIAE")) {
+      assayInfo.setAssayCategory("OTHER - SACCHAROMYCES CEREVISIAE");
+    }
+    else if (
+      assayCategoryText.contains("SUPPRESS S6 PHOSPHORYLATION") ||
+      assayCategoryText.contains("LUCIFERASE")) {
+      assayInfo.setAssayCategory("OTHER - BIOLUMINESCENCE");
+    }
+    else if (
+      assayCategoryText.contains("BINUCLEATE CELLS IN DROSOPHILA CELLS")) {
+      assayInfo.setAssayCategory("OTHER - CELL DIVISION");
+    }
+    else if (
+      assayCategoryText.contains("MITOCHONDRIAL PROLIFERATION")) {
+      assayInfo.setAssayCategory("OTHER - MITOCHONDRIAL PROLIFERATION");
+    }
+    else if (
+      assayCategoryText.contains("INHIBIT DNA REPLICATION")) {
+      assayInfo.setAssayCategory("OTHER - INHIBIT DNA REPLICATION");
+    }
+    else if (
+      assayCategoryText.contains("EMBRYONIC STEM (ES) CELL")) {
+      assayInfo.setAssayCategory("OTHER - EMBRYONIC STEM CELLS");
+    }
+    else if (
+      assayCategoryText.contains("IRON UPTAKE")) {
+      assayInfo.setAssayCategory("OTHER - ANEMIA");
+    }
+    else if (
+      assayCategoryText.contains("LILY POLLEN TUBES")) {
+      assayInfo.setAssayCategory("OTHER - LILY POLLEN TUBES");
     }
     else {
       log.info("assigning assay category OTHER for assay category text: " + assayCategoryText);
