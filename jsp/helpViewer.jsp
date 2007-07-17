@@ -67,6 +67,25 @@
       </t:collapsiblePanel>
 
       <t:collapsiblePanel
+        value="#{helpViewer.isPanelCollapsedMap['wellVolumeSearchResultsHelp']}"
+        var="isCollapsed"
+        rendered="#{helpViewer.screensaverUser.isUserInRoleOfNameMap[\"librariesAdmin\"]}"
+      >
+        <f:facet name="header">
+          <t:div styleClass="sectionHeader">
+            <t:headerLink immediate="true" styleClass="sectionHeader">
+              <h:graphicImage
+                value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+                styleClass="icon"
+              />
+              <h:outputText value="Viewing Well Volume Search Results" styleClass="sectionHeader" />
+            </t:headerLink>
+          </t:div>
+        </f:facet>
+        <%@ include file="help/libraries/wellVolumeSearchResultsHelp.jsp" %>
+      </t:collapsiblePanel>
+
+      <t:collapsiblePanel
         value="#{helpViewer.isPanelCollapsedMap['wellViewerHelp']}"
         var="isCollapsed"
       >

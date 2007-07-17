@@ -11,7 +11,9 @@ package edu.harvard.med.screensaver.model.users;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -67,6 +69,8 @@ abstract public class ScreensaverUser extends AbstractEntity
   private String _eCommonsId;
   private String _harvardId;
   private Set<Activity> _activitiesPerformed = new HashSet<Activity>();
+  
+  private transient HashMap<String,Boolean> _rolesMap;
 
 
   // public constructors
@@ -392,6 +396,20 @@ abstract public class ScreensaverUser extends AbstractEntity
     return _roles;
   }
   
+  /**
+   * @motivation for JSF EL expressions
+   */
+  public Map<String,Boolean> getIsUserInRoleOfNameMap()
+  {
+    if (_rolesMap == null) {
+      _rolesMap = new HashMap<String,Boolean>();
+      for (ScreensaverUserRole role : ScreensaverUserRole.values()) {
+        _rolesMap.put(role.getRoleName(), isUserInRole(role));
+      }
+    }
+    return _rolesMap;
+  }
+
   /**
    * Add a role to this user (i.e., place the user into a new role).
    *

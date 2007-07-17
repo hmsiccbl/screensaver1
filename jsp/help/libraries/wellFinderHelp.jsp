@@ -52,4 +52,10 @@
      </p>
 
   </f:verbatim>
+	<t:panelGroup visibleOnUserRole="librariesAdmin">
+		<f:verbatim escape="false">
+      As a <i>Libraries Adminstrator</i>, you can view click the "Find Well Volumes" button 
+      to view volume information for each of the library plate copies of the specified wells.
+		</f:verbatim>
+	</t:panelGroup>
 </f:subview>

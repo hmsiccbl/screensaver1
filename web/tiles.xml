@@ -114,7 +114,7 @@
   
   <definition name="/libraries/admin/wellVolumeSearchResults.tiles" extends=".base">
     <put name="pageTitle" value="Well Volume Search Results" />
-    <put name="pageHelpURL" value="../help/libraries/wellVolumeSearchResultsHelp.jsf" />
+    <put name="pageHelpURL" value="../../help/libraries/wellVolumeSearchResultsHelp.jsf" />
     <put name="body" value="/libraries/admin/wellVolumeSearchResults.jsp" />
   </definition>
   
@@ -197,6 +197,11 @@
   <definition name="/help/libraries/wellSearchResultsHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Well Search Results Help" />
     <put name="body" value="/help/libraries/wellSearchResultsHelp.jsp" />
+  </definition>
+  
+  <definition name="/help/libraries/wellVolumeSearchResultsHelp.tiles" extends=".pageHelpBase">
+    <put name="pageTitle" value="Well Volume Search Results Help" />
+    <put name="body" value="/help/libraries/wellVolumeSearchResultsHelp.jsp" />
   </definition>
   
   <definition name="/help/libraries/wellViewerHelp.tiles" extends=".pageHelpBase">
