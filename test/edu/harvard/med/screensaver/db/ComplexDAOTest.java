@@ -986,14 +986,14 @@ public class ComplexDAOTest extends AbstractSpringTest
       assertNotNull("second rvt is 'Raw value' RVT", 
                     entry.getValue().get(1).getNumericValue());
     }
-
   }
   
   public void testFindResultValuesByPlate()
   {
     final Screen screen = MakeDummyEntities.makeDummyScreen(1); 
     ScreenResult screenResult = new ScreenResult(screen, new Date());
-    ResultValueType rvt = new ResultValueType(screenResult, "Raw Value");
+    ResultValueType rvt1 = new ResultValueType(screenResult, "Raw Value");
+    ResultValueType rvt2 = new ResultValueType(screenResult, "Derived Value");
     Library library = new Library(
       "library 1",
       "lib1",
@@ -1005,16 +1005,28 @@ public class ComplexDAOTest extends AbstractSpringTest
       int plateNumber = iPlate;
       for (int iWell = 0; iWell < 10; ++iWell) {
         Well well = new Well(library, plateNumber, "A" + (iWell + 1));
-        rvt.addResultValue(well, Integer.toString(iWell));
+        rvt1.addResultValue(well, (double) iWell, 3);
+        rvt2.addResultValue(well, iWell + 10.0, 3);
       }
     }
     genericEntityDao.persistEntity(screen);
 
-    Map<WellKey,ResultValue> resultValues = screenResultsDao.findResultValuesByPlate(2, rvt);
-    assertEquals("result values size", 10, resultValues.size());
+    // test findResultValuesByPlate(Integer, RVT)
+    Map<WellKey,ResultValue> resultValues1 = screenResultsDao.findResultValuesByPlate(2, rvt1);
+    assertEquals("result values size", 10, resultValues1.size());
     for (int iWell = 0; iWell < 10; ++iWell) {
-      ResultValue rv = resultValues.get(new WellKey(2, 0, iWell));
-      assertEquals("rv.value", Integer.toString(iWell), rv.getValue());
+      ResultValue rv = resultValues1.get(new WellKey(2, 0, iWell));
+      assertEquals("rv.value", new Double(iWell), rv.getNumericValue());
+    }
+    
+    // test findResultValuesByPlate(Integer, List<RVT>)
+    // note: we ask for result values types in reverse order, to test that returned result values are ordered similarly
+    Map<WellKey,List<ResultValue>> resultValues2 = screenResultsDao.findResultValuesByPlate(2, Arrays.asList(rvt2, rvt1));
+    assertEquals("result values size", 10, resultValues2.size());
+    for (int iWell = 0; iWell < 10; ++iWell) {
+      List<ResultValue> rvs = resultValues2.get(new WellKey(2, 0, iWell));
+      assertEquals("rv[1].value", new Double(iWell), rvs.get(1).getNumericValue());
+      assertEquals("rv[0].value", new Double(iWell + 10.0), rvs.get(0).getNumericValue());
     }
   }
   

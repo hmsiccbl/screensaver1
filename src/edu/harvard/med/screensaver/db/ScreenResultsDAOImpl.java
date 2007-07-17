@@ -57,7 +57,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
   {
   }
   
-  public Map<WellKey,ResultValue> findResultValuesByPlate(Integer plateNumber, ResultValueType rvt )
+  public Map<WellKey,ResultValue> findResultValuesByPlate(Integer plateNumber, ResultValueType rvt)
   {
     Map<WellKey,List<ResultValue>> result1 = findResultValuesByPlate(plateNumber, Arrays.asList(rvt));
     Map<WellKey,ResultValue> result = new HashMap<WellKey,ResultValue>(result1.size());
@@ -72,14 +72,19 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
    */
   public Map<WellKey,List<ResultValue>> findResultValuesByPlate(Integer plateNumber, List<ResultValueType> rvts)
   {
-    List<Number> rvtIds = new ArrayList<Number>(rvts.size()); 
+    List<Integer> rvtIds = new ArrayList<Integer>(rvts.size());
+    Map<Integer,Integer> rvtOrder = new HashMap<Integer,Integer>(rvts.size());
+    int i = 0;
     for (ResultValueType rvt : rvts) {
       rvtIds.add(rvt.getEntityId());
+      rvtOrder.put(rvt.getEntityId(), i++);
     }
-    String hql = "select index(rv), elements(rv) " +
+
+    String hql = "select index(rv), elements(rv), rvt.id " +
     "from ResultValueType rvt join rvt.resultValues rv " +
     "where rvt.id in (" + StringUtils.makeListString(rvtIds, ",") + 
-    ") and substring(index(rv),1," + Well.PLATE_NUMBER_LEN + ") = ?";
+    ") and substring(index(rv),1," + Well.PLATE_NUMBER_LEN + ") = ? " +
+    "order by rvt.id";
     String paddedPlateNumber = String.format("%0" + Well.PLATE_NUMBER_LEN + "d", plateNumber);
     List hqlResult = getHibernateTemplate().find(hql.toString(), new Object[] { paddedPlateNumber });
     Map<WellKey,List<ResultValue>> result = new HashMap<WellKey,List<ResultValue>>(hqlResult.size());
@@ -89,9 +94,10 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
       List<ResultValue> rvsForRvt = result.get(wellKey);
       if (rvsForRvt == null) {
         rvsForRvt = new ArrayList<ResultValue>(rvts.size());
+        CollectionUtils.fill(rvsForRvt, null, rvts.size());
         result.put(wellKey, rvsForRvt);
       }
-      rvsForRvt.add((ResultValue) row[1]);
+      rvsForRvt.set(rvtOrder.get((Integer) row[2]), (ResultValue) row[1]);
     }
     return result;
   }
