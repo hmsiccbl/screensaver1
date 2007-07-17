@@ -22,6 +22,7 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.ui.libraries.WellVolume;
 
 public interface LibrariesDAO
@@ -82,6 +83,8 @@ public interface LibrariesDAO
   public BigDecimal findRemainingVolumeInWell(Copy copy, Well well);
 
   public Collection<WellVolume> findWellVolumes(Library library);
+
+  public Collection<WellVolume> findWellVolumes(CherryPickRequest cherryPickRequest);
 
   public Collection<WellVolume> findWellVolumes(Copy copy);
 

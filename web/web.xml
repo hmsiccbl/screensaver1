@@ -418,6 +418,22 @@
 
   <security-constraint>
     <web-resource-collection>
+      <web-resource-name>cherryPickAdmin</web-resource-name>
+      <url-pattern>/cherryPickRequests/admin/*</url-pattern>
+    </web-resource-collection>
+
+    <auth-constraint>
+      <role-name>cherryPickAdmin</role-name>  
+    </auth-constraint>
+
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+      <!--  TODO: transport-guarantee>CONFIDENTIAL</transport-guarantee -->
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
       <web-resource-name>screenResultsAdmin</web-resource-name>
       <url-pattern>/screens/screenresults/admin/*</url-pattern>
     </web-resource-collection>

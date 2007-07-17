@@ -28,6 +28,8 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.ui.libraries.WellVolume;
 
 import org.apache.log4j.Logger;
@@ -243,6 +245,19 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(well, result), wellVolumeAdjustments);
   }
   
+  @SuppressWarnings("unchecked")
+  public Collection<WellVolume> findWellVolumes(CherryPickRequest cherryPickRequest)
+  {
+    cherryPickRequest = _dao.reloadEntity(cherryPickRequest, true, "labCherryPicks.sourceWell.hbnLibrary");
+    String hql = "select distinct wva " +
+    "from WellVolumeAdjustment wva, CherryPickRequest cpr join cpr.labCherryPicks lcp join lcp.sourceWell sw " +
+    "where wva.well = sw and cpr = ?"; 
+    List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { cherryPickRequest });
+    List<WellVolume> result = new ArrayList<WellVolume>();
+    return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(cherryPickRequest, result), wellVolumeAdjustments);
+  }
+
+
   // private methods
 
   private List<WellVolume> makeEmptyWellVolumes(Library library, List<WellVolume> wellVolumes)
@@ -275,6 +290,14 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   {
     for (Copy copy : well.getLibrary().getCopies()) {
       result.add(new WellVolume(well, copy));
+    }
+    return result;
+  }
+
+  private List<WellVolume> makeEmptyWellVolumes(CherryPickRequest cherryPickRequest, List<WellVolume> result)
+  {
+    for (LabCherryPick lcp : cherryPickRequest.getLabCherryPicks()) {
+      makeEmptyWellVolumes(lcp.getSourceWell(), result);
     }
     return result;
   }

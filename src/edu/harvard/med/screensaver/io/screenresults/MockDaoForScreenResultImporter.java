@@ -36,6 +36,7 @@ import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.libraries.WellVolume;
@@ -292,6 +293,12 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   }
 
   public Collection<WellVolume> findWellVolumes(WellKey wellKey)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public Collection<WellVolume> findWellVolumes(CherryPickRequest cherryPickRequest)
   {
     // TODO Auto-generated method stub
     return null;

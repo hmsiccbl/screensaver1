@@ -148,6 +148,9 @@ public interface ScreensController
   public String deleteAllScreenerCherryPicks(CherryPickRequest cherryPickRequest);
 
   @UIControllerMethod
+  public String viewCherryPickRequestWellVolumes(CherryPickRequest cherryPickRequest);
+
+  @UIControllerMethod
   public String allocateCherryPicks(CherryPickRequest cherryPickRequest);
 
   @UIControllerMethod
@@ -183,5 +186,6 @@ public interface ScreensController
                                            Date dateOfLiquidTransfer, 
                                            String comments);
 
+  @UIControllerMethod
   public String downloadCherryPickRequest(CherryPickRequest cherryPickRequest);
 }

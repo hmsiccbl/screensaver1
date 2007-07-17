@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -59,6 +60,8 @@ import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocato
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper;
 import edu.harvard.med.screensaver.service.libraries.rnai.LibraryPoolToDuplexWellMapper;
+import edu.harvard.med.screensaver.ui.libraries.WellVolume;
+import edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
@@ -1030,6 +1033,16 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     }
 
     return viewCherryPickRequest(cherryPickRequestIn);
+  }
+
+  @UIControllerMethod
+  public String viewCherryPickRequestWellVolumes(CherryPickRequest cherryPickRequest)
+  {
+    logUserActivity("viewCherryPickRequestWellVolumes for " + cherryPickRequest);
+    
+    Collection<WellVolume> wellVolumes = _librariesDao.findWellVolumes(cherryPickRequest);
+    WellVolumeSearchResults wellVolumeSearchResults = new WellVolumeSearchResults(wellVolumes, _librariesController);
+    return _librariesController.viewWellVolumeSearchResults(wellVolumeSearchResults);
   }
 
   @UIControllerMethod

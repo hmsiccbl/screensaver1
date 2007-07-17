@@ -48,6 +48,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequestTest;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
@@ -1342,6 +1343,34 @@ public class ComplexDAOTest extends AbstractSpringTest
 
     wellVolumes = librariesDao.findWellVolumes(new WellKey(3, "A01"));
     assertEquals("findWellVolumes(wellKey)", 0, wellVolumes.size());
+    
+    Screen screen = MakeDummyEntities.makeDummyScreen(1);
+    CherryPickRequest cherryPickRequest = new RNAiCherryPickRequest(screen, 
+                                                                    screen.getLeadScreener(), 
+                                                                    new Date());
+    ScreenerCherryPick dummyScreenCherryPick = new ScreenerCherryPick(cherryPickRequest, plate1WellA01);
+    Well sourceWell1 = librariesDao.findWell(new WellKey(1, "P23"));
+    Well sourceWell2 = librariesDao.findWell(new WellKey(2, "P23"));
+    Well sourceWell3 = librariesDao.findWell(new WellKey(2, "P24"));
+    new LabCherryPick(dummyScreenCherryPick, sourceWell1);
+    new LabCherryPick(dummyScreenCherryPick, sourceWell2);
+    new LabCherryPick(dummyScreenCherryPick, sourceWell3);
+    genericEntityDao.persistEntity(cherryPickRequest);
+    wellVolumes = librariesDao.findWellVolumes(cherryPickRequest);
+    assertEquals("cherryPickRequest well volumes count", 2 /*copies*/ * 3 /*lab cherry picks*/, wellVolumes.size());
+    expectedWellVolumes.clear();
+    expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell1.getWellKey(), copyC.getName()), new BigDecimal("10.00")); 
+    expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell1.getWellKey(), copyD.getName()), new BigDecimal("20.00")); 
+    expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell2.getWellKey(), copyC.getName()), new BigDecimal("10.00")); 
+    expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell2.getWellKey(), copyD.getName()), new BigDecimal("20.00")); 
+    expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell3.getWellKey(), copyC.getName()), new BigDecimal("10.00")); 
+    expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell3.getWellKey(), copyD.getName()), new BigDecimal("20.00")); 
+    for (WellVolume wellVolume : wellVolumes) {
+      BigDecimal expectedRemainingVolume = expectedWellVolumes.get(new Pair<WellKey,String>(wellVolume.getWell().getWellKey(), wellVolume.getCopy().getName()));
+      assertEquals(wellVolume.getWell() + ":" + wellVolume.getCopy().getName() + " volume",
+                   expectedRemainingVolume,
+                   wellVolume.getRemainingMicroliterVolume());
+    }
   }
   
 }

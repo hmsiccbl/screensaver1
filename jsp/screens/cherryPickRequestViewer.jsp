@@ -442,18 +442,24 @@ TODO:
 				<t:panelGroup id="labCherryPicksCommandPanel"
 					styleClass="commandPanel"
 					rendered="#{cherryPickRequestViewer.editable && !empty cherryPickRequestViewer.cherryPickRequest.labCherryPicks}">
+					<t:commandButton id="viewCherryPickRequestWellVolumes"
+						value="View Well Volumes"
+						action="#{cherryPickRequestViewer.viewCherryPickRequestWellVolumes}"
+						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks}"
+						styleClass="command"
+						title="View the  available #{cherryPickRequestViewer.liquidTerm} volumes for the cherry picks on the cherry pick copy plates" />
 					<t:commandButton id="allocateCherryPicks"
 						value="Reserve #{cherryPickRequestViewer.liquidTerm}"
 						action="#{cherryPickRequestViewer.allocateCherryPicks}"
 						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks || cherryPickRequestViewer.cherryPickRequest.allocated}"
 						styleClass="command"
-						title="Reserve liquid for the cherry picks from the cherry pick copy plates" />
+						title="Reserve #{cherryPickRequestViewer.liquidTerm} for the cherry picks from the cherry pick copy plates" />
 					<t:commandButton id="deallocateCherryPicks"
 						value="Cancel Reservation"
 						action="#{cherryPickRequestViewer.deallocateCherryPicks}"
 						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated || cherryPickRequestViewer.cherryPickRequest.mapped}"
 						styleClass="command"
-						title="Cancel the liquid reservations from the cherry pick copy plates" />
+						title="Cancel the #{cherryPickRequestViewer.liquidTerm} reservations from the cherry pick copy plates" />
 					<t:commandButton id="plateMapCherryPicks" value="Map to Plates"
 						action="#{cherryPickRequestViewer.plateMapCherryPicks}"
 						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated || cherryPickRequestViewer.cherryPickRequest.mapped}"
@@ -664,14 +670,14 @@ TODO:
 								value="#{cherryPickRequestViewer.liquidTransferPerformedBy.selectItems}" />
 						</t:selectOneMenu>
 						<t:outputLabel for="dateOfLiquidTransfer" value="Date:"
-							styleClass="label" title="The date the liquid transfer took place" />
+							styleClass="label" title="The date the #{cherryPickRequestViewer.liquidTerm} transfer took place" />
 						<t:inputDate id="dateOfLiquidTransfer" 
 							value="#{cherryPickRequestViewer.dateOfLiquidTransfer}"
 							popupCalendar="true"
 							rendered="#{cherryPickRequestViewer.editable}" 
 							styleClass="inputText" />
 						<t:outputLabel for="liquidTransferComments" value="Comments:" styleClass="label"
-						  title="Screening room staff comments for the liquid transfer" />
+						  title="Screening room staff comments for the #{cherryPickRequestViewer.liquidTerm} transfer" />
 						<t:inputText id="liquidTransferComments"
 							value="#{cherryPickRequestViewer.liquidTransferComments}"
 							rendered="#{cherryPickRequestViewer.editable}"
@@ -684,13 +690,13 @@ TODO:
 							action="#{cherryPickRequestViewer.recordLiquidTransferForSelectedAssayPlates}"
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 							styleClass="command"
-							title="Record successful liquid transfer" />
+							title="Record successful #{cherryPickRequestViewer.liquidTerm} transfer" />
 						<t:commandButton id="recordFailureOfAssayPlates"
 							value="Record Selected Plates as 'Failed'"
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 							action="#{cherryPickRequestViewer.recordFailureOfAssayPlates}"
 							styleClass="command"
-							title="Record unsuccessful liquid transfer" />
+							title="Record unsuccessful #{cherryPickRequestViewer.liquidTerm} transfer" />
 						<t:commandButton id="cancelAssayPlates"
 							value="Cancel Selected Plates"
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"

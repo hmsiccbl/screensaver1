@@ -3,7 +3,7 @@
 <%@ taglib uri="http://myfaces.apache.org/tomahawk"  prefix="t"     %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 
-<f:subview id="wellVolumeSearchResultsViewer">
+<f:subview id="cherryPickRequestWellVolumeSearchResultsViewer">
 
   <t:aliasBean alias="#{searchResults}" value="#{wellVolumeSearchResultsViewer.searchResults}">
     <%@include file="../../searchResults.jspf"%>
