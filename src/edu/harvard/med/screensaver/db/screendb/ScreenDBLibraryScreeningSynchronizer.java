@@ -354,6 +354,12 @@ public class ScreenDBLibraryScreeningSynchronizer
       String description = resultSet.getString("description");
 
       LibraryScreening screening = _screenDBVisitIdToLibraryScreeningMap.get(visitId);
+
+      if (screening == null) {
+        // yes, surprisingly enough, screendb does have some dangling rows
+        continue;
+      }
+
       new EquipmentUsed(screening, equipment, protocol, description);
     }
     statement.close();
