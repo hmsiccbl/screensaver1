@@ -77,6 +77,11 @@
 			<p>As a Cherry Pick Request Administrator, the following commands
 			will be available:
 			<dl>
+				<dt>View Well Volumes</dt>
+				<dd>Show the volume information for all Lab Cherry Pick source wells.  
+				This can be used to determine if the "Reserve Reagent" command (below) 
+				will be able to fulfill all Lab Cherry Picks.</dd>
+
 				<dt>Reserve Reagent</dt>
 				<dd>For each unfulfilled Lab Cherry Pick, have Screenasver
 				determine the cherry pick library plate copy from which reagent will
