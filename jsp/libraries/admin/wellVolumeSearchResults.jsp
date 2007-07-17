@@ -6,7 +6,7 @@
 <f:subview id="wellVolumeSearchResultsViewer">
 
   <t:aliasBean alias="#{searchResults}" value="#{wellVolumeSearchResultsViewer.searchResults}">
-    <%@include file="../searchResults.jspf"%>
+    <%@include file="../../searchResults.jspf"%>
   </t:aliasBean>
 
 </f:subview>

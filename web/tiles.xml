@@ -112,10 +112,10 @@
     <put name="body" value="/libraries/wellSearchResults.jsp" />
   </definition>
   
-  <definition name="/libraries/wellVolumeSearchResults.tiles" extends=".base">
+  <definition name="/libraries/admin/wellVolumeSearchResults.tiles" extends=".base">
     <put name="pageTitle" value="Well Volume Search Results" />
     <put name="pageHelpURL" value="../help/libraries/wellVolumeSearchResultsHelp.jsf" />
-    <put name="body" value="/libraries/wellVolumeSearchResults.jsp" />
+    <put name="body" value="/libraries/admin/wellVolumeSearchResults.jsp" />
   </definition>
   
   <definition name="/libraries/wellViewer.tiles" extends=".base">
