@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.util.eutils;
 
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -30,38 +32,26 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public abstract class EutilsQueryPerformer
+abstract public class EutilsUtils
 {
-
-  // static fields
-  
-  private static Logger log = Logger.getLogger(EutilsQueryPerformer.class);
-  protected static final String EUTILS_BASE_URL = "http://www.ncbi.nlm.nih.gov/entrez/eutils/";
-  private static final String EUTILS_BASE_PARAMS =
-    "?retmode=xml&usehistory=n&tool=screensaver" +
-    "&email=%7Bjohn_sullivan%2Candrew_tolopko%7D%40hms.harvard.edu";
+  private static final Logger log = Logger.getLogger(EutilsUtils.class);
   protected static final int NUM_RETRIES = 5;
   protected static final int CONNECT_TIMEOUT = 5000;
-  
-  
-  // private instance classes
-  
-  private class EutilsConnectionException extends Exception {
+  protected static final String EUTILS_BASE_URL = "http://www.ncbi.nlm.nih.gov/entrez/eutils/";
+  private static final String EUTILS_BASE_PARAMS =
+    "?retmode=xml" +
+    "&tool=screensaver" +
+    "&email=%7Bjohn_sullivan%2Candrew_tolopko%7D%40hms.harvard.edu";
+
+  protected class EutilsConnectionException extends Exception {
     private static final long serialVersionUID = 1L;
   };
   
-  
-  // protected instance fields
-  
   protected DocumentBuilder _documentBuilder;
 
-  
-  // protected instance methods
-  
-  abstract protected void reportError(String errorMessage);
-  
-  protected void initializeDocumentBuilder()
-  {
+  protected abstract void reportError(String error);
+
+  protected void initializeDocumentBuilder() {
     DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
     try {
       _documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -69,28 +59,6 @@ public abstract class EutilsQueryPerformer
     catch (ParserConfigurationException e) {
       reportError(e.getMessage());
     }
-  }
-  
-  /**
-   * Get the XML document response for an eUtils query.
-   * @param fcgi one of "esummary.fcgi", "esearch.fcgi"
-   * @param queryParams any extra query params, starting with '&'. needs to include param for
-   * "db".
-   * @return the xml document. return null if any errors were ecountered.
-   */
-  protected Document getXMLForQuery(String fcgi, String queryParams)
-  {
-    String urlString = EUTILS_BASE_URL + fcgi + EUTILS_BASE_PARAMS + queryParams;
-    URL url = getUrlForUrlString(urlString);
-    for (int i = 0; i < NUM_RETRIES; i ++) {
-      try {
-        return getXMLForQuery0(url);
-      }
-      catch (EutilsConnectionException e) {
-      }
-    }
-    reportError("couldnt get XML for query after " + NUM_RETRIES + " tries.");
-    return null;
   }
 
   /**
@@ -101,14 +69,30 @@ public abstract class EutilsQueryPerformer
    * @return the text content of the specified element node. Return null if the specified
    * element node is not found. 
    */
-  protected String getNamedItemFromNodeList(NodeList nodes, String attributeValue) {
+  protected String getNamedItemFromNodeList(NodeList nodes, String attributeValue)
+  {
+    return getNamedItemFromNodeList(nodes, attributeValue, true);
+  }
+  
+  /**
+   * Find the element node in the node list that has an attribute named "Name" with the
+   * specified attribute value. Return the text content of that element node. 
+   * @param nodes the list of element nodes
+   * @param attributeValue the attribute value
+   * @return the text content of the specified element node. Return null if the specified
+   * element node is not found. 
+   */
+  protected String getNamedItemFromNodeList(NodeList nodes, String attributeValue, boolean reportError)
+  {
     for (int i = 0; i < nodes.getLength(); i++) {
       Node node = nodes.item(i);
       if (node.getAttributes().getNamedItem("Name").getNodeValue().equals(attributeValue)) {
         return getTextContent(node);
       }
     }
-    reportError("eUtils results did not include a \"" + attributeValue + "\" in the XML response");
+    if (reportError) {
+      reportError("eUtils results did not include a \"" + attributeValue + "\" in the XML response");
+    }
     return null;
   }
 
@@ -129,7 +113,7 @@ public abstract class EutilsQueryPerformer
     }
     return namedItems;
   }
-  
+
   /**
    * Recursively traverse the nodal structure of the node, accumulating the accumulate
    * parts of the text content of the node and all its children.
@@ -147,30 +131,9 @@ public abstract class EutilsQueryPerformer
     }
     return textContent;
   }
-  
-  /**
-   * Debugging helper method.
-   * @param document
-   * @param outputStream
-   */
-  protected void printDocumentToOutputStream(Document document, OutputStream outputStream)
-  {
-    try {
-      TransformerFactory tFactory = TransformerFactory.newInstance();
-      Transformer transformer = tFactory.newTransformer();
 
-      DOMSource source = new DOMSource(document);
-      StreamResult result = new StreamResult(outputStream);
-      transformer.transform(source, result);
-    }
-    catch (Exception e) {
-    }
-  }
-  
-  
-  // private instance methods
-  
-  private URL getUrlForUrlString(String urlString) {
+  protected URL getUrlForUrlString(String urlString)
+  {
     try {
       return new URL(urlString);
     }
@@ -179,15 +142,39 @@ public abstract class EutilsQueryPerformer
     }
     return null;
   }
-  
-  private Document getXMLForQuery0(URL url) throws EutilsConnectionException
+
+  /**
+   * Get the XML document response for an eUtils query.
+   * @param fcgi one of "esummary.fcgi", "esearch.fcgi"
+   * @param queryParams any extra query params, starting with '&'. needs to include param for
+   * "db".
+   * @return the xml document. return null if any errors were ecountered.
+   */
+  protected Document getXMLForEutilsQuery(String fcgi, String queryParams)
+  {
+    String urlString = EUTILS_BASE_URL + fcgi + EUTILS_BASE_PARAMS + queryParams;
+    URL url = getUrlForUrlString(urlString);
+    for (int i = 0; i < NUM_RETRIES; i ++) {
+      try {
+        return getXMLForEutilsQuery0(url);
+      }
+      catch (EutilsConnectionException e) {
+      }
+    }
+    reportError("couldnt get XML for query after " + NUM_RETRIES + " tries.");
+    return null;
+  }
+
+  private Document getXMLForEutilsQuery0(URL url) throws EutilsConnectionException
   {
     InputStream esearchContent = getResponseContent(url);
     assert(esearchContent != null);
+    //    printInputStreamToOutputStream(esearchContent, System.out);
+    //    if (true) return null;
     return getDocumentFromInputStream(esearchContent);
   }
 
-  private InputStream getResponseContent(URL url) throws EutilsConnectionException
+  protected InputStream getResponseContent(URL url) throws EutilsConnectionException
   {
     try {
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -201,16 +188,52 @@ public abstract class EutilsQueryPerformer
       throw new EutilsConnectionException();
     }
   }
-  
-  private Document getDocumentFromInputStream(InputStream epostContent)
-  throws EutilsConnectionException
+
+  protected Document getDocumentFromInputStream(InputStream epostContent) throws EutilsConnectionException
   {
     try {
       return _documentBuilder.parse(epostContent);
     }
     catch (Exception e) {
+      e.printStackTrace();
       log.warn("error parsing eUtils response content: " + e.getMessage());
       throw new EutilsConnectionException();
     }
+  }
+
+  /**
+   * Debugging helper method.
+   * @param document
+   * @param outputStream
+   */
+  protected void printDocumentToOutputStream(Document document, OutputStream outputStream)
+  {
+    try {
+      TransformerFactory tFactory = TransformerFactory.newInstance();
+      Transformer transformer = tFactory.newTransformer();
+  
+      DOMSource source = new DOMSource(document);
+      StreamResult result = new StreamResult(outputStream);
+      transformer.transform(source, result);
+    }
+    catch (Exception e) {
+    }
+  }
+  
+  /**
+   * Debugging helper method.
+   * @param inputStream
+   * @param outputStream
+   */
+  protected void printInputStreamToOutputStream(InputStream inputStream, OutputStream outputStream)
+  {
+    try {
+      for (int ch = inputStream.read(); ch != -1; ch = inputStream.read()) {
+        outputStream.write(ch);
+      }
+    }
+    catch (IOException e) {
+    }
+    System.exit(0);
   }
 }

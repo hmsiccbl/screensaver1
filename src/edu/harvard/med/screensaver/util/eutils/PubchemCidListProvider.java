@@ -24,7 +24,7 @@ import org.w3c.dom.NodeList;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class PubchemCidListProvider extends EutilsQueryPerformer
+public class PubchemCidListProvider extends EutilsUtils
 {
   // static fields
 
@@ -42,7 +42,7 @@ public class PubchemCidListProvider extends EutilsQueryPerformer
   {
     List<String> pubchemCids = new ArrayList<String>();
     try {
-      Document document = getXMLForQuery(
+      Document document = getXMLForEutilsQuery(
         "esearch.fcgi",
         "&db=pccompound&&rettype=uilist&term=\"" + URLEncoder.encode(inchi, "UTF-8") + "\"[inchi]");
       if (document == null) {

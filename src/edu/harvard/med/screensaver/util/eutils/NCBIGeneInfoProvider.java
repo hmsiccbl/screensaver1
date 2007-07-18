@@ -31,7 +31,7 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class NCBIGeneInfoProvider extends EutilsQueryPerformer
+public class NCBIGeneInfoProvider extends EutilsUtils
 {
   
   // static and instance fields
@@ -82,7 +82,7 @@ public class NCBIGeneInfoProvider extends EutilsQueryPerformer
   {
     _entrezgeneId = entrezgeneId;
     _cell = cell;
-    Document efetchDocument = getXMLForQuery("esummary.fcgi", "&db=gene&id=" + entrezgeneId);
+    Document efetchDocument = getXMLForEutilsQuery("esummary.fcgi", "&db=gene&id=" + entrezgeneId);
     if (efetchDocument == null) {
       return null;
     }

@@ -26,7 +26,7 @@ import edu.harvard.med.screensaver.model.screens.Publication;
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class PublicationInfoProvider extends EutilsQueryPerformer
+public class PublicationInfoProvider extends EutilsUtils
 {
   
   // static and instance fields
@@ -55,7 +55,7 @@ public class PublicationInfoProvider extends EutilsQueryPerformer
   public synchronized PublicationInfo getPublicationInfoForPubmedId(Integer pubmedId)
   {
     _pubmedId = pubmedId;
-    Document esummaryDocument = getXMLForQuery("esummary.fcgi", "&db=pubmed&id=" + pubmedId);
+    Document esummaryDocument = getXMLForEutilsQuery("esummary.fcgi", "&db=pubmed&id=" + pubmedId);
     if (esummaryDocument == null) {
       return null;
     }
