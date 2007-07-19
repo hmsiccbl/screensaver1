@@ -9,14 +9,29 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.DataExporter;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
+import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.control.LibrariesControllerImpl;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
+import edu.harvard.med.screensaver.ui.util.Messages;
 
 import org.apache.log4j.Logger;
 
@@ -34,6 +49,7 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
     COMPOUND_SORTS.add(new Integer[] {6, 1, 2, 3});
     COMPOUND_SORTS.add(new Integer[] {7, 1, 2, 3});
   }
+  private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.LIBRARIES_ADMIN;
 
   private static Logger log = Logger.getLogger(WellVolumeSearchResults.class);
 
@@ -43,18 +59,33 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
   private LibrariesController _librariesController;
   private ArrayList<TableColumn<WellVolume>> _columns;
   private TableColumn<WellVolume> _remainingVolumeColumn;
+  private Map<WellVolume,BigDecimal> _newRemainingVolumes;
+  private String _wellVolumeAdjustmentActivityComments;
+  private GenericEntityDAO _dao;
 
   
   // public constructors and methods
 
   public WellVolumeSearchResults(Collection<WellVolume> unsortedResults,
-                                 LibrariesController librariesController)
+                                 LibrariesController librariesController,
+                                 GenericEntityDAO dao,
+                                 Messages messages)
   {
     super(unsortedResults);
     _librariesController = librariesController;
+    _dao = dao;
     getColumns(); // force initialization of _remainingVolumeColumn
     // start with sort descending on remainingVolume column
     getSortManager().setSortColumn(_remainingVolumeColumn);
+    
+    setCurrentScreensaverUser(((LibrariesControllerImpl) _librariesController).getCurrentScreensaverUser());
+    setMessages(messages);
+  }
+
+  @Override
+  protected ScreensaverUserRole getEditableAdminRole()
+  {
+    return EDITING_ROLE;
   }
 
   @Override
@@ -110,18 +141,48 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
         public Object getCellValue(WellVolume wellVolume) { return wellVolume.getRemainingMicroliterVolume(); }
       };      
       _columns.add(_remainingVolumeColumn);
-      _columns.add(new TableColumn<WellVolume>("Withdrawals", "The number of withdrawals made from this well copy", true) {
+      _columns.add(new TableColumn<WellVolume>("Withdrawals/Adjustments", "The number of withdrawals and administrative adjustment smade from this well copy", true) {
         @Override
         public Object getCellValue(WellVolume wellVolume) { return wellVolume.getWellVolumeAdjustments().size(); }
 
         @Override
-        public boolean isCommandLink() { return getEntity().getWellVolumeAdjustments().size() > 0; }
+        public boolean isVisible() { return !isEditMode(); }
+
+        // TODO
+//        @Override
+//        public boolean isCommandLink() { return getEntity().getWellVolumeAdjustments().size() > 0; }
+//        
+//        @Override
+//        public Object cellAction(WellVolume entity)
+//        {
+//          return REDISPLAY_PAGE_ACTION_RESULT; 
+//        }
+      });      
+      _columns.add(new TableColumn<WellVolume>("New Remaining Volume", "Enter new remaining volume", true) {
+
+        @Override
+        public Object getCellValue(WellVolume wellVolume) { return _newRemainingVolumes.get(wellVolume); }
         
         @Override
-        public Object cellAction(WellVolume entity)
+        public void setCellValue(WellVolume wellVolume, Object value)
         {
-          return REDISPLAY_PAGE_ACTION_RESULT; 
+          if (value != null && value.toString().trim().length() > 0) {
+            try {
+              BigDecimal newValue = new BigDecimal(value.toString()).setScale(Well.VOLUME_SCALE);
+              _newRemainingVolumes.put(wellVolume, newValue);
+            }
+            catch (Exception e) {
+              showMessage("libraries.badWellVolumeAdjustmentValue", value, wellVolume.getWell().getWellKey(), wellVolume.getCopy().getName());
+            }
+          }
         }
+          
+        
+        @Override
+        public boolean isEditable() { return true; }
+
+        @Override
+        public boolean isVisible() { return isEditMode(); }
       });      
     }
     return _columns;
@@ -144,12 +205,63 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
   {
     _librariesController.viewWell(wellVolume.getWell(), null);
   }
+  
+  public String getWellVolumeAdjustmentActivityComments()
+  {
+    return _wellVolumeAdjustmentActivityComments;
+  }
 
+  public void setWellVolumeAdjustmentActivityComments(String wellVolumeAdjustmentActivityComments)
+  {
+    _wellVolumeAdjustmentActivityComments = wellVolumeAdjustmentActivityComments;
+  }
+
+  public void doEdit()
+  {
+    _newRemainingVolumes = new HashMap<WellVolume,BigDecimal>();
+    _wellVolumeAdjustmentActivityComments = null;
+  }
+
+  @Override
+  public void doSave()
+  {
+    ScreensaverUser screensaverUser = getCurrentScreensaverUser().getScreensaverUser();
+    if (!(screensaverUser instanceof AdministratorUser) || !((AdministratorUser) screensaverUser).isUserInRole(ScreensaverUserRole.LIBRARIES_ADMIN)) {
+      throw new BusinessRuleViolationException("only libraries administrators can edit well volumes");
+    }
+    final AdministratorUser administratorUser = (AdministratorUser) screensaverUser;
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        if (_newRemainingVolumes.size() > 0) {
+          _dao.reattachEntity(administratorUser);
+          WellVolumeCorrectionActivity wellVolumeCorrectionActivity = 
+            new WellVolumeCorrectionActivity(administratorUser, new Date());
+          wellVolumeCorrectionActivity.setComments(getWellVolumeAdjustmentActivityComments());
+          // TODO
+          //wellVolumeCorrectionActivity.setApprovedBy();
+          for (Map.Entry<WellVolume,BigDecimal> entry : _newRemainingVolumes.entrySet()) {
+            WellVolume wellVolume = entry.getKey();
+            BigDecimal newRemainingVolume = entry.getValue();
+            WellVolumeAdjustment wellVolumeAdjustment = 
+              new WellVolumeAdjustment(wellVolume.getCopy(),
+                                       wellVolume.getWell(),
+                                       newRemainingVolume.subtract(wellVolume.getRemainingMicroliterVolume()));
+            wellVolume.addWellVolumeAdjustment(wellVolumeAdjustment);
+            wellVolumeCorrectionActivity.getWellVolumeAdjustments().add(wellVolumeAdjustment);
+          }
+          _dao.persistEntity(wellVolumeCorrectionActivity);
+        }
+      }
+    });
+    showMessage("libraries.updatedWellVolumes", new Integer(_newRemainingVolumes.size()));
+  }
+  
   @Override
   protected List<DataExporter<WellVolume>> getDataExporters()
   {
     return new ArrayList<DataExporter<WellVolume>>();
   }
+  
 
   // private methods
 

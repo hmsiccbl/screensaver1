@@ -126,12 +126,31 @@ public abstract class TableColumn<E>
   }
 
   /**
-   * Get the value to be displayed for the current cell.
+   * Get the value to be displayed for the current column and cell.
    * 
    * @param entity the entity displayed in the current cell (the row index)
    * @return the value to be displayed for the current cell
    */
   abstract public Object getCellValue(E entity);
+  
+  /**
+   * Set the new value of the entity for the current column and cell.
+   * 
+   * @param entity the entity displayed in the current cell (the row index)
+   * @param value the new value
+   */
+  public void setCellValue(E entity, Object value) {}
+  
+  /**
+   * Get whether this table column is editable by the user. If it is, you must
+   * implement {@link #setCellValue(Object, Object)}, if submitted values are
+   * to update your data model. Also, {@link #isCommandLink()} and
+   * {@link #isCommandLinkList()} should be return false if this method return
+   * true.
+   */
+  public boolean isEditable() { return false; }
+  
+  public boolean isVisible() { return true; }
   
   /**
    * Return true whenever the cell values for the column with the specified name

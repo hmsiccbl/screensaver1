@@ -94,7 +94,9 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   private DataModel _dataModel;
   private TableSortManager<E> _sortManager;
   private UISelectOneBean<DataExporter<E>> _dataExporterSelector;
-  
+  private boolean _editMode;
+  private boolean _hasEditableColumns;
+
   
   // public constructor
   
@@ -118,24 +120,12 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   public TableSortManager<E> getSortManager()
   {
     if (_sortManager == null) {
-      _sortManager = new TableSortManager<E>(getColumns());
-      _sortManager.addObserver(new Observer() {
-        public void update(Observable o, Object obj)
-        {
-          doSort();
-        }
-      });
-      
-      List<Integer[]> compoundSorts = getCompoundSorts();
-      for (Integer[] compoundSort : compoundSorts) {
-        List<TableColumn<E>> columns = new ArrayList<TableColumn<E>>();
-        for (Integer colIndex : compoundSort) {
-          columns.add(_sortManager.getColumn(colIndex));
-        }
-        _sortManager.addCompoundSortColumns(columns);
-      }
+      List<TableColumn<E>> columns = getColumns();
+      initializeTableSortManager(columns);
+      initializeCompoundSortColumns();
+      initializeHasEditableColumns(columns);
     }
-   
+    
     return _sortManager;
   }
   
@@ -143,7 +133,6 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   {
     return new ArrayList<Integer[]>();
   }
-
 
   public Collection<E> getContents()
   {
@@ -284,6 +273,14 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     return getCurrentColumn().getCellValue(getEntity());
   }
   
+  public void setCellValue(Object value)
+  {
+    if (log.isDebugEnabled()) {
+      log.debug("setting value on " + getEntity() + " from column " + getCurrentColumn().getName() + ": " + value);
+    }
+    getCurrentColumn().setCellValue(getEntity(), value);
+  }
+
   /**
    * Perform the action for clicking on the current cell. Return the navigation rule to go
    * along with the action for clicking on the current cell. This method is only called when
@@ -393,6 +390,16 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     return getViewMode().equals(SearchResultsViewMode.SUMMARY);
   }
   
+  public boolean isEditMode()
+  {
+    return _editMode;
+  }
+  
+  public boolean getHasEditableColumns()
+  {
+    return _hasEditableColumns;
+  }
+  
   /**
    * Update the number of items displayed per page, based on the user selecting
    * a new value in the selection input for items per page.
@@ -405,6 +412,34 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     _currentPageIndex = 0;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
+  
+  final public String edit()
+  {
+    setEditMode(true);
+    doEdit();
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  protected void doEdit() {}
+
+  final public String save()
+  {
+    setEditMode(false);
+    doSave();
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  protected void doSave() {}
+  
+  final public String cancel()
+  {
+    setEditMode(false);
+    doCancel();
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  protected void doCancel() {}
+
 
   public UISelectOneBean<DataExporter<E>> getDataExporterSelector()
   {
@@ -466,12 +501,12 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   
   abstract protected List<DataExporter<E>> getDataExporters();
   
-  
+    
   // protected instance methods
   
   final protected TableColumn<E> getCurrentColumn()
   {
-    return getColumns().get(getSortManager().getCurrentColumnIndex());
+    return getSortManager().getCurrentColumn();
   }
 
   /**
@@ -493,6 +528,40 @@ abstract public class SearchResults<E> extends AbstractBackingBean
 
   // private instance methods
   
+
+  private void initializeTableSortManager(List<TableColumn<E>> columns)
+  {
+    _sortManager = new TableSortManager<E>(columns);
+    _sortManager.addObserver(new Observer() {
+      public void update(Observable o, Object obj)
+      {
+        doSort();
+      }
+    });
+  }
+
+  private void initializeHasEditableColumns(List<TableColumn<E>> columns)
+  {
+    for (TableColumn<E> column : columns) {
+      if (column.isEditable()) {
+        _hasEditableColumns = true;
+        break;
+      }
+    }
+  }
+
+  private void initializeCompoundSortColumns()
+  {
+    List<Integer[]> compoundSorts = getCompoundSorts();
+    for (Integer[] compoundSort : compoundSorts) {
+      List<TableColumn<E>> compoundSortColumns = new ArrayList<TableColumn<E>>();
+      for (Integer colIndex : compoundSort) {
+        compoundSortColumns.add(_sortManager.getColumn(colIndex));
+      }
+      _sortManager.addCompoundSortColumns(compoundSortColumns);
+    }
+  }
+
   /**
    * Update the search browser's data table, or the search viewer's current
    * entity, depending upon the current SearchResultsViewMode.
@@ -527,5 +596,11 @@ abstract public class SearchResults<E> extends AbstractBackingBean
       _dataModel = new ListDataModel(_currentSort);
       _currentSortType = newSortType;
     }
+  }
+
+  private void setEditMode(boolean isEditMode)
+  {
+    _editMode = isEditMode;
+    getSortManager().getColumnModel().updateVisibleColumns();
   }
 }

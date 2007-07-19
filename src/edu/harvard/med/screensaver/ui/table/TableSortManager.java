@@ -9,16 +9,12 @@
 
 package edu.harvard.med.screensaver.ui.table;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-
-import javax.faces.model.DataModel;
-import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
@@ -34,9 +30,7 @@ public class TableSortManager<E> extends Observable implements Observer
 
   // instance data members
 
-  private DataModel _columnModel;
-  private List<TableColumn<E>> _columns;
-  private List<String> _columnNames;
+  private VisibleTableColumnModel<E> _columnModel;
   private UISelectOneBean<SortDirection> _sortDirection;
   private UISelectOneBean<TableColumn<E>> _sortColumn;
   private Map<TableColumn<E>,Map<SortDirection,Comparator<E>>> _comparators = new HashMap<TableColumn<E>,Map<SortDirection,Comparator<E>>>();
@@ -98,30 +92,22 @@ public class TableSortManager<E> extends Observable implements Observer
    */
   public int getCurrentColumnIndex()
   {
-    return _columnModel.getRowIndex();
-  }
-
-  /**
-   * Get the name of the column currently being rendered by JSF.
-   * @return
-   */
-  public String getCurrentColumnName()
-  {
-    return getColumnNames().get(_columnModel.getRowIndex());
+    return getColumnModel().getRowIndex();
   }
 
   /**
    * Get the column currently being rendered by JSF.
    * @return
    */
+  @SuppressWarnings("unchecked")
   public TableColumn<E> getCurrentColumn()
   {
-    return _columns.get(getCurrentColumnIndex());
+    return (TableColumn<E>) getColumnModel().getRowData();
   }
   
   public TableColumn<E> getColumn(int i)
   {
-    return _columns.get(i);
+    return getColumns().get(i);
   }
 
   /**
@@ -144,7 +130,7 @@ public class TableSortManager<E> extends Observable implements Observer
    */
   public void setSortColumnName(String sortColumnName)
   {
-    setSortColumn(getColumn(_columnNames.indexOf(sortColumnName)));
+    setSortColumn(getColumnModel().getColumn(sortColumnName));
   }
   
   /**
@@ -209,7 +195,7 @@ public class TableSortManager<E> extends Observable implements Observer
    * Get the data header column model.
    * @return the data header column model
    */
-  public DataModel getColumnModel()
+  public VisibleTableColumnModel<E> getColumnModel()
   {
     return _columnModel;
   }
@@ -222,24 +208,20 @@ public class TableSortManager<E> extends Observable implements Observer
    */
   public void setColumns(List<TableColumn<E>> columns)
   {
-    _columns = columns;
-    _columnNames = new ArrayList<String>(columns.size());
-    for (TableColumn<E> column : columns) {
-      _columnNames.add(column.getName());
-    }
-    _columnModel = new ListDataModel(columns);
+    _columnModel = new VisibleTableColumnModel<E>(columns);
     // ensure sort column exists in the new set of columns
-    if (!_columns.contains(getSortColumn())) {
+    if (!columns.contains(getSortColumn())) {
       getSortColumnSelector().setSelectionIndex(0);
       getSortDirectionSelector().setSelection(SortDirection.ASCENDING);
     }
   }
-
-  public List<String> getColumnNames()
-  {
-    return _columnNames;
-  }
   
+  @SuppressWarnings("unchecked")
+  public List<TableColumn<E>> getColumns()
+  {
+    return (List<TableColumn<E>>) getColumnModel().getWrappedData();
+  }
+
   /**
    * Get a list of SelectItem objects for the set of columns that can be sorted
    * on.
@@ -250,7 +232,7 @@ public class TableSortManager<E> extends Observable implements Observer
   public UISelectOneBean<TableColumn<E>> getSortColumnSelector()
   {
     if (_sortColumn == null) {
-      _sortColumn = new UISelectOneBean<TableColumn<E>>(_columns) {
+      _sortColumn = new UISelectOneBean<TableColumn<E>>(getColumns()) {
         @Override
         protected String getLabel(TableColumn<E> t) { return t.getName(); }
       };

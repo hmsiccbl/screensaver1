@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResultsViewer;
 
 /**

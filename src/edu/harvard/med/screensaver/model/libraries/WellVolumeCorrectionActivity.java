@@ -79,6 +79,13 @@ public class WellVolumeCorrectionActivity extends AdministrativeActivity
     return _wellVolumeAdjustments;
   }
 
+  /**
+   * @motivation for Hibernate and CGLIB2 
+   */
+  protected WellVolumeCorrectionActivity()
+  {
+  }
+
   private void setWellVolumeAdjustments(Set<WellVolumeAdjustment> wellVolumeAdjustments)
   {
     _wellVolumeAdjustments = wellVolumeAdjustments;

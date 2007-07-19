@@ -26,6 +26,7 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     addTestSuite(TableSortManagerTest.class);
+    addTestSuite(VisibleTableColumnModelTest.class);
   }
 
 }

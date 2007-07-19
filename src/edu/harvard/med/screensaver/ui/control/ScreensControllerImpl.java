@@ -1041,7 +1041,10 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     logUserActivity("viewCherryPickRequestWellVolumes for " + cherryPickRequest);
     
     Collection<WellVolume> wellVolumes = _librariesDao.findWellVolumes(cherryPickRequest);
-    WellVolumeSearchResults wellVolumeSearchResults = new WellVolumeSearchResults(wellVolumes, _librariesController);
+    WellVolumeSearchResults wellVolumeSearchResults = new WellVolumeSearchResults(wellVolumes, 
+                                                                                  _librariesController, 
+                                                                                  _dao,
+                                                                                  getMessages());
     return _librariesController.viewWellVolumeSearchResults(wellVolumeSearchResults);
   }
 

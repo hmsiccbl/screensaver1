@@ -315,7 +315,9 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
         }
         WellVolumeSearchResults searchResults =
           new WellVolumeSearchResults(foundWellVolumes,
-                                      LibrariesControllerImpl.this);
+                                      LibrariesControllerImpl.this,
+                                      _dao,
+                                      getMessages());
         result[0] = viewWellVolumeSearchResults(searchResults);
       }
     });
@@ -395,7 +397,9 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
         Collection<WellVolume> wellVolumes = _librariesDao.findWellVolumes(libraryIn);
         WellVolumeSearchResults wellVolumeSearchResults = 
           new WellVolumeSearchResults(wellVolumes,
-                                      LibrariesControllerImpl.this);
+                                      LibrariesControllerImpl.this,
+                                      _dao,
+                                      getMessages());
         _wellVolumeSearchResultsViewer.setSearchResults(wellVolumeSearchResults);
       }
     });
