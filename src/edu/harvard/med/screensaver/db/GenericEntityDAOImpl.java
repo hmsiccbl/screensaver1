@@ -199,7 +199,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     // TODO: throw exception if entity already exists in the session
     if (entity != null) {
       log.debug("reloading entity " + entity);
-      return (E) findEntityById(entity.getClass(), entity.getEntityId(), readOnly, relationships);
+      return (E) findEntityById(getEntityClass(entity), entity.getEntityId(), readOnly, relationships);
     }
     return null;
   }
@@ -752,7 +752,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
       entityInflatorLog.debug("inflating " + entity + " for relationships: " + relationships);
       start = System.currentTimeMillis();
     }
-    findEntityById(entity.getClass(), entity.getEntityId(), readOnly, relationships);
+    findEntityById(getEntityClass(entity), entity.getEntityId(), readOnly, relationships);
     if (entityInflatorLog.isDebugEnabled()) {
       entityInflatorLog.debug("inflating " + entity + " took " + (System.currentTimeMillis() - start) / 1000.0 + " seconds");
     }
@@ -794,6 +794,15 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
       } while (pos >= 0);
     }
      return new ArrayList<String>(expandedRelationships);
+  }
+
+  private Class getEntityClass(AbstractEntity entity)
+  {
+    Class c = entity.getClass();
+    if (c.getName().contains("$$EnhancerByCGLIB")) {
+      return c.getSuperclass();
+    }
+    return c;
   }
    
 }
