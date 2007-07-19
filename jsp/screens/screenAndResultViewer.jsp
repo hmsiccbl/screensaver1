@@ -12,7 +12,7 @@
 <f:subview id="screenAndResultViewer">
 
 	<t:aliasBean alias="#{navigator}"
-		value="#{screensBrowser.screenSearchResults}">
+		value="#{screensBrowser.searchResults}">
 		<%@ include file="../searchResultsNavPanel.jspf"%>
 	</t:aliasBean>
 
