@@ -91,7 +91,7 @@ public class WellVolumeAdjustment extends AbstractEntity
    *   column="copy_id"
    *   not-null="true"
    *   foreign-key="fk_well_volume_adjustment_to_copy"
-   *   cascade="save-update"
+   *   cascade="none"
    * @return
    */
   @ToOneRelationship(unidirectional=true, nullable=false)
