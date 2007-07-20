@@ -19,7 +19,7 @@ import edu.harvard.med.screensaver.ui.libraries.NaturalProductsLibraryContentsIm
 import edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporter;
 import edu.harvard.med.screensaver.ui.libraries.WellFinder;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResultsViewer;
-import edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResults;
+import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
@@ -148,9 +148,9 @@ public interface LibrariesController
   @UIControllerMethod
   public String unloadLibraryContents(final Library libraryIn, final SearchResults<Library> results);
 
-  public String viewLibraryWellVolumes(Library library);
+  public String viewLibraryWellCopyVolumes(Library library);
 
-  public String viewWellVolumeSearchResults(WellVolumeSearchResults wellVolumeSearchResults);
+  public String viewWellCopyVolumeSearchResults(WellCopyVolumeSearchResults wellCopyVolumeSearchResults);
 
   String findWellVolumes(String plateWellList);
 

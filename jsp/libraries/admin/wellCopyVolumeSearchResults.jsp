@@ -3,10 +3,10 @@
 <%@ taglib uri="http://myfaces.apache.org/tomahawk"  prefix="t"     %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 
-<f:subview id="wellVolumeSearchResultsViewer">
+<f:subview id="wellCopyVolumeSearchResultsViewer">
 
 
-  <t:aliasBean alias="#{searchResults}" value="#{wellVolumeSearchResultsViewer.searchResults}">
+  <t:aliasBean alias="#{searchResults}" value="#{wellCopyVolumeSearchResultsViewer.searchResults}">
 
 		<t:buffer into="#{searchResultsFooter}">
 			<t:panelGrid rendered="#{searchResults.editMode}" columns="1">

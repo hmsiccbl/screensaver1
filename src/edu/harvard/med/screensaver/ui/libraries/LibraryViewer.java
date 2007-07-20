@@ -115,7 +115,7 @@ public class LibraryViewer extends AbstractBackingBean
 
   public String viewLibraryWellVolumes()
   {
-    return _librariesController.viewLibraryWellVolumes(_library);
+    return _librariesController.viewLibraryWellCopyVolumes(_library);
   }
 
   public String importCompoundLibraryContents()

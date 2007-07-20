@@ -36,8 +36,8 @@ public interface ScreensaverConstants
   public static final String BROWSE_LIBRARIES = "browseLibraries";
   public static final String VIEW_LIBRARY = "viewLibrary";
   public static final String VIEW_WELL_SEARCH_RESULTS = "viewWellSearchResults";
-  public static final String VIEW_WELL_VOLUME_SEARCH_RESULTS = "viewWellVolumeSearchResults";
-  public static final String VIEW_CHERRY_PICK_REQUEST_WELL_VOLUMES = "viewCherryPickRequestWellVolumeSearchResults";
+  public static final String VIEW_WELL_COPY_VOLUME_SEARCH_RESULTS = "viewWellCopyVolumeSearchResults";
+  public static final String VIEW_CHERRY_PICK_REQUEST_WELL_COPY_VOLUMES = "viewCherryPickRequestWellCopyVolumeSearchResults";
   public static final String VIEW_WELL = "viewWell";
   public static final String VIEW_GENE = "viewGene";
   public static final String VIEW_COMPOUND = "viewCompound";

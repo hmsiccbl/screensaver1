@@ -35,7 +35,7 @@ import edu.harvard.med.screensaver.ui.util.Messages;
 
 import org.apache.log4j.Logger;
 
-public class WellVolumeSearchResults extends SearchResults<WellCopyVolume>
+public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume>
 {
   // static members
 
@@ -51,7 +51,7 @@ public class WellVolumeSearchResults extends SearchResults<WellCopyVolume>
   }
   private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.LIBRARIES_ADMIN;
 
-  private static Logger log = Logger.getLogger(WellVolumeSearchResults.class);
+  private static Logger log = Logger.getLogger(WellCopyVolumeSearchResults.class);
 
 
   // instance data members
@@ -66,7 +66,7 @@ public class WellVolumeSearchResults extends SearchResults<WellCopyVolume>
   
   // public constructors and methods
 
-  public WellVolumeSearchResults(Collection<WellCopyVolume> unsortedResults,
+  public WellCopyVolumeSearchResults(Collection<WellCopyVolume> unsortedResults,
                                  LibrariesController librariesController,
                                  GenericEntityDAO dao,
                                  Messages messages)
@@ -126,7 +126,7 @@ public class WellVolumeSearchResults extends SearchResults<WellCopyVolume>
 //        public boolean isCommandLink() { return true; }
 //
 //        @Override
-//        public Object cellAction(WellCopyVolume wellVolume) { return _librariesController.viewLibraryCopyVolumes(wellVolume.getWell(), WellVolumeSearchResults.this); }
+//        public Object cellAction(WellCopyVolume wellVolume) { return _librariesController.viewLibraryCopyVolumes(wellVolume.getWell(), WellCopyVolumeSearchResults.this); }
       });
       _columns.add(new TableColumn<WellCopyVolume>("Initial Volume", "The initial volume of this well copy", true) {
         @Override
@@ -197,7 +197,7 @@ public class WellVolumeSearchResults extends SearchResults<WellCopyVolume>
   @Override
   public String showSummaryView()
   {
-    return _librariesController.viewWellVolumeSearchResults(this);
+    return _librariesController.viewWellCopyVolumeSearchResults(this);
   }
 
   @Override

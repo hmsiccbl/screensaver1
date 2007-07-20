@@ -3,7 +3,7 @@
 <%@ taglib uri="http://myfaces.apache.org/tomahawk"  prefix="t"     %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 
-<f:subview id="wellVolumeSearchResultsHelpText">
+<f:subview id="wellCopyVolumeSearchResultsHelpText">
   <f:verbatim escape="false">
     <p>
       After searching for multiple well volumes (using the Well Finder's "Find Well Volumes" 

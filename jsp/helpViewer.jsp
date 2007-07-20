@@ -67,7 +67,7 @@
       </t:collapsiblePanel>
 
       <t:collapsiblePanel
-        value="#{helpViewer.isPanelCollapsedMap['wellVolumeSearchResultsHelp']}"
+        value="#{helpViewer.isPanelCollapsedMap['wellCopyVolumeSearchResultsHelp']}"
         var="isCollapsed"
         rendered="#{helpViewer.screensaverUser.isUserInRoleOfNameMap[\"librariesAdmin\"]}"
       >
@@ -82,7 +82,7 @@
             </t:headerLink>
           </t:div>
         </f:facet>
-        <%@ include file="help/libraries/wellVolumeSearchResultsHelp.jsp" %>
+        <%@ include file="help/libraries/wellCopyVolumeSearchResultsHelp.jsp" %>
       </t:collapsiblePanel>
 
       <t:collapsiblePanel

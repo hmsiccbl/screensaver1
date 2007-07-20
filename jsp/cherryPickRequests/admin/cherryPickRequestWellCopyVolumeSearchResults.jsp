@@ -3,9 +3,9 @@
 <%@ taglib uri="http://myfaces.apache.org/tomahawk"  prefix="t"     %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 
-<f:subview id="cherryPickRequestWellVolumeSearchResultsViewer">
+<f:subview id="cherryPickRequestWellCopyVolumeSearchResultsViewer">
 
-  <t:aliasBean alias="#{searchResults}" value="#{wellVolumeSearchResultsViewer.searchResults}">
+  <t:aliasBean alias="#{searchResults}" value="#{wellCopyVolumeSearchResultsViewer.searchResults}">
     <%@include file="../../searchResults.jspf"%>
   </t:aliasBean>
 

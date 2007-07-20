@@ -42,8 +42,8 @@ import edu.harvard.med.screensaver.ui.libraries.WellFinder;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResultsViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
-import edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResults;
-import edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResultsViewer;
+import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
+import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResultsViewer;
 import edu.harvard.med.screensaver.ui.namevaluetable.CompoundNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.GeneNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.LibraryNameValueTable;
@@ -79,7 +79,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   private LibrariesBrowser _librariesBrowser;
   private LibraryViewer _libraryViewer;
   private WellSearchResultsViewer _wellSearchResultsViewer;
-  private WellVolumeSearchResultsViewer _wellVolumeSearchResultsViewer;
+  private WellCopyVolumeSearchResultsViewer _wellCopyVolumeSearchResultsViewer;
   private WellViewer _wellViewer;
   private GeneViewer _geneViewer;
   private CompoundViewer _compoundViewer;
@@ -125,9 +125,9 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     _wellSearchResultsViewer = wellSearchResultsViewer;
   }
   
-  public void setWellVolumeSearchResultsViewer(WellVolumeSearchResultsViewer wellVolumeSearchResultsViewer)
+  public void setWellCopyVolumeSearchResultsViewer(WellCopyVolumeSearchResultsViewer wellCopyVolumeSearchResultsViewer)
   {
-    _wellVolumeSearchResultsViewer = wellVolumeSearchResultsViewer;
+    _wellCopyVolumeSearchResultsViewer = wellCopyVolumeSearchResultsViewer;
   }
   
   public void setWellViewer(WellViewer wellViewer)
@@ -313,12 +313,12 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
             foundWellCopyVolumes.addAll(wellCopyVolumes);
           }
         }
-        WellVolumeSearchResults searchResults =
-          new WellVolumeSearchResults(foundWellCopyVolumes,
+        WellCopyVolumeSearchResults searchResults =
+          new WellCopyVolumeSearchResults(foundWellCopyVolumes,
                                       LibrariesControllerImpl.this,
                                       _dao,
                                       getMessages());
-        result[0] = viewWellVolumeSearchResults(searchResults);
+        result[0] = viewWellCopyVolumeSearchResults(searchResults);
       }
     });
     return result[0];
@@ -388,23 +388,23 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   }
   
   @UIControllerMethod
-  public String viewLibraryWellVolumes(final Library libraryIn)
+  public String viewLibraryWellCopyVolumes(final Library libraryIn)
   {
-    logUserActivity(VIEW_WELL_VOLUME_SEARCH_RESULTS + " for library " + libraryIn);
+    logUserActivity(VIEW_WELL_COPY_VOLUME_SEARCH_RESULTS + " for library " + libraryIn);
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
         Collection<WellCopyVolume> wellCopyVolumes = _librariesDao.findWellCopyVolumes(libraryIn);
-        WellVolumeSearchResults wellCopyVolumeSearchResults = 
-          new WellVolumeSearchResults(wellCopyVolumes,
-                                      LibrariesControllerImpl.this,
-                                      _dao,
-                                      getMessages());
-        _wellVolumeSearchResultsViewer.setSearchResults(wellCopyVolumeSearchResults);
+        WellCopyVolumeSearchResults wellCopyVolumeSearchResults = 
+          new WellCopyVolumeSearchResults(wellCopyVolumes,
+                                          LibrariesControllerImpl.this,
+                                          _dao,
+                                          getMessages());
+        _wellCopyVolumeSearchResultsViewer.setSearchResults(wellCopyVolumeSearchResults);
       }
     });
 
-    return VIEW_WELL_VOLUME_SEARCH_RESULTS;
+    return VIEW_WELL_COPY_VOLUME_SEARCH_RESULTS;
   }
 
   @UIControllerMethod
@@ -533,11 +533,11 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     return VIEW_COMPOUND;
   }
 
-  public String viewWellVolumeSearchResults(WellVolumeSearchResults wellVolumeSearchResults)
+  public String viewWellCopyVolumeSearchResults(WellCopyVolumeSearchResults wellCopyVolumeSearchResults)
   {
-    logUserActivity(VIEW_WELL_VOLUME_SEARCH_RESULTS);
-    _wellVolumeSearchResultsViewer.setSearchResults(wellVolumeSearchResults);
-    return VIEW_WELL_VOLUME_SEARCH_RESULTS;
+    logUserActivity(VIEW_WELL_COPY_VOLUME_SEARCH_RESULTS);
+    _wellCopyVolumeSearchResultsViewer.setSearchResults(wellCopyVolumeSearchResults);
+    return VIEW_WELL_COPY_VOLUME_SEARCH_RESULTS;
   }
 
   @UIControllerMethod

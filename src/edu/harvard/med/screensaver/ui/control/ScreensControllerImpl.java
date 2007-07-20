@@ -61,7 +61,7 @@ import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMap
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper;
 import edu.harvard.med.screensaver.service.libraries.rnai.LibraryPoolToDuplexWellMapper;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
-import edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResults;
+import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
@@ -1041,11 +1041,11 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     logUserActivity("viewCherryPickRequestWellVolumes for " + cherryPickRequest);
     
     Collection<WellCopyVolume> wellCopyVolumes = _librariesDao.findWellCopyVolumes(cherryPickRequest);
-    WellVolumeSearchResults wellVolumeSearchResults = new WellVolumeSearchResults(wellCopyVolumes, 
-                                                                                  _librariesController, 
-                                                                                  _dao,
-                                                                                  getMessages());
-    return _librariesController.viewWellVolumeSearchResults(wellVolumeSearchResults);
+    WellCopyVolumeSearchResults wellCopyVolumeSearchResults = new WellCopyVolumeSearchResults(wellCopyVolumes, 
+                                                                                              _librariesController, 
+                                                                                              _dao,
+                                                                                              getMessages());
+    return _librariesController.viewWellCopyVolumeSearchResults(wellCopyVolumeSearchResults);
   }
 
   @UIControllerMethod
