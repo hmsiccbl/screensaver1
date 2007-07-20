@@ -39,13 +39,12 @@ public class WellVolumeCorrectionActivity extends AdministrativeActivity
   // static members
 
   private static final long serialVersionUID = 1L;
-
   private static Logger log = Logger.getLogger(WellVolumeCorrectionActivity.class);
 
-  private Set<WellVolumeAdjustment> _wellVolumeAdjustments = new HashSet<WellVolumeAdjustment>();
-
-
+  
   // instance data members
+
+  private Set<WellVolumeAdjustment> _wellVolumeAdjustments = new HashSet<WellVolumeAdjustment>();
 
 
   // public constructors and methods
