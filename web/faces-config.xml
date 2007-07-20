@@ -119,6 +119,11 @@
       <redirect/>
     </navigation-case>
     <navigation-case>
+      <from-outcome>viewWellVolumeSearchResults</from-outcome>
+      <to-view-id>/libraries/admin/wellVolumeSearchResults</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>viewCherryPickRequestWellCopyVolumeSearchResults</from-outcome>
       <to-view-id>/cherryPickRequests/admin/cherryPickRequestWellCopyVolumeSearchResults</to-view-id>
       <redirect/>

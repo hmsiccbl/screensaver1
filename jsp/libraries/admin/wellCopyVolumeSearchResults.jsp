@@ -8,6 +8,14 @@
 
   <t:aliasBean alias="#{searchResults}" value="#{wellCopyVolumeSearchResultsViewer.searchResults}">
 
+		<t:buffer into="#{searchResultsHeader}">
+			<t:panelGrid columns="1">
+				<t:commandButton value="Group by Copy"
+					action="#{wellCopyVolumeSearchResultsViewer.viewWellVolumeSearchResults}"
+					styleClass="command" />
+			</t:panelGrid>
+		</t:buffer>
+
 		<t:buffer into="#{searchResultsFooter}">
 			<t:panelGrid rendered="#{searchResults.editMode}" columns="1">
 				<t:outputLabel for="wellVolumeAdjustmentActivityComments"

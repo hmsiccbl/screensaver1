@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResultsViewer;
 
 /**
@@ -17,4 +18,17 @@ import edu.harvard.med.screensaver.ui.searchresults.SearchResultsViewer;
  */
 public class WellCopyVolumeSearchResultsViewer extends SearchResultsViewer<WellCopyVolume>
 {
+  private LibrariesController _librariesController;
+
+
+  public void setLibrariesController(LibrariesController librariesController)
+  {
+    _librariesController = librariesController;
+  }
+
+  public String viewWellVolumeSearchResults()
+  {
+    // TODO: go through _librariesController
+    return VIEW_WELL_VOLUME_SEARCH_RESULTS;
+  }
 }

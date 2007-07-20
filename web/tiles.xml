@@ -118,6 +118,12 @@
     <put name="body" value="/libraries/admin/wellCopyVolumeSearchResults.jsp" />
   </definition>
   
+  <definition name="/libraries/admin/wellVolumeSearchResults.tiles" extends=".base">
+    <put name="pageTitle" value="Well Volume Search Results" />
+    <put name="pageHelpURL" value="../../help/libraries/wellVolumeSearchResultsHelp.jsf" />
+    <put name="body" value="/libraries/admin/wellVolumeSearchResults.jsp" />
+  </definition>
+  
   <definition name="/cherryPickRequests/admin/cherryPickRequestWellCopyVolumeSearchResults.tiles" extends=".base">
     <put name="pageTitle" value="Cherry Pick Request Well/Copy Volume Search Results" />
     <put name="pageHelpURL" value="../../help/libraries/wellCopyVolumeSearchResultsHelp.jsf" />

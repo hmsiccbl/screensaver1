@@ -58,7 +58,6 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume>
   
   private LibrariesController _librariesController;
   private ArrayList<TableColumn<WellCopyVolume>> _columns;
-  private TableColumn<WellCopyVolume> _remainingVolumeColumn;
   private Map<WellCopyVolume,BigDecimal> _newRemainingVolumes;
   private String _wellVolumeAdjustmentActivityComments;
   private GenericEntityDAO _dao;
@@ -74,10 +73,6 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume>
     super(unsortedResults);
     _librariesController = librariesController;
     _dao = dao;
-    getColumns(); // force initialization of _remainingVolumeColumn
-    // start with sort descending on remainingVolume column
-    getSortManager().setSortColumn(_remainingVolumeColumn);
-    
     setCurrentScreensaverUser(((LibrariesControllerImpl) _librariesController).getCurrentScreensaverUser());
     setMessages(messages);
   }
@@ -136,11 +131,10 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume>
         @Override
         public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getConsumedMicroliterVolume(); }
       });      
-      _remainingVolumeColumn = new TableColumn<WellCopyVolume>("Remaining Volume", "The remaining volume of this well copy", true) {
+      _columns.add(new TableColumn<WellCopyVolume>("Remaining Volume", "The remaining volume of this well copy", true) {
         @Override
         public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getRemainingMicroliterVolume(); }
-      };      
-      _columns.add(_remainingVolumeColumn);
+      });      
       _columns.add(new TableColumn<WellCopyVolume>("Withdrawals/Adjustments", "The number of withdrawals and administrative adjustment smade from this well copy", true) {
         @Override
         public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getWellVolumeAdjustments().size(); }

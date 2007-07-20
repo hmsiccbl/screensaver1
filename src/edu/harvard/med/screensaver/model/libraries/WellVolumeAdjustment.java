@@ -18,6 +18,8 @@ import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 
 import org.apache.log4j.Logger;
 
+import sun.security.krb5.internal.n;
+
 /**
  * A Hibernate entity bean representing a well volume adjustment. A well volume
  * adjustment normally occurs when the lab removes liquid from a library copy
@@ -118,7 +120,7 @@ public class WellVolumeAdjustment extends AbstractEntity
   }
 
   /**
-   * @hibernate.property type="big_decimal"
+   * @hibernate.property type="big_decimal" not-null="true"
    * @return
    */
   public BigDecimal getMicroliterVolume()
