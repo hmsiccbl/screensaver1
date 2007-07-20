@@ -129,7 +129,23 @@ public class CompoundCherryPickSynchronizer
         createCherryPickLiquidTransfer(resultSet, volumeTransferred, request);
       CherryPickAssayPlate assayPlate =
         createCherryPickAssayPlate(visitId, request, liquidTransfer);
-      createCherryPicks(visitId, request, assayPlate);
+      if (volumeTransferred != null) {
+
+        // TODO: null volumeTransferreds tend to break the *CherryPick
+        // classes. there are a slew of compound cherry picks in
+        // ScreenDBwith null volumes, ranging in visit dates from
+        // 2001-12 to 2004-05. im not really hip to trying to fix
+        // those data issues - probably completely impossible. in the
+        // cases that i looked at, there are a lot of null fields and
+        // the populated fields look like they are mis-populated, so i
+        // am going to venture that the data is total crap anyway, and
+        // no good reason to try to add them as cherry picks here. i
+        // may change my mind in a couple of days and ask some people
+        // on the team what they think of these old cherry picks with
+        // null volumes (or volumns, as they say in screendb-land :)
+
+        createCherryPicks(visitId, request, assayPlate);
+      }
       _dao.persistEntity(request);
     }
     statement.close();
