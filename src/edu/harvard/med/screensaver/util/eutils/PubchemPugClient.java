@@ -89,7 +89,7 @@ public abstract class PubchemPugClient extends EutilsUtils
       return connection.getInputStream();
     }
     catch (Exception e) {
-      log.warn("failed to connect to eUtils URL \"" + url + "\"");
+      log.warn("failed to connect to PUG URL \"" + url + "\"");
       throw new EutilsConnectionException();
     }
   }
