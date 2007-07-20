@@ -71,15 +71,15 @@ public class PubchemSmilesSearchTest extends AbstractSpringTest
       }
       public void reportError(String errorMessage)
       {
-        if (errorMessage.startsWith("PUG server reported data or server error:")) {
+        if (errorMessage.startsWith("PUG server reported non-success status")) {
           _gotDataOrServerError = true;
         }
       }
     }
     MockedPubchemSmilesSearch mockedSearch = new MockedPubchemSmilesSearch();
     List<String> pubchemCids = mockedSearch.getPubchemCidsForSmiles(
-      "CCOC(=O)C(C#N)C(=O)c1ccc(N)cc1)");
-    assertEquals(0, pubchemCids.size());
+      "CCOC(=O)C(C#N)C(=O)c1ccc(N)cc1)"); // the dangling ')' is a actual encountered error
+    assertNull(pubchemCids);
     assertTrue(mockedSearch.gotDataOrServerError());
   }
 }

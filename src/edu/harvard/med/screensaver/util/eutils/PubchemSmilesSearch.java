@@ -23,6 +23,10 @@ import org.w3c.dom.Text;
  * Uses PUG to do a SMILES structure search on PubChem, returning a list of PubChem
  * CIDs.
  * <p>
+ * For details on how the PUG interface works, see the
+ * <a href="ftp://ftp.ncbi.nlm.nih.gov/pubchem/specifications/pubchem_pug.pdf">PubChem PUG
+ * documentation</a>.
+ * <p>
  * If things go well, this class should supercede {@link PubchemCidListProvider}. It should be
  * a more comprehensive way to retrieve PubChem CIDs for compounds structures, but that has yet to
  * be shown out.
@@ -39,6 +43,13 @@ public class PubchemSmilesSearch extends PubchemPugClient
   
   // public constructors and methods
 
+  /**
+   * Return the list of PubChem CIDs for this SMILES string, as reported by the PubChem PUG
+   * interface, searching for exact match, with non-conflicting stereoisometry. Report an
+   * error to the log and return null on error.
+   * @param smiles the smiles to search for PubChem CIDs with
+   * @return the list of PubChem CIDs for this SMILES string. return null on error.
+   */
   public List<String> getPubchemCidsForSmiles(String smiles)
   {
     Document searchDocument = createSearchDocumentForSmiles(smiles);
@@ -46,38 +57,16 @@ public class PubchemSmilesSearch extends PubchemPugClient
     while (! isJobCompleted(outputDocument)) {
       sleep(1000);
       String reqid = getReqidFromOutputDocument(outputDocument);
-      if (reqid == null) {
-        // TODO: see if this still happens any more now that we have added that check ofr
-        // PUG data or server errors
-        log.error("missing reqid!");
-        printDocumentToOutputStream(outputDocument, System.out);
-        System.exit(100134);
-        outputDocument = getXMLForPugQuery(searchDocument);
-        continue;
-      }
       Document pollDocument = createPollDocumentForReqid(reqid);      
       outputDocument = getXMLForPugQuery(pollDocument);
     }
-    if (outputDocument == null) {
+    if (! isJobSuccessfullyCompleted(outputDocument)) {
+      return null;
+    }
+    if (! hasResults(outputDocument)) {
       return new ArrayList<String>();
     }
-    
-    List<String> pubchemCids = new ArrayList<String>();
-    if (hasResults(outputDocument)) {
-      Document resultsDocument = getXMLForEutilsQuery(
-        "efetch.fcgi",
-        "&db=pccompound" +
-        "&rettype=uilist&" +
-        "WebEnvRq=1&" +
-        "&query_key=" + getQueryKeyFromDocument(outputDocument) +
-        "&WebEnv=" + getWebenvFromDocument(outputDocument));
-      NodeList nodes = resultsDocument.getElementsByTagName("Id");
-      for (int i = 0; i < nodes.getLength(); i++) {
-        Node node = nodes.item(i);
-        pubchemCids.add(getTextContent(node));
-      }
-    }
-    return pubchemCids;
+    return getResultsFromOutputDocument(outputDocument);
   }
 
 
@@ -89,6 +78,11 @@ public class PubchemSmilesSearch extends PubchemPugClient
   
   // private methods
 
+  /**
+   * Create and return a PUG search request XML document for the SMILES string.
+   * @param smiles the SMILES string to create a PUG search request XML document for
+   * @return the XML document for the SMILES string
+   */
   private Document createSearchDocumentForSmiles(String smiles) {
     Document document = _documentBuilder.newDocument();
     
@@ -138,30 +132,93 @@ public class PubchemSmilesSearch extends PubchemPugClient
     parent.appendChild(textNode);
     return textNode;
   }
-  
-  private boolean isJobCompleted(Document document)
+
+  private boolean isJobCompleted(Document outputDocument)
   {
-    NodeList nodes = document.getElementsByTagName("PCT-Status");
-    if (nodes.getLength() != 1) {
-      throw new RuntimeException("no PCT-Status node in response");
-    }
-    Element element = (Element) nodes.item(0);
-    String statusValue = element.getAttribute("value");
-    if (statusValue.equals("data-error") || statusValue.equals("server-error")) {
-      String errorMessage =
-        getTextContent(document.getElementsByTagName("PCT-Status-Message_message").item(0));
-      reportError("PUG server reported data or server error: " + errorMessage);
+    if (outputDocument == null) {
+      // this happens when there was a connection error in one of the handshakes, with the
+      // specified TIMEOUT and NUM_RETRIES. the error has already been reported. the job should
+      // be considered completed in this circumstance
       return true;
     }
-    return statusValue.equals("success");
+    String statusValue = getStatusValueFromOutputDocument(outputDocument); 
+    return ! (statusValue.equals("running") || statusValue.equals("queued"));
+  }
+
+  /**
+   * Get the status value from the non-null output document.
+   * @param outputDocument
+   * @return
+   */
+  private String getStatusValueFromOutputDocument(Document outputDocument)
+  {
+    NodeList nodes = outputDocument.getElementsByTagName("PCT-Status");
+    if (nodes.getLength() != 1) {
+      throw new RuntimeException("PCT-Status node count in response != 1: " + nodes.getLength());
+    }
+    Element element = (Element) nodes.item(0);
+    return element.getAttribute("value");
   }
   
-  private boolean hasResults(Document document)
+  /**
+   * Check the output document to see if the job completed successfully. If it has not, and the
+   * error has not previously been reported, then report the error. In any case return true
+   * whenever the job completed successfully.
+   * @param outputDocument the output document to check for successful job completion
+   * @return true whenever the job completed successfully
+   */
+  private boolean isJobSuccessfullyCompleted(Document outputDocument)
   {
-    NodeList nodes = document.getElementsByTagName("PCT-Entrez_webenv");
+    if (outputDocument == null) {
+      // this happens when there was a connection error in one of the handshakes, with the
+      // specified TIMEOUT and NUM_RETRIES. the error has already been reported.
+      return false;
+    }
+    String statusValue = getStatusValueFromOutputDocument(outputDocument);
+    if (statusValue.equals("success")) {
+      return true;
+    }
+    NodeList nodes = outputDocument.getElementsByTagName("PCT-Status-Message_message");
+    if (nodes.getLength() != 1) {
+      throw new RuntimeException("PCT-Status-Message_message node count in response != 1: " + nodes.getLength());
+    }
+    String errorMessage = getTextContent(nodes.item(0));
+    reportError(
+      "PUG server reported non-success status '" + statusValue +
+      "' with error message '" + errorMessage + "'");
+    return false;
+  }
+  
+  /**
+   * Check the output document to see if this successfully completed job has any results. Return
+   * true whenever there are results.
+   * @param outputDocument the output document to check to see if there are any results
+   * @return true whenever there are results
+   */
+  private boolean hasResults(Document outputDocument)
+  {
+    NodeList nodes = outputDocument.getElementsByTagName("PCT-Entrez_webenv");
     return nodes.getLength() != 0;
   }
   
+  private List<String> getResultsFromOutputDocument(Document outputDocument) {
+    List<String> pubchemCids = new ArrayList<String>();
+      Document resultsDocument = getXMLForEutilsQuery(
+        "efetch.fcgi",
+        "&db=pccompound" +
+        "&rettype=uilist&" +
+        "WebEnvRq=1&" +
+        "&query_key=" + getQueryKeyFromDocument(outputDocument) +
+        "&WebEnv=" + getWebenvFromDocument(outputDocument));
+      NodeList nodes = resultsDocument.getElementsByTagName("Id");
+      for (int i = 0; i < nodes.getLength(); i++) {
+        Node node = nodes.item(i);
+        pubchemCids.add(getTextContent(node));
+      }
+    return pubchemCids;
+  }
+
+
   private String getWebenvFromDocument(Document document)
   {
     NodeList nodes = document.getElementsByTagName("PCT-Entrez_webenv");
