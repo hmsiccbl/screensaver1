@@ -121,6 +121,7 @@ public class ScreenDBScreenSynchronizer
       Date publishableProtocolDateEntered = resultSet.getDate("protocol_date_entered");
       String publishableProtocolEnteredBy = resultSet.getString("protocol_entered_by");
       String publishableProtocol = resultSet.getString("protocol");
+      String publishableProtocolComments = resultSet.getString("protocol_comments");
       
       Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
       if (screen == null) {
@@ -146,6 +147,7 @@ public class ScreenDBScreenSynchronizer
       screen.setPublishableProtocolDateEntered(publishableProtocolDateEntered);
       screen.setPublishableProtocolEnteredBy(publishableProtocolEnteredBy);
       screen.setPublishableProtocol(publishableProtocol);
+      screen.setPublishableProtocolComments(publishableProtocolComments);
       
       synchronizeKeywords(keywords, screen);
       synchronizeFundingSupports(fundingSupportString, screen);
