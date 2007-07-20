@@ -206,7 +206,7 @@ public class Copy extends AbstractEntity
   // protected methods
 
   /**
-   * A business key class for the well.
+   * A business key class for the copy.
    */
   private class BusinessKey
   {
