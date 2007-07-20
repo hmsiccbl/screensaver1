@@ -145,6 +145,7 @@ public class CompoundPubchemCidListUpgrader
               numCompoundsWithPubchemCids ++;
             }
             _visitedCompounds.add(compound);
+            _dao.persistEntity(compound);
             if (numCompounds % 100 == 0) {
               log.info("upgraded " + numCompounds + " compound so far..");
               //break OUT;
