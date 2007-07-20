@@ -84,55 +84,59 @@ public class ScreenSearchResults extends SearchResults<Screen>
         @Override
         public Object getCellValue(Screen screen) { return screen.getScreenType().getValue(); }
       });
-      if (showStatusFields()) {
-        _columns.add(new TableColumn<Screen>("Status", "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.") {
-          @Override
-          public Object getCellValue(Screen screen) 
-          { 
-            SortedSet<StatusItem> statusItems = screen.getSortedStatusItems();
-            if (statusItems.size() == 0) {
-              return "";
-            }
-            StatusItem statusItem = statusItems.last();
-            return statusItem.getStatusValue();
+      _columns.add(new TableColumn<Screen>("Status", "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.") {
+        @Override
+        public Object getCellValue(Screen screen) 
+        { 
+          SortedSet<StatusItem> statusItems = screen.getSortedStatusItems();
+          if (statusItems.size() == 0) {
+            return "";
           }
-        });
-        _columns.add(new TableColumn<Screen>("Status Date", "The date of the most recent change of status for the screen") {
-          @Override
-          public Object getCellValue(Screen screen) 
-          {
-            SortedSet<StatusItem> statusItems = screen.getSortedStatusItems();
-            if (statusItems.size() == 0) {
-              return "";
-            }
-            StatusItem statusItem = statusItems.last();
-            return String.format("%tD", statusItem.getStatusDate());
-          }
+          StatusItem statusItem = statusItems.last();
+          return statusItem.getStatusValue();
+        }
 
-          @Override
-          protected Comparator<Screen> getAscendingComparator() 
-          { 
-            return new Comparator<Screen>() {
-              public int compare(Screen s1, Screen s2) {
-                SortedSet<StatusItem> statusItems1 = s1.getSortedStatusItems();
-                SortedSet<StatusItem> statusItems2 = s2.getSortedStatusItems();
-                if (statusItems1.size() == 0) {
-                  if (statusItems2.size() == 0) {
-                    return 0;
-                  }
-                  return -1;
-                }
-                if (statusItems2.size() == 0) {
-                  return 1;
-                }
-                StatusItem statusItem1 = statusItems1.last();
-                StatusItem statusItem2 = statusItems2.last();
-                return statusItem1.getStatusDate().compareTo(statusItem2.getStatusDate());
-              }
-            };
+        @Override
+        public boolean isVisible() { return showStatusFields(); }
+      });
+      _columns.add(new TableColumn<Screen>("Status Date", "The date of the most recent change of status for the screen") {
+        @Override
+        public Object getCellValue(Screen screen) 
+        {
+          SortedSet<StatusItem> statusItems = screen.getSortedStatusItems();
+          if (statusItems.size() == 0) {
+            return "";
           }
-        });
-      }
+          StatusItem statusItem = statusItems.last();
+          return String.format("%tD", statusItem.getStatusDate());
+        }
+
+        @Override
+        protected Comparator<Screen> getAscendingComparator() 
+        { 
+          return new Comparator<Screen>() {
+            public int compare(Screen s1, Screen s2) {
+              SortedSet<StatusItem> statusItems1 = s1.getSortedStatusItems();
+              SortedSet<StatusItem> statusItems2 = s2.getSortedStatusItems();
+              if (statusItems1.size() == 0) {
+                if (statusItems2.size() == 0) {
+                  return 0;
+                }
+                return -1;
+              }
+              if (statusItems2.size() == 0) {
+                return 1;
+              }
+              StatusItem statusItem1 = statusItems1.last();
+              StatusItem statusItem2 = statusItems2.last();
+              return statusItem1.getStatusDate().compareTo(statusItem2.getStatusDate());
+            }
+          };
+        }
+
+        @Override
+        public boolean isVisible() { return showStatusFields(); }
+      });
       _columns.add(new TableColumn<Screen>("Title", "The title of the screen") {
         @Override
         public Object getCellValue(Screen screen) { return screen.getTitle(); }
@@ -218,13 +222,10 @@ public class ScreenSearchResults extends SearchResults<Screen>
   @Override
   protected List<Integer[]> getCompoundSorts()
   {
-    if (showStatusFields()) {
-      List<Integer[]> compoundSorts = super.getCompoundSorts();
-      compoundSorts.add(new Integer[] {2, 3, 0});
-      compoundSorts.add(new Integer[] {3, 2, 1});
-      return compoundSorts;
-    }
-    return null; 
+    List<Integer[]> compoundSorts = super.getCompoundSorts();
+    compoundSorts.add(new Integer[] {2, 3, 0});
+    compoundSorts.add(new Integer[] {3, 2, 0});
+    return compoundSorts;
   }
 
   private boolean showStatusFields()
