@@ -253,7 +253,12 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
         }
       }
     });
-    showMessage("libraries.updatedWellVolumes", new Integer(_newRemainingVolumes.size()));
+    if (_newRemainingVolumes.size() > 0) {
+      showMessage("libraries.updatedWellVolumes", new Integer(_newRemainingVolumes.size()));
+    }
+    else {
+      showMessage("libraries.updatedNoWellVolumes");
+    }
   }
   
   @Override
