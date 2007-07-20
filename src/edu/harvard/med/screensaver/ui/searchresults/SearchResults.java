@@ -556,7 +556,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     for (Integer[] compoundSort : compoundSorts) {
       List<TableColumn<E>> compoundSortColumns = new ArrayList<TableColumn<E>>();
       for (Integer colIndex : compoundSort) {
-        compoundSortColumns.add(_sortManager.getColumn(colIndex));
+        compoundSortColumns.add(getColumns().get(colIndex));
       }
       _sortManager.addCompoundSortColumns(compoundSortColumns);
     }
