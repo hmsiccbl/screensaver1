@@ -40,6 +40,11 @@ public class CompoundPubchemCidListUpgrader
   // static fields
   
   private static Logger log = Logger.getLogger(CompoundPubchemCidListUpgrader.class);
+  private static Set<String> _alreadyUpgradedLibraryShortNames = new HashSet<String>();
+  static {
+    // eg:
+    //_alreadyUpgradedLibraryShortNames.add("Bionet1");
+  }
   
   
   // static methods
@@ -91,6 +96,10 @@ public class CompoundPubchemCidListUpgrader
     String libraryShortName,
     CompoundPubchemCidListUpgrader upgrader)
   {
+    if (_alreadyUpgradedLibraryShortNames.contains(libraryShortName)) {
+      log.info("skipping upgrade for library " + libraryShortName + " (already upgraded)..");
+      return;
+    }
     log.info("upgrading pubchem cid lists for library " + libraryShortName + "..");
     upgrader.upgradeLibrary(libraryShortName);
     log.info("successfully upgraded pubchem cid lists for library " + libraryShortName + ".");
