@@ -100,7 +100,7 @@ public class CompoundPubchemCidListUpgrader
   // instance fields
   
   private GenericEntityDAO _dao;
-  private static Set<Compound> _visitedCompounds = new HashSet<Compound>();
+  private Set<Compound> _visitedCompounds = new HashSet<Compound>();
   private PubchemSmilesSearch pubchemSmilesSearch = new PubchemSmilesSearch();
   
   
