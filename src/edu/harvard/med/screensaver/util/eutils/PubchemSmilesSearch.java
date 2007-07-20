@@ -46,10 +46,22 @@ public class PubchemSmilesSearch extends PubchemPugClient
     while (! isJobCompleted(outputDocument)) {
       sleep(1000);
       String reqid = getReqidFromOutputDocument(outputDocument);
+      if (reqid == null) {
+        // TODO: see if this still happens any more now that we have added that check ofr
+        // PUG data or server errors
+        log.error("missing reqid!");
+        printDocumentToOutputStream(outputDocument, System.out);
+        System.exit(100134);
+        outputDocument = getXMLForPugQuery(searchDocument);
+        continue;
+      }
       Document pollDocument = createPollDocumentForReqid(reqid);      
       outputDocument = getXMLForPugQuery(pollDocument);
     }
-
+    if (outputDocument == null) {
+      return new ArrayList<String>();
+    }
+    
     List<String> pubchemCids = new ArrayList<String>();
     if (hasResults(outputDocument)) {
       Document resultsDocument = getXMLForEutilsQuery(
@@ -101,9 +113,11 @@ public class PubchemSmilesSearch extends PubchemPugClient
     element = createParentedElement(document, queryCompoundCS, "PCT-QueryCompoundCS_type");
     element = createParentedElement(document, element, "PCT-QueryCompoundCS_type_identical");
     element = createParentedElement(document, element, "PCT-CSIdentity");
-    // TODO: figure out what the PCT-CSIdentity attribute and textnode child mean
-    element.setAttribute("value", "same-stereo-isotope");
-    createParentedTextNode(document, element, "5");
+
+    // match any structure with non-conflicting stereochemistry, ie, non-specified in one or
+    // both structures, or specified and matching in both
+    element.setAttribute("value", "same-nonconflict-stereo");
+    createParentedTextNode(document, element, "6");
     
     element = createParentedElement(document, queryCompoundCS, "PCT-QueryCompoundCS_results");
     createParentedTextNode(document, element, "2000000");
@@ -111,13 +125,15 @@ public class PubchemSmilesSearch extends PubchemPugClient
   }
 
 
-  private Element createParentedElement(Document document, Node parent, String elementName) {
+  private Element createParentedElement(Document document, Node parent, String elementName)
+  {
     Element element = (Element) document.createElement(elementName);
     parent.appendChild(element);
     return element;
   }
 
-  private Text createParentedTextNode(Document document, Node parent, String text) {
+  private Text createParentedTextNode(Document document, Node parent, String text)
+  {
     Text textNode = (Text) document.createTextNode(text);
     parent.appendChild(textNode);
     return textNode;
@@ -131,7 +147,13 @@ public class PubchemSmilesSearch extends PubchemPugClient
     }
     Element element = (Element) nodes.item(0);
     String statusValue = element.getAttribute("value");
-    return statusValue != null && statusValue.equals("success");
+    if (statusValue.equals("data-error") || statusValue.equals("server-error")) {
+      String errorMessage =
+        getTextContent(document.getElementsByTagName("PCT-Status-Message_message").item(0));
+      reportError("PUG server reported data or server error: " + errorMessage);
+      return true;
+    }
+    return statusValue.equals("success");
   }
   
   private boolean hasResults(Document document)

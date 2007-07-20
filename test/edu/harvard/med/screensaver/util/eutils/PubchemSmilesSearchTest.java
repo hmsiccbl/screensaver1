@@ -29,7 +29,9 @@ public class PubchemSmilesSearchTest extends AbstractSpringTest
   {
     List<String> pubchemCids = _pubchemSmilesSearch.getPubchemCidsForSmiles(
       "Clc1ccc(\\C=C/c2c(C)n(C)n(c3ccccc3)c2=O)c(Cl)c1");
-    assertEquals(0, pubchemCids.size());
+    assertEquals(2, pubchemCids.size());
+    assertTrue(pubchemCids.contains("1268921"));
+    assertTrue(pubchemCids.contains("1268922"));
   }
 
   public void testGetPubchemCidsForSmiles2()
@@ -46,5 +48,38 @@ public class PubchemSmilesSearchTest extends AbstractSpringTest
       "NC(=S)c1cnc2ccccn2c1=N");
     assertEquals(1, pubchemCids.size());
     assertEquals("687414", pubchemCids.get(0));
+  }
+  
+  public void testGetPubchemCidsForSmiles4()
+  {
+    List<String> pubchemCids = _pubchemSmilesSearch.getPubchemCidsForSmiles(
+      "CCOC(=O)C(C#N)C(=O)c1ccc(N)cc1");
+    assertEquals(3, pubchemCids.size());
+    assertTrue(pubchemCids.contains("577795"));
+    assertTrue(pubchemCids.contains("684423"));
+    assertTrue(pubchemCids.contains("684424"));
+  }
+  
+  public void testGetPubchemCidsForInvalidSmiles()
+  {
+    class MockedPubchemSmilesSearch extends PubchemSmilesSearch
+    {
+      private boolean _gotDataOrServerError = false;
+      public boolean gotDataOrServerError()
+      {
+        return _gotDataOrServerError;
+      }
+      public void reportError(String errorMessage)
+      {
+        if (errorMessage.startsWith("PUG server reported data or server error:")) {
+          _gotDataOrServerError = true;
+        }
+      }
+    }
+    MockedPubchemSmilesSearch mockedSearch = new MockedPubchemSmilesSearch();
+    List<String> pubchemCids = mockedSearch.getPubchemCidsForSmiles(
+      "CCOC(=O)C(C#N)C(=O)c1ccc(N)cc1)");
+    assertEquals(0, pubchemCids.size());
+    assertTrue(mockedSearch.gotDataOrServerError());
   }
 }
