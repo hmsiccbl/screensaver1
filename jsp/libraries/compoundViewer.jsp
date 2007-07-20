@@ -6,7 +6,9 @@
 <f:subview id="compoundViewer">
 
   <t:aliasBean alias="#{navigator}" value="#{compoundViewer.wellSearchResults}" >
-    <%@ include file="../searchResultsNavPanel.jspf" %>
+		<h:form id="navPanelForm">
+			<%@ include file="../searchResultsNavPanel.jspf" %>
+		</h:form>
   </t:aliasBean>
 
 	<t:panelGrid rendered="#{! empty compoundViewer.compound}" columns="1">

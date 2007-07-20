@@ -6,7 +6,9 @@
 <f:subview id="wellViewer">
 
   <t:aliasBean alias="#{navigator}" value="#{wellViewer.wellSearchResults}">
-    <%@ include file="../searchResultsNavPanel.jspf" %>
+		<h:form id="navPanelForm">
+			<%@ include file="../searchResultsNavPanel.jspf" %>
+		</h:form>
   </t:aliasBean>
   
   <t:aliasBean alias="#{nameValueTable}" value="#{wellViewer.wellNameValueTable}">

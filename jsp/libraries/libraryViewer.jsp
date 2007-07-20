@@ -6,7 +6,9 @@
 <f:subview id="libraryViewer">
 
   <t:aliasBean alias="#{navigator}" value="#{libraryViewer.librarySearchResults}" >
-    <%@ include file="../searchResultsNavPanel.jspf"  %>
+		<h:form id="navPanelForm">
+			<%@ include file="../searchResultsNavPanel.jspf" %>
+		</h:form>
   </t:aliasBean>
 
   <t:aliasBean alias="#{nameValueTable}" value="#{libraryViewer.libraryNameValueTable}" >

@@ -6,13 +6,14 @@
 <f:subview id="searchResultsSubview">
 	<t:panelGrid columns="1" width="100%">
 
-		<t:aliasBean alias="#{navigator}" value="#{searchResults}">
-			<%@ include file="searchResultsNavPanel.jspf"%>
-		</t:aliasBean>
-
-		<t:outputText value="#{searchResultsHeader}" escape="false"/>
-
 		<h:form id="searchResultsForm">
+
+			<t:aliasBean alias="#{navigator}" value="#{searchResults}">
+				<%@ include file="searchResultsNavPanel.jspf"%>
+			</t:aliasBean>
+
+			<t:outputText value="#{searchResultsHeader}" escape="false" />
+
 			<t:dataTable id="searchResultsTable"
 				binding="#{searchResults.dataTable}"
 				value="#{searchResults.dataModel}" var="row"

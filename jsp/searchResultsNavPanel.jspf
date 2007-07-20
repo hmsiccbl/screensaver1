@@ -6,79 +6,73 @@
 <f:subview id="searchResultsNavPanelSubview"
 	rendered="#{navigator != null}">
 
-	<h:form id="searchResultNavForm">
-		<t:panelGrid id="searchResultsNavPanel" columns="4"
-			styleClass="searchResultsCommandPanel" width="100%">
+	<t:panelGrid id="searchResultsNavPanel" columns="4"
+		styleClass="searchResultsCommandPanel" width="100%">
 
-			<t:panelGroup>
-				<t:commandButton id="firstPageCommand"
-					action="#{navigator.firstPage}" value="First"
-					image="/images/arrow-first.png" styleClass="command"
-					title="First page" />
-				<t:commandButton id="prevPageCommand" action="#{navigator.prevPage}"
-					value="Prev" image="/images/arrow-previous.png" 
-					styleClass="command" title="Previous page" />
-				<t:commandButton id="nextPageCommand" action="#{navigator.nextPage}"
-					value="Next" image="/images/arrow-next.png" styleClass="command"
-					title="Next page" />
-				<t:commandButton id="lastPageCommand" action="#{navigator.lastPage}"
-					value="Last" image="/images/arrow-last.png" styleClass="command"
-					title="Last page" />
-			</t:panelGroup>
+		<t:panelGroup>
+			<t:commandButton id="firstPageCommand"
+				action="#{navigator.firstPage}" value="First"
+				image="/images/arrow-first.png" styleClass="command"
+				title="First page" />
+			<t:commandButton id="prevPageCommand" action="#{navigator.prevPage}"
+				value="Prev" image="/images/arrow-previous.png" styleClass="command"
+				title="Previous page" />
+			<t:commandButton id="nextPageCommand" action="#{navigator.nextPage}"
+				value="Next" image="/images/arrow-next.png" styleClass="command"
+				title="Next page" />
+			<t:commandButton id="lastPageCommand" action="#{navigator.lastPage}"
+				value="Last" image="/images/arrow-last.png" styleClass="command"
+				title="Last page" />
+		</t:panelGroup>
 
-			<t:panelGroup title="The range of the results currently displayed">
-				<t:outputText rendered="#{navigator.summaryView}"
-					value="#{navigator.firstIndex}..#{navigator.lastIndex} out of #{navigator.resultsSize}"
-					styleClass="searchResultNavPanelStatus" />
-				<t:outputText rendered="#{! navigator.summaryView}"
-					value="#{navigator.currentIndex} of #{navigator.resultsSize}"
-					styleClass="searchResultNavPanelStatus" />
-			</t:panelGroup>
+		<t:panelGroup title="The range of the results currently displayed">
+			<t:outputText rendered="#{navigator.summaryView}"
+				value="#{navigator.firstIndex}..#{navigator.lastIndex} out of #{navigator.resultsSize}"
+				styleClass="searchResultNavPanelStatus" />
+			<t:outputText rendered="#{! navigator.summaryView}"
+				value="#{navigator.currentIndex} of #{navigator.resultsSize}"
+				styleClass="searchResultNavPanelStatus" />
+		</t:panelGroup>
 
-			<t:panelGroup title="The sort column and direction">
-				<t:outputLabel for="sortOrderMenu" value="Sort by"
-					styleClass="label" />
-				<t:commandButton id="updateSortOrder" value="update sort order"
-					action="#{navigator.sortOnSelectedColumn}"
-					styleClass="hiddenCommand" />
-				<t:selectOneMenu id="sortOrderMenu"
-					value="#{navigator.sortManager.sortColumnSelector.value}"
-					onchange="this.previousSibling.click();" styleClass="command">
-					<f:selectItems value="#{navigator.sortManager.sortColumnSelector.selectItems}" />
-				</t:selectOneMenu>
-				<t:selectOneMenu id="sortDirection"
-					value="#{navigator.sortManager.sortDirectionSelector.value}"
-					styleClass="command"
-					onchange="this.previousSibling.previousSibling.click();">
-					<f:selectItems
-						value="#{navigator.sortManager.sortDirectionSelector.selectItems}" />
-				</t:selectOneMenu>
-			</t:panelGroup>
+		<t:panelGroup title="The sort column and direction">
+			<t:outputLabel for="sortOrderMenu" value="Sort by" styleClass="label" />
+			<t:commandButton id="updateSortOrder" value="update sort order"
+				action="#{navigator.sortOnSelectedColumn}"
+				styleClass="hiddenCommand" />
+			<t:selectOneMenu id="sortOrderMenu"
+				value="#{navigator.sortManager.sortColumnSelector.value}"
+				onchange="this.previousSibling.click();" styleClass="command">
+				<f:selectItems
+					value="#{navigator.sortManager.sortColumnSelector.selectItems}" />
+			</t:selectOneMenu>
+			<t:selectOneMenu id="sortDirection"
+				value="#{navigator.sortManager.sortDirectionSelector.value}"
+				styleClass="command"
+				onchange="this.previousSibling.previousSibling.click();">
+				<f:selectItems
+					value="#{navigator.sortManager.sortDirectionSelector.selectItems}" />
+			</t:selectOneMenu>
+		</t:panelGroup>
 
-			<t:panelGroup style="float: right"
-				rendered="#{navigator.summaryView}"
-				title="The number of results displayed per page">
-				<t:commandButton id="updateRowsPerPage"
-					value="update items per page"
-					action="#{navigator.updateRowsPerPage}" style="display: none" />
-				<t:selectOneMenu id="rowsPerPage"
-					value="#{navigator.rowsPerPageSelector.value}"
-					onchange="this.previousSibling.click();">
-					<f:selectItems
-						value="#{navigator.rowsPerPageSelector.selectItems}" />
-				</t:selectOneMenu>
-				<t:outputText value=" per page" styleClass="label" />
-			</t:panelGroup>
+		<t:panelGroup style="float: right" rendered="#{navigator.summaryView}"
+			title="The number of results displayed per page">
+			<t:commandButton id="updateRowsPerPage" value="update items per page"
+				action="#{navigator.updateRowsPerPage}" style="display: none" />
+			<t:selectOneMenu id="rowsPerPage"
+				value="#{navigator.rowsPerPageSelector.value}"
+				onchange="this.previousSibling.click();">
+				<f:selectItems value="#{navigator.rowsPerPageSelector.selectItems}" />
+			</t:selectOneMenu>
+			<t:outputText value=" per page" styleClass="label" />
+		</t:panelGroup>
 
-			<t:panelGroup style="float: right"
-				rendered="#{! navigator.summaryView}"
-				title="Return to the search results page">
-				<t:commandButton id="summaryView" value="Results Summary"
-					action="#{navigator.showSummaryView}" styleClass="command" />
-			</t:panelGroup>
+		<t:panelGroup style="float: right"
+			rendered="#{! navigator.summaryView}"
+			title="Return to the search results page">
+			<t:commandButton id="summaryView" value="Results Summary"
+				action="#{navigator.showSummaryView}" styleClass="command" />
+		</t:panelGroup>
 
-		</t:panelGrid>
-
-	</h:form>
+	</t:panelGrid>
 
 </f:subview>

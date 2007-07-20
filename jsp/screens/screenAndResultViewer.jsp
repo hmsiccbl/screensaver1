@@ -13,7 +13,9 @@
 
 	<t:aliasBean alias="#{navigator}"
 		value="#{screensBrowser.searchResults}">
-		<%@ include file="../searchResultsNavPanel.jspf"%>
+		<h:form id="navPanelForm">
+			<%@ include file="../searchResultsNavPanel.jspf" %>
+		</h:form>
 	</t:aliasBean>
 
 	<%--t:panelGroup rendered="#{!screenResultViewer.readOnly}">

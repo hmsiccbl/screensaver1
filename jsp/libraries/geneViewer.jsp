@@ -6,7 +6,9 @@
 <f:subview id="geneViewer">
 
   <t:aliasBean alias="#{navigator}" value="#{geneViewer.wellSearchResults}">
-    <%@ include file="../searchResultsNavPanel.jspf" %>
+		<h:form id="navPanelForm">
+			<%@ include file="../searchResultsNavPanel.jspf" %>
+		</h:form>
   </t:aliasBean>
 
 	<t:panelGrid rendered="#{! empty geneViewer.gene}" columns="1">
