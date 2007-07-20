@@ -107,7 +107,6 @@ public class ScreenDBSynchronizer
   private LibrariesDAO _librariesDao;
   private CherryPickRequestDAO _cherryPickRequestDao;
   private CompoundCherryPickSynchronizer compoundCherryPickSynchronizer;
-  //private ScreenDBRnaiCherryPickSynchronizer rnRnaiCherryPickSynchronizer;
   
 
   // public constructors and methods
@@ -159,13 +158,12 @@ public class ScreenDBSynchronizer
    * Delete the old compound cherry pick requests in a separate transaction.
    * 
    * @motivation This should really be part of
-   *             {@link CompoundCherryPickSynchronizer} and
-   *             {@link ScreenDBRnaiCherryPickSynchronizer}, but I need to run
+   *             {@link CompoundCherryPickSynchronizer}, but I need to run
    *             it in a separate transaction or I get hibernate exceptions
    *             about deleted entities that would be resaved by cascade. I
    *             probably should refactor things a bit so I can call
-   *             "deleteOldCherryPickRequests" methods in the two
-   *             above-mentioned synchronizers, in separate transactions.
+   *             "deleteOldCherryPickRequests" methods in the
+   *             CCPSynchronizer, in separate transactions.
    */
   private void deleteOldCompoundCherryPickRequests()
   {
