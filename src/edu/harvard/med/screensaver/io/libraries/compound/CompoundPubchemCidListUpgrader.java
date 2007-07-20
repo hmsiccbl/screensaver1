@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.io.libraries.compound;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
@@ -144,9 +145,12 @@ public class CompoundPubchemCidListUpgrader
               numCompoundsWithOldPubchemCids ++;
             }
             
-            for (String pubchemCid :
-              pubchemSmilesSearch.getPubchemCidsForSmiles(compound.getSmiles())) {
-              compound.addPubchemCid(pubchemCid);
+            List<String> pubchemCids =
+              pubchemSmilesSearch.getPubchemCidsForSmiles(compound.getSmiles());
+            if (pubchemCids != null) {
+              for (String pubchemCid : pubchemCids) {
+                compound.addPubchemCid(pubchemCid);
+              }
             }
             
             numPubchemCids += compound.getNumPubchemCids();
