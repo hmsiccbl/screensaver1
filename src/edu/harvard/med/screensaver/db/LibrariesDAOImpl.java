@@ -30,7 +30,7 @@ import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
-import edu.harvard.med.screensaver.ui.libraries.WellVolume;
+import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 
 import org.apache.log4j.Logger;
 import org.hibernate.TransientObjectException;
@@ -155,7 +155,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       "from Library where libraryType not in ('Annotation', 'DOS', 'NCI', 'Discrete')")); 
   }
 
-  public BigDecimal findRemainingVolumeInWell(Copy copy, Well well)
+  public BigDecimal findRemainingVolumeInWellCopy(Well well, Copy copy)
   {
     String hql;
 
@@ -175,33 +175,33 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   }
   
   @SuppressWarnings("unchecked")
-  public Collection<WellVolume> findWellVolumes(Library libraryIn)
+  public Collection<WellCopyVolume> findWellCopyVolumes(Library libraryIn)
   {
     Library library = _dao.reloadEntity(libraryIn, true, "hbnWells");
     _dao.needReadOnly(library, "hbnCopies.hbnCopyInfos");
     String hql = "from WellVolumeAdjustment wva where wva.copy.hbnLibrary = ?"; 
     List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { library });
-    List<WellVolume> result = new ArrayList<WellVolume>();
+    List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
     return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(library, result), wellVolumeAdjustments);
   }
 
   @SuppressWarnings("unchecked")
-  public Collection<WellVolume> findWellVolumes(Copy copy)
+  public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy)
   {
     // TODO: eager fetch copies and wells
     String hql = "from WellVolumeAdjustment wva where wva.copy = ?"; 
     List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { copy });
-    List<WellVolume> result = new ArrayList<WellVolume>();
+    List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
     return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(copy, result), wellVolumeAdjustments);
   }
 
   @SuppressWarnings("unchecked")
-  public Collection<WellVolume> findWellVolumes(Copy copy, Integer plateNumber)
+  public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy, Integer plateNumber)
   {
     // TODO: eager fetch copies and wells
     String hql = "select wva from WellVolumeAdjustment wva join wva.copy c join c.hbnCopyInfos ci where wva.copy = ? and ci.hbnPlateNumber = ?"; 
     List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { copy, plateNumber });
-    List<WellVolume> result = new ArrayList<WellVolume>();
+    List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
     if (wellVolumeAdjustments.size() == 0) {
       return result;
     }
@@ -209,12 +209,12 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   }
 
   @SuppressWarnings("unchecked")
-  public Collection<WellVolume> findWellVolumes(Integer plateNumber)
+  public Collection<WellCopyVolume> findWellCopyVolumes(Integer plateNumber)
   {
     // TODO: eager fetch copies and wells
     String hql = "select wva from WellVolumeAdjustment wva join wva.copy c join c.hbnCopyInfos ci where ci.hbnPlateNumber = ?"; 
     List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { plateNumber });
-    List<WellVolume> result = new ArrayList<WellVolume>();
+    List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
     if (wellVolumeAdjustments.size() == 0) {
       return result;
     }
@@ -222,11 +222,11 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   }
 
   @SuppressWarnings("unchecked")
-  public Collection<WellVolume> findWellVolumes(WellKey wellKey)
+  public Collection<WellCopyVolume> findWellCopyVolumes(WellKey wellKey)
   {
     String hql = "select distinct wva from WellVolumeAdjustment wva left join fetch wva.copy left join fetch wva.well w left join fetch w.hbnLibrary l left join fetch l.hbnCopies where w.id = ?"; 
     List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { wellKey.toString() });
-    List<WellVolume> result = new ArrayList<WellVolume>();
+    List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
     Well well = null;
     if (wellVolumeAdjustments.size() == 0) {
       well = findWell(wellKey);
@@ -246,21 +246,21 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   }
   
   @SuppressWarnings("unchecked")
-  public Collection<WellVolume> findWellVolumes(CherryPickRequest cherryPickRequest)
+  public Collection<WellCopyVolume> findWellCopyVolumes(CherryPickRequest cherryPickRequest)
   {
     cherryPickRequest = _dao.reloadEntity(cherryPickRequest, true, "labCherryPicks.sourceWell.hbnLibrary");
     String hql = "select distinct wva " +
     "from WellVolumeAdjustment wva, CherryPickRequest cpr join cpr.labCherryPicks lcp join lcp.sourceWell sw " +
     "where wva.well = sw and cpr = ?"; 
     List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { cherryPickRequest });
-    List<WellVolume> result = new ArrayList<WellVolume>();
+    List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
     return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(cherryPickRequest, result), wellVolumeAdjustments);
   }
 
 
   // private methods
 
-  private List<WellVolume> makeEmptyWellVolumes(Library library, List<WellVolume> wellVolumes)
+  private List<WellCopyVolume> makeEmptyWellVolumes(Library library, List<WellCopyVolume> wellVolumes)
   {
     for (Copy copy : library.getCopies()) {
       makeEmptyWellVolumes(copy, wellVolumes);
@@ -268,7 +268,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return wellVolumes;
   }
 
-  private List<WellVolume> makeEmptyWellVolumes(Copy copy, List<WellVolume> wellVolumes)
+  private List<WellCopyVolume> makeEmptyWellVolumes(Copy copy, List<WellCopyVolume> wellVolumes)
   {
     for (int plateNumber = copy.getLibrary().getStartPlate(); plateNumber <= copy.getLibrary().getEndPlate(); ++plateNumber) {
       makeEmptyWellVolumes(copy, plateNumber, wellVolumes);
@@ -276,25 +276,25 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return wellVolumes;
   }
 
-  private List<WellVolume> makeEmptyWellVolumes(Copy copy, int plateNumber, List<WellVolume> wellVolumes)
+  private List<WellCopyVolume> makeEmptyWellVolumes(Copy copy, int plateNumber, List<WellCopyVolume> wellVolumes)
   {
     for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
       for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
-        wellVolumes.add(new WellVolume(findWell(new WellKey(plateNumber, iRow, iCol)), copy));
+        wellVolumes.add(new WellCopyVolume(findWell(new WellKey(plateNumber, iRow, iCol)), copy));
       }
     }
     return wellVolumes;
   }
 
-  private List<WellVolume> makeEmptyWellVolumes(Well well, List<WellVolume> result)
+  private List<WellCopyVolume> makeEmptyWellVolumes(Well well, List<WellCopyVolume> result)
   {
     for (Copy copy : well.getLibrary().getCopies()) {
-      result.add(new WellVolume(well, copy));
+      result.add(new WellCopyVolume(well, copy));
     }
     return result;
   }
 
-  private List<WellVolume> makeEmptyWellVolumes(CherryPickRequest cherryPickRequest, List<WellVolume> result)
+  private List<WellCopyVolume> makeEmptyWellVolumes(CherryPickRequest cherryPickRequest, List<WellCopyVolume> result)
   {
     for (LabCherryPick lcp : cherryPickRequest.getLabCherryPicks()) {
       makeEmptyWellVolumes(lcp.getSourceWell(), result);
@@ -302,15 +302,15 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return result;
   }
 
-  private Collection<WellVolume> aggregateWellVolumeAdjustments(List<WellVolume> allWellVolumes,
-                                                                List<WellVolumeAdjustment> wellVolumeAdjustments)
+  private Collection<WellCopyVolume> aggregateWellVolumeAdjustments(List<WellCopyVolume> wellCopyVolumes,
+                                                                    List<WellVolumeAdjustment> wellVolumeAdjustments)
   {
-    Collections.sort(allWellVolumes, new Comparator<WellVolume>() {
-      public int compare(WellVolume wv1, WellVolume wv2)
+    Collections.sort(wellCopyVolumes, new Comparator<WellCopyVolume>() {
+      public int compare(WellCopyVolume wcv1, WellCopyVolume wcv2)
       {
-        int result = wv1.getWell().compareTo(wv2.getWell());
+        int result = wcv1.getWell().compareTo(wcv2.getWell());
         if (result == 0) {
-          result = wv1.getCopy().getName().compareTo(wv2.getCopy().getName());
+          result = wcv1.getCopy().getName().compareTo(wcv2.getCopy().getName());
         }
         return result;
       }
@@ -325,22 +325,22 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         return result;
       }
     });
-    Iterator<WellVolume> wvIter = allWellVolumes.iterator();
+    Iterator<WellCopyVolume> wcvIter = wellCopyVolumes.iterator();
     Iterator<WellVolumeAdjustment> wvaIter = wellVolumeAdjustments.iterator();
-    if (wvIter.hasNext()) {
-      WellVolume wellVolume = wvIter.next();
+    if (wcvIter.hasNext()) {
+      WellCopyVolume wellCopyVolume = wcvIter.next();
       while (wvaIter.hasNext()) {
         WellVolumeAdjustment wellVolumeAdjustment = wvaIter.next();
-        while (!wellVolume.getWell().equals(wellVolumeAdjustment.getWell()) ||
-          !wellVolume.getCopy().equals(wellVolumeAdjustment.getCopy())) {
-          if (!wvIter.hasNext()) {
+        while (!wellCopyVolume.getWell().equals(wellVolumeAdjustment.getWell()) ||
+          !wellCopyVolume.getCopy().equals(wellVolumeAdjustment.getCopy())) {
+          if (!wcvIter.hasNext()) {
             throw new IllegalArgumentException("wellVolumeAdjustments exist for wells that are were not in allWellVolumes: " + wellVolumeAdjustment.getWell() + ":" + wellVolumeAdjustment.getCopy().getName());
           }
-          wellVolume = wvIter.next();
+          wellCopyVolume = wcvIter.next();
         }
-        wellVolume.addWellVolumeAdjustment(wellVolumeAdjustment);
+        wellCopyVolume.addWellVolumeAdjustment(wellVolumeAdjustment);
       }
     }
-    return allWellVolumes;
+    return wellCopyVolumes;
   }
 }

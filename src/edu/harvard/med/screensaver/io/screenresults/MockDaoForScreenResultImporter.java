@@ -39,7 +39,7 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.ui.libraries.WellVolume;
+import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 
 import org.apache.log4j.Logger;
 
@@ -239,7 +239,7 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
-  public BigDecimal findRemainingVolumeInWell(Copy copy, Well well)
+  public BigDecimal findRemainingVolumeInWellCopy(Well well, Copy copy)
   {
     return BigDecimal.ZERO.setScale(Well.VOLUME_SCALE);
   }
@@ -268,37 +268,37 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
-  public List<WellVolume> findWellVolumes(Library library)
+  public List<WellCopyVolume> findWellCopyVolumes(Library library)
   {
     // TODO Auto-generated method stub
     return null;
   }
 
-  public List<WellVolume> findWellVolumes(Copy copy)
+  public List<WellCopyVolume> findWellCopyVolumes(Copy copy)
   {
     // TODO Auto-generated method stub
     return null;
   }
 
-  public List<WellVolume> findWellVolumes(Integer plateNumber)
+  public List<WellCopyVolume> findWellCopyVolumes(Integer plateNumber)
   {
     // TODO Auto-generated method stub
     return null;
   }
 
-  public Collection<WellVolume> findWellVolumes(Copy copy, Integer plateNumber)
+  public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy, Integer plateNumber)
   {
     // TODO Auto-generated method stub
     return null;
   }
 
-  public Collection<WellVolume> findWellVolumes(WellKey wellKey)
+  public Collection<WellCopyVolume> findWellCopyVolumes(WellKey wellKey)
   {
     // TODO Auto-generated method stub
     return null;
   }
 
-  public Collection<WellVolume> findWellVolumes(CherryPickRequest cherryPickRequest)
+  public Collection<WellCopyVolume> findWellCopyVolumes(CherryPickRequest cherryPickRequest)
   {
     // TODO Auto-generated method stub
     return null;

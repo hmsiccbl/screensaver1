@@ -107,8 +107,9 @@ public class WellFinder extends AbstractBackingBean
   }
 
   /**
-   * Find the wells specified in the plate-well list, and go to the {@link WellSearchResultsViewer}
-   * page.
+   * Find the volumes for all copies of the wells specified in the plate-well
+   * list, and go to the {@link WellSearchResultsViewer} page.
+   * 
    * @return the controler code for the next appropriate page
    */
   public String findWellVolumes()

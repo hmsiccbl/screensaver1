@@ -60,7 +60,7 @@ import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocato
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper;
 import edu.harvard.med.screensaver.service.libraries.rnai.LibraryPoolToDuplexWellMapper;
-import edu.harvard.med.screensaver.ui.libraries.WellVolume;
+import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 import edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
@@ -1040,8 +1040,8 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   {
     logUserActivity("viewCherryPickRequestWellVolumes for " + cherryPickRequest);
     
-    Collection<WellVolume> wellVolumes = _librariesDao.findWellVolumes(cherryPickRequest);
-    WellVolumeSearchResults wellVolumeSearchResults = new WellVolumeSearchResults(wellVolumes, 
+    Collection<WellCopyVolume> wellCopyVolumes = _librariesDao.findWellCopyVolumes(cherryPickRequest);
+    WellVolumeSearchResults wellVolumeSearchResults = new WellVolumeSearchResults(wellCopyVolumes, 
                                                                                   _librariesController, 
                                                                                   _dao,
                                                                                   getMessages());

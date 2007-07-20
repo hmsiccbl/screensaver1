@@ -23,7 +23,7 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
-import edu.harvard.med.screensaver.ui.libraries.WellVolume;
+import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 
 public interface LibrariesDAO
 {
@@ -80,17 +80,17 @@ public interface LibrariesDAO
   @SuppressWarnings("unchecked")
   public List<Library> findLibrariesDisplayedInLibrariesBrowser();
 
-  public BigDecimal findRemainingVolumeInWell(Copy copy, Well well);
+  public BigDecimal findRemainingVolumeInWellCopy(Well well, Copy copy);
 
-  public Collection<WellVolume> findWellVolumes(Library library);
+  public Collection<WellCopyVolume> findWellCopyVolumes(Library library);
 
-  public Collection<WellVolume> findWellVolumes(CherryPickRequest cherryPickRequest);
+  public Collection<WellCopyVolume> findWellCopyVolumes(CherryPickRequest cherryPickRequest);
 
-  public Collection<WellVolume> findWellVolumes(Copy copy);
+  public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy);
 
-  public Collection<WellVolume> findWellVolumes(Integer plateNumber);
+  public Collection<WellCopyVolume> findWellCopyVolumes(Integer plateNumber);
 
-  public Collection<WellVolume> findWellVolumes(Copy copy, Integer plateNumber);
+  public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy, Integer plateNumber);
 
-  public Collection<WellVolume> findWellVolumes(WellKey wellKey);
+  public Collection<WellCopyVolume> findWellCopyVolumes(WellKey wellKey);
 }

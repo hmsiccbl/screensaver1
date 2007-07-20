@@ -197,7 +197,7 @@ public class CherryPickRequestAllocator
     Collections.sort(copies, SourceCopyComparator.getInstance());
 
     for (Copy copy : copies) {
-      BigDecimal wellCopyVolumeRemaining = _librariesDao.findRemainingVolumeInWell(copy, well);
+      BigDecimal wellCopyVolumeRemaining = _librariesDao.findRemainingVolumeInWellCopy(well, copy);
       if (log.isDebugEnabled()) {
         log.debug("remaining volume in " + well + " " + copy + ": " + wellCopyVolumeRemaining);
       }

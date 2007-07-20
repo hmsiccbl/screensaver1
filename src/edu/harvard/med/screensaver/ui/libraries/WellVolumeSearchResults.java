@@ -35,7 +35,7 @@ import edu.harvard.med.screensaver.ui.util.Messages;
 
 import org.apache.log4j.Logger;
 
-public class WellVolumeSearchResults extends SearchResults<WellVolume>
+public class WellVolumeSearchResults extends SearchResults<WellCopyVolume>
 {
   // static members
 
@@ -57,16 +57,16 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
   // instance data members
   
   private LibrariesController _librariesController;
-  private ArrayList<TableColumn<WellVolume>> _columns;
-  private TableColumn<WellVolume> _remainingVolumeColumn;
-  private Map<WellVolume,BigDecimal> _newRemainingVolumes;
+  private ArrayList<TableColumn<WellCopyVolume>> _columns;
+  private TableColumn<WellCopyVolume> _remainingVolumeColumn;
+  private Map<WellCopyVolume,BigDecimal> _newRemainingVolumes;
   private String _wellVolumeAdjustmentActivityComments;
   private GenericEntityDAO _dao;
 
   
   // public constructors and methods
 
-  public WellVolumeSearchResults(Collection<WellVolume> unsortedResults,
+  public WellVolumeSearchResults(Collection<WellCopyVolume> unsortedResults,
                                  LibrariesController librariesController,
                                  GenericEntityDAO dao,
                                  Messages messages)
@@ -89,61 +89,61 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
   }
 
   @Override
-  protected List<TableColumn<WellVolume>> getColumns()
+  protected List<TableColumn<WellCopyVolume>> getColumns()
   {
     if (_columns == null) {
-      _columns = new ArrayList<TableColumn<WellVolume>>();
-      _columns.add(new TableColumn<WellVolume>("Library", "The library containing the well") {
+      _columns = new ArrayList<TableColumn<WellCopyVolume>>();
+      _columns.add(new TableColumn<WellCopyVolume>("Library", "The library containing the well") {
         @Override
-        public Object getCellValue(WellVolume wellVolume) { return wellVolume.getWell().getLibrary().getLibraryName(); }
+        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getWell().getLibrary().getLibraryName(); }
 
         @Override
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(WellVolume wellVolume) { return _librariesController.viewLibrary(wellVolume.getWell().getLibrary(), null); }
+        public Object cellAction(WellCopyVolume wellVolume) { return _librariesController.viewLibrary(wellVolume.getWell().getLibrary(), null); }
       });
-      _columns.add(new TableColumn<WellVolume>("Plate", "The number of the plate the well is located on", true) {
+      _columns.add(new TableColumn<WellCopyVolume>("Plate", "The number of the plate the well is located on", true) {
         @Override
-        public Object getCellValue(WellVolume wellVolume) { return wellVolume.getWell().getPlateNumber(); }
+        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getWell().getPlateNumber(); }
       });      
-      _columns.add(new TableColumn<WellVolume>("Well", "The plate coordinates of the well") {
+      _columns.add(new TableColumn<WellCopyVolume>("Well", "The plate coordinates of the well") {
         @Override
-        public Object getCellValue(WellVolume wellVolume) { return wellVolume.getWell().getWellName(); }
+        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getWell().getWellName(); }
 
         @Override
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(WellVolume wellVolume) { return _librariesController.viewWell(wellVolume.getWell(), null); }
+        public Object cellAction(WellCopyVolume wellVolume) { return _librariesController.viewWell(wellVolume.getWell(), null); }
       });
-      _columns.add(new TableColumn<WellVolume>("Copy", "The name of the library plate copy") {
+      _columns.add(new TableColumn<WellCopyVolume>("Copy", "The name of the library plate copy") {
         @Override
-        public Object getCellValue(WellVolume wellVolume) { return wellVolume.getCopy().getName(); }
+        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getCopy().getName(); }
 
         // TODO
 //        @Override
 //        public boolean isCommandLink() { return true; }
 //
 //        @Override
-//        public Object cellAction(WellVolume wellVolume) { return _librariesController.viewLibraryCopyVolumes(wellVolume.getWell(), WellVolumeSearchResults.this); }
+//        public Object cellAction(WellCopyVolume wellVolume) { return _librariesController.viewLibraryCopyVolumes(wellVolume.getWell(), WellVolumeSearchResults.this); }
       });
-      _columns.add(new TableColumn<WellVolume>("Initial Volume", "The initial volume of this well copy", true) {
+      _columns.add(new TableColumn<WellCopyVolume>("Initial Volume", "The initial volume of this well copy", true) {
         @Override
-        public Object getCellValue(WellVolume wellVolume) { return wellVolume.getInitialMicroliterVolume(); }
+        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getInitialMicroliterVolume(); }
       });      
-      _columns.add(new TableColumn<WellVolume>("Consumed Volume", "The volume already used from this well copy", true) {
+      _columns.add(new TableColumn<WellCopyVolume>("Consumed Volume", "The volume already used from this well copy", true) {
         @Override
-        public Object getCellValue(WellVolume wellVolume) { return wellVolume.getConsumedMicroliterVolume(); }
+        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getConsumedMicroliterVolume(); }
       });      
-      _remainingVolumeColumn = new TableColumn<WellVolume>("Remaining Volume", "The remaining volume of this well copy", true) {
+      _remainingVolumeColumn = new TableColumn<WellCopyVolume>("Remaining Volume", "The remaining volume of this well copy", true) {
         @Override
-        public Object getCellValue(WellVolume wellVolume) { return wellVolume.getRemainingMicroliterVolume(); }
+        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getRemainingMicroliterVolume(); }
       };      
       _columns.add(_remainingVolumeColumn);
-      _columns.add(new TableColumn<WellVolume>("Withdrawals/Adjustments", "The number of withdrawals and administrative adjustment smade from this well copy", true) {
+      _columns.add(new TableColumn<WellCopyVolume>("Withdrawals/Adjustments", "The number of withdrawals and administrative adjustment smade from this well copy", true) {
         @Override
-        public Object getCellValue(WellVolume wellVolume) { return wellVolume.getWellVolumeAdjustments().size(); }
+        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getWellVolumeAdjustments().size(); }
 
         @Override
         public boolean isVisible() { return !isEditMode(); }
@@ -153,18 +153,18 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
 //        public boolean isCommandLink() { return getEntity().getWellVolumeAdjustments().size() > 0; }
 //        
 //        @Override
-//        public Object cellAction(WellVolume entity)
+//        public Object cellAction(WellCopyVolume entity)
 //        {
 //          return REDISPLAY_PAGE_ACTION_RESULT; 
 //        }
       });      
-      _columns.add(new TableColumn<WellVolume>("New Remaining Volume", "Enter new remaining volume", true) {
+      _columns.add(new TableColumn<WellCopyVolume>("New Remaining Volume", "Enter new remaining volume", true) {
 
         @Override
-        public Object getCellValue(WellVolume wellVolume) { return _newRemainingVolumes.get(wellVolume); }
+        public Object getCellValue(WellCopyVolume wellVolume) { return _newRemainingVolumes.get(wellVolume); }
         
         @Override
-        public void setCellValue(WellVolume wellVolume, Object value)
+        public void setCellValue(WellCopyVolume wellVolume, Object value)
         {
           if (value != null && value.toString().trim().length() > 0) {
             try {
@@ -201,9 +201,9 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
   }
 
   @Override
-  protected void setEntityToView(WellVolume wellVolume)
+  protected void setEntityToView(WellCopyVolume wellCopyVolume)
   {
-    _librariesController.viewWell(wellVolume.getWell(), null);
+    _librariesController.viewWell(wellCopyVolume.getWell(), null);
   }
   
   public String getWellVolumeAdjustmentActivityComments()
@@ -218,7 +218,7 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
 
   public void doEdit()
   {
-    _newRemainingVolumes = new HashMap<WellVolume,BigDecimal>();
+    _newRemainingVolumes = new HashMap<WellCopyVolume,BigDecimal>();
     _wellVolumeAdjustmentActivityComments = null;
   }
 
@@ -239,8 +239,8 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
           wellVolumeCorrectionActivity.setComments(getWellVolumeAdjustmentActivityComments());
           // TODO
           //wellVolumeCorrectionActivity.setApprovedBy();
-          for (Map.Entry<WellVolume,BigDecimal> entry : _newRemainingVolumes.entrySet()) {
-            WellVolume wellVolume = entry.getKey();
+          for (Map.Entry<WellCopyVolume,BigDecimal> entry : _newRemainingVolumes.entrySet()) {
+            WellCopyVolume wellVolume = entry.getKey();
             BigDecimal newRemainingVolume = entry.getValue();
             WellVolumeAdjustment wellVolumeAdjustment = 
               new WellVolumeAdjustment(wellVolume.getCopy(),
@@ -262,9 +262,9 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
   }
   
   @Override
-  protected List<DataExporter<WellVolume>> getDataExporters()
+  protected List<DataExporter<WellCopyVolume>> getDataExporters()
   {
-    return new ArrayList<DataExporter<WellVolume>>();
+    return new ArrayList<DataExporter<WellCopyVolume>>();
   }
   
 

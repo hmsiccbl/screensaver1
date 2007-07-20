@@ -41,7 +41,7 @@ import edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporter;
 import edu.harvard.med.screensaver.ui.libraries.WellFinder;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResultsViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
-import edu.harvard.med.screensaver.ui.libraries.WellVolume;
+import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 import edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResultsViewer;
 import edu.harvard.med.screensaver.ui.namevaluetable.CompoundNameValueTable;
@@ -303,18 +303,18 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
           showMessage("libraries.plateWellListParseError", error.getSecond());
         }
 
-        List<WellVolume> foundWellVolumes = new ArrayList<WellVolume>();
+        List<WellCopyVolume> foundWellCopyVolumes = new ArrayList<WellCopyVolume>();
         for (WellKey wellKey : parseResult.getParsedWellKeys()) {
-          Collection<WellVolume> wellVolumes = _librariesDao.findWellVolumes(wellKey);
-          if (wellVolumes.size() == 0) {
+          Collection<WellCopyVolume> wellCopyVolumes = _librariesDao.findWellCopyVolumes(wellKey);
+          if (wellCopyVolumes.size() == 0) {
             showMessage("libraries.noSuchWell", wellKey.getPlateNumber(), wellKey.getWellName());
           }
           else {
-            foundWellVolumes.addAll(wellVolumes);
+            foundWellCopyVolumes.addAll(wellCopyVolumes);
           }
         }
         WellVolumeSearchResults searchResults =
-          new WellVolumeSearchResults(foundWellVolumes,
+          new WellVolumeSearchResults(foundWellCopyVolumes,
                                       LibrariesControllerImpl.this,
                                       _dao,
                                       getMessages());
@@ -394,13 +394,13 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Collection<WellVolume> wellVolumes = _librariesDao.findWellVolumes(libraryIn);
-        WellVolumeSearchResults wellVolumeSearchResults = 
-          new WellVolumeSearchResults(wellVolumes,
+        Collection<WellCopyVolume> wellCopyVolumes = _librariesDao.findWellCopyVolumes(libraryIn);
+        WellVolumeSearchResults wellCopyVolumeSearchResults = 
+          new WellVolumeSearchResults(wellCopyVolumes,
                                       LibrariesControllerImpl.this,
                                       _dao,
                                       getMessages());
-        _wellVolumeSearchResultsViewer.setSearchResults(wellVolumeSearchResults);
+        _wellVolumeSearchResultsViewer.setSearchResults(wellCopyVolumeSearchResults);
       }
     });
 

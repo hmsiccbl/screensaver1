@@ -22,11 +22,11 @@ import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 
-public class WellVolume
+public class WellCopyVolume
 {
   // static members
 
-  private static Logger log = Logger.getLogger(WellVolume.class);
+  private static Logger log = Logger.getLogger(WellCopyVolume.class);
 
 
   // instance data members
@@ -42,7 +42,7 @@ public class WellVolume
 
   // public constructors and methods
   
-  public WellVolume(Well well, Copy copy)
+  public WellCopyVolume(Well well, Copy copy)
   {
     _well = well;
     _copy = copy;
@@ -105,8 +105,8 @@ public class WellVolume
     if (this == obj) {
       return true;
     }
-    if (obj instanceof WellVolume) {
-      return _key.equals(((WellVolume) obj)._key);
+    if (obj instanceof WellCopyVolume) {
+      return _key.equals(((WellCopyVolume) obj)._key);
     }
     return false;
   }
