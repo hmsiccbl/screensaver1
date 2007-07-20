@@ -208,7 +208,26 @@ public class TableSortManager<E> extends Observable implements Observer
    */
   public void setColumns(List<TableColumn<E>> columns)
   {
-    _columnModel = new VisibleTableColumnModel<E>(columns);
+    _columnModel = new VisibleTableColumnModel<E>(columns) {
+      /**
+       * Intercept call to VisibleTableColumnModel.updateVisibleColumns(), so
+       * that we can update our _sortColumn UISelectOneBean.
+       */
+      @Override
+      public void updateVisibleColumns()
+      {
+        super.updateVisibleColumns();
+        if (_sortColumn != null) {
+          TableColumn<E> sortColumn = _sortColumn.getSelection();
+          _sortColumn = null; // force recreate, based upon new set of visible columns
+          UISelectOneBean<TableColumn<E>> sortColumnSelector = getSortColumnSelector(); // recreate now
+          // re-select previous selection, if it still exists
+          if (sortColumn.isVisible()) {
+            sortColumnSelector.setSelection(sortColumn);
+          }
+        }
+      }
+    };
     // ensure sort column exists in the new set of columns
     if (!columns.contains(getSortColumn())) {
       getSortColumnSelector().setSelectionIndex(0);
