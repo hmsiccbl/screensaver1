@@ -39,11 +39,11 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class ScreenDBUserSynchronizer
+public class UserSynchronizer
 {
   // static members
 
-  private static Logger log = Logger.getLogger(ScreenDBUserSynchronizer.class);
+  private static Logger log = Logger.getLogger(UserSynchronizer.class);
   private static Map<String,String> CHECKLIST_ITEM_TYPE_MAP = new HashMap<String,String>();
   static {
     CHECKLIST_ITEM_TYPE_MAP.put(
@@ -97,7 +97,7 @@ public class ScreenDBUserSynchronizer
   
   // public constructors and methods
 
-  public ScreenDBUserSynchronizer(Connection connection, GenericEntityDAO dao)
+  public UserSynchronizer(Connection connection, GenericEntityDAO dao)
   {
     _connection = connection;
     _dao = dao;

@@ -32,12 +32,12 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
 
-public class ScreenDBLibraryScreeningSynchronizer
+public class LibraryScreeningSynchronizer
 {
 
   // static members
 
-  private static Logger log = Logger.getLogger(ScreenDBLibraryScreeningSynchronizer.class);
+  private static Logger log = Logger.getLogger(LibraryScreeningSynchronizer.class);
   private static Pattern _numericalVolumeTransferredPattern =
     Pattern.compile(".*?([\\d.]+)(([nu][lL])?\\s*(x|X|and)\\s*(\\d+))?.*");
   
@@ -47,8 +47,8 @@ public class ScreenDBLibraryScreeningSynchronizer
   private Connection _connection;
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
-  private ScreenDBUserSynchronizer _userSynchronizer;
-  private ScreenDBScreenSynchronizer _screenSynchronizer;
+  private UserSynchronizer _userSynchronizer;
+  private ScreenSynchronizer _screenSynchronizer;
   private Map<Integer,LibraryScreening> _screenDBVisitIdToLibraryScreeningMap =
     new HashMap<Integer,LibraryScreening>();
   private ScreenDBSynchronizationException _synchronizationException = null;
@@ -56,12 +56,12 @@ public class ScreenDBLibraryScreeningSynchronizer
   
   // public constructors and methods
 
-  public ScreenDBLibraryScreeningSynchronizer(
+  public LibraryScreeningSynchronizer(
     Connection connection,
     GenericEntityDAO dao,
     LibrariesDAO librariesDao,
-    ScreenDBUserSynchronizer userSynchronizer,
-    ScreenDBScreenSynchronizer screenSynchronizer)
+    UserSynchronizer userSynchronizer,
+    ScreenSynchronizer screenSynchronizer)
   {
     _connection = connection;
     _dao = dao;

@@ -106,7 +106,7 @@ public class ScreenDBSynchronizer
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
   private CherryPickRequestDAO _cherryPickRequestDao;
-  private ScreenDBCompoundCherryPickSynchronizer compoundCherryPickSynchronizer;
+  private CompoundCherryPickSynchronizer compoundCherryPickSynchronizer;
   //private ScreenDBRnaiCherryPickSynchronizer rnRnaiCherryPickSynchronizer;
   
 
@@ -159,7 +159,7 @@ public class ScreenDBSynchronizer
    * Delete the old compound cherry pick requests in a separate transaction.
    * 
    * @motivation This should really be part of
-   *             {@link ScreenDBCompoundCherryPickSynchronizer} and
+   *             {@link CompoundCherryPickSynchronizer} and
    *             {@link ScreenDBRnaiCherryPickSynchronizer}, but I need to run
    *             it in a separate transaction or I get hibernate exceptions
    *             about deleted entities that would be resaved by cascade. I
@@ -187,8 +187,8 @@ public class ScreenDBSynchronizer
     {
       public void runTransaction()
       {
-        ScreenDBLibrarySynchronizer librarySynchronizer =
-          new ScreenDBLibrarySynchronizer(_connection, _dao, _librariesDao);
+        LibrarySynchronizer librarySynchronizer =
+          new LibrarySynchronizer(_connection, _dao, _librariesDao);
         librarySynchronizer.synchronizeLibraries();
       }
     }); 
@@ -197,14 +197,14 @@ public class ScreenDBSynchronizer
 
   private void synchronizeNonLibraries() throws ScreenDBSynchronizationException
   {
-    final ScreenDBUserSynchronizer userSynchronizer =
-      new ScreenDBUserSynchronizer(_connection, _dao);
-    final ScreenDBScreenSynchronizer screenSynchronizer =
-      new ScreenDBScreenSynchronizer(_connection, _dao, userSynchronizer);
-    final ScreenDBLibraryScreeningSynchronizer libraryScreeningSynchronizer =
-      new ScreenDBLibraryScreeningSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
-    final ScreenDBCompoundCherryPickSynchronizer compoundCherryPickSynchronizer =
-      new ScreenDBCompoundCherryPickSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
+    final UserSynchronizer userSynchronizer =
+      new UserSynchronizer(_connection, _dao);
+    final ScreenSynchronizer screenSynchronizer =
+      new ScreenSynchronizer(_connection, _dao, userSynchronizer);
+    final LibraryScreeningSynchronizer libraryScreeningSynchronizer =
+      new LibraryScreeningSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
+    final CompoundCherryPickSynchronizer compoundCherryPickSynchronizer =
+      new CompoundCherryPickSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
 
     log.info("synchronizing non-libraries..");
     _dao.doInTransaction(new DAOTransaction()

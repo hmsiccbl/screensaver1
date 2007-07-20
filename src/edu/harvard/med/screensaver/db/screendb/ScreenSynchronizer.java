@@ -37,19 +37,19 @@ import edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider;
 
 import org.apache.log4j.Logger;
 
-public class ScreenDBScreenSynchronizer
+public class ScreenSynchronizer
 {
 
   // static members
 
-  private static Logger log = Logger.getLogger(ScreenDBScreenSynchronizer.class);
+  private static Logger log = Logger.getLogger(ScreenSynchronizer.class);
 
 
   // instance data members
   
   private Connection _connection;
   private GenericEntityDAO _dao;
-  private ScreenDBUserSynchronizer _userSynchronizer;
+  private UserSynchronizer _userSynchronizer;
   private ScreenType.UserType _screenUserType = new ScreenType.UserType();
   private StatusValue.UserType _statusValueUserType = new StatusValue.UserType();
   private FundingSupport.UserType _fundingSupportUserType = new FundingSupport.UserType();
@@ -59,9 +59,9 @@ public class ScreenDBScreenSynchronizer
   
   // public constructors and methods
 
-  public ScreenDBScreenSynchronizer(Connection connection, 
+  public ScreenSynchronizer(Connection connection, 
                                     GenericEntityDAO dao, 
-                                    ScreenDBUserSynchronizer userSynchronizer)
+                                    UserSynchronizer userSynchronizer)
   {
     _connection = connection;
     _dao = dao;

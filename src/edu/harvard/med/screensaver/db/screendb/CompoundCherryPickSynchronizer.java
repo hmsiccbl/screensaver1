@@ -41,12 +41,12 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
-public class ScreenDBCompoundCherryPickSynchronizer
+public class CompoundCherryPickSynchronizer
 {
 
   // static members
 
-  private static Logger log = Logger.getLogger(ScreenDBCompoundCherryPickSynchronizer.class);
+  private static Logger log = Logger.getLogger(CompoundCherryPickSynchronizer.class);
   
 
   // instance data members
@@ -54,18 +54,18 @@ public class ScreenDBCompoundCherryPickSynchronizer
   private Connection _connection;
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
-  private ScreenDBUserSynchronizer _userSynchronizer;
-  private ScreenDBScreenSynchronizer _screenSynchronizer;
+  private UserSynchronizer _userSynchronizer;
+  private ScreenSynchronizer _screenSynchronizer;
 
   
   // public constructors and methods
 
-  public ScreenDBCompoundCherryPickSynchronizer(
+  public CompoundCherryPickSynchronizer(
     Connection connection,
     GenericEntityDAO dao,
     LibrariesDAO librariesDao,
-    ScreenDBUserSynchronizer userSynchronizer,
-    ScreenDBScreenSynchronizer screenSynchronizer)
+    UserSynchronizer userSynchronizer,
+    ScreenSynchronizer screenSynchronizer)
   {
     _connection = connection;
     _dao = dao;

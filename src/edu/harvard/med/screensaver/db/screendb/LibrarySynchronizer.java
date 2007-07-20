@@ -30,12 +30,12 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class ScreenDBLibrarySynchronizer
+public class LibrarySynchronizer
 {
 
   // static members
 
-  private static Logger log = Logger.getLogger(ScreenDBLibrarySynchronizer.class);
+  private static Logger log = Logger.getLogger(LibrarySynchronizer.class);
 
 
   // instance data members
@@ -49,7 +49,7 @@ public class ScreenDBLibrarySynchronizer
   
   // public constructors and methods
 
-  public ScreenDBLibrarySynchronizer(Connection connection, 
+  public LibrarySynchronizer(Connection connection, 
                                      GenericEntityDAO dao,
                                      LibrariesDAO librariesDao)
   {
