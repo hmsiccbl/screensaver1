@@ -59,35 +59,39 @@ public class CompoundPubchemCidListUpgrader
       log.error("error parsing command line options", e);
       return;
     }
-    GenericEntityDAO dao = (GenericEntityDAO) context.getBean("genericEntityDao");
     String libraryShortName = commandLine.getOptionValue("L");
     if (libraryShortName == null) {
       log.error("usage: <program-name> -L <library-short-name>");
       System.exit(1);
     }
+    GenericEntityDAO dao = (GenericEntityDAO) context.getBean("genericEntityDao");
+    CompoundPubchemCidListUpgrader upgrader = new CompoundPubchemCidListUpgrader(dao);
     if (libraryShortName.equals("ALL")) {
-      upgradeAllLibraries(dao);
+      upgradeAllLibraries(dao, upgrader);
     }
     else {
-      upgradeOneLibrary(libraryShortName, dao);
+      upgradeOneLibrary(libraryShortName, upgrader);
     }
   }
   
-  private static void upgradeAllLibraries(GenericEntityDAO dao)
+  private static void upgradeAllLibraries(
+    GenericEntityDAO dao,
+    CompoundPubchemCidListUpgrader upgrader)
   {
     log.info("upgrading pubchem cid lists for all small molecule libraries");
     for (Library library : dao.findAllEntitiesOfType(Library.class, true)) {
       if (library.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-        upgradeOneLibrary(library.getShortName(), dao);
+        upgradeOneLibrary(library.getShortName(), upgrader);
       }
     }
     log.info("successfully upgraded pubchem cid lists for all small molecule libraries");
   }
   
-  private static void upgradeOneLibrary(String libraryShortName, GenericEntityDAO dao)
+  private static void upgradeOneLibrary(
+    String libraryShortName,
+    CompoundPubchemCidListUpgrader upgrader)
   {
     log.info("upgrading pubchem cid lists for library " + libraryShortName + "..");
-    CompoundPubchemCidListUpgrader upgrader = new CompoundPubchemCidListUpgrader(dao);
     upgrader.upgradeLibrary(libraryShortName);
     log.info("successfully upgraded pubchem cid lists for library " + libraryShortName + ".");
   }
@@ -96,7 +100,7 @@ public class CompoundPubchemCidListUpgrader
   // instance fields
   
   private GenericEntityDAO _dao;
-  private Set<Compound> _visitedCompounds = new HashSet<Compound>();
+  private static Set<Compound> _visitedCompounds = new HashSet<Compound>();
   private PubchemSmilesSearch pubchemSmilesSearch = new PubchemSmilesSearch();
   
   
