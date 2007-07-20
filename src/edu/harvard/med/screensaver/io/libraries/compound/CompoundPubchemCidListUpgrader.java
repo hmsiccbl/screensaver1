@@ -145,17 +145,19 @@ public class CompoundPubchemCidListUpgrader
               numCompoundsWithPubchemCids ++;
             }
             _visitedCompounds.add(compound);
-            //if (numCompounds > 999) {
-            //  break OUT;
-            //}
+            if (numCompounds % 100 == 0) {
+              log.info("upgraded " + numCompounds + " compound so far..");
+              //break OUT;
+            }
           }
         }
 
-        //System.out.println("numCompounds                   = " + numCompounds);
-        //System.out.println("numCompoundsWithOldPubchemCids = " + numCompoundsWithOldPubchemCids);
-        //System.out.println("numCompoundsWithPubchemCids    = " + numCompoundsWithPubchemCids);
-        //System.out.println("numPubchemCids                 = " + numPubchemCids);
-        //System.out.println("numOldPubchemCids              = " + numOldPubchemCids);
+        log.info("upgrade statistics for library " + libraryShortName + ":");
+        log.info("  numCompounds                   = " + numCompounds);
+        log.info("  numCompoundsWithOldPubchemCids = " + numCompoundsWithOldPubchemCids);
+        log.info("  numCompoundsWithPubchemCids    = " + numCompoundsWithPubchemCids);
+        log.info("  numPubchemCids                 = " + numPubchemCids);
+        log.info("  numOldPubchemCids              = " + numOldPubchemCids);
       }
     });
   }
