@@ -82,6 +82,7 @@ public class Screen extends AbstractEntity
   private Date _publishableProtocolDateEntered;
   private String _publishableProtocolEnteredBy;
   private String _publishableProtocol;
+  private String _publishableProtocolComments;
   private Date _dateOfApplication;
   private ScreenResult _screenResult;
 
@@ -940,6 +941,28 @@ public class Screen extends AbstractEntity
   public void setPublishableProtocol(String publishableProtocol)
   {
     _publishableProtocol = publishableProtocol;
+  }
+
+  /**
+   * Get the publishable protocol comments.
+   *
+   * @return the publishable protocol comments
+   * @hibernate.property
+   *   type="text"
+   */
+  public String getPublishableProtocolComments()
+  {
+    return _publishableProtocolComments;
+  }
+
+  /**
+   * Set the publishable protocol comments.
+   *
+   * @param publishableProtocolComments the new publishable protocol comments
+   */
+  public void setPublishableProtocolComments(String publishableProtocolComments)
+  {
+    _publishableProtocolComments = publishableProtocolComments;
   }
 
   /**
