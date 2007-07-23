@@ -40,7 +40,8 @@
 				<t:outputText value="#{searchResults.cellValue}"
 					rendered="#{! (column.isCommandLink || column.isCommandLinkList || (column.editable && searchResults.editMode))}" />
 				<t:inputText value="#{searchResults.cellValue}"
-					rendered="#{column.editable && searchResults.editMode}" />
+					rendered="#{column.editable && searchResults.editMode}"
+					immediate="true" />
 				<t:commandLink action="#{searchResults.cellAction}"
 					value="#{searchResults.cellValue}"
 					rendered="#{column.isCommandLink && (!column.editable || !searchResults.editMode)}">
