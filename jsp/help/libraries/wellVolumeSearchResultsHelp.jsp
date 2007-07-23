@@ -16,8 +16,8 @@
 			<dt>Well Volumes</dt>
 			<dd>Displays volume information per well, summarizing the
 			volumes in each copy of the well. In particular, the maximum
-			volume(and less importantly, the minimum volume) of the well's copies
-			are dislpayed, allowing the administrator to view whether a well is
+			volume (and less importantly, the minimum volume) of the well's copies
+			are displayed, allowing the administrator to view whether a well is
 			in need of new copies or whether the existing copies are sufficient
 			to satisfy a particular need.</dd>
 			<dt>Well/Copy Volumes</dt>
