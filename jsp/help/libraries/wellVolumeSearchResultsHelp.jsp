@@ -21,7 +21,7 @@
 			in need of new copies or whether the existing copies are sufficient
 			to satisfy a particular need.</dd>
 			<dt>Well/Copy Volumes</dt>
-			<dd>Displays volume information per well copy. This tab allows
+			<dd>Displays volume information per well copy. This tab also allows
 			the administrator to edit the remaining volume for any of the
 			available well copies.</dd>
 		</dl>
@@ -40,7 +40,6 @@
 		
 		<ol>
 			<li>Click the "Edit" button below the search results table.
-			<li>
 			<li>Enter the new remaining volume for whichever well copies
 			need to be adjusted. You may page through the search results,
 			allowing you to edit well copy volumes on multiple pages.</li>
