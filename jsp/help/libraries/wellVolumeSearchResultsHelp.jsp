@@ -39,12 +39,12 @@
 		From the "Well/Copy Volumes" tab, you can edit the remaining volume for any of the available well copies.  To do so:
 		
 		<ol>
-			<li>Click the "Edit" button below the search results table.
+			<li>Click the "Edit" button below the search results table.</li>
 			<li>Enter the new remaining volume for whichever well copies
 			need to be adjusted. You may page through the search results,
 			allowing you to edit well copy volumes on multiple pages.</li>
 			<li>Enter a comment explaining why the well copy volumes need to
-			be adjusted.
+			be adjusted.</li>
 			<li>Click the "Save" button to commit your changes, or "Cancel"
 			to discard them.</li>
 		</ol>
