@@ -4,11 +4,11 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 
 <f:subview id="librariesBrowser">
-
-  <t:aliasBean alias="#{searchResults}" value="#{librariesBrowser.searchResults}">
-    <%@include file="../searchResults.jspf"%>
-  </t:aliasBean>
-
+	<h:form id="librariesBrowserForm">
+		<t:aliasBean alias="#{searchResults}" value="#{librariesBrowser.searchResults}">
+			<%@include file="../searchResults.jspf"%>
+		</t:aliasBean>
+	</h:form>
 </f:subview>
 
 

@@ -6,9 +6,7 @@
 <%-- This page, which is just an include for the wellVolumeSearchResults page, exists to handle web.xml security constraints --%>
 
 <f:subview id="cherryPickRequestWellVolumeSearchResultsViewer">
-
 	<%@include file="../../libraries/admin/wellVolumeSearchResults.jsp"%>
-
 </f:subview>
 
 
