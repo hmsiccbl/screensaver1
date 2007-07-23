@@ -203,7 +203,9 @@ public class ScreenDBSynchronizer
       new LibraryScreeningSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
     final CompoundCherryPickSynchronizer compoundCherryPickSynchronizer =
       new CompoundCherryPickSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
-
+    final RNAiCherryPickScreeningSynchronizer rnaiCherryPickScreeningSynchronizer =
+      new RNAiCherryPickScreeningSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
+    
     log.info("synchronizing non-libraries..");
     _dao.doInTransaction(new DAOTransaction()
     {
@@ -221,6 +223,9 @@ public class ScreenDBSynchronizer
         log.info("synchronizing compound cherry picks..");
         compoundCherryPickSynchronizer.synchronizeCompoundCherryPicks();
         log.info("done synchronizing compound cherry picks.");
+        log.info("synchronizing rnai cherry pick screenings..");
+        rnaiCherryPickScreeningSynchronizer.synchronizeRnaiCherryPickScreenings();
+        log.info("done synchronizing rnai cherry pick screenings.");
       }
     });
     log.info("done synchronizing non-libraries.");
