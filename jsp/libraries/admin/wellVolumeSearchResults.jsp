@@ -3,23 +3,35 @@
 <%@ taglib uri="http://myfaces.apache.org/tomahawk"  prefix="t"     %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 
-<f:subview id="wellCopyVolumeSearchResultsViewer">
+<f:subview id="wellVolumeSearchResultsViewer">
 
+	<t:panelTabbedPane serverSideTabSwitch="true">
+		<t:panelTab id="wellVolumeSearchResultsTab" label="Well Volumes">
+			<t:aliasBean alias="#{searchResults}"
+				value="#{wellCopyVolumeSearchResultsViewer.wellVolumeSearchResults}">
+				<%@include file="../../searchResults.jspf"%>
+			</t:aliasBean>
+		</t:panelTab>
 
-  <t:aliasBean alias="#{searchResults}" value="#{wellVolumeSearchResultsViewer.searchResults}">
+		<t:panelTab id="wellCopyVolumeSearchResultsTab" label="Well/Copy Volumes">
+			<t:aliasBean alias="#{searchResults}"
+				value="#{wellCopyVolumeSearchResultsViewer.searchResults}">
+				<t:buffer into="#{searchResultsFooter}">
+					<t:panelGrid rendered="#{searchResults.editMode}" columns="1">
+						<t:outputLabel for="wellVolumeAdjustmentActivityComments"
+							value="Comments for well volume adjustment(s):"
+							styleClass="label"
+							title="Comments to associated with the well volume adjustment(s)" />
+						<t:inputTextarea id="wellVolumeAdjustmentActivityComments"
+							rows="3" cols="80"
+							value="#{searchResults.wellVolumeAdjustmentActivityComments}"
+							styleClass="inputText" />
+					</t:panelGrid>
+				</t:buffer>
 
-		<t:buffer into="#{searchResultsHeader}">
-			<t:panelGrid columns="1">
-				<t:commandButton value="View Well and Copy"
-					action="#{wellVolumeSearchResultsViewer.viewWellCopyVolumeSearchResults}"
-					styleClass="command" />
-			</t:panelGrid>
-		</t:buffer>
-
-		<%@include file="../../searchResults.jspf"%>
-
-	</t:aliasBean>
+				<%@include file="../../searchResults.jspf"%>
+			</t:aliasBean>
+		</t:panelTab>
+	</t:panelTabbedPane>
 
 </f:subview>
-
-

@@ -3,11 +3,11 @@
 <%@ taglib uri="http://myfaces.apache.org/tomahawk"  prefix="t"     %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 
-<f:subview id="cherryPickRequestWellCopyVolumeSearchResultsViewer">
+<%-- This page, which is just an include for the wellVolumeSearchResults page, exists to handle web.xml security constraints --%>
 
-  <t:aliasBean alias="#{searchResults}" value="#{wellCopyVolumeSearchResultsViewer.searchResults}">
-    <%@include file="../../searchResults.jspf"%>
-  </t:aliasBean>
+<f:subview id="cherryPickRequestWellVolumeSearchResultsViewer">
+
+	<%@include file="../../libraries/admin/wellVolumeSearchResults.jsp"%>
 
 </f:subview>
 

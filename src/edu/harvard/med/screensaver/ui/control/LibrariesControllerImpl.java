@@ -38,21 +38,18 @@ import edu.harvard.med.screensaver.ui.libraries.LibrariesBrowser;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.NaturalProductsLibraryContentsImporter;
 import edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporter;
-import edu.harvard.med.screensaver.ui.libraries.WellFinder;
-import edu.harvard.med.screensaver.ui.libraries.WellSearchResultsViewer;
-import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResultsViewer;
-import edu.harvard.med.screensaver.ui.libraries.WellVolume;
-import edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResultsViewer;
+import edu.harvard.med.screensaver.ui.libraries.WellFinder;
+import edu.harvard.med.screensaver.ui.libraries.WellSearchResultsViewer;
+import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.namevaluetable.CompoundNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.GeneNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.LibraryNameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.SearchResultsViewer;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.util.Pair;
 
@@ -83,7 +80,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   private LibraryViewer _libraryViewer;
   private WellSearchResultsViewer _wellSearchResultsViewer;
   private WellCopyVolumeSearchResultsViewer _wellCopyVolumeSearchResultsViewer;
-  private WellVolumeSearchResultsViewer _wellVolumeSearchResultsViewer;
   private WellViewer _wellViewer;
   private GeneViewer _geneViewer;
   private CompoundViewer _compoundViewer;
@@ -132,11 +128,6 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   public void setWellCopyVolumeSearchResultsViewer(WellCopyVolumeSearchResultsViewer wellCopyVolumeSearchResultsViewer)
   {
     _wellCopyVolumeSearchResultsViewer = wellCopyVolumeSearchResultsViewer;
-  }
-  
-  public void setWellVolumeSearchResultsViewer(WellVolumeSearchResultsViewer wellVolumeSearchResultsViewer)
-  {
-    _wellVolumeSearchResultsViewer = wellVolumeSearchResultsViewer;
   }
   
   public void setWellViewer(WellViewer wellViewer)
@@ -399,7 +390,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   @UIControllerMethod
   public String viewLibraryWellCopyVolumes(final Library libraryIn)
   {
-    logUserActivity(VIEW_WELL_COPY_VOLUME_SEARCH_RESULTS + " for library " + libraryIn);
+    logUserActivity(VIEW_WELL_VOLUME_SEARCH_RESULTS + " for library " + libraryIn);
     final String[] result = new String[1];
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
@@ -545,10 +536,9 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
 
   public String viewWellCopyVolumeSearchResults(WellCopyVolumeSearchResults wellCopyVolumeSearchResults)
   {
-    logUserActivity(VIEW_WELL_COPY_VOLUME_SEARCH_RESULTS);
+    logUserActivity(VIEW_WELL_VOLUME_SEARCH_RESULTS);
     _wellCopyVolumeSearchResultsViewer.setSearchResults(wellCopyVolumeSearchResults);
-    _wellVolumeSearchResultsViewer.setSearchResults(wellCopyVolumeSearchResults);
-    return VIEW_WELL_COPY_VOLUME_SEARCH_RESULTS;
+    return VIEW_WELL_VOLUME_SEARCH_RESULTS;
   }
 
   @UIControllerMethod

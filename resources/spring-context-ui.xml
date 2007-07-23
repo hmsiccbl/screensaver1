@@ -162,9 +162,6 @@
       name="wellCopyVolumeSearchResultsViewer"
       ref="wellCopyVolumeSearchResultsViewer" />
     <property
-      name="wellVolumeSearchResultsViewer"
-      ref="wellVolumeSearchResultsViewer" />
-    <property
       name="wellViewer"
       ref="wellViewer" />
     <property
@@ -258,15 +255,6 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResultsViewer">
-    <description>Well/Copy Volume Search Results Viewer</description>
-    <aop:scoped-proxy/>
-  </bean>
-
-  <bean
-    id="wellVolumeSearchResultsViewer"
-    parent="uiBean"
-    scope="session"
-    class="edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResultsViewer">
     <description>Well/Copy Volume Search Results Viewer</description>
     <property
       name="librariesController"

@@ -114,18 +114,13 @@
       <redirect/>
     </navigation-case>
     <navigation-case>
-      <from-outcome>viewWellCopyVolumeSearchResults</from-outcome>
-      <to-view-id>/libraries/admin/wellCopyVolumeSearchResults</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
       <from-outcome>viewWellVolumeSearchResults</from-outcome>
       <to-view-id>/libraries/admin/wellVolumeSearchResults</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
-      <from-outcome>viewCherryPickRequestWellCopyVolumeSearchResults</from-outcome>
-      <to-view-id>/cherryPickRequests/admin/cherryPickRequestWellCopyVolumeSearchResults</to-view-id>
+      <from-outcome>viewCherryPickRequestWellVolumeSearchResults</from-outcome>
+      <to-view-id>/cherryPickRequests/admin/cherryPickRequestWellVolumeSearchResults</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
