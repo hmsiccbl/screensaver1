@@ -1,10 +1,10 @@
 # run bin/orchestra/ss-build first!
 #
 # usage:
-# bsub ~/screensaver/bin/import-screen-result.sh <screen#>
+# bsub ~/screensaver/bin/import_screen_result.sh <screen#>
 #
 # usage (interactive/debug):
-# bsub -Is -q shared_int_2h ~/screensaver/bin/screendbsynchronizer.sh <screen#>
+# bsub -Is -q shared_int_2h ~/screensaver/bin/import_screen_result.sh <screen#>
 #
 # Screen result file must be $SCREEN_RESULTS/<screen#>_finalResults.xls
 #
