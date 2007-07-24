@@ -331,11 +331,17 @@ a.menuItem:hover,a.menuItemActive:hover {
 	vertical-align: top;
 }
 
-.helpTip, .helpNB {
+.helpTip,.helpNB {
 	font-style: italic;
 	font-weight: bold;
 }
 
 .nowrap {
 	white-space: nowrap;
+}
+
+.activeTab {
+}
+
+.inactiveTab {
 }

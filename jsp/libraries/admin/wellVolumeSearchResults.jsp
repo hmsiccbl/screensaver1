@@ -7,7 +7,10 @@
 
 	<h:form id="wellVolumeSearchResultsViewerForm">
 
-		<t:panelTabbedPane serverSideTabSwitch="true">
+		<t:panelTabbedPane serverSideTabSwitch="true"
+			style="color:white"
+			activeTabStyleClass="activeTab" inactiveTabStyleClass="inactiveTab"
+			activePanelTabVar="isActivePanel">
 			<t:panelTab id="wellVolumeSearchResultsTab" label="Well Volumes">
 				<t:aliasBean alias="#{searchResults}"
 					value="#{wellCopyVolumeSearchResultsViewer.wellVolumeSearchResults}">
