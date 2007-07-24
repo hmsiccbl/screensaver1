@@ -98,12 +98,12 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
       });      
       _maxRemainingVolumeColumn = new TableColumn<WellVolume>("Max Remaining Volume", "The maximum remaining volume of this well (for all copies)", true) {
         @Override
-        public Object getCellValue(WellVolume wellVolume) { return wellVolume.getMaxRemainingMicroliterVolume(); }
+        public Object getCellValue(WellVolume wellVolume) { return wellVolume.getMaxWellCopyVolume().getRemainingMicroliterVolume() + " ("  + wellVolume.getMaxWellCopyVolume().getCopy().getName() + ")"; }
       };      
       _columns.add(_maxRemainingVolumeColumn);
       _columns.add(new TableColumn<WellVolume>("Min Remaining Volume", "The minimum remaining volume of this well (for all copies)", true) {
         @Override
-        public Object getCellValue(WellVolume wellVolume) { return wellVolume.getMinRemainingMicroliterVolume(); }
+        public Object getCellValue(WellVolume wellVolume) { return wellVolume.getMinWellCopyVolume().getRemainingMicroliterVolume() + " ("  + wellVolume.getMinWellCopyVolume().getCopy().getName() + ")"; }
       });      
       _columns.add(new TableColumn<WellVolume>("Withdrawals/Adjustments", "The number of withdrawals and administrative adjustments made from this well (for all copies)", true) {
         @Override

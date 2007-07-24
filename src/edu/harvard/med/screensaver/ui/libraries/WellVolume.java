@@ -34,8 +34,8 @@ public class WellVolume
   private List<WellCopyVolume> _wellCopyVolumes;
   private BigDecimal _initialMicroliterVolume;
   private BigDecimal _consumedMicroliterVolume;
-  private BigDecimal _maxRemainingMicroliterVolume;
-  private BigDecimal _minRemainingMicroliterVolume;
+  private WellCopyVolume _maxWellCopyVolume;
+  private WellCopyVolume _minWellCopyVolume;
   private int _volumeAdjustments;
   private String _copies;
 
@@ -64,37 +64,23 @@ public class WellVolume
     });
 
     _consumedMicroliterVolume = BigDecimal.ZERO.setScale(Well.VOLUME_SCALE);
-    _maxRemainingMicroliterVolume = null;
-    _minRemainingMicroliterVolume = null;
+    if (wellCopyVolumes.size() > 0) {
+      _minWellCopyVolume = _maxWellCopyVolume = wellCopyVolumes.iterator().next();
+    }
     for (WellCopyVolume wellCopyVolume : wellCopyVolumes) {
       assert wellCopyVolume.getWell().equals(_well) : "all wellCopyVolumes must be for same well";
-      _consumedMicroliterVolume.add(wellCopyVolume.getConsumedMicroliterVolume());
-      if (_maxRemainingMicroliterVolume == null) {
-        _maxRemainingMicroliterVolume = wellCopyVolume.getRemainingMicroliterVolume();
+      _consumedMicroliterVolume = _consumedMicroliterVolume.add(wellCopyVolume.getConsumedMicroliterVolume());
+      if (wellCopyVolume.getRemainingMicroliterVolume().compareTo(_minWellCopyVolume.getRemainingMicroliterVolume()) < 0) {
+        _minWellCopyVolume = wellCopyVolume;
       }
-      else {
-        _maxRemainingMicroliterVolume = _maxRemainingMicroliterVolume.max(wellCopyVolume.getRemainingMicroliterVolume());
-      }
-      if (_minRemainingMicroliterVolume == null) {
-        _minRemainingMicroliterVolume = wellCopyVolume.getRemainingMicroliterVolume();
-      }
-      else {
-        _minRemainingMicroliterVolume = _minRemainingMicroliterVolume.min(wellCopyVolume.getRemainingMicroliterVolume());
+      if (wellCopyVolume.getRemainingMicroliterVolume().compareTo(_maxWellCopyVolume.getRemainingMicroliterVolume()) > 0) {
+        _maxWellCopyVolume = wellCopyVolume;
       }
       _volumeAdjustments += wellCopyVolume.getWellVolumeAdjustments().size();
     }
     _copies = makeCopyNames(_wellCopyVolumes);
   }
   
-  private String makeCopyNames(List<WellCopyVolume> wellCopyVolumes)
-  {
-    StringBuilder s = new StringBuilder();
-    for (WellCopyVolume volume : wellCopyVolumes) {
-      s.append(volume.getCopy().getName()).append(' ');
-    }
-    return s.toString();
-  }
-
   public BigDecimal getInitialMicroliterVolume()
   {
     return _initialMicroliterVolume;
@@ -105,14 +91,14 @@ public class WellVolume
     return _consumedMicroliterVolume;
   }
 
-  public BigDecimal getMaxRemainingMicroliterVolume()
+  public WellCopyVolume getMaxWellCopyVolume()
   {
-    return _maxRemainingMicroliterVolume;
+    return _maxWellCopyVolume;
   }
 
-  public BigDecimal getMinRemainingMicroliterVolume()
+  public WellCopyVolume getMinWellCopyVolume()
   {
-    return _minRemainingMicroliterVolume;
+    return _minWellCopyVolume;
   }
 
   public Well getWell()
@@ -156,10 +142,19 @@ public class WellVolume
   @Override
   public String toString()
   {
-    return _well.getWellKey() + "=" + _maxRemainingMicroliterVolume; 
+    return _well.getWellKey().toString(); 
   }
 
 
   // private methods
+
+  private String makeCopyNames(List<WellCopyVolume> wellCopyVolumes)
+  {
+    StringBuilder s = new StringBuilder();
+    for (WellCopyVolume volume : wellCopyVolumes) {
+      s.append(volume.getCopy().getName()).append(' ');
+    }
+    return s.toString();
+  }
 
 }
