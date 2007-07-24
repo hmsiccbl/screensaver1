@@ -34,10 +34,6 @@ class RNAiCherryPickScreeningSynchronizer extends ScreeningSynchronizer
   private static Logger log = Logger.getLogger(RNAiCherryPickScreeningSynchronizer.class);
   private static Pattern _numericalVolumeTransferredPattern =
     Pattern.compile(".*?([\\d.]+)(([nu][lL])?\\s*(x|X|and)\\s*(\\d+))?.*");
-  
-
-  // instance data members
-  
 
   
   // public constructors and methods
@@ -176,4 +172,3 @@ class RNAiCherryPickScreeningSynchronizer extends ScreeningSynchronizer
     return cherryPickRequest;
   }
 }
-

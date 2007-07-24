@@ -148,4 +148,3 @@ public class VisitVolumeTransferredPerWellParser
     return numericalVolumeTransferred > 10;
   }
 }
-
