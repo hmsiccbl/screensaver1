@@ -61,30 +61,6 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE);
   private static final Integer DEFAULT_PAGESIZE = PAGE_SIZE_SELECTIONS.get(1);
 
-  @SuppressWarnings("unchecked")
-  private static final SearchResults<Object> DUMMY_DATATABLE_BINDING_HACK = new SearchResults<Object>(Collections.EMPTY_LIST) {
-    @Override
-    protected List<TableColumn<Object>> getColumns() 
-    { 
-      ArrayList<TableColumn<Object>> columns = new ArrayList<TableColumn<Object>>();
-      columns.add(new TableColumn<Object>("dummy", "") {
-        @Override
-        public Object getCellValue(Object entity) { return null; }
-      });
-      return columns;
-    }
-
-    @Override
-    protected List<DataExporter<Object>> getDataExporters() { return null; }
-
-    @Override
-    protected void setEntityToView(Object entity) {}
-    
-    @Override
-    public String showSummaryView() { return null; }
-
-  };
-
   /**
    * Workaround for JSF suckiness. Two things: first, I need to use the returning a Map trick to
    * get around the problem that JSF EL doesn't allow parameterized methods. Second, I gotta
@@ -169,7 +145,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   
   /**
    * Get the data table.
-   * @return the data table
+   * @return the data table; might be null if <t:dataTable> doesn't define a binding attribute, so watch out!
    */
   public UIData getDataTable()
   {
