@@ -65,6 +65,9 @@ public class CompoundPubchemCidListUpgrader
   
   public void upgradeAllNonUpgradedCompounds()
   {
+    // once an initial run is complete, we can play around with this HQL to try to rerun
+    // the failed cases, both to see if they might succeed a second time, and to see what is
+    // the cause if they fail consistently
     final Iterator<Compound> nonUpgradedCompounds = _dao.findEntitiesByHql(
       Compound.class,
       "from Compound " +
