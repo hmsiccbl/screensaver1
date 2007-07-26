@@ -40,6 +40,11 @@ public class PubchemSmilesSearch extends PubchemPugClient
 
   private static Logger log = Logger.getLogger(PubchemSmilesSearch.class);
 
+
+  // private instance fields
+
+  private String _smiles;
+
   
   // public constructors and methods
 
@@ -50,8 +55,9 @@ public class PubchemSmilesSearch extends PubchemPugClient
    * @param smiles the smiles to search for PubChem CIDs with
    * @return the list of PubChem CIDs for this SMILES string. return null on error.
    */
-  public List<String> getPubchemCidsForSmiles(String smiles)
+  synchronized public List<String> getPubchemCidsForSmiles(String smiles)
   {
+    _smiles = smiles;
     Document searchDocument = createSearchDocumentForSmiles(smiles);
     Document outputDocument = getXMLForPugQuery(searchDocument);
     while (! isJobCompleted(outputDocument)) {
@@ -72,7 +78,7 @@ public class PubchemSmilesSearch extends PubchemPugClient
 
   public void reportError(String error)
   {
-    log.error(error);
+    log.error("Error for smiles '" + _smiles + "': " + error);
   }
   
   
@@ -202,19 +208,25 @@ public class PubchemSmilesSearch extends PubchemPugClient
   }
   
   private List<String> getResultsFromOutputDocument(Document outputDocument) {
+    Document resultsDocument = getXMLForEutilsQuery(
+      "efetch.fcgi",
+      "&db=pccompound" +
+      "&rettype=uilist&" +
+      "WebEnvRq=1&" +
+      "&query_key=" + getQueryKeyFromDocument(outputDocument) +
+      "&WebEnv=" + getWebenvFromDocument(outputDocument));
+
+    if (resultsDocument == null) {
+      // there was a connection error that has already been reported
+      return null;
+    }
+
     List<String> pubchemCids = new ArrayList<String>();
-      Document resultsDocument = getXMLForEutilsQuery(
-        "efetch.fcgi",
-        "&db=pccompound" +
-        "&rettype=uilist&" +
-        "WebEnvRq=1&" +
-        "&query_key=" + getQueryKeyFromDocument(outputDocument) +
-        "&WebEnv=" + getWebenvFromDocument(outputDocument));
-      NodeList nodes = resultsDocument.getElementsByTagName("Id");
-      for (int i = 0; i < nodes.getLength(); i++) {
-        Node node = nodes.item(i);
-        pubchemCids.add(getTextContent(node));
-      }
+    NodeList nodes = resultsDocument.getElementsByTagName("Id");
+    for (int i = 0; i < nodes.getLength(); i++) {
+      Node node = nodes.item(i);
+      pubchemCids.add(getTextContent(node));
+    }
     return pubchemCids;
   }
 
