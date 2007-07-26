@@ -838,7 +838,7 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   public String downloadCherryPickRequestPlateMappingFiles(final CherryPickRequest cherryPickRequestIn,
                                                            final Set<CherryPickAssayPlate> plateNames)
   {
-    logUserActivity("downloadScreenResult " + cherryPickRequestIn);
+    logUserActivity("downloadCherryPickRequestPlateMappingFiles " + cherryPickRequestIn);
 
     if (plateNames.size() == 0) {
       showMessage("cherryPicks.noPlatesSelected", "assayPlatesTable");
