@@ -22,24 +22,6 @@
 			sortAscending="#{searchResults.sortManager.sortAscending}"
 			width="100%">
 
-			<f:facet name="detailStamp">
-				<t:panelGroup rendered="#{searchResults.hasRowDetail}">
-					<t:aliasBean alias="#{detail}"
-						value="#{searchResults.currentRowDetail}">
-						<%@ include file="searchResultsRowDetail.jspf"%>
-					</t:aliasBean>
-				</t:panelGroup>
-			</f:facet>
-
-			<t:column id="toggleDetailColumn"
-				rendered="#{searchResults.hasRowDetail}">
-				<h:commandLink action="#{detailToggler.toggleDetail}">
-					<h:outputText
-						value="#{detailToggler.currentDetailExpanded ? \"[-]\" : \"[+]\"}"
-						styleClass="" />
-				</h:commandLink>
-			</t:column>
-
 			<t:columns id="dataColumns"
 				value="#{searchResults.sortManager.columnModel}" var="column"
 				styleClass="column">
@@ -81,6 +63,14 @@
 				</t:dataList>
 			</t:columns>
 		</t:dataTable>
+
+		<t:panelGrid
+			rendered="#{searchResults.hasRowDetail && !searchResults.editMode}"
+			columns="1">
+			<t:outputText value="Row Detail:" styleClass="label"/>
+			<%@include file="searchResultsRowDetail.jspf"%>
+			<t:commandButton image="/images/delete.png" action="#{searchResults.closeRowDetail}"/>
+		</t:panelGrid>
 
 		<t:outputText value="#{searchResultsFooter}" escape="false" />
 

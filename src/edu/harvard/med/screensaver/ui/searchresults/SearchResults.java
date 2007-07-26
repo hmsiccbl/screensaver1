@@ -120,8 +120,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   private UISelectOneBean<DataExporter<E>> _dataExporterSelector;
   private boolean _editMode;
   private boolean _hasEditableColumns;
-  private Map<E,SearchResults<?>> _rowDetails = new HashMap<E, SearchResults<?>>();
-
+  
   
   // public constructor
   
@@ -255,20 +254,9 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     return getCurrentSort().get(getCurrentIndex() - 1);
   }
   
-  public boolean getHasRowDetail() { return false; }
-  
-  final public SearchResults<?> getCurrentRowDetail()
-  {
-    SearchResults<?> detail = null;
-    if (getDataModel().isRowAvailable()) {
-      E entity = getEntity();
-      detail = _rowDetails.get(entity);
-      if (detail == null) {
-        detail = makeRowDetail(entity);
-        _rowDetails.put(entity, detail);
-      }
-    }
-    return detail == null ? DUMMY_DATATABLE_BINDING_HACK : detail;
+  final public boolean getHasRowDetail() 
+  { 
+    return getRequestMap().containsKey("detail");
   }
   
   protected SearchResults<?> makeRowDetail(E entity) 
@@ -343,6 +331,23 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     return getCurrentColumn().cellAction(getEntity());
   }
 
+  @SuppressWarnings("unchecked")
+  public String showRowDetail()
+  {
+    SearchResults<?> detail = null;
+    if (getDataModel().isRowAvailable()) {
+      E entity = getEntity();
+      detail = makeRowDetail(entity);
+      getRequestMap().put("detail", detail);
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String hideRowDetail()
+  {
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
   /**
    * Reset the state of the search results to display the first page.
    * 
@@ -457,7 +462,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
    */
   public String updateRowsPerPage()
   {
-    getDataTable().setFirst(0);
+    if (getDataTable() != null) { getDataTable().setFirst(0); }
     _currentPageIndex = 0;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -619,7 +624,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   {
     if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
       // update the search results summary table
-      getDataTable().setFirst(_currentPageIndex * _rowsPerPage.getSelection());
+      if (getDataTable() != null) { getDataTable().setFirst(_currentPageIndex * _rowsPerPage.getSelection()); }
     }
     else {
       // update the entity viewer
@@ -645,18 +650,11 @@ abstract public class SearchResults<E> extends AbstractBackingBean
       _dataModel = new ListDataModel(_currentSort);
       _currentSortType = newSortType;
     }
-    // reset all row detail, since MyFaces UIDataTable associates detail's state
-    // with row index, not with row data object (i.e. detail content won't
-    // "follow" re-ordered rows)
-    _rowDetails.clear();
   }
 
   private void setEditMode(boolean isEditMode)
   {
     _editMode = isEditMode;
     getSortManager().getColumnModel().updateVisibleColumns();
-    // reset all row detail, detail may be out of date after editing row object 
-    _rowDetails.clear();
-    
   }
 }

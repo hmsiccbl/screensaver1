@@ -58,12 +58,11 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume>
   // instance data members
   
   private LibrariesController _librariesController;
-
   private ScreensController _screensController;
+  private GenericEntityDAO _dao;
   private ArrayList<TableColumn<WellCopyVolume>> _columns;
   private Map<WellCopyVolume,BigDecimal> _newRemainingVolumes;
   private String _wellVolumeAdjustmentActivityComments;
-  private GenericEntityDAO _dao;
 
   
   // public constructors and methods
@@ -147,15 +146,14 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume>
         @Override
         public boolean isVisible() { return !isEditMode(); }
 
-        // TODO
-//        @Override
-//        public boolean isCommandLink() { return getEntity().getWellVolumeAdjustments().size() > 0; }
-//        
-//        @Override
-//        public Object cellAction(WellCopyVolume entity)
-//        {
-//          return REDISPLAY_PAGE_ACTION_RESULT; 
-//        }
+        @Override
+        public boolean isCommandLink() { return getEntity().getWellVolumeAdjustments().size() > 0; }
+        
+        @Override
+        public Object cellAction(WellCopyVolume entity)
+        {
+          return showRowDetail(); 
+        }
       });      
       _columns.add(new TableColumn<WellCopyVolume>("New Remaining Volume", "Enter new remaining volume", true) {
 
@@ -191,12 +189,6 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume>
   protected List<Integer[]> getCompoundSorts()
   {
     return COMPOUND_SORTS;
-  }
-  
-  @Override
-  public boolean getHasRowDetail()
-  { 
-    return true;
   }
   
   @Override

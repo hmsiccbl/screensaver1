@@ -11,9 +11,7 @@ package edu.harvard.med.screensaver.ui.libraries;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.DataExporter;
@@ -48,11 +46,10 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
   
   private LibrariesController _librariesController;
   private ScreensController _screensController;
+  private GenericEntityDAO _dao;
   private ArrayList<TableColumn<WellVolume>> _columns;
   private TableColumn<WellVolume> _maxRemainingVolumeColumn;
-  private Map<Object,SearchResults<WellVolumeAdjustment>> _rowDetails = new HashMap<Object,SearchResults<WellVolumeAdjustment>>();
-  private GenericEntityDAO _dao;
-
+  
   
   // public constructors and methods
 
@@ -120,6 +117,15 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
       _columns.add(new TableColumn<WellVolume>("Withdrawals/Adjustments", "The number of withdrawals and administrative adjustments made from this well (for all copies)", true) {
         @Override
         public Object getCellValue(WellVolume wellVolume) { return wellVolume.getWellVolumeAdjustments().size(); }
+
+        @Override
+        public boolean isCommandLink() { return getEntity().getWellVolumeAdjustments().size() > 0; }
+        
+        @Override
+        public Object cellAction(WellVolume wellVolume)
+        {
+          return showRowDetail(); 
+        }
       });      
     }
     return _columns;
@@ -131,12 +137,6 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
     return COMPOUND_SORTS;
   }
 
-  @Override
-  public boolean getHasRowDetail()
-  { 
-    return true;
-  }
-  
   @Override
   protected SearchResults<WellVolumeAdjustment> makeRowDetail(WellVolume wv)
   {

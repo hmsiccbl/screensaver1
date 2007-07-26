@@ -3,9 +3,9 @@
 <%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
-<f:subview id="searchResultsRowDetail" rendered="#{!empty detail && detail.resultsSize > 0}">
+<f:subview id="searchResultsRowDetail">
 
-	<t:dataTable id="detailTable" binding="#{detail.dataTable}"
+	<t:dataTable id="detailTable" 
 		value="#{detail.dataModel}" var="row" styleClass="standardTable"
 		headerClass="tableHeader" rowClasses="row1,row2"
 		sortColumn="#{detail.sortManager.sortColumnName}"
