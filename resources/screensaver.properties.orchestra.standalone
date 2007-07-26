@@ -6,7 +6,7 @@
 
 #appserver.dir=/www/screensaver.med.harvard.edu/tomcat/
 #deploy.dir=/www/screensaver.med.harvard.edu/docroot/screensaver/
-log4j.properties.resource=log4j.properties.debug
+log4j.properties.resource=log4j.properties.orchestra.prod
 
 
 ### run-time properties
