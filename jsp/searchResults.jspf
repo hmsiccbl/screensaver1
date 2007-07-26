@@ -65,11 +65,11 @@
 		</t:dataTable>
 
 		<t:panelGrid
-			rendered="#{searchResults.hasRowDetail && !searchResults.editMode}"
+			rendered="#{!empty searchResults.rowDetail && !searchResults.editMode}"
 			columns="1">
 			<t:outputText value="Row Detail:" styleClass="label"/>
 			<%@include file="searchResultsRowDetail.jspf"%>
-			<t:commandButton image="/images/delete.png" action="#{searchResults.closeRowDetail}"/>
+			<t:commandButton image="/images/delete.png" action="#{searchResults.hideRowDetail}"/>
 		</t:panelGrid>
 
 		<t:outputText value="#{searchResultsFooter}" escape="false" />

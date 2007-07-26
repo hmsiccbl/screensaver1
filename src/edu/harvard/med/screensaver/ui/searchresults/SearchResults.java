@@ -120,6 +120,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   private UISelectOneBean<DataExporter<E>> _dataExporterSelector;
   private boolean _editMode;
   private boolean _hasEditableColumns;
+  private SearchResults<?> _rowDetail;
   
   
   // public constructor
@@ -254,16 +255,21 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     return getCurrentSort().get(getCurrentIndex() - 1);
   }
   
-  final public boolean getHasRowDetail() 
-  { 
-    return getRequestMap().containsKey("detail");
-  }
-  
   protected SearchResults<?> makeRowDetail(E entity) 
   { 
     return null; 
   }
   
+  public SearchResults<?> getRowDetail()
+  {
+    return _rowDetail;
+  }
+
+  public void setRowDetail(SearchResults<?> rowDetail)
+  {
+    _rowDetail = rowDetail;
+  }
+
   /**
    * Get the total size of the search results.
    * @return the total size of the search results
@@ -334,17 +340,16 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   @SuppressWarnings("unchecked")
   public String showRowDetail()
   {
-    SearchResults<?> detail = null;
     if (getDataModel().isRowAvailable()) {
       E entity = getEntity();
-      detail = makeRowDetail(entity);
-      getRequestMap().put("detail", detail);
+      _rowDetail = makeRowDetail(entity);
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   public String hideRowDetail()
   {
+    _rowDetail = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
@@ -622,6 +627,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
    */
   private String gotoCurrentIndex()
   {
+    hideRowDetail();
     if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
       // update the search results summary table
       if (getDataTable() != null) { getDataTable().setFirst(_currentPageIndex * _rowsPerPage.getSelection()); }
@@ -641,6 +647,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
    */
   private void doSort()
   {
+    hideRowDetail();
     // TODO: reinstate cached sort orders by column & direction
     Pair<TableColumn<E>,SortDirection> newSortType = 
       new Pair<TableColumn<E>,SortDirection>(getSortManager().getSortColumn(), getSortManager().getSortDirection());
@@ -654,6 +661,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
 
   private void setEditMode(boolean isEditMode)
   {
+    hideRowDetail();
     _editMode = isEditMode;
     getSortManager().getColumnModel().updateVisibleColumns();
   }
