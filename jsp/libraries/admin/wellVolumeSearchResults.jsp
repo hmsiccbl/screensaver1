@@ -1,16 +1,16 @@
-<%@ taglib uri="http://java.sun.com/jsf/html"        prefix="h"     %>
-<%@ taglib uri="http://java.sun.com/jsf/core"        prefix="f"     %>
-<%@ taglib uri="http://myfaces.apache.org/tomahawk"  prefix="t"     %>
-<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
+<%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
 <f:subview id="wellVolumeSearchResultsViewer">
 
 	<h:form id="wellVolumeSearchResultsViewerForm">
 
 		<t:panelTabbedPane serverSideTabSwitch="true"
-			style="color:white"
 			activeTabStyleClass="activeTab" inactiveTabStyleClass="inactiveTab"
 			activePanelTabVar="isActivePanel">
+
 			<t:panelTab id="wellVolumeSearchResultsTab" label="Well Volumes">
 				<t:aliasBean alias="#{searchResults}"
 					value="#{wellCopyVolumeSearchResultsViewer.wellVolumeSearchResults}">
@@ -22,6 +22,7 @@
 				label="Well/Copy Volumes">
 				<t:aliasBean alias="#{searchResults}"
 					value="#{wellCopyVolumeSearchResultsViewer.searchResults}">
+
 					<t:buffer into="#{searchResultsFooter}">
 						<t:panelGrid rendered="#{searchResults.editMode}" columns="1">
 							<t:outputLabel for="wellVolumeAdjustmentActivityComments"
