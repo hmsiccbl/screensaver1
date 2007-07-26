@@ -57,6 +57,8 @@ public class Compound extends AbstractEntity
   private Set<String> _casNumbers = new HashSet<String>();
   private Set<String> _nscNumbers = new HashSet<String>();
   private Set<String> _pubchemCids = new HashSet<String>();
+  private boolean     _isPubchemCidListUpgraderSuccessful;
+  private boolean     _isPubchemCidListUpgraderFailed;
   private String      _chembankId;
   
   /** used to compute molecular mass and molecular formula. */
@@ -412,6 +414,38 @@ public class Compound extends AbstractEntity
   public boolean removePubchemCid(String pubchemCid)
   {
     return _pubchemCids.remove(pubchemCid);
+  }
+
+  /**
+   * @return
+   * @hibernate.property
+   *   column="is_pubchem_cid_list_upgrader_failed"
+   *   not-null="true"
+   */
+  public boolean isPubchemCidListUpgraderFailed() {
+    return _isPubchemCidListUpgraderFailed;
+  }
+
+  public void setPubchemCidListUpgraderFailed(
+    boolean isPubchemCidListUpgraderFailed)
+  {
+    _isPubchemCidListUpgraderFailed = isPubchemCidListUpgraderFailed;
+  }
+
+  /**
+   * @return
+   * @hibernate.property
+   *   column="is_pubchem_cid_list_upgrader_successful"
+   *   not-null="true"
+   */
+  public boolean isPubchemCidListUpgraderSuccessful() {
+    return _isPubchemCidListUpgraderSuccessful;
+  }
+
+  public void setPubchemCidListUpgraderSuccessful(
+    boolean isPubchemCidListUpgraderSuccessful)
+  {
+    _isPubchemCidListUpgraderSuccessful = isPubchemCidListUpgraderSuccessful;
   }
 
   /**
