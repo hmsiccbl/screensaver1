@@ -18,8 +18,8 @@ LIBS=`for s in $BUILD/lib/*.jar ; do printf ":$s" ; done`
 CLASSPATH="$BUILD/classes$LIBS"
 JAVA=/opt/java/jdk1.5/bin/java
 
-$JAVA -Xmx1500m -cp $CLASSPATH edu.harvard.med.screensaver.db.screendb.OrchestraStandaloneScreenDBSynchronizer -S pgsql.cl.med.harvard.edu -D screendb -U $USER > screendbsynchronizer.out 2> screendbsynchronizer.err
+$JAVA -Xmx1500m -cp $CLASSPATH edu.harvard.med.screensaver.db.screendb.OrchestraStandaloneScreenDBSynchronizer -S pgsql.cl.med.harvard.edu -D screendb -U $USER > screendb_synchronizer.out 2> screendb_synchronizer.err
 
-echo screendbsynchronizer.sh is complete
-echo program output is in $SCREENSAVER_CHECKOUT/screendbsynchronizer.{out,err}
+echo screendb_synchronizer.sh is complete
+echo program output is in $SCREENSAVER_CHECKOUT/screendb_synchronizer.{out,err}
 
