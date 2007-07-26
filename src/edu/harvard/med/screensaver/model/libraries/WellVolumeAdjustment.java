@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 
@@ -45,11 +46,13 @@ public class WellVolumeAdjustment extends AbstractEntity
   private Copy _copy;
   private Well _well;
   private BigDecimal _microliterVolume;
+  private LabCherryPick _labCherryPick;
+  private WellVolumeCorrectionActivity _wellVolumeCorrectionActivity;
 
   
   // public constructors and methods
 
-  public WellVolumeAdjustment(Copy copy, Well well, BigDecimal microliterVolume)
+  public WellVolumeAdjustment(Copy copy, Well well, BigDecimal microliterVolume, LabCherryPick labCherryPick)
   {
     if (microliterVolume.scale() != Well.VOLUME_SCALE) {
       throw new IllegalArgumentException("scale must be " + Well.VOLUME_SCALE);
@@ -57,6 +60,18 @@ public class WellVolumeAdjustment extends AbstractEntity
     _copy = copy;
     _well = well;
     _microliterVolume = microliterVolume;
+    _labCherryPick = labCherryPick;
+  }
+  
+  public WellVolumeAdjustment(Copy copy, Well well, BigDecimal microliterVolume, WellVolumeCorrectionActivity wellVolumeCorrectionActivity)
+  {
+    if (microliterVolume.scale() != Well.VOLUME_SCALE) {
+      throw new IllegalArgumentException("scale must be " + Well.VOLUME_SCALE);
+    }
+    _copy = copy;
+    _well = well;
+    _microliterVolume = microliterVolume;
+    _wellVolumeCorrectionActivity = wellVolumeCorrectionActivity;
   }
   
   @Override
@@ -128,7 +143,58 @@ public class WellVolumeAdjustment extends AbstractEntity
 
   
   // protected methods
+
+  /**
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.screens.LabCherryPick"
+   *   column="lab_cherry_pick_id"
+   *   not-null="false"
+   *   foreign-key="fk_well_volume_adjustment_to_lab_cherry_pick"
+   *   cascade="none"
+   */
+  public LabCherryPick getLabCherryPick()
+  {
+    return _labCherryPick;
+  }
+
+  private void setLabCherryPick(LabCherryPick labCherryPick)
+  {
+    _labCherryPick = labCherryPick;
+  }
+
+  /**
+   * @hibernate.many-to-one
+   *   class="edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity"
+   *   column="well_volume_correction_activity_id"
+   *   not-null="false"
+   *   foreign-key="fk_well_volume_adjustment_to_well_volume_correction_activity"
+   *   cascade="none"
+   */
+  public WellVolumeCorrectionActivity getWellVolumeCorrectionActivity()
+  {
+    return _wellVolumeCorrectionActivity;
+  }
+
+  private void setWellVolumeCorrectionActivity(WellVolumeCorrectionActivity wellVolumeCorrectionActivity)
+  {
+    _wellVolumeCorrectionActivity = wellVolumeCorrectionActivity;
+  }
   
+  public Activity getRelatedActivity()
+  {
+    if (_labCherryPick != null) {
+      if (_labCherryPick.isPlated() || _labCherryPick.isFailed()) {
+        return _labCherryPick.getAssayPlate().getCherryPickLiquidTransfer();
+      }
+    }
+    else {
+      if (_wellVolumeCorrectionActivity != null) {
+        return _wellVolumeCorrectionActivity;
+      }
+    }
+    return null;
+  }
+
   /**
    * @motivation for Hibernate & CGLIB2
    */

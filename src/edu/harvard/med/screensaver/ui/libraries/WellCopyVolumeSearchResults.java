@@ -29,6 +29,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.control.LibrariesControllerImpl;
+import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 import edu.harvard.med.screensaver.ui.util.Messages;
@@ -57,6 +58,8 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume>
   // instance data members
   
   private LibrariesController _librariesController;
+
+  private ScreensController _screensController;
   private ArrayList<TableColumn<WellCopyVolume>> _columns;
   private Map<WellCopyVolume,BigDecimal> _newRemainingVolumes;
   private String _wellVolumeAdjustmentActivityComments;
@@ -66,12 +69,14 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume>
   // public constructors and methods
 
   public WellCopyVolumeSearchResults(Collection<WellCopyVolume> unsortedResults,
-                                 LibrariesController librariesController,
-                                 GenericEntityDAO dao,
-                                 Messages messages)
+                                     LibrariesController librariesController,
+                                     ScreensController screensController,
+                                     GenericEntityDAO dao,
+                                     Messages messages)
   {
     super(unsortedResults);
     _librariesController = librariesController;
+    _screensController = screensController;
     _dao = dao;
     setCurrentScreensaverUser(((LibrariesControllerImpl) _librariesController).getCurrentScreensaverUser());
     setMessages(messages);
@@ -187,7 +192,31 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume>
   {
     return COMPOUND_SORTS;
   }
-
+  
+  @Override
+  public boolean getHasRowDetail()
+  { 
+    return true;
+  }
+  
+  @Override
+  protected SearchResults<WellVolumeAdjustment> makeRowDetail(WellCopyVolume wcv)
+  {
+    List<WellVolumeAdjustment> wvas = new ArrayList<WellVolumeAdjustment>(wcv.getWellVolumeAdjustments().size());
+    for (WellVolumeAdjustment wva : wcv.getWellVolumeAdjustments()) {
+      WellVolumeAdjustment wva2 = _dao.reloadEntity(wva, 
+                                                    true, 
+                                                    "well", 
+                                                    "copy", 
+                                                    "labCherryPick.wellVolumeAdjustments", 
+                                                    "labCherryPick.cherryPickRequest",
+                                                    "labCherryPick.assayPlate.hbnCherryPickLiquidTransfer",
+                                                    "wellVolumeCorrectionActivity.hbnPerformedBy");
+      wvas.add(wva2);
+    }
+    return new WellVolumeAdjustmentSearchResults(wvas, _screensController);
+  }
+  
   @Override
   public String showSummaryView()
   {
@@ -234,13 +263,14 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume>
           // TODO
           //wellVolumeCorrectionActivity.setApprovedBy();
           for (Map.Entry<WellCopyVolume,BigDecimal> entry : _newRemainingVolumes.entrySet()) {
-            WellCopyVolume wellVolume = entry.getKey();
+            WellCopyVolume wellCopyVolume = entry.getKey();
             BigDecimal newRemainingVolume = entry.getValue();
             WellVolumeAdjustment wellVolumeAdjustment = 
-              new WellVolumeAdjustment(wellVolume.getCopy(),
-                                       wellVolume.getWell(),
-                                       newRemainingVolume.subtract(wellVolume.getRemainingMicroliterVolume()));
-            wellVolume.addWellVolumeAdjustment(wellVolumeAdjustment);
+              new WellVolumeAdjustment(wellCopyVolume.getCopy(),
+                                       wellCopyVolume.getWell(),
+                                       newRemainingVolume.subtract(wellCopyVolume.getRemainingMicroliterVolume()),
+                                       wellVolumeCorrectionActivity);
+            wellCopyVolume.addWellVolumeAdjustment(wellVolumeAdjustment);
             wellVolumeCorrectionActivity.getWellVolumeAdjustments().add(wellVolumeAdjustment);
           }
           _dao.persistEntity(wellVolumeCorrectionActivity);

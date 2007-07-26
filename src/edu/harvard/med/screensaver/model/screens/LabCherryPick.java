@@ -31,10 +31,10 @@ import org.apache.log4j.Logger;
 
 /**
  * A Hibernate entity bean representing a lab cherry pick. See
- * {@link #CherryPickRequest} for explanation.
+ * {@link CherryPickRequest} for explanation.
  * 
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @hibernate.class lazy="false"
  */
 public class LabCherryPick extends AbstractEntity
@@ -224,7 +224,7 @@ public class LabCherryPick extends AbstractEntity
    * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment"
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
-  @ToManyRelationship(unidirectional=true,inverseProperty="wellVolumeAdjustments")
+  @ToManyRelationship(inverseProperty="wellVolumeAdjustments")
   public Set<WellVolumeAdjustment> getWellVolumeAdjustments()
   {
     return _wellVolumeAdjustments;
@@ -270,7 +270,8 @@ public class LabCherryPick extends AbstractEntity
       WellVolumeAdjustment wellVolumeAdjustment = 
         new WellVolumeAdjustment(sourceCopy,
                                  getSourceWell(),
-                                 getCherryPickRequest().getMicroliterTransferVolumePerWellApproved().negate());
+                                 getCherryPickRequest().getMicroliterTransferVolumePerWellApproved().negate(),
+                                 this);
       _wellVolumeAdjustments.add(wellVolumeAdjustment);
     }
   }

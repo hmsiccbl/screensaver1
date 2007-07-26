@@ -207,11 +207,11 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         Well wellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
         Well wellB02 = genericEntityDao.findEntityById(Well.class, "00001:B02");
         Well wellC03 = genericEntityDao.findEntityById(Well.class, "00001:C03");
-        wellVolumeAdjustments.add(new WellVolumeAdjustment(copy1, wellA01, new BigDecimal("-1.00")));
-        wellVolumeAdjustments.add(new WellVolumeAdjustment(copy2, wellA01, new BigDecimal("-1.00")));
-        wellVolumeAdjustments.add(new WellVolumeAdjustment(copy1, wellB02, new BigDecimal("0.00")));
-        wellVolumeAdjustments.add(new WellVolumeAdjustment(copy2, wellB02, new BigDecimal("-1.00")));
-        wellVolumeAdjustments.add(new WellVolumeAdjustment(copy2, wellC03, requestVolume));
+        wellVolumeAdjustments.add(new WellVolumeAdjustment(copy1, wellA01, new BigDecimal("-1.00"), wellVolumeCorrectionActivity));
+        wellVolumeAdjustments.add(new WellVolumeAdjustment(copy2, wellA01, new BigDecimal("-1.00"), wellVolumeCorrectionActivity));
+        wellVolumeAdjustments.add(new WellVolumeAdjustment(copy1, wellB02, new BigDecimal("0.00"), wellVolumeCorrectionActivity));
+        wellVolumeAdjustments.add(new WellVolumeAdjustment(copy2, wellB02, new BigDecimal("-1.00"), wellVolumeCorrectionActivity));
+        wellVolumeAdjustments.add(new WellVolumeAdjustment(copy2, wellC03, requestVolume, wellVolumeCorrectionActivity));
         genericEntityDao.persistEntity(wellVolumeCorrectionActivity);
       }
     });

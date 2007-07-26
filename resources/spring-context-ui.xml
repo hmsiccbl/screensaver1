@@ -147,6 +147,9 @@
       name="librariesDao"
       ref="librariesDao" />
     <property
+      name="screensController"
+      ref="screensController" />
+    <property
       name="wellFinder"
       ref="wellFinder" />
     <property
@@ -259,6 +262,12 @@
     <property
       name="librariesController"
       ref="librariesController" />
+    <property
+      name="screensController"
+      ref="screensController" />
+    <property
+      name="genericEntityDao"
+      ref="genericEntityDao" />
     <aop:scoped-proxy/>
   </bean>
 

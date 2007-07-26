@@ -11,10 +11,15 @@ package edu.harvard.med.screensaver.ui.libraries;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.DataExporter;
+import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
@@ -42,17 +47,24 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
   // instance data members
   
   private LibrariesController _librariesController;
+  private ScreensController _screensController;
   private ArrayList<TableColumn<WellVolume>> _columns;
   private TableColumn<WellVolume> _maxRemainingVolumeColumn;
+  private Map<Object,SearchResults<WellVolumeAdjustment>> _rowDetails = new HashMap<Object,SearchResults<WellVolumeAdjustment>>();
+  private GenericEntityDAO _dao;
 
   
   // public constructors and methods
 
   public WellVolumeSearchResults(Collection<WellVolume> unsortedResults,
-                                 LibrariesController librariesController)
+                                 LibrariesController librariesController,
+                                 ScreensController screensController,
+                                 GenericEntityDAO dao)
   {
     super(unsortedResults);
     _librariesController = librariesController;
+    _screensController = screensController;
+    _dao = dao;
   }
 
   @Override
@@ -107,7 +119,7 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
       });      
       _columns.add(new TableColumn<WellVolume>("Withdrawals/Adjustments", "The number of withdrawals and administrative adjustments made from this well (for all copies)", true) {
         @Override
-        public Object getCellValue(WellVolume wellVolume) { return wellVolume.getWellVolumeAdjustments(); }
+        public Object getCellValue(WellVolume wellVolume) { return wellVolume.getWellVolumeAdjustments().size(); }
       });      
     }
     return _columns;
@@ -119,6 +131,30 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
     return COMPOUND_SORTS;
   }
 
+  @Override
+  public boolean getHasRowDetail()
+  { 
+    return true;
+  }
+  
+  @Override
+  protected SearchResults<WellVolumeAdjustment> makeRowDetail(WellVolume wv)
+  {
+    List<WellVolumeAdjustment> wvas = new ArrayList<WellVolumeAdjustment>(wv.getWellVolumeAdjustments().size());
+    for (WellVolumeAdjustment wva : wv.getWellVolumeAdjustments()) {
+      WellVolumeAdjustment wva2 = _dao.reloadEntity(wva, 
+                                                    true, 
+                                                    "well", 
+                                                    "copy", 
+                                                    "labCherryPick.wellVolumeAdjustments", 
+                                                    "labCherryPick.cherryPickRequest",
+                                                    "labCherryPick.assayPlate.hbnCherryPickLiquidTransfer",
+                                                    "wellVolumeCorrectionActivity.hbnPerformedBy");
+      wvas.add(wva2);
+    }
+    return new WellVolumeAdjustmentSearchResults(wvas, _screensController);
+  }
+  
   @Override
   public String showSummaryView()
   {

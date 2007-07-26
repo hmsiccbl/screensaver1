@@ -61,6 +61,30 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE);
   private static final Integer DEFAULT_PAGESIZE = PAGE_SIZE_SELECTIONS.get(1);
 
+  @SuppressWarnings("unchecked")
+  private static final SearchResults<Object> DUMMY_DATATABLE_BINDING_HACK = new SearchResults<Object>(Collections.EMPTY_LIST) {
+    @Override
+    protected List<TableColumn<Object>> getColumns() 
+    { 
+      ArrayList<TableColumn<Object>> columns = new ArrayList<TableColumn<Object>>();
+      columns.add(new TableColumn<Object>("dummy", "") {
+        @Override
+        public Object getCellValue(Object entity) { return null; }
+      });
+      return columns;
+    }
+
+    @Override
+    protected List<DataExporter<Object>> getDataExporters() { return null; }
+
+    @Override
+    protected void setEntityToView(Object entity) {}
+    
+    @Override
+    public String showSummaryView() { return null; }
+
+  };
+
   /**
    * Workaround for JSF suckiness. Two things: first, I need to use the returning a Map trick to
    * get around the problem that JSF EL doesn't allow parameterized methods. Second, I gotta
@@ -96,6 +120,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   private UISelectOneBean<DataExporter<E>> _dataExporterSelector;
   private boolean _editMode;
   private boolean _hasEditableColumns;
+  private Map<E,SearchResults<?>> _rowDetails = new HashMap<E, SearchResults<?>>();
 
   
   // public constructor
@@ -121,8 +146,11 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   {
     if (_sortManager == null) {
       List<TableColumn<E>> columns = getColumns();
+      if (columns == null) {
+        columns = new ArrayList<TableColumn<E>>();
+      }
       initializeTableSortManager(columns);
-      initializeCompoundSortColumns();
+      initializeCompoundSortColumns(columns);
       initializeHasEditableColumns(columns);
     }
     
@@ -225,6 +253,27 @@ abstract public class SearchResults<E> extends AbstractBackingBean
       return null;
     }
     return getCurrentSort().get(getCurrentIndex() - 1);
+  }
+  
+  public boolean getHasRowDetail() { return false; }
+  
+  final public SearchResults<?> getCurrentRowDetail()
+  {
+    SearchResults<?> detail = null;
+    if (getDataModel().isRowAvailable()) {
+      E entity = getEntity();
+      detail = _rowDetails.get(entity);
+      if (detail == null) {
+        detail = makeRowDetail(entity);
+        _rowDetails.put(entity, detail);
+      }
+    }
+    return detail == null ? DUMMY_DATATABLE_BINDING_HACK : detail;
+  }
+  
+  protected SearchResults<?> makeRowDetail(E entity) 
+  { 
+    return null; 
   }
   
   /**
@@ -550,13 +599,13 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     }
   }
 
-  private void initializeCompoundSortColumns()
+  private void initializeCompoundSortColumns(List<TableColumn<E>> columns)
   {
     List<Integer[]> compoundSorts = getCompoundSorts();
     for (Integer[] compoundSort : compoundSorts) {
       List<TableColumn<E>> compoundSortColumns = new ArrayList<TableColumn<E>>();
       for (Integer colIndex : compoundSort) {
-        compoundSortColumns.add(getColumns().get(colIndex));
+        compoundSortColumns.add(columns.get(colIndex));
       }
       _sortManager.addCompoundSortColumns(compoundSortColumns);
     }
@@ -596,11 +645,18 @@ abstract public class SearchResults<E> extends AbstractBackingBean
       _dataModel = new ListDataModel(_currentSort);
       _currentSortType = newSortType;
     }
+    // reset all row detail, since MyFaces UIDataTable associates detail's state
+    // with row index, not with row data object (i.e. detail content won't
+    // "follow" re-ordered rows)
+    _rowDetails.clear();
   }
 
   private void setEditMode(boolean isEditMode)
   {
     _editMode = isEditMode;
     getSortManager().getColumnModel().updateVisibleColumns();
+    // reset all row detail, detail may be out of date after editing row object 
+    _rowDetails.clear();
+    
   }
 }

@@ -1222,10 +1222,10 @@ public class ComplexDAOTest extends AbstractSpringTest
         Well wellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
         Well wellB02 = genericEntityDao.findEntityById(Well.class, "00001:B02");
         /*Well wellC03 =*/ genericEntityDao.findEntityById(Well.class, "00001:C03");
-        wellVolumeAdjustments.add(new WellVolumeAdjustment(copyD, wellA01, new BigDecimal("-1.00")));
-        wellVolumeAdjustments.add(new WellVolumeAdjustment(copyF, wellA01, new BigDecimal("-1.00")));
-        wellVolumeAdjustments.add(new WellVolumeAdjustment(copyD, wellB02, new BigDecimal("-1.00")));
-        wellVolumeAdjustments.add(new WellVolumeAdjustment(copyF, wellB02, new BigDecimal("-1.00")));
+        wellVolumeAdjustments.add(new WellVolumeAdjustment(copyD, wellA01, new BigDecimal("-1.00"), wellVolumeCorrectionActivity));
+        wellVolumeAdjustments.add(new WellVolumeAdjustment(copyF, wellA01, new BigDecimal("-1.00"), wellVolumeCorrectionActivity));
+        wellVolumeAdjustments.add(new WellVolumeAdjustment(copyD, wellB02, new BigDecimal("-1.00"), wellVolumeCorrectionActivity));
+        wellVolumeAdjustments.add(new WellVolumeAdjustment(copyF, wellB02, new BigDecimal("-1.00"), wellVolumeCorrectionActivity));
         genericEntityDao.persistEntity(wellVolumeCorrectionActivity);
         
         RNAiCherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, 2);

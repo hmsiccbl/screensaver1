@@ -1042,7 +1042,8 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
     
     Collection<WellCopyVolume> wellCopyVolumes = _librariesDao.findWellCopyVolumes(cherryPickRequest);
     WellCopyVolumeSearchResults wellCopyVolumeSearchResults = new WellCopyVolumeSearchResults(wellCopyVolumes, 
-                                                                                              _librariesController, 
+                                                                                              _librariesController,
+                                                                                              this,
                                                                                               _dao,
                                                                                               getMessages());
     return _librariesController.viewWellCopyVolumeSearchResults(wellCopyVolumeSearchResults);

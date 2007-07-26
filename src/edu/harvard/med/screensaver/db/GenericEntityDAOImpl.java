@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
@@ -86,6 +87,15 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
 
   private static Logger log = Logger.getLogger(GenericEntityDAOImpl.class);
   private static final Logger entityInflatorLog = Logger.getLogger(GenericEntityDAOImpl.class.getName() + ".EntityInflator");
+  
+  public static String makeQueryIdList(List<? extends AbstractEntity> entities)
+  {
+    List<Object> ids = new ArrayList<Object>(entities.size());
+    for (AbstractEntity entity : entities) {
+      ids.add(entity.getEntityId());
+    }
+    return StringUtils.makeListString(ids, ", ");
+  }
 
 
   // instance data members

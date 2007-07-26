@@ -3,8 +3,8 @@
 <%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
-<f:subview id="searchResultsSubview" rendered="#{!empty searchResults}">
-	<t:panelGrid columns="1" width="100%">
+<f:subview id="searchResultsSubview">
+	<t:panelGrid id="searchResultsPanel" columns="1" width="100%">
 
 		<t:aliasBean alias="#{navigator}" value="#{searchResults}">
 			<%@ include file="searchResultsNavPanel.jspf"%>
@@ -15,14 +15,34 @@
 		<t:dataTable id="searchResultsTable"
 			binding="#{searchResults.dataTable}"
 			value="#{searchResults.dataModel}" var="row"
-			rows="#{searchResults.rowsPerPageSelector.selection}" rendered="true"
-			styleClass="standardTable" headerClass="tableHeader"
-			rowClasses="row1,row2"
+			rows="#{searchResults.rowsPerPageSelector.selection}"
+			varDetailToggler="detailToggler" styleClass="standardTable"
+			headerClass="tableHeader" rowClasses="row1,row2"
 			sortColumn="#{searchResults.sortManager.sortColumnName}"
 			sortAscending="#{searchResults.sortManager.sortAscending}"
 			width="100%">
-			<t:columns value="#{searchResults.sortManager.columnModel}"
-				var="column" styleClass="column">
+
+			<f:facet name="detailStamp">
+				<t:panelGroup rendered="#{searchResults.hasRowDetail}">
+					<t:aliasBean alias="#{detail}"
+						value="#{searchResults.currentRowDetail}">
+						<%@ include file="searchResultsRowDetail.jspf"%>
+					</t:aliasBean>
+				</t:panelGroup>
+			</f:facet>
+
+			<t:column id="toggleDetailColumn"
+				rendered="#{searchResults.hasRowDetail}">
+				<h:commandLink action="#{detailToggler.toggleDetail}">
+					<h:outputText
+						value="#{detailToggler.currentDetailExpanded ? \"[-]\" : \"[+]\"}"
+						styleClass="" />
+				</h:commandLink>
+			</t:column>
+
+			<t:columns id="dataColumns"
+				value="#{searchResults.sortManager.columnModel}" var="column"
+				styleClass="column">
 				<f:facet name="header">
 					<t:commandSortHeader columnName="#{column.name}" arrow="false"
 						immediate="false" title="#{column.description}">

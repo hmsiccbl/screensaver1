@@ -75,6 +75,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
+  private ScreensController _screensController;
   private WellFinder _wellFinder;
   private LibrariesBrowser _librariesBrowser;
   private LibraryViewer _libraryViewer;
@@ -103,6 +104,11 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
   public void setLibrariesDao(LibrariesDAO librariesDao)
   {
     _librariesDao = librariesDao;
+  }
+  
+  public void setScreensController(ScreensController screensController)
+  {
+    _screensController = screensController;
   }
 
   public void setWellFinder(WellFinder wellFinder)
@@ -315,9 +321,10 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
         }
         WellCopyVolumeSearchResults searchResults =
           new WellCopyVolumeSearchResults(foundWellCopyVolumes,
-                                      LibrariesControllerImpl.this,
-                                      _dao,
-                                      getMessages());
+                                          LibrariesControllerImpl.this,
+                                          _screensController,
+                                          _dao,
+                                          getMessages());
         result[0] = viewWellCopyVolumeSearchResults(searchResults);
       }
     });
@@ -399,6 +406,7 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
         WellCopyVolumeSearchResults wellCopyVolumeSearchResults = 
           new WellCopyVolumeSearchResults(wellCopyVolumes,
                                           LibrariesControllerImpl.this,
+                                          _screensController,
                                           _dao,
                                           getMessages());
         result[0] = viewWellCopyVolumeSearchResults(wellCopyVolumeSearchResults);

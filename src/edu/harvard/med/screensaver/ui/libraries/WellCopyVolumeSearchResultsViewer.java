@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.control.ScreensController;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResultsViewer;
 
@@ -27,7 +29,9 @@ import org.apache.commons.collections.map.MultiValueMap;
 public class WellCopyVolumeSearchResultsViewer extends SearchResultsViewer<WellCopyVolume>
 {
   private LibrariesController _librariesController;
+  private ScreensController _screensController;
   private WellVolumeSearchResults _wellVolumeSearchResults;
+  private GenericEntityDAO _dao;
 
 
   public void setLibrariesController(LibrariesController librariesController)
@@ -35,6 +39,16 @@ public class WellCopyVolumeSearchResultsViewer extends SearchResultsViewer<WellC
     _librariesController = librariesController;
   }
 
+  public void setScreensController(ScreensController screensController)
+  {
+    _screensController = screensController;
+  }
+
+  public void setGenericEntityDao(GenericEntityDAO dao) 
+  {
+    _dao = dao;
+  }
+  
   @Override
   @SuppressWarnings("unchecked")
   public void setSearchResults(SearchResults<WellCopyVolume> wellCopyVolumeSearchResults)
@@ -53,7 +67,7 @@ public class WellCopyVolumeSearchResultsViewer extends SearchResultsViewer<WellC
       wellVolumes.add(new WellVolume(wellCopyVolumes.get(0).getWell(),
                                      wellCopyVolumes));
     }
-    _wellVolumeSearchResults = new WellVolumeSearchResults(wellVolumes, _librariesController);
+    _wellVolumeSearchResults = new WellVolumeSearchResults(wellVolumes, _librariesController, _screensController, _dao);
   }
 
   public WellVolumeSearchResults getWellVolumeSearchResults()

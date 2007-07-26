@@ -72,7 +72,7 @@ public class WellVolumeCorrectionActivity extends AdministrativeActivity
    *   class="edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment"
    * @motivation for hibernate and maintenance of bi-directional relationships
    */
-  @ToManyRelationship(unidirectional=true,inverseProperty="wellVolumeAdjustments")
+  @ToManyRelationship(inverseProperty="wellVolumeAdjustments")
   public Set<WellVolumeAdjustment> getWellVolumeAdjustments()
   {
     return _wellVolumeAdjustments;

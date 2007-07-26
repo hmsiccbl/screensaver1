@@ -18,6 +18,7 @@ import java.util.List;
 
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 
 import org.apache.log4j.Logger;
 
@@ -36,7 +37,7 @@ public class WellVolume
   private BigDecimal _consumedMicroliterVolume;
   private WellCopyVolume _maxWellCopyVolume;
   private WellCopyVolume _minWellCopyVolume;
-  private int _volumeAdjustments;
+  private List<WellVolumeAdjustment> _volumeAdjustments;
   private String _copies;
 
 
@@ -67,6 +68,7 @@ public class WellVolume
     if (wellCopyVolumes.size() > 0) {
       _minWellCopyVolume = _maxWellCopyVolume = wellCopyVolumes.iterator().next();
     }
+    _volumeAdjustments = new ArrayList<WellVolumeAdjustment>();
     for (WellCopyVolume wellCopyVolume : wellCopyVolumes) {
       assert wellCopyVolume.getWell().equals(_well) : "all wellCopyVolumes must be for same well";
       _consumedMicroliterVolume = _consumedMicroliterVolume.add(wellCopyVolume.getConsumedMicroliterVolume());
@@ -76,7 +78,7 @@ public class WellVolume
       if (wellCopyVolume.getRemainingMicroliterVolume().compareTo(_maxWellCopyVolume.getRemainingMicroliterVolume()) > 0) {
         _maxWellCopyVolume = wellCopyVolume;
       }
-      _volumeAdjustments += wellCopyVolume.getWellVolumeAdjustments().size();
+      _volumeAdjustments.addAll(wellCopyVolume.getWellVolumeAdjustments());
     }
     _copies = makeCopyNames(_wellCopyVolumes);
   }
@@ -116,7 +118,7 @@ public class WellVolume
     return _copies;
   }
   
-  public int getWellVolumeAdjustments()
+  public List<WellVolumeAdjustment> getWellVolumeAdjustments()
   {
     return _volumeAdjustments;
   }
