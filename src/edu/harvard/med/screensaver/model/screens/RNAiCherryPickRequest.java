@@ -57,7 +57,7 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   // instance data members
 
   private String _assayProtocol;
-  private RNAiCherryPickScreening _rnaiCherryPickScreening;
+  private Set<RNAiCherryPickScreening> _rnaiCherryPickScreenings = new HashSet<RNAiCherryPickScreening>();
 
 
   public RNAiCherryPickRequest(Screen screen,
@@ -127,21 +127,28 @@ public class RNAiCherryPickRequest extends CherryPickRequest
    * Get the set of RNAi cherry pick assay
    *
    * @return the RNAi cherry pick assay
-   * @hibernate.one-to-one
+   * @hibernate.set
+   *   cascade="save-update"
+   *   inverse="true"
+   *   lazy="true"
+   * @hibernate.collection-key
+   *   column="activity_id"
+   * @hibernate.collection-one-to-many
    *   class="edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening"
-   *   property-ref="rnaiCherryPickRequest"
-   *   cascade="all"
-   * @motivation for hibernate and maintenance of bi-directional relationships
    */
   @ToOneRelationship(inverseProperty="rnaiCherryPickRequest")
-  public RNAiCherryPickScreening getRnaiCherryPickScreening()
+  public Set<RNAiCherryPickScreening> getRnaiCherryPickScreenings()
   {
-    return _rnaiCherryPickScreening;
+    return _rnaiCherryPickScreenings;
   }
 
-  public void setRnaiCherryPickScreening(RNAiCherryPickScreening rnaiCherryPickScreening)
+  /**
+   * @param rnaiCherryPickScreenings
+   * @motivation for hibernate
+   */
+  private void setRnaiCherryPickScreenings(Set<RNAiCherryPickScreening> rnaiCherryPickScreenings)
   {
-    _rnaiCherryPickScreening = rnaiCherryPickScreening;
+    _rnaiCherryPickScreenings = rnaiCherryPickScreenings;
   }
   
   @Override

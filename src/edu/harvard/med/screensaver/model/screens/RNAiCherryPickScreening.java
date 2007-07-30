@@ -54,7 +54,7 @@ public class RNAiCherryPickScreening extends Screening
   {
     super(screen, performedBy, dateCreated, dateOfActivity);
     _rnaiCherryPickRequest = rnaiCherryPickRequest;
-    _rnaiCherryPickRequest.setRnaiCherryPickScreening(this);
+    _rnaiCherryPickRequest.getRnaiCherryPickScreenings().add(this);
   }
 
   @Override
