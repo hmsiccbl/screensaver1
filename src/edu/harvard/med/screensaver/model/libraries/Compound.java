@@ -47,7 +47,7 @@ public class Compound extends AbstractEntity
   
   // instance fields
   
-	private String      _compoundId;
+  private String      _compoundId;
   private Integer     _version;
   private Set<Well>   _wells = new HashSet<Well>();
   private String      _smiles;
@@ -57,8 +57,8 @@ public class Compound extends AbstractEntity
   private Set<String> _casNumbers = new HashSet<String>();
   private Set<String> _nscNumbers = new HashSet<String>();
   private Set<String> _pubchemCids = new HashSet<String>();
-  private boolean     _isPubchemCidListUpgraderSuccessful;
-  private boolean     _isPubchemCidListUpgraderFailed;
+  private boolean     _isPubchemCidListUpgraderSuccessful = false;
+  private boolean     _isPubchemCidListUpgraderFailed = false;
   private String      _chembankId;
   
   /** used to compute molecular mass and molecular formula. */
