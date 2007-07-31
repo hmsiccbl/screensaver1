@@ -16,9 +16,11 @@ Other	Central Michigan University, Department of Chemistry
 HMS Affiliated Hospital	Children's Hospital
 Other	Clemson University
 Other	Cleveland Clinic
+Other	Colorado State University
 Other	Columbia University
 HMS Affiliated Hospital	Dana Farber Cancer Institute
 HMS Affiliated Hospital	Dana Farber Cancer Institute and Harvard Medical School, BCMP Department
+Other	Dartmouth Medical School
 Other	European Molecular Biology Laboratory (EMBL), Grenoble
 Other	Fox Chase Cancer Center
 Other	Fred Hutchinson Cancer Research Center
