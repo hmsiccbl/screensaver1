@@ -87,6 +87,9 @@ public interface LibrariesController
   public String viewWell(final Well wellIn, WellSearchResults wellSearchResults);
 
   @UIControllerMethod
+  public String downloadWellSDFile(final Well well);
+  
+  @UIControllerMethod
   public String viewGene(final Gene geneIn, WellSearchResults wellSearchResults);
 
   @UIControllerMethod

@@ -15,6 +15,16 @@
     <%@ include file="../nameValueTable.jspf" %>
   </t:aliasBean>
 
+  <t:panelGrid style="margin-top: 10px;">
+    <t:panelGroup rendered="#{! empty wellViewer.well.compounds}">
+      <h:form id="wellContentsDownloadForm">
+		  	<h:commandButton value="Dowload SD File"
+			  	action="#{wellViewer.downloadWellSDFile}" styleClass="command"
+				  title="Download the contents of the well as an SD File" />
+      </h:form>
+    </t:panelGroup>
+  </t:panelGrid>
+
   <t:panelGroup rendered="#{! empty wellViewer.well.compounds}">
     <%@ include file="structureImageNotice.jspf" %>
   </t:panelGroup>

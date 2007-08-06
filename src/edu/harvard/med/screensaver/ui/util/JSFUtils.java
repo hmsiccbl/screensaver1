@@ -90,6 +90,7 @@ public class JSFUtils
     OutputStream out = response.getOutputStream();
     IOUtils.copy(dataInputStream, out);
     out.close();
+    
     // skip Render-Response JSF lifecycle phase, since we're generating a
     // non-Faces response
     facesContext.responseComplete();

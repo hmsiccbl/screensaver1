@@ -99,7 +99,7 @@ public class WellsDataExporter implements DataExporter<Well>
 
   public String getFileName()
   {
-    return "wellSearchResults." +_dataFormat.name().toLowerCase();
+    return "wellSearchResults." + _dataFormat.name().toLowerCase();
   }
   
   public String getFormatName()

@@ -11,9 +11,16 @@ package edu.harvard.med.screensaver.ui.control;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.springframework.dao.DataAccessException;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
@@ -22,6 +29,8 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
+import edu.harvard.med.screensaver.io.libraries.WellsDataExporter;
+import edu.harvard.med.screensaver.io.libraries.WellsDataExporterFormat;
 import edu.harvard.med.screensaver.io.libraries.compound.NaturalProductsLibraryContentsParser;
 import edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser;
 import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
@@ -51,11 +60,8 @@ import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
+import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.Pair;
-
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-import org.springframework.dao.DataAccessException;
 
 /**
  * 
@@ -291,6 +297,25 @@ public class LibrariesControllerImpl extends AbstractUIController implements Lib
       }
     });
     return result[0];
+  }
+
+  @UIControllerMethod
+  public String downloadWellSDFile(final Well well)
+  {
+    WellsDataExporter dataExporter = new WellsDataExporter(_dao, WellsDataExporterFormat.SDF);
+    Set<Well> wells = new HashSet<Well>(1, 2.0f);
+    wells.add(well);
+    InputStream inputStream = dataExporter.export(wells);
+    try {
+      JSFUtils.handleUserDownloadRequest(getFacesContext(),
+                                         inputStream,
+                                         dataExporter.getFileName(),
+                                         dataExporter.getMimeType());
+    }
+    catch (IOException e) {
+      reportApplicationError(e.toString());
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
   @UIControllerMethod

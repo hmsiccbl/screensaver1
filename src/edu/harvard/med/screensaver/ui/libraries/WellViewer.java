@@ -105,4 +105,9 @@ public class WellViewer extends AbstractBackingBean
     }
     return _librariesController.viewCompound(compound, _wellSearchResults);
   }
+  
+  public String downloadWellSDFile()
+  {
+    return _librariesController.downloadWellSDFile(_well);
+  }
 }
