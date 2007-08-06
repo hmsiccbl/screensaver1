@@ -16,21 +16,20 @@
       These pages display lists of wells containing the same gene or compound.
     </p>
     <p>
-      <span class="helpNB">Please note</span> that Screensaver currently marks some wells as "empty" that
-      are not actually empty! This happens in two circumstances:
-      <ol>
-        <li>Some wells that have DMSO or siRNA buffer.</li>
-        <li>
-          All of the natural products libraries experimental wells are currently labelled as
-          empty. Even though we do not know the structures for most of these compounds, the
-          experimental wells should be properly labelled as experimental, and vendor
-          identifier information should be included as well.
-        </li>
-      </ol>
-      We are currently working on fixing both of these problems. Thank you for your patience!
+      <span class="helpNB">Please note</span> that Screensaver currently has no information on
+      the small molecules in the natural products libraries. While the experimental wells in these
+      libraries are labelled as "experimental", no information about the small molecules contained
+      in those wells will be displayed.
     </p>
     <p>
-      <span class="helpTip">Internet Explorer Tip: </span>Are you getting a "Security Information" popup
+      On rare occasions, a compound will fail to display a structure image.
+      We apologize for this and we are working on fixing the problem.
+      In the meantime, if you encounter this problem, you can copy the SMILES string and paste it
+      into <a href="http://demo.eyesopen.com/cgi-bin/depict" target="_blank">OpenEye depict</a>
+      as a workaround.
+    </p>
+    <p>
+      <span class="helpTip">Internet Explorer Tip:</span> Are you getting a "Security Information" popup
       window every time you try to view a well with compounds in it? Here's a workaround:
       <ol>
         <li>Open the Tools menu</li>

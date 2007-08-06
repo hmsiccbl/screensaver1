@@ -15,4 +15,8 @@
     <%@ include file="../nameValueTable.jspf" %>
   </t:aliasBean>
 
+  <t:panelGroup rendered="#{! empty wellViewer.well.compounds}">
+    <%@ include file="structureImageNotice.jspf" %>
+  </t:panelGroup>
+
 </f:subview>

@@ -16,8 +16,15 @@
     </p>
     <p>
       <span class="helpNB">Please note</span> we are currently working on getting PubChem IDs for all of
-      our compounds. Currently, about 40% of our compounds have PubChem IDs. Thank you for
+      our compounds. Currently, about 50% of our compounds have PubChem IDs. Thank you for
       your patience!
+    </p>
+    <p>
+      On rare occasions, a compound will fail to display a structure image.
+      We apologize for this and we are working on fixing the problem.
+      In the meantime, if you encounter this problem, you can copy the SMILES string and paste it
+      into <a href="http://demo.eyesopen.com/cgi-bin/depict" target="_blank">OpenEye depict</a>
+      as a workaround.
     </p>
     <p>
       <span class="helpTip">Internet Explorer Tip: </span>Are you getting a "Security Information" popup

@@ -29,6 +29,8 @@
 			</t:panelGrid>
 		</t:div>
 
+    <%@ include file="structureImageNotice.jspf" %>
+
 	</t:panelGrid>
 	
 	<t:panelGroup rendered="#{empty compoundViewer.compound}">
