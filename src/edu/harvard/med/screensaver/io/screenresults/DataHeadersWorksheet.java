@@ -83,7 +83,7 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
         Object value = columnValues.get(metadataRow);
         HSSFRow row = HSSFCellUtil.getRow(metadataRow.getRowIndex(), sheet);
         Cell.setTypedCellValue(workbook,
-                               HSSFCellUtil.getCell(row, rvt.getOrdinal() + METADATA_FIRST_DATA_HEADER_COLUMN_INDEX),
+                               HSSFCellUtil.getCell(row, rvt.getOrdinal() + DATA_HEADERS_FIRST_DATA_HEADER_COLUMN_INDEX),
                                value);
       }
     }

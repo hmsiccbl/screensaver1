@@ -10,16 +10,16 @@
 package edu.harvard.med.screensaver.ui.screenresults;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Map;
 
 import javax.faces.event.ActionEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import jxl.write.WritableWorkbook;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
-import edu.harvard.med.screensaver.io.workbook.Workbook;
+import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.ScreensController;
@@ -120,19 +120,16 @@ public class ScreenResultImporter extends AbstractBackingBean
   {
     File errorAnnotatedWorkbookFile = null;
     try {
-      Map<Workbook,File> workbook2File = _screenResultParser.outputErrorsInAnnotatedWorkbooks(null,
-                                                                                              ERRORS_XLS_FILE_EXTENSION);
-      if (workbook2File.size() != 1) {
-        reportSystemError("expected exactly 1 error-annotated workbook to be generated");
-        return;
-      }
-      Workbook errorAnnotatedWorkbook = workbook2File.keySet().iterator().next();
-      errorAnnotatedWorkbookFile = workbook2File.get(errorAnnotatedWorkbook);
+      WritableWorkbook errorAnnotatedWorkbook = _screenResultParser.getErrorAnnotatedWorkbook();
+      errorAnnotatedWorkbookFile = File.createTempFile(_uploadedFile.getName(), ERRORS_XLS_FILE_EXTENSION);
+      errorAnnotatedWorkbook.setOutputFile(errorAnnotatedWorkbookFile);
+      errorAnnotatedWorkbook.write();
+      errorAnnotatedWorkbook.close();
       JSFUtils.handleUserFileDownloadRequest(getFacesContext(),
                                              errorAnnotatedWorkbookFile,
                                              Workbook.MIME_TYPE);
     }
-    catch (IOException e) {
+    catch (Exception e) {
       e.printStackTrace();
       reportSystemError(e);
     }

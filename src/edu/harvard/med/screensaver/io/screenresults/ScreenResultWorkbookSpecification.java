@@ -18,7 +18,7 @@ public interface ScreenResultWorkbookSpecification
   public static final String DATA_HEADERS_SHEET_NAME = "Data Headers";
   public static final int FIRST_DATA_SHEET_INDEX = 2;
 
-  public static final int METADATA_FIRST_DATA_HEADER_COLUMN_INDEX = 1;
+  public static final int DATA_HEADERS_FIRST_DATA_HEADER_COLUMN_INDEX = 1;
   public static final char DATA_SHEET__FIRST_DATA_HEADER_COLUMN_LABEL = 'E';
   public static final int METADATA_ROW_NAMES_COLUMN_INDEX = 0;
   public static final int RAWDATA_HEADER_ROW_INDEX = 0;

@@ -24,7 +24,7 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
-import edu.harvard.med.screensaver.io.workbook.ParseError;
+import edu.harvard.med.screensaver.io.workbook2.ParseError;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.util.StringUtils;
 

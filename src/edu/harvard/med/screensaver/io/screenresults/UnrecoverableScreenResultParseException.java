@@ -9,8 +9,8 @@
 
 package edu.harvard.med.screensaver.io.screenresults;
 
-import edu.harvard.med.screensaver.io.workbook.Cell;
-import edu.harvard.med.screensaver.io.workbook.Workbook;
+import edu.harvard.med.screensaver.io.workbook2.Cell;
+import edu.harvard.med.screensaver.io.workbook2.Workbook;
 
 /**
  * Used to report an unrecoverable parse error; indicates that further parsing

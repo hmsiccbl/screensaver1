@@ -24,17 +24,25 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import jxl.BooleanFormulaCell;
+import jxl.CellType;
+import jxl.NumberFormulaCell;
+import jxl.Sheet;
+import jxl.read.biff.BiffException;
+import jxl.write.WritableWorkbook;
+import jxl.write.WriteException;
+
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.io.workbook.Cell;
-import edu.harvard.med.screensaver.io.workbook.ParseError;
-import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
-import edu.harvard.med.screensaver.io.workbook.Workbook;
+import edu.harvard.med.screensaver.io.workbook2.Cell;
+import edu.harvard.med.screensaver.io.workbook2.ParseError;
+import edu.harvard.med.screensaver.io.workbook2.ParseErrorManager;
+import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
+import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -45,15 +53,9 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.util.DateUtil;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFDataFormat;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.usermodel.contrib.HSSFCellUtil;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 /**
  */
@@ -85,14 +87,13 @@ public class ScreenResultParserTest extends AbstractSpringTest
   }
 
   /**
-   * Tests basic usage of the HSSF API to read an Excel spreadsheet, but does
+   * Tests basic usage of the JXL API to read an Excel spreadsheet, but does
    * not test Screensaver-related functionality. Basically, just a check that
    * the technology we're using actually works. Somewhat useful to keep around
    * in case we upgrade jar version, etc.
    */
   public void testReadExcelSpreadsheet() throws Exception 
   {
-    // TODO: for sheet names (at least) underscores appear to converted to dashes by HSSF
     String[] expectedSheetNames = new String[] { "Screen Info", "Data Headers", "PL_00001", "PL_00003", "PL_00002" };
     String[] expectedHeaderRowValues = new String[] { 
       "Stock Plate ID", 
@@ -108,19 +109,17 @@ public class ScreenResultParserTest extends AbstractSpringTest
       "AssayIndicator3" };
 
     InputStream xlsInStream = ScreenResultParserTest.class.getResourceAsStream(SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
-    POIFSFileSystem fs = new POIFSFileSystem(xlsInStream);
-    HSSFWorkbook wb = new HSSFWorkbook(fs);
+    jxl.Workbook wb = jxl.Workbook.getWorkbook(xlsInStream);
     int nSheets = wb.getNumberOfSheets();
     assertEquals("worksheet count", expectedSheetNames.length, nSheets);
     for (int i = 0; i < nSheets; i++) {
-      String sheetName = wb.getSheetName(i);
+      String sheetName = wb.getSheet(i).getName();
       assertEquals("worksheet " + i + " name", expectedSheetNames[i], sheetName);
-      HSSFSheet sheet = wb.getSheetAt(i);
-      HSSFRow row = sheet.getRow(0);
+      jxl.Sheet sheet = wb.getSheet(i);
       if (i >= 2) {
-        for (short iCell = 0; iCell < row.getPhysicalNumberOfCells(); ++iCell) {
-          HSSFCell cell = row.getCell(iCell);
-          assertEquals(expectedHeaderRowValues[iCell], cell.getStringCellValue());
+        for (int iCell = 0; iCell < sheet.getRow(0).length; ++iCell) {
+          jxl.Cell cell = sheet.getCell(iCell, 0);
+          assertEquals(expectedHeaderRowValues[iCell], cell.getContents());
         }
       }
     }
@@ -133,59 +132,78 @@ public class ScreenResultParserTest extends AbstractSpringTest
     // the same in both places!
     InputStream xlsInStream = 
       ScreenResultParserTest.class.getResourceAsStream(FORMULA_VALUE_TEST_WORKBOOK_FILE);
-    POIFSFileSystem fs = new POIFSFileSystem(xlsInStream);
-    HSSFWorkbook wb = new HSSFWorkbook(fs);
-    HSSFSheet sheet = wb.getSheetAt(0);
-    HSSFRow row = sheet.getRow(0);
-    HSSFCell hssfNumericFormulaCell = row.getCell((short) 2);
-    assertEquals("HSSF cell type",
-                 HSSFCell.CELL_TYPE_FORMULA,
-                 hssfNumericFormulaCell.getCellType());
-    double hssfNumericValue = hssfNumericFormulaCell.getNumericCellValue();
-    assertEquals("HSSF numeric value", 2.133, hssfNumericValue, 0.0001);
-    String hssfFormula = hssfNumericFormulaCell.getCellFormula();
-    assertEquals("HSSF formula", "A1+B1", hssfFormula);
-    HSSFDataFormat dataFormat = wb.createDataFormat();
-    String format = dataFormat.getFormat(hssfNumericFormulaCell.getCellStyle().getDataFormat());
-    assertEquals("HSSF numeric data format precision", "0.0000", format);
+    jxl.Workbook wb = jxl.Workbook.getWorkbook(xlsInStream);
+    Sheet sheet = wb.getSheet(0);
+    jxl.Cell numericFormulaCell = sheet.getCell(3, 1);
+    assertEquals("cell type",
+                 CellType.NUMBER_FORMULA,
+                 numericFormulaCell.getType());
+    double numericValue = ((NumberFormulaCell) numericFormulaCell).getValue();
+    assertEquals("numeric value", 2.133, numericValue, 0.0001);
+    String formula = ((NumberFormulaCell) numericFormulaCell).getFormula();
+    assertEquals("formula", "B2+C2", formula);
+    assertEquals("numeric data format precision", 
+                 4, 
+                 ((NumberFormulaCell) numericFormulaCell).getNumberFormat().getMaximumFractionDigits());
 
     ParseErrorManager errors = new ParseErrorManager();
-    Workbook workbook = new Workbook(new File(TEST_INPUT_FILE_DIR, 
-                                              FORMULA_VALUE_TEST_WORKBOOK_FILE), errors);
+    Workbook workbook = new Workbook(new File(TEST_INPUT_FILE_DIR, FORMULA_VALUE_TEST_WORKBOOK_FILE), 
+                                     errors);
     Cell.Factory cellFactory = new Cell.Factory(workbook, 0, errors);
-    Cell cell = cellFactory.getCell((short) 2, (short) 0, false);
+    Cell cell = cellFactory.getCell((short) 3, (short) 1, false);
     assertNotNull(cell);
     Double parsedNumericValue = cell.getDouble();
     assertEquals("parse numeric value",
-                 hssfNumericValue,
+                 numericValue,
                  parsedNumericValue.doubleValue(),
                  0.0001);
 
     // test numeric precision (TODO: should probably be a separate unit test)
-    Cell numericFormatFormulaCell = cellFactory.getCell((short) 2, (short) 0, false);
+    Cell numericFormatFormulaCell = cellFactory.getCell((short) 3, (short) 1, false);
     assertEquals("precision of numeric format on formula cell", 4, 
                  numericFormatFormulaCell.getDoublePrecision());
-    Cell generalFormatFormulaCell = cellFactory.getCell((short) 3, (short) 0);
-    assertEquals("precision of general format on formula cell", -1, 
-                 generalFormatFormulaCell.getDoublePrecision());
-    Cell generalFormatNumericCell = cellFactory.getCell((short) 0, (short) 0);
-    assertEquals("precision of general format on numeric cell", -1, 
-                 generalFormatNumericCell.getDoublePrecision());
-    Cell numericFormatNumericCell = cellFactory.getCell((short) 1, (short) 0);
+//    Cell generalFormatFormulaCell = cellFactory.getCell((short) 4, (short) 1);
+//    assertEquals("precision of general format on formula cell", -1, 
+//                 generalFormatFormulaCell.getDoublePrecision());
+//    Cell generalFormatNumericCell = cellFactory.getCell((short) 1, (short) 1);
+//    assertEquals("precision of general format on numeric cell", -1, 
+//                 generalFormatNumericCell.getDoublePrecision());
+    Cell numericFormatNumericCell = cellFactory.getCell((short) 2, (short) 1);
     assertEquals("precision of numeric format on numeric cell", 3, 
                  numericFormatNumericCell.getDoublePrecision());
-    Cell integerNumericFormatNumericCell = cellFactory.getCell((short) 4, (short) 0);
+    Cell integerNumericFormatNumericCell = cellFactory.getCell((short) 5, (short) 1);
     assertEquals("precision of integer number format on numeric cell", 0, 
                  integerNumericFormatNumericCell.getDoublePrecision());
-    Cell percentageNumericCell = cellFactory.getCell((short) 5, (short) 0);
+    Cell percentageNumericCell = cellFactory.getCell((short) 6, (short) 1);
     assertEquals("precision of percentage number format on numeric cell", 3, 
                  percentageNumericCell.getDoublePrecision());
+  }
+  
+  public void testReadUndefinedCell() throws BiffException, IOException 
+  {
+    InputStream xlsInStream = 
+      ScreenResultParserTest.class.getResourceAsStream(FORMULA_VALUE_TEST_WORKBOOK_FILE);
+    jxl.Workbook wb = jxl.Workbook.getWorkbook(xlsInStream);
+    Sheet sheet = wb.getSheet(0);
+    try {
+      jxl.Cell cell = sheet.getCell(0, 2);
+      fail("expected ArrayIndexOutOfBoundsException");
+    }
+    catch (ArrayIndexOutOfBoundsException e) {}
+    try {
+      jxl.Cell cell = sheet.getCell(10, 0);
+      fail("expected ArrayIndexOutOfBoundsException");
+    }
+    catch (ArrayIndexOutOfBoundsException e) {}
   }
   
   public void testDetectEmptyRow() throws Exception
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, BLANK_ROWS_TEST_WORKBOOK_FILE);
     mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115), workbookFile);
+    if (mockScreenResultParser.getHasErrors()) {
+      log.debug("parse errors:\n" + StringUtils.makeListString(mockScreenResultParser.getErrors(), "\n"));
+    }
     assertFalse("screen result had no errors", mockScreenResultParser.getHasErrors());
     assertEquals("well count", 4, mockScreenResultParser.getParsedScreenResult().getExperimentalWellCount());
   }
@@ -196,72 +214,89 @@ public class ScreenResultParserTest extends AbstractSpringTest
   {
     InputStream xlsInStream = 
       ScreenResultParserTest.class.getResourceAsStream(FORMULA_VALUE_TEST_WORKBOOK_FILE);
-    POIFSFileSystem fs = new POIFSFileSystem(xlsInStream);
-    HSSFWorkbook wb = new HSSFWorkbook(fs);
-    HSSFSheet sheet = wb.getSheetAt(0);
-    HSSFRow row = sheet.getRow(0);
-    HSSFCell hssfBooleanFormulaCell = row.getCell((short) 3);
-    assertEquals("HSSF cell type",
-                 HSSFCell.CELL_TYPE_FORMULA,
-                 hssfBooleanFormulaCell.getCellType());
-    boolean hssfBooleanValue = hssfBooleanFormulaCell.getBooleanCellValue();
-    assertEquals("HSSF numeric value", true, hssfBooleanValue);
-    String hssfFormula = hssfBooleanFormulaCell.getCellFormula();
-    assertEquals("HSSF formula", "C1=2", hssfFormula);
+    jxl.Workbook wb = jxl.Workbook.getWorkbook(xlsInStream);
+    Sheet sheet = wb.getSheet(0);
+
+    // test boolean formula cell w/'general' format
+    jxl.Cell booleanFormulaCell = sheet.getCell(7, 1);
+    assertEquals("cell type",
+                 CellType.BOOLEAN_FORMULA,
+                 booleanFormulaCell.getType());
+    boolean booleanValue = ((BooleanFormulaCell) booleanFormulaCell).getValue();
+    assertEquals("boolean value", true, booleanValue);
+    String formula = ((BooleanFormulaCell) booleanFormulaCell).getFormula();
+    assertEquals("formula", "G2>0.01", formula);
     
+    // test boolean formula cell w/explicit 'boolean' format
+    booleanFormulaCell = sheet.getCell(8, 1);
+    assertEquals("cell type",
+                 CellType.BOOLEAN_FORMULA,
+                 booleanFormulaCell.getType());
+    booleanValue = ((BooleanFormulaCell) booleanFormulaCell).getValue();
+    assertEquals("boolean value", true, booleanValue);
+    formula = ((BooleanFormulaCell) booleanFormulaCell).getFormula();
+    assertEquals("formula", "G2>0.01", formula);
+
+    // test boolean formula cell, read via our own Cell class
     ParseErrorManager errors = new ParseErrorManager();
     Workbook workbook = new Workbook(new File(TEST_INPUT_FILE_DIR, 
                                               FORMULA_VALUE_TEST_WORKBOOK_FILE), errors);
     Cell.Factory cellFactory = new Cell.Factory(workbook, 0, errors);
-    Cell cell = cellFactory.getCell((short) 3, (short) 0, false);
+    Cell cell = cellFactory.getCell((short) 7, (short) 1, false);
     assertNotNull(cell);
     assertEquals("parse boolean value",
-                 hssfBooleanValue,
+                 booleanValue,
                  cell.getBoolean().booleanValue());
-    
   }
   
   /**
    * Tests that screen result errors are saved to a new set of workbooks.
    * @throws IOException 
+   * @throws BiffException 
+   * @throws WriteException 
    */
-  public void testSaveScreenResultErrors() throws IOException
+  public void testErrorAnnotatedWorkbook() throws IOException, BiffException, WriteException
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
     mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115), workbookFile);
-    String extension = "errors.xls";
-    Map<Workbook,File> workbook2File =
-      mockScreenResultParser.outputErrorsInAnnotatedWorkbooks(new File(System.getProperty("java.io.tmpdir")),
-                                                          extension);
+    WritableWorkbook errorAnnotatedWorkbook = mockScreenResultParser.getErrorAnnotatedWorkbook();
+    File file = File.createTempFile(ERRORS_TEST_WORKBOOK_FILE, ".xls");
+    errorAnnotatedWorkbook.setOutputFile(file);
+    errorAnnotatedWorkbook.write();
+    errorAnnotatedWorkbook.close();
+    
+    assertTrue("error-annotated workbook file exists", file.exists());
+    
+    // test error-annotated workbook contents
+    jxl.Workbook errorAnnotatedWorkbook2 = jxl.Workbook.getWorkbook(file);
+    assertEquals(5,
+                 errorAnnotatedWorkbook2.getNumberOfSheets());
+    Sheet sheet1 = errorAnnotatedWorkbook2.getSheet(1);
 
-    for (Workbook workbook : workbook2File.keySet()) {
-      if (workbook.getWorkbookFile().equals(workbookFile))
-      {
-        // test metadata workbook
-        assertEquals(5,
-                     workbook.getWorkbook().getNumberOfSheets());
-        HSSFSheet sheet1 = workbook.getWorkbook().getSheetAt(1);
-        
-        assertEquals("ERROR: unparseable value \"sushiraw\" (expected one of [, derived, raw])",
-                     HSSFCellUtil.getCell(sheet1.getRow(6),'C' - 'A').getStringCellValue());
-        assertEquals("ERROR: invalid Data Header column reference 'B' (expected one of [E, F])",
-                     HSSFCellUtil.getCell(sheet1.getRow(8),'D' - 'A').getStringCellValue());
-        assertEquals("ERROR: invalid Data Header column reference 'H' (expected one of [E, F, G])",
-                     HSSFCellUtil.getCell(sheet1.getRow(8),'E' - 'A').getStringCellValue());
-        assertEquals("ERROR: invalid Data Header column reference 'D' (expected one of [E, F, G, H])",
-                     HSSFCellUtil.getCell(sheet1.getRow(8),'F' - 'A').getStringCellValue());
-        assertEquals("ERROR: value required; unparseable value \"\" (expected one of [<, >])",
-                     HSSFCellUtil.getCell(sheet1.getRow(11),'F' - 'A').getStringCellValue());
-        assertEquals("ERROR: unparseable value \"follow-up\" (expected one of [, follow up, primary])",
-                     HSSFCellUtil.getCell(sheet1.getRow(13),'E' - 'A').getStringCellValue());
-      }
-    }
+    assertEquals("SushiRaw: unparseable value \"sushiraw\" (expected one of [, derived, raw])",
+                 sheet1.getCell('C' - 'A', 6).getContents());
+    assertEquals("B: invalid Data Header column reference 'B' (expected one of [E, F])",
+                 sheet1.getCell('D' - 'A', 8).getContents());
+    assertEquals("H: invalid Data Header column reference 'H' (expected one of [E, F, G])",
+                 sheet1.getCell('E' - 'A', 8).getContents());
+    assertEquals("D,E: invalid Data Header column reference 'D' (expected one of [E, F, G, H])",
+                 sheet1.getCell('F' - 'A', 8).getContents());
+    assertEquals("unparseable value \"\" (expected one of [<, >])",
+                 sheet1.getCell('F' - 'A', 11).getContents());
+    assertEquals("Follow-up: unparseable value \"follow-up\" (expected one of [, follow up, primary])",
+                 sheet1.getCell('E' - 'A', 13).getContents());
+    assertEquals("Baloonean: unparseable value \"baloonean\" (expected one of [Boolean, Numeric, Numerical, Partition, Partitioned])",
+                 sheet1.getCell('H' - 'A', 10).getContents());
+    assertEquals("unparseable value \"\" (expected one of [<, >])",
+                 sheet1.getCell('H' - 'A', 11).getContents());
+    assertEquals("value required",
+                 sheet1.getCell('H' - 'A', 12).getContents());
   }
   
   /**
    * Tests that Cells are cloned when needed (a single Cell is generally
    * recycled, as an optimization). Note that this test assumes that the test
-   * workbooks do not have more than 1 error per cell, which is a possibility in
+   * errorAnnotatedWorkbooks do not have more than 1 error per cell, which is a possibility in
    * the real world, but would break our naive test. (I suppose we could also
    * test simply that at least some of our ParseErrors' cells were different.)
    */

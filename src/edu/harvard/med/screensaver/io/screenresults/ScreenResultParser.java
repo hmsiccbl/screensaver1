@@ -32,23 +32,26 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import jxl.CellType;
+import jxl.Sheet;
+
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.io.workbook.Cell;
-import edu.harvard.med.screensaver.io.workbook.CellValueParser;
-import edu.harvard.med.screensaver.io.workbook.CellVocabularyParser;
-import edu.harvard.med.screensaver.io.workbook.ParseError;
-import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
-import edu.harvard.med.screensaver.io.workbook.PlateNumberParser;
-import edu.harvard.med.screensaver.io.workbook.WellNameParser;
-import edu.harvard.med.screensaver.io.workbook.Workbook;
-import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
+import edu.harvard.med.screensaver.io.workbook2.Cell;
+import edu.harvard.med.screensaver.io.workbook2.CellValueParser;
+import edu.harvard.med.screensaver.io.workbook2.CellVocabularyParser;
+import edu.harvard.med.screensaver.io.workbook2.ParseError;
+import edu.harvard.med.screensaver.io.workbook2.ParseErrorManager;
+import edu.harvard.med.screensaver.io.workbook2.PlateNumberParser;
+import edu.harvard.med.screensaver.io.workbook2.WellNameParser;
+import edu.harvard.med.screensaver.io.workbook2.Workbook;
+import edu.harvard.med.screensaver.io.workbook2.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
-import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
+import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
+import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueTypeNumericalnessException;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -57,9 +60,6 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 
 import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 
 /**
  * Parses data from a workbook files (a.k.a. Excel spreadsheets) necessary for
@@ -81,14 +81,15 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
  * the face of errors, in order to catch as many errors as possible, as this
  * will aid the manual effort of correcting the files' format and content
  * between import attempts. By calling
- * {@link #outputErrorsInAnnotatedWorkbooks(String)}, a new set of workbooks
- * will be written to the same directory as the metadata file. These workbooks
- * will contain errors messages in each cell that encountered an error during
- * parsing. Error messages that are not cell-specific will be written to a new
- * "Parse Errors" sheet in the new metadata workbook. Error-annotated workbook
- * files will only be written for input workbooks that generated parse errors.
- * Each error annotated workbook will be named the same as its respective
- * workbook input file with an ".errors.xls" suffix.
+ * {@link #outputErrorsInAnnotatedWorkbook(String)}, a new error-annotated
+ * workbook will be written to the same directory as the workbook file. This
+ * error-annotated workbook will contain errors messages in each cell that
+ * encountered an error during parsing. Error messages that are not
+ * cell-specific will be written to a new "Parse Errors" sheet in the
+ * error-annotated workbook. The error-annotated workbook file will only be
+ * written if the input workbook generated parse errors. The error-annotated
+ * workbook will be named the same as its respective workbook input file with an
+ * ".errors.xls" suffix.
  * <p>
  * Each call to {@link #parse} will clear the errors accumulated from the
  * previous call, and so the result of calling {@link #getErrors()} will change
@@ -197,7 +198,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private WellNameParser _wellNameParser;
 
   private LibrariesDAO _librariesDao;
-  private Factory _metadataCellParserFactory;
+  private Factory _dataHeadersCellParserFactory;
   private Factory _dataCellParserFactory;
   private Map<Integer,Short> _dataHeaderIndex2DataHeaderColumn;
   private Set<Library> _preloadedLibraries;
@@ -301,17 +302,17 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     try {
       Workbook workbook = new Workbook(workbookFile, workbookInputStream, _errors);
       log.info("parsing " + workbookFile.getAbsolutePath());
-      DataHeadersParseResult metadataParseResult = parseDataHeaders(screen,
-                                                                    workbook);
+      DataHeadersParseResult dataHeadersParseResult = parseDataHeaders(screen,
+                                                                       workbook);
       if (_errors.getHasErrors()) {
         log.info("errors found in data headers, will not attempt to parse data sheets");
       }
       else {
         log.info("parsing data sheets");
         parseData(workbook,
-                  metadataParseResult.getScreenResult());
+                  dataHeadersParseResult.getScreenResult());
       }
-      _screenResult = metadataParseResult.getScreenResult();
+      _screenResult = dataHeadersParseResult.getScreenResult();
     }
     catch (UnrecoverableScreenResultParseException e) {
       _errors.addError("serious parse error encountered (could not continue further parsing): " + e.getMessage());
@@ -325,6 +326,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       // TODO: close workbooks' inputstreams?
     }
     return _screenResult;
+  }
+  
+  public boolean getHasErrors()
+  {
+    return _errors.getHasErrors();
   }
   
   /**
@@ -342,9 +348,16 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     return _errors.getErrors();
   }
   
-  public boolean getHasErrors()
+  /**
+   * Get an annotated copy of the parsed workbook with parse errors. Cells with
+   * errors will have a red background and error message will be contained in
+   * the cell's comment field.
+   * 
+   * @throws IOException
+   */
+  public jxl.write.WritableWorkbook getErrorAnnotatedWorkbook() throws IOException
   {
-    return _errors.getHasErrors();
+    return _errors.getErrorAnnotatedWorkbook();
   }
   
   public ScreenResult getParsedScreenResult()
@@ -356,49 +369,56 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   // private methods
 
   /**
-   * Initialize the metadata worksheet and related data members.
+   * Initialize the 'Data Headers' worksheet and related data members.
    * 
-   * @throws UnrecoverableScreenResultParseException if metadata worksheet could
-   *           not be initialized or does not appear to be a valid metadata
-   *           definition
+   * @throws UnrecoverableScreenResultParseException if 'Data Headers' worksheet could
+   *           not be initialized or does not appear to be valid
    */
-  private HSSFSheet initializeDataHeadersSheet(Workbook metadataWorkbook)
+  private Sheet initializeDataHeadersSheet(Workbook workbook)
     throws UnrecoverableScreenResultParseException
   {
     // find the "Data Headers" sheet
     int dataHeadersSheetIndex;
     try {
-      dataHeadersSheetIndex = metadataWorkbook.findSheetIndex(DATA_HEADERS_SHEET_NAME);
+      dataHeadersSheetIndex = workbook.findSheetIndex(DATA_HEADERS_SHEET_NAME);
     }
     catch (IllegalArgumentException e) {
       throw new UnrecoverableScreenResultParseException(
                                                         DATA_HEADER_SHEET_NOT_FOUND_ERROR,
-                                                        metadataWorkbook);
+                                                        workbook);
     }
-    HSSFSheet metadataSheet = metadataWorkbook.getWorkbook().getSheetAt(dataHeadersSheetIndex);
+    Sheet dataHeadersSheet = workbook.getWorkbook().getSheet(dataHeadersSheetIndex);
 
-    // at this point, we know we have a valid metadata workbook, to which we can
+    // at this point, we know we have a valid workbook, to which we can
     // append errors
-    _errors.setErrorsWorbook(metadataWorkbook);
-    _metadataCellParserFactory = new Cell.Factory(metadataWorkbook,
-                                                  dataHeadersSheetIndex,
-                                                  _errors);
+    _errors.setWorbook(workbook);
+    _dataHeadersCellParserFactory = new Cell.Factory(workbook,
+                                                     dataHeadersSheetIndex,
+                                                     _errors);
     _dataHeaderIndex2DataHeaderColumn = new HashMap<Integer,Short>();
-    return metadataSheet;
+    return dataHeadersSheet;
   }
 
   /**
    * Finds the total number of data header columns.
    * 
-   * @param metadataSheet
+   * @param dataHeadersSheet
    * @throws UnrecoverableScreenResultParseException
    */
-  private int findDataHeaderColumnCount(HSSFSheet metadataSheet) throws UnrecoverableScreenResultParseException
+  private int findDataHeaderColumnCount(Sheet dataHeadersSheet) throws UnrecoverableScreenResultParseException
   {
-    HSSFRow row = metadataSheet.getRow(DataHeaderRow.COLUMN_IN_DATA_WORKSHEET.getRowIndex());
-    short n = 0;
-    while (row.getCell(n) != null && row.getCell(n).getCellType() != HSSFCell.CELL_TYPE_BLANK) { ++n; }
-    return n - 1;
+    int rows = dataHeadersSheet.getRows();
+    if (DataHeaderRow.COLUMN_IN_DATA_WORKSHEET.getRowIndex() >= rows) {
+      return 0;
+    }
+    int iCol = 1; // skip label column
+    int n = 0;
+    jxl.Cell[] row = dataHeadersSheet.getRow(DataHeaderRow.COLUMN_IN_DATA_WORKSHEET.getRowIndex());
+    while (iCol < row.length && !row[iCol].getType().equals(CellType.EMPTY)) { 
+      ++n;
+      ++iCol;
+    }
+    return n;
   }
 
   /**
@@ -407,16 +427,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @param sheetIndex
    * @return
    */
-  private HSSFSheet initializeDataSheet(final Workbook workbook, int sheetIndex)
+  private Sheet initializeDataSheet(final Workbook workbook, int sheetIndex)
   {
-//    // HACK: occassionally reclaim memory, since data held by previously loaded
-//    // sheets are no longer needed
-//    if (sheetIndex % RELOAD_WORKBOOK_AFTER_SHEET_COUNT == 0) {
-//      log.debug("releasing memory held by workbook");
-//      releaseMemory(new Runnable() { public void run() { workbook.reload(); } });
-//    }
-    
-    HSSFSheet dataSheet = workbook.getWorkbook().getSheetAt(sheetIndex);
+    Sheet dataSheet = workbook.getWorkbook().getSheet(sheetIndex);
     _dataCellParserFactory = new Cell.Factory(workbook,
                                               sheetIndex,
                                               _errors);  
@@ -426,9 +439,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   private Cell dataHeadersCell(DataHeaderRow row, int dataHeader, boolean isRequired) 
   {
-    return _metadataCellParserFactory.getCell((short) (METADATA_FIRST_DATA_HEADER_COLUMN_INDEX + dataHeader),
-                                              row.getRowIndex(),
-                                              isRequired);
+    return _dataHeadersCellParserFactory.getCell((short) (DATA_HEADERS_FIRST_DATA_HEADER_COLUMN_INDEX + dataHeader),
+                                                 row.getRowIndex(),
+                                                 isRequired);
   }
   
   private Cell dataHeadersCell(DataHeaderRow row, int dataHeader)
@@ -480,17 +493,16 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   }
   
   /**
-   * Parse the workbook containing the ScreenResult metadata
+   * Parse the worksheet containing the ScreenResult data headers
    * @param workbook
    * @throws UnrecoverableScreenResultParseException 
    */
-  private DataHeadersParseResult parseDataHeaders(
-    Screen screen,
-    Workbook workbook)
+  private DataHeadersParseResult parseDataHeaders(Screen screen,
+                                                  Workbook workbook)
     throws UnrecoverableScreenResultParseException 
   {
     DataHeadersParseResult dataHeadersParseResult = new DataHeadersParseResult();
-    HSSFSheet dataHeadersSheet = initializeDataHeadersSheet(workbook);
+    Sheet dataHeadersSheet = initializeDataHeadersSheet(workbook);
     ParsedScreenInfo parsedScreenInfo = parseScreenInfo(workbook, screen);
     
     dataHeadersParseResult.setScreenResult(new ScreenResult(screen, parsedScreenInfo.getDateCreated()));
@@ -511,7 +523,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         for (ResultValueType resultValueType : _columnsDerivedFromParser.parseList(dataHeadersCell(DataHeaderRow.COLUMNS_DERIVED_FROM, 
                                                                                                    iDataHeader, 
                                                                                                    true))) {
-          if (resultValueType != null) { // can be null if unparseable value is encountered in list
+          if (resultValueType != null) { // can be null if unparsable value is encountered in list
             rvt.addTypeDerivedFrom(resultValueType);
           }
         }
@@ -571,9 +583,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     int totalSheets = workbook.getWorkbook().getNumberOfSheets();
     int totalDataSheets = totalSheets - FIRST_DATA_SHEET_INDEX;
     for (int iSheet = FIRST_DATA_SHEET_INDEX; iSheet < totalSheets; ++iSheet) {
-      String sheetName = workbook.getWorkbook().getSheetName(iSheet);
+      String sheetName = workbook.getWorkbook().getSheet(iSheet).getName();
       log.info("parsing sheet " + (dataSheetsParsed + 1) + " of " + totalDataSheets + ", " + sheetName);
-      final HSSFSheet sheet = initializeDataSheet(workbook, iSheet);
+      initializeDataSheet(workbook, iSheet);
       DataRowIterator rowIter = new DataRowIterator(workbook, iSheet);
       
       int iDataHeader = 0;
@@ -655,9 +667,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         }
       }
       ++dataSheetsParsed;
-      releaseMemory(new Runnable() {
-        public void run() { sheet.releaseData(); }
-      });
     }
     if (dataSheetsParsed == 0) {
       _errors.addError(NO_DATA_SHEETS_FOUND_ERROR);
@@ -706,17 +715,17 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   
   private class DataRowIterator implements Iterator<Integer>
   {
-    private HSSFSheet _sheet;
+    private Sheet _sheet;
     private int _iRow;
     private Well _well;
-    private int _lastRowNum;
+    private int _lastRowIndex;
 
     public DataRowIterator(Workbook workbook,
                            int sheetIndex)
     {
-      _sheet = workbook.getWorkbook().getSheetAt(sheetIndex);
+      _sheet = workbook.getWorkbook().getSheet(sheetIndex);
       _iRow = RAWDATA_FIRST_DATA_ROW_INDEX - 1;
-      _lastRowNum = _sheet.getLastRowNum();
+      _lastRowIndex = _sheet.getRows() - 1;
     }
     
     public DataRowIterator(DataRowIterator rowIter)
@@ -724,7 +733,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       _sheet = rowIter._sheet;
       _iRow = rowIter._iRow;
       _well = rowIter._well;
-      _lastRowNum = rowIter._lastRowNum;
+      _lastRowIndex = rowIter._lastRowIndex;
     }
 
     public boolean hasNext()
@@ -764,7 +773,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     private int findNextRow()
     {
       int iRow = _iRow;
-      while (++iRow <= _lastRowNum) {
+      while (++iRow <= _lastRowIndex) {
         if (!ignoreRow(_sheet, iRow)) {
           if (findWell(iRow) != null) {
             return iRow;
@@ -804,7 +813,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   }
 
   /**
-   * Determines if the logical row at the specified 0-based index should be ignored,
+   * Determines if row at the specified 0-based index should be ignored,
    * which is the case if the row is undefined, has no cells, or the first cell
    * is blank or contains the empty string or only whitespace.
    * 
@@ -812,24 +821,19 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @param rowIndex
    * @return
    */
-  private boolean ignoreRow(HSSFSheet sheet, int rowIndex)
+  private boolean ignoreRow(Sheet sheet, int rowIndex)
   {
-    HSSFRow row = sheet.getRow(rowIndex);
-    if (row == null) return true;
-    if (row.getPhysicalNumberOfCells() == 0) {
+    if (rowIndex >= sheet.getRows()) {
       return true;
     }
-    HSSFCell cell = row.getCell((short) 0);
-    if (cell == null) {
+    jxl.Cell[] row = sheet.getRow(rowIndex);
+    if (row.length == 0) {
       return true;
     }
-    if (cell.getCellType() == HSSFCell.CELL_TYPE_BLANK) {
+    if (row[0].getType().equals(CellType.EMPTY)) {
       return true;
     }
-    if (cell.getStringCellValue() == null) {
-      return true;
-    }
-    if (cell.getStringCellValue().trim().length() == 0) {
+    if (row[0].getContents().trim().length() == 0) {
       return true;
     }
     return false;
@@ -899,12 +903,12 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     ParsedScreenInfo parsedScreenInfo = new ParsedScreenInfo();
     int screenInfoSheetIndex;
     screenInfoSheetIndex = workbook.findSheetIndex(SCREEN_INFO_SHEET_NAME);
-    HSSFSheet screenInfoSheet = workbook.getWorkbook().getSheetAt(screenInfoSheetIndex);
+    Sheet screenInfoSheet = workbook.getWorkbook().getSheet(screenInfoSheetIndex);
     Cell.Factory factory = new Cell.Factory(workbook,
                                             screenInfoSheetIndex,
                                             _errors);
     if (screenInfoSheet != null) {
-      for (int iRow = screenInfoSheet.getFirstRowNum(); iRow < screenInfoSheet.getLastRowNum(); iRow++) {
+      for (int iRow = 0; iRow < screenInfoSheet.getRows(); iRow++) {
         Cell labelCell = factory.getCell((short) 0, iRow);
         String rowLabel = labelCell.getString();
         if (rowLabel != null) {
@@ -939,34 +943,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       }
     }
     return parsedScreenInfo;
-  }
-  
-  /**
-   * Annotate copies of parsed workbooks with parse errors. Only workbooks
-   * containing errors are written. In fact, we simply save the workbooks, since
-   * cells have already been modified in the in-memory representation.
-   * 
-   * @param newDirectory the output directory; if null the workbook's original
-   *          file directory is used.
-   * @param newExtension the extension to use when saving the workbook,
-   *          replacing the workbook's original filename extension; if null
-   *          original filename extension is used. A leading period will added
-   *          iff it does not exist.
-   * @return a Map of the <@link Workbook>s for which error-annotate workbooks
-   *         (copies) were written out, mapped to their respective output file
-   * @throws IOException
-   */
-  public Map<Workbook,File> outputErrorsInAnnotatedWorkbooks(
-    File newDirectory,
-    String newExtension) throws IOException
-  {
-    Map<Workbook,File> result = new HashMap<Workbook,File>();
-    for (Workbook workbook : _errors.getWorkbooksWithErrors()) {
-      File file = workbook.save(newDirectory,
-                                newExtension);
-      result.put(workbook, file);
-    }
-    return result;
   }
   
   public class ColumnLabelsParser implements CellValueParser<ResultValueType>
@@ -1055,27 +1031,4 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       return super.parseList(cell);
     }
   }
-  
-  private void releaseMemory(Runnable runBeforeGarbageCollection)
-  {
-    long freeMem = 0L;
-    //long usedMem = Runtime.getRuntime().totalMemory() - freeMem;
-    if (memoryDebugLog.isDebugEnabled()) {
-      freeMem = Runtime.getRuntime().freeMemory();
-      //memoryDebugLog.debug(String.format("totalMem=%.2fMB", Runtime.getRuntime().totalMemory() / (1024.0*1024.0)));
-      //memoryDebugLog.debug(String.format("freeMem=%.2fMB", Runtime.getRuntime().freeMemory() / (1024.0*1024.0)));
-      long availMem = (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) + freeMem;
-      memoryDebugLog.debug(String.format("Before GC: avail mem=%.2fMB",  availMem / (1024.0*1024.0)));
-    }
-    runBeforeGarbageCollection.run();
-    if (memoryDebugLog.isDebugEnabled()) {
-      Runtime.getRuntime().gc();
-      //memoryDebugLog.debug(String.format("freeMem=%.2fMB", Runtime.getRuntime().freeMemory() / (1024.0*1024.0)));
-      long availMem = (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) + Runtime.getRuntime().freeMemory();
-      memoryDebugLog.debug(String.format("After GC:  avail mem=%.2fMB, delta=%.2fMB",  
-                                         availMem / (1024.0*1024.0),
-                                         (freeMem - Runtime.getRuntime().freeMemory()) / (1024.0*1024.0)));
-    }
-  }
-
 }

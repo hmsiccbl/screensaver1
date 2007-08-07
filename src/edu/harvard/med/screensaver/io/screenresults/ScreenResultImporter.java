@@ -14,9 +14,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 
+import jxl.write.WritableWorkbook;
+
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
@@ -24,9 +25,10 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
-import edu.harvard.med.screensaver.io.workbook.ParseError;
+import edu.harvard.med.screensaver.io.workbook2.ParseError;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.util.FileUtils;
 
 public class ScreenResultImporter
 {
@@ -110,17 +112,20 @@ public class ScreenResultImporter
 
           ScreenResult screenResult = finalScreenResultParser.parse(finalScreen,
                                                                     inputFile);
-          if (finalScreenResultParser.getErrors().size() > 0) {
+          if (finalScreenResultParser.getHasErrors()) {
             log.error("Errors encountered during parse:");
             for (ParseError error : finalScreenResultParser.getErrors()) {
               log.error(error.toString());
             }
 
             try {
-              finalScreenResultParser.outputErrorsInAnnotatedWorkbooks(null,
-                                                                       ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
+              WritableWorkbook errorAnnotatedWorkbook = finalScreenResultParser.getErrorAnnotatedWorkbook();
+              File errorAnnotatedWorkbookFile = FileUtils.modifyFileDirectoryAndExtension(inputFile, (File) null, ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
+              errorAnnotatedWorkbook.setOutputFile(errorAnnotatedWorkbookFile);
+              errorAnnotatedWorkbook.write();
+              errorAnnotatedWorkbook.close();
             }
-            catch (IOException e) {
+            catch (Exception e) {
               log.error("could not create error-annotated workbook: " + e.getMessage());
             }
             throw new DAOTransactionRollbackException("screen result errors");
@@ -165,6 +170,7 @@ public class ScreenResultImporter
     return screen;
   }
 
+  @SuppressWarnings("unchecked")
   private static void cleanOutputDirectory(File dir)
   {
     if (!dir.isDirectory()) {
@@ -172,9 +178,9 @@ public class ScreenResultImporter
       return;
     }
     log.info("cleaning directory " + dir);
-    Iterator iterator = FileUtils.iterateFiles(dir,
-                                               new String[] {ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION, ".out"},
-                                               false);
+    Iterator<File> iterator = org.apache.commons.io.FileUtils.iterateFiles(dir,
+                                                                           new String[] {ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION, ".out"},
+                                                                           false);
     while (iterator.hasNext()) {
       File fileToDelete = (File) iterator.next();
       log.info("deleting previously generated outputfile '" + fileToDelete + "'");

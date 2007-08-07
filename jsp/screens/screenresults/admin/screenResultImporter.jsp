@@ -14,9 +14,7 @@
 
   <h:form id="errorsTableForm" rendered="#{screenResultImporter.screenResultParser.hasErrors}">
 
-		<h:outputText value="Import of screen result file \"
-			#{screenResultImporter.uploadedFile.name}\" failed for
-			screen #{screenResultImporter.screen.screenNumber}"
+		<h:outputText value="Import of screen result file \"#{screenResultImporter.uploadedFile.name}\" failed for screen #{screenResultImporter.screen.screenNumber}"
       styleClass="errorMessage" />
 
 		<t:div/>
