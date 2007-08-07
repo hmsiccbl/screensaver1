@@ -345,3 +345,9 @@ a.menuItem:hover,a.menuItemActive:hover {
 
 .inactiveTab {
 }
+
+.newsDate {
+  font-family: monospace;
+  font: Courier;
+  font-weight: bold;
+}

@@ -72,13 +72,18 @@
       <redirect/>
     </navigation-case>
     <navigation-case>
-      <from-outcome>viewHelp</from-outcome>
-      <to-view-id>/helpViewer</to-view-id>
+      <from-outcome>viewNews</from-outcome>
+      <to-view-id>/newsViewer</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-outcome>viewDownloads</from-outcome>
       <to-view-id>/downloadsViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewHelp</from-outcome>
+      <to-view-id>/helpViewer</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>

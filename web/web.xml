@@ -379,6 +379,7 @@
       <url-pattern>/main.jsf</url-pattern>
       <url-pattern>/login.jsf</url-pattern>
       <url-pattern>/login-error.jsf</url-pattern>
+      <url-pattern>/newsViewer.jsf</url-pattern>
       <url-pattern>/downloadsViewer.jsf</url-pattern>
       <url-pattern>/helpViewer.jsf</url-pattern>
       <url-pattern>/libraries/*</url-pattern>

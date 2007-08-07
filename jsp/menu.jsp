@@ -67,6 +67,10 @@
 					accesskey="M"
 					title="Browse the screens that you headed, led and collaborated on" />
 				<t:commandNavigation2 />
+				<t:commandNavigation2 action="#{mainController.viewNews}"
+					value="Latest News"
+					accesskey="N"
+					title="The latest Screensaver news" />
 				<t:commandNavigation2 action="#{mainController.viewDownloads}"
 					value="Data Downloads"
 					accesskey="D"

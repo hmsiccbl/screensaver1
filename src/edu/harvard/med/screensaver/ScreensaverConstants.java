@@ -30,6 +30,7 @@ public interface ScreensaverConstants
   public static final String VIEW_MAIN ="viewMain";
   public static final String VIEW_GOODBYE = "goodbye";
   public static final String VIEW_HELP ="viewHelp";
+  public static final String VIEW_NEWS ="viewNews";
   public static final String VIEW_DOWNLOADS ="viewDownloads";
   public static final String FIND_WELLS = "findWells";
   public static final String FIND_WELL_VOLUMES = "findWellVolumes";

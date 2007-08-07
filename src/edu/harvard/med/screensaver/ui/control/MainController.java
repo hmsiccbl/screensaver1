@@ -26,10 +26,13 @@ public interface MainController
   public String viewMain();
 
   @UIControllerMethod
-  public String viewHelp();
+  public String viewNews();
 
   @UIControllerMethod
   public String viewDownloads();
+
+  @UIControllerMethod
+  public String viewHelp();
 
   @UIControllerMethod
   public String logout();

@@ -40,9 +40,6 @@ public class MainControllerImpl extends AbstractUIController implements MainCont
   
   // public constructors and methods
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.MainController#viewMain()
-   */
   @UIControllerMethod
   public String viewMain()
   {
@@ -50,19 +47,13 @@ public class MainControllerImpl extends AbstractUIController implements MainCont
     return VIEW_MAIN;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.MainController#viewInstructions()
-   */
   @UIControllerMethod
-  public String viewHelp()
+  public String viewNews()
   {
-    logUserActivity(VIEW_HELP);
-    return VIEW_HELP;
+    logUserActivity(VIEW_NEWS);
+    return VIEW_NEWS;
   }
-  
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.MainController#viewDownloads()
-   */
+
   @UIControllerMethod
   public String viewDownloads()
   {
@@ -70,9 +61,13 @@ public class MainControllerImpl extends AbstractUIController implements MainCont
     return VIEW_DOWNLOADS;
   }
   
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.ui.control.MainController#logout()
-   */
+  @UIControllerMethod
+  public String viewHelp()
+  {
+    logUserActivity(VIEW_HELP);
+    return VIEW_HELP;
+  }
+
   public String logout()
   {
     logUserActivity("logout");

@@ -20,7 +20,7 @@ log4j.appender.file.append=true
 
 ### Root logger
 
-log4j.rootLogger=info, stdout
+log4j.rootLogger=info, stdout, file
 
 ### User Activity logger
 

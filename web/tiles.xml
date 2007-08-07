@@ -66,15 +66,21 @@
     <put name="body" value="/main.jsp" />
   </definition>
   
+  <definition name="newsViewer.tiles" extends=".base">
+    <put name="pageTitle" value="Latest News" />
+    <put name="body" value="/newsViewer.jsp" />
+  </definition>
+  
+  <definition name="/downloadsViewer.tiles" extends=".base">
+    <put name="pageTitle" value="Data Downloads" />
+    <put name="body" value="/downloadsViewer.jsp" />
+  </definition>
+  
   <definition name="/helpViewer.tiles" extends=".base">
     <put name="pageTitle" value="Help Viewer" />
     <put name="body" value="/helpViewer.jsp" />
   </definition>
 
-  <definition name="/downloadsViewer.tiles" extends=".base">
-    <put name="pageTitle" value="Data Downloads" />
-    <put name="body" value="/downloadsViewer.jsp" />
-  </definition>
 
 
   <!-- libraries tiles -->
