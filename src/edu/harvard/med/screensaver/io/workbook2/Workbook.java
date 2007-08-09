@@ -10,6 +10,8 @@
 package edu.harvard.med.screensaver.io.workbook2;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -38,9 +40,9 @@ public class Workbook
   private ParseErrorManager _errors;
 
 
-  public Workbook(File workbookFile, ParseErrorManager errors)
+  public Workbook(File workbookFile, ParseErrorManager errors) throws FileNotFoundException
   {
-    this(workbookFile, null, errors);
+    this(workbookFile, new FileInputStream(workbookFile), errors);
   }
 
   public Workbook(File workbookFile, InputStream workbookStream, ParseErrorManager errors)

@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,6 +27,8 @@ import java.util.TreeSet;
 
 import jxl.BooleanFormulaCell;
 import jxl.CellType;
+import jxl.DateCell;
+import jxl.NumberCell;
 import jxl.NumberFormulaCell;
 import jxl.Sheet;
 import jxl.read.biff.BiffException;
@@ -33,6 +36,7 @@ import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultWorkbookSpecification.ScreenInfoRow;
 import edu.harvard.med.screensaver.io.workbook2.Cell;
 import edu.harvard.med.screensaver.io.workbook2.ParseError;
 import edu.harvard.med.screensaver.io.workbook2.ParseErrorManager;
@@ -55,6 +59,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.util.DateUtil;
 import edu.harvard.med.screensaver.util.StringUtils;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -258,7 +263,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testErrorAnnotatedWorkbook() throws IOException, BiffException, WriteException
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
-    mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115), workbookFile);
+    ScreenResult screenResult = mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115), workbookFile);
     WritableWorkbook errorAnnotatedWorkbook = mockScreenResultParser.getErrorAnnotatedWorkbook();
     File file = File.createTempFile(ERRORS_TEST_WORKBOOK_FILE, ".xls");
     errorAnnotatedWorkbook.setOutputFile(file);
@@ -269,10 +274,32 @@ public class ScreenResultParserTest extends AbstractSpringTest
     
     // test error-annotated workbook contents
     jxl.Workbook errorAnnotatedWorkbook2 = jxl.Workbook.getWorkbook(file);
-    assertEquals(5,
+    
+    // note: data sheets w/o errors are not exported
+    assertEquals("number of sheets", 2,
                  errorAnnotatedWorkbook2.getNumberOfSheets());
-    Sheet sheet1 = errorAnnotatedWorkbook2.getSheet(1);
 
+    Sheet sheet0 = errorAnnotatedWorkbook2.getSheet(0);
+    
+    int i = ScreenResultWorkbookSpecification.SCREENINFO_FIRST_DATA_ROW_INDEX;
+    for (ScreenInfoRow screenInfoRow : ScreenInfoRow.values()) {
+      assertEquals("row " + i + " label",
+                   screenInfoRow.getDisplayText(),
+                   sheet0.getCell(ScreenResultWorkbookSpecification.SCREENINFO_ROW_HEADER_COLUMN_INDEX, i).getContents());
+      if (screenInfoRow.equals(ScreenInfoRow.ID)) {
+        assertEquals(screenInfoRow.name() + " value",
+                     screenResult.getScreen().getScreenNumber(),
+                     new Integer((int) ((NumberCell) sheet0.getCell(ScreenResultWorkbookSpecification.SCREENINFO_VALUE_COLUMN_INDEX, i)).getValue()));
+      }
+      if (screenInfoRow.equals(ScreenInfoRow.DATE_FIRST_LIBRARY_SCREENING)) {
+        assertEquals(screenInfoRow.name() + " value",
+                     DateUtils.round(screenResult.getDateCreated(), Calendar.DATE), 
+                     DateUtils.round(((DateCell) sheet0.getCell(ScreenResultWorkbookSpecification.SCREENINFO_VALUE_COLUMN_INDEX, i)).getDate(), Calendar.DATE));
+      }
+      ++i;
+    }
+    
+    Sheet sheet1 = errorAnnotatedWorkbook2.getSheet(1);
     assertEquals("SushiRaw: unparseable value \"sushiraw\" (expected one of [, derived, raw])",
                  sheet1.getCell('C' - 'A', 6).getContents());
     assertEquals("B: invalid Data Header column reference 'B' (expected one of [E, F])",
