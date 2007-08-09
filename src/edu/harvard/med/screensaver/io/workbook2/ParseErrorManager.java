@@ -104,6 +104,10 @@ public class ParseErrorManager
       WritableWorkbook errorAnnotatedWorkbook = jxl.Workbook.createWorkbook(dummyOutputStream);
       if (_workbook != null) {
         errorAnnotatedWorkbook = jxl.Workbook.createWorkbook(dummyOutputStream);
+        
+        // TODO: this sheet is being created, but the data itself is not always
+        // being imported (see RT #50154). Not going to fix unless a user runs
+        // across this problem!
         errorAnnotatedWorkbook.importSheet(ScreenResultWorkbookSpecification.SCREEN_INFO_SHEET_NAME,
                                            0,
                                            _workbook.getWorkbook().getSheet(ScreenResultWorkbookSpecification.SCREEN_INFO_SHEET_NAME));
@@ -113,7 +117,7 @@ public class ParseErrorManager
       }
 
       // annotate workbook with non-cell-specific error by appending to a specially created "errors" sheet
-      for (ParseError error : _errors) {
+       for (ParseError error : _errors) {
         if (error.getCell() == null) {
           WritableSheet generalParseErrorsSheet = errorAnnotatedWorkbook.getSheet("Parse Errors");
           if (generalParseErrorsSheet == null) {
