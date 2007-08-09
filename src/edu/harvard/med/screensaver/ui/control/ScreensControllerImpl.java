@@ -37,6 +37,7 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
@@ -799,14 +800,29 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
       {
         public void runTransaction()
         {
-          ScreenResult screenResult = _dao.reloadEntity(screenResultIn);
+          ScreenResult screenResult = _dao.reloadEntity(screenResultIn, 
+                                                        true,
+                                                        "hbnResultValueTypes");
+          // note: we eager fetch the resultValues for each ResultValueType
+          // individually, since fetching all with a single needReadOnly() call
+          // would generate an SQL result cross-product for all RVTs+RVs that
+          // would include a considerable amount of redundant data
+          // for the (denormalized) RVT fields
+          for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+            // note: requesting the iterator generates an SQL statement that
+            // only includes the result_value_type_result_values table, whereas
+            // the needReadOnly() call's SQL statement joins to the
+            // result_value_type table as well, which is slower
+            rvt.getResultValues().keySet().iterator();
+            //_dao.needReadOnly(rvt, "resultValues");
+          }
           File exportedWorkbookFile = null;
           FileOutputStream out = null;
           try {
             if (screenResult != null) {
               HSSFWorkbook workbook = _screenResultExporter.build(screenResult);
-              exportedWorkbookFile = File.createTempFile("screenResult" + screenResult.getScreen().getScreenNumber() + ".", 
-              ".xls");
+              exportedWorkbookFile = File.createTempFile("screenResult" + screenResult.getScreen().getScreenNumber() + ".",
+                                                         ".xls");
               out = new FileOutputStream(exportedWorkbookFile);
               workbook.write(out);
               out.close();
