@@ -759,7 +759,16 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   
   public String viewCherryPickRequestWellVolumes()
   {
-    _screensController.viewCherryPickRequestWellVolumes(_cherryPickRequest);
+    _screensController.viewCherryPickRequestWellVolumes(_cherryPickRequest, false);
+    // use the special wellVolumeSearchResult page that the cherryPickAdmin role
+    // can access (the normal wellVolumeSearchResult is restricted to the
+    // librariesAdmin role)
+    return VIEW_CHERRY_PICK_REQUEST_WELL_VOLUMES;
+  }
+  
+  public String viewCherryPickRequestWellVolumesForUnfulfilled()
+  {
+    _screensController.viewCherryPickRequestWellVolumes(_cherryPickRequest, true);
     // use the special wellVolumeSearchResult page that the cherryPickAdmin role
     // can access (the normal wellVolumeSearchResult is restricted to the
     // librariesAdmin role)

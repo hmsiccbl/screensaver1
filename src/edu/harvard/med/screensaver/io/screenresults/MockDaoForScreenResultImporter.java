@@ -298,7 +298,8 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
-  public Collection<WellCopyVolume> findWellCopyVolumes(CherryPickRequest cherryPickRequest)
+  public Collection<WellCopyVolume> findWellCopyVolumes(CherryPickRequest cherryPickRequest,
+                                                        boolean forUnfufilledLabCherryPicksOnly)
   {
     // TODO Auto-generated method stub
     return null;

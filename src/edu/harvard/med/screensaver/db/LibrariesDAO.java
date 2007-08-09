@@ -84,7 +84,8 @@ public interface LibrariesDAO
 
   public Collection<WellCopyVolume> findWellCopyVolumes(Library library);
 
-  public Collection<WellCopyVolume> findWellCopyVolumes(CherryPickRequest cherryPickRequest);
+  public Collection<WellCopyVolume> findWellCopyVolumes(CherryPickRequest cherryPickRequest,
+                                                        boolean forUnfufilledLabCherryPicksOnly);
 
   public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy);
 

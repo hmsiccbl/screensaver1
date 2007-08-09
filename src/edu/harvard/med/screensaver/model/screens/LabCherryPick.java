@@ -264,6 +264,9 @@ public class LabCherryPick extends AbstractEntity
     if (isPlated()) {
       throw new BusinessRuleViolationException("cannot allocate or deallocate a cherry pick after it has been plated");
     }
+    if (getCherryPickRequest().getMicroliterTransferVolumePerWellApproved() == null) {
+      throw new BusinessRuleViolationException("cannot allocate a cherry pick if its parent cherry pick request has unspecified approved well volume");
+    }
     
     _wellVolumeAdjustments.clear();
     if (sourceCopy != null) {

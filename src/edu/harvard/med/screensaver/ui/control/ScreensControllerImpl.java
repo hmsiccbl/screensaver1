@@ -1052,11 +1052,13 @@ public class ScreensControllerImpl extends AbstractUIController implements Scree
   }
 
   @UIControllerMethod
-  public String viewCherryPickRequestWellVolumes(CherryPickRequest cherryPickRequest)
+  public String viewCherryPickRequestWellVolumes(CherryPickRequest cherryPickRequest,
+                                                 boolean forUnfufilledLabCherryPicksOnly)
   {
     logUserActivity("viewCherryPickRequestWellVolumes for " + cherryPickRequest);
     
-    Collection<WellCopyVolume> wellCopyVolumes = _librariesDao.findWellCopyVolumes(cherryPickRequest);
+    Collection<WellCopyVolume> wellCopyVolumes = _librariesDao.findWellCopyVolumes(cherryPickRequest, 
+                                                                                   forUnfufilledLabCherryPicksOnly);
     WellCopyVolumeSearchResults wellCopyVolumeSearchResults = new WellCopyVolumeSearchResults(wellCopyVolumes, 
                                                                                               _librariesController,
                                                                                               this,

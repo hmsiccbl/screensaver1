@@ -448,6 +448,12 @@ TODO:
 						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks}"
 						styleClass="command"
 						title="View the  available #{cherryPickRequestViewer.liquidTerm} volumes for the cherry picks on the cherry pick copy plates" />
+					<t:commandButton id="viewCherryPickRequestWellVolumesForUnfulfilled"
+						value="View Unfulfilled Well Volumes"
+						action="#{cherryPickRequestViewer.viewCherryPickRequestWellVolumesForUnfulfilled}"
+						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks}"
+						styleClass="command"
+						title="View the  available #{cherryPickRequestViewer.liquidTerm} volumes for the unfulfilled cherry picks on the cherry pick copy plates" />
 					<t:commandButton id="allocateCherryPicks"
 						value="Reserve #{cherryPickRequestViewer.liquidTerm}"
 						action="#{cherryPickRequestViewer.allocateCherryPicks}"

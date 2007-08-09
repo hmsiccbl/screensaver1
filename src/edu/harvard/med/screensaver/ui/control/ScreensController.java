@@ -148,7 +148,8 @@ public interface ScreensController
   public String deleteAllScreenerCherryPicks(CherryPickRequest cherryPickRequest);
 
   @UIControllerMethod
-  public String viewCherryPickRequestWellVolumes(CherryPickRequest cherryPickRequest);
+  public String viewCherryPickRequestWellVolumes(CherryPickRequest cherryPickRequest,
+                                                 boolean forUnfufilledLabCherryPicksOnly);
 
   @UIControllerMethod
   public String allocateCherryPicks(CherryPickRequest cherryPickRequest);
