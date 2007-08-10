@@ -376,7 +376,7 @@ public abstract class AbstractEntity implements Serializable
     if (originalDate == null) {
       return null;
     }
-    return DateUtils.round(originalDate, mostSignificantField);
+    return DateUtils.truncate(originalDate, mostSignificantField);
   }
 
   
