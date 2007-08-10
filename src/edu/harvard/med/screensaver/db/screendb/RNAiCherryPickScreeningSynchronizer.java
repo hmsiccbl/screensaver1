@@ -85,7 +85,7 @@ class RNAiCherryPickScreeningSynchronizer extends ScreeningSynchronizer
     for (RNAiCherryPickScreening rnaiCherryPickScreening :
       _dao.findAllEntitiesOfType(RNAiCherryPickScreening.class)) {
       rnaiCherryPickScreening.getScreen().getScreeningRoomActivities().remove(rnaiCherryPickScreening);
-      rnaiCherryPickScreening.getPerformedBy().getHbnActivitiesPerformed().remove(rnaiCherryPickScreening);
+      rnaiCherryPickScreening.getPerformedBy().getActivitiesPerformed().remove(rnaiCherryPickScreening);
     }
   }
 
@@ -98,7 +98,11 @@ class RNAiCherryPickScreeningSynchronizer extends ScreeningSynchronizer
     while (resultSet.next()) {
       RNAiCherryPickScreening screening = createRnaiCherryPickScreening(resultSet);
       if (screening == null) {
-        continue; // forced at present because some of these visits have null cprNumber
+        // forced at present because some of these visits have null cprNumber
+        log.error(
+          "Encountered an RNAi Cherry Pick Screening visit in ScreenDB without a " +
+          "cpr_number_for_cp_screen: " + resultSet.getInt("id"));
+        continue;
       }
       screening.setComments(resultSet.getString("comments"));
       screening.setAssayProtocol(resultSet.getString("assay_protocol"));
@@ -165,6 +169,9 @@ class RNAiCherryPickScreeningSynchronizer extends ScreeningSynchronizer
       "legacyCherryPickRequestNumber",
       cherryPickRequestNumber,
       true);
+    if (cherryPickRequest == null) {
+      cherryPickRequest = _dao.findEntityById(RNAiCherryPickRequest.class, cherryPickRequestNumber);
+    }
     if (cherryPickRequest == null) {
       throw new ScreenDBSynchronizationException(
         "couldnt find RNAiCherryPickRequest with cherryPickRequestNumber " + cherryPickRequestNumber);
