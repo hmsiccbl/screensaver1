@@ -112,6 +112,14 @@
   </bean>
   
   <bean
+    id="libraryCopyGenerator"
+    class="edu.harvard.med.screensaver.service.libraries.LibraryCopyGenerator"
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="librariesDao"/>
+  </bean>
+  
+  <bean
     id="cherryPickRequestAllocator"
     class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator"
     scope="singleton">
