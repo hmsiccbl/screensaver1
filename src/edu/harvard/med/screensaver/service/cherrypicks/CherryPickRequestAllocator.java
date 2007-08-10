@@ -52,7 +52,7 @@ public class CherryPickRequestAllocator
    * inaccurracy on the number of times the well was drawn from, but the above
    * strategy is considered sufficient by the lab).
    */
-   public static final BigDecimal MINIMUM_SOURCE_WELL_VOLUME = new BigDecimal(1).setScale(Well.VOLUME_SCALE);
+   public static final BigDecimal MINIMUM_SOURCE_WELL_VOLUME = new BigDecimal(3).setScale(Well.VOLUME_SCALE);
 
 
   // static members
