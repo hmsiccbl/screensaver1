@@ -55,7 +55,6 @@ public class CompoundPubchemCidListUpgrader
   private PubchemSmilesSearch pubchemSmilesSearch = new PubchemSmilesSearch();
   private int _numCompoundsUpgraded = 0;
   
-  
   // constructor and instance methods
   
   public CompoundPubchemCidListUpgrader(GenericEntityDAO dao)
