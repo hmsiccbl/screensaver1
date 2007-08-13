@@ -85,7 +85,7 @@ class RNAiCherryPickScreeningSynchronizer extends ScreeningSynchronizer
     for (RNAiCherryPickScreening rnaiCherryPickScreening :
       _dao.findAllEntitiesOfType(RNAiCherryPickScreening.class)) {
       rnaiCherryPickScreening.getScreen().getScreeningRoomActivities().remove(rnaiCherryPickScreening);
-      rnaiCherryPickScreening.getPerformedBy().getActivitiesPerformed().remove(rnaiCherryPickScreening);
+      rnaiCherryPickScreening.getPerformedBy().getHbnActivitiesPerformed().remove(rnaiCherryPickScreening);
     }
   }
 
