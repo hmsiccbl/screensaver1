@@ -91,13 +91,13 @@ public class HtmlDateRenderer extends HtmlRenderer {
 
         writer.startElement(HTML.SPAN_ELEM, uiComponent);
         writer.writeAttribute(HTML.ID_ATTR, clientId, null);
-        // [ant 2007-07-02]: always disable wrapping between the date input fields
+        // [screensaver]: always disable wrapping between the date input fields
         writer.writeAttribute(HTML.STYLE_ATTR,
                               "white-space: nowrap",
                               null);
 
         if( ! (type.equals("time") || type.equals("short_time"))){
-          // [ant 2007-07-02]: switched order of month and day, to appease users
+          // [screensaver]: switched order of month and day, to appease users
           encodeInputMonth(inputDate, writer, clientId, userData, currentLocale, disabled, readonly);
 	        encodeInputDay(inputDate, writer, clientId, userData, disabled, readonly);
 	        encodeInputYear(inputDate, writer, clientId, userData, disabled, readonly);
