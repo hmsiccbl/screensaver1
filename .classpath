@@ -32,28 +32,28 @@
 	<classpathentry kind="lib" path="lib/hms/eCommonsAuth.jar"/>
 	<classpathentry kind="lib" path="lib/cdk-20060714/cdk-20060714.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-math-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/cglib-2.2_beta1.jar"/>
-	<classpathentry kind="lib" path="lib/springframework-2.0.2/asm-2.2.2.jar"/>
-	<classpathentry kind="lib" path="lib/springframework-2.0.2/asm-commons-2.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/springframework-2.0.2/spring.jar" sourcepath="/usr/local/spring-framework-2.0.2-with-dependencies/spring-framework-2.0.2/src"/>
+	<classpathentry kind="lib" path="lib/springframework-2.0.2/dev/spring-mock.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-2.0.2/aspectjrt.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-2.0.2/aspectjweaver.jar"/>
-	<classpathentry kind="lib" path="lib/springframework-2.0.2/spring.jar"/>
-	<classpathentry kind="lib" path="lib/springframework-2.0.2/dev/spring-mock.jar"/>
+	<classpathentry kind="lib" path="lib/springframework-2.0.2/asm-2.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/springframework-2.0.2/asm-commons-2.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/cglib-2.2_beta1.jar"/>
 	<classpathentry kind="lib" path="lib/poi-2.5.1/poi-hacked.jar"/>
 	<classpathentry kind="lib" path="lib/poi-2.5.1/poi-contrib-2.5.1-final-20040804.jar"/>
-	<classpathentry kind="lib" path="lib/jexcel-2.6.3/jxl.jar"/>
-	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/tomahawk-1.1.5.jar"/>
-	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/myfaces-impl-1.1.5.jar"/>
-	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/myfaces-api-1.1.5.jar"/>
-	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/jstl-1.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/commons-logging-1.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/commons-el-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/commons-digester-1.6.jar"/>
-	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/commons-beanutils-1.7.0.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate-3.2.4/jta.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate-3.2.4/hibernate3.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate-3.2.4/ehcache-1.2.3.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/commons-codec-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/commons-digester-1.6.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/commons-el-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/commons-logging-1.0.4.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/jstl-1.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/myfaces-api-1.1.5.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/myfaces-impl-1.1.5.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/tomahawk-1.1.5.jar" sourcepath="/usr/local/tomahawk-1.1.5/src"/>
+	<classpathentry kind="lib" path="lib/hibernate-3.2.4/hibernate3.jar" sourcepath="/usr/local/hibernate-3.2.4/src"/>
 	<classpathentry kind="lib" path="lib/hibernate-3.2.4/antlr-2.7.6.jar"/>
+	<classpathentry kind="lib" path="lib/hibernate-3.2.4/ehcache-1.2.3.jar"/>
+	<classpathentry kind="lib" path="lib/hibernate-3.2.4/jta.jar"/>
+	<classpathentry kind="lib" path="lib/jexcel-2.6.5/jxl.jar" sourcepath="/usr/local/jexcelapi-2.6.5/src"/>
 	<classpathentry kind="output" path=".eclipse.classes"/>
 </classpath>
