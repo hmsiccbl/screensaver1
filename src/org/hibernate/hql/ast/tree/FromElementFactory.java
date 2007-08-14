@@ -344,7 +344,7 @@ class FromElementFactory implements SqlTokenTypes {
 //    origin.addDestination( destination );
 // This was the cause of HHH-242
 //    origin.setType( FROM_FRAGMENT );      // Set the parent node type so that the AST is properly formed.
-    // [ant4] commented out next 2 lines to fix bug whereby left-join-fetching EntityCollection->Entity->ValueCollection threw a NPE
+    // [screensaver] commented out next 2 lines to fix bug whereby left-join-fetching EntityCollection->Entity->ValueCollection threw a NPE
 //    origin.setText( "" );           // The destination node will have all the FROM text.
 //    origin.setCollectionJoin( true );     // The parent node is a collection join too (voodoo - see JoinProcessor)
     fromClause.addCollectionJoinFromElementByPath( path, destination );

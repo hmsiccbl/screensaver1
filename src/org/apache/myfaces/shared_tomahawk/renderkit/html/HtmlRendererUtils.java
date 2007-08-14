@@ -63,7 +63,7 @@ public final class HtmlRendererUtils {
     public static final String SUBMIT_FORM_FN_NAME = "oamSubmitForm";
     private static final String AUTO_SCROLL_PARAM = "autoScroll";
     private static final String AUTO_SCROLL_FUNCTION = "getScrolling";
-    private static final String SKIP_AUTO_SCROLL_PARAM = "skipAutoScroll";
+    private static final String SKIP_AUTO_SCROLL_PARAM = "skipAutoScroll"; // [screensaver: added]
     public static final String ALLOW_CDATA_SECTION_ON = "org.apache.myfaces.ResponseWriter.CdataSectionOn";
 
 
@@ -1090,7 +1090,9 @@ public final class HtmlRendererUtils {
         {
             //ok, we stayed on the same page, so let's scroll it to the former place
             String scrolling = (String)externalContext.getRequestParameterMap().get(AUTO_SCROLL_PARAM);
+            // [screensaver: added next line]
             Boolean skipAutoScrolling = (Boolean) externalContext.getRequestMap().get(SKIP_AUTO_SCROLL_PARAM);
+            // [screensaver: updated next line]
             if (scrolling != null && scrolling.length() > 0 && (skipAutoScrolling == null || !skipAutoScrolling))
             {
                 String x = "0";
