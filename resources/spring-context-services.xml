@@ -103,15 +103,6 @@
   </bean>
   
   <bean
-    id="allCherryPicksImporter"
-    class="edu.harvard.med.screensaver.io.cherrypicks.AllCherryPicksImporter"
-    scope="singleton">
-    <constructor-arg ref="genericEntityDao"/>
-    <constructor-arg ref="librariesDao"/>
-    <constructor-arg ref="libraryPoolToDuplexWellMapper"/>
-  </bean>
-  
-  <bean
     id="libraryCopyGenerator"
     class="edu.harvard.med.screensaver.service.libraries.LibraryCopyGenerator"
     scope="singleton">

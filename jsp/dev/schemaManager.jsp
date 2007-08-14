@@ -53,20 +53,4 @@
 		</t:panelGrid>
 	</h:form>
 
-	<h:form id="allCherryPicksImportForm" enctype="multipart/form-data">
-		<h:panelGrid columns="1">
-			<h:outputText value="AllCherryPicks Importer:"
-				styleClass="sectionHeader" />
-			<t:outputLabel for="uploadCherryPickFile"
-				value="Import AllCherryPicks.xls file:" />
-			<t:inputFileUpload id="uploadCherryPickFile"
-				value="#{allCherryPicksImporterBean.uploadedFile}" storage="file"
-				accept="application/vnd.ms-excel" required="true"
-				maxlength="134217728" styleClass="inputText" />
-			<t:commandButton value="Import"
-				action="#{allCherryPicksImporterBean.importAllCherryPicks}"
-				styleClass="command" />
-		</h:panelGrid>
-	</h:form>
-
 </f:subview>

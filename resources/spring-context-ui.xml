@@ -485,17 +485,6 @@
     <aop:scoped-proxy/>
   </bean>
   
-  <bean
-    id="allCherryPicksImporterBean"
-    parent="uiBean"
-    scope="session"
-    class="edu.harvard.med.screensaver.ui.screens.AllCherryPicksImporter">
-    <property
-      name="allCherryPicksImporter"
-      ref="allCherryPicksImporter" />
-    <aop:scoped-proxy/>
-  </bean>
-  
   <!-- Development/Debug related beans -->
 
   <bean

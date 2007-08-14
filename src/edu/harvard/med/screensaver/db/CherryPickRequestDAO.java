@@ -97,13 +97,14 @@ public class CherryPickRequestDAO extends AbstractDAO
   }
   
   /**
-   * @motivation Bypassing business rule violation checks is present for the purpose of the
-   * {@link ScreenDBRnaiCherryPickSynchronizer} only. This is a special-case situation where
-   * data needs to be loaded from multiple sources - the ScreenDB synchronizer, and
-   * to-be-written code to import data from the AllCherryPicks.xls file and the cherry
-   * pick request .csv files themselves. The data may well lead to busines rule violations, as
-   * well as data model violations, in the intermediate state where the ScreenDB synchronizer
-   * has run, but the AllCherryPicks.xls importer has not.
+   * @motivation Bypassing business rule violation checks is present for the
+   *             purpose of the {@link ScreenDBRnaiCherryPickSynchronizer} only.
+   *             This is a special-case situation where data needs to be loaded
+   *             from multiple sources - the ScreenDB synchronizer, and
+   *             to-be-written code to import data from the cherry pick request
+   *             .csv files themselves. The data may well lead to business rule
+   *             violations, as well as data model violations, in the
+   *             intermediate state where the ScreenDB synchronizer has run.
    */
   public void deleteCherryPickRequest(
     final CherryPickRequest cherryPickRequestIn,
