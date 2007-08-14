@@ -29,6 +29,7 @@ log4j.logger.userActivity=info
 ### Screensaver application
 
 log4j.logger.edu.harvard.med.screensaver=debug
+log4j.logger.edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter=debug
 
 # filter out debug output that is especially verbose and common
 log4j.logger.edu.harvard.med.screensaver.db.RestrictedAccessCollectionDaoMethodInterceptor=warn
@@ -111,9 +112,6 @@ log4j.logger.org.hibernate.impl.SessionImpl=warn
 #log4j.logger.org.hibernate.loader=warn
 
 
-# log HQL query parser activity
-#log4j.logger.org.hibernate.hql.ast.AST=debug
-
 # log just the SQL - set this to "debug" to get all the SQL stmts
 #log4j.logger.org.hibernate.SQL=debug
 
@@ -133,6 +131,9 @@ log4j.logger.org.hibernate.impl.SessionImpl=warn
 
 # log HQL parse trees
 #log4j.logger.org.hibernate.hql=debug
+
+# log HQL query parser activity
+#log4j.logger.org.hibernate.hql.ast.AST=debug
 
 # log cache activity
 #log4j.logger.org.hibernate.cache=debug

@@ -6,8 +6,8 @@
 
 ### build-time properties
 
-debug=true
-servlet.authentication.method=FORM
+#servlet.authentication.method=FORM
+servlet.authentication.method=BASIC
 appserver.dir=/usr/local/tomcat
 log4j.properties.resource=log4j.properties.web.ant4
 #log4j.properties.resource=log4j.properties.debug
@@ -24,6 +24,6 @@ babel.executable.path=/usr/local/openbabel/bin/babel
 
 # database connection
 SCREENSAVER_PGSQL_SERVER=localhost
-SCREENSAVER_PGSQL_DB=screensaver1
-SCREENSAVER_PGSQL_USER=screensaver1web
+SCREENSAVER_PGSQL_DB=devscreensaver1
+SCREENSAVER_PGSQL_USER=devscreensaver1
 SCREENSAVER_PGSQL_PASSWORD=
