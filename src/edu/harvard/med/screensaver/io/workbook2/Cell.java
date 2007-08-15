@@ -9,8 +9,11 @@
 
 package edu.harvard.med.screensaver.io.workbook2;
 
+import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import jxl.BooleanCell;
@@ -18,12 +21,6 @@ import jxl.CellType;
 import jxl.DateCell;
 import jxl.NumberCell;
 import jxl.Sheet;
-import jxl.format.Colour;
-import jxl.write.Label;
-import jxl.write.WritableCell;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableSheet;
-import jxl.write.WriteException;
 
 import org.apache.log4j.Logger;
 
@@ -59,6 +56,29 @@ public class Cell
   private static final String CELL_VALUE_REQUIRED_ERROR = "value required";
   private static final Pattern DECIMAL_PRECISION_PATTERN = Pattern.compile(".*?(\\.([0#]+))?(%?)");
   private static final String GENERAL_FORMAT = "GENERAL";
+
+  
+  // static methods
+  
+  public static Date convertGmtDateToLocalTimeZone(Date date)
+  {
+    try {
+      // all of the below nonsense is to convert the GMT-time zone date (as
+      // returned from the workbook) to the local time zone; see
+      // http://www.andykhan.com/jexcelapi/tutorial.html#dates
+      DateFormat dateFormat = DateFormat.getDateInstance();
+      dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+      String formattedDate = dateFormat.format(date); // formatted output is w/o time zone
+      dateFormat.setTimeZone(TimeZone.getDefault()); 
+      Date convertedDate = dateFormat.parse(formattedDate); // convertedDate is now correct for current time zone
+      return convertedDate;
+    }
+    catch (ParseException e) {
+      // should never occur since we're using the DateFormat object to parse what it previously formatted 
+      log.error(e);
+      return date; 
+    }
+  }
 
 
   // instance data members
@@ -405,7 +425,8 @@ public class Cell
         }
         return null;
       }
-      return ((DateCell) cell).getDate();
+      Date date = ((DateCell) cell).getDate();
+      return convertGmtDateToLocalTimeZone(date);
     } 
     catch (CellOutOfRangeException e) {
       if (_required) {

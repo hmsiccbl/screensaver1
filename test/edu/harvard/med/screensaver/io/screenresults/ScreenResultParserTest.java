@@ -293,8 +293,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
       }
       if (screenInfoRow.equals(ScreenInfoRow.DATE_FIRST_LIBRARY_SCREENING)) {
         assertEquals(screenInfoRow.name() + " value",
-                     DateUtils.round(screenResult.getDateCreated(), Calendar.DATE), 
-                     DateUtils.round(((DateCell) sheet0.getCell(ScreenResultWorkbookSpecification.SCREENINFO_VALUE_COLUMN_INDEX, i)).getDate(), Calendar.DATE));
+                     screenResult.getDateCreated(), 
+                     DateUtils.truncate(Cell.convertGmtDateToLocalTimeZone(((DateCell) sheet0.getCell(ScreenResultWorkbookSpecification.SCREENINFO_VALUE_COLUMN_INDEX, i)).getDate()), Calendar.DATE));
       }
       ++i;
     }
@@ -410,7 +410,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     Date expectedDate = DateUtil.makeDate(2006, 1, 1);
     ScreenResult expectedScreenResult = makeScreenResult(expectedDate);
     assertEquals("date",
-                 expectedScreenResult.getDateCreated(),
+                 expectedDate,
                  screenResult.getDateCreated());
     assertEquals("replicate count", 2, screenResult.getReplicateCount().intValue());
 
