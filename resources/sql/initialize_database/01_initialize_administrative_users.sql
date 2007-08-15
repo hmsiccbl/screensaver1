@@ -1,9 +1,32 @@
-begin;
-
 /*
+ * This SQL script initializes the users in the Screensaver database.
+ *
+ * Two types of users are supported: administrators and screening room
+ * users.  All users will have an record in the screensaver_user
+ * table.  Administrators must have a related record in the
+ * administrator_user table.  Screening room users must have a related
+ * record in the screensaver_user table.
+ *
+ * The 'login_id' field will be used to authenticate the admin/user, along
+ * with the 'digested_password' field that contains a SHA1-hashed
+ * value of the user's password.  For ICCB-L web deployments only, the
+ * optional 'ecommons_id' can also be used for login (and which has no
+ * accompanying password in the database).
+ * 
  * Need to generate a SHA1 hashed password?  Try: 
  *   perl -e 'use Digest::SHA1; my $sha1 = Digest::SHA1->new; $sha1->add("YOUR_PASSWORD"); print $sha1->hexdigest(), "\n";'
+ *
+ * The screensaver_user_role_type table is used to specify the roles
+ * associated with each user, which control the user's authorizations.
+ * The list of valid user roles can be found in the
+ * edu.harvard.med.screensaver.model.users.ScreensaverUserRole Java
+ * class.  Note that adminstrator users must only be given
+ * administrator roles, and screening room users must only be given
+ * user roles.
  */
+
+
+begin;
 
 /* guest has empty password */
 insert into screensaver_user (screensaver_user_id, version, date_created, first_name, last_name, email, login_id, digested_password) values (nextval('screensaver_user_id_seq'), 1, 'today', 'Screensaver', 'Guest', 'guest@hms.harvard.edu', 'guest', 'da39a3ee5e6b4b0d3255bfef95601890afd80709');
