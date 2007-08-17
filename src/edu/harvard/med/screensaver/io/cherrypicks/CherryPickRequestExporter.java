@@ -46,11 +46,13 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Exports the cherry picks of a CherryPickRequest to an Excel file, to be
  * provided to the screener(s).
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -62,7 +64,7 @@ public class CherryPickRequestExporter
   private static final String LIST_OF_VALUES_DELIMITER = ", ";
 
   private static Logger log = Logger.getLogger(CherryPickRequestExporter.class);
-  
+
   private static final int SCREENER_CHERRY_PICKS_SHEET_INDEX = 0;
   private static final int LAB_CHERRY_PICKS_SHEET_INDEX = 1;
 
@@ -76,38 +78,33 @@ public class CherryPickRequestExporter
       System.exit(1);
     }
     final CherryPickRequestExporter exporter = (CherryPickRequestExporter) app.getSpringBean("cherryPickRequestExporter");
-    exporter.getDao().doInTransaction(new DAOTransaction() 
-    {
-      public void runTransaction() 
-      {
-        try { 
-          Integer cherryPickRequestNumber = app.getCommandLineOptionValue("n", Integer.class);
-          RNAiCherryPickRequest rnaiCherryPickRequest = 
-            exporter.getDao().findEntityByProperty(RNAiCherryPickRequest.class, 
-                                                   "cherryPickRequestNumber", 
-                                                   cherryPickRequestNumber);
-          if (rnaiCherryPickRequest == null) {
-            throw new IllegalArgumentException("no such cherry pick request number " + cherryPickRequestNumber);
-          }
-          Workbook workbook = exporter.exportRNAiCherryPickRequest(rnaiCherryPickRequest);
-          File file = app.getCommandLineOptionValue("f", File.class);
-          WritableWorkbook workbook2 = Workbook.createWorkbook(file, workbook);
-          workbook2.write();
-          workbook2.close();
-          log.info("cherry pick request exported to " + file);
-        }
-        catch (Exception e) {
-          throw new DAOTransactionRollbackException(e);
-        }
+    Integer cherryPickRequestNumber = app.getCommandLineOptionValue("n", Integer.class);
+    RNAiCherryPickRequest rnaiCherryPickRequest =
+      exporter.getDao().findEntityByProperty(RNAiCherryPickRequest.class,
+                                             "legacyCherryPickRequestNumber",
+                                             cherryPickRequestNumber);
+    if (rnaiCherryPickRequest == null) {
+      rnaiCherryPickRequest =
+        exporter.getDao().findEntityByProperty(RNAiCherryPickRequest.class,
+                                               "cherryPickRequestId",
+                                               cherryPickRequestNumber);
+      if (rnaiCherryPickRequest == null) {
+        throw new IllegalArgumentException("no such cherry pick request number " + cherryPickRequestNumber);
       }
-    });
+    }
+    Workbook workbook = exporter.exportRNAiCherryPickRequest(rnaiCherryPickRequest);
+    File file = app.getCommandLineOptionValue("f", File.class);
+    WritableWorkbook workbook2 = Workbook.createWorkbook(file, workbook);
+    workbook2.write();
+    workbook2.close();
+    log.info("cherry pick request exported to " + file);
   }
 
 
   // instance data members
-  
+
   private GenericEntityDAO _dao;
-  
+
 
   // public constructors and methods
 
@@ -121,35 +118,35 @@ public class CherryPickRequestExporter
     return _dao;
   }
 
+  @Transactional(readOnly=true)
   public Workbook exportRNAiCherryPickRequest(final RNAiCherryPickRequest cherryPickRequestIn)
   {
-    final Workbook[] result = new Workbook[1];
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction() 
-      {
-        try {
-          RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) _dao.reloadEntity(cherryPickRequestIn);
-          
-          ByteArrayOutputStream rawBytes = new ByteArrayOutputStream();
-          OutputStream out = new BufferedOutputStream(rawBytes);
-          WritableWorkbook workbook = Workbook.createWorkbook(out);
+    try {
+      RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) _dao.reloadEntity(cherryPickRequestIn);
 
-          writeCherryPicks(workbook, cherryPickRequest);
-          workbook.write();
-          workbook.close();
-          result[0] = Workbook.getWorkbook(new ByteArrayInputStream(rawBytes.toByteArray()));
-        }
-        catch (Exception e) {
-          throw new DAOTransactionRollbackException(e);
-        }
-      }
-    });
-    return result[0];
+      ByteArrayOutputStream rawBytes = new ByteArrayOutputStream();
+      OutputStream out = new BufferedOutputStream(rawBytes);
+      WritableWorkbook workbook = Workbook.createWorkbook(out);
+
+      writeCherryPicks(workbook, cherryPickRequest);
+      workbook.write();
+      workbook.close();
+      return Workbook.getWorkbook(new ByteArrayInputStream(rawBytes.toByteArray()));
+    }
+    catch (Exception e) {
+      throw new DAOTransactionRollbackException(e);
+    }
   }
 
 
   // private methods
+
+  /**
+   * @motivation for CGLIB2
+   */
+  protected CherryPickRequestExporter()
+  {
+  }
 
   private void writeCherryPicks(WritableWorkbook workbook, CherryPickRequest cherryPickRequest) throws RowsExceededException, WriteException
   {
@@ -159,7 +156,7 @@ public class CherryPickRequestExporter
 
   private void writeLabCherryPicks(WritableWorkbook workbook, CherryPickRequest cherryPickRequest) throws RowsExceededException, WriteException
   {
-    // TODO: this sheet is not always representing duplexes (it could be representing cherry picked pool wells, e.g.), 
+    // TODO: this sheet is not always representing duplexes (it could be representing cherry picked pool wells, e.g.),
     // but there is no *easy* way to determine if this is the case, so we'll just default to naming this sheet "Duplexes"
     WritableSheet sheet = workbook.createSheet("Duplexes", LAB_CHERRY_PICKS_SHEET_INDEX);
     writeLabCherryPicksHeaders(sheet);
@@ -186,12 +183,12 @@ public class CherryPickRequestExporter
                             (gene == null ? null : gene.getGeneName()),
                             StringUtils.makeListString(CollectionUtils.
                                                        collect(sourceWell.getSilencingReagents(),
-                                                                             new Transformer() 
+                                                                             new Transformer()
                                                        {
-                                                         public Object transform(Object silencingReagent) 
-                                                         { 
-                                                           return ((SilencingReagent) silencingReagent).getSequence(); 
-                                                         } 
+                                                         public Object transform(Object silencingReagent)
+                                                         {
+                                                           return ((SilencingReagent) silencingReagent).getSequence();
+                                                         }
                                                        }), LIST_OF_VALUES_DELIMITER),
                             sourceWell.getVendorIdentifier());
   }
@@ -211,7 +208,7 @@ public class CherryPickRequestExporter
 
   private void writeScreenerCherryPicks(WritableWorkbook workbook, CherryPickRequest cherryPickRequest) throws RowsExceededException, WriteException
   {
-    // TODO: this sheet is not always representing pools (it could be representing duplex cherry pick wells, e.g.), 
+    // TODO: this sheet is not always representing pools (it could be representing duplex cherry pick wells, e.g.),
     // but there is no *easy* way to determine if this is the case, so we'll just default to naming this sheet "Pools"
     WritableSheet sheet = workbook.createSheet("Pools", SCREENER_CHERRY_PICKS_SHEET_INDEX);
     writeScreenerCherryPicksHeaders(sheet, cherryPickRequest.getScreen().getScreenResult());
@@ -230,20 +227,20 @@ public class CherryPickRequestExporter
                             iRow,
                             (gene == null ? null : gene.getEntrezgeneSymbol()),
                             (gene == null ? null : gene.getEntrezgeneId()),
-                            (gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(), 
+                            (gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(),
                                                                               LIST_OF_VALUES_DELIMITER)),
                             (gene == null ? null : gene.getGeneName()),
                             StringUtils.makeListString(CollectionUtils.
                                                        collect(screenedWell.getSilencingReagents(),
-                                                                             new Transformer() 
+                                                                             new Transformer()
                                                        {
-                                                         public Object transform(Object silencingReagent) 
-                                                         { 
-                                                           return ((SilencingReagent) silencingReagent).getSequence(); 
-                                                         } 
+                                                         public Object transform(Object silencingReagent)
+                                                         {
+                                                           return ((SilencingReagent) silencingReagent).getSequence();
+                                                         }
                                                        }), LIST_OF_VALUES_DELIMITER),
                             screenedWell.getVendorIdentifier());
-    
+
     List<Map<WellKey,ResultValue>> resultValueMaps = getResultValuesForDataHeaders(screenerCherryPick);
     int resultValueCol = 0;
     for (Map<WellKey,ResultValue> resultValues : resultValueMaps) {
