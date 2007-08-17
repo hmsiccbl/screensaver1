@@ -19,10 +19,14 @@ import org.apache.log4j.Logger;
  * between any two states is valid. When a state transition is invalid, the
  * system should throw a BusinessRuleViolationException.
  * <p>
- * BusinessRuleViolationExceptions should not be thrown while interacting with
- * the data model via the Screensaver web user interface. If this occurs, logic
- * in the user interface is flawed and should be fixed.  
+ * BusinessRuleViolationExceptions are not expected to be thrown while
+ * interacting with the data model via the Screensaver web user interface. If a
+ * {@link BusinessRuleViolationException} is thrown out user interface code, you
+ * can assume it is flawed in that it is allowing a non-valid action to occur.
+ * (e.g. perhaps a command that should have been disabled for the current state
+ * of the data model, was erroneously enabled).
  * 
+ * @see DataModelViolationException
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */

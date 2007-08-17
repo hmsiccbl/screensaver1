@@ -298,7 +298,6 @@ public abstract class AbstractEntity implements Serializable
    * insert <code>visitor.acceptVisitor(this);</code>
    * 
    * @param visitor
-   * @return
    * @motivation to keep most of our AbstractEntity subclasses clean, as we
    *             currently only have the DataAccessPolicy visitor, which does
    *             not actually need to visit every subclass.

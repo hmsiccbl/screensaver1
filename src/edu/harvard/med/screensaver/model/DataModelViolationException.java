@@ -11,6 +11,17 @@ package edu.harvard.med.screensaver.model;
 
 import org.apache.log4j.Logger;
 
+/**
+ * Indicates that an attempt has been made to alter the data model in a way that
+ * violates data requirements. In general, only the domain model entity classes
+ * will throw this exception. However, it is also valid for methods of service classes to
+ * throw this exception if they are performing "sanity checks" on the state of
+ * the data model during their execution. 
+ * 
+ * @see BusinessRuleViolationException
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ */
 public class DataModelViolationException extends RuntimeException
 {
   // static members

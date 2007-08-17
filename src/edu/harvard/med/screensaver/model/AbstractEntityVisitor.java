@@ -48,6 +48,19 @@ import edu.harvard.med.screensaver.model.users.ChecklistItemType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
+/**
+ * A visitor interface for the Screensaver domain model entity classes.
+ * <p>
+ * Note: <code>visit</code> methods should only be added for concrete entity
+ * classes (i.e., <i>abstract</i> entity classes should not be visitable). This
+ * ensures that each <i>concrete</i> <code>AbstractEntity</code> class that
+ * extends a subclass of {@link AbstractEntity} can provide its own
+ * {@link AbstractEntity#acceptVisitor(AbstractEntityVisitor)} method
+ * implementation.
+ * 
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ */
 public interface AbstractEntityVisitor
 {
   public boolean visit(AbaseTestset entity);
@@ -89,4 +102,3 @@ public interface AbstractEntityVisitor
   public boolean visit(Well entity);
   public boolean visit(WellVolumeCorrectionActivity entity);
 }
-
