@@ -63,17 +63,12 @@ public interface GenericEntityDAO
    * <p>
    * Internally, Hibernate will issue SQL calls to increment the version field
    * of each entity. This can be expensive for large entity networks.
-   * </p>
-   * 
-   * @param <E>
-   * @param entity
-   * @return
    */
   public <E extends AbstractEntity> E reattachEntity(E entity);
 
 
   /**
-   * Reattach a <i>new instance</i> of a previously persistent, but dettached
+   * Reattach a <i>new instance</i> of a previously persistent, but detached
    * entity to the current Hibernate session, allowing its previously
    * uninitialized lazy relationships to be navigated (without throwing
    * LazyInitializationExceptions). If the entity already exists in the session,
@@ -93,7 +88,7 @@ public interface GenericEntityDAO
 
 
   /**
-   * Reattach a <i>new instance</i> of a previously persistent, but dettached
+   * Reattach a <i>new instance</i> of a previously persistent, but detached
    * entity to the current Hibernate session, allowing its previously
    * uninitialized lazy relationships to be navigated (without throwing
    * LazyInitializationExceptions). If the entity already exists in the session,
@@ -119,7 +114,7 @@ public interface GenericEntityDAO
 
   /**
    * Loads the specified relationships of a given entity, allowing these
-   * relationships to be navigated after the entity is dettached from the
+   * relationships to be navigated after the entity is detached from the
    * Hibernate session.
    * 
    * @param entity the root entity
@@ -132,7 +127,7 @@ public interface GenericEntityDAO
 
   /**
    * Loads the specified relationships of a given entity, allowing these
-   * relationships to be navigated after the entity is dettached from the
+   * relationships to be navigated after the entity is detached from the
    * Hibernate session. See class-level documentation of
    * {@link GenericEntityDAO} for issues related to loading read-only entities.
    * 
@@ -147,9 +142,6 @@ public interface GenericEntityDAO
   /**
    * Returns the size of a to-many relationship collection, and does so
    * efficiently, without loading the entities in the relationship.
-   * 
-   * @param persistentCollection
-   * @return
    */
   public int relationshipSize(final Object persistentCollection);
 
@@ -157,16 +149,11 @@ public interface GenericEntityDAO
   /**
    * Returns the size of a to-many relationship collection, and does so
    * efficiently, without loading the entities in the relationship.
-   *
-   * @param entity
-   * @param relationship
-   * @return
    */
   public int relationshipSize(final AbstractEntity entity, final String relationship);
 
 
-  public int relationshipSize(
-                              final AbstractEntity entity,
+  public int relationshipSize(final AbstractEntity entity,
                               final String relationship,
                               final String relationshipProperty,
                               final String relationshipPropertyValue);
@@ -178,7 +165,7 @@ public interface GenericEntityDAO
   /**
    * Retrieve and return a list of entities of the specified type.
    * 
-   * @param<E> The type of the entity to retrieve
+   * @param <E> The type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
    * @return a list of the entities of the specified type
    */
@@ -186,13 +173,10 @@ public interface GenericEntityDAO
 
 
   /**
-   * 
-   * @param <E>
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
-   * @return
    */
   public <E extends AbstractEntity> List<E> findAllEntitiesOfType(Class<E> entityClass,
                                                                   boolean readOnly,
@@ -242,6 +226,8 @@ public interface GenericEntityDAO
 
   /**
    * See @{@link #findEntitiesByProperties(Class, Map)}.
+   * @param name2Value a <code>Map</code> containing entries for each
+   *          property/value pair to query against
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
@@ -250,7 +236,7 @@ public interface GenericEntityDAO
   public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass,
                                                                      Map<String,Object> name2Value,
                                                                      final boolean readOnly,
-                                                                     String... relationshipsIn);
+                                                                     String... relationships);
 
 
   /**
@@ -259,8 +245,8 @@ public interface GenericEntityDAO
    * 
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
-   * @param propertyName the name of the property to query against
-   * @param propertyValue the value of the property to query for
+   * @param name2Value a <code>Map</code> containing entries for each
+   *          property/value pair to query against
    * @return a list of entities that have the specified value for the specified
    *         property
    * @exception InvalidArgumentException when there is more
@@ -272,6 +258,8 @@ public interface GenericEntityDAO
 
   /**
    * See @{@link #findEntityByProperties(Class, Map)}.
+   * @param name2Value a <code>Map</code> containing entries for each
+   *          property/value pair to query against
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property

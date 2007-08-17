@@ -39,22 +39,33 @@ import org.apache.log4j.Logger;
     
 
 /**
- * This LoginModule authenticates users via an injected AuthenticationClient
- * service.
+ * This LoginModule authenticates users via one of two mechanisms, in the
+ * following order:
+ * <ol>
+ * <li>Via the login ID and password stored in the Screensaver database</li>
+ * <li>Via the injected AuthenticationClient.</li>
+ * </ol>
  * <p>
- * If user is successfully authenticated, a set <code>Principal</code>s will
- * added to the login Subject, which will be subsequently removed when the user
- * is logged out.  The Principals are obtained from a database, via a GenericEntityDAO object.
+ * If user is successfully authenticated, a set of <code>Principal</code>s
+ * will be added to the login Subject, and which will be subsequently removed
+ * when the user is logged out. The Principals are obtained from a database, via
+ * a GenericEntityDAO object.
+ * <p>
+ * The LoginModule also allows administrators to login as normal users by
+ * specifying a composite login ID that is formed by concatenating admin's login
+ * ID with the user's login ID, separated by a colon. ("admin:user").
  */
+// TODO: refactor into 3 separate LoginModules, one for normal login ID
+// strategy, one for the AuthenticationClient strategy, and one for the
+// composite admin:user login ID strategy. combine strategies via a
+// ChainedLoginModule class.
 public class ScreensaverLoginModule implements LoginModule
 {
   
   private static final Logger log = Logger.getLogger(ScreensaverLoginModule.class);
 
   private static final String NO_SUCH_USER = "No such user";
-
   private static final String FOUND_SCREENSAVER_USER = "Found Screensaver user";
-
   private static final String FOUND_ECOMMONS_USER = "Found eCommons user";
   
   private GenericEntityDAO _dao;
@@ -63,7 +74,9 @@ public class ScreensaverLoginModule implements LoginModule
   // initial state
   private Subject _subject;
   private CallbackHandler _callbackHandler;
+  @SuppressWarnings("unchecked")
   private Map _sharedState;
+  @SuppressWarnings("unchecked")
   private Map _options;
   
   // the authentication status
@@ -110,15 +123,16 @@ public class ScreensaverLoginModule implements LoginModule
   /**
    * Initialize this <code>LoginModule</code>.
    * 
-   * @param _subject the <code>Subject</code> to be authenticated.
-   * @param _callbackHandler a <code>CallbackHandler</code> for communicating
+   * @param subject the <code>Subject</code> to be authenticated.
+   * @param callbackHandler a <code>CallbackHandler</code> for communicating
    *          with the end user (prompting for user names and passwords, for
    *          example).
-   * @param _sharedState shared <code>LoginModule</code> state.
-   * @param _options _options specified in the login
+   * @param sharedState shared <code>LoginModule</code> state.
+   * @param options _options specified in the login
    *          <code>Configuration</pcode> for this particular
    *      <code>LoginModule</code>.
    */
+  @SuppressWarnings("unchecked")
   public void initialize(
     Subject subject,
     CallbackHandler callbackHandler,

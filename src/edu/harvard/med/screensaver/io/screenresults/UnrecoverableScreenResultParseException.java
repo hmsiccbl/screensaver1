@@ -16,7 +16,8 @@ import edu.harvard.med.screensaver.io.workbook2.Workbook;
  * Used to report an unrecoverable parse error; indicates that further parsing
  * is not possible; causes parsing to abort immediately.
  * 
- * @author ant
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class UnrecoverableScreenResultParseException extends Exception
 {

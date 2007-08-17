@@ -51,7 +51,6 @@ public class ScreenSearchResults extends SearchResults<Screen>
    * Construct a new <code>ScreenSearchResult</code> object.
    * @param unsortedResults the unsorted list of the results, as they are returned from the
    * database
-   * @param genericEntityDao 
    */
   public ScreenSearchResults(List<Screen> unsortedResults, 
                              ScreensController screensController, 

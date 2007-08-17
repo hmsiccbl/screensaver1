@@ -70,7 +70,6 @@ public class UISelectManyBean<T> extends UISelectBean<T>
   
   /**
    * called by controller 
-   * @param selections
    */
   public List<T> getSelections()
   {

@@ -20,7 +20,10 @@ import edu.harvard.med.screensaver.ui.control.MainController;
 import edu.harvard.med.screensaver.util.Pair;
 
 /**
- *
+ * Backing bean for view that displays error message, when an unexpected error
+ * occurs, and provides some continuation options for users. For developers,
+ * shows formatted stack traces for exception chain.
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */

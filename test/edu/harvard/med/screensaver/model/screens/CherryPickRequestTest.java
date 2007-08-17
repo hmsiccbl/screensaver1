@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.beans.IntrospectionException;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -77,7 +78,7 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest
     fail("not implemented");
   }
 
-  public void testDeleteCompoundCherryPick()
+  public void testDeleteCompoundCherryPickRequest()
   {
     schemaUtil.truncateTablesOrCreateSchema();
     final Integer cherryPickRequestNumber = 2504;
@@ -89,6 +90,7 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest
       {
         Library library = new Library("name", "short", ScreenType.SMALL_MOLECULE, LibraryType.DOS,
           5, 5);
+        Copy copy = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "A");
         genericEntityDao.persistEntity(library);
         librariesDao.loadOrCreateWellsForLibrary(library);
         Well well = library.getWells().iterator().next();
@@ -101,16 +103,9 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest
         
         CompoundCherryPickRequest request =
           new CompoundCherryPickRequest(screen, user, new Date(), cherryPickRequestNumber);
-        CherryPickAssayPlate plate = new CherryPickAssayPlate(request, 1, 0 , PlateType.ABGENE);
+        request.setMicroliterTransferVolumePerWellApproved(new BigDecimal(1));
         ScreenerCherryPick screenerCherryPick = new ScreenerCherryPick(request, well);
-        LabCherryPick labCherryPick = new LabCherryPick(screenerCherryPick, well);
-        labCherryPick.setAllocated(new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "A"));
-        labCherryPick.setMapped(plate, 0, 0);
-        
-        CherryPickLiquidTransfer transfer =
-          new CherryPickLiquidTransfer(user, new Date(), new Date(), request);
-        transfer.addCherryPickAssayPlate(plate);
-
+        new LabCherryPick(screenerCherryPick, well);
         genericEntityDao.persistEntity(request);
       }
     });
@@ -122,7 +117,7 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest
       {
         CompoundCherryPickRequest request =
           genericEntityDao.findEntityByProperty(CompoundCherryPickRequest.class, "legacyCherryPickRequestNumber", cherryPickRequestNumber);
-        cherryPickRequestDao.deleteCherryPickRequest(request, true);
+        cherryPickRequestDao.deleteCherryPickRequest(request);
       }
     });
 

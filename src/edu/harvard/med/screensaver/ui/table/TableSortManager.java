@@ -88,7 +88,6 @@ public class TableSortManager<E> extends Observable implements Observer
   
   /**
    * Get the index of the column currently being rendered by JSF.
-   * @return
    */
   public int getCurrentColumnIndex()
   {
@@ -97,7 +96,6 @@ public class TableSortManager<E> extends Observable implements Observer
 
   /**
    * Get the column currently being rendered by JSF.
-   * @return
    */
   @SuppressWarnings("unchecked")
   public TableColumn<E> getCurrentColumn()
@@ -201,10 +199,9 @@ public class TableSortManager<E> extends Observable implements Observer
   }
 
   /**
-   * Set the data header column model.
+   * Set the columns.
    * 
-   * @param dataHeaderColumnModel the data header column model, consisting of
-   *          {@link TableColumn} elements
+   * @param columns the new list columns
    */
   public void setColumns(List<TableColumn<E>> columns)
   {
@@ -281,7 +278,7 @@ public class TableSortManager<E> extends Observable implements Observer
 
   public void update(Observable o, Object arg)
   {
-    SortChangedEvent sortChangedEvent = null;
+    SortChangedEvent<E> sortChangedEvent = null;
     if (o == _sortColumn) {
       sortChangedEvent = new SortChangedEvent<E>(getSortColumn()); 
       setChanged();

@@ -35,7 +35,9 @@ import org.apache.poi.hssf.util.HSSFColor;
  * @motivation explicitly associates sheet name with a cell, since you cannot
  *             get it from an HSSFSheet!
  * @motivation handle the fact that HSSFSheet cells can be undefined
- * @author ant
+ *
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class Cell
 {
@@ -66,10 +68,11 @@ public class Cell
   // inner class definitions
   
   /**
-   * Instantiates Cell objects with shared arguments. For lisp-o-philes,
-   * this is akin to "currying" a function.
+   * Instantiates Cell objects with shared arguments. (For lisp-o-philes,
+   * this is akin to "currying" a function.)
    * 
-   * @author ant
+   * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+   * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
    */
   public static class Factory
   {
@@ -90,10 +93,6 @@ public class Cell
     /**
      * Constructs a Factory object that can be used instantiate Cell
      * objects with a shared set of arguments.
-     * 
-     * @param sheetName the name of the worksheet
-     * @param sheet the worksheet itself
-     * @param errors the error manager that will be notified of parse errors
      */
     public Factory(Workbook workbook,
                    int sheetIndex,
@@ -109,11 +108,8 @@ public class Cell
      * with a shared set of arguments and a new origin, allowing requested Cell
      * coordinates to be made relative to this origin.
      * 
-     * @param sheetName the name of the worksheet
-     * @param sheet the worksheet itself
      * @param columnOffset the "x" component of the new origin, to which all requested Cell coordinates will be relative
      * @param rowOffset the "y" component of the new origin, to which all requested Cell coordinates will be relative
-     * @param errors the error manager that will be notified of parse errors
      */
     public Factory(Workbook workbook,
                    int sheetIndex,
@@ -651,7 +647,6 @@ public class Cell
    * Determine if cell contains a numeric value, taking into account formula
    * type cells.
    * 
-   * @param cell the cell to inspect
    * @return true iff cell is of type HSSFCell.CELL_TYPE_NUMERIC, or
    *         HSSFCell.CELL_TYPE_FORMULA and formula evaluates to a numeric type.
    */
@@ -684,7 +679,6 @@ public class Cell
    * Determine if cell contains a boolean value, taking into account formula
    * type cells.
    * 
-   * @param cell the cell to inspect
    * @return true iff cell is of type HSSFCell.CELL_TYPE_BOOLEAN, or
    *         HSSFCell.CELL_TYPE_FORMULA and formula evaluates to a boolean type.
    */

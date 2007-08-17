@@ -46,9 +46,9 @@ public class Child extends AbstractEntity
   {
     _id = id;
   }
+
   /**
    * @hibernate.property
-   * @return
    */
   public String getValue()
   {
@@ -58,6 +58,7 @@ public class Child extends AbstractEntity
   {
     _value = value;
   }
+
   /**
    * @hibernate.version
    */

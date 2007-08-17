@@ -277,9 +277,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     return _dataHeadersModel;
   }
 
-  /**
-   * @return a List of {@link RawDataRow} objects
-   */
   public ScreenResultDataModel getDataTableModel()
   {
     if (_rawDataModel == null) {
@@ -366,7 +363,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   
   /**
    * @motivation for "Columns" JSF data table component
-   * @return
    */
   public Object getDataHeadersCellValue()
   {
@@ -631,7 +627,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
   /**
    * Called when the set of rows to be displayed in the table needs to be changed (row filtering).
-   * @return
    */
   public void dataTableFilterListener(ValueChangeEvent event)
   {
@@ -652,7 +647,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
   /**
    * Called when the set of rows to be displayed in the table needs to be changed (row filtering).
-   * @return
    */
   public void showPositivesForDataHeaderListener(ValueChangeEvent event)
   {
@@ -846,8 +840,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     
     /**
      * Override to format value in a custom way.
-     * @param rvt
-     * @return
      */
     public String formatValue(ResultValueType rvt)
     {
@@ -864,7 +856,9 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   /**
    * DataHeaderRow bean, used to provide ScreenResult data headers to JSF components
    * @see ScreenResultViewer#getDataHeadersCellValue()
-   * @author ant
+   * 
+   * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+   * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
    */
   public static class DataHeaderRow
   {
@@ -876,20 +870,10 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
     /**
      * Constructs a DataHeaderRow object.
-     * 
-     * @param rvts The {@link ResultValueType}s that contain the data for this
-     *          row
-     * @param uniqueNames
-     * @param property a bean property of the {@link ResultValueType}, which
-     *          defines the type of data header to be displayed by this row
-     * @throws Exception if the specified property cannot be determined for a
-     *           ResultValueType
      */
     public DataHeaderRow(Collection<ResultValueType> rvts, 
                          UniqueDataHeaderNames uniqueNames, 
                          DataHeaderRowDefinition dataHeaderRowDefinition)
-
-      throws Exception
     {
       _dataHeaderRowDefinition = dataHeaderRowDefinition;
       _rvtPropertyValues = new HashMap<String,Object>();

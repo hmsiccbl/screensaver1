@@ -15,7 +15,9 @@ import org.apache.commons.io.FilenameUtils;
 
 /**
  * File utilities.
- * @author ant
+ * 
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class FileUtils
 {
@@ -26,7 +28,7 @@ public class FileUtils
    * @param file the File object to be modified
    * @param newDirectory the output directory; if null the workbook's original
    *          file directory is used.
-   * @param fileExtension the extension to use when saving the workbook,
+   * @param newExtension the extension to use when saving the workbook,
    *          replacing the workbook's original filename extension; if null
    *          original filename extension is used. A leading period will be
    *          added if it does not exist.
@@ -61,7 +63,7 @@ public class FileUtils
    * @param file the File object to be modified
    * @param newDirectory the output directory; if null the workbook's original
    *          file directory is used.
-   * @param fileExtension the extension to use when saving the workbook,
+   * @param newExtension the extension to use when saving the workbook,
    *          replacing the workbook's original filename extension; if null
    *          original filename extension is used. A leading period will be
    *          added if it does not exist.

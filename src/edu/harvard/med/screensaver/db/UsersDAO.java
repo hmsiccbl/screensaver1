@@ -51,7 +51,7 @@ public class UsersDAO extends AbstractDAO
 
   /**
    * Find all the screening room users that are lab heads.
-   * @return a List of {@link ScreeningRoomUsers}s.
+   * @return a List of {@link ScreeningRoomUser}s.
    */
   @SuppressWarnings("unchecked")
   public SortedSet<ScreeningRoomUser> findAllLabHeads()

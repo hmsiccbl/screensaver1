@@ -61,7 +61,7 @@ class SDRecordParser
   }
 
   /**
-   * @return
+
    */
   boolean sdFileHasMoreRecords()
   {
@@ -269,7 +269,7 @@ class SDRecordParser
   /**
    * Create a compound from a SMILES string, filling in the InChI and the PubChem CIDs.
    * @param smiles
-   * @return
+
    */
   private Compound createCompoundFromSmiles(String smiles)
   {

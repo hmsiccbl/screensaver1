@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.SortedMap;
 
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 

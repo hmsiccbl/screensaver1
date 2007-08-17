@@ -16,7 +16,6 @@ public class BeanUtils
    * Convert a property name to Title Case with spaces between words.
    * For example "aPropertyName" becomes "A Property Name".
    * @param propertyName
-   * @return
    */
   public static String formatPropertyName(String propertyName)
   {

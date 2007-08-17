@@ -27,7 +27,9 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
  * allows the workbook to be associated with the filename it originated from.
  * 
  * @motivation HSSFWorkbook does not store the file whence it orignated
- * @author ant
+ * 
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class Workbook
 {
@@ -95,7 +97,6 @@ public class Workbook
    * adds an error and returns <code>null</code>.
    * 
    * @motivation the HSSFWorkbook API is case sensitive for worksheet names
-   * @param name the worksheet name
    * @return the first HSSFSheet to match the specified name
    *         (case-insensitively)
    */

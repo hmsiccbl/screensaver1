@@ -93,11 +93,6 @@ public class LibraryCopyGenerator
 
   /**
    * Create a new plate copy for the specified copy and plate number
-   * @param copy
-   * @param plateNumber
-   * @param volume
-   * @param plateType
-   * @return
    */
   @Transactional
   public CopyInfo createPlateCopy(Copy copy,

@@ -25,7 +25,8 @@ import org.springframework.util.Log4jConfigurer;
  * logging will be configured per our project-specific settings, which happen to
  * be stored in resources/log4j.properties (as of 2006-06-23).
  * 
- * @author ant
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class LogConfigurer
 {
@@ -36,10 +37,6 @@ public class LogConfigurer
   
   public LogConfigurer() {}
   
-  /**
-   * @motivation avoid duplicate this class form outputting duplicate log
-   *             messages explaining that log system has been configured
-   */
   public LogConfigurer(
     String logPropertiesResource,
     long refreshInterval,

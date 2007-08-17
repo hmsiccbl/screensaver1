@@ -12,13 +12,15 @@ package edu.harvard.med.screensaver.ui.table;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.faces.component.html.HtmlDataTable;
 import javax.faces.model.DataModel;
 
 import org.apache.log4j.Logger;
 
 /**
- * @motivation Manager table column visibility. 
- *
+ * A {@link DataModel} for {@link HtmlDataTable} columns that manages table column
+ * visibility, making use of {@link TableColumn#isVisible()}.
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */

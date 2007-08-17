@@ -86,7 +86,6 @@ public class HeatMap
 
   /**
    * @motivation for rendering color legends
-   * @return
    */
   public ColorFunction getColorFunction()
   {

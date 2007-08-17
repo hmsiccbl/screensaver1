@@ -77,7 +77,6 @@ public class Child extends AbstractEntity
    * @hibernate.property
    *   type="java.lang.String"
    *   not-null="true"
-   * @return
    */
   public String getName()
   {
@@ -97,9 +96,6 @@ public class Child extends AbstractEntity
     _parent = parent;
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.model.AbstractEntity#getBusinessKey()
-   */
   protected Object getBusinessKey()
   {
     return getName();

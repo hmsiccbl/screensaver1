@@ -6,11 +6,12 @@ import edu.harvard.med.screensaver.io.workbook.Cell;
 
 /**
  * Interface for the various cell parsers used by the
- * {@link ScreenResultParser} class. Cell parsers read the value from a cell
- * and convert to a more strictly typed object, for use within our entity
- * model. (This interface is probably a case of over-engineering.)
+ * {@link edu.harvard.med.screensaver.io.screenresults.ScreenResultParser}
+ * class. Cell parsers read the value from a cell and convert to a more strictly
+ * typed object, for use within our domain model.
  * 
- * @author ant
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public interface CellValueParser<T>
 {

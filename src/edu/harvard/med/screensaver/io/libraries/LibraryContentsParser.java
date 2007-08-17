@@ -16,7 +16,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 
 /**
  * Parses library contents (either partial or complete) from an input
- * stream into the entity model.
+ * stream into the domain model.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */

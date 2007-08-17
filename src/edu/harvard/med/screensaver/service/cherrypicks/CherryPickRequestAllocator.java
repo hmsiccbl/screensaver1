@@ -49,7 +49,7 @@ public class CherryPickRequestAllocator
    * should be considered depleted. By setting this to a positive value, we
    * account for real-world inaccuracies that might otherwise cause a source
    * well to be overdrawn. (A theoretically better approach might be to base the
-   * inaccurracy on the number of times the well was drawn from, but the above
+   * inaccuracy on the number of times the well was drawn from, but the above
    * strategy is considered sufficient by the lab).
    */
    public static final BigDecimal MINIMUM_SOURCE_WELL_VOLUME = new BigDecimal(3).setScale(Well.VOLUME_SCALE);
@@ -79,8 +79,6 @@ public class CherryPickRequestAllocator
   }
   
   /**
-   * 
-   * @param cherryPickRequest
    * @return the set of <i>unfulfillable</i> cherry picks
    */
   public Set<LabCherryPick> allocate(final CherryPickRequest cherryPickRequestIn) throws DataAccessException
@@ -192,7 +190,7 @@ public class CherryPickRequestAllocator
   {
     List<Copy> copies = new ArrayList<Copy>(well.getLibrary().getCopies());
     if (copies.size() == 0) {
-      throw new DataModelViolationException("library " + well.getLibrary() + " has no Copies, so cannot allocate liquid");
+      throw new BusinessRuleViolationException("library " + well.getLibrary() + " has no Copies, so cannot allocate liquid");
     }
     Collections.sort(copies, SourceCopyComparator.getInstance());
 

@@ -80,16 +80,11 @@ import org.apache.log4j.Logger;
  * The class attempts to parse the file(s) as fully as possible, carrying on in
  * the face of errors, in order to catch as many errors as possible, as this
  * will aid the manual effort of correcting the files' format and content
- * between import attempts. By calling
- * {@link #outputErrorsInAnnotatedWorkbook(String)}, a new error-annotated
- * workbook will be written to the same directory as the workbook file. This
- * error-annotated workbook will contain errors messages in each cell that
- * encountered an error during parsing. Error messages that are not
- * cell-specific will be written to a new "Parse Errors" sheet in the
- * error-annotated workbook. The error-annotated workbook file will only be
- * written if the input workbook generated parse errors. The error-annotated
- * workbook will be named the same as its respective workbook input file with an
- * ".errors.xls" suffix.
+ * between import attempts. By calling {@link #getErrorAnnotatedWorkbook()}, a
+ * new error-annotated workbook will be generated (in memory only), containing
+ * errors messages in each cell that encountered an error during parsing. Error
+ * messages that are not cell-specific will be written to a new "Parse Errors"
+ * sheet in the error-annotated workbook.
  * <p>
  * Each call to {@link #parse} will clear the errors accumulated from the
  * previous call, and so the result of calling {@link #getErrors()} will change
@@ -227,8 +222,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * be partially populated if errors are encountered, so always call
    * getErrors() to determine parsing success.
    * 
-   * @param the parent Screen of the Screen Result being parsed
-   * @param the workbook file to be parsed
+   * @param screen the parent Screen of the Screen Result being parsed
+   * @param workbookFile the workbook file to be parsed
    * @return a ScreenResult object containing the data parsed from the workbook
    *         file; <code>null</code> if a fatal error occurs (e.g. file not
    *         found)
@@ -249,21 +244,19 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   }
 
   /**
-   * Parses the specified workbook file that contains Screen Result data in the
-   * <a
-   * href="https://wiki.med.harvard.edu/ICCBL/NewScreenResultFileFormat">"new"
-   * format</a>. Errors encountered during parsing are stored with this object
-   * until a parse() method is called again, and these errors can be retrieved
-   * via {@link #getErrors}. The returned <code>ScreenResult</code> may only
-   * be partially populated if errors are encountered, so always call
-   * getErrors() to determine parsing success.
+   * Parses the specified workbook file that contains Screen Result data. Errors
+   * encountered during parsing are stored with this object until a parse()
+   * method is called again, and these errors can be retrieved via
+   * {@link #getErrors}. The returned <code>ScreenResult</code> may only be
+   * partially populated if errors are encountered, so always call getErrors()
+   * to determine parsing success.
    * 
-   * @param the parent Screen of the Screen Result being parsed
-   * @param the workbook file to be parsed; if inputStream is null, will be used
-   *          to obtain the workbook file, otherwise just used to hold a name
-   *          for display/output purposes; if named file does not actually
-   *          exist, inputStream must not be null
-   * @param an InputStream that provides the workbook file as...well... an
+   * @param screen the parent Screen of the Screen Result being parsed
+   * @param inputSourceName the name of the workbook file to be parsed; if
+   *          inputStream is null, will be used to obtain the workbook file,
+   *          otherwise just used to hold a name for display/output purposes; if
+   *          named file does not actually exist, inputStream must not be null
+   * @param inputStream an InputStream that provides the workbook file via an
    *          InputStream
    * @return a ScreenResult object containing the data parsed from the workbook
    *         file; <code>null</code> if a fatal error occurs
@@ -425,7 +418,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * Prepares the _dataCellParserFactory to return Cells from the specified sheet.
    * @param workbook
    * @param sheetIndex
-   * @return
+
    */
   private Sheet initializeDataSheet(final Workbook workbook, int sheetIndex)
   {
@@ -819,7 +812,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * 
    * @param sheet
    * @param rowIndex
-   * @return
+
    */
   private boolean ignoreRow(Sheet sheet, int rowIndex)
   {

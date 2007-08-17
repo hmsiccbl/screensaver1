@@ -42,7 +42,8 @@ import org.apache.log4j.Logger;
  * implement such a generic class, which is parameterized on an Enum type, since
  * E.values() doesn't seem to be made available.
  * 
- * @author ant
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class EnumTypeConverter<E extends Enum<E>> implements Converter
 {

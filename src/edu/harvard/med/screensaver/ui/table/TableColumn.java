@@ -70,7 +70,6 @@ public abstract class TableColumn<E>
    * Get a comparator for sorting the column for the specified sortDirection and
    * that is null-safe.
    * 
-   * @param columnName the name of the column
    * @return a comparator for sorting the column
    */
   final public Comparator<E> getComparator(final SortDirection sortDirection)
@@ -97,7 +96,6 @@ public abstract class TableColumn<E>
    * on each call, since TableColumn will only call this method once for a given
    * instance.
    * 
-   * @param columnName the name of the column
    * @return a comparator for sorting the column
    */
   protected Comparator<E> getAscendingComparator()
@@ -163,9 +161,9 @@ public abstract class TableColumn<E>
   /**
    * Return true whenever the cell values for the column should be a
    * semicolon-separated list of hyperlinks. In this situation, {@link
-   * #getCellValue()} returns an array of values, and {@link #cellAction()} is
+   * #getCellValue(Object)} returns an array of values, and {@link #cellAction(Object)} is
    * called with a <code>commandValue</code> parameter equal to the results of
-   * {@link #getCellValue(AbstractEntity, String)}.
+   * {@link #getCellValue(Object)}.
    * 
    * @return true whenever the cell values for the column should be a list of
    *         hyperlinks.
@@ -175,7 +173,7 @@ public abstract class TableColumn<E>
   /**
    * Perform the action for clicking on the current cell. Return the navigation rule to go
    * along with the action for clicking on the current cell. This method is only called when
-   * {@link #isCommandLink} is true.
+   * {@link #isCommandLink()} is true.
    * 
    * @param entity the entity displayed in the current cell (the row index)
    * @return the navigation rule to go along with the action for clicking on the current cell 
@@ -185,7 +183,7 @@ public abstract class TableColumn<E>
   /**
    * Return true whenever the cell values for the column should be a hyperlink.
    * @motivation isCommandLink() translates to just 'commandLink' JavaBean property name, which is not as nice as 'isCommandLink'
-   * @see #isCommandLink(String)
+   * @see #isCommandLink()
    * @return true whenever the cell values for the column should be a hyperlink
    */
   final public boolean getIsCommandLink()
@@ -196,14 +194,14 @@ public abstract class TableColumn<E>
   /**
    * Return true whenever the cell values for the column should be a
    * semicolon-separated list of hyperlinks. In this situation, {@link
-   * #getCellValue()} returns an array of values, and {@link #cellAction()} is
+   * #getCellValue(Object)} returns an array of values, and {@link #cellAction(Object)} is
    * called with a <code>commandValue</code> parameter equal to the results of
-   * {@link #getCellValue(AbstractEntity, String)}.
+   * {@link #getCellValue(Object)}.
    * 
    * @motivation isCommandLinkList() translates to just 'commandLinkList'
    *             JavaBean property name, which is not as nice as
    *             'isCommandLinkList'
-   * @see #isCommandLinkList(String)
+   * @see #isCommandLinkList()
    * @return true whenever the cell values for the column should be a list of
    *         hyperlinks
    */

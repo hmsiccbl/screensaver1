@@ -15,7 +15,8 @@ import java.io.File;
  * Contains pertinent data for parse errors. Essentially, a data struct, with a
  * toString() method.
  * 
- * @author ant
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class FileParseError
 {
@@ -27,7 +28,7 @@ public class FileParseError
    * Construct a <code>FileParseError</code>, containing the error message, the
    * associated SDFile, and the associated SDFile record number.
    * 
-   * @param errorMessage the error message
+   * @param message the error message
    * @param file the associated file
    * @param recordNumber the associated record number in the file
    */
@@ -42,7 +43,7 @@ public class FileParseError
    * Construct a <code>FileParseError</code>, containing the error message, but
    * not specific to any SDFile, or SDFile record number.
    * 
-   * @param errorMessage the error message
+   * @param message the error message
    */
   public FileParseError(String message)
   {

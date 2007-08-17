@@ -12,11 +12,12 @@ package edu.harvard.med.screensaver.db;
 import org.springframework.core.NestedRuntimeException;
 
 /**
- * Used to convert checked exceptions that are thrown withn a
- * {@link DAOTransaction#runTransaction()} method into runtime exceptions,
- * allowing these exceptions to propagate out of the method call, forcing a
- * transaction rollback. Any runtime exception could be used, but explicitly
- * using DAOTransactionRollbackException indicates that a rollback is desired.
+ * Used within {@link DAOTransaction#runTransaction()} method to convert checked
+ * exceptions into runtime exceptions, allowing these runtime exceptions to
+ * propagate out of the method call, forcing a transaction rollback. Any runtime
+ * exception could be used, since any runtime exception will trigger a rollback,
+ * but explicitly using DAOTransactionRollbackException explicitly indicates
+ * that a rollback is desired.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>

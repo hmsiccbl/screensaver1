@@ -72,10 +72,9 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
   
   /**
    * Construct a new <code>SDFileCompoundLibraryContentsParser</code> object.
-   * @param genericEntityDao the data access object
    */
   public NaturalProductsLibraryContentsParser(GenericEntityDAO dao,
-                                             LibrariesDAO librariesDao)
+                                              LibrariesDAO librariesDao)
   {
     _dao = dao;
     _librariesDao = librariesDao;

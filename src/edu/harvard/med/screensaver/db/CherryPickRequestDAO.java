@@ -79,7 +79,7 @@ public class CherryPickRequestDAO extends AbstractDAO
       throw new BusinessRuleViolationException("cannot delete a lab cherry pick for a cherry pick request that has been allocated");
     }
 
-    // disassociate from related entities
+    // dissociate from related entities
     labCherryPick.getCherryPickRequest().getLabCherryPicks().remove(labCherryPick);
 //    if (labCherryPick.getSourceCopy() != null) {
 //      labCherryPick.getSourceCopy().getHbnLabCherryPicks().remove(labCherryPick);
@@ -91,24 +91,7 @@ public class CherryPickRequestDAO extends AbstractDAO
     getHibernateTemplate().delete(labCherryPick);
   }
 
-  public void deleteCherryPickRequest(CherryPickRequest cherryPickRequest)
-  {
-    deleteCherryPickRequest(cherryPickRequest, false);
-  }
-  
-  /**
-   * @motivation Bypassing business rule violation checks is present for the
-   *             purpose of the {@link ScreenDBRnaiCherryPickSynchronizer} only.
-   *             This is a special-case situation where data needs to be loaded
-   *             from multiple sources - the ScreenDB synchronizer, and
-   *             to-be-written code to import data from the cherry pick request
-   *             .csv files themselves. The data may well lead to business rule
-   *             violations, as well as data model violations, in the
-   *             intermediate state where the ScreenDB synchronizer has run.
-   */
-  public void deleteCherryPickRequest(
-    final CherryPickRequest cherryPickRequestIn,
-    boolean bypassBusinessRuleViolationChecks)
+  public void deleteCherryPickRequest(final CherryPickRequest cherryPickRequestIn)
   {
     CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
     // note: the cherryPickRequest.screen child-to-parent relationship is not cascaded, so although
@@ -117,14 +100,11 @@ public class CherryPickRequestDAO extends AbstractDAO
     // particular, screen.cherryPickRequests (needed below)
     _dao.reattachEntity(cherryPickRequestIn.getScreen());
 
-    if (! bypassBusinessRuleViolationChecks) {
-      if (cherryPickRequestIn.isAllocated()) {
-        throw new BusinessRuleViolationException("cannot delete a cherry pick request that has been allocated");
-      }
+    if (cherryPickRequestIn.isAllocated()) {
+      throw new BusinessRuleViolationException("cannot delete a cherry pick request that has been allocated");
     }
 
-    // disassociate from related entities
-    
+    // dissociate from related entities
     cherryPickRequest.getRequestedBy().getHbnCherryPickRequests().remove(cherryPickRequest);
     cherryPickRequest.getScreen().getCherryPickRequests().remove(cherryPickRequest);    
     getHibernateTemplate().delete(cherryPickRequest);

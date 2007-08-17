@@ -37,7 +37,7 @@ import edu.harvard.med.screensaver.util.eutils.NCBIGeneInfoProvider;
 
 /**
  * Parses the contents (either partial or complete) of an RNAi library
- * from an Excel spreadsheet into the entity model.
+ * from an Excel spreadsheet into the domain model.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -68,7 +68,6 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
   
   /**
    * Construct a new <code>RNAiLibraryContentsParser</code> object.
-   * @param genericEntityDao the data access object
    */
   public RNAiLibraryContentsParser(GenericEntityDAO dao,
                                    LibrariesDAO librariesDao)

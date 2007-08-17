@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.ui;
 
 import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.derivatives.Derivative;
 import edu.harvard.med.screensaver.model.derivatives.DerivativeScreenResult;
 import edu.harvard.med.screensaver.model.libraries.Compound;
@@ -57,9 +56,10 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 
 import org.apache.log4j.Logger;
 
-// TODO: implement billing permissions
-
-public class WebDataAccessPolicy implements AbstractEntityVisitor, DataAccessPolicy
+/**
+ * A DataAccessPolicy implementation that is used by the web application.
+ */
+public class WebDataAccessPolicy implements DataAccessPolicy
 {
   // static members
 

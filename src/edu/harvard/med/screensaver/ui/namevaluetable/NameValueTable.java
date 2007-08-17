@@ -200,7 +200,7 @@ abstract public class NameValueTable extends AbstractBackingBean
   /**
    * Perform the action for clicking on the current cell. Return the navigation rule to go
    * along with the action for clicking on the current cell. This method is only called when
-   * {@link #getIsCommandLink()} is true.
+   * {@link #getIsLinkValue()} is true.
    * 
    * @return the navigation rule to go along with the action for clicking on the current cell 
    */

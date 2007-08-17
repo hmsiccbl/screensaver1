@@ -22,28 +22,22 @@ import javax.security.auth.spi.LoginModule;
 import org.apache.log4j.Logger;
 
 /**
- * A JAAS LoginModule that can be instantiated by Tomcat's JAASRealm, via its
- * default constructor. This class delegates its behavior to a Spring-managed
- * LoginModule, which has been injected with its required dependencies. This
- * class constitutes a Spring-endorsed hack, allowing us to delegate to a
- * Spring-managed bean, since this class cannot be Spring-managed, as it is
- * instantiated directly by Tomcat.  Sigh.
+ * A JAAS LoginModule that delegates its behavior to another LoginModule, that
+ * is found via JNDI under
+ * <code>java:comp/env/bean/loginMOduleFactoryCapsule</code>.
  * 
- * @motivation Classes that are instantiated by third-party code cannot be
- *             Spring-managed beans. See <a
- *             href="http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLoader</a>.
+ * @motivation The LoginModule class that Tomcat is configured to use (via
+ *             login.conf) will be instantiated by Tomcat, and therefore cannot
+ *             be initialized in any way by the web application (e.g. it cannot
+ *             be a Spring-managed bean). To allow use of a LoginModule that
+ *             <i>is</i> initialized by a web application, we use delegation,
+ *             and receive the delegate via JNDI. This is a hack, of course.
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class ScreensaverTomcatLoginModule implements LoginModule
 {
   private static Logger log = Logger.getLogger(ScreensaverTomcatLoginModule.class);
-  
-  // It sure would be nice to place these parameters in a configuration file,
-  // like, say, a Spring config file, but then we'd have a bootstrapping
-  // problem, now wouldn't we? :)
-  private static final String LOGIN_MODULE_BEAN_NAME = "screensaverLoginModule";
-  private static final String APPLICATION_CONTEXT_BEAN_NAME = "edu.harvard.med.screensaver.Screensaver";
   
   private LoginModule _delegate;
 
@@ -55,15 +49,6 @@ public class ScreensaverTomcatLoginModule implements LoginModule
     Map options)
   {
     log.debug("initialize()");
-    // Use a Spring-endorsed hack to obtain a Spring-managed LoginModule, since
-    // this class cannot be Spring managed.
-    // TODO: this does not work as expected: we are not getting the same
-    // instance of the login module bean as is in the ApplicationContext created
-    // by the ServletListener.
-//    System.out.println("ClassPathXmlApplicationContext is-a BeanFactory: " + BeanFactory.class.isAssignableFrom(ClassPathXmlApplicationContext.class));
-//    BeanFactoryLocator bfl = SingletonBeanFactoryLocator.getInstance(META_SPRING_CONTEXT_FILE);
-//    BeanFactoryReference bf = bfl.useBeanFactory(APPLICATION_CONTEXT_BEAN_NAME);
-//    _delegate = (LoginModule) bf.getFactory().getBean(LOGIN_MODULE_BEAN_NAME);
 
     Context initialCtx;
     try {

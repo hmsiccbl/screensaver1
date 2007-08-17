@@ -102,7 +102,6 @@ public class UISelectOneBean<T> extends UISelectBean<T>
   
   /**
    * called by controller 
-   * @param selections
    */
   public T getSelection()
   {

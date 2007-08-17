@@ -139,7 +139,6 @@ public class ScreenViewer extends AbstractBackingBean
   
   /**
    * Determine if the current user can view the restricted screen fields.
-   * @return
    */
   public boolean isAllowedAccessToScreenDetails()
   {
@@ -304,11 +303,6 @@ public class ScreenViewer extends AbstractBackingBean
     ArrayList<String> keywords = new ArrayList<String>(_screen.getKeywords());
     Collections.sort(keywords);
     return StringUtils.makeListString(keywords, ", ");
-  }
-
-  public List<SelectItem> getScreenTypeSelectItems()
-  {
-    return JSFUtils.createUISelectItems(ScreenType.values());
   }
 
   public UISelectOneBean<ScreeningRoomUser> getLabName()

@@ -153,8 +153,6 @@ public class PubchemSmilesSearch extends PubchemPugClient
 
   /**
    * Get the status value from the non-null output document.
-   * @param outputDocument
-   * @return
    */
   private String getStatusValueFromOutputDocument(Document outputDocument)
   {

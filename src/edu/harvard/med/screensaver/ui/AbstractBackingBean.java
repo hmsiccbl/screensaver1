@@ -23,8 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.BuildNumber;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -32,18 +30,26 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.util.Messages;
 import edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter;
 
+import org.apache.log4j.Logger;
+
 /**
- * A base Controller class for JSF backing beans (beans that handle JSF actions
- * and events). Provides convenience methods for
+ * A base class for JSF backing beans. A backing bean is responsible for
+ * managing UI state via bean properties, providing methods to access the
+ * underlying domain model entities, and providing methods to handle JSF actions
+ * (command invocation) and events. This base class provides a grab bag of
+ * convenience methods for
  * <ul>
- * <li>accessing servlet state</li>
- * <li>accessing JSF state and current view's components</li>
- * <li>reporting system errors back to the user</li>
- * <li>obtaining internationalized message strings (not ready for prime-time)</li>
- * <li>closing Hibernate and HTTP sessions</li>
+ * <li>application information (name,version)</li>
+ * <li>accessing servlet session and request state</li>
+ * <li>accessing JSF state (FacesContext) and current view's UI components</li>
+ * <li>reporting application and system errors back to the user</li>
+ * <li>obtaining internationalized, parameterized message strings</li>
+ * <li>accessing the current user and his/her roles and privileges</li>
+ * <li>closing the current HTTP session</li>
  * </ul>
  * 
- * @author ant
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public abstract class AbstractBackingBean implements ScreensaverConstants
 {
@@ -321,7 +327,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   /**
    * Adds the message of the specified key to the specified component. Any
    * request parameters that have a name of the form "<componentId>MessageParam*"
-   * will be used to parameterize the messsage.
+   * will be used to parameterize the message.
    * 
    * @param messageKey the key of the message to be shown
    * @param componentId the "simple" component ID, as specified in the "id"
@@ -402,7 +408,6 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   /**
    * Returns the fully-qualified "client" ID of the component, which can be used to 
    * @param component
-   * @return
    */
   protected String getClientId(UIComponent component)
   {
@@ -454,7 +459,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    * message (assumes an <code>h:messages</code> component exists). System
    * errors are errors that developers should be concerned about.
    * 
-   * @param errorMesssage the error message to report
+   * @param errorMessage the error message to report
    * @see #reportApplicationError(String)
    */
   protected void reportSystemError(String errorMessage)
@@ -485,7 +490,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    * error is one that a developer would not be concerned about, and that
    * occurred due to so-called "user error".
    * 
-   * @param errorMesssage the error message to report
+   * @param errorMessage the error message to report
    * @see #reportSystemError(String)
    * @see #reportSystemError(Throwable)
    */

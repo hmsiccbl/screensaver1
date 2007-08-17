@@ -179,8 +179,6 @@ public class ScreensaverServletFilter extends OncePerRequestFilter {
    * 
    * @motivation We use this to avoid performing Hibernate session management
    *             tasks for URLs of static resources (images, etc.).
-   * @param request
-   * @return
    */
   private boolean isRequestForApplicationView(HttpServletRequest request)
   {

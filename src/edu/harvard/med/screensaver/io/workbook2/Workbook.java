@@ -26,7 +26,8 @@ import org.apache.log4j.Logger;
  * Encapsulates the (lazy) instantiation of an jxl.Workbook from a file. Also
  * allows the workbook to be associated with the filename it originated from.
  * 
- * @author ant
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class Workbook
 {
@@ -90,7 +91,7 @@ public class Workbook
    * adds an error and returns <code>null</code>.
    * 
    * @motivation the jxl.Workbook API is case sensitive for worksheet names
-   * @param name the worksheet name
+   * @param targetSheetName the worksheet name
    * @return the first Sheet to match the specified name
    *         (case-insensitively)
    */

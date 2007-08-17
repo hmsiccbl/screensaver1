@@ -29,7 +29,9 @@ import org.apache.log4j.Logger;
 
 /**
  * Maintains a list of error messages.
- * @author ant
+ * 
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class ParseErrorManager
 {
@@ -56,8 +58,6 @@ public class ParseErrorManager
   
   /**
    * Add a simple error.
-   * 
-   * @param error the error
    */
   public void addError(String errorMessage)
   {
@@ -89,8 +89,7 @@ public class ParseErrorManager
   }
   
   /**
-   * @motivation jsp inspection
-   * @return
+   * @motivation For JSF EL expressions
    */
   public boolean getHasErrors()
   {

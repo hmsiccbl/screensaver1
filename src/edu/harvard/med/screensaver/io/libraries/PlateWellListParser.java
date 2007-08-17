@@ -61,7 +61,6 @@ public class PlateWellListParser
 
   /**
    * Parse and return the list of well keys from the plate-well list.
-   * Helper method for {@link #findWells(String)}.
    * @param plateWellList the plate-well list
    * @throws IOException
    * @return the list of wells
@@ -124,7 +123,6 @@ public class PlateWellListParser
 
   /**
    * Parse and return the well for the plate number and well name.
-   * Helper method for {@link #findWell(Integer, String)}.
    * @param plateNumberString the unparsed plate number
    * @param wellName the unparsed well name
    * @return the well

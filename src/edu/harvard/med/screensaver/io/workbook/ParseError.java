@@ -10,10 +10,11 @@
 package edu.harvard.med.screensaver.io.workbook;
 
 /**
- * Contains pertinent data for parse errors. Essentially, a data struct, with a
- * toString() method.
+ * Pairs a workbook parsing error message with the (optional) affected cell, and
+ * can generated a human-readable error message.
  * 
- * @author ant
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class ParseError
 {
@@ -36,7 +37,7 @@ public class ParseError
    * Constructs a general ParseError object, not specific to a particular cell
    * location.
    * 
-   * @param errorMessage the error message
+   * @param message the error message
    */
   public ParseError(String message)
   {

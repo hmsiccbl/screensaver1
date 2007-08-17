@@ -63,9 +63,8 @@ public class GeneViewer extends AbstractBackingBean
    * compound can be in multiple wells, but the UI may want to be explicit about
    * which Well "led" to this viewer").
    * 
-   * @param the parent Well of interest, for which this compound is being
-   *          viewed; may be null
-   * @return the parent Well of intereset
+   * @param parentWellOfInterest the parent Well of interest, for which this
+   *          compound is being viewed; may be null
    */
   public void setParentWellOfInterest(Well parentWellOfInterest)
   {

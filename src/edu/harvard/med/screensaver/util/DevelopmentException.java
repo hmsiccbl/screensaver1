@@ -11,7 +11,9 @@ package edu.harvard.med.screensaver.util;
 
 /**
  * Report an exception that must have been due to a developer's error.
- * @author ant
+ * 
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class DevelopmentException extends Exception
 {

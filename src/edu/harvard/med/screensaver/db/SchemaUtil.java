@@ -342,7 +342,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
    * 
    * @motivation bean properties are not set in a deterministic order, but we
    *             depend upon multiple properties.
-   * @return
+
    */
   private LocalSessionFactoryBean getLocalSessionFactoryBean()
   {

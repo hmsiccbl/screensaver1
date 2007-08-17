@@ -44,12 +44,14 @@ import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 import org.apache.log4j.Logger;
 
 /**
- * Enable invocation of ScreenResultParser in non-database environment.
+ * A DAO implementation that can be used in a database-free environment.
  * 
- * @motivation for command-line ScreenResultImporter, when used in validation
- *             mode (i.e., non-import mode).
+ * @motivation for command-line ScreenResultImporter, when used in parse-only
+ *             (non-import) mode.
  * @motivation testing ScreenResultImporter
- * @author ant
+ * 
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenResultsDAO, LibrariesDAO 
 {
@@ -246,62 +248,52 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
 
   public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value)
   {
-    // TODO Auto-generated method stub
     return null;
   }
 
   public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationshipsIn)
   {
-    // TODO Auto-generated method stub
     return null;
   }
 
   public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value)
   {
-    // TODO Auto-generated method stub
     return null;
   }
 
   public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationships)
   {
-    // TODO Auto-generated method stub
     return null;
   }
 
   public List<WellCopyVolume> findWellCopyVolumes(Library library)
   {
-    // TODO Auto-generated method stub
     return null;
   }
 
   public List<WellCopyVolume> findWellCopyVolumes(Copy copy)
   {
-    // TODO Auto-generated method stub
     return null;
   }
 
   public List<WellCopyVolume> findWellCopyVolumes(Integer plateNumber)
   {
-    // TODO Auto-generated method stub
     return null;
   }
 
   public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy, Integer plateNumber)
   {
-    // TODO Auto-generated method stub
     return null;
   }
 
   public Collection<WellCopyVolume> findWellCopyVolumes(WellKey wellKey)
   {
-    // TODO Auto-generated method stub
     return null;
   }
 
   public Collection<WellCopyVolume> findWellCopyVolumes(CherryPickRequest cherryPickRequest,
                                                         boolean forUnfufilledLabCherryPicksOnly)
   {
-    // TODO Auto-generated method stub
     return null;
   }
 }

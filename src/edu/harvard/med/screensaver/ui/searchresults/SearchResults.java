@@ -27,7 +27,6 @@ import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.io.DataExporter;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.screenresults.DataTableRowsPerPageUISelectOneBean;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
@@ -40,12 +39,13 @@ import org.apache.log4j.Logger;
 
 
 /**
- * A sortable, paging search result of {@link AbstractEntity model entities}.
- * Supports two modes of operation: "summary" and "detail" modes, corresponding
- * to UI browsers and UI viewers, respectively. Maintains the current page for
- * summary mode and the current entity for detail mode, allowing each of these
- * to be scrolled independently. The current sort column and sort order,
- * however, are shared between the two modes.
+ * Manages sorting and paging of a search result. Supports two modes of
+ * operation: "summary" and "detail" modes, corresponding to UI browsers and UI
+ * viewers, respectively. A browser display a sortable, paged list of the search
+ * results, while a viewer shows detail for a selected search result item.
+ * Maintains the current page for summary mode and the current entity for detail
+ * mode, allowing each of these to be scrolled independently. The current sort
+ * column and sort order, however, are shared between the two modes.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -270,8 +270,8 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   /**
    * Resort the results according to the current column, as selected by the user
    * in a drop-down list (in the UI), and redisplay the page. Sort direction is
-   * determined by last call to {@link #setSortDirection(SortDirection)}.
-   * Cache any newly computed sorts of the results for reuse.
+   * determined by last call to
+   * {@link TableSortManager#setSortDirection(SortDirection)}.
    * 
    * @return the navigation rule to redisplay the current page
    */
@@ -303,7 +303,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   /**
    * Perform the action for clicking on the current cell. Return the navigation rule to go
    * along with the action for clicking on the current cell. This method is only called when
-   * {@link #getIsCommandLink()} is true.
+   * {@link TableColumn#getIsCommandLink()} is true for the current column.
    * 
    * @return the navigation rule to go along with the action for clicking on the current cell 
    */

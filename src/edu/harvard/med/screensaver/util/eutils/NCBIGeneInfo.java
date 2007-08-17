@@ -10,7 +10,7 @@
 package edu.harvard.med.screensaver.util.eutils;
 
 /**
- * Encapsulates the information needed from NCBI for a {@link Gene}.
+ * Encapsulates the information needed from NCBI for a {@link edu.harvard.med.screensaver.model.libraries.Gene}.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */

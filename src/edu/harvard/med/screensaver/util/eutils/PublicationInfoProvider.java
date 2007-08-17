@@ -49,7 +49,6 @@ public class PublicationInfoProvider extends EutilsUtils
    * Get the {@link PublicationInfo information needed from PubChem} for a {@link Publication},
    * based on the PubMed ID. If any errors occur, report the error and return null.
    * @param pubmedId the EntrezGene ID for the Gene.
-   * @param cell the cell to specify when reporting an error
    * @return the publication info
    */
   public synchronized PublicationInfo getPublicationInfoForPubmedId(Integer pubmedId)

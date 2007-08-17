@@ -22,6 +22,13 @@ import javax.servlet.http.Cookie;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 
+/**
+ * Backing bean for developer-only view that displays environment information
+ * for the running web application.
+ * 
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ */
 public class Environment extends AbstractBackingBean
 {
   private String _db;

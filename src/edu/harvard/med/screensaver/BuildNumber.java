@@ -17,6 +17,13 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+/**
+ * Determines the application's build number, which is taken to be the same as
+ * the Subversion revision number.
+ * 
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ */
 public class BuildNumber
 {
   // static members
@@ -40,7 +47,7 @@ public class BuildNumber
           if (buildNumber == null) {
             buildNumber = reader.readLine();
             Pattern pattern = Pattern.compile(SVN_VERSION_NUMBER_REGEX);
-            Matcher matcher =pattern.matcher(buildNumber);
+            Matcher matcher = pattern.matcher(buildNumber);
             if (!matcher.matches()) {
               throw new RuntimeException("unrecognizable build number string: '" + buildNumber + "'");
             }

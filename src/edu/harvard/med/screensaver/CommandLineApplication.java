@@ -31,7 +31,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * application. The main purpose of this class is to house the Spring framework
  * bootstrapping code, so that developers can forget the details of how to do
  * this (and don't have to cut and paste code between various main() methods).
- * Also provides a some help with:
+ * Also provides help with:
  * <ul>
  * <li>command-line argument parsing (including special-case handling of
  * database connection options)
@@ -45,7 +45,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * 'dbname', 'dbuser', and 'dbpassword' will be used to configure the database
  * connection settings.
  * 
- * @author ant
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class CommandLineApplication
 {
@@ -163,12 +164,11 @@ public class CommandLineApplication
   
   /**
    * @param acceptDatabaseOptions
-   * @param showHelpOnError if codetrue/code and method returns
-   *          codefalse/code, calling code should not call
-   *          {@link #getCommandLineOptionValue} or
+   * @param showHelpOnError if true and method returns false, calling code
+   *          should not call {@link #getCommandLineOptionValue} or
    *          {@link #isCommandLineFlagSet(String)}.
-   * @return
-   * @throws ParseException
+   * @return true if options were successfully processed, false if options were not successfully processed and showHelpOnError is true
+   * @throws ParseException if options were not successfully processed and showHelpOnError is false
    */
   @SuppressWarnings("unchecked")
   public boolean processOptions(

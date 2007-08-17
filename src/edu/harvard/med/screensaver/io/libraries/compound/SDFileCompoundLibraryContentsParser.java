@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
 
 /**
  * Parses the contents (either partial or complete) of an compound library from
- * an SDFile into the entity model.
+ * an SDFile into the domain model.
  * <p>
  * All wells for each plate of the library will be created, even if the wells
  * are not defined in the SDFile.
@@ -69,7 +69,6 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
   
   /**
    * Construct a new <code>SDFileCompoundLibraryContentsParser</code> object.
-   * @param genericEntityDao the data access object
    */
   public SDFileCompoundLibraryContentsParser(GenericEntityDAO dao,
                                              LibrariesDAO librariesDao)

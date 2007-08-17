@@ -17,7 +17,9 @@ import org.apache.log4j.Logger;
 
 /**
  * Maintains a list of error messages.
- * @author ant
+ * 
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class FileParseErrorManager
 {
@@ -27,8 +29,6 @@ public class FileParseErrorManager
   
   /**
    * Add a simple error.
-   * 
-   * @param error the error
    */
   public void addError(String errorMessage)
   {
@@ -39,7 +39,7 @@ public class FileParseErrorManager
   /**
    * Add an error, noting the file and record number associated with it.
    * 
-   * @param error the error
+   * @param errorMessage the error
    * @param sdFile the SDFile associated with the error
    * @param sdRecordNumber the SDFile record number associated with the error
    */
@@ -61,8 +61,7 @@ public class FileParseErrorManager
   }
   
   /**
-   * @motivation jsp inspection
-   * @return
+   * @motivation For JSF EL expressions
    */
   public boolean getHasErrors()
   {

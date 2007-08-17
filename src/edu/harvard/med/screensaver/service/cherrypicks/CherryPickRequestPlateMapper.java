@@ -131,12 +131,6 @@ public class CherryPickRequestPlateMapper
     }
   }
 
-  /**
-   * @param assayPlate
-   * @param labCherryPicks
-   * @param availableWellNames
-   * @return
-   */
   private Map<LabCherryPick,Pair<Integer,WellName>> plateMapCherryPicks(CherryPickAssayPlate assayPlate,
                                                                         List<LabCherryPick> labCherryPicks,
                                                                         List<WellName> availableWellNames)
@@ -161,10 +155,6 @@ public class CherryPickRequestPlateMapper
     return plateWellMapping;
   }
 
-  /**
-   * @param toBeMapped
-   * @return
-   */
   private List<LabCherryPick> findNextIndivisibleBlock(SortedSet<LabCherryPick> toBeMapped)
   {
     List<LabCherryPick> block = new ArrayList<LabCherryPick>();

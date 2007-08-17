@@ -14,7 +14,7 @@ package edu.harvard.med.screensaver.util;
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class Quadruple<F,S,T, Q>
+public class Quadruple<F,S,T,Q>
 {
 
   private F _first;
@@ -27,7 +27,7 @@ public class Quadruple<F,S,T, Q>
    * @param first the first element of the quadruple
    * @param second the second element of the quadruple
    * @param third the third element of the quadruple
-   * @param forth the forth element of the quadruple
+   * @param fourth the forth element of the quadruple
    */
   public Quadruple(F first, S second, T third, Q fourth)
   {

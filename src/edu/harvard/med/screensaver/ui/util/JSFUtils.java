@@ -145,9 +145,7 @@ public class JSFUtils
   /**
    * Creates a UISelectItems object that can be assigned to the "value"
    * attribute of a UISelectItems JSF component.
-   * 
-   * @param items
-   * @return
+   * @deprecated Use a subclass of {@link UISelectBean}
    */
   public static List<SelectItem> createUISelectItems(Collection items)
   {
@@ -159,80 +157,6 @@ public class JSFUtils
     return result;
   }
   
-  /**
-   * Creates a UISelectItems object that can be assigned to the "value"
-   * attribute of a UISelectItems JSF component.
-   * 
-   * @param labels the display labels for each SelectItem
-   * @param values the values for each SelectItem (this is a "parallel" list to labels)
-   * @return a List of SelectItems, one for each label/value pair
-   */
-  public static List<SelectItem> createUISelectItems(List<String> labels,
-                                                     List values)
-  {
-    List<SelectItem> result = new ArrayList<SelectItem>();
-    assert labels.size() == values.size() : "size of 'labels' and 'values' collections differ";
-    for (int i = 0; i < labels.size(); ++i) {
-      result.add(new SelectItem(values.get(i).toString(),
-                                labels.get(i)));
-    }
-    return result;
-  }
-
-  /**
-   * Creates a UISelectItems object that can be assigned to the "value"
-   * attribute of a UISelectItems JSF component.
-   * 
-   * @param labels the display labels for each SelectItem
-   * @return a List of SelectItems, one for each label, where the value property
-   *         of each SelectItem is its index in the returned list
-   */
-  public static List<SelectItem> createUISelectItemsWithIndexValues(List<String> labels)
-  {
-    List<SelectItem> result = new ArrayList<SelectItem>();
-    for (int i = 0; i < labels.size(); ++i) {
-      result.add(new SelectItem(new Integer(i),
-                                labels.get(i)));
-    }
-    return result;
-  }
-
-  /**
-   * Creates a UISelectItems object that can be assigned to the "value"
-   * attribute of a UISelectItems JSF component.
-   * 
-   * @param values
-   * @return a List of SelectItems, one for each Map entry (label/value pair)
-   */
-  public static List<SelectItem> createUISelectItems(Map values)
-  {
-    List<SelectItem> result = new ArrayList<SelectItem>();
-    for (Iterator iter = values.entrySet().iterator(); iter.hasNext();) {
-      Map.Entry entry = (Map.Entry) iter.next();
-      result.add(new SelectItem(entry.getValue(),
-                                entry.getKey().toString()));
-    }
-    return result;
-  }
-  
-  /**
-   * Creates a UISelectItems object that can be assigned to the "value"
-   * attribute of a UISelectItems JSF component.
-   * 
-   * @param values
-   * @return a List of SelectItems, one for each VocabularyTerm provided
-   */
-  public static List<SelectItem> createUISelectItems(VocabularyTerm[] terms)
-  {
-    List<SelectItem> result = new ArrayList<SelectItem>();
-    for (int i = 0; i < terms.length; i++) {
-      VocabularyTerm term = terms[i];
-      result.add(new SelectItem(term,
-                                term.getValue()));
-    }
-    return result;
-  }
-
   /**
    * Output the names of all registered JSF components to the logger, as debug output.
    * 

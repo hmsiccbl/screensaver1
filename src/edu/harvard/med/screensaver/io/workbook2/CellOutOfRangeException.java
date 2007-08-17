@@ -13,7 +13,8 @@ package edu.harvard.med.screensaver.io.workbook2;
  * Exception for reporting attempt to read a cell that is outside of the range
  * of valid cells in an <code>HSSFSheet</code> worksheet.
  * 
- * @author ant
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class CellOutOfRangeException extends Exception
 {
@@ -22,8 +23,6 @@ public class CellOutOfRangeException extends Exception
   /**
    * Constructs a CellOutOfRangeException exception object.
    * 
-   * @param undefinedInAxis whether the row, or column, or both, were undefined
-   *          in the worksheet
    * @param cell the cell that was undefined
    */
   public CellOutOfRangeException(Cell cell)

@@ -10,8 +10,8 @@
 package edu.harvard.med.screensaver.model;
 
 /**
- * An interface for the terms in the vocabularies in the model. The vocabularies
- * are implemented as enums.
+ * An interface for the terms in the controlled vocabularies of the model. The
+ * vocabularies are implemented as enums.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>

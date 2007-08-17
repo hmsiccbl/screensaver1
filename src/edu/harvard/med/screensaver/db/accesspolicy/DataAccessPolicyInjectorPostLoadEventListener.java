@@ -21,8 +21,8 @@ import org.hibernate.event.def.DefaultPostLoadEventListener;
  * 
  * @see AbstractEntity#isRestricted()
  * 
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class DataAccessPolicyInjectorPostLoadEventListener extends DefaultPostLoadEventListener
 {

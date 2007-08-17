@@ -16,7 +16,8 @@ package edu.harvard.med.screensaver.io.screenresults;
  * {@link edu.harvard.med.screensaver.model.libraries.Compound}, indicating
  * that the Library was expected to have been loaded, but apparently was not.
  * 
- * @author ant
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class ExtantLibraryException extends Exception
 {

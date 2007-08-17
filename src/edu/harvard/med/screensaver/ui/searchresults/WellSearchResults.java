@@ -49,7 +49,6 @@ public class WellSearchResults extends SearchResults<Well>
 
   /**
    * Construct a new <code>WellSearchResultsViewer</code> object.
-   * @param wells the list of wells
    */
   public WellSearchResults(List<Well> unsortedResults,
                            LibrariesController librariesController,

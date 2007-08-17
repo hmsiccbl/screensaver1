@@ -20,7 +20,7 @@ public class CryptoUtils
 
   /**
    * Utility method for generating a SHA-digested (hashed) version of a String.
-   * @param s
+   * @param s string to be hashed
    * @return the digested (hashed) version of the String, as a hex String.
    */
   public static String digest(String s)
@@ -30,7 +30,7 @@ public class CryptoUtils
 
   /**
    * Utility method for generating a SHA-digested (hashed) version of a char[].
-   * @param s
+   * @param a array of characters to be hashed
    * @return the digested (hashed) version of the char[], as a hex String.
    */
   public static String digest(char[] a)
@@ -40,7 +40,7 @@ public class CryptoUtils
 
   /**
    * Utility method for generating a SHA-digested (hashed) version of a byte[].
-   * @param s
+   * @param bytes array of bytes to be hashed
    * @return the digested (hashed) version of the byte[], as a hex String.
    */
   public static String digest(byte[] bytes)

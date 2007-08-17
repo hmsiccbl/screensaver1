@@ -50,9 +50,7 @@ public class PlateWellListParserResult
   }
   
   /**
-   * Return true if either syntax or fatal errors were found. Specified wells
-   * that do not exist in the database are not considered errors (see
-   * {@link #getWellsNotFound()}).
+   * Return true if either syntax or fatal errors were found.
    * 
    * @return true if errors were found while parsing and/or looking up wells in
    *         the database.

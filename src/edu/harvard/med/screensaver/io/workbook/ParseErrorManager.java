@@ -25,7 +25,9 @@ import com.sun.rowset.internal.Row;
 
 /**
  * Maintains a list of error messages.
- * @author ant
+ * 
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class ParseErrorManager
 {
@@ -46,8 +48,6 @@ public class ParseErrorManager
   
   /**
    * Add a simple error.
-   * 
-   * @param error the error
    */
   public void addError(String errorMessage)
   {
@@ -70,10 +70,6 @@ public class ParseErrorManager
   
   /**
    * Add an error, noting the particular cell the error is related to.
-   * 
-   * @param error the error
-   * @param dataHeader the data header of the cell containing the error
-   * @param row the {@link Row} of the cell containing the error
    */
   public void addError(String errorMessage, Cell cell)
   {
@@ -94,8 +90,7 @@ public class ParseErrorManager
   }
   
   /**
-   * @motivation jsp inspection
-   * @return
+   * @motivation For JSF EL expressions
    */
   public boolean getHasErrors()
   {

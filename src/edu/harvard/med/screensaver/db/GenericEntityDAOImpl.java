@@ -45,7 +45,7 @@ import org.springframework.orm.hibernate3.HibernateCallback;
  * The relationships specify what related data should be loaded from the
  * database at the same time the entity itself is being loaded (i.e., within a
  * single SQL call). This is useful in cases where the returned entity (or
- * entities) will be used outside of a Hibernate session (i.e., "dettached").
+ * entities) will be used outside of a Hibernate session (i.e., "detached").
  * This is also useful for minimizing the number of SQL calls that are used to
  * fetch data for each of the relationships that will be traversed while using
  * the entity within an active Hibernate session. This or reduce or eliminate
@@ -74,7 +74,7 @@ import org.springframework.orm.hibernate3.HibernateCallback;
  * code does not intend to make modifications that need to be persisted. Note
  * that this does not in any way make the loaded entity instances immutable, so
  * if any of these entity instances happen to have already been loaded into the
- * Hibernate session as managed (read-write) entities, changes to them <i>will<i>
+ * Hibernate session as managed (read-write) entities, changes to them <i>will</i>
  * be persisted! So the best practice is for the client code to never modify
  * entities loaded as read-only.
  * 
@@ -146,10 +146,6 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * Internally, Hibernate will issue SQL calls to increment the version field
    * of each entity. This can be expensive for large entity networks.
    * </p>
-   * 
-   * @param <E>
-   * @param entity
-   * @return
    */
   public <E extends AbstractEntity> E reattachEntity(E entity)
   {
@@ -158,7 +154,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
   
   /**
-   * Reattach a <i>new instance</i> of a previously persistent, but deattached
+   * Reattach a <i>new instance</i> of a previously persistent, but detached
    * entity to the current Hibernate session, allowing its previously
    * uninitialized lazy relationships to be navigated (without throwing
    * LazyInitializationExceptions). If the entity already exists in the session,
@@ -182,7 +178,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
   
   /**
-   * Reattach a <i>new instance</i> of a previously persistent, but dettached
+   * Reattach a <i>new instance</i> of a previously persistent, but detached
    * entity to the current Hibernate session, allowing its previously
    * uninitialized lazy relationships to be navigated (without throwing
    * LazyInitializationExceptions). If the entity already exists in the session,
@@ -216,7 +212,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   
   /**
    * Loads the specified relationships of a given entity, allowing these
-   * relationships to be navigated after the entity is dettached from the
+   * relationships to be navigated after the entity is detached from the
    * Hibernate session.
    * 
    * @param entity the root entity
@@ -235,7 +231,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   
   /**
    * Loads the specified relationships of a given entity, allowing these
-   * relationships to be navigated after the entity is dettached from the
+   * relationships to be navigated after the entity is detached from the
    * Hibernate session. See class-level documentation of
    * {@link GenericEntityDAO} for issues related to loading read-only entities.
    * 
@@ -258,7 +254,6 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * efficiently, without loading the entities in the relationship.
    * 
    * @param persistentCollection
-   * @return
    */
   public int relationshipSize(final Object persistentCollection)
   {
@@ -278,7 +273,6 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *
    * @param entity
    * @param relationship
-   * @return
    */
   public int relationshipSize(final AbstractEntity entity, final String relationship)
   {
@@ -328,7 +322,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   /**
    * Retrieve and return a list of entities of the specified type.
    * 
-   * @param<E> The type of the entity to retrieve
+   * @param <E> The type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
    * @return a list of the entities of the specified type
    */
@@ -339,13 +333,11 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
 
   /**
-   * 
    * @param <E>
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
-   * @return
    */
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> List<E> findAllEntitiesOfType(Class<E> entityClass,
@@ -406,8 +398,10 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
 
   /**
    * See @{@link #findEntitiesByProperties(Class, Map)}.
+   * @param name2Value a <code>Map</code> containing entries for each
+   *          property/value pair to query against
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
-   * @param relationships the relationships to loaded, relative to the root
+   * @param relationshipsIn the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
@@ -492,10 +486,10 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * 
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
-   * @param propertyName the name of the property to query against
-   * @param propertyValue the value of the property to query for
    * @return a list of entities that have the specified value for the specified
    *         property
+   * @param name2Value a <code>Map</code> containing entries for each
+   *          property/value pair to query against
    * @exception InvalidArgumentException when there is more
    *    than one entity with the specified value for the property
    */
@@ -509,6 +503,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
 
   /**
    * See @{@link #findEntityByProperties(Class, Map)}.
+   * @param name2Value a <code>Map</code> containing entries for each
+   *          property/value pair to query against
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
@@ -784,9 +780,6 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * Returns an ordered set of the relationships, expanded to include all
    * implicit, intermediate relationships. For example, if input is { "w", "x.y.z", },
    * output will be { "w", "x", "x.y", "x.y.z" }.
-   * 
-   * @param relationships
-   * @return
    */
   private List<String> expandRelationships(String[] relationships)
   {

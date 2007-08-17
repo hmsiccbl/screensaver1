@@ -11,7 +11,8 @@ import edu.harvard.med.screensaver.io.screenresults.ScreenResultWorkbookSpecific
  * Parses the value of a cell containing a "well name". Validates that the
  * well name follows proper syntax, defined by the regex "[A-Z]\d\d".
  * 
- * @author ant
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class WellNameParser implements CellValueParser<String>
 {
