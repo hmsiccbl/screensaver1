@@ -1,18 +1,11 @@
-/*
- * Copyright 2002-2005 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// $HeadURL:$
+// $Id:$
+//
+// Copyright 2006 by the President and Fellows of Harvard College.
+// 
+// Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+// at Harvard Medical School. This software is distributed under the terms of
+// the GNU General Public License.
 
 package edu.harvard.med.screensaver.ui.util;
 
@@ -38,10 +31,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 // TODO: this filter has taken on too many roles: txn mgmt, HTTP session mgmt, and error handling.  We should break up responsibilities into individual filters (or, minimally, rename this class)
 public class ScreensaverServletFilter extends OncePerRequestFilter {
-
   
   // static data members
-  
 
   private static Logger log = Logger.getLogger(ScreensaverServletFilter.class);
 
@@ -58,7 +49,6 @@ public class ScreensaverServletFilter extends OncePerRequestFilter {
   // instance data members
   
   private String sessionFactoryBeanName = DEFAULT_SESSION_FACTORY_BEAN_NAME;
-
 
 
   // methods

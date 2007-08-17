@@ -1,3 +1,11 @@
+// $HeadURL:$
+// $Id:$
+//
+// Copyright 2006 by the President and Fellows of Harvard College.
+// 
+// Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+// at Harvard Medical School. This software is distributed under the terms of
+// the GNU General Public License.
 
 package edu.harvard.med.screensaver.util;
 
@@ -6,8 +14,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public class StringUtils {
-
+public class StringUtils 
+{
 
 	/**
    * Makes a delimited list of items from a Collection, just like Perl's join()
@@ -42,7 +50,6 @@ public class StringUtils {
     return buf.toString();
   }
 
-
 	public static String makeRepeatedString(String segment, int count)
   {
     int targetLength = segment.length() * count;
@@ -59,7 +66,6 @@ public class StringUtils {
     }
     return buf.toString();
   }
-
 
 	@SuppressWarnings("unchecked")
   public static List wrapStrings(Collection elements, String left, String right)
