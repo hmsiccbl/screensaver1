@@ -15,6 +15,8 @@ import java.util.Map;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 
+import org.springframework.transaction.annotation.Transactional;
+
 public interface GenericEntityDAO
 {
   /**
@@ -30,12 +32,16 @@ public interface GenericEntityDAO
   /**
    * Executes a block of code, presumably with multiple GenericEntityDAO calls, into a single
    * transactions.
-   * 
+   * <p>
+   * <i>It is now preferred that any code that needs to be executed within a
+   * transaction is instead contained within a method of a Spring-managed bean
+   * class that has a {@link Transactional} annotation.</i>
+   *
    * @param daoTransaction the object encapsulating the transactional code to
    *          execute.
    */
   public void doInTransaction(DAOTransaction daoTransaction);
-  
+
   /**
    * @deprecated Use this method prevents compile-time checking of constructor
    *             signature. Instantiate the entity via its constructor and use
@@ -47,7 +53,7 @@ public interface GenericEntityDAO
   /**
    * Make the specified entity persistent. The entity's ID property will be set
    * upon return.
-   * 
+   *
    * @param entity
    */
   public void persistEntity(AbstractEntity entity);
@@ -80,7 +86,7 @@ public interface GenericEntityDAO
    * (network) will <i>not</i> be pre-initialized in the new instance of the
    * returned entity.
    * </p>
-   * 
+   *
    * @param entity the entity to be reloaded
    * @return a new Hibernate-managed instance of the specified entity
    */
@@ -100,10 +106,10 @@ public interface GenericEntityDAO
    * (network) will <i>not</i> be pre-initialized in the new instance of the
    * returned entity.
    * </p>
-   * 
+   *
    * @param <E>
    * @param entity the entity to be reloaded
-   * @param readOnly see class-level documentation of {@link GenericEntityDAO} 
+   * @param readOnly see class-level documentation of {@link GenericEntityDAO}
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
@@ -116,7 +122,7 @@ public interface GenericEntityDAO
    * Loads the specified relationships of a given entity, allowing these
    * relationships to be navigated after the entity is detached from the
    * Hibernate session.
-   * 
+   *
    * @param entity the root entity
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
@@ -130,7 +136,7 @@ public interface GenericEntityDAO
    * relationships to be navigated after the entity is detached from the
    * Hibernate session. See class-level documentation of
    * {@link GenericEntityDAO} for issues related to loading read-only entities.
-   * 
+   *
    * @param entity the root entity
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
@@ -164,7 +170,7 @@ public interface GenericEntityDAO
 
   /**
    * Retrieve and return a list of entities of the specified type.
-   * 
+   *
    * @param <E> The type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
    * @return a list of the entities of the specified type
@@ -185,7 +191,7 @@ public interface GenericEntityDAO
 
   /**
    * Retrieve and return an entity by its identifier (primary key).
-   * 
+   *
    * @param <E> the type of the entity to retrieve
    * @param id the identifier of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
@@ -211,8 +217,8 @@ public interface GenericEntityDAO
   /**
    * Retrieve and return the entity that has specific values for the specified
    * properties. Return <code>null</code> if no entity has that value for that
-   * set of properties. 
-   * 
+   * set of properties.
+   *
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
    * @param name2Value a <code>Map</code> containing entries for each
@@ -220,7 +226,7 @@ public interface GenericEntityDAO
    * @return the entity that has the specified values for the specified
    *         set of properties
    */
-  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, 
+  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass,
                                                                      Map<String,Object> name2Value);
 
 
@@ -242,7 +248,7 @@ public interface GenericEntityDAO
   /**
    * Retrieve and return a list of entities that have specific values for the
    * specified properties.
-   * 
+   *
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
    * @param name2Value a <code>Map</code> containing entries for each
@@ -252,7 +258,7 @@ public interface GenericEntityDAO
    * @exception InvalidArgumentException when there is more
    *    than one entity with the specified value for the property
    */
-  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, 
+  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass,
                                                              Map<String,Object> name2Value);
 
 
@@ -275,15 +281,15 @@ public interface GenericEntityDAO
    * Retrieve and return the entities that have a specific value for the
    * specified property. Return empty list if no entity has that value for that
    * property.
-   * 
+   *
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
    * @param propertyName the name of the property to query against
    * @param propertyValue the value of the property to query for
    * @return the entity that has the specified value for the specified property
    */
-  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass, 
-                                                                   String propertyName, 
+  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass,
+                                                                   String propertyName,
                                                                    Object propertyValue);
 
 
@@ -305,11 +311,11 @@ public interface GenericEntityDAO
    * property. Return <code>null</code> if no entity has that value for that
    * property. Throw an <code>InvalidArgumentException</code> if there is more
    * than one entity with the specified value.
-   * 
+   *
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
    * @param propertyName the name of the property to query against
-   * @param propertyValue the value of the property to query for 
+   * @param propertyValue the value of the property to query for
    * @return the entity that has the specified value for the specified property
    * @exception InvalidArgumentException when there is more
    *    than one entity with the specified value for the property

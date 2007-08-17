@@ -25,7 +25,6 @@ import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.workbook2.Workbook2Utils;
@@ -46,7 +45,6 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**

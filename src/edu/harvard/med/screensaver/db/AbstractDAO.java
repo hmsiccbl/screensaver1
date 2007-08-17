@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -24,7 +24,7 @@ public class AbstractDAO extends HibernateDaoSupport
   // instance data members
 
   // public constructors and methods
-  
+
   /**
    * This method can be called before invoking other GenericEntityDAO methods that issue HQL
    * (or Criteria-based) queries to ensure that newly instantiated and persisted
@@ -41,7 +41,11 @@ public class AbstractDAO extends HibernateDaoSupport
   /**
    * Executes a block of code, presumably with multiple GenericEntityDAO calls, into a single
    * transactions.
-   * 
+   * <p>
+   * <i>It is now preferred that any code that needs to be executed within a
+   * transaction is instead contained within a method of a Spring-managed bean
+   * class that has a {@link Transactional} annotation.</i>
+   *
    * @param daoTransaction the object encapsulating the transactional code to
    *          execute.
    */
@@ -49,7 +53,7 @@ public class AbstractDAO extends HibernateDaoSupport
   {
     daoTransaction.runTransaction();
   }
-  
+
 
   // private methods
 

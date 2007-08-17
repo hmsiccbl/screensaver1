@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
-import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
@@ -34,11 +33,12 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * For a cherry pick request, selects source plate copies to draw from, and
  * records allocation of liquid needed to fulfill the request.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -61,7 +61,7 @@ public class CherryPickRequestAllocator
 
 
   // instance data members
-  
+
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
   private CherryPickRequestDAO _cherryPickRequestDao;
@@ -77,115 +77,94 @@ public class CherryPickRequestAllocator
     _librariesDao = librariesDao;
     _cherryPickRequestDao = cherryPickRequestDao;
   }
-  
+
   /**
    * @return the set of <i>unfulfillable</i> cherry picks
    */
+  @Transactional
   public Set<LabCherryPick> allocate(final CherryPickRequest cherryPickRequestIn) throws DataAccessException
   {
     // TODO: handle concurrency; perform appropriate locking to prevent race conditions (overdrawing well) among multiple allocate() calls
     final Set<LabCherryPick> unfulfillableLabCherryPicks = new HashSet<LabCherryPick>();
-    // TODO: new, non-nested txn should be required here, or if not possible, should perform a flush; this ensures that any LabCherryPicks allocated in an enclosing Hibernate session will be flushed to the database, ensuring that our genericEntityDao.findLabCherryPicksForWell() will return non-stale results
-    _dao.flush();
-    _dao.doInTransaction(new DAOTransaction() 
-    {
-      public void runTransaction() 
-      {
-//        // TODO: we really want to call reattachEntity(), to warn user of concurrent modification,
-//        // but we get LazyInitEx, due to labCherryPicks.sourceWell not being cascaded
-//        CherryPickRequest cherryPickRequest = (CherryPickRequest) 
-//        _dao.reloadEntity(cherryPickRequestIn,
-//                          false,
-//                          "labCherryPicks.sourceWell.hbnLibrary.hbnCopies.hbnCopyInfos");
-      CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
-        validateAllocationBusinessRules(cherryPickRequest);
-        for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
-          if (!doAllocate(labCherryPick)) {
-            unfulfillableLabCherryPicks.add(labCherryPick);
-          }
-        }
+    CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
+    validateAllocationBusinessRules(cherryPickRequest);
+    for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
+      if (!doAllocate(labCherryPick)) {
+        unfulfillableLabCherryPicks.add(labCherryPick);
       }
-    });
+    }
     return unfulfillableLabCherryPicks;
   }
 
+  @Transactional
   public boolean allocate(final LabCherryPick labCherryPickIn)
   {
-    final boolean[] result = new boolean[1];
     // TODO: handle concurrency; perform appropriate locking to prevent race conditions (overdrawing well) among multiple allocate() calls
-    _dao.doInTransaction(new DAOTransaction() 
-    {
-      public void runTransaction() 
-      {
-        LabCherryPick labCherryPick = (LabCherryPick) _dao.reattachEntity(labCherryPickIn);
-        validateAllocationBusinessRules(labCherryPick.getCherryPickRequest());
-        result[0] = doAllocate(labCherryPick);
-      }
-    });
-    return result[0];
+    LabCherryPick labCherryPick = (LabCherryPick) _dao.reattachEntity(labCherryPickIn);
+    validateAllocationBusinessRules(labCherryPick.getCherryPickRequest());
+    return doAllocate(labCherryPick);
   }
 
+  @Transactional
   public void deallocate(final CherryPickRequest cherryPickRequestIn)
   {
-    _dao.doInTransaction(new DAOTransaction() 
-    {
-      public void runTransaction() 
-      {
-        CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
-        for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
-          if (labCherryPick.isMapped()) {
-            // note: for safety, we do not allow wholesale deallocation of cherry picks once they have been mapped to plates;
-            // we do allow this to occur on a per-plate basis, however, which requires the user to be more explicit about his intent/action
-            throw new BusinessRuleViolationException("cannot deallocate all cherry picks (at once) after request has mapped plates");
-          }
-          if (labCherryPick.isAllocated()) {
-            labCherryPick.setAllocated(null);
-          }
-        }
+    CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
+    for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
+      if (labCherryPick.isMapped()) {
+        // note: for safety, we do not allow wholesale deallocation of cherry picks once they have been mapped to plates;
+        // we do allow this to occur on a per-plate basis, however, which requires the user to be more explicit about his intent/action
+        throw new BusinessRuleViolationException("cannot deallocate all cherry picks (at once) after request has mapped plates");
       }
-    });
+      if (labCherryPick.isAllocated()) {
+        labCherryPick.setAllocated(null);
+      }
+    }
   }
-  
+
+  @Transactional
   public void cancelAndDeallocateAssayPlates(final CherryPickRequest cherryPickRequestIn,
                                              final Set<CherryPickAssayPlate> assayPlates,
                                              final ScreensaverUser performedByIn,
                                              final Date dateOfLiquidTransfer,
                                              final String comments)
   {
-    _dao.doInTransaction(new DAOTransaction() 
-    {
-      public void runTransaction() 
-      {
-        CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
-        ScreensaverUser performedBy = _dao.reloadEntity(performedByIn);
-        CherryPickLiquidTransfer cplt = new CherryPickLiquidTransfer(performedBy,
-                                                                     new Date(),
-                                                                     dateOfLiquidTransfer,
-                                                                     cherryPickRequest,
-                                                                     CherryPickLiquidTransferStatus.CANCELED);
-        cplt.setComments(comments);
-        // note: by iterating through cherryPickRequest's active assay plates, rather than the 
-        // method assayPlates method arg, we are manipulating Hibernate-managed persistent entities, 
-        // rather than deatch entities 
-        for (CherryPickAssayPlate assayPlate : cherryPickRequest.getActiveCherryPickAssayPlates()) {
-          if (assayPlates.contains(assayPlate)) {
-            for (LabCherryPick labCherryPick : assayPlate.getLabCherryPicks()) {
-              // note: it is okay to cancel a plate that has some (or all) lab cherry
-              // picks that are unallocated
-              if (labCherryPick.isAllocated()) {
-                labCherryPick.setAllocated(null);
-              }
-            }
-            assayPlate.setCherryPickLiquidTransfer(cplt);
+    CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
+    ScreensaverUser performedBy = _dao.reloadEntity(performedByIn);
+    CherryPickLiquidTransfer cplt = new CherryPickLiquidTransfer(performedBy,
+                                                                 new Date(),
+                                                                 dateOfLiquidTransfer,
+                                                                 cherryPickRequest,
+                                                                 CherryPickLiquidTransferStatus.CANCELED);
+    cplt.setComments(comments);
+    // note: by iterating through cherryPickRequest's active assay plates, rather than the
+    // method assayPlates method arg, we are manipulating Hibernate-managed persistent entities,
+    // rather than deatch entities
+    for (CherryPickAssayPlate assayPlate : cherryPickRequest.getActiveCherryPickAssayPlates()) {
+      if (assayPlates.contains(assayPlate)) {
+        for (LabCherryPick labCherryPick : assayPlate.getLabCherryPicks()) {
+          // note: it is okay to cancel a plate that has some (or all) lab cherry
+          // picks that are unallocated
+          if (labCherryPick.isAllocated()) {
+            labCherryPick.setAllocated(null);
           }
         }
+        assayPlate.setCherryPickLiquidTransfer(cplt);
       }
-    });
+    }
   }
-  
+
+  // protected methods
+
+  /**
+   * @motivation for CGLIB2
+   */
+  protected CherryPickRequestAllocator()
+  {
+  }
+
 
   // private methods
-  
+
   private Copy selectCopy(Well well, BigDecimal volumeNeeded)
   {
     List<Copy> copies = new ArrayList<Copy>(well.getLibrary().getCopies());
