@@ -1,11 +1,11 @@
-//$HeadURL$
-//$Id$
+// $HeadURL$
+// $Id$
 //
-//Copyright 2006 by the President and Fellows of Harvard College.
+// Copyright 2006 by the President and Fellows of Harvard College.
 //
-//Screensaver is an open-source project developed by the ICCB-L and NSRB labs
-//at Harvard Medical School. This software is distributed under the terms of
-//the GNU General Public License.
+// Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+// at Harvard Medical School. This software is distributed under the terms of
+// the GNU General Public License.
 
 package edu.harvard.med.screensaver;
 
@@ -17,7 +17,7 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
  * the abstract method
  * {@link org.springframework.test.AbstractDependencyInjectionSpringContextTests#getConfigLocations}
  * by loading our <code>spring-context-test.xml</code> resource file.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
@@ -25,7 +25,7 @@ public abstract class AbstractSpringTest
 extends AbstractDependencyInjectionSpringContextTests
 {
   protected LogConfigurer logConfigurer;
-  
+
   /**
    * Spring configuration will be loaded from the configuration file(s)
    * specified in this constant.
@@ -33,9 +33,9 @@ extends AbstractDependencyInjectionSpringContextTests
   private static final String[] SPRING_CONFIG_FILES = new String[] {
     "spring-context-test.xml",
   };
-  
-  
-  public AbstractSpringTest(String testName) 
+
+
+  public AbstractSpringTest(String testName)
   {
     super(testName);
     // have AbstractDependencyInjectionSpringContextTests inject the properties
@@ -43,15 +43,15 @@ extends AbstractDependencyInjectionSpringContextTests
     // our Spring configuration files.
     setPopulateProtectedVariables(true);
   }
-  
-  public AbstractSpringTest() 
+
+  public AbstractSpringTest()
   {
     // have AbstractDependencyInjectionSpringContextTests inject the properties
     // we need into protected data members that share the same name as beans in
     // our Spring configuration files.
     setPopulateProtectedVariables(true);
   }
-  
+
   /* (non-Javadoc)
    * @see org.springframework.test.AbstractDependencyInjectionSpringContextTests#getConfigLocations()
    */
@@ -59,7 +59,7 @@ extends AbstractDependencyInjectionSpringContextTests
   protected String[] getConfigLocations() {
     return SPRING_CONFIG_FILES;
   }
-  
+
   @Override
   /**
    * <i>If overriding this method in a subclass, remember to call <code>super.onSetUp()</code>!</i>

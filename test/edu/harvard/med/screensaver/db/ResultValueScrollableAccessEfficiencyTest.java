@@ -1,11 +1,11 @@
-//$HeadURL:
-//svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/test/edu/harvard/med/screensaver/TestHibernate.java
-//$
-//$Id: ComplexDAOTest.java 793 2006-11-22 15:54:30Z ant4 $
+// $HeadURL:
+// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/test/edu/harvard/med/screensaver/TestHibernate.java
+// $
+// $Id: ComplexDAOTest.java 793 2006-11-22 15:54:30Z ant4 $
 
-//Copyright 2006 by the President and Fellows of Harvard College.
+// Copyright 2006 by the President and Fellows of Harvard College.
 
-//Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+// Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 //at Harvard Medical School. This software is distributed under the terms of
 //the GNU General Public License.
 
