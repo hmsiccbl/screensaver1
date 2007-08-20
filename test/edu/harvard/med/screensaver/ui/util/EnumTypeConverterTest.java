@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -19,7 +19,7 @@ public class EnumTypeConverterTest extends TestCase
 {
   public void testGetAsObject()
   {
-    LibraryTypeConverter converter = new LibraryTypeConverter();
+    TestEnumTypeConverter converter = new TestEnumTypeConverter();
     for (LibraryType libraryType : LibraryType.values()) {
       assertEquals(libraryType,
                    converter.getAsObject(null, null, libraryType.getValue()));
@@ -45,10 +45,10 @@ public class EnumTypeConverterTest extends TestCase
       fail("expected ConverterException");
     }
   }
-  
+
   public void testGetAsString()
   {
-    LibraryTypeConverter converter = new LibraryTypeConverter();
+    TestEnumTypeConverter converter = new TestEnumTypeConverter();
     String s = converter.getAsString(null, null, LibraryType.COMMERCIAL);
     assertEquals(s, LibraryType.COMMERCIAL.getValue());
   }

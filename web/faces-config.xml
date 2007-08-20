@@ -8,7 +8,7 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
    $Id$
 
    Copyright 2006 by the President and Fellows of Harvard College.
-   
+
    Screensaver is an open-source project developed by the ICCB-L and NSRB labs
    at Harvard Medical School. This software is distributed under the terms of
    the GNU General Public License.
@@ -25,21 +25,21 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <default-locale>en</default-locale>
       <supported-locale>en</supported-locale>
     </locale-config>
-    
+
     <!-- user interface text messages -->
     <message-bundle>org.springframework.context.support.ReloadableResourcebundleMessagesource</message-bundle>
 
-    <!-- Tiles support.  This ViewHandler takes requests for *.jsp JSF views and processes them with their 
-         corresponding *.tiles definition (found in /WEB-INF/tiles.xml, or whatever the 'tiles-definition' 
+    <!-- Tiles support.  This ViewHandler takes requests for *.jsp JSF views and processes them with their
+         corresponding *.tiles definition (found in /WEB-INF/tiles.xml, or whatever the 'tiles-definition'
          context param defines in web.xml) -->
     <view-handler>org.apache.myfaces.tomahawk.application.jsp.JspTilesViewHandlerImpl</view-handler>
 
   </application>
-  
-  
+
+
   <!-- === === Phase Listeners === === -->
-  
-  <!-- The Messages class implements the JSF PhaseListener interface, allowing 
+
+  <!-- The Messages class implements the JSF PhaseListener interface, allowing
        it display enqueued messages on a new, subsequent view. -->
   <lifecycle>
     <phase-listener>edu.harvard.med.screensaver.ui.util.Messages</phase-listener>
@@ -47,29 +47,29 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
 
 
   <!-- === === Managed beans === === -->
-  
+
   <!-- NOTE: all JSF backing beans are being defined via Spring in
        spring-context-ui.xml.  Doing so provides the following advantages:
-        - simplified backing bean config, using Spring's bean definition 
+        - simplified backing bean config, using Spring's bean definition
           inheritance feature
         - avoid hacks to deal with initialization ordering deficiencies when
           defined in faces-config.xml
         - support for mutual references
         - can now use AOP on backing beans (e.g., for activity logging)
-       Access to Spring-defined session-scope beans requires that 
+       Access to Spring-defined session-scope beans requires that
        org.springframework.web.context.request.RequestContextListener is
        registered as a servlet listener in web.xml.
-  -->  
+  -->
 
-  
+
   <!-- Navigation rules -->
-  
-  <!-- Note: We are able to leave off the extension for the view defined in each <to-view-id>, 
-       since Tiles accepts and handles missing extensions.  This is kind of nice. Unfortunately, 
-       the <from-view-id> views require a ".jsp" extension, although intuitively one would like 
+
+  <!-- Note: We are able to leave off the extension for the view defined in each <to-view-id>,
+       since Tiles accepts and handles missing extensions.  This is kind of nice. Unfortunately,
+       the <from-view-id> views require a ".jsp" extension, although intuitively one would like
        to use ".jsf".
   -->
-  
+
   <!-- define navigation rules that are applicable from *all* views (e.g. those that contain a navigation panel) -->
   <navigation-rule>
     <from-view-id>*</from-view-id>
@@ -110,7 +110,7 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <to-view-id>/dev/schemaManager</to-view-id>
       <redirect/>
     </navigation-case>
-    
+
     <!-- === libraries navigation rules === -->
     <navigation-case>
       <from-outcome>findWells</from-outcome>
@@ -172,8 +172,8 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <to-view-id>/libraries/admin/rnaiLibraryContentsImporter</to-view-id>
       <redirect/>
     </navigation-case>
-    
-    <!-- === screens navigation rules === -->    
+
+    <!-- === screens navigation rules === -->
     <navigation-case>
       <from-outcome>browseScreens</from-outcome>
       <to-view-id>/screens/screensBrowser</to-view-id>
@@ -190,7 +190,7 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <redirect/>
     </navigation-case>
 
-    <!-- === screenresults navigation rules === --> 
+    <!-- === screenresults navigation rules === -->
     <navigation-case>
       <from-outcome>viewScreenResultImportErrors</from-outcome>
       <to-view-id>/screens/screenresults/admin/screenResultImporter</to-view-id>
@@ -198,87 +198,31 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
     </navigation-case>
 
   </navigation-rule>
-  
+
 
   <!-- === === Converters === === -->
 
   <converter>
-    <description>Converter for LibraryType enum to/from string representation</description>
-    <converter-id>LibraryTypeConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.ui.util.LibraryTypeConverter</converter-class>
-  </converter>
-  
-  <converter>
     <converter-id>ScreenTypeConverter</converter-id>
     <converter-class>edu.harvard.med.screensaver.ui.util.ScreenTypeConverter</converter-class>
   </converter>
-  
+
   <converter>
     <converter-id>SilencingReagentTypeConverter</converter-id>
     <converter-class>edu.harvard.med.screensaver.ui.util.SilencingReagentTypeConverter</converter-class>
   </converter>
-  
-  <converter>
-    <converter-id>ScreeningRoomUserConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.ui.util.ScreeningRoomUserConverter</converter-class>
-    <!-- property>
-     <property-name>dao</property-name>
-     <property-class>edu.harvard.med.screensaver.db.DAO</property-class>
-     <default-value>#{dao}</default-value>
-    </property-->
-  </converter>
-  
-  <converter>
-    <converter-id>SortDirectionConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.ui.table.SortDirectionConverter</converter-class>
-  </converter>
-  
+
   <converter>
     <converter-id>StatusValueConverter</converter-id>
     <converter-class>edu.harvard.med.screensaver.ui.util.StatusValueConverter</converter-class>
   </converter>
 
   <converter>
-    <converter-id>AssayReadoutTypeConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.ui.util.AssayReadoutTypeConverter</converter-class>
-  </converter>
-  
-  <converter>
     <converter-id>FundingSupportConverter</converter-id>
     <converter-class>edu.harvard.med.screensaver.ui.util.FundingSupportConverter</converter-class>
-  </converter>
-  
-  <converter>
-    <converter-id>ResultValueTypeConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.ui.util.ResultValueTypeConverter</converter-class>
-  </converter>
-  
-  <converter>
-    <converter-id>ScoringTypeConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.ui.util.ScoringTypeConverter</converter-class>
-  </converter>
-  
-  <converter>
-    <converter-id>IntegerConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.ui.util.IntegerConverter</converter-class>
   </converter>
 
 
   <!-- === === Validators === === -->
-
-  <validator>
-   <validator-id>YearValidator</validator-id>
-   <validator-class>javax.faces.validator.LongRangeValidator</validator-class>
-   <property>
-    <property-name>maximum</property-name>
-    <property-class>java.lang.Long</property-class>
-    <default-value>2020</default-value>
-    </property>
-   <property>
-    <property-name>minimum</property-name>
-    <property-class>java.lang.Long</property-class>
-    <default-value>1970</default-value>
-    </property>
-  </validator>
 
 </faces-config>

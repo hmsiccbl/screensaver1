@@ -7,7 +7,7 @@
 <%-- Tiles --%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
-<%-- 
+<%--
 TODO:
 - table sorting (fixed, but by business key, or something appropriate)
 - validation messages (per component)
@@ -394,8 +394,6 @@ TODO:
 					<t:inputText value="#{publication.yearPublished}"
 						displayValueOnly="#{!screenViewer.editMode}" maxlength="4"
 						styleClass="inputText" displayValueOnlyStyleClass="dataText" />
-					<%-- TODO: f:validator validatorId="YearValidator" />
-						</t:inputText --%>
 				</t:column>
 				<t:column>
 					<f:facet name="header">
