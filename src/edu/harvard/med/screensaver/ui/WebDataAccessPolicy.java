@@ -57,7 +57,11 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import org.apache.log4j.Logger;
 
 /**
- * A DataAccessPolicy implementation that is used by the web application.
+ * A DataAccessPolicy implementation that is used by the web
+ * application.  It is parameterized with a {@link
+ * WebCurrentScreensaverUser} when instantiated, allowing a single
+ * instance of this class (per web application instance) to determine
+ * entity usage authorizations for the current web user.
  */
 public class WebDataAccessPolicy implements DataAccessPolicy
 {

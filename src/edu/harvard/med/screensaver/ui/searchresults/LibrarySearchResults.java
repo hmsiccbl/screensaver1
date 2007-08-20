@@ -40,7 +40,7 @@ public class LibrarySearchResults extends SearchResults<Library>
   private ArrayList<TableColumn<Library>> _columns;
   
   
-  // public contructor
+  // public constructor
   
   /**
    * Construct a new <code>LibrarySearchResult</code> object.

@@ -19,8 +19,8 @@ import org.apache.log4j.Logger;
  * application, the current user will be taken from the current HTTP session;
  * see {@link WebCurrentScreensaverUser}.
  * 
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class CurrentScreensaverUser
 {
