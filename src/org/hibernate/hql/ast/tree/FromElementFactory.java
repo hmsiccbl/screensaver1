@@ -1,4 +1,4 @@
-// $Id: FromElementFactory.java 9586 2006-03-09 21:11:44Z steve.ebersole@jboss.com $
+// $Id$
 package org.hibernate.hql.ast.tree;
 
 import org.hibernate.engine.JoinSequence;
