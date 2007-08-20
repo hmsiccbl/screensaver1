@@ -143,7 +143,8 @@
   </t:dataTable>
 
   <h:form>
-    <t:commandButton action="#{envInfo.throwAnException}" value="Throw an exception!" />
+    <t:commandButton action="#{envInfo.throwAnException}" value="Throw an exception!" style="command" />
+    <t:commandButton action="#{envInfo.throwAConcurrencyFailureException}" value="Throw a ConcurrencyFailure exception!" style="command" />
   </h:form>
 
 </f:subview>

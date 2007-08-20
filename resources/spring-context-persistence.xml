@@ -5,7 +5,7 @@
    $Id$
 
    Copyright 2006 by the President and Fellows of Harvard College.
-   
+
    Screensaver is an open-source project developed by the ICCB-L and NSRB labs
    at Harvard Medical School. This software is distributed under the terms of
    the GNU General Public License.
@@ -16,7 +16,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:aop="http://www.springframework.org/schema/aop"
   xmlns:tx="http://www.springframework.org/schema/tx"
-  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd 
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
                       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
                       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
@@ -124,7 +124,8 @@
   <!-- Transactional support -->
 
   <!-- enable the configuration of transactional behavior based on annotations -->
-  <tx:annotation-driven transaction-manager="txnManager" proxy-target-class="true" />
+  <!-- we (arbitrarily) use order="16" to allow other advice to be execute "outside" (before & after) transactional scope -->
+  <tx:annotation-driven transaction-manager="txnManager" proxy-target-class="true" order="16"/>
 
   <bean
     id="txnManager"
@@ -138,7 +139,6 @@
   </bean>
 
   <!-- end of transactional support configuration -->
-
 
 
   <bean

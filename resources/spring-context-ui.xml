@@ -7,7 +7,7 @@
    $Id$
 
    Copyright 2006 by the President and Fellows of Harvard College.
-   
+
    Screensaver is an open-source project developed by the ICCB-L and NSRB labs
    at Harvard Medical School. This software is distributed under the terms of
    the GNU General Public License.
@@ -17,14 +17,54 @@
   xmlns="http://www.springframework.org/schema/beans"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:aop="http://www.springframework.org/schema/aop"
-  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd 
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
                       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
-  <!--aop:aspectj-autoproxy proxy-target-class="true"/ -->
-  
-  <!-- bean
-    id="userActivityLogAspect"
-    class="edu.harvard.med.screensaver.ui.UserActivityLoggerAspect"/-->
+   <!-- an aspect to perform user activity logging -->
+   <bean
+     id="userActivityLoggerAspectBean"
+     class="edu.harvard.med.screensaver.ui.aspects.UserActivityLoggerAspect">
+     <!-- execute earlier than other advice (e.g. before the transactional advice) -->
+     <property
+       name="order"
+       value="1" />
+     <property
+       name="currentScreensaverUser"
+       ref="currentScreensaverUser" />
+   </bean>
+
+   <!-- an aspect to handler concurrency failure exceptions -->
+   <bean
+     id="concurrencyFailureExceptionHandlerAspectBean"
+     class="edu.harvard.med.screensaver.ui.aspects.ConcurrencyFailureExceptionHandlerAspect">
+     <!-- execute earlier than other advice (e.g. before the transactional advice) -->
+     <property
+       name="order"
+       value="2" />
+     <property
+       name="messages"
+       ref="messages" />
+   </bean>
+
+   <aop:config>
+    <aop:pointcut
+      id="uiControllerPointcut"
+      expression="@annotation(edu.harvard.med.screensaver.ui.control.UIControllerMethod)" />
+    <aop:aspect
+      id="userActivityLoggerAspect"
+      ref="userActivityLoggerAspectBean">
+      <aop:before
+        method="logUserActivity"
+        pointcut-ref="uiControllerPointcut" />
+    </aop:aspect>
+    <aop:aspect
+      id="concurrencyFailureExceptionHandlerAspect"
+      ref="concurrencyFailureExceptionHandlerAspectBean">
+      <aop:around
+        method="invoke"
+        pointcut-ref="uiControllerPointcut" />
+    </aop:aspect>
+  </aop:config>
 
   <bean
     id="messages"
@@ -40,7 +80,7 @@
     </property>
     <!--  TODO property name="locale" value=""/-->
   </bean>
-  
+
   <!--  user authentication -->
 
   <bean
@@ -71,10 +111,10 @@
       name="currentScreensaverUser"
       ref="currentScreensaverUser" />
   </bean>
-  
+
 
   <!-- === top-level & misc backing beans === -->
-  
+
   <bean
     id="appInfo"
     parent="uiBean"
@@ -112,7 +152,7 @@
       ref="exceptionReporter" />
     <aop:scoped-proxy/>
   </bean>
-  
+
   <bean
     id="menu"
     parent="uiBean"
@@ -130,7 +170,7 @@
     <description>Backing bean for the Help Viewer page.</description>
     <aop:scoped-proxy/>
   </bean>
-  
+
   <bean
     id="schemaManager"
     parent="uiBean"
@@ -149,7 +189,7 @@
     id="librariesController"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.control.LibrariesControllerImpl">
+    class="edu.harvard.med.screensaver.ui.control.LibrariesController">
     <description>Libraries Controller Bean</description>
     <property
       name="genericEntityDao"
@@ -211,7 +251,7 @@
     <ref bean="xlsWellsDataExporter"/>
     </list>
     </property>
-      
+
     <aop:scoped-proxy/>
   </bean>
 
@@ -221,7 +261,7 @@
     abstract="true">
     <description>
       Abstract bean definition for user interface beans that are
-      associated with the ScreensController.
+      associated with the LibrariesController.
     </description>
     <property
       name="librariesController"
@@ -348,7 +388,7 @@
     id="screensController"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.control.ScreensControllerImpl">
+    class="edu.harvard.med.screensaver.ui.control.ScreensController">
     <description>Screens Controller</description>
     <property
       name="genericEntityDao"
@@ -495,7 +535,7 @@
     <property name="librariesDao" ref="librariesDao"/>
     <aop:scoped-proxy/>
   </bean>
-  
+
   <!-- Development/Debug related beans -->
 
   <bean

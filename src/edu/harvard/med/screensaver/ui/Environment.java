@@ -2,7 +2,7 @@
 // $Id: org.eclipse.jdt.ui.prefs 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -21,11 +21,14 @@ import javax.servlet.http.Cookie;
 
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+
+import org.springframework.dao.ConcurrencyFailureException;
 
 /**
  * Backing bean for developer-only view that displays environment information
  * for the running web application.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -35,7 +38,7 @@ public class Environment extends AbstractBackingBean
   private String _user;
   private String _host;
   private String _url;
-  
+
   public static class Row
   {
     private String _name;
@@ -62,7 +65,7 @@ public class Environment extends AbstractBackingBean
       _value = value;
     }
   }
-  
+
   public DataModel getJvmModel()
   {
     List<Row> data = new ArrayList<Row>();
@@ -83,10 +86,10 @@ public class Environment extends AbstractBackingBean
     List<Row> data = new ArrayList<Row>();
     Map reqParamMap = getExternalContext().getRequestParameterMap();
     for (Object paramName : reqParamMap.keySet()) {
-      data.add(new Row(paramName.toString(), 
+      data.add(new Row(paramName.toString(),
                       reqParamMap.get(paramName).toString()));
     }
-    String[] dbParamNames = { 
+    String[] dbParamNames = {
       "SCREENSAVER_PGSQL_SERVER",
       "SCREENSAVER_PGSQL_DB",
       "SCREENSAVER_PGSQL_USER",
@@ -106,7 +109,7 @@ public class Environment extends AbstractBackingBean
     List<Row> data = new ArrayList<Row>();
     Map sessionParamMap = getExternalContext().getSessionMap();
     for (Object paramName : sessionParamMap.keySet()) {
-      data.add(new Row(paramName.toString(), 
+      data.add(new Row(paramName.toString(),
                       sessionParamMap.get(paramName).toString()));
     }
     return new ListDataModel(data);
@@ -117,12 +120,12 @@ public class Environment extends AbstractBackingBean
     List<Row> data = new ArrayList<Row>();
     Map sessionParamMap = getExternalContext().getApplicationMap();
     for (Object paramName : sessionParamMap.keySet()) {
-      data.add(new Row(paramName.toString(), 
+      data.add(new Row(paramName.toString(),
                       sessionParamMap.get(paramName).toString()));
     }
     return new ListDataModel(data);
   }
-  
+
   @SuppressWarnings("unchecked")
   public DataModel getCookiesTableModel()
   {
@@ -133,20 +136,20 @@ public class Environment extends AbstractBackingBean
     }
     return new ListDataModel(cookies);
   }
-  
+
   public DataModel getUserSecurityTableModel()
   {
     List<Row> userSecurityItems = new ArrayList<Row>();
-    
+
     userSecurityItems.add(new Row("remoteUser", getExternalContext().getRemoteUser()));
     Principal principal = getExternalContext().getUserPrincipal();
     userSecurityItems.add(new Row("userPrincipal", principal == null ? "<none>" : principal.getName()));
     ScreensaverUser screensaverUser = getCurrentScreensaverUser().getScreensaverUser();
-    userSecurityItems.add(new Row("currentScreensaverUser", 
+    userSecurityItems.add(new Row("currentScreensaverUser",
                                   screensaverUser == null ? "<none>" : screensaverUser.getFullNameFirstLast()));
-                                  
+
     for (ScreensaverUserRole role : ScreensaverUserRole.values()) {
-      userSecurityItems.add(new Row("in role '" + role.toString() + "'",  
+      userSecurityItems.add(new Row("in role '" + role.toString() + "'",
                                     Boolean.toString(isUserInRole(role))));
     }
     userSecurityItems.add(new Row("authenticationType", getExternalContext().getAuthType()));
@@ -219,11 +222,17 @@ public class Environment extends AbstractBackingBean
   {
     throw new Exception("You asked for it!");
   }
-  
+
+  @UIControllerMethod
+  public String throwAConcurrencyFailureException() throws Exception
+  {
+    throw new ConcurrencyFailureException("You asked for it!");
+  }
+
   public String runGC()
   {
     Runtime.getRuntime().gc();
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
 }
