@@ -49,6 +49,7 @@ public class Menu extends AbstractBackingBean
     return VIEW_HELP;
   }
 
+  @UIControllerMethod
   public String logout()
   {
     log.info("logout for session "  + getHttpSession().getId());
