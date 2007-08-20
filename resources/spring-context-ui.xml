@@ -137,19 +137,8 @@
       stack traces to be viewed in a custom manner.
     </description>
     <property
-      name="mainController"
-      ref="mainController"/>
-    <aop:scoped-proxy/>
-  </bean>
-
-  <bean
-    id="mainController"
-    parent="uiBean"
-    scope="session"
-    class="edu.harvard.med.screensaver.ui.control.MainControllerImpl">
-    <property
-      name="exceptionReporter"
-      ref="exceptionReporter" />
+      name="menu"
+      ref="menu"/>
     <aop:scoped-proxy/>
   </bean>
 

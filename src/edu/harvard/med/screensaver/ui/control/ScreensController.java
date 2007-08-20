@@ -91,10 +91,6 @@ public class ScreensController extends AbstractUIController
   // private static final fields
 
   private static final Logger log = Logger.getLogger(ScreensController.class);
-  private static final String BROWSE_SCREENS = "browseScreens";
-  private static final String VIEW_SCREEN = "viewScreen";
-  private static String VIEW_SCREEN_RESULT_IMPORT_ERRORS = "viewScreenResultImportErrors";
-
 
   // private instance fields
 

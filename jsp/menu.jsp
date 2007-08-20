@@ -13,7 +13,7 @@
   <t:panelGrid columns="1">
 
 		<h:form id="titleForm">
-			<t:commandLink id="menuTitle" action="#{mainController.viewMain}"
+			<t:commandLink id="menuTitle" action="#{menu.viewMain}"
 				value="#{menu.applicationName}" styleClass="menuItem title"
 				title="Go to the Screensaver main page" />
 			<t:htmlTag value="br"/>
@@ -37,7 +37,7 @@
 					<t:div/>
 				<%-- t:commandLink id="account" action="goMyAccount" value="#{\"Edit\"}" styleClass="menuItem" />
 				<t:outputText value="|" styleClass="spacer" /--%>
-				<t:commandLink id="logout" action="#{mainController.logout}"
+				<t:commandLink id="logout" action="#{menu.logout}"
 					value="#{\"Logout\"}" styleClass="menuItem"
 					title="Click here to log out" />
 			</h:form>
@@ -67,15 +67,15 @@
 					accesskey="M"
 					title="Browse the screens that you headed, led and collaborated on" />
 				<t:commandNavigation2 />
-				<t:commandNavigation2 action="#{mainController.viewNews}"
+				<t:commandNavigation2 action="#{menu.viewNews}"
 					value="Latest News"
 					accesskey="N"
 					title="The latest Screensaver news" />
-				<t:commandNavigation2 action="#{mainController.viewDownloads}"
+				<t:commandNavigation2 action="#{menu.viewDownloads}"
 					value="Data Downloads"
 					accesskey="D"
 					title="Download SD Files for small molecule libraries" />
-				<t:commandNavigation2 action="#{mainController.viewHelp}"
+				<t:commandNavigation2 action="#{menu.viewHelp}"
 					value="View Help"
 					accesskey="H"
 					title="View the Screensaver help page" />

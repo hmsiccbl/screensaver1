@@ -6,7 +6,7 @@
 <f:subview id="goodbyeSubview">
 
 	<h:form id="loginAgainForm">
-		<t:commandButton id="loginAgain" action="#{mainController.viewMain}"
+		<t:commandButton id="loginAgain" action="#{menu.viewMain}"
 			value="Login again" style="command"
 			title="Click this button to return to the login page" />
 	</h:form>

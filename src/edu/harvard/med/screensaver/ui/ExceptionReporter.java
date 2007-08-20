@@ -16,33 +16,32 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.servlet.ServletException;
 
-import edu.harvard.med.screensaver.ui.control.MainController;
 import edu.harvard.med.screensaver.util.Pair;
 
 /**
  * Backing bean for view that displays error message, when an unexpected error
  * occurs, and provides some continuation options for users. For developers,
  * shows formatted stack traces for exception chain.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class ExceptionReporter extends AbstractBackingBean
 {
   public static final String EXCEPTION_SESSION_PARAM = "javax.servlet.error.exception";
-  
-  private MainController _mainController;
 
-  public void setMainController(MainController menuController)
+  private Menu _menu;
+
+  public void setMenu(Menu menuController)
   {
-    _mainController = menuController;
+    _menu = menuController;
   }
 
   public String loginAgain()
   {
-    return _mainController.logout();
+    return _menu.logout();
   }
-  
+
   public DataModel getThrowablesDataModel()
   {
     return new ListDataModel(getStackTrace());
@@ -50,7 +49,7 @@ public class ExceptionReporter extends AbstractBackingBean
 
   private List<ExceptionInfo> getStackTrace()
   {
-    List<ExceptionInfo> throwables = new ArrayList<ExceptionInfo>();    
+    List<ExceptionInfo> throwables = new ArrayList<ExceptionInfo>();
     Throwable t = (Throwable) getHttpSession().getAttribute(EXCEPTION_SESSION_PARAM);
     while (t != null) {
       throwables.add(new ExceptionInfo(t));
@@ -63,7 +62,7 @@ public class ExceptionReporter extends AbstractBackingBean
     }
     return throwables;
   }
-  
+
   public static class ExceptionInfo
   {
     private String nameAndMessage;

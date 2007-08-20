@@ -40,7 +40,7 @@
         title="Once you have entered your username and password, and read the Confidentiality Agreement, click this button to log in"
       />
       <%--t:commandLink value="Forgot your ID or password?" immediate="true"
-        action="#{mainController.forgotIdOrPassword}" styleClass="command" /--%>
+        action="#{menu.forgotIdOrPassword}" styleClass="command" /--%>
     </t:panelGroup>
   </h:form>
   
