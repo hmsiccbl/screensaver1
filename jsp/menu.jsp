@@ -25,13 +25,13 @@
 				title="The build number" />
 		</h:form>
 
-		<t:htmlTag id="menuSectionSeparator0" value="hr" 
+		<t:htmlTag id="menuSectionSeparator0" value="hr"
 			rendered="#{menu.authenticatedUser}"/>
 
 		<t:panelGroup rendered="#{menu.authenticatedUser}">
 			<h:form id="userForm">
 				<%--t:outputText value="User " styleClass="label"/--%>
-				<t:outputText id="userName" 
+				<t:outputText id="userName"
 					value="#{menu.screensaverUser.fullNameFirstLast}" styleClass="menuItem userName"
 					title="The name of the logged in user" />
 					<t:div/>
@@ -42,7 +42,7 @@
 					title="Click here to log out" />
 			</h:form>
 		</t:panelGroup>
-    
+
     <t:htmlTag id="menuSectionSeparator1" value="hr"/>
 
     <h:form id="navForm">
@@ -58,11 +58,11 @@
 					value="Browse Libraries"
 					accesskey="L"
 					title="Browse the currently available libraries" />
-				<t:commandNavigation2 action="#{screensController.browseScreens}"
+				<t:commandNavigation2 action="#{menu.browseScreens}"
 					value="Browse Screens"
 					accesskey="S"
 					title="Browse the screens currently available and accessible to you" />
-				<t:commandNavigation2 action="#{screensController.browseMyScreens}"
+				<t:commandNavigation2 action="#{menu.browseMyScreens}"
 					value="My Screens"
 					accesskey="M"
 					title="Browse the screens that you headed, led and collaborated on" />
@@ -125,7 +125,7 @@
 				<t:outputText id="nowPanelGridHasEvenChildCount" value="" />
 			</t:panelGrid>
 		</h:form>
-    
+
     <h:form id="quickFindScreenForm" title="Look up a screen by screen number">
 			<t:panelGrid columns="1"
 				rendered="#{menu.authenticatedUser}">
@@ -138,7 +138,7 @@
 					rendered="#{menu.authenticatedUser}" styleClass="command" />
 			</t:panelGrid>
 		</h:form>
-    
+
     <h:form id="quickFindCherryPickRequest"
       title="Look up a cherry pick request by cherry pick request number"
     >

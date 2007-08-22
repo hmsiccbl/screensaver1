@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -29,15 +29,15 @@ import edu.harvard.med.screensaver.ui.control.LibrariesController;
  */
 public class CompoundNameValueTable extends NameValueTable
 {
-  
+
   // private static final fields
-  
+
   private static final Logger log = Logger.getLogger(CompoundNameValueTable.class);
   private static final String SCREENSAVER0_IMAGE_RENDERER_URL_PREFIX =
     "http://screensaver.med.harvard.edu/render_molecule.png?smiles=";
   private static final String PUBCHEM_CID_LOOKUP_URL_PREFIX =
     "http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid=";
-  
+
   // the row names
   private static final String STRUCTURE = "Structure";
   private static final String SMILES = "Smiles";
@@ -51,9 +51,9 @@ public class CompoundNameValueTable extends NameValueTable
   private static final String NSC_NUMBERS = "NSC&nbsp;Numbers";
   private static final String CAS_NUMBERS = "CAS&nbsp;Numbers";
 
-  
+
   // private instance fields
-  
+
   private LibrariesController _librariesController;
   private Compound _compound;
   private boolean _isEmbedded;
@@ -61,15 +61,15 @@ public class CompoundNameValueTable extends NameValueTable
   private List<Object> _values = new ArrayList<Object>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
   private List<String> _descriptions = new ArrayList<String>();
-  
-  
+
+
   // public constructor and implementations of NameValueTable abstract methods
-  
+
   public CompoundNameValueTable(LibrariesController librariesController, Compound compound)
   {
     this(librariesController, compound, false);
   }
-  
+
   public CompoundNameValueTable(
     LibrariesController librariesController,
     Compound compound,
@@ -81,7 +81,7 @@ public class CompoundNameValueTable extends NameValueTable
     initializeLists(compound);
     setDataModel(new ListDataModel(_values));
   }
-  
+
 
   @Override
   public int getNumRows()
@@ -94,7 +94,7 @@ public class CompoundNameValueTable extends NameValueTable
   {
     return _descriptions.get(index);
   }
-  
+
   @Override
   public String getName(int index)
   {
@@ -120,13 +120,13 @@ public class CompoundNameValueTable extends NameValueTable
     if (_isEmbedded) {
       String name = getName(index);
       if (name.equals(SMILES)) {
-        return _librariesController.viewCompound(_compound, null);
+        return _librariesController.viewCompound(_compound);
       }
     }
     // other fields do not have actions
     return null;
   }
-  
+
   @Override
   public String getLink(int index, String value)
   {
@@ -146,8 +146,8 @@ public class CompoundNameValueTable extends NameValueTable
     // other fields do not have links
     return null;
   }
-  
-  
+
+
   // private instance methods
 
   /**

@@ -2,56 +2,69 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.namevaluetable.CompoundNameValueTable;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
+
+import org.apache.log4j.Logger;
 
 public class CompoundViewer extends AbstractBackingBean
 {
-  
+
   // private static stuff
-  
+
   private static final Logger log = Logger.getLogger(CompoundViewer.class);
-  
-  
+
+
   // private instance fields
-  
+
   private LibrariesController _librariesController;
   private Compound _compound;
-  private WellSearchResults _wellSearchResults;
   private CompoundNameValueTable _compoundNameValueTable;
   private Well _parentWellOfInterest;
 
-  
+
+  // constructors
+
+  /**
+   * @motivation for CGLIB2
+   */
+  protected CompoundViewer()
+  {
+  }
+
+  public CompoundViewer(LibrariesController librariesController)
+  {
+    _librariesController = librariesController;
+  }
+
+
   // public getters and setters
-  
+
   public LibrariesController getLibrariesController()
   {
     return _librariesController;
   }
-  
+
   public void setLibrariesController(LibrariesController librariesController)
   {
     _librariesController = librariesController;
   }
-  
+
   /**
    * Set the parent Well of interest, for which this compound is being viewed (a
    * compound can be in multiple wells, but the UI may want to be explicit about
    * which Well "led" to this viewer").
-   * 
+   *
    * @param parentWellOfInterest the parent Well of interest, for which this
    *          compound is being viewed; may be null
    */
@@ -64,7 +77,7 @@ public class CompoundViewer extends AbstractBackingBean
    * Get the parent Well of interest, for which this compound is being viewed (a
    * compound can be in multiple wells, but the UI may want to be explicit about
    * which Well "led" to this viewer").
-   * 
+   *
    * @return the parent Well of interest, for which this compound is being
    *         viewed; may be null
    */
@@ -72,7 +85,7 @@ public class CompoundViewer extends AbstractBackingBean
   {
     return _parentWellOfInterest;
   }
-  
+
   public Compound getCompound()
   {
     return _compound;
@@ -81,16 +94,6 @@ public class CompoundViewer extends AbstractBackingBean
   public void setCompound(Compound compound)
   {
     _compound = compound;
-  }
-  
-  public WellSearchResults getWellSearchResults()
-  {
-    return _wellSearchResults;
-  }
-
-  public void setWellSearchResults(WellSearchResults wellSearchResults)
-  {
-    _wellSearchResults = wellSearchResults;
   }
 
   public CompoundNameValueTable getCompoundNameValueTable()
@@ -105,6 +108,6 @@ public class CompoundViewer extends AbstractBackingBean
 
   public String viewCompound()
   {
-    return _librariesController.viewCompound(_compound, _wellSearchResults);
+    return _librariesController.viewCompound(_compound);
   }
 }

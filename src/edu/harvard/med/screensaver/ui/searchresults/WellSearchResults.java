@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class WellSearchResults extends SearchResults<Well>
+public class WellSearchResults extends SearchResults<Well,Object>
 {
 
   // private static final fields
@@ -45,16 +45,21 @@ public class WellSearchResults extends SearchResults<Well>
   private List<TableColumn<Well>> _columns;
 
 
-  // public constructor
+  // constructors
+
+  /**
+   * @motivation for CGLIB2
+   */
+  protected WellSearchResults()
+  {
+  }
 
   /**
    * Construct a new <code>WellSearchResultsViewer</code> object.
    */
-  public WellSearchResults(List<Well> unsortedResults,
-                           LibrariesController librariesController,
+  public WellSearchResults(LibrariesController librariesController,
                            List<DataExporter<Well>> dataExporters)
   {
-    super(unsortedResults);
     _librariesController = librariesController;
     _dataExporters = dataExporters;
   }
@@ -62,7 +67,7 @@ public class WellSearchResults extends SearchResults<Well>
 
   // implementations of the SearchResults abstract methods
 
-  @Override  
+  @Override
   protected List<TableColumn<Well>> getColumns()
   {
     if (_columns == null) {
@@ -75,12 +80,12 @@ public class WellSearchResults extends SearchResults<Well>
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(Well well) { return _librariesController.viewLibrary(well.getLibrary(), null); }
+        public Object cellAction(Well well) { return _librariesController.viewLibrary(well.getLibrary()); }
       });
       _columns.add(new TableColumn<Well>("Plate", "The number of the plate the well is located on", true) {
         @Override
         public Object getCellValue(Well well) { return well.getPlateNumber(); }
-      });      
+      });
       _columns.add(new TableColumn<Well>("Well", "The plate coordinates of the well") {
         @Override
         public Object getCellValue(Well well) { return well.getWellName(); }
@@ -89,19 +94,19 @@ public class WellSearchResults extends SearchResults<Well>
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(Well well) { return _librariesController.viewWell(well, WellSearchResults.this); }
+        public Object cellAction(Well well) { return _librariesController.viewWell(well); }
       });
       _columns.add(new TableColumn<Well>("Well Type", "The type of well, e.g., 'Experimental', 'Control', 'Empty', etc.") {
         @Override
         public Object getCellValue(Well well) { return well.getWellType(); }
-      });      
+      });
       _columns.add(new TableColumn<Well>("Contents", "The gene name for the silencing reagent, or SMILES for the compound, in the well") {
         @Override
         public Object getCellValue(Well well) { return getContentsValue(well); }
 
         @Override
-        protected Comparator<Well> getAscendingComparator() 
-        { 
+        protected Comparator<Well> getAscendingComparator()
+        {
           return new Comparator<Well>() {
             @SuppressWarnings("unchecked")
             public int compare(Well w1, Well w2) {
@@ -121,10 +126,10 @@ public class WellSearchResults extends SearchResults<Well>
         public boolean isCommandLinkList() { return getContentsCount(getEntity()) > 1; }
 
         @Override
-        public Object cellAction(Well well) 
-        { 
+        public Object cellAction(Well well)
+        {
           if (getGeneCount(well) == 1) {
-            return _librariesController.viewGene(well.getGene(), WellSearchResults.this);
+            return _librariesController.viewGene(well.getGene());
           }
           if (getCompoundCount(well) > 0) {
             // commandValue is really a smiles, not a compoundId
@@ -136,7 +141,7 @@ public class WellSearchResults extends SearchResults<Well>
                 break;
               }
             }
-            return _librariesController.viewCompound(compound, WellSearchResults.this);
+            return _librariesController.viewCompound(compound);
           }
           return REDISPLAY_PAGE_ACTION_RESULT;
         }
@@ -156,19 +161,19 @@ public class WellSearchResults extends SearchResults<Well>
   {
     // NOTE: if there were more ways to get to a well search results, then this method would
     // need to be more intelligent
-    return _librariesController.viewWellSearchResults(this);
+    return VIEW_WELL_SEARCH_RESULTS;
   }
 
   @Override
   protected void setEntityToView(Well well)
   {
     // TODO: we should really only call the view*() method for the mode we're in; otherwise we're doing extra db work
-    _librariesController.viewWell(well, this);
+    _librariesController.viewWell(well);
     // we need to call these view methods even, if the gene/compound is null, so
     // that the view can at least be updated to reflect the emptiness of the
     // well
-    _librariesController.viewGene(well.getGene(), this);
-    _librariesController.viewCompound(well.getPrimaryCompound(), this);
+    _librariesController.viewGene(well.getGene());
+    _librariesController.viewCompound(well.getPrimaryCompound());
   }
 
 

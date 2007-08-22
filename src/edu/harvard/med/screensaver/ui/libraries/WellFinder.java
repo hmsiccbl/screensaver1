@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -22,29 +22,44 @@ import org.apache.log4j.Logger;
  */
 public class WellFinder extends AbstractBackingBean
 {
-  
+
   // private static final fields
-  
+
   private static final Logger log = Logger.getLogger(WellFinder.class);
 
   private static final ScreensaverUserRole ADMIN_ROLE = ScreensaverUserRole.LIBRARIES_ADMIN;
-  
-  
+
+
   // private instance fields
-  
+
   private LibrariesController _librariesController;
   private String _plateNumber;
   private String _wellName;
   private String _plateWellList;
-  
-  
+
+
+  // constructors
+
+  /**
+   * @motivation for CGLIB2
+   */
+  protected WellFinder()
+  {
+  }
+
+  public WellFinder(LibrariesController librariesController)
+  {
+    _librariesController = librariesController;
+  }
+
+
   // public instance methods
-  
+
   public LibrariesController getLibrariesController()
   {
     return _librariesController;
   }
-  
+
   public void setLibrariesController(LibrariesController librariesController)
   {
     _librariesController = librariesController;
@@ -75,11 +90,11 @@ public class WellFinder extends AbstractBackingBean
     return _plateWellList;
   }
 
-  public void setPlateWellList(String plateWellList) 
+  public void setPlateWellList(String plateWellList)
   {
     _plateWellList = plateWellList;
   }
-  
+
   @Override
   protected ScreensaverUserRole getEditableAdminRole()
   {
@@ -95,7 +110,7 @@ public class WellFinder extends AbstractBackingBean
   {
     return _librariesController.findWell(_plateNumber, _wellName);
   }
-  
+
   /**
    * Find the wells specified in the plate-well list, and go to the {@link WellSearchResultsViewer}
    * page.
@@ -109,7 +124,7 @@ public class WellFinder extends AbstractBackingBean
   /**
    * Find the volumes for all copies of the wells specified in the plate-well
    * list, and go to the {@link WellSearchResultsViewer} page.
-   * 
+   *
    * @return the controler code for the next appropriate page
    */
   public String findWellVolumes()

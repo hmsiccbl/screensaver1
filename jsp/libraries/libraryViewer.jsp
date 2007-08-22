@@ -5,7 +5,7 @@
 
 <f:subview id="libraryViewer">
 
-  <t:aliasBean alias="#{navigator}" value="#{libraryViewer.librarySearchResults}" >
+  <t:aliasBean alias="#{navigator}" value="#{librariesBrowser}" >
 		<h:form id="navPanelForm">
 			<%@ include file="../searchResultsNavPanel.jspf" %>
 		</h:form>
@@ -22,7 +22,7 @@
 				title="View a list of all the wells in the library" />
 
 			<h:commandButton value="View Well Volumes"
-				action="#{libraryViewer.viewLibraryWellVolumes}" 
+				action="#{libraryViewer.viewLibraryWellVolumes}"
 				rendered="#{libraryViewer.editable}"
 				styleClass="command"
 				title="View a list of all the wells in the library" />

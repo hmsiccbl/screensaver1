@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -10,20 +10,19 @@
 package edu.harvard.med.screensaver.ui.libraries;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
-import edu.harvard.med.screensaver.ui.control.ScreensController;
+import edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
 import org.apache.log4j.Logger;
 
-public class WellVolumeSearchResults extends SearchResults<WellVolume>
+public class WellVolumeSearchResults extends SearchResults<WellVolume,WellVolumeAdjustment>
 {
   // static members
 
@@ -43,26 +42,35 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
 
 
   // instance data members
-  
-  private LibrariesController _librariesController;
-  private ScreensController _screensController;
+
   private GenericEntityDAO _dao;
+  private LibrariesController _librariesController;
+  private CherryPickRequestViewer _cherryPickRequestViewer;
   private ArrayList<TableColumn<WellVolume>> _columns;
   private TableColumn<WellVolume> _maxRemainingVolumeColumn;
-  
-  
-  // public constructors and methods
 
-  public WellVolumeSearchResults(Collection<WellVolume> unsortedResults,
-                                 LibrariesController librariesController,
-                                 ScreensController screensController,
-                                 GenericEntityDAO dao)
+
+  // constructors
+
+  /**
+   * @motivation for CGLIB2
+   */
+  protected WellVolumeSearchResults()
   {
-    super(unsortedResults);
-    _librariesController = librariesController;
-    _screensController = screensController;
-    _dao = dao;
   }
+
+  public WellVolumeSearchResults(GenericEntityDAO dao,
+                                 LibrariesController librariesController,
+                                 CherryPickRequestViewer cherryPickRequestViewer,
+                                 WellVolumeAdjustmentSearchResults rowDetail)
+  {
+    _dao = dao;
+    _librariesController = librariesController;
+    _cherryPickRequestViewer = cherryPickRequestViewer;
+    setRowDetail(rowDetail);
+  }
+
+  // public methods
 
   @Override
   protected List<TableColumn<WellVolume>> getColumns()
@@ -77,12 +85,12 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(WellVolume wellVolume) { return _librariesController.viewLibrary(wellVolume.getWell().getLibrary(), null); }
+        public Object cellAction(WellVolume wellVolume) { return _librariesController.viewLibrary(wellVolume.getWell().getLibrary()); }
       });
       _columns.add(new TableColumn<WellVolume>("Plate", "The number of the plate the well is located on", true) {
         @Override
         public Object getCellValue(WellVolume wellVolume) { return wellVolume.getWell().getPlateNumber(); }
-      });      
+      });
       _columns.add(new TableColumn<WellVolume>("Well", "The plate coordinates of the well") {
         @Override
         public Object getCellValue(WellVolume wellVolume) { return wellVolume.getWell().getWellName(); }
@@ -91,7 +99,7 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(WellVolume wellVolume) { return _librariesController.viewWell(wellVolume.getWell(), null); }
+        public Object cellAction(WellVolume wellVolume) { return _librariesController.viewWell(wellVolume.getWell()); }
       });
       _columns.add(new TableColumn<WellVolume>("Copies", "The copies of this well") {
         @Override
@@ -100,37 +108,37 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
       _columns.add(new TableColumn<WellVolume>("Initial Volume", "The initial volume of this well", true) {
         @Override
         public Object getCellValue(WellVolume wellVolume) { return wellVolume.getInitialMicroliterVolume(); }
-      });      
+      });
       _columns.add(new TableColumn<WellVolume>("Consumed Volume", "The cumulative volume already used from this well (for all copies)", true) {
         @Override
         public Object getCellValue(WellVolume wellVolume) { return wellVolume.getConsumedMicroliterVolume(); }
-      });      
+      });
       _maxRemainingVolumeColumn = new TableColumn<WellVolume>("Max Remaining Volume", "The maximum remaining volume of this well (for all copies)", true) {
         @Override
         public Object getCellValue(WellVolume wellVolume) { return wellVolume.getMaxWellCopyVolume().getRemainingMicroliterVolume() + " ("  + wellVolume.getMaxWellCopyVolume().getCopy().getName() + ")"; }
-      };      
+      };
       _columns.add(_maxRemainingVolumeColumn);
       _columns.add(new TableColumn<WellVolume>("Min Remaining Volume", "The minimum remaining volume of this well (for all copies)", true) {
         @Override
         public Object getCellValue(WellVolume wellVolume) { return wellVolume.getMinWellCopyVolume().getRemainingMicroliterVolume() + " ("  + wellVolume.getMinWellCopyVolume().getCopy().getName() + ")"; }
-      });      
+      });
       _columns.add(new TableColumn<WellVolume>("Withdrawals/Adjustments", "The number of withdrawals and administrative adjustments made from this well (for all copies)", true) {
         @Override
         public Object getCellValue(WellVolume wellVolume) { return wellVolume.getWellVolumeAdjustments().size(); }
 
         @Override
         public boolean isCommandLink() { return getEntity().getWellVolumeAdjustments().size() > 0; }
-        
+
         @Override
         public Object cellAction(WellVolume wellVolume)
         {
-          return showRowDetail(); 
+          return showRowDetail();
         }
-      });      
+      });
     }
     return _columns;
   }
-  
+
   @Override
   protected List<Integer[]> getCompoundSorts()
   {
@@ -138,23 +146,23 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
   }
 
   @Override
-  protected SearchResults<WellVolumeAdjustment> makeRowDetail(WellVolume wv)
+  protected void makeRowDetail(WellVolume wv)
   {
     List<WellVolumeAdjustment> wvas = new ArrayList<WellVolumeAdjustment>(wv.getWellVolumeAdjustments().size());
     for (WellVolumeAdjustment wva : wv.getWellVolumeAdjustments()) {
-      WellVolumeAdjustment wva2 = _dao.reloadEntity(wva, 
-                                                    true, 
-                                                    "well", 
-                                                    "copy", 
-                                                    "labCherryPick.wellVolumeAdjustments", 
+      WellVolumeAdjustment wva2 = _dao.reloadEntity(wva,
+                                                    true,
+                                                    "well",
+                                                    "copy",
+                                                    "labCherryPick.wellVolumeAdjustments",
                                                     "labCherryPick.cherryPickRequest",
                                                     "labCherryPick.assayPlate.hbnCherryPickLiquidTransfer",
                                                     "wellVolumeCorrectionActivity.hbnPerformedBy");
       wvas.add(wva2);
     }
-    return new WellVolumeAdjustmentSearchResults(wvas, _screensController);
+    getRowDetail().setContents(wvas);
   }
-  
+
   @Override
   public String showSummaryView()
   {
@@ -164,15 +172,15 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume>
   @Override
   protected void setEntityToView(WellVolume wellCopyVolume)
   {
-    _librariesController.viewWell(wellCopyVolume.getWell(), null);
+    _librariesController.viewWell(wellCopyVolume.getWell());
   }
-  
+
   @Override
   protected List<DataExporter<WellVolume>> getDataExporters()
   {
     return new ArrayList<DataExporter<WellVolume>>();
   }
-  
+
 
   // private methods
 

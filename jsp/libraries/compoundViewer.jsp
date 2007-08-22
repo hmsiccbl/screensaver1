@@ -5,7 +5,7 @@
 
 <f:subview id="compoundViewer">
 
-  <t:aliasBean alias="#{navigator}" value="#{compoundViewer.wellSearchResults}" >
+  <t:aliasBean alias="#{navigator}" value="#{wellSearchResults}">
 		<h:form id="navPanelForm">
 			<%@ include file="../searchResultsNavPanel.jspf" %>
 		</h:form>
@@ -32,7 +32,7 @@
     <%@ include file="structureImageNotice.jspf" %>
 
 	</t:panelGrid>
-	
+
 	<t:panelGroup rendered="#{empty compoundViewer.compound}">
 		<t:outputText
 			value="There are no compounds in well #{compoundViewer.parentWellOfInterest.wellKey}"

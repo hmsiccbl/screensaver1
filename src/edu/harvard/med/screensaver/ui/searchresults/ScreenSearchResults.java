@@ -14,14 +14,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.SortedSet;
 
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.control.ScreensController;
+import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
@@ -33,7 +31,7 @@ import edu.harvard.med.screensaver.util.NullSafeComparator;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class ScreenSearchResults extends SearchResults<Screen>
+public class ScreenSearchResults extends SearchResults<Screen,Object>
 {
 
   // private static final fields
@@ -41,27 +39,25 @@ public class ScreenSearchResults extends SearchResults<Screen>
 
   // instance fields
 
-  private ScreensController _screensController;
-  private GenericEntityDAO _dao;
+  private ScreenViewer _screenViewer;
+
   private ArrayList<TableColumn<Screen>> _columns;
+
 
   // public constructor
 
   /**
-   * Construct a new <code>ScreenSearchResult</code> object.
-   * @param unsortedResults the unsorted list of the results, as they are returned from the
-   * database
+   * @motivation for CGLIB2
    */
-  public ScreenSearchResults(List<Screen> unsortedResults, 
-                             ScreensController screensController, 
-                             GenericEntityDAO dao)
+  protected ScreenSearchResults()
   {
-    super(unsortedResults);
-    _screensController = screensController;
-    _dao = dao;
-    setCurrentScreensaverUser(((AbstractBackingBean) screensController).getCurrentScreensaverUser());
   }
-  
+
+  public ScreenSearchResults(ScreenViewer screenViewer)
+  {
+    _screenViewer = screenViewer;
+  }
+
 
   // implementations of the SearchResults abstract methods
 
@@ -74,7 +70,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
         public Object getCellValue(Screen screen) { return screen.getScreenNumber(); }
 
         @Override
-        public Object cellAction(Screen screen) { return _screensController.viewScreen(screen, ScreenSearchResults.this); }
+        public Object cellAction(Screen screen) { return _screenViewer.viewScreen(screen); }
 
         @Override
         public boolean isCommandLink() { return true; }
@@ -85,8 +81,8 @@ public class ScreenSearchResults extends SearchResults<Screen>
       });
       _columns.add(new TableColumn<Screen>("Status", "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.") {
         @Override
-        public Object getCellValue(Screen screen) 
-        { 
+        public Object getCellValue(Screen screen)
+        {
           SortedSet<StatusItem> statusItems = screen.getSortedStatusItems();
           if (statusItems.size() == 0) {
             return "";
@@ -100,7 +96,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
       });
       _columns.add(new TableColumn<Screen>("Status Date", "The date of the most recent change of status for the screen") {
         @Override
-        public Object getCellValue(Screen screen) 
+        public Object getCellValue(Screen screen)
         {
           SortedSet<StatusItem> statusItems = screen.getSortedStatusItems();
           if (statusItems.size() == 0) {
@@ -111,8 +107,8 @@ public class ScreenSearchResults extends SearchResults<Screen>
         }
 
         @Override
-        protected Comparator<Screen> getAscendingComparator() 
-        { 
+        protected Comparator<Screen> getAscendingComparator()
+        {
           return new Comparator<Screen>() {
             public int compare(Screen s1, Screen s2) {
               SortedSet<StatusItem> statusItems1 = s1.getSortedStatusItems();
@@ -145,11 +141,11 @@ public class ScreenSearchResults extends SearchResults<Screen>
         public Object getCellValue(Screen screen) { return screen.getLabHead().getFullNameLastFirst(); }
 
         @Override
-        protected Comparator<Screen> getAscendingComparator() 
-        { 
+        protected Comparator<Screen> getAscendingComparator()
+        {
           return new Comparator<Screen>() {
             public int compare(Screen s1, Screen s2) {
-              return ScreensaverUserComparator.getInstance().compare(s1.getLabHead(), 
+              return ScreensaverUserComparator.getInstance().compare(s1.getLabHead(),
                                                                      s2.getLabHead());
             }
           };
@@ -160,22 +156,22 @@ public class ScreenSearchResults extends SearchResults<Screen>
         public Object getCellValue(Screen screen) { return screen.getLeadScreener().getFullNameLastFirst(); }
 
         @Override
-        protected Comparator<Screen> getAscendingComparator() 
-        { 
+        protected Comparator<Screen> getAscendingComparator()
+        {
           return new Comparator<Screen>() {
             public int compare(Screen s1, Screen s2) {
-              return ScreensaverUserComparator.getInstance().compare(s1.getLeadScreener(), 
+              return ScreensaverUserComparator.getInstance().compare(s1.getLeadScreener(),
                                                                      s2.getLeadScreener());
-            } 
+            }
           };
         }
       });
-      _columns.add(new TableColumn<Screen>("Screen Result", 
+      _columns.add(new TableColumn<Screen>("Screen Result",
         "'available' if the screen result is loaded into Screensaver and viewable by the current user;" +
         " 'not shared' if loaded but not viewable by the current user; otherwise 'none'") {
         @Override
-        public Object getCellValue(Screen screen) 
-        { 
+        public Object getCellValue(Screen screen)
+        {
           if (screen.getScreenResult() == null) {
             return "none";
           }
@@ -188,7 +184,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
         }
 
         @Override
-        protected Comparator<Screen> getAscendingComparator() 
+        protected Comparator<Screen> getAscendingComparator()
         {
           return new Comparator<Screen>() {
             private NullSafeComparator<ScreenResult> _srComparator =
@@ -206,7 +202,7 @@ public class ScreenSearchResults extends SearchResults<Screen>
                 return sr1.getScreen().getScreenNumber().compareTo(sr2.getScreen().getScreenNumber());
               }
             };
-            
+
             public int compare(Screen s1, Screen s2) {
               return _srComparator.compare(s1.getScreenResult(),
                                            s2.getScreenResult());
@@ -241,12 +237,12 @@ public class ScreenSearchResults extends SearchResults<Screen>
   @Override
   public String showSummaryView()
   {
-    return _screensController.browseScreens();
+    return BROWSE_SCREENS;
   }
 
   @Override
   protected void setEntityToView(Screen screen)
   {
-    _screensController.viewScreen(screen, this);
+    _screenViewer.viewScreen(screen);
   }
 }

@@ -5,8 +5,7 @@
 
 <f:subview id="screensBrowser">
 	<h:form id="screensBrowserForm">
-		<t:aliasBean alias="#{searchResults}"
-			value="#{screensBrowser.searchResults}">
+		<t:aliasBean alias="#{searchResults}" value="#{screensBrowser}">
 			<%@include file="../searchResults.jspf"%>
 		</t:aliasBean>
 	</h:form>

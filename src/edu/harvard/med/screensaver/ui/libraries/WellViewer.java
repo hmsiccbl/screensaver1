@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -15,35 +15,39 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 import org.apache.log4j.Logger;
 
 public class WellViewer extends AbstractBackingBean
 {
-  
+
   private static final Logger log = Logger.getLogger(WellViewer.class);
-  
-  
+
+
   // private instance fields
-  
+
   private LibrariesController _librariesController;
+
   private Well _well;
-  private WellSearchResults _wellSearchResults;
   private WellNameValueTable _wellNameValueTable;
-  
-  
-  // public instance methods
-  
-  public LibrariesController getLibrariesController()
+
+
+  // constructors
+
+  /**
+   * @motivation for CGLIB2
+   */
+  protected WellViewer()
   {
-    return _librariesController;
   }
 
-  public void setLibrariesController(LibrariesController librariesController)
+  public WellViewer(LibrariesController librariesController)
   {
     _librariesController = librariesController;
   }
+
+
+  // public instance methods
 
   public Well getWell()
   {
@@ -53,16 +57,6 @@ public class WellViewer extends AbstractBackingBean
   public void setWell(Well well)
   {
     _well = well;
-  }
-  
-  public WellSearchResults getWellSearchResults()
-  {
-    return _wellSearchResults;
-  }
-
-  public void setWellSearchResults(WellSearchResults searchResults)
-  {
-    _wellSearchResults = searchResults;
   }
 
   public WellNameValueTable getWellNameValueTable()
@@ -77,9 +71,9 @@ public class WellViewer extends AbstractBackingBean
 
   public String viewLibrary()
   {
-    return _librariesController.viewLibrary(_well.getLibrary(), null);
+    return _librariesController.viewLibrary(_well.getLibrary());
   }
-  
+
   public String viewGene()
   {
     String geneId = (String) getFacesContext().getExternalContext().getRequestParameterMap().get("geneId");
@@ -90,9 +84,9 @@ public class WellViewer extends AbstractBackingBean
         break;
       }
     }
-    return _librariesController.viewGene(gene, _wellSearchResults);
+    return _librariesController.viewGene(gene);
   }
-  
+
   public String viewCompound()
   {
     String compoundId = (String) getRequestParameter("compoundId");
@@ -103,9 +97,9 @@ public class WellViewer extends AbstractBackingBean
         break;
       }
     }
-    return _librariesController.viewCompound(compound, _wellSearchResults);
+    return _librariesController.viewCompound(compound);
   }
-  
+
   public String downloadWellSDFile()
   {
     return _librariesController.downloadWellSDFile(_well);

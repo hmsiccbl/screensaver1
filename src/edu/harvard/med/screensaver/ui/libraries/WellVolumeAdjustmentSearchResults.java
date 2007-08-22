@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -10,25 +10,29 @@
 package edu.harvard.med.screensaver.ui.libraries;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
-import edu.harvard.med.screensaver.ui.control.ScreensController;
+import edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
-public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeAdjustment> 
+public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeAdjustment,Object>
 {
-  private ScreensController _screensController;
+  private CherryPickRequestViewer _cherryPickRequestViewer;
 
-  public WellVolumeAdjustmentSearchResults(Collection<WellVolumeAdjustment> unsortedResults, 
-                                           ScreensController screensController)
+  /**
+   * @motivation for CGLIB2
+   */
+  protected WellVolumeAdjustmentSearchResults()
   {
-    super(unsortedResults);
-    _screensController = screensController;
+  }
+
+  public WellVolumeAdjustmentSearchResults(CherryPickRequestViewer cherryPickRequestViewer)
+  {
+    _cherryPickRequestViewer = cherryPickRequestViewer;
   }
 
   @Override
@@ -37,8 +41,8 @@ public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeA
     List<TableColumn<WellVolumeAdjustment>> columns = new ArrayList<TableColumn<WellVolumeAdjustment>>();
     columns.add(new TableColumn<WellVolumeAdjustment>("Date", "The date the volume adjustment was made") {
       @Override
-      public Object getCellValue(WellVolumeAdjustment wva) 
-      { 
+      public Object getCellValue(WellVolumeAdjustment wva)
+      {
         Activity activity = wva.getRelatedActivity();
         if (activity != null) {
           return activity.getDateOfActivity();
@@ -52,8 +56,8 @@ public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeA
     });
     columns.add(new TableColumn<WellVolumeAdjustment>("Performed By", "The person that performed the volume adjustment") {
       @Override
-      public Object getCellValue(WellVolumeAdjustment wva) 
-      { 
+      public Object getCellValue(WellVolumeAdjustment wva)
+      {
         Activity activity = wva.getRelatedActivity();
         if (activity != null) {
           return activity.getPerformedBy().getFullNameLastFirst();
@@ -72,12 +76,12 @@ public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeA
     columns.add(new TableColumn<WellVolumeAdjustment>("Cherry Pick Request", "The cherry pick request that made the volume adjustment", true) {
       @Override
       public Object getCellValue(WellVolumeAdjustment wva) { return wva.getLabCherryPick() == null ? null : wva.getLabCherryPick().getCherryPickRequest().getCherryPickRequestNumber(); }
-      
+
       @Override
       public boolean isCommandLink() { return true; }
-      
+
       @Override
-      public Object cellAction(WellVolumeAdjustment entity) { return _screensController.viewCherryPickRequest(entity.getLabCherryPick().getCherryPickRequest()); }
+      public Object cellAction(WellVolumeAdjustment entity) { return _cherryPickRequestViewer.viewCherryPickRequest(entity.getLabCherryPick().getCherryPickRequest()); }
     });
     columns.add(new TableColumn<WellVolumeAdjustment>("Admin Adjustment", "The well volume correction activity that made the volume adjustment", true) {
       @Override
@@ -85,7 +89,7 @@ public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeA
     });
     return columns;
   }
-  
+
   @Override
   protected List<DataExporter<WellVolumeAdjustment>> getDataExporters() { return null; }
 

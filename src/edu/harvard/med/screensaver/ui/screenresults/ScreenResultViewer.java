@@ -2,13 +2,16 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.ui.screenresults;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,9 +32,12 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
+import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
@@ -41,16 +47,23 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
-import edu.harvard.med.screensaver.ui.control.ScreensController;
+import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
+import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.table.SortChangedEvent;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 import edu.harvard.med.screensaver.ui.table.TableSortManager;
+import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.DataAccessException;
 
 
 /**
@@ -66,9 +79,9 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 {
 
   // static data members
-  
+
   private static Logger log = Logger.getLogger(ScreenResultViewer.class);
-  
+
   private static final DataModel EMPTY_DATAHEADERS_MODEL = new ListDataModel(new ArrayList<DataHeaderRow>());
   private static final ScreenResultDataModel EMPTY_RAW_DATA_MODEL = new EmptyScreenResultDataModel();
   // TODO: consider replacing DataHeaderRowDefinition with TableColumn<ResultValueType>
@@ -79,8 +92,8 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     new DataHeaderRowDefinition("timePoint", "Time Point", "The time point the readout was taken"),
     new DataHeaderRowDefinition("derived", "Derived", "True when this column is derived from other data headers"),
     new DataHeaderRowDefinition("howDerived", "How Derived", "How this column was derived from other data headers"),
-    new DataHeaderRowDefinition("typesDerivedFrom", "Types Derived From", "The data headers from which this column was derived") 
-    { 
+    new DataHeaderRowDefinition("typesDerivedFrom", "Types Derived From", "The data headers from which this column was derived")
+    {
       @Override
       public String formatValue(ResultValueType rvt)
       {
@@ -120,17 +133,20 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
   public static final int DATA_TABLE_FIXED_COLUMNS = 3;
 
-  
+
   // instance data members
 
-  private ScreensController _screensController;
-  private LibrariesController _librariesController;
+  private GenericEntityDAO _dao;
   private ScreenResultsDAO _screenResultsDao;
   private LibrariesDAO _librariesDao;
+  private LibrariesController _librariesController;
+  private ScreenSearchResults _screensBrowser;
+  private ScreenViewer _screenViewer;
   private ScreenResultExporter _screenResultExporter;
+
   private ScreenResult _screenResult;
   private Map<String,Boolean> _isPanelCollapsedMap;
-  
+
   // data members for data headers table
   private UniqueDataHeaderNames _uniqueDataHeaderNames;
   private UISelectMany _dataHeadersSelectManyUIInput;
@@ -139,7 +155,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   private DataModel _dataHeadersModel;
   private TableSortManager<Map<String,Object>> _sortManager;
 
-  // data members for raw data table 
+  // data members for raw data table
   /**
    * Data model for the raw data, <i>containing only the set of rows being displayed in the current view</i>.
    */
@@ -157,37 +173,41 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   private int _screenResultSize;
 
 
-  
+  // constructors
+
+
+
   // public methods
-  
-  public ScreenResultViewer()
+
+  /**
+   * @motivation for CGLIB2
+   */
+  protected ScreenResultViewer()
   {
+  }
+
+  public ScreenResultViewer(GenericEntityDAO dao,
+                            ScreenResultsDAO screenResultsDao,
+                            LibrariesDAO librariesDao,
+                            LibrariesController librariesController,
+                            ScreenSearchResults screensBrowser,
+                            ScreenViewer screenViewer,
+                            ScreenResultExporter screenResultExporter)
+  {
+    _dao = dao;
+    _screenResultsDao = screenResultsDao;
+    _librariesDao = librariesDao;
+    _librariesController = librariesController;
+    _screensBrowser = screensBrowser;
+    _screenViewer = screenViewer;
+    _screenResultExporter = screenResultExporter;
+
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
     _isPanelCollapsedMap.put("screenSummary", false);
     _isPanelCollapsedMap.put("screenResultSummary", false);
     _isPanelCollapsedMap.put("dataHeadersTable", true);
     _isPanelCollapsedMap.put("dataTable", true);
     _isPanelCollapsedMap.put("heatMaps", true);
-  }
-  
-  public void setLibrariesDao(LibrariesDAO librariesDao)
-  {
-    _librariesDao = librariesDao;
-  }
-
-  public void setScreenResultsDao(ScreenResultsDAO screenResultsDao)
-  {
-    _screenResultsDao = screenResultsDao;
-  }
-
-  public void setScreensController(ScreensController screensController) 
-  {
-    _screensController = screensController;
-  }
-
-  public void setLibrariesController(LibrariesController librariesController) 
-  {
-    _librariesController = librariesController;
   }
 
   public void setScreenResult(ScreenResult screenResult)
@@ -205,7 +225,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   {
     _screenResultSize = screenResultSize;
   }
-  
+
   public void setScreenResultExporter(ScreenResultExporter screenResultExporter)
   {
     _screenResultExporter = screenResultExporter;
@@ -215,7 +235,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   {
     return _isPanelCollapsedMap;
   }
-  
+
   public UISelectMany getDataHeadersSelectManyUIInput()
   {
     return _dataHeadersSelectManyUIInput;
@@ -267,7 +287,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   {
     _dataTable = dataUIComponent;
   }
-  
+
   public DataModel getDataHeaders()
   {
     lazyBuildDataHeadersModel();
@@ -284,7 +304,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     }
     return _rawDataModel;
   }
-  
+
   public boolean isResultValueExcluded()
   {
     return getDataTableModel().isResultValueCellExcluded(getSortManager().getCurrentColumnIndex());
@@ -310,7 +330,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   {
     return getSortManager().getCurrentColumn().isNumeric();
   }
-  
+
   public int getRawDataSize()
   {
     return getDataTableModel().getRowCount();
@@ -318,14 +338,14 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
   public String getRowRangeText()
   {
-    return getRowNumber() + 
-           ".." + 
-           Math.min(getRowNumber() + getDataTableRowsPerPage().getSelection() - 1, 
-                    getRawDataSize()) + 
-           " of " + 
+    return getRowNumber() +
+           ".." +
+           Math.min(getRowNumber() + getDataTableRowsPerPage().getSelection() - 1,
+                    getRawDataSize()) +
+           " of " +
            getRawDataSize();
   }
-  
+
   public UISelectManyBean<ResultValueType> getSelectedDataHeaders()
   {
     if (_selectedDataHeaders == null) {
@@ -339,7 +359,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
       };
       // select all data headers, initially
       _selectedDataHeaders.setSelections(getResultValueTypes());
-      
+
       _selectedDataHeaders.addObserver(this);
     }
     return _selectedDataHeaders;
@@ -352,7 +372,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     }
     return _dataHeadersColumnModel;
   }
-  
+
   public UniqueDataHeaderNames getUniqueDataHeaderNames()
   {
     if (_uniqueDataHeaderNames == null) {
@@ -360,7 +380,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     }
     return _uniqueDataHeaderNames;
   }
-  
+
   /**
    * @motivation for "Columns" JSF data table component
    */
@@ -375,7 +395,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     }
     return null;
   }
-  
+
   public TableSortManager<Map<String,Object>> getSortManager()
   {
     if (_sortManager == null) {
@@ -394,7 +414,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     }
     return _showPositivesOnlyForDataHeader;
   }
-  
+
   // UI update pseudo-event handlers
 
   private void updateDataHeadersColumnModel()
@@ -408,7 +428,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     log.debug("updating data table content");
     if (_screenResult == null) {
       _rawDataModel = EMPTY_RAW_DATA_MODEL;
-    } 
+    }
     else if (getDataFilter().getSelection() == DATA_TABLE_FILTER_SHOW_ALL) {
       _rawDataModel = new FullScreenResultDataModel(_screenResult,
                                                     getSelectedDataHeaders().getSelections(),
@@ -454,8 +474,8 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     log.debug("updating data header selections for show positives");
     List<ResultValueType> resultValueTypes = new ArrayList<ResultValueType>();
     resultValueTypes.addAll(getResultValueTypes());
-    for (Iterator iter = resultValueTypes.iterator(); iter.hasNext();) {
-      ResultValueType rvt = (ResultValueType) iter.next();
+    for (Iterator<ResultValueType> iter = resultValueTypes.iterator(); iter.hasNext();) {
+      ResultValueType rvt = iter.next();
       if (!rvt.isPositiveIndicator()) {
         iter.remove();
       }
@@ -483,7 +503,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     if (getShowPositivesOnlyForDataHeader().getSize() > 0) {
       filters.add(DATA_TABLE_FILTER_SHOW_POSITIVES);
     }
-    _dataFilter = 
+    _dataFilter =
       new UISelectOneBean<Integer>(filters, DATA_TABLE_FILTER_SHOW_ALL) {
       @Override
       protected String getLabel(Integer val)
@@ -498,20 +518,20 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
       }
     };
   }
-  
+
   private void updateDataTableRowsPerPageSelections()
   {
     log.debug("updating data table rows per page selections");
     if (getDataFilter().getSelection() == DATA_TABLE_FILTER_SHOW_ALL) {
-      // note: don't allow "show all rows" when not filtering result values (too many!) 
-      _dataTableRowsPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(16, 24, 48, 96, 384)); 
+      // note: don't allow "show all rows" when not filtering result values (too many!)
+      _dataTableRowsPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(16, 24, 48, 96, 384));
     }
     else if (getDataFilter().getSelection() == DATA_TABLE_FILTER_SHOW_POSITIVES) {
       _dataTableRowsPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE));
       _dataTableRowsPerPage.setAllRowsValue(getRawDataSize());
     }
     else { // single plate
-      _dataTableRowsPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(16, 24, 48, 96, 384)); 
+      _dataTableRowsPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(16, 24, 48, 96, 384));
     }
     // prevent dataTableRowsPerPageListener from being invoked; we only want
     // listener invoked when the user explicitly changes the selection in this
@@ -521,26 +541,14 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
 
   // JSF application methods
-  
-  public String gotoPage(int pageIndex)
-  {
-    try {
-      int newRowIndex = (pageIndex * getDataTable().getRows());
-      if (newRowIndex >= 0 && newRowIndex < getRawDataSize()) {
-        getDataTable().setFirst(newRowIndex);
-      }
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    } 
-    catch (Exception e) {
-      return ERROR_ACTION_RESULT;
-    }
-  }
-  
+
+  @UIControllerMethod
   public String firstPage()
   {
     return gotoPage(0);
   }
 
+  @UIControllerMethod
   public String lastPage()
   {
     int rowsPerPage = getDataTable().getRows();
@@ -557,54 +565,127 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
   }
-  
+
+  @UIControllerMethod
   public String nextPage()
   {
-    return gotoPage(getPageIndex() + 1); 
+    return gotoPage(getPageIndex() + 1);
   }
-  
+
+  @UIControllerMethod
   public String prevPage()
   {
-    return gotoPage(getPageIndex() - 1); 
+    return gotoPage(getPageIndex() - 1);
   }
-  
+
+  @UIControllerMethod
   public String download()
   {
-    return _screensController.downloadScreenResult(getScreenResult());
+    try {
+      _dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          ScreenResult screenResult = _dao.reloadEntity(_screenResult,
+                                                        true,
+                                                        "hbnResultValueTypes");
+          // note: we eager fetch the resultValues for each ResultValueType
+          // individually, since fetching all with a single needReadOnly() call
+          // would generate an SQL result cross-product for all RVTs+RVs that
+          // would include a considerable amount of redundant data
+          // for the (denormalized) RVT fields
+          for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+            // note: requesting the iterator generates an SQL statement that
+            // only includes the result_value_type_result_values table, whereas
+            // the needReadOnly() call's SQL statement joins to the
+            // result_value_type table as well, which is slower
+            rvt.getResultValues().keySet().iterator();
+            //_dao.needReadOnly(rvt, "resultValues");
+          }
+          File exportedWorkbookFile = null;
+          FileOutputStream out = null;
+          try {
+            if (screenResult != null) {
+              HSSFWorkbook workbook = _screenResultExporter.build(screenResult);
+              exportedWorkbookFile = File.createTempFile("screenResult" + screenResult.getScreen().getScreenNumber() + ".",
+                                                         ".xls");
+              out = new FileOutputStream(exportedWorkbookFile);
+              workbook.write(out);
+              out.close();
+              JSFUtils.handleUserFileDownloadRequest(getFacesContext(),
+                                                     exportedWorkbookFile,
+                                                     Workbook.MIME_TYPE);
+            }
+          }
+          catch (IOException e)
+          {
+            reportApplicationError(e);
+          }
+          finally {
+            IOUtils.closeQuietly(out);
+            if (exportedWorkbookFile != null && exportedWorkbookFile.exists()) {
+              exportedWorkbookFile.delete();
+            }
+          }
+        }
+      });
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
+  @UIControllerMethod
   public String delete()
   {
-    return _screensController.deleteScreenResult(getScreenResult());
+    if (_screenResult != null) {
+      try {
+        _screenResultsDao.deleteScreenResult(_screenResult);
+        _screensBrowser.invalidateSearchResult();
+        return _screenViewer.viewScreen(_screenResult.getScreen());
+      }
+      catch (ConcurrencyFailureException e) {
+        showMessage("concurrentModificationConflict");
+      }
+      catch (DataAccessException e) {
+        showMessage("databaseOperationFailed", e.getMessage());
+      }
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
   public String cellAction()
-  { 
+  {
     return (String) getSortManager().getCurrentColumn().cellAction(getDataTableModel().getRowData());
   }
-  
+
+  @UIControllerMethod
   public String saveScreenResult()
   {
-    // note: saving the parent screen will save its screenResult
-    return _screensController.saveScreen(_screenResult.getScreen(), null);
+    // note: saving the parent screen will save its screenResult; assumes
+    // ScreenViewer and ScreenResultViewer are in sync (showing data for same
+    // screen)
+    return _screenViewer.saveScreen();
   }
-  
+
+  @UIControllerMethod
   public String showAllDataHeaders()
   {
     getSelectedDataHeaders().setSelections(getResultValueTypes());
     _dataHeadersSelectManyUIInput.setValue(getSelectedDataHeaders().getValue());
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
-  
+
+
   // JSF event listener methods
-  
+
   @SuppressWarnings("unchecked")
   public void dataHeadersSelectionListener(ValueChangeEvent event)
   {
     log.debug("data header selections changed to " + event.getNewValue());
     getSelectedDataHeaders().setValue((List<String>) event.getNewValue());
-    
+
     // enforce minimum of 1 selected data header (data table query will break otherwise)
     if (getSelectedDataHeaders().getSelections().size() == 0) {
       getSelectedDataHeaders().setSelections(new ArrayList<ResultValueType>(getResultValueTypes()).subList(0,1));
@@ -615,7 +696,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     // skip "update model" JSF phase, to avoid overwriting model values set above
     getFacesContext().renderResponse();
   }
-  
+
   public void rowNumberListener(ValueChangeEvent event)
   {
     log.debug("row number changed to " + event.getNewValue());
@@ -662,23 +743,37 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   {
     log.debug("dataTableRowsPerPage changed to " + event.getNewValue());
     getDataTableRowsPerPage().setValue((String) event.getNewValue());
-    getDataTableModel().setRowsToFetch(getDataTableRowsPerPage().getSelection()); 
+    getDataTableModel().setRowsToFetch(getDataTableRowsPerPage().getSelection());
 
     // skip "update model" JSF phase, to avoid overwriting model values set above
     getFacesContext().renderResponse();
   }
-  
-  
+
+
   // protected methods
-  
+
   protected ScreensaverUserRole getEditableAdminRole()
   {
     return ScreensaverUserRole.SCREEN_RESULTS_ADMIN;
   }
 
-  
+
   // private methods
-  
+
+  private String gotoPage(int pageIndex)
+  {
+    try {
+      int newRowIndex = (pageIndex * getDataTable().getRows());
+      if (newRowIndex >= 0 && newRowIndex < getRawDataSize()) {
+        getDataTable().setFirst(newRowIndex);
+      }
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    catch (Exception e) {
+      return ERROR_ACTION_RESULT;
+    }
+  }
+
   /**
    * Get ResultValueTypes set, safely, handling case that no screen result
    * exists.
@@ -699,7 +794,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
   private List<TableColumn<Map<String,Object>>> getDataTableFixedColumns()
   {
-    List<TableColumn<Map<String,Object>>> fixedColumns = new ArrayList<TableColumn<Map<String,Object>>>(3); 
+    List<TableColumn<Map<String,Object>>> fixedColumns = new ArrayList<TableColumn<Map<String,Object>>>(3);
     fixedColumns.add(new TableColumn<Map<String,Object>>("Plate", "The plate number", true) {
       @Override
       public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
@@ -707,20 +802,20 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     fixedColumns.add(new TableColumn<Map<String,Object>>("Well", "The well name") {
       @Override
       public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
-      
+
       @Override
       public boolean isCommandLink() { return true; }
-      
+
       @Override
-      public Object cellAction(Map<String,Object> row) 
+      public Object cellAction(Map<String,Object> row)
       {
         Integer plateNumber = (Integer) getSortManager().getColumn(0).getCellValue(row);
         String wellName = (String) getSortManager().getColumn(1).getCellValue(row);
         Well well = _librariesDao.findWell(new WellKey(plateNumber, wellName));
-        return _librariesController.viewWell(well, null);
+        return _librariesController.viewWell(well);
       }
     });
-    fixedColumns.add(new TableColumn<Map<String,Object>>("Type", 
+    fixedColumns.add(new TableColumn<Map<String,Object>>("Type",
       StringUtils.makeListString(StringUtils.wrapStrings(Arrays.asList(WellType.values()), "'", "'"), ", ").toLowerCase()) {
       @Override
       public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
@@ -751,7 +846,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   {
     return name.replaceAll("[ ()]", "") + "Column";
   }
-  
+
   private void resetView()
   {
     _dataHeadersColumnModel = null;
@@ -796,7 +891,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
         }
         catch (Exception e) {
           e.printStackTrace();
-          log.error("could not obtain value for property ResultValueType." + 
+          log.error("could not obtain value for property ResultValueType." +
                     dataHeaderAttribute.getPropertyName());
         }
       }
@@ -806,14 +901,14 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
 
   // inner classes
-  
+
   public static class DataHeaderRowDefinition
   {
     private String _propertyName;
     private String _displayName;
     private String _description;
 
-    public DataHeaderRowDefinition(String propertyName, 
+    public DataHeaderRowDefinition(String propertyName,
                                    String displayName,
                                    String description)
     {
@@ -832,12 +927,12 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     {
       return _propertyName;
     }
-    
+
     public String getDescription()
     {
       return _description;
     }
-    
+
     /**
      * Override to format value in a custom way.
      */
@@ -852,11 +947,11 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
       }
     }
   }
-  
+
   /**
    * DataHeaderRow bean, used to provide ScreenResult data headers to JSF components
    * @see ScreenResultViewer#getDataHeadersCellValue()
-   * 
+   *
    * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
    * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
    */
@@ -866,19 +961,19 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     /**
      * Array containing the value of the same property for each ResultValueType
      */
-    private Map<String,Object> _rvtPropertyValues;    
+    private Map<String,Object> _rvtPropertyValues;
 
     /**
      * Constructs a DataHeaderRow object.
      */
-    public DataHeaderRow(Collection<ResultValueType> rvts, 
-                         UniqueDataHeaderNames uniqueNames, 
+    public DataHeaderRow(Collection<ResultValueType> rvts,
+                         UniqueDataHeaderNames uniqueNames,
                          DataHeaderRowDefinition dataHeaderRowDefinition)
     {
       _dataHeaderRowDefinition = dataHeaderRowDefinition;
       _rvtPropertyValues = new HashMap<String,Object>();
       for (ResultValueType rvt : rvts) {
-        _rvtPropertyValues.put(uniqueNames.get(rvt), 
+        _rvtPropertyValues.put(uniqueNames.get(rvt),
                                dataHeaderRowDefinition.formatValue(rvt));
       }
     }
@@ -887,12 +982,12 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     {
       return _dataHeaderRowDefinition.getDisplayName();
     }
-    
+
     public String getRowTitle()
     {
       return _dataHeaderRowDefinition.getDescription();
     }
-    
+
     public Map getDataHeaderSinglePropertyValues()
     {
       return _rvtPropertyValues;
@@ -910,7 +1005,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
       updateDataHeadersColumnModel();
       updateSortManagerWithSelectedDataHeaders();
       updateDataTableContent();
-      } 
+      }
       finally {
         _sortManager.addObserver(this);
       }

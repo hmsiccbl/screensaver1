@@ -5,8 +5,7 @@
 
 <f:subview id="wellSearchResultsViewer">
 	<h:form id="wellSearchResultsViewerForm">
-		<t:aliasBean alias="#{searchResults}"
-			value="#{wellSearchResultsViewer.searchResults}">
+		<t:aliasBean alias="#{searchResults}" value="#{wellsBrowser}">
 			<%@include file="../searchResults.jspf"%>
 		</t:aliasBean>
 	</h:form>

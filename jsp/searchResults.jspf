@@ -65,7 +65,7 @@
 		</t:dataTable>
 
 		<t:panelGrid
-			rendered="#{!empty searchResults.rowDetail && !searchResults.editMode}"
+			rendered="#{searchResults.rowDetailVisible && !searchResults.editMode}"
 			columns="1">
 			<t:outputText value="Row Detail:" styleClass="label"/>
 			<%@include file="searchResultsRowDetail.jspf"%>

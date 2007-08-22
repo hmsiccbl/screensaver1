@@ -28,6 +28,7 @@ import javax.faces.model.ListDataModel;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.screenresults.DataTableRowsPerPageUISelectOneBean;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 import edu.harvard.med.screensaver.ui.table.TableSortManager;
@@ -50,7 +51,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-abstract public class SearchResults<E> extends AbstractBackingBean
+abstract public class SearchResults<E,D> extends AbstractBackingBean
 {
 
   // public static final data
@@ -96,25 +97,45 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   private UISelectOneBean<DataExporter<E>> _dataExporterSelector;
   private boolean _editMode;
   private boolean _hasEditableColumns;
-  private SearchResults<?> _rowDetail;
+  private SearchResults<D,?> _rowDetail;
+  private boolean _isRowDetailVisible;
 
 
   // public constructor
 
   /**
-   * Construct a new <code>SearchResult</code> object.
-   * @param unsortedResults the unsorted list of the results, as they are returned from the
-   * database
+   * @motivation for CGLIB2
    */
-  public SearchResults(Collection<E> unsortedResults)
+  protected SearchResults()
+  {
+  }
+
+  /**
+   * Set the contents of the search results.
+   *
+   * @param unsortedResults the unsorted list of the results, as they are
+   *          returned from the database
+   */
+  public void setContents(Collection<E> unsortedResults)
   {
     _unsortedResults = unsortedResults;
     _resultsSize = unsortedResults.size();
     _rowsPerPage = new DataTableRowsPerPageUISelectOneBean(PAGE_SIZE_SELECTIONS,
                                                            DEFAULT_PAGESIZE);
     _rowsPerPage.setAllRowsValue(_resultsSize);
+    _currentSortType = null; // force re-initialization
+    doSort();
   }
 
+  /**
+   * If the application knowingly updates one or more items in the search
+   * results, they can call this method to cause the search result to be
+   * regenerated the next time this viewer is visited.
+   */
+  public void invalidateSearchResult()
+  {
+    // TODO: implement
+  }
 
   // public getters and setters - used by searchResults.jspf
 
@@ -231,17 +252,16 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     return getCurrentSort().get(getCurrentIndex() - 1);
   }
 
-  protected SearchResults<?> makeRowDetail(E entity)
+  protected void makeRowDetail(E entity)
   {
-    return null;
   }
 
-  public SearchResults<?> getRowDetail()
+  public SearchResults<D,?> getRowDetail()
   {
     return _rowDetail;
   }
 
-  public void setRowDetail(SearchResults<?> rowDetail)
+  public void setRowDetail(SearchResults<D,?> rowDetail)
   {
     _rowDetail = rowDetail;
   }
@@ -318,15 +338,21 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   {
     if (getDataModel().isRowAvailable()) {
       E entity = getEntity();
-      _rowDetail = makeRowDetail(entity);
+      makeRowDetail(entity);
+      _isRowDetailVisible = true;
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   public String hideRowDetail()
   {
-    _rowDetail = null;
+    _isRowDetailVisible = false;
     return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  public boolean isRowDetailVisible()
+  {
+    return _isRowDetailVisible;
   }
 
   /**
@@ -334,6 +360,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
    *
    * @return the navigation rule to redisplay the search results
    */
+  @UIControllerMethod
   public String firstPage()
   {
     if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
@@ -350,6 +377,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
    *
    * @return the navigation rule to redisplay the search results
    */
+  @UIControllerMethod
   public String prevPage()
   {
     if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
@@ -368,6 +396,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
    *
    * @return the navigation rule to redisplay the search results
    */
+  @UIControllerMethod
   public String nextPage()
   {
     if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
@@ -387,6 +416,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
    *
    * @return the navigation rule to redisplay the search results
    */
+  @UIControllerMethod
   public String lastPage()
   {
     if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
@@ -448,7 +478,8 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  final public String edit()
+  @UIControllerMethod
+  /*final (CGLIB2 restriction)*/ public String edit()
   {
     setEditMode(true);
     doEdit();
@@ -457,7 +488,8 @@ abstract public class SearchResults<E> extends AbstractBackingBean
 
   protected void doEdit() {}
 
-  final public String save()
+  @UIControllerMethod
+  /*final (CGLIB2 restriction)*/ public String save()
   {
     setEditMode(false);
     doSave();
@@ -466,7 +498,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
 
   protected void doSave() {}
 
-  final public String cancel()
+  /*final (CGLIB2 restriction)*/ public String cancel()
   {
     setEditMode(false);
     doCancel();
@@ -474,7 +506,6 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   }
 
   protected void doCancel() {}
-
 
   public UISelectOneBean<DataExporter<E>> getDataExporterSelector()
   {
@@ -491,7 +522,8 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   }
 
   @SuppressWarnings("unchecked")
-  final public String downloadSearchResults()
+  @UIControllerMethod
+  /*final (CGLIB2 restriction)*/ public String downloadSearchResults()
   {
     try {
       DataExporter dataExporter = getDataExporterSelector().getSelection();
@@ -519,6 +551,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
    * Return the string action to show the summary view
    * @return the summary view page
    */
+  @UIControllerMethod
   abstract public String showSummaryView();
 
   /**
@@ -562,7 +595,6 @@ abstract public class SearchResults<E> extends AbstractBackingBean
 
 
   // private instance methods
-
 
   private void initializeTableSortManager(List<TableColumn<E>> columns)
   {

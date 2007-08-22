@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -21,44 +21,43 @@ import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.control.LibrariesController;
 
 /**
- * The JSF backing bean for the compoundLibraryContentsImporter subview.
- * 
- * @author s
+ * The JSF backing bean for the naturalProductsLibraryContentsImporter subview.
+ *
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 public class NaturalProductsLibraryContentsImporter extends AbstractBackingBean
 {
-  
+
   private static Logger log = Logger.getLogger(NaturalProductsLibraryContentsImporter.class);
 
   // instance data
 
   private LibrariesController _librariesController;
   private NaturalProductsLibraryContentsParser _naturalProductsLibraryContentsParser;
+
   private UploadedFile _uploadedFile;
   private Library _library;
-  
 
-  // backing bean property getter and setter methods
 
-  public LibrariesController getLibrariesController()
+  // constructors
+
+  /**
+   * @motivation for CGLIB2
+   */
+  protected NaturalProductsLibraryContentsImporter()
   {
-    return _librariesController;
   }
-  
-  public void setLibrariesController(LibrariesController librariesController)
+
+  public NaturalProductsLibraryContentsImporter(LibrariesController librariesController,
+                                                NaturalProductsLibraryContentsParser naturalProductsLibraryContentsParser)
   {
     _librariesController = librariesController;
-  }
-  
-  public NaturalProductsLibraryContentsParser getNaturalProductsLibraryContentsParser()
-  {
-    return _naturalProductsLibraryContentsParser;
-  }
-
-  public void setNaturalProductsLibraryContentsParser(NaturalProductsLibraryContentsParser naturalProductsLibraryContentsParser)
-  {
     _naturalProductsLibraryContentsParser = naturalProductsLibraryContentsParser;
   }
+
+
+  // backing bean property getter and setter methods
 
   public void setUploadedFile(UploadedFile uploadedFile)
   {
@@ -84,7 +83,7 @@ public class NaturalProductsLibraryContentsImporter extends AbstractBackingBean
   {
     return _naturalProductsLibraryContentsParser.getHasErrors();
   }
-  
+
   public DataModel getImportErrors()
   {
     return new ListDataModel(_naturalProductsLibraryContentsParser.getErrors());
@@ -92,7 +91,7 @@ public class NaturalProductsLibraryContentsImporter extends AbstractBackingBean
 
   public String viewLibrary()
   {
-    return _librariesController.viewLibrary(_library, null);
+    return _librariesController.viewLibrary(_library);
   }
 
   /**
@@ -106,4 +105,3 @@ public class NaturalProductsLibraryContentsImporter extends AbstractBackingBean
   }
 }
 
-  

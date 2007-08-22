@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,7 +25,11 @@ import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
@@ -41,7 +46,11 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.WebDataAccessPolicy;
-import edu.harvard.med.screensaver.ui.control.ScreensController;
+import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer;
+import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
+import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
+import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectManyEntityBean;
@@ -50,6 +59,8 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.DataAccessException;
 
 public class ScreenViewer extends AbstractBackingBean
 {
@@ -59,14 +70,20 @@ public class ScreenViewer extends AbstractBackingBean
   private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole./*SCREENS_ADMIN*/DEVELOPER;
 
   private static Logger log = Logger.getLogger(ScreenViewer.class);
-  
-  
+
+
   // instance data
 
-  private ScreensController _screensController;
   private GenericEntityDAO _dao;
+  private ScreenResultsDAO _screenResultsDao;
   private UsersDAO _usersDao;
+  private ScreenSearchResults _screensBrowser;
+  private ScreenResultViewer _screenResultViewer;
+  private CherryPickRequestViewer _cherryPickRequestViewer;
+  private HeatMapViewer _heatMapViewer;
+  private ScreenResultImporter _screenResultImporter;
   private WebDataAccessPolicy _dataAccessPolicy;
+
   private Screen _screen;
   private UISelectOneEntityBean<ScreeningRoomUser> _labName;
   private UISelectOneEntityBean<ScreeningRoomUser> _leadScreener;
@@ -78,45 +95,60 @@ public class ScreenViewer extends AbstractBackingBean
   private boolean _isEditMode = true;
   private boolean _isAdminViewMode = false;
 
-  
+
   // public property getter & setter methods
 
-  public void setScreensController(ScreensController screensController)
+  /**
+   * @motivation for CGLIB2
+   */
+  protected ScreenViewer()
   {
-    _screensController = screensController;
   }
-  
-  public void setDao(GenericEntityDAO dao)
+
+  public ScreenViewer(GenericEntityDAO dao,
+                      ScreenResultsDAO screenResultsDao,
+                      UsersDAO usersDao,
+                      ScreenSearchResults screensBrowser,
+                      ScreenResultViewer screenResultViewer,
+                      CherryPickRequestViewer cherryPickRequestViewer,
+                      HeatMapViewer heatMapViewer,
+                      ScreenResultImporter screenResultImporter,
+                      WebDataAccessPolicy dataAccessPolicy)
   {
     _dao = dao;
-  }
-
-  public void setUsersDao(UsersDAO usersDao)
-  {
+    _screenResultsDao = screenResultsDao;
     _usersDao = usersDao;
-  }
-
-  public void setDataAccessPolicy(WebDataAccessPolicy dataAccessPolicy)
-  {
+    _screensBrowser = screensBrowser;
+    _screenResultViewer = screenResultViewer;
+    _cherryPickRequestViewer = cherryPickRequestViewer;
+    _heatMapViewer = heatMapViewer;
+    _screenResultImporter = screenResultImporter;
     _dataAccessPolicy = dataAccessPolicy;
   }
 
-  public Screen getScreen() 
+  public Screen getScreen()
   {
     return _screen;
   }
 
-  public void setScreen(Screen screen) 
+  public void setScreen(Screen screen)
   {
     _screen = screen;
+    _screenResultImporter.setScreen(screen);
+    ScreenResult screenResult = screen.getScreenResult();
+    _heatMapViewer.setScreenResult(screenResult);
+    _screenResultViewer.setScreenResult(screenResult);
+    if (screenResult != null && screenResult.getResultValueTypes().size() > 0) {
+      _screenResultViewer.setScreenResultSize(screenResult.getResultValueTypesList().get(0).getResultValues().size());
+    }
     resetView();
   }
-  
+
   private void resetView()
   {
     _isEditMode = false;
     _isAdminViewMode = false;
-    
+
     _newFundingSupport = null;
     _newStatusValue = null;
     _newKeyword = "";
@@ -126,17 +158,17 @@ public class ScreenViewer extends AbstractBackingBean
     _leadScreener = null;
     _collaborators = null;
   }
-  
+
   public boolean isEditMode()
   {
     return !super.isReadOnly() && _isEditMode;
   }
-  
+
   public boolean isAdminViewMode()
   {
     return _isAdminViewMode;
   }
-  
+
   /**
    * Determine if the current user can view the restricted screen fields.
    */
@@ -184,7 +216,7 @@ public class ScreenViewer extends AbstractBackingBean
   {
     _newKeyword = newKeyword;
   }
-  
+
   public DataModel getCollaboratorsDataModel()
   {
     return new ListDataModel(new ArrayList<ScreeningRoomUser>(_screen.getCollaborators()));
@@ -195,9 +227,9 @@ public class ScreenViewer extends AbstractBackingBean
     ArrayList<StatusItem> statusItems = new ArrayList<StatusItem>(_screen.getStatusItems());
     Collections.sort(statusItems,
                      new Comparator<StatusItem>() {
-      public int compare(StatusItem si1, StatusItem si2) 
-      { 
-        return si1.getStatusDate().compareTo(si2.getStatusDate()); 
+      public int compare(StatusItem si1, StatusItem si2)
+      {
+        return si1.getStatusDate().compareTo(si2.getStatusDate());
       }
     });
     return new ListDataModel(statusItems);
@@ -208,9 +240,9 @@ public class ScreenViewer extends AbstractBackingBean
     ArrayList<ScreeningRoomActivity> screeningRoomActivities = new ArrayList<ScreeningRoomActivity>(_screen.getScreeningRoomActivities());
     Collections.sort(screeningRoomActivities,
                      new Comparator<ScreeningRoomActivity>() {
-      public int compare(ScreeningRoomActivity sra1, ScreeningRoomActivity sra2) 
-      { 
-        return sra1.getDateOfActivity().compareTo(sra2.getDateOfActivity()); 
+      public int compare(ScreeningRoomActivity sra1, ScreeningRoomActivity sra2)
+      {
+        return sra1.getDateOfActivity().compareTo(sra2.getDateOfActivity());
       }
     });
     return new ListDataModel(screeningRoomActivities);
@@ -221,9 +253,9 @@ public class ScreenViewer extends AbstractBackingBean
     ArrayList<CherryPickRequest> cherryPickRequests = new ArrayList<CherryPickRequest>(_screen.getCherryPickRequests());
     Collections.sort(cherryPickRequests,
                      new Comparator<CherryPickRequest>() {
-      public int compare(CherryPickRequest cpr1, CherryPickRequest cpr2) 
-      { 
-        return cpr1.getCherryPickRequestNumber().compareTo(cpr2.getCherryPickRequestNumber()); 
+      public int compare(CherryPickRequest cpr1, CherryPickRequest cpr2)
+      {
+        return cpr1.getCherryPickRequestNumber().compareTo(cpr2.getCherryPickRequestNumber());
       }
     });
     return new ListDataModel(cherryPickRequests);
@@ -234,9 +266,9 @@ public class ScreenViewer extends AbstractBackingBean
     ArrayList<Publication> publications = new ArrayList<Publication>(_screen.getPublications());
     Collections.sort(publications,
                      new Comparator<Publication>() {
-      public int compare(Publication p1, Publication p2) 
-      { 
-        return p1.getAuthors().compareTo(p2.getAuthors()); 
+      public int compare(Publication p1, Publication p2)
+      {
+        return p1.getAuthors().compareTo(p2.getAuthors());
       }
     });
     return new ListDataModel(publications);
@@ -247,9 +279,9 @@ public class ScreenViewer extends AbstractBackingBean
     ArrayList<LetterOfSupport> lettersOfSupport = new ArrayList<LetterOfSupport>(_screen.getLettersOfSupport());
     Collections.sort(lettersOfSupport,
                      new Comparator<LetterOfSupport>() {
-      public int compare(LetterOfSupport los1, LetterOfSupport los2) 
-      { 
-        return los1.getDateWritten().compareTo(los2.getDateWritten()); 
+      public int compare(LetterOfSupport los1, LetterOfSupport los2)
+      {
+        return los1.getDateWritten().compareTo(los2.getDateWritten());
       }
     });
     return new ListDataModel(lettersOfSupport);
@@ -260,9 +292,9 @@ public class ScreenViewer extends AbstractBackingBean
     ArrayList<AttachedFile> attachedFiles = new ArrayList<AttachedFile>(_screen.getAttachedFiles());
     Collections.sort(attachedFiles,
                      new Comparator<AttachedFile>() {
-      public int compare(AttachedFile af1, AttachedFile af2) 
-      { 
-        return af1.getFilename().compareTo(af2.getFilename()); 
+      public int compare(AttachedFile af1, AttachedFile af2)
+      {
+        return af1.getFilename().compareTo(af2.getFilename());
       }
     });
     return new ListDataModel(attachedFiles);
@@ -278,9 +310,9 @@ public class ScreenViewer extends AbstractBackingBean
     ArrayList<AttachedFile> attachedFiles = new ArrayList<AttachedFile>(_screen.getAttachedFiles());
     Collections.sort(attachedFiles,
                      new Comparator<AttachedFile>() {
-      public int compare(AttachedFile af1, AttachedFile af2) 
-      { 
-        return af1.getFilename().compareTo(af2.getFilename()); 
+      public int compare(AttachedFile af1, AttachedFile af2)
+      {
+        return af1.getFilename().compareTo(af2.getFilename());
       }
     });
     return new ListDataModel(new ArrayList<AssayReadoutType>(_screen.getAssayReadoutTypes()));
@@ -297,7 +329,7 @@ public class ScreenViewer extends AbstractBackingBean
     Collections.sort(keywords);
     return new ListDataModel(keywords);
   }
-  
+
   public String getKeywords()
   {
     ArrayList<String> keywords = new ArrayList<String>(_screen.getKeywords());
@@ -308,8 +340,8 @@ public class ScreenViewer extends AbstractBackingBean
   public UISelectOneBean<ScreeningRoomUser> getLabName()
   {
     if (_labName == null) {
-      _labName = new UISelectOneEntityBean<ScreeningRoomUser>(_usersDao.findAllLabHeads(), _screen.getLabHead(), _dao) { 
-        protected String getLabel(ScreeningRoomUser t) { return t.getLabName(); } 
+      _labName = new UISelectOneEntityBean<ScreeningRoomUser>(_usersDao.findAllLabHeads(), _screen.getLabHead(), _dao) {
+        protected String getLabel(ScreeningRoomUser t) { return t.getLabName(); }
       };
     }
     return _labName;
@@ -334,7 +366,7 @@ public class ScreenViewer extends AbstractBackingBean
     }
     return _collaborators;
   }
-  
+
   public UISelectOneBean<ScreeningRoomUser> getLeadScreener()
   {
     if (_leadScreener == null) {
@@ -365,186 +397,348 @@ public class ScreenViewer extends AbstractBackingBean
     candiateAssayReadoutTypes.removeAll(_screen.getAssayReadoutTypes());
     return JSFUtils.createUISelectItems(candiateAssayReadoutTypes);
   }
-  
-  
+
+
   /* JSF Application methods */
-  
+
+  @UIControllerMethod
+  public String viewScreen(final Screen screenIn)
+  {
+    // TODO: implement as aspect
+    if (screenIn.isRestricted()) {
+      showMessage("restrictedEntity", "Screen " + screenIn.getScreenNumber());
+      log.warn("user unauthorized to view " + screenIn);
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+
+    try {
+      _dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          Screen screen = _dao.reloadEntity(screenIn,
+                                            true,
+                                            "hbnLabHead.hbnLabMembers",
+                                            "hbnLeadScreener",
+                                            "billingInformation");
+          _dao.needReadOnly(screen, "hbnCollaborators.hbnLabAffiliation");
+          _dao.needReadOnly(screen, "screeningRoomActivities");
+          _dao.needReadOnly(screen, "abaseTestsets", "attachedFiles", "fundingSupports", "keywords", "lettersOfSupport", "publications");
+          _dao.needReadOnly(screen, "statusItems");
+          _dao.needReadOnly(screen, "cherryPickRequests");
+          _dao.needReadOnly(screen, "hbnCollaborators");
+          _dao.needReadOnly(screen.getScreenResult(), "plateNumbers");
+          _dao.needReadOnly(screen.getScreenResult(),
+                            "hbnResultValueTypes.hbnDerivedTypes",
+                            "hbnResultValueTypes.hbnTypesDerivedFrom");
+
+          setScreen(screen);
+        }
+      });
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+
+    return VIEW_SCREEN;
+  }
+
+  @UIControllerMethod
+  public String viewLastScreen()
+  {
+    return viewScreen(_screen);
+  }
+
+  @UIControllerMethod
+  public String editScreen()
+  {
+    _isEditMode = true;
+    try {
+      _dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          _dao.reattachEntity(_screen); // checks if up-to-date
+          _dao.need(_screen, "hbnLabHead.hbnLabMembers");
+        }
+      });
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    catch (ConcurrencyFailureException e) {
+      showMessage("concurrentModificationConflict");
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return viewLastScreen(); // on error, reload (and not in edit mode)
+  }
+
+  @UIControllerMethod
   public String toggleAdminViewMode()
   {
     _isEditMode = false;
     _isAdminViewMode ^= true;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
+  @UIControllerMethod
   public String cancelAdminViewMode()
   {
     _isAdminViewMode = false;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  public String editScreen()
+  @UIControllerMethod
+  public String cancelEdit()
   {
-    _isEditMode = true;
-    return _screensController.editScreen(_screen);
-  }
-  
-  public String cancelEdit() {
-    // edits are discarded (and edit mode is cancelled) by virtue of controller reloading the screen entity from the database
-    return _screensController.viewLastScreen();
-  }
-  
-  /**
-   * A command to save the user's edits.
-   */
-  public String saveScreen() {
-    _isEditMode = false;
-    return _screensController.saveScreen(_screen,
-                                         new DAOTransaction() 
-    {
-      public void runTransaction() 
-      {
-        _screen.setLabHead(getLabName().getSelection());
-        _screen.setLeadScreener(getLeadScreener().getSelection());
-        _screen.setCollaboratorsList(getCollaborators().getSelections());
-      }
-    });
+    // edits are discarded (and edit mode is canceled) by virtue of controller
+    // reloading the screen entity from the database
+    return viewLastScreen();
   }
 
+  @UIControllerMethod
+  public String saveScreen()
+  {
+    _isEditMode = false;
+    try {
+      _dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          _dao.reattachEntity(_screen);
+          _screen.setLabHead(getLabName().getSelection());
+          _screen.setLeadScreener(getLeadScreener().getSelection());
+          _screen.setCollaboratorsList(getCollaborators().getSelections());
+        }
+      });
+    }
+    catch (ConcurrencyFailureException e) {
+      showMessage("concurrentModificationConflict");
+      viewLastScreen();
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+      viewLastScreen();
+    }
+    _screensBrowser.invalidateSearchResult();
+    return VIEW_SCREEN;
+  }
+
+  @UIControllerMethod
   public String addStatusItem()
   {
-    return _screensController.addStatusItem(_screen, _newStatusValue);
+    if (_newStatusValue != null) {
+      try {
+        new StatusItem(_screen,
+                       new Date(),
+                       _newStatusValue);
+      }
+      catch (DuplicateEntityException e) {
+        showMessage("screens.duplicateEntity", "status item");
+      }
+      setNewStatusValue(null);
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
+  @UIControllerMethod
   public String deleteStatusItem()
   {
-    return _screensController.deleteStatusItem(_screen, getSelectedEntityOfType(StatusItem.class));
+    _screen.getStatusItems().remove(getSelectedEntityOfType(StatusItem.class));
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
-  public String addCherryPickRequest()
+
+  @UIControllerMethod
+  public String addPublication()
   {
-    // TODO: save screen
-    return _screensController.createCherryPickRequest(_screen);
+    try {
+      new Publication(_screen, "<new>", "", "", "");
+    }
+    catch (DuplicateEntityException e) {
+      showMessage("screens.duplicateEntity", "publication");
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
+  @UIControllerMethod
+  public String deletePublication()
+  {
+    _screen.getPublications().remove(getSelectedEntityOfType(Publication.class));
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  public String addLetterOfSupport()
+  {
+    try {
+      new LetterOfSupport(_screen, new Date(), "");
+    }
+    catch (DuplicateEntityException e) {
+      showMessage("screens.duplicateEntity", "letter of support");
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  public String deleteLetterOfSupport()
+  {
+    _screen.getLettersOfSupport().remove(getSelectedEntityOfType(LetterOfSupport.class));
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  public String addAttachedFile()
+  {
+    try {
+      new AttachedFile(_screen, "<new>", "");
+    }
+    catch (DuplicateEntityException e) {
+      showMessage("screens.duplicateEntity", "attached file");
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  public String deleteAttachedFile()
+  {
+    _screen.getAttachedFiles().remove(getSelectedEntityOfType(AttachedFile.class));
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  public String addFundingSupport()
+  {
+    if (_newFundingSupport != null) {
+      if (!_screen.addFundingSupport(_newFundingSupport)) {
+        showMessage("screens.duplicateEntity", "funding support");
+      }
+      setNewFundingSupport(null);
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  public String deleteFundingSupport()
+  {
+    _screen.getFundingSupports().remove(getSelectedEntityOfType(FundingSupport.class));
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  public String addKeyword()
+  {
+    if (! _screen.addKeyword(_newKeyword)) {
+      showMessage("screens.duplicateEntity", "keyword");
+    }
+    else {
+      setNewKeyword("");
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  public String deleteKeyword()
+  {
+    _screen.getKeywords().remove((String) getHttpServletRequest().getAttribute("keyword"));
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
   // TODO: save & go to screening room activity viewer
+  @UIControllerMethod
   public String addScreeningRoomActivity()
   {
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
+  @UIControllerMethod
   public String copyScreeningRoomActivity()
   {
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
+  @UIControllerMethod
   public String copyCherryPickRequest()
   {
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
+  @UIControllerMethod
+  public String addCherryPickRequest()
+  {
+    // TODO: save screen
+    if (!_screen.getScreenType().equals(ScreenType.RNAI)) {
+      showMessage("applicationError", "Cherry Pick Requests can only be created for RNAi screens, currently");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+
+    final CherryPickRequest[] result = new CherryPickRequest[1];
+    try {
+      _dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          Screen screen = _dao.reloadEntity(_screen);
+          result[0] =  screen.createCherryPickRequest();
+        }
+      });
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return _cherryPickRequestViewer.viewCherryPickRequest(result[0]);
+  }
+
+  @UIControllerMethod
   public String viewCherryPickRequest()
   {
-    return _screensController.viewCherryPickRequest((CherryPickRequest) getRequestMap().get("cherryPickRequest"));
-  }  
-  
+    // TODO: can we also use our getSelectedEntityOfType() here?
+    return  _cherryPickRequestViewer.viewCherryPickRequest((CherryPickRequest) getRequestMap().get("cherryPickRequest"));
+  }
+
+  @UIControllerMethod
   public String viewScreeningRoomActivity()
   {
     // TODO: implement
-    return VIEW_SCREENING_ROOM_ACTIVITY_ACTION_RESULT;  
-  }  
-  
-  public String addPublication()
-  {
-    return _screensController.addPublication(_screen);
+    return VIEW_SCREENING_ROOM_ACTIVITY_ACTION_RESULT;
   }
-  
-  public String deletePublication()
-  {
-    return _screensController.deletePublication(
-      _screen,
-      getSelectedEntityOfType(Publication.class));
-  }
-  
-  public String addLetterOfSupport()
-  {
-    return _screensController.addLetterOfSupport(_screen);
-  }
-  
-  public String deleteLetterOfSupport()
-  {
-    return _screensController.deleteLetterOfSupport(
-      _screen,
-      getSelectedEntityOfType(LetterOfSupport.class));
-  }
-  
-  public String addAttachedFile()
-  {
-    return _screensController.addAttachedFile(_screen);
-  }
-  
-  public String deleteAttachedFile()
-  {
-    return _screensController.deleteAttachedFile(
-      _screen,
-      getSelectedEntityOfType(AttachedFile.class));
-  }
-  
-  public String addFundingSupport()
-  {
-    return _screensController.addFundingSupport(_screen, _newFundingSupport);
-  }
-  
-  public String deleteFundingSupport()
-  {
-    return _screensController.deleteFundingSupport(
-      _screen,
-      getSelectedEntityOfType(FundingSupport.class));
-  }
-  
-  public String addKeyword()
-  {
-    return _screensController.addKeyword(_screen, _newKeyword);
-  }
-  
-  public String deleteKeyword()
-  {
-    return _screensController.deleteKeyword(
-      _screen,
-      (String) getHttpServletRequest().getAttribute("keyword"));
-  }
-  
+
+  @UIControllerMethod
   public String viewCollaborator()
   {
-    //String collaboratorIdToView = (String) getRequestParameterMap().get(COLLABORATOR_ID_PARAM_NAME);
-    //_screeningRoomUserViewer.setScreensaverUserId(collaboratorIdToView);
+    // TODO: implement
     return VIEW_SCREENING_ROOM_USER_ACTION_RESULT;
   }
 
+  @UIControllerMethod
   public String viewCollaboratorLabHead()
   {
     // TODO: implement
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
+  @UIControllerMethod
   public String viewLabHead()
   {
     // TODO: implement
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
+  @UIControllerMethod
   public String viewLeadScreener()
   {
     // TODO: implement
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
+  @UIControllerMethod
   public String viewBillingInformation()
   {
     return VIEW_BILLING_INFORMATION_ACTION_RESULT;
   }
 
-  
-  /* JSF Action event listeners */
+
+  // JSF event listeners
 
   public void update(ValueChangeEvent event) {
     // despite the Tomahawk taglib docs, this event listener is called *before*
@@ -554,8 +748,8 @@ public class ScreenViewer extends AbstractBackingBean
     updateLeadScreenerSelectItems();
     getFacesContext().renderResponse();
   }
-  
-  
+
+
   // protected methods
 
   protected ScreensaverUserRole getEditableAdminRole()
@@ -565,17 +759,17 @@ public class ScreenViewer extends AbstractBackingBean
 
 
   // private methods
-  
+
   /**
    * Updates the set of lead screeners that can be selected for this screen.
    * Depends upon the lab head.
-   * 
+   *
    * @motivation to update the list of lead screeners in the UI, in response to
    *             a new lab head selection, but without updating the entity
    *             before the user saves his edits
    */
   private void updateLeadScreenerSelectItems() {
-    _dao.doInTransaction(new DAOTransaction() 
+    _dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
@@ -586,7 +780,7 @@ public class ScreenViewer extends AbstractBackingBean
           leadScreenerCandidates.addAll(labHead.getLabMembers());
         }
         _leadScreener = new UISelectOneEntityBean<ScreeningRoomUser>(leadScreenerCandidates, _screen.getLeadScreener(), _dao) {
-          protected String getLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); } 
+          protected String getLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); }
         };
       }
     });

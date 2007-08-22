@@ -1,4 +1,3 @@
-
 <%-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
 <%-- The core taglib contains all the logic, validation, controller, and other tags specific to JSF. --%>
@@ -9,7 +8,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
 
-<%-- 
+<%--
 TODO:
  - add lead screener, lab head to Screen Summary
 --%>
@@ -387,7 +386,7 @@ TODO:
 								title="Back 10 pages" />
 						</f:facet>
 					</t:dataScroller>
-					<t:dataScroller id="screenerCherryPicksDataScroller2" 
+					<t:dataScroller id="screenerCherryPicksDataScroller2"
 						for="screenerCherryPicksTable" binding="#{cherryPickRequestViewer.screenerCherryPicksTableDataScroller2}"
 						firstRowIndexVar="fromRow"
 						lastRowIndexVar="toRow" rowsCountVar="rowCount"
@@ -408,7 +407,7 @@ TODO:
 					<t:commandButton id="updateScreenerCherryPicksPerPage"
 						forceId="true" value="update screener cherry picks per page"
 						style="display: none" />
-						
+
 				</t:panelGrid>
 
 				<t:div>
@@ -677,10 +676,10 @@ TODO:
 						</t:selectOneMenu>
 						<t:outputLabel for="dateOfLiquidTransfer" value="Date:"
 							styleClass="label" title="The date the #{cherryPickRequestViewer.liquidTerm} transfer took place" />
-						<t:inputDate id="dateOfLiquidTransfer" 
+						<t:inputDate id="dateOfLiquidTransfer"
 							value="#{cherryPickRequestViewer.dateOfLiquidTransfer}"
 							popupCalendar="true"
-							rendered="#{cherryPickRequestViewer.editable}" 
+							rendered="#{cherryPickRequestViewer.editable}"
 							styleClass="inputText" />
 						<t:outputLabel for="liquidTransferComments" value="Comments:" styleClass="label"
 						  title="Screening room staff comments for the #{cherryPickRequestViewer.liquidTerm} transfer" />

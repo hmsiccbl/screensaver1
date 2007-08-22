@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -26,36 +26,36 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class LibrarySearchResults extends SearchResults<Library>
+public class LibrarySearchResults extends SearchResults<Library,Object>
 {
-  
+
   // private static final fields
-  
+
   private static final Logger log = Logger.getLogger(LibrarySearchResults.class);
 
 
   // instance fields
-  
+
   private LibrariesController _librariesController;
+
   private ArrayList<TableColumn<Library>> _columns;
-  
-  
-  // public constructor
-  
+
+
+  // constructors
+
   /**
-   * Construct a new <code>LibrarySearchResult</code> object.
-   * @param unsortedResults the unsorted list of the results, as they are returned from the
-   * database
+   * @motivation for CGLIB2
    */
-  public LibrarySearchResults(
-    List<Library> unsortedResults,
-    LibrariesController librariesController)
+  protected LibrarySearchResults()
   {
-    super(unsortedResults);
+  }
+
+  public LibrarySearchResults(LibrariesController librariesController)
+  {
     _librariesController = librariesController;
   }
 
-  
+
   // implementations of the SearchResults abstract methods
 
   @Override
@@ -69,9 +69,9 @@ public class LibrarySearchResults extends SearchResults<Library>
   {
     // NOTE: if there were more ways to get to a library search results, then this method would
     // need to be more intelligent
-    return _librariesController.browseLibraries();
+    return BROWSE_LIBRARIES;
   }
-  
+
   protected List<TableColumn<Library>> getColumns()
   {
     if (_columns == null) {
@@ -84,7 +84,7 @@ public class LibrarySearchResults extends SearchResults<Library>
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(Library library) { return _librariesController.viewLibrary(library, LibrarySearchResults.this); }
+        public Object cellAction(Library library) { return _librariesController.viewLibrary(library); }
       });
       _columns.add(new TableColumn<Library>("Library Name", "The full name of the library") {
         @Override
@@ -109,7 +109,7 @@ public class LibrarySearchResults extends SearchResults<Library>
     }
     return _columns;
   }
-  
+
   @Override
   protected List<Integer[]> getCompoundSorts()
   {
@@ -118,10 +118,10 @@ public class LibrarySearchResults extends SearchResults<Library>
     compoundSorts.add(new Integer[] {3, 0});
     return compoundSorts;
   }
-  
+
   @Override
   protected void setEntityToView(Library library)
   {
-    _librariesController.viewLibrary(library, this);
+    _librariesController.viewLibrary(library);
   }
 }

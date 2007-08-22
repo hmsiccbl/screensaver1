@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -28,45 +28,43 @@ import org.apache.myfaces.custom.fileupload.UploadedFile;
 
 /**
  * The JSF backing bean for the rnaiLibraryContentsImporter subview.
- * 
+ *
  * @author s
  */
 public class RNAiLibraryContentsImporter extends AbstractBackingBean
 {
-  
+
   private static Logger log = Logger.getLogger(RNAiLibraryContentsImporter.class);
 
   // instance data
 
   private LibrariesController _librariesController;
   private RNAiLibraryContentsParser _rnaiLibraryContentsParser;
+
   private UploadedFile _uploadedFile;
   private Library _library;
   private SilencingReagentType _silencingReagentType =
     RNAiLibraryContentsParser.DEFAULT_SILENCING_REAGENT_TYPE;
 
 
-  // backing bean property getter and setter methods
+  // constructors
 
-  public LibrariesController getLibrariesController()
+  /**
+   * @motivation for CGLIB2
+   */
+  protected RNAiLibraryContentsImporter()
   {
-    return _librariesController;
   }
-  
-  public void setLibrariesController(LibrariesController librariesController)
+
+  public RNAiLibraryContentsImporter(LibrariesController librariesController,
+                                     RNAiLibraryContentsParser rnaiLibraryContentsParser)
   {
     _librariesController = librariesController;
-  }
-
-  public RNAiLibraryContentsParser getRnaiLibraryContentsParser()
-  {
-    return _rnaiLibraryContentsParser;
-  }
-
-  public void setRnaiLibraryContentsParser(RNAiLibraryContentsParser rnaiLibraryContentsParser)
-  {
     _rnaiLibraryContentsParser = rnaiLibraryContentsParser;
   }
+
+
+  // backing bean property getter and setter methods
 
   public void setUploadedFile(UploadedFile uploadedFile)
   {
@@ -119,17 +117,17 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
   {
     return _rnaiLibraryContentsParser.getHasErrors();
   }
-  
+
   public DataModel getImportErrors()
   {
     return new ListDataModel(_rnaiLibraryContentsParser.getErrors());
   }
-  
+
   public String viewLibrary()
   {
-    return _librariesController.viewLibrary(_library, null);
+    return _librariesController.viewLibrary(_library);
   }
-  
+
   /**
    * Parse the RNAi library contents from the file, and go to the appropriate next page
    * depending on the result.

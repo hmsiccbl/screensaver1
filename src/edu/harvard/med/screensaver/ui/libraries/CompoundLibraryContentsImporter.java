@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -22,43 +22,42 @@ import org.apache.myfaces.custom.fileupload.UploadedFile;
 
 /**
  * The JSF backing bean for the compoundLibraryContentsImporter subview.
- * 
- * @author s
+ *
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 public class CompoundLibraryContentsImporter extends AbstractBackingBean
 {
-  
+
   private static Logger log = Logger.getLogger(CompoundLibraryContentsImporter.class);
 
   // instance data
 
   private LibrariesController _librariesController;
   private SDFileCompoundLibraryContentsParser _compoundLibraryContentsParser;
+
   private UploadedFile _uploadedFile;
   private Library _library;
-  
 
-  // backing bean property getter and setter methods
 
-  public LibrariesController getLibrariesController()
+  // constructors
+
+  /**
+   * @motivation for CGLIB2
+   */
+  protected CompoundLibraryContentsImporter()
   {
-    return _librariesController;
   }
-  
-  public void setLibrariesController(LibrariesController librariesController)
+
+  public CompoundLibraryContentsImporter(LibrariesController librariesController,
+                                         SDFileCompoundLibraryContentsParser compoundLibraryContentsParser)
   {
     _librariesController = librariesController;
-  }
-  
-  public SDFileCompoundLibraryContentsParser getCompoundLibraryContentsParser()
-  {
-    return _compoundLibraryContentsParser;
-  }
-
-  public void setCompoundLibraryContentsParser(SDFileCompoundLibraryContentsParser compoundLibraryContentsParser)
-  {
     _compoundLibraryContentsParser = compoundLibraryContentsParser;
   }
+
+
+  // backing bean property getter and setter methods
 
   public void setUploadedFile(UploadedFile uploadedFile)
   {
@@ -84,7 +83,7 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
   {
     return _compoundLibraryContentsParser.getHasErrors();
   }
-  
+
   public DataModel getImportErrors()
   {
     return new ListDataModel(_compoundLibraryContentsParser.getErrors());
@@ -92,7 +91,7 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
 
   public String viewLibrary()
   {
-    return _librariesController.viewLibrary(_library, null);
+    return _librariesController.viewLibrary(_library);
   }
 
   /**
@@ -106,4 +105,3 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
   }
 }
 
-  

@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
 <f:subview id="searchResultsNavPanelSubview"
-	rendered="#{navigator != null}">
+	rendered="#{navigator != null && navigator.resultsSize > 0}">
 
 	<t:panelGrid id="searchResultsNavPanel" columns="4"
 		styleClass="searchResultsCommandPanel" width="100%">

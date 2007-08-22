@@ -12,7 +12,7 @@
 
 <f:subview id="screenResultImporter">
 
-  <h:form id="errorsTableForm" rendered="#{screenResultImporter.screenResultParser.hasErrors}">
+  <h:form id="errorsTableForm" rendered="#{screenResultImporter.hasErrors}">
 
 		<h:outputText value="Import of screen result file \"#{screenResultImporter.uploadedFile.name}\" failed for screen #{screenResultImporter.screen.screenNumber}"
       styleClass="errorMessage" />
@@ -31,14 +31,14 @@
 				<h:outputText value="<workbook>"
 					rendered="#{empty row.cell.sheetName}" />
 			</t:column>
-      <t:column styleClass="column">	
+      <t:column styleClass="column">
         <f:facet name="header">
           <h:outputText value="Error" />
         </f:facet>
         <h:outputText value="#{row.message}" />
       </t:column>
     </t:dataTable>
-    
+
     <t:dataScroller id="errorsScroller" for="importErrorsTable" firstRowIndexVar="fromRow"
       lastRowIndexVar="toRow" rowsCountVar="rowCount" paginator="true" paginatorMaxPages="10"
       fastStep="10" renderFacetsIfSinglePage="true" styleClass="scroller"
@@ -65,7 +65,7 @@
     </t:dataScroller>
 
   </h:form>
-  
+
   <h:form id="commandForm">
     <h:commandButton id="cancel"
       action="#{screenResultImporter.cancel}"
@@ -75,9 +75,9 @@
     <h:commandButton id="downloadCommand"
       actionListener="#{screenResultImporter.downloadErrorAnnotatedWorkbookListener}"
       value="View Error-Annotated Workbook"
-      rendered="#{screenResultImporter.screenResultParser.hasErrors}" styleClass="command" />
+      rendered="#{screenResultImporter.hasErrors}" styleClass="command" />
 	</h:form>
-	
+
 	<t:div/>
 
 	<h:panelGroup>

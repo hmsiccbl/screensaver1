@@ -13,7 +13,7 @@
 
 			<t:panelTab id="wellVolumeSearchResultsTab" label="Well Volumes">
 				<t:aliasBean alias="#{searchResults}"
-					value="#{wellCopyVolumeSearchResultsViewer.wellVolumeSearchResults}">
+					value="#{wellVolumesBrowser}">
 					<%@include file="../../searchResults.jspf"%>
 				</t:aliasBean>
 			</t:panelTab>
@@ -21,7 +21,7 @@
 			<t:panelTab id="wellCopyVolumeSearchResultsTab"
 				label="Well/Copy Volumes">
 				<t:aliasBean alias="#{searchResults}"
-					value="#{wellCopyVolumeSearchResultsViewer.searchResults}">
+					value="#{wellCopyVolumesBrowser}">
 
 					<t:buffer into="#{searchResultsFooter}">
 						<t:panelGrid rendered="#{searchResults.editMode}" columns="1">

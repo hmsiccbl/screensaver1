@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -27,15 +27,15 @@ import edu.harvard.med.screensaver.ui.control.LibrariesController;
  */
 public class GeneNameValueTable extends NameValueTable
 {
-  
+
   // private static final fields
-  
+
   private static final Logger log = Logger.getLogger(GeneNameValueTable.class);
   private static final String GENBANK_ACCESSION_NUMBER_LOOKUP_URL_PREFIX =
     "http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi?val=";
   private static final String ENTREZGENE_ID_LOOKUP_URL_PREFIX =
     "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=gene&cmd=Retrieve&dopt=full_report&list_uids=";
-  
+
   // the row names
   private static final String GENE_NAME = "Gene&nbsp;Name";
   private static final String ENTREZGENE_ID = "EntrezGene&nbsp;ID";
@@ -44,9 +44,9 @@ public class GeneNameValueTable extends NameValueTable
   private static final String GENBANK_ACCESSION_NUMBERS = "GenBank&nbsp;Accession&nbsp;Numbers";
   private static final String SPECIES_NAME = "Species&nbsp;Name";
 
-  
+
   // private instance fields
-  
+
   private LibrariesController _librariesController;
   private Gene _gene;
   private boolean _isEmbedded;
@@ -54,10 +54,10 @@ public class GeneNameValueTable extends NameValueTable
   private List<Object> _values = new ArrayList<Object>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
   private List<String> _descriptions = new ArrayList<String>();
-  
-  
+
+
   // public constructor and implementations of NameValueTable abstract methods
-  
+
   public GeneNameValueTable(LibrariesController librariesController, Gene gene)
   {
     this(librariesController, gene, false);
@@ -71,7 +71,7 @@ public class GeneNameValueTable extends NameValueTable
     initializeLists(gene);
     setDataModel(new ListDataModel(_values));
   }
-  
+
   @Override
   public int getNumRows()
   {
@@ -83,7 +83,7 @@ public class GeneNameValueTable extends NameValueTable
   {
     return _descriptions.get(index);
   }
-  
+
   @Override
   public String getName(int index)
   {
@@ -109,13 +109,13 @@ public class GeneNameValueTable extends NameValueTable
     if (_isEmbedded) {
       String name = getName(index);
       if (name.equals(GENE_NAME)) {
-        return _librariesController.viewGene(_gene, null);
+        return _librariesController.viewGene(_gene);
       }
     }
     // other fields do not have actions
     return null;
   }
-  
+
   @Override
   public String getLink(int index, String value)
   {
@@ -131,9 +131,9 @@ public class GeneNameValueTable extends NameValueTable
     return null;
   }
 
-  
+
   // private instance methods
-  
+
   /**
    * Initialize the lists {@link #_names}, {@link #_values}, and {@link #_valueTypes}. Don't
    * add rows for missing values.
@@ -144,7 +144,7 @@ public class GeneNameValueTable extends NameValueTable
     addItem(ENTREZGENE_ID, gene.getEntrezgeneId(), ValueType.LINK, "The EntrezGene ID, a.k.a. Locus ID");
     addItem(ENTREZGENE_SYMBOL, gene.getEntrezgeneSymbol(), ValueType.TEXT, "The EntrezGene Gene Symbol");
     if (! gene.getOldEntrezgeneIds().isEmpty()) {
-      addItem(OLD_ENTREZGENE_IDS, gene.getOldEntrezgeneIds(), ValueType.LINK_LIST, "Old EntrezGene IDs that refer to the same gene");      
+      addItem(OLD_ENTREZGENE_IDS, gene.getOldEntrezgeneIds(), ValueType.LINK_LIST, "Old EntrezGene IDs that refer to the same gene");
     }
     addItem(GENBANK_ACCESSION_NUMBERS, gene.getGenbankAccessionNumbers(), ValueType.LINK_LIST, "The GenBank Accession Numbers for the gene");
     addItem(SPECIES_NAME, gene.getSpeciesName(), ValueType.TEXT, "The species this gene is found in");

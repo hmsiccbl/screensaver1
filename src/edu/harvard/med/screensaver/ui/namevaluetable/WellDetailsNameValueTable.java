@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -27,15 +27,15 @@ import edu.harvard.med.screensaver.ui.control.LibrariesController;
  */
 public class WellDetailsNameValueTable extends NameValueTable
 {
-  
+
   // private static final fields
-  
+
   private static final Logger log = Logger.getLogger(WellDetailsNameValueTable.class);
   private static final String GENBANK_ACCESSION_NUMBER_LOOKUP_URL_PREFIX =
     "http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi?val=";
   private static final String ENTREZGENE_ID_LOOKUP_URL_PREFIX =
     "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=gene&cmd=Retrieve&dopt=full_report&list_uids=";
-  
+
   // the row names:
   private static final String LIBRARY = "Library";
   private static final String PLATE = "Plate";
@@ -44,19 +44,19 @@ public class WellDetailsNameValueTable extends NameValueTable
   private static final String ICCB_NUMBER = "ICCB&nbsp;Number";
   private static final String VENDOR_IDENTIFIER = "Vendor&nbsp;Identifier";
 
-  
+
   // private instance fields
-  
+
   private LibrariesController _librariesController;
   private Well _well;
   private List<String> _names = new ArrayList<String>();
   private List<Object> _values = new ArrayList<Object>();
   private List<String> _descriptions = new ArrayList<String>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
-  
-  
+
+
   // public constructor and implementations of NameValueTable abstract methods
-  
+
   public WellDetailsNameValueTable(LibrariesController librariesController, Well well)
   {
     _librariesController = librariesController;
@@ -76,7 +76,7 @@ public class WellDetailsNameValueTable extends NameValueTable
   {
     return _descriptions.get(index);
   }
-  
+
   @Override
   public String getName(int index)
   {
@@ -100,12 +100,12 @@ public class WellDetailsNameValueTable extends NameValueTable
   {
     String name = getName(index);
     if (name.equals(LIBRARY)) {
-      return _librariesController.viewLibrary(_well.getLibrary(), null);
+      return _librariesController.viewLibrary(_well.getLibrary());
     }
     // other fields do not have actions
     return null;
   }
-  
+
   @Override
   public String getLink(int index, String value)
   {
@@ -113,9 +113,9 @@ public class WellDetailsNameValueTable extends NameValueTable
     return null;
   }
 
-  
+
   // private instance methods
-  
+
   /**
    * Initialize the lists {@link #_names}, {@link #_values}, and {@link #_valueTypes}. Don't
    * add rows for missing values.

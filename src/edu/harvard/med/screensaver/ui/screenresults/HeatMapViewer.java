@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -94,8 +94,8 @@ public class HeatMapViewer extends AbstractBackingBean
 
 
   private static Logger log = Logger.getLogger(HeatMapViewer.class);
-  
-  
+
+
   // instance data members
 
   private GenericEntityDAO _dao;
@@ -113,27 +113,30 @@ public class HeatMapViewer extends AbstractBackingBean
   private List<DataModel> _heatMapStatistics;
   private List<DataModel> _heatMapColumnDataModels;
   private List<String> _heatMapRowLabels;
-  
-  // bean property methods
-  
-  public void setGenericEntityDao(GenericEntityDAO dao)
+
+
+  // constructors
+
+  /**
+   * @motivation for CGLIB2
+   */
+  protected HeatMapViewer()
+  {
+  }
+
+  public HeatMapViewer(GenericEntityDAO dao,
+                       ScreenResultsDAO screenResultsDao,
+                       LibrariesDAO librariesDao,
+                       LibrariesController librariesController)
   {
     _dao = dao;
-  }
-
-  public void setScreenResultsDao(ScreenResultsDAO dao)
-  {
-    _screenResultsDao = dao;
-  }
-
-  public void setLibrariesDao(LibrariesDAO librariesDao)
-  {
+    _screenResultsDao = screenResultsDao;
     _librariesDao = librariesDao;
-  }
-
-  public void setLibrariesController(LibrariesController librariesController) {
     _librariesController = librariesController;
   }
+
+
+  // bean property methods
 
   public void setScreenResult(ScreenResult screenResult)
   {
@@ -155,17 +158,17 @@ public class HeatMapViewer extends AbstractBackingBean
     _heatMapColumnDataModels = null;
     _heatMapRowLabels = null;
   }
-  
+
   public ScreenResult getScreenResult()
   {
     return _screenResult;
   }
-  
+
   public UISelectOneBean<Integer> getPlateNumber()
   {
     return _plateNumber;
   }
-  
+
   public boolean isShowValues() {
     return _showValues;
   }
@@ -178,7 +181,7 @@ public class HeatMapViewer extends AbstractBackingBean
   {
     return HEAT_MAP_ROW_LABELS;
   }
-  
+
   public DataModel getCellTypeLegendDataModel()
   {
     return HEAT_MAP_CELL_LEGEND_MODEL;
@@ -188,12 +191,12 @@ public class HeatMapViewer extends AbstractBackingBean
   {
     return _heatMapDataModels;
   }
-  
+
   public List<DataModel> getHeatMapColumnDataModels()
   {
     return _heatMapColumnDataModels;
   }
-  
+
   public DataModel getColorLegendDataModel()
   {
     int heatMapIndex = _heatMapConfigurationsDataModel.getRowIndex();
@@ -215,17 +218,17 @@ public class HeatMapViewer extends AbstractBackingBean
     }
     return new ListDataModel(steps);
   }
-  
+
   public List<HeatMap> getHeatMaps()
   {
     return _heatMaps;
   }
-  
+
   public List<DataModel> getHeatMapStatisticsDataModels()
   {
     return _heatMapStatistics;
   }
-  
+
   public DataModel getHeatMapConfigurationsDataModel()
   {
     return _heatMapConfigurationsDataModel;
@@ -244,7 +247,7 @@ public class HeatMapViewer extends AbstractBackingBean
     }
     return EMPTY_HEAT_MAP_CELL;
   }
-  
+
   public String getHeatMapTitle()
   {
     int heatMapIndex = _heatMapConfigurationsDataModel.getRowIndex();
@@ -260,7 +263,7 @@ public class HeatMapViewer extends AbstractBackingBean
       for (Filter filter : filterSelections) {
         if (first) {
           first = false;
-        } 
+        }
         else {
           title.append(", ");
         }
@@ -284,8 +287,8 @@ public class HeatMapViewer extends AbstractBackingBean
     for (HeatMapConfiguration heatMapConfig : _heatMapConfigurations) {
       if (heatMapConfig.getDataHeaders().getSelection() != null &&
         _plateNumber.getSelection() != null) {
-        Map<WellKey,ResultValue> resultValues = 
-          _screenResultsDao.findResultValuesByPlate(_plateNumber.getSelection(), 
+        Map<WellKey,ResultValue> resultValues =
+          _screenResultsDao.findResultValuesByPlate(_plateNumber.getSelection(),
                                                     heatMapConfig.getDataHeaders().getSelection());
         HeatMap heatMap = new HeatMap(_plateNumber.getSelection(),
                                       resultValues,
@@ -350,10 +353,10 @@ public class HeatMapViewer extends AbstractBackingBean
         _heatMapStatistics.add(new ListDataModel(heatMapStatistics));
       }
     }
-    
+
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
   // TODO: set initial values to previous HeatMapConfig
   public String addHeatMap()
   {
@@ -363,23 +366,23 @@ public class HeatMapViewer extends AbstractBackingBean
 
     HeatMapConfiguration heatMapConfiguration = new HeatMapConfiguration();
     heatMapConfiguration.setDataHeaders(new UISelectOneBean<ResultValueType>(_screenResult.getNumericResultValueTypes()) {
-      protected String getLabel(ResultValueType t) { return t.getName(); } 
+      protected String getLabel(ResultValueType t) { return t.getName(); }
     });
     heatMapConfiguration.setScoringType(new UISelectOneBean<ScoringType>(Arrays.asList(ScoringType.values())));
     heatMapConfiguration.setNumericFormat(new UISelectOneBean<NumberFormat>(NUMBER_FORMATS) {
-      protected String getLabel(NumberFormat t) { return t.format(SAMPLE_NUMBER); } 
+      protected String getLabel(NumberFormat t) { return t.format(SAMPLE_NUMBER); }
     });
     heatMapConfiguration.setExcludedWellFilters(new UISelectManyBean<Filter<Pair<WellKey,ResultValue>>>(EXCLUDED_WELL_FILTERS));
     _heatMapConfigurations.add(heatMapConfiguration);
     _heatMapConfigurationsDataModel = new ListDataModel(_heatMapConfigurations);
 
     // set default values
-    heatMapConfiguration.getExcludedWellFilters().setValue(Arrays.asList(new String[] { 
+    heatMapConfiguration.getExcludedWellFilters().setValue(Arrays.asList(new String[] {
       (String) heatMapConfiguration.getExcludedWellFilters().getSelectItems().get(0).getValue() }));
 
     return update();
   }
-  
+
   public String deleteHeatMap()
   {
     int heatMapIndexToDelete = ((Integer) getHttpServletRequest().getAttribute("heatMapIndex")).intValue();
@@ -391,14 +394,14 @@ public class HeatMapViewer extends AbstractBackingBean
     _heatMapConfigurationsDataModel = new ListDataModel(_heatMapConfigurations);
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
   public String viewWell()
   {
     HeatMapCell heatMapCell = getHeatMapCell();
     Well well = _librariesDao.findWell(heatMapCell.getWellKey());
-    return _librariesController.viewWell(well, null);
+    return _librariesController.viewWell(well);
   }
-  
+
   public String nextPlate()
   {
     return gotoPlate(_plateNumber.getSelectionIndex() + 1);
@@ -408,7 +411,7 @@ public class HeatMapViewer extends AbstractBackingBean
   {
     return gotoPlate(_plateNumber.getSelectionIndex() - 1);
   }
-  
+
 
   // private methods
 
@@ -420,5 +423,5 @@ public class HeatMapViewer extends AbstractBackingBean
     _plateNumber.setSelectionIndex(plateIndex);
     return update();
   }
-  
+
 }

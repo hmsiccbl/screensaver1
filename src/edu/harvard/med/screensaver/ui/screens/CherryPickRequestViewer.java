@@ -2,13 +2,15 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,27 +35,45 @@ import javax.faces.model.ArrayDataModel;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.io.cherrypicks.CherryPickRequestExporter;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
+import edu.harvard.med.screensaver.io.workbook.Workbook;
+import edu.harvard.med.screensaver.io.workbook2.Workbook2Utils;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
+import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransferStatus;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.InvalidCherryPickWellException;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.LegacyCherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator;
+import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder;
+import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper;
+import edu.harvard.med.screensaver.service.libraries.rnai.LibraryPoolToDuplexWellMapper;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.control.ScreensController;
+import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
+import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.screenresults.DataTableRowsPerPageUISelectOneBean;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 import edu.harvard.med.screensaver.ui.table.TableSortManager;
+import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
@@ -61,6 +81,8 @@ import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.datascroller.HtmlDataScroller;
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.DataAccessException;
 
 public class CherryPickRequestViewer extends AbstractBackingBean
 {
@@ -77,7 +99,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private static final String VALIDATE_SELECTED_PLATES_FOR_DEALLOCATION = "for_deallocaton";
 
   private static final List<TableColumn<ScreenerCherryPick>> SCREENER_CHERRY_PICKS_TABLE_COLUMNS = new ArrayList<TableColumn<ScreenerCherryPick>>();
-  private static final List<List<TableColumn<ScreenerCherryPick>>> SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS = new ArrayList<List<TableColumn<ScreenerCherryPick>>>();  
+  private static final List<List<TableColumn<ScreenerCherryPick>>> SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS = new ArrayList<List<TableColumn<ScreenerCherryPick>>>();
   static {
     SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<ScreenerCherryPick>("Library Plate", "The library plate number of the well that was originally screened", true) {
       @Override
@@ -97,34 +119,34 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     });
     SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<ScreenerCherryPick>("Gene", "The name of the gene targeted by the screened well") {
       @Override
-      public Object getCellValue(ScreenerCherryPick scp) 
-      { 
-        Gene gene = scp.getScreenedWell().getGene(); 
-        return gene == null ? null : gene.getGeneName(); 
+      public Object getCellValue(ScreenerCherryPick scp)
+      {
+        Gene gene = scp.getScreenedWell().getGene();
+        return gene == null ? null : gene.getGeneName();
       }
     });
     SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<ScreenerCherryPick>("Entrez ID", "The Entrez ID of the gene targeted by the screened well") {
       @Override
-      public Object getCellValue(ScreenerCherryPick scp) 
-      { 
-        Gene gene = scp.getScreenedWell().getGene(); 
-        return gene == null ? null : gene.getEntrezgeneId(); 
+      public Object getCellValue(ScreenerCherryPick scp)
+      {
+        Gene gene = scp.getScreenedWell().getGene();
+        return gene == null ? null : gene.getEntrezgeneId();
       }
     });
     SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<ScreenerCherryPick>("Entrez Symbol", "The Entrez symbol of the gene targeted by the screened well") {
       @Override
-      public Object getCellValue(ScreenerCherryPick scp) 
-      { 
-        Gene gene = scp.getScreenedWell().getGene(); 
-        return gene == null ? null : gene.getEntrezgeneSymbol(); 
+      public Object getCellValue(ScreenerCherryPick scp)
+      {
+        Gene gene = scp.getScreenedWell().getGene();
+        return gene == null ? null : gene.getEntrezgeneSymbol();
       }
     });
     SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<ScreenerCherryPick>("Genbank AccNo", "The Genbank accession number of the gene targeted by the screened well") {
       @Override
-      public Object getCellValue(ScreenerCherryPick scp) 
-      { 
-        Gene gene = scp.getScreenedWell().getGene(); 
-        return gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(), "; "); 
+      public Object getCellValue(ScreenerCherryPick scp)
+      {
+        Gene gene = scp.getScreenedWell().getGene();
+        return gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(), "; ");
       }
     });
 
@@ -136,7 +158,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<ScreenerCherryPick>>());
     SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(1).add(SCREENER_CHERRY_PICKS_TABLE_COLUMNS.get(1));
     SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(1).add(SCREENER_CHERRY_PICKS_TABLE_COLUMNS.get(0));
-    
+
     SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<ScreenerCherryPick>>());
     SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(2).add(SCREENER_CHERRY_PICKS_TABLE_COLUMNS.get(2));
     SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(2).add(SCREENER_CHERRY_PICKS_TABLE_COLUMNS.get(0));
@@ -144,29 +166,29 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   }
 
   private static final List<TableColumn<LabCherryPick>> LAB_CHERRY_PICKS_TABLE_COLUMNS = new ArrayList<TableColumn<LabCherryPick>>();
-  private static final List<List<TableColumn<LabCherryPick>>> LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS = new ArrayList<List<TableColumn<LabCherryPick>>>();  
+  private static final List<List<TableColumn<LabCherryPick>>> LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS = new ArrayList<List<TableColumn<LabCherryPick>>>();
   static {
     LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Status", "'Unfulfilled', 'Reserved', 'Mapped', 'Canceled', 'Plated', 'Failed'") {
       @Override
-      public Object getCellValue(LabCherryPick lcp) 
-      { 
-        return lcp.isPlated() ? "plated" : 
+      public Object getCellValue(LabCherryPick lcp)
+      {
+        return lcp.isPlated() ? "plated" :
           lcp.isFailed() ? "failed" :
             lcp.isCanceled() ? "canceled" :
-              lcp.isMapped() ? "mapped" : 
+              lcp.isMapped() ? "mapped" :
                 lcp.isAllocated() ? "reserved" : "unfulfilled";
       }
-      
+
       @Override
       protected Comparator<LabCherryPick> getAscendingComparator()
       {
         return new Comparator<LabCherryPick>() {
           private Integer sortValue(LabCherryPick lcp)
           {
-            return lcp.isPlated() ? 5 : 
+            return lcp.isPlated() ? 5 :
               lcp.isFailed() ? 4 :
                 lcp.isCanceled() ? 3 :
-                  lcp.isMapped() ? 2 : 
+                  lcp.isMapped() ? 2 :
                     lcp.isAllocated() ? 1 : 0;
           }
           public int compare(LabCherryPick o1, LabCherryPick o2)
@@ -194,34 +216,34 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     });
     LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Gene", "The name of the gene targeted by the cherry picked well") {
       @Override
-      public Object getCellValue(LabCherryPick lcp) 
-      { 
-        Gene gene = lcp.getSourceWell().getGene(); 
-        return gene == null ? null : gene.getGeneName(); 
+      public Object getCellValue(LabCherryPick lcp)
+      {
+        Gene gene = lcp.getSourceWell().getGene();
+        return gene == null ? null : gene.getGeneName();
       }
     });
     LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Entrez ID", "The Entrez ID of the gene targeted by the cherry picked well") {
       @Override
-      public Object getCellValue(LabCherryPick lcp) 
-      { 
-        Gene gene = lcp.getSourceWell().getGene(); 
-        return gene == null ? null : gene.getEntrezgeneId(); 
+      public Object getCellValue(LabCherryPick lcp)
+      {
+        Gene gene = lcp.getSourceWell().getGene();
+        return gene == null ? null : gene.getEntrezgeneId();
       }
     });
     LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Entrez Symbol", "The Entrez symbol of the gene targeted by the cherry picked well") {
       @Override
-      public Object getCellValue(LabCherryPick lcp) 
-      { 
-        Gene gene = lcp.getSourceWell().getGene(); 
-        return gene == null ? null : gene.getEntrezgeneSymbol(); 
+      public Object getCellValue(LabCherryPick lcp)
+      {
+        Gene gene = lcp.getSourceWell().getGene();
+        return gene == null ? null : gene.getEntrezgeneSymbol();
       }
     });
     LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Genbank AccNo", "The Genbank accession number of the gene targeted by the cherry picked well") {
       @Override
-      public Object getCellValue(LabCherryPick lcp) 
-      { 
-        Gene gene = lcp.getSourceWell().getGene(); 
-        return gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(), "; "); 
+      public Object getCellValue(LabCherryPick lcp)
+      {
+        Gene gene = lcp.getSourceWell().getGene();
+        return gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(), "; ");
       }
     });
     LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Cherry Pick Plate #", "The cherry pick plate number that this cherry pick has been mapped to", true) {
@@ -242,55 +264,55 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(0).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(0));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(0).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(0).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
-    
+
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(1).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(1).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
-    
+
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(2).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(2).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
-    
+
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(3).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(3));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(3).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(3).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
-    
+
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(4).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(4));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(4).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(4).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
-    
+
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(5).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(5));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(5).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(5).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
-    
+
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(6).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(6));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(6).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(6).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
-    
+
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(7).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(7));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(7).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(7).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
-    
+
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(8).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(8));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(8).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(1));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(8).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(2));
-    
+
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(9).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(9));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(9).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(10));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(9).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(11));
-    
+
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(10).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(10));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(10).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(9));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(10).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(11));
-    
+
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.add(new ArrayList<TableColumn<LabCherryPick>>());
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(11).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(11));
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(11).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(9));
@@ -305,12 +327,20 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     }
   }
 
-  
+
   // instance data members
-  
+
   private GenericEntityDAO _dao;
-  private ScreensController _screensController;
+  private CherryPickRequestDAO _cherryPickRequestDao;
+  private LibrariesDAO _librariesDao;
+  private ScreenViewer _screenViewer;
+  private WellCopyVolumeSearchResults _wellCopyVolumesBrowser;
   private PlateWellListParser _plateWellListParser;
+  private CherryPickRequestAllocator _cherryPickRequestAllocator;
+  private CherryPickRequestPlateMapper _cherryPickRequestPlateMapper;
+  private CherryPickRequestPlateMapFilesBuilder _cherryPickRequestPlateMapFilesBuilder;
+  private LibraryPoolToDuplexWellMapper _libraryPoolToDuplexWellMapper;
+  private CherryPickRequestExporter _cherryPickRequestExporter;
 
   private CherryPickRequest _cherryPickRequest;
   private boolean _isEditMode = false;
@@ -333,7 +363,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private UISelectOneEntityBean<ScreensaverUser> _liquidTransferPerformedBy;
   private Date _dateOfLiquidTransfer;
   private String _liquidTransferComments;
-  
+
   private HtmlDataScroller _screenerCherryPicksTableDataScroller1;
   private HtmlDataScroller _screenerCherryPicksTableDataScroller2;
 
@@ -341,82 +371,96 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private DataTableRowsPerPageUISelectOneBean _screenerCherryPicksPerPage;
 
 
-  
+
   // public constructors and methods
-  
-  public CherryPickRequestViewer()
+
+  /**
+   * @motivation for CGLIB2
+   */
+  protected CherryPickRequestViewer()
   {
+  }
+
+  public CherryPickRequestViewer(GenericEntityDAO dao,
+                                 CherryPickRequestDAO cherryPickRequestDao,
+                                 LibrariesDAO librariesDao,
+                                 ScreenViewer screenViewer,
+                                 WellCopyVolumeSearchResults wellCopyVolumesBrowser,
+                                 PlateWellListParser plateWellListParser,
+                                 CherryPickRequestAllocator cherryPickRequestAllocator,
+                                 CherryPickRequestPlateMapper cherryPickRequestPlateMapper,
+                                 CherryPickRequestPlateMapFilesBuilder cherryPickRequestPlateMapFilesBuilder,
+                                 LibraryPoolToDuplexWellMapper libraryPoolToDuplexWellMapper,
+                                 CherryPickRequestExporter cherryPickRequestExporter)
+  {
+    _dao = dao;
+    _cherryPickRequestDao = cherryPickRequestDao;
+    _librariesDao = librariesDao;
+    _screenViewer = screenViewer;
+    _wellCopyVolumesBrowser = wellCopyVolumesBrowser;
+    _plateWellListParser = plateWellListParser;
+    _cherryPickRequestAllocator = cherryPickRequestAllocator;
+    _cherryPickRequestPlateMapper = cherryPickRequestPlateMapper;
+    _cherryPickRequestPlateMapFilesBuilder = cherryPickRequestPlateMapFilesBuilder;
+    _libraryPoolToDuplexWellMapper = libraryPoolToDuplexWellMapper;
+    _cherryPickRequestExporter = cherryPickRequestExporter;
+
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
     _isPanelCollapsedMap.put("screenSummary", true);
     _isPanelCollapsedMap.put("cherryPickRequest", false);
     _isPanelCollapsedMap.put("screenerCherryPicks", false);
     _isPanelCollapsedMap.put("labCherryPicks", false);
     _isPanelCollapsedMap.put("cherryPickPlates", false);
-    
+
     _labCherryPicksPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE));
     _screenerCherryPicksPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE));
   }
 
-  public void setDao(GenericEntityDAO dao)
-  {
-    _dao = dao;
-  }
-  
-  public void setPlateWellListParser(PlateWellListParser plateWellListParser)
-  {
-    _plateWellListParser = plateWellListParser;
-  }
-
-  public void setScreensController(ScreensController screensController)
-  {
-    _screensController = screensController;
-  }
-  
   public void setCherryPickRequest(CherryPickRequest cherryPickRequest)
   {
     _cherryPickRequest = cherryPickRequest;
-    
+
     _isEditMode = false;
     _cherryPicksInput = null;
-    
+
     SortedSet<ScreeningRoomUser> candidateRequestors = new TreeSet<ScreeningRoomUser>(ScreensaverUserComparator.getInstance());
     candidateRequestors.add(_cherryPickRequest.getScreen().getLabHead());
     candidateRequestors.add(_cherryPickRequest.getScreen().getLeadScreener());
     candidateRequestors.addAll(_cherryPickRequest.getScreen().getCollaborators());
     _requestedBy = new UISelectOneEntityBean<ScreeningRoomUser>(candidateRequestors,
       _cherryPickRequest.getRequestedBy(),
-      _dao) { 
-      protected String getLabel(ScreeningRoomUser u) { return u.getFullNameLastFirst(); } 
+      _dao) {
+      protected String getLabel(ScreeningRoomUser u) { return u.getFullNameLastFirst(); }
     };
 
     SortedSet<AdministratorUser> candidateVolumeApprovers = new TreeSet<AdministratorUser>(ScreensaverUserComparator.getInstance());
     candidateVolumeApprovers.add(null);
     candidateVolumeApprovers.addAll(_dao.findAllEntitiesOfType(AdministratorUser.class)); // TODO: filter out all but CherryPickAdmins
-    _volumeApprovedBy = new UISelectOneEntityBean<AdministratorUser>(candidateVolumeApprovers, 
+    _volumeApprovedBy = new UISelectOneEntityBean<AdministratorUser>(candidateVolumeApprovers,
       _cherryPickRequest.getVolumeApprovedBy(),
-      _dao) { 
-      protected String getLabel(AdministratorUser a) { return a == null ? super.getLabel(a) : a.getFullNameLastFirst(); } 
+      _dao) {
+      protected String getLabel(AdministratorUser a) { return a == null ? super.getLabel(a) : a.getFullNameLastFirst(); }
     };
-      
+
     SortedSet<ScreensaverUser> candidatePreparers = new TreeSet<ScreensaverUser>(ScreensaverUserComparator.getInstance());
     candidatePreparers.addAll(_dao.findAllEntitiesOfType(AdministratorUser.class));
     _liquidTransferPerformedBy = new UISelectOneEntityBean<ScreensaverUser>(candidatePreparers,
       candidatePreparers.contains(getScreensaverUser()) ? getScreensaverUser() : candidatePreparers.first(),
-                                                        _dao) { 
-      protected String getLabel(ScreensaverUser u) { return u.getFullNameLastFirst(); } 
+                                                        _dao) {
+      protected String getLabel(ScreensaverUser u) { return u.getFullNameLastFirst(); }
     };
 
     Set<Integer> selectableEmptyColumns = new TreeSet<Integer>(PLATE_COLUMNS_LIST);
     selectableEmptyColumns.removeAll(_cherryPickRequest.getRequiredEmptyColumnsOnAssayPlate());
-    _emptyColumnsOnAssayPlate = 
-      new UISelectManyBean<Integer>(selectableEmptyColumns, 
+    _emptyColumnsOnAssayPlate =
+      new UISelectManyBean<Integer>(selectableEmptyColumns,
                                     _cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate());
-    
+
     _assayPlatesColumnModel = new ArrayDataModel(AssayPlateRow.ASSAY_PLATES_TABLE_COLUMNS);
     _screenerCherryPicksDataModel = null;
     _labCherryPicksDataModel = null;
     _assayPlatesDataModel = null;
-    
+
     // set "Cherry Pick Plates" panel to initially expanded, if cherry pick plates have been created
     boolean hasCherryPickPlates = _cherryPickRequest.getCherryPickAssayPlates().size() > 0;
     _isPanelCollapsedMap.put("cherryPickPlates", !hasCherryPickPlates);
@@ -426,7 +470,64 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   {
     return _cherryPickRequest;
   }
-  
+
+  @UIControllerMethod
+  public String viewCherryPickRequest(final CherryPickRequest cherryPickRequestIn)
+  {
+    // TODO: implement as aspect
+    if (cherryPickRequestIn.isRestricted()) {
+      showMessage("restrictedEntity", "Cherry Pick Request " + cherryPickRequestIn.getCherryPickRequestNumber());
+      log.warn("user unauthorized to view " + cherryPickRequestIn);
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+
+    try {
+      _dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          CherryPickRequest cherryPickRequest = _dao.reloadEntity(cherryPickRequestIn,
+                                                                  true,
+                                                                  "hbnRequestedBy",
+                                                                  "screen.hbnLabHead",
+                                                                  "screen.hbnLeadScreener",
+                                                                  "screen.hbnCollaborators");
+          if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+            throw new UnsupportedOperationException("Sorry, but viewing compound cherry pick requests is not yet implemented.");
+          }
+
+          _dao.needReadOnly(cherryPickRequest,
+                            "cherryPickAssayPlates.hbnCherryPickLiquidTransfer",
+                            "cherryPickAssayPlates.labCherryPicks.sourceWell");
+          if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI)) {
+            _dao.needReadOnly(cherryPickRequest,
+                              "labCherryPicks.sourceWell.hbnSilencingReagents.gene.genbankAccessionNumbers");
+            _dao.needReadOnly(cherryPickRequest,
+                              "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene.genbankAccessionNumbers",
+                              "screenerCherryPicks.RNAiKnockdownConfirmation");
+            _dao.needReadOnly(cherryPickRequest,
+                              "screenerCherryPicks.labCherryPicks.wellVolumeAdjustments");
+          }
+//          else if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+//            // TODO: inflate, as needed
+//            _dao.needReadOnly(cherryPickRequest,
+//                              "screenerCherryPicks",
+//                              "screenerCherryPicks.labCherryPicks");
+//          }
+          setCherryPickRequest(cherryPickRequest);
+        }
+      });
+      return VIEW_CHERRY_PICK_REQUEST_ACTION_RESULT;
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    catch (UnsupportedOperationException e) {
+      reportApplicationError(e);
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
   public boolean isEditMode()
   {
     return _isEditMode;
@@ -436,7 +537,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   {
     return _isPanelCollapsedMap;
   }
-  
+
   public HtmlDataScroller getScreenerCherryPicksTableDataScroller1()
   {
     return _screenerCherryPicksTableDataScroller1;
@@ -486,7 +587,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   {
     return _volumeApprovedBy;
   }
-  
+
   public String getDateVolumeApproved()
   {
     return DateFormat.getDateInstance(DateFormat.SHORT).format(_cherryPickRequest.getDateVolumeApproved());
@@ -524,17 +625,17 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     }
     return _screenerCherryPicksSortManager;
   }
-  
+
   public int getScreenerCherryPickCount()
   {
     return _cherryPickRequest.getScreenerCherryPicks().size();
   }
-  
+
   public int getLabCherryPickCount()
   {
     return _cherryPickRequest.getLabCherryPicks().size();
   }
-  
+
   public TableSortManager<LabCherryPick> getLabCherryPicksSortManager()
   {
     if (_labCherryPicksSortManager == null) {
@@ -545,23 +646,23 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           _labCherryPicksDataModel = null;
         }
       });
-      
+
       for (List<TableColumn<LabCherryPick>> compoundSortColumns : LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS) {
         _labCherryPicksSortManager.addCompoundSortColumns(compoundSortColumns);
       }
     }
     return _labCherryPicksSortManager;
   }
-  
+
   public boolean isRnaiScreen()
   {
     return _cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI);
   }
-  
+
   public DataModel getScreenerCherryPicksDataModel()
   {
     if (_screenerCherryPicksDataModel == null) {
-      
+
       List<ScreenerCherryPick> screenerCherryPicks = new ArrayList<ScreenerCherryPick>(_cherryPickRequest.getScreenerCherryPicks());
       Collections.sort(screenerCherryPicks,
                        getScreenerCherryPicksSortManager().getSortColumnComparator());
@@ -573,7 +674,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   public DataModel getLabCherryPicksDataModel()
   {
     if (_labCherryPicksDataModel == null) {
-      
+
       List<LabCherryPick> labCherryPicks = new ArrayList<LabCherryPick>(_cherryPickRequest.getLabCherryPicks().size());
       for (LabCherryPick cherryPick : _cherryPickRequest.getLabCherryPicks()) {
         if (!_showFailedLabCherryPicks && cherryPick.isFailed()) {
@@ -587,17 +688,17 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     }
     return _labCherryPicksDataModel;
   }
-  
+
   public Object getScreenerCherryPicksCellValue()
   {
     return getScreenerCherryPicksSortManager().getCurrentColumn().getCellValue((ScreenerCherryPick) getScreenerCherryPicksDataModel().getRowData());
   }
-  
+
   public Object getLabCherryPicksCellValue()
   {
     return getLabCherryPicksSortManager().getCurrentColumn().getCellValue((LabCherryPick) getLabCherryPicksDataModel().getRowData());
   }
-  
+
   public DataModel getAssayPlatesColumnModel()
   {
     return _assayPlatesColumnModel;
@@ -607,8 +708,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   {
     if (_assayPlatesDataModel == null) {
       List<AssayPlateRow> rows = new ArrayList<AssayPlateRow>();
-      Collection<CherryPickAssayPlate> assayPlates = 
-        _showFailedAssayPlates ? _cherryPickRequest.getCherryPickAssayPlates() : 
+      Collection<CherryPickAssayPlate> assayPlates =
+        _showFailedAssayPlates ? _cherryPickRequest.getCherryPickAssayPlates() :
           _cherryPickRequest.getActiveCherryPickAssayPlates();
       for (CherryPickAssayPlate assayPlate : assayPlates) {
         AssayPlateRow row = new AssayPlateRow(assayPlate);
@@ -619,7 +720,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     }
     return _assayPlatesDataModel;
   }
-  
+
   public boolean isSelectAllAssayPlates()
   {
     return _selectAllAssayPlates;
@@ -692,10 +793,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     }
     return "Liquid";
   }
-  
-  /*
-   * JSF Listeners
-   */
+
+
+  // JSF listeners
 
   public void toggleShowFailedLabCherryPicks(ValueChangeEvent event)
   {
@@ -705,7 +805,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     // force regen of data model
     _labCherryPicksDataModel = null;
   }
-  
+
   public void toggleShowFailedAssayPlates(ValueChangeEvent event)
   {
     _showFailedAssayPlates = (Boolean) event.getNewValue();
@@ -714,95 +814,186 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     // force regen of data model
     _assayPlatesDataModel = null;
   }
-  
 
-  /* JSF Application methods */
-  
+
+  // JSF application methods
+
+  @UIControllerMethod
   public String viewScreen()
   {
-    return _screensController.viewScreen(_cherryPickRequest.getScreen(), null);
-  }
-  
-  public String addCherryPicks()
-  {
-    PlateWellListParserResult result = _plateWellListParser.parseWellsFromPlateWellList(_cherryPicksInput);
-    // TODO: report errors
-    if (result.getErrors().size() > 0) {
-      showMessage("cherryPicks.parseError");
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    return _screensController.addCherryPicksForWells(_cherryPickRequest,
-                                                     result.getParsedWellKeys());
-  }
-  
-  public String addPoolCherryPicks()
-  {
-    PlateWellListParserResult result = _plateWellListParser.parseWellsFromPlateWellList(_cherryPicksInput);
-    // TODO: report errors
-    if (result.getErrors().size() > 0) {
-      showMessage("cherryPicks.parseError");
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    return _screensController.addCherryPicksForPoolWells(_cherryPickRequest,
-                                                         result.getParsedWellKeys());
-  }
-  
-  public String deleteCherryPickRequest()
-  {
-    return _screensController.deleteCherryPickRequest(_cherryPickRequest);
-  }
-  
-  public String deleteAllCherryPicks()
-  {
-    return _screensController.deleteAllScreenerCherryPicks(_cherryPickRequest);
-  }
-  
-  public String viewCherryPickRequestWellVolumes()
-  {
-    _screensController.viewCherryPickRequestWellVolumes(_cherryPickRequest, false);
-    // use the special wellVolumeSearchResult page that the cherryPickAdmin role
-    // can access (the normal wellVolumeSearchResult is restricted to the
-    // librariesAdmin role)
-    return VIEW_CHERRY_PICK_REQUEST_WELL_VOLUMES;
-  }
-  
-  public String viewCherryPickRequestWellVolumesForUnfulfilled()
-  {
-    _screensController.viewCherryPickRequestWellVolumes(_cherryPickRequest, true);
-    // use the special wellVolumeSearchResult page that the cherryPickAdmin role
-    // can access (the normal wellVolumeSearchResult is restricted to the
-    // librariesAdmin role)
-    return VIEW_CHERRY_PICK_REQUEST_WELL_VOLUMES;
-  }
-  
-  public String allocateCherryPicks()
-  {
-    return _screensController.allocateCherryPicks(_cherryPickRequest);
+    return _screenViewer.viewScreen(_cherryPickRequest.getScreen());
   }
 
+  @UIControllerMethod
+  public String addCherryPicksForWells()
+  {
+    PlateWellListParserResult result = _plateWellListParser.parseWellsFromPlateWellList(_cherryPicksInput);
+    // TODO: report errors
+    if (result.getErrors().size() > 0) {
+      showMessage("cherryPicks.parseError");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    return doAddCherryPicksForWells(_cherryPickRequest,
+                                    result.getParsedWellKeys(),
+                                    false);
+  }
+
+  @UIControllerMethod
+  public String addCherryPicksForPoolWells()
+  {
+    PlateWellListParserResult result = _plateWellListParser.parseWellsFromPlateWellList(_cherryPicksInput);
+    // TODO: report errors
+    if (result.getErrors().size() > 0) {
+      showMessage("cherryPicks.parseError");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    return doAddCherryPicksForWells(_cherryPickRequest,
+                                    result.getParsedWellKeys(),
+                                    true);
+  }
+
+  @UIControllerMethod
+  public String deleteCherryPickRequest()
+  {
+    if (_cherryPickRequest != null) {
+      try {
+        _cherryPickRequestDao.deleteCherryPickRequest(_cherryPickRequest);
+        return _screenViewer.viewScreen(_cherryPickRequest.getScreen());
+      }
+      catch (ConcurrencyFailureException e) {
+        showMessage("concurrentModificationConflict");
+      }
+      catch (DataAccessException e) {
+        showMessage("databaseOperationFailed", e.getMessage());
+      }
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  public String deleteAllCherryPicks()
+  {
+    try {
+      _dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          CherryPickRequest cherryPickRequest = _dao.reloadEntity(_cherryPickRequest,
+                                                                  false,
+                                                                  "labCherryPicks.sourceWell");
+          _dao.need(cherryPickRequest,
+                    "screenerCherryPicks.screenedWell",
+                    "screenerCherryPicks.RNAiKnockdownConfirmation");
+          if (cherryPickRequest.isAllocated()) {
+            throw new BusinessRuleViolationException("cherry picks cannot be deleted once a cherry pick request has been allocated");
+          }
+          Set<ScreenerCherryPick> cherryPicksToDelete = new HashSet<ScreenerCherryPick>(cherryPickRequest.getScreenerCherryPicks());
+          for (ScreenerCherryPick cherryPick : cherryPicksToDelete) {
+            _cherryPickRequestDao.deleteScreenerCherryPick(cherryPick);
+          }
+        }
+      });
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+
+    return viewCherryPickRequest(_cherryPickRequest);
+  }
+
+
+  @UIControllerMethod
+  public String viewCherryPickRequestWellVolumes()
+  {
+    return doViewCherryPickRequestWellVolumes(false);
+  }
+
+  @UIControllerMethod
+  public String viewCherryPickRequestWellVolumesForUnfulfilled()
+  {
+    return doViewCherryPickRequestWellVolumes(true);
+  }
+
+  @UIControllerMethod
+  public String allocateCherryPicks()
+  {
+    if (_cherryPickRequest.getMicroliterTransferVolumePerWellApproved() == null) {
+      showMessage("cherryPicks.approvedCherryPickVolumeRequired");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+
+    try {
+      Set<LabCherryPick> unfulfillable = _cherryPickRequestAllocator.allocate(_cherryPickRequest);
+      if (unfulfillable.size() == _cherryPickRequest.getLabCherryPicks().size()) {
+        showMessage("cherryPicks.allCherryPicksUnfulfillable");
+      }
+      else if (unfulfillable.size() > 0) {
+        showMessage("cherryPicks.someCherryPicksUnfulfillable");
+      }
+    }
+    catch (ConcurrencyFailureException e) {
+      showMessage("concurrentModificationConflict");
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return viewCherryPickRequest(_cherryPickRequest);
+  }
+
+  @UIControllerMethod
   public String deallocateCherryPicks()
   {
-    return _screensController.deallocateCherryPicks(_cherryPickRequest);
+    try {
+      _cherryPickRequestAllocator.deallocate(_cherryPickRequest);
+    }
+    catch (ConcurrencyFailureException e) {
+      showMessage("concurrentModificationConflict");
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return viewCherryPickRequest(_cherryPickRequest);
   }
-  
+
+  @UIControllerMethod
   public String deallocateCherryPicksByPlate()
   {
     if (!validateSelectedAssayPlates(VALIDATE_SELECTED_PLATES_FOR_DEALLOCATION)) {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    return _screensController.cancelAndDeallocateCherryPicksByPlate(_cherryPickRequest,
-                                                                    getSelectedAssayPlates(),
-                                                                    getLiquidTransferPerformedBy().getSelection(),
-                                                                    getDateOfLiquidTransfer(),
-                                                                    getLiquidTransferComments());
+    try {
+      _cherryPickRequestAllocator.cancelAndDeallocateAssayPlates(_cherryPickRequest,
+                                                                 getSelectedAssayPlates(),
+                                                                 getLiquidTransferPerformedBy().getSelection(),
+                                                                 getDateOfLiquidTransfer(),
+                                                                 getLiquidTransferComments());
+    }
+    catch (ConcurrencyFailureException e) {
+      showMessage("concurrentModificationConflict");
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return viewCherryPickRequest(_cherryPickRequest);
   }
-  
+
+  @UIControllerMethod
   public String plateMapCherryPicks()
   {
-    return _screensController.plateMapCherryPicks(_cherryPickRequest);
+    try {
+      _cherryPickRequestPlateMapper.generatePlateMapping(_cherryPickRequest);
+    }
+    catch (ConcurrencyFailureException e) {
+      showMessage("concurrentModificationConflict");
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return viewCherryPickRequest(_cherryPickRequest);
   }
 
   @SuppressWarnings("unchecked")
+  @UIControllerMethod
   public String selectAllAssayPlates()
   {
     List<AssayPlateRow> data = (List<AssayPlateRow>) getAssayPlatesDataModel().getWrappedData();
@@ -811,110 +1002,194 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
+  @UIControllerMethod
   public String downloadPlateMappingFilesForSelectedAssayPlates()
   {
     if (!validateSelectedAssayPlates(VALIDATE_SELECTED_PLATES_FOR_DOWNLOAD)) {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    return _screensController.downloadCherryPickRequestPlateMappingFiles(_cherryPickRequest, 
-                                                                         getSelectedAssayPlates());
+
+    final Set<CherryPickAssayPlate> plateNames = getSelectedAssayPlates();
+    if (plateNames.size() == 0) {
+      showMessage("cherryPicks.noPlatesSelected", "assayPlatesTable");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+
+    try {
+      _dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          CherryPickRequest cherryPickRequest = _dao.reloadEntity(_cherryPickRequest);
+          try {
+            if (cherryPickRequest != null) {
+              InputStream zipStream = _cherryPickRequestPlateMapFilesBuilder.buildZip(cherryPickRequest, plateNames);
+              JSFUtils.handleUserDownloadRequest(getFacesContext(),
+                                                 zipStream,
+                                                 "CherryPickRequest" + cherryPickRequest.getEntityId() + "_PlateMapFiles.zip",
+              "application/zip");
+            }
+          }
+          catch (IOException e)
+          {
+            reportApplicationError(e);
+          }
+          finally {
+          }
+        }
+      });
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
+  @UIControllerMethod
   public String recordLiquidTransferForSelectedAssayPlates()
   {
     if (!validateSelectedAssayPlates(VALIDATE_SELECTED_PLATES_FOR_LIQUID_TRANSFER)) {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    return _screensController.recordLiquidTransferForAssayPlates(_cherryPickRequest, 
-                                                                 getSelectedAssayPlates(),
-                                                                 getLiquidTransferPerformedBy().getSelection(),
-                                                                 getDateOfLiquidTransfer(),
-                                                                 getLiquidTransferComments());
+    try {
+      doRecordLiquidTransferForAssayPlates(getSelectedAssayPlates(),
+                                           getLiquidTransferPerformedBy().getSelection(),
+                                           getDateOfLiquidTransfer(),
+                                           getLiquidTransferComments(),
+                                           true);
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return viewCherryPickRequest(_cherryPickRequest);
   }
-  
+
+  @UIControllerMethod
   public String recordFailureOfAssayPlates()
   {
     if (!validateSelectedAssayPlates(VALIDATE_SELECTED_PLATES_FOR_LIQUID_TRANSFER)) {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    return _screensController.recordFailureOfAssayPlates(_cherryPickRequest,
-                                                         getSelectedAssayPlates(),
-                                                         getLiquidTransferPerformedBy().getSelection(),
-                                                         getDateOfLiquidTransfer(),
-                                                         getLiquidTransferComments());
+
+    // create new assay plates, duplicating plate name, lab cherry picks with same layout but new copy selection, incrementing attempt ordinal
+    try {
+      _dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          Set<CherryPickAssayPlate> selectedAssayPlates = getSelectedAssayPlates();
+          doRecordLiquidTransferForAssayPlates(selectedAssayPlates,
+                                               getLiquidTransferPerformedBy().getSelection(),
+                                               getDateOfLiquidTransfer(),
+                                               getLiquidTransferComments(),
+                                               false);
+
+          boolean someCherryPicksUnfulfillable = false;
+          for (CherryPickAssayPlate assayPlate : selectedAssayPlates) {
+            _dao.reattachEntity(assayPlate);
+
+            // Construct a CherryPickAssayPlate from an existing one, preserving the
+            // plate ordinal and plate type, but incrementing the attempt ordinal. The new
+            // assay plate will have a new set of lab cherry picks that duplicate the
+            // original plate's lab cherry picks, preserving their original well layout,
+            // and allocated anew.
+            // TODO: protect against race condition (should enforce at schema level)
+            CherryPickAssayPlate newAssayPlate = (CherryPickAssayPlate) assayPlate.clone();
+            for (LabCherryPick labCherryPick : assayPlate.getLabCherryPicks()) {
+              LabCherryPick newLabCherryPick = new LabCherryPick(labCherryPick.getScreenerCherryPick(),
+                                                                 labCherryPick.getSourceWell());
+              _dao.persistEntity(newLabCherryPick);
+              if (!_cherryPickRequestAllocator.allocate(newLabCherryPick)) {
+                someCherryPicksUnfulfillable = true;
+              } else {
+                newLabCherryPick.setMapped(newAssayPlate,
+                                           labCherryPick.getAssayPlateRow(),
+                                           labCherryPick.getAssayPlateColumn());
+              }
+            }
+          }
+          if (someCherryPicksUnfulfillable) {
+            showMessage("cherryPicks.someCherryPicksUnfulfillable");
+          }
+        }
+      });
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    return viewCherryPickRequest(_cherryPickRequest);
   }
-  
+
+  @UIControllerMethod
   public String downloadCherryPickRequest()
   {
-    return _screensController.downloadCherryPickRequest(_cherryPickRequest);
+    if (_cherryPickRequest instanceof RNAiCherryPickRequest) {
+      try {
+        jxl.Workbook workbook = _cherryPickRequestExporter.exportRNAiCherryPickRequest((RNAiCherryPickRequest) _cherryPickRequest);
+        JSFUtils.handleUserDownloadRequest(getFacesContext(),
+                                           Workbook2Utils.toInputStream(workbook),
+                                           _cherryPickRequest.getClass().getSimpleName() + "-" + _cherryPickRequest.getCherryPickRequestNumber() + ".xls",
+                                           Workbook.MIME_TYPE);
+      }
+      catch (Exception e) {
+        reportSystemError(e);
+      }
+    }
+    else {
+      showMessage("systemError", "downloading of compound cherry pick requests is not yet implemented");
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @SuppressWarnings("unchecked")
-  private boolean validateSelectedAssayPlates(String validationType)
-  {
-    Set<CherryPickAssayPlate> selectedAssayPlates = getSelectedAssayPlates();
-    if (selectedAssayPlates.size() == 0) {
-      showMessage("cherryPicks.noPlatesSelected", "assayPlatesTable");
-      return false;
-    }
-    
-    boolean adjustSelection = false;
-    for (Iterator iter = selectedAssayPlates.iterator(); iter.hasNext();) {
-      CherryPickAssayPlate assayPlate = (CherryPickAssayPlate) iter.next();
-      if (validationType.equals(VALIDATE_SELECTED_PLATES_FOR_DEALLOCATION)) {
-        if (assayPlate.isFailed() || assayPlate.isPlated() || assayPlate.isCanceled()) {
-          showMessageForComponent("cherryPicks.deallocateActiveMappedPlatesOnly", 
-                                  "assayPlatesTable", 
-                                  assayPlate.getName());
-          iter.remove();
-          adjustSelection = true;
-        }
-      }
-      else if (validationType.equals(VALIDATE_SELECTED_PLATES_FOR_DOWNLOAD)) {
-        if (assayPlate.isFailed()) {
-          showMessageForComponent("cherryPicks.downloadActiveMappedPlatesOnly", 
-                                  "assayPlatesTable", 
-                                  assayPlate.getName());
-          iter.remove();
-          adjustSelection = true;
-        }
-      }
-      else if (validationType.equals(VALIDATE_SELECTED_PLATES_FOR_LIQUID_TRANSFER)) {
-        if (assayPlate.getLabCherryPicks().size() == 0 && 
-          !(assayPlate instanceof LegacyCherryPickAssayPlate)) {
-          // this can happen if an assay plate failed, was re-run, but no lab cherry picks could be allocated for the new plate 
-          iter.remove();
-          showMessageForComponent("cherryPicks.assayPlateEmpty", 
-                                  "assayPlatesTable", 
-                                  assayPlate.getName());
-          adjustSelection = true;
-        }
-        else if (assayPlate.isPlated() || assayPlate.isFailed() || assayPlate.isCanceled()) {
-          iter.remove();
-          showMessageForComponent("cherryPicks.assayPlateAlreadyPlatedFailedCanceled", 
-                                  "assayPlatesTable", 
-                                  assayPlate.getName());
-          adjustSelection = true;
-        }
-      }
-    }
-    
-    if (adjustSelection) {
-      List<AssayPlateRow> data = (List<AssayPlateRow>) getAssayPlatesDataModel().getWrappedData();
-      for (AssayPlateRow row : data) {
-        if (row.isSelected() && !selectedAssayPlates.contains(row.getAssayPlate())) {
-          row.setSelected(false);
-        }
-      }
-    }
-    
-    return !adjustSelection;
-  }
 
+  @UIControllerMethod
   public String createNewCherryPickRequestForUnfulfilledCherryPicks()
   {
-    return _screensController.createNewCherryPickRequestForUnfulfilledCherryPicks(_cherryPickRequest);
+    final CherryPickRequest[] result = new CherryPickRequest[1];
+    try {
+      _dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(_cherryPickRequest);
+          CherryPickRequest newCherryPickRequest = cherryPickRequest.getScreen().createCherryPickRequest();
+          newCherryPickRequest.setComments("Created for unfulfilled cherry picks in Cherry Pick Request " +
+                                           cherryPickRequest.getCherryPickRequestNumber());
+          // TODO: this might be better done in a copy constructor
+          newCherryPickRequest.setMicroliterTransferVolumePerWellApproved(cherryPickRequest.getMicroliterTransferVolumePerWellApproved());
+          newCherryPickRequest.setMicroliterTransferVolumePerWellRequested(cherryPickRequest.getMicroliterTransferVolumePerWellRequested());
+          newCherryPickRequest.setVolumeApprovedBy(cherryPickRequest.getVolumeApprovedBy());
+          newCherryPickRequest.setDateVolumeApproved(cherryPickRequest.getDateVolumeApproved());
+          newCherryPickRequest.setDateRequested(new Date());
+          newCherryPickRequest.setRandomizedAssayPlateLayout(cherryPickRequest.isRandomizedAssayPlateLayout());
+          newCherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(new HashSet<Integer>(cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate()));
+          newCherryPickRequest.setRequestedBy(cherryPickRequest.getRequestedBy());
+          // note: we can only instantiate one new ScreenerCherryPick per *set*
+          // of LabCherryPicks from the same screenedWell, otherwise we'll
+          // (appropriately) get a DuplicateEntityException
+          for (ScreenerCherryPick screenerCherryPick : cherryPickRequest.getScreenerCherryPicks()) {
+            ScreenerCherryPick newScreenerCherryPick = null;
+            for (LabCherryPick labCherryPick : screenerCherryPick.getLabCherryPicks()) {
+              if (!labCherryPick.isAllocated() && !labCherryPick.isCanceled()) {
+                if (newScreenerCherryPick == null) {
+                  newScreenerCherryPick = new ScreenerCherryPick(newCherryPickRequest,
+                                                                 labCherryPick.getScreenerCherryPick().getScreenedWell());
+                }
+                new LabCherryPick(newScreenerCherryPick, labCherryPick.getSourceWell());
+              }
+            }
+          }
+          _dao.persistEntity(newCherryPickRequest);
+          result[0] = newCherryPickRequest;
+        }
+      });
+      return viewCherryPickRequest(result[0]);
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
   }
 
 //  public String createNewCherryPickRequestForSelectedAssayPlates()
@@ -923,37 +1198,71 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 //    return REDISPLAY_PAGE_ACTION_RESULT;
 //  }
 
+  @UIControllerMethod
   public String viewLeadScreener()
   {
     // TODO
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
+  @UIControllerMethod
   public String setEditMode()
   {
     _isEditMode = true;
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    try {
+      _dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          _dao.reattachEntity(_cherryPickRequest); // checks if up-to-date
+          //_dao.need(cherryPickRequest, "");
+        }
+      });
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    catch (ConcurrencyFailureException e) {
+      showMessage("concurrentModificationConflict");
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    // on error, reload
+    return viewCherryPickRequest(_cherryPickRequest);
   }
-  
+
+  @UIControllerMethod
   public String cancelEdit() {
-    // edits are discarded (and edit mode is cancelled) by virtue of controller reloading the screen entity from the database
-    return _screensController.viewCherryPickRequest(_cherryPickRequest);
+    // edits are discarded (and edit mode is canceled) by virtue of controller reloading the screen entity from the database
+    return viewCherryPickRequest(_cherryPickRequest);
   }
-  
+
+  @UIControllerMethod
   public String save() {
     _isEditMode = false;
-    return _screensController.saveCherryPickRequest(_cherryPickRequest,
-                                                    new DAOTransaction() 
-    {
-      public void runTransaction() 
+
+    try {
+      _dao.doInTransaction(new DAOTransaction()
       {
-        _cherryPickRequest.setRequestedBy(_requestedBy.getSelection());
-        _cherryPickRequest.setVolumeApprovedBy(_volumeApprovedBy.getSelection());
-        _cherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(new HashSet<Integer>(_emptyColumnsOnAssayPlate.getSelections()));
-      }
-    });
+        public void runTransaction()
+        {
+          _dao.reattachEntity(_cherryPickRequest);
+          _cherryPickRequest.setRequestedBy(_requestedBy.getSelection());
+          _cherryPickRequest.setVolumeApprovedBy(_volumeApprovedBy.getSelection());
+          _cherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(new HashSet<Integer>(_emptyColumnsOnAssayPlate.getSelections()));
+        }
+      });
+    }
+    catch (ConcurrencyFailureException e) {
+      showMessage("concurrentModificationConflict");
+      viewCherryPickRequest(_cherryPickRequest);
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+      viewCherryPickRequest(_cherryPickRequest);
+    }
+    return VIEW_CHERRY_PICK_REQUEST_ACTION_RESULT;
   }
-  
+
 
   // protected methods
 
@@ -975,5 +1284,197 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       }
     }
     return selectedAssayPlates;
+  }
+
+  @SuppressWarnings("unchecked")
+  private boolean validateSelectedAssayPlates(String validationType)
+  {
+    Set<CherryPickAssayPlate> selectedAssayPlates = getSelectedAssayPlates();
+    if (selectedAssayPlates.size() == 0) {
+      showMessage("cherryPicks.noPlatesSelected", "assayPlatesTable");
+      return false;
+    }
+
+    boolean adjustSelection = false;
+    for (Iterator iter = selectedAssayPlates.iterator(); iter.hasNext();) {
+      CherryPickAssayPlate assayPlate = (CherryPickAssayPlate) iter.next();
+      if (validationType.equals(VALIDATE_SELECTED_PLATES_FOR_DEALLOCATION)) {
+        if (assayPlate.isFailed() || assayPlate.isPlated() || assayPlate.isCanceled()) {
+          showMessageForComponent("cherryPicks.deallocateActiveMappedPlatesOnly",
+                                  "assayPlatesTable",
+                                  assayPlate.getName());
+          iter.remove();
+          adjustSelection = true;
+        }
+      }
+      else if (validationType.equals(VALIDATE_SELECTED_PLATES_FOR_DOWNLOAD)) {
+        if (assayPlate.isFailed()) {
+          showMessageForComponent("cherryPicks.downloadActiveMappedPlatesOnly",
+                                  "assayPlatesTable",
+                                  assayPlate.getName());
+          iter.remove();
+          adjustSelection = true;
+        }
+      }
+      else if (validationType.equals(VALIDATE_SELECTED_PLATES_FOR_LIQUID_TRANSFER)) {
+        if (assayPlate.getLabCherryPicks().size() == 0 &&
+          !(assayPlate instanceof LegacyCherryPickAssayPlate)) {
+          // this can happen if an assay plate failed, was re-run, but no lab cherry picks could be allocated for the new plate
+          iter.remove();
+          showMessageForComponent("cherryPicks.assayPlateEmpty",
+                                  "assayPlatesTable",
+                                  assayPlate.getName());
+          adjustSelection = true;
+        }
+        else if (assayPlate.isPlated() || assayPlate.isFailed() || assayPlate.isCanceled()) {
+          iter.remove();
+          showMessageForComponent("cherryPicks.assayPlateAlreadyPlatedFailedCanceled",
+                                  "assayPlatesTable",
+                                  assayPlate.getName());
+          adjustSelection = true;
+        }
+      }
+    }
+
+    if (adjustSelection) {
+      List<AssayPlateRow> data = (List<AssayPlateRow>) getAssayPlatesDataModel().getWrappedData();
+      for (AssayPlateRow row : data) {
+        if (row.isSelected() && !selectedAssayPlates.contains(row.getAssayPlate())) {
+          row.setSelected(false);
+        }
+      }
+    }
+
+    return !adjustSelection;
+  }
+
+  private String doAddCherryPicksForWells(final CherryPickRequest _cherryPickRequest,
+                                          final Set<WellKey> cherryPickWellKeys,
+                                          final boolean arePoolWells)
+  {
+    assert !arePoolWells || _cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI);
+
+    try {
+      _dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(_cherryPickRequest);
+          if (cherryPickRequest.isAllocated()) {
+            throw new BusinessRuleViolationException("cherry picks cannot be added to a cherry pick request that has already been allocated");
+          }
+
+          for (WellKey wellKey : cherryPickWellKeys) {
+            Well well = _dao.findEntityById(Well.class,
+                                            wellKey.toString(),
+                                            true,
+                                            // needed by libraryPoolToDuplexWellMapper, below
+                                            "hbnSilencingReagents.hbnWells.hbnSilencingReagents.gene",
+                                            "hbnSilencingReagents.gene");
+            if (well == null) {
+              throw new InvalidCherryPickWellException(wellKey, "no such well");
+            }
+            else {
+              ScreenerCherryPick screenerCherryPick = new ScreenerCherryPick(cherryPickRequest, well);
+              if (!arePoolWells) {
+                new LabCherryPick(screenerCherryPick, well);
+              }
+            }
+          }
+
+          if (arePoolWells) {
+            _libraryPoolToDuplexWellMapper.createDuplexLabCherryPicksforPoolScreenerCherryPicks((RNAiCherryPickRequest) cherryPickRequest);
+          }
+
+
+        }
+      });
+
+      doWarnOnInvalidPoolWellScreenerCherryPicks(_cherryPickRequest);
+      doWarnOnDuplicateScreenerCherryPicks(_cherryPickRequest);
+
+
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+    }
+    catch (InvalidCherryPickWellException e) {
+      showMessage("cherryPicks.invalidWell", e.getWellKey());
+    }
+    catch (BusinessRuleViolationException e) {
+      showMessage("businessError", e.getMessage());
+    }
+    return viewCherryPickRequest(_cherryPickRequest);
+  }
+
+  private void doRecordLiquidTransferForAssayPlates(final Set<CherryPickAssayPlate> selectedAssayPlates,
+                                                    final ScreensaverUser performedByIn,
+                                                    final Date dateOfLiquidTransfer,
+                                                    final String comments,
+                                                    final boolean success)
+  {
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(_cherryPickRequest);
+        ScreensaverUser performedBy = _dao.reloadEntity(performedByIn);
+        CherryPickLiquidTransfer liquidTransfer = new CherryPickLiquidTransfer(performedBy,
+                                                                               new Date(),
+                                                                               dateOfLiquidTransfer,
+                                                                               cherryPickRequest,
+                                                                               success ? CherryPickLiquidTransferStatus.SUCCESSFUL : CherryPickLiquidTransferStatus.FAILED);
+        liquidTransfer.setComments(comments);
+        for (CherryPickAssayPlate assayPlate : selectedAssayPlates) {
+          if (!assayPlate.getCherryPickRequest().equals(cherryPickRequest)) {
+            throw new IllegalArgumentException("all assay plates must be from the specified cherry pick request");
+          }
+          if (assayPlate.isPlated()) {
+            throw new BusinessRuleViolationException("cannot record successful liquid transfer more than once for a cherry pick assay plate");
+          }
+          assayPlate.setCherryPickLiquidTransfer(liquidTransfer);
+        }
+        _dao.persistEntity(liquidTransfer); // necessary?
+      }
+    });
+  }
+
+  private void doWarnOnInvalidPoolWellScreenerCherryPicks(CherryPickRequest _cherryPickRequest)
+  {
+    int n = 0;
+    for (ScreenerCherryPick screenerCherryPick : _cherryPickRequest.getScreenerCherryPicks()) {
+      if (screenerCherryPick.getLabCherryPicks().size() == 0) {
+        ++n;
+      }
+    }
+    if (n > 0) {
+      showMessage("cherryPicks.poolWellsWithoutDuplexWells", Integer.toString(n));
+    }
+  }
+
+  private void doWarnOnDuplicateScreenerCherryPicks(final CherryPickRequest _cherryPickRequest)
+  {
+    Map<WellKey,Number> duplicateScreenerCherryPickWellKeysMap = _cherryPickRequestDao.findDuplicateCherryPicksForScreen(_cherryPickRequest.getScreen());
+    Set<WellKey> duplicateScreenerCherryPickWellKeys = duplicateScreenerCherryPickWellKeysMap.keySet();
+    Set<WellKey> ourScreenerCherryPickWellsKeys = new HashSet<WellKey>();
+    for (ScreenerCherryPick screenerCherryPick : _cherryPickRequest.getScreenerCherryPicks()) {
+      ourScreenerCherryPickWellsKeys.add(screenerCherryPick.getScreenedWell().getWellKey());
+    }
+    duplicateScreenerCherryPickWellKeys.retainAll(ourScreenerCherryPickWellsKeys);
+    if (duplicateScreenerCherryPickWellKeysMap.size() > 0) {
+      String duplicateWellsList = StringUtils.makeListString(duplicateScreenerCherryPickWellKeys, ", ");
+      showMessage("cherryPicks.duplicateCherryPicksInScreen", _cherryPickRequest.getScreen().getScreenNumber(), duplicateWellsList);
+    }
+  }
+
+  private String doViewCherryPickRequestWellVolumes(boolean forUnfulfilledOnly)
+  {
+    Collection<WellCopyVolume> wellCopyVolumes =
+      _librariesDao.findWellCopyVolumes(_cherryPickRequest, forUnfulfilledOnly);
+    _wellCopyVolumesBrowser.setContents(wellCopyVolumes);
+    // use the special wellVolumeSearchResult page that the cherryPickAdmin role
+    // can access (the normal wellVolumeSearchResult is restricted to the
+    // librariesAdmin role)
+    return VIEW_CHERRY_PICK_REQUEST_WELL_VOLUMES;
   }
 }

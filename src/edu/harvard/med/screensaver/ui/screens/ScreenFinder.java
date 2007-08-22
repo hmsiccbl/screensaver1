@@ -2,15 +2,17 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.control.ScreensController;
+import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 
 import org.apache.log4j.Logger;
 
@@ -21,29 +23,38 @@ import org.apache.log4j.Logger;
  */
 public class ScreenFinder extends AbstractBackingBean
 {
-  
+
   // private static final fields
-  
+
   private static final Logger log = Logger.getLogger(ScreenFinder.class);
-  
-  
+
+
   // private instance fields
-  
-  private ScreensController _screensController;
+
+  private GenericEntityDAO _dao;
+  private ScreenViewer _screenViewer;
+
   private Integer _screenNumber;
 
-  
+
+  // constructors
+
+  /**
+   * @motivation for CGLIB2
+   */
+  protected ScreenFinder()
+  {
+  }
+
+  public ScreenFinder(GenericEntityDAO dao,
+                      ScreenViewer screenViewer)
+  {
+    _dao = dao;
+    _screenViewer = screenViewer;
+  }
+
+
   // public instance methods
-  
-  public ScreensController getScreensController()
-  {
-    return _screensController;
-  }
-  
-  public void setScreensController(ScreensController screensController)
-  {
-    _screensController = screensController;
-  }
 
   public Integer getScreenNumber()
   {
@@ -55,13 +66,24 @@ public class ScreenFinder extends AbstractBackingBean
     _screenNumber = screenNumber;
   }
 
-  /**
-   * Find the screen with the specified screen number, and go to the appropriate next
-   * page depending on the result.
-   * @return the control code for the appropriate next page
-   */
+  @UIControllerMethod
   public String findScreen()
   {
-    return _screensController.findScreen(_screenNumber);
+    if (_screenNumber != null) {
+      Screen screen = _dao.findEntityByProperty(Screen.class,
+                                                "hbnScreenNumber",
+                                                _screenNumber);
+      if (screen != null) {
+        return _screenViewer.viewScreen(screen);
+      }
+      else {
+        showMessage("noSuchEntity",
+                    "Screen " + _screenNumber);
+      }
+    }
+    else {
+      showMessage("screens.screenNumberRequired", _screenNumber);
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 }

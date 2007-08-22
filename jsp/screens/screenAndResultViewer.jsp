@@ -11,10 +11,9 @@
 
 <f:subview id="screenAndResultViewer">
 
-	<t:aliasBean alias="#{navigator}"
-		value="#{screensBrowser.searchResults}">
+	<t:aliasBean alias="#{navigator}" value="#{screensBrowser}">
 		<h:form id="navPanelForm">
-			<%@ include file="../searchResultsNavPanel.jspf" %>
+			<%@ include file="../searchResultsNavPanel.jspf"%>
 		</h:form>
 	</t:aliasBean>
 
@@ -96,8 +95,8 @@
 
 				<t:panelGrid columns="2" styleClass="standardTable"
 					columnClasses="keyColumn,textColumn" rowClasses="row1,row2">
-					<%-- as long as screenResult.dateCreated is synonymous with "first screening room activity date", 
-				       there's no point in displaying this redundant field, as screening room activities, with their assoicated dates, are 
+					<%-- as long as screenResult.dateCreated is synonymous with "first screening room activity date",
+				       there's no point in displaying this redundant field, as screening room activities, with their assoicated dates, are
 				       shown in screen panel --%>
 					<%--t:outputLabel for="screenResultDateCreated"
 						value="Date of first screning room activity" styleClass="keyColumn" />
@@ -265,7 +264,7 @@
 								value="#{screenResultViewer.dataTableRowsPerPage.selectItems}" />
 						</t:selectOneMenu>
 						<t:outputText value=" per page" styleClass="label" />
-						
+
 					</t:panelGroup>
 
 					<t:panelGroup id="dataTableCommandPanel" styleClass="commandPanel">
@@ -301,7 +300,7 @@
 
 					</t:panelGroup>
 
-					<t:dataTable id="resultValuesDataTable" 
+					<t:dataTable id="resultValuesDataTable"
 						binding="#{screenResultViewer.dataTable}"
 						value="#{screenResultViewer.dataTableModel}" var="row"
 						rows="#{screenResultViewer.dataTableRowsPerPage.selection}"

@@ -2,15 +2,17 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
+import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.control.ScreensController;
+import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 
 import org.apache.log4j.Logger;
 
@@ -21,29 +23,38 @@ import org.apache.log4j.Logger;
  */
 public class CherryPickRequestFinder extends AbstractBackingBean
 {
-  
+
   // private static final fields
-  
+
   private static final Logger log = Logger.getLogger(CherryPickRequestFinder.class);
-  
-  
+
+
   // private instance fields
-  
-  private ScreensController _screensController;
+
+  private CherryPickRequestDAO _cherryPickRequestDao;
+  private CherryPickRequestViewer _cherryPickRequestViewer;
+
   private Integer _cherryPickRequestNumber;
 
-  
+
+  // constructors
+
+  /**
+   * @motivation for CGLIB2
+   */
+  protected CherryPickRequestFinder()
+  {
+  }
+
+  public CherryPickRequestFinder(CherryPickRequestDAO cherryPickRequestDao,
+                                 CherryPickRequestViewer cherryPickRequestViewer)
+  {
+    _cherryPickRequestDao = cherryPickRequestDao;
+    _cherryPickRequestViewer = cherryPickRequestViewer;
+  }
+
+
   // public instance methods
-  
-  public ScreensController getScreensController()
-  {
-    return _screensController;
-  }
-  
-  public void setScreensController(ScreensController screensController)
-  {
-    _screensController = screensController;
-  }
 
   public Integer getCherryPickRequestNumber()
   {
@@ -55,13 +66,23 @@ public class CherryPickRequestFinder extends AbstractBackingBean
     _cherryPickRequestNumber = screenNumber;
   }
 
-  /**
-   * Find the screen with the specified screen number, and go to the appropriate next
-   * page depending on the result.
-   * @return the control code for the appropriate next page
-   */
+  @UIControllerMethod
   public String findCherryPickRequest()
   {
-    return _screensController.findCherryPickRequest(_cherryPickRequestNumber);
+    if (_cherryPickRequestNumber != null) {
+      CherryPickRequest cherryPickRequest = _cherryPickRequestDao.findCherryPickRequestByNumber(_cherryPickRequestNumber);
+      if (cherryPickRequest != null) {
+        return _cherryPickRequestViewer.viewCherryPickRequest(cherryPickRequest);
+      }
+      else {
+        showMessage("noSuchEntity",
+                    "Cherry Pick Request " + _cherryPickRequestNumber);
+      }
+    }
+    else {
+      showMessage("cherryPickRequests.cherryPickRequestNumberRequired",
+                  _cherryPickRequestNumber);
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 }

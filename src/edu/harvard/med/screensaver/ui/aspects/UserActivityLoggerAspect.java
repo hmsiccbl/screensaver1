@@ -1,5 +1,5 @@
-// $HeadURL:$
-// $Id:$
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //
@@ -9,8 +9,13 @@
 
 package edu.harvard.med.screensaver.ui.aspects;
 
+import java.util.Arrays;
+import java.util.List;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
+import edu.harvard.med.screensaver.ui.EntityViewer;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.aspectj.lang.JoinPoint;
 
@@ -33,11 +38,17 @@ public class UserActivityLoggerAspect extends OrderedAspect
 
   public void logUserActivity(JoinPoint joinPoint)
   {
-    AbstractEntity entity = null;
-    if (joinPoint.getArgs().length > 0 &&
-      joinPoint.getArgs()[0] instanceof AbstractEntity) {
-      entity = (AbstractEntity) joinPoint.getArgs()[0];
+    StringBuilder s = new StringBuilder();
+    s.append(joinPoint.getSignature().getName());
+
+    Object target = joinPoint.getTarget();
+    if (target instanceof EntityViewer) {
+      EntityViewer entityViewer = (EntityViewer) target;
+      AbstractEntity entity = entityViewer.getEntity();
+      s.append(": ").append(entity);
     }
-    _currentScreensaverUser.logActivity(joinPoint.getSignature().getName() + (entity == null ? "" : ": " + entity));
+    List<Object> args = Arrays.asList(joinPoint.getArgs());
+    s.append(" ").append(StringUtils.makeListString(args, ", "));
+    _currentScreensaverUser.logActivity(s.toString());
   }
 }
