@@ -10,6 +10,12 @@
 	  </p>
 		<dl>
 			<dt>
+        <span class="newsDate">2007.Aug.24, v1.1.0</span>
+      </dt>
+      <dd>
+				Screensaver released as open source project.
+			</dd>
+			<dt>
         <span class="newsDate">2007.Aug.6</span>
       </dt>
       <dd>
