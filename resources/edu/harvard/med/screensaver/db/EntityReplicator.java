@@ -69,8 +69,8 @@ public class EntityReplicator
   {
     CommandLineApplication app = new CommandLineApplication(args);
     addDestinationDatabaseOptions(app);
-    app.addCommandLineOption(OptionBuilder.isRequired().hasArgs().withArgName("entity class name").withDescription("the fully qualified class name of the entity type to load").create("e"));
-    app.addCommandLineOption(OptionBuilder.isRequired().hasArgs().withArgName("id").withDescription("the entity identifier").create("i"));
+    app.addCommandLineOption(OptionBuilder.isRequired().hasArg().withArgName("entity class name").withDescription("the fully qualified class name of the entity type to load").create("e"));
+    app.addCommandLineOption(OptionBuilder.isRequired().hasArgs().withArgName("id(s)").withDescription("the entity identifier(s)").create("i"));
     app.addCommandLineOption(OptionBuilder.hasArgs().withArgName("relationships").withDescription("the relationships to fetch").create("r"));
 
     if (!app.processOptions(true, true)) {
@@ -87,21 +87,30 @@ public class EntityReplicator
       System.exit(1);
     }
     final Class<? extends AbstractEntity> entityClass = entityMetadata.getMappedClass(EntityMode.POJO);
-    final Integer id = app.getCommandLineOptionValue("i", Integer.class);
+    final List<String> ids = app.getCommandLineOptionValues("i");
     final List<String> relationships = app.getCommandLineOptionValues("r");
-    dao.doInTransaction(new DAOTransaction() {
-      public void runTransaction() {
-        AbstractEntity entity1 = dao.findEntityById(entityClass, id);
-        for (String relationshipGroup : relationships) {
-          String[] relationships = relationshipGroup.split(",");
-          dao.needReadOnly(entity1, relationships);
-        }
-        log.info("retrieved " + entity1 + " from source database");
-        entityToReplicate[0] = entity1;
-      }
-    });
     EntityReplicator replicator = new EntityReplicator(sessionFactory);
-    replicator.replicateEntity(entityToReplicate[0]);
+    for (final String id : ids) {
+      dao.doInTransaction(new DAOTransaction() {
+        public void runTransaction() {
+          Integer numericId;
+          try {
+            numericId = Integer.parseInt(id);
+          }
+          catch (Exception e) {
+            throw new IllegalArgumentException("id " + id + " is not numeric");
+          }
+          AbstractEntity srcEntity = dao.findEntityById(entityClass, numericId); // TODO: not all entities have Integer IDs!
+          for (String relationshipGroup : relationships) {
+            String[] relationships = relationshipGroup.split(",");
+            dao.needReadOnly(srcEntity, relationships);
+          }
+          log.info("retrieved " + srcEntity + " from source database");
+          entityToReplicate[0] = srcEntity;
+        }
+      } );
+      replicator.replicateEntity(entityToReplicate[0]);
+    }
   }
 
   @SuppressWarnings("static-access")
