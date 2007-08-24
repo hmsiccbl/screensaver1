@@ -50,6 +50,8 @@ lib/               Java JAR (library) files.  Subdirectories reflect origins of
                    'unused' contain JARs that are not depended upon by the 
                    project's source code or third-party libraries.
 
+licenses/          Software licenses for redistributed software.
+
 resources/         Java resource files; i.e., files that can found within the 
                    project's Java classpath via Java's resource loading
                    mechanism.  Many files in this directory tree are generated
