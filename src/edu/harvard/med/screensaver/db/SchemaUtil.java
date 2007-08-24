@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -37,21 +37,21 @@ import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 
 /**
  * Utility for manipulating schemas, via Spring+Hibernate.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
 {
-  
+
   // static fields
 
   private static Logger log = Logger.getLogger(SchemaUtil.class);
   private static String INITIALIZE_DATABASE_DIR = "/sql/initialize_database";
-  
-  
+
+
   // static methods
-  
+
   @SuppressWarnings("static-access")
   public static void main(String[] args)
   {
@@ -80,12 +80,12 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
       if (!app.processOptions(/*acceptDatabaseOptions=*/true, /*showHelpOnError=*/true)) {
         return;
       }
-      
+
       boolean canInitialize = true; // do not allow initialize 'drop' invoked w/o 'create'
-      
+
       if (app.isCommandLineFlagSet("recreate")) {
         app.getSpringBean("schemaUtil", SchemaUtil.class).recreateSchema();
-      } 
+      }
       else {
         if (app.isCommandLineFlagSet("drop")) {
           app.getSpringBean("schemaUtil", SchemaUtil.class).dropSchema();
@@ -111,24 +111,24 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
 
 
   // instance fields
-  
+
   /**
    * The Spring application context.
-   * 
+   *
    * @motivation Needed to get a Hibernate SessionFactory from Spring. Normal
-   *             injection of a SessionFactory is problematic, as Spring 
+   *             injection of a SessionFactory is problematic, as Spring
    *             treats factory beans as special cases, and injects the
    *             product of the factory, rather than the factory itself.
    */
   private ApplicationContext _appCtx;
-  
+
   private LocalSessionFactoryBean _sessionFactory;
 
   private String _sessionFactoryBeanId;
-  
+
   private UsersDAO _usersDao;
 
-  
+
   public void setSessionFactoryBeanId(String sessionFactoryBeanId)
   {
     // we go through some hoops to get the sessionFactory bean, because Spring
@@ -138,7 +138,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
     // not its product" in Spring 1.2.x. reference manual.
     _sessionFactoryBeanId = sessionFactoryBeanId;
   }
-  
+
   /**
    * Setter for applicationContext Property.
    */
@@ -147,7 +147,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
   {
     _appCtx = applicationContext;
   }
-  
+
   public void setUsersDao(UsersDAO usersDao)
   {
     _usersDao = usersDao;
@@ -161,7 +161,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
     log.info("dropping schema for " + makeDataSourceString());
     getLocalSessionFactoryBean().dropDatabaseSchema();
   }
-  
+
   /**
    * Create the schema that is configured for this Spring+Hibernate enabled project.
    */
@@ -170,7 +170,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
     log.info("creating schema for " + makeDataSourceString());
     getLocalSessionFactoryBean().createDatabaseSchema();
   }
-  
+
   /**
    * Initialize the database by running SQL initialization scripts
    */
@@ -198,10 +198,13 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
         File file = new File(directory, filename);
         BufferedReader reader =
           new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-        
+
         Statement statement = connection.createStatement();
         String line;
         while ((line = reader.readLine()) != null) {
+          if (isComment(line)) {
+            continue;
+          }
           if (line.endsWith(";")) {
             log.debug("executing sql = " + line);
             statement.execute(line);
@@ -229,7 +232,12 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
       releaseSession(session);
     }
   }
-  
+
+  private boolean isComment(String line)
+  {
+    return line.matches("^\\s*(//|/\\*).*");
+  }
+
   /**
    * Drop and create (in that order) the schema that is configured for this
    * Spring+Hibernate enabled project.
@@ -240,7 +248,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
     createSchema();
     initializeDatabase();
   }
-  
+
   /**
    * Truncate all the tables in the schema. If there are no tables in the schema, then
    * {@link #createSchema() create the schema}.
@@ -252,7 +260,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
     log.info("truncating tables for " + makeDataSourceString());
     Session session = getSession();
     Connection connection = session.connection();
-    
+
     try {
       String sql = "TRUNCATE TABLE " + getCommaSepratedTableList();
       if (sql.equals("TRUNCATE TABLE ")) { // no tables in the schema
@@ -293,7 +301,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
     log.info("granting developer permissions for " + makeDataSourceString());
     Session session = getSession();
     Connection connection = session.connection();
-    
+
     try {
       String tableList = getCommaSepratedTableList();
       if (tableList.equals("")) {
@@ -308,7 +316,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
       {
         sql += eCommonsId + ", ";
       }
-      
+
       sql = sql.substring(0, sql.length() - 2);
 
       Statement statement = connection.createStatement();
@@ -334,12 +342,12 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
     }
   }
 
-  
+
   // private methods
-  
+
   /**
    * Lazy acquisition of LocalSessionFactoryBean.
-   * 
+   *
    * @motivation bean properties are not set in a deterministic order, but we
    *             depend upon multiple properties.
 
@@ -357,14 +365,14 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
     Session session = getSession();
     try {
       Connection connection = session.connection();
-      
+
       String connectionUrl = connection.getMetaData().getURL();
       String connectionUserName = connection.getMetaData().getUserName();
       String dataSourceString = connectionUserName + "@" + connectionUrl;
-      
+
       // QUESTION: any need to close the connection? test suite stalling problem goes
       // away whether or not i close the conn. -s
-      
+
       return dataSourceString;
     }
     catch (SQLException e) {
@@ -375,7 +383,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
       releaseSession(session);
     }
   }
-  
+
   /**
    * Get a list of all the tables in the schema, separated by commas.
    * @return a list of all the tables in the schema, separated by commas
@@ -385,7 +393,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
   {
     Session session = getSession();
     Connection connection = session.connection();
-    
+
     try {
       String url = connection.getMetaData().getURL();
       String schemaName = url.substring(url.lastIndexOf('/') + 1);
@@ -396,18 +404,18 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
         "WHERE\n" +
         " table_catalog = '" + schemaName + "' AND\n" +
         " table_schema = 'public'\n");
-      
-      String tableList = ""; 
+
+      String tableList = "";
       ResultSet resultSet = statement.getResultSet();
       while (resultSet.next()) {
         tableList += resultSet.getString(1) + ", ";
       }
       statement.close();
-      
+
       if (tableList.equals("")) { // no tables in the schema
         return "";
       }
-      
+
       return tableList.substring(0, tableList.length() - 2);
     }
     catch (HibernateException e) {
