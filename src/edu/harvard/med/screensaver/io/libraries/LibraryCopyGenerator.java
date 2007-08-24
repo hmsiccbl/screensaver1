@@ -37,16 +37,16 @@ import org.apache.log4j.Logger;
  * individual copy plates already exist, skips creation attempt without error.
  * Plate numbers must be specified in an Excel workbook, in column 0 of first
  * worksheet (with no column header).
- * 
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class LibraryCopyGenerator 
+public class LibraryCopyGenerator
 {
   // static members
 
   private static Logger log = Logger.getLogger(LibraryCopyGenerator.class);
-  
+
 
   @SuppressWarnings("static-access")
   public static void main(String[] args)
@@ -74,20 +74,20 @@ public class LibraryCopyGenerator
         int plateNumber = (int) ((NumberCell) cell).getValue();
         plateNumbers.add(plateNumber);
       }
-      log.info("creating RNAi cherry pick library copy " + copyName + 
-               " with volume " + volume + 
+      log.info("creating RNAi cherry pick library copy " + copyName +
+               " with volume " + volume +
                ", plate type " + plateType +
-               ", plated on " + datePlated + 
+               ", plated on " + datePlated +
                ", for plates: " + StringUtils.makeListString(plateNumbers, ", "));
 
-      edu.harvard.med.screensaver.service.libraries.LibraryCopyGenerator libraryCopyGenerator = 
+      edu.harvard.med.screensaver.service.libraries.LibraryCopyGenerator libraryCopyGenerator =
         (edu.harvard.med.screensaver.service.libraries.LibraryCopyGenerator) app.getSpringBean("libraryCopyGenerator");
-      List<CopyInfo> plateCopiesCreated = libraryCopyGenerator.createPlateCopies(plateNumbers, 
+      List<CopyInfo> plateCopiesCreated = libraryCopyGenerator.createPlateCopies(plateNumbers,
                                                                                  Arrays.asList(copyName),
                                                                                  volume,
                                                                                  plateType,
                                                                                  datePlated);
-      log.info("created " + plateCopiesCreated.size() + " plate copies: " + StringUtils.makeListString(plateCopiesCreated, ", ")); 
+      log.info("created " + plateCopiesCreated.size() + " plate copies: " + StringUtils.makeListString(plateCopiesCreated, ", "));
     }
     catch (Exception e) {
       e.printStackTrace();
@@ -96,9 +96,9 @@ public class LibraryCopyGenerator
       System.exit(1);
     }
   }
-  
+
   // instance data members
-  
+
   // public constructors and methods
 
   // private methods
