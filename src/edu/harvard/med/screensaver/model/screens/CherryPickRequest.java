@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
 /**
  * A Hibernate entity bean representing a cherry pick request ("CPR"). A CPR
  * provides an abstraction for managing the workflow of producing a cherry pick
- * screening in response to the cherry picks ("CP") requsted by the screener.
+ * screening in response to the cherry picks ("CP") requested by the screener.
  * Two types of cherry picks are managed: "screener" cherry picks ({@link
  * ScreenerCherryPick}) and "lab" cherry picks ({@link LabCherryPick}). The
  * ScreenerCPs represent the wells from the original screen that are to be

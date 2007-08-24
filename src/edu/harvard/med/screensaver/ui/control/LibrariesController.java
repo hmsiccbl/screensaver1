@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -59,6 +60,9 @@ import org.apache.myfaces.custom.fileupload.UploadedFile;
 import org.springframework.dao.DataAccessException;
 
 /**
+ * <i>Notice: This class is going to be eliminated and all of its methods will
+ * be moved to the appropriate JSF backing bean classes. [ant 2007-08-24]<i>
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
@@ -92,11 +96,6 @@ public class LibrariesController extends AbstractUIController
 
 
   // constructors
-
-
-
-
-  // controller methods
 
   /**
    * @motivation for CGLIB2
@@ -142,24 +141,23 @@ public class LibrariesController extends AbstractUIController
     _plateWellListParser = plateWellListParser;
   }
 
+  // controller methods
+
   @UIControllerMethod
   public String findWells()
   {
-    logUserActivity("open findWells");
     return FIND_WELLS;
   }
 
   @UIControllerMethod
   public String findWell(final String plateNumber, final String wellName)
   {
-    logUserActivity("findWell " + plateNumber + ":" + wellName);
     return viewWell(_plateWellListParser.lookupWell(plateNumber, wellName));
   }
 
   @UIControllerMethod
   public String findWells(final String plateWellList)
   {
-    logUserActivity(FIND_WELLS);
     final String[] result = new String[1];
     _dao.doInTransaction(new DAOTransaction()
     {
@@ -192,7 +190,7 @@ public class LibrariesController extends AbstractUIController
           }
         }
         _wellsBrowser.setContents(foundWells);
-        result[0] = VIEW_WELL_SEARCH_RESULTS;
+          result[0] = VIEW_WELL_SEARCH_RESULTS;
       }
     });
     return result[0];
@@ -220,7 +218,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String findWellVolumes(final String plateWellList)
   {
-    logUserActivity(FIND_WELL_VOLUMES);
     final String[] result = new String[1];
     _dao.doInTransaction(new DAOTransaction()
     {
@@ -270,8 +267,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String viewLibrary(final Library libraryIn)
   {
-    logUserActivity(VIEW_LIBRARY + " " + libraryIn);
-
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
@@ -290,7 +285,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String viewLibraryContents(final Library libraryIn)
   {
-    logUserActivity(VIEW_WELL_SEARCH_RESULTS + " for libraryContents " + libraryIn);
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
@@ -308,7 +302,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String viewLibraryWellCopyVolumes(final Library libraryIn)
   {
-    logUserActivity(VIEW_WELL_VOLUME_SEARCH_RESULTS + " for library " + libraryIn);
     final String[] result = new String[1];
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
@@ -334,7 +327,6 @@ public class LibrariesController extends AbstractUIController
     if (well == null) {
       reportApplicationError("attempted to view an unknown well (not in database)");
       return REDISPLAY_PAGE_ACTION_RESULT;
-
     }
     return viewWell(well.getWellKey());
   }
@@ -346,8 +338,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String viewWell(final WellKey wellKey)
   {
-    logUserActivity(VIEW_WELL + " " + wellKey);
-
     try {
       _dao.doInTransaction(new DAOTransaction() {
         public void runTransaction()
@@ -366,6 +356,7 @@ public class LibrariesController extends AbstractUIController
           }
           _wellViewer.setWell(well);
           _wellViewer.setWellNameValueTable(new WellNameValueTable(LibrariesController.this, well));
+          _wellsBrowser.setContents(Arrays.asList(well));
         }
       });
     }
@@ -379,7 +370,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String viewGene(final Gene geneIn)
   {
-    logUserActivity(VIEW_GENE + " " + geneIn);
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
@@ -407,7 +397,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String viewCompound(final Compound compoundIn)
   {
-    logUserActivity(VIEW_COMPOUND + " " + compoundIn);
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
@@ -439,7 +428,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String importCompoundLibraryContents(Library library)
   {
-    logUserActivity(IMPORT_COMPOUND_LIBRARY_CONTENTS + " " + library);
     _compoundLibraryContentsImporter.setLibrary(library);
     _compoundLibraryContentsImporter.setUploadedFile(null);
     _compoundLibraryContentsParser.clearErrors();
@@ -449,7 +437,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String importCompoundLibraryContents(final Library libraryIn, final UploadedFile uploadedFile)
   {
-    logUserActivity(IMPORT_COMPOUND_LIBRARY_CONTENTS + " " + libraryIn + " " + uploadedFile.getName() + " " + uploadedFile.getSize());
     try {
       if (uploadedFile == null || uploadedFile.getInputStream().available() == 0) {
         showMessage("badUploadedFile", uploadedFile.getName());
@@ -494,7 +481,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String importNaturalProductsLibraryContents(Library library)
   {
-    logUserActivity(IMPORT_NATURAL_PRODUCTS_LIBRARY_CONTENTS+ " " + library);
     _naturalProductsLibraryContentsImporter.setLibrary(library);
     _naturalProductsLibraryContentsImporter.setUploadedFile(null);
     _naturalProductsLibraryContentsParser.clearErrors();
@@ -504,7 +490,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String importNaturalProductsLibraryContents(final Library libraryIn, final UploadedFile uploadedFile)
   {
-    logUserActivity(IMPORT_NATURAL_PRODUCTS_LIBRARY_CONTENTS + " " + libraryIn + " " + uploadedFile.getName() + " " + uploadedFile.getSize());
     try {
       if (uploadedFile == null || uploadedFile.getInputStream().available() == 0) {
         showMessage("badUploadedFile", uploadedFile.getName());
@@ -550,7 +535,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String importRNAiLibraryContents(Library library)
   {
-    logUserActivity(IMPORT_RNAI_LIBRARY_CONTENTS + " " + library);
     _rnaiLibraryContentsImporter.setLibrary(library);
     _rnaiLibraryContentsImporter.setUploadedFile(null);
     _rnaiLibraryContentsParser.clearErrors();
@@ -563,7 +547,6 @@ public class LibrariesController extends AbstractUIController
     final UploadedFile uploadedFile,
     final SilencingReagentType silencingReagentType)
   {
-    logUserActivity(IMPORT_RNAI_LIBRARY_CONTENTS + " " + libraryIn + " " + uploadedFile.getName() + " " + uploadedFile.getSize());
     try {
       if (uploadedFile == null || uploadedFile.getInputStream().available() == 0) {
         showMessage("badUploadedFile", uploadedFile.getName());
@@ -607,7 +590,6 @@ public class LibrariesController extends AbstractUIController
   @UIControllerMethod
   public String unloadLibraryContents(final Library libraryIn)
   {
-    logUserActivity("unloadLibraryContents " + libraryIn);
     _dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()

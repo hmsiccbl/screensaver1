@@ -99,7 +99,7 @@
 				       there's no point in displaying this redundant field, as screening room activities, with their assoicated dates, are
 				       shown in screen panel --%>
 					<%--t:outputLabel for="screenResultDateCreated"
-						value="Date of first screning room activity" styleClass="keyColumn" />
+						value="Date of first screening room activity" styleClass="keyColumn" />
 					<t:outputText id="screenResultDateCreated"
 						value="#{screenResultViewer.screenResult.dateCreated}"
 						styleClass="dataText" /--%>

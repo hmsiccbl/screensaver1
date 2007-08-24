@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -11,24 +11,23 @@ package edu.harvard.med.screensaver.io.screenresults;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Iterator;
 
 import jxl.write.WritableWorkbook;
 
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.io.workbook2.ParseError;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.util.FileUtils;
+
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.ParseException;
+import org.apache.log4j.Logger;
 
 public class ScreenResultImporter
 {
@@ -76,7 +75,7 @@ public class ScreenResultImporter
                                           .withLongOpt(IMPORT_OPTION[LONG_OPTION])
                                           .create(IMPORT_OPTION[SHORT_OPTION]));
     try {
-      if (!app.processOptions(/* acceptDatabaseOptions= */true, 
+      if (!app.processOptions(/* acceptDatabaseOptions= */true,
                               /* showHelpOnError= */true)) {
         return;
       }
@@ -84,7 +83,7 @@ public class ScreenResultImporter
       if (!app.isCommandLineFlagSet(IMPORT_OPTION[SHORT_OPTION])) {
         app.setSpringConfigurationResource(SCREEN_RESULT_IMPORTER_SPRING_CONFIGURATION);
       }
-      
+
       final File inputFile = app.getCommandLineOptionValue(INPUT_FILE_OPTION[SHORT_OPTION],
                                                            File.class);
       cleanOutputDirectory(inputFile.getAbsoluteFile().getParentFile());
@@ -92,7 +91,7 @@ public class ScreenResultImporter
       Screen screen = findScreenOrExit(app);
       ScreenResultParser screenResultParser = null;
       screenResultParser = (ScreenResultParser) app.getSpringBean("screenResultParser");
-      
+
       final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
       final ScreenResultsDAO screenResultsDao = (ScreenResultsDAO) app.getSpringBean("screenResultsDao");
 
@@ -160,7 +159,7 @@ public class ScreenResultImporter
   {
     int screenNumber = Integer.parseInt(app.getCommandLineOptionValue(SCREEN_OPTION[SHORT_OPTION]));
     GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
-    Screen screen = dao.findEntityByProperty(Screen.class, 
+    Screen screen = dao.findEntityByProperty(Screen.class,
                                               "hbnScreenNumber",
                                               screenNumber);
     if (screen == null) {

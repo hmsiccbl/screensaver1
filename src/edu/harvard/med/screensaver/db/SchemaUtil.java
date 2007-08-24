@@ -69,7 +69,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
     app.addCommandLineOption(OptionBuilder.
                              withArgName("recreate").
                              withLongOpt("recreate").
-                             withDescription("drop and then create database schema").
+                             withDescription("drop, then create and initialize the database schema").
                              create());
     app.addCommandLineOption(OptionBuilder.
                              withArgName("initialize").
