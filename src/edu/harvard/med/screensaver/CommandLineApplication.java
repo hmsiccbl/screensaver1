@@ -122,8 +122,8 @@ public class CommandLineApplication
   {
     _options.addOption(option);
     if (option.hasArgs()) {
-      if (defaultValue instanceof Collection) {
-        throw new IllegalArgumentException("when option takes multiple args, defaultValue must be a Collection");
+      if (defaultValue instanceof List) {
+        throw new IllegalArgumentException("when option takes multiple args, defaultValue must be a List");
       }
     }
     _option2DefaultValue.put(option.getOpt(), defaultValue);
@@ -140,17 +140,22 @@ public class CommandLineApplication
     return optionValue == null ? "" : optionValue.toString();
   }
 
-  public List<?> getCommandLineOptionValues(String optionName) throws ParseException
+  @SuppressWarnings("unchecked")
+  public List<String> getCommandLineOptionValues(String optionName) throws ParseException
   {
     verifyOptionsProcessed();
+    List<String> optionValues = new ArrayList<String>();
     if (!_cmdLine.hasOption(optionName) &&
       _option2DefaultValue.containsKey(optionName)) {
-      return (List<?>) _option2DefaultValue.get(optionName);
+      for (Object defaultValue : (List<?>) _option2DefaultValue.get(optionName)) {
+        optionValues.add(defaultValue.toString());
+      }
     }
-    String[] optionValuesArray = _cmdLine.getOptionValues(optionName);
-    List<String> optionValues = new ArrayList<String>();
-    if (optionValuesArray != null) {
-      optionValues.addAll(Arrays.asList(optionValuesArray));
+    else {
+      String[] optionValuesArray = _cmdLine.getOptionValues(optionName);
+      if (optionValuesArray != null) {
+        optionValues.addAll(Arrays.asList(optionValuesArray));
+      }
     }
     return optionValues;
   }
