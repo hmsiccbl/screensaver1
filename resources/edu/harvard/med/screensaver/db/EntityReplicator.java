@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,7 +43,10 @@ import org.hibernate.type.Type;
 // TODO: convert to an instance-based service (not static methods)
 // TODO: have main method take entity loading plan from command line
 /**
- * Replicates an entity network from one database to another.
+ * Replicates an entity network from one database to another. Requires that any
+ * entities being copied do not already exist in the destination database (i.e.,
+ * does not perform merging). Non-nullable to-one relationships must be loaded
+ * via the specified relationships.
  */
 public class EntityReplicator
 {
@@ -86,12 +88,13 @@ public class EntityReplicator
     }
     final Class<? extends AbstractEntity> entityClass = entityMetadata.getMappedClass(EntityMode.POJO);
     final Integer id = app.getCommandLineOptionValue("i", Integer.class);
-    final List<?> relationships = app.getCommandLineOptionValues("r");
+    final List<String> relationships = app.getCommandLineOptionValues("r");
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         AbstractEntity entity1 = dao.findEntityById(entityClass, id);
-        for (Object relationship : relationships) {
-          dao.needReadOnly(entity1, relationship.toString());
+        for (String relationshipGroup : relationships) {
+          String[] relationships = relationshipGroup.split(",");
+          dao.needReadOnly(entity1, relationships);
         }
         log.info("retrieved " + entity1 + " from source database");
         entityToReplicate[0] = entity1;
@@ -233,9 +236,9 @@ public class EntityReplicator
     List<String> props = Arrays.asList(classMetadata.getPropertyNames());
     for (String propName : props) {
       Type propType = classMetadata.getPropertyType(propName);
-      log.info(classMetadata.getEntityName() + "." + propName +
-               " [" + propType.getName() +
-               (propType.isCollectionType() ? " (ToMany)" : propType.isEntityType() ? " (ToOne)" : "") + "]");
+      log.debug(classMetadata.getEntityName() + "." + propName +
+                " [" + propType.getName() +
+                (propType.isCollectionType() ? " (ToMany)" : propType.isEntityType() ? " (ToOne)" : "") + "]");
 
       // get the property value, but w/o triggering lazy initialization
       Object value = classMetadata.getPropertyValue(entity, propName, EntityMode.POJO);
@@ -264,17 +267,17 @@ public class EntityReplicator
             throw new RuntimeException("unsupported collection type: " + propType.getReturnedClass() + " for property " + propName);
           }
           if (coll != null) {
-            log.info("persistent collection " + propName + " replaced with normal collection " + coll.getClass());
+            log.debug("persistent collection " + propName + " replaced with normal collection " + coll.getClass());
             if (((PersistentCollection) value).wasInitialized()) {
-              log.info("persistent collection " + propName + " copied");
+              log.debug("persistent collection " + propName + " copied");
               coll.addAll((Collection) value);
             }
             value = coll;
           }
           else {
-            log.info("persistent map " + propName + " replaced with normal map " + map.getClass());
+            log.debug("persistent map " + propName + " replaced with normal map " + map.getClass());
             if (((PersistentCollection) value).wasInitialized()) {
-              log.info("persistent map " + propName + " copied");
+              log.debug("persistent map " + propName + " copied");
               map.putAll((Map) value);
             }
             value = map;
@@ -305,17 +308,17 @@ public class EntityReplicator
       }
       else if (propType.isAssociationType() && value != null) { // single entity association
         if (value.getClass().getSimpleName().contains("CGLIB")) { // HACK: better way to determine if a lazy, single entity association is uninitialized? also, doesn't handle Java-styel proxies
-          log.info("associatied entity " + propName + " not initialized...nullifying");
+          log.debug("associated entity " + propName + " not initialized...nullifying");
           value = null;
           classMetadata.setPropertyValue(entity, propName, value, EntityMode.POJO);
         }
         else {
-          log.info("associatied entity " + propName + " not initialized...virginizing");
+          log.debug("associated entity " + propName + " initialized...virginizing");
           virginize((AbstractEntity) value);
         }
       }
       else {
-        log.info("property value=" + value);
+        log.debug("property value=" + value);
       }
     }
   }
