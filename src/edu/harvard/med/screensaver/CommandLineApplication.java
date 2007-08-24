@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -10,9 +10,11 @@
 package edu.harvard.med.screensaver;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
@@ -44,29 +46,29 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * acceptDatabaseOptions=true, the command line options 'dbhost', 'dbport',
  * 'dbname', 'dbuser', and 'dbpassword' will be used to configure the database
  * connection settings.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class CommandLineApplication
 {
   private static final Logger log = Logger.getLogger(CommandLineApplication.class);
-  
+
   public static final String DEFAULT_SPRING_CONFIG = "spring-context-cmdline.xml";
-  
-  
+
+
   // instance data
-  
+
   private String _springConfigurationResource = DEFAULT_SPRING_CONFIG;
   private ApplicationContext _appCtx;
   private Options _options;
   private CommandLine _cmdLine;
   private String[] _cmdLineArgs;
   private Map<String,Object> _option2DefaultValue = new HashMap<String,Object>();
-  
-  
+
+
   // public methods
-  
+
   @SuppressWarnings("static-access")
   public CommandLineApplication(String[] cmdLineArgs)
   {
@@ -77,32 +79,32 @@ public class CommandLineApplication
                        withDescription("print this help").
                        create("h"));
   }
-  
+
 
   public Object getSpringBean(String springBeanName)
   {
     return getSpringApplicationContext().getBean(springBeanName);
   }
-  
+
   @SuppressWarnings("unchecked")
   public <T> T getSpringBean(String springBeanName, Class<T> ofType)
   {
     return (T) getSpringApplicationContext().getBean(springBeanName);
   }
-  
+
   public ApplicationContext getSpringApplicationContext()
   {
     if (_appCtx == null) {
-      
+
       _appCtx = new ClassPathXmlApplicationContext(getSpringConfigurationResource());
     }
     return _appCtx;
   }
-  
+
   /**
    * Override this method to specify a different spring configuration resource
    * file.
-   * 
+   *
    * @return the name of the spring configuration resource file (resource name
    *         relative to the classpath root).
    */
@@ -115,13 +117,18 @@ public class CommandLineApplication
   {
     _options.addOption(option);
   }
-  
+
   public void addCommandLineOption(Option option, Object defaultValue)
   {
     _options.addOption(option);
+    if (option.hasArgs()) {
+      if (defaultValue instanceof Collection) {
+        throw new IllegalArgumentException("when option takes multiple args, defaultValue must be a Collection");
+      }
+    }
     _option2DefaultValue.put(option.getOpt(), defaultValue);
   }
-  
+
   public String getCommandLineOptionValue(String optionName) throws ParseException
   {
     verifyOptionsProcessed();
@@ -132,12 +139,25 @@ public class CommandLineApplication
     Object optionValue = _cmdLine.getOptionValue(optionName);
     return optionValue == null ? "" : optionValue.toString();
   }
-  
+
+  public List<?> getCommandLineOptionValues(String optionName) throws ParseException
+  {
+    verifyOptionsProcessed();
+    if (!_cmdLine.hasOption(optionName) &&
+      _option2DefaultValue.containsKey(optionName)) {
+      return (List<?>) _option2DefaultValue.get(optionName);
+    }
+    String[] optionValuesArray = _cmdLine.getOptionValues(optionName);
+    List<String> optionValues = new ArrayList<String>();
+    if (optionValuesArray != null) {
+      optionValues.addAll(Arrays.asList(optionValuesArray));
+    }
+    return optionValues;
+  }
+
   @SuppressWarnings("unchecked")
-  public <T> T getCommandLineOptionValue(String optionName, Class<T> ofType) 
-    throws ParseException, IllegalArgumentException, SecurityException, 
-           InstantiationException, IllegalAccessException, InvocationTargetException, 
-           NoSuchMethodException
+  public <T> T getCommandLineOptionValue(String optionName, Class<T> ofType)
+    throws ParseException
   {
     verifyOptionsProcessed();
     if (!_cmdLine.hasOption(optionName) &&
@@ -145,23 +165,28 @@ public class CommandLineApplication
       return (T) _option2DefaultValue.get(optionName);
     }
     if (_cmdLine.hasOption(optionName)) {
-      Constructor cstr = ofType.getConstructor(String.class);
-      return (T) cstr.newInstance(getCommandLineOptionValue(optionName));
+      try {
+        Constructor cstr = ofType.getConstructor(String.class);
+        return (T) cstr.newInstance(getCommandLineOptionValue(optionName));
+      }
+      catch (Exception e) {
+        throw new ParseException("could not parse option " + optionName + " as type " + ofType.getSimpleName());
+      }
     }
     return null;
   }
-  
+
   public boolean isCommandLineFlagSet(String optionName) throws ParseException
   {
     verifyOptionsProcessed();
     return _cmdLine.hasOption(optionName);
   }
-  
+
   public void showHelp()
   {
     new HelpFormatter().printHelp("command", _options, true);
   }
-  
+
   /**
    * @param acceptDatabaseOptions
    * @param showHelpOnError if true and method returns false, calling code
@@ -178,7 +203,7 @@ public class CommandLineApplication
     if (acceptDatabaseOptions) {
       addDatabaseOptions();
     }
-    
+
     try {
       _cmdLine = new GnuParser().parse(_options, _cmdLineArgs);
     }
@@ -203,7 +228,7 @@ public class CommandLineApplication
         System.setProperty("SCREENSAVER_PGSQL_SERVER", getCommandLineOptionValue("H"));
       }
       if (isCommandLineFlagSet("D") || isCommandLineFlagSet("T")) {
-        System.setProperty("SCREENSAVER_PGSQL_DB", 
+        System.setProperty("SCREENSAVER_PGSQL_DB",
                            (isCommandLineFlagSet("D") ? getCommandLineOptionValue("D") : "localhost") +
                            (isCommandLineFlagSet("T") ? ": " + getCommandLineOptionValue("T") : ""));
       }
@@ -214,7 +239,7 @@ public class CommandLineApplication
         System.setProperty("SCREENSAVER_PGSQL_PASSWORD", getCommandLineOptionValue("P"));
       }
     }
-    
+
     StringBuilder s = new StringBuilder();
     for (Option option : (Collection<Option>) _options.getOptions()) {
       if (_cmdLine.hasOption(option.getOpt())) {
@@ -231,8 +256,8 @@ public class CommandLineApplication
 
     return true;
   }
-  
-  
+
+
   // private methods
 
   private void verifyOptionsProcessed()
@@ -290,5 +315,5 @@ public class CommandLineApplication
     }
     _springConfigurationResource = springConfigurationResource;
   }
-  
+
 }
