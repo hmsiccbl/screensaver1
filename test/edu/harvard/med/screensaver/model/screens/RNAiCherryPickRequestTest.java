@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -36,7 +36,7 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
   {
     super(RNAiCherryPickRequest.class);
   }
-  
+
   public void testRequestedEmptyColumnsOnAssayPlate()
   {
     schemaUtil.truncateTablesOrCreateSchema();
@@ -44,7 +44,7 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
     final Set<Integer> requestedEmptyColumns = new HashSet<Integer>(Arrays.asList(3, 7, 11));
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
-      public void runTransaction() 
+      public void runTransaction()
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
@@ -53,10 +53,10 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
         genericEntityDao.persistEntity(screen);
       }
     });
-    
+
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
-      public void runTransaction() 
+      public void runTransaction()
       {
         Screen screen2 = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
         assertEquals(requestedEmptyColumns,
@@ -79,19 +79,16 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest
         genericEntityDao.persistEntity(CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, 384));
 
         for (int plateOrdinal = 0; plateOrdinal < 6; ++plateOrdinal) {
-          for (int attempt = 0; attempt <= plateOrdinal; ++attempt) {
-            WellKey[] allWellsOnPlate = new WellKey[Well.PLATE_COLUMNS * Well.PLATE_ROWS];
-            int i = 0;
-            for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
-              for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
-                WellKey wellKey = new WellKey(plateOrdinal + 50001, iRow, iCol);
-                Well well = librariesDao.findWell(wellKey);
-                new ScreenerCherryPick(cherryPickRequest, well);
-                allWellsOnPlate[i++] = wellKey;
-              }
+          for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
+            for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
+              WellKey wellKey = new WellKey(plateOrdinal + 50001, iRow, iCol);
+              Well well = librariesDao.findWell(wellKey);
+              System.out.println("found " + well + "for " + wellKey);
+              ScreenerCherryPick screenerCherryPick = new ScreenerCherryPick(cherryPickRequest, well);
+              System.out.println("created " + screenerCherryPick);
             }
           }
-        }
+                }
         genericEntityDao.persistEntity(cherryPickRequest); // avoid hib errors on flush
         genericEntityDao.persistEntity(screen); // avoid hib errors on flush
 
