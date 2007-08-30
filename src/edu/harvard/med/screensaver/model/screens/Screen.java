@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -24,6 +24,7 @@ import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
+import edu.harvard.med.screensaver.model.screenresults.Annotation;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -35,14 +36,14 @@ import org.apache.log4j.Logger;
 
 /**
  * A Hibernate entity bean representing a screen.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @hibernate.class lazy="false"
  */
 public class Screen extends AbstractEntity
 {
-  
+
   // static fields
 
   private static final Logger log = Logger.getLogger(Screen.class);
@@ -51,41 +52,51 @@ public class Screen extends AbstractEntity
 
   // instance fields
 
+  // study (provides annotation of library contents)
+
+  //private Integer _studyId;
   private Integer _screenId;
   private Integer _version;
-  private ScreeningRoomUser _leadScreener;
+  private String _title;
+  private Date _dateCreated;
+  private ScreeningRoomUser _leadScreener; // should rename
   private ScreeningRoomUser _labHead;
   private Set<ScreeningRoomUser> _collaborators = new HashSet<ScreeningRoomUser>();
-  private Set<StatusItem> _statusItems = new HashSet<StatusItem>();
-  private transient SortedSet<StatusItem> _sortedStatusItems;
-  private Set<ScreeningRoomActivity> _screeningRoomActivities = new HashSet<ScreeningRoomActivity>();
-  private int _allTimeScreeningRoomActivityCount = 0;
-  private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
-  private int _allTimeCherryPickRequestCount = 0;
-  private Set<AbaseTestset> _abaseTestsets = new HashSet<AbaseTestset>();
   private Set<Publication> _publications = new HashSet<Publication>();
-  private Set<LetterOfSupport> _lettersOfSupport = new HashSet<LetterOfSupport>();
-  private BillingInformation _billingInformation;
-  private Set<AttachedFile> _attachedFiles = new HashSet<AttachedFile>();
-  private Integer _screenNumber;
-  private Date _dateCreated;
-  private ScreenType _screenType;
-  private String _title;
-  private Date _dataMeetingScheduled;
-  private Date _dataMeetingComplete;
-  private Set<String> _keywords = new HashSet<String>();
-  private Set<FundingSupport> _fundingSupports = new HashSet<FundingSupport>();
   private String _summary;
   private String _comments;
-  private String _abaseStudyId;
-  private String _abaseProtocolId;
-  private Date _publishableProtocolDateEntered;
-  private String _publishableProtocolEnteredBy;
+  private Set<Annotation> _annotations = new HashSet<Annotation>();
+  private StudyType _studyType;
+
+  // generic screen
+
+  private Integer _screenNumber;
+  private ScreenType _screenType;
+  private Set<AttachedFile> _attachedFiles = new HashSet<AttachedFile>();
+  private Set<String> _keywords = new HashSet<String>();
   private String _publishableProtocol;
   private String _publishableProtocolComments;
-  private Date _dateOfApplication;
   private ScreenResult _screenResult;
 
+  // iccb screen
+
+  private Set<StatusItem> _statusItems = new HashSet<StatusItem>();
+  private transient SortedSet<StatusItem> _sortedStatusItems;
+  private int _allTimeScreeningRoomActivityCount = 0;
+  private Set<ScreeningRoomActivity> _screeningRoomActivities = new HashSet<ScreeningRoomActivity>();
+  private Date _dataMeetingScheduled;
+  private Date _dataMeetingComplete;
+  private BillingInformation _billingInformation;
+  private Set<FundingSupport> _fundingSupports = new HashSet<FundingSupport>();
+  private Date _dateOfApplication;
+  private Set<AbaseTestset> _abaseTestsets = new HashSet<AbaseTestset>();
+  private String _abaseStudyId;
+  private String _abaseProtocolId;
+  private Set<LetterOfSupport> _lettersOfSupport = new HashSet<LetterOfSupport>();
+  private Date _publishableProtocolDateEntered;
+  private String _publishableProtocolEnteredBy;
+  private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
+  private int _allTimeCherryPickRequestCount = 0;
 
   // public constructor
 
@@ -126,8 +137,9 @@ public class Screen extends AbstractEntity
     _comments = comments;
     _abaseStudyId = abaseStudyId;
     _abaseProtocolId = abaseProtocolId;
+    _studyType = StudyType.IN_VITRO;
   }
-  
+
   /**
    * Constructs an initialized <code>Screen</code> object.
    *
@@ -146,6 +158,24 @@ public class Screen extends AbstractEntity
     ScreenType screenType,
     String title)
   {
+    this(leadScreener,
+         labHead,
+         screenNumber,
+         dateCreated,
+         screenType,
+         StudyType.IN_VITRO,
+         title);
+  }
+
+  public Screen(ScreeningRoomUser leadScreener,
+                ScreeningRoomUser labHead,
+                Integer screenNumber,
+                Date dateCreated,
+                ScreenType screenType,
+                StudyType studyType,
+                String title)
+
+  {
     if (leadScreener == null || labHead == null) {
       throw new NullPointerException();
     }
@@ -157,6 +187,7 @@ public class Screen extends AbstractEntity
     _title = title;
     _leadScreener.getHbnScreensLed().add(this);
     _labHead.getHbnScreensHeaded().add(this);
+    _studyType = studyType;
   }
 
 
@@ -247,7 +278,7 @@ public class Screen extends AbstractEntity
   {
     return Collections.unmodifiableSet(_collaborators);
   }
-  
+
   /**
    * @motivation JSF EL binding
    */
@@ -259,7 +290,7 @@ public class Screen extends AbstractEntity
     Collections.sort(collaboratorsList, ScreensaverUserComparator.getInstance());
     return Collections.unmodifiableList(collaboratorsList);
   }
-  
+
   /**
    * Get a comma-delimited list of the Screen's collaborators, identified by
    * their full name ("first, last" format).
@@ -342,10 +373,10 @@ public class Screen extends AbstractEntity
   {
     return _statusItems;
   }
-  
+
   /**
    * Get the status items, sorted by their natural ordering.
-   * 
+   *
    * @return the status items, sorted by their natural ordering; null if there
    *         are no status items
    */
@@ -588,6 +619,20 @@ public class Screen extends AbstractEntity
   public void setDateCreated(Date dateCreated)
   {
     _dateCreated = truncateDate(dateCreated);
+  }
+
+  /**
+   * Get the study type.
+   *
+   * @return the study type
+   * @hibernate.property
+   *   type="edu.harvard.med.screensaver.model.screens.StudyType$UserType"
+   *   not-null="true"
+   */
+  @ImmutableProperty
+  public StudyType getStudyType()
+  {
+    return _studyType;
   }
 
   /**
@@ -987,6 +1032,24 @@ public class Screen extends AbstractEntity
   }
 
   /**
+   * Get the annotations generated by this screen.
+   *
+   * @return the annotations
+   * @hibernate.set
+   *   cascade="all-delete-orphan"
+   *   lazy="true"
+   *   inverse="true"
+   * @hibernate.collection-key
+   *   column="study_id"
+   * @hibernate.collection-one-to-many
+   *   class="edu.harvard.med.screensaver.model.screenresults.Annotation"
+   */
+  public Set<Annotation> getAnnotations()
+  {
+    return _annotations;
+  }
+
+  /**
    * Get the set of screen result.
    *
    * @return the screen result
@@ -1005,12 +1068,22 @@ public class Screen extends AbstractEntity
   {
     _screenResult = screenResult;
   }
-  
- 
+
+  /**
+   * Set the annotations.
+   *
+   * @param annotations the new annotations
+   * @motivation for hibernate
+   */
+  private void setAnnotations(Set<Annotation> annotations)
+  {
+    _annotations = annotations;
+  }
+
   /**
    * A factory method for creating an appropriately typed cherry pick request
    * for this screen.
-   * 
+   *
    * @return
    */
   public CherryPickRequest createCherryPickRequest()
@@ -1025,7 +1098,7 @@ public class Screen extends AbstractEntity
     return null;
   }
 
-  
+
   // protected methods
 
   /**
@@ -1088,7 +1161,7 @@ public class Screen extends AbstractEntity
   }
 
   // protected methods
-  
+
   @Override
   protected Object getBusinessKey()
   {
@@ -1148,6 +1221,16 @@ public class Screen extends AbstractEntity
    */
   private void setVersion(Integer version) {
     _version = version;
+  }
+
+  /**
+   * Set the study type.
+   *
+   * @param studyType the new studyType
+   */
+  private void setStudyType(StudyType studyType)
+  {
+    _studyType = studyType;
   }
 
   /**

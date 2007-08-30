@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -21,6 +21,8 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
+import edu.harvard.med.screensaver.model.screenresults.Annotation;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -68,22 +70,35 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   // static members
 
   private static Logger log = Logger.getLogger(WebDataAccessPolicy.class);
-  
-  
+
+
   // instance data
 
   private CurrentScreensaverUser _currentScreensaverUser;
-  
-  
+
+
   // public methods
 
   public WebDataAccessPolicy(CurrentScreensaverUser user)
   {
     _currentScreensaverUser = user;
   }
-  
+
   public boolean visit(AbaseTestset entity)
   {
+    return true;
+  }
+
+
+  public boolean visit(Annotation annotation)
+  {
+    // TODO
+    return true;
+  }
+
+  public boolean visit(AnnotationValue annotationValue)
+  {
+    // TODO
     return true;
   }
 
@@ -220,11 +235,11 @@ public class WebDataAccessPolicy implements DataAccessPolicy
       user.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREENS_ADMIN)) {
       return true;
     }
-    if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE) && 
+    if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE) &&
       user.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER)) {
       return true;
     }
-    if (screen.getScreenType().equals(ScreenType.RNAI) && 
+    if (screen.getScreenType().equals(ScreenType.RNAI) &&
       user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER)) {
       return true;
     }
@@ -258,12 +273,12 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   {
     return visit((ScreensaverUser) screeningRoomUser);
   }
-  
+
   public boolean visit(AdministratorUser administratorUser)
   {
     return visit((ScreensaverUser) administratorUser);
   }
-  
+
   public boolean visit(SilencingReagent entity)
   {
     return true;
@@ -279,22 +294,22 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     return true;
   }
 
-  public boolean visit(CompoundCherryPickRequest entity) 
+  public boolean visit(CompoundCherryPickRequest entity)
   {
     return visit((CherryPickRequest) entity);
   }
 
-  public boolean visit(RNAiCherryPickRequest entity) 
+  public boolean visit(RNAiCherryPickRequest entity)
   {
     return visit((CherryPickRequest) entity);
   }
 
-  public boolean visit(LibraryScreening entity) 
+  public boolean visit(LibraryScreening entity)
   {
     return visit((ScreeningRoomActivity) entity);
   }
 
-  public boolean visit(RNAiCherryPickScreening entity) 
+  public boolean visit(RNAiCherryPickScreening entity)
   {
     return visit((ScreeningRoomActivity) entity);
   }
@@ -315,7 +330,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   }
 
   // private methods
-  
+
   private boolean visit(ScreensaverUser screensaverUser)
   {
     ScreensaverUser loggedInUser = _currentScreensaverUser.getScreensaverUser();
@@ -357,17 +372,17 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     return isReadEverythingAdmin() || isScreenerAllowedAccessToScreenDetails(entity.getScreen());
   }
 
-  private boolean isReadEverythingAdmin() 
+  private boolean isReadEverythingAdmin()
   {
     return _currentScreensaverUser.getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
   }
-  
-  private boolean isScreenerAssociatedWithScreen(Screen screen) 
+
+  private boolean isScreenerAssociatedWithScreen(Screen screen)
   {
     ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
     if (user instanceof ScreeningRoomUser) {
       ScreeningRoomUser screeningUser = (ScreeningRoomUser) user;
-      return 
+      return
       screeningUser.getScreensHeaded().contains(screen) ||
       screeningUser.getScreensLed().contains(screen) ||
       screeningUser.getScreensCollaborated().contains(screen);

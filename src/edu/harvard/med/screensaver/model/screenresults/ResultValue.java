@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -25,7 +25,7 @@ import org.apache.log4j.Logger;
  * contains an "isNumeric" property that indicates whether its member
  * ResultValues are numeric (the isNumeric flag is not stored with each
  * ResultValue for space efficiency).
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -37,13 +37,14 @@ public class ResultValue
   private static final int DEFAULT_DECIMAL_PRECISION = 3;
   private static final String[] FORMAT_STRINGS = new String[10];
   static {
-    for (int i = 0; i < FORMAT_STRINGS.length; i++) {
+    FORMAT_STRINGS[0] = "%1f";
+    for (int i = 1; i < FORMAT_STRINGS.length; i++) {
       FORMAT_STRINGS[i] = "%1." + i + "f";
     }
   }
-  
+
   // properties instance data
-  
+
   private String          _value;
   private Double          _numericValue;
   private Integer         _numericDecimalPrecision;
@@ -57,10 +58,10 @@ public class ResultValue
    */
   private boolean _exclude;
   private boolean _isPositive;
-  
+
 
   // public constructors and instance methods
-  
+
   /**
    * Constructs an initialized <code>ResultValue</code> object.
    * @param resultValueType
@@ -71,11 +72,11 @@ public class ResultValue
   {
     this(AssayWellType.EXPERIMENTAL, value, false, false);
   }
-  
+
   /**
    * Constructs a numeric ResultValue object, using a Double to specify the
    * numeric value.
-   * 
+   *
    * @param value
    * @param decimalPrecision the number of digits to appear after the decimal point, when displayed
    */
@@ -89,7 +90,7 @@ public class ResultValue
    * <p>
    * Warning: to add a ResultValue to the model, call
    * {@link ResultValueType#addResultValue}.
-   * 
+   *
    * @param assayWellType the AssayWellType of the new ResultValue
    * @param value the value of the new ResultValue
    * @param decimalPrecision the number of digits to appear after the decimal
@@ -119,7 +120,7 @@ public class ResultValue
    * {@link ResultValueType#addResultValue}. This constructor is package
    * protected so that ResultValueType can use it, otherwise it would be
    * private.
-   * 
+   *
    * @param assayWellType the AssayWellType of the new ResultValue
    * @param value the value of the new ResultValue
    * @param exclude the exclude flag of the new ResultValue
@@ -134,18 +135,18 @@ public class ResultValue
     setValue(value);
     setExclude(exclude);
     setPositive(isPositive);
-  } 
+  }
 
   /**
    * Get the assay well's type.
-   * 
+   *
    * @return the assay well's type
    */
   public AssayWellType getAssayWellType()
   {
     return _assayWellType;
   }
-  
+
   /**
    * @motivation reduces confusion as to whether callers needs to check both
    *             getValue() and getNumericValue() to determine if ResultValue is
@@ -159,27 +160,27 @@ public class ResultValue
 
   /**
    * Get the string value of this <code>ResultValue</code>.
-   * 
+   *
    * @return a {@link java.lang.String} representing the string value of this
    *         <code>ResultValue</code>; may return null.
    */
   public String getValue() {
     return _value;
   }
-  
+
   /**
    * Get the numeric value of this <code>ResultValue</code>.
-   * 
+   *
    * @return a {@link java.lang.Double} representing the numeric value of this
    *         <code>ResultValue</code>; may return null.
    */
   public Double getNumericValue() {
     return _numericValue;
   }
-  
+
   /**
    * Get the default decimal precision for this ResultValue's numeric value.
-   * 
+   *
    * @return the number of digits to be displayed after the decimal point, when
    *         value is displayed; null if ResultValue is not numeric or not
    *         defined
@@ -191,7 +192,7 @@ public class ResultValue
 
   /**
    * Formats the numeric value of this ResultValue.
-   * 
+   *
    * @param decimalPrecision if &lt; 0, uses "general" formatting (%g), with precision 9, as
    *          described in {@link java.util.Formatter}
    * @return formatted numeric value
@@ -212,12 +213,12 @@ public class ResultValue
       }
     }
     return strValue;
-  } 
+  }
 
   /**
    * Get whether this <code>ResultValue</code> is to be excluded in any
    * subsequent analyses.
-   * 
+   *
    * @return <code>true</code> iff this <code>ResultValue</code> is to be
    *         excluded in any subsequent analysis
    */
@@ -225,30 +226,30 @@ public class ResultValue
   {
     return _exclude;
   }
-  
+
   public boolean isPositive()
   {
     return _isPositive;
   }
-  
+
   @DerivedEntityProperty
   public boolean isExperimentalWell()
   {
     return getAssayWellType().equals(AssayWellType.EXPERIMENTAL);
   }
-  
+
   @DerivedEntityProperty
   public boolean isControlWell()
   {
     return getAssayWellType().isControl();
   }
-  
+
   @DerivedEntityProperty
   public boolean isDataProducerWell()
   {
     return getAssayWellType().isDataProducing();
   }
-  
+
   @DerivedEntityProperty
   public boolean isOtherWell()
   {
@@ -260,7 +261,7 @@ public class ResultValue
   {
     return getAssayWellType().equals(AssayWellType.EMPTY);
   }
-  
+
   public boolean equals(Object o)
   {
     if (!(o instanceof ResultValue)) {
@@ -269,14 +270,14 @@ public class ResultValue
     ResultValue other = (ResultValue) o;
     return
     ((_value == null && other._value == null) ||
-      (_value != null && other._value != null && _value.equals(other._value))) && 
-      _assayWellType.equals(other._assayWellType) && 
+      (_value != null && other._value != null && _value.equals(other._value))) &&
+      _assayWellType.equals(other._assayWellType) &&
       _exclude == other._exclude;
   }
- 
+
 
   // public static methods
-  
+
   /**
    * Returns the value of this <code>ResultValue</code> as an appropriately
    * typed object, depending upon {@link ResultValueType#isPositiveIndicator()},
@@ -290,7 +291,7 @@ public class ResultValue
    * <li> PositiveIndicatorType.NUMERICAL: returns Double
    * <li> PositiveIndicatorType.PARTITION: returns String (PartitionedValue.getDisplayValue())
    * </ul>
-   * 
+   *
    * @return a Boolean, Double, or String
    * @motivation to preserve typed data in exported Workbooks (rather than treat
    *             all result values as text strings)
@@ -300,11 +301,11 @@ public class ResultValue
     if (rv == null || rv.isNull()) {
       return null;
     }
-    
+
     if (rvt.isNumeric()) {
       return rv.getNumericValue();
     }
-      
+
     if (rvt.isPositiveIndicator()) {
       PositiveIndicatorType activityIndicatorType = rvt.getPositiveIndicatorType();
       if (activityIndicatorType.equals(PositiveIndicatorType.BOOLEAN)) {
@@ -329,10 +330,10 @@ public class ResultValue
 
 
   // package-protected methods
-  
+
   /**
    * Set whether this <code>ResultValue</code> is a positive.
-   * 
+   *
    * @param isPositive set to <code>true</code> iff this <code>ResultValue</code>
    *          is a positive
    * @motivation for hibernate and ResultValueType
@@ -350,7 +351,7 @@ public class ResultValue
    * @motivation for hibernate
    */
   private ResultValue() {}
-  
+
   /**
    * Set the assay well's type. <i>Note: This is implemented as a denormalized
    * attribute. If you call this method, you must also call it for every
@@ -358,7 +359,7 @@ public class ResultValue
    * Technically, we should have an AssayWell entity, which groups all the
    * ResultValues for a given stock plate well (within the parent screen
    * result). But it's creates a lot of new bidirectional relationships!
-   * 
+   *
    * @param assayWellType the new type of the assay well
    * @motivation for hibernate
    */
@@ -375,7 +376,7 @@ public class ResultValue
 
   /**
    * Set the actual value of this <code>ResultValue</code>.
-   * 
+   *
    * @param value the value to set
    * @motivation for hibernate
    */
@@ -385,7 +386,7 @@ public class ResultValue
 
   /**
    * Set the actual value of this <code>ResultValue</code>.
-   * 
+   *
    * @param value the value to set
    * @motivation for hibernate
    */
@@ -394,7 +395,7 @@ public class ResultValue
   }
 
   /**
-   * 
+   *
    * @param numericDecimalPrecision
    * @motivation for hibernate
    */
@@ -406,7 +407,7 @@ public class ResultValue
   /**
    * Set whether the screener has deemed that this <code>ResultValue</code>
    * should be excluded in any subsequent analyses.
-   * 
+   *
    * @param exclude set to <code>true</code> iff this <code>ResultValue</code>
    *          is to be excluded in any subsequent analysis
    * @motivation for hibernate

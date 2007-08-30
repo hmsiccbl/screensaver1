@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -20,6 +20,8 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
+import edu.harvard.med.screensaver.model.screenresults.Annotation;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -57,7 +59,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
  * extends a subclass of {@link AbstractEntity} can provide its own
  * {@link AbstractEntity#acceptVisitor(AbstractEntityVisitor)} method
  * implementation.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -65,6 +67,8 @@ public interface AbstractEntityVisitor
 {
   public boolean visit(AbaseTestset entity);
   public boolean visit(AdministratorUser administratorUser);
+  public boolean visit(Annotation annotation);
+  public boolean visit(AnnotationValue annotationValue);
   public boolean visit(AttachedFile entity);
   public boolean visit(BillingInformation entity);
   public boolean visit(BillingItem entity);

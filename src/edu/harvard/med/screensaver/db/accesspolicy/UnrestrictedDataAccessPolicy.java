@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -20,6 +20,8 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
+import edu.harvard.med.screensaver.model.screenresults.Annotation;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -58,6 +60,16 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
   private static Logger log = Logger.getLogger(UnrestrictedDataAccessPolicy.class);
 
   public boolean visit(AbaseTestset entity)
+  {
+    return true;
+  }
+
+  public boolean visit(Annotation annotation)
+  {
+    return true;
+  }
+
+  public boolean visit(AnnotationValue annotationValue)
   {
     return true;
   }
@@ -217,32 +229,32 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
     return true;
   }
 
-  public boolean visit(CompoundCherryPickRequest entity) 
+  public boolean visit(CompoundCherryPickRequest entity)
   {
     return true;
   }
 
-  public boolean visit(LibraryScreening entity) 
+  public boolean visit(LibraryScreening entity)
   {
     return true;
   }
 
-  public boolean visit(RNAiCherryPickRequest entity) 
+  public boolean visit(RNAiCherryPickRequest entity)
   {
     return true;
   }
 
-  public boolean visit(RNAiCherryPickScreening entity) 
+  public boolean visit(RNAiCherryPickScreening entity)
   {
     return true;
   }
 
-  public boolean visit(AdministratorUser administratorUser) 
+  public boolean visit(AdministratorUser administratorUser)
   {
     return true;
   }
 
-  public boolean visit(ScreeningRoomUser screeningRoomUser) 
+  public boolean visit(ScreeningRoomUser screeningRoomUser)
   {
     return true;
   }
