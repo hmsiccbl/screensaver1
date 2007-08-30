@@ -1,9 +1,9 @@
 BEGIN;
 
-INSERT INTO schema_history (screensaver_revision, date_updated, comment) 
-SELECT 
-1749,
-current_timestamp, 
+INSERT INTO schema_history (screensaver_revision, date_updated, comment)
+SELECT
+1752,
+current_timestamp,
 'added library annotations';
 
 CREATE TABLE annotation (
@@ -31,24 +31,24 @@ CREATE TABLE annotation_value_well_link (
     PRIMARY KEY (annotation_value_id, well_id)
 );
 
-ALTER TABLE annotation 
-    ADD CONSTRAINT fk_annotation_to_screen 
-    FOREIGN KEY (study_id) 
+ALTER TABLE annotation
+    ADD CONSTRAINT fk_annotation_to_screen
+    FOREIGN KEY (study_id)
     REFERENCES screen;
 
-ALTER TABLE annotation_value 
+ALTER TABLE annotation_value
     ADD CONSTRAINT fk_annotation_value_to_annotation
-    FOREIGN KEY (annotation_id) 
+    FOREIGN KEY (annotation_id)
     REFERENCES annotation;
 
-ALTER TABLE annotation_value_well_link 
-    ADD CONSTRAINT FK180A4E6D11EE135B 
-    FOREIGN KEY (annotation_value_id) 
+ALTER TABLE annotation_value_well_link
+    ADD CONSTRAINT FK180A4E6D11EE135B
+    FOREIGN KEY (annotation_value_id)
     REFERENCES annotation_value;
 
-ALTER TABLE annotation_value_well_link 
-    ADD CONSTRAINT FK180A4E6D433A43AB 
-    FOREIGN KEY (well_id) 
+ALTER TABLE annotation_value_well_link
+    ADD CONSTRAINT FK180A4E6D433A43AB
+    FOREIGN KEY (well_id)
     REFERENCES well;
 
 CREATE SEQUENCE annotation_id_seq;
