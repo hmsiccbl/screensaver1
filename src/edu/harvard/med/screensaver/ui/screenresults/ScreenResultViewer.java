@@ -156,14 +156,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   private TableSortManager<Map<String,Object>> _sortManager;
 
   // data members for raw data table
-  /**
-   * Data model for the raw data, <i>containing only the set of rows being displayed in the current view</i>.
-   */
   private ScreenResultDataModel _rawDataModel;
-  /**
-   * For internal tracking of first data row displayed in data table (the data
-   * table's model rowIndex is always 0).
-   */
   private UIData _dataTable;
   private UIInput _rowNumberUIInput;
   private UIInput _dataTableRowsPerPageUIInput;
@@ -174,10 +167,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
 
   // constructors
-
-
-
-  // public methods
 
   /**
    * @motivation for CGLIB2
@@ -209,6 +198,9 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     _isPanelCollapsedMap.put("dataTable", true);
     _isPanelCollapsedMap.put("heatMaps", true);
   }
+
+
+  // public methods
 
   public void setScreenResult(ScreenResult screenResult)
   {
