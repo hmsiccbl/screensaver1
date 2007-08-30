@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -34,11 +34,11 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
   {
     HSSFSheet sheet = workbook.createSheet(DATA_HEADERS_SHEET_NAME);
     sheet.setColumnWidth((short) 0, ROW_HEADER_COLUMN_WIDTH);
-    writeDataHeaderRowNames(workbook, 
+    writeDataHeaderRowNames(workbook,
                             sheet,
                             screenResult);
     writeDataHeaders(workbook,
-                     sheet, 
+                     sheet,
                      screenResult);
     sheet.setColumnWidth((short) 0, ROW_HEADER_COLUMN_WIDTH);
     return sheet;
@@ -62,15 +62,17 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
         columnValues.put(DataHeaderRow.COLUMNS_DERIVED_FROM, makeColumnsDerivedFromList(rvt));
       }
       else {
-        columnValues.put(DataHeaderRow.ASSAY_READOUT_TYPE, rvt.getAssayReadoutType().getValue().toLowerCase());
+        columnValues.put(DataHeaderRow.ASSAY_READOUT_TYPE,
+                         rvt.getAssayReadoutType() == null ? null :
+                           rvt.getAssayReadoutType().getValue().toLowerCase());
       }
       columnValues.put(DataHeaderRow.IS_ASSAY_ACTIVITY_INDICATOR, makeYesOrNoString(rvt.isPositiveIndicator()));
       if (rvt.isPositiveIndicator()) {
         columnValues.put(DataHeaderRow.ACTIVITY_INDICATOR_TYPE, rvt.getPositiveIndicatorType().getValue().toLowerCase());
         if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.NUMERICAL) {
-          columnValues.put(DataHeaderRow.NUMERICAL_INDICATOR_DIRECTION, 
-                           rvt.getPositiveIndicatorDirection().equals(PositiveIndicatorDirection.HIGH_VALUES_INDICATE) 
-                           ?  ScreenResultParser.NUMERICAL_INDICATOR_DIRECTION_HIGH_VALUES_INDICATE : 
+          columnValues.put(DataHeaderRow.NUMERICAL_INDICATOR_DIRECTION,
+                           rvt.getPositiveIndicatorDirection().equals(PositiveIndicatorDirection.HIGH_VALUES_INDICATE)
+                           ?  ScreenResultParser.NUMERICAL_INDICATOR_DIRECTION_HIGH_VALUES_INDICATE :
                              ScreenResultParser.NUMERICAL_INDICATOR_DIRECTION_LOW_VALUES_INDICATE);
           columnValues.put(DataHeaderRow.NUMERICAL_INDICATOR_CUTOFF, rvt.getPositiveIndicatorCutoff());
         }
@@ -78,7 +80,7 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
       columnValues.put(DataHeaderRow.PRIMARY_OR_FOLLOWUP, (rvt.isFollowUpData() ? FOLLOWUP_VALUE : PRIMARY_VALUE).toLowerCase());
       columnValues.put(DataHeaderRow.ASSAY_PHENOTYPE, rvt.getAssayPhenotype());
       columnValues.put(DataHeaderRow.COMMENTS, rvt.getComments());
-      
+
       for (DataHeaderRow metadataRow : columnValues.keySet()) {
         Object value = columnValues.get(metadataRow);
         HSSFRow row = HSSFCellUtil.getRow(metadataRow.getRowIndex(), sheet);
@@ -123,7 +125,7 @@ public class DataHeadersWorksheet implements ScreenResultWorkbookSpecification
       cell.setCellStyle(style);
       cell.setCellValue(metadataRow.getDisplayText());
     }
-    
+
   }
 
 }
