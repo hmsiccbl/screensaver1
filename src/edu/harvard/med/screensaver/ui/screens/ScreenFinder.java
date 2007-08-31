@@ -12,7 +12,7 @@ package edu.harvard.med.screensaver.ui.screens;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UIControllerMethod;
 
 import org.apache.log4j.Logger;
 

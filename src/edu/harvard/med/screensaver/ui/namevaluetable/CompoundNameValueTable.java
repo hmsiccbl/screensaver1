@@ -16,10 +16,11 @@ import java.util.List;
 
 import javax.faces.model.ListDataModel;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.libraries.Compound;
-import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
+import edu.harvard.med.screensaver.ui.libraries.WellViewer;
+
+import org.apache.log4j.Logger;
 
 /**
  * A NameValueTable for the Compound Viewer.
@@ -54,9 +55,9 @@ public class CompoundNameValueTable extends NameValueTable
 
   // private instance fields
 
-  private LibrariesController _librariesController;
+  private CompoundViewer _compoundViewer;
   private Compound _compound;
-  private boolean _isEmbedded;
+  private WellViewer _parentWellViewer;
   private List<String> _names = new ArrayList<String>();
   private List<Object> _values = new ArrayList<Object>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
@@ -65,19 +66,20 @@ public class CompoundNameValueTable extends NameValueTable
 
   // public constructor and implementations of NameValueTable abstract methods
 
-  public CompoundNameValueTable(LibrariesController librariesController, Compound compound)
+  public CompoundNameValueTable(Compound compound,
+                                CompoundViewer compoundViewer)
   {
-    this(librariesController, compound, false);
+    this(compound, compoundViewer, null);
   }
 
   public CompoundNameValueTable(
-    LibrariesController librariesController,
     Compound compound,
-    boolean isEmbedded)
+    CompoundViewer compoundViewer,
+    WellViewer parentWellViewer)
   {
-    _librariesController = librariesController;
+    _compoundViewer = compoundViewer;
     _compound = compound;
-    _isEmbedded = isEmbedded;
+    _parentWellViewer = parentWellViewer;
     initializeLists(compound);
     setDataModel(new ListDataModel(_values));
   }
@@ -117,10 +119,12 @@ public class CompoundNameValueTable extends NameValueTable
   public String getAction(int index, String value)
   {
     // only link to the compound viewer page from the smiles when embedded in the well viewer
-    if (_isEmbedded) {
+    if (isEmbedded()) {
       String name = getName(index);
       if (name.equals(SMILES)) {
-        return _librariesController.viewCompound(_compound);
+        return _compoundViewer.viewCompound(_compound,
+                                            isEmbedded() ? _parentWellViewer.getWell() : null,
+                                            isEmbedded() ? _parentWellViewer.isShowNavigationBar() : null);
       }
     }
     // other fields do not have actions
@@ -150,6 +154,11 @@ public class CompoundNameValueTable extends NameValueTable
 
   // private instance methods
 
+  private boolean isEmbedded()
+  {
+    return _parentWellViewer != null;
+  }
+
   /**
    * Initialize the lists {@link #_names}, {@link #_values}, and {@link #_valueTypes}. Don't
    * add rows for missing values.
@@ -157,7 +166,7 @@ public class CompoundNameValueTable extends NameValueTable
    */
   private void initializeLists(Compound compound) {
     addItem(STRUCTURE, compound.getSmiles(), ValueType.IMAGE, "A 2D structure image of the compound");
-    addItem(SMILES, compound.getSmiles(), _isEmbedded ? ValueType.COMMAND : ValueType.TEXT, "The SMILES string for the compound");
+    addItem(SMILES, compound.getSmiles(), isEmbedded() ? ValueType.COMMAND : ValueType.TEXT, "The SMILES string for the compound");
     addItem(INCHI, compound.getInchi(), ValueType.TEXT, "The InChI string for the compound");
     if (compound.getNumCompoundNames() > 0) {
       addItem(COMPOUND_NAMES, compound.getCompoundNames(),  ValueType.TEXT_LIST, "The various names the compound goes by");

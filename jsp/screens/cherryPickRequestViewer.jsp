@@ -291,13 +291,13 @@ TODO:
 						styleClass="inputText" />
 					<t:commandButton id="addPoolCherryPicksCommand"
 						value="Add Cherry Picks (Pool Wells)"
-						action="#{cherryPickRequestViewer.addPoolCherryPicks}"
+						action="#{cherryPickRequestViewer.addCherryPicksForPoolWells}"
 						rendered="#{cherryPickRequestViewer.rnaiScreen}"
 						styleClass="command"
 						title="Add cherry picks, mapping from pool wells to duplex wells" />
 					<t:commandButton id="addCherryPicksCommand"
 						value="Add Cherry Picks"
-						action="#{cherryPickRequestViewer.addCherryPicks}"
+						action="#{cherryPickRequestViewer.addCherryPicksForWells}"
 						styleClass="command"
 						title="Add cherry picks for the specified wells" />
 				</t:panelGrid>

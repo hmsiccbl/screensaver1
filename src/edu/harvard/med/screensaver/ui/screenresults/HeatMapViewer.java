@@ -38,7 +38,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.util.Pair;
@@ -101,7 +101,7 @@ public class HeatMapViewer extends AbstractBackingBean
   private GenericEntityDAO _dao;
   private ScreenResultsDAO _screenResultsDao;
   private LibrariesDAO _librariesDao;
-  private LibrariesController _librariesController;
+  private WellViewer _wellViewer;
 
   private ScreenResult _screenResult;
   private UISelectOneBean<Integer> _plateNumber;
@@ -127,12 +127,12 @@ public class HeatMapViewer extends AbstractBackingBean
   public HeatMapViewer(GenericEntityDAO dao,
                        ScreenResultsDAO screenResultsDao,
                        LibrariesDAO librariesDao,
-                       LibrariesController librariesController)
+                       WellViewer wellViewer)
   {
     _dao = dao;
     _screenResultsDao = screenResultsDao;
     _librariesDao = librariesDao;
-    _librariesController = librariesController;
+    _wellViewer = wellViewer;
   }
 
 
@@ -399,7 +399,7 @@ public class HeatMapViewer extends AbstractBackingBean
   {
     HeatMapCell heatMapCell = getHeatMapCell();
     Well well = _librariesDao.findWell(heatMapCell.getWellKey());
-    return _librariesController.viewWell(well);
+    return _wellViewer.viewWell(well);
   }
 
   public String nextPlate()

@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 
 <f:subview id="wellTable">
-    
+
   <h:form id="wellTableForm">
     <t:dataTable
       id="wellTable"
@@ -20,7 +20,7 @@
           <t:outputText value="Library" title="The library containing the well" />
         </f:facet>
         <t:commandLink
-          action="#{librariesController.viewLibrary}"
+          action="#{libraryViewer.viewLibrary}"
           value="#{well.library.shortName}"
         >
           <f:param name="libraryId" value="#{well.library.libraryId}" />
@@ -37,7 +37,7 @@
           <t:outputText value="Well" title="The plate coordinates of the well" />
         </f:facet>
         <t:commandLink
-          action="#{librariesController.viewWell}"
+          action="#{wellViewer.viewWell}"
           value="#{well.wellName}"
         >
           <f:param name="wellId" value="#{well.wellId}" />
@@ -57,7 +57,7 @@
       </h:column>
     </t:dataTable>
   </h:form>
-    
+
 </f:subview>
 
 

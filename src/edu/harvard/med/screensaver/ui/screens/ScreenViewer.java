@@ -44,8 +44,8 @@ import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.WebDataAccessPolicy;
-import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
@@ -93,6 +93,7 @@ public class ScreenViewer extends AbstractBackingBean
   private String _newKeyword = "";
   private boolean _isEditMode = true;
   private boolean _isAdminViewMode = false;
+  private boolean _showNavigationBar;
 
 
   // public property getter & setter methods
@@ -174,6 +175,19 @@ public class ScreenViewer extends AbstractBackingBean
   public boolean isAllowedAccessToScreenDetails()
   {
     return isReadOnlyAdmin() || _dataAccessPolicy.isScreenerAllowedAccessToScreenDetails(_screen);
+  }
+
+  /**
+   * @motivation for JSF saveState component
+   */
+  public void setShowNavigationBar(boolean showNavigationBar)
+  {
+    _showNavigationBar = showNavigationBar;
+  }
+
+  public boolean isShowNavigationBar()
+  {
+    return _showNavigationBar;
   }
 
   public AssayReadoutType getNewAssayReadoutType()

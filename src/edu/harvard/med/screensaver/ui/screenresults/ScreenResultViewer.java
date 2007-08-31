@@ -45,9 +45,9 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
-import edu.harvard.med.screensaver.ui.control.LibrariesController;
-import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.table.SortChangedEvent;
@@ -139,10 +139,10 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   private GenericEntityDAO _dao;
   private ScreenResultsDAO _screenResultsDao;
   private LibrariesDAO _librariesDao;
-  private LibrariesController _librariesController;
   private ScreenSearchResults _screensBrowser;
   private ScreenViewer _screenViewer;
   private ScreenResultExporter _screenResultExporter;
+  private WellViewer _wellViewer;
 
   private ScreenResult _screenResult;
   private Map<String,Boolean> _isPanelCollapsedMap;
@@ -178,18 +178,18 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   public ScreenResultViewer(GenericEntityDAO dao,
                             ScreenResultsDAO screenResultsDao,
                             LibrariesDAO librariesDao,
-                            LibrariesController librariesController,
                             ScreenSearchResults screensBrowser,
                             ScreenViewer screenViewer,
-                            ScreenResultExporter screenResultExporter)
+                            ScreenResultExporter screenResultExporter,
+                            WellViewer wellViewer)
   {
     _dao = dao;
     _screenResultsDao = screenResultsDao;
     _librariesDao = librariesDao;
-    _librariesController = librariesController;
     _screensBrowser = screensBrowser;
     _screenViewer = screenViewer;
     _screenResultExporter = screenResultExporter;
+    _wellViewer = wellViewer;
 
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
     _isPanelCollapsedMap.put("screenSummary", false);
@@ -804,7 +804,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
         Integer plateNumber = (Integer) getSortManager().getColumn(0).getCellValue(row);
         String wellName = (String) getSortManager().getColumn(1).getCellValue(row);
         Well well = _librariesDao.findWell(new WellKey(plateNumber, wellName));
-        return _librariesController.viewWell(well);
+        return _wellViewer.viewWell(well);
       }
     });
     fixedColumns.add(new TableColumn<Map<String,Object>>("Type",

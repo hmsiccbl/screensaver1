@@ -18,9 +18,11 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 
 import org.apache.log4j.Logger;
@@ -36,7 +38,9 @@ public class Menu extends AbstractBackingBean
   // instance data members
 
   private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
   private ScreenSearchResults _screensBrowser;
+  private LibrarySearchResults _librariesBrowser;
 
 
   // public methods
@@ -49,10 +53,14 @@ public class Menu extends AbstractBackingBean
   }
 
   public Menu(GenericEntityDAO dao,
-              ScreenSearchResults screensBrowser)
+              LibrariesDAO librariesDao,
+              ScreenSearchResults screensBrowser,
+              LibrarySearchResults librariesBrowser)
   {
     _dao = dao;
+    _librariesDao = librariesDao;
     _screensBrowser = screensBrowser;
+    _librariesBrowser = librariesBrowser;
   }
 
 
@@ -88,6 +96,20 @@ public class Menu extends AbstractBackingBean
     log.info("logout for session "  + getHttpSession().getId());
     closeHttpSession();
     return VIEW_GOODBYE;
+  }
+
+  @UIControllerMethod
+  public String findWells()
+  {
+    return FIND_WELLS;
+  }
+
+  @UIControllerMethod
+  public String browseLibraries()
+  {
+    List<Library> libraries = _librariesDao.findLibrariesDisplayedInLibrariesBrowser();
+    _librariesBrowser.setContents(libraries);
+    return BROWSE_LIBRARIES;
   }
 
   @UIControllerMethod

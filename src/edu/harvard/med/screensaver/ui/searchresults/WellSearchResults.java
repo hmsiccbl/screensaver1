@@ -18,7 +18,10 @@ import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
+import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
+import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
+import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
 import org.apache.log4j.Logger;
@@ -40,8 +43,12 @@ public class WellSearchResults extends SearchResults<Well,Object>
 
   // instance fields
 
-  private LibrariesController _librariesController;
+  private LibraryViewer _libraryViewer;
+  private WellViewer _wellViewer;
+  private CompoundViewer _compoundViewer;
+  private GeneViewer _geneViewer;
   private List<DataExporter<Well>> _dataExporters;
+
   private List<TableColumn<Well>> _columns;
 
 
@@ -57,10 +64,16 @@ public class WellSearchResults extends SearchResults<Well,Object>
   /**
    * Construct a new <code>WellSearchResultsViewer</code> object.
    */
-  public WellSearchResults(LibrariesController librariesController,
+  public WellSearchResults(LibraryViewer libraryViewer,
+                           WellViewer wellViewer,
+                           CompoundViewer compoundViewer,
+                           GeneViewer geneViewer,
                            List<DataExporter<Well>> dataExporters)
   {
-    _librariesController = librariesController;
+    _libraryViewer = libraryViewer;
+    _wellViewer = wellViewer;
+    _compoundViewer = compoundViewer;
+    _geneViewer = geneViewer;
     _dataExporters = dataExporters;
   }
 
@@ -80,7 +93,7 @@ public class WellSearchResults extends SearchResults<Well,Object>
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(Well well) { return _librariesController.viewLibrary(well.getLibrary()); }
+        public Object cellAction(Well well) { return _libraryViewer.viewLibrary(well.getLibrary()); }
       });
       _columns.add(new TableColumn<Well>("Plate", "The number of the plate the well is located on", true) {
         @Override
@@ -94,7 +107,7 @@ public class WellSearchResults extends SearchResults<Well,Object>
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(Well well) { return _librariesController.viewWell(well); }
+        public Object cellAction(Well well) { return _wellViewer.viewWell(well, true); }
       });
       _columns.add(new TableColumn<Well>("Well Type", "The type of well, e.g., 'Experimental', 'Control', 'Empty', etc.") {
         @Override
@@ -129,7 +142,7 @@ public class WellSearchResults extends SearchResults<Well,Object>
         public Object cellAction(Well well)
         {
           if (getGeneCount(well) == 1) {
-            return _librariesController.viewGene(well.getGene());
+            return _geneViewer.viewGene(well.getGene(), well, true);
           }
           if (getCompoundCount(well) > 0) {
             // commandValue is really a smiles, not a compoundId
@@ -141,7 +154,7 @@ public class WellSearchResults extends SearchResults<Well,Object>
                 break;
               }
             }
-            return _librariesController.viewCompound(compound);
+            return _compoundViewer.viewCompound(compound, well, true);
           }
           return REDISPLAY_PAGE_ACTION_RESULT;
         }
@@ -168,12 +181,12 @@ public class WellSearchResults extends SearchResults<Well,Object>
   protected void setEntityToView(Well well)
   {
     // TODO: we should really only call the view*() method for the mode we're in; otherwise we're doing extra db work
-    _librariesController.viewWell(well);
+    _wellViewer.viewWell(well, true);
     // we need to call these view methods even, if the gene/compound is null, so
     // that the view can at least be updated to reflect the emptiness of the
     // well
-    _librariesController.viewGene(well.getGene());
-    _librariesController.viewCompound(well.getPrimaryCompound());
+    _geneViewer.viewGene(well.getGene(), well, true);
+    _compoundViewer.viewCompound(well.getPrimaryCompound(), well, true);
   }
 
 

@@ -14,10 +14,11 @@ import java.util.List;
 
 import javax.faces.model.ListDataModel;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.libraries.Gene;
-import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
+import edu.harvard.med.screensaver.ui.libraries.WellViewer;
+
+import org.apache.log4j.Logger;
 
 /**
  * A NameValueTable for the Gene Viewer.
@@ -47,9 +48,9 @@ public class GeneNameValueTable extends NameValueTable
 
   // private instance fields
 
-  private LibrariesController _librariesController;
+  private GeneViewer _geneViewer;
   private Gene _gene;
-  private boolean _isEmbedded;
+  private WellViewer _parentWellViewer;
   private List<String> _names = new ArrayList<String>();
   private List<Object> _values = new ArrayList<Object>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
@@ -58,16 +59,16 @@ public class GeneNameValueTable extends NameValueTable
 
   // public constructor and implementations of NameValueTable abstract methods
 
-  public GeneNameValueTable(LibrariesController librariesController, Gene gene)
+  public GeneNameValueTable(Gene gene, GeneViewer geneViewer)
   {
-    this(librariesController, gene, false);
+    this(gene, geneViewer, null);
   }
 
-  public GeneNameValueTable(LibrariesController librariesController, Gene gene, boolean isEmbedded)
+  public GeneNameValueTable(Gene gene, GeneViewer geneViewer, WellViewer parentWellViewer)
   {
-    _librariesController = librariesController;
+    _geneViewer = geneViewer;
     _gene = gene;
-    _isEmbedded = isEmbedded;
+    _parentWellViewer = parentWellViewer;
     initializeLists(gene);
     setDataModel(new ListDataModel(_values));
   }
@@ -106,10 +107,12 @@ public class GeneNameValueTable extends NameValueTable
   public String getAction(int index, String value)
   {
     // only link from gene name to gene viewer page when embedded in the well viewer
-    if (_isEmbedded) {
+    if (isEmbedded()) {
       String name = getName(index);
       if (name.equals(GENE_NAME)) {
-        return _librariesController.viewGene(_gene);
+        return _geneViewer.viewGene(_gene,
+                                    isEmbedded() ? _parentWellViewer.getWell() : null,
+                                    isEmbedded() ? _parentWellViewer.isShowNavigationBar() : null);
       }
     }
     // other fields do not have actions
@@ -134,13 +137,18 @@ public class GeneNameValueTable extends NameValueTable
 
   // private instance methods
 
+  private boolean isEmbedded()
+  {
+    return _parentWellViewer != null;
+  }
+
   /**
    * Initialize the lists {@link #_names}, {@link #_values}, and {@link #_valueTypes}. Don't
    * add rows for missing values.
    */
   private void initializeLists(Gene gene)
   {
-    addItem(GENE_NAME, gene.getGeneName(), _isEmbedded ? ValueType.COMMAND : ValueType.TEXT, "The name of the gene, as labelled in EntrezGene");
+    addItem(GENE_NAME, gene.getGeneName(), isEmbedded() ? ValueType.COMMAND : ValueType.TEXT, "The name of the gene, as labelled in EntrezGene");
     addItem(ENTREZGENE_ID, gene.getEntrezgeneId(), ValueType.LINK, "The EntrezGene ID, a.k.a. Locus ID");
     addItem(ENTREZGENE_SYMBOL, gene.getEntrezgeneSymbol(), ValueType.TEXT, "The EntrezGene Gene Symbol");
     if (! gene.getOldEntrezgeneIds().isEmpty()) {

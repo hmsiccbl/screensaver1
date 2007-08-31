@@ -15,7 +15,6 @@ import java.util.List;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
-import edu.harvard.med.screensaver.ui.control.LibrariesController;
 import edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
@@ -44,7 +43,8 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume,WellVolume
   // instance data members
 
   private GenericEntityDAO _dao;
-  private LibrariesController _librariesController;
+  private LibraryViewer _libraryViewer;
+  private WellViewer _wellViewer;
   private CherryPickRequestViewer _cherryPickRequestViewer;
   private ArrayList<TableColumn<WellVolume>> _columns;
   private TableColumn<WellVolume> _maxRemainingVolumeColumn;
@@ -60,12 +60,14 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume,WellVolume
   }
 
   public WellVolumeSearchResults(GenericEntityDAO dao,
-                                 LibrariesController librariesController,
+                                 LibraryViewer libraryViewer,
+                                 WellViewer wellViewer,
                                  CherryPickRequestViewer cherryPickRequestViewer,
                                  WellVolumeAdjustmentSearchResults rowDetail)
   {
     _dao = dao;
-    _librariesController = librariesController;
+    _libraryViewer = libraryViewer;
+    _wellViewer = wellViewer;
     _cherryPickRequestViewer = cherryPickRequestViewer;
     setRowDetail(rowDetail);
   }
@@ -85,7 +87,7 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume,WellVolume
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(WellVolume wellVolume) { return _librariesController.viewLibrary(wellVolume.getWell().getLibrary()); }
+        public Object cellAction(WellVolume wellVolume) { return _libraryViewer.viewLibrary(wellVolume.getWell().getLibrary()); }
       });
       _columns.add(new TableColumn<WellVolume>("Plate", "The number of the plate the well is located on", true) {
         @Override
@@ -99,7 +101,7 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume,WellVolume
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(WellVolume wellVolume) { return _librariesController.viewWell(wellVolume.getWell()); }
+        public Object cellAction(WellVolume wellVolume) { return _wellViewer.viewWell(wellVolume.getWell()); }
       });
       _columns.add(new TableColumn<WellVolume>("Copies", "The copies of this well") {
         @Override
@@ -172,7 +174,7 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume,WellVolume
   @Override
   protected void setEntityToView(WellVolume wellCopyVolume)
   {
-    _librariesController.viewWell(wellCopyVolume.getWell());
+    _wellViewer.viewWell(wellCopyVolume.getWell());
   }
 
   @Override

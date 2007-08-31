@@ -9,9 +9,12 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.GeneNameValueTable;
 
 public class GeneViewer extends AbstractBackingBean
@@ -19,9 +22,27 @@ public class GeneViewer extends AbstractBackingBean
 
   // private instance fields
 
+  private GenericEntityDAO _dao;
+
   private Gene _gene;
   private GeneNameValueTable _geneNameValueTable;
+  private boolean _showNavigationBar;
   private Well _parentWellOfInterest;
+
+
+  // constructors
+
+  /**
+   * @motivation for CGLIB2
+   */
+  protected GeneViewer()
+  {
+  }
+
+  public GeneViewer(GenericEntityDAO dao)
+  {
+    _dao = dao;
+  }
 
 
   // public instance methods
@@ -47,16 +68,16 @@ public class GeneViewer extends AbstractBackingBean
   }
 
   /**
-   * Set the parent Well of interest, for which this compound is being viewed (a
-   * compound can be in multiple wells, but the UI may want to be explicit about
-   * which Well "led" to this viewer").
-   *
-   * @param parentWellOfInterest the parent Well of interest, for which this
-   *          compound is being viewed; may be null
+   * @motivation for JSF saveState component
    */
-  public void setParentWellOfInterest(Well parentWellOfInterest)
+  public void setShowNavigationBar(boolean showNavigationBar)
   {
-    _parentWellOfInterest = parentWellOfInterest;
+    _showNavigationBar = showNavigationBar;
+  }
+
+  public boolean isShowNavigationBar()
+  {
+    return _showNavigationBar;
   }
 
   /**
@@ -71,4 +92,36 @@ public class GeneViewer extends AbstractBackingBean
   {
     return _parentWellOfInterest;
   }
+
+  @UIControllerMethod
+  public String viewGene(final Gene geneIn)
+  {
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        if (geneIn != null) {
+          Gene gene = _dao.reloadEntity(geneIn, false);
+          _dao.needReadOnly(gene,
+                            "genbankAccessionNumbers",
+                            "hbnSilencingReagents.hbnWells.hbnLibrary");
+          setGene(gene);
+          setGeneNameValueTable(new GeneNameValueTable(gene, GeneViewer.this));
+        }
+        else {
+          setGene(null);
+          setGeneNameValueTable(null);
+        }
+      }
+    });
+    return VIEW_GENE;
+  }
+
+  @UIControllerMethod
+  public String viewGene(Gene gene, Well forWell, boolean showNavigationBar)
+  {
+    _parentWellOfInterest = forWell;
+    _showNavigationBar = showNavigationBar;
+    return viewGene(gene);
+  }
+
 }

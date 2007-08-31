@@ -67,7 +67,7 @@ import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMap
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper;
 import edu.harvard.med.screensaver.service.libraries.rnai.LibraryPoolToDuplexWellMapper;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.screenresults.DataTableRowsPerPageUISelectOneBean;

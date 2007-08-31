@@ -5,21 +5,25 @@
 
 <f:subview id="geneViewer">
 
-  <t:aliasBean alias="#{navigator}" value="#{wellSearchResults}">
-		<h:form id="navPanelForm">
-			<%@ include file="../searchResultsNavPanel.jspf" %>
-		</h:form>
-  </t:aliasBean>
+	<t:saveState value="#{geneViewer.showNavigationBar}" />
+
+	<t:panelGroup rendered="#{geneViewer.showNavigationBar}">
+		<t:aliasBean alias="#{navigator}" value="#{wellsBrowser}">
+			<h:form id="navPanelForm">
+				<%@ include file="../searchResultsNavPanel.jspf"%>
+			</h:form>
+		</t:aliasBean>
+	</t:panelGroup>
 
 	<t:panelGrid rendered="#{! empty geneViewer.gene}" columns="1">
 		<t:aliasBean alias="#{nameValueTable}" value="#{geneViewer.geneNameValueTable}">
 			<%@ include file="../nameValueTable.jspf" %>
 		</t:aliasBean>
-		
+
     <t:div style="margin-top: 15px; margin-left: 20px;">
       <t:outputText
         styleClass="subsectionHeader"
-        value="Wells in which Silencing Reagents for this Gene are Found"
+        value="Wells in which Silencing Reagents for this Gene are found"
       />
 			<t:aliasBean alias="#{wells}" value="#{geneViewer.gene.wells}">
 				<%@ include file="wellTable.jspf" %>
@@ -29,7 +33,7 @@
 
 	<t:panelGroup rendered="#{empty geneViewer.gene}">
 		<t:outputText
-			value="There are no genes in well #{compoundViewer.parentWellOfInterest.wellKey}"
+			value="There are no genes in well #{geneViewer.parentWellOfInterest.wellKey}"
 			styleClass="label" />
 	</t:panelGroup>
 

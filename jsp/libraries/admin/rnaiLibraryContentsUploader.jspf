@@ -24,7 +24,7 @@
       />
       <h:selectOneMenu
         id="silencingReagentType"
-        value="#{librariesController.rnaiLibraryContentsParser.silencingReagentType}"
+        value="#{rnaiLibraryContentsImporter.silencingReagentType}"
         converter="SilencingReagentTypeConverter"
         styleClass="inputText"
       >
@@ -47,7 +47,7 @@
         maxlength="134217728"
         styleClass="inputText"
       />
-      
+
       <t:commandButton
         id="import"
         value="Import"

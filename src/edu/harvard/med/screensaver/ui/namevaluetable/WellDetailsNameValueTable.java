@@ -14,10 +14,10 @@ import java.util.List;
 
 import javax.faces.model.ListDataModel;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
+
+import org.apache.log4j.Logger;
 
 /**
  * A NameValueTable for the well details portion of the Well Viewer.
@@ -47,7 +47,8 @@ public class WellDetailsNameValueTable extends NameValueTable
 
   // private instance fields
 
-  private LibrariesController _librariesController;
+  private LibraryViewer _libraryViewer;
+
   private Well _well;
   private List<String> _names = new ArrayList<String>();
   private List<Object> _values = new ArrayList<Object>();
@@ -57,10 +58,11 @@ public class WellDetailsNameValueTable extends NameValueTable
 
   // public constructor and implementations of NameValueTable abstract methods
 
-  public WellDetailsNameValueTable(LibrariesController librariesController, Well well)
+  public WellDetailsNameValueTable(Well well,
+                                   LibraryViewer libraryViewer)
   {
-    _librariesController = librariesController;
     _well = well;
+    _libraryViewer = libraryViewer;
     initializeLists(well);
     setDataModel(new ListDataModel(_values));
   }
@@ -100,7 +102,7 @@ public class WellDetailsNameValueTable extends NameValueTable
   {
     String name = getName(index);
     if (name.equals(LIBRARY)) {
-      return _librariesController.viewLibrary(_well.getLibrary());
+      return _libraryViewer.viewLibrary(_well.getLibrary());
     }
     // other fields do not have actions
     return null;

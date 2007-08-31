@@ -5,11 +5,15 @@
 
 <f:subview id="compoundViewer">
 
-  <t:aliasBean alias="#{navigator}" value="#{wellSearchResults}">
-		<h:form id="navPanelForm">
-			<%@ include file="../searchResultsNavPanel.jspf" %>
-		</h:form>
-  </t:aliasBean>
+	<t:saveState value="#{compoundViewer.showNavigationBar}" />
+
+	<t:panelGroup rendered="#{compoundViewer.showNavigationBar}">
+		<t:aliasBean alias="#{navigator}" value="#{wellsBrowser}">
+			<h:form id="navPanelForm">
+				<%@ include file="../searchResultsNavPanel.jspf"%>
+			</h:form>
+		</t:aliasBean>
+	</t:panelGroup>
 
 	<t:panelGrid rendered="#{! empty compoundViewer.compound}" columns="1">
 		<t:aliasBean alias="#{nameValueTable}"
@@ -21,7 +25,7 @@
       <t:panelGrid columns="1">
         <t:outputText
           styleClass="subsectionHeader"
-          value="Wells in which this Compound is Found"
+          value="Wells in which this Compound is found"
         />
 			  <t:aliasBean alias="#{wells}" value="#{compoundViewer.compound.wells}">
 				  <%@ include file="wellTable.jspf" %>

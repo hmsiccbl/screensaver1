@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -26,28 +26,28 @@ import org.apache.log4j.Logger;
 /**
  * A Hibernate entity bean representing a cherry pick. See
  * {@link #CherryPickRequest} for explanation.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @hibernate.class lazy="true"
  */
 public class ScreenerCherryPick extends AbstractEntity
 {
-  
+
   // static fields
 
   private static final Logger log = Logger.getLogger(ScreenerCherryPick.class);
   private static final long serialVersionUID = 0L;
-  
+
   // instance fields
 
   private Integer _screenerCherryPickId;
   private Integer _version;
-  
+
   private CherryPickRequest _cherryPickRequest;
   private Well _screenedWell;
   private Set<LabCherryPick> _labCherryPicks = new HashSet<LabCherryPick>();
-  
+
   /* follow-up data from screener, after cherry pick screening is completed */
   private RNAiKnockdownConfirmation _rnaiKnockdownConfirmation;
   private IsHitConfirmedViaExperimentation _isHitConfirmedViaExperimentation;
@@ -68,8 +68,8 @@ public class ScreenerCherryPick extends AbstractEntity
     if (cherryPickRequest == null || screenedWell == null) {
         throw new NullPointerException();
     }
-    
-    // TODO: verify well was actually one that was screened 
+
+    // TODO: verify well was actually one that was screened
 
     _cherryPickRequest = cherryPickRequest;
     _screenedWell = screenedWell;
@@ -87,7 +87,7 @@ public class ScreenerCherryPick extends AbstractEntity
   {
     return visitor.visit(this);
   }
-  
+
   @Override
   public Integer getEntityId()
   {
@@ -128,7 +128,7 @@ public class ScreenerCherryPick extends AbstractEntity
    * Get the screened library well for this cherry pick. The screened well
    * corresponds to a well that took part in the screen that generated this
    * cherry pick.  Screened wells are specified by the screener.
-   * 
+   *
    * @return the screened well
    * @see LabCherryPick#getSourceWell()
    * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.libraries.Well"
@@ -155,7 +155,7 @@ public class ScreenerCherryPick extends AbstractEntity
   {
     return _labCherryPicks;
   }
-  
+
   private void setLabCherryPicks(Set<LabCherryPick> labCherryPicks)
   {
     _labCherryPicks = labCherryPicks;
@@ -227,7 +227,7 @@ public class ScreenerCherryPick extends AbstractEntity
    */
   private class BusinessKey
   {
-    
+
     /**
      * Get the cherry pick request.
      *
@@ -237,7 +237,7 @@ public class ScreenerCherryPick extends AbstractEntity
     {
       return _cherryPickRequest;
     }
-    
+
     /**
      * Get the well.
      *
@@ -264,8 +264,8 @@ public class ScreenerCherryPick extends AbstractEntity
     public int hashCode()
     {
       return
-        this.getCherryPickRequest().hashCode() +
-        this.getWell().hashCode();
+        this.getCherryPickRequest().hashCode() * 17 +
+        this.getWell().hashCode() * 63;
     }
 
     @Override

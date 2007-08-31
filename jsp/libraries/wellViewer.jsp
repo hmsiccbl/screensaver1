@@ -5,11 +5,15 @@
 
 <f:subview id="wellViewer">
 
-  <t:aliasBean alias="#{navigator}" value="#{wellsBrowser}">
-		<h:form id="navPanelForm">
-			<%@ include file="../searchResultsNavPanel.jspf" %>
-		</h:form>
-  </t:aliasBean>
+	<t:saveState value="#{wellViewer.showNavigationBar}" />
+
+	<t:panelGroup rendered="#{wellViewer.showNavigationBar}" >
+	  <t:aliasBean alias="#{navigator}" value="#{wellsBrowser}">
+			<h:form id="navPanelForm">
+				<%@ include file="../searchResultsNavPanel.jspf" %>
+			</h:form>
+  	</t:aliasBean>
+  </t:panelGroup>
 
   <t:aliasBean alias="#{nameValueTable}" value="#{wellViewer.wellNameValueTable}">
     <%@ include file="../nameValueTable.jspf" %>

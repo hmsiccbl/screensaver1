@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,15 +18,19 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.springframework.dao.DataAccessException;
 
 /**
  * The JSF backing bean for the rnaiLibraryContentsImporter subview.
@@ -38,7 +44,8 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
 
   // instance data
 
-  private LibrariesController _librariesController;
+  private GenericEntityDAO _dao;
+  private LibraryViewer _libraryViewer;
   private RNAiLibraryContentsParser _rnaiLibraryContentsParser;
 
   private UploadedFile _uploadedFile;
@@ -56,10 +63,12 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
   {
   }
 
-  public RNAiLibraryContentsImporter(LibrariesController librariesController,
+  public RNAiLibraryContentsImporter(GenericEntityDAO dao,
+                                     LibraryViewer libraryViewer,
                                      RNAiLibraryContentsParser rnaiLibraryContentsParser)
   {
-    _librariesController = librariesController;
+    _dao = dao;
+    _libraryViewer = libraryViewer;
     _rnaiLibraryContentsParser = rnaiLibraryContentsParser;
   }
 
@@ -84,6 +93,8 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
   public void setLibrary(Library library)
   {
     _library = library;
+    setUploadedFile(null);
+    _rnaiLibraryContentsParser.clearErrors();
   }
 
   /**
@@ -125,7 +136,14 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
 
   public String viewLibrary()
   {
-    return _librariesController.viewLibrary(_library);
+    return _libraryViewer.viewLibrary(_library);
+  }
+
+  @UIControllerMethod
+  public String viewRNAiLibraryContentsImporter(Library library)
+  {
+    setLibrary(library);
+    return IMPORT_RNAI_LIBRARY_CONTENTS;
   }
 
   /**
@@ -133,11 +151,46 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
    * depending on the result.
    * @return the control code for the appropriate next page
    */
+  @UIControllerMethod
   public String importRNAiLibraryContents()
   {
-    return _librariesController.importRNAiLibraryContents(
-      _library,
-      _uploadedFile,
-      _silencingReagentType);
+    try {
+      if (_uploadedFile == null || _uploadedFile.getInputStream().available() == 0) {
+        showMessage("badUploadedFile", _uploadedFile.getName());
+        return IMPORT_RNAI_LIBRARY_CONTENTS;
+      }
+      _dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          try {
+            Library library = _dao.reloadEntity(_library);
+            _rnaiLibraryContentsParser.setSilencingReagentType(_silencingReagentType);
+            _rnaiLibraryContentsParser.parseLibraryContents(library,
+                                                            new File(_uploadedFile.getName()),
+                                                            _uploadedFile.getInputStream());
+            _dao.persistEntity(library);
+          }
+          catch (IOException e) {
+            throw new DAOTransactionRollbackException("could not access uploaded file", e);
+          }
+        }
+      });
+      if (_rnaiLibraryContentsParser.getHasErrors()) {
+        return IMPORT_RNAI_LIBRARY_CONTENTS;
+      }
+      showMessage("libraries.importedLibraryContents", "libraryViewer");
+      // TODO: to be correct, we should regen the search results, though I don't think anything in the results would actually be different after this import
+      return _libraryViewer.viewLibrary(_library);
+    }
+    catch (DataAccessException e) {
+      // TODO: should reload library and goto library viewer
+      reportSystemError(e);
+      return IMPORT_RNAI_LIBRARY_CONTENTS;
+    }
+    catch (Exception e) {
+      reportApplicationError(e);
+      return IMPORT_RNAI_LIBRARY_CONTENTS;
+    }
   }
 }

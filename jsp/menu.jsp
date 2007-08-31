@@ -49,12 +49,12 @@
 			<t:panelNavigation2 id="navMenu" layout="table" itemClass="menuItem"
 				openItemClass="menuItem" activeItemClass="menuItemActive"
 				separatorClass="navSeparator" rendered="#{menu.authenticatedUser}">
-				<t:commandNavigation2 action="#{librariesController.findWells}"
+				<t:commandNavigation2 action="#{menu.findWells}"
 					value="Find Wells"
 					accesskey="W"
 					title="Look up one or more library wells by plate number and well name" />
 				<t:commandNavigation2
-					action="#{librariesController.browseLibraries}"
+					action="#{menu.browseLibraries}"
 					value="Browse Libraries"
 					accesskey="L"
 					title="Browse the currently available libraries" />

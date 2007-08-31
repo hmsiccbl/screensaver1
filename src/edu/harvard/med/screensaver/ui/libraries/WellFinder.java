@@ -9,9 +9,22 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
+import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 
@@ -32,7 +45,13 @@ public class WellFinder extends AbstractBackingBean
 
   // private instance fields
 
-  private LibrariesController _librariesController;
+  private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
+  private PlateWellListParser _plateWellListParser;
+  private WellSearchResults _wellsBrowser;
+  private WellViewer _wellViewer;
+  private WellCopyVolumeSearchResults _wellCopyVolumesBrowser;
+
   private String _plateNumber;
   private String _wellName;
   private String _plateWellList;
@@ -47,23 +66,23 @@ public class WellFinder extends AbstractBackingBean
   {
   }
 
-  public WellFinder(LibrariesController librariesController)
+  public WellFinder(GenericEntityDAO dao,
+                    LibrariesDAO librariesDao,
+                    WellSearchResults wellsBrowser,
+                    WellViewer wellViewer,
+                    WellCopyVolumeSearchResults wellCopyVolumesBrowser,
+                    PlateWellListParser plateWellListParser)
   {
-    _librariesController = librariesController;
+    _dao = dao;
+    _librariesDao = librariesDao;
+    _wellsBrowser = wellsBrowser;
+    _wellViewer = wellViewer;
+    _wellCopyVolumesBrowser = wellCopyVolumesBrowser;
+    _plateWellListParser = plateWellListParser;
   }
 
 
   // public instance methods
-
-  public LibrariesController getLibrariesController()
-  {
-    return _librariesController;
-  }
-
-  public void setLibrariesController(LibrariesController librariesController)
-  {
-    _librariesController = librariesController;
-  }
 
   public String getPlateNumber()
   {
@@ -106,19 +125,56 @@ public class WellFinder extends AbstractBackingBean
    * page depending on the result.
    * @return the control code for the appropriate next page
    */
+  @UIControllerMethod
   public String findWell()
   {
-    return _librariesController.findWell(_plateNumber, _wellName);
+    return _wellViewer.viewWell(_plateWellListParser.lookupWell(_plateNumber, _wellName));
   }
 
   /**
    * Find the wells specified in the plate-well list, and go to the {@link WellSearchResultsViewer}
    * page.
-   * @return the controler code for the next appropriate page
+   * @return the controller code for the next appropriate page
    */
+  @UIControllerMethod
   public String findWells()
   {
-    return _librariesController.findWells(_plateWellList);
+    final String[] result = new String[1];
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        PlateWellListParserResult parseResult = _plateWellListParser.parseWellsFromPlateWellList(_plateWellList);
+        if (parseResult.getParsedWellKeys().size() == 1) {
+          result[0] = _wellViewer.viewWell(parseResult.getParsedWellKeys().first(), false);
+          return;
+        }
+
+        // display parse errors before proceeding with successfully parsed wells
+        for (Pair<Integer,String> error : parseResult.getErrors()) {
+          showMessage("libraries.plateWellListParseError", error.getSecond());
+        }
+
+        List<Well> foundWells = new ArrayList<Well>();
+        for (WellKey wellKey : parseResult.getParsedWellKeys()) {
+          Well well = _dao.findEntityById(Well.class,
+                                          wellKey.toString(),
+                                          true,
+                                          "hbnLibrary",
+                                          "hbnSilencingReagents.gene",
+                                          "hbnCompounds");
+          if (well == null) {
+            showMessage("libraries.noSuchWell", wellKey.getPlateNumber(), wellKey.getWellName());
+          }
+          else {
+            foundWells.add(well);
+          }
+        }
+        _wellsBrowser.setContents(foundWells);
+          result[0] = VIEW_WELL_SEARCH_RESULTS;
+      }
+    });
+    return result[0];
   }
 
   /**
@@ -127,8 +183,35 @@ public class WellFinder extends AbstractBackingBean
    *
    * @return the controler code for the next appropriate page
    */
+  @UIControllerMethod
   public String findWellVolumes()
   {
-    return _librariesController.findWellVolumes(_plateWellList);
+    final String[] result = new String[1];
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        PlateWellListParserResult parseResult = _plateWellListParser.parseWellsFromPlateWellList(_plateWellList);
+
+        // display parse errors before proceeding with successfully parsed wells
+        for (Pair<Integer,String> error : parseResult.getErrors()) {
+          showMessage("libraries.plateWellListParseError", error.getSecond());
+        }
+
+        List<WellCopyVolume> foundWellCopyVolumes = new ArrayList<WellCopyVolume>();
+        for (WellKey wellKey : parseResult.getParsedWellKeys()) {
+          Collection<WellCopyVolume> wellCopyVolumes = _librariesDao.findWellCopyVolumes(wellKey);
+          if (wellCopyVolumes.size() == 0) {
+            showMessage("libraries.noSuchWell", wellKey.getPlateNumber(), wellKey.getWellName());
+          }
+          else {
+            foundWellCopyVolumes.addAll(wellCopyVolumes);
+          }
+        }
+        _wellCopyVolumesBrowser.setContents(foundWellCopyVolumes);
+        result[0] = VIEW_WELL_VOLUME_SEARCH_RESULTS;
+      }
+    });
+    return result[0];
   }
 }

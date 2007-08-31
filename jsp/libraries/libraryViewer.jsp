@@ -5,13 +5,17 @@
 
 <f:subview id="libraryViewer">
 
-  <t:aliasBean alias="#{navigator}" value="#{librariesBrowser}" >
-		<h:form id="navPanelForm">
-			<%@ include file="../searchResultsNavPanel.jspf" %>
-		</h:form>
-  </t:aliasBean>
+	<t:saveState value="#{libraryViewer.showNavigationBar}" />
 
-  <t:aliasBean alias="#{nameValueTable}" value="#{libraryViewer.libraryNameValueTable}" >
+	<t:panelGroup rendered="#{libraryViewer.showNavigationBar}">
+		<t:aliasBean alias="#{navigator}" value="#{librariesBrowser}">
+			<h:form id="navPanelForm">
+				<%@ include file="../searchResultsNavPanel.jspf"%>
+			</h:form>
+		</t:aliasBean>
+	</t:panelGroup>
+
+	<t:aliasBean alias="#{nameValueTable}" value="#{libraryViewer.libraryNameValueTable}" >
     <%@ include file="../nameValueTable.jspf"  %>
   </t:aliasBean>
 
@@ -22,28 +26,16 @@
 				title="View a list of all the wells in the library" />
 
 			<h:commandButton value="View Well Volumes"
-				action="#{libraryViewer.viewLibraryWellVolumes}"
+				action="#{libraryViewer.viewLibraryWellCopyVolumes}"
 				rendered="#{libraryViewer.editable}"
 				styleClass="command"
-				title="View a list of all the wells in the library" />
+				title="View volume information for all the wells in the library" />
 
 			<h:commandButton value="Import Library Contents"
-				action="#{libraryViewer.importRNAiLibraryContents}"
-				rendered="#{libraryViewer.editable && libraryViewer.isRNAiLibrary}"
+				action="#{libraryViewer.viewLibraryContentsImporter}"
+				rendered="#{libraryViewer.editable}"
 			    styleClass="command"
-			    title="Import the contents of library wells from an Excel spreadsheet" />
-
-      <h:commandButton value="Import Library Contents"
-        action="#{libraryViewer.importCompoundLibraryContents}"
-        rendered="#{libraryViewer.editable && libraryViewer.isCompoundLibrary && ! libraryViewer.isNaturalProductsLibrary}"
-        styleClass="command"
-        title="Import the contents of library wells from an SD File" />
-
-      <h:commandButton value="Import Library Contents"
-        action="#{libraryViewer.importNaturalProductsLibraryContents}"
-        rendered="#{libraryViewer.editable && libraryViewer.isNaturalProductsLibrary}"
-        styleClass="command"
-        title="Import contents from a natural products excel file" />
+			    title="Import the contents of library wells." />
 
 			<h:commandButton value="Unload Library Contents"
 				action="#{libraryViewer.unloadLibraryContents}"

@@ -14,7 +14,7 @@ import java.util.List;
 
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
 import org.apache.log4j.Logger;
@@ -36,7 +36,7 @@ public class LibrarySearchResults extends SearchResults<Library,Object>
 
   // instance fields
 
-  private LibrariesController _librariesController;
+  private LibraryViewer _libraryViewer;
 
   private ArrayList<TableColumn<Library>> _columns;
 
@@ -50,9 +50,9 @@ public class LibrarySearchResults extends SearchResults<Library,Object>
   {
   }
 
-  public LibrarySearchResults(LibrariesController librariesController)
+  public LibrarySearchResults(LibraryViewer libraryViewer)
   {
-    _librariesController = librariesController;
+    _libraryViewer = libraryViewer;
   }
 
 
@@ -84,7 +84,7 @@ public class LibrarySearchResults extends SearchResults<Library,Object>
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(Library library) { return _librariesController.viewLibrary(library); }
+        public Object cellAction(Library library) { return _libraryViewer.viewLibrary(library, true); }
       });
       _columns.add(new TableColumn<Library>("Library Name", "The full name of the library") {
         @Override
@@ -122,6 +122,6 @@ public class LibrarySearchResults extends SearchResults<Library,Object>
   @Override
   protected void setEntityToView(Library library)
   {
-    _librariesController.viewLibrary(library);
+    _libraryViewer.viewLibrary(library, true);
   }
 }

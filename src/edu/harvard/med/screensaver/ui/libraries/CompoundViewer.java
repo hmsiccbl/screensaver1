@@ -9,10 +9,12 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.control.LibrariesController;
+import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.CompoundNameValueTable;
 
 import org.apache.log4j.Logger;
@@ -27,9 +29,11 @@ public class CompoundViewer extends AbstractBackingBean
 
   // private instance fields
 
-  private LibrariesController _librariesController;
+  private GenericEntityDAO _dao;
+
   private Compound _compound;
   private CompoundNameValueTable _compoundNameValueTable;
+  private boolean _showNavigationBar;
   private Well _parentWellOfInterest;
 
 
@@ -42,35 +46,25 @@ public class CompoundViewer extends AbstractBackingBean
   {
   }
 
-  public CompoundViewer(LibrariesController librariesController)
+  public CompoundViewer(GenericEntityDAO dao)
   {
-    _librariesController = librariesController;
+    _dao = dao;
   }
 
 
-  // public getters and setters
-
-  public LibrariesController getLibrariesController()
-  {
-    return _librariesController;
-  }
-
-  public void setLibrariesController(LibrariesController librariesController)
-  {
-    _librariesController = librariesController;
-  }
+  // public instance methods
 
   /**
-   * Set the parent Well of interest, for which this compound is being viewed (a
-   * compound can be in multiple wells, but the UI may want to be explicit about
-   * which Well "led" to this viewer").
-   *
-   * @param parentWellOfInterest the parent Well of interest, for which this
-   *          compound is being viewed; may be null
+   * @motivation for JSF saveState component
    */
-  public void setParentWellOfInterest(Well parentWellOfInterest)
+  public void setShowNavigationBar(boolean showNavigationBar)
   {
-    _parentWellOfInterest = parentWellOfInterest;
+    _showNavigationBar = showNavigationBar;
+  }
+
+  public boolean isShowNavigationBar()
+  {
+    return _showNavigationBar;
   }
 
   /**
@@ -106,8 +100,38 @@ public class CompoundViewer extends AbstractBackingBean
     _compoundNameValueTable = compoundNameValueTable;
   }
 
-  public String viewCompound()
+  @UIControllerMethod
+  public String viewCompound(final Compound compoundIn)
   {
-    return _librariesController.viewCompound(_compound);
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        if (compoundIn != null) {
+          Compound compound = _dao.reloadEntity(compoundIn, true);
+          _dao.needReadOnly(compound,
+                            "compoundNames",
+                            "pubchemCids",
+                            "casNumbers",
+                            "nscNumbers",
+                            "hbnWells.hbnLibrary");
+          setCompound(compound);
+          setCompoundNameValueTable(new CompoundNameValueTable(compound, CompoundViewer.this));
+        }
+        else {
+          setCompound(null);
+          setCompoundNameValueTable(null);
+        }
+      }
+    });
+    return VIEW_COMPOUND;
   }
+
+  @UIControllerMethod
+  public String viewCompound(Compound compound, Well forWell, boolean showNavigationBar)
+  {
+    _parentWellOfInterest = forWell;
+    _showNavigationBar = showNavigationBar;
+    return viewCompound(compound);
+  }
+
 }

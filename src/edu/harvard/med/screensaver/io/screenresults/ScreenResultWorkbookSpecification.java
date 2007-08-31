@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -36,7 +36,7 @@ public interface ScreenResultWorkbookSpecification
    * The data rows of the "Data Headers" worksheet. Order of enum values is
    * significant, as we use the ordinal() method.
    */
-  public enum DataHeaderRow { 
+  public enum DataHeaderRow {
     COLUMN_IN_DATA_WORKSHEET("\"Data\" Worksheet Column", 0),
     NAME("Name", 1),
     DESCRIPTION("Description", 2),
@@ -54,29 +54,29 @@ public interface ScreenResultWorkbookSpecification
     ASSAY_PHENOTYPE("Which Assay Phenotype does it belong to?", 14),
     COMMENTS("Comments", 15),
     ;
-    
-    
+
+
     private String _displayText;
     private Integer _rowIndex;
-    
+
     private DataHeaderRow(String displayText,
                         Integer rowIndex)
     {
       _displayText = displayText;
       _rowIndex = rowIndex;
     }
-    
+
     public String getDisplayText()
     {
       return _displayText;
     }
-    
+
     public Integer getRowIndex()
     {
       return _rowIndex;
     }
   };
-  
+
   public static final int METADATA_ROW_COUNT = DataHeaderRow.values().length;
   public static final String FILENAMES_LIST_DELIMITER = "\\s*,\\s*";
 
@@ -91,18 +91,18 @@ public interface ScreenResultWorkbookSpecification
     EXCLUDE("Exclude");
 
     private String _displayText;
-    
+
     private DataColumn(String displayText)
-    { 
+    {
       _displayText = displayText;
     }
-    
+
     public String getDisplayText()
     {
       return _displayText;
     }
   }
-  
+
   /**
    * The row of the "Screen Info" worksheet.
    */
@@ -118,19 +118,19 @@ public interface ScreenResultWorkbookSpecification
     EMAIL("Email"),
     LAB_AFFILIATION("Lab Affiliation"),
     ;
-    
+
     private String _displayText;
-    
+
     private ScreenInfoRow(String displayText)
-    { 
+    {
       _displayText = displayText;
     }
-    
+
     public String getDisplayText()
     {
       return _displayText;
     }
-    
+
   }
 
   public static final String YES_VALUE = "yes";
@@ -144,10 +144,9 @@ public interface ScreenResultWorkbookSpecification
 
   public static final String EXCLUDE_ALL_VALUE = "all";
 
-  // TODO: merge with LibrariesControllerImpl._plateNumberPattern
+  // TODO: move to WellKey (or some central location)
   public static final String PLATE_NUMBER_REGEX = "(PL[-_])?(\\d+)(\\.0)?";
   public static final String PLATE_NUMBER_FORMAT = "PL-%0" + Well.PLATE_NUMBER_LEN + "d";
-  // TODO: merge with LibrariesControllerImpl._wellNamePattern
   public static final String WELL_NAME_REGEX = "[A-P]\\d\\d";
 
 }

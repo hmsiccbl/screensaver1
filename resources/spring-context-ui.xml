@@ -49,7 +49,7 @@
    <aop:config>
     <aop:pointcut
       id="uiControllerPointcut"
-      expression="@annotation(edu.harvard.med.screensaver.ui.control.UIControllerMethod)" />
+      expression="@annotation(edu.harvard.med.screensaver.ui.UIControllerMethod)" />
     <aop:aspect
       id="userActivityLoggerAspect"
       ref="userActivityLoggerAspectBean">
@@ -149,6 +149,8 @@
     class="edu.harvard.med.screensaver.ui.Menu">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="screensBrowser" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="librariesBrowser" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -174,70 +176,52 @@
   <!-- === libraries backing beans === -->
 
   <bean
-    id="librariesController"
+    id="wellFinder"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.control.LibrariesController">
+    class="edu.harvard.med.screensaver.ui.libraries.WellFinder">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
-    <constructor-arg ref="wellFinder" />
-    <constructor-arg ref="librariesBrowser" />
-    <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="wellsBrowser" />
-    <constructor-arg ref="wellViewer" />
+    <constructor-arg ref="wellViewer"/>
     <constructor-arg ref="wellCopyVolumesBrowser" />
-    <constructor-arg ref="geneViewer" />
-    <constructor-arg ref="compoundViewer" />
-    <constructor-arg ref="compoundLibraryContentsImporter" />
-    <constructor-arg ref="compoundLibraryContentsParser" />
-    <constructor-arg ref="naturalProductsLibraryContentsImporter" />
-    <constructor-arg ref="naturalProductsLibraryContentsParser" />
-    <constructor-arg ref="rnaiLibraryContentsImporter" />
-    <constructor-arg ref="rnaiLibraryContentsParser" />
     <constructor-arg ref="plateWellListParser" />
     <aop:scoped-proxy/>
   </bean>
 
   <bean
-    id="librariesUiBean"
-    parent="uiBean"
-    abstract="true">
-    <description>
-      Abstract bean definition for user interface beans that are
-      associated with the LibrariesController.
-    </description>
-    <constructor-arg ref="librariesController" />
-  </bean>
-
-  <bean
-    id="wellFinder"
-    parent="librariesUiBean"
-    scope="session"
-    class="edu.harvard.med.screensaver.ui.libraries.WellFinder">
-    <aop:scoped-proxy/>
-  </bean>
-
-  <bean
     id="librariesBrowser"
-    parent="librariesUiBean"
+    parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults">
+    <constructor-arg ref="libraryViewer" />
     <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="libraryViewer"
-    parent="librariesUiBean"
+    parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.LibraryViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="wellsBrowser" />
+    <constructor-arg ref="wellCopyVolumesBrowser" />
+    <constructor-arg ref="compoundLibraryContentsImporter" />
+    <constructor-arg ref="rnaiLibraryContentsImporter" />
+    <constructor-arg ref="naturalProductsLibraryContentsImporter" />
     <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="wellsBrowser"
-    parent="librariesUiBean"
+    parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.searchresults.WellSearchResults">
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="wellViewer" />
+    <constructor-arg ref="compoundViewer" />
+    <constructor-arg ref="geneViewer" />
     <constructor-arg>
       <list>
         <ref bean="sdfWellsDataExporter" />
@@ -249,10 +233,12 @@
 
   <bean
     id="wellCopyVolumesBrowser"
-    parent="librariesUiBean"
+    parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults">
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="wellViewer" />
     <constructor-arg ref="wellVolumesBrowser" />
     <constructor-arg>
       <bean
@@ -265,10 +251,12 @@
 
   <bean
     id="wellVolumesBrowser"
-    parent="librariesUiBean"
+    parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResults">
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="wellViewer" />
     <constructor-arg ref="cherryPickRequestViewer" />
     <constructor-arg>
       <bean
@@ -281,9 +269,13 @@
 
   <bean
     id="wellViewer"
-    parent="librariesUiBean"
+    parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.WellViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="geneViewer" />
+    <constructor-arg ref="compoundViewer" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -292,40 +284,48 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.GeneViewer">
+    <constructor-arg ref="genericEntityDao" />
     <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="compoundViewer"
-    parent="librariesUiBean"
+    parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.CompoundViewer">
+    <constructor-arg ref="genericEntityDao" />
     <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="compoundLibraryContentsImporter"
-    parent="librariesUiBean"
+    parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.CompoundLibraryContentsImporter">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="compoundLibraryContentsParser" />
     <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="naturalProductsLibraryContentsImporter"
-    parent="librariesUiBean"
+    parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.NaturalProductsLibraryContentsImporter">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="naturalProductsLibraryContentsParser" />
     <aop:scoped-proxy/>
   </bean>
 
   <bean
     id="rnaiLibraryContentsImporter"
-    parent="librariesUiBean"
+    parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporter">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="rnaiLibraryContentsParser" />
     <aop:scoped-proxy/>
   </bean>
@@ -367,10 +367,10 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="screenResultsDao" />
     <constructor-arg ref="librariesDao" />
-    <constructor-arg ref="librariesController" />
     <constructor-arg ref="screensBrowser" />
     <constructor-arg ref="screenViewer" />
     <constructor-arg ref="screenResultExporter" />
+    <constructor-arg ref="wellViewer" />
     <aop:scoped-proxy />
   </bean>
 
@@ -432,7 +432,7 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="screenResultsDao" />
     <constructor-arg ref="librariesDao" />
-    <constructor-arg ref="librariesController" />
+    <constructor-arg ref="wellViewer" />
     <aop:scoped-proxy/>
   </bean>
 

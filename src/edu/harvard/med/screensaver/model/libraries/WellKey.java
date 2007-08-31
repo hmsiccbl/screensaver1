@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -32,13 +32,12 @@ public class WellKey implements Comparable, Serializable
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(WellKey.class);
 
-  // TODO: merge with LibrariesController._wellNamePattern
   private static final Pattern keyPattern = Pattern.compile("(\\d+):(.*)");
   private static final String wellKeyFormat = "%0" + Well.PLATE_NUMBER_LEN + "d:%s";
-  
-  
+
+
   // instance data members
-  
+
   private int _plateNumber;
 
   private transient WellName _wellName;
@@ -47,7 +46,7 @@ public class WellKey implements Comparable, Serializable
 
 
   // public constructors and methods
-  
+
   private WellKey()
   {
   }
@@ -57,17 +56,17 @@ public class WellKey implements Comparable, Serializable
     _plateNumber = plateNumber;
     _wellName = new WellName(row, column);
   }
-  
+
   public WellKey(int plateNumber, String wellName)
   {
     this(plateNumber, new WellName(wellName));
   }
-  
+
   public WellKey(String key)
   {
     setKey(key);
   }
-  
+
   public WellKey(int plateNumber, WellName wellName)
   {
     _plateNumber = plateNumber;
@@ -78,7 +77,7 @@ public class WellKey implements Comparable, Serializable
   {
     return toString();
   }
-  
+
   public int getColumn()
   {
     return _wellName.getColumnIndex();
@@ -108,23 +107,23 @@ public class WellKey implements Comparable, Serializable
 
   public boolean equals(Object o)
   {
-    if (o == this) { 
+    if (o == this) {
       return true;
     }
     WellKey other = (WellKey) o;
     return _plateNumber == other._plateNumber && _wellName.equals(other._wellName);
   }
-  
+
   public int hashCode()
   {
     if (_hashCode == -1) {
-      _hashCode = _plateNumber * (Well.PLATE_ROWS * Well.PLATE_COLUMNS) + 
-      _wellName.getRowIndex() * Well.PLATE_COLUMNS + 
+      _hashCode = _plateNumber * (Well.PLATE_ROWS * Well.PLATE_COLUMNS) +
+      _wellName.getRowIndex() * Well.PLATE_COLUMNS +
       _wellName.getColumnIndex();
     }
     return _hashCode;
   }
-  
+
   public String toString()
   {
     if (_asString == null) {
@@ -132,7 +131,7 @@ public class WellKey implements Comparable, Serializable
     }
     return _asString;
   }
-  
+
   public int compareTo(Object o)
   {
     WellKey other = (WellKey) o;
@@ -163,12 +162,12 @@ public class WellKey implements Comparable, Serializable
     if (matcher.matches()) {
       _plateNumber = Integer.parseInt(matcher.group(1));
       _wellName = new WellName(matcher.group(2));
-    } 
+    }
     else {
       throw new IllegalArgumentException("invalid composite well key string '" + key + "'");
     }
     resetDerivedValues();
   }
-  
+
 }
 

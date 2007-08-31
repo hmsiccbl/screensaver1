@@ -28,8 +28,7 @@ import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.control.LibrariesController;
-import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
@@ -58,8 +57,9 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume,We
 
   // instance data members
 
-  private LibrariesController _librariesController;
   private GenericEntityDAO _dao;
+  private LibraryViewer _libraryViewer;
+  private WellViewer _wellViewer;
   private WellVolumeSearchResults _wellVolumeSearchResults;
 
   private ArrayList<TableColumn<WellCopyVolume>> _columns;
@@ -76,14 +76,16 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume,We
   {
   }
 
-  public WellCopyVolumeSearchResults(LibrariesController librariesController,
-                                     GenericEntityDAO dao,
+  public WellCopyVolumeSearchResults(GenericEntityDAO dao,
+                                     LibraryViewer libraryViewer,
+                                     WellViewer wellViewer,
                                      WellVolumeSearchResults wellVolumeSearchResults,
                                      WellVolumeAdjustmentSearchResults rowDetail)
   {
-    _librariesController = librariesController;
-    _wellVolumeSearchResults = wellVolumeSearchResults;
     _dao = dao;
+    _wellVolumeSearchResults = wellVolumeSearchResults;
+    _libraryViewer = libraryViewer;
+    _wellViewer = wellViewer;
     setRowDetail(rowDetail);
   }
 
@@ -134,7 +136,7 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume,We
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(WellCopyVolume wellVolume) { return _librariesController.viewLibrary(wellVolume.getWell().getLibrary()); }
+        public Object cellAction(WellCopyVolume wellVolume) { return _libraryViewer.viewLibrary(wellVolume.getWell().getLibrary()); }
       });
       _columns.add(new TableColumn<WellCopyVolume>("Plate", "The number of the plate the well is located on", true) {
         @Override
@@ -148,7 +150,7 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume,We
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(WellCopyVolume wellVolume) { return _librariesController.viewWell(wellVolume.getWell()); }
+        public Object cellAction(WellCopyVolume wellVolume) { return _wellViewer.viewWell(wellVolume.getWell()); }
       });
       _columns.add(new TableColumn<WellCopyVolume>("Copy", "The name of the library plate copy") {
         @Override
@@ -159,7 +161,7 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume,We
 //        public boolean isCommandLink() { return true; }
 //
 //        @Override
-//        public Object cellAction(WellCopyVolume wellVolume) { return _librariesController.viewLibraryCopyVolumes(wellVolume.getWell(), WellCopyVolumeSearchResults.this); }
+//        public Object cellAction(WellCopyVolume wellVolume) { return _libraryViewer.viewLibraryCopyVolumes(wellVolume.getWell(), WellCopyVolumeSearchResults.this); }
       });
       _columns.add(new TableColumn<WellCopyVolume>("Initial Volume", "The initial volume of this well copy", true) {
         @Override
@@ -253,7 +255,7 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume,We
   @Override
   protected void setEntityToView(WellCopyVolume wellCopyVolume)
   {
-    _librariesController.viewWell(wellCopyVolume.getWell());
+    _wellViewer.viewWell(wellCopyVolume.getWell());
   }
 
   public String getWellVolumeAdjustmentActivityComments()
