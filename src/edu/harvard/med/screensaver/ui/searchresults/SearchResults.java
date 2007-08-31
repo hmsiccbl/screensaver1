@@ -28,7 +28,7 @@ import javax.faces.model.ListDataModel;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.control.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.screenresults.DataTableRowsPerPageUISelectOneBean;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 import edu.harvard.med.screensaver.ui.table.TableSortManager;
@@ -120,6 +120,8 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
   {
     _unsortedResults = unsortedResults;
     _resultsSize = unsortedResults.size();
+    _currentEntityIndex = 0;
+    _currentPageIndex = 0;
     _rowsPerPage = new DataTableRowsPerPageUISelectOneBean(PAGE_SIZE_SELECTIONS,
                                                            DEFAULT_PAGESIZE);
     _rowsPerPage.setAllRowsValue(_resultsSize);
@@ -330,6 +332,11 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
   @SuppressWarnings("unchecked")
   public Object cellAction()
   {
+    // update the current entity, based upon the row that the user just interacted with
+    if (getDataTable() != null) {
+      _currentEntityIndex = getDataTable().getRowIndex();
+    }
+
     return getCurrentColumn().cellAction(getEntity());
   }
 
@@ -638,7 +645,9 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
     hideRowDetail();
     if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
       // update the search results summary table
-      if (getDataTable() != null) { getDataTable().setFirst(_currentPageIndex * _rowsPerPage.getSelection()); }
+      if (getDataTable() != null) {
+        getDataTable().setFirst(_currentPageIndex * _rowsPerPage.getSelection());
+      }
     }
     else {
       // update the entity viewer
