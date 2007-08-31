@@ -148,29 +148,29 @@
 				</t:panelGrid>
 
 				<!--h:form id="dataHeadersSelectionForm"-->
-					<t:panelGrid columns="1"
-						rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted && !(screenResultViewer.isPanelCollapsedMap['dataHeadersTable'] && screenResultViewer.isPanelCollapsedMap['dataTable'])}"
-						title="Select the data headers to display in the Data Headers and Data tables below">
-						<t:outputLabel for="dataHeadersList"
-							value="Show selected data headers:" styleClass="label" />
-						<t:selectManyCheckbox id="dataHeadersList" layout="pageDirection"
-							layoutWidth="6"
-							value="#{screenResultViewer.selectedDataHeaders.value}"
-							valueChangeListener="#{screenResultViewer.dataHeadersSelectionListener}"
-							binding="#{screenResultViewer.dataHeadersSelectManyUIInput}"
-							styleClass="label" style="vertical-align: top">
-							<f:selectItems id="dataHeaders"
-								value="#{screenResultViewer.selectedDataHeaders.selectItems}" />
-						</t:selectManyCheckbox>
-						<t:panelGroup>
-							<t:commandButton id="updateDataHeadersButton" forceId="true"
-								value="Update" styleClass="command"
-								title="Update the data headers selection" />
-							<t:commandButton id="allDataHeadersButton" value="All"
-								action="#{screenResultViewer.showAllDataHeaders}"
-								styleClass="command" title="Select all of the data headers" />
-						</t:panelGroup>
-					</t:panelGrid>
+				<t:panelGrid columns="1"
+					rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted && !(screenResultViewer.isPanelCollapsedMap['dataHeadersTable'] && screenResultViewer.isPanelCollapsedMap['dataTable'])}"
+					title="Select the data headers to display in the Data Headers and Data tables below">
+					<t:outputLabel for="dataHeadersList"
+						value="Show selected data headers:" styleClass="label" />
+					<t:selectManyCheckbox id="dataHeadersList" layout="pageDirection"
+						layoutWidth="6"
+						value="#{screenResultViewer.selectedDataHeaders.value}"
+						valueChangeListener="#{screenResultViewer.dataHeadersSelectionListener}"
+						binding="#{screenResultViewer.dataHeadersSelectManyUIInput}"
+						styleClass="label" style="vertical-align: top">
+						<f:selectItems id="dataHeaders"
+							value="#{screenResultViewer.selectedDataHeaders.selectItems}" />
+					</t:selectManyCheckbox>
+					<t:panelGroup>
+						<t:commandButton id="updateDataHeadersButton" forceId="true"
+							value="Update" styleClass="command"
+							title="Update the data headers selection" />
+						<t:commandButton id="allDataHeadersButton" value="All"
+							action="#{screenResultViewer.showAllDataHeaders}"
+							styleClass="command" title="Select all of the data headers" />
+					</t:panelGroup>
+				</t:panelGrid>
 				<!--/h:form -->
 
 				<t:div style="margin-left: 30px">
@@ -255,85 +255,113 @@
 										value="#{screenResultViewer.showPositivesOnlyForDataHeader.selectItems}" />
 								</t:selectOneMenu>
 
-								<t:selectOneMenu id="dataTableRowsPerPageList"
-									value="#{screenResultViewer.dataTableRowsPerPage.value}"
-									binding="#{screenResultViewer.dataTableRowsPerPageUIInput}"
-									valueChangeListener="#{screenResultViewer.dataTableRowsPerPageListener}"
-									onchange="document.getElementById('updateDataTableButton').click();"
-									styleClass="data" title="Number of rows to display per page">
-									<f:selectItems
-										value="#{screenResultViewer.dataTableRowsPerPage.selectItems}" />
-								</t:selectOneMenu>
-								<t:outputText value=" per page" styleClass="label" />
-
 							</t:panelGroup>
 
-							<t:panelGroup id="dataTableCommandPanel"
-								styleClass="commandPanel">
-								<h:commandButton id="firstPageCommand"
-									action="#{screenResultViewer.firstPage}" value="First"
-									image="/images/arrow-first.png" styleClass="command"
-									title="First page" />
-								<t:commandButton id="prevPageCommand"
-									action="#{screenResultViewer.prevPage}" value="Previous"
-									image="/images/arrow-previous.png" styleClass="command"
-									title="Previous page" />
-								<t:commandButton id="nextPageCommand"
-									action="#{screenResultViewer.nextPage}" value="Next"
-									image="/images/arrow-next.png" styleClass="command"
-									title="Next page" />
-								<h:commandButton id="lastPageCommand"
-									action="#{screenResultViewer.lastPage}" value="Last"
-									image="/images/arrow-last.png" styleClass="command"
-									title="Last page" />
+							<t:buffer into="#{resultValuesDataTableBuffer}">
+								<t:dataTable id="resultValuesDataTable"
+									binding="#{screenResultViewer.dataTable}"
+									value="#{screenResultViewer.dataTableModel}" var="row"
+									rows="#{screenResultViewer.dataTableRowsPerPage.selection}"
+									styleClass="standardTable" headerClass="tableHeader"
+									rowClasses="row1,row2"
+									sortColumn="#{screenResultViewer.sortManager.sortColumnName}"
+									sortAscending="#{screenResultViewer.sortManager.sortAscending}">
+									<t:columns
+										value="#{screenResultViewer.sortManager.columnModel}"
+										var="column"
+										styleClass="#{(column.name==\"Plate\" || column.name==\"Well\") ? \"keyColumn\" : (column.numeric ? \"numericColumn\" : \"textColumn\")} #{screenResultViewer.resultValueExcluded ? \"excludedValue\" : \"\"} ">
+										<f:facet name="header">
+											<t:commandSortHeader columnName="#{column.name}"
+												arrow="false">
+												<f:facet name="ascending">
+													<t:graphicImage value="/images/ascending-arrow.gif"
+														rendered="true" border="0" />
+												</f:facet>
+												<f:facet name="descending">
+													<t:graphicImage value="/images/descending-arrow.gif"
+														rendered="true" border="0" />
+												</f:facet>
+												<h:outputText value="#{column.name}" />
+											</t:commandSortHeader>
+										</f:facet>
+										<t:outputText value="#{row[column.name]}"
+											rendered="#{!column.isCommandLink}" />
+										<t:commandLink action="#{screenResultViewer.cellAction}"
+											rendered="#{column.isCommandLink}">
+											<t:outputText value="#{row[column.name]}" />
+										</t:commandLink>
+									</t:columns>
+								</t:dataTable>
+							</t:buffer>
 
-								<t:outputLabel id="rowRange"
-									value="#{screenResultViewer.rowRangeText}" for="rowNumber"
-									styleClass="label" />
-								<t:inputText id="rowNumber"
-									value="#{screenResultViewer.rowNumber}"
-									binding="#{screenResultViewer.rowNumberUIInput}"
-									valueChangeListener="#{screenResultViewer.rowNumberListener}"
-									size="6" styleClass="inputText">
-								</t:inputText>
-								<%-- note: no 'action' attribute necessary, as 'rowNumber' inputText component, above, invokes update logic via valueChangeListener --%>
-								<t:commandButton id="updateDataTablePositionButton2" value="Go"
-									styleClass="command" />
-
-							</t:panelGroup>
-
-							<t:dataTable id="resultValuesDataTable"
-								binding="#{screenResultViewer.dataTable}"
-								value="#{screenResultViewer.dataTableModel}" var="row"
-								rows="#{screenResultViewer.dataTableRowsPerPage.selection}"
-								styleClass="standardTable" headerClass="tableHeader"
-								rowClasses="row1,row2"
-								sortColumn="#{screenResultViewer.sortManager.sortColumnName}"
-								sortAscending="#{screenResultViewer.sortManager.sortAscending}">
-								<t:columns value="#{screenResultViewer.sortManager.columnModel}"
-									var="column"
-									styleClass="#{(column.name==\"Plate\" || column.name==\"Well\") ? \"keyColumn\" : (column.numeric ? \"numericColumn\" : \"textColumn\")} #{screenResultViewer.resultValueExcluded ? \"excludedValue\" : \"\"} ">
-									<f:facet name="header">
-										<t:commandSortHeader columnName="#{column.name}" arrow="false">
-											<f:facet name="ascending">
-												<t:graphicImage value="/images/ascending-arrow.gif"
-													rendered="true" border="0" />
-											</f:facet>
-											<f:facet name="descending">
-												<t:graphicImage value="/images/descending-arrow.gif"
-													rendered="true" border="0" />
-											</f:facet>
-											<h:outputText value="#{column.name}" />
-										</t:commandSortHeader>
+							<t:panelGrid columns="3">
+								<t:dataScroller id="dataTableScroller"
+									for="resultValuesDataTable" firstRowIndexVar="fromRow"
+									lastRowIndexVar="toRow" rowsCountVar="rowCount"
+									paginator="true" paginatorMaxPages="10" fastStep="10"
+									renderFacetsIfSinglePage="false" styleClass="scroller"
+									paginatorActiveColumnClass="scroller_activePage">
+									<f:facet name="first">
+										<t:graphicImage url="/images/arrow-first.png" border="0"
+											title="First page" />
 									</f:facet>
-									<t:outputText value="#{row[column.name]}"
-										rendered="#{!column.isCommandLink}" />
-									<t:commandLink action="#{screenResultViewer.cellAction}"
-										rendered="#{column.isCommandLink}">
-										<t:outputText value="#{row[column.name]}" />
-									</t:commandLink>
-								</t:columns>
-							</t:dataTable>
+									<f:facet name="last">
+										<t:graphicImage url="/images/arrow-last.png" border="0"
+											title="Last page" />
+									</f:facet>
+									<f:facet name="previous">
+										<t:graphicImage url="/images/arrow-previous.png" border="0"
+											title="Previous page" />
+									</f:facet>
+									<f:facet name="next">
+										<t:graphicImage url="/images/arrow-next.png" border="0"
+											title="Next page" />
+									</f:facet>
+									<f:facet name="fastforward">
+										<t:graphicImage url="/images/arrow-fastforward.png" border="0"
+											title="Forward 10 pages" />
+									</f:facet>
+									<f:facet name="fastrewind">
+										<t:graphicImage url="/images/arrow-fastrewind.png" border="0"
+											title="Back 10 pages" />
+									</f:facet>
+								</t:dataScroller>
+								<t:dataScroller id="dataTableScroller2"
+									for="resultValuesDataTable" firstRowIndexVar="fromRow"
+									lastRowIndexVar="toRow" rowsCountVar="rowCount">
+									<t:outputText value="#{fromRow}..#{toRow} of #{rowCount}"
+										styleClass="label" />
+								</t:dataScroller>
+
+								<t:panelGroup id="dataTableCommandPanel"
+									styleClass="commandPanel">
+
+									<t:inputText id="rowNumber"
+										value="#{screenResultViewer.rowNumber}"
+										valueChangeListener="#{screenResultViewer.rowNumberListener}"
+										size="6" styleClass="inputText">
+									</t:inputText>
+									<%-- note: no 'action' attribute necessary, as 'rowNumber' inputText component, above, invokes update logic via valueChangeListener --%>
+									<t:commandButton id="updateDataTablePositionButton2" value="Go"
+										styleClass="command" />
+
+									<t:selectOneMenu id="dataTableRowsPerPageList"
+										value="#{screenResultViewer.dataTableRowsPerPage.value}"
+										binding="#{screenResultViewer.dataTableRowsPerPageUIInput}"
+										valueChangeListener="#{screenResultViewer.dataTableRowsPerPageListener}"
+										onchange="document.getElementById('updateDataTableButton').click();"
+										styleClass="data" title="Number of rows to display per page">
+										<f:selectItems
+											value="#{screenResultViewer.dataTableRowsPerPage.selectItems}" />
+									</t:selectOneMenu>
+									<t:outputText value=" per page" styleClass="label" />
+								</t:panelGroup>
+
+							</t:panelGrid>
+
+							<t:outputText escape="false"
+								value="#{resultValuesDataTableBuffer}" />
+
 						</t:panelGrid>
 					</t:collapsiblePanel>
 					<!-- /h:form-->

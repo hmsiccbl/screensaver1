@@ -158,7 +158,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   // data members for raw data table
   private ScreenResultDataModel _rawDataModel;
   private UIData _dataTable;
-  private UIInput _rowNumberUIInput;
   private UIInput _dataTableRowsPerPageUIInput;
   private UISelectOneBean<Integer> _dataFilter;
   private DataTableRowsPerPageUISelectOneBean _dataTableRowsPerPage;
@@ -236,16 +235,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   public void setDataHeadersSelectManyUIInput(UISelectMany dataHeadersSelectMany)
   {
     _dataHeadersSelectManyUIInput = dataHeadersSelectMany;
-  }
-
-  public UIInput getRowNumberUIInput()
-  {
-    return _rowNumberUIInput;
-  }
-
-  public void setRowNumberUIInput(UIInput rowNumberInput)
-  {
-    _rowNumberUIInput = rowNumberInput;
   }
 
   public UIInput getDataTableRowsPerPageUIInput()
@@ -326,16 +315,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   public int getRawDataSize()
   {
     return getDataTableModel().getRowCount();
-  }
-
-  public String getRowRangeText()
-  {
-    return getRowNumber() +
-           ".." +
-           Math.min(getRowNumber() + getDataTableRowsPerPage().getSelection() - 1,
-                    getRawDataSize()) +
-           " of " +
-           getRawDataSize();
   }
 
   public UISelectManyBean<ResultValueType> getSelectedDataHeaders()
@@ -535,42 +514,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   // JSF application methods
 
   @UIControllerMethod
-  public String firstPage()
-  {
-    return gotoPage(0);
-  }
-
-  @UIControllerMethod
-  public String lastPage()
-  {
-    int rowsPerPage = getDataTable().getRows();
-    if (rowsPerPage > 0) {
-      int newPage = Math.max(0, getRawDataSize() / rowsPerPage);
-      // handle case where total rows is evenly divided by rowsPerPage, in which
-      // case "last page" would have 0 rows
-      if (newPage * rowsPerPage == getRawDataSize()) {
-        --newPage;
-      }
-      return gotoPage(newPage);
-    }
-    else {
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-  }
-
-  @UIControllerMethod
-  public String nextPage()
-  {
-    return gotoPage(getPageIndex() + 1);
-  }
-
-  @UIControllerMethod
-  public String prevPage()
-  {
-    return gotoPage(getPageIndex() - 1);
-  }
-
-  @UIControllerMethod
   public String download()
   {
     try {
@@ -752,20 +695,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
   // private methods
 
-  private String gotoPage(int pageIndex)
-  {
-    try {
-      int newRowIndex = (pageIndex * getDataTable().getRows());
-      if (newRowIndex >= 0 && newRowIndex < getRawDataSize()) {
-        getDataTable().setFirst(newRowIndex);
-      }
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    catch (Exception e) {
-      return ERROR_ACTION_RESULT;
-    }
-  }
-
   /**
    * Get ResultValueTypes set, safely, handling case that no screen result
    * exists.
@@ -862,13 +791,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     rowIndex = Math.max(0,
                         Math.min(rowIndex,
                                  getRawDataSize() - _dataTable.getRows()));
-    _rowNumberUIInput.setValue(rowIndex + 1);
     _dataTable.setFirst(rowIndex);
-  }
-
-  private int getPageIndex()
-  {
-    return getDataTable().getFirst() / getDataTableRowsPerPage().getSelection();
   }
 
   private void lazyBuildDataHeadersModel()
