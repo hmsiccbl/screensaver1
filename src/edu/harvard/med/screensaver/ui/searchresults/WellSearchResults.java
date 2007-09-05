@@ -98,6 +98,19 @@ public class WellSearchResults extends SearchResults<Well,Object>
       _columns.add(new TableColumn<Well>("Plate", "The number of the plate the well is located on", true) {
         @Override
         public Object getCellValue(Well well) { return well.getPlateNumber(); }
+
+        @Override
+        protected Comparator<Well> getAscendingComparator()
+        {
+          return new Comparator<Well>()
+          {
+            @SuppressWarnings("unchecked")
+            public int compare(Well w1, Well w2)
+            {
+              return w1.getWellKey().compareTo(w2.getWellKey());
+            }
+          };
+        }
       });
       _columns.add(new TableColumn<Well>("Well", "The plate coordinates of the well") {
         @Override
