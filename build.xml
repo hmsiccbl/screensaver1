@@ -189,7 +189,7 @@
     <srcfiles dir="jsp"/>
   </uptodate>
 
-  <!-- TODO: should also check endorsed libs when setting this uptoddate property -->
+  <!-- TODO: should also check endorsed libs when setting this uptodate property -->
   <uptodate property="tomcat.configured" targetfile="${deployed.loginmodule.config.file}">
     <srcfiles file="${dev.loginmodule.config.file}"/>
   </uptodate>

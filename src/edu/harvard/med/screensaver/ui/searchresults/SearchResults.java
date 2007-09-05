@@ -534,7 +534,7 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
   {
     try {
       DataExporter dataExporter = getDataExporterSelector().getSelection();
-      InputStream inputStream = dataExporter.export(getContents());
+      InputStream inputStream = dataExporter.export(_currentSort);
       JSFUtils.handleUserDownloadRequest(getFacesContext(),
                                          inputStream,
                                          dataExporter.getFileName(),
