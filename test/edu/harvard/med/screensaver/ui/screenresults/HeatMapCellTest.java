@@ -25,6 +25,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapCell;
 
 public class HeatMapCellTest extends AbstractSpringTest
 {

@@ -371,6 +371,9 @@
     <constructor-arg ref="screenViewer" />
     <constructor-arg ref="screenResultExporter" />
     <constructor-arg ref="wellViewer" />
+    <constructor-arg>
+      <bean class="edu.harvard.med.screensaver.ui.screenresults.ResultValueTypeTable" />
+    </constructor-arg>
     <aop:scoped-proxy />
   </bean>
 
@@ -428,7 +431,7 @@
     id="heatMapViewer"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.screenresults.HeatMapViewer">
+    class="edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapViewer">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="screenResultsDao" />
     <constructor-arg ref="librariesDao" />

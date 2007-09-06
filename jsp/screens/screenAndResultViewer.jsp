@@ -45,8 +45,7 @@
 
 				<f:facet name="closedContent">
 					<t:panelGrid columns="1">
-						<t:outputText value="#{screenViewer.screen.screenNumber}: \"
-							#{screenViewer.screen.title}\""
+						<t:outputText value="#{screenViewer.screen.screenNumber}: \"#{screenViewer.screen.title}\""
 							styleClass="dataText" />
 						<t:div>
 							<t:outputText value="Lab:" styleClass="label" />
@@ -155,19 +154,19 @@
 						value="Show selected data headers:" styleClass="label" />
 					<t:selectManyCheckbox id="dataHeadersList" layout="pageDirection"
 						layoutWidth="6"
-						value="#{screenResultViewer.selectedDataHeaders.value}"
-						valueChangeListener="#{screenResultViewer.dataHeadersSelectionListener}"
-						binding="#{screenResultViewer.dataHeadersSelectManyUIInput}"
+						value="#{screenResultViewer.dataHeaderSelections.value}"
+						valueChangeListener="#{screenResultViewer.dataHeadersTable.selectionListener}"
+						binding="#{screenResultViewer.dataHeadersTable.selectManyUIInput}"
 						styleClass="label" style="vertical-align: top">
 						<f:selectItems id="dataHeaders"
-							value="#{screenResultViewer.selectedDataHeaders.selectItems}" />
+							value="#{screenResultViewer.dataHeaderSelections.selectItems}" />
 					</t:selectManyCheckbox>
 					<t:panelGroup>
 						<t:commandButton id="updateDataHeadersButton" forceId="true"
 							value="Update" styleClass="command"
 							title="Update the data headers selection" />
 						<t:commandButton id="allDataHeadersButton" value="All"
-							action="#{screenResultViewer.showAllDataHeaders}"
+							action="#{screenResultViewer.dataHeadersTable.selectAll}"
 							styleClass="command" title="Select all of the data headers" />
 					</t:panelGroup>
 				</t:panelGrid>
@@ -191,7 +190,7 @@
 						</f:facet>
 
 						<t:dataTable id="dataHeadersTable"
-							value="#{screenResultViewer.dataHeaders}" var="row"
+							value="#{screenResultViewer.dataHeadersTable.dataModel}" var="row"
 							rendered="#{!isCollapsed}" styleClass="standardTable"
 							headerClass="tableHeader" rowClasses="row1,row2">
 							<t:column styleClass="keyColumn">
@@ -199,14 +198,14 @@
 									<t:outputText value="Data Header Name" />
 								</f:facet>
 								<t:outputText value="#{row.rowLabel}" escape="false"
-									title="#{row.rowTitle}" />
+									title="#{row.rowDescription}" />
 							</t:column>
-							<t:columns value="#{screenResultViewer.dataHeadersColumnModel}"
+							<t:columns value="#{screenResultViewer.dataHeadersTable.columnModel}"
 								var="columnName" styleClass="column">
 								<f:facet name="header">
 									<t:outputText value="#{columnName}" />
 								</f:facet>
-								<t:outputText value="#{screenResultViewer.dataHeadersCellValue}" />
+								<t:outputText value="#{screenResultViewer.dataHeadersTable.cellValue}" />
 							</t:columns>
 						</t:dataTable>
 					</t:collapsiblePanel>
@@ -337,7 +336,6 @@
 									styleClass="commandPanel">
 
 									<t:inputText id="rowNumber"
-										value="#{screenResultViewer.rowNumber}"
 										valueChangeListener="#{screenResultViewer.rowNumberListener}"
 										size="6" styleClass="inputText">
 									</t:inputText>

@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -24,6 +24,7 @@ import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
+import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 
 
 /**
@@ -36,21 +37,21 @@ import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
  * the metadata describes the parameters of a single, physical machine read of a
  * single replicate assay plate, using the same assay read technology, at the
  * same read time interval, etc.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @hibernate.class
  *   lazy="false"
  */
-public class ResultValueType extends AbstractEntity implements Comparable
+public class ResultValueType extends AbstractEntity implements MetaDataType, Comparable
 {
 
   // TODO: perhaps we should split ResultValueType into subclasses, one for raw
   // data value descriptions and one for derived data descriptions?
-  
+
   private static final long serialVersionUID = -2325466055774432202L;
 
-  
+
   // instance data
 
   private Integer                    _resultValueTypeId;
@@ -78,7 +79,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   private boolean                    _isNumericalnessDetermined = false;
   private Integer                    _positivesCount;
 
-  
+
   // public constructors and instance methods
 
   /**
@@ -108,7 +109,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
     setFollowUpData(isFollowupData);
     setAssayPhenotype(assayPhenotype);
   }
-  
+
   /**
    * Constructs an initialized ResultValueType object.
    * @param screenResult
@@ -122,13 +123,13 @@ public class ResultValueType extends AbstractEntity implements Comparable
     setName(name);
     //setReplicateOrdinal(1);
   }
-  
+
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
   }
-  
+
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
    */
@@ -136,10 +137,10 @@ public class ResultValueType extends AbstractEntity implements Comparable
   {
     return getResultValueTypeId();
   }
-  
+
   /**
    * Get a unique identifier for the <code>ResultValueType</code>.
-   * 
+   *
    * @return an Integer representing a unique identifier for the
    *         <code>ResultValueType</code>
    * @hibernate.id generator-class="sequence"
@@ -151,14 +152,14 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
   /**
    * Set a unique identifier for the <code>ResultValueType</code>.
-   * 
+   *
    * @param resultValueTypeId a unique identifier for the
    *          <code>ResultValueType</code>
    */
   public void setResultValueTypeId(Integer resultValueTypeId) {
     _resultValueTypeId = resultValueTypeId;
   }
-  
+
   /**
    * Get the parent {@link ScreenResult}.
    * @return the parent {@link ScreenResult}
@@ -166,7 +167,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   public ScreenResult getScreenResult() {
     return _screenResult;
   }
-  
+
   /**
    * Add this <code>ResultValueType</code> to the specified
    * {@link ScreenResult}, removing from the existing {@link ScreenResult}
@@ -198,7 +199,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * Hibernate XDoclet configuration is overridden by hand-coded Hibernate
    * mapping in ./hibernate-properties-ResultValueType.xml. Necessary since
    * XDoclet does not support lazy="extra".
-   * 
+   *
    * @motivation for Hibernate and bi-directional association management
    * @return the {@link java.util.Map} of {@link ResultValue}s generated
    *         for this <code>ResultValueType</code>, keyed on WellKeys.
@@ -216,7 +217,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   {
     return _isNumeric;
   }
-  
+
   public void setNumeric(boolean isNumeric)
   {
     _isNumeric = isNumeric;
@@ -231,7 +232,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
   /**
    * Add a ResultValue to the ResultValueType.
-   * 
+   *
    * @param well the well of the new ResultValue
    * @param assayWellType the AssayWellType of the new ResultValue
    * @param value the value of the new ResultValue
@@ -266,7 +267,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * {@link #addResultValue(Well, AssayWellType, String, boolean, boolean)}
    * instead, to preserve the full precision of the value (with isNumeric param
    * set to true).
-   * 
+   *
    * @param well the well of the new ResultValue
    * @param assayWellType the AssayWellType of the new ResultValue
    * @param value the numeric value of the new ResultValue
@@ -298,21 +299,21 @@ public class ResultValueType extends AbstractEntity implements Comparable
     rv.setPositive(isPositive(rv));
     return addResultValue(rv, well);
   }
-  
+
   /**
    * Add a non-numeric, experimental type, non-excluded ResultValue to the
-   * ResultValueType. 
-   * 
+   * ResultValueType.
+   *
    * @param well the well of the new ResultValue
    * @param value the value of the new ResultValue
    * @return true, iff the ResultValue was added
    */
-  public boolean addResultValue(Well well, 
+  public boolean addResultValue(Well well,
                                 String value)
   {
-    return addResultValue(well, 
-                          AssayWellType.EXPERIMENTAL, 
-                          value, 
+    return addResultValue(well,
+                          AssayWellType.EXPERIMENTAL,
+                          value,
                           false);
   }
 
@@ -321,18 +322,18 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * If the numeric value is originally available as a String, call
    * {@link #addResultValue(Well, String, boolean)} instead, to preserve the
    * full precision of the value (with isNumeric param set to true).
-   * 
+   *
    * @param well the well of the new ResultValue
    * @param value the value of the new ResultValue
    * @param decimalPrecision the number of digits to appear after the decimal point, when displayed
    * @return true, iff the ResultValue was added
    */
-  public boolean addResultValue(Well well, 
+  public boolean addResultValue(Well well,
                                 Double value,
                                 int decimalPrecision)
   {
-    return addResultValue(well, 
-                          AssayWellType.EXPERIMENTAL, 
+    return addResultValue(well,
+                          AssayWellType.EXPERIMENTAL,
                           value,
                           decimalPrecision,
                           false);
@@ -351,7 +352,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
     }
 
     getScreenResult().addWell(well);
-    
+
     return _resultValues.put(well.getWellKey(), rv) == null;
   }
 
@@ -359,7 +360,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * Determine whether a result value is to be considered a positive, using its
    * value and this ResultValueType's definition of what constitutes a positive.
    * Only applicable for ResultValueTypes that are positive indicators.
-   * 
+   *
    * @param rv
    * @return true iff ResultValueType is a positive indicator, result
    *         value is for an experimental well, result value is not excluded,
@@ -405,20 +406,20 @@ public class ResultValueType extends AbstractEntity implements Comparable
   /**
    * Get the ordinal position of this <code>ResultValueType</code> within its
    * parent {@link ScreenResult}.
-   * 
+   *
    * @return an <code>Integer</code>
    * @hibernate.property type="integer" column="ordinal"
-   */  
+   */
   public Integer getOrdinal() {
     return _ordinal;
   }
-  
+
   /**
    * Set the ordinal position of this <code>ResultValueType</code> within its
    * parent {@link ScreenResult}. To be called by Hibernate only, as this
    * property is set automatically when {@link #setScreenResult(ScreenResult)}
    * is called.
-   * 
+   *
    * @param ordinal the ordinal position of this <code>ResultValueType</code>
    *          within its parent {@link ScreenResult}
    * @motivation for Hibernate
@@ -433,7 +434,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * This ordering is really only significant from the standpoint of presenting
    * a {@link ScreenResult} to the user (historically speaking, it reflects the
    * ordering found during spreadsheet file import).
-   * 
+   *
    * @return the replicate ordinal
    * @hibernate.property
    *   type="integer"
@@ -441,18 +442,18 @@ public class ResultValueType extends AbstractEntity implements Comparable
   public Integer getReplicateOrdinal() {
     return _replicateOrdinal;
   }
-  
+
   /**
    * Set the replicate ordinal, a 1-based index indicating the order of this
-   * <code>ResultValueType</code> within its parent {@link ScreenResult}.  
-   * 
+   * <code>ResultValueType</code> within its parent {@link ScreenResult}.
+   *
    * @param replicateOrdinal the replicate ordinal
    */
   public void setReplicateOrdinal(Integer replicateOrdinal) {
     assert replicateOrdinal == null || replicateOrdinal > 0 : "replicate ordinal values must be positive (non-zero), unless null";
     _replicateOrdinal = replicateOrdinal;
   }
-  
+
   /**
    * Get the Positive Indicator Type.
    * @return an {@link PositiveIndicatorType} enum
@@ -515,7 +516,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * Get the comments. Comments should describe real-world issues relating to
    * how the data was generated, how it may be problematic, etc. Contrast with
    * {@link #getDescription()}.
-   * 
+   *
    * @return a <code>String</code> containing the comments
    * @see #getDescription()
    * @hibernate.property type="text"
@@ -540,7 +541,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * {@link ResultValue}s of other {@link ResultValueType}s (of the same stock
    * plate well). The details of the derivation should be specified via
    * {@link #setHowDerived}.
-   * 
+   *
    * @return the set of {@link ResultValueType}s that this
    *         <code>ResultValueType</code> was derived from
    */
@@ -552,13 +553,13 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
   /**
    * Add the result value type to the types derived from.
-   * @param typeDerivedFrom the result value type to add 
+   * @param typeDerivedFrom the result value type to add
    * @return true iff the result value type was not already contained in the
    * set of types derived from this type
    */
   public boolean addTypeDerivedFrom(ResultValueType typeDerivedFrom) {
     assert !(typeDerivedFrom.getHbnDerivedTypes().contains(this) ^
-      getHbnTypesDerivedFrom().contains(typeDerivedFrom)) : 
+      getHbnTypesDerivedFrom().contains(typeDerivedFrom)) :
       "asymmetric types derived from / derived types association encountered";
     if (getHbnTypesDerivedFrom().add(typeDerivedFrom)) {
       setDerived(true);
@@ -566,7 +567,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
     }
     return false;
   }
-  
+
   /**
    * Remove the result value type from the types derived from.
    * @param typeDerivedFrom the result value type to remove
@@ -575,7 +576,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    */
   public boolean removeTypeDerivedFrom(ResultValueType typeDerivedFrom) {
     assert !(typeDerivedFrom.getHbnDerivedTypes().contains(this) ^
-      getHbnTypesDerivedFrom().contains(typeDerivedFrom)) : 
+      getHbnTypesDerivedFrom().contains(typeDerivedFrom)) :
       "asymmetric types derived from / derived types association encountered";
     if (getHbnTypesDerivedFrom().remove(typeDerivedFrom)) {
       setDerived(! getHbnTypesDerivedFrom().isEmpty());
@@ -583,11 +584,11 @@ public class ResultValueType extends AbstractEntity implements Comparable
     }
     return false;
   }
-  
+
   /**
    * Get the set of {@link ResultValueType}s that derive from this
    * <code>ResultValueType</code>.
-   * 
+   *
    * @return the set of {@link ResultValueType}s that derive from this
    *         <code>ResultValueType</code>
    */
@@ -598,13 +599,13 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
   /**
    * Add the result value type to the derived types.
-   * @param derivedType the result value type to add 
+   * @param derivedType the result value type to add
    * @return true iff the result value type was not already contained in the
    * set of derived types
    */
   public boolean addDerivedType(ResultValueType derivedType) {
     assert !(derivedType.getHbnTypesDerivedFrom().contains(this) ^
-      getHbnDerivedTypes().contains(derivedType)) : 
+      getHbnDerivedTypes().contains(derivedType)) :
       "asymmetric derived types / types derived from association encountered";
     if (getHbnDerivedTypes().add(derivedType)) {
       derivedType.getHbnTypesDerivedFrom().add(this);
@@ -613,7 +614,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
     }
     return false;
   }
-  
+
   /**
    * Remove the result value type from the derived types.
    * @param derivedType the result value type to remove
@@ -622,7 +623,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    */
   public boolean removeDerivedType(ResultValueType derivedType) {
     assert !(derivedType.getHbnTypesDerivedFrom().contains(this) ^
-      getHbnDerivedTypes().contains(derivedType)) : 
+      getHbnDerivedTypes().contains(derivedType)) :
       "asymmetric derived types / types derived from association encountered";
     if (getHbnDerivedTypes().remove(derivedType)) {
       derivedType.getHbnTypesDerivedFrom().remove(this);
@@ -630,11 +631,11 @@ public class ResultValueType extends AbstractEntity implements Comparable
       return true;
     }
     return false;
-  }                       
+  }
 
   /**
    * Get a description of this <code>ResultValueType</code>.
-   * 
+   *
    * @return a <code>String</code> description of this
    *         <code>ResultValueType</code>
    * @hibernate.property type="text"
@@ -645,7 +646,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
   /**
    * Set a description of this <code>ResultValueType</code>.
-   * 
+   *
    * @param description a description of this <code>ResultValueType</code>
    */
   public void setDescription(String description) {
@@ -656,7 +657,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   /**
    * Get then description of how this <code>ResultValueType</code> was derived
    * from other <code>ResultValueType</code>s.
-   * 
+   *
    * @return a <code>String</code> description of how this
    *         <code>ResultValueType</code> was derived from other
    *         <code>ResultValueType</code>s
@@ -669,7 +670,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   /**
    * Set the description of how this <code>ResultValueType</code> was derived
    * from other <code>ResultValueType</code>s.
-   * 
+   *
    * @param howDerived a description of how this <code>ResultValueType</code>
    *          was derived from other <code>ResultValueType</code>s
    */
@@ -698,7 +699,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * Get the indicator direction, which indicates whether a "positive" exists
    * based upon whether a numeric result value is above or below the indicator
    * cutoff.
-   * 
+   *
    * @return an {@link PositiveIndicatorDirection} enum
    * @hibernate.property type="edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection$UserType"
    */
@@ -710,7 +711,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * Set the indicator direction, which indicates whether a "positive" exists
    * based upon whether a numeric result value is above or below the indicator
    * cutoff.
-   * 
+   *
    * @param indicatorDirection the indicator direction
    */
   public void setPositiveIndicatorDirection(PositiveIndicatorDirection indicatorDirection) {
@@ -720,7 +721,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   /**
    * Get whether this <code>ResultValueType</code> is an positive indicator.
    * TODO: explain what this is, exactly.
-   * 
+   *
    * @return <code>true</code> iff this <code>ResultValueType</code> is an
    *         positive indicator
    * @hibernate.property type="boolean" not-null="true"
@@ -731,7 +732,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
   /**
    * Set whether this <code>ResultValueType</code> is an positive indicator.
-   * 
+   *
    * @param isActivityIndicator set to <code>true</code> iff this
    *          <code>ResultValueType</code> is an positive indicator
    */
@@ -742,7 +743,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   /**
    * Get whether this <code>ResultValueType</code> contains follow up data
    * [TODO: presumably generated during a subsequent library screening?]
-   * 
+   *
    * @return <code>true</code> iff this <code>ResultValueType</code>
    *         contains follow up data
    * @hibernate.property type="boolean" not-null="true"
@@ -754,7 +755,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   /**
    * Set whether this <code>ResultValueType</code> contains follow up data
    * [TODO: presumably generated during a subsequent library screening?]
-   * 
+   *
    * @param isFollowUpData set to <code>true</code> iff this
    *          <code>ResultValueType</code> contains follow up data
    */
@@ -764,7 +765,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
   /**
    * Get the name of this <code>ResultValueType</code>.
-   * 
+   *
    * @return a <code>String</code> name
    * @hibernate.property type="string" not-null="true"
    */
@@ -791,7 +792,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * assay plate was first read [TODO: prepared?], at which the
    * {@link ResultValue}s for this <code>ResultValueType</code> were read.
    * The format and units for the time point is arbitrary.
-   * 
+   *
    * @return a <code>String</code> representing the time point
    * @hibernate.property type="text"
    */
@@ -805,7 +806,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * assay plate was first read [TODO: prepared?], at which the
    * {@link ResultValue}s for this <code>ResultValueType</code> were read.
    * The format and units for the time point is arbitrary.
-   * 
+   *
    * @param timePoint the time point
    */
   public void setTimePoint(String timePoint) {
@@ -814,11 +815,11 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
 
   // public Object methods
-  
+
   /**
    * Get whether this <code>ResultValueType</code> is derived from other
    * <code>ResultValueType</code>s.
-   * 
+   *
    * @return <code>true</code> iff this <code>ResultValueType</code> is
    *         derived from other <code>ResultValueType</code>s.
    * @see #setTypesDerivedFrom(SortedSet)
@@ -831,7 +832,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   /**
    * Set whether this <code>ResultValueType</code> is derived from other
    * <code>ResultValueType</code>s.
-   * 
+   *
    * @param isDerived <code>true</code> iff this <code>ResultValueType</code>
    *          is derived from other <code>ResultValueType</code>s.
    * @see #setTypesDerivedFrom(SortedSet)
@@ -843,7 +844,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   /**
    * Get the number of ResultValues that are positives, if this is an
    * ActivityIndicator ResultValueType.
-   * 
+   *
    * @return the number of ResultValues that are positives, if this is an
    *         ActivityIndicator ResultValueType; otherwise null
    * @hibernate.property type="integer"
@@ -853,7 +854,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   {
     return _positivesCount;
   }
-  
+
   @DerivedEntityProperty
   public Double getPositivesPercentage()
   {
@@ -863,9 +864,9 @@ public class ResultValueType extends AbstractEntity implements Comparable
     return null;
   }
 
-  
+
   // Comparable interface methods
-  
+
   /**
    * Defines natural ordering of <code>ResultValueType</code> objects, based
    * upon their ordinal field value. Note that natural ordering is only defined
@@ -878,7 +879,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
 
   // protected getters and setters
-  
+
   /**
    * Set the parent {@link ScreenResult}.
    * @param newScreenResult the parent {@link ScreenResult}
@@ -893,28 +894,28 @@ public class ResultValueType extends AbstractEntity implements Comparable
    */
   private class BusinessKey
   {
-    
+
     /**
      * Get the parent {@link ScreenResult}.
-     * 
+     *
      * @return the parent {@link ScreenResult}
      */
     public ScreenResult getScreenResult()
     {
       return _screenResult;
     }
-    
+
     /**
      * Get the ordinal position of this <code>ResultValueType</code> within
      * its parent {@link ScreenResult}.
-     * 
+     *
      * @return an <code>Integer</code>
      */
     public Integer getOrdinal()
     {
       return _ordinal;
     }
-    
+
     @Override
     public boolean equals(Object object)
     {
@@ -955,10 +956,10 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * @motivation for Hibernate loading
    */
   private ResultValueType() {}
-  
+
   /**
    * Get the version number of the compound.
-   * 
+   *
    * @return the version number of the <code>ResultValueType</code>
    * @motivation for hibernate
    * @hibernate.version
@@ -969,7 +970,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
   /**
    * Set the version number of the <code>ResultValueType</code>
-   * 
+   *
    * @param version the new version number for the <code>ResultValueType</code>
    * @motivation for hibernate
    */
@@ -979,7 +980,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
 
   /**
    * Get the parent {@link ScreenResult}.
-   * 
+   *
    * @hibernate.many-to-one class="edu.harvard.med.screensaver.model.screenresults.ScreenResult"
    *                        column="screen_result_id" not-null="true"
    *                        foreign-key="fk_result_value_type_to_screen_result"
@@ -988,11 +989,11 @@ public class ResultValueType extends AbstractEntity implements Comparable
   private ScreenResult getHbnScreenResult() {
     return _screenResult;
   }
-  
+
   /**
    * Set the set of {@link ResultValue}s that comprise this
    * <code>ResultValueType</code>.
-   * 
+   *
    * @param resultValue the {@link java.util.SortedSet} of {@link ResultValue}s
    *          generated for this <code>ResultValueType</code>.
    * @motivation for Hibernate
@@ -1005,7 +1006,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * Get the set of {@link ResultValueType}s that this
    * <code>ResultValueType</code> was derived from.
    * The caller of this method must ensure bi-directionality is perserved.
-   * 
+   *
    * @return the set of {@link ResultValueType}s that this
    *         <code>ResultValueType</code> was derived from
    * @hibernate.set
@@ -1028,7 +1029,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * Set the set of {@link ResultValueType}s that this
    * <code>ResultValueType</code> was derived from. The caller of this method
    * must ensure bi-directionality is perserved.
-   * 
+   *
    * @param derivedFrom the set of {@link ResultValueType}s that this
    *          <code>ResultValueType</code> was derived from
    * @motivation for hibernate
@@ -1037,12 +1038,12 @@ public class ResultValueType extends AbstractEntity implements Comparable
     // NOTE: cannot setDerived(true) here, Hibernate chokes
     _typesDerivedFrom = derivedFrom;
   }
-  
+
   /**
    * Get the set of {@link ResultValueType}s that derive from this
    * <code>ResultValueType</code>.
    * The caller of this method must ensure bi-directionality is perserved.
-   * 
+   *
    * @return the set of {@link ResultValueType}s that derive from this
    *         <code>ResultValueType</code>
    * @hibernate.set
@@ -1066,7 +1067,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
    * Set the set of {@link ResultValueType}s that derive from this
    * <code>ResultValueType</code>. The caller of this method
    * must ensure bi-directionality is perserved.
-   * 
+   *
    * @param derivedTypes the set of {@link ResultValueType}s that derive from
    * this <code>ResultValueType</code>
    * @motivation for hibernate
@@ -1074,7 +1075,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   private void setHbnDerivedTypes(SortedSet<ResultValueType> derivedTypes) {
     _derivedTypes = derivedTypes;
   }
-  
+
   /**
    * @motivation for Hibernate
    * @param positives
@@ -1083,7 +1084,7 @@ public class ResultValueType extends AbstractEntity implements Comparable
   {
     _positivesCount = positivesCount;
   }
-  
+
   private void incrementPositivesCount()
   {
     if (_positivesCount == null) {

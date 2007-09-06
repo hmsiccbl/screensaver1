@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -21,7 +21,7 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 import org.apache.log4j.Logger;
 
-public class TableSortManager<E> extends Observable implements Observer 
+public class TableSortManager<E> extends Observable implements Observer
 {
   // static members
 
@@ -31,13 +31,13 @@ public class TableSortManager<E> extends Observable implements Observer
   // instance data members
 
   private VisibleTableColumnModel<E> _columnModel;
-  private UISelectOneBean<SortDirection> _sortDirection;
-  private UISelectOneBean<TableColumn<E>> _sortColumn;
+  private UISelectOneBean<SortDirection> _sortDirectionSelector;
+  private UISelectOneBean<TableColumn<E>> _sortColumnSelector;
   private Map<TableColumn<E>,Map<SortDirection,Comparator<E>>> _comparators = new HashMap<TableColumn<E>,Map<SortDirection,Comparator<E>>>();
-  
-  
+
+
   // public constructors and methods
-  
+
   public TableSortManager(List<TableColumn<E>> columns)
   {
     setColumns(columns);
@@ -45,7 +45,7 @@ public class TableSortManager<E> extends Observable implements Observer
 
   /**
    * Get the current sort column.
-   * 
+   *
    * @motivation allow sort column to be set from a drop-down list UI component
    *             (in addition to clicking on table column headers)
    * @return the current sort column
@@ -54,12 +54,12 @@ public class TableSortManager<E> extends Observable implements Observer
   {
     return getSortColumnSelector().getSelection();
   }
-  
+
   /**
    * Get a comparator that can be used to sort rows. If there exists a compound
    * sorting order for the primary sort column, the comparator will take this
    * into account.
-   * 
+   *
    * @return the sort columns
    */
   public Comparator<E> getSortColumnComparator()
@@ -72,7 +72,7 @@ public class TableSortManager<E> extends Observable implements Observer
     // return the single-column sort comparator
     return getSortColumn().getComparator(getSortDirection());
   }
-  
+
   public void addCompoundSortColumns(List<TableColumn<E>> compoundSortColumns)
   {
     Map<SortDirection,Comparator<E>> comparators = new HashMap<SortDirection,Comparator<E>>(2);
@@ -85,7 +85,7 @@ public class TableSortManager<E> extends Observable implements Observer
   {
     return getSortColumnSelector().getSelectionIndex();
   }
-  
+
   /**
    * Get the index of the column currently being rendered by JSF.
    */
@@ -102,7 +102,7 @@ public class TableSortManager<E> extends Observable implements Observer
   {
     return (TableColumn<E>) getColumnModel().getRowData();
   }
-  
+
   public TableColumn<E> getColumn(int i)
   {
     return getColumns().get(i);
@@ -110,10 +110,10 @@ public class TableSortManager<E> extends Observable implements Observer
 
   /**
    * Set the current sort column.
-   * 
+   *
    * @motivation allow sort column to be set from a drop-down list UI component
    *             (in addition to clicking on table column headers)
-   * @param currentSortColumn the new current sort column 
+   * @param currentSortColumn the new current sort column
    */
   public void setSortColumn(TableColumn<E> currentSortColumn)
   {
@@ -121,7 +121,7 @@ public class TableSortManager<E> extends Observable implements Observer
       getSortColumnSelector().setSelection(currentSortColumn);
     }
   }
-  
+
   /**
    * @motivation for use by dataTable JSF component.
    * @param sortColumnName the name of the new sort column
@@ -130,7 +130,7 @@ public class TableSortManager<E> extends Observable implements Observer
   {
     setSortColumn(getColumnModel().getColumn(sortColumnName));
   }
-  
+
   /**
    * @motivation for use by dataTable JSF component.
    * @return true the name of the current sort column
@@ -153,7 +153,7 @@ public class TableSortManager<E> extends Observable implements Observer
       setSortDirection(SortDirection.DESCENDING);
     }
   }
-  
+
   /**
    * @motivation for use by dataTable JSF component.
    * @return true if current sort direction is ascending; false if descending
@@ -162,10 +162,10 @@ public class TableSortManager<E> extends Observable implements Observer
   {
     return getSortDirection().equals(SortDirection.ASCENDING);
   }
-    
+
   /**
    * Get the current sort direction.
-   * 
+   *
    * @motivation allow sort direction to be set from a drop-down list UI
    *             component (in addition to clicking on table column headers)
    * @return the current sort column name
@@ -177,7 +177,7 @@ public class TableSortManager<E> extends Observable implements Observer
 
   /**
    * Set the current sort direction.
-   * 
+   *
    * @motivation allow sort direction to be set from a drop-down list UI
    *             component (in addition to clicking on table column headers)
    * @param currentSortDirection the new current sort direction
@@ -200,7 +200,7 @@ public class TableSortManager<E> extends Observable implements Observer
 
   /**
    * Set the columns.
-   * 
+   *
    * @param columns the new list columns
    */
   public void setColumns(List<TableColumn<E>> columns)
@@ -208,15 +208,15 @@ public class TableSortManager<E> extends Observable implements Observer
     _columnModel = new VisibleTableColumnModel<E>(columns) {
       /**
        * Intercept call to VisibleTableColumnModel.updateVisibleColumns(), so
-       * that we can update our _sortColumn UISelectOneBean.
+       * that we can update our _sortColumnSelector   UISelectOneBean.
        */
       @Override
       public void updateVisibleColumns()
       {
         super.updateVisibleColumns();
-        if (_sortColumn != null) {
-          TableColumn<E> sortColumn = _sortColumn.getSelection();
-          _sortColumn = null; // force recreate, based upon new set of visible columns
+        if (_sortColumnSelector != null) {
+          TableColumn<E> sortColumn = _sortColumnSelector.getSelection();
+          _sortColumnSelector = null; // force recreate, based upon new set of visible columns
           UISelectOneBean<TableColumn<E>> sortColumnSelector = getSortColumnSelector(); // recreate now
           // re-select previous selection, if it still exists
           if (sortColumn.isVisible()) {
@@ -231,60 +231,46 @@ public class TableSortManager<E> extends Observable implements Observer
       getSortDirectionSelector().setSelection(SortDirection.ASCENDING);
     }
   }
-  
+
   @SuppressWarnings("unchecked")
   public List<TableColumn<E>> getColumns()
   {
     return (List<TableColumn<E>>) getColumnModel().getWrappedData();
   }
 
-  /**
-   * Get a list of SelectItem objects for the set of columns that can be sorted
-   * on.
-   * 
-   * @return list of SelectItem objects for the set of columns that can be
-   *         sorted on
-   */
   public UISelectOneBean<TableColumn<E>> getSortColumnSelector()
   {
-    if (_sortColumn == null) {
-      _sortColumn = new UISelectOneBean<TableColumn<E>>(getColumns()) {
+    if (_sortColumnSelector == null) {
+      _sortColumnSelector = new UISelectOneBean<TableColumn<E>>(getColumns()) {
         @Override
         protected String getLabel(TableColumn<E> t) { return t.getName(); }
       };
-      _sortColumn.addObserver(this);
+      _sortColumnSelector.addObserver(this);
     }
-    return _sortColumn;
+    return _sortColumnSelector;
   }
 
-  /**
-   * Get a list of SelectItem objects for the set of sort directions (ascending,
-   * descending).
-   * 
-   * @return list of SelectItem objects for the set of sort directions
-   *         (ascending, descending)
-   */
   public UISelectOneBean<SortDirection> getSortDirectionSelector()
   {
-    if (_sortDirection == null) {
-      _sortDirection = new SortDirectionSelector();
-      _sortDirection.addObserver(this);
+    if (_sortDirectionSelector == null) {
+      _sortDirectionSelector = new SortDirectionSelector();
+      _sortDirectionSelector.addObserver(this);
     }
-    return _sortDirection;
+    return _sortDirectionSelector;
   }
 
-  
+
   // Observer methods
 
   public void update(Observable o, Object arg)
   {
     SortChangedEvent<E> sortChangedEvent = null;
-    if (o == _sortColumn) {
-      sortChangedEvent = new SortChangedEvent<E>(getSortColumn()); 
+    if (o == _sortColumnSelector) {
+      sortChangedEvent = new SortChangedEvent<E>(getSortColumn());
       setChanged();
     }
-    else if (o == _sortDirection) {
-      sortChangedEvent = new SortChangedEvent<E>(getSortDirection()); 
+    else if (o == _sortDirectionSelector) {
+      sortChangedEvent = new SortChangedEvent<E>(getSortDirection());
       setChanged();
     }
     if (sortChangedEvent != null) {
@@ -294,5 +280,5 @@ public class TableSortManager<E> extends Observable implements Observer
 
 
   // private methods
-  
+
 }
