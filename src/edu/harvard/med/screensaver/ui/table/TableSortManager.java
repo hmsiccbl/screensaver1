@@ -198,11 +198,6 @@ public class TableSortManager<E> extends Observable implements Observer
     return _columnModel;
   }
 
-  /**
-   * Set the columns.
-   *
-   * @param columns the new list columns
-   */
   public void setColumns(List<TableColumn<E>> columns)
   {
     _columnModel = new VisibleTableColumnModel<E>(columns) {

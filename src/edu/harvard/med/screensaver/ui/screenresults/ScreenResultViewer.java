@@ -187,16 +187,11 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     if (o == getDataHeadersTable().getSelections()) {
       // visible columns changed
       _sortManager.deleteObserver(this); // avoid recursive notifications
-      try {
         if (log.isDebugEnabled()) {
-          log.debug("data header selection changed: " + getDataHeaderSelections());
+          log.debug("data header selection changed");
         }
-        updateSortManagerWithSelectedDataHeaders();
+        _sortManager = null; // force recreate
         updateDataTableContent();
-      }
-      finally {
-        _sortManager.addObserver(this);
-      }
     }
     else if (obj instanceof SortChangedEvent) {
       // sort column changed
@@ -420,14 +415,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
       _rawDataModel = EMPTY_RAW_DATA_MODEL;
     }
     gotoDataTableRowIndex(0);
-  }
-
-  private void updateSortManagerWithSelectedDataHeaders()
-  {
-    log.debug("updating sort manager with selected data headers");
-    List<TableColumn<Map<String,Object>>> newColumns = getDataTableFixedColumns();
-    newColumns.addAll(getColumnsForSelectedDataHeaders());
-    getSortManager().setColumns(newColumns);
   }
 
   private void updateDataHeaderSelectionsForShowPositives()

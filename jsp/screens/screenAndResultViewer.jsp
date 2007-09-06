@@ -146,33 +146,40 @@
 
 				</t:panelGrid>
 
-				<!--h:form id="dataHeadersSelectionForm"-->
-				<t:panelGrid columns="1"
-					rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted && !(screenResultViewer.isPanelCollapsedMap['dataHeadersTable'] && screenResultViewer.isPanelCollapsedMap['dataTable'])}"
-					title="Select the data headers to display in the Data Headers and Data tables below">
-					<t:outputLabel for="dataHeadersList"
-						value="Show selected data headers:" styleClass="label" />
-					<t:selectManyCheckbox id="dataHeadersList" layout="pageDirection"
-						layoutWidth="6"
-						value="#{screenResultViewer.dataHeaderSelections.value}"
-						valueChangeListener="#{screenResultViewer.dataHeadersTable.selectionListener}"
-						binding="#{screenResultViewer.dataHeadersTable.selectManyUIInput}"
-						styleClass="label" style="vertical-align: top">
-						<f:selectItems id="dataHeaders"
-							value="#{screenResultViewer.dataHeaderSelections.selectItems}" />
-					</t:selectManyCheckbox>
-					<t:panelGroup>
-						<t:commandButton id="updateDataHeadersButton" forceId="true"
-							value="Update" styleClass="command"
-							title="Update the data headers selection" />
-						<t:commandButton id="allDataHeadersButton" value="All"
-							action="#{screenResultViewer.dataHeadersTable.selectAll}"
-							styleClass="command" title="Select all of the data headers" />
-					</t:panelGroup>
-				</t:panelGrid>
-				<!--/h:form -->
+				<t:div style="margin-left: 30px">
+					<!--h:form id="dataHeadersSelectionForm"-->
+					<t:panelGrid columns="1"
+						rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted && !(screenResultViewer.isPanelCollapsedMap['dataHeadersTable'] && screenResultViewer.isPanelCollapsedMap['dataTable'])}"
+						styleClass="groupingPanel"
+						title="Select the data headers to display in the Data Headers and Data tables below">
+						<t:outputLabel for="dataHeadersList"
+							value="Show selected data headers:" styleClass="label" />
+						<t:selectManyCheckbox id="dataHeadersList" layout="pageDirection"
+							layoutWidth="#{screenResultViewer.dataHeaderSelections.size}"
+							value="#{screenResultViewer.dataHeaderSelections.value}"
+							valueChangeListener="#{screenResultViewer.dataHeadersTable.selectionListener}"
+							binding="#{screenResultViewer.dataHeadersTable.selectManyUIInput}"
+							styleClass="label" style="vertical-align: top">
+							<f:selectItems id="dataHeaders"
+								value="#{screenResultViewer.dataHeaderSelections.selectItems}" />
+						</t:selectManyCheckbox>
+						<t:panelGroup>
+							<t:commandButton id="updateDataHeadersButton" forceId="true"
+								value="Update" styleClass="command"
+								title="Update the data headers selection" />
+							<t:commandButton id="allDataHeadersButton" value="All"
+								action="#{screenResultViewer.dataHeadersTable.selectAll}"
+								styleClass="command" title="Show all data headers" />
+							<t:commandButton id="noDataHeadersButton" value="First"
+								action="#{screenResultViewer.dataHeadersTable.selectNone}"
+								styleClass="command" title="Show the first the data header" />
+						</t:panelGroup>
+					</t:panelGrid>
+					<!--/h:form -->
+				</t:div>
 
 				<t:div style="margin-left: 30px">
+
 					<!-- h:form id="dataHeadersPanelForm" -->
 					<t:collapsiblePanel id="dataHeadersPanel"
 						value="#{screenResultViewer.isPanelCollapsedMap['dataHeadersTable']}"

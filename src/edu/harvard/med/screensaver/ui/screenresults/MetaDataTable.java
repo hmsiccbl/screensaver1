@@ -192,6 +192,14 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
+  @UIControllerMethod
+  public String selectNone()
+  {
+    getSelections().setSelections(getDataTypes().subList(0, 1));
+    _selectManyUIInput.setValue(getSelections().getValue());
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
 
   // private methods
 
@@ -201,6 +209,7 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
     _selections = null;
     _columnModel = null;
     _dataModel = null;
+    _selectManyUIInput = null;
   }
 
   private List<T> getDataTypes()
