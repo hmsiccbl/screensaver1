@@ -138,9 +138,6 @@ public class ScreenViewer extends AbstractBackingBean
     ScreenResult screenResult = screen.getScreenResult();
     _heatMapViewer.setScreenResult(screenResult);
     _screenResultViewer.setScreenResult(screenResult);
-    if (screenResult != null && screenResult.getResultValueTypes().size() > 0) {
-      _screenResultViewer.setScreenResultSize(screenResult.getResultValueTypesList().get(0).getResultValues().size());
-    }
     resetView();
   }
 

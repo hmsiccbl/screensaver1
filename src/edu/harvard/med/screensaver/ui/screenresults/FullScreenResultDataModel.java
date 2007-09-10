@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -18,7 +18,6 @@ import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.apache.log4j.Logger;
 
@@ -39,15 +38,14 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
 
   // public constructors and methods
 
-  public FullScreenResultDataModel(ScreenResult screenResult,
-                                   List<ResultValueType> resultValueTypes,
+  public FullScreenResultDataModel(List<ResultValueType> resultValueTypes,
                                    int sortColumnIndex,
                                    SortDirection sortDirection,
                                    ScreenResultsDAO dao,
                                    int rowsToFetch,
                                    int preCalculatedSize)
   {
-    super(screenResult, resultValueTypes, sortColumnIndex, sortDirection, dao);
+    super(resultValueTypes, sortColumnIndex, sortDirection, dao);
     _rowsToFetch = rowsToFetch;
     _preCalculatedSize = preCalculatedSize;
     _fetchedRows = new HashMap<Integer,Map<String,Object>>();
@@ -70,24 +68,24 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
     }
     return _fetchedRows.get(_rowIndex);
   }
-  
+
   @Override
   public List<Map<String,Object>> getWrappedData()
   {
     throw new UnsupportedOperationException();
   }
-  
+
   public void setRowsToFetch(int rowsToFetch)
   {
-    _rowsToFetch = rowsToFetch;
     log.debug("set rowsToFetch=" + rowsToFetch);
+    _rowsToFetch = rowsToFetch;
   }
-  
+
   protected Map<WellKey,List<ResultValue>> fetchData(List<ResultValueType> selectedResultValueTypes,
-                                                   int sortBy,
-                                                   SortDirection sortDirection)
+                                                     int sortBy,
+                                                     SortDirection sortDirection)
   {
-    Map<WellKey,List<ResultValue>> rvData = 
+    Map<WellKey,List<ResultValue>> rvData =
       _screenResultsDao.findSortedResultValueTableByRange(_resultValueTypes,
                                                           sortBy,
                                                           sortDirection,
@@ -95,31 +93,31 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
                                                           _rowsToFetch,
                                                           null,
                                                           null);
-    log.debug("  fetched rows " + _firstRowIndexToFetch + 
+    log.debug("  fetched rows " + _firstRowIndexToFetch +
               " to " + ((_firstRowIndexToFetch + rvData.size()) - 1));
     log.debug("total fetched row count = " + rvData.size());
     return rvData;
   }
-  
+
   @Override
   protected void addRowValues(int rowIndex, Map<String,Object> rowValues)
   {
     _fetchedRows.put(_firstRowIndexToFetch + rowIndex, rowValues);
   }
-  
+
   @Override
   protected void addRowResultValueExcludes(int rowIndex, List<Boolean> rowExcludes)
   {
     _excludedResultValuesMap.put(_firstRowIndexToFetch + rowIndex, rowExcludes);
   }
-  
+
   @Override
   public boolean isResultValueCellExcluded(int colIndex)
   {
-    if (colIndex < ScreenResultViewer.DATA_TABLE_FIXED_COLUMNS) {
+    if (colIndex < ScreenResultDataModel.DATA_TABLE_FIXED_COLUMNS) {
       return false;
     }
-    return _excludedResultValuesMap.get(getRowIndex()).get(colIndex - ScreenResultViewer.DATA_TABLE_FIXED_COLUMNS);
+    return _excludedResultValuesMap.get(getRowIndex()).get(colIndex - ScreenResultDataModel.DATA_TABLE_FIXED_COLUMNS);
   }
 }
 

@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -17,10 +17,8 @@ import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.apache.log4j.Logger;
-
 public class SinglePlateScreenResultDataModel extends ScreenResultDataModel
 {
   // static members
@@ -32,15 +30,14 @@ public class SinglePlateScreenResultDataModel extends ScreenResultDataModel
   // instance data members
 
   // public constructors and methods
-  
-  public SinglePlateScreenResultDataModel(ScreenResult screenResult,
-                                          List<ResultValueType> resultValueTypes,
+
+  public SinglePlateScreenResultDataModel(List<ResultValueType> resultValueTypes,
                                           int sortColumnIndex,
                                           SortDirection sortDirection,
                                           ScreenResultsDAO dao,
                                           int plateNumber)
   {
-    super(screenResult, resultValueTypes, sortColumnIndex, sortDirection, dao);
+    super(resultValueTypes, sortColumnIndex, sortDirection, dao);
     _plateNumber = plateNumber;
   }
 

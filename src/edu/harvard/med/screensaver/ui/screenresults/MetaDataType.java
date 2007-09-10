@@ -14,5 +14,6 @@ public interface MetaDataType
 {
   String getName();
   String getDescription();
+  boolean isNumeric();
 }
 

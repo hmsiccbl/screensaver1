@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,29 +28,19 @@ import javax.faces.event.ValueChangeEvent;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
-import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
-import edu.harvard.med.screensaver.ui.table.DataTableRowsPerPageUISelectOneBean;
-import edu.harvard.med.screensaver.ui.table.SortChangedEvent;
-import edu.harvard.med.screensaver.ui.table.TableColumn;
-import edu.harvard.med.screensaver.ui.table.TableSortManager;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -77,38 +66,29 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
   private static Logger log = Logger.getLogger(ScreenResultViewer.class);
 
-  private static final ScreenResultDataModel EMPTY_RAW_DATA_MODEL = new EmptyScreenResultDataModel();
-
   public static final Integer DATA_TABLE_FILTER_SHOW_ALL = -2;
   public static final Integer DATA_TABLE_FILTER_SHOW_POSITIVES = -1;
-  public static final int DATA_TABLE_FIXED_COLUMNS = 3;
 
 
   // instance data members
 
   private GenericEntityDAO _dao;
   private ScreenResultsDAO _screenResultsDao;
-  private LibrariesDAO _librariesDao;
   private ScreenSearchResults _screensBrowser;
   private ScreenViewer _screenViewer;
   private ScreenResultExporter _screenResultExporter;
-  private WellViewer _wellViewer;
+  private ScreenResultDataTable _screenResultDataTable;
+  private FullScreenResultDataTable _fullScreenResultDataTable;
+  private PositivesOnlyScreenResultDataTable _positivesOnlyScreenResultDataTable;
+  private SinglePlateScreenResultDataTable _singlePlateScreenResultDataTable;
 
   private ScreenResult _screenResult;
   private Map<String,Boolean> _isPanelCollapsedMap;
 
   private ResultValueTypeTable _rvtTable;
-
-  // data members for raw data table
-  private ScreenResultDataModel _rawDataModel;
-  private UIData _dataTable;
-  private TableSortManager<Map<String,Object>> _sortManager;
-  private UIInput _dataTableRowsPerPageUIInput;
   private UISelectOneBean<Integer> _dataFilter;
-  private DataTableRowsPerPageUISelectOneBean _dataTableRowsPerPage;
   private UISelectOneBean<ResultValueType> _showPositivesOnlyForDataHeader;
   private int _screenResultSize;
-
 
 
   // constructors
@@ -122,21 +102,24 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
   public ScreenResultViewer(GenericEntityDAO dao,
                             ScreenResultsDAO screenResultsDao,
-                            LibrariesDAO librariesDao,
                             ScreenSearchResults screensBrowser,
                             ScreenViewer screenViewer,
                             ScreenResultExporter screenResultExporter,
-                            WellViewer wellViewer,
-                            ResultValueTypeTable rvtTable)
+                            ResultValueTypeTable rvtTable,
+                            FullScreenResultDataTable fullScreenResultDataTable,
+                            PositivesOnlyScreenResultDataTable positivesOnlyScreenResultDataTable,
+                            SinglePlateScreenResultDataTable singlePlateScreenResultDataTable)
+
   {
     _dao = dao;
     _screenResultsDao = screenResultsDao;
-    _librariesDao = librariesDao;
     _screensBrowser = screensBrowser;
     _screenViewer = screenViewer;
     _screenResultExporter = screenResultExporter;
-    _wellViewer = wellViewer;
     _rvtTable = rvtTable;
+    _fullScreenResultDataTable = fullScreenResultDataTable;
+    _positivesOnlyScreenResultDataTable = positivesOnlyScreenResultDataTable;
+    _singlePlateScreenResultDataTable = singlePlateScreenResultDataTable;
 
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
     _isPanelCollapsedMap.put("screenSummary", false);
@@ -154,6 +137,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     resetView();
     _screenResult = screenResult;
     getDataHeadersTable().initialize(getResultValueTypes(), this);
+    updateDataTable();
   }
 
   public ScreenResult getScreenResult()
@@ -161,14 +145,53 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     return _screenResult;
   }
 
-  public void setScreenResultSize(int screenResultSize)
-  {
-    _screenResultSize = screenResultSize;
-  }
-
   public Map<?,?> getIsPanelCollapsedMap()
   {
     return _isPanelCollapsedMap;
+  }
+
+  /**
+   * @motivation Each of 3 backing bean objects need a reference to the
+   *             UIComponent, but the active one will only be swapped in after
+   *             JSF binds the reference (i.e. calls the
+   *             DataTable.setRowsPerPageUIComponent() method), allowing only
+   *             the previous active backing bean to have the correct reference
+   *             to the UIComponent
+   */
+  public void setSharedRowsPerPageUIComponent(UIInput rowsPerPageUIComponent)
+  {
+    _fullScreenResultDataTable.setRowsPerPageUIComponent(rowsPerPageUIComponent);
+    _positivesOnlyScreenResultDataTable.setRowsPerPageUIComponent(rowsPerPageUIComponent);
+    _singlePlateScreenResultDataTable.setRowsPerPageUIComponent(rowsPerPageUIComponent);
+  }
+
+  public UIInput getSharedRowsPerPageUIComponent()
+  {
+    assert _fullScreenResultDataTable.getRowsPerPageUIComponent() == _positivesOnlyScreenResultDataTable.getRowsPerPageUIComponent() &&
+    _fullScreenResultDataTable.getRowsPerPageUIComponent() == _singlePlateScreenResultDataTable.getRowsPerPageUIComponent();
+    return _fullScreenResultDataTable.getRowsPerPageUIComponent();
+  }
+
+  /**
+   * @motivation Each of 3 backing bean objects need a reference to the
+   *             UIComponent, but the active one will only be swapped in after
+   *             JSF binds the reference (i.e. calls the
+   *             DataTable.setDataTableUIComponent() method), allowing only the
+   *             previous active backing bean to have the correct reference to
+   *             the UIComponent
+   */
+  public void setSharedDataTableUIComponent(UIData dataTableUIComponent)
+  {
+    _fullScreenResultDataTable.setDataTableUIComponent(dataTableUIComponent);
+    _positivesOnlyScreenResultDataTable.setDataTableUIComponent(dataTableUIComponent);
+    _singlePlateScreenResultDataTable.setDataTableUIComponent(dataTableUIComponent);
+  }
+
+  public UIData getSharedDataTableUIComponent()
+  {
+    assert _fullScreenResultDataTable.getDataTableUIComponent() == _positivesOnlyScreenResultDataTable.getDataTableUIComponent() &&
+    _fullScreenResultDataTable.getDataTableUIComponent() == _singlePlateScreenResultDataTable.getDataTableUIComponent();
+    return _fullScreenResultDataTable.getDataTableUIComponent();
   }
 
   public UISelectManyBean<ResultValueType> getDataHeaderSelections()
@@ -181,27 +204,16 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     return _rvtTable;
   }
 
-  @SuppressWarnings("unchecked")
-  public void update(Observable o, Object obj)
+  public ScreenResultDataTable getResultValueTable()
   {
-    if (o == getDataHeadersTable().getSelections()) {
-      // visible columns changed
-      _sortManager.deleteObserver(this); // avoid recursive notifications
-        if (log.isDebugEnabled()) {
-          log.debug("data header selection changed");
-        }
-        _sortManager = null; // force recreate
-        updateDataTableContent();
-    }
-    else if (obj instanceof SortChangedEvent) {
-      // sort column changed
-      SortChangedEvent<Map<String,Object>> event = (SortChangedEvent<Map<String,Object>>) obj;
-      if (log.isDebugEnabled()) {
-        log.debug(event.toString());
-      }
-      // TODO: full rebuild is only strictly needed by FullScreenResultDataModel, other ScreenResultDataModel classes could have a callback method called to avoid database calls (they would do their own in-memory sorting)
-      updateDataTableContent();
-    }
+    return _screenResultDataTable;
+  }
+
+  public void update(Observable observable, Object o)
+  {
+    // data header selections changed
+    // TODO: make use of TableSortManager.getColumnModel().updateVisibleColumns(), instead of rebuilding data table backing bean wholesale
+    updateDataTable();
   }
 
 
@@ -294,82 +306,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   }
 
 
-  // data table methods
-
-  public UIData getDataTable()
-  {
-    return _dataTable;
-  }
-
-  public void setDataTable(UIData dataUIComponent)
-  {
-    _dataTable = dataUIComponent;
-  }
-
-  public ScreenResultDataModel getDataTableModel()
-  {
-    if (_rawDataModel == null) {
-      updateDataTableContent();
-    }
-    return _rawDataModel;
-  }
-
-  public TableSortManager<Map<String,Object>> getSortManager()
-  {
-    if (_sortManager == null) {
-      List<TableColumn<Map<String,Object>>> columns = getDataTableFixedColumns();
-      columns.addAll(getColumnsForSelectedDataHeaders());
-      _sortManager = new TableSortManager<Map<String,Object>>(columns);
-      _sortManager.addObserver(this);
-    }
-    return _sortManager;
-  }
-
-  public UIInput getDataTableRowsPerPageUIInput()
-  {
-    return _dataTableRowsPerPageUIInput;
-  }
-
-  public void setDataTableRowsPerPageUIInput(UIInput dataTableRowsPerPageUIInput)
-  {
-    _dataTableRowsPerPageUIInput = dataTableRowsPerPageUIInput;
-  }
-
-  public String cellAction()
-  {
-    return (String) getSortManager().getCurrentColumn().cellAction(getDataTableModel().getRowData());
-  }
-
-  public boolean isResultValueExcluded()
-  {
-    return getDataTableModel().isResultValueCellExcluded(getSortManager().getCurrentColumnIndex());
-  }
-
-  public UISelectOneBean<Integer> getDataFilter()
-  {
-    if (_dataFilter == null) {
-      updateDataFilterSelections();
-    }
-    return _dataFilter;
-  }
-
-  public UISelectOneBean<Integer> getDataTableRowsPerPage()
-  {
-    if (_dataTableRowsPerPage == null) {
-      updateDataTableRowsPerPageSelections();
-    }
-    return _dataTableRowsPerPage;
-  }
-
-  public boolean isNumericColumn()
-  {
-    return getSortManager().getCurrentColumn().isNumeric();
-  }
-
-  public int getRawDataSize()
-  {
-    return getDataTableModel().getRowCount();
-  }
+  // result value data table filtering methods
 
   public UISelectOneBean<ResultValueType> getShowPositivesOnlyForDataHeader()
   {
@@ -377,44 +314,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
       updateDataHeaderSelectionsForShowPositives();
     }
     return _showPositivesOnlyForDataHeader;
-  }
-
-  private void updateDataTableContent()
-  {
-    log.debug("updating data table content");
-    if (_screenResult == null) {
-      _rawDataModel = EMPTY_RAW_DATA_MODEL;
-    }
-    else if (getDataFilter().getSelection() == DATA_TABLE_FILTER_SHOW_ALL) {
-      _rawDataModel = new FullScreenResultDataModel(_screenResult,
-                                                    getDataHeaderSelections().getSelections(),
-                                                    getSortManager().getSortColumnIndex(),
-                                                    getSortManager().getSortDirection(),
-                                                    _screenResultsDao,
-                                                    getDataTableRowsPerPage().getSelection(),
-                                                    _screenResultSize);
-    }
-    else if (getDataFilter().getSelection() == DATA_TABLE_FILTER_SHOW_POSITIVES) {
-      _rawDataModel = new PositivesOnlyScreenResultDataModel(_screenResult,
-                                                             getDataHeaderSelections().getSelections(),
-                                                             getSortManager().getSortColumnIndex(),
-                                                             getSortManager().getSortDirection(),
-                                                             _screenResultsDao,
-                                                             getShowPositivesOnlyForDataHeader().getSelection());
-    }
-    else if (getDataFilter().getSelection() >= 0) { // plate number
-      _rawDataModel = new SinglePlateScreenResultDataModel(_screenResult,
-                                                           getDataHeaderSelections().getSelections(),
-                                                           getSortManager().getSortColumnIndex(),
-                                                           getSortManager().getSortDirection(),
-                                                           _screenResultsDao,
-                                                           getDataFilter().getSelection());
-    }
-    else {
-      log.warn("unknown data filter value");
-      _rawDataModel = EMPTY_RAW_DATA_MODEL;
-    }
-    gotoDataTableRowIndex(0);
   }
 
   private void updateDataHeaderSelectionsForShowPositives()
@@ -437,7 +336,88 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     };
   }
 
-  private void updateDataFilterSelections()
+  // result value data table methods
+
+  public UISelectOneBean<Integer> getDataFilter/*TODO: Selections*/()
+  {
+    if (_dataFilter == null) {
+      lazyBuildDataFilterSelections();
+    }
+    return _dataFilter;
+  }
+
+  /**
+   * Called when the set of rows to be displayed in the table needs to be changed (row filtering).
+   */
+  public void dataTableFilterListener(ValueChangeEvent event)
+  {
+    log.debug("dataTableFilter changed to " + event.getNewValue());
+    getDataFilter().setValue((String) event.getNewValue());
+    updateDataTable();
+    getFacesContext().renderResponse();
+  }
+
+
+  /**
+   * Called when the set of rows to be displayed in the table needs to be changed (row filtering).
+   */
+  public void showPositivesForDataHeaderListener(ValueChangeEvent event)
+  {
+    log.debug("showPositivesForDataHeader changed to " + event.getNewValue());
+    getShowPositivesOnlyForDataHeader().setValue((String) event.getNewValue());
+    updateDataTable();
+    getFacesContext().renderResponse();
+  }
+
+  // protected methods
+
+  protected ScreensaverUserRole getEditableAdminRole()
+  {
+    return ScreensaverUserRole.SCREEN_RESULTS_ADMIN;
+  }
+
+
+  // private methods
+
+  /**
+   * Get ResultValueTypes set, safely, handling case that no screen result
+   * exists.
+   */
+  private List<ResultValueType> getResultValueTypes()
+  {
+    List<ResultValueType> rvts = new ArrayList<ResultValueType>();
+    if (getScreenResult() != null) {
+      rvts.addAll(getScreenResult().getResultValueTypes());
+    }
+    return rvts;
+  }
+
+  private void updateDataTable()
+  {
+    log.debug("updating data table content");
+    if (_screenResult == null) {
+      _screenResultDataTable = new EmptyScreenResultDataTable();
+    }
+    else if (getDataFilter().getSelection().equals(DATA_TABLE_FILTER_SHOW_ALL)) {
+      int screenResultSize = 0;
+      if (getResultValueTypes().size() > 0) {
+        screenResultSize = getResultValueTypes().get(0).getResultValues().size();
+      }
+      _fullScreenResultDataTable.setScreenResultSize(screenResultSize);
+      _screenResultDataTable = _fullScreenResultDataTable;
+    }
+    else if (getDataFilter().getSelection().equals(DATA_TABLE_FILTER_SHOW_POSITIVES)) {
+      _positivesOnlyScreenResultDataTable.setPositivesDataHeader(getShowPositivesOnlyForDataHeader().getSelection());
+      _screenResultDataTable = _positivesOnlyScreenResultDataTable;
+    }
+    else {
+      _singlePlateScreenResultDataTable.setPlateNumber(getDataFilter().getSelection());
+      _screenResultDataTable = _singlePlateScreenResultDataTable;
+    }
+    _screenResultDataTable.setResultValueTypes(getDataHeaderSelections().getSelections());
+  }
+
+  private void lazyBuildDataFilterSelections()
   {
     if (_screenResult == null) {
       _dataFilter = new UISelectOneBean<Integer>();
@@ -466,176 +446,10 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
       }
     };
   }
-
-  private void updateDataTableRowsPerPageSelections()
-  {
-    log.debug("updating data table rows per page selections");
-    if (getDataFilter().getSelection() == DATA_TABLE_FILTER_SHOW_ALL) {
-      // note: don't allow "show all rows" when not filtering result values (too many!)
-      _dataTableRowsPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(16, 24, 48, 96, 384));
-    }
-    else if (getDataFilter().getSelection() == DATA_TABLE_FILTER_SHOW_POSITIVES) {
-      _dataTableRowsPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE));
-      _dataTableRowsPerPage.setAllRowsValue(getRawDataSize());
-    }
-    else { // single plate
-      _dataTableRowsPerPage = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(16, 24, 48, 96, 384));
-    }
-    // prevent dataTableRowsPerPageListener from being invoked; we only want
-    // listener invoked when the user explicitly changes the selection in this
-    // UIInput component, not in response to a programmatic update
-    _dataTableRowsPerPageUIInput.setValue(_dataTableRowsPerPage.getValue());
-  }
-
-
-  // JSF event listener methods
-
-  public void rowNumberListener(ValueChangeEvent event)
-  {
-    if (event.getNewValue() != null && event.getNewValue().toString().trim().length() > 0) {
-      log.debug("row number changed to " + event.getNewValue());
-      gotoDataTableRowIndex(Integer.parseInt(event.getNewValue().toString()) - 1);
-
-      // skip "update model" JSF phase, to avoid overwriting model values set above
-      getFacesContext().renderResponse();
-    }
-  }
-
-  /**
-   * Called when the set of rows to be displayed in the table needs to be changed (row filtering).
-   */
-  public void dataTableFilterListener(ValueChangeEvent event)
-  {
-    log.debug("dataTableFilter changed to " + event.getNewValue());
-    getDataFilter().setValue((String) event.getNewValue());
-    // ordering of next 2 lines is significant
-    updateDataTableRowsPerPageSelections();
-    updateDataTableContent();
-    // setAllRowsValue() was already called in
-    // updateDataTableRowsPerPageSelections(), above, but its value was
-    // determined from the previous data table model, due to ordering or above
-    // two lines
-    _dataTableRowsPerPage.setAllRowsValue(getRawDataSize());
-
-    // skip "update model" JSF phase, to avoid overwriting model values set above
-    getFacesContext().renderResponse();
-  }
-
-  /**
-   * Called when the set of rows to be displayed in the table needs to be changed (row filtering).
-   */
-  public void showPositivesForDataHeaderListener(ValueChangeEvent event)
-  {
-    log.debug("showPositivesForDataHeader changed to " + event.getNewValue());
-    getShowPositivesOnlyForDataHeader().setValue((String) event.getNewValue());
-    updateDataTableContent();
-
-    // skip "update model" JSF phase, to avoid overwriting model values set above
-    getFacesContext().renderResponse();
-  }
-
-  public void dataTableRowsPerPageListener(ValueChangeEvent event)
-  {
-    log.debug("dataTableRowsPerPage changed to " + event.getNewValue());
-    getDataTableRowsPerPage().setValue((String) event.getNewValue());
-    getDataTableModel().setRowsToFetch(getDataTableRowsPerPage().getSelection());
-
-    // skip "update model" JSF phase, to avoid overwriting model values set above
-    getFacesContext().renderResponse();
-  }
-
-
-
-  // protected methods
-
-  protected ScreensaverUserRole getEditableAdminRole()
-  {
-    return ScreensaverUserRole.SCREEN_RESULTS_ADMIN;
-  }
-
-
-  // private methods
-
-  /**
-   * Get ResultValueTypes set, safely, handling case that no screen result
-   * exists.
-   */
-  private List<ResultValueType> getResultValueTypes()
-  {
-    List<ResultValueType> rvts = new ArrayList<ResultValueType>();
-    if (getScreenResult() != null) {
-      rvts.addAll(getScreenResult().getResultValueTypes());
-    }
-    return rvts;
-  }
-
-  private List<TableColumn<Map<String,Object>>> getDataTableFixedColumns()
-  {
-    List<TableColumn<Map<String,Object>>> fixedColumns = new ArrayList<TableColumn<Map<String,Object>>>(3);
-    fixedColumns.add(new TableColumn<Map<String,Object>>("Plate", "The plate number", true) {
-      @Override
-      public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
-    });
-    fixedColumns.add(new TableColumn<Map<String,Object>>("Well", "The well name") {
-      @Override
-      public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
-
-      @Override
-      public boolean isCommandLink() { return true; }
-
-      @Override
-      public Object cellAction(Map<String,Object> row)
-      {
-        Integer plateNumber = (Integer) getSortManager().getColumn(0).getCellValue(row);
-        String wellName = (String) getSortManager().getColumn(1).getCellValue(row);
-        Well well = _librariesDao.findWell(new WellKey(plateNumber, wellName));
-        return _wellViewer.viewWell(well);
-      }
-    });
-    fixedColumns.add(new TableColumn<Map<String,Object>>("Type",
-      StringUtils.makeListString(StringUtils.wrapStrings(Arrays.asList(WellType.values()), "'", "'"), ", ").toLowerCase()) {
-      @Override
-      public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
-    });
-    return fixedColumns;
-  }
-
-  private List<TableColumn<Map<String,Object>>> getColumnsForSelectedDataHeaders()
-  {
-    ArrayList<TableColumn<Map<String,Object>>> result = new ArrayList<TableColumn<Map<String,Object>>>();
-    List<ResultValueType> selectedDataHeaders = getDataHeaderSelections().getSelections();
-    for (ResultValueType rvt : selectedDataHeaders) {
-      result.add(new TableColumn<Map<String,Object>>(rvt.getUniqueName(), rvt.getDescription(), rvt.isNumeric()) {
-        @Override
-        public Object getCellValue(Map<String,Object> row)
-        {
-          return row.get(getName());
-        }
-      });
-    }
-    return result;
-  }
-
   private void resetView()
   {
     _dataFilter = null;
-    _dataTableRowsPerPage = null;
-    _rawDataModel = null;
-    _sortManager = null;
     _showPositivesOnlyForDataHeader = null;
-    _screenResultSize = 0;
-  }
-
-  private void gotoDataTableRowIndex(int rowIndex)
-  {
-    log.debug("goto data table row index " + rowIndex);
-    // ensure value is within valid range, and in particular that we never show
-    // less than the table's configured row count (unless it's more than the
-    // total number of rows)
-    rowIndex = Math.max(0,
-                        Math.min(rowIndex,
-                                 getRawDataSize() - _dataTable.getRows()));
-    _dataTable.setFirst(rowIndex);
   }
 
 }

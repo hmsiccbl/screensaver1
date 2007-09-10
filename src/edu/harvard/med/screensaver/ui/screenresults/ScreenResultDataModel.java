@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -23,44 +23,56 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.apache.log4j.Logger;
 
+/**
+ * Abstract data model class for JSF data table that displays the ResultValues
+ * for an arbitrary set of ResultValueTypes from a single ScreenResult. The
+ * ResultValueTypes define the table columns. This abstract class provides the
+ * following common functionality to its subclasses:
+ * <ul>
+ * <li>Adds a set of fixed "key" columns before the ResultValueType columns: Plate, Well, Well Type</li>
+ * <li>Can report whether a given ResultValue (cell value) is "excluded"</li>
+ * </ul>
+ *
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ */
 abstract public class ScreenResultDataModel extends DataModel
 {
   // static members
 
   private static Logger log = Logger.getLogger(ScreenResultDataModel.class);
 
+  public static final int DATA_TABLE_FIXED_COLUMNS = 3;
+
+
   // instance data members
 
-  protected ScreenResult _screenResult;
   protected List<ResultValueType> _resultValueTypes;
   protected int _sortColumnIndex;
   protected SortDirection _sortDirection;
   protected ScreenResultsDAO _screenResultsDao;
   protected int _rowIndex;
-  
+
   private List<List<Boolean>> _excludedResultValues;
   private List<Map<String,Object>> _wrappedData;
 
 
   // public constructors and methods
 
-  public ScreenResultDataModel(ScreenResult screenResult,
-                               List<ResultValueType> resultValueTypes,
+  public ScreenResultDataModel(List<ResultValueType> resultValueTypes,
                                int sortColumnIndex,
                                SortDirection sortDirection,
                                ScreenResultsDAO dao)
   {
-    _screenResult = screenResult;
     _sortColumnIndex = sortColumnIndex;
     _sortDirection = sortDirection;
     _resultValueTypes = resultValueTypes;
     _screenResultsDao = dao;
   }
-  
+
   @Override
   public Map<String,Object> getRowData()
   {
@@ -104,7 +116,7 @@ abstract public class ScreenResultDataModel extends DataModel
   {
     throw new UnsupportedOperationException();
   }
-  
+
   abstract protected Map<WellKey,List<ResultValue>> fetchData(List<ResultValueType> selectedResultValueTypes,
                                                               int sortBy,
                                                               SortDirection sortDirection);
@@ -115,7 +127,7 @@ abstract public class ScreenResultDataModel extends DataModel
 
   //abstract public void sort(String sortColumnName, SortDirection sortDirection);
 
-  
+
   // private methods
 
   @SuppressWarnings("unchecked")
@@ -129,7 +141,7 @@ abstract public class ScreenResultDataModel extends DataModel
     case 1: sortByArg = ScreenResultsDAO.SORT_BY_WELL_PLATE; break;
     case 2: sortByArg = ScreenResultsDAO.SORT_BY_ASSAY_WELL_TYPE; break;
     default:
-      sortByArg = _sortColumnIndex - ScreenResultViewer.DATA_TABLE_FIXED_COLUMNS;
+      sortByArg = _sortColumnIndex - DATA_TABLE_FIXED_COLUMNS;
     }
     _wrappedData = new ArrayList<Map<String,Object>>();
     _excludedResultValues = new ArrayList<List<Boolean>>();
@@ -138,21 +150,21 @@ abstract public class ScreenResultDataModel extends DataModel
                                                                 sortByArg,
                                                                 _sortDirection).entrySet()) {
       WellKey wellKey = entry.getKey();
-      addRow(rowIndex++, 
+      addRow(rowIndex++,
              wellKey,
              entry.getValue().get(0).getAssayWellType(),
              entry.getValue(),
              _resultValueTypes);
     }
   }
-  
-  /**  
+
+  /**
    * @sideeffect adds element to {@link #_excludedResultValues}
    */
   private void addRow(int rowIndex,
                       WellKey wellKey,
                       AssayWellType assayWellType,
-                      List<ResultValue> resultValues, 
+                      List<ResultValue> resultValues,
                       List<ResultValueType> resultValueTypes)
   {
     int i = 0;
@@ -183,12 +195,12 @@ abstract public class ScreenResultDataModel extends DataModel
   {
     _excludedResultValues.add(rowIndex, rowExcludes);
   }
-  
+
   public boolean isResultValueCellExcluded(int colIndex)
   {
-    if (colIndex < ScreenResultViewer.DATA_TABLE_FIXED_COLUMNS) {
+    if (colIndex < DATA_TABLE_FIXED_COLUMNS) {
       return false;
     }
-    return _excludedResultValues.get(getRowIndex()).get(colIndex - ScreenResultViewer.DATA_TABLE_FIXED_COLUMNS);
+    return _excludedResultValues.get(getRowIndex()).get(colIndex - DATA_TABLE_FIXED_COLUMNS);
   }
 }

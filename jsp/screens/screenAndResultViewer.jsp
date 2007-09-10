@@ -158,7 +158,7 @@
 							layoutWidth="#{screenResultViewer.dataHeaderSelections.size}"
 							value="#{screenResultViewer.dataHeaderSelections.value}"
 							valueChangeListener="#{screenResultViewer.dataHeadersTable.selectionListener}"
-							binding="#{screenResultViewer.dataHeadersTable.selectManyUIInput}"
+							binding="#{screenResultViewer.dataHeadersTable.selectManyUIComponent}"
 							styleClass="label" style="vertical-align: top">
 							<f:selectItems id="dataHeaders"
 								value="#{screenResultViewer.dataHeaderSelections.selectItems}" />
@@ -265,17 +265,17 @@
 
 							<t:buffer into="#{resultValuesDataTableBuffer}">
 								<t:dataTable id="resultValuesDataTable"
-									binding="#{screenResultViewer.dataTable}"
-									value="#{screenResultViewer.dataTableModel}" var="row"
-									rows="#{screenResultViewer.dataTableRowsPerPage.selection}"
+									binding="#{screenResultViewer.sharedDataTableUIComponent}"
+									value="#{screenResultViewer.resultValueTable.dataModel}" var="row"
+									rows="#{screenResultViewer.resultValueTable.rowsPerPageSelector.selection}"
 									styleClass="standardTable" headerClass="tableHeader"
 									rowClasses="row1,row2"
-									sortColumn="#{screenResultViewer.sortManager.sortColumnName}"
-									sortAscending="#{screenResultViewer.sortManager.sortAscending}">
+									sortColumn="#{screenResultViewer.resultValueTable.sortManager.sortColumnName}"
+									sortAscending="#{screenResultViewer.resultValueTable.sortManager.sortAscending}">
 									<t:columns
-										value="#{screenResultViewer.sortManager.columnModel}"
+										value="#{screenResultViewer.resultValueTable.sortManager.columnModel}"
 										var="column"
-										styleClass="#{(column.name==\"Plate\" || column.name==\"Well\") ? \"keyColumn\" : (column.numeric ? \"numericColumn\" : \"textColumn\")} #{screenResultViewer.resultValueExcluded ? \"excludedValue\" : \"\"} ">
+										styleClass="#{(column.name==\"Plate\" || column.name==\"Well\") ? \"keyColumn\" : (column.numeric ? \"numericColumn\" : \"textColumn\")} #{screenResultViewer.resultValueTable.resultValueExcluded ? \"excludedValue\" : \"\"} ">
 										<f:facet name="header">
 											<t:commandSortHeader columnName="#{column.name}"
 												arrow="false">
@@ -292,7 +292,7 @@
 										</f:facet>
 										<t:outputText value="#{row[column.name]}"
 											rendered="#{!column.isCommandLink}" />
-										<t:commandLink action="#{screenResultViewer.cellAction}"
+										<t:commandLink action="#{screenResultViewer.resultValueTable.cellAction}"
 											rendered="#{column.isCommandLink}">
 											<t:outputText value="#{row[column.name]}" />
 										</t:commandLink>
@@ -343,7 +343,7 @@
 									styleClass="commandPanel">
 
 									<t:inputText id="rowNumber"
-										valueChangeListener="#{screenResultViewer.rowNumberListener}"
+										valueChangeListener="#{screenResultViewer.resultValueTable.rowNumberListener}"
 										size="6" styleClass="inputText">
 									</t:inputText>
 									<%-- note: no 'action' attribute necessary, as 'rowNumber' inputText component, above, invokes update logic via valueChangeListener --%>
@@ -351,13 +351,13 @@
 										styleClass="command" />
 
 									<t:selectOneMenu id="dataTableRowsPerPageList"
-										value="#{screenResultViewer.dataTableRowsPerPage.value}"
-										binding="#{screenResultViewer.dataTableRowsPerPageUIInput}"
-										valueChangeListener="#{screenResultViewer.dataTableRowsPerPageListener}"
+										value="#{screenResultViewer.resultValueTable.rowsPerPageSelector.value}"
+										binding="#{screenResultViewer.sharedRowsPerPageUIComponent}"
+										valueChangeListener="#{screenResultViewer.resultValueTable.rowsPerPageListener}"
 										onchange="document.getElementById('updateDataTableButton').click();"
 										styleClass="data" title="Number of rows to display per page">
 										<f:selectItems
-											value="#{screenResultViewer.dataTableRowsPerPage.selectItems}" />
+											value="#{screenResultViewer.resultValueTable.rowsPerPageSelector.selectItems}" />
 									</t:selectOneMenu>
 									<t:outputText value=" per page" styleClass="label" />
 								</t:panelGroup>

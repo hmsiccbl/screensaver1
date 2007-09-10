@@ -52,7 +52,7 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
   // instance data members
 
   private List<T> _metaDataTypes;
-  private UISelectMany _selectManyUIInput;
+  private UISelectMany _selectManyUIComponent;
   private UISelectManyBean<T> _selections;
   private DataModel _columnModel;
   private DataModel _dataModel;
@@ -96,14 +96,14 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
     return _dataModel;
   }
 
-  public UISelectMany getSelectManyUIInput()
+  public UISelectMany getSelectManyUIComponent()
   {
-    return _selectManyUIInput;
+    return _selectManyUIComponent;
   }
 
-  public void setSelectManyUIInput(UISelectMany selectManyUIInput)
+  public void setSelectManyUIComponent(UISelectMany selectManyUIComponent)
   {
-    _selectManyUIInput = selectManyUIInput;
+    _selectManyUIComponent = selectManyUIComponent;
   }
 
   public DataModel getColumnModel()
@@ -174,7 +174,7 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
     if (getSelections().getSelections().size() == 0) {
       getSelections().setSelections(getDataTypes().subList(0,1));
       // this call shouldn't be necessary, as I would've expected UIInput component to query its model in render phase, but...
-      _selectManyUIInput.setValue(getSelections().getValue());
+      _selectManyUIComponent.setValue(getSelections().getValue());
     }
 
     // skip "update model" JSF phase, to avoid overwriting model values set above
@@ -188,7 +188,7 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
   public String selectAll()
   {
     getSelections().setSelections(getDataTypes());
-    _selectManyUIInput.setValue(getSelections().getValue());
+    _selectManyUIComponent.setValue(getSelections().getValue());
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
@@ -196,7 +196,7 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
   public String selectNone()
   {
     getSelections().setSelections(getDataTypes().subList(0, 1));
-    _selectManyUIInput.setValue(getSelections().getValue());
+    _selectManyUIComponent.setValue(getSelections().getValue());
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
@@ -209,7 +209,7 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
     _selections = null;
     _columnModel = null;
     _dataModel = null;
-    _selectManyUIInput = null;
+    _selectManyUIComponent = null;
   }
 
   private List<T> getDataTypes()
