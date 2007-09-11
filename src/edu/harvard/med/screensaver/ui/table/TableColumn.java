@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 
 import org.apache.log4j.Logger;
 
@@ -24,7 +23,7 @@ public abstract class TableColumn<E>
 
   private static Logger log = Logger.getLogger(TableColumn.class);
 
-  
+
   // instance data members
 
   private Map<SortDirection,Comparator<E>> _comparators = new HashMap<SortDirection,Comparator<E>>();
@@ -34,34 +33,34 @@ public abstract class TableColumn<E>
 
 
   // public constructors and methods
-  
+
   public TableColumn()
   {
   }
-  
+
   public TableColumn(String name, String description)
   {
     _name = name;
     _description = description;
   }
-  
+
   public TableColumn(String name, String description, boolean isNumeric)
   {
     _name = name;
     _description = description;
     _isNumeric = isNumeric;
   }
-  
+
   /**
    * Get the name of the column.
-   * 
+   *
    * @return the name of the column
    */
   public String getName() { return _name; }
-  
+
   /**
    * Get the descriptive text for the column. Used for mouse-over quick-help.
-   * 
+   *
    * @return the descriptive text for the column
    */
   public String getDescription() { return _description; }
@@ -69,13 +68,13 @@ public abstract class TableColumn<E>
   /**
    * Get a comparator for sorting the column for the specified sortDirection and
    * that is null-safe.
-   * 
+   *
    * @return a comparator for sorting the column
    */
   final public Comparator<E> getComparator(final SortDirection sortDirection)
   {
     if (_comparators.get(sortDirection) == null) {
-      _comparators.put(sortDirection, 
+      _comparators.put(sortDirection,
                        new Comparator<E>() {
         public int compare(E o1, E o2)
         {
@@ -95,7 +94,7 @@ public abstract class TableColumn<E>
    * order. It is acceptable if the implementation instantiates a new Comparator
    * on each call, since TableColumn will only call this method once for a given
    * instance.
-   * 
+   *
    * @return a comparator for sorting the column
    */
   protected Comparator<E> getAscendingComparator()
@@ -125,20 +124,20 @@ public abstract class TableColumn<E>
 
   /**
    * Get the value to be displayed for the current column and cell.
-   * 
+   *
    * @param entity the entity displayed in the current cell (the row index)
    * @return the value to be displayed for the current cell
    */
   abstract public Object getCellValue(E entity);
-  
+
   /**
    * Set the new value of the entity for the current column and cell.
-   * 
+   *
    * @param entity the entity displayed in the current cell (the row index)
    * @param value the new value
    */
   public void setCellValue(E entity, Object value) {}
-  
+
   /**
    * Get whether this table column is editable by the user. If it is, you must
    * implement {@link #setCellValue(Object, Object)}, if submitted values are
@@ -147,39 +146,39 @@ public abstract class TableColumn<E>
    * true.
    */
   public boolean isEditable() { return false; }
-  
+
   public boolean isVisible() { return true; }
-  
+
   /**
    * Return true whenever the cell values for the column with the specified name
    * should be a hyperlink.
-   * 
+   *
    * @return true whenever the cell values for the column should be a hyperlink.
    */
   public boolean isCommandLink() { return false; }
-  
+
   /**
    * Return true whenever the cell values for the column should be a
    * semicolon-separated list of hyperlinks. In this situation, {@link
    * #getCellValue(Object)} returns an array of values, and {@link #cellAction(Object)} is
    * called with a <code>commandValue</code> parameter equal to the results of
    * {@link #getCellValue(Object)}.
-   * 
+   *
    * @return true whenever the cell values for the column should be a list of
    *         hyperlinks.
    */
   public boolean isCommandLinkList() { return false; }
-  
+
   /**
    * Perform the action for clicking on the current cell. Return the navigation rule to go
    * along with the action for clicking on the current cell. This method is only called when
    * {@link #isCommandLink()} is true.
-   * 
+   *
    * @param entity the entity displayed in the current cell (the row index)
-   * @return the navigation rule to go along with the action for clicking on the current cell 
+   * @return the navigation rule to go along with the action for clicking on the current cell
    */
   public Object cellAction(E entity) { return null; }
-  
+
   /**
    * Return true whenever the cell values for the column should be a hyperlink.
    * @motivation isCommandLink() translates to just 'commandLink' JavaBean property name, which is not as nice as 'isCommandLink'
@@ -190,14 +189,14 @@ public abstract class TableColumn<E>
   {
     return isCommandLink();
   }
-  
+
   /**
    * Return true whenever the cell values for the column should be a
    * semicolon-separated list of hyperlinks. In this situation, {@link
    * #getCellValue(Object)} returns an array of values, and {@link #cellAction(Object)} is
    * called with a <code>commandValue</code> parameter equal to the results of
    * {@link #getCellValue(Object)}.
-   * 
+   *
    * @motivation isCommandLinkList() translates to just 'commandLinkList'
    *             JavaBean property name, which is not as nice as
    *             'isCommandLinkList'
@@ -214,7 +213,7 @@ public abstract class TableColumn<E>
   {
     return _isNumeric;
   }
-  
+
   @Override
   public boolean equals(Object o)
   {
@@ -228,13 +227,13 @@ public abstract class TableColumn<E>
     }
     return false;
   }
-  
+
   @Override
   public int hashCode()
   {
     return getName().hashCode();
   }
-  
+
   @Override
   public String toString()
   {

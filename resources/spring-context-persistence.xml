@@ -192,6 +192,14 @@
   </bean>
 
   <bean
+    id="annotationsDao"
+    class="edu.harvard.med.screensaver.db.AnnotationsDAO">
+    <property
+      name="hibernateTemplate"
+      ref="hibernateTemplate" />
+  </bean>
+
+  <bean
     id="cherryPickRequestDao"
     class="edu.harvard.med.screensaver.db.CherryPickRequestDAO">
     <constructor-arg ref="genericEntityDao" />

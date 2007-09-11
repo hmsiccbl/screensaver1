@@ -11,26 +11,22 @@ package edu.harvard.med.screensaver.model.screenresults;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.ToManyRelationship;
+import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
-import edu.harvard.med.screensaver.model.libraries.Well;
 
 import org.apache.log4j.Logger;
 
 /**
- * Annotation value on a particular library member (e.g. a compound or silencing reagent). A
- * single annotation value can be associated with multiple wells, since it is possible
- * for different wells to contains the same library member (since Screensaver
- * does not (currently) represent library members as first-class entities, we
- * use this many-to-many relationship instead). In general, all wells that share
- * the same annotation will also share the same vendor identifier (though this
- * is not enforced by the model).
+ * Annotation value on a particular library member (e.g. a compound or silencing
+ * reagent). A single annotation value can be associated with multiple wells,
+ * since it is possible for different wells to contains the same library member
+ * (since Screensaver does not (currently) represent library members as
+ * first-class entities, we use this many-to-many relationship instead). In
+ * general, all wells that share the same annotation will also share the same
+ * vendor identifier (though this is not enforced by the model).
  *
  * @hibernate.class
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -41,15 +37,15 @@ public class AnnotationValue extends AbstractEntity
   // static members
 
   private static final long serialVersionUID = 1L;
-  private static Logger log = Logger.getLogger(Annotation.class);
+  private static Logger log = Logger.getLogger(AnnotationType.class);
 
 
   // instance data members
 
   private Integer _annotationValueId;
   private Integer _version;
-  private Annotation _annotation;
-  private SortedSet<Well> _wells = new TreeSet<Well>();
+  private AnnotationType _annotationType;
+  private String _vendorIdentifier;
   private BigDecimal _numericValue;
   private String _value;
 
@@ -60,13 +56,13 @@ public class AnnotationValue extends AbstractEntity
   {
   }
 
-  AnnotationValue(Annotation annotation,
-                  Set<Well> wells,
-                  String value,
-                  BigDecimal numericValue)
+  public AnnotationValue(AnnotationType annotation,
+                         String vendorIdentifier,
+                         String value,
+                         BigDecimal numericValue)
   {
-    _annotation = annotation;
-    _wells = new TreeSet<Well>(wells);
+    _annotationType = annotation;
+    _vendorIdentifier = vendorIdentifier;
     _value = value;
     _numericValue = numericValue;
   }
@@ -100,16 +96,29 @@ public class AnnotationValue extends AbstractEntity
 
   /**
   * @hibernate.many-to-one
-  *   class="edu.harvard.med.screensaver.model.screenresults.Annotation"
-  *   column="annotation_id"
+  *   class="edu.harvard.med.screensaver.model.screenresults.AnnotationType"
+  *   column="annotation_type_id"
   *   not-null="true"
-  *   foreign-key="fk_annotation_value_to_annotation"
+  *   foreign-key="fk_annotation_value_to_annotation_type"
   *   cascade="none"
   */
   @ToOneRelationship
-  public Annotation getAnnotation()
+  public AnnotationType getAnnotationType()
   {
-    return _annotation;
+    return _annotationType;
+  }
+
+  /**
+   * @hibernate.property type="text" not-null="true"
+   */
+  public String getVendorIdentifier()
+  {
+    return _vendorIdentifier;
+  }
+
+  public void setVendorIdentifier(String wellVendorIdentifier)
+  {
+    _vendorIdentifier = wellVendorIdentifier;
   }
 
   /**
@@ -128,32 +137,42 @@ public class AnnotationValue extends AbstractEntity
     return _numericValue;
   }
 
-  /**
-   * Add a well that is annotated by this annotation value
-   *
-   * @param well the well to add
-   * @return true iff the well was added successfully
-   */
-  public boolean addWell(Well well)
+  @DerivedEntityProperty
+  public String getFormattedValue()
   {
-    return _wells.add(well);
+    if (_annotationType.isNumeric()) {
+      return _numericValue.toString();
+    }
+    return _value;
   }
 
-  /**
-   * Get the set of wells associated with this Annotation.
-   *
-   * @return the set of wells associated with this Annotation
-   * @hibernate.set table="annotation_value_well_link" lazy="true"
-   *                cascade="save-update" sort="natural"
-   * @hibernate.collection-key column="annotation_value_id"
-   * @hibernate.collection-many-to-many class="edu.harvard.med.screensaver.model.libraries.Well"
-   *                                    column="well_id"
-   */
-  @ToManyRelationship(unidirectional=true)
-  public SortedSet<Well> getWells()
-  {
-    return _wells;
-  }
+
+//  /**
+//   * Add a well that is annotated by this annotation value
+//   *
+//   * @param well the well to add
+//   * @return true iff the well was added successfully
+//   */
+//  public boolean addWell(Well well)
+//  {
+//    return _wells.add(well);
+//  }
+//
+//  /**
+//   * Get the set of wells associated with this Annotation.
+//   *
+//   * @return the set of wells associated with this Annotation
+//   * @hibernate.set table="annotation_value_well_link" lazy="true"
+//   *                cascade="save-update" sort="natural"
+//   * @hibernate.collection-key column="annotation_value_id"
+//   * @hibernate.collection-many-to-many class="edu.harvard.med.screensaver.model.libraries.Well"
+//   *                                    column="well_id"
+//   */
+//  @ToManyRelationship(unidirectional=true)
+//  public SortedSet<Well> getWells()
+//  {
+//    return _wells;
+//  }
 
 
   // private methods
@@ -189,18 +208,18 @@ public class AnnotationValue extends AbstractEntity
   /**
    * @motivation for hibernate
    */
-  private void setAnnotation(Annotation annotation)
+  private void setAnnotationType(AnnotationType annotationType)
   {
-    _annotation = annotation;
+    _annotationType = annotationType;
   }
 
-  /**
-   * @motivation for Hibernate
-   */
-  private void setWells(SortedSet<Well> wells)
-  {
-    _wells = wells;
-  }
+//  /**
+//   * @motivation for Hibernate
+//   */
+//  private void setWells(SortedSet<Well> wells)
+//  {
+//    _wells = wells;
+//  }
 
   private void setValue(String value)
   {
@@ -215,6 +234,6 @@ public class AnnotationValue extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    return _annotation + ":" + _wells;
+    return _annotationType + ":" + _vendorIdentifier;
   }
 }

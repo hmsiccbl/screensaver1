@@ -13,10 +13,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 import jxl.Cell;
 import jxl.Sheet;
@@ -27,9 +23,7 @@ import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.workbook2.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.screenresults.Annotation;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
@@ -167,85 +161,102 @@ public class BoutrosAnnotationImporter
   static private void importScreenResultData(Screen screen,
                                              File file,
                                              GenericEntityDAO dao)
-    throws FileNotFoundException
+  throws FileNotFoundException
   {
 
-    Annotation[] rvts = new Annotation[13];
-    rvts[0] = new Annotation(screen, "Dharmacon SMARTPool ID", "", false);
-    rvts[1] = new Annotation(screen,
-                             "siRNA IDs",
-                             "The siRNA Ids belonging to the SMARTPool. Concatenated by \"&\"",
-                             false);
-    rvts[2] = new Annotation(screen,
-                             "Intended Target Gene",
-                             "Original Dharmacon annotation",
-                             false);
-    rvts[3] = new Annotation(screen,
-                             "Intended RefSeq Targets",
-                             "The RefSeq transcript IDs that Dharmacon intended to be targeted by the SMARTPool",
-                             false);
-    rvts[4] = new Annotation(screen, "ON-Target Flag", "Dharamcon's \"ON-Target\" flag", false);
-    rvts[5] = new Annotation(screen,
-                             "Calculated Target Genes",
-                             "Gene symbols of genes that have been calculated to be targeted by at least one siRNAI of the SMARTPool. Concatenated by \"&\"", false);
-    rvts[6] = new Annotation(screen, "# Calculated Target Genes", "The predicted number of genes that have been calculated to be targeted by the SMARTPool", true);
-    rvts[7] = new Annotation(screen, "Calculated RefSeq Targets", "The RefSeq transcript IDs that have been calculated to be targeted by the SMARTPool.  Transcripts derived from the same gene are concatenated by \"+\".  Transcripts derived from different genes are concatenated by \"&\".  Transcript IDs have the same order as in \"" + rvts[5].getName() + "\"", false);
-    rvts[8] = new Annotation(screen, "Hits of SMARTPool siRNAs", "The number of hits for each respective RefSeq transcript target in \"" + rvts[7].getName() + "\"", false);
-    rvts[9] = new Annotation(screen, "# RefSeq Target Transcripts", "The total number of RefSeq transcripts target by at least one siRNA in the SMARTPool", true);
-    rvts[10] = new Annotation(screen, "Avg SMARTPool Efficiency", "The averaged SMARTPool efficiency (according to Reynolds, et. al.)", true);
-    rvts[11] = new Annotation(screen, "Is Annotation Changed", "\"Yes\" if annotation changed from Dharmacon's original annotation, otherwise \"No\"", false);
-    rvts[12] = new Annotation(screen, "Summary", "A summary of the annotation change", false);
+    AnnotationType[] annot = new AnnotationType[12];
+    int ordinal = 0;
+    annot[ordinal] = new AnnotationType(screen,
+                                        "siRNA IDs",
+                                        "The siRNA Ids belonging to the SMARTPool. Concatenated by \"&\"",
+                                        ordinal,
+                                        false);
+    ++ordinal;
+    annot[ordinal] = new AnnotationType(screen,
+                                        "Intended Target Gene",
+                                        "Original Dharmacon annotation",
+                                        ordinal,
+                                        false);
+    ++ordinal;
+    annot[ordinal] = new AnnotationType(screen,
+                                        "Intended RefSeq Targets",
+                                        "The RefSeq transcript IDs that Dharmacon intended to be targeted by the SMARTPool",
+                                        ordinal,
+                                        false);
+    ++ordinal;
+    annot[ordinal] = new AnnotationType(screen,
+                                        "ON-Target Flag",
+                                        "Dharamcon's \"ON-Target\" flag",
+                                        ordinal,
+                                        false);
+    ++ordinal;
+    annot[ordinal] = new AnnotationType(screen,
+                                        "Calculated Target Genes",
+                                        "Gene symbols of genes that have been calculated to be targeted by at least one siRNAI of the SMARTPool. Concatenated by \"&\"",
+                                        ordinal,
+                                        false);
+    ++ordinal;
+    annot[ordinal] = new AnnotationType(screen,
+                                        "# Calculated Target Genes",
+                                        "The predicted number of genes that have been calculated to be targeted by the SMARTPool",
+                                        ordinal,
+                                        true);
+    ++ordinal;
+    annot[ordinal] = new AnnotationType(screen,
+                                        "Calculated RefSeq Targets",
+                                        "The RefSeq transcript IDs that have been calculated to be targeted by the SMARTPool.  Transcripts derived from the same gene are concatenated by \"+\".  Transcripts derived from different genes are concatenated by \"&\".  Transcript IDs have the same order as in \"" + annot[ordinal - 2].getName() + "\"",
+                                        ordinal,
+                                        false);
+    ++ordinal;
+    annot[ordinal] = new AnnotationType(screen,
+                                        "Hits of SMARTPool siRNAs",
+                                        "The number of hits for each respective RefSeq transcript target in \"" + annot[ordinal - 1].getName() + "\"",
+                                        ordinal, false);
+    ++ordinal;
+    annot[ordinal] = new AnnotationType(screen,
+                                        "# RefSeq Target Transcripts",
+                                        "The total number of RefSeq transcripts target by at least one siRNA in the SMARTPool",
+                                        ordinal,
+                                        true);
+    ++ordinal;
+    annot[ordinal] = new AnnotationType(screen,
+                                        "Avg SMARTPool Efficiency",
+                                        "The averaged SMARTPool efficiency (according to Reynolds, et. al.)",
+                                        ordinal,
+                                        true);
+    ++ordinal;
+    annot[ordinal] = new AnnotationType(screen,
+                                        "Is Annotation Changed",
+                                        "\"Yes\" if annotation changed from Dharmacon's original annotation, otherwise \"No\"",
+                                        ordinal,
+                                        false);
+    ++ordinal;
+    annot[ordinal] = new AnnotationType(screen,
+                                        "Summary",
+                                        "A summary of the annotation change",
+                                        ordinal,
+                                        false);
 
     ParseErrorManager errors = new ParseErrorManager();
     Workbook workbook = new Workbook(file, errors);
-    Sheet sheet = workbook.getWorkbook()
-                          .getSheet(0);
+    Sheet sheet = workbook.getWorkbook().getSheet(0);
 
     for (int iRow = 1; iRow < sheet.getRows(); iRow++) {
       Cell[] row = sheet.getRow(iRow);
       Cell vendorIdCell = row[0];
       String vendorId = vendorIdCell.getContents();
-      Set<Well> wells = findPoolWellsForVendorId(vendorId, dao);
-      for (int i = 0; i < rvts.length; i++) {
-        Cell cell = row[i];
+      for (int i = 0; i < annot.length; i++) {
+        Cell cell = row[i + 1];
         String value = cell.getContents();
-        Annotation annotation = rvts[i];
-        if (annotation.isNumeric()) {
-          annotation.addAnnotationValue(new BigDecimal(value), wells);
-        }
-        else {
-          value = value.replaceAll("&", " & ").replaceAll("\\+", " + ");
-          annotation.addAnnotationValue(value, wells);
-        }
+        AnnotationType annotation = annot[i];
+        value = value.replaceAll("&", " & ").replaceAll("\\+", " + ");
+        annotation.addAnnotationValue(vendorId,
+                                      (annotation.isNumeric() ? null : value),
+                                      (annotation.isNumeric() ? new BigDecimal(value) : null));
       }
       if (iRow % 100 == 0) {
         log.info("processed " + iRow + " rows");
       }
     }
-  }
-
-  private static Set<Well> findPoolWellsForVendorId(String vendorId, GenericEntityDAO dao)
-  {
-    List<Well> result = dao.findEntitiesByProperty(Well.class,
-                                                  "vendorIdentifier",
-                                                  vendorId,
-                                                  true,
-                                                  "hbnLibrary");
-
-    if (result.size() == 0) {
-      throw new DataModelViolationException("no pool well for vendor identifier " +
-                                            vendorId);
-    }
-
-    Set<Well> wells = new HashSet<Well>(result);
-    Iterator<Well> iter = wells.iterator();
-    while (iter.hasNext()) {
-      Well well = iter.next();
-      if (!well.getLibrary().getLibraryName().contains("Pool")) {
-        iter.remove();
-        log.warn("excluding annotation for well " + well + " for vendor identifier");
-      }
-    }
-    return wells;
   }
 }

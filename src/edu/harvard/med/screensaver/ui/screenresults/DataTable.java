@@ -142,7 +142,10 @@ public abstract class DataTable extends AbstractBackingBean implements Observer
   {
     log.debug("rowsPerPage changed to " + event.getNewValue());
     getRowsPerPageSelector().setValue((String) event.getNewValue());
-    ((ScreenResultDataModel) getDataModel()).setRowsToFetch(getRowsPerPageSelector().getSelection());
+    // TODO: remove this hack; perhaps introduce an appropriate LazyDataModel interface
+    if (getDataModel() instanceof ScreenResultDataModel) {
+      ((ScreenResultDataModel) getDataModel()).setRowsToFetch(getRowsPerPageSelector().getSelection());
+    }
     getFacesContext().renderResponse();
   }
 

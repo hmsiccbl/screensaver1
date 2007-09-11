@@ -46,6 +46,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.WebDataAccessPolicy;
+import edu.harvard.med.screensaver.ui.screenresults.AnnotationViewer;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
 import edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapViewer;
@@ -77,6 +78,7 @@ public class ScreenViewer extends AbstractBackingBean
   private ScreenResultsDAO _screenResultsDao;
   private UsersDAO _usersDao;
   private ScreenSearchResults _screensBrowser;
+  private AnnotationViewer _annotationViewer;
   private ScreenResultViewer _screenResultViewer;
   private CherryPickRequestViewer _cherryPickRequestViewer;
   private HeatMapViewer _heatMapViewer;
@@ -96,6 +98,7 @@ public class ScreenViewer extends AbstractBackingBean
   private boolean _showNavigationBar;
 
 
+
   // public property getter & setter methods
 
   /**
@@ -109,6 +112,7 @@ public class ScreenViewer extends AbstractBackingBean
                       ScreenResultsDAO screenResultsDao,
                       UsersDAO usersDao,
                       ScreenSearchResults screensBrowser,
+                      AnnotationViewer annotationViewer,
                       ScreenResultViewer screenResultViewer,
                       CherryPickRequestViewer cherryPickRequestViewer,
                       HeatMapViewer heatMapViewer,
@@ -119,6 +123,7 @@ public class ScreenViewer extends AbstractBackingBean
     _screenResultsDao = screenResultsDao;
     _usersDao = usersDao;
     _screensBrowser = screensBrowser;
+    _annotationViewer = annotationViewer;
     _screenResultViewer = screenResultViewer;
     _cherryPickRequestViewer = cherryPickRequestViewer;
     _heatMapViewer = heatMapViewer;
@@ -135,9 +140,11 @@ public class ScreenViewer extends AbstractBackingBean
   {
     _screen = screen;
     _screenResultImporter.setScreen(screen);
+    _annotationViewer.setScreen(screen);
     ScreenResult screenResult = screen.getScreenResult();
     _heatMapViewer.setScreenResult(screenResult);
     _screenResultViewer.setScreenResult(screenResult);
+
     resetView();
   }
 
@@ -437,6 +444,7 @@ public class ScreenViewer extends AbstractBackingBean
           _dao.needReadOnly(screen, "statusItems");
           _dao.needReadOnly(screen, "cherryPickRequests");
           _dao.needReadOnly(screen, "hbnCollaborators");
+          _dao.needReadOnly(screen, "annotationTypes.annotationValues");
           _dao.needReadOnly(screen.getScreenResult(), "plateNumbers");
           _dao.needReadOnly(screen.getScreenResult(),
                             "hbnResultValueTypes.hbnDerivedTypes",

@@ -31,9 +31,10 @@ import org.apache.log4j.Logger;
 
 /**
  * Backing bean for a "meta data" table, which displays information for a set of
- * data types, one data type per column, one row per data type attribute.
- * Manages a "select many" component that allows the user to select the subset
- * of data types that are to be viewed.
+ * data types (e.g. {@link ResultValueType} or {@link AnnotationType}, one data
+ * type per column, one row per data type attribute. Manages a "select many"
+ * component that allows the user to select the subset of data types that are to
+ * be viewed.
  *
  * @motivation Encapsulate common functionality for ScreenResultViewer's Data
  *             Headers table and Annotation table.

@@ -351,6 +351,7 @@
     <constructor-arg ref="screenResultsDao" />
     <constructor-arg ref="usersDao" />
     <constructor-arg ref="screensBrowser" />
+    <constructor-arg ref="annotationViewer" />
     <constructor-arg ref="screenResultViewer" />
     <constructor-arg ref="cherryPickRequestViewer" />
     <constructor-arg ref="heatMapViewer" />
@@ -391,6 +392,24 @@
         <constructor-arg ref="wellViewer" />
         <constructor-arg ref="librariesDao" />
         <constructor-arg ref="screenResultsDao" />
+      </bean>
+    </constructor-arg>
+    <aop:scoped-proxy />
+  </bean>
+
+  <bean
+    id="annotationViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screenresults.AnnotationViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg>
+      <bean class="edu.harvard.med.screensaver.ui.screenresults.AnnotationTypesTable" />
+    </constructor-arg>
+    <constructor-arg>
+      <bean class="edu.harvard.med.screensaver.ui.screenresults.AnnotationValuesTable" >
+        <constructor-arg ref="annotationsDao" />
+        <constructor-arg ref="wellViewer" />
       </bean>
     </constructor-arg>
     <aop:scoped-proxy />

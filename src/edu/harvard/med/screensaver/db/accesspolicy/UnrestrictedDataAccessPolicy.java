@@ -20,7 +20,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
-import edu.harvard.med.screensaver.model.screenresults.Annotation;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -64,7 +64,7 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
     return true;
   }
 
-  public boolean visit(Annotation annotation)
+  public boolean visit(AnnotationType annotation)
   {
     return true;
   }

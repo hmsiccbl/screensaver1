@@ -1,0 +1,228 @@
+<%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
+<%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
+
+<f:subview id="annotationViewer">
+	<h:form id="annotationPanelForm">
+		<t:collapsiblePanel id="annotationPanel"
+			value="#{screenResultViewer.isPanelCollapsedMap['annotations']}"
+			title="Annotations" var="isCollapsed" titleVar="title"
+			rendered="#{!annotationViewer.screen.restricted && !empty annotationViewer.screen.annotationTypes}">
+			<f:facet name="header">
+				<t:div styleClass="sectionHeader">
+					<t:headerLink immediate="true" styleClass="sectionHeader">
+						<h:graphicImage
+							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+							styleClass="icon" />
+						<h:outputText value="Annotations" styleClass="sectionHeader" />
+					</t:headerLink>
+				</t:div>
+			</f:facet>
+
+			<t:panelGroup>
+				<t:commandButton action="#{annotationViewer.download}"
+					value="Download" styleClass="command"
+					title="Download the annotations in an Excel file format" />
+			</t:panelGroup>
+
+			<t:div style="margin-left: 30px">
+				<t:panelGrid columns="1"
+					rendered="#{!(screenResultViewer.isPanelCollapsedMap['annotationTypes'] && screenResultViewer.isPanelCollapsedMap['annotationValues'])}"
+					styleClass="groupingPanel"
+					title="Select the annotations to display in the annotation tables below">
+					<t:outputLabel for="annotationsList"
+						value="Show selected annotations:" styleClass="label" />
+					<t:selectManyCheckbox id="annotationsList" layout="pageDirection"
+						layoutWidth="#{annotationViewer.annotationTypeSelections.size}"
+						value="#{annotationViewer.annotationTypeSelections.value}"
+						valueChangeListener="#{annotationViewer.annotationTypesTable.selectionListener}"
+						binding="#{annotationViewer.annotationTypesTable.selectManyUIComponent}"
+						styleClass="label" style="vertical-align: top">
+						<f:selectItems id="annotations"
+							value="#{annotationViewer.annotationTypeSelections.selectItems}" />
+					</t:selectManyCheckbox>
+					<t:panelGroup>
+						<t:commandButton id="updateAnnotationTypesButton" forceId="true"
+							value="Update" styleClass="command"
+							title="Update the annotations selection" />
+						<t:commandButton id="allAnnotationsButton" value="All"
+							action="#{annotationViewer.annotationTypesTable.selectAll}"
+							styleClass="command" title="Show all annotations" />
+						<t:commandButton id="noAnnotationsButton" value="First"
+							action="#{annotationViewer.annotationTypesTable.selectNone}"
+							styleClass="command" title="Show the first annotation" />
+					</t:panelGroup>
+				</t:panelGrid>
+			</t:div>
+
+			<t:div style="margin-left: 30px">
+
+				<t:collapsiblePanel id="annotationTypesPanel"
+					value="#{screenResultViewer.isPanelCollapsedMap['annotationTypes']}"
+					title="Annotation Types" var="isCollapsed" titleVar="title">
+					<f:facet name="header">
+						<t:div styleClass="subsectionHeader">
+							<t:headerLink immediate="true" styleClass="subsectionHeader">
+								<h:graphicImage
+									value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+									styleClass="icon" />
+								<h:outputText value="#{title}" styleClass="subsectionHeader" />
+							</t:headerLink>
+						</t:div>
+					</f:facet>
+
+					<t:dataTable id="annotationTypesTable"
+						value="#{annotationViewer.annotationTypesTable.dataModel}" var="row"
+						rendered="#{!isCollapsed}" styleClass="standardTable"
+						headerClass="tableHeader" rowClasses="row1,row2">
+						<t:column styleClass="keyColumn">
+							<f:facet name="header">
+								<t:outputText value="Annotation Name" />
+							</f:facet>
+							<t:outputText value="#{row.rowLabel}" escape="false"
+								title="#{row.rowDescription}" />
+						</t:column>
+						<t:columns
+							value="#{annotationViewer.annotationTypesTable.columnModel}"
+							var="columnName" styleClass="column">
+							<f:facet name="header">
+								<t:outputText value="#{columnName}" />
+							</f:facet>
+							<t:outputText
+								value="#{annotationViewer.annotationTypesTable.cellValue}" />
+						</t:columns>
+					</t:dataTable>
+				</t:collapsiblePanel>
+
+				<t:commandButton id="updateAnnotationValuesButton" forceId="true"
+					styleClass="hiddenCommand" />
+				<t:collapsiblePanel id="annotationValuesPanel"
+					value="#{screenResultViewer.isPanelCollapsedMap['annotationValues']}"
+					title="Annotation Data" var="isCollapsed" titleVar="title">
+					<f:facet name="header">
+						<t:div styleClass="subsectionHeader">
+							<t:headerLink immediate="true" styleClass="subsectionHeader">
+								<h:graphicImage
+									value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+									styleClass="icon" />
+								<h:outputText value="#{title}" styleClass="subsectionHeader" />
+							</t:headerLink>
+						</t:div>
+					</f:facet>
+
+					<t:panelGrid columns="1" style="width: 100%"
+						rendered="#{!isCollapsed}">
+
+						<t:buffer into="#{annotationValuesTableBuffer}">
+							<t:dataTable id="annotationValuesTable"
+								binding="#{annotationViewer.annotationValuesTable.dataTableUIComponent}"
+								value="#{annotationViewer.annotationValuesTable.dataModel}" var="row"
+								rows="#{annotationViewer.annotationValuesTable.rowsPerPageSelector.selection}"
+								styleClass="standardTable" headerClass="tableHeader"
+								rowClasses="row1,row2"
+								sortColumn="#{annotationViewer.annotationValuesTable.sortManager.sortColumnName}"
+								sortAscending="#{annotationViewer.annotationValuesTable.sortManager.sortAscending}">
+								<t:columns
+									value="#{annotationViewer.annotationValuesTable.sortManager.columnModel}"
+									var="column"
+									styleClass="#{(column.name==\"Vendor ID\") ? \"keyColumn\" : (column.numeric ? \"numericColumn\" : \"textColumn\")}">
+									<f:facet name="header">
+										<t:commandSortHeader columnName="#{column.name}" arrow="false">
+											<f:facet name="ascending">
+												<t:graphicImage value="/images/ascending-arrow.gif"
+													rendered="true" border="0" />
+											</f:facet>
+											<f:facet name="descending">
+												<t:graphicImage value="/images/descending-arrow.gif"
+													rendered="true" border="0" />
+											</f:facet>
+											<h:outputText value="#{column.name}" />
+										</t:commandSortHeader>
+									</f:facet>
+									<t:outputText value="#{row[column.name]}"
+										rendered="#{!column.isCommandLink}" />
+									<t:commandLink
+										action="#{annotationViewer.annotationValuesTable.cellAction}"
+										rendered="#{column.isCommandLink}">
+										<t:outputText value="#{row[column.name]}" />
+									</t:commandLink>
+								</t:columns>
+							</t:dataTable>
+						</t:buffer>
+
+						<t:panelGrid columns="3">
+							<t:dataScroller id="annotationValuesTableScroller"
+								for="annotationValuesTable" firstRowIndexVar="fromRow"
+								lastRowIndexVar="toRow" rowsCountVar="rowCount" paginator="true"
+								paginatorMaxPages="10" fastStep="10"
+								renderFacetsIfSinglePage="false" styleClass="scroller"
+								paginatorActiveColumnClass="scroller_activePage">
+								<f:facet name="first">
+									<t:graphicImage url="/images/arrow-first.png" border="0"
+										title="First page" />
+								</f:facet>
+								<f:facet name="last">
+									<t:graphicImage url="/images/arrow-last.png" border="0"
+										title="Last page" />
+								</f:facet>
+								<f:facet name="previous">
+									<t:graphicImage url="/images/arrow-previous.png" border="0"
+										title="Previous page" />
+								</f:facet>
+								<f:facet name="next">
+									<t:graphicImage url="/images/arrow-next.png" border="0"
+										title="Next page" />
+								</f:facet>
+								<f:facet name="fastforward">
+									<t:graphicImage url="/images/arrow-fastforward.png" border="0"
+										title="Forward 10 pages" />
+								</f:facet>
+								<f:facet name="fastrewind">
+									<t:graphicImage url="/images/arrow-fastrewind.png" border="0"
+										title="Back 10 pages" />
+								</f:facet>
+							</t:dataScroller>
+							<t:dataScroller id="annotationValuesTableScroller2"
+								for="annotationValuesTable" firstRowIndexVar="fromRow"
+								lastRowIndexVar="toRow" rowsCountVar="rowCount">
+								<t:outputText value="#{fromRow}..#{toRow} of #{rowCount}"
+									styleClass="label" />
+							</t:dataScroller>
+
+							<t:panelGroup id="annotationValuesTableCommandPanel"
+								styleClass="commandPanel">
+
+								<t:inputText id="rowNumber"
+									valueChangeListener="#{annotationViewer.annotationValuesTable.rowNumberListener}"
+									size="6" styleClass="inputText">
+								</t:inputText>
+								<%-- note: no 'action' attribute necessary, as 'rowNumber' inputText component, above, invokes update logic via valueChangeListener --%>
+								<t:commandButton id="updateAnnotationValuesPositionButton2" value="Go"
+									styleClass="command" />
+
+								<t:selectOneMenu id="annotationValuesTableRowsPerPageList"
+									value="#{annotationViewer.annotationValuesTable.rowsPerPageSelector.value}"
+									binding="#{annotationViewer.annotationValuesTable.rowsPerPageUIComponent}"
+									valueChangeListener="#{annotationViewer.annotationValuesTable.rowsPerPageListener}"
+									onchange="document.getElementById('updateAnnotationValuesButton').click();"
+									styleClass="data" title="Number of rows to display per page">
+									<f:selectItems
+										value="#{annotationViewer.annotationValuesTable.rowsPerPageSelector.selectItems}" />
+								</t:selectOneMenu>
+								<t:outputText value=" per page" styleClass="label" />
+							</t:panelGroup>
+
+						</t:panelGrid>
+
+						<t:outputText escape="false"
+							value="#{annotationValuesTableBuffer}" />
+
+					</t:panelGrid>
+				</t:collapsiblePanel>
+
+			</t:div>
+		</t:collapsiblePanel>
+	</h:form>
+
+</f:subview>

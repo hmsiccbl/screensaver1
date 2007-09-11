@@ -30,7 +30,6 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
   // instance data members
 
   private int _preCalculatedSize;
-  private int _rowsToFetch;
   private int _firstRowIndexToFetch = -1;
   private Map<Integer,Map<String,Object>> _fetchedRows;
   private Map<Integer,List<Boolean>> _excludedResultValuesMap;
@@ -46,7 +45,7 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
                                    int preCalculatedSize)
   {
     super(resultValueTypes, sortColumnIndex, sortDirection, dao);
-    _rowsToFetch = rowsToFetch;
+    setRowsToFetch(rowsToFetch);
     _preCalculatedSize = preCalculatedSize;
     _fetchedRows = new HashMap<Integer,Map<String,Object>>();
     _excludedResultValuesMap = new HashMap<Integer,List<Boolean>>();
@@ -62,7 +61,9 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
   public Map<String,Object> getRowData()
   {
     if (!_fetchedRows.containsKey(_rowIndex)) {
-      log.debug("row not yet fetched: " + _rowIndex);
+      if (log.isDebugEnabled()) {
+        log.debug("row not yet fetched: " + _rowIndex);
+      }
       _firstRowIndexToFetch = _rowIndex;
       build();
     }
@@ -73,12 +74,6 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
   public List<Map<String,Object>> getWrappedData()
   {
     throw new UnsupportedOperationException();
-  }
-
-  public void setRowsToFetch(int rowsToFetch)
-  {
-    log.debug("set rowsToFetch=" + rowsToFetch);
-    _rowsToFetch = rowsToFetch;
   }
 
   protected Map<WellKey,List<ResultValue>> fetchData(List<ResultValueType> selectedResultValueTypes,
@@ -93,9 +88,11 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
                                                           _rowsToFetch,
                                                           null,
                                                           null);
-    log.debug("  fetched rows " + _firstRowIndexToFetch +
-              " to " + ((_firstRowIndexToFetch + rvData.size()) - 1));
-    log.debug("total fetched row count = " + rvData.size());
+    if (log.isDebugEnabled()) {
+      log.debug("  fetched rows " + _firstRowIndexToFetch +
+                " to " + ((_firstRowIndexToFetch + rvData.size()) - 1));
+      log.debug("total fetched row count = " + rvData.size());
+    }
     return rvData;
   }
 
@@ -120,4 +117,3 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
     return _excludedResultValuesMap.get(getRowIndex()).get(colIndex - ScreenResultDataModel.DATA_TABLE_FIXED_COLUMNS);
   }
 }
-

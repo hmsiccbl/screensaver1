@@ -21,7 +21,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
-import edu.harvard.med.screensaver.model.screenresults.Annotation;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -89,17 +89,14 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     return true;
   }
 
-
-  public boolean visit(Annotation annotation)
+  public boolean visit(AnnotationType annotation)
   {
-    // TODO
-    return true;
+    return visit(annotation.getStudy());
   }
 
   public boolean visit(AnnotationValue annotationValue)
   {
-    // TODO
-    return true;
+    return visit(annotationValue.getAnnotationType());
   }
 
   public boolean visit(AttachedFile entity)

@@ -653,7 +653,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     _description = description;
   }
 
-
   /**
    * Get then description of how this <code>ResultValueType</code> was derived
    * from other <code>ResultValueType</code>s.

@@ -123,6 +123,9 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
     _isPanelCollapsedMap.put("screenSummary", false);
+    _isPanelCollapsedMap.put("annotations", true);
+    _isPanelCollapsedMap.put("annotationTypes", true);
+    _isPanelCollapsedMap.put("annotationValues", true);
     _isPanelCollapsedMap.put("screenResultSummary", false);
     _isPanelCollapsedMap.put("dataHeadersTable", true);
     _isPanelCollapsedMap.put("dataTable", true);

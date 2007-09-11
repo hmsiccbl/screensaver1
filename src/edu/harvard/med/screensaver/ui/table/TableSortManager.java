@@ -23,6 +23,11 @@ import org.apache.log4j.Logger;
 
 public class TableSortManager<E> extends Observable implements Observer
 {
+  private static final Comparator<Object> PHYSICAL_ORDER_COMPARATOR = new Comparator<Object>() {
+    public int compare(Object o1, Object o2){ return 0; }
+  };
+
+
   // static members
 
   private static Logger log = Logger.getLogger(TableSortManager.class);
@@ -62,8 +67,12 @@ public class TableSortManager<E> extends Observable implements Observer
    *
    * @return the sort columns
    */
+  @SuppressWarnings("unchecked")
   public Comparator<E> getSortColumnComparator()
   {
+    if (getSortColumn() == null) {
+      return (Comparator<E>) PHYSICAL_ORDER_COMPARATOR;
+    }
     Map<SortDirection,Comparator<E>> comparator = _comparators.get(getSortColumn());
     if (comparator != null) {
       // return the compound column sort comparator
@@ -78,7 +87,9 @@ public class TableSortManager<E> extends Observable implements Observer
     Map<SortDirection,Comparator<E>> comparators = new HashMap<SortDirection,Comparator<E>>(2);
     comparators.put(SortDirection.ASCENDING, new CompoundColumnComparator<E>(compoundSortColumns, SortDirection.ASCENDING));
     comparators.put(SortDirection.DESCENDING, new CompoundColumnComparator<E>(compoundSortColumns, SortDirection.DESCENDING));
-    _comparators.put(compoundSortColumns.get(0), comparators);
+    if (comparators.size() > 0) {
+      _comparators.put(compoundSortColumns.get(0), comparators);
+    }
   }
 
   public int getSortColumnIndex()
@@ -115,10 +126,12 @@ public class TableSortManager<E> extends Observable implements Observer
    *             (in addition to clicking on table column headers)
    * @param currentSortColumn the new current sort column
    */
-  public void setSortColumn(TableColumn<E> currentSortColumn)
+  public void setSortColumn(TableColumn<E> newSortColumn)
   {
-    if (!getSortColumn().equals(currentSortColumn)) {
-      getSortColumnSelector().setSelection(currentSortColumn);
+    if (newSortColumn != null) {
+      if (!newSortColumn.equals(getSortColumn())) {
+        getSortColumnSelector().setSelection(newSortColumn);
+      }
     }
   }
 
@@ -128,7 +141,12 @@ public class TableSortManager<E> extends Observable implements Observer
    */
   public void setSortColumnName(String sortColumnName)
   {
-    setSortColumn(getColumnModel().getColumn(sortColumnName));
+    if (sortColumnName != null) {
+      setSortColumn(getColumnModel().getColumn(sortColumnName));
+    }
+    else {
+      setSortColumn(null);
+    }
   }
 
   /**
@@ -137,6 +155,9 @@ public class TableSortManager<E> extends Observable implements Observer
    */
   public String getSortColumnName()
   {
+    if (getSortColumn() == null) {
+      return null;
+    }
     return getSortColumn().getName();
   }
 
@@ -203,7 +224,7 @@ public class TableSortManager<E> extends Observable implements Observer
     _columnModel = new VisibleTableColumnModel<E>(columns) {
       /**
        * Intercept call to VisibleTableColumnModel.updateVisibleColumns(), so
-       * that we can update our _sortColumnSelector   UISelectOneBean.
+       * that we can also update our _sortColumnSelector UISelectOneBean.
        */
       @Override
       public void updateVisibleColumns()
@@ -221,7 +242,7 @@ public class TableSortManager<E> extends Observable implements Observer
       }
     };
     // ensure sort column exists in the new set of columns
-    if (!columns.contains(getSortColumn())) {
+    if (columns.size() > 0 && !columns.contains(getSortColumn())) {
       getSortColumnSelector().setSelectionIndex(0);
       getSortDirectionSelector().setSelection(SortDirection.ASCENDING);
     }

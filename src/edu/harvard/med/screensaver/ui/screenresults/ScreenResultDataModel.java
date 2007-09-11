@@ -55,9 +55,21 @@ abstract public class ScreenResultDataModel extends DataModel
   protected SortDirection _sortDirection;
   protected ScreenResultsDAO _screenResultsDao;
   protected int _rowIndex;
+  protected int _rowsToFetch;
 
   private List<List<Boolean>> _excludedResultValues;
   private List<Map<String,Object>> _wrappedData;
+
+
+  // abstract methods
+
+
+  abstract protected Map<WellKey,List<ResultValue>> fetchData(List<ResultValueType> selectedResultValueTypes,
+                                                              int sortBy,
+                                                              SortDirection sortDirection);
+
+
+  //abstract public void sort(String sortColumnName, SortDirection sortDirection);
 
 
   // public constructors and methods
@@ -117,15 +129,31 @@ abstract public class ScreenResultDataModel extends DataModel
     throw new UnsupportedOperationException();
   }
 
-  abstract protected Map<WellKey,List<ResultValue>> fetchData(List<ResultValueType> selectedResultValueTypes,
-                                                              int sortBy,
-                                                              SortDirection sortDirection);
-
-  public void setRowsToFetch(int rowsToFetch)
+  final public void setRowsToFetch(int rowsToFetch)
   {
+    log.debug("set rowsToFetch=" + rowsToFetch);
+    _rowsToFetch = rowsToFetch;
   }
 
-  //abstract public void sort(String sortColumnName, SortDirection sortDirection);
+  /**
+   * Subclassses that implement virtual paging (i.e., on-demand fetching of
+   * viewable data) can call this method to determine how many rows of data need
+   * to be fetched in order to populate the visible rows of the data table.
+   *
+   * @param rowsToFetch
+   */
+  public int getRowsToFetch()
+  {
+    return _rowsToFetch;
+  }
+
+  public boolean isResultValueCellExcluded(int colIndex)
+  {
+    if (colIndex < DATA_TABLE_FIXED_COLUMNS) {
+      return false;
+    }
+    return _excludedResultValues.get(getRowIndex()).get(colIndex - DATA_TABLE_FIXED_COLUMNS);
+  }
 
 
   // private methods
@@ -167,7 +195,6 @@ abstract public class ScreenResultDataModel extends DataModel
                       List<ResultValue> resultValues,
                       List<ResultValueType> resultValueTypes)
   {
-    int i = 0;
     HashMap<String,Object> cellValues = new HashMap<String,Object>();
     // TODO: eliminate hardcoded column name strings
     cellValues.put("Plate", wellKey.getPlateNumber());
@@ -179,7 +206,7 @@ abstract public class ScreenResultDataModel extends DataModel
       ResultValueType rvt = rvtIter.next();
       excludedResultValuesRow.add(rv.isExclude());
       Object typedValue = ResultValue.getTypedValue(rv, rvt);
-      cellValues.put(resultValueTypes.get(i++).getUniqueName(),
+      cellValues.put(rvt.getUniqueName(),
                      typedValue == null ? null : typedValue.toString());
     }
     addRowValues(rowIndex, cellValues);
@@ -194,13 +221,5 @@ abstract public class ScreenResultDataModel extends DataModel
   protected void addRowResultValueExcludes(int rowIndex, List<Boolean> rowExcludes)
   {
     _excludedResultValues.add(rowIndex, rowExcludes);
-  }
-
-  public boolean isResultValueCellExcluded(int colIndex)
-  {
-    if (colIndex < DATA_TABLE_FIXED_COLUMNS) {
-      return false;
-    }
-    return _excludedResultValues.get(getRowIndex()).get(colIndex - DATA_TABLE_FIXED_COLUMNS);
   }
 }

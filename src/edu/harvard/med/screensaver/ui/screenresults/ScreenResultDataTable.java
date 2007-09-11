@@ -65,8 +65,8 @@ public abstract class ScreenResultDataTable extends DataTable
   }
 
   public ScreenResultDataTable(WellViewer wellViewer,
-                          LibrariesDAO librariesDao,
-                          ScreenResultsDAO screenResultsDao)
+                               LibrariesDAO librariesDao,
+                               ScreenResultsDAO screenResultsDao)
   {
     _wellViewer = wellViewer;
     _librariesDao = librariesDao;
