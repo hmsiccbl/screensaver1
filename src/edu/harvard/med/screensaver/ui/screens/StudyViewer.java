@@ -9,12 +9,16 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.screenresults.AnnotationViewer;
 
 import org.apache.log4j.Logger;
+import org.springframework.dao.DataAccessException;
 
 public class StudyViewer extends AbstractBackingBean
 {
@@ -29,7 +33,7 @@ public class StudyViewer extends AbstractBackingBean
   private StudyDetailViewer _studyDetailViewer;
   private AnnotationViewer _annotationViewer;
 
-  private Screen _study;
+  private Study _study;
   private boolean _showNavigationBar;
 
   // constructors
@@ -53,14 +57,14 @@ public class StudyViewer extends AbstractBackingBean
 
   // public methods
 
-  public void setStudy(Screen study)
+  public void setStudy(Study study)
   {
     _study = study;
     _studyDetailViewer.setStudy(study);
     _annotationViewer.setStudy(study);
   }
 
-  public Screen getStudy()
+  public Study getStudy()
   {
     return _study;
   }
@@ -76,6 +80,42 @@ public class StudyViewer extends AbstractBackingBean
   public boolean isShowNavigationBar()
   {
     return _showNavigationBar;
+  }
+
+
+  /* JSF Application methods */
+
+  @UIControllerMethod
+  public String viewStudy(final Study studyIn)
+  {
+    // TODO: implement as aspect
+    if (studyIn.isRestricted()) {
+      showMessage("restrictedEntity", "Study " + ((Screen) studyIn).getScreenNumber());
+      log.warn("user unauthorized to view " + studyIn);
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+
+    try {
+      _dao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          Study study = _dao.reloadEntity(studyIn,
+                                          true,
+                                          "hbnLabHead.hbnLabMembers",
+                                          "hbnLeadScreener");
+          _dao.needReadOnly(study, "hbnCollaborators.hbnLabAffiliation");
+          _dao.needReadOnly(study, "publications");
+          _dao.needReadOnly(study, "annotationTypes.annotationValues");
+          setStudy(study);
+        }
+      });
+    }
+    catch (DataAccessException e) {
+      showMessage("databaseOperationFailed", e.getMessage());
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    return VIEW_STUDY;
   }
 
 

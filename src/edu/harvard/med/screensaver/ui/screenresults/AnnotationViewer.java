@@ -19,6 +19,7 @@ import java.util.Observer;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
@@ -30,8 +31,8 @@ import org.apache.log4j.Logger;
 /**
  * JSF backing bean for Annotation Viewer web page (annotationViewer.jspf).
  * <p>
- * The <code>screen</code> property should be set to the
- * {@link Screen} whose annotations are to be viewed.<br>
+ * The <code>study</code> property should be set to the
+ * {@link Study} whose annotations are to be viewed.<br>
 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -49,7 +50,7 @@ public class AnnotationViewer extends AbstractBackingBean implements Observer
   private GenericEntityDAO _dao;
   //private ScreenAnnotationExporter _screenAnnotationExporter;
 
-  private Screen _screen;
+  private Study _study;
   private AnnotationTypesTable _annotationTypesTable;
   private AnnotationValuesTable _annotationValuesTable;
   private Map<String,Boolean> _isPanelCollapsedMap;
@@ -81,16 +82,16 @@ public class AnnotationViewer extends AbstractBackingBean implements Observer
 
   // public methods
 
-  public void setStudy(Screen screen)
+  public void setStudy(Study study)
   {
-    _screen = screen;
-    getAnnotationTypesTable().initialize(new ArrayList(_screen.getAnnotationTypes()), this);
+    _study = study;
+    getAnnotationTypesTable().initialize(new ArrayList(_study.getAnnotationTypes()), this);
     updateAnnotationValuesTable();
   }
 
-  public Screen getScreen()
+  public Study getStudy()
   {
-    return _screen;
+    return _study;
   }
 
   public Map<?,?> getIsPanelCollapsedMap()
@@ -199,7 +200,7 @@ public class AnnotationViewer extends AbstractBackingBean implements Observer
   private List<AnnotationType> getAnnotationTypes()
   {
     List<AnnotationType> rvts = new ArrayList<AnnotationType>();
-    rvts.addAll(_screen.getAnnotationTypes());
+    rvts.addAll(_study.getAnnotationTypes());
     return rvts;
   }
 

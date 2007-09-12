@@ -129,7 +129,7 @@ public class BoutrosAnnotationImporter
                                      ScreenType.RNAI,
                                      StudyType.IN_SILICO,
                                      SCREEN_TITLE);
-          screen.setSummary("In-silico analysis of SMARTPool siRNA gene targets.  This is a pseudo-screen.");
+          screen.setSummary("In-silico analysis of SMARTPool siRNA gene targets.");
 
           ScreeningRoomUser rnaiGlobalMember =
             new ScreeningRoomUser(new Date(),

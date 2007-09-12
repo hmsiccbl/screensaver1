@@ -149,6 +149,7 @@
     class="edu.harvard.med.screensaver.ui.Menu">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="screensBrowser" />
+    <constructor-arg ref="studiesBrowser" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="librariesBrowser" />
     <aop:scoped-proxy/>
@@ -331,14 +332,14 @@
   </bean>
 
 
-  <!-- === screens backing beans === -->
+  <!-- === studies backing beans === -->
 
   <bean
-    id="screensBrowser"
+    id="studiesBrowser"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults">
-    <constructor-arg ref="screenViewer" />
+    class="edu.harvard.med.screensaver.ui.searchresults.StudySearchResults">
+    <constructor-arg ref="studyViewer" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -350,6 +351,18 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="studyDetailViewer" />
     <constructor-arg ref="annotationViewer" />
+    <aop:scoped-proxy/>
+  </bean>
+
+
+  <!-- === screens backing beans === -->
+
+  <bean
+    id="screensBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults">
+    <constructor-arg ref="screenViewer" />
     <aop:scoped-proxy/>
   </bean>
 

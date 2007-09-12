@@ -194,7 +194,7 @@
       </t:collapsiblePanel>
 
       <t:collapsiblePanel
-        value="#{helpViewer.isPanelCollapsedMap['studyViewerHelp']}"
+        value="#{helpViewer.isPanelCollapsedMap['screenViewerHelp']}"
         var="isCollapsed"
       >
         <f:facet name="header">
@@ -209,7 +209,7 @@
           </t:div>
         </f:facet>
         <t:aliasBean alias="#{inHelpViewer}" value="true">
-          <%@ include file="help/screens/studyViewerHelp.jsp" %>
+          <%@ include file="help/screens/screenViewerHelp.jsp" %>
         </t:aliasBean>
 
         <t:div style="margin-left: 30px">
@@ -421,5 +421,5 @@
 
     </t:panelGrid>
   </h:form>
-  
+
 </f:subview>

@@ -47,6 +47,9 @@ public interface ScreensaverConstants
   public static final String IMPORT_RNAI_LIBRARY_CONTENTS = "importRNAiLibraryContents";
   public static final String VIEW_SCREENING_ROOM_USER_ACTION_RESULT = "viewScreeningRoomUser";
   public static final String SHOW_SEARCH_RESULTS_SUMMARY_ACTION = "showSearchResultsSummary";
+  public static final String BROWSE_STUDIES = "browseStudies";
+  public static final String VIEW_STUDIES = "viewStudies";
+  public static final String VIEW_STUDY = "viewStudy";
   public static final String BROWSE_SCREENS = "browseScreens";
   public static final String VIEW_SCREEN = "viewScreen";
   public static final String VIEW_SCREENING_ROOM_ACTIVITY_ACTION_RESULT = "viewScreeningRoomActivity";

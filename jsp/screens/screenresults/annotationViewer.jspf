@@ -8,7 +8,7 @@
 		<t:collapsiblePanel id="annotationPanel"
 			value="#{annotationViewer.isPanelCollapsedMap['annotations']}"
 			title="Annotations" var="isCollapsed" titleVar="title"
-			rendered="#{!annotationViewer.screen.restricted && !empty annotationViewer.screen.annotationTypes}">
+			rendered="#{!annotationViewer.study.restricted && !empty annotationViewer.study.annotationTypes}">
 			<f:facet name="header">
 				<t:div styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">

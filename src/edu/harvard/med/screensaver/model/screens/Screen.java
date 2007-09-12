@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
@@ -41,7 +40,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @hibernate.class lazy="false"
  */
-public class Screen extends AbstractEntity
+public class Screen extends Study
 {
 
   // static fields
@@ -567,6 +566,13 @@ public class Screen extends AbstractEntity
   public BillingInformation getBillingInformation()
   {
     return _billingInformation;
+  }
+
+  @Override
+  @DerivedEntityProperty
+  public Integer getStudyNumber()
+  {
+    return getScreenNumber();
   }
 
   /**

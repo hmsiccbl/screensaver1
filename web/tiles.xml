@@ -166,6 +166,21 @@
   </definition>
 
 
+  <!-- studies tiles -->
+
+  <definition name="/screens/studiesBrowser.tiles" extends=".base">
+    <put name="pageTitle" value="Studies Browser" />
+    <put name="pageHelpURL" value="../help/screens/studiesBrowserHelp.jsf" />
+    <put name="body" value="/screens/studiesBrowser.jsp" />
+  </definition>
+
+  <definition name="/screens/studyViewer.tiles" extends=".base">
+    <put name="pageTitle" value="Study Viewer" />
+    <put name="pageHelpURL" value="../help/screens/studyViewerHelp.jsf" />
+    <put name="body" value="/screens/studyViewer.jsp" />
+  </definition>
+
+
   <!-- screens tiles -->
 
   <definition name="/screens/screensBrowser.tiles" extends=".base">

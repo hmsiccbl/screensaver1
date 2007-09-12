@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui;
 
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -21,9 +22,12 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.Study;
+import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.StudySearchResults;
 
 import org.apache.log4j.Logger;
 
@@ -40,6 +44,7 @@ public class Menu extends AbstractBackingBean
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
   private ScreenSearchResults _screensBrowser;
+  private StudySearchResults _studiesBrowser;
   private LibrarySearchResults _librariesBrowser;
 
 
@@ -55,11 +60,13 @@ public class Menu extends AbstractBackingBean
   public Menu(GenericEntityDAO dao,
               LibrariesDAO librariesDao,
               ScreenSearchResults screensBrowser,
+              StudySearchResults studiesBrowser,
               LibrarySearchResults librariesBrowser)
   {
     _dao = dao;
     _librariesDao = librariesDao;
     _screensBrowser = screensBrowser;
+    _studiesBrowser = studiesBrowser;
     _librariesBrowser = librariesBrowser;
   }
 
@@ -110,6 +117,32 @@ public class Menu extends AbstractBackingBean
     List<Library> libraries = _librariesDao.findLibrariesDisplayedInLibrariesBrowser();
     _librariesBrowser.setContents(libraries);
     return BROWSE_LIBRARIES;
+  }
+
+  @UIControllerMethod
+  public String browseStudies()
+  {
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        List<? extends Study> studies = _dao.findAllEntitiesOfType(Screen.class /* TODO: change to Study.class*/,
+                                                                   true,
+                                                                   "hbnLabHead",
+                                                                   "hbnLeadScreener");
+        for (Iterator<? extends Study> iter = studies.iterator(); iter.hasNext();) {
+          Study study = iter.next();
+          if (study.isRestricted()) {
+            iter.remove();
+          }
+          if (study.getStudyType().equals(StudyType.IN_VITRO)) {
+            iter.remove();
+          }
+        }
+        _studiesBrowser.setContents((Collection<Study>) studies);
+      }
+    });
+    return BROWSE_STUDIES;
   }
 
   @UIControllerMethod

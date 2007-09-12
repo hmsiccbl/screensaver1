@@ -58,6 +58,10 @@
 					value="Browse Libraries"
 					accesskey="L"
 					title="Browse the currently available libraries" />
+				<t:commandNavigation2 action="#{menu.browseStudies}"
+					value="Browse Studies"
+					accesskey="T"
+					title="Browse the studies currently available and accessible to you" />
 				<t:commandNavigation2 action="#{menu.browseScreens}"
 					value="Browse Screens"
 					accesskey="S"

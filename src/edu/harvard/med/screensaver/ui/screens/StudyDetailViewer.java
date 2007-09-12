@@ -19,6 +19,7 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
@@ -40,7 +41,7 @@ public class StudyDetailViewer extends AbstractBackingBean
   private GenericEntityDAO _dao;
   private UsersDAO _usersDao;
 
-  private Screen _study;
+  private Study _study;
   private UISelectOneEntityBean<ScreeningRoomUser> _labName;
   private UISelectOneEntityBean<ScreeningRoomUser> _leadScreener;
   private UISelectManyEntityBean<ScreeningRoomUser> _collaborators;
@@ -66,13 +67,13 @@ public class StudyDetailViewer extends AbstractBackingBean
 
   // public methods
 
-  public void setStudy(Screen study)
+  public void setStudy(Study study)
   {
     _study = study;
     resetView();
   }
 
-  public Screen getStudy()
+  public Study getStudy()
   {
     return _study;
   }
