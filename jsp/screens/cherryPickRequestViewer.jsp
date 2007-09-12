@@ -17,7 +17,7 @@ TODO:
 
 	<h:form id="cherryPickRequestViewerForm">
 
-		<%-- following screen summary should be shared with screenAndResultViewer.jspf --%>
+		<%-- following screen summary should be shared with studyViewer.jspf --%>
 		<t:collapsiblePanel id="screenSummaryPanel"
 			value="#{cherryPickRequestViewer.isPanelCollapsedMap['screenSummary']}"
 			title="Screen Summary" var="isCollapsed" titleVar="title">

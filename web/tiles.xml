@@ -3,17 +3,17 @@
        "http://struts.apache.org/dtds/tiles-config_1_1.dtd">
 
 <!--
-   $HeadURL:$
-   $Id:$
+   $HeadURL$
+   $Id$
 
    Copyright 2006 by the President and Fellows of Harvard College.
-   
+
    Screensaver is an open-source project developed by the ICCB-L and NSRB labs
    at Harvard Medical School. This software is distributed under the terms of
    the GNU General Public License.
 -->
 
-<!-- 
+<!--
   One definition per view/page.
   "name" attribute of definition tag is inferred from the requested *.jsp URL.
   "put" elements define the parameters that are used to generate an instance of the referenced template.
@@ -30,7 +30,7 @@
     <put name="menu" value="/menu.jsp" />
     <put name="header" value="/header.jsp" />
     <put name="footer" value="/footer.jsp" />
-    <!-- the JSF ID of the input component that should have initial focus 
+    <!-- the JSF ID of the input component that should have initial focus
          (specify forceId="true" in the JSF component definition) -->
     <put name="inputFocusId" value="" />
   </definition>
@@ -50,7 +50,7 @@
 
 
   <!-- top-level tiles -->
-  
+
   <definition name="/reportException.tiles" extends=".base">
     <put name="pageTitle" value="Screensaver Error!" />
     <put name="body" value="/reportException.jsp" />
@@ -66,27 +66,27 @@
     <put name="pageTitle" value="Thanks for using Screensaver!" />
     <put name="body" value="/goodbye.jsp" />
   </definition>
-  
+
   <definition name="/login-error.tiles" extends=".unauthenticatedBase">
     <put name="pageTitle" value="Login failed! (sorry)" />
     <put name="body" value="/login-error.jsp" />
   </definition>
-  
+
   <definition name="/main.tiles" extends=".base">
     <put name="pageTitle" value="" />
     <put name="body" value="/main.jsp" />
   </definition>
-  
+
   <definition name="newsViewer.tiles" extends=".base">
     <put name="pageTitle" value="Latest News" />
     <put name="body" value="/newsViewer.jsp" />
   </definition>
-  
+
   <definition name="/downloadsViewer.tiles" extends=".base">
     <put name="pageTitle" value="Data Downloads" />
     <put name="body" value="/downloadsViewer.jsp" />
   </definition>
-  
+
   <definition name="/helpViewer.tiles" extends=".base">
     <put name="pageTitle" value="Help Viewer" />
     <put name="body" value="/helpViewer.jsp" />
@@ -95,28 +95,28 @@
 
 
   <!-- libraries tiles -->
-  
+
   <definition name="/libraries/admin/rnaiLibraryContentsImporter.tiles" extends=".base">
     <put name="pageTitle" value="RNAi Library Contents Importer" />
     <put name="body" value="/libraries/admin/rnaiLibraryContentsImporter.jsp" />
   </definition>
-    
+
   <definition name="/libraries/admin/compoundLibraryContentsImporter.tiles" extends=".base">
     <put name="pageTitle" value="Compound Library Contents Importer" />
     <put name="body" value="/libraries/admin/compoundLibraryContentsImporter.jsp" />
   </definition>
-   
+
   <definition name="/libraries/admin/naturalProductsLibraryContentsImporter.tiles" extends=".base">
     <put name="pageTitle" value="Natural Products Library Contents Importer" />
     <put name="body" value="/libraries/admin/naturalProductsLibraryContentsImporter.jsp" />
   </definition>
-   
+
   <definition name="/libraries/librariesBrowser.tiles" extends=".base">
     <put name="pageTitle" value="Libraries Browser" />
     <put name="pageHelpURL" value="../help/libraries/librariesBrowserHelp.jsf" />
     <put name="body" value="/libraries/librariesBrowser.jsp" />
   </definition>
-  
+
   <definition name="/libraries/libraryViewer.tiles" extends=".base">
     <put name="pageTitle" value="Library Viewer" />
     <put name="pageHelpURL" value="../help/libraries/libraryViewerHelp.jsf" />
@@ -128,19 +128,19 @@
     <put name="pageHelpURL" value="../help/libraries/wellSearchResultsHelp.jsf" />
     <put name="body" value="/libraries/wellSearchResults.jsp" />
   </definition>
-  
+
   <definition name="/libraries/admin/wellVolumeSearchResults.tiles" extends=".base">
     <put name="pageTitle" value="Well Volume Search Results" />
     <put name="pageHelpURL" value="../../help/libraries/wellVolumeSearchResultsHelp.jsf" />
     <put name="body" value="/libraries/admin/wellVolumeSearchResults.jsp" />
   </definition>
-  
+
   <definition name="/cherryPickRequests/admin/cherryPickRequestWellVolumeSearchResults.tiles" extends=".base">
     <put name="pageTitle" value="Cherry Pick Request Well Volume Search Results" />
     <put name="pageHelpURL" value="../../help/libraries/wellVolumeSearchResultsHelp.jsf" />
     <put name="body" value="/cherryPickRequests/admin/cherryPickRequestWellVolumeSearchResults.jsp" />
   </definition>
-  
+
   <definition name="/libraries/wellViewer.tiles" extends=".base">
     <put name="pageTitle" value="Well Viewer" />
     <put name="pageHelpURL" value="../help/libraries/wellViewerHelp.jsf" />
@@ -158,28 +158,28 @@
     <put name="pageHelpURL" value="../help/libraries/geneViewerHelp.jsf" />
     <put name="body" value="/libraries/geneViewer.jsp" />
   </definition>
-   
+
   <definition name="/libraries/compoundViewer.tiles" extends=".base">
     <put name="pageTitle" value="Compound Viewer" />
     <put name="pageHelpURL" value="../help/libraries/compoundViewerHelp.jsf" />
     <put name="body" value="/libraries/compoundViewer.jsp" />
   </definition>
-    
-  
+
+
   <!-- screens tiles -->
-  
+
   <definition name="/screens/screensBrowser.tiles" extends=".base">
     <put name="pageTitle" value="Screens Browser" />
     <put name="pageHelpURL" value="../help/screens/screensBrowserHelp.jsf" />
     <put name="body" value="/screens/screensBrowser.jsp" />
   </definition>
-  
-  <definition name="/screens/screenAndResultViewer.tiles" extends=".base">
+
+  <definition name="/screens/screenViewer.tiles" extends=".base">
     <put name="pageTitle" value="Screen Viewer" />
-    <put name="pageHelpURL" value="../help/screens/screenAndResultViewerHelp.jsf" />
-    <put name="body" value="/screens/screenAndResultViewer.jsp" />
+    <put name="pageHelpURL" value="../help/screens/screenViewerHelp.jsf" />
+    <put name="body" value="/screens/screenViewer.jsp" />
   </definition>
-  
+
   <definition name="/screens/screenresults/admin/screenResultImporter.tiles" extends=".base">
     <put name="pageTitle" value="Screen Result Import Errors" />
     <put name="body" value="/screens/screenresults/admin/screenResultImporter.jsp" />
@@ -190,15 +190,15 @@
     <put name="pageHelpURL" value="../help/screens/cherryPickRequestViewerHelp.jsf" />
     <put name="body" value="/screens/cherryPickRequestViewer.jsp" />
   </definition>
-  
-  
+
+
   <!-- dev tiles -->
 
   <definition name="/dev/env.tiles" extends=".base">
     <put name="pageTitle" value="Environment" />
     <put name="body" value="/dev/env.jsp" />
   </definition>
-    
+
   <definition name="/dev/schemaManager.tiles" extends=".base">
     <put name="pageTitle" value="Schema Manager" />
     <put name="body" value="/dev/schemaManager.jsp" />
@@ -206,12 +206,12 @@
 
 
   <!-- page help tiles -->
-   
+
   <definition name="/help/libraries/librariesBrowserHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Libraries Browser Help" />
     <put name="body" value="/help/libraries/librariesBrowserHelp.jsp" />
   </definition>
-  
+
   <definition name="/help/libraries/libraryViewerHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Library Viewer Help" />
     <put name="body" value="/help/libraries/libraryViewerHelp.jsp" />
@@ -221,12 +221,12 @@
     <put name="pageTitle" value="Well Search Results Help" />
     <put name="body" value="/help/libraries/wellSearchResultsHelp.jsp" />
   </definition>
-  
+
   <definition name="/help/libraries/wellVolumeSearchResultsHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Well Volume Search Results Help" />
     <put name="body" value="/help/libraries/wellVolumeSearchResultsHelp.jsp" />
   </definition>
-  
+
   <definition name="/help/libraries/wellViewerHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Well Viewer Help" />
     <put name="body" value="/help/libraries/wellViewerHelp.jsp" />
@@ -241,42 +241,42 @@
     <put name="pageTitle" value="Gene Viewer Help" />
     <put name="body" value="/help/libraries/geneViewerHelp.jsp" />
   </definition>
-   
+
   <definition name="/help/libraries/compoundViewerHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Compound Viewer Help" />
     <put name="body" value="/help/libraries/compoundViewerHelp.jsp" />
   </definition>
-  
+
   <definition name="/help/screens/screensBrowserHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Screens Browser Help" />
     <put name="body" value="/help/screens/screensBrowserHelp.jsp" />
   </definition>
-  
-  <definition name="/help/screens/screenAndResultViewerHelp.tiles" extends=".pageHelpBase">
+
+  <definition name="/help/screens/screenViewerHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Screen Viewer Help" />
-    <put name="body" value="/help/screens/screenAndResultViewerHelp.jsp" />
+    <put name="body" value="/help/screens/screenViewerHelp.jsp" />
   </definition>
-  
+
   <definition name="/help/screens/screenViewer/screenDetailsHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Screen Viewer: Screen Details Help" />
     <put name="body" value="/help/screens/screenViewer/screenDetailsHelp.jsp" />
   </definition>
-  
+
   <definition name="/help/screens/screenViewer/screenResultsSummaryHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Screen Viewer: Screen Results Summary Help" />
     <put name="body" value="/help/screens/screenViewer/screenResultsSummaryHelp.jsp" />
   </definition>
-  
+
   <definition name="/help/screens/screenViewer/dataHeadersHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Screen Viewer: Data Headers Help" />
     <put name="body" value="/help/screens/screenViewer/dataHeadersHelp.jsp" />
   </definition>
-  
+
   <definition name="/help/screens/screenViewer/dataHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Screen Viewer: Data Help" />
     <put name="body" value="/help/screens/screenViewer/dataHelp.jsp" />
   </definition>
-  
+
   <definition name="/help/screens/screenViewer/heatMapsHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Screen Viewer: Heat Maps Help" />
     <put name="body" value="/help/screens/screenViewer/heatMapsHelp.jsp" />
@@ -291,25 +291,25 @@
     <put name="pageTitle" value="Cherry Pick Request Viewer: Screen Summary Help" />
     <put name="body" value="/help/screens/cherryPickRequestViewer/screenSummaryHelp.jsp" />
   </definition>
-  
+
   <definition name="/help/screens/cherryPickRequestViewer/cherryPickRequestDetailsHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Cherry Pick Request Viewer: Details Help" />
     <put name="body" value="/help/screens/cherryPickRequestViewer/cherryPickRequestDetailsHelp.jsp" />
   </definition>
-  
+
   <definition name="/help/screens/cherryPickRequestViewer/screenerCherryPicksHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Cherry Pick Request Viewer: Screener Cherry Picks Help" />
     <put name="body" value="/help/screens/cherryPickRequestViewer/screenerCherryPicksHelp.jsp" />
   </definition>
-  
+
   <definition name="/help/screens/cherryPickRequestViewer/labCherryPicksHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Cherry Pick Request Viewer: Lab Cherry Picks Help" />
     <put name="body" value="/help/screens/cherryPickRequestViewer/labCherryPicksHelp.jsp" />
   </definition>
-  
+
   <definition name="/help/screens/cherryPickRequestViewer/cherryPickPlatesHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Cherry Pick Request Viewer: Cherry Pick Plates Help" />
     <put name="body" value="/help/screens/cherryPickRequestViewer/cherryPickPlatesHelp.jsp" />
   </definition>
-  
+
 </tiles-definitions>

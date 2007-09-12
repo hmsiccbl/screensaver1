@@ -36,6 +36,7 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
@@ -76,6 +77,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   private ScreenResultsDAO _screenResultsDao;
   private ScreenSearchResults _screensBrowser;
   private ScreenViewer _screenViewer;
+  private ScreenDetailViewer _screenDetailViewer;
   private ScreenResultExporter _screenResultExporter;
   private ScreenResultDataTable _screenResultDataTable;
   private FullScreenResultDataTable _fullScreenResultDataTable;
@@ -104,6 +106,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
                             ScreenResultsDAO screenResultsDao,
                             ScreenSearchResults screensBrowser,
                             ScreenViewer screenViewer,
+                            ScreenDetailViewer screenDetailViewer,
                             ScreenResultExporter screenResultExporter,
                             ResultValueTypeTable rvtTable,
                             FullScreenResultDataTable fullScreenResultDataTable,
@@ -115,6 +118,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     _screenResultsDao = screenResultsDao;
     _screensBrowser = screensBrowser;
     _screenViewer = screenViewer;
+    _screenDetailViewer = screenDetailViewer;
     _screenResultExporter = screenResultExporter;
     _rvtTable = rvtTable;
     _fullScreenResultDataTable = fullScreenResultDataTable;
@@ -122,10 +126,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     _singlePlateScreenResultDataTable = singlePlateScreenResultDataTable;
 
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
-    _isPanelCollapsedMap.put("screenSummary", false);
-    _isPanelCollapsedMap.put("annotations", true);
-    _isPanelCollapsedMap.put("annotationTypes", true);
-    _isPanelCollapsedMap.put("annotationValues", true);
     _isPanelCollapsedMap.put("screenResultSummary", false);
     _isPanelCollapsedMap.put("dataHeadersTable", true);
     _isPanelCollapsedMap.put("dataTable", true);
@@ -305,7 +305,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     // note: saving the parent screen will save its screenResult; assumes
     // ScreenViewer and ScreenResultViewer are in sync (showing data for same
     // screen)
-    return _screenViewer.saveScreen();
+    return _screenDetailViewer.saveScreen();
   }
 
 

@@ -10,7 +10,9 @@
 package edu.harvard.med.screensaver.ui.screenresults;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -50,6 +52,7 @@ public class AnnotationViewer extends AbstractBackingBean implements Observer
   private Screen _screen;
   private AnnotationTypesTable _annotationTypesTable;
   private AnnotationValuesTable _annotationValuesTable;
+  private Map<String,Boolean> _isPanelCollapsedMap;
 
 
   // constructors
@@ -69,12 +72,16 @@ public class AnnotationViewer extends AbstractBackingBean implements Observer
     _dao = dao;
     _annotationTypesTable = annotationTypesTable;
     _annotationValuesTable = annotationValuesTable;
+    _isPanelCollapsedMap = new HashMap<String,Boolean>();
+    _isPanelCollapsedMap.put("annotations", true);
+    _isPanelCollapsedMap.put("annotationTypes", true);
+    _isPanelCollapsedMap.put("annotationValues", true);
   }
 
 
   // public methods
 
-  public void setScreen(Screen screen)
+  public void setStudy(Screen screen)
   {
     _screen = screen;
     getAnnotationTypesTable().initialize(new ArrayList(_screen.getAnnotationTypes()), this);
@@ -84,6 +91,11 @@ public class AnnotationViewer extends AbstractBackingBean implements Observer
   public Screen getScreen()
   {
     return _screen;
+  }
+
+  public Map<?,?> getIsPanelCollapsedMap()
+  {
+    return _isPanelCollapsedMap;
   }
 
   public UISelectManyBean<AnnotationType> getAnnotationTypeSelections()

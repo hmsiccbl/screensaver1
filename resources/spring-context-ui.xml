@@ -343,20 +343,52 @@
   </bean>
 
   <bean
+    id="studyViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screens.StudyViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="studyDetailViewer" />
+    <constructor-arg ref="annotationViewer" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
     id="screenViewer"
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.screens.ScreenViewer">
     <constructor-arg ref="genericEntityDao" />
-    <constructor-arg ref="screenResultsDao" />
-    <constructor-arg ref="usersDao" />
-    <constructor-arg ref="screensBrowser" />
+    <constructor-arg ref="screenDetailViewer" />
     <constructor-arg ref="annotationViewer" />
+    <constructor-arg ref="screenResultsDao" />
     <constructor-arg ref="screenResultViewer" />
-    <constructor-arg ref="cherryPickRequestViewer" />
     <constructor-arg ref="heatMapViewer" />
     <constructor-arg ref="screenResultImporter" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="studyDetailViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screens.StudyDetailViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="usersDao" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="screenDetailViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="usersDao" />
     <constructor-arg ref="dataAccessPolicy" />
+    <constructor-arg ref="screenViewer" />
+    <constructor-arg ref="screensBrowser" />
+    <constructor-arg ref="cherryPickRequestViewer" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -369,6 +401,7 @@
     <constructor-arg ref="screenResultsDao" />
     <constructor-arg ref="screensBrowser" />
     <constructor-arg ref="screenViewer" />
+    <constructor-arg ref="screenDetailViewer" />
     <constructor-arg ref="screenResultExporter" />
     <constructor-arg>
       <bean class="edu.harvard.med.screensaver.ui.screenresults.ResultValueTypeTable" />

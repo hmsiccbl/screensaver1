@@ -1,10 +1,6 @@
-<%-- The html taglib contains all the tags for dealing with forms and other HTML-specific goodies. --%>
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
-<%-- The core taglib contains all the logic, validation, controller, and other tags specific to JSF. --%>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
-<%-- The Apache Tomahawk JSF components --%>
 <%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
-<%-- Tiles --%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
 <%--
@@ -16,10 +12,10 @@ TODO:
 - sort subtables
 --%>
 
-<f:subview id="screenViewer">
-	<h:form id="screenPanelForm">
-		<t:collapsiblePanel id="screenPanel"
-			value="#{screenResultViewer.isPanelCollapsedMap['screenSummary']}"
+<f:subview id="screenDetailViewer">
+	<h:form id="screenDetailPanelForm">
+		<t:collapsiblePanel id="screenDetailPanel"
+			value="#{screenDetailViewer.panelCollapsed}"
 			title="Screen Summary" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
 				<t:div styleClass="sectionHeader">
@@ -37,19 +33,19 @@ TODO:
 
 			<f:facet name="closedContent">
 				<t:panelGrid columns="1">
-					<t:outputText value="#{screenViewer.screen.screenNumber}: \"
-						#{screenViewer.screen.title}\""
+					<t:outputText value="#{screenDetailViewer.screen.screenNumber}: \"
+						#{screenDetailViewer.screen.title}\""
 							styleClass="dataText" />
 					<t:div>
 						<t:outputText value="Lab:" styleClass="label" />
-						<t:commandLink value="#{screenViewer.screen.labHead.labName}"
-							action="#{screenViewer.viewLabHead}"
+						<t:commandLink value="#{screenDetailViewer.screen.labHead.labName}"
+							action="#{screenDetailViewer.viewLabHead}"
 							styleClass="dataText entityLink" />
 						<t:outputText value="&nbsp;&nbsp;Screener:" styleClass="label"
 							escape="false" />
 						<t:commandLink
-							value="#{screenViewer.screen.leadScreener.fullNameLastFirst}"
-							action="#{screenViewer.viewLeadScreener}"
+							value="#{screenDetailViewer.screen.leadScreener.fullNameLastFirst}"
+							action="#{screenDetailViewer.viewLeadScreener}"
 							styleClass="dataText entityLink" />
 					</t:div>
 				</t:panelGrid>
@@ -57,21 +53,21 @@ TODO:
 
 			<t:panelGroup id="commandPanel">
 				<h:commandButton id="viewAdminOnlyFieldsCommand"
-					value="#{screenViewer.adminViewMode ? \"Hide Admin\" : \"Show Admin\"}"
-					rendered="#{(screenViewer.editable || screenViewer.readOnlyAdmin) && !screenViewer.editMode}"
-					action="#{screenViewer.toggleAdminViewMode}" styleClass="command"
+					value="#{screenDetailViewer.adminViewMode ? \"Hide Admin\" : \"Show Admin\"}"
+					rendered="#{(screenDetailViewer.editable || screenDetailViewer.readOnlyAdmin) && !screenDetailViewer.editMode}"
+					action="#{screenDetailViewer.toggleAdminViewMode}" styleClass="command"
 					title="Show or hide administrative fields for the screen" />
 				<h:commandButton id="editCommand" value="Edit"
-					rendered="#{screenViewer.editable && !screenViewer.editMode}"
-					action="#{screenViewer.editScreen}" styleClass="command"
+					rendered="#{screenDetailViewer.editable && !screenDetailViewer.editMode}"
+					action="#{screenDetailViewer.editScreen}" styleClass="command"
 					title="Enter edit mode for screen details" />
 				<t:commandButton id="saveCommand" value="Save"
-					action="#{screenViewer.saveScreen}" styleClass="command"
-					rendered="#{screenViewer.editMode}"
+					action="#{screenDetailViewer.saveScreen}" styleClass="command"
+					rendered="#{screenDetailViewer.editMode}"
 					title="Save your changes and leave edit mode" />
 				<h:commandButton id="cancelEditCommand" value="Cancel"
-					rendered="#{screenViewer.editMode}"
-					action="#{screenViewer.cancelEdit}" immediate="true"
+					rendered="#{screenDetailViewer.editMode}"
+					action="#{screenDetailViewer.cancelEdit}" immediate="true"
 					styleClass="command"
 					title="Discard your changes and leave edit mode" />
 			</t:panelGroup>
@@ -83,184 +79,184 @@ TODO:
 				<t:outputLabel for="screenId" value="Screen ID"
 					visibleOnUserRole="developer"
 					title="The database ID for the screen. This is an implementation-level detail displayed only for development purposes" />
-				<t:outputText id="screenId" value="#{screenViewer.screen.screenId}"
+				<t:outputText id="screenId" value="#{screenDetailViewer.screen.screenId}"
 					styleClass="dataText" visibleOnUserRole="developer" />
 
 				<t:outputLabel for="screenNumber" value="Screen Number"
 					title="The number used to uniquely identify the screen" />
 				<t:outputText id="screenNumber"
-					value="#{screenViewer.screen.screenNumber}" styleClass="dataText" />
+					value="#{screenDetailViewer.screen.screenNumber}" styleClass="dataText" />
 
 				<t:outputLabel for="title" value="Title"
 					title="The title of the screen" />
-				<t:inputText id="title" value="#{screenViewer.screen.title}"
-					displayValueOnly="#{!screenViewer.editMode}" size="80"
+				<t:inputText id="title" value="#{screenDetailViewer.screen.title}"
+					displayValueOnly="#{!screenDetailViewer.editMode}" size="80"
 					styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 
 				<t:outputLabel for="screenType" value="Screen Type"
 					title="'Small Molecule' or 'RNAi'" />
 				<t:outputText id="screenType"
-					value="#{screenViewer.screen.screenType}"
+					value="#{screenDetailViewer.screen.screenType}"
 					converter="ScreenTypeConverter" styleClass="dataText" />
 
 				<%-- "lab name" == last name of "lab head", but former is required for UI, latter is for internal design --%>
 				<t:outputLabel for="labNameEditable" value="Lab Name"
 					title="The name of the lab carrying out the screen" />
-				<h:panelGroup rendered="#{!screenViewer.editMode}">
+				<h:panelGroup rendered="#{!screenDetailViewer.editMode}">
 					<t:commandLink id="labName"
-						value="#{screenViewer.screen.labHead.labName}"
-						action="#{screenViewer.viewLabHead}"
+						value="#{screenDetailViewer.screen.labHead.labName}"
+						action="#{screenDetailViewer.viewLabHead}"
 						styleClass="dataText entityLink" style="margin-right: 4px" />
 					<t:outputText value=" (" styleClass="dataText" />
-					<h:outputLink value="mailto:#{screenViewer.screen.labHead.email}">
+					<h:outputLink value="mailto:#{screenDetailViewer.screen.labHead.email}">
 						<t:outputText id="labHeadEmail"
-							value="#{screenViewer.screen.labHead.email}"
+							value="#{screenDetailViewer.screen.labHead.email}"
 							styleClass="dataText " />
 					</h:outputLink>
 					<t:outputText value=")" styleClass="dataText" />
 				</h:panelGroup>
 				<t:selectOneMenu id="labNameEditable"
-					value="#{screenViewer.labName.value}"
+					value="#{screenDetailViewer.labName.value}"
 					onchange="javascript:submit()" immediate="true"
-					valueChangeListener="#{screenViewer.update}"
-					rendered="#{screenViewer.editMode}" styleClass="inputText">
-					<f:selectItems value="#{screenViewer.labName.selectItems}" />
+					valueChangeListener="#{screenDetailViewer.update}"
+					rendered="#{screenDetailViewer.editMode}" styleClass="inputText">
+					<f:selectItems value="#{screenDetailViewer.labName.selectItems}" />
 				</t:selectOneMenu>
 
 				<t:outputLabel for="leadScreenerEditable" value="Lead Screener"
 					title="The scientist primarily responsible for carrying out the screen" />
-				<h:panelGroup rendered="#{!screenViewer.editMode}">
+				<h:panelGroup rendered="#{!screenDetailViewer.editMode}">
 					<t:commandLink id="leadScreener"
-						value="#{screenViewer.screen.leadScreener.fullNameLastFirst}"
-						action="#{screenViewer.viewLeadScreener}"
+						value="#{screenDetailViewer.screen.leadScreener.fullNameLastFirst}"
+						action="#{screenDetailViewer.viewLeadScreener}"
 						styleClass="dataText entityLink" style="margin-right: 4px" />
 					<t:outputText value=" (" styleClass="dataText" />
 					<h:outputLink
-						value="mailto:#{screenViewer.screen.leadScreener.email}">
+						value="mailto:#{screenDetailViewer.screen.leadScreener.email}">
 						<t:outputText id="leadScreenerEmail"
-							value="#{screenViewer.screen.leadScreener.email}"
+							value="#{screenDetailViewer.screen.leadScreener.email}"
 							styleClass="dataText" />
 					</h:outputLink>
 					<t:outputText value=")" styleClass="dataText" />
 				</h:panelGroup>
 				<t:selectOneMenu id="leadScreenerEditable"
-					value="#{screenViewer.leadScreener.value}"
-					rendered="#{screenViewer.editMode}" styleClass="inputText">
-					<f:selectItems value="#{screenViewer.leadScreener.selectItems}" />
+					value="#{screenDetailViewer.leadScreener.value}"
+					rendered="#{screenDetailViewer.editMode}" styleClass="inputText">
+					<f:selectItems value="#{screenDetailViewer.leadScreener.selectItems}" />
 				</t:selectOneMenu>
 
 				<t:outputLabel for="collaboratorsEditable" value="Collaborators"
 					title="Other scientists involved in carrying out the screen" />
 				<t:panelGrid columns="1" styleClass="layoutPanel"
-					rendered="#{!screenViewer.editMode}">
+					rendered="#{!screenDetailViewer.editMode}">
 					<t:outputText value="<none>" styleClass="dataText"
-						rendered="#{empty screenViewer.screen.collaborators}" />
+						rendered="#{empty screenDetailViewer.screen.collaborators}" />
 					<t:dataTable id="collaborators" var="collaborator"
-						value="#{screenViewer.screen.collaborators}"
+						value="#{screenDetailViewer.screen.collaborators}"
 						styleClass="standardTable" columnClasses="column"
-						rendered="#{!empty screenViewer.screen.collaborators}">
+						rendered="#{!empty screenDetailViewer.screen.collaborators}">
 						<t:column>
-							<t:commandLink action="#{screenViewer.viewCollaborator}"
+							<t:commandLink action="#{screenDetailViewer.viewCollaborator}"
 								value="#{collaborator.fullNameLastFirst}"
 								styleClass="dataText entityLink" />
 							<t:outputText value=" (" styleClass="dataText" />
-							<t:commandLink action="#{screenViewer.viewCollaboratorLabHead}"
+							<t:commandLink action="#{screenDetailViewer.viewCollaboratorLabHead}"
 								value="#{collaborator.labName}" styleClass="dataText labLink" />
 							<t:outputText value=")" styleClass="dataText" />
 						</t:column>
 					</t:dataTable>
 				</t:panelGrid>
 				<t:selectManyListbox id="collaboratorsEditable"
-					value="#{screenViewer.collaborators.value}"
-					rendered="#{screenViewer.editMode}" size="5" styleClass="inputText">
-					<f:selectItems value="#{screenViewer.collaborators.selectItems}" />
+					value="#{screenDetailViewer.collaborators.value}"
+					rendered="#{screenDetailViewer.editMode}" size="5" styleClass="inputText">
+					<f:selectItems value="#{screenDetailViewer.collaborators.selectItems}" />
 				</t:selectManyListbox>
 
 				<t:outputLabel for="dateCreatedEditable" value="Created"
-					rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+					rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
 					title="The date the screen was originally created in the database (either ScreenDB or Screensaver)" />
 				<t:inputDate id="dateCreatedEditable"
-					value="#{screenViewer.screen.dateCreated}" popupCalendar="true"
-					rendered="#{screenViewer.editMode}" styleClass="inputText" />
+					value="#{screenDetailViewer.screen.dateCreated}" popupCalendar="true"
+					rendered="#{screenDetailViewer.editMode}" styleClass="inputText" />
 				<t:outputText id="dateCreated"
-					value="#{screenViewer.screen.dateCreated}"
-					rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
+					value="#{screenDetailViewer.screen.dateCreated}"
+					rendered="#{screenDetailViewer.adminViewMode}" styleClass="dataText" />
 
 				<t:outputLabel for="dateOfApplicationEditable"
 					value="Application Date"
-					rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+					rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
 					title="The date the application for the screen was submitted" />
 				<t:inputDate id="dateOfApplicationEditable"
-					value="#{screenViewer.screen.dateOfApplication}"
-					popupCalendar="true" rendered="#{screenViewer.editMode}"
+					value="#{screenDetailViewer.screen.dateOfApplication}"
+					popupCalendar="true" rendered="#{screenDetailViewer.editMode}"
 					styleClass="inputText" />
 				<t:outputText id="dateOfApplication"
-					value="#{screenViewer.screen.dateOfApplication}"
-					rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
+					value="#{screenDetailViewer.screen.dateOfApplication}"
+					rendered="#{screenDetailViewer.adminViewMode}" styleClass="dataText" />
 
 				<t:outputLabel for="dateDataMeetingScheduledEditable"
 					value="Data Meeting Scheduled"
-					rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+					rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
 					title="The date the data meeting was scheduled" />
 				<t:inputDate id="dateDataMeetingScheduledEditable"
-					value="#{screenViewer.screen.dataMeetingScheduled}"
-					popupCalendar="true" rendered="#{screenViewer.editMode}"
+					value="#{screenDetailViewer.screen.dataMeetingScheduled}"
+					popupCalendar="true" rendered="#{screenDetailViewer.editMode}"
 					styleClass="inputText" />
 				<t:outputText id="dateDataMeetingScheduled"
-					value="#{screenViewer.screen.dataMeetingScheduled}"
-					rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
+					value="#{screenDetailViewer.screen.dataMeetingScheduled}"
+					rendered="#{screenDetailViewer.adminViewMode}" styleClass="dataText" />
 
 				<t:outputLabel for="dateDataMeetingCompletedEditable"
 					value="Data Meeting Completed"
-					rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+					rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
 					title="The date the data meeting was completed" />
 				<t:inputDate id="dateDataMeetingCompletedEditable"
-					value="#{screenViewer.screen.dataMeetingComplete}"
-					popupCalendar="true" rendered="#{screenViewer.editMode}"
+					value="#{screenDetailViewer.screen.dataMeetingComplete}"
+					popupCalendar="true" rendered="#{screenDetailViewer.editMode}"
 					styleClass="inputText" />
 				<t:outputText id="dateDataMeetingCompleted"
-					value="#{screenViewer.screen.dataMeetingComplete}"
-					rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
+					value="#{screenDetailViewer.screen.dataMeetingComplete}"
+					rendered="#{screenDetailViewer.adminViewMode}" styleClass="dataText" />
 
 				<t:outputLabel for="publishableProtocol"
 					value="Publishable Protocol"
-					rendered="#{screenViewer.allowedAccessToScreenDetails}"
+					rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
 					title="A publication-quality description of the protocol used for this screen" />
 				<t:inputTextarea id="publishableProtocol" rows="3" cols="80"
-					value="#{screenViewer.screen.publishableProtocol}"
-					displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
+					value="#{screenDetailViewer.screen.publishableProtocol}"
+					displayValueOnly="#{!screenDetailViewer.editMode}" styleClass="inputText"
 					displayValueOnlyStyleClass="dataText"
-					rendered="#{screenViewer.allowedAccessToScreenDetails}" />
+					rendered="#{screenDetailViewer.allowedAccessToScreenDetails}" />
 
 				<t:outputLabel for="summary" value="Summary"
-					rendered="#{screenViewer.allowedAccessToScreenDetails}"
+					rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
 					title="A summary of the screen" />
 				<t:inputTextarea id="summary" rows="3" cols="80"
-					value="#{screenViewer.screen.summary}"
-					displayValueOnly="#{!screenViewer.editMode}" styleClass="inputText"
+					value="#{screenDetailViewer.screen.summary}"
+					displayValueOnly="#{!screenDetailViewer.editMode}" styleClass="inputText"
 					displayValueOnlyStyleClass="dataText"
-					rendered="#{screenViewer.allowedAccessToScreenDetails}" />
+					rendered="#{screenDetailViewer.allowedAccessToScreenDetails}" />
 
 				<t:outputLabel for="comments" value="Comments"
-					rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+					rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
 					title="Administrative comments" />
 				<t:inputTextarea id="comments" rows="3" cols="80"
-					value="#{screenViewer.screen.comments}"
-					rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
-					displayValueOnly="#{screenViewer.adminViewMode}"
+					value="#{screenDetailViewer.screen.comments}"
+					rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
+					displayValueOnly="#{screenDetailViewer.adminViewMode}"
 					styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 
 				<t:outputLabel for="activityItems" value="Screening Room Activities"
-					rendered="#{screenViewer.allowedAccessToScreenDetails}"
+					rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
 					title="Activities carried out in the screening room, such as performing an assay or using a plate reader" />
 				<t:panelGrid columns="1"
-					rendered="#{screenViewer.allowedAccessToScreenDetails}">
+					rendered="#{screenDetailViewer.allowedAccessToScreenDetails}">
 					<t:outputText value="<none>" styleClass="dataText"
-						rendered="#{empty screenViewer.screen.screeningRoomActivities}" />
+						rendered="#{empty screenDetailViewer.screen.screeningRoomActivities}" />
 					<t:dataTable id="activityItems" var="activityItem"
-						value="#{screenViewer.screeningRoomActivitiesDataModel}"
+						value="#{screenDetailViewer.screeningRoomActivitiesDataModel}"
 						preserveDataModel="false"
-						rendered="#{!empty screenViewer.screen.screeningRoomActivities}"
+						rendered="#{!empty screenDetailViewer.screen.screeningRoomActivities}"
 						styleClass="standardTable" rowClasses="row1,row2"
 						columnClasses="column" headerClass="tableHeader">
 						<t:column>
@@ -289,33 +285,33 @@ TODO:
 						<%--
 				<t:column>
 					<t:commandButton id="viewActivity"
-						action="#{screenViewer.viewScreeningRoomActivity}"
-						value="#{screenViewer.editMode ? \"View/Edit...\" : \"View...\"}"
+						action="#{screenDetailViewer.viewScreeningRoomActivity}"
+						value="#{screenDetailViewer.editMode ? \"View/Edit...\" : \"View...\"}"
 						styleClass="command" />
-					<%- - t:commandButton id="copyScreeningRoomActivity" action="#{screenViewer.copyScreeningRoomActivity}"
-						rendered="#{screenViewer.editMode}" value="#{\"Copy...\"}"
+					<%- - t:commandButton id="copyScreeningRoomActivity" action="#{screenDetailViewer.copyScreeningRoomActivity}"
+						rendered="#{screenDetailViewer.editMode}" value="#{\"Copy...\"}"
 						styleClass="command" title="Copy to another screen" - -%>
 				</t:column>
 				--%>
 					</t:dataTable>
 					<t:panelGroup>
 						<t:commandButton value="Add Screening Room Activity..."
-							action="#{screenViewer.addScreeningRoomActivity}"
-							styleClass="command" rendered="#{screenViewer.editMode}" />
+							action="#{screenDetailViewer.addScreeningRoomActivity}"
+							styleClass="command" rendered="#{screenDetailViewer.editMode}" />
 					</t:panelGroup>
 				</t:panelGrid>
 
 				<t:outputLabel for="cherryPickRequests" value="Cherry Pick Requests"
-					rendered="#{screenViewer.allowedAccessToScreenDetails}"
+					rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
 					title="The cherry pick requests for this screen" />
 				<t:panelGrid columns="1"
-					rendered="#{screenViewer.allowedAccessToScreenDetails}">
+					rendered="#{screenDetailViewer.allowedAccessToScreenDetails}">
 					<t:outputText value="<none>" styleClass="dataText"
-						rendered="#{empty screenViewer.screen.cherryPickRequests}" />
+						rendered="#{empty screenDetailViewer.screen.cherryPickRequests}" />
 					<t:dataTable id="cherryPickRequests" var="cherryPickRequest"
-						value="#{screenViewer.cherryPickRequestsDataModel}"
+						value="#{screenDetailViewer.cherryPickRequestsDataModel}"
 						preserveDataModel="false"
-						rendered="#{!empty screenViewer.screen.cherryPickRequests}"
+						rendered="#{!empty screenDetailViewer.screen.cherryPickRequests}"
 						styleClass="standardTable" rowClasses="row1,row2"
 						columnClasses="column" headerClass="tableHeader">
 						<t:column>
@@ -343,31 +339,31 @@ TODO:
 						</t:column>
 						<t:column>
 							<t:commandButton id="viewCherryPickRequest"
-								action="#{screenViewer.viewCherryPickRequest}"
-								value="#{screenViewer.editMode ? \"View/Edit...\" : \"View...\"}"
+								action="#{screenDetailViewer.viewCherryPickRequest}"
+								value="#{screenDetailViewer.editMode ? \"View/Edit...\" : \"View...\"}"
 								styleClass="command" />
 						</t:column>
 					</t:dataTable>
 					<t:panelGroup>
 						<%-- TODO: 'rendered' expression is a bit of a hack --%>
 						<t:commandButton value="Add Cherry Pick Request..."
-							action="#{screenViewer.addCherryPickRequest}"
+							action="#{screenDetailViewer.addCherryPickRequest}"
 							styleClass="command"
 							rendered="#{cherryPickRequestViewer.editable}" />
 					</t:panelGroup>
 				</t:panelGrid>
 
 				<t:outputLabel for="statusItems" value="Status Items"
-					rendered="#{screenViewer.allowedAccessToScreenDetails}"
+					rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
 					title="A record of the status of the screen, such as when it was accepted, and whether it is ongoing, completed or dropped" />
 				<t:panelGrid columns="1"
-					rendered="#{screenViewer.allowedAccessToScreenDetails}">
+					rendered="#{screenDetailViewer.allowedAccessToScreenDetails}">
 					<t:outputText value="<none>" styleClass="dataText"
-						rendered="#{empty screenViewer.screen.statusItems}" />
+						rendered="#{empty screenDetailViewer.screen.statusItems}" />
 					<t:dataTable id="statusItems" var="statusItem"
-						value="#{screenViewer.statusItemsDataModel}"
+						value="#{screenDetailViewer.statusItemsDataModel}"
 						preserveDataModel="false"
-						rendered="#{!empty screenViewer.screen.statusItems}"
+						rendered="#{!empty screenDetailViewer.screen.statusItems}"
 						styleClass="standardTable" rowClasses="row1,row2"
 						columnClasses="column" headerClass="tableHeader">
 						<t:column>
@@ -383,24 +379,24 @@ TODO:
 							</f:facet>
 							<t:inputDate id="statusDateEditable"
 								value="#{statusItem.statusDate}" popupCalendar="true"
-								rendered="#{screenViewer.editMode}" styleClass="inputText" />
+								rendered="#{screenDetailViewer.editMode}" styleClass="inputText" />
 							<t:outputText id="statusDate" value="#{statusItem.statusDate}"
-								rendered="#{!screenViewer.editMode}" styleClass="dataText" />
+								rendered="#{!screenDetailViewer.editMode}" styleClass="dataText" />
 						</t:column>
-						<t:column rendered="#{screenViewer.editMode}">
+						<t:column rendered="#{screenDetailViewer.editMode}">
 							<t:commandButton value="Delete" image="/images/delete.png"
-								action="#{screenViewer.deleteStatusItem}" styleClass="command" />
+								action="#{screenDetailViewer.deleteStatusItem}" styleClass="command" />
 						</t:column>
 					</t:dataTable>
-					<t:panelGroup rendered="#{screenViewer.editMode}">
-						<t:selectOneMenu value="#{screenViewer.newStatusValue}"
+					<t:panelGroup rendered="#{screenDetailViewer.editMode}">
+						<t:selectOneMenu value="#{screenDetailViewer.newStatusValue}"
 							required="false" styleClass="inputText"
 							converter="StatusValueConverter">
-							<f:selectItems value="#{screenViewer.newStatusValueSelectItems}" />
+							<f:selectItems value="#{screenDetailViewer.newStatusValueSelectItems}" />
 						</t:selectOneMenu>
 						<t:commandButton value="Add Status Item"
-							action="#{screenViewer.addStatusItem}"
-							disabled="#{empty screenViewer.newStatusValueSelectItems}"
+							action="#{screenDetailViewer.addStatusItem}"
+							disabled="#{empty screenDetailViewer.newStatusValueSelectItems}"
 							styleClass="command" />
 					</t:panelGroup>
 				</t:panelGrid>
@@ -409,11 +405,11 @@ TODO:
 					title="Publications reporting results of the screen" />
 				<t:panelGrid columns="1">
 					<t:outputText value="<none>" styleClass="dataText"
-						rendered="#{empty screenViewer.screen.publications}" />
+						rendered="#{empty screenDetailViewer.screen.publications}" />
 					<t:dataTable id="publications" var="publication"
-						value="#{screenViewer.publicationsDataModel}"
+						value="#{screenDetailViewer.publicationsDataModel}"
 						preserveDataModel="false"
-						rendered="#{!empty screenViewer.screen.publications}"
+						rendered="#{!empty screenDetailViewer.screen.publications}"
 						styleClass="standardTable" rowClasses="row1,row2"
 						columnClasses="column" headerClass="tableHeader">
 						<t:column>
@@ -421,10 +417,10 @@ TODO:
 								<t:outputText value="Pubmed ID" />
 							</f:facet>
 							<t:inputText value="#{publication.pubmedId}"
-								rendered="#{screenViewer.editMode}" styleClass="inputText" />
+								rendered="#{screenDetailViewer.editMode}" styleClass="inputText" />
 							<h:outputLink
 								value="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi"
-								rendered="#{!screenViewer.editMode}">
+								rendered="#{!screenDetailViewer.editMode}">
 								<f:param name="cmd" value="Search" />
 								<f:param name="db" value="PubMed" />
 								<f:param name="term" value="#{publication.pubmedId}[PMID]" />
@@ -436,7 +432,7 @@ TODO:
 								<t:outputText value="Year" />
 							</f:facet>
 							<t:inputText value="#{publication.yearPublished}"
-								displayValueOnly="#{!screenViewer.editMode}" maxlength="4"
+								displayValueOnly="#{!screenDetailViewer.editMode}" maxlength="4"
 								styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 						</t:column>
 						<t:column>
@@ -444,7 +440,7 @@ TODO:
 								<t:outputText value="Title" />
 							</f:facet>
 							<t:inputText value="#{publication.title}"
-								displayValueOnly="#{!screenViewer.editMode}"
+								displayValueOnly="#{!screenDetailViewer.editMode}"
 								styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 						</t:column>
 						<t:column>
@@ -452,32 +448,32 @@ TODO:
 								<t:outputText value="Authors" />
 							</f:facet>
 							<t:inputText value="#{publication.authors}"
-								displayValueOnly="#{!screenViewer.editMode}"
+								displayValueOnly="#{!screenDetailViewer.editMode}"
 								styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 						</t:column>
 						<t:column>
 							<t:commandButton value="Delete" image="/images/delete.png"
-								action="#{screenViewer.deletePublication}" styleClass="command"
-								rendered="#{screenViewer.editMode}" />
+								action="#{screenDetailViewer.deletePublication}" styleClass="command"
+								rendered="#{screenDetailViewer.editMode}" />
 						</t:column>
 					</t:dataTable>
-					<t:panelGroup rendered="#{screenViewer.editMode}">
+					<t:panelGroup rendered="#{screenDetailViewer.editMode}">
 						<t:commandButton value="Add Publication"
-							action="#{screenViewer.addPublication}" styleClass="command" />
+							action="#{screenDetailViewer.addPublication}" styleClass="command" />
 					</t:panelGroup>
 				</t:panelGrid>
 
 				<t:outputLabel for="lettersOfSupport" value="Letters of Support"
-					rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+					rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
 					title="Letters of support written by screening room staff for those associated with the screen" />
 				<t:panelGrid columns="1"
-					rendered="#{screenViewer.editMode || screenViewer.adminViewMode}">
+					rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}">
 					<t:outputText value="<none>" styleClass="dataText"
-						rendered="#{empty screenViewer.screen.lettersOfSupport}" />
+						rendered="#{empty screenDetailViewer.screen.lettersOfSupport}" />
 					<t:dataTable id="lettersOfSupport" var="letterOfSupport"
-						value="#{screenViewer.lettersOfSupportDataModel}"
+						value="#{screenDetailViewer.lettersOfSupportDataModel}"
 						preserveDataModel="false"
-						rendered="#{!empty screenViewer.screen.lettersOfSupport}"
+						rendered="#{!empty screenDetailViewer.screen.lettersOfSupport}"
 						styleClass="standardTable" rowClasses="row1,row2"
 						columnClasses="column" headerClass="tableHeader">
 						<t:column>
@@ -485,7 +481,7 @@ TODO:
 								<t:outputText value="Written By" />
 							</f:facet>
 							<t:inputText value="#{letterOfSupport.writtenBy}"
-								displayValueOnly="#{!screenViewer.editMode}"
+								displayValueOnly="#{!screenDetailViewer.editMode}"
 								styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 						</t:column>
 						<t:column>
@@ -494,34 +490,34 @@ TODO:
 							</f:facet>
 							<t:inputDate id="statusDateEditable"
 								value="#{letterOfSupport.dateWritten}" popupCalendar="true"
-								rendered="#{screenViewer.editMode}" styleClass="inputText" />
+								rendered="#{screenDetailViewer.editMode}" styleClass="inputText" />
 							<t:outputText id="statusDate"
 								value="#{letterOfSupport.dateWritten}"
-								rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
+								rendered="#{screenDetailViewer.adminViewMode}" styleClass="dataText" />
 						</t:column>
 						<t:column>
 							<t:commandButton value="Delete" image="/images/delete.png"
-								action="#{screenViewer.deleteLetterOfSupport}"
-								styleClass="command" rendered="#{screenViewer.editMode}" />
+								action="#{screenDetailViewer.deleteLetterOfSupport}"
+								styleClass="command" rendered="#{screenDetailViewer.editMode}" />
 						</t:column>
 					</t:dataTable>
-					<t:panelGroup rendered="#{screenViewer.editMode}">
+					<t:panelGroup rendered="#{screenDetailViewer.editMode}">
 						<t:commandButton value="Add Letter of Support"
-							action="#{screenViewer.addLetterOfSupport}" styleClass="command" />
+							action="#{screenDetailViewer.addLetterOfSupport}" styleClass="command" />
 					</t:panelGroup>
 				</t:panelGrid>
 
 				<t:outputLabel for="attachedFiles" value="Attached Files"
-					rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+					rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
 					title="Downloadable files associated with the screen" />
 				<t:panelGrid columns="1"
-					rendered="#{screenViewer.editMode || screenViewer.adminViewMode}">
+					rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}">
 					<t:outputText value="<none>" styleClass="dataText"
-						rendered="#{empty screenViewer.screen.attachedFiles}" />
+						rendered="#{empty screenDetailViewer.screen.attachedFiles}" />
 					<t:dataTable id="attachedFiles" var="attachedFile"
-						value="#{screenViewer.attachedFilesDataModel}"
+						value="#{screenDetailViewer.attachedFilesDataModel}"
 						preserveDataModel="false"
-						rendered="#{!empty screenViewer.screen.attachedFiles}"
+						rendered="#{!empty screenDetailViewer.screen.attachedFiles}"
 						styleClass="standardTable" rowClasses="row1,row2"
 						columnClasses="column" headerClass="tableHeader">
 						<t:column>
@@ -529,7 +525,7 @@ TODO:
 								<t:outputText value="File Name" />
 							</f:facet>
 							<t:inputText value="#{attachedFile.filename}"
-								displayValueOnly="#{!screenViewer.editMode}"
+								displayValueOnly="#{!screenDetailViewer.editMode}"
 								styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 						</t:column>
 						<t:column>
@@ -537,34 +533,34 @@ TODO:
 								<t:outputText value="Contents" />
 							</f:facet>
 							<t:inputText value="#{attachedFile.fileContents}"
-								displayValueOnly="#{!screenViewer.editMode}"
+								displayValueOnly="#{!screenDetailViewer.editMode}"
 								styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 						</t:column>
 						<t:column>
 							<t:commandButton value="Delete" image="/images/delete.png"
-								action="#{screenViewer.deleteAttachedFile}" styleClass="command"
-								rendered="#{screenViewer.editMode}" />
+								action="#{screenDetailViewer.deleteAttachedFile}" styleClass="command"
+								rendered="#{screenDetailViewer.editMode}" />
 							<t:commandButton value="View..."
-								action="#{screenViewer.viewAttachedFile}" styleClass="command" />
+								action="#{screenDetailViewer.viewAttachedFile}" styleClass="command" />
 						</t:column>
 					</t:dataTable>
-					<t:panelGroup rendered="#{screenViewer.editMode}">
+					<t:panelGroup rendered="#{screenDetailViewer.editMode}">
 						<t:commandButton value="Add Attached File"
-							action="#{screenViewer.addAttachedFile}" styleClass="command" />
+							action="#{screenDetailViewer.addAttachedFile}" styleClass="command" />
 					</t:panelGroup>
 				</t:panelGrid>
 
 				<t:outputLabel for="fundingSupports" value="Funding Support"
-					rendered="#{screenViewer.editMode || screenViewer.adminViewMode}"
+					rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
 					title="The sources of funding support for the screen" />
 				<t:panelGrid columns="1"
-					rendered="#{screenViewer.editMode || screenViewer.adminViewMode}">
+					rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}">
 					<t:outputText value="<none>" styleClass="dataText"
-						rendered="#{empty screenViewer.screen.fundingSupports}" />
+						rendered="#{empty screenDetailViewer.screen.fundingSupports}" />
 					<t:dataTable id="fundingSupports" var="fundingSupport"
-						value="#{screenViewer.fundingSupportsDataModel}"
+						value="#{screenDetailViewer.fundingSupportsDataModel}"
 						preserveDataModel="false"
-						rendered="#{!empty screenViewer.screen.fundingSupports}"
+						rendered="#{!empty screenDetailViewer.screen.fundingSupports}"
 						styleClass="standardTable" rowClasses="row1,row2"
 						columnClasses="column" headerClass="tableHeader">
 						<t:column>
@@ -573,93 +569,93 @@ TODO:
 						</t:column>
 						<t:column>
 							<t:commandButton value="Delete" image="/images/delete.png"
-								action="#{screenViewer.deleteFundingSupport}"
-								styleClass="command" rendered="#{screenViewer.editMode}" />
+								action="#{screenDetailViewer.deleteFundingSupport}"
+								styleClass="command" rendered="#{screenDetailViewer.editMode}" />
 						</t:column>
 					</t:dataTable>
-					<t:panelGroup rendered="#{screenViewer.editMode}">
-						<t:selectOneMenu value="#{screenViewer.newFundingSupport}"
+					<t:panelGroup rendered="#{screenDetailViewer.editMode}">
+						<t:selectOneMenu value="#{screenDetailViewer.newFundingSupport}"
 							required="false" styleClass="inputText"
 							converter="FundingSupportConverter">
 							<f:selectItems
-								value="#{screenViewer.newFundingSupportSelectItems}" />
+								value="#{screenDetailViewer.newFundingSupportSelectItems}" />
 						</t:selectOneMenu>
 						<t:commandButton value="Add Funding Support"
-							action="#{screenViewer.addFundingSupport}"
-							rendered="#{screenViewer.editMode}"
-							disabled="#{empty screenViewer.newFundingSupportSelectItems}"
+							action="#{screenDetailViewer.addFundingSupport}"
+							rendered="#{screenDetailViewer.editMode}"
+							disabled="#{empty screenDetailViewer.newFundingSupportSelectItems}"
 							styleClass="command" />
 					</t:panelGroup>
 				</t:panelGrid>
 
 				<t:outputLabel for="assayReadoutTypes" value="Assay Readout Types"
-					rendered="#{screenViewer.allowedAccessToScreenDetails}"
+					rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
 					title="The assay readout types used" />
 				<t:outputText id="assayReadoutTypes"
-					value="#{empty screenViewer.screen.assayReadoutTypes ? \"<none>\" : screenViewer.screen.assayReadoutTypesString}"
+					value="#{empty screenDetailViewer.screen.assayReadoutTypes ? \"<none>\" : screenDetailViewer.screen.assayReadoutTypesString}"
 					styleClass="dataText"
-					rendered="#{screenViewer.allowedAccessToScreenDetails}" />
+					rendered="#{screenDetailViewer.allowedAccessToScreenDetails}" />
 
 				<t:outputLabel for="keywords" value="Keywords"
 					title="A set of keywords associated with the screen" />
 				<t:outputText value="<none>" styleClass="dataText"
-					rendered="#{!screenViewer.editMode && empty screenViewer.screen.keywords}" />
-				<t:outputText value="#{screenViewer.keywords}"
-					rendered="#{!screenViewer.editMode && !empty screenViewer.screen.keywords}" />
-				<t:panelGrid columns="1" rendered="#{screenViewer.editMode}">
+					rendered="#{!screenDetailViewer.editMode && empty screenDetailViewer.screen.keywords}" />
+				<t:outputText value="#{screenDetailViewer.keywords}"
+					rendered="#{!screenDetailViewer.editMode && !empty screenDetailViewer.screen.keywords}" />
+				<t:panelGrid columns="1" rendered="#{screenDetailViewer.editMode}">
 					<t:outputText value="<none>" styleClass="dataText"
-						rendered="#{!empty screenViewer.screen.keywords}" />
+						rendered="#{!empty screenDetailViewer.screen.keywords}" />
 					<t:dataTable id="keywords" var="keyword"
-						value="#{screenViewer.keywordsDataModel}"
+						value="#{screenDetailViewer.keywordsDataModel}"
 						preserveDataModel="false" styleClass="standardTable"
 						rowClasses="row1,row2" columnClasses="column"
 						headerClass="tableHeader"
-						rendered="#{!empty screenViewer.screen.keywords}">
+						rendered="#{!empty screenDetailViewer.screen.keywords}">
 						<t:column>
 							<t:outputText value="#{keyword}" styleClass="dataText" />
 						</t:column>
 						<t:column>
 							<t:commandButton value="Delete" image="/images/delete.png"
-								action="#{screenViewer.deleteKeyword}" styleClass="command"
-								rendered="#{screenViewer.editMode}" />
+								action="#{screenDetailViewer.deleteKeyword}" styleClass="command"
+								rendered="#{screenDetailViewer.editMode}" />
 						</t:column>
 					</t:dataTable>
-					<t:panelGroup rendered="#{screenViewer.editMode}">
-						<t:inputText id="newKeyword" value="#{screenViewer.newKeyword}"
+					<t:panelGroup rendered="#{screenDetailViewer.editMode}">
+						<t:inputText id="newKeyword" value="#{screenDetailViewer.newKeyword}"
 							styleClass="inputText" required="false" />
 						<t:commandButton id="addKeywordCommand" value="Add Keyword"
-							action="#{screenViewer.addKeyword}" styleClass="command" />
+							action="#{screenDetailViewer.addKeyword}" styleClass="command" />
 					</t:panelGroup>
 				</t:panelGrid>
 
 				<t:outputLabel for="Abase" value="Abase"
-					rendered="#{screenViewer.adminViewMode}" title="Abase stuff" />
-				<t:panelGroup rendered="#{screenViewer.adminViewMode}">
+					rendered="#{screenDetailViewer.adminViewMode}" title="Abase stuff" />
+				<t:panelGroup rendered="#{screenDetailViewer.adminViewMode}">
 					<t:outputLabel for="abaseStudyId" value="Study ID: "
-						rendered="#{screenViewer.adminViewMode}" styleClass="label" />
+						rendered="#{screenDetailViewer.adminViewMode}" styleClass="label" />
 					<t:outputText id="abaseStudyId"
-						value="#{screenViewer.screen.abaseStudyId}"
-						rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
+						value="#{screenDetailViewer.screen.abaseStudyId}"
+						rendered="#{screenDetailViewer.adminViewMode}" styleClass="dataText" />
 
 					<t:outputLabel for="abaseProtocolId" value=", Protocol ID: "
-						rendered="#{screenViewer.adminViewMode}" styleClass="label" />
+						rendered="#{screenDetailViewer.adminViewMode}" styleClass="label" />
 					<t:outputText id="abaseProtocolId"
-						value="#{screenViewer.screen.abaseProtocolId}"
-						rendered="#{screenViewer.adminViewMode}" styleClass="dataText" />
+						value="#{screenDetailViewer.screen.abaseProtocolId}"
+						rendered="#{screenDetailViewer.adminViewMode}" styleClass="dataText" />
 
 					<t:outputLabel for="AbaseTestsets" value=", Testsets: "
-						rendered="#{screenViewer.adminViewMode}" styleClass="label" />
+						rendered="#{screenDetailViewer.adminViewMode}" styleClass="label" />
 					<t:outputText
-						value="#{empty screenViewer.screen.abaseTestsets ? \"<none>\" : screenViewer.abaseTestsets}"
-						styleClass="dataText" rendered="#{screenViewer.adminViewMode}" />
+						value="#{empty screenDetailViewer.screen.abaseTestsets ? \"<none>\" : screenDetailViewer.abaseTestsets}"
+						styleClass="dataText" rendered="#{screenDetailViewer.adminViewMode}" />
 				</t:panelGroup>
 
 				<t:outputLabel value="Billing Information" styleClass="label"
 					visibleOnUserRole="billingAdmin"
 					title="Information for tracking billing from ICCB-L to the lab performing the screen" />
 				<t:commandButton id="viewBillingInformation"
-					value="#{screenViewer.editMode ? \"Edit...\" : \"View...\"}"
-					action="#{screenViewer.viewBillingInformation}"
+					value="#{screenDetailViewer.editMode ? \"Edit...\" : \"View...\"}"
+					action="#{screenDetailViewer.viewBillingInformation}"
 					styleClass="command" visibleOnUserRole="billingAdmin" />
 			</t:panelGrid>
 		</t:collapsiblePanel>

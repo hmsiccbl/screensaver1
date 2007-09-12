@@ -26,6 +26,7 @@ import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;

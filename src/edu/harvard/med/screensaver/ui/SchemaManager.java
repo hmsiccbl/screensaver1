@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -14,14 +14,13 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.db.screendb.ScreenDBSynchronizer;
-import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 
 import org.apache.log4j.Logger;
 
 public class SchemaManager extends AbstractBackingBean
 {
-  private static Logger log = Logger.getLogger(ScreenViewer.class);
-  
+  private static Logger log = Logger.getLogger(SchemaManager.class);
+
   private SchemaUtil _schemaUtil;
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
@@ -31,10 +30,10 @@ public class SchemaManager extends AbstractBackingBean
   private String _screenDBDatabase = "screendb";
   private String _screenDBUsername = "s";
   private String _screenDBPassword;
-  
-  
+
+
   // getters and setters
-  
+
   public SchemaUtil getSchemaUtil()
   {
     return _schemaUtil;
@@ -100,39 +99,39 @@ public class SchemaManager extends AbstractBackingBean
     _screenDBPassword = screenDBPassword;
   }
 
-  
+
   // JSF application methods
-  
+
   public void dropSchema()
   {
     _schemaUtil.dropSchema();
   }
-  
+
   public void createSchema()
   {
     _schemaUtil.createSchema();
   }
-  
+
   public void initializeDatabase()
   {
     _schemaUtil.initializeDatabase();
   }
-  
+
   public void truncateTables()
   {
     _schemaUtil.truncateTablesOrCreateSchema();
   }
-  
+
   public void grantDeveloperPermissions()
   {
     _schemaUtil.grantDeveloperPermissions();
   }
-  
+
   public void synchronizeScreenDB()
   {
     if (_screenDBUsername.equals("")) {
       showMessage("screenDBSynchronizer.missingUsernamePassword");
-      return; 
+      return;
     }
     ScreenDBSynchronizer screenDBSynchronizer = new ScreenDBSynchronizer(
       _screenDBServer,

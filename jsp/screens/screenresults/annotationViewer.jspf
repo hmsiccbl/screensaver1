@@ -6,7 +6,7 @@
 <f:subview id="annotationViewer">
 	<h:form id="annotationPanelForm">
 		<t:collapsiblePanel id="annotationPanel"
-			value="#{screenResultViewer.isPanelCollapsedMap['annotations']}"
+			value="#{annotationViewer.isPanelCollapsedMap['annotations']}"
 			title="Annotations" var="isCollapsed" titleVar="title"
 			rendered="#{!annotationViewer.screen.restricted && !empty annotationViewer.screen.annotationTypes}">
 			<f:facet name="header">
@@ -28,7 +28,7 @@
 
 			<t:div style="margin-left: 30px">
 				<t:panelGrid columns="1"
-					rendered="#{!(screenResultViewer.isPanelCollapsedMap['annotationTypes'] && screenResultViewer.isPanelCollapsedMap['annotationValues'])}"
+					rendered="#{!(annotationViewer.isPanelCollapsedMap['annotationTypes'] && annotationViewer.isPanelCollapsedMap['annotationValues'])}"
 					styleClass="groupingPanel"
 					title="Select the annotations to display in the annotation tables below">
 					<t:outputLabel for="annotationsList"
@@ -59,7 +59,7 @@
 			<t:div style="margin-left: 30px">
 
 				<t:collapsiblePanel id="annotationTypesPanel"
-					value="#{screenResultViewer.isPanelCollapsedMap['annotationTypes']}"
+					value="#{annotationViewer.isPanelCollapsedMap['annotationTypes']}"
 					title="Annotation Types" var="isCollapsed" titleVar="title">
 					<f:facet name="header">
 						<t:div styleClass="subsectionHeader">
@@ -98,7 +98,7 @@
 				<t:commandButton id="updateAnnotationValuesButton" forceId="true"
 					styleClass="hiddenCommand" />
 				<t:collapsiblePanel id="annotationValuesPanel"
-					value="#{screenResultViewer.isPanelCollapsedMap['annotationValues']}"
+					value="#{annotationViewer.isPanelCollapsedMap['annotationValues']}"
 					title="Annotation Data" var="isCollapsed" titleVar="title">
 					<f:facet name="header">
 						<t:div styleClass="subsectionHeader">
