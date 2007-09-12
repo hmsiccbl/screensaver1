@@ -45,7 +45,6 @@ public class BoutrosAnnotationImporter
 
   private static final String SCREENER_LAB_AFFILIATION_NAME = "German Cancer Research Center";
   private static final String RNAIGLOBAL_LOGIN = "rnaiglobal";
-  private static final String RNAI_GLOBAL_PASSWORD = "rna1global";
   private static final Date SCREEN_DATE = DateUtil.makeDate(2007, 6, 14);
   private static final String SCREENER_EMAIL = "m.boutros@dkfz.de";
   private static final String SCREEN_TITLE = "Sequence Analysis of siGENOME";
@@ -58,6 +57,7 @@ public class BoutrosAnnotationImporter
   {
     CommandLineApplication app = new CommandLineApplication(args);
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("data file to import").withArgName("csv file").create("f"));
+    app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("password for RNAi Global user").withArgName("password").create("p"));
     if (!app.processOptions(true, true)) {
       System.exit(1);
     }
@@ -68,6 +68,7 @@ public class BoutrosAnnotationImporter
     }
 
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+    final String rnaiGlobalUserPassword = app.getCommandLineOptionValue("p");
 
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
@@ -144,9 +145,9 @@ public class BoutrosAnnotationImporter
                                   ScreeningRoomUserClassification.UNASSIGNED,
                                   true);
           rnaiGlobalMember.setLoginId(RNAIGLOBAL_LOGIN);
-          rnaiGlobalMember.setDigestedPassword(CryptoUtils.digest(RNAI_GLOBAL_PASSWORD));
-          rnaiGlobalMember.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
-          screen.addCollaborator(rnaiGlobalMember);
+          rnaiGlobalMember.setDigestedPassword(CryptoUtils.digest(rnaiGlobalUserPassword));
+          rnaiGlobalMember.addScreensaverUserRole(ScreensaverUserRole.GUEST_USER);
+          dao.persistEntity(rnaiGlobalMember);
 
           importScreenResultData(screen, file, dao);
           dao.persistEntity(screen);

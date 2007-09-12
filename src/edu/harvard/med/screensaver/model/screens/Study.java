@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
@@ -33,5 +34,17 @@ public abstract class Study extends AbstractEntity
   abstract public SortedSet<AnnotationType> getAnnotationTypes();
 
   abstract public ScreenType getScreenType();
+
+  public boolean isStudyOnly()
+  {
+    // TODO: this is a total hack; proper solution is waiting on having the Study->Screen->IccbScreen hierarchy in place
+    return getStudyType().equals(StudyType.IN_SILICO);
+  }
+
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
 }
 

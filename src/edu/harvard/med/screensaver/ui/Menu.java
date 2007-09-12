@@ -135,7 +135,7 @@ public class Menu extends AbstractBackingBean
           if (study.isRestricted()) {
             iter.remove();
           }
-          if (study.getStudyType().equals(StudyType.IN_VITRO)) {
+          else if (!study.isStudyOnly()) {
             iter.remove();
           }
         }
@@ -162,6 +162,9 @@ public class Menu extends AbstractBackingBean
         for (Iterator<Screen> iter = screens.iterator(); iter.hasNext();) {
           Screen screen = iter.next();
           if (screen.isRestricted()) {
+            iter.remove();
+          }
+          else if (screen.isStudyOnly()) {
             iter.remove();
           }
         }

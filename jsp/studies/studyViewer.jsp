@@ -15,7 +15,7 @@
 
 	<t:panelGrid columns="1" width="100%">
 		<%@include file="studyDetailViewer.jspf"%>
-		<%@include file="screenresults/annotationViewer.jspf"%>
+		<%@include file="annotationViewer.jspf"%>
 	</t:panelGrid>
 
 </f:subview>

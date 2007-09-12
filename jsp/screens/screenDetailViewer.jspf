@@ -54,7 +54,7 @@ TODO:
 			<t:panelGroup id="commandPanel">
 				<h:commandButton id="viewAdminOnlyFieldsCommand"
 					value="#{screenDetailViewer.adminViewMode ? \"Hide Admin\" : \"Show Admin\"}"
-					rendered="#{(screenDetailViewer.editable || screenDetailViewer.readOnlyAdmin) && !screenDetailViewer.editMode}"
+					rendered="#{(screenDetailViewer.editable || screenDetailViewer.readAdmin) && !screenDetailViewer.editMode}"
 					action="#{screenDetailViewer.toggleAdminViewMode}" styleClass="command"
 					title="Show or hide administrative fields for the screen" />
 				<h:commandButton id="editCommand" value="Edit"

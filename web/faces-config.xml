@@ -176,12 +176,12 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
     <!-- === studies navigation rules === -->
     <navigation-case>
       <from-outcome>browseStudies</from-outcome>
-      <to-view-id>/screens/studiesBrowser</to-view-id>
+      <to-view-id>/studies/studiesBrowser</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-outcome>viewStudy</from-outcome>
-      <to-view-id>/screens/studyViewer</to-view-id>
+      <to-view-id>/studies/studyViewer</to-view-id>
       <redirect/>
     </navigation-case>
 

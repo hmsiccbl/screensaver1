@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-   $HeadURL$
-   $Id$
+   $HeadURL:svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/web/web.xml $
+   $Id:web.xml 1750 2007-08-30 11:58:57Z ant4 $
 
    Copyright 2006 by the President and Fellows of Harvard College.
-   
+
    Screensaver is an open-source project developed by the ICCB-L and NSRB labs
    at Harvard Medical School. This software is distributed under the terms of
    the GNU General Public License.
@@ -15,7 +15,7 @@
   version="2.4"
   xmlns="http://java.sun.com/xml/ns/j2ee"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
+  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
 	http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
   <display-name>Screensaver 1.x</display-name>
@@ -68,7 +68,7 @@
     <filter-name>ScreensaverServletFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
-  
+
 
   <!-- JSF/MyFaces configuration -->
 
@@ -257,7 +257,7 @@
     <filter-name>MyFacesExtensionsFilter</filter-name>
     <url-pattern>/faces/myFacesExtensionResource/*</url-pattern>
   </filter-mapping>
-  
+
 
   <!-- Tiles configuration -->
 
@@ -282,7 +282,7 @@
       <scripting-invalid>false</scripting-invalid>
       <is-xml>false</is-xml>
       <!-- Can't use these w/MyEclipse JSP editor.
-        See http://www.myeclipseide.com/PNphpBB2+file-viewtopic-t-9223.html 
+        See http://www.myeclipseide.com/PNphpBB2+file-viewtopic-t-9223.html
         <include-prelude>/fragments/header.jspf</include-prelude>
         <include-coda>/fragments/footer.jspf</include-coda>
       -->
@@ -302,10 +302,10 @@
   <listener>
     <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
   </listener>
-  
+
 
   <!-- JNDI setup -->
-  
+
   <resource-env-ref>
     <description>Mutable capsule that allows us to store a LoginModuleFactory in JNDI, which is instantiated by our web app, and not available at Tomcat initialization time.</description>
     <resource-env-ref-name>bean/loginModuleFactoryCapsule</resource-env-ref-name>
@@ -358,7 +358,7 @@
       <url-pattern>/goodbye.jsf</url-pattern>
       <http-method>GET</http-method>
     </web-resource-collection>
-    
+
     <web-resource-collection>
       <web-resource-name>Resources</web-resource-name>
       <description>Images, stylesheets, etc.  Access via HTTP GET and HEAD methods only.</description>
@@ -370,14 +370,14 @@
       <http-method>GET</http-method>
       <http-method>HEAD</http-method>
     </web-resource-collection>
-    
+
     <web-resource-collection>
       <web-resource-name>Error Messages</web-resource-name>
       <description>Pages that display error messages, which should displayable to everyone, including unauthenticated users.</description>
       <url-pattern>/reportException.jsf</url-pattern>
       <url-pattern>/unauthorizedAccess.jsp</url-pattern>
     </web-resource-collection>
-    
+
     <!-- Having no auth-constraint element allows all roles, including users not authenticated -->
 
     <user-data-constraint>
@@ -395,9 +395,29 @@
       <url-pattern>/downloadsViewer.jsf</url-pattern>
       <url-pattern>/helpViewer.jsf</url-pattern>
       <url-pattern>/libraries/*</url-pattern>
+      <url-pattern>/studies/*</url-pattern>
+      <url-pattern>/help/*</url-pattern>
+    </web-resource-collection>
+
+    <auth-constraint>
+      <role-name>guestUser</role-name>
+      <role-name>compoundScreeningRoomUser</role-name>
+      <role-name>rnaiScreeningRoomUser</role-name>
+      <role-name>readEverythingAdmin</role-name>
+      <role-name>developer</role-name>
+    </auth-constraint>
+
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+      <!--  TODO: transport-guarantee>CONFIDENTIAL</transport-guarantee -->
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>screener</web-resource-name>
       <url-pattern>/screens/*</url-pattern>
       <url-pattern>/screens/screenresults/*</url-pattern>
-      <url-pattern>/help/*</url-pattern>
     </web-resource-collection>
 
     <auth-constraint>
@@ -420,7 +440,7 @@
     </web-resource-collection>
 
     <auth-constraint>
-      <role-name>librariesAdmin</role-name>  
+      <role-name>librariesAdmin</role-name>
     </auth-constraint>
 
     <user-data-constraint>
@@ -436,7 +456,7 @@
     </web-resource-collection>
 
     <auth-constraint>
-      <role-name>cherryPickAdmin</role-name>  
+      <role-name>cherryPickAdmin</role-name>
     </auth-constraint>
 
     <user-data-constraint>
@@ -452,7 +472,7 @@
     </web-resource-collection>
 
     <auth-constraint>
-      <role-name>screenResultsAdmin</role-name>  
+      <role-name>screenResultsAdmin</role-name>
     </auth-constraint>
 
     <user-data-constraint>

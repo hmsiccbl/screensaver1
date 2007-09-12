@@ -48,6 +48,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
+import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemType;
@@ -221,6 +222,11 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   }
 
   public boolean visit(RNAiKnockdownConfirmation entity)
+  {
+    return true;
+  }
+
+  public boolean visit(Study study)
   {
     return true;
   }

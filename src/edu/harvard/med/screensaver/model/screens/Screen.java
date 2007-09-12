@@ -194,6 +194,10 @@ public class Screen extends Study
 
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
+    // TODO: HACK, until we have the real Study->Screen->IccbScreen hierarchy
+    if (isStudyOnly()) {
+      return visitor.visit((Study) this);
+    }
     return visitor.visit(this);
   }
 

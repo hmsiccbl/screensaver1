@@ -135,7 +135,7 @@ public class ScreenDetailViewer extends StudyDetailViewer
   // IccbAdminScreen to contain admin-only fields
   public boolean isAllowedAccessToScreenDetails()
   {
-    return isReadOnlyAdmin() ||
+    return isReadAdmin() ||
            _dataAccessPolicy.isScreenerAllowedAccessToScreenDetails(getScreen());
   }
 

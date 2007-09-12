@@ -9,16 +9,16 @@
 	<h:form id="studyDetailPanelForm">
 		<t:collapsiblePanel id="studyDetailPanel"
 			value="#{studyDetailViewer.panelCollapsed}"
-			title="#{entityTypeName} Summary" var="isCollapsed" titleVar="title">
+			title="Study Summary" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
 				<t:div styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
 						<h:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
-						<h:outputText value="#{entityTypeName} Summary"
+						<h:outputText value="Study Summary"
 							styleClass="sectionHeader" rendered="#{isCollapsed}" />
-						<h:outputText value="#{entityTypeName} Details"
+						<h:outputText value="Study Details"
 							styleClass="sectionHeader" rendered="#{!isCollapsed}" />
 					</t:headerLink>
 				</t:div>
