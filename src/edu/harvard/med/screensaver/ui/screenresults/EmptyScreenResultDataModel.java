@@ -17,7 +17,6 @@ import java.util.Map;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 
 import org.apache.log4j.Logger;
 
@@ -31,49 +30,13 @@ public class EmptyScreenResultDataModel extends ScreenResultDataModel
 
   public EmptyScreenResultDataModel()
   {
-    super(null, -1, null, null);
+    super(null, -1, -1, SortDirection.ASCENDING, null);
   }
 
   @Override
-  public int getRowCount()
+  protected Map<WellKey,List<ResultValue>> fetchData(int firstRowIndex, int rowsToFetch)
   {
-    return 0;
+    return new HashMap<WellKey,List<ResultValue>>();
   }
 
-  @Override
-  public Map<String,Object> getRowData()
-  {
-    return EMTPY_ROW;
-  }
-
-  @Override
-  public int getRowIndex()
-  {
-    return 0;
-  }
-
-  @Override
-  public List<Map<String,Object>> getWrappedData()
-  {
-    return EMPTY_RESULT;
-  }
-
-  @Override
-  public boolean isRowAvailable()
-  {
-    return false;
-  }
-
-  @Override
-  public void setRowIndex(int rowIndex)
-  {
-  }
-
-  @Override
-  protected Map<WellKey,List<ResultValue>> fetchData(List<ResultValueType> selectedResultValueTypes,
-                                                     int sortBy,
-                                                     SortDirection sortDirection)
-  {
-    return null;
-  }
 }

@@ -134,7 +134,7 @@ public class AnnotationsDAO extends AbstractDAO
         orderByClauses.add(sortByAvAlias + ".value" + sortDirStr);
       }
     }
-    else if (sortBy == SORT_BY_VENDOR_ID) {
+    else {
       orderByClauses.add(sortByAvAlias + ".vendorIdentifier " + sortDirStr);
     }
 

@@ -74,11 +74,10 @@ public class FullScreenResultDataTable extends ScreenResultDataTable
   protected DataModel buildDataModel()
   {
     return new FullScreenResultDataModel(getResultValueTypes(),
+                                         getRowsPerPageSelector().getSelection(),
                                          getSortManager().getSortColumnIndex(),
                                          getSortManager().getSortDirection(),
-                                         _screenResultsDao,
-                                         getRowsPerPageSelector().getSelection(),
-                                         _screenResultSize);
+                                         _screenResultsDao);
   }
 
 

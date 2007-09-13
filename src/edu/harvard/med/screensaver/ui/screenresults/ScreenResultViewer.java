@@ -402,11 +402,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
       _screenResultDataTable = new EmptyScreenResultDataTable();
     }
     else if (getDataFilter().getSelection().equals(DATA_TABLE_FILTER_SHOW_ALL)) {
-      int screenResultSize = 0;
-      if (getResultValueTypes().size() > 0) {
-        screenResultSize = getResultValueTypes().get(0).getResultValues().size();
-      }
-      _fullScreenResultDataTable.setScreenResultSize(screenResultSize);
       _screenResultDataTable = _fullScreenResultDataTable;
     }
     else if (getDataFilter().getSelection().equals(DATA_TABLE_FILTER_SHOW_POSITIVES)) {

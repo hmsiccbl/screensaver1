@@ -15,14 +15,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.faces.model.DataModel;
-
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.ui.table.VirtualPagingDataModel;
 
 import org.apache.log4j.Logger;
 
@@ -39,7 +37,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-abstract public class ScreenResultDataModel extends DataModel
+abstract public class ScreenResultDataModel extends VirtualPagingDataModel<WellKey,ResultValue>
 {
   // static members
 
@@ -50,176 +48,61 @@ abstract public class ScreenResultDataModel extends DataModel
 
   // instance data members
 
-  protected List<ResultValueType> _resultValueTypes;
-  protected int _sortColumnIndex;
-  protected SortDirection _sortDirection;
   protected ScreenResultsDAO _screenResultsDao;
-  protected int _rowIndex;
-  protected int _rowsToFetch;
-
-  private List<List<Boolean>> _excludedResultValues;
-  private List<Map<String,Object>> _wrappedData;
-
-
-  // abstract methods
-
-
-  abstract protected Map<WellKey,List<ResultValue>> fetchData(List<ResultValueType> selectedResultValueTypes,
-                                                              int sortBy,
-                                                              SortDirection sortDirection);
-
-
-  //abstract public void sort(String sortColumnName, SortDirection sortDirection);
+  protected List<ResultValueType> _resultValueTypes;
+  private Map<Integer,List<Boolean>> _excludedResultValuesMap = new HashMap<Integer,List<Boolean>>();
 
 
   // public constructors and methods
 
   public ScreenResultDataModel(List<ResultValueType> resultValueTypes,
+                               int rowsToFetch,
                                int sortColumnIndex,
                                SortDirection sortDirection,
                                ScreenResultsDAO dao)
   {
-    _sortColumnIndex = sortColumnIndex;
-    _sortDirection = sortDirection;
+    super(rowsToFetch,
+          resultValueTypes == null || resultValueTypes.size() == 0 ? 0 : resultValueTypes.get(0).getResultValues().size(),
+          sortColumnIndex - DATA_TABLE_FIXED_COLUMNS,
+          sortDirection);
     _resultValueTypes = resultValueTypes;
     _screenResultsDao = dao;
-  }
-
-  @Override
-  public Map<String,Object> getRowData()
-  {
-    return getWrappedData().get(_rowIndex);
-  }
-
-  @Override
-  public int getRowIndex()
-  {
-    return _rowIndex;
-  }
-
-  @Override
-  public int getRowCount()
-  {
-    return getWrappedData().size();
-  }
-
-  public List<Map<String,Object>> getWrappedData()
-  {
-    if (_wrappedData == null) {
-      build();
-    }
-    return _wrappedData;
-  }
-
-  @Override
-  public boolean isRowAvailable()
-  {
-    return _rowIndex < getRowCount() && _rowIndex >= 0;
-  }
-
-  @Override
-  public void setRowIndex(int rowIndex)
-  {
-    _rowIndex = rowIndex;
-  }
-
-  @Override
-  final public void setWrappedData(Object data)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  final public void setRowsToFetch(int rowsToFetch)
-  {
-    log.debug("set rowsToFetch=" + rowsToFetch);
-    _rowsToFetch = rowsToFetch;
-  }
-
-  /**
-   * Subclassses that implement virtual paging (i.e., on-demand fetching of
-   * viewable data) can call this method to determine how many rows of data need
-   * to be fetched in order to populate the visible rows of the data table.
-   *
-   * @param rowsToFetch
-   */
-  public int getRowsToFetch()
-  {
-    return _rowsToFetch;
   }
 
   public boolean isResultValueCellExcluded(int colIndex)
   {
     if (colIndex < DATA_TABLE_FIXED_COLUMNS) {
+      // fixed columns do not contain result values
       return false;
     }
-    return _excludedResultValues.get(getRowIndex()).get(colIndex - DATA_TABLE_FIXED_COLUMNS);
+    return _excludedResultValuesMap.get(getRowIndex()).get(colIndex - DATA_TABLE_FIXED_COLUMNS);
   }
 
 
-  // private methods
-
-  @SuppressWarnings("unchecked")
-  final protected void build()
-  {
-    log.debug("building ScreenResultDataModel");
-    int sortByArg;
-    switch (_sortColumnIndex)
-    {
-    case 0: sortByArg = ScreenResultsDAO.SORT_BY_PLATE_WELL; break;
-    case 1: sortByArg = ScreenResultsDAO.SORT_BY_WELL_PLATE; break;
-    case 2: sortByArg = ScreenResultsDAO.SORT_BY_ASSAY_WELL_TYPE; break;
-    default:
-      sortByArg = _sortColumnIndex - DATA_TABLE_FIXED_COLUMNS;
-    }
-    _wrappedData = new ArrayList<Map<String,Object>>();
-    _excludedResultValues = new ArrayList<List<Boolean>>();
-    int rowIndex = 0;
-    for (Map.Entry<WellKey,List<ResultValue>> entry : fetchData(_resultValueTypes,
-                                                                sortByArg,
-                                                                _sortDirection).entrySet()) {
-      WellKey wellKey = entry.getKey();
-      addRow(rowIndex++,
-             wellKey,
-             entry.getValue().get(0).getAssayWellType(),
-             entry.getValue(),
-             _resultValueTypes);
-    }
-  }
+  // protected methods
 
   /**
    * @sideeffect adds element to {@link #_excludedResultValues}
    */
-  private void addRow(int rowIndex,
-                      WellKey wellKey,
-                      AssayWellType assayWellType,
-                      List<ResultValue> resultValues,
-                      List<ResultValueType> resultValueTypes)
+  @Override
+  protected Map<String,Object> makeRow(int rowIndex, WellKey wellKey, List<ResultValue> rowData)
   {
-    HashMap<String,Object> cellValues = new HashMap<String,Object>();
+    HashMap<String,Object> row = new HashMap<String,Object>();
     // TODO: eliminate hardcoded column name strings
-    cellValues.put("Plate", wellKey.getPlateNumber());
-    cellValues.put("Well", wellKey.getWellName());
-    cellValues.put("Type", assayWellType);
-    List<Boolean> excludedResultValuesRow = new ArrayList<Boolean>();
-    Iterator<ResultValueType> rvtIter = resultValueTypes.iterator();
-    for (ResultValue rv : resultValues) {
+    row.put("Plate", wellKey.getPlateNumber());
+    row.put("Well", wellKey.getWellName());
+    row.put("Type", rowData.get(0).getAssayWellType());
+    List<Boolean> rowExcludes = new ArrayList<Boolean>();
+    Iterator<ResultValueType> rvtIter = _resultValueTypes.iterator();
+    for (ResultValue rv : rowData) {
       ResultValueType rvt = rvtIter.next();
-      excludedResultValuesRow.add(rv.isExclude());
+      rowExcludes.add(rv.isExclude());
       Object typedValue = ResultValue.getTypedValue(rv, rvt);
-      cellValues.put(rvt.getUniqueName(),
+      row.put(rvt.getUniqueName(),
                      typedValue == null ? null : typedValue.toString());
     }
-    addRowValues(rowIndex, cellValues);
-    addRowResultValueExcludes(rowIndex, excludedResultValuesRow);
+    _excludedResultValuesMap.put(rowIndex, rowExcludes);
+    return row;
   }
 
-  protected void addRowValues(int rowIndex, Map<String,Object> rowValues)
-  {
-    _wrappedData.add(rowIndex, rowValues);
-  }
-
-  protected void addRowResultValueExcludes(int rowIndex, List<Boolean> rowExcludes)
-  {
-    _excludedResultValues.add(rowIndex, rowExcludes);
-  }
 }

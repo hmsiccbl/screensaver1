@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.screenresults;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,91 +28,28 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
 
   // instance data members
 
-  private int _preCalculatedSize;
-  private int _firstRowIndexToFetch = -1;
-  private Map<Integer,Map<String,Object>> _fetchedRows;
-  private Map<Integer,List<Boolean>> _excludedResultValuesMap;
-
-
   // public constructors and methods
 
   public FullScreenResultDataModel(List<ResultValueType> resultValueTypes,
+                                   int rowsToFetch,
                                    int sortColumnIndex,
                                    SortDirection sortDirection,
-                                   ScreenResultsDAO dao,
-                                   int rowsToFetch,
-                                   int preCalculatedSize)
+                                   ScreenResultsDAO dao)
   {
-    super(resultValueTypes, sortColumnIndex, sortDirection, dao);
-    setRowsToFetch(rowsToFetch);
-    _preCalculatedSize = preCalculatedSize;
-    _fetchedRows = new HashMap<Integer,Map<String,Object>>();
-    _excludedResultValuesMap = new HashMap<Integer,List<Boolean>>();
+    super(resultValueTypes, rowsToFetch, sortColumnIndex, sortDirection, dao);
   }
 
   @Override
-  public int getRowCount()
-  {
-    return _preCalculatedSize;
-  }
-
-  @Override
-  public Map<String,Object> getRowData()
-  {
-    if (!_fetchedRows.containsKey(_rowIndex)) {
-      if (log.isDebugEnabled()) {
-        log.debug("row not yet fetched: " + _rowIndex);
-      }
-      _firstRowIndexToFetch = _rowIndex;
-      build();
-    }
-    return _fetchedRows.get(_rowIndex);
-  }
-
-  @Override
-  public List<Map<String,Object>> getWrappedData()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  protected Map<WellKey,List<ResultValue>> fetchData(List<ResultValueType> selectedResultValueTypes,
-                                                     int sortBy,
-                                                     SortDirection sortDirection)
+  protected Map<WellKey,List<ResultValue>> fetchData(int firstRowIndex, int rowsToFetch)
   {
     Map<WellKey,List<ResultValue>> rvData =
       _screenResultsDao.findSortedResultValueTableByRange(_resultValueTypes,
-                                                          sortBy,
-                                                          sortDirection,
-                                                          _firstRowIndexToFetch,
-                                                          _rowsToFetch,
+                                                          _sortColumnIndex,
+                                                          _sortDirection,
+                                                          firstRowIndex,
+                                                          rowsToFetch,
                                                           null,
                                                           null);
-    if (log.isDebugEnabled()) {
-      log.debug("  fetched rows " + _firstRowIndexToFetch +
-                " to " + ((_firstRowIndexToFetch + rvData.size()) - 1));
-      log.debug("total fetched row count = " + rvData.size());
-    }
     return rvData;
-  }
-
-  @Override
-  protected void addRowValues(int rowIndex, Map<String,Object> rowValues)
-  {
-    _fetchedRows.put(_firstRowIndexToFetch + rowIndex, rowValues);
-  }
-
-  @Override
-  protected void addRowResultValueExcludes(int rowIndex, List<Boolean> rowExcludes)
-  {
-    _excludedResultValuesMap.put(_firstRowIndexToFetch + rowIndex, rowExcludes);
-  }
-
-  @Override
-  public boolean isResultValueCellExcluded(int colIndex)
-  {
-    if (colIndex < ScreenResultDataModel.DATA_TABLE_FIXED_COLUMNS) {
-      return false;
-    }
-    return _excludedResultValuesMap.get(getRowIndex()).get(colIndex - ScreenResultDataModel.DATA_TABLE_FIXED_COLUMNS);
   }
 }

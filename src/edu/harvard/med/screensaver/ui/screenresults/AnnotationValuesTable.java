@@ -17,8 +17,11 @@ import java.util.Map;
 import javax.faces.model.DataModel;
 
 import edu.harvard.med.screensaver.db.AnnotationsDAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
+import edu.harvard.med.screensaver.ui.table.DataTable;
 import edu.harvard.med.screensaver.ui.table.DataTableRowsPerPageUISelectOneBean;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
@@ -32,12 +35,12 @@ public class AnnotationValuesTable extends DataTable
   private static Logger log = Logger.getLogger(AnnotationValuesTable.class);
 
   public static final String VENDOR_ID_COLUMN_NAME = "Vendor ID";
-  public static final int FIXED_KEY_COLUMNS = 1;
 
 
   // instance data members
 
   private AnnotationsDAO _annotationsDao;
+  private GenericEntityDAO _dao;
   private WellViewer _vendorProductViewer;
 
   private List<AnnotationType> _annotationTypes;
@@ -52,9 +55,11 @@ public class AnnotationValuesTable extends DataTable
   {
   }
 
-  public AnnotationValuesTable(AnnotationsDAO annotationsDao,
+  public AnnotationValuesTable(GenericEntityDAO dao,
+                               AnnotationsDAO annotationsDao,
                                WellViewer wellViewer)
   {
+    _dao = dao;
     _annotationsDao = annotationsDao;
     _vendorProductViewer = wellViewer;
   }
@@ -84,8 +89,20 @@ public class AnnotationValuesTable extends DataTable
   @Override
   protected DataModel buildDataModel()
   {
+    final int[] totalRows = { 0 };
+    if (_annotationTypes.size() > 0) {
+      _dao.doInTransaction(new DAOTransaction() {
+        public void runTransaction() {
+          AnnotationType annotationType = _dao.reloadEntity(_annotationTypes.get(0), true);
+          totalRows[0] = _dao.relationshipSize(annotationType.getAnnotationValues());
+        }
+      });
+    }
+
     return new AnnotationValuesDataModel(_annotationTypes,
-                                         getSortManager().getSortColumnIndex() - FIXED_KEY_COLUMNS,
+                                         getRowsPerPageSelector().getSelection(),
+                                         totalRows[0],
+                                         getSortManager().getSortColumnIndex(),
                                          getSortManager().getSortDirection(),
                                          _annotationsDao);
   }

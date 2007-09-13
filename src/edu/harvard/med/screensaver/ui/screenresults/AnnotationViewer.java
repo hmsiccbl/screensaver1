@@ -18,7 +18,6 @@ import java.util.Observer;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
-import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
@@ -75,8 +74,8 @@ public class AnnotationViewer extends AbstractBackingBean implements Observer
     _annotationValuesTable = annotationValuesTable;
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
     _isPanelCollapsedMap.put("annotations", true);
-    _isPanelCollapsedMap.put("annotationTypes", true);
-    _isPanelCollapsedMap.put("annotationValues", true);
+    _isPanelCollapsedMap.put("annotationTypes", false);
+    _isPanelCollapsedMap.put("annotationValues", false);
   }
 
 

@@ -106,7 +106,7 @@ public class StudyViewer extends AbstractBackingBean
                                           "hbnLeadScreener");
           _dao.needReadOnly(study, "hbnCollaborators.hbnLabAffiliation");
           _dao.needReadOnly(study, "publications");
-          _dao.needReadOnly(study, "annotationTypes.annotationValues");
+          _dao.needReadOnly(study, "annotationTypes");
           setStudy(study);
         }
       });

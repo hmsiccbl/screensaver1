@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.screenresults;
+package edu.harvard.med.screensaver.ui.table;
 
 import java.util.List;
 import java.util.Map;
@@ -20,9 +20,7 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.table.DataTableRowsPerPageUISelectOneBean;
-import edu.harvard.med.screensaver.ui.table.TableColumn;
-import edu.harvard.med.screensaver.ui.table.TableSortManager;
+import edu.harvard.med.screensaver.ui.screenresults.ScreenResultDataModel;
 
 import org.apache.log4j.Logger;
 
@@ -142,9 +140,8 @@ public abstract class DataTable extends AbstractBackingBean implements Observer
   {
     log.debug("rowsPerPage changed to " + event.getNewValue());
     getRowsPerPageSelector().setValue((String) event.getNewValue());
-    // TODO: remove this hack; perhaps introduce an appropriate LazyDataModel interface
     if (getDataModel() instanceof ScreenResultDataModel) {
-      ((ScreenResultDataModel) getDataModel()).setRowsToFetch(getRowsPerPageSelector().getSelection());
+      ((VirtualPagingDataModel<?,?>) getDataModel()).setRowsToFetch(getRowsPerPageSelector().getSelection());
     }
     getFacesContext().renderResponse();
   }

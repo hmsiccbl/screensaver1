@@ -25,11 +25,12 @@ public class PositivesOnlyScreenResultDataModel extends ScreenResultDataModel
   // static members
 
   private static Logger log = Logger.getLogger(PositivesOnlyScreenResultDataModel.class);
-  private Map<WellKey,List<ResultValue>> _data;
-  private ResultValueType _positivesOnlyRvt;
 
 
   // instance data members
+
+  private ResultValueType _positivesOnlyRvt;
+
 
   // public constructors and methods
 
@@ -39,7 +40,7 @@ public class PositivesOnlyScreenResultDataModel extends ScreenResultDataModel
                                             ScreenResultsDAO dao,
                                             ResultValueType positivesOnlyRvt)
   {
-    super(resultValueTypes, sortColumnIndex, sortDirection, dao);
+    super(resultValueTypes, -1, sortColumnIndex, sortDirection, dao);
     _positivesOnlyRvt = positivesOnlyRvt;
   }
 
@@ -47,18 +48,15 @@ public class PositivesOnlyScreenResultDataModel extends ScreenResultDataModel
   // protected methods
 
   @Override
-  protected Map<WellKey,List<ResultValue>> fetchData(List<ResultValueType> selectedResultValueTypes,
-                                                     int sortBy,
-                                                     SortDirection sortDirection)
+  protected Map<WellKey,List<ResultValue>> fetchData(int firstRowIndex, int rowsToFetch)
   {
-    _data = _screenResultsDao.findSortedResultValueTableByRange(_resultValueTypes,
-                                                                sortBy,
-                                                                sortDirection,
-                                                                0,
-                                                                null,
-                                                                _positivesOnlyRvt,
-                                                                null);
-    return _data;
+    return _screenResultsDao.findSortedResultValueTableByRange(_resultValueTypes,
+                                                               _sortColumnIndex,
+                                                               _sortDirection,
+                                                               0,
+                                                               null,
+                                                               _positivesOnlyRvt,
+                                                               null);
   }
 
   // private methods

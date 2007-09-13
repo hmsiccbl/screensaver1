@@ -37,7 +37,7 @@ public class SinglePlateScreenResultDataModel extends ScreenResultDataModel
                                           ScreenResultsDAO dao,
                                           int plateNumber)
   {
-    super(resultValueTypes, sortColumnIndex, sortDirection, dao);
+    super(resultValueTypes, -1, sortColumnIndex, sortDirection, dao);
     _plateNumber = plateNumber;
   }
 
@@ -45,13 +45,11 @@ public class SinglePlateScreenResultDataModel extends ScreenResultDataModel
   // protected methods
 
   @Override
-  protected Map<WellKey,List<ResultValue>> fetchData(List<ResultValueType> selectedResultValueTypes,
-                                                     int sortBy,
-                                                     SortDirection sortDirection)
+  protected Map<WellKey,List<ResultValue>> fetchData(int firstRowIndex, int rowsToFetch)
   {
     _data = _screenResultsDao.findSortedResultValueTableByRange(_resultValueTypes,
-                                                                sortBy,
-                                                                sortDirection,
+                                                                _sortColumnIndex,
+                                                                _sortDirection,
                                                                 0,
                                                                 null,
                                                                 null,

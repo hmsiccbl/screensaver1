@@ -454,6 +454,7 @@
     </constructor-arg>
     <constructor-arg>
       <bean class="edu.harvard.med.screensaver.ui.screenresults.AnnotationValuesTable" >
+        <constructor-arg ref="genericEntityDao" />
         <constructor-arg ref="annotationsDao" />
         <constructor-arg ref="wellViewer" />
       </bean>

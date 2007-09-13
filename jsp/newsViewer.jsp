@@ -10,6 +10,13 @@
 	  </p>
 		<dl>
 			<dt>
+        <span class="newsDate">2007.Sep.13, v1.2.0</span>
+      </dt>
+      <dd>Added "Study" and "Annotations" data types to Screensaver,
+			allowing the system to incorporate and present 3rd-party library annotation data,
+			as well as providing a means for sharing and presenting biologically relevant
+			results from in-house screens.</dd>
+			<dt>
         <span class="newsDate">2007.Aug.24, v1.1.0</span>
       </dt>
       <dd>
