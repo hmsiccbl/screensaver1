@@ -11,8 +11,9 @@ package edu.harvard.med.screensaver.io.rnaiglobal;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import jxl.Cell;
 import jxl.Sheet;
@@ -43,13 +44,14 @@ public class BoutrosAnnotationImporter
 {
   // static members
 
-  private static final String SCREENER_LAB_AFFILIATION_NAME = "German Cancer Research Center";
+  private static final String SCREENER_LAB_AFFILIATION_NAME = "DKFZ German Cancer Research Center";
   private static final String RNAIGLOBAL_LOGIN = "rnaiglobal";
   private static final Date SCREEN_DATE = DateUtil.makeDate(2007, 6, 14);
   private static final String SCREENER_EMAIL = "m.boutros@dkfz.de";
-  private static final String SCREEN_TITLE = "Sequence Analysis of siGENOME";
-  private static final int SCREEN_NUMBER = 69120;
+  private static final String SCREEN_TITLE = "Sequence Annotation of the Dharmacon/Thermofisher siGENOME Whole Human Genome siRNA Library";
+  private static final int SCREEN_NUMBER = 100000;
   protected static final String RNAI_GLOBAL_EMAIL = "info@rnaiglobal.org";
+  // http://www.dkfz.de/index.html
   private static Logger log = Logger.getLogger(BoutrosAnnotationImporter.class);
 
   @SuppressWarnings("static-access")
@@ -149,7 +151,7 @@ public class BoutrosAnnotationImporter
           rnaiGlobalMember.addScreensaverUserRole(ScreensaverUserRole.GUEST_USER);
           dao.persistEntity(rnaiGlobalMember);
 
-          importScreenResultData(screen, file, dao);
+          importAnnotationData(screen, file, dao);
           dao.persistEntity(screen);
         }
         catch (Exception e) {
@@ -159,105 +161,131 @@ public class BoutrosAnnotationImporter
     });
   }
 
-  static private void importScreenResultData(Screen screen,
-                                             File file,
-                                             GenericEntityDAO dao)
+  static private void importAnnotationData(Screen screen,
+                                           File file,
+                                           GenericEntityDAO dao)
   throws FileNotFoundException
   {
-
-    AnnotationType[] annot = new AnnotationType[12];
-    int ordinal = 0;
-    annot[ordinal] = new AnnotationType(screen,
-                                        "siRNA IDs",
-                                        "The siRNA Ids belonging to the SMARTPool. Concatenated by \"&\"",
-                                        ordinal,
-                                        false);
-    ++ordinal;
-    annot[ordinal] = new AnnotationType(screen,
-                                        "Intended Target Gene",
-                                        "Original Dharmacon annotation",
-                                        ordinal,
-                                        false);
-    ++ordinal;
-    annot[ordinal] = new AnnotationType(screen,
-                                        "Intended RefSeq Targets",
-                                        "The RefSeq transcript IDs that Dharmacon intended to be targeted by the SMARTPool",
-                                        ordinal,
-                                        false);
-    ++ordinal;
-    annot[ordinal] = new AnnotationType(screen,
-                                        "ON-Target Flag",
-                                        "Dharamcon's \"ON-Target\" flag",
-                                        ordinal,
-                                        false);
-    ++ordinal;
-    annot[ordinal] = new AnnotationType(screen,
-                                        "Calculated Target Genes",
-                                        "Gene symbols of genes that have been calculated to be targeted by at least one siRNAI of the SMARTPool. Concatenated by \"&\"",
-                                        ordinal,
-                                        false);
-    ++ordinal;
-    annot[ordinal] = new AnnotationType(screen,
-                                        "# Calculated Target Genes",
-                                        "The predicted number of genes that have been calculated to be targeted by the SMARTPool",
-                                        ordinal,
-                                        true);
-    ++ordinal;
-    annot[ordinal] = new AnnotationType(screen,
-                                        "Calculated RefSeq Targets",
-                                        "The RefSeq transcript IDs that have been calculated to be targeted by the SMARTPool.  Transcripts derived from the same gene are concatenated by \"+\".  Transcripts derived from different genes are concatenated by \"&\".  Transcript IDs have the same order as in \"" + annot[ordinal - 2].getName() + "\"",
-                                        ordinal,
-                                        false);
-    ++ordinal;
-    annot[ordinal] = new AnnotationType(screen,
-                                        "Hits of SMARTPool siRNAs",
-                                        "The number of hits for each respective RefSeq transcript target in \"" + annot[ordinal - 1].getName() + "\"",
-                                        ordinal, false);
-    ++ordinal;
-    annot[ordinal] = new AnnotationType(screen,
-                                        "# RefSeq Target Transcripts",
-                                        "The total number of RefSeq transcripts target by at least one siRNA in the SMARTPool",
-                                        ordinal,
-                                        true);
-    ++ordinal;
-    annot[ordinal] = new AnnotationType(screen,
-                                        "Avg SMARTPool Efficiency",
-                                        "The averaged SMARTPool efficiency (according to Reynolds, et. al.)",
-                                        ordinal,
-                                        true);
-    ++ordinal;
-    annot[ordinal] = new AnnotationType(screen,
-                                        "Is Annotation Changed",
-                                        "\"Yes\" if annotation changed from Dharmacon's original annotation, otherwise \"No\"",
-                                        ordinal,
-                                        false);
-    ++ordinal;
-    annot[ordinal] = new AnnotationType(screen,
-                                        "Summary",
-                                        "A summary of the annotation change",
-                                        ordinal,
-                                        false);
-
     ParseErrorManager errors = new ParseErrorManager();
     Workbook workbook = new Workbook(file, errors);
     Sheet sheet = workbook.getWorkbook().getSheet(0);
 
+    List<AnnotationValueBuilder> builders = getAnnotationValueBuilder(screen);
     for (int iRow = 1; iRow < sheet.getRows(); iRow++) {
       Cell[] row = sheet.getRow(iRow);
-      Cell vendorIdCell = row[0];
-      String vendorId = vendorIdCell.getContents();
-      for (int i = 0; i < annot.length; i++) {
-        Cell cell = row[i + 1];
-        String value = cell.getContents();
-        AnnotationType annotation = annot[i];
-        value = value.replaceAll("&", " & ").replaceAll("\\+", " + ");
-        annotation.addAnnotationValue(vendorId,
-                                      (annotation.isNumeric() ? null : value),
-                                      (annotation.isNumeric() ? new BigDecimal(value) : null));
+      for (AnnotationValueBuilder builder : builders) {
+        builder.buildAnnotationValue(row);
       }
       if (iRow % 100 == 0) {
         log.info("processed " + iRow + " rows");
       }
     }
+    log.info("processed " + sheet.getRows() + " total rows ");
+  }
+
+  private static List<AnnotationValueBuilder> getAnnotationValueBuilder(Screen screen)
+  {
+    List<AnnotationValueBuilder> builders = new ArrayList<AnnotationValueBuilder>();
+    builders.add(new AnnotationValueBuilder(builders.size() + 1,
+                                            new AnnotationType(screen,
+                                                               "siRNA IDs",
+                                                               "The Dharmacon/Thermofisher siRNA IDs of the individual duplexes that comprise the SMARTPool. " +
+                                                               "Concatenated by \"&\".",
+                                                               builders.size(),
+                                                               false)) {
+      public String transformValue(String value) {
+        return value.replaceAll("([&+])", " $1 ");
+      }
+    });
+    builders.add(new AnnotationValueBuilder(builders.size() + 1,
+                                            new AnnotationType(screen,
+                                                               "Intended Target Gene",
+                                                               "Original Dharmacon/Thermofisher annotation.",
+                                                               builders.size(),
+                                                               false)));
+    builders.add(new AnnotationValueBuilder(builders.size() + 1,
+                                            new AnnotationType(screen,
+                                                               "Intended RefSeq Targets",
+                                                               "The RefSeq transcript IDs that Dharmacon/Thermofisher intended to be targeted by the SMARTPool " +
+                                                               "and that was originally provided in the product documentation.",
+                                                               builders.size(),
+                                                               false)));
+    builders.add(new AnnotationValueBuilder(builders.size() + 1,
+                                            new AnnotationType(screen,
+                                                               "ON-Target Flag",
+                                                               "Dharamcon's \"ON-Target\" flag",
+                                                               builders.size(),
+                                                               false)));
+
+    builders.add(new AnnotationValueBuilder(builders.size() + 1,
+                                            new AnnotationType(screen,
+                                                               "Entrez Gene IDs of Predicted Targets",
+                                                               "Entrez Gene IDs of genes that have been computationally predicted by this study to be targeted by at " +
+                                                               "least one siRNA duplex in the SMARTPool. Concatenated by \"&\".",
+                                                               builders.size(),
+                                                               false)) {
+      public String transformValue(String value) {
+        return value.replaceAll("GeneID:", "").replaceAll("([&+])", " $1 ");
+      }
+    });
+
+    builders.add(new AnnotationValueBuilder(builders.size() + 1,
+                                            new AnnotationType(screen,
+                                                               "# Predicted Target Genes",
+                                                               "The number of genes that have been computationally predicted by this study to be targeted " +
+                                                               "by the SMARTPool.",
+                                                               builders.size(),
+                                                               true)));
+
+    builders.add(new AnnotationValueBuilder(builders.size() + 1,
+                                            new AnnotationType(screen,
+                                                               "Predicted RefSeq Targets",
+                                                               "The RefSeq transcript IDs that have been computationally predicted by this study to be targeted " +
+                                                               "by the SMARTPool.  Transcripts derived from the same gene are concatenated by \"+\".  Transcripts " +
+                                                               "derived from different genes are concatenated by \"&\".  Transcript IDs have the same order as in \"" +
+                                                               builders.get(builders.size() - 2).getAnnotationType().getName() + "\" column.",
+                                                               builders.size(),
+                                                               false)) {
+      public String transformValue(String value) {
+        return value.replaceAll("([&+])", " $1 ");
+      }
+    });
+
+    builders.add(new AnnotationValueBuilder(builders.size() + 1,
+                                            new AnnotationType(screen,
+                                                               "# Duplexes Targeting each RefSeq",
+                                                               "The number of duplex siRNAs from the SMARTPool that are predicted by this study to target each " +
+                                                               "RefSeq.  Ordered and concatenated as in \"" + builders.get(builders.size() - 1).getAnnotationType().getName() + "\" column.",
+                                                               builders.size(),
+                                                               false)) {
+      public String transformValue(String value) {
+        // TODO: not working!!!
+        return value.replaceAll("([&+])", " $1 ");
+      }
+    });
+
+    builders.add(new AnnotationValueBuilder(builders.size() + 1,
+                                            new AnnotationType(screen,
+                                                               "# RefSeq Target Transcripts",
+                                                               "The total number of RefSeq transcripts predicted by this study to be targeted by the SMARTPool.",
+                                                               builders.size(),
+                                                               true)));
+
+    // note: excluding "Avg SMARTPool Efficiency" annotation due to controversial nature of this algorithm (per request of Laura Selfors, 2007-09-13)
+
+    builders.add(new AnnotationValueBuilder(builders.size() + 2,
+                                            new AnnotationType(screen,
+                                                               "Is Annotation Changed",
+                                                               "\"Yes\" if annotation from the Dharmacon/Thermofisher annotation, otherwise \"No\".",
+                                                               builders.size(),
+                                                               false)));
+
+    builders.add(new AnnotationValueBuilder(builders.size() + 2,
+                                            new AnnotationType(screen,
+                                                               "Comments",
+                                                               "Comments on the annotation change.",
+                                                               builders.size(),
+                                                               false)));
+    return builders;
   }
 }
