@@ -204,6 +204,15 @@
 					</t:dataTable>
 				</t:panelGrid>
 
+				<t:outputLabel for="comments" value="Comments"
+					rendered="#{studyDetailViewer.readAdmin}"
+					title="Administrative comments" />
+				<t:inputTextarea id="comments" rows="3" cols="80"
+					value="#{studyDetailViewer.study.comments}"
+					rendered="#{studyDetailViewer.readAdmin}"
+					displayValueOnly="#{studyDetailViewer.readAdmin}"
+					styleClass="inputText" displayValueOnlyStyleClass="dataText" />
+
 			</t:panelGrid>
 		</t:collapsiblePanel>
 	</h:form>
