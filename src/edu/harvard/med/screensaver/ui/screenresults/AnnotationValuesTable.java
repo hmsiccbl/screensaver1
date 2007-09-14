@@ -110,7 +110,7 @@ public class AnnotationValuesTable extends DataTable
   @Override
   protected List<Integer> getRowsPerPageSelections()
   {
-    return Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE);
+    return Arrays.asList(10, 20, 50, 100);
   }
 
 
