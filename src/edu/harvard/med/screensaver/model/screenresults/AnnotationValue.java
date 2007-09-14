@@ -56,12 +56,15 @@ public class AnnotationValue extends AbstractEntity
   {
   }
 
-  public AnnotationValue(AnnotationType annotation,
+  public AnnotationValue(AnnotationType annotationType,
                          String vendorIdentifier,
                          String value,
                          BigDecimal numericValue)
   {
-    _annotationType = annotation;
+    if (annotationType.isNumeric() && numericValue == null) {
+      throw new IllegalArgumentException("numeric value must be specified for numeric annotation types");
+    }
+    _annotationType = annotationType;
     _vendorIdentifier = vendorIdentifier;
     _value = value;
     _numericValue = numericValue;
@@ -131,6 +134,7 @@ public class AnnotationValue extends AbstractEntity
 
   /**
    * @hibernate.property
+   * @motivation for sorting via SQL
    */
   public BigDecimal getNumericValue()
   {
@@ -140,9 +144,6 @@ public class AnnotationValue extends AbstractEntity
   @DerivedEntityProperty
   public String getFormattedValue()
   {
-    if (_annotationType.isNumeric()) {
-      return _numericValue.toString();
-    }
     return _value;
   }
 

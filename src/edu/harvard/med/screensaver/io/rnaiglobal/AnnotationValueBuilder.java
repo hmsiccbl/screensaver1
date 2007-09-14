@@ -32,7 +32,7 @@ class AnnotationValueBuilder
   {
     String value = transformValue(row[_sourceColumnIndex].getContents());
     if (_annotationType.isNumeric()) {
-      return _annotationType.addAnnotationValue(row[0].getContents(), null, new BigDecimal(value));
+      return _annotationType.addAnnotationValue(row[0].getContents(), value, new BigDecimal(value));
     }
     else {
       return _annotationType.addAnnotationValue(row[0].getContents(), value, null);
