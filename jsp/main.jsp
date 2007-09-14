@@ -15,40 +15,45 @@
 		styleClass="title" />
 	<t:div />
 	<f:verbatim escape="false">
-          <div id="ie_detection_message" style="display:none; color:fuchsia;">
-            The Screensaver development team recommends the
-            <a href="www.mozilla.com">Mozilla Firefox Browser</a> (version 1.5
-            or higher). While we work to support other browsers, it's not
-            always possible for us to test every feature across all browser
-            types.
-          </div>
-          <script type="text/javascript">
+		<div id="ie_detection_message" style="display: none; color: fuchsia;">
+		The Screensaver development team recommends the <a
+			href="www.mozilla.com">Mozilla Firefox Browser</a> (version 1.5 or
+		higher). While we work to support other browsers, it's not always
+		possible for us to test every feature across all browser types.</div>
+		<script type="text/javascript">
             if (! Array.every) { // if not firefox >=1.5
               document.getElementById("ie_detection_message").style.display = "block";
             }
           </script>
-	</f:verbatim>
-	<f:verbatim escape="false">
 		<p>To get started, try clicking some of the items in the left menu
 		bar. For a detailed description of what you can do, see our <a
-			href="helpViewer.jsf">help</a> page.  Here are a few highlights:</p>
+			href="helpViewer.jsf">help</a> page. Here are a few highlights:</p>
 		<p>
 		<ul>
-			<li>Use "Browse Libraries" or "Find Wells" to view the contents
-			of ICCB-L compound and RNAi libraries, including structures, SMILES
-			strings, vendor information, and when possible, links to PubChem (or
-			GenBank for RNAi libraries).</li>
-			<li>"Find Wells" should be your first stop when searching for
-			information on wells that score as positive (or potentially positive)
-			in your screen.</li>
-			<li>From "Data Downloads" you can download SD files for all
-			ICCB-L libraries, either as a single file or as individual library
-			files (note that natural product extracts do not have SD files or
-			structural information).</li>
-			<li>"My Screens" permits access to your personal screen result data,
-			if it has been loaded into the database. We are endeavoring to load
-			all available screen result data, so if you find that your screen's
-			result data is not available for viewing, please contact <a
+			<li>Use "Browse Libraries" to view the contents of ICCB-L
+			compound and RNAi libraries, including structures, SMILES strings,
+			vendor information, and when possible, links to PubChem (or GenBank
+			for RNAi libraries).</li>
+	</f:verbatim>
+	<t:div rendered="#{menu.screener || menu.readAdmin}">
+		<f:verbatim escape="false">
+			<li>Use "Find Wells" to search for information on a particular
+			set of wells, such as those that scored as positive (or potentially
+			positive) in your screen.</li>
+		</f:verbatim>
+	</t:div>
+	<t:div >
+		<f:verbatim escape="false">
+			<li>Use "Browse Studies" to view the studies that have been added to
+			Screensaver. Studies associated biologically significant annotations with
+			library reagents.</f:verbatim>
+	</t:div>
+	<t:div rendered="#{menu.screener || menu.readAdmin}">
+		<f:verbatim escape="false">
+			<li>"My Screens" permits access to your personal screen result
+			data, if it has been loaded into the database. We are endeavoring to
+			load all available screen result data, so if you find that your
+			screen's result data is not available for viewing, please contact <a
 				href="mailto:david_wrobel@hms.harvard.edu">David Wrobel</a> and we
 			will make it a priority. Among the more useful features are the
 			ability to view each screening data plate with a heat map viewer and
@@ -57,14 +62,22 @@
 			your own unless they have been classified as "shared" by the
 			screener, in which case they are available for viewing. ICCB-L is in
 			the process of developing guidelines for data sharing. Please contact
-			<a
-				href="mailto:caroline_shamu@hms.harvard.edu">Caroline Shamu</a> or <a
-				href="mailto:su_chiang@hms.harvard.edu">Su Chiang</a> if you have
+			<a href="mailto:caroline_shamu@hms.harvard.edu">Caroline Shamu</a> or
+			<a href="mailto:su_chiang@hms.harvard.edu">Su Chiang</a> if you have
 			any questions.</li>
+		</f:verbatim>
+	</t:div>
+	<f:verbatim escape="false">
+		<li>From "Data Downloads" you can download SD files for all
+		ICCB-L libraries, either as a single file or as individual library
+		files (note that natural product extracts do not have SD files or
+		structural information).</li>
+	</f:verbatim>
+	<f:verbatim escape="false">
 		</ul>
 		</p>
 
-			<p>The development team will be continuing to add features and
+		<p>The development team will be continuing to add features and
 		enhancements, so your questions and feedback are welcome! Please use
 		the feedback link at bottom of the page to contact the development
 		team.</p>

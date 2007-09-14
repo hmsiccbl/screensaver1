@@ -168,7 +168,7 @@ public class BoutrosAnnotationImporter
             new ScreeningRoomUser(new Date(),
                                   "RNAi Global",
                                   "Member",
-                                  "",
+                                  RNAI_GLOBAL_EMAIL,
                                   "",
                                   "",
                                   "RNAi Global group account",
