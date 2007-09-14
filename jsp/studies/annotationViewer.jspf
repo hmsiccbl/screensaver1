@@ -20,11 +20,13 @@
 				</t:div>
 			</f:facet>
 
-			<t:panelGroup>
+			<%--
+			<t:panelGroup >
 				<t:commandButton action="#{annotationViewer.download}"
 					value="Download" styleClass="command"
 					title="Download the annotations in an Excel file format" />
 			</t:panelGroup>
+			--%>
 
 			<t:div style="margin-left: 30px">
 				<t:panelGrid columns="1"
@@ -137,7 +139,8 @@
 												<t:graphicImage value="/images/descending-arrow.gif"
 													rendered="true" border="0" />
 											</f:facet>
-											<h:outputText value="#{column.name}" />
+											<h:outputText value="#{column.name}"
+												title="#{annotationViewer.annotationValuesTable.sortManager.currentColumn.description}" />
 										</t:commandSortHeader>
 									</f:facet>
 									<t:outputText value="#{row[column.name]}"
