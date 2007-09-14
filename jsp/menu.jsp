@@ -49,7 +49,7 @@
 		<h:form id="navForm">
 			<t:panelNavigation2 id="navMenu" layout="table" itemClass="menuItem"
 				openItemClass="menuItem" activeItemClass="menuItemActive"
-				separatorClass="navSeparator" rendered="#{menu.authenticatedUser}">
+				rendered="#{menu.authenticatedUser}">
 				<t:commandNavigation2 action="#{menu.findWells}" value="Find Wells"
 					accesskey="W"
 					title="Look up one or more library wells by plate number and well name"
@@ -57,9 +57,15 @@
 				<t:commandNavigation2 action="#{menu.browseLibraries}"
 					value="Browse Libraries" accesskey="L"
 					title="Browse the currently available libraries" />
-				<t:commandNavigation2 action="#{menu.browseStudies}"
-					value="Browse Studies" accesskey="T"
-					title="Browse the studies currently available and accessible to you" />
+				<t:panelNavigation2 id="libraryNavMenu" layout="table"
+					itemClass="submenuItem" openItemClass="submenuItem"
+					activeItemClass="menuItemActive">
+					<t:commandNavigation2 action="#{menu.browseRnaiLibraries}" value="RNAi"
+						title="Browse the currently available RNAi libraries" />
+					<t:commandNavigation2 action="#{menu.browseSmallMoleculeLibraries}"
+						value="Small Molecule"
+						title="Browse the currently available small molecule libraries"/>
+				</t:panelNavigation2>
 				<t:commandNavigation2 action="#{menu.browseScreens}"
 					value="Browse Screens" accesskey="S"
 					title="Browse the screens currently available and accessible to you"
@@ -68,6 +74,9 @@
 					value="My Screens" accesskey="M"
 					title="Browse the screens that you headed, led or collaborated on"
 					rendered="#{menu.screener}" />
+				<t:commandNavigation2 action="#{menu.browseStudies}"
+					value="Browse Studies" accesskey="T"
+					title="Browse the studies currently available and accessible to you" />
 				<t:commandNavigation2 />
 				<t:commandNavigation2 action="#{menu.viewNews}" value="Latest News"
 					accesskey="N" title="The latest Screensaver news" />

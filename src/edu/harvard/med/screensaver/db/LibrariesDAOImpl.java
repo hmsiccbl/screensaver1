@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -22,6 +22,7 @@ import java.util.TreeSet;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -30,10 +31,13 @@ import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.LabCherryPick;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Query;
 import org.hibernate.TransientObjectException;
+import org.springframework.orm.hibernate3.HibernateCallback;
 
 public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
 {
@@ -43,24 +47,24 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
 
 
   // instance data members
-  
+
   private GenericEntityDAO _dao;
-  
+
 
   // public constructors and methods
-  
+
   /**
    * @motivation for CGLIB dynamic proxy creation
    */
   public LibrariesDAOImpl()
   {
   }
-  
+
   public LibrariesDAOImpl(GenericEntityDAO dao)
   {
     _dao = dao;
   }
-  
+
   public Well findWell(WellKey wellKey)
   {
     return _dao.findEntityById(Well.class, wellKey.getKey());
@@ -72,11 +76,11 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     String sequence)
   {
     return _dao.findEntityById(SilencingReagent.class,
-                               gene.toString() + ":" + 
-                               silencingReagentType.toString() + ":" + 
+                               gene.toString() + ":" +
+                               silencingReagentType.toString() + ":" +
                                sequence);
   }
-  
+
   @SuppressWarnings("unchecked")
   public Library findLibraryWithPlate(Integer plateNumber)
   {
@@ -87,9 +91,9 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     if (libraries.size() == 0) {
       return null;
     }
-    return libraries.get(0); 
+    return libraries.get(0);
   }
-  
+
   public void deleteLibraryContents(Library library)
   {
     for (Well well : library.getWells()) {
@@ -146,13 +150,21 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     }
     log.info("created wells for library " + library.getLibraryName());
   }
-  
+
   @SuppressWarnings("unchecked")
-  public List<Library> findLibrariesDisplayedInLibrariesBrowser()
+  public List<Library> findLibrariesOfType(final LibraryType[] libraryTypes,
+                                           final ScreenType[] screenTypes)
   {
-    // TODO: make this HQL type-safe by using LibraryType enum to obtain the values
-    return new ArrayList<Library>(getHibernateTemplate().find(
-      "from Library where libraryType not in ('Annotation', 'DOS', 'NCI', 'Discrete')")); 
+    return (List<Library>) getHibernateTemplate().executeFind(new HibernateCallback() {
+      public Object doInHibernate(org.hibernate.Session session)
+      throws org.hibernate.HibernateException, java.sql.SQLException
+      {
+        Query query = session.createQuery("from Library where libraryType in (:libraryTypes) and screenType in (:screenTypes)");
+        query.setParameterList("libraryTypes", libraryTypes);
+        query.setParameterList("screenTypes", screenTypes);
+        return query.list();
+      }
+    });
   }
 
   public BigDecimal findRemainingVolumeInWellCopy(Well well, Copy copy)
@@ -173,13 +185,13 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     }
     return initialMicroliterVolume.add(deltaMicroliterVolume).setScale(Well.VOLUME_SCALE);
   }
-  
+
   @SuppressWarnings("unchecked")
   public Collection<WellCopyVolume> findWellCopyVolumes(Library libraryIn)
   {
     Library library = _dao.reloadEntity(libraryIn, true, "hbnWells");
     _dao.needReadOnly(library, "hbnCopies.hbnCopyInfos");
-    String hql = "from WellVolumeAdjustment wva where wva.copy.hbnLibrary = ?"; 
+    String hql = "from WellVolumeAdjustment wva where wva.copy.hbnLibrary = ?";
     List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { library });
     List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
     return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(library, result), wellVolumeAdjustments);
@@ -189,7 +201,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy)
   {
     // TODO: eager fetch copies and wells
-    String hql = "from WellVolumeAdjustment wva where wva.copy = ?"; 
+    String hql = "from WellVolumeAdjustment wva where wva.copy = ?";
     List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { copy });
     List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
     return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(copy, result), wellVolumeAdjustments);
@@ -199,7 +211,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy, Integer plateNumber)
   {
     // TODO: eager fetch copies and wells
-    String hql = "select wva from WellVolumeAdjustment wva join wva.copy c join c.hbnCopyInfos ci where wva.copy = ? and ci.hbnPlateNumber = ?"; 
+    String hql = "select wva from WellVolumeAdjustment wva join wva.copy c join c.hbnCopyInfos ci where wva.copy = ? and ci.hbnPlateNumber = ?";
     List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { copy, plateNumber });
     List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
     if (wellVolumeAdjustments.size() == 0) {
@@ -212,7 +224,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   public Collection<WellCopyVolume> findWellCopyVolumes(Integer plateNumber)
   {
     // TODO: eager fetch copies and wells
-    String hql = "select wva from WellVolumeAdjustment wva join wva.copy c join c.hbnCopyInfos ci where ci.hbnPlateNumber = ?"; 
+    String hql = "select wva from WellVolumeAdjustment wva join wva.copy c join c.hbnCopyInfos ci where ci.hbnPlateNumber = ?";
     List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { plateNumber });
     List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
     if (wellVolumeAdjustments.size() == 0) {
@@ -224,7 +236,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   @SuppressWarnings("unchecked")
   public Collection<WellCopyVolume> findWellCopyVolumes(WellKey wellKey)
   {
-    String hql = "select distinct wva from WellVolumeAdjustment wva left join fetch wva.copy left join fetch wva.well w left join fetch w.hbnLibrary l left join fetch l.hbnCopies where w.id = ?"; 
+    String hql = "select distinct wva from WellVolumeAdjustment wva left join fetch wva.copy left join fetch wva.well w left join fetch w.hbnLibrary l left join fetch l.hbnCopies where w.id = ?";
     List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { wellKey.toString() });
     List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
     Well well = null;
@@ -237,14 +249,14 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       // well exists, but just doesn't have any wellVolumeAdjustments (which is
       // valid); in this case we still want to return a collection that contains
       // an element for each copy of the well's library
-    } 
+    }
     else {
       // wel exists, and has wellVolumeAdjustments
       well = wellVolumeAdjustments.get(0).getWell();
     }
     return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(well, result), wellVolumeAdjustments);
   }
-  
+
   @SuppressWarnings("unchecked")
   public Collection<WellCopyVolume> findWellCopyVolumes(CherryPickRequest cherryPickRequest,
                                                         boolean forUnfufilledLabCherryPicksOnly)
@@ -254,7 +266,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
                                           "labCherryPicks.sourceWell.hbnLibrary");
     _dao.needReadOnly(cherryPickRequest,
                       "labCherryPicks.wellVolumeAdjustments");
-    if (forUnfufilledLabCherryPicksOnly) { 
+    if (forUnfufilledLabCherryPicksOnly) {
       // if filtering unfulfilled lab cherry picks, we need to fetch more relationships, to be efficient
       _dao.needReadOnly(cherryPickRequest,
                         "labCherryPicks.assayPlate.hbnCherryPickLiquidTransfer");
@@ -269,10 +281,10 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         wellVolumeAdjustments.addAll(labCherryPick.getWellVolumeAdjustments());
       }
     }
-    
+
     List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
-    List<WellCopyVolume> emptyWellVolumes = makeEmptyWellVolumes(cherryPickRequest, 
-                                                                 result, 
+    List<WellCopyVolume> emptyWellVolumes = makeEmptyWellVolumes(cherryPickRequest,
+                                                                 result,
                                                                  forUnfufilledLabCherryPicksOnly);
     return aggregateWellVolumeAdjustments(emptyWellVolumes, wellVolumeAdjustments);
   }
@@ -314,7 +326,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return result;
   }
 
-  private List<WellCopyVolume> makeEmptyWellVolumes(CherryPickRequest cherryPickRequest, 
+  private List<WellCopyVolume> makeEmptyWellVolumes(CherryPickRequest cherryPickRequest,
                                                     List<WellCopyVolume> result,
                                                     boolean forUnfufilledLabCherryPicksOnly)
   {
@@ -358,7 +370,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         while (!wellCopyVolume.getWell().equals(wellVolumeAdjustment.getWell()) ||
           !wellCopyVolume.getCopy().equals(wellVolumeAdjustment.getCopy())) {
           if (!wcvIter.hasNext()) {
-            throw new IllegalArgumentException("wellVolumeAdjustments exist for wells that were not in wellCopyVolumes: " + 
+            throw new IllegalArgumentException("wellVolumeAdjustments exist for wells that were not in wellCopyVolumes: " +
                                                wellVolumeAdjustment.getWell() + ":" + wellVolumeAdjustment.getCopy().getName());
           }
           wellCopyVolume = wcvIter.next();

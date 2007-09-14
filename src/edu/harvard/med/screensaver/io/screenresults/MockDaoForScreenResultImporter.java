@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -45,18 +45,18 @@ import org.apache.log4j.Logger;
 
 /**
  * A DAO implementation that can be used in a database-free environment.
- * 
+ *
  * @motivation for command-line ScreenResultImporter, when used in parse-only
  *             (non-import) mode.
  * @motivation testing ScreenResultImporter
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenResultsDAO, LibrariesDAO 
+public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenResultsDAO, LibrariesDAO
 {
   private static final Logger log = Logger.getLogger(MockDaoForScreenResultImporter.class);
-  
+
   private static final String NAME_OF_PSEUDO_LIBRARY_FOR_IMPORT = "PseudoLibraryForScreenResultImport";
 
   private Library _library;
@@ -65,7 +65,7 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
 
   public MockDaoForScreenResultImporter()
   {
-    _library = 
+    _library =
       new Library(NAME_OF_PSEUDO_LIBRARY_FOR_IMPORT,
                   NAME_OF_PSEUDO_LIBRARY_FOR_IMPORT,
                   ScreenType.OTHER,
@@ -78,12 +78,12 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   {
     return new Well(_library, wellKey, WellType.EXPERIMENTAL);
   }
-  
+
   public Library findLibraryWithPlate(Integer plateNumber)
   {
     return _library;
   }
-  
+
   public void deleteLibraryContents(Library library)
   {
   }
@@ -294,6 +294,13 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   public Collection<WellCopyVolume> findWellCopyVolumes(CherryPickRequest cherryPickRequest,
                                                         boolean forUnfufilledLabCherryPicksOnly)
   {
+    return null;
+  }
+
+  public List<Library> findLibrariesOfType(LibraryType[] libraryTypes,
+                                           ScreenType[] screenTypes)
+  {
+    // TODO Auto-generated method stub
     return null;
   }
 }

@@ -6,6 +6,10 @@
 <f:subview id="searchResultsSubview">
 	<t:panelGrid id="searchResultsPanel" columns="1" width="100%">
 
+		<t:outputText value="#{searchResults.description}"
+			styleClass="sectionHeader"
+			rendered="#{! empty searchResults.description}" />
+
 		<t:aliasBean alias="#{navigator}" value="#{searchResults}">
 			<%@ include file="searchResultsNavPanel.jspf"%>
 		</t:aliasBean>

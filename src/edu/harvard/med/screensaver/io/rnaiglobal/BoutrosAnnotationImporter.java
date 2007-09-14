@@ -27,6 +27,7 @@ import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
@@ -44,15 +45,16 @@ public class BoutrosAnnotationImporter
 {
   // static members
 
-  private static final String SCREENER_LAB_AFFILIATION_NAME = "DKFZ German Cancer Research Center";
-  private static final String RNAIGLOBAL_LOGIN = "rnaiglobal";
-  private static final Date SCREEN_DATE = DateUtil.makeDate(2007, 6, 14);
-  private static final String SCREENER_EMAIL = "m.boutros@dkfz.de";
-  private static final String SCREEN_TITLE = "Sequence Annotation of the Dharmacon/Thermofisher siGENOME Whole Human Genome siRNA Library";
-  private static final int SCREEN_NUMBER = 100000;
-  protected static final String RNAI_GLOBAL_EMAIL = "info@rnaiglobal.org";
-  // http://www.dkfz.de/index.html
   private static Logger log = Logger.getLogger(BoutrosAnnotationImporter.class);
+
+  private static final String RNAIGLOBAL_LOGIN = "rnaiglobal";
+  private static final String RNAI_GLOBAL_EMAIL = "info@rnaiglobal.org";
+  private static final String STUDY_TITLE = "Sequence Annotation of the Dharmacon/Thermofisher siGENOME Whole Human Genome siRNA Library";
+  private static final Date STUDY_DATE = DateUtil.makeDate(2007, 6, 14);
+  private static final String LAB_AFFILIATION_NAME = "DKFZ German Cancer Research Center";
+  private static final String LAB_HEAD_EMAIL = "m.boutros@dkfz.de";
+  private static final String SCREENER_EMAIL = "t.horn@dkfz.de";
+  private static final int STUDY_NUMBER = 100000;
 
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws ParseException
@@ -75,33 +77,41 @@ public class BoutrosAnnotationImporter
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Screen screen = dao.findEntityByProperty(Screen.class,
-                                                 "hbnScreenNumber",
-                                                 SCREEN_NUMBER);
-        if (screen != null) {
-          log.info("deleting existing screen");
-          dao.deleteEntity(screen);
+        Study study = dao.findEntityByProperty(Screen.class,
+                                               "hbnScreenNumber",
+                                               STUDY_NUMBER);
+        if (study != null) {
+          log.info("deleting existing screen " + study);
+          dao.deleteEntity(study);
         }
-        ScreeningRoomUser boutrosScreener = dao.findEntityByProperty(ScreeningRoomUser.class,
-                                                                     "email",
-                                                                     SCREENER_EMAIL);
-        if (boutrosScreener != null) {
-          log.info("deleting existing lead screener");
-          dao.deleteEntity(boutrosScreener);
-          LabAffiliation labAffiliation = dao.findEntityByProperty(LabAffiliation.class,
-                                                                   "affiliationName",
-                                                                   SCREENER_LAB_AFFILIATION_NAME);
-          if (labAffiliation != null) {
-            log.info("deleting lab affiliation");
+
+        deleteUser(SCREENER_EMAIL);
+        deleteUser(LAB_HEAD_EMAIL);
+        deleteUser(RNAI_GLOBAL_EMAIL);
+
+        LabAffiliation labAffiliation = dao.findEntityByProperty(LabAffiliation.class,
+                                                                 "affiliationName",
+                                                                 LAB_AFFILIATION_NAME);
+        if (labAffiliation != null) {
+          if (labAffiliation.getScreeningRoomUsers().size() > 0) {
+            log.warn("lab affiliation " + labAffiliation + " referenced by other users...not deleting");
+          }
+          else {
+            log.info("deleting lab affiliation " + labAffiliation);
             dao.deleteEntity(labAffiliation);
           }
         }
-        ScreeningRoomUser rnaiGlobalMember = dao.findEntityByProperty(ScreeningRoomUser.class,
-                                                                      "email",
-                                                                      RNAI_GLOBAL_EMAIL);
-        if (rnaiGlobalMember != null) {
-          log.info("deleting existing RNAi Global group account");
-          dao.deleteEntity(rnaiGlobalMember);
+     }
+
+      private void deleteUser(String email)
+      {
+        ScreeningRoomUser user = dao.findEntityByProperty(ScreeningRoomUser.class,
+                                                          "email",
+                                                          email);
+        if (user != null) {
+          log.info("deleting existing user " + user);
+          user.setLabAffiliation(null);
+          dao.deleteEntity(user);
         }
       }
     });
@@ -110,10 +120,22 @@ public class BoutrosAnnotationImporter
       public void runTransaction()
       {
         try {
-          ScreeningRoomUser boutrosScreener =
+          ScreeningRoomUser labHead =
             new ScreeningRoomUser(new Date(),
                                   "Michael",
                                   "Boutros",
+                                  LAB_HEAD_EMAIL,
+                                  "",
+                                  "",
+                                  "",
+                                  "",
+                                  "",
+                                  ScreeningRoomUserClassification.UNASSIGNED,
+                                  true);
+          ScreeningRoomUser leadScreener =
+            new ScreeningRoomUser(new Date(),
+                                  "Thomas",
+                                  "Horn",
                                   SCREENER_EMAIL,
                                   "",
                                   "",
@@ -122,16 +144,24 @@ public class BoutrosAnnotationImporter
                                   "",
                                   ScreeningRoomUserClassification.UNASSIGNED,
                                   true);
-          LabAffiliation labAffiliation = new LabAffiliation(SCREENER_LAB_AFFILIATION_NAME,
-                                                             AffiliationCategory.OTHER);
-          boutrosScreener.setLabAffiliation(labAffiliation);
-          Screen screen = new Screen(boutrosScreener,
-                                     boutrosScreener,
-                                     SCREEN_NUMBER,
-                                     SCREEN_DATE,
+          LabAffiliation labAffiliation = dao.findEntityByProperty(LabAffiliation.class,
+                                                                   "affiliationName",
+                                                                   LAB_AFFILIATION_NAME);
+          if (labAffiliation == null) {
+            labAffiliation = new LabAffiliation(LAB_AFFILIATION_NAME,
+                                                AffiliationCategory.OTHER);
+          }
+
+          labHead.setLabAffiliation(labAffiliation);
+          leadScreener.setLabAffiliation(labAffiliation);
+
+          Screen screen = new Screen(leadScreener,
+                                     labHead,
+                                     STUDY_NUMBER,
+                                     STUDY_DATE,
                                      ScreenType.RNAI,
                                      StudyType.IN_SILICO,
-                                     SCREEN_TITLE);
+                                     STUDY_TITLE);
           screen.setSummary("In-silico analysis of SMARTPool siRNA gene targets.");
 
           ScreeningRoomUser rnaiGlobalMember =
@@ -259,7 +289,6 @@ public class BoutrosAnnotationImporter
                                                                builders.size(),
                                                                false)) {
       public String transformValue(String value) {
-        // TODO: not working!!!
         return value.replaceAll("([&+])", " $1 ");
       }
     });

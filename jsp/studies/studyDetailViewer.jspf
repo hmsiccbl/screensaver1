@@ -55,8 +55,8 @@
 					value="#{studyDetailViewer.study.screenId}" styleClass="dataText"
 					visibleOnUserRole="developer" />
 
-				<t:outputLabel for="screenNumber" value="Screen Number"
-					title="The number used to uniquely identify the screen" />
+				<t:outputLabel for="screenNumber" value="Study Number"
+					title="The number used to uniquely identify the study" />
 				<t:outputText id="screenNumber"
 					value="#{studyDetailViewer.study.screenNumber}"
 					styleClass="dataText" />
@@ -67,7 +67,7 @@
 					displayValueOnly="#{true}" size="80"
 					styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 
-				<t:outputLabel for="studyType" value="Study"
+				<t:outputLabel for="studyType" value="Study Type"
 					title="'In Vitro' or 'In Silico'" />
 				<t:outputText id="studyType"
 					value="#{studyDetailViewer.study.studyType}"

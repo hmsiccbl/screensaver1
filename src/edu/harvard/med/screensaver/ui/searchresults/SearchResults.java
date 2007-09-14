@@ -84,6 +84,7 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
 
   // private instance data
 
+  private String _description;
   private Collection<E> _unsortedResults;
   private List<E> _currentSort;
   private Pair<TableColumn<E>,SortDirection> _currentSortType;
@@ -110,14 +111,20 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
   {
   }
 
+  public void setContents(Collection<E> unsortedResults)
+  {
+    setContents(unsortedResults, null);
+  }
+
   /**
    * Set the contents of the search results.
    *
    * @param unsortedResults the unsorted list of the results, as they are
    *          returned from the database
    */
-  public void setContents(Collection<E> unsortedResults)
+  public void setContents(Collection<E> unsortedResults, String description)
   {
+    _description = description;
     _unsortedResults = unsortedResults;
     _resultsSize = unsortedResults.size();
     _currentEntityIndex = 0;
@@ -164,6 +171,11 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
   public Collection<E> getContents()
   {
     return _unsortedResults;
+  }
+
+  public String getDescription()
+  {
+    return _description;
   }
 
   /**

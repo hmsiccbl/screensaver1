@@ -1,5 +1,5 @@
-/* $HeadURL:$                                                                   */
-/* $Id:$                                                                        */
+/* $HeadURL$                                                                   */
+/* $Id$                                                                        */
 /*                                                                              */
 /* Copyright 2006 by the President and Fellows of Harvard College.              */
 /*                                                                              */
@@ -255,7 +255,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 .menuAndContent {
 	/* using fixed table layout prevents horiz scrollbar to appear on IE when content column width is at minimum */
 	/*	table-layout: fixed;*/
-	
+
 }
 
 .menuColumn,.contentColumn {
@@ -274,22 +274,27 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	width: 100%;
 }
 
-.menuItem,.menuItemActive {
+.menuItem,.menuItemActive,.submenuItem {
 	color: white;
 }
 
-.menuItemActive {
+.submenuItem {
+	font-size: x-small;
+}
+
+.menuItemActive,.submenuItemActive {
 	font-weight: bold;
 }
 
-a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited
-	{
+a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited,
+a.submenuItem:link,a.submenuItem:visited,a.submenuItemActive:link,a.submenuItemActive:visited {
 	color: white;
 	text-decoration: none;
 	vertical-align: bottom;
 }
 
-a.menuItem:hover,a.menuItemActive:hover {
+a.menuItem:hover,a.menuItemActive:hover,
+a.submenuItem:hover,a.submenuItemActive:hover {
 	color: inherit;
 	text-decoration: underline;
 }

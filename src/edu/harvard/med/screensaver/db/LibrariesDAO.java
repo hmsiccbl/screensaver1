@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -18,19 +18,24 @@ import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 
 public interface LibrariesDAO
 {
 
+  public List<Library> findLibrariesOfType(LibraryType[] libraryTypes,
+                                           ScreenType[] screenTypes);
+
   /**
    * Find and return the well.
-   * 
+   *
    * @param wellKey the wellKey
    * @return the well, null if there is no well
    */
@@ -52,7 +57,7 @@ public interface LibrariesDAO
   /**
    * Find and return the library that contains the specified plate, or null if
    * no such library contains the plate.
-   * 
+   *
    * @param plateNumber the plate number
    * @return the library that contains the specified plate. return null if no
    *         such library contains the plate.
@@ -74,12 +79,6 @@ public interface LibrariesDAO
   @SuppressWarnings("unchecked")
   public void loadOrCreateWellsForLibrary(Library library);
 
-  /**
-   * Return the libraries that are eligible for viewing in the Libraries Browser.
-   */
-  @SuppressWarnings("unchecked")
-  public List<Library> findLibrariesDisplayedInLibrariesBrowser();
-
   public BigDecimal findRemainingVolumeInWellCopy(Well well, Copy copy);
 
   public Collection<WellCopyVolume> findWellCopyVolumes(Library library);
@@ -94,4 +93,5 @@ public interface LibrariesDAO
   public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy, Integer plateNumber);
 
   public Collection<WellCopyVolume> findWellCopyVolumes(WellKey wellKey);
+
 }
