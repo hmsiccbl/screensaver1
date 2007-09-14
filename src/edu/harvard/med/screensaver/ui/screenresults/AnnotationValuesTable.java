@@ -34,7 +34,7 @@ public class AnnotationValuesTable extends DataTable
 
   private static Logger log = Logger.getLogger(AnnotationValuesTable.class);
 
-  public static final String VENDOR_ID_COLUMN_NAME = "Vendor ID";
+  public static final String VENDOR_ID_COLUMN_NAME = "Reagent Source ID";
 
 
   // instance data members
@@ -71,7 +71,7 @@ public class AnnotationValuesTable extends DataTable
   protected List<TableColumn<Map<String,Object>>> buildColumns()
   {
     List<TableColumn<Map<String,Object>>> columns = new ArrayList<TableColumn<Map<String,Object>>>();
-    columns.add(new TableColumn<Map<String,Object>>(VENDOR_ID_COLUMN_NAME, "The vendor-assigned identifier") {
+    columns.add(new TableColumn<Map<String,Object>>(VENDOR_ID_COLUMN_NAME, "The vendor-assigned reagent source identifier") {
       @Override
       public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
     });
