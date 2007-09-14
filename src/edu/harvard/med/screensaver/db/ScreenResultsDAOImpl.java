@@ -220,6 +220,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
       args.add(plateNumber);
     }
 
+    // TODO: always do a secondary sort on plate/well ascending (if sorting primarily on another column)
     String sortDirStr = sortDirection.equals(SortDirection.ASCENDING)? " asc" : " desc";
     if (sortBy >= 0) {
       if (selectedRvts.get(sortBy).isNumeric()) {
