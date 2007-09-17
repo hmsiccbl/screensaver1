@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.util.CollectionUtils;
@@ -52,13 +53,13 @@ public class AnnotationsDAO extends AbstractDAO
   }
 
   @SuppressWarnings("unchecked")
-  public Map<String,List<AnnotationValue> > findSortedAnnotationValuesTableByRange(final List<AnnotationType> annotationTypes,
-                                                                                   final int sortBy,
-                                                                                   final SortDirection sortDirection,
-                                                                                   final int fromIndex,
-                                                                                   final Integer rowsToFetch,
-                                                                                   final Map<String,Object> criteria) {
-    Map<String,List<AnnotationValue>> mapResult = (Map<String,List<AnnotationValue>>)
+  public Map<ReagentVendorIdentifier,List<AnnotationValue> > findSortedAnnotationValuesTableByRange(final List<AnnotationType> annotationTypes,
+                                                                                                    final int sortBy,
+                                                                                                    final SortDirection sortDirection,
+                                                                                                    final int fromIndex,
+                                                                                                    final Integer rowsToFetch,
+                                                                                                    final Map<String,Object> criteria) {
+    Map<ReagentVendorIdentifier,List<AnnotationValue>> mapResult = (Map<ReagentVendorIdentifier,List<AnnotationValue>>)
     getHibernateTemplate().execute(new HibernateCallback()
     {
       public Object doInHibernate(Session session) throws HibernateException, SQLException
@@ -68,22 +69,22 @@ public class AnnotationsDAO extends AbstractDAO
                                                                       sortBy,
                                                                       sortDirection,
                                                                       criteria);
-        Map<String,List<AnnotationValue>> mapResult = new LinkedHashMap<String,List<AnnotationValue>>();
+        Map<ReagentVendorIdentifier,List<AnnotationValue>> mapResult = new LinkedHashMap<ReagentVendorIdentifier,List<AnnotationValue>>();
         ScrollableResults scrollableResults = query.scroll();
         if (scrollableResults.setRowNumber(fromIndex) && (rowsToFetch == null || rowsToFetch > 0)) {
           int rowCount = 0;
           do {
             Object[] valuesArray = scrollableResults.get();
             List<AnnotationValue> values = new ArrayList<AnnotationValue>(annotationTypes.size());
-            mapResult.put(valuesArray[0].toString(), values);
+            mapResult.put((ReagentVendorIdentifier) valuesArray[0], values);
           } while (scrollableResults.next() && (rowsToFetch == null || ++rowCount < rowsToFetch));
 
           // now add the AnnotationValues
-          Map<String,List<AnnotationValue>> secondaryMapResult =
+          Map<ReagentVendorIdentifier,List<AnnotationValue>> secondaryMapResult =
             findRelatedAnnotationValues/*InParts*/(session,
                                                    mapResult.keySet(),
                                                    annotationTypes);
-          for (Map.Entry<String,List<AnnotationValue>> entry : mapResult.entrySet()) {
+          for (Map.Entry<ReagentVendorIdentifier,List<AnnotationValue>> entry : mapResult.entrySet()) {
             entry.getValue().addAll(secondaryMapResult.get(entry.getKey()));
           }
         }
@@ -113,7 +114,7 @@ public class AnnotationsDAO extends AbstractDAO
     List<Object> args = new ArrayList<Object>();
 
     String sortByAvAlias = "av";
-    selectFields.add("av.vendorIdentifier");
+    selectFields.add("av.reagentVendorIdentifier");
     fromClauses.add("AnnotationType at join at.annotationValues " + sortByAvAlias);
     whereClauses.add("at.id=?");
     args.add(annotationTypes.get(Math.max(0, sortBy)).getEntityId());
@@ -134,10 +135,10 @@ public class AnnotationsDAO extends AbstractDAO
         orderByClauses.add(sortByAvAlias + ".value" + sortDirStr);
       }
       // secondary sort order
-      orderByClauses.add(sortByAvAlias + ".vendorIdentifier asc");
+      orderByClauses.add(sortByAvAlias + ".reagentVendorIdentifier asc");
     }
     else {
-      orderByClauses.add(sortByAvAlias + ".vendorIdentifier " + sortDirStr);
+      orderByClauses.add(sortByAvAlias + ".reagentVendorIdentifier " + sortDirStr);
     }
 
     hql.append("select ").append(StringUtils.makeListString(selectFields, ", "));
@@ -161,33 +162,33 @@ public class AnnotationsDAO extends AbstractDAO
    *             is slower than breaking up the queries into subsets and
    *             recombining the results in memory.
    */
-  private Map<String,List<AnnotationValue>> findRelatedAnnotationValuesInParts(Session session,
-                                                                               Set<String> vendorIds,
-                                                                               List<AnnotationType> annotationTypes) {
-    Map<String,List<AnnotationValue>> result = new HashMap<String,List<AnnotationValue>>();
-    ArrayList<String> vendorIdList = new ArrayList<String>(vendorIds);
+  private Map<ReagentVendorIdentifier,List<AnnotationValue>> findRelatedAnnotationValuesInParts(Session session,
+                                                                                                Set<ReagentVendorIdentifier> reagentVendorIds,
+                                                                                                List<AnnotationType> annotationTypes) {
+    Map<ReagentVendorIdentifier,List<AnnotationValue>> result = new HashMap<ReagentVendorIdentifier,List<AnnotationValue>>();
+    ArrayList<ReagentVendorIdentifier> reagentVendorIdList = new ArrayList<ReagentVendorIdentifier>(reagentVendorIds);
     // the size of each subset probably shouldn't be less than 384, since
     // performance is okay at this value, and querying for <=384 wellKeys is a
     // very common (384 well plate size)
     int subsetSize = 384;
     int i = 0;
-    while (i * subsetSize < vendorIds.size()) {
-      List<String> vendorIdsSubset =
-        vendorIdList.subList(i * subsetSize,
-                             Math.min((i + 1) * subsetSize, vendorIdList.size()));
-      result.putAll(findRelatedAnnotationValues(session, vendorIdsSubset, annotationTypes));
+    while (i * subsetSize < reagentVendorIds.size()) {
+      List<ReagentVendorIdentifier> reagentVendorIdsSubset =
+        reagentVendorIdList.subList(i * subsetSize,
+                                    Math.min((i + 1) * subsetSize, reagentVendorIdList.size()));
+      result.putAll(findRelatedAnnotationValues(session, reagentVendorIdsSubset, annotationTypes));
       ++i;
     }
-    assert result.size() == vendorIds.size();
+    assert result.size() == reagentVendorIds.size();
     return result;
   }
 
-  private Map<String,List<AnnotationValue>> findRelatedAnnotationValues(Session session,
-                                                                        Collection<String> vendorIds,
-                                                                        List<AnnotationType> annotationTypes)
+  private Map<ReagentVendorIdentifier,List<AnnotationValue>> findRelatedAnnotationValues(Session session,
+                                                                                         Collection<ReagentVendorIdentifier> reagentVendorIds,
+                                                                                         List<AnnotationType> annotationTypes)
   {
     Map<Number,Integer> atId2Pos = new HashMap<Number,Integer>(annotationTypes.size());
-    String vendorIdsList = StringUtils.makeListString(StringUtils.wrapStrings(vendorIds, "'", "'"), ",");
+    String vendorIdsList = StringUtils.makeListString(StringUtils.wrapStrings(reagentVendorIds, "'", "'"), ",");
     List<Number> atIds = new ArrayList<Number>();
     for (int i = 0; i < annotationTypes.size(); i++) {
       AnnotationType at = annotationTypes.get(i);
@@ -197,29 +198,30 @@ public class AnnotationsDAO extends AbstractDAO
     String atIdsList = StringUtils.makeListString(StringUtils.wrapStrings(atIds, "'", "'"), ",");
 
     StringBuilder sql = new StringBuilder();
-    sql.append("select av.annotation_type_id, av.vendor_identifier, av.value, av.numeric_value ").
+    sql.append("select av.annotation_type_id, av.vendor_name, av.reagent_identifier, av.value, av.numeric_value ").
     append("from annotation_value av ").
     append("where (av.annotation_type_id in (").append(atIdsList).
-    append(")) and (av.vendor_identifier in (").append(vendorIdsList).append("))");
+    append(")) and (av.vendor_name || ':' || av.reagent_identifier in (").append(vendorIdsList).append("))");
 
-    Map<String,List<AnnotationValue>> result = new HashMap<String,List<AnnotationValue>>();
+    Map<ReagentVendorIdentifier,List<AnnotationValue>> result = new HashMap<ReagentVendorIdentifier,List<AnnotationValue>>();
     Query query = session.createSQLQuery(sql.toString());
     for (Iterator<?> iter = query.list().iterator(); iter.hasNext();) {
       int field = 0;
       Object[] row = (Object[]) iter.next();
       Number atId = (Number) row[field++];
-      String vendorId = new String(row[field++].toString());
-      List<AnnotationValue> annotationValues = result.get(vendorId);
+      ReagentVendorIdentifier reagentVendorId = new ReagentVendorIdentifier(row[field++].toString(),
+                                                                            row[field++].toString());
+      List<AnnotationValue> annotationValues = result.get(reagentVendorId);
       if (annotationValues == null) {
         annotationValues = new ArrayList<AnnotationValue>(annotationTypes.size());
         CollectionUtils.fill(annotationValues, null, annotationTypes.size());
-        result.put(vendorId, annotationValues);
+        result.put(reagentVendorId, annotationValues);
       }
       String textValue = (String) row[field++];
       BigDecimal numValue = (BigDecimal) row[field++];
 
       AnnotationType at = annotationTypes.get(atId2Pos.get(atId));
-      AnnotationValue annotationValue = new AnnotationValue(at, vendorId, textValue, numValue);
+      AnnotationValue annotationValue = new AnnotationValue(at, reagentVendorId, textValue, numValue);
       annotationValues.set(atId2Pos.get(atId), annotationValue);
     }
     return result;

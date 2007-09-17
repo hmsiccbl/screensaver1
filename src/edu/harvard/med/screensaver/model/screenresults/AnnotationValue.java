@@ -16,6 +16,7 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DerivedEntityProperty;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 
 import org.apache.log4j.Logger;
 
@@ -45,7 +46,7 @@ public class AnnotationValue extends AbstractEntity
   private Integer _annotationValueId;
   private Integer _version;
   private AnnotationType _annotationType;
-  private String _vendorIdentifier;
+  private ReagentVendorIdentifier _reagentVendorIdentifier;
   private BigDecimal _numericValue;
   private String _value;
 
@@ -57,15 +58,15 @@ public class AnnotationValue extends AbstractEntity
   }
 
   public AnnotationValue(AnnotationType annotationType,
-                         String vendorIdentifier,
+                         ReagentVendorIdentifier reagentVendorIdentifier,
                          String value,
                          BigDecimal numericValue)
   {
-    if (annotationType.isNumeric() && numericValue == null) {
-      throw new IllegalArgumentException("numeric value must be specified for numeric annotation types");
+    if (annotationType.isNumeric() && value != null && numericValue == null) {
+      throw new IllegalArgumentException("'numericValue' must be specified (in addition to 'value') for numeric annotation types");
     }
     _annotationType = annotationType;
-    _vendorIdentifier = vendorIdentifier;
+    _reagentVendorIdentifier = reagentVendorIdentifier;
     _value = value;
     _numericValue = numericValue;
   }
@@ -112,16 +113,16 @@ public class AnnotationValue extends AbstractEntity
   }
 
   /**
-   * @hibernate.property type="text" not-null="true"
+   * @hibernate.component not-null="true"
    */
-  public String getVendorIdentifier()
+  public ReagentVendorIdentifier getReagentVendorIdentifier()
   {
-    return _vendorIdentifier;
+    return _reagentVendorIdentifier;
   }
 
-  public void setVendorIdentifier(String wellVendorIdentifier)
+  public void setReagentVendorIdentifier(ReagentVendorIdentifier reagentVendorIdentifier)
   {
-    _vendorIdentifier = wellVendorIdentifier;
+    _reagentVendorIdentifier = reagentVendorIdentifier;
   }
 
   /**
@@ -235,6 +236,6 @@ public class AnnotationValue extends AbstractEntity
   @Override
   protected Object getBusinessKey()
   {
-    return _annotationType + ":" + _vendorIdentifier;
+    return _annotationType + ":" + _reagentVendorIdentifier;
   }
 }

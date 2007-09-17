@@ -28,7 +28,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class WellNameValueTable extends ComboNameValueTable
+public class WellNameValueTable extends ReagentNameValueTable
 {
   private static Logger log = Logger.getLogger(WellNameValueTable.class);
 
@@ -38,16 +38,7 @@ public class WellNameValueTable extends ComboNameValueTable
                             GeneViewer geneViewer,
                             CompoundViewer compoundViewer)
   {
-    List<NameValueTable> comboNameValueTables = new ArrayList<NameValueTable>();
-    comboNameValueTables.add(new WellDetailsNameValueTable(well, libraryViewer));
-    for (Gene gene : well.getGenes()) {
-      comboNameValueTables.add(new GeneNameValueTable(gene, geneViewer, wellViewer));
-    }
-    for (Compound compound : well.getOrderedCompounds()) {
-      comboNameValueTables.add(new CompoundNameValueTable(compound, compoundViewer, wellViewer));
-    }
-    initializeComboNameValueTable((NameValueTable [])
-      comboNameValueTables.toArray(new NameValueTable [0]));
+    super(well, wellViewer, geneViewer, compoundViewer, new WellDetailsNameValueTable(well, libraryViewer));
   }
 }
 

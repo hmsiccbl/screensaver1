@@ -19,6 +19,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.ImmutableProperty;
 import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.ToOneRelationship;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 
@@ -188,9 +189,14 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
     return _isNumeric;
   }
 
-  public AnnotationValue addAnnotationValue(String vendorIdentifier, String textValue, BigDecimal numericValue)
+  public AnnotationValue addAnnotationValue(ReagentVendorIdentifier reagentVendorIdentifier,
+                                            String textValue,
+                                            boolean isNumeric)
   {
-    AnnotationValue annotationValue = new AnnotationValue(this, vendorIdentifier, textValue, numericValue);
+    AnnotationValue annotationValue = new AnnotationValue(this,
+                                                          reagentVendorIdentifier,
+                                                          textValue,
+                                                          isNumeric && textValue != null ?  new BigDecimal(textValue) : null);
     boolean result = _values.add(annotationValue);
     if (result) {
       return annotationValue;

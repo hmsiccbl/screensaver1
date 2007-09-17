@@ -16,6 +16,7 @@ import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
+import edu.harvard.med.screensaver.ui.libraries.ReagentViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 
 import org.apache.log4j.Logger;
@@ -50,7 +51,7 @@ public class GeneNameValueTable extends NameValueTable
 
   private GeneViewer _geneViewer;
   private Gene _gene;
-  private WellViewer _parentWellViewer;
+  private ReagentViewer _parentViewer;
   private List<String> _names = new ArrayList<String>();
   private List<Object> _values = new ArrayList<Object>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
@@ -64,11 +65,11 @@ public class GeneNameValueTable extends NameValueTable
     this(gene, geneViewer, null);
   }
 
-  public GeneNameValueTable(Gene gene, GeneViewer geneViewer, WellViewer parentWellViewer)
+  public GeneNameValueTable(Gene gene, GeneViewer geneViewer, ReagentViewer parentViewer)
   {
     _geneViewer = geneViewer;
     _gene = gene;
-    _parentWellViewer = parentWellViewer;
+    _parentViewer = parentViewer;
     initializeLists(gene);
     setDataModel(new ListDataModel(_values));
   }
@@ -111,8 +112,8 @@ public class GeneNameValueTable extends NameValueTable
       String name = getName(index);
       if (name.equals(GENE_NAME)) {
         return _geneViewer.viewGene(_gene,
-                                    isEmbedded() ? _parentWellViewer.getWell() : null,
-                                    isEmbedded() ? _parentWellViewer.isShowNavigationBar() : null);
+                                    isEmbedded() ? _parentViewer.getWell() : null,
+                                    isEmbedded() ? _parentViewer.isShowNavigationBar() : null);
       }
     }
     // other fields do not have actions
@@ -139,7 +140,7 @@ public class GeneNameValueTable extends NameValueTable
 
   private boolean isEmbedded()
   {
-    return _parentWellViewer != null;
+    return _parentViewer != null;
   }
 
   /**

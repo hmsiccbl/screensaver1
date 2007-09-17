@@ -29,7 +29,7 @@ import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 import org.apache.log4j.Logger;
 
-public class WellViewer extends AbstractBackingBean
+public class WellViewer extends ReagentViewer
 {
 
   private static final Logger log = Logger.getLogger(WellViewer.class);
@@ -37,14 +37,7 @@ public class WellViewer extends AbstractBackingBean
 
   // private instance fields
 
-  private GenericEntityDAO _dao;
   private LibraryViewer _libraryViewer;
-  private GeneViewer _geneViewer;
-  private CompoundViewer _compoundViewer;
-
-  private Well _well;
-  private WellNameValueTable _wellNameValueTable;
-  private boolean _showNavigationBar;
 
 
   // constructors
@@ -61,47 +54,12 @@ public class WellViewer extends AbstractBackingBean
                     GeneViewer geneViewer,
                     CompoundViewer compoundViewer)
   {
-    _dao = dao;
+    super(dao, geneViewer, compoundViewer);
     _libraryViewer = libraryViewer;
-    _geneViewer = geneViewer;
-    _compoundViewer = compoundViewer;
   }
 
 
   // public instance methods
-
-  public Well getWell()
-  {
-    return _well;
-  }
-
-  public void setWell(Well well)
-  {
-    _well = well;
-  }
-
-  public WellNameValueTable getWellNameValueTable()
-  {
-    return _wellNameValueTable;
-  }
-
-  public void setWellNameValueTable(WellNameValueTable wellNameValueTable)
-  {
-    _wellNameValueTable = wellNameValueTable;
-  }
-
-  /**
-   * @motivation for JSF saveState component
-   */
-  public void setShowNavigationBar(boolean showNavigationBar)
-  {
-    _showNavigationBar = showNavigationBar;
-  }
-
-  public boolean isShowNavigationBar()
-  {
-    return _showNavigationBar;
-  }
 
   @UIControllerMethod
   public String viewWell()
@@ -129,7 +87,7 @@ public class WellViewer extends AbstractBackingBean
   @UIControllerMethod
   public String viewWell(final WellKey wellKey, boolean showNavigationBar)
   {
-    _showNavigationBar = showNavigationBar;
+    setShowNavigationBar(showNavigationBar);
     try {
       _dao.doInTransaction(new DAOTransaction() {
         public void runTransaction()
@@ -147,11 +105,11 @@ public class WellViewer extends AbstractBackingBean
             throw new IllegalArgumentException("no such well");
           }
           setWell(well);
-          setWellNameValueTable(new WellNameValueTable(well,
-                                                       WellViewer.this,
-                                                       _libraryViewer,
-                                                       _geneViewer,
-                                                       _compoundViewer));
+          setNameValueTable(new WellNameValueTable(well,
+                                                   WellViewer.this,
+                                                   _libraryViewer,
+                                                   _geneViewer,
+                                                   _compoundViewer));
         }
       });
     }
@@ -164,51 +122,7 @@ public class WellViewer extends AbstractBackingBean
 
   public String viewLibrary()
   {
-    return _libraryViewer.viewLibrary(_well.getLibrary());
+    return _libraryViewer.viewLibrary(getWell().getLibrary());
   }
 
-  public String viewGene()
-  {
-    String geneId = (String) getFacesContext().getExternalContext().getRequestParameterMap().get("geneId");
-    Gene gene = null;
-    for (Gene gene2 : _well.getGenes()) {
-      if (gene2.getGeneId().equals(geneId)) {
-        gene = gene2;
-        break;
-      }
-    }
-    return _geneViewer.viewGene(gene, _well, _showNavigationBar);
-  }
-
-  public String viewCompound()
-  {
-    String compoundId = (String) getRequestParameter("compoundId");
-    Compound compound = null;
-    for (Compound compound2 : _well.getCompounds()) {
-      if (compound2.getCompoundId().equals(compoundId)) {
-        compound = compound2;
-        break;
-      }
-    }
-    return _compoundViewer.viewCompound(compound, _well, _showNavigationBar);
-  }
-
-  @UIControllerMethod
-  public String downloadWellSDFile()
-  {
-    try {
-      WellsDataExporter dataExporter = new WellsDataExporter(_dao, WellsDataExporterFormat.SDF);
-      Set<Well> wells = new HashSet<Well>(1, 2.0f);
-      wells.add(_well);
-      InputStream inputStream = dataExporter.export(wells);
-      JSFUtils.handleUserDownloadRequest(getFacesContext(),
-                                         inputStream,
-                                         dataExporter.getFileName(),
-                                         dataExporter.getMimeType());
-    }
-    catch (IOException e) {
-      reportApplicationError(e.toString());
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
 }

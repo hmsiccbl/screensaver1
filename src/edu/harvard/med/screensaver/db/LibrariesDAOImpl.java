@@ -19,10 +19,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -68,6 +70,14 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   public Well findWell(WellKey wellKey)
   {
     return _dao.findEntityById(Well.class, wellKey.getKey());
+  }
+
+  public List<Well> findReagentWellsByVendorId(ReagentVendorIdentifier reagentVendorIdentifier)
+  {
+    String hql = "select w from Well w join w.hbnLibrary l where l.vendor = ? and w.vendorIdentifier = ?";
+    List<Well> result = getHibernateTemplate().find(hql,
+                                                    new Object[] { reagentVendorIdentifier.getVendorName(), reagentVendorIdentifier.getReagentIdentifier() } );
+    return result;
   }
 
   public SilencingReagent findSilencingReagent(

@@ -18,6 +18,7 @@ import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
+import edu.harvard.med.screensaver.ui.libraries.ReagentViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 
 import org.apache.log4j.Logger;
@@ -57,7 +58,7 @@ public class CompoundNameValueTable extends NameValueTable
 
   private CompoundViewer _compoundViewer;
   private Compound _compound;
-  private WellViewer _parentWellViewer;
+  private ReagentViewer _parentViewer;
   private List<String> _names = new ArrayList<String>();
   private List<Object> _values = new ArrayList<Object>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
@@ -75,11 +76,11 @@ public class CompoundNameValueTable extends NameValueTable
   public CompoundNameValueTable(
     Compound compound,
     CompoundViewer compoundViewer,
-    WellViewer parentWellViewer)
+    ReagentViewer parentViewer)
   {
     _compoundViewer = compoundViewer;
     _compound = compound;
-    _parentWellViewer = parentWellViewer;
+    _parentViewer = parentViewer;
     initializeLists(compound);
     setDataModel(new ListDataModel(_values));
   }
@@ -123,8 +124,8 @@ public class CompoundNameValueTable extends NameValueTable
       String name = getName(index);
       if (name.equals(SMILES)) {
         return _compoundViewer.viewCompound(_compound,
-                                            isEmbedded() ? _parentWellViewer.getWell() : null,
-                                            isEmbedded() ? _parentWellViewer.isShowNavigationBar() : null);
+                                            isEmbedded() ? _parentViewer.getWell() : null,
+                                            isEmbedded() ? _parentViewer.isShowNavigationBar() : null);
       }
     }
     // other fields do not have actions
@@ -156,7 +157,7 @@ public class CompoundNameValueTable extends NameValueTable
 
   private boolean isEmbedded()
   {
-    return _parentWellViewer != null;
+    return _parentViewer != null;
   }
 
   /**

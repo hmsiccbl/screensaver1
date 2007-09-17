@@ -16,13 +16,14 @@ import java.util.Map;
 
 import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.ui.table.VirtualPagingDataModel;
 
 import org.apache.log4j.Logger;
 
-public class AnnotationValuesDataModel extends VirtualPagingDataModel<String,AnnotationValue>
+public class AnnotationValuesDataModel extends VirtualPagingDataModel<ReagentVendorIdentifier,AnnotationValue>
 {
   // static members
 
@@ -58,7 +59,7 @@ public class AnnotationValuesDataModel extends VirtualPagingDataModel<String,Ann
   // abstract method implementations
 
   @Override
-  protected Map<String,List<AnnotationValue>> fetchData(int firstRowIndex, int rowsToFetch)
+  protected Map<ReagentVendorIdentifier,List<AnnotationValue>> fetchData(int firstRowIndex, int rowsToFetch)
   {
     return _annotationsDao.findSortedAnnotationValuesTableByRange(_annotationTypes,
                                                                   _sortColumnIndex,
@@ -71,12 +72,13 @@ public class AnnotationValuesDataModel extends VirtualPagingDataModel<String,Ann
 
   @Override
   protected Map<String,Object> makeRow(int rowIndex,
-                                       String vendorId,
+                                       ReagentVendorIdentifier key,
                                        List<AnnotationValue> rowValues)
   {
     Map<String,Object> row = new HashMap<String,Object>();
-    // add fixed key column
-    row.put(AnnotationValuesTable.VENDOR_ID_COLUMN_NAME, vendorId);
+    // add fixed key columns
+    row.put(AnnotationValuesTable.VENDOR_NAME_COLUMN_NAME, key.getVendorName());
+    row.put(AnnotationValuesTable.VENDOR_REAGENT_ID_COLUMN_NAME, key.getReagentIdentifier());
     // add variable annotation type columns
     Iterator<AnnotationValue> colIter = rowValues.iterator();
     for (AnnotationType annotationType : _annotationTypes) {

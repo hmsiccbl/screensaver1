@@ -19,6 +19,7 @@ import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -40,6 +41,15 @@ public interface LibrariesDAO
    * @return the well, null if there is no well
    */
   public Well findWell(WellKey wellKey);
+
+  /**
+   * Find and return the wells containing the reagent of a given a vendor and
+   * vendorId.
+   *
+   * @return the wells, empty list if there are no wells for the given vendor
+   *         and vendorId.
+   */
+  public List<Well> findReagentWellsByVendorId(ReagentVendorIdentifier reagentVendorIdentifier);
 
   /**
    * Find and return the silencing reagent. Return null if there is no matching

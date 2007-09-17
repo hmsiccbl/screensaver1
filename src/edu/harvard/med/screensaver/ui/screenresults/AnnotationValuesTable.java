@@ -19,10 +19,12 @@ import javax.faces.model.DataModel;
 import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
-import edu.harvard.med.screensaver.ui.libraries.WellViewer;
+import edu.harvard.med.screensaver.ui.libraries.ReagentViewer;
 import edu.harvard.med.screensaver.ui.table.DataTable;
-import edu.harvard.med.screensaver.ui.table.DataTableRowsPerPageUISelectOneBean;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
 import org.apache.log4j.Logger;
@@ -34,14 +36,16 @@ public class AnnotationValuesTable extends DataTable
 
   private static Logger log = Logger.getLogger(AnnotationValuesTable.class);
 
-  public static final String VENDOR_ID_COLUMN_NAME = "Reagent Source ID";
+  public static final String VENDOR_NAME_COLUMN_NAME = "Vendor";
+  public static final String VENDOR_REAGENT_ID_COLUMN_NAME = "Reagent Source ID";
 
 
   // instance data members
 
   private AnnotationsDAO _annotationsDao;
   private GenericEntityDAO _dao;
-  private WellViewer _vendorProductViewer;
+  private LibrariesDAO _librariesDao;
+  private ReagentViewer _reagentViewer;
 
   private List<AnnotationType> _annotationTypes;
 
@@ -57,11 +61,13 @@ public class AnnotationValuesTable extends DataTable
 
   public AnnotationValuesTable(GenericEntityDAO dao,
                                AnnotationsDAO annotationsDao,
-                               WellViewer wellViewer)
+                               LibrariesDAO librariesDao,
+                               ReagentViewer reagentViewer)
   {
     _dao = dao;
     _annotationsDao = annotationsDao;
-    _vendorProductViewer = wellViewer;
+    _librariesDao = librariesDao;
+    _reagentViewer = reagentViewer;
   }
 
 
@@ -71,9 +77,31 @@ public class AnnotationValuesTable extends DataTable
   protected List<TableColumn<Map<String,Object>>> buildColumns()
   {
     List<TableColumn<Map<String,Object>>> columns = new ArrayList<TableColumn<Map<String,Object>>>();
-    columns.add(new TableColumn<Map<String,Object>>(VENDOR_ID_COLUMN_NAME, "The vendor-assigned reagent source identifier") {
+    columns.add(new TableColumn<Map<String,Object>>(VENDOR_NAME_COLUMN_NAME, "The vendor that supplies the reagent") {
       @Override
       public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
+    });
+    columns.add(new TableColumn<Map<String,Object>>(VENDOR_REAGENT_ID_COLUMN_NAME, "The vendor-assigned reagent source identifier") {
+
+      @Override
+      public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
+
+      @Override
+      public boolean isCommandLink() { return true; }
+
+      @Override
+      public Object cellAction(Map<String,Object> row)
+      {
+        String vendor = (String) getSortManager().getColumn(0).getCellValue(row);
+        String vendorId = (String) getSortManager().getColumn(1).getCellValue(row);
+        ReagentVendorIdentifier reagentVendorIdentifier = new ReagentVendorIdentifier(vendor, vendorId);
+        List<Well> wells = _librariesDao.findReagentWellsByVendorId(reagentVendorIdentifier);
+        if (wells.size() == 0) {
+          reportApplicationError("unknown reagent with reagent vendor ID " + reagentVendorIdentifier);
+        }
+        return _reagentViewer.viewReagent(wells.get(0));
+      }
+
     });
     for (AnnotationType annotationType : _annotationTypes) {
       columns.add(new TableColumn<Map<String,Object>>(annotationType.getName(),

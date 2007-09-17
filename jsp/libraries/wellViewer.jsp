@@ -5,32 +5,8 @@
 
 <f:subview id="wellViewer">
 
-	<t:saveState value="#{wellViewer.showNavigationBar}" />
-
-	<t:panelGroup rendered="#{wellViewer.showNavigationBar}" >
-	  <t:aliasBean alias="#{navigator}" value="#{wellsBrowser}">
-			<h:form id="navPanelForm">
-				<%@ include file="../searchResultsNavPanel.jspf" %>
-			</h:form>
-  	</t:aliasBean>
-  </t:panelGroup>
-
-  <t:aliasBean alias="#{nameValueTable}" value="#{wellViewer.wellNameValueTable}">
-    <%@ include file="../nameValueTable.jspf" %>
-  </t:aliasBean>
-
-  <t:panelGrid style="margin-top: 10px;">
-    <t:panelGroup rendered="#{! empty wellViewer.well.compounds}">
-      <h:form id="wellContentsDownloadForm">
-		  	<h:commandButton value="Dowload SD File"
-			  	action="#{wellViewer.downloadWellSDFile}" styleClass="command"
-				  title="Download the contents of the well as an SD File" />
-      </h:form>
-    </t:panelGroup>
-  </t:panelGrid>
-
-  <t:panelGroup rendered="#{! empty wellViewer.well.compounds}">
-    <%@ include file="structureImageNotice.jspf" %>
-  </t:panelGroup>
+	<t:aliasBean alias="#{reagentViewer}" value="#{wellViewer}">
+		<%@ include file="reagentViewer.jsp"%>
+	</t:aliasBean>
 
 </f:subview>

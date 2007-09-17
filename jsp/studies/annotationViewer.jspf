@@ -128,7 +128,7 @@
 								<t:columns
 									value="#{annotationViewer.annotationValuesTable.sortManager.columnModel}"
 									var="column"
-									styleClass="#{(column.name==\"Reagent Source ID\") ? \"keyColumn\" : (column.numeric ? \"numericColumn\" : \"textColumn\")}">
+									styleClass="#{(column.name==\"Vendor\" || column.name==\"Reagent Source ID\") ? \"keyColumn\" : (column.numeric ? \"numericColumn\" : \"textColumn\")}">
 									<f:facet name="header">
 										<t:commandSortHeader columnName="#{column.name}" arrow="false">
 											<f:facet name="ascending">

@@ -35,6 +35,7 @@ import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
@@ -1040,19 +1041,20 @@ public class ComplexDAOTest extends AbstractSpringTest
     AnnotationType at1 = new AnnotationType(screen, "annot1", "desc1", 0, false);
     AnnotationType at2 = new AnnotationType(screen, "annot2", "desc2", 1, true);
     for (int i = 0; i < 20; ++i) {
-      String vendorId = String.format("vendorId%02d", i);
-      at1.addAnnotationValue(vendorId,
+      ReagentVendorIdentifier reagentVendorId = new ReagentVendorIdentifier("vendor",
+                                                                            String.format("vendorId%02d", i));
+      at1.addAnnotationValue(reagentVendorId,
                              String.format("value%02d", i),
-                             null);
-      at2.addAnnotationValue(vendorId,
-                             null,
-                             new BigDecimal(i));
+                             false);
+      at2.addAnnotationValue(reagentVendorId,
+                             Integer.toString(i),
+                             true);
     }
     genericEntityDao.persistEntity(screen);
 
     // test sort by vendor id (fixed key column)
     Map<String,Object> criteria = new HashMap<String,Object>();
-    Map<String,List<AnnotationValue>> result =
+    Map<ReagentVendorIdentifier,List<AnnotationValue>> result =
       annotationsDao.findSortedAnnotationValuesTableByRange(Arrays.asList(at1, at2),
                                                             AnnotationsDAO.SORT_BY_VENDOR_ID,
                                                             SortDirection.ASCENDING,
@@ -1061,9 +1063,10 @@ public class ComplexDAOTest extends AbstractSpringTest
                                                             null);
     assertEquals("result size", 20, result.size());
     int iWell = 0;
-    for (Map.Entry<String,List<AnnotationValue>> entry : result.entrySet()) {
+    for (Map.Entry<ReagentVendorIdentifier,List<AnnotationValue>> entry : result.entrySet()) {
       assertEquals("sorted key value for " + entry.getKey() + " at sort index " + iWell,
-                   String.format("vendorId%02d",  iWell),
+                   new ReagentVendorIdentifier("vendor",
+                                               String.format("vendorId%02d",  iWell)),
                    entry.getKey());
       assertEquals("associated annotation 0 value for " + entry.getKey(),
                    String.format("value%02d",  iWell),
@@ -1084,7 +1087,7 @@ public class ComplexDAOTest extends AbstractSpringTest
                                                             criteria);
     assertEquals("result size", 5, result.size());
     iWell = 15;
-    for (Map.Entry<String,List<AnnotationValue>> entry : result.entrySet()) {
+    for (Map.Entry<ReagentVendorIdentifier,List<AnnotationValue>> entry : result.entrySet()) {
       --iWell;
       assertEquals("sorted annotation value for " + entry.getKey() + " at sort index " + iWell,
                    String.format("value%02d",  iWell),

@@ -269,6 +269,17 @@
   </bean>
 
   <bean
+    id="reagentViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.ReagentViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="geneViewer" />
+    <constructor-arg ref="compoundViewer" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
     id="wellViewer"
     parent="uiBean"
     scope="session"
@@ -417,24 +428,32 @@
     <constructor-arg ref="screenDetailViewer" />
     <constructor-arg ref="screenResultExporter" />
     <constructor-arg>
-      <bean class="edu.harvard.med.screensaver.ui.screenresults.ResultValueTypeTable" />
+      <bean
+        class="edu.harvard.med.screensaver.ui.screenresults.ResultValueTypeTable"
+        parent="uiBean" />
     </constructor-arg>
     <constructor-arg>
-      <bean class="edu.harvard.med.screensaver.ui.screenresults.FullScreenResultDataTable" >
+      <bean
+        class="edu.harvard.med.screensaver.ui.screenresults.FullScreenResultDataTable"
+        parent="uiBean">
         <constructor-arg ref="wellViewer" />
         <constructor-arg ref="librariesDao" />
         <constructor-arg ref="screenResultsDao" />
       </bean>
     </constructor-arg>
     <constructor-arg>
-      <bean class="edu.harvard.med.screensaver.ui.screenresults.PositivesOnlyScreenResultDataTable" >
+      <bean
+        class="edu.harvard.med.screensaver.ui.screenresults.PositivesOnlyScreenResultDataTable"
+        parent="uiBean">
         <constructor-arg ref="wellViewer" />
         <constructor-arg ref="librariesDao" />
         <constructor-arg ref="screenResultsDao" />
       </bean>
     </constructor-arg>
     <constructor-arg>
-      <bean class="edu.harvard.med.screensaver.ui.screenresults.SinglePlateScreenResultDataTable" >
+      <bean
+        class="edu.harvard.med.screensaver.ui.screenresults.SinglePlateScreenResultDataTable"
+        parent="uiBean">
         <constructor-arg ref="wellViewer" />
         <constructor-arg ref="librariesDao" />
         <constructor-arg ref="screenResultsDao" />
@@ -450,13 +469,18 @@
     class="edu.harvard.med.screensaver.ui.screenresults.AnnotationViewer">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg>
-      <bean class="edu.harvard.med.screensaver.ui.screenresults.AnnotationTypesTable" />
+      <bean
+        class="edu.harvard.med.screensaver.ui.screenresults.AnnotationTypesTable"
+        parent="uiBean" />
     </constructor-arg>
     <constructor-arg>
-      <bean class="edu.harvard.med.screensaver.ui.screenresults.AnnotationValuesTable" >
+      <bean
+        class="edu.harvard.med.screensaver.ui.screenresults.AnnotationValuesTable"
+        parent="uiBean">
         <constructor-arg ref="genericEntityDao" />
         <constructor-arg ref="annotationsDao" />
-        <constructor-arg ref="wellViewer" />
+        <constructor-arg ref="librariesDao" />
+        <constructor-arg ref="reagentViewer" />
       </bean>
     </constructor-arg>
     <aop:scoped-proxy />

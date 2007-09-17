@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.io.screenresults;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -77,6 +79,11 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   public Well findWell(WellKey wellKey)
   {
     return new Well(_library, wellKey, WellType.EXPERIMENTAL);
+  }
+
+  public List<Well> findReagentWellsByVendorId(ReagentVendorIdentifier reagentVendorIdentifier)
+  {
+    return new ArrayList<Well>();
   }
 
   public Library findLibraryWithPlate(Integer plateNumber)

@@ -13,11 +13,17 @@ import java.math.BigDecimal;
 
 import jxl.Cell;
 
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 
 class AnnotationValueBuilder
 {
+  /**
+   * This value should match the value in our database for Dharmacon libraries.
+   */
+  private static final String DHARMACON_VENDOR_NAME = "Dharmacon";
+
   private int _sourceColumnIndex;
   private AnnotationType _annotationType;
 
@@ -31,12 +37,11 @@ class AnnotationValueBuilder
   public AnnotationValue buildAnnotationValue(Cell[] row)
   {
     String value = transformValue(row[_sourceColumnIndex].getContents());
-    if (_annotationType.isNumeric()) {
-      return _annotationType.addAnnotationValue(row[0].getContents(), value, new BigDecimal(value));
-    }
-    else {
-      return _annotationType.addAnnotationValue(row[0].getContents(), value, null);
-    }
+    ReagentVendorIdentifier reagentVendorIdentifier = new ReagentVendorIdentifier(DHARMACON_VENDOR_NAME,
+                                                                                  row[0].getContents());
+    return _annotationType.addAnnotationValue(reagentVendorIdentifier,
+                                              value,
+                                              _annotationType.isNumeric());
   }
 
   public AnnotationType getAnnotationType()

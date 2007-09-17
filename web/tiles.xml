@@ -153,6 +153,18 @@
     <put name="body" value="/libraries/wellFinder.jsp" />
   </definition>
 
+  <definition name="/libraries/reagentViewer.tiles" extends=".base">
+    <put name="pageTitle" value="Reagent Viewer" />
+    <put name="pageHelpURL" value="../help/libraries/reagentViewerHelp.jsf" />
+    <put name="body" value="/libraries/reagentViewer.jsp" />
+  </definition>
+
+  <!-- definition name="/libraries/reagentFinder.tiles" extends=".base">
+    <put name="pageTitle" value="Reagent Finder" />
+    <put name="pageHelpURL" value="../help/libraries/reagentFinderHelp.jsf" />
+    <put name="body" value="/libraries/reagentFinder.jsp" />
+  </definition-->
+
   <definition name="/libraries/geneViewer.tiles" extends=".base">
     <put name="pageTitle" value="Gene Viewer" />
     <put name="pageHelpURL" value="../help/libraries/geneViewerHelp.jsf" />
