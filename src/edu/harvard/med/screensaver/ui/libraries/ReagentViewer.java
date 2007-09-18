@@ -12,21 +12,24 @@ package edu.harvard.med.screensaver.ui.libraries;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.libraries.WellsDataExporter;
 import edu.harvard.med.screensaver.io.libraries.WellsDataExporterFormat;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.NameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.ReagentNameValueTable;
-import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 import org.apache.log4j.Logger;
@@ -41,11 +44,13 @@ public class ReagentViewer extends AbstractBackingBean
   // private instance fields
 
   protected GenericEntityDAO _dao;
+  private AnnotationsDAO _annotationsDao;
   protected GeneViewer _geneViewer;
   protected CompoundViewer _compoundViewer;
 
   private Well _well;
   private NameValueTable _nameValueTable;
+  private NameValueTable _annotationNameValueTable;
   private boolean _showNavigationBar;
 
 
@@ -59,10 +64,12 @@ public class ReagentViewer extends AbstractBackingBean
   }
 
   public ReagentViewer(GenericEntityDAO dao,
+                       AnnotationsDAO annotationsDao,
                        GeneViewer geneViewer,
                        CompoundViewer compoundViewer)
   {
     _dao = dao;
+    _annotationsDao = annotationsDao;
     _geneViewer = geneViewer;
     _compoundViewer = compoundViewer;
   }
@@ -78,6 +85,10 @@ public class ReagentViewer extends AbstractBackingBean
   public void setWell(Well well)
   {
     _well = well;
+    List<AnnotationValue> annotationValues =
+      _annotationsDao.findAnnotationValuesForReagent(new ReagentVendorIdentifier(_well.getLibrary().getVendor(),
+                                                                                 _well.getVendorIdentifier()));
+    setAnnotationNameValueTable(new AnnotationNameValueTable(annotationValues));
   }
 
   public NameValueTable getNameValueTable()
@@ -89,6 +100,18 @@ public class ReagentViewer extends AbstractBackingBean
   {
     _nameValueTable = nameValueTable;
   }
+
+  public NameValueTable getAnnotationNameValueTable()
+  {
+    return _annotationNameValueTable;
+  }
+
+  public void setAnnotationNameValueTable(NameValueTable annotationNameValueTable)
+  {
+    _annotationNameValueTable = annotationNameValueTable;
+  }
+
+
 
   /**
    * @motivation for JSF saveState component
@@ -132,11 +155,13 @@ public class ReagentViewer extends AbstractBackingBean
     _showNavigationBar = showNavigationBar;
     try {
       _dao.doInTransaction(new DAOTransaction() {
+
         public void runTransaction()
         {
           Well well = _dao.findEntityById(Well.class,
                                           wellKey.toString(),
                                           true,
+                                          "hbnLibrary",
                                           "hbnSilencingReagents.gene.genbankAccessionNumbers",
                                           "hbnCompounds.compoundNames",
                                           "hbnCompounds.pubchemCids",

@@ -301,6 +301,7 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.ReagentViewer">
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="annotationsDao" />
     <constructor-arg ref="geneViewer" />
     <constructor-arg ref="compoundViewer" />
     <aop:scoped-proxy/>
@@ -312,6 +313,7 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.WellViewer">
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="annotationsDao" />
     <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="geneViewer" />
     <constructor-arg ref="compoundViewer" />

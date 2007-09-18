@@ -9,23 +9,17 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
+import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.io.libraries.WellsDataExporter;
-import edu.harvard.med.screensaver.io.libraries.WellsDataExporterFormat;
-import edu.harvard.med.screensaver.model.libraries.Compound;
-import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 import org.apache.log4j.Logger;
 
@@ -50,11 +44,12 @@ public class WellViewer extends ReagentViewer
   }
 
   public WellViewer(GenericEntityDAO dao,
+                    AnnotationsDAO annotationsDao,
                     LibraryViewer libraryViewer,
                     GeneViewer geneViewer,
                     CompoundViewer compoundViewer)
   {
-    super(dao, geneViewer, compoundViewer);
+    super(dao, annotationsDao, geneViewer, compoundViewer);
     _libraryViewer = libraryViewer;
   }
 

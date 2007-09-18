@@ -51,9 +51,10 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
   private boolean _isNumeric;
   private Set<AnnotationValue> _values = new HashSet<AnnotationValue>();
 
+
   // constructors
 
-  private AnnotationType()
+  protected AnnotationType()
   {
   }
 

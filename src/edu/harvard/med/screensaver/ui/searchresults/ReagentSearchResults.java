@@ -153,9 +153,7 @@ public class ReagentSearchResults extends SearchResults<Well,Object>
   @Override
   public String showSummaryView()
   {
-    // NOTE: if there were more ways to get to a well search results, then this method would
-    // need to be more intelligent
-    return VIEW_WELL_SEARCH_RESULTS;
+    return VIEW_REAGENT_SEARCH_RESULTS;
   }
 
   @Override

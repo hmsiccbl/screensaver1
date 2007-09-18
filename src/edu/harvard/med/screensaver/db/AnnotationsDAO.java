@@ -22,6 +22,7 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.util.CollectionUtils;
@@ -234,5 +235,14 @@ public class AnnotationsDAO extends AbstractDAO
       annotationValues.set(atId2Pos.get(atId), annotationValue);
     }
     return result;
+  }
+
+  public List<AnnotationValue> findAnnotationValuesForReagent(ReagentVendorIdentifier rvi)
+  {
+    // note: we eager fetch the related AnnotationTypes, as a courtesy to the calling code (it's reasonable to expect the calling code will need the AnnotationType)
+    return getHibernateTemplate().find("from AnnotationValue av left join fetch av.annotationType where av.reagentVendorIdentifier=(?,?)",
+                                       new Object[] { rvi.getVendorName(), rvi.getReagentIdentifier() } );
+    // this simpler version doesn't work, for some reason
+    // return getHibernateTemplate().find("from AnnotationValue av where av.reagentVendorIdentifier=?", rvi);
   }
 }
