@@ -112,6 +112,12 @@ public class Menu extends AbstractBackingBean
   }
 
   @UIControllerMethod
+  public String findReagents()
+  {
+    return FIND_REAGENTS;
+  }
+
+  @UIControllerMethod
   public String findWells()
   {
     return FIND_WELLS;

@@ -32,10 +32,12 @@ public interface ScreensaverConstants
   public static final String VIEW_HELP ="viewHelp";
   public static final String VIEW_NEWS ="viewNews";
   public static final String VIEW_DOWNLOADS ="viewDownloads";
+  public static final String FIND_REAGENTS = "findReagents";
   public static final String FIND_WELLS = "findWells";
   public static final String FIND_WELL_VOLUMES = "findWellVolumes";
   public static final String BROWSE_LIBRARIES = "browseLibraries";
   public static final String VIEW_LIBRARY = "viewLibrary";
+  public static final String VIEW_REAGENT_SEARCH_RESULTS = "viewReagentSearchResults";
   public static final String VIEW_WELL_SEARCH_RESULTS = "viewWellSearchResults";
   public static final String VIEW_WELL_VOLUME_SEARCH_RESULTS = "viewWellVolumeSearchResults";
   public static final String VIEW_CHERRY_PICK_REQUEST_WELL_VOLUMES = "viewCherryPickRequestWellVolumeSearchResults";

@@ -177,6 +177,19 @@
   <!-- === libraries backing beans === -->
 
   <bean
+    id="reagentFinder"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.ReagentFinder">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="reagentsBrowser" />
+    <constructor-arg ref="reagentViewer" />
+    <constructor-arg ref="reagentVendorIdentiferListParser" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
     id="wellFinder"
     parent="uiBean"
     scope="session"
@@ -184,7 +197,7 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="wellsBrowser" />
-    <constructor-arg ref="wellViewer"/>
+    <constructor-arg ref="wellViewer" />
     <constructor-arg ref="wellCopyVolumesBrowser" />
     <constructor-arg ref="plateWellListParser" />
     <aop:scoped-proxy/>
@@ -211,6 +224,20 @@
     <constructor-arg ref="compoundLibraryContentsImporter" />
     <constructor-arg ref="rnaiLibraryContentsImporter" />
     <constructor-arg ref="naturalProductsLibraryContentsImporter" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="reagentsBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.ReagentSearchResults">
+    <constructor-arg ref="reagentViewer" />
+    <constructor-arg ref="compoundViewer" />
+    <constructor-arg ref="geneViewer" />
+    <constructor-arg>
+      <list />
+    </constructor-arg>
     <aop:scoped-proxy/>
   </bean>
 

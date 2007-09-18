@@ -18,12 +18,15 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class ReagentVendorIdentifier
+public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifier>
 {
   // instance data members
 
   private String _vendorName;
   private String _reagentIdentifier;
+
+  transient private String _asString;
+  transient private String _id;
 
 
   // public constructors and methods
@@ -68,7 +71,18 @@ public class ReagentVendorIdentifier
   @Override
   public String toString()
   {
-    return _vendorName + ":" + _reagentIdentifier;
+    if (_asString == null) {
+      _asString = _vendorName + " " + _reagentIdentifier;
+    }
+    return _asString;
+  }
+
+  public String getId()
+  {
+    if (_id == null) {
+      _id = _vendorName + ":" + _reagentIdentifier;
+    }
+    return _id;
   }
 
   private void setVendorName(String vendorName)
@@ -86,5 +100,14 @@ public class ReagentVendorIdentifier
    */
   private ReagentVendorIdentifier()
   {
+  }
+
+  public int compareTo(ReagentVendorIdentifier other)
+  {
+    int result = other._vendorName.compareTo(_vendorName);
+    if (result == 0) {
+      result = other._reagentIdentifier.compareTo(_reagentIdentifier);
+    }
+    return result;
   }
 }

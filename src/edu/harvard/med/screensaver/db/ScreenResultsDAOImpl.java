@@ -154,6 +154,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
             findRelatedResultValuesInParts(session,
                                            mapResult.keySet(),
                                            selectedRvts);
+          assert secondaryMapResult.keySet().equals(mapResult.keySet()) : "primary and secondary queries returned different results that do not have 1-1 mapping of keys";
           for (Map.Entry<WellKey,List<ResultValue>> entry : mapResult.entrySet()) {
             entry.getValue().addAll(secondaryMapResult.get(entry.getKey()));
           }

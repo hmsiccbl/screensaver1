@@ -36,7 +36,6 @@ public class AnnotationValuesTable extends DataTable
 
   private static Logger log = Logger.getLogger(AnnotationValuesTable.class);
 
-  public static final String VENDOR_NAME_COLUMN_NAME = "Vendor";
   public static final String VENDOR_REAGENT_ID_COLUMN_NAME = "Reagent Source ID";
 
 
@@ -77,10 +76,6 @@ public class AnnotationValuesTable extends DataTable
   protected List<TableColumn<Map<String,Object>>> buildColumns()
   {
     List<TableColumn<Map<String,Object>>> columns = new ArrayList<TableColumn<Map<String,Object>>>();
-    columns.add(new TableColumn<Map<String,Object>>(VENDOR_NAME_COLUMN_NAME, "The vendor that supplies the reagent") {
-      @Override
-      public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
-    });
     columns.add(new TableColumn<Map<String,Object>>(VENDOR_REAGENT_ID_COLUMN_NAME, "The vendor-assigned reagent source identifier") {
 
       @Override
@@ -92,9 +87,7 @@ public class AnnotationValuesTable extends DataTable
       @Override
       public Object cellAction(Map<String,Object> row)
       {
-        String vendor = (String) getSortManager().getColumn(0).getCellValue(row);
-        String vendorId = (String) getSortManager().getColumn(1).getCellValue(row);
-        ReagentVendorIdentifier reagentVendorIdentifier = new ReagentVendorIdentifier(vendor, vendorId);
+        ReagentVendorIdentifier reagentVendorIdentifier = (ReagentVendorIdentifier) getSortManager().getColumn(0).getCellValue(row);
         List<Well> wells = _librariesDao.findReagentWellsByVendorId(reagentVendorIdentifier);
         if (wells.size() == 0) {
           reportApplicationError("unknown reagent with reagent vendor ID " + reagentVendorIdentifier);

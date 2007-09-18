@@ -54,6 +54,9 @@
 					accesskey="W"
 					title="Look up one or more library wells by plate number and well name"
 					rendered="#{menu.screener || menu.readAdmin}" />
+				<t:commandNavigation2 action="#{menu.findReagents}" value="Find Reagents"
+					accesskey="R"
+					title="Look up one or more reagents by vendor reagent ID" />
 				<t:commandNavigation2 action="#{menu.browseLibraries}"
 					value="Browse Libraries" accesskey="L"
 					title="Browse the currently available libraries" />

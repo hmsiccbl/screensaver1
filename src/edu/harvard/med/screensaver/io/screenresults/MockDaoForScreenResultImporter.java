@@ -86,6 +86,11 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return new ArrayList<Well>();
   }
 
+  public Collection<String> findAllVendorNames()
+  {
+    return new ArrayList<String>();
+  }
+
   public Library findLibraryWithPlate(Integer plateNumber)
   {
     return _library;

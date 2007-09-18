@@ -7,23 +7,23 @@
    $Id:$
 
    Copyright 2006 by the President and Fellows of Harvard College.
-   
+
    Screensaver is an open-source project developed by the ICCB-L and NSRB labs
    at Harvard Medical School. This software is distributed under the terms of
    the GNU General Public License.
 -->
 
 <beans>
- 
-  <bean 
+
+  <bean
     id="screenResultParser"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
     scope="prototype">
     <constructor-arg index="0" ref="librariesDao"/>
   </bean>
 
-  <!-- TODO: place this in a spring-context-testing.xml file, or something similar -->  
-  <bean 
+  <!-- TODO: place this in a spring-context-testing.xml file, or something similar -->
+  <bean
     id="mockScreenResultParser"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
     scope="prototype">
@@ -33,13 +33,13 @@
     </constructor-arg>
   </bean>
 
-  <bean 
+  <bean
     id="screenResultExporter"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter"
     scope="singleton">
   </bean>
 
-  <bean 
+  <bean
     id="compoundLibraryContentsParser"
     class="edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser"
     scope="singleton"
@@ -48,7 +48,7 @@
     <constructor-arg ref="librariesDao"/>
   </bean>
 
-  <bean 
+  <bean
     id="naturalProductsLibraryContentsParser"
     class="edu.harvard.med.screensaver.io.libraries.compound.NaturalProductsLibraryContentsParser"
     scope="singleton"
@@ -57,7 +57,7 @@
     <constructor-arg ref="librariesDao"/>
   </bean>
 
-  <bean 
+  <bean
     id="rnaiLibraryContentsParser"
     class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser"
     scope="singleton"
@@ -66,31 +66,31 @@
     <constructor-arg ref="librariesDao"/>
   </bean>
 
-  <bean 
+  <bean
     id="bulkCompoundLibraryLoader"
     class="edu.harvard.med.screensaver.io.libraries.compound.BulkCompoundLibraryLoader"
     scope="singleton">
     <constructor-arg ref="genericEntityDao"/>
     <constructor-arg ref="compoundLibraryContentsParser"/>
   </bean>
-  
-  <bean 
+
+  <bean
     id="bulkRNAiLibraryLoader"
     class="edu.harvard.med.screensaver.io.libraries.rnai.BulkRNAiLibraryLoader"
     scope="singleton">
     <constructor-arg ref="genericEntityDao"/>
     <constructor-arg ref="rnaiLibraryContentsParser"/>
   </bean>
-  
-  <bean 
+
+  <bean
     id="rnaiLibraryContentsFileLoader"
     class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsFileLoader"
     scope="singleton">
     <constructor-arg ref="genericEntityDao"/>
     <constructor-arg ref="rnaiLibraryContentsParser"/>
   </bean>
-  
-  <bean 
+
+  <bean
     id="bulkScreenResultImporter"
     class="edu.harvard.med.screensaver.io.screenresults.BulkScreenResultImporter"
     scope="singleton">
@@ -104,7 +104,13 @@
     <constructor-arg ref="screenResultsDao"/>
     <constructor-arg ref="hibernateTemplate"/>
   </bean>
-  
+
+  <bean
+    id="reagentVendorIdentiferListParser"
+    class="edu.harvard.med.screensaver.io.libraries.ReagentVendorIdentifierListParser"
+    scope="singleton">
+  </bean>
+
   <bean
     id="plateWellListParser"
     class="edu.harvard.med.screensaver.io.libraries.PlateWellListParser"
@@ -112,7 +118,7 @@
     <constructor-arg ref="genericEntityDao"/>
     <constructor-arg ref="librariesDao"/>
   </bean>
-  
+
   <bean
     id="libraryCopyGenerator"
     class="edu.harvard.med.screensaver.service.libraries.LibraryCopyGenerator"
@@ -120,7 +126,7 @@
     <constructor-arg ref="genericEntityDao"/>
     <constructor-arg ref="librariesDao"/>
   </bean>
-  
+
   <bean
     id="cherryPickRequestAllocator"
     class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator"
@@ -143,7 +149,7 @@
     scope="singleton">
     <constructor-arg ref="genericEntityDao"/>
   </bean>
-  
+
   <bean
     id="libraryPoolToDuplexWellMapper"
     class="edu.harvard.med.screensaver.service.libraries.rnai.LibraryPoolToDuplexWellMapper"

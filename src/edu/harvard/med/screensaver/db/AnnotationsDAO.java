@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
@@ -84,8 +85,10 @@ public class AnnotationsDAO extends AbstractDAO
             findRelatedAnnotationValues/*InParts*/(session,
                                                    mapResult.keySet(),
                                                    annotationTypes);
+          assert secondaryMapResult.keySet().equals(mapResult.keySet()) : "primary and secondary queries returned different results that do not have 1-1 mapping of keys";
           for (Map.Entry<ReagentVendorIdentifier,List<AnnotationValue>> entry : mapResult.entrySet()) {
-            entry.getValue().addAll(secondaryMapResult.get(entry.getKey()));
+            List<AnnotationValue> relatedAnnotationValues = secondaryMapResult.get(entry.getKey());
+            entry.getValue().addAll(relatedAnnotationValues);
           }
         }
         return mapResult;
@@ -188,23 +191,29 @@ public class AnnotationsDAO extends AbstractDAO
                                                                                          List<AnnotationType> annotationTypes)
   {
     Map<Number,Integer> atId2Pos = new HashMap<Number,Integer>(annotationTypes.size());
-    String vendorIdsList = StringUtils.makeListString(StringUtils.wrapStrings(reagentVendorIds, "'", "'"), ",");
+
+    List<String> rviIds = new ArrayList<String>();
+    for (ReagentVendorIdentifier rviId : reagentVendorIds) {
+      rviIds.add(rviId.getId());
+    }
+
     List<Number> atIds = new ArrayList<Number>();
     for (int i = 0; i < annotationTypes.size(); i++) {
       AnnotationType at = annotationTypes.get(i);
       atIds.add((Number) at.getEntityId());
       atId2Pos.put((Number) at.getEntityId(), i);
     }
-    String atIdsList = StringUtils.makeListString(StringUtils.wrapStrings(atIds, "'", "'"), ",");
 
     StringBuilder sql = new StringBuilder();
     sql.append("select av.annotation_type_id, av.vendor_name, av.reagent_identifier, av.value, av.numeric_value ").
     append("from annotation_value av ").
-    append("where (av.annotation_type_id in (").append(atIdsList).
-    append(")) and (av.vendor_name || ':' || av.reagent_identifier in (").append(vendorIdsList).append("))");
+    append("where (av.annotation_type_id in (:atIds)) ").
+    append("and (av.vendor_name || ':' || av.reagent_identifier in (:rviIds))");
 
     Map<ReagentVendorIdentifier,List<AnnotationValue>> result = new HashMap<ReagentVendorIdentifier,List<AnnotationValue>>();
     Query query = session.createSQLQuery(sql.toString());
+    query.setParameterList("atIds", atIds);
+    query.setParameterList("rviIds", rviIds);
     for (Iterator<?> iter = query.list().iterator(); iter.hasNext();) {
       int field = 0;
       Object[] row = (Object[]) iter.next();

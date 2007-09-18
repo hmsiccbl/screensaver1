@@ -80,6 +80,13 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return result;
   }
 
+  public List<String> findAllVendorNames()
+  {
+    String hql = "select distinct l.vendor from Library l where l.vendor is not null";
+    List<String> vendorNames = getHibernateTemplate().find(hql);
+    return vendorNames;
+  }
+
   public SilencingReagent findSilencingReagent(
     Gene gene,
     SilencingReagentType silencingReagentType,

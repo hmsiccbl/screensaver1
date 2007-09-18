@@ -72,13 +72,12 @@ public class AnnotationValuesDataModel extends VirtualPagingDataModel<ReagentVen
 
   @Override
   protected Map<String,Object> makeRow(int rowIndex,
-                                       ReagentVendorIdentifier key,
+                                       ReagentVendorIdentifier rowKey,
                                        List<AnnotationValue> rowValues)
   {
     Map<String,Object> row = new HashMap<String,Object>();
     // add fixed key columns
-    row.put(AnnotationValuesTable.VENDOR_NAME_COLUMN_NAME, key.getVendorName());
-    row.put(AnnotationValuesTable.VENDOR_REAGENT_ID_COLUMN_NAME, key.getReagentIdentifier());
+    row.put(AnnotationValuesTable.VENDOR_REAGENT_ID_COLUMN_NAME, rowKey);
     // add variable annotation type columns
     Iterator<AnnotationValue> colIter = rowValues.iterator();
     for (AnnotationType annotationType : _annotationTypes) {

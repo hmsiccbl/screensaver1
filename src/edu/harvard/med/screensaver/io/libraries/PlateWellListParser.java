@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -29,7 +29,7 @@ public class PlateWellListParser
 
   private static Logger log = Logger.getLogger(PlateWellListParser.class);
 
-  
+
   // TODO: consider moving these to WellKey
   private static final Pattern _plateWellHeaderLinePattern = Pattern.compile(
     "^\\s*((((stock|384)\\s+)?plate)\\s+(((stock|384)\\s+)?well)|(stock_id\\s+row))\\s*$",
@@ -46,15 +46,15 @@ public class PlateWellListParser
 
 
   // instance data members
-  
+
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
 
   // public constructors and methods
-  
+
   public PlateWellListParser(GenericEntityDAO dao,
                              LibrariesDAO librariesDao)
-  {  
+  {
     _dao = dao;
     _librariesDao = librariesDao;
   }
@@ -119,7 +119,7 @@ public class PlateWellListParser
     }
     return result;
   }
-  
+
 
   /**
    * Parse and return the well for the plate number and well name.
@@ -127,6 +127,7 @@ public class PlateWellListParser
    * @param wellName the unparsed well name
    * @return the well
    */
+  // TODO: this method doesn't belong in the parser class (move to calling class)
   public Well lookupWell(String plateNumberString, String wellName)
   {
     Integer plateNumber = parsePlateNumber(plateNumberString);
@@ -137,7 +138,7 @@ public class PlateWellListParser
     return _librariesDao.findWell(new WellKey(plateNumber, wellName));
   }
 
-  
+
   // private methods
 
   /**
@@ -160,7 +161,7 @@ public class PlateWellListParser
     }
     return line;
   }
-  
+
   /**
    * Parse the plate number.
    */
@@ -179,7 +180,7 @@ public class PlateWellListParser
     }
     return null;
   }
-  
+
   /**
    * Parse the well name.
    */

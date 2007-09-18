@@ -104,4 +104,6 @@ public interface LibrariesDAO
 
   public Collection<WellCopyVolume> findWellCopyVolumes(WellKey wellKey);
 
+  public Collection<String> findAllVendorNames();
+
 }
