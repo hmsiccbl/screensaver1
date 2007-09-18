@@ -27,7 +27,7 @@
 					title="Download the annotations in an Excel file format" />
 			</t:panelGroup>
 
-			<t:div style="margin-left: 30px">
+			<t:div style="margin-left: 0px">
 				<t:panelGrid columns="1"
 					rendered="#{!(annotationViewer.isPanelCollapsedMap['annotationTypes'] && annotationViewer.isPanelCollapsedMap['annotationValues'])}"
 					styleClass="groupingPanel"
@@ -57,7 +57,7 @@
 				</t:panelGrid>
 			</t:div>
 
-			<t:div style="margin-left: 30px">
+			<t:div style="margin-left: 0px">
 
 				<t:collapsiblePanel id="annotationTypesPanel"
 					value="#{annotationViewer.isPanelCollapsedMap['annotationTypes']}"
