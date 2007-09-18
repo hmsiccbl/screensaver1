@@ -35,11 +35,15 @@ public abstract class Study extends AbstractEntity
 
   abstract public ScreenType getScreenType();
 
+  abstract public boolean isShareable();
+
   public boolean isStudyOnly()
   {
     // TODO: this is a total hack; proper solution is waiting on having the Study->Screen->IccbScreen hierarchy in place
     return getStudyType().equals(StudyType.IN_SILICO);
   }
+
+
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)

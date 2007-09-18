@@ -228,7 +228,7 @@ public class AnnotationsDAO extends AbstractDAO
         result.put(reagentVendorId, annotationValues);
       }
       String textValue = (String) row[field++];
-      BigDecimal numValue = (BigDecimal) row[field++];
+      Double numValue = (Double) row[field++];
 
       AnnotationType at = annotationTypes.get(atId2Pos.get(atId));
       AnnotationValue annotationValue = new AnnotationValue(at, reagentVendorId, textValue, numValue);
@@ -241,7 +241,7 @@ public class AnnotationsDAO extends AbstractDAO
   {
     // note: we eager fetch the related AnnotationTypes, as a courtesy to the calling code (it's reasonable to expect the calling code will need the AnnotationType)
     return getHibernateTemplate().find("from AnnotationValue av left join fetch av.annotationType where av.reagentVendorIdentifier=(?,?)",
-                                       new Object[] { rvi.getVendorName(), rvi.getReagentIdentifier() } );
+                                       new Object[] { rvi.getVendorName(), rvi.getVendorIdentifier() } );
     // this simpler version doesn't work, for some reason
     // return getHibernateTemplate().find("from AnnotationValue av where av.reagentVendorIdentifier=?", rvi);
   }

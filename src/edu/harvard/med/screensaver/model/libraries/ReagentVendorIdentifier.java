@@ -23,7 +23,7 @@ public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifi
   // instance data members
 
   private String _vendorName;
-  private String _reagentIdentifier;
+  private String _vendorIdentifier;
 
   transient private String _asString;
   transient private String _id;
@@ -34,7 +34,7 @@ public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifi
   public ReagentVendorIdentifier(String vendorName, String reagentIdentifier)
   {
     _vendorName = vendorName;
-    _reagentIdentifier = reagentIdentifier;
+    _vendorIdentifier = reagentIdentifier;
   }
 
   /**
@@ -50,29 +50,29 @@ public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifi
    * @return vendorId the vendor ID (from {@link Well#getVendorIdentifier()}).
    * @hibernate.property
    */
-  public String getReagentIdentifier()
+  public String getVendorIdentifier()
   {
-    return _reagentIdentifier;
+    return _vendorIdentifier;
   }
 
   @Override
   public boolean equals(Object other)
   {
     return ((ReagentVendorIdentifier) other).getVendorName().equals(_vendorName) &&
-    ((ReagentVendorIdentifier) other).getReagentIdentifier().equals(_reagentIdentifier);
+    ((ReagentVendorIdentifier) other).getVendorIdentifier().equals(_vendorIdentifier);
   }
 
   @Override
   public int hashCode()
   {
-    return _vendorName.hashCode() * 7 + _reagentIdentifier.hashCode() * 17;
+    return _vendorName.hashCode() * 7 + _vendorIdentifier.hashCode() * 17;
   }
 
   @Override
   public String toString()
   {
     if (_asString == null) {
-      _asString = _vendorName + " " + _reagentIdentifier;
+      _asString = _vendorName + " " + _vendorIdentifier;
     }
     return _asString;
   }
@@ -80,7 +80,7 @@ public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifi
   public String getId()
   {
     if (_id == null) {
-      _id = _vendorName + ":" + _reagentIdentifier;
+      _id = _vendorName + ":" + _vendorIdentifier;
     }
     return _id;
   }
@@ -92,7 +92,7 @@ public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifi
 
   private void setReagentIdentifier(String reagentIdentifier)
   {
-    _reagentIdentifier = reagentIdentifier;
+    _vendorIdentifier = reagentIdentifier;
   }
 
   /**
@@ -106,7 +106,7 @@ public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifi
   {
     int result = other._vendorName.compareTo(_vendorName);
     if (result == 0) {
-      result = other._reagentIdentifier.compareTo(_reagentIdentifier);
+      result = other._vendorIdentifier.compareTo(_vendorIdentifier);
     }
     return result;
   }

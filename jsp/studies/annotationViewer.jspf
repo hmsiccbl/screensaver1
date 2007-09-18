@@ -20,13 +20,12 @@
 				</t:div>
 			</f:facet>
 
-			<%--
 			<t:panelGroup >
 				<t:commandButton action="#{annotationViewer.download}"
-					value="Download" styleClass="command"
+					rendered="#{annotationViewer.study.downloadable}" value="Download"
+					styleClass="command"
 					title="Download the annotations in an Excel file format" />
 			</t:panelGroup>
-			--%>
 
 			<t:div style="margin-left: 30px">
 				<t:panelGrid columns="1"

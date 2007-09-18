@@ -197,7 +197,7 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
     AnnotationValue annotationValue = new AnnotationValue(this,
                                                           reagentVendorIdentifier,
                                                           textValue,
-                                                          isNumeric && textValue != null ?  new BigDecimal(textValue) : null);
+                                                          isNumeric && textValue != null ?  new Double(textValue) : null);
     boolean result = _values.add(annotationValue);
     if (result) {
       return annotationValue;

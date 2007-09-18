@@ -228,7 +228,10 @@ public class WebDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(Study study)
   {
-    return true;
+    if (study.isShareable()) {
+      return true;
+    }
+    return isReadEverythingAdmin() || isScreenerAssociatedWithScreen((Screen) study);
   }
 
   public boolean visit(Screen screen)

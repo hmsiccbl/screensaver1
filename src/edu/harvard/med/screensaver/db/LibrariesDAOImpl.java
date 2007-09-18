@@ -76,7 +76,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   {
     String hql = "select w from Well w join w.hbnLibrary l where l.vendor = ? and w.vendorIdentifier = ?";
     List<Well> result = getHibernateTemplate().find(hql,
-                                                    new Object[] { reagentVendorIdentifier.getVendorName(), reagentVendorIdentifier.getReagentIdentifier() } );
+                                                    new Object[] { reagentVendorIdentifier.getVendorName(), reagentVendorIdentifier.getVendorIdentifier() } );
     return result;
   }
 

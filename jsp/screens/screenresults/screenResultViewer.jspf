@@ -21,7 +21,7 @@
 				</t:div>
 			</f:facet>
 
-			<t:panelGroup>
+			<t:panelGroup rendered="#{screenResultViewer.screenResult.screen.downloadable}">
 				<t:commandButton action="#{screenResultViewer.download}"
 					value="Download" styleClass="command"
 					title="Download the screen results in an Excel file format" />

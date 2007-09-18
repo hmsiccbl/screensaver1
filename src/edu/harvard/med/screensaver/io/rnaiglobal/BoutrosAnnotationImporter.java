@@ -43,25 +43,31 @@ import org.apache.log4j.Logger;
 
 public class BoutrosAnnotationImporter
 {
+
   // static members
 
   private static Logger log = Logger.getLogger(BoutrosAnnotationImporter.class);
 
   private static final String RNAIGLOBAL_LOGIN = "rnaiglobal";
   private static final String RNAI_GLOBAL_EMAIL = "info@rnaiglobal.org";
+
+  private static final int STUDY_NUMBER = 100000;
   private static final String STUDY_TITLE = "Sequence Annotation of the Dharmacon/Thermofisher siGENOME Whole Human Genome siRNA Library";
+  private static final String STUDY_SUMMARY = "In-silico analysis of SMARTPool siRNA gene targets.";
+  private static final String STUDY_URL = "http://www.dkfz.de/signaling2/siGENOME/";
   private static final Date STUDY_DATE = DateUtil.makeDate(2007, 6, 14);
   private static final String LAB_AFFILIATION_NAME = "DKFZ German Cancer Research Center";
   private static final String LAB_HEAD_EMAIL = "m.boutros@dkfz.de";
   private static final String SCREENER_EMAIL = "t.horn@dkfz.de";
-  private static final int STUDY_NUMBER = 100000;
+
 
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws ParseException
   {
     CommandLineApplication app = new CommandLineApplication(args);
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("data file to import").withArgName("csv file").create("f"));
-    app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("password for RNAi Global user").withArgName("password").create("p"));
+    app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("password for RNAi Global user").withArgName("password").create("rp"));
+    app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("password for user accounts associated with study").withArgName("password").create("up"));
     if (!app.processOptions(true, true)) {
       System.exit(1);
     }
@@ -72,7 +78,8 @@ public class BoutrosAnnotationImporter
     }
 
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
-    final String rnaiGlobalUserPassword = app.getCommandLineOptionValue("p");
+    final String rnaiGlobalUserPassword = app.getCommandLineOptionValue("rp");
+    final String studyUserAccountPassword = app.getCommandLineOptionValue("up");
 
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
@@ -132,6 +139,10 @@ public class BoutrosAnnotationImporter
                                   "",
                                   ScreeningRoomUserClassification.UNASSIGNED,
                                   true);
+          labHead.setLoginId("mboutros");
+          labHead.updateScreensaverPassword(studyUserAccountPassword);
+          labHead.addScreensaverUserRole(ScreensaverUserRole.GUEST_USER);
+
           ScreeningRoomUser leadScreener =
             new ScreeningRoomUser(new Date(),
                                   "Thomas",
@@ -144,6 +155,10 @@ public class BoutrosAnnotationImporter
                                   "",
                                   ScreeningRoomUserClassification.UNASSIGNED,
                                   true);
+          leadScreener.setLoginId("thorn");
+          leadScreener.updateScreensaverPassword(studyUserAccountPassword);
+          leadScreener.addScreensaverUserRole(ScreensaverUserRole.GUEST_USER);
+
           LabAffiliation labAffiliation = dao.findEntityByProperty(LabAffiliation.class,
                                                                    "affiliationName",
                                                                    LAB_AFFILIATION_NAME);
@@ -162,7 +177,10 @@ public class BoutrosAnnotationImporter
                                      ScreenType.RNAI,
                                      StudyType.IN_SILICO,
                                      STUDY_TITLE);
-          screen.setSummary("In-silico analysis of SMARTPool siRNA gene targets.");
+          screen.setSummary(STUDY_SUMMARY);
+          screen.setUrl(STUDY_URL);
+          screen.setShareable(false);
+          screen.setDownloadable(false);
 
           ScreeningRoomUser rnaiGlobalMember =
             new ScreeningRoomUser(new Date(),
@@ -242,10 +260,18 @@ public class BoutrosAnnotationImporter
                                                                false)));
     builders.add(new AnnotationValueBuilder(builders.size() + 1,
                                             new AnnotationType(screen,
-                                                               "ON-Target Flag",
-                                                               "Dharamcon's \"ON-Target\" flag",
+                                                               "ON-Target Modification",
+                                                               "Dharamcon's \"ON-Target\" flag, indicating whether chemical modification of the sense strand " +
+                                                               "siRNA has been performed to reduce off-target effects",
                                                                builders.size(),
-                                                               false)));
+                                                               false))
+    {
+      @Override
+      public String transformValue(String value)
+      {
+        return Integer.parseInt(value) == 1 ?  "Yes" : "No";
+      }
+    });
 
     builders.add(new AnnotationValueBuilder(builders.size() + 1,
                                             new AnnotationType(screen,

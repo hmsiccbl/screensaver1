@@ -47,8 +47,8 @@ public class AnnotationValue extends AbstractEntity
   private Integer _version;
   private AnnotationType _annotationType;
   private ReagentVendorIdentifier _reagentVendorIdentifier;
-  private BigDecimal _numericValue;
   private String _value;
+  private Double _numericValue;
 
 
   // constructors
@@ -60,7 +60,7 @@ public class AnnotationValue extends AbstractEntity
   public AnnotationValue(AnnotationType annotationType,
                          ReagentVendorIdentifier reagentVendorIdentifier,
                          String value,
-                         BigDecimal numericValue)
+                         Double numericValue)
   {
     if (annotationType.isNumeric() && value != null && numericValue == null) {
       throw new IllegalArgumentException("'numericValue' must be specified (in addition to 'value') for numeric annotation types");
@@ -137,7 +137,7 @@ public class AnnotationValue extends AbstractEntity
    * @hibernate.property
    * @motivation for sorting via SQL
    */
-  public BigDecimal getNumericValue()
+  public Double getNumericValue()
   {
     return _numericValue;
   }
@@ -215,20 +215,12 @@ public class AnnotationValue extends AbstractEntity
     _annotationType = annotationType;
   }
 
-//  /**
-//   * @motivation for Hibernate
-//   */
-//  private void setWells(SortedSet<Well> wells)
-//  {
-//    _wells = wells;
-//  }
-
   private void setValue(String value)
   {
     _value = value;
   }
 
-  private void setNumericValue(BigDecimal value)
+  private void setNumericValue(Double value)
   {
     _numericValue = value;
   }

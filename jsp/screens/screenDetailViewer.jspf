@@ -5,6 +5,7 @@
 
 <%--
 TODO:
+- add URL field
 - table sorting (fixed, but by business key, or something appropriate)
 - validation messages (per component)
 - save button needs to be more accessible (multiple locations)

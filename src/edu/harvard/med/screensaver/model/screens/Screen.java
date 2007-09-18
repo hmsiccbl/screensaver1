@@ -62,10 +62,13 @@ public class Screen extends Study
   private ScreeningRoomUser _labHead;
   private Set<ScreeningRoomUser> _collaborators = new HashSet<ScreeningRoomUser>();
   private Set<Publication> _publications = new HashSet<Publication>();
+  private String _url;
   private String _summary;
   private String _comments;
   private SortedSet<AnnotationType> _annotationTypes = new TreeSet<AnnotationType>();
   private StudyType _studyType;
+  private boolean _isShareable = true;
+  private boolean _isDownloadable = true;
 
   // generic screen
 
@@ -217,6 +220,45 @@ public class Screen extends Study
   public Integer getScreenId()
   {
     return _screenId;
+  }
+
+  /**
+   * Get whether this <code>Screen</code> can be viewed by all users of
+   * the system; that is,
+   * {@link edu.harvard.med.screensaver.model.users.ScreeningRoomUser}s other
+   * than those associated with the
+   * {@link edu.harvard.med.screensaver.screens.Screen}.
+   *
+   * @return <code>true</code> iff this <code>ScreenResult</code> is
+   *         shareable among all users
+   * @hibernate.property column="is_shareable" not-null="true"
+   */
+  public boolean isShareable()
+  {
+    return _isShareable;
+  }
+
+  public void setShareable(boolean isShareable)
+  {
+    _isShareable = isShareable;
+  }
+
+  /**
+   * Get whether this <code>Screen</code> allows it Annotations and
+   * ScreenResult to be downloaded.
+   *
+   * @return <code>true</code> iff this <code>Screen</code> is
+   *         downloadable
+   * @hibernate.property column="is_downloadable" not-null="true"
+   */
+  public boolean isDownloadable()
+  {
+    return _isDownloadable;
+  }
+
+  public void setDownloadable(boolean isDownloadable)
+  {
+    _isDownloadable = isDownloadable;
   }
 
   /**
@@ -680,6 +722,19 @@ public class Screen extends Study
   public void setTitle(String title)
   {
     _title = title;
+  }
+
+  /**
+   * @hibernate.property type="text"
+   */
+  public String getUrl()
+  {
+    return _url;
+  }
+
+  public void setUrl(String url)
+  {
+    _url = url;
   }
 
   /**

@@ -34,7 +34,7 @@
 						<t:commandLink value="#{studyDetailViewer.study.labHead.labName}"
 							action="#{studyDetailViewer.viewLabHead}"
 							styleClass="dataText entityLink" />
-						<t:outputText value="&nbsp;&nbsp;Screener:" styleClass="label"
+						<t:outputText value="&nbsp;&nbsp;Study Lead:" styleClass="label"
 							escape="false" />
 						<t:commandLink
 							value="#{studyDetailViewer.study.leadScreener.fullNameLastFirst}"
@@ -54,6 +54,20 @@
 				<t:outputText id="screenId"
 					value="#{studyDetailViewer.study.screenId}" styleClass="dataText"
 					visibleOnUserRole="developer" />
+
+				<t:outputLabel for="studyIsShareable" value="Shareable"
+					title="True when the study is shareable with scientists outside the lab" />
+				<t:div>
+					<t:selectBooleanCheckbox id="studyIsShareable"
+						value="#{studyViewer.study.shareable}"
+						styleClass="label"
+						displayValueOnly="#{studyViewer.readOnly}"
+						displayValueOnlyStyleClass="dataText"
+						onclick="javascript:document.getElementById('saveScreenResultButton').click()" />
+					<t:commandButton id="saveScreenResultButton" forceId="true"
+						action="#{studyViewer.saveScreenResult}"
+						styleClass="hiddenCommand" />
+				</t:div>
 
 				<t:outputLabel for="screenNumber" value="Study Number"
 					title="The number used to uniquely identify the study" />
@@ -148,6 +162,12 @@
 					value="#{studyDetailViewer.study.summary}"
 					displayValueOnly="#{true}"
 					displayValueOnlyStyleClass="dataText" />
+
+				<t:outputLabel for="url" value="Home page"
+					title="A URL for the home page of the study" />
+				<h:outputLink id="url" value="#{studyDetailViewer.study.url}">
+					<t:outputText value="#{studyDetailViewer.study.url}" styleClass="dataText"/>
+				</h:outputLink>
 
 				<t:outputLabel for="publications" value="Publications"
 					title="Publications reporting results of the screen" />
