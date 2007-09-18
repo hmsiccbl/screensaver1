@@ -90,7 +90,7 @@ public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifi
     _vendorName = vendorName;
   }
 
-  private void setReagentIdentifier(String reagentIdentifier)
+  private void setVendorIdentifier(String reagentIdentifier)
   {
     _vendorIdentifier = reagentIdentifier;
   }

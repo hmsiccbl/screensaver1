@@ -206,10 +206,10 @@ public class AnnotationsDAO extends AbstractDAO
     }
 
     StringBuilder sql = new StringBuilder();
-    sql.append("select av.annotation_type_id, av.vendor_name, av.reagent_identifier, av.value, av.numeric_value ").
+    sql.append("select av.annotation_type_id, av.vendor_name, av.vendor_identifier, av.value, av.numeric_value ").
     append("from annotation_value av ").
     append("where (av.annotation_type_id in (:atIds)) ").
-    append("and (av.vendor_name || ':' || av.reagent_identifier in (:rviIds))");
+    append("and (av.vendor_name || ':' || av.vendor_identifier in (:rviIds))");
 
     Map<ReagentVendorIdentifier,List<AnnotationValue>> result = new HashMap<ReagentVendorIdentifier,List<AnnotationValue>>();
     Query query = session.createSQLQuery(sql.toString());

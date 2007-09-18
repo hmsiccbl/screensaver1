@@ -1072,8 +1072,9 @@ public class ComplexDAOTest extends AbstractSpringTest
                    String.format("value%02d",  iWell),
                    entry.getValue().get(0).getValue());
       assertEquals("associated annotation 1 value for " + entry.getKey(),
-                   new BigDecimal(iWell).setScale(2),
-                   entry.getValue().get(1).getNumericValue());
+                   (double) iWell,
+                   entry.getValue().get(1).getNumericValue(),
+                   0.001);
       ++iWell;
     }
 
@@ -1093,8 +1094,9 @@ public class ComplexDAOTest extends AbstractSpringTest
                    String.format("value%02d",  iWell),
                    entry.getValue().get(1).getValue());
       assertEquals("associated annotation value for " + entry.getKey(),
-                   new BigDecimal(iWell).setScale(2),
-                   entry.getValue().get(0).getNumericValue());
+                   (double) iWell,
+                   entry.getValue().get(0).getNumericValue(),
+                   0.001);
     }
 
 //    // test sort by wellname, plate number ascending
