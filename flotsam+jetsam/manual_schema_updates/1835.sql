@@ -14,8 +14,13 @@ UPDATE screen SET is_downloadable = true;
 ALTER TABLE screen ALTER is_shareable SET NOT NULL;
 ALTER TABLE screen ALTER is_downloadable SET NOT NULL;
 
-ALTER TABLE annotation_value ALTER numeric_value TYPE float8;
-ALTER TABLE annotation_value RENAME reagent_identifier TO vendor_identifier;
+/*ALTER TABLE annotation_value ALTER numeric_value TYPE float8;*/
+ALTER TABLE annotation_value ADD numeric_value_2 float8;
+UPDATE annotation_value set numeric_value_2 = numeric_value;
+ALTER TABLE annotation_value DROP numeric_value;
+ALTER TABLE annotation_value RENAME COLUMN numeric_value_2 TO numeric_value;
+
+ALTER TABLE annotation_value RENAME COLUMN reagent_identifier TO vendor_identifier;
 
 CREATE INDEX well_vendor_identifier ON well (vendor_identifier);
 
