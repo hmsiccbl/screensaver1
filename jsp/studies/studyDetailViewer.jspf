@@ -55,20 +55,6 @@
 					value="#{studyDetailViewer.study.screenId}" styleClass="dataText"
 					visibleOnUserRole="developer" />
 
-				<t:outputLabel for="studyIsShareable" value="Shareable"
-					title="True when the study is shareable with scientists outside the lab" />
-				<t:div>
-					<t:selectBooleanCheckbox id="studyIsShareable"
-						value="#{studyViewer.study.shareable}"
-						styleClass="label"
-						displayValueOnly="#{studyViewer.readOnly}"
-						displayValueOnlyStyleClass="dataText"
-						onclick="javascript:document.getElementById('saveScreenResultButton').click()" />
-					<t:commandButton id="saveScreenResultButton" forceId="true"
-						action="#{studyViewer.saveScreenResult}"
-						styleClass="hiddenCommand" />
-				</t:div>
-
 				<t:outputLabel for="screenNumber" value="Study Number"
 					title="The number used to uniquely identify the study" />
 				<t:outputText id="screenNumber"
@@ -92,6 +78,20 @@
 				<t:outputText id="screenType"
 					value="#{studyDetailViewer.study.screenType}"
 					converter="ScreenTypeConverter" styleClass="dataText" />
+
+				<t:outputLabel for="studyIsShareable" value="Shareable"
+					title="True when the study is shareable with scientists outside the lab" />
+				<t:div>
+					<t:selectBooleanCheckbox id="studyIsShareable"
+						value="#{studyViewer.study.shareable}"
+						styleClass="label"
+						displayValueOnly="#{studyViewer.readOnly}"
+						displayValueOnlyStyleClass="dataText"
+						onclick="javascript:document.getElementById('saveScreenResultButton').click()" />
+					<t:commandButton id="saveScreenResultButton" forceId="true"
+						action="#{studyViewer.saveScreenResult}"
+						styleClass="hiddenCommand" />
+				</t:div>
 
 				<%-- "lab name" == last name of "lab head", but former is required for UI, latter is for internal design --%>
 				<t:outputLabel for="labName" value="Lab Name"

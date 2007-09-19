@@ -45,7 +45,7 @@
 	<t:div >
 		<f:verbatim escape="false">
 			<li>Use "Browse Studies" to view the studies that have been added to
-			Screensaver. Studies associated biologically significant annotations with
+			Screensaver. Studies associate biologically significant annotations with
 			library reagents.</f:verbatim>
 	</t:div>
 	<t:div rendered="#{menu.screener || menu.readAdmin}">
