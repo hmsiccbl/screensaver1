@@ -92,7 +92,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(AnnotationType annotation)
   {
-    return visit(annotation.getStudy());
+    return visit((Study) annotation.getStudy());
   }
 
   public boolean visit(AnnotationValue annotationValue)

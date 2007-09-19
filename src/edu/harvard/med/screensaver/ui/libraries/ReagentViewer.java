@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.ui.libraries;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -88,6 +89,12 @@ public class ReagentViewer extends AbstractBackingBean
     List<AnnotationValue> annotationValues =
       _annotationsDao.findAnnotationValuesForReagent(new ReagentVendorIdentifier(_well.getLibrary().getVendor(),
                                                                                  _well.getVendorIdentifier()));
+    for (Iterator iterator = annotationValues.iterator(); iterator.hasNext();) {
+      AnnotationValue annotationValue = (AnnotationValue) iterator.next();
+      if (annotationValue.isRestricted()) {
+        iterator.remove();
+      }
+    }
     setAnnotationNameValueTable(new AnnotationNameValueTable(annotationValues));
   }
 
