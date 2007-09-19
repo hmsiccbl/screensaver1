@@ -118,6 +118,11 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <redirect/>
     </navigation-case>
     <navigation-case>
+      <from-outcome>findReagents</from-outcome>
+      <to-view-id>/libraries/reagentFinder</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>browseLibraries</from-outcome>
       <to-view-id>/libraries/librariesBrowser</to-view-id>
       <redirect/>
@@ -143,13 +148,18 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <redirect/>
     </navigation-case>
     <navigation-case>
+      <from-outcome>viewWell</from-outcome>
+      <to-view-id>/libraries/wellViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>viewReagent</from-outcome>
       <to-view-id>/libraries/reagentViewer</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
-      <from-outcome>viewWell</from-outcome>
-      <to-view-id>/libraries/wellViewer</to-view-id>
+      <from-outcome>viewReagentSearchResults</from-outcome>
+      <to-view-id>/libraries/reagentSearchResults</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>

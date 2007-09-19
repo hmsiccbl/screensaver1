@@ -159,11 +159,17 @@
     <put name="body" value="/libraries/reagentViewer.jsp" />
   </definition>
 
-  <!-- definition name="/libraries/reagentFinder.tiles" extends=".base">
+  <definition name="/libraries/reagentFinder.tiles" extends=".base">
     <put name="pageTitle" value="Reagent Finder" />
     <put name="pageHelpURL" value="../help/libraries/reagentFinderHelp.jsf" />
     <put name="body" value="/libraries/reagentFinder.jsp" />
-  </definition-->
+  </definition>
+
+  <definition name="/libraries/reagentSearchResults.tiles" extends=".base">
+    <put name="pageTitle" value="Reagent Search Results" />
+    <put name="pageHelpURL" value="../help/libraries/reagentSearchResultsHelp.jsf" />
+    <put name="body" value="/libraries/reagentSearchResults.jsp" />
+  </definition>
 
   <definition name="/libraries/geneViewer.tiles" extends=".base">
     <put name="pageTitle" value="Gene Viewer" />
