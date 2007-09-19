@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.faces.model.ListDataModel;
+
+import edu.harvard.med.screensaver.ui.util.HtmlUtils;
 
 import org.apache.log4j.Logger;
 
@@ -25,21 +27,21 @@ import org.apache.log4j.Logger;
  */
 abstract public class ComboNameValueTable extends NameValueTable
 {
-  
+
   // static members
 
   private static Logger log = Logger.getLogger(ComboNameValueTable.class);
 
-  
+
   // private instance fields
-  
+
   private NameValueTable [] _childTables;
   private int [] _rowIndexToChildTableIndex;
   private int [] _rowIndexToChildTableRowIndex;
-  
-  
+
+
   // instance methods
-  
+
   /**
    * Initialize the ComboNameValueTable with the child tables. This method must be called
    * before any attempt to use this table! You may want to call it in the constructor or any
@@ -50,11 +52,11 @@ abstract public class ComboNameValueTable extends NameValueTable
   protected void initializeComboNameValueTable(NameValueTable [] childTables)
   {
     _childTables = childTables;
-    
+
     int numRows = countRows(childTables);
     _rowIndexToChildTableIndex = new int[numRows];
     _rowIndexToChildTableRowIndex = new int[numRows];
-    
+
     // TODO: see if i can do without the setDataModel crap. or maybe I can do it more simply
     // with an Arrays.fill() or something like that. why is this needed? i am managing all the
     // callbacks from here...
@@ -67,23 +69,23 @@ abstract public class ComboNameValueTable extends NameValueTable
         _rowIndexToChildTableIndex[parentRowIndex] = childTableIndex;
         _rowIndexToChildTableRowIndex[parentRowIndex] = childTableRowIndex;
         parentRowIndex ++;
-        
+
         dataModelContents.add(childTable.getValue(childTableRowIndex));
       }
-      
+
       // blank row between child tables
       if (childTableIndex + 1 < _childTables.length) {
         _rowIndexToChildTableIndex[parentRowIndex] = -1;
         _rowIndexToChildTableRowIndex[parentRowIndex] = -1;
         parentRowIndex ++;
-        
+
         dataModelContents.add("spacer");
       }
     }
-    
+
     setDataModel(new ListDataModel(dataModelContents));
   }
-  
+
   @Override
   public int getNumRows()
   {
@@ -95,7 +97,7 @@ abstract public class ComboNameValueTable extends NameValueTable
   {
     int childTableIndex = _rowIndexToChildTableIndex[rowIndex];
     if (childTableIndex == -1) {
-      return "&nbsp;";
+      return HtmlUtils.NON_BREAKING_SPACE;
     }
     int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
     return _childTables[childTableIndex].getDescription(childTableRowIndex);
@@ -106,7 +108,7 @@ abstract public class ComboNameValueTable extends NameValueTable
   {
     int childTableIndex = _rowIndexToChildTableIndex[rowIndex];
     if (childTableIndex == -1) {
-      return "&nbsp;";
+      return HtmlUtils.NON_BREAKING_SPACE;
     }
     int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
     return _childTables[childTableIndex].getName(childTableRowIndex);
@@ -128,7 +130,7 @@ abstract public class ComboNameValueTable extends NameValueTable
   {
     int childTableIndex = _rowIndexToChildTableIndex[rowIndex];
     if (childTableIndex == -1) {
-      return "&nbsp;";
+      return HtmlUtils.NON_BREAKING_SPACE;
     }
     int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
     return _childTables[childTableIndex].getValue(childTableRowIndex);
@@ -155,10 +157,10 @@ abstract public class ComboNameValueTable extends NameValueTable
     int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
     return _childTables[childTableIndex].getLink(childTableRowIndex, value);
   }
-  
-  
+
+
   // private instance methods
-  
+
   private int countRows(NameValueTable [] childTables)
   {
     int numRows = 0;

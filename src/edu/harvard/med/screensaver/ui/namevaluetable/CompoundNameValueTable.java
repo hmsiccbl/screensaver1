@@ -19,7 +19,7 @@ import javax.faces.model.ListDataModel;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
 import edu.harvard.med.screensaver.ui.libraries.ReagentViewer;
-import edu.harvard.med.screensaver.ui.libraries.WellViewer;
+import edu.harvard.med.screensaver.ui.util.HtmlUtils;
 
 import org.apache.log4j.Logger;
 
@@ -44,14 +44,14 @@ public class CompoundNameValueTable extends NameValueTable
   private static final String STRUCTURE = "Structure";
   private static final String SMILES = "Smiles";
   private static final String INCHI = "InChI";
-  private static final String COMPOUND_NAMES = "Compound&nbsp;Names";
-  private static final String MOLECULAR_MASS = "Molecular&nbsp;Mass";
-  private static final String MOLECULAR_FORMULA = "Molecular&nbsp;Formula";
-  private static final String PUBCHEM_CIDS = "PubChem&nbsp;CIDs";
-  private static final String CHEMBANK_IDS = "ChemBank&nbsp;ID";
-  private static final String IS_SALT = "Is&nbsp;Salt";
-  private static final String NSC_NUMBERS = "NSC&nbsp;Numbers";
-  private static final String CAS_NUMBERS = "CAS&nbsp;Numbers";
+  private static final String COMPOUND_NAMES = "Compound Names";
+  private static final String MOLECULAR_MASS = "Molecular Mass";
+  private static final String MOLECULAR_FORMULA = "Molecular Formula";
+  private static final String PUBCHEM_CIDS = "PubChem CIDs";
+  private static final String CHEMBANK_IDS = "ChemBank ID";
+  private static final String IS_SALT = "Is Salt";
+  private static final String NSC_NUMBERS = "NSC Numbers";
+  private static final String CAS_NUMBERS = "CAS Numbers";
 
 
   // private instance fields
@@ -191,7 +191,7 @@ public class CompoundNameValueTable extends NameValueTable
 
   private void addItem(String name, Object value, ValueType valueType, String description)
   {
-    _names.add(name);
+    _names.add(HtmlUtils.toNonBreakingSpaces(name));
     _values.add(value);
     _valueTypes.add(valueType);
     _descriptions.add(description);

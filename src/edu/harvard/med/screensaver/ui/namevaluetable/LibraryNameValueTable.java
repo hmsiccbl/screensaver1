@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -17,6 +17,7 @@ import javax.faces.model.ListDataModel;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.ui.util.HtmlUtils;
 
 /**
  * A NameValueTable for the Library Viewer.
@@ -26,48 +27,48 @@ import edu.harvard.med.screensaver.model.libraries.Library;
  */
 public class LibraryNameValueTable extends NameValueTable
 {
-  
+
   // private static final fields
-  
+
   private static final Logger log = Logger.getLogger(LibraryNameValueTable.class);
-  
+
   // the row names
-  private static final String LIBRARY_NAME = "Library&nbsp;Name";
-  private static final String SHORT_NAME = "Short&nbsp;Name";
-  private static final String SCREEN_TYPE = "Screen&nbsp;Type";
-  private static final String LIBRARY_TYPE = "Library&nbsp;Type";
-  private static final String START_PLATE = "Start&nbsp;Plate";
-  private static final String END_PLATE = "End&nbsp;Plate";
+  private static final String LIBRARY_NAME = "Library Name";
+  private static final String SHORT_NAME = "Short Name";
+  private static final String SCREEN_TYPE = "Screen Type";
+  private static final String LIBRARY_TYPE = "Library Type";
+  private static final String START_PLATE = "Start Plate";
+  private static final String END_PLATE = "End Plate";
   private static final String VENDOR = "Vendor";
   private static final String DESCRIPTION = "Description";
-  private static final String NUMBER_OF_WELLS = "Number&nbsp;of&nbsp;Experimental&nbsp;Wells";
+  private static final String NUMBER_OF_WELLS = "Number of Experimental Wells";
 
-  
+
   // private instance fields
-  
+
   private List<String> _descriptions = new ArrayList<String>();
   private List<String> _names = new ArrayList<String>();
   private List<String> _values = new ArrayList<String>();
-  
+
   @SuppressWarnings("unchecked")
   public LibraryNameValueTable(Library library, int librarySize)
   {
     initializeLists(library, librarySize);
     setDataModel(new ListDataModel(_values));
   }
-  
+
   @Override
   public int getNumRows()
   {
     return _names.size();
   }
-  
+
   @Override
   public String getDescription(int index)
   {
     return _descriptions.get(index);
   }
-  
+
   @Override
   public String getName(int index)
   {
@@ -100,8 +101,8 @@ public class LibraryNameValueTable extends NameValueTable
     // library name value table has no links
     return null;
   }
-  
-  
+
+
   // private instance methods
 
   /**
@@ -125,7 +126,7 @@ public class LibraryNameValueTable extends NameValueTable
 
   private void addItem(String name, String value, String description)
   {
-    _names.add(name);
+    _names.add(HtmlUtils.toNonBreakingSpaces(name));
     _values.add(value);
     _descriptions.add(description);
   }

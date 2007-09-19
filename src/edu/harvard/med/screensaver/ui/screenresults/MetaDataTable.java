@@ -22,8 +22,11 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.util.HtmlUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -266,8 +269,7 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
                                    String description)
     {
       _propertyName = propertyName;
-      // TODO: HACK: nbsp replacement; right place to do this?
-      _displayName = displayName.replaceAll(" ", "&nbsp;");
+      _displayName = HtmlUtils.toNonBreakingSpaces(displayName);
       _description = description;
     }
 

@@ -36,8 +36,8 @@ public class WellDetailsNameValueTable extends ReagentDetailsNameValueTable
   private static final String LIBRARY = "Library";
   private static final String PLATE = "Plate";
   private static final String WELL = "Well";
-  private static final String WELL_TYPE = "Well&nbsp;Type";
-  private static final String ICCB_NUMBER = "ICCB&nbsp;Number";
+  private static final String WELL_TYPE = "Well Type";
+  private static final String ICCB_NUMBER = "ICCB Number";
 
 
   // private instance fields

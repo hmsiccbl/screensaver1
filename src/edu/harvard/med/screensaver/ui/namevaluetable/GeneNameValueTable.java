@@ -18,6 +18,7 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
 import edu.harvard.med.screensaver.ui.libraries.ReagentViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
+import edu.harvard.med.screensaver.ui.util.HtmlUtils;
 
 import org.apache.log4j.Logger;
 
@@ -39,12 +40,12 @@ public class GeneNameValueTable extends NameValueTable
     "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=gene&cmd=Retrieve&dopt=full_report&list_uids=";
 
   // the row names
-  private static final String GENE_NAME = "Gene&nbsp;Name";
-  private static final String ENTREZGENE_ID = "EntrezGene&nbsp;ID";
-  private static final String ENTREZGENE_SYMBOL = "EntrezGene&nbsp;Symbol";
-  private static final String OLD_ENTREZGENE_IDS = "Old&nbsp;EntrezGene&nbsp;IDs";
-  private static final String GENBANK_ACCESSION_NUMBERS = "GenBank&nbsp;Accession&nbsp;Numbers";
-  private static final String SPECIES_NAME = "Species&nbsp;Name";
+  private static final String GENE_NAME = HtmlUtils.toNonBreakingSpaces("Gene Name");
+  private static final String ENTREZGENE_ID = "EntrezGene ID";
+  private static final String ENTREZGENE_SYMBOL = "EntrezGene Symbol";
+  private static final String OLD_ENTREZGENE_IDS = "Old EntrezGene IDs";
+  private static final String GENBANK_ACCESSION_NUMBERS = "GenBank Accession Numbers";
+  private static final String SPECIES_NAME = "Species Name";
 
 
   // private instance fields

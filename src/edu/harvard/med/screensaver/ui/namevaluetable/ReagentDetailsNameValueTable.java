@@ -16,6 +16,7 @@ import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
+import edu.harvard.med.screensaver.ui.util.HtmlUtils;
 
 import org.apache.log4j.Logger;
 
@@ -33,7 +34,7 @@ public class ReagentDetailsNameValueTable extends NameValueTable
   private static final Logger log = Logger.getLogger(ReagentDetailsNameValueTable.class);
 
   // the row names:
-  private static final String VENDOR_IDENTIFIER = "Vendor&nbsp;Identifier";
+  private static final String VENDOR_IDENTIFIER = "Reagent Source ID";
 
 
   // private instance fields
@@ -121,7 +122,7 @@ public class ReagentDetailsNameValueTable extends NameValueTable
 
   protected void addItem(String name, Object value, ValueType valueType, String description)
   {
-    _names.add(name);
+    _names.add(HtmlUtils.toNonBreakingSpaces(name));
     _values.add(value);
     _valueTypes.add(valueType);
     _descriptions.add(description);
