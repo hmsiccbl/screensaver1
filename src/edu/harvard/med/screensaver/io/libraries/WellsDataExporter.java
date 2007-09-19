@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -46,12 +46,12 @@ public class WellsDataExporter implements DataExporter<Well>
   private static Logger log = Logger.getLogger(WellsDataExporter.class);
   private static final String LIST_DELIMITER = "; ";
 
-  
+
   // instance data members
 
   private GenericEntityDAO _dao;
   private WellsDataExporterFormat _dataFormat;
-  
+
 
   // public constructors and methods
 
@@ -66,10 +66,10 @@ public class WellsDataExporter implements DataExporter<Well>
   {
     // TODO: logUserActivity("downloadWellSearchResults");
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
-    _dao.doInTransaction(new DAOTransaction() 
+    _dao.doInTransaction(new DAOTransaction()
     {
       @SuppressWarnings("unchecked")
-      public void runTransaction() 
+      public void runTransaction()
       {
         List<Well> inflatedWells = eagerFetchWellsForDownloadWellSearchResults(wells);
         try {
@@ -94,14 +94,14 @@ public class WellsDataExporter implements DataExporter<Well>
         }
       }
     });
-    return new ByteArrayInputStream(out.toByteArray()); 
+    return new ByteArrayInputStream(out.toByteArray());
   }
 
   public String getFileName()
   {
     return "wellSearchResults." + _dataFormat.name().toLowerCase();
   }
-  
+
   public String getFormatName()
   {
     return _dataFormat.toString();
@@ -116,7 +116,7 @@ public class WellsDataExporter implements DataExporter<Well>
   // private methods
 
   private List<Well> eagerFetchWellsForDownloadWellSearchResults(final Collection<Well> wells) {
-    // eager fetch all of the data that will be needed to generate the downloaded file 
+    // eager fetch all of the data that will be needed to generate the downloaded file
     Set<Library> libraries = new HashSet<Library>();
     List<Well> inflatedWells = new ArrayList<Well>();
     for (Well well : wells) {
@@ -170,7 +170,7 @@ public class WellsDataExporter implements DataExporter<Well>
     }
     return inflatedWells;
   }
-  
+
   public void writeSDFileSearchResults(PrintWriter searchResultsPrintWriter,
                                        List<Well> wells)
   {
@@ -180,7 +180,7 @@ public class WellsDataExporter implements DataExporter<Well>
       }
     }
   }
-  
+
   public void writeExcelFileSearchResults(HSSFWorkbook searchResultsWorkbook,
                                           List<Well> wells)
   {
@@ -211,7 +211,7 @@ public class WellsDataExporter implements DataExporter<Well>
       searchResultsWorkbook.removeSheetAt(0);
     }
   }
-  
+
   private HSSFCellStyle createHeaderStyle(HSSFWorkbook searchResultsWorkbook) {
     HSSFCellStyle style = searchResultsWorkbook.createCellStyle();
     HSSFFont font = searchResultsWorkbook.createFont();
@@ -229,14 +229,14 @@ public class WellsDataExporter implements DataExporter<Well>
     rnaiHeaderRow.createCell((short) 1).setCellValue("Plate");
     rnaiHeaderRow.createCell((short) 2).setCellValue("Well");
     rnaiHeaderRow.createCell((short) 3).setCellValue("Well Type");
-    rnaiHeaderRow.createCell((short) 4).setCellValue("Vendor Identifier");
+    rnaiHeaderRow.createCell((short) 4).setCellValue("Reagent Source ID");
     rnaiHeaderRow.createCell((short) 5).setCellValue("ICCB Number");
     rnaiHeaderRow.createCell((short) 6).setCellValue("EntrezGene ID");
     rnaiHeaderRow.createCell((short) 7).setCellValue("EntrezGene Symbol");
     rnaiHeaderRow.createCell((short) 8).setCellValue("GenBank Accession Number");
     rnaiHeaderRow.createCell((short) 9).setCellValue("Gene Name");
     for (short i = 0; i < 10; i ++) {
-      rnaiHeaderRow.getCell(i).setCellStyle(style);      
+      rnaiHeaderRow.getCell(i).setCellStyle(style);
     }
     return rnaiSheet;
   }
@@ -248,7 +248,7 @@ public class WellsDataExporter implements DataExporter<Well>
     compoundHeaderRow.createCell((short) 1).setCellValue("Plate");
     compoundHeaderRow.createCell((short) 2).setCellValue("Well");
     compoundHeaderRow.createCell((short) 3).setCellValue("Well Type");
-    compoundHeaderRow.createCell((short) 4).setCellValue("Vendor Identifier");
+    compoundHeaderRow.createCell((short) 4).setCellValue("Reagent Source ID");
     compoundHeaderRow.createCell((short) 5).setCellValue("ICCB Number");
     compoundHeaderRow.createCell((short) 6).setCellValue("Smiles");
     compoundHeaderRow.createCell((short) 7).setCellValue("Compound Names");
@@ -257,7 +257,7 @@ public class WellsDataExporter implements DataExporter<Well>
     compoundHeaderRow.createCell((short) 10).setCellValue("PubChem CID");
     compoundHeaderRow.createCell((short) 11).setCellValue("ChemBank ID");
     for (short i = 0; i < 12; i ++) {
-      compoundHeaderRow.getCell(i).setCellStyle(style);      
+      compoundHeaderRow.getCell(i).setCellStyle(style);
     }
     return compoundSheet;
   }
@@ -384,12 +384,12 @@ public class WellsDataExporter implements DataExporter<Well>
       for (String pubchemCid : compound.getPubchemCids()) {
         pw.println(">  <PubChem_CID>");
         pw.println(pubchemCid);
-        pw.println();        
+        pw.println();
       }
       if (compound.getChembankId() != null) {
         pw.println(">  <ChemBank_ID>");
         pw.println(compound.getChembankId());
-        pw.println();        
+        pw.println();
       }
     }
     pw.println("$$$$");

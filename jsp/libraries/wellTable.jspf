@@ -51,7 +51,7 @@
       </h:column>
       <h:column>
         <f:facet name="header">
-          <t:outputText value="Vendor Identifier" title="The vendor identifier (reorder number) for the well contents" />
+          <t:outputText value="Reagent Source ID" title="The reagent source identifier (e.g., catalog number; reorder number) for the well contents" />
         </f:facet>
 				<t:commandLink action="#{reagentViewer.viewReagent}"
 					value="#{well.fullVendorIdentifier}">

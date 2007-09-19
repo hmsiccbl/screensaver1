@@ -116,7 +116,7 @@ public class ReagentDetailsNameValueTable extends NameValueTable
       String vendor = well.getLibrary().getVendor();
       String vendorIdentifier = vendor == null ?
         well.getVendorIdentifier() : vendor + " " + well.getVendorIdentifier();
-      addItem(VENDOR_IDENTIFIER, vendorIdentifier, ValueType.TEXT, "The vendor identifier (catalog number; reorder number) for the well contents");
+      addItem(VENDOR_IDENTIFIER, vendorIdentifier, ValueType.TEXT, "The reagent source identifier (e.g., catalog number; reorder number) for the well contents");
     }
   }
 
