@@ -18,8 +18,13 @@ log4j.rootLogger=info, fileLog
 
 log4j.logger.edu.harvard.med.screensaver=info
 log4j.logger.edu.harvard.med.screensaver.ui=debug
+log4j.logger.org.apache.myfaces.lifecycle.LifecycleImpl=debug
 log4j.logger.org.hibernate=warn
 log4j.logger.org.springframework=warn
+#log4j.logger.org.springframework.transaction=debug
+#log4j.logger.org.springframework.aop=debug
+#log4j.logger.org.springframework.aop.Cglib2AopProxy=warn
+
 
 
 
@@ -28,7 +33,7 @@ log4j.logger.org.springframework=warn
 log4j.logger.userActivity=info, userActivityLog
 
 # log just the SQL - set this to "debug" to get all the SQL stmts
-log4j.logger.org.hibernate.SQL=debug
+#log4j.logger.org.hibernate.SQL=debug
 # log JDBC bind parameters
 #log4j.logger.org.hibernate.type=trace
 
