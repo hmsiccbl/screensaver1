@@ -118,8 +118,6 @@ public class ReagentViewer extends AbstractBackingBean
     _annotationNameValueTable = annotationNameValueTable;
   }
 
-
-
   /**
    * @motivation for JSF saveState component
    */

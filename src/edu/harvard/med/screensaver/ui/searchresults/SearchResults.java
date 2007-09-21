@@ -124,8 +124,8 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
    */
   public void setContents(Collection<E> unsortedResults, String description)
   {
-    _description = description;
     _unsortedResults = unsortedResults;
+    _description = description;
     _resultsSize = unsortedResults.size();
     _currentEntityIndex = 0;
     _currentPageIndex = 0;
@@ -133,6 +133,7 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
                                                            DEFAULT_PAGESIZE);
     _rowsPerPage.setAllRowsValue(_resultsSize);
     _currentSortType = null; // force re-initialization
+    _sortManager = null; // force re-initialization; necessary in case column set has changed, as returned by getColumns()
     doSort();
   }
 

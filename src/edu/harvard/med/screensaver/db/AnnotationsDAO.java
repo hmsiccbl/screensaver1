@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
@@ -52,6 +50,46 @@ public class AnnotationsDAO extends AbstractDAO
    */
   public AnnotationsDAO()
   {
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<AnnotationType> findAllAnnotationTypes()
+  {
+    return getHibernateTemplate().find("from AnnotationType");
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<AnnotationType> findAllAnnotationTypesForReagent(ReagentVendorIdentifier rvi)
+  {
+    return getHibernateTemplate().find("select at from AnnotationValue av join av.annotationType at " +
+                                       "where av.reagentVendorIdentifier=(?,?)",
+                                       new Object[] { rvi.getVendorName(), rvi.getVendorIdentifier() } );
+  }
+
+  @SuppressWarnings("unchecked")
+  public Map<ReagentVendorIdentifier,List<AnnotationValue>> findAnnotationValues(final Collection<ReagentVendorIdentifier> reagentVendorIds,
+                                                                                 final List<AnnotationType> annotationTypes)
+  {
+    return (Map<ReagentVendorIdentifier,List<AnnotationValue>>) getHibernateTemplate().execute(new HibernateCallback()
+    {
+      public Object doInHibernate(Session session) throws HibernateException, SQLException
+      {
+        return findRelatedAnnotationValues(session,
+                                           reagentVendorIds,
+                                           annotationTypes);
+      }
+    });
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<AnnotationValue> findAnnotationValuesForReagent(ReagentVendorIdentifier rvi)
+  {
+    // note: we eager fetch the related AnnotationTypes, as a courtesy to the calling code (it's reasonable to expect the calling code will need the AnnotationType)
+    return getHibernateTemplate().find("from AnnotationValue av left join fetch av.annotationType " +
+                                       "where av.reagentVendorIdentifier=(?,?)",
+                                       new Object[] { rvi.getVendorName(), rvi.getVendorIdentifier() } );
+    // this simpler version doesn't work, for some reason
+    // return getHibernateTemplate().find("from AnnotationValue av where av.reagentVendorIdentifier=?", rvi);
   }
 
   @SuppressWarnings("unchecked")
@@ -235,14 +273,5 @@ public class AnnotationsDAO extends AbstractDAO
       annotationValues.set(atId2Pos.get(atId), annotationValue);
     }
     return result;
-  }
-
-  public List<AnnotationValue> findAnnotationValuesForReagent(ReagentVendorIdentifier rvi)
-  {
-    // note: we eager fetch the related AnnotationTypes, as a courtesy to the calling code (it's reasonable to expect the calling code will need the AnnotationType)
-    return getHibernateTemplate().find("from AnnotationValue av left join fetch av.annotationType where av.reagentVendorIdentifier=(?,?)",
-                                       new Object[] { rvi.getVendorName(), rvi.getVendorIdentifier() } );
-    // this simpler version doesn't work, for some reason
-    // return getHibernateTemplate().find("from AnnotationValue av where av.reagentVendorIdentifier=?", rvi);
   }
 }

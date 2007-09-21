@@ -227,11 +227,6 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
     return getBusinessKey().hashCode();
   }
 
-  public boolean equals(Object o)
-  {
-    return o == this;
-  }
-
   public String toString()
   {
     return _study.getScreenNumber() + ":" + _name;

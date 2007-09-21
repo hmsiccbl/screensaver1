@@ -183,6 +183,7 @@
     class="edu.harvard.med.screensaver.ui.libraries.ReagentFinder">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="annotationsDao" />
     <constructor-arg ref="reagentsBrowser" />
     <constructor-arg ref="reagentViewer" />
     <constructor-arg ref="reagentVendorIdentiferListParser" />
@@ -235,6 +236,7 @@
     <constructor-arg ref="reagentViewer" />
     <constructor-arg ref="compoundViewer" />
     <constructor-arg ref="geneViewer" />
+    <constructor-arg ref="annotationsDao" />
     <constructor-arg>
       <list />
     </constructor-arg>

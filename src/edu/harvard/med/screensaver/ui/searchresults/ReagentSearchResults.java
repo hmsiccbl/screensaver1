@@ -10,19 +10,23 @@
 package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
+import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
-import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.ReagentViewer;
-import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
 import org.apache.log4j.Logger;
@@ -47,9 +51,12 @@ public class ReagentSearchResults extends SearchResults<Well,Object>
   private ReagentViewer _reagentViewer;
   private CompoundViewer _compoundViewer;
   private GeneViewer _geneViewer;
+  private AnnotationsDAO _annotationsDao;
   private List<DataExporter<Well>> _dataExporters;
 
   private List<TableColumn<Well>> _columns;
+  private List<AnnotationType> _annotationTypes;
+  private Map<ReagentVendorIdentifier,List<AnnotationValue>> _annotationValues;
 
 
   // constructors
@@ -67,12 +74,28 @@ public class ReagentSearchResults extends SearchResults<Well,Object>
   public ReagentSearchResults(ReagentViewer reagentViewer,
                               CompoundViewer compoundViewer,
                               GeneViewer geneViewer,
+                              AnnotationsDAO annotationsDao,
                               List<DataExporter<Well>> dataExporters)
   {
     _reagentViewer = reagentViewer;
     _compoundViewer = compoundViewer;
     _geneViewer = geneViewer;
+    _annotationsDao = annotationsDao;
     _dataExporters = dataExporters;
+  }
+
+  public void setContents(Collection<Well> unsortedResults,
+                          String description,
+                          List<AnnotationType> annotationTypes)
+  {
+    _annotationTypes = annotationTypes;
+    List<ReagentVendorIdentifier> rvids = new ArrayList<ReagentVendorIdentifier>(unsortedResults.size());
+    for (Well well : unsortedResults) {
+      rvids.add(well.getReagentVendorIdentifier());
+    }
+    _annotationValues = _annotationsDao.findAnnotationValues(rvids, annotationTypes);
+
+    super.setContents(unsortedResults, description);
   }
 
 
@@ -141,7 +164,36 @@ public class ReagentSearchResults extends SearchResults<Well,Object>
         return REDISPLAY_PAGE_ACTION_RESULT;
       }
     });
+
+    if (_annotationTypes != null) {
+      int i = 0;
+      for (AnnotationType annotationType : _annotationTypes) {
+        _columns.add(new AnnotationTypeColumn(annotationType, i++));
+      }
+    }
+
     return _columns;
+  }
+
+  private class AnnotationTypeColumn extends TableColumn<Well>
+  {
+    private AnnotationType _annotationType;
+    private int _index;
+
+    public AnnotationTypeColumn(AnnotationType annotationType, int index)
+    {
+      super(annotationType.getName(),
+            annotationType.getDescription(),
+            annotationType.isNumeric());
+      _annotationType = annotationType;
+      _index = index;
+    }
+
+    @Override
+    public Object getCellValue(Well well)
+    {
+      return _annotationValues.get(well.getReagentVendorIdentifier()).get(_index).getValue();
+    }
   }
 
   @Override

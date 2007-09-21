@@ -10,23 +10,20 @@
 package edu.harvard.med.screensaver.ui.libraries;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
+import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
-import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
 import edu.harvard.med.screensaver.io.libraries.ReagentVendorIdentifierListParser;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.searchresults.ReagentSearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.util.Pair;
 
@@ -51,6 +48,7 @@ public class ReagentFinder extends AbstractBackingBean
 
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
+  private AnnotationsDAO _annotationsDao;
   private ReagentVendorIdentifierListParser _reagentVendorIdentifierListParser;
   private ReagentSearchResults _reagentsBrowser;
   private ReagentViewer _reagentViewer;
@@ -73,12 +71,14 @@ public class ReagentFinder extends AbstractBackingBean
 
   public ReagentFinder(GenericEntityDAO dao,
                        LibrariesDAO librariesDao,
+                       AnnotationsDAO annotationsDao,
                        ReagentSearchResults reagentsBrowser,
                        ReagentViewer reagentViewer,
                        ReagentVendorIdentifierListParser reagentVendorIdentifierListParser)
   {
     _dao = dao;
     _librariesDao = librariesDao;
+    _annotationsDao = annotationsDao;
     _reagentsBrowser = reagentsBrowser;
     _reagentViewer = reagentViewer;
     _reagentVendorIdentifierListParser = reagentVendorIdentifierListParser;
@@ -180,7 +180,8 @@ public class ReagentFinder extends AbstractBackingBean
             showMessage("libraries.noSuchReagent", reagentVendorIdentifier);
           }
         }
-        _reagentsBrowser.setContents(foundWells);
+        List<AnnotationType> annotationTypes = _annotationsDao.findAllAnnotationTypes();
+        _reagentsBrowser.setContents(foundWells, null, annotationTypes);
         result[0] = VIEW_REAGENT_SEARCH_RESULTS;
       }
     });

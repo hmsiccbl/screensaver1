@@ -1167,11 +1167,12 @@ public class ComplexDAOTest extends AbstractSpringTest
   }
 
 
-  public void testFindAnnotationValuesForReagent()
+  public void testFindAnnotationValuesAndAnnotationsTypes()
   {
     final Screen screen = MakeDummyEntities.makeDummyScreen(1);
     AnnotationType at1 = new AnnotationType(screen, "annot1", "desc1", 0, false);
     AnnotationType at2 = new AnnotationType(screen, "annot2", "desc2", 1, true);
+    AnnotationType at3 = new AnnotationType(screen, "annot3", "desc3", 2, true);
     for (int i = 0; i < 20; ++i) {
       ReagentVendorIdentifier reagentVendorId = new ReagentVendorIdentifier("vendor",
                                                                             String.format("vendorId%02d", i));
@@ -1184,11 +1185,20 @@ public class ComplexDAOTest extends AbstractSpringTest
     }
     genericEntityDao.persistEntity(screen);
 
+    assertEquals("all annotation types",
+                 new HashSet<AnnotationType>(Arrays.asList(at1, at2, at3)),
+                 new HashSet<AnnotationType>(annotationsDao.findAllAnnotationTypes()));
+
+    assertEquals("reagent's annotation types",
+                 new HashSet<AnnotationType>(Arrays.asList(at1, at2)),
+                 new HashSet<AnnotationType>(annotationsDao.findAllAnnotationTypesForReagent(new ReagentVendorIdentifier("vendor", "vendorId02"))));
+
     List<AnnotationValue> annotationValues = annotationsDao.findAnnotationValuesForReagent(new ReagentVendorIdentifier("vendor", "vendorId02"));
     assertEquals("annotation values count", 2, annotationValues.size());
     // TODO: the ordering of these asserts relies upon the database maintaining the same physical ordering as above insertions
     assertEquals("value02", annotationValues.get(0).getFormattedValue());
     assertEquals("2", annotationValues.get(1).getFormattedValue());
+
   }
 
   public void testEntityInflation()

@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -43,7 +43,7 @@ public class LibraryPoolToDuplexWellMapper
   public LibraryPoolToDuplexWellMapper()
   {
   }
-  
+
   /**
    * Maps cherry pick wells from a Dharmacon SMARTPool library to the respective
    * wells in the related Dharmacon duplex library. The mapping is keyed on the
@@ -54,28 +54,39 @@ public class LibraryPoolToDuplexWellMapper
   {
     // TODO: currently assumes that all RNAi cherry picks are from Dharmacon
     // libraries, which are split into pool and duplex libraries
-    
+
     // note: anomalies (i.e., when exactly 4 duplexes are not found, and,
     // most importantly, when 0 duplexes are found) are implicitly recorded in
     // our data model; a UI can handle notification of these cases as desired,
     // simply by finding ScreenerCherryPicks that do not have a sufficient
     // number of LabCherryPicks
-    
+
     Set<LabCherryPick> labCherryPicks = new HashSet<LabCherryPick>(cherryPickRequest.getScreenerCherryPicks().size() * 4);
-    for (ScreenerCherryPick screenerCherryPick : cherryPickRequest.getScreenerCherryPicks()) {
+    Set<ScreenerCherryPick> screenerCherryPicks = cherryPickRequest.getScreenerCherryPicks();
+    for (ScreenerCherryPick screenerCherryPick : screenerCherryPicks) {
       Well poolWell = screenerCherryPick.getScreenedWell();
-      String duplexLibraryName = getDuplexLibraryNameForPoolLibrary(poolWell.getLibrary());
-      for (SilencingReagent silencingReagent : poolWell.getSilencingReagents()) {
-        for (Well candidateCherryPickSourceWell : silencingReagent.getWells()) {
-          if (candidateCherryPickSourceWell.getLibrary().getLibraryName().equals(duplexLibraryName)) {
-            labCherryPicks.add(new LabCherryPick(screenerCherryPick, candidateCherryPickSourceWell));
-          }
-        }
+      Set<Well> duplexWells = mapPoolWellToDuplexWells(poolWell);
+      for (Well duplexWell : duplexWells) {
+        labCherryPicks.add(new LabCherryPick(screenerCherryPick, duplexWell));
       }
     }
     return labCherryPicks;
   }
-  
+
+  public Set<Well> mapPoolWellToDuplexWells(Well poolWell)
+  {
+    Set<Well> duplexWells = new HashSet<Well>();
+    String duplexLibraryName = getDuplexLibraryNameForPoolLibrary(poolWell.getLibrary());
+    for (SilencingReagent silencingReagent : poolWell.getSilencingReagents()) {
+      for (Well candidateDuplexWell : silencingReagent.getWells()) {
+        if (candidateDuplexWell.getLibrary().getLibraryName().equals(duplexLibraryName)) {
+          duplexWells.add(candidateDuplexWell);
+        }
+      }
+    }
+    return duplexWells;
+  }
+
   public Map<Well,Well> mapDuplexWellsToPoolWells(Set<Well> duplexWells)
   {
     Map<Well,Well> result = new HashMap<Well,Well>();
@@ -122,7 +133,7 @@ public class LibraryPoolToDuplexWellMapper
     }
     return duplexLibraryName;
   }
-  
+
   private String getPoolLibraryNameForDuplexLibrary(Library library)
   {
     // Note: this mapping relies upon our library naming convention
@@ -135,6 +146,6 @@ public class LibraryPoolToDuplexWellMapper
     }
     return poolLibraryName;
   }
-  
+
 }
 

@@ -9,15 +9,11 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.util.List;
-
 import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
 

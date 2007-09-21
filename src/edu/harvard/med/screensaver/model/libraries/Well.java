@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -29,14 +29,14 @@ import edu.harvard.med.screensaver.model.EntityIdProperty;
 
 /**
  * A Hibernate entity bean representing a well.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @hibernate.class lazy="false"
  */
 public class Well extends AbstractEntity implements Comparable
 {
-  
+
   // static fields
 
   private static final Logger log = Logger.getLogger(Well.class);
@@ -56,13 +56,13 @@ public class Well extends AbstractEntity implements Comparable
    * The number of decimal places used when recording volume values.
    */
   public static final int VOLUME_SCALE = 2;
-  
+
   public static boolean isValidWellName(String wellName)
   {
     return _wellParsePattern.matcher(wellName).matches();
   }
-  
-  
+
+
   // instance fields
 
   private String _wellId;
@@ -74,18 +74,19 @@ public class Well extends AbstractEntity implements Comparable
   private String _vendorIdentifier;
   private WellType _wellType = WellType.EXPERIMENTAL;
   private String _smiles;
-  // TODO: this is always either a 0 or 1-element set, so consider changing to a to-one relationship with a proxyable entity; the key is to maintain lazy loading of the molfile data 
+  // TODO: this is always either a 0 or 1-element set, so consider changing to a to-one relationship with a proxyable entity; the key is to maintain lazy loading of the molfile data
   private Set<String> _molfile = new HashSet<String>();
   private String _genbankAccessionNumber;
 
   private transient WellKey _wellKey;
+  private transient ReagentVendorIdentifier _reagentVendorIdentifier;
 
 
   // public constructors and instance methods
 
   /**
    * Constructs an initialized <code>Well</code> object.
-   * 
+   *
    * @param parentLibrary
    * @param wellKey
    * @param wellType
@@ -100,7 +101,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Constructs an initialized <code>Well</code> object.
-   * 
+   *
    * @param parentLibrary
    * @param plateNumber
    * @param wellName
@@ -115,16 +116,16 @@ public class Well extends AbstractEntity implements Comparable
   {
     return visitor.visit(this);
   }
-  
+
   @Override
   public String getEntityId()
   {
     return getBusinessKey().toString();
   }
-  
+
   /**
    * Get the well id for the well.
-   * 
+   *
    * @return the well id for the well
    * @hibernate.id
    *   generator-class="assigned"
@@ -136,7 +137,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Get the library the well is in.
-   * 
+   *
    * @return the library the well is in.
    */
   public Library getLibrary()
@@ -147,7 +148,7 @@ public class Well extends AbstractEntity implements Comparable
   /**
    * Set the library the well is in. Throw a NullPointerException if the library
    * is null.
-   * 
+   *
    * @param library the new library for the well
    * @throws NullPointerException when the library is null
    */
@@ -160,10 +161,10 @@ public class Well extends AbstractEntity implements Comparable
     setHbnLibrary(library);
     library.getHbnWells().add(this);
   }
-  
+
   /**
    * Get an unmodifiable copy of the set of compounds.
-   * 
+   *
    * @return an unmodifiable copy of the set of compounds
    */
   public Set<Compound> getCompounds()
@@ -192,7 +193,7 @@ public class Well extends AbstractEntity implements Comparable
     orderedCompounds.addAll(getHbnCompounds());
     return orderedCompounds;
   }
-  
+
   /**
    * Get the primary compound: the compound that is most likely the one being tested for
    * bioactivity. Normally, we expect a single potentially bioactive
@@ -212,12 +213,12 @@ public class Well extends AbstractEntity implements Comparable
         compoundWithLongestSmiles = compound;
       }
     }
-    return compoundWithLongestSmiles; 
+    return compoundWithLongestSmiles;
   }
 
   /**
    * Add the compound.
-   * 
+   *
    * @param compound the compound to add
    * @return true iff the compound was not already in the well
    */
@@ -233,7 +234,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Remove the compound.
-   * 
+   *
    * @param compound the compound to remove
    * @return true iff the compound was previously in the well
    */
@@ -246,9 +247,9 @@ public class Well extends AbstractEntity implements Comparable
     }
     return false;
   }
-  
+
   /**
-   * Remove all the compounds. 
+   * Remove all the compounds.
    */
   public void removeCompounds()
   {
@@ -260,7 +261,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Get an unmodifiable copy of the set of silencing reagents.
-   * 
+   *
    * @return an unmodifiable copy of the set of silencing reagents
    */
   public Set<SilencingReagent> getSilencingReagents()
@@ -281,7 +282,7 @@ public class Well extends AbstractEntity implements Comparable
     }
     return genes;
   }
-  
+
   /**
    * Get the gene that has silencing reagents contained in this well.
    * @return the gene that have silencing reagents contained in this well
@@ -298,10 +299,10 @@ public class Well extends AbstractEntity implements Comparable
     }
     return genes.iterator().next();
   }
-  
+
   /**
    * Add the silencing reagent.
-   * 
+   *
    * @param silencingReagent the silencing reagent to add
    * @return true iff the silencing reagent was not already in the well
    */
@@ -318,7 +319,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Remove the silencing reagent.
-   * 
+   *
    * @param silencingReagent the silencing reagent to remove
    * @return true iff the compound was previously in the well
    */
@@ -333,9 +334,9 @@ public class Well extends AbstractEntity implements Comparable
     }
     return false;
   }
-  
+
   /**
-   * Remove all the silencing reagents. 
+   * Remove all the silencing reagents.
    */
   public void removeSilencingReagents()
   {
@@ -343,12 +344,12 @@ public class Well extends AbstractEntity implements Comparable
       new HashSet<SilencingReagent>(getHbnSilencingReagents());
     for (SilencingReagent silencingReagent : silencingReagentsCopy) {
       removeSilencingReagent(silencingReagent);
-    }
+  }
   }
 
   /**
    * Get the plate number for the well.
-   * 
+   *
    * @return the plate number for the well
    * @hibernate.property not-null="true"
    */
@@ -360,7 +361,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Set the plate number for the well.
-   * 
+   *
    * @param plateNumber the new plate number for the well
    */
   private void setPlateNumber(Integer plateNumber)
@@ -375,7 +376,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Get the well name for the well.
-   * 
+   *
    * @return the well name for the well
    * @hibernate.property type="text" not-null="true"
    */
@@ -387,7 +388,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Set the well name for the well.
-   * 
+   *
    * @param wellName the new well name for the well
    */
   private void setWellName(String wellName)
@@ -399,7 +400,7 @@ public class Well extends AbstractEntity implements Comparable
       _wellKey.setWellName(wellName);
     }
   }
-  
+
   @DerivedEntityProperty
   public WellKey getWellKey()
   {
@@ -408,7 +409,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Get the ICCB number for the well.
-   * 
+   *
    * @return the ICCB number for the well
    * @hibernate.property type="text"
    */
@@ -419,7 +420,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Set the ICCB number for the well.
-   * 
+   *
    * @param iccbNumber The new ICCB number for the well
    */
   public void setIccbNumber(String iccbNumber)
@@ -429,7 +430,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Get the vendor identifier for the well.
-   * 
+   *
    * @return the vendor identifier for the well
    * @hibernate.property type="text" not-null="false"
    */
@@ -437,7 +438,17 @@ public class Well extends AbstractEntity implements Comparable
   {
     return _vendorIdentifier;
   }
-  
+
+  @DerivedEntityProperty
+  public ReagentVendorIdentifier getReagentVendorIdentifier()
+  {
+    if (_reagentVendorIdentifier == null) {
+      _reagentVendorIdentifier = new ReagentVendorIdentifier(_library.getVendor(),
+                                                             _vendorIdentifier);
+    }
+    return _reagentVendorIdentifier;
+  }
+
   @DerivedEntityProperty
   public String getFullVendorIdentifier()
   {
@@ -453,17 +464,17 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Set the vendor identifier for the well.
-   * 
+   *
    * @param vendorIdentifier the new vendor identifier for the well
    */
   public void setVendorIdentifier(String vendorIdentifier)
   {
     _vendorIdentifier = vendorIdentifier;
   }
-  
+
   /**
    * Get the well's type.
-   * 
+   *
    * @return the well's type
    * @hibernate.property type="edu.harvard.med.screensaver.model.libraries.WellType$UserType"
    *                     not-null="true"
@@ -475,17 +486,17 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Set the well's type.
-   * 
+   *
    * @param wellType the new type of the well
    */
   public void setWellType(WellType wellType)
   {
     _wellType = wellType;
   }
-  
+
   /**
    * Get the SMILES for the well.
-   * 
+   *
    * @return the SMILES for the well
    * @hibernate.property type="text"
    */
@@ -496,7 +507,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Set the SMILES for the well.
-   * 
+   *
    * @param smiles The new SMILES for the well
    */
   public void setSmiles(String smiles)
@@ -506,7 +517,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Get the molfile for the well.
-   * 
+   *
    * @return the molfile for the well
    */
   public String getMolfile()
@@ -519,7 +530,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Set the molfile for the well.
-   * 
+   *
    * @param molfile The new molfile for the well
    */
   public void setMolfile(String molfile)
@@ -543,15 +554,15 @@ public class Well extends AbstractEntity implements Comparable
   {
     return _molfile;
   }
-  
+
   private void setHbnMolfile(Set<String> molfile)
   {
     _molfile = molfile;
   }
-  
+
   /**
    * Get the GenBank Accession number.
-   * 
+   *
    * @return the GenBank Accession number
    * @hibernate.property type="text"
    */
@@ -562,17 +573,17 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Set the GenBank Accession number.
-   * 
+   *
    * @param genbankAccessionNumber the GenBank Accession number
    */
   public void setGenbankAccessionNumber(String genbankAccessionNumber)
   {
     _genbankAccessionNumber = genbankAccessionNumber;
   }
-  
-  
+
+
   // public hibernate methods for cross-package relationships
-  
+
   /**
    * Get the <i>zero-based</i> row index of this well.
    * @return the <i>zero-based</i> row index of this well
@@ -582,7 +593,7 @@ public class Well extends AbstractEntity implements Comparable
   {
     return _wellKey.getRow();
   }
-  
+
   @DerivedEntityProperty
   /**
    * Get the row letter of this well.
@@ -602,15 +613,15 @@ public class Well extends AbstractEntity implements Comparable
   {
     return _wellKey.getColumn();
   }
-  
+
   @DerivedEntityProperty
   public boolean isEdgeWell()
   {
     // TODO: use plate size/layout to determine this dynamically
-    return _wellKey.getRow() == 0 || _wellKey.getRow() == PLATE_ROWS - 1 || 
+    return _wellKey.getRow() == 0 || _wellKey.getRow() == PLATE_ROWS - 1 ||
     _wellKey.getColumn() == 0 || _wellKey.getColumn() == PLATE_COLUMNS - 1;
   }
-  
+
 
   // protected getters and setters
 
@@ -618,14 +629,14 @@ public class Well extends AbstractEntity implements Comparable
   {
     return _wellKey;
   }
-  
+
 
   // package getters and setters
 
   /**
    * Set the library the well is in. Throw a NullPointerException when the library
    * is null.
-   * 
+   *
    * @param library the new library for the well
    * @throws NullPointerException when the library is null
    * @motivation for hibernate
@@ -643,7 +654,7 @@ public class Well extends AbstractEntity implements Comparable
    * modifies the returned collection, it must ensure that the bi-directional
    * relationship is maintained by updating the related {@link Compound}
    * bean(s).
-   * 
+   *
    * @return the set of compounds contained in the well
    * @motivation for Hibernate and for associated {@link Compound} bean (so that
    *             it can maintain the bi-directional association between
@@ -666,7 +677,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Get the silencing reagents.
-   * 
+   *
    * @return the silencing reagents
    * @hibernate.set
    *   table="well_silencing_reagent_link"
@@ -685,19 +696,19 @@ public class Well extends AbstractEntity implements Comparable
     return _silencingReagents;
   }
 
-  
+
   // private methods
-  
+
   /**
    * Constructs an uninitialized Well object.
-   * 
+   *
    * @motivation for hibernate
    */
   private Well() {}
 
   /**
    * Set the well id for the well.
-   * 
+   *
    * @param wellId the new well id for the well
    * @motivation for hibernate
    */
@@ -708,19 +719,19 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Get the version of the well.
-   * 
+   *
    * @return the version of the well
    * @motivation for hibernate
    * @hibernate.version
    */
-  private Integer getVersion() 
+  private Integer getVersion()
   {
     return _version;
   }
 
   /**
    * Set the version of the well.
-   * 
+   *
    * @param version the new version of the well
    * @motivation for hibernate
    */
@@ -728,10 +739,10 @@ public class Well extends AbstractEntity implements Comparable
   {
     _version = version;
   }
-  
+
   /**
    * Get the library the well is in.
-   * 
+   *
    * @return the library the well is in
    * @hibernate.many-to-one
    *   class="edu.harvard.med.screensaver.model.libraries.Library"
@@ -748,7 +759,7 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Set the set of compounds contained in the well.
-   * 
+   *
    * @param compounds the new set of compounds contained in the well
    * @motivation for hibernate
    */
@@ -756,10 +767,10 @@ public class Well extends AbstractEntity implements Comparable
   {
     _compounds = compounds;
   }
-  
+
   /**
    * Set the silencing reagents.
-   * 
+   *
    * @param silencingReagents the new silencing reagents
    * @motivation for hibernate
    */
@@ -767,7 +778,7 @@ public class Well extends AbstractEntity implements Comparable
   {
     _silencingReagents = silencingReagents;
   }
-  
+
   public int compareTo(Object o)
   {
     assert o instanceof Well : "input to compareTo() must be a Well";
