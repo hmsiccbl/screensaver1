@@ -179,7 +179,7 @@ public class BoutrosAnnotationImporter
                                      STUDY_TITLE);
           screen.setSummary(STUDY_SUMMARY);
           screen.setUrl(STUDY_URL);
-          screen.setShareable(false);
+          screen.setShareable(true);
           screen.setDownloadable(false);
 
           ScreeningRoomUser rnaiGlobalMember =
