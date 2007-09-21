@@ -13,24 +13,23 @@
 			</t:panelGroup>
 		</t:buffer>
 
-		<t:panelGrid columns="2">
+		<t:panelGrid columns="2" style="vertical-align: top">
 			<t:panelGrid columns="1">
 				<t:panelGroup>
-					<t:outputLabel for="vendorMenu" value="Vendor:" styleClass="label" />
+					<t:outputLabel for="vendorMenu" value="Source/Vendor:" styleClass="label" />
 					<t:selectOneMenu id="vendorMenu"
 						value="#{reagentFinder.vendorSelector.value}"
 						styleClass="inputText">
 						<f:selectItems value="#{reagentFinder.vendorSelector.selectItems}" />
 					</t:selectOneMenu>
-					<t:outputText value="#{commandsBuffer}" escape="false" />
 				</t:panelGroup>
+				<t:outputText value="#{commandsBuffer}" escape="false" />
 				<t:inputTextarea id="reagentVendorIdentifierList"
 					value="#{reagentFinder.reagentVendorIdentifierList}"
 					styleClass="inputText" cols="50" rows="40" forceId="true" />
 				<t:outputText value="#{commandsBuffer}" escape="false" />
 			</t:panelGrid>
-			<t:outputText value="Help text coming soon!" />
-			<%--@ include file="../help/libraries/reagentFinderInputHelp.jsp"--%>
+			<%@ include file="../help/libraries/reagentFinderInputHelp.jsp"%>
 		</t:panelGrid>
 	</h:form>
 </f:subview>

@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.ui.libraries;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.AnnotationsDAO;
@@ -42,6 +43,7 @@ public class ReagentFinder extends AbstractBackingBean
   private static final Logger log = Logger.getLogger(ReagentFinder.class);
 
   private static final ScreensaverUserRole ADMIN_ROLE = ScreensaverUserRole.LIBRARIES_ADMIN;
+  private static final String DEFAULT_VENDOR = "Dharmacon"; // TODO: hack, convenience for RNAi Global consortium users
 
 
   // private instance fields
@@ -82,7 +84,10 @@ public class ReagentFinder extends AbstractBackingBean
     _reagentsBrowser = reagentsBrowser;
     _reagentViewer = reagentViewer;
     _reagentVendorIdentifierListParser = reagentVendorIdentifierListParser;
-    _vendorSelector = new UISelectOneBean<String>(_librariesDao.findAllVendorNames());
+    Collection<String> vendorNames = _librariesDao.findAllVendorNames();
+    _vendorSelector =
+      vendorNames.contains(DEFAULT_VENDOR) ? new UISelectOneBean<String>(vendorNames, DEFAULT_VENDOR)
+                                           : new UISelectOneBean<String>(vendorNames);
   }
 
 
@@ -151,12 +156,6 @@ public class ReagentFinder extends AbstractBackingBean
         ReagentVendorIdentifierParserResult parseResult =
           _reagentVendorIdentifierListParser.parseReagentVendorIdentifiers(_vendorSelector.getSelection(),
                                                                            _reagentVendorIdentifierList);
-        if (parseResult.getParsedReagentVendorIdentifiers().size() == 1) {
-          _reagentVendorIdentifier = parseResult.getParsedReagentVendorIdentifiers().first();
-          result[0] = findReagent();
-          return;
-        }
-
         // display parse errors before proceeding with successfully parsed ReagentVendorIdentifiers
         for (Pair<Integer,String> error : parseResult.getErrors()) {
           showMessage("libraries.reagentVendorIdentifierListParseError", error.getSecond());
@@ -180,9 +179,19 @@ public class ReagentFinder extends AbstractBackingBean
             showMessage("libraries.noSuchReagent", reagentVendorIdentifier);
           }
         }
-        List<AnnotationType> annotationTypes = _annotationsDao.findAllAnnotationTypes();
-        _reagentsBrowser.setContents(foundWells, null, annotationTypes);
-        result[0] = VIEW_REAGENT_SEARCH_RESULTS;
+
+        if (foundWells.size() == 0) {
+          result[0] = REDISPLAY_PAGE_ACTION_RESULT;
+        }
+        // show in reagent viewer, iff the user entered exactly 1 reagent (counting erroneous reagent identifiers)
+        else if (parseResult.getParsedReagentVendorIdentifiers().size() == 1 && parseResult.getErrors().size() == 0) {
+          result[0] = _reagentViewer.viewReagent(foundWells.get(0));
+        }
+        else {
+          List<AnnotationType> annotationTypes = _annotationsDao.findAllAnnotationTypes();
+          _reagentsBrowser.setContents(foundWells, null, annotationTypes);
+          result[0] = VIEW_REAGENT_SEARCH_RESULTS;
+        }
       }
     });
     return result[0];

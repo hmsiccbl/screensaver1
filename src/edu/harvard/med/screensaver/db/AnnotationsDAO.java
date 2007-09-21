@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.util.CollectionUtils;
@@ -229,6 +228,12 @@ public class AnnotationsDAO extends AbstractDAO
                                                                                          Collection<ReagentVendorIdentifier> reagentVendorIds,
                                                                                          List<AnnotationType> annotationTypes)
   {
+    Map<ReagentVendorIdentifier,List<AnnotationValue>> result = new HashMap<ReagentVendorIdentifier,List<AnnotationValue>>();
+
+    if (reagentVendorIds.size() == 0 || annotationTypes.size() == 0) {
+      return result;
+    }
+
     Map<Number,Integer> atId2Pos = new HashMap<Number,Integer>(annotationTypes.size());
 
     List<String> rviIds = new ArrayList<String>();
@@ -249,7 +254,6 @@ public class AnnotationsDAO extends AbstractDAO
     append("where (av.annotation_type_id in (:atIds)) ").
     append("and (av.vendor_name || ':' || av.vendor_identifier in (:rviIds))");
 
-    Map<ReagentVendorIdentifier,List<AnnotationValue>> result = new HashMap<ReagentVendorIdentifier,List<AnnotationValue>>();
     Query query = session.createSQLQuery(sql.toString());
     query.setParameterList("atIds", atIds);
     query.setParameterList("rviIds", rviIds);

@@ -145,11 +145,6 @@ public class WellFinder extends AbstractBackingBean
       public void runTransaction()
       {
         PlateWellListParserResult parseResult = _plateWellListParser.parseWellsFromPlateWellList(_plateWellList);
-        if (parseResult.getParsedWellKeys().size() == 1) {
-          result[0] = _wellViewer.viewWell(parseResult.getParsedWellKeys().first(), false);
-          return;
-        }
-
         // display parse errors before proceeding with successfully parsed wells
         for (Pair<Integer,String> error : parseResult.getErrors()) {
           showMessage("libraries.plateWellListParseError", error.getSecond());
@@ -170,8 +165,18 @@ public class WellFinder extends AbstractBackingBean
             foundWells.add(well);
           }
         }
-        _wellsBrowser.setContents(foundWells);
+
+        if (foundWells.size() == 0) {
+          result[0] = REDISPLAY_PAGE_ACTION_RESULT;
+        }
+        // show in well viewer, iff the user entered exactly 1 well (counting erroneous wells)
+        else if (parseResult.getParsedWellKeys().size() == 1 && parseResult.getErrors().size() == 0) {
+          result[0] = _wellViewer.viewWell(parseResult.getParsedWellKeys().first(), false);
+        }
+        else {
+          _wellsBrowser.setContents(foundWells);
           result[0] = VIEW_WELL_SEARCH_RESULTS;
+        }
       }
     });
     return result[0];

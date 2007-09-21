@@ -24,36 +24,21 @@ public class ReagentVendorIdentifierListParser
 
   private static Logger log = Logger.getLogger(ReagentVendorIdentifierListParser.class);
 
+  // public constructors and methods
+
   public ReagentVendorIdentifierParserResult parseReagentVendorIdentifiers(String vendorName,
                                                                            String reagentVendorIdentifierList)
   {
     ReagentVendorIdentifierParserResult result = new ReagentVendorIdentifierParserResult();
     BufferedReader inputReader = new BufferedReader(new StringReader(reagentVendorIdentifierList));
     try {
-      int lineNumber = 0;
-      for (
-        String line = inputReader.readLine();
-        line != null;
-        line = inputReader.readLine()) {
-
-        ++lineNumber;
-
+      for (String identifier = inputReader.readLine(); identifier != null; identifier = inputReader.readLine()) {
         // trim leading and trailing whitespace, and skip blank lines
-        line = line.trim();
-        if (line.equals("")) {
-          continue;
-        }
-
-        // tokenize the line
-        String [] tokens = line.split("[\\s;,]+");
-        if (tokens.length == 0) {
-          continue;
-        }
-
-        for (int i = 0; i < tokens.length; i ++) {
-          ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(vendorName, tokens[i]);
-          // TODO: we could maintain a list of valid vendor identifier regex patterns for each vendor, and validate the input
-//          if (rvi == null) {
+        identifier = identifier.trim();
+        if (identifier.length() > 0) {
+          ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(vendorName, identifier);
+        // TODO: we could maintain a list of valid vendor identifier regex patterns for each vendor, and validate the input
+//          if (...) {
 //            result.addError(lineNumber, "invalid reagent vendor identifier " + tokens[i] +
 //                            (vendorName == null ? "" : " (vendor " + vendorName + ")"));
 //            continue;
@@ -66,14 +51,6 @@ public class ReagentVendorIdentifierListParser
       result.addError(0, "internal error: could not read reagentVendorIdentifierList");
     }
     return result;
-
   }
-
-  // instance data members
-
-  // public constructors and methods
-
-  // private methods
-
 }
 
