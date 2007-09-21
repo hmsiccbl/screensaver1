@@ -15,7 +15,7 @@
 			</t:panelGroup>
 		</t:buffer>
 
-		<t:panelGrid columns="2">
+		<t:panelGrid columns="2" rowClasses="topAlignedPanelRow">
 			<t:panelGrid columns="1">
 				<t:outputText value="#{commandsBuffer}" escape="false" />
 				<t:inputTextarea id="plateWellList"

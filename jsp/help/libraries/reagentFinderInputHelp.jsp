@@ -27,8 +27,8 @@
 				</li>
 			</ul>
 			<li>Click the "Find Reagents" button. (Or press the <span
-				style="">Tab</span> key to move focus to the button, and then press
-			<span style="">Spacebar</span> or <span style="">Enter</span>.)</li>
+				class="">Tab</span> key to move focus to the button, and then press
+			<span class="">Spacebar</span> or <span class="">Enter</span>.)</li>
 		</ul>
 	</f:verbatim>
 </f:subview>

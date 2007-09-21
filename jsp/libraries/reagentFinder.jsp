@@ -13,10 +13,11 @@
 			</t:panelGroup>
 		</t:buffer>
 
-		<t:panelGrid columns="2" style="vertical-align: top">
+		<t:panelGrid columns="2" rowClasses="topAlignedPanelRow">
 			<t:panelGrid columns="1">
 				<t:panelGroup>
-					<t:outputLabel for="vendorMenu" value="Source/Vendor:" styleClass="label" />
+					<t:outputLabel for="vendorMenu" value="Source/Vendor:"
+						styleClass="label" />
 					<t:selectOneMenu id="vendorMenu"
 						value="#{reagentFinder.vendorSelector.value}"
 						styleClass="inputText">
