@@ -207,10 +207,7 @@ public class AnnotationsDAO extends AbstractDAO
                                                                                                 List<AnnotationType> annotationTypes) {
     Map<ReagentVendorIdentifier,List<AnnotationValue>> result = new HashMap<ReagentVendorIdentifier,List<AnnotationValue>>();
     ArrayList<ReagentVendorIdentifier> reagentVendorIdList = new ArrayList<ReagentVendorIdentifier>(reagentVendorIds);
-    // the size of each subset probably shouldn't be less than 384, since
-    // performance is okay at this value, and querying for <=384 wellKeys is a
-    // very common (384 well plate size)
-    int subsetSize = 384;
+    int subsetSize = 128;
     int i = 0;
     while (i * subsetSize < reagentVendorIds.size()) {
       List<ReagentVendorIdentifier> reagentVendorIdsSubset =
