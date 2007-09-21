@@ -22,12 +22,13 @@
 51 a6 a7 a8 b6 b7 b8</pre></li>
 				<li>
 				<pre class="example">Plate Well
-50 A06
-50 B17
-50 H11
-51 C10
-51 E03
-51 F22 ...</pre></li>
+50    A06
+50    B17
+50    H11
+51    C10
+51    E03
+51    F22
+...</pre></li>
 			</ul>
 			</li>
 			<li><span style="font-size: smaller;"> Separate every
