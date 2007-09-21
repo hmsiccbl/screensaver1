@@ -16,6 +16,7 @@ import javax.faces.model.ListDataModel;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.ui.namevaluetable.NameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.ValueType;
+import edu.harvard.med.screensaver.ui.util.HtmlUtils;
 
 import org.apache.log4j.Logger;
 
@@ -54,7 +55,7 @@ public class AnnotationNameValueTable extends NameValueTable
   @Override
   public String getName(int index)
   {
-    return _annotationValues.get(index).getAnnotationType().getName();
+    return HtmlUtils.toNonBreakingSpaces(_annotationValues.get(index).getAnnotationType().getName());
   }
 
   @Override
