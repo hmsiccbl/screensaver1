@@ -17,7 +17,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
@@ -73,9 +72,9 @@ public class AnnotationsDAO extends AbstractDAO
     {
       public Object doInHibernate(Session session) throws HibernateException, SQLException
       {
-        return findRelatedAnnotationValues(session,
-                                           reagentVendorIds,
-                                           annotationTypes);
+        return findRelatedAnnotationValuesInParts(session,
+                                                  reagentVendorIds,
+                                                  annotationTypes);
       }
     });
   }
@@ -120,9 +119,9 @@ public class AnnotationsDAO extends AbstractDAO
 
           // now add the AnnotationValues
           Map<ReagentVendorIdentifier,List<AnnotationValue>> secondaryMapResult =
-            findRelatedAnnotationValues/*InParts*/(session,
-                                                   mapResult.keySet(),
-                                                   annotationTypes);
+            findRelatedAnnotationValuesInParts(session,
+                                               mapResult.keySet(),
+                                               annotationTypes);
           assert secondaryMapResult.keySet().equals(mapResult.keySet()) : "primary and secondary queries returned different results that do not have 1-1 mapping of keys";
           for (Map.Entry<ReagentVendorIdentifier,List<AnnotationValue>> entry : mapResult.entrySet()) {
             List<AnnotationValue> relatedAnnotationValues = secondaryMapResult.get(entry.getKey());
@@ -204,7 +203,7 @@ public class AnnotationsDAO extends AbstractDAO
    *             recombining the results in memory.
    */
   private Map<ReagentVendorIdentifier,List<AnnotationValue>> findRelatedAnnotationValuesInParts(Session session,
-                                                                                                Set<ReagentVendorIdentifier> reagentVendorIds,
+                                                                                                Collection<ReagentVendorIdentifier> reagentVendorIds,
                                                                                                 List<AnnotationType> annotationTypes) {
     Map<ReagentVendorIdentifier,List<AnnotationValue>> result = new HashMap<ReagentVendorIdentifier,List<AnnotationValue>>();
     ArrayList<ReagentVendorIdentifier> reagentVendorIdList = new ArrayList<ReagentVendorIdentifier>(reagentVendorIds);

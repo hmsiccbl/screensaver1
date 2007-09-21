@@ -192,7 +192,11 @@ public class ReagentSearchResults extends SearchResults<Well,Object>
     @Override
     public Object getCellValue(Well well)
     {
-      return _annotationValues.get(well.getReagentVendorIdentifier()).get(_index).getValue();
+      List<AnnotationValue> annotationValues = _annotationValues.get(well.getReagentVendorIdentifier());
+      if (annotationValues == null) {
+        return null;
+      }
+      return annotationValues.get(_index).getValue();
     }
   }
 
