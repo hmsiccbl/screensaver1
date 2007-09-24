@@ -21,6 +21,8 @@ Other	Columbia University
 HMS Affiliated Hospital	Dana Farber Cancer Institute
 HMS Affiliated Hospital	Dana Farber Cancer Institute and Harvard Medical School, BCMP Department
 Other	Dartmouth Medical School
+Other	DKFZ German Cancer Research Center
+Other	Duke University
 Other	European Molecular Biology Laboratory (EMBL), Grenoble
 Other	Fox Chase Cancer Center
 Other	Fred Hutchinson Cancer Research Center
@@ -67,10 +69,12 @@ Other	Microbiotix
 Other	Mount Sinai School of Medicine
 Other	National Institute of Allergy and Infectious Disease
 Other	New York Medical College
+Other	New York University (NYU)
 Other	Northeastern University
 Other	Oregon Health Sciences University, Department of Molecular and Medical Genetics
 Other	PI David Sacks
 Other	Princeton University, Chemistry Department
+Other	RiboNovix, Inc.
 Other	Samuel Lunenfield Research Institute/Mount Sinai Hospital
 Broad/ICG	Broad Institute and Harvard University
 Other	St. Andrew's University, Scotland
