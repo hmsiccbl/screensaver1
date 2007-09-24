@@ -28,7 +28,7 @@
 
 			<t:columns id="dataColumns"
 				value="#{searchResults.sortManager.columnModel}" var="column"
-				styleClass="column">
+				styleClass="#{column.numeric ? \"numericColumn\" : \"column\"}">
 				<f:facet name="header">
 					<t:commandSortHeader columnName="#{column.name}" arrow="false"
 						immediate="false" title="#{column.description}">
