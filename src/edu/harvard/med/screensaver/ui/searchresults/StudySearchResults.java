@@ -72,14 +72,6 @@ public class StudySearchResults extends SearchResults<Study,Object>
         @Override
         public boolean isCommandLink() { return true; }
       });
-      _columns.add(new TableColumn<Study>("Study Type", "'" + StudyType.IN_SILICO + "'' or '" + StudyType.IN_VITRO +"'") {
-        @Override
-        public Object getCellValue(Study study) { return study.getStudyType().getValue(); }
-      });
-      _columns.add(new TableColumn<Study>("Library Screen Type", "'RNAi' or 'Small Molecule'") {
-        @Override
-        public Object getCellValue(Study study) { return study.getScreenType().getValue(); }
-      });
       _columns.add(new TableColumn<Study>("Title", "The title of the study") {
         @Override
         public Object getCellValue(Study study) { return study.getTitle(); }
@@ -113,6 +105,14 @@ public class StudySearchResults extends SearchResults<Study,Object>
             }
           };
         }
+      });
+      _columns.add(new TableColumn<Study>("Study Type", "'" + StudyType.IN_SILICO + "'' or '" + StudyType.IN_VITRO +"'") {
+        @Override
+        public Object getCellValue(Study study) { return study.getStudyType().getValue(); }
+      });
+      _columns.add(new TableColumn<Study>("Library Screen Type", "'RNAi' or 'Small Molecule'") {
+        @Override
+        public Object getCellValue(Study study) { return study.getScreenType().getValue(); }
       });
     }
     return _columns;
