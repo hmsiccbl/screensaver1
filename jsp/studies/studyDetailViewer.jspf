@@ -31,15 +31,13 @@
 							styleClass="dataText" />
 					<t:div>
 						<t:outputText value="Lab:" styleClass="label" />
-						<t:commandLink value="#{studyDetailViewer.study.labHead.labName}"
-							action="#{studyDetailViewer.viewLabHead}"
-							styleClass="dataText entityLink" />
+						<t:outputText value="#{studyDetailViewer.study.labHead.labName}"
+							styleClass="dataText" />
 						<t:outputText value="&nbsp;&nbsp;Study Lead:" styleClass="label"
 							escape="false" />
-						<t:commandLink
+						<t:outputText
 							value="#{studyDetailViewer.study.leadScreener.fullNameLastFirst}"
-							action="#{studyDetailViewer.viewLeadScreener}"
-							styleClass="dataText entityLink" />
+							styleClass="dataText" />
 					</t:div>
 				</t:panelGrid>
 			</f:facet>
@@ -83,24 +81,18 @@
 					title="True when the study is shareable with scientists outside the lab" />
 				<t:div>
 					<t:selectBooleanCheckbox id="studyIsShareable"
-						value="#{studyViewer.study.shareable}"
-						styleClass="label"
+						value="#{studyViewer.study.shareable}" styleClass="label"
 						displayValueOnly="#{studyViewer.readOnly}"
-						displayValueOnlyStyleClass="dataText"
-						onclick="javascript:document.getElementById('saveScreenResultButton').click()" />
-					<t:commandButton id="saveScreenResultButton" forceId="true"
-						action="#{studyViewer.saveScreenResult}"
-						styleClass="hiddenCommand" />
+						displayValueOnlyStyleClass="dataText" />
 				</t:div>
 
 				<%-- "lab name" == last name of "lab head", but former is required for UI, latter is for internal design --%>
 				<t:outputLabel for="labName" value="Lab Name"
 					title="The name of the lab carrying out the study" />
 				<h:panelGroup>
-					<t:commandLink id="labName"
+					<t:outputText id="labName"
 						value="#{studyDetailViewer.study.labHead.labName}"
-						action="#{studyDetailViewer.viewLabHead}"
-						styleClass="dataText entityLink" style="margin-right: 4px" />
+						styleClass="dataText" style="margin-right: 4px" />
 					<t:outputText value=" (" styleClass="dataText" />
 					<h:outputLink
 						value="mailto:#{studyDetailViewer.study.labHead.email}">
@@ -114,10 +106,9 @@
 				<t:outputLabel for="leadScreener" value="Lead Screener"
 					title="The scientist primarily responsible for carrying out the study" />
 				<h:panelGroup>
-					<t:commandLink id="leadScreener"
+					<t:outputText id="leadScreener"
 						value="#{studyDetailViewer.study.leadScreener.fullNameLastFirst}"
-						action="#{studyDetailViewer.viewLeadScreener}"
-						styleClass="dataText entityLink" style="margin-right: 4px" />
+						styleClass="dataText" style="margin-right: 4px" />
 					<t:outputText value=" (" styleClass="dataText" />
 					<h:outputLink
 						value="mailto:#{studyDetailViewer.study.leadScreener.email}">
@@ -138,13 +129,11 @@
 						styleClass="standardTable" columnClasses="column"
 						rendered="#{!empty studyDetailViewer.study.collaborators}">
 						<t:column>
-							<t:commandLink action="#{studyDetailViewer.viewCollaborator}"
-								value="#{collaborator.fullNameLastFirst}"
-								styleClass="dataText entityLink" />
+							<t:outputText value="#{collaborator.fullNameLastFirst}"
+								styleClass="dataText" />
 							<t:outputText value=" (" styleClass="dataText" />
-							<t:commandLink
-								action="#{studyDetailViewer.viewCollaboratorLabHead}"
-								value="#{collaborator.labName}" styleClass="dataText labLink" />
+							<t:outputText value="#{collaborator.labName}"
+								styleClass="dataText" />
 							<t:outputText value=")" styleClass="dataText" />
 						</t:column>
 					</t:dataTable>
@@ -215,11 +204,6 @@
 							<t:inputText value="#{publication.authors}"
 								displayValueOnly="true"
 								styleClass="inputText" displayValueOnlyStyleClass="dataText" />
-						</t:column>
-						<t:column>
-							<t:commandButton value="Delete" image="/images/delete.png"
-								action="#{studyDetailViewer.deletePublication}"
-								styleClass="command" rendered="#{true}" />
 						</t:column>
 					</t:dataTable>
 				</t:panelGrid>
