@@ -37,7 +37,6 @@ import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.util.CryptoUtils;
 import edu.harvard.med.screensaver.util.DateUtil;
 
 import org.apache.commons.cli.OptionBuilder;
@@ -92,36 +91,9 @@ public class BoutrosAnnotationImporter
                                                STUDY_NUMBER);
         if (study != null) {
           log.info("deleting existing screen " + study);
+          study.getLabHead().getHbnScreensHeaded().remove(study);
+          study.getLeadScreener().getHbnScreensLed().remove(study);
           dao.deleteEntity(study);
-        }
-
-        deleteUser(SCREENER_EMAIL);
-        deleteUser(LAB_HEAD_EMAIL);
-        deleteUser(RNAI_GLOBAL_EMAIL);
-
-        LabAffiliation labAffiliation = dao.findEntityByProperty(LabAffiliation.class,
-                                                                 "affiliationName",
-                                                                 LAB_AFFILIATION_NAME);
-        if (labAffiliation != null) {
-          if (labAffiliation.getScreeningRoomUsers().size() > 0) {
-            log.warn("lab affiliation " + labAffiliation + " referenced by other users...not deleting");
-          }
-          else {
-            log.info("deleting lab affiliation " + labAffiliation);
-            dao.deleteEntity(labAffiliation);
-          }
-        }
-      }
-
-      private void deleteUser(String email)
-      {
-        ScreeningRoomUser user = dao.findEntityByProperty(ScreeningRoomUser.class,
-                                                          "email",
-                                                          email);
-        if (user != null) {
-          log.info("deleting existing user " + user);
-          user.setLabAffiliation(null);
-          dao.deleteEntity(user);
         }
       }
     });
@@ -130,49 +102,18 @@ public class BoutrosAnnotationImporter
       public void runTransaction()
       {
         try {
-          ScreeningRoomUser labHead =
-            new ScreeningRoomUser(new Date(),
-                                  "Michael",
-                                  "Boutros",
-                                  LAB_HEAD_EMAIL,
-                                  "",
-                                  "",
-                                  "",
-                                  "",
-                                  "",
-                                  ScreeningRoomUserClassification.UNASSIGNED,
-                                  true);
-          labHead.setLoginId("mboutros");
-          labHead.updateScreensaverPassword(studyUserAccountPassword);
-          labHead.addScreensaverUserRole(ScreensaverUserRole.GUEST_USER);
-
-          ScreeningRoomUser leadScreener =
-            new ScreeningRoomUser(new Date(),
-                                  "Thomas",
-                                  "Horn",
-                                  SCREENER_EMAIL,
-                                  "",
-                                  "",
-                                  "",
-                                  "",
-                                  "",
-                                  ScreeningRoomUserClassification.UNASSIGNED,
-                                  true);
-          leadScreener.setLoginId("thorn");
-          leadScreener.updateScreensaverPassword(studyUserAccountPassword);
-          leadScreener.addScreensaverUserRole(ScreensaverUserRole.GUEST_USER);
-
-          LabAffiliation labAffiliation = dao.findEntityByProperty(LabAffiliation.class,
-                                                                   "affiliationName",
-                                                                   LAB_AFFILIATION_NAME);
-          if (labAffiliation == null) {
-            labAffiliation = new LabAffiliation(LAB_AFFILIATION_NAME,
-                                                AffiliationCategory.OTHER);
-          }
-
-          labHead.setLabAffiliation(labAffiliation);
-          leadScreener.setLabAffiliation(labAffiliation);
-
+          ScreeningRoomUser labHead = findOrCreateUser("Michael",
+                                                       "Boutros",
+                                                       LAB_HEAD_EMAIL,
+                                                       "mboutros",
+                                                       studyUserAccountPassword,
+                                                       dao);
+          ScreeningRoomUser leadScreener = findOrCreateUser("Thomas",
+                                                            "Horn",
+                                                            SCREENER_EMAIL,
+                                                            "thorn",
+                                                            studyUserAccountPassword,
+                                                            dao);
           Screen screen = new Screen(leadScreener,
                                      labHead,
                                      STUDY_NUMBER,
@@ -185,21 +126,14 @@ public class BoutrosAnnotationImporter
           screen.setShareable(true);
           screen.setDownloadable(false);
 
-          ScreeningRoomUser rnaiGlobalMember =
-            new ScreeningRoomUser(new Date(),
-                                  "RNAi Global",
-                                  "Member",
-                                  RNAI_GLOBAL_EMAIL,
-                                  "",
-                                  "",
-                                  "RNAi Global group account",
-                                  "",
-                                  "",
-                                  ScreeningRoomUserClassification.UNASSIGNED,
-                                  true);
-          rnaiGlobalMember.setLoginId(RNAIGLOBAL_LOGIN);
-          rnaiGlobalMember.setDigestedPassword(CryptoUtils.digest(rnaiGlobalUserPassword));
-          rnaiGlobalMember.addScreensaverUserRole(ScreensaverUserRole.GUEST_USER);
+
+          ScreeningRoomUser rnaiGlobalMember = findOrCreateUser("RNAi Global",
+                                                                "Member",
+                                                                RNAI_GLOBAL_EMAIL,
+                                                                RNAIGLOBAL_LOGIN,
+                                                                rnaiGlobalUserPassword,
+                                                                dao);
+          rnaiGlobalMember.setComments("RNAi Global group account");
           dao.persistEntity(rnaiGlobalMember);
 
           importAnnotationData(screen, file, dao);
@@ -211,6 +145,55 @@ public class BoutrosAnnotationImporter
       }
     });
   }
+
+  static private ScreeningRoomUser findOrCreateUser(String firstName,
+                                                    String lastName,
+                                                    String email,
+                                                    String loginId,
+                                                    String password,
+                                                    GenericEntityDAO dao)
+  {
+    ScreeningRoomUser user = dao.findEntityByProperty(ScreeningRoomUser.class,
+                                                      "email",
+                                                      email);
+    if (user == null) {
+      user = new ScreeningRoomUser(new Date(),
+                                   firstName,
+                                   lastName,
+                                   email,
+                                   "",
+                                   "",
+                                   "",
+                                   "",
+                                   "",
+                                   ScreeningRoomUserClassification.UNASSIGNED,
+                                   true);
+      user.setLoginId(loginId);
+      user.updateScreensaverPassword(password);
+      user.addScreensaverUserRole(ScreensaverUserRole.GUEST_USER);
+
+      LabAffiliation labAffiliation = findOrCreateLabAffiliation(dao);
+      user.setLabAffiliation(labAffiliation);
+    }
+    else {
+      log.warn("user with login ID " + loginId +
+               " already exists and will be associated with imported study");
+    }
+    return user;
+  }
+
+  private static LabAffiliation findOrCreateLabAffiliation(GenericEntityDAO dao)
+  {
+    LabAffiliation labAffiliation = dao.findEntityByProperty(LabAffiliation.class,
+                                                             "affiliationName",
+                                                             LAB_AFFILIATION_NAME);
+    if (labAffiliation == null) {
+      labAffiliation = new LabAffiliation(LAB_AFFILIATION_NAME,
+                                          AffiliationCategory.OTHER);
+    }
+    return labAffiliation;
+  }
+
 
   static private void importAnnotationData(Screen screen,
                                            File file,
