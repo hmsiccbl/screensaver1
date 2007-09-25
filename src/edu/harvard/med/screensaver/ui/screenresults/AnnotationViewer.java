@@ -10,11 +10,13 @@
 package edu.harvard.med.screensaver.ui.screenresults;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.SortedSet;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
@@ -83,8 +85,9 @@ public class AnnotationViewer extends AbstractBackingBean implements Observer
   public void setStudy(Study study)
   {
     _study = study;
-    getAnnotationTypesTable().initialize(new ArrayList(_study.getAnnotationTypes()), this);
-    updateAnnotationValuesTable();
+    ArrayList annotationTypes = new ArrayList(_study.getAnnotationTypes());
+    getAnnotationTypesTable().initialize(annotationTypes, this);
+    updateAnnotationValuesTable(annotationTypes);
   }
 
   public Study getStudy()
@@ -112,11 +115,11 @@ public class AnnotationViewer extends AbstractBackingBean implements Observer
     return _annotationValuesTable;
   }
 
-  public void update(Observable observable, Object o)
+  public void update(Observable observable, Object selections)
   {
     // annotation type selections changed
     // TODO: make use of TableSortManager.getColumnModel().updateVisibleColumns(), instead of rebuilding data table backing bean wholesale
-    updateAnnotationValuesTable();
+    updateAnnotationValuesTable((List<AnnotationType>) selections);
   }
 
 
@@ -191,10 +194,10 @@ public class AnnotationViewer extends AbstractBackingBean implements Observer
 
   // private methods
 
-  private void updateAnnotationValuesTable()
+  private void updateAnnotationValuesTable(List<AnnotationType> annotationTypes)
   {
     log.debug("updating annotation values table content");
-    _annotationValuesTable.setAnnotationTypes(getAnnotationTypeSelections().getSelections());
+    _annotationValuesTable.setAnnotationTypes(annotationTypes);
   }
 
 }

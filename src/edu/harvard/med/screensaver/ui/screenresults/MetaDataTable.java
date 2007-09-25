@@ -113,7 +113,7 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
   public DataModel getColumnModel()
   {
     if (_columnModel == null) {
-      updateColumnModel();
+      _columnModel = new ListDataModel(getSelectedMetaDataTypeNames());
     }
     return _columnModel;
   }
@@ -153,15 +153,14 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
   }
 
   @SuppressWarnings("unchecked")
-  public void update(Observable o, Object obj)
+  public void update(Observable o, Object selections)
   {
     if (log.isDebugEnabled()) {
       log.debug("meta data selections changed: " + getSelectedMetaDataTypeNames());
     }
-    updateColumnModel();
+    _columnModel = null; // force re-initialization
     if (_observer != null) {
-      // note: we must notify the observer only *after* we've updated our column model
-      _observer.update(o, obj);
+      _observer.update(o, selections);
     }
   }
 
@@ -249,11 +248,11 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
     return namesOfSelected;
   }
 
-  private void updateColumnModel()
-  {
-    log.debug("updating meta data types");
-    _columnModel = new ListDataModel(getSelectedMetaDataTypeNames());
-  }
+//  private void updateColumnModel()
+//  {
+//    log.debug("updating meta data types");
+//    _columnModel = new ListDataModel(getSelectedMetaDataTypeNames());
+//  }
 
 
   // inner classes
@@ -265,8 +264,8 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
     private String _description;
 
     public MetaDataTableRowDefinition(String propertyName,
-                                   String displayName,
-                                   String description)
+                                      String displayName,
+                                      String description)
     {
       _propertyName = propertyName;
       _displayName = HtmlUtils.toNonBreakingSpaces(displayName);
