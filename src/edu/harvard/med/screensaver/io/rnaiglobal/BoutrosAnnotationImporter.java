@@ -28,7 +28,6 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
-import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
@@ -306,9 +305,17 @@ public class BoutrosAnnotationImporter
       }
     });
 
-    builders.add(new AnnotationValueBuilderImpl(column++,
+    builders.add(new AnnotationValueBuilderImpl(column++ + 1,
                                                 new AnnotationType(screen,
-                                                                   "Entrez Gene IDs of Predicted Targets",
+                                                                   "# Predicted Target Genes",
+                                                                   "The number of genes that have been computationally predicted by this study to be targeted " +
+                                                                   "by the SMARTPool.",
+                                                                   ordinal++,
+                                                                   true)));
+
+    builders.add(new AnnotationValueBuilderImpl(column++ - 1,
+                                                new AnnotationType(screen,
+                                                                   "Gene IDs of Predicted Targets",
                                                                    "Entrez Gene IDs of genes that have been computationally predicted by this study to be targeted by at " +
                                                                    "least one siRNA duplex in the SMARTPool. Concatenated by \"&\".",
                                                                    ordinal++,
@@ -317,14 +324,6 @@ public class BoutrosAnnotationImporter
         return value.replaceAll("GeneID:", "").replaceAll("([&+])", " $1 ");
       }
     });
-
-    builders.add(new AnnotationValueBuilderImpl(column++,
-                                                new AnnotationType(screen,
-                                                                   "# Predicted Target Genes",
-                                                                   "The number of genes that have been computationally predicted by this study to be targeted " +
-                                                                   "by the SMARTPool.",
-                                                                   ordinal++,
-                                                                   true)));
 
     builders.add(new AnnotationValueBuilderImpl(column++,
                                                 new AnnotationType(screen,
