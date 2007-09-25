@@ -270,6 +270,21 @@
     <put name="body" value="/help/libraries/wellFinderHelp.jsp" />
   </definition>
 
+  <definition name="/help/libraries/reagentSearchResultsHelp.tiles" extends=".pageHelpBase">
+    <put name="pageTitle" value="Reagent Search Results Help" />
+    <put name="body" value="/help/libraries/reagentSearchResultsHelp.jsp" />
+  </definition>
+
+  <definition name="/help/libraries/reagentViewerHelp.tiles" extends=".pageHelpBase">
+    <put name="pageTitle" value="Reagent Viewer Help" />
+    <put name="body" value="/help/libraries/reagentViewerHelp.jsp" />
+  </definition>
+
+  <definition name="/help/libraries/reagentFinderHelp.tiles" extends=".pageHelpBase">
+    <put name="pageTitle" value="Reagent Finder Help" />
+    <put name="body" value="/help/libraries/reagentFinderHelp.jsp" />
+  </definition>
+
   <definition name="/help/libraries/geneViewerHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Gene Viewer Help" />
     <put name="body" value="/help/libraries/geneViewerHelp.jsp" />
@@ -343,6 +358,31 @@
   <definition name="/help/screens/cherryPickRequestViewer/cherryPickPlatesHelp.tiles" extends=".pageHelpBase">
     <put name="pageTitle" value="Cherry Pick Request Viewer: Cherry Pick Plates Help" />
     <put name="body" value="/help/screens/cherryPickRequestViewer/cherryPickPlatesHelp.jsp" />
+  </definition>
+
+  <definition name="/help/screens/studiesBrowserHelp.tiles" extends=".pageHelpBase">
+    <put name="pageTitle" value="Studies Browser Help" />
+    <put name="body" value="/help/screens/studiesBrowserHelp.jsp" />
+  </definition>
+
+  <definition name="/help/screens/studyViewerHelp.tiles" extends=".pageHelpBase">
+    <put name="pageTitle" value="Study Viewer Help" />
+    <put name="body" value="/help/screens/studyViewerHelp.jsp" />
+  </definition>
+
+  <definition name="/help/screens/studyViewer/studyDetailsHelp.tiles" extends=".pageHelpBase">
+    <put name="pageTitle" value="Study Viewer: Study Details Help" />
+    <put name="body" value="/help/screens/studyViewer/studyDetailsHelp.jsp" />
+  </definition>
+
+  <definition name="/help/screens/studyViewer/annotationTypesHelp.tiles" extends=".pageHelpBase">
+    <put name="pageTitle" value="Study Viewer: Annotations Help" />
+    <put name="body" value="/help/screens/studyViewer/annotationTypesHelp.jsp" />
+  </definition>
+
+  <definition name="/help/screens/studyViewer/annotationDataHelp.tiles" extends=".pageHelpBase">
+    <put name="pageTitle" value="Study Viewer: Annotation Data Help" />
+    <put name="body" value="/help/screens/studyViewer/annotationDataHelp.jsp" />
   </definition>
 
 </tiles-definitions>

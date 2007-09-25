@@ -3,23 +3,23 @@
 <%@ taglib uri="http://myfaces.apache.org/tomahawk"  prefix="t"     %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 
-<f:subview id="wellViewerHelpText">
+<f:subview id="reagentViewerHelpText">
   <f:verbatim escape="false">
-    <p>
-      The Well Viewer page displays some basic information about a well, as well as information
-      about the compounds contained in the well, and the genes for which silencing reagents
-      are contained in the well.
-    </p>
-    <p>
-      If you want to find other wells with similar contents, click on the Gene Name, or the
-      SMILES string, to get to the Gene Viewer page, or the Compound Viewer page, respectively.
-      These pages display lists of wells containing the same gene or compound.
-    </p>
+    <p>The Reagent Viewer page displays some basic information about a
+		reagent, as reagent as information about the compounds contained in
+		the reagent, and the genes for which silencing reagents are contained
+		in the reagent. At the bottom, a table will display all available
+		annotations for the reagent.</p>
+    <p>If you want to find the ICCB-L library wells that contain the
+		same or similar reagents, click on the Gene Name, or the SMILES
+		string, to get to the Gene Viewer page, or the Compound Viewer page,
+		respectively. These pages display lists of wells containing same gene
+		or compound.</p>
     <p>
       <span class="helpNB">Please note</span> that Screensaver currently has no information on
-      the small molecules in the natural products libraries. While the experimental wells in these
+      the small molecules in the natural products libraries. While the experimental reagents in these
       libraries are labeled as "experimental", no information about the small molecules contained
-      in those wells will be displayed.
+      in those reagents will be displayed.
     </p>
     <p>
       On rare occasions, a compound will fail to display a structure image.
@@ -30,7 +30,7 @@
     </p>
     <p>
       <span class="helpTip">Internet Explorer Tip:</span> Are you getting a "Security Information" popup
-      window every time you try to view a well with compounds in it? Here's a workaround:
+      window every time you try to view a reagent with compounds in it? Here's a workaround:
       <ol>
         <li>Open the Tools menu</li>
         <li>Click on Internet Options...</li>

@@ -23,7 +23,8 @@
       Data sections by using the "Show selected data headers" controls that
       appear above the Data Headers section when either of the Data Headers and Data sections is
       expanded. Just uncheck the checkboxes next to the data header names that you don't want to
-      see, and click the "Update" button. Click the "All" button to show all the columns.
+      see, and click the "Update" button. As a shortcut, click the "All" button to show all the columns,
+      or "First" to show only the first column.
     </p>
   </f:verbatim>
 </f:subview>

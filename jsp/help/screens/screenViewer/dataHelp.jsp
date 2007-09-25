@@ -10,7 +10,7 @@
       results. There are three extra columns to go along with all the Data Headers columns: Plate,
       Well, and Well Type. The Well Type column indicates the type of well on the <i>assay plates</i>,
       and not just the library plates, so there may be some assay control wells that are just empty
-      wells int the library. You can sort and browse the data in many different ways:
+      wells in the library. You can sort and browse the data in many different ways:
       <ul>
         <li>
           Navigate through the data using the first page, previous page, next
@@ -26,7 +26,7 @@
           allowing you to select the Data Header that will be used to determine
           the set of positives.</li>
         <li>
-          From the "Show:" menu list, select a plate number to browse all the result values for a 
+          From the "Show:" menu list, select a plate number to browse all the result values for a
           particular plate.
         </li>
         <li>
@@ -54,7 +54,8 @@
       Data sections by using the "Show selected data headers" controls that
       appear above the Data Headers section when either of the Data Headers and Data sections is
       expanded. Just uncheck the checkboxes next to the data header names that you don't want to
-      see, and click the "Update" button. Click the "All" button to show all the columns.
+      see, and click the "Update" button. As a shortcut, click the "All" button to show all the
+      columns, or "First" to show only the first column.
     </p>
   </f:verbatim>
 </f:subview>

@@ -5,22 +5,10 @@
 
 <f:subview id="annotationViewer">
 	<h:form id="annotationPanelForm">
-		<t:collapsiblePanel id="annotationPanel"
-			value="#{annotationViewer.isPanelCollapsedMap['annotations']}"
-			title="Annotations" var="isCollapsed" titleVar="title"
+		<t:panelGrid id="annotationPanel"
 			rendered="#{!annotationViewer.study.restricted && !empty annotationViewer.study.annotationTypes}">
-			<f:facet name="header">
-				<t:div styleClass="sectionHeader">
-					<t:headerLink immediate="true" styleClass="sectionHeader">
-						<h:graphicImage
-							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
-							styleClass="icon" />
-						<h:outputText value="Annotations" styleClass="sectionHeader" />
-					</t:headerLink>
-				</t:div>
-			</f:facet>
 
-			<t:panelGroup >
+			<t:panelGroup>
 				<t:commandButton action="#{annotationViewer.download}"
 					rendered="#{annotationViewer.study.downloadable}" value="Download"
 					styleClass="command"
@@ -74,8 +62,8 @@
 					</f:facet>
 
 					<t:dataTable id="annotationTypesTable"
-						value="#{annotationViewer.annotationTypesTable.dataModel}" var="row"
-						rendered="#{!isCollapsed}" styleClass="standardTable"
+						value="#{annotationViewer.annotationTypesTable.dataModel}"
+						var="row" rendered="#{!isCollapsed}" styleClass="standardTable"
 						headerClass="tableHeader" rowClasses="row1,row2">
 						<t:column styleClass="keyColumn">
 							<f:facet name="header">
@@ -118,7 +106,8 @@
 						<t:buffer into="#{annotationValuesTableBuffer}">
 							<t:dataTable id="annotationValuesTable"
 								binding="#{annotationViewer.annotationValuesTable.dataTableUIComponent}"
-								value="#{annotationViewer.annotationValuesTable.dataModel}" var="row"
+								value="#{annotationViewer.annotationValuesTable.dataModel}"
+								var="row"
 								rows="#{annotationViewer.annotationValuesTable.rowsPerPageSelector.selection}"
 								styleClass="standardTable" headerClass="tableHeader"
 								rowClasses="row1,row2"
@@ -200,8 +189,8 @@
 									size="6" styleClass="inputText">
 								</t:inputText>
 								<%-- note: no 'action' attribute necessary, as 'rowNumber' inputText component, above, invokes update logic via valueChangeListener --%>
-								<t:commandButton id="updateAnnotationValuesPositionButton2" value="Go"
-									styleClass="command" />
+								<t:commandButton id="updateAnnotationValuesPositionButton2"
+									value="Go" styleClass="command" />
 
 								<t:selectOneMenu id="annotationValuesTableRowsPerPageList"
 									value="#{annotationViewer.annotationValuesTable.rowsPerPageSelector.value}"
@@ -224,7 +213,7 @@
 				</t:collapsiblePanel>
 
 			</t:div>
-		</t:collapsiblePanel>
+		</t:panelGrid>
 	</h:form>
 
 </f:subview>
