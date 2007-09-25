@@ -229,7 +229,7 @@ public class BoutrosAnnotationImporter
                                                                    ordinal++,
                                                                    false)) {
       public String transformValue(String value) {
-        return value.replaceAll("([&+])", " $1 ");
+        return value.replaceAll("&", ", ");
       }
     });
     builders.add(new AnnotationValueBuilderImpl(column++,
@@ -305,7 +305,6 @@ public class BoutrosAnnotationImporter
       public String transformValue(String value) {
         return value.replaceAll("GeneID:", "").replaceAll("&", ", ");
       }
-
     });
 
     builders.add(new AnnotationValueBuilderImpl(column++,
