@@ -225,8 +225,7 @@ public class BoutrosAnnotationImporter
     builders.add(new AnnotationValueBuilderImpl(column++,
                                                 new AnnotationType(screen,
                                                                    "siRNA IDs",
-                                                                   "The Dharmacon/Thermofisher siRNA IDs of the individual duplexes that comprise the SMARTPool. " +
-                                                                   "Concatenated by \"&\".",
+                                                                   "The Dharmacon/Thermofisher siRNA IDs of the individual duplexes that comprise the SMARTPool.",
                                                                    ordinal++,
                                                                    false)) {
       public String transformValue(String value) {
@@ -300,25 +299,26 @@ public class BoutrosAnnotationImporter
                                                 new AnnotationType(screen,
                                                                    "Gene IDs of Predicted Targets",
                                                                    "Entrez Gene IDs of genes that have been computationally predicted by this study to be targeted by at " +
-                                                                   "least one siRNA duplex in the SMARTPool. Concatenated by \"&\".",
+                                                                   "least one siRNA duplex in the SMARTPool.",
                                                                    ordinal++,
                                                                    false)) {
       public String transformValue(String value) {
-        return value.replaceAll("GeneID:", "").replaceAll("([&+])", " $1 ");
+        return value.replaceAll("GeneID:", "").replaceAll("&", ", ");
       }
+
     });
 
     builders.add(new AnnotationValueBuilderImpl(column++,
                                                 new AnnotationType(screen,
                                                                    "Predicted RefSeq Targets",
                                                                    "The RefSeq transcript IDs that have been computationally predicted by this study to be targeted " +
-                                                                   "by the SMARTPool.  Transcripts derived from the same gene are concatenated by \"+\".  Transcripts " +
-                                                                   "derived from different genes are concatenated by \"&\".  Transcript IDs have the same order as in \"" +
-                                                                   builders.get(builders.size() - 2).getAnnotationType().getName() + "\" column.",
+                                                                   "by the SMARTPool.  Transcripts derived from the same gene are grouped with square brackets and " +
+                                                                   "gene group order matches Gene ID order in \"" +
+                                                                   builders.get(builders.size() - 1).getAnnotationType().getName() + "\".",
                                                                    ordinal++,
                                                                    false)) {
       public String transformValue(String value) {
-        return value.replaceAll("([&+])", " $1 ");
+        return transformDelimiters(value);
       }
     });
 
@@ -326,11 +326,12 @@ public class BoutrosAnnotationImporter
                                                 new AnnotationType(screen,
                                                                    "# Duplexes Targeting each RefSeq",
                                                                    "The number of duplex siRNAs from the SMARTPool that are predicted by this study to target each " +
-                                                                   "RefSeq.  Ordered and concatenated as in \"" + builders.get(builders.size() - 1).getAnnotationType().getName() + "\" column.",
+                                                                   "RefSeq.  Duplex grouping and ordering matches RefSeq transcripts in \"" +
+                                                                   builders.get(builders.size() - 1).getAnnotationType().getName() + "\".",
                                                                    ordinal++,
                                                                    false)) {
       public String transformValue(String value) {
-        return value.replaceAll("([&+])", " $1 ");
+        return transformDelimiters(value);
       }
     });
 
@@ -359,4 +360,18 @@ public class BoutrosAnnotationImporter
                                                                    false)));
     return builders;
   }
+
+  private static String transformDelimiters(String v)
+  {
+    String[] vs = v.replaceAll("&", ", ").split(", ");
+    StringBuilder r = new StringBuilder();
+    for (int i = 0; i < vs.length; i++) {
+      if (r.length() > 0) {
+        r.append(", ");
+      }
+      r.append('[').append(vs[i].replaceAll("\\+", ", ")).append(']');
+    }
+    return r.toString();
+  }
+
 }
