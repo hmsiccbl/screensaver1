@@ -33,8 +33,9 @@ public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifi
 
   public ReagentVendorIdentifier(String vendorName, String reagentIdentifier)
   {
-    _vendorName = vendorName;
-    _vendorIdentifier = reagentIdentifier;
+    // convert nulls to empty strings, for safety
+    _vendorName = vendorName == null ? "" : vendorName;
+    _vendorIdentifier = reagentIdentifier == null ? "" : reagentIdentifier;
   }
 
   /**
@@ -47,7 +48,7 @@ public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifi
   }
 
   /**
-   * @return vendorId the vendor ID (from {@link Well#getVendorIdentifier()}).
+   * @return vendorId the vendor ID (from {@link Well#getVendorIdentifier()})
    * @hibernate.property
    */
   public String getVendorIdentifier()

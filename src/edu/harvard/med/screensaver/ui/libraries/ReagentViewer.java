@@ -87,8 +87,7 @@ public class ReagentViewer extends AbstractBackingBean
   {
     _well = well;
     List<AnnotationValue> annotationValues =
-      _annotationsDao.findAnnotationValuesForReagent(new ReagentVendorIdentifier(_well.getLibrary().getVendor(),
-                                                                                 _well.getVendorIdentifier()));
+      _annotationsDao.findAnnotationValuesForReagent(_well.getReagentVendorIdentifier());
     for (Iterator iterator = annotationValues.iterator(); iterator.hasNext();) {
       AnnotationValue annotationValue = (AnnotationValue) iterator.next();
       if (annotationValue.isRestricted()) {
