@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -32,6 +32,8 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.util.eutils.PublicationInfo;
 import edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider;
 
@@ -46,7 +48,7 @@ public class ScreenSynchronizer
 
 
   // instance data members
-  
+
   private Connection _connection;
   private GenericEntityDAO _dao;
   private UserSynchronizer _userSynchronizer;
@@ -56,11 +58,11 @@ public class ScreenSynchronizer
   private Map<Integer,Screen> _screenNumberToScreenMap = new HashMap<Integer,Screen>();
   private PublicationInfoProvider _publicationInfoProvider = new PublicationInfoProvider();
 
-  
+
   // public constructors and methods
 
-  public ScreenSynchronizer(Connection connection, 
-                                    GenericEntityDAO dao, 
+  public ScreenSynchronizer(Connection connection,
+                                    GenericEntityDAO dao,
                                     UserSynchronizer userSynchronizer)
   {
     _connection = connection;
@@ -94,10 +96,10 @@ public class ScreenSynchronizer
   {
     return _screenNumberToScreenMap.get(screenNumber);
   }
-  
+
 
   // private instance methods
-  
+
   private void synchronizeScreensProper() throws SQLException, ScreenDBSynchronizationException
   {
     Statement statement = _connection.createStatement();
@@ -122,7 +124,7 @@ public class ScreenSynchronizer
       String publishableProtocolEnteredBy = resultSet.getString("protocol_entered_by");
       String publishableProtocol = resultSet.getString("protocol");
       String publishableProtocolComments = resultSet.getString("protocol_comments");
-      
+
       Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
       if (screen == null) {
         screen = new Screen(leadScreener, labHead, screenNumber, dateCreated, screenType,
@@ -134,7 +136,9 @@ public class ScreenSynchronizer
           throw new ScreenDBSynchronizationException("screen type has changed in ScreenDB data for Screen " + screen.getScreenNumber() + " but changing screen type in Screensaver is prohibited");
         }
         screen.setLeadScreener(leadScreener);
+        addScreensaverUserRoleForScreenType(leadScreener, screen);
         screen.setLabHead(labHead);
+        addScreensaverUserRoleForScreenType(labHead, screen);
         screen.setDateCreated(dateCreated);
         screen.setTitle(screenTitle);
         screen.setDataMeetingScheduled(dataMeetingScheduled);
@@ -148,12 +152,22 @@ public class ScreenSynchronizer
       screen.setPublishableProtocolEnteredBy(publishableProtocolEnteredBy);
       screen.setPublishableProtocol(publishableProtocol);
       screen.setPublishableProtocolComments(publishableProtocolComments);
-      
+
       synchronizeKeywords(keywords, screen);
       synchronizeFundingSupports(fundingSupportString, screen);
       _dao.persistEntity(screen);
       synchronizeBillingInformation(resultSet, screen);
       _screenNumberToScreenMap.put(screenNumber, screen);
+    }
+  }
+
+  private void addScreensaverUserRoleForScreenType(ScreensaverUser user, Screen screen)
+  {
+    if (screen.getScreenType().equals(ScreenType.RNAI)) {
+      user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
+    }
+    else if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+      user.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
     }
   }
 
@@ -221,6 +235,7 @@ public class ScreenSynchronizer
       ScreeningRoomUser user = getCollaborator(resultSet);
       Screen screen = getScreenFromTable("collaborators", resultSet.getInt("screen_id"));
       screen.addCollaborator(user);
+      addScreensaverUserRoleForScreenType(user, screen);
     }
     statement.close();
   }
@@ -268,7 +283,7 @@ public class ScreenSynchronizer
     Screen screen = _screenNumberToScreenMap.get(screenNumber);
     if (screen == null) {
       throw new ScreenDBSynchronizationException(
-        "invalid screen_id in screendb " + tablename + " table: " + screenNumber);        
+        "invalid screen_id in screendb " + tablename + " table: " + screenNumber);
     }
     return screen;
   }
@@ -311,7 +326,7 @@ public class ScreenSynchronizer
     }
     statement.close();
   }
-  
+
   private void synchronizePublications() throws SQLException, ScreenDBSynchronizationException
   {
     // synchronizing requires emptying out all previous publications
@@ -325,7 +340,7 @@ public class ScreenSynchronizer
       Integer screenNumber = resultSet.getInt("screen_id");
       Screen screen = getScreenFromTable("pub_med", screenNumber);
       String pubmedId = resultSet.getString("pubmed_id");
-      PublicationInfo publicationInfo = 
+      PublicationInfo publicationInfo =
         _publicationInfoProvider.getPublicationInfoForPubmedId(new Integer(pubmedId));
       if (publicationInfo == null) {
         throw new ScreenDBSynchronizationException("unable to get publication info from pubmed");
