@@ -20,7 +20,6 @@ import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
@@ -39,8 +38,6 @@ public class WellFinder extends AbstractBackingBean
   // private static final fields
 
   private static final Logger log = Logger.getLogger(WellFinder.class);
-
-  private static final ScreensaverUserRole ADMIN_ROLE = ScreensaverUserRole.LIBRARIES_ADMIN;
 
 
   // private instance fields
@@ -112,12 +109,6 @@ public class WellFinder extends AbstractBackingBean
   public void setPlateWellList(String plateWellList)
   {
     _plateWellList = plateWellList;
-  }
-
-  @Override
-  protected ScreensaverUserRole getEditableAdminRole()
-  {
-    return ADMIN_ROLE;
   }
 
   /**

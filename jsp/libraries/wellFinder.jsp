@@ -11,7 +11,9 @@
 				<t:commandButton action="#{wellFinder.findWells}"
 					id="findWellsSubmit" value="Find Wells" styleClass="command" />
 				<t:commandButton action="#{wellFinder.findWellVolumes}"
-					id="findWellVolumes" value="Find Well Volumes" rendered="#{wellFinder.editable}" styleClass="command" />
+					id="findWellVolumes" value="Find Well Volumes"
+					rendered="#{wellCopyVolumesBrowser.editable || wellCopyVolumesBrowser.readAdmin}"
+					styleClass="command" />
 			</t:panelGroup>
 		</t:buffer>
 
