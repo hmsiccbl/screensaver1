@@ -15,35 +15,45 @@
 					title="Download the annotations in an Excel file format" />
 			</t:panelGroup>
 
-			<t:div style="margin-left: 0px">
-				<t:panelGrid columns="1"
-					rendered="#{!(annotationViewer.isPanelCollapsedMap['annotationTypes'] && annotationViewer.isPanelCollapsedMap['annotationValues'])}"
-					styleClass="groupingPanel"
-					title="Select the annotations to display in the annotation tables below">
-					<t:outputLabel for="annotationsList"
-						value="Show selected annotations:" styleClass="label" />
-					<t:selectManyCheckbox id="annotationsList" layout="pageDirection"
-						layoutWidth="#{annotationViewer.annotationTypeSelections.size}"
-						value="#{annotationViewer.annotationTypeSelections.value}"
-						valueChangeListener="#{annotationViewer.annotationTypesTable.selectionListener}"
-						binding="#{annotationViewer.annotationTypesTable.selectManyUIComponent}"
-						styleClass="label" style="vertical-align: top">
-						<f:selectItems id="annotations"
-							value="#{annotationViewer.annotationTypeSelections.selectItems}" />
-					</t:selectManyCheckbox>
-					<t:panelGroup>
-						<t:commandButton id="updateAnnotationTypesButton" forceId="true"
-							value="Update" styleClass="command"
-							title="Update the annotations selection" />
-						<t:commandButton id="allAnnotationsButton" value="All"
-							action="#{annotationViewer.annotationTypesTable.selectAll}"
-							styleClass="command" title="Show all annotations" />
-						<t:commandButton id="noAnnotationsButton" value="First"
-							action="#{annotationViewer.annotationTypesTable.selectNone}"
-							styleClass="command" title="Show the first annotation" />
-					</t:panelGroup>
-				</t:panelGrid>
-			</t:div>
+			<t:buffer into="#{showHideAnnotationDialogBuffer}">
+				<t:popup id="showHideAnnotationDialog"
+					closePopupOnExitingPopup="true" closePopupOnExitingElement="false"
+					styleClass="popupDialog">
+					<t:commandLink>
+						<t:outputText value="Show/Hide Annotations >>" styleClass="label" />
+					</t:commandLink>
+					<f:facet name="popup">
+						<t:panelGrid columns="1" styleClass="popupDialog">
+							<t:outputLabel for="annotationsList"
+								value="Show selected annotations:" styleClass="label" />
+							<t:selectManyCheckbox id="annotationsList" layout="lineDirection"
+								layoutWidth="#{annotationViewer.annotationTypeSelections.size}"
+								value="#{annotationViewer.annotationTypeSelections.value}"
+								valueChangeListener="#{annotationViewer.annotationTypesTable.selectionListener}"
+								binding="#{annotationViewer.annotationTypesTable.selectManyUIComponent}"
+								styleClass="label" style="vertical-align: top">
+								<f:selectItems id="annotations"
+									value="#{annotationViewer.annotationTypeSelections.selectItems}" />
+							</t:selectManyCheckbox>
+							<t:panelGroup>
+								<t:commandButton id="updateAnnotationTypesButton" forceId="true"
+									value="Update" styleClass="command"
+									title="Update the annotations selection" />
+								<t:commandButton id="allAnnotationsButton" value="All"
+									action="#{annotationViewer.annotationTypesTable.selectAll}"
+									styleClass="command" title="Show all annotations" />
+								<t:commandButton id="noAnnotationsButton" value="First"
+									action="#{annotationViewer.annotationTypesTable.selectNone}"
+									styleClass="command" title="Show the first annotation" />
+							</t:panelGroup>
+						</t:panelGrid>
+					</f:facet>
+				</t:popup>
+			</t:buffer>
+
+			<t:outputText value="#{showHideAnnotationDialogBuffer}"
+				escape="false"
+				rendered="#{!annotationViewer.isPanelCollapsedMap['annotationTypes'] && !annotationViewer.isPanelCollapsedMap['annotationValues']}" />
 
 			<t:div style="margin-left: 0px">
 
@@ -60,6 +70,10 @@
 							</t:headerLink>
 						</t:div>
 					</f:facet>
+
+					<t:outputText value="#{showHideAnnotationDialogBuffer}"
+						escape="false"
+						rendered="#{annotationViewer.isPanelCollapsedMap['annotationValues']}" />
 
 					<t:dataTable id="annotationTypesTable"
 						value="#{annotationViewer.annotationTypesTable.dataModel}"
@@ -100,6 +114,10 @@
 						</t:div>
 					</f:facet>
 
+					<t:outputText value="#{showHideAnnotationDialogBuffer}"
+						escape="false"
+						rendered="#{annotationViewer.isPanelCollapsedMap['annotationTypes']}" />
+
 					<t:panelGrid columns="1" style="width: 100%"
 						rendered="#{!isCollapsed}">
 
@@ -118,18 +136,27 @@
 									var="column"
 									styleClass="#{(column.name==\"Reagent Source ID\") ? \"keyColumn\" : (column.numeric ? \"numericColumn\" : \"textColumn\")}">
 									<f:facet name="header">
-										<t:commandSortHeader columnName="#{column.name}" arrow="false">
-											<f:facet name="ascending">
-												<t:graphicImage value="/images/ascending-arrow.gif"
-													rendered="true" border="0" />
+										<t:popup displayAtDistanceY="20">
+											<t:commandSortHeader columnName="#{column.name}"
+												arrow="false">
+												<h:outputText value="#{column.name}" />
+												<f:facet name="ascending">
+													<t:graphicImage value="/images/ascending-arrow.gif"
+														rendered="true" border="0" />
+												</f:facet>
+												<f:facet name="descending">
+													<t:graphicImage value="/images/descending-arrow.gif"
+														rendered="true" border="0" />
+												</f:facet>
+											</t:commandSortHeader>
+											<f:facet name="popup">
+												<t:panelGrid styleClass="popupHelp">
+													<t:outputText styleClass="popupText"
+														value="#{annotationViewer.annotationValuesTable.sortManager.currentColumn.description}"
+														escape="false" />
+												</t:panelGrid>
 											</f:facet>
-											<f:facet name="descending">
-												<t:graphicImage value="/images/descending-arrow.gif"
-													rendered="true" border="0" />
-											</f:facet>
-											<h:outputText value="#{column.name}"
-												title="#{annotationViewer.annotationValuesTable.sortManager.currentColumn.description}" />
-										</t:commandSortHeader>
+										</t:popup>
 									</f:facet>
 									<t:outputText value="#{row[column.name]}"
 										rendered="#{!column.isCommandLink}" />

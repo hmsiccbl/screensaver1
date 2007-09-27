@@ -374,3 +374,22 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
 .topAlignedPanelRow {
 	vertical-align: top;
 }
+
+.popupDialog {
+	background: white;
+	border-style: solid;
+	border-width: 1px;
+	border-color: blue;
+}
+
+.popupHelp {
+	background: #fffccc;
+	border-style: solid;
+	border-width: 1px;
+}
+
+.popupText {
+	font-family: sans-serif;
+	font-size: small;
+	font-weight: normal;
+}
