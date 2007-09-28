@@ -17,7 +17,7 @@ public class ProjectTestSuite extends TestSuite
 
   public static void main(String[] args)
   {
-    junit.textui.TestRunner.run(ProjectTestSuite.class);
+    junit.textui.TestRunner.run(suite());
   }
   
   public static Test suite()
@@ -27,6 +27,7 @@ public class ProjectTestSuite extends TestSuite
 
   public ProjectTestSuite()
   {
+    addTest(edu.harvard.med.screensaver.analysis.heatmaps.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.model.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.db.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.io.PackageTestSuite.suite());

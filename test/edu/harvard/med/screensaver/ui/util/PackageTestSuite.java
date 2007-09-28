@@ -15,7 +15,7 @@ import junit.framework.TestSuite;
 public class PackageTestSuite extends TestSuite
 {
   public static void main(String[] args) {
-    junit.textui.TestRunner.run(PackageTestSuite.class);
+    junit.textui.TestRunner.run(suite());
   }
   
   public PackageTestSuite()
