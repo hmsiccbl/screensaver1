@@ -130,6 +130,9 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
       };
       // select all meta data types, initially
       _selections.setSelections(getDataTypes());
+      if (_selectManyUIComponent != null) {
+        _selectManyUIComponent.setValue(_selections.getValue());
+      }
 
       _selections.addObserver(this);
     }

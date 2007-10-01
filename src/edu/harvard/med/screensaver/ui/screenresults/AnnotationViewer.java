@@ -75,7 +75,7 @@ public class AnnotationViewer extends AbstractBackingBean implements Observer
     _annotationTypesTable = annotationTypesTable;
     _annotationValuesTable = annotationValuesTable;
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
-    _isPanelCollapsedMap.put("annotationTypes", true);
+    _isPanelCollapsedMap.put("annotationTypes", false);
     _isPanelCollapsedMap.put("annotationValues", true);
   }
 
