@@ -366,6 +366,9 @@ public class Cell
         }
         return null;
       }
+      if (cell.getCellType() == HSSFCell.CELL_TYPE_STRING) {
+        return new Integer(cell.getStringCellValue().trim());
+      }
       return new Integer((int) cell.getNumericCellValue());
     } 
     catch (CellOutOfRangeException e) {
