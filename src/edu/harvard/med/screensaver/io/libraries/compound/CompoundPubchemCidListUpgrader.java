@@ -92,6 +92,7 @@ public class CompoundPubchemCidListUpgrader
                 compound.addPubchemCid(pubchemCid);
               }
               compound.setPubchemCidListUpgraderSuccessful(true);
+              compound.setPubchemCidListUpgraderFailed(false);
             }
             else {
               compound.setPubchemCidListUpgraderFailed(true);
