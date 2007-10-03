@@ -71,7 +71,7 @@ public class CompoundPubchemCidListUpgrader
       Compound.class,
       "from Compound " +
       "where pubchemCidListUpgraderSuccessful = false " +
-      "and pubchemCidListUpgraderFailed = false");
+      "and pubchemCidListUpgraderFailed = true");
     log.info(
       "retrieved " + nonUpgradedCompoundsList.size() +
       " compounds needing an upgrade");
