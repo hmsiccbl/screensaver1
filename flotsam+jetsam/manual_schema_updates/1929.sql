@@ -1,4 +1,4 @@
-/* manual schema upgrade for schema-upgrade-2007 branch (pre-merge)            */
+/* manual schema upgrade for schema-upgrade-2007                               */
 
 /* this schema upgrade is designed to work on postgres 8.2.4 or greater. it    */
 /* has not been tested on earlier versions, and probably will not work.        */
@@ -13,12 +13,10 @@
 
 /* schema changes here are alphabetical by table.                              */
 
-/* TODO: rename to a proper revision number instead of 9999                    */
-
 BEGIN TRANSACTION;
 
 INSERT INTO schema_history (screensaver_revision, date_updated, comment) 
-SELECT 9999, current_timestamp, 'schema-upgrade-2007';
+SELECT 1929, current_timestamp, 'schema-upgrade-2007';
 
 ALTER TABLE administrative_activity ADD COLUMN date_approved TIMESTAMP;
 
