@@ -88,11 +88,11 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
       _dao.need(user, "screensaverUserRoles");
       if (user instanceof ScreeningRoomUser) {
         _dao.need(user,
-                  "hbnScreensLed",
-                  "hbnScreensHeaded",
-                  "hbnScreensCollaborated",
-                  "hbnLabHead.hbnLabMembers",
-                  "hbnLabMembers");
+                  "screensLed",
+                  "screensHeaded",
+                  "screensCollaborated",
+                  "labHead.labMembers",
+                  "labMembers");
       }
     }
     super.setScreensaverUser(user);

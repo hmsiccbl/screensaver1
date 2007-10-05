@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -13,31 +13,35 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
 
-import edu.harvard.med.screensaver.model.DuplicateEntityException;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import javax.persistence.Entity;
+import javax.persistence.PrimaryKeyJoinColumn;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
 /**
- * TODO: javadoc
+ * A screening room activity representing a screener screening various assay plates. These
+ * assay plates could be plated from a library, as with a {@link LibraryScreening}, or from
+ * a set of cherry picks, as with a {@link RnaiCherryPickScreening}.
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * 
- * @hibernate.joined-subclass table="screening" lazy="true"
- * @hibernate.joined-subclass-key column="activity_id"
  */
+@Entity
+@PrimaryKeyJoinColumn(name="activityId")
+@org.hibernate.annotations.ForeignKey(name="fk_screening_to_activity")
+@org.hibernate.annotations.Proxy
 public abstract class Screening extends ScreeningRoomActivity
 {
-  // static members
+  // private static data
 
   private static final long serialVersionUID = 1L;
-  
   private static Logger log = Logger.getLogger(Screening.class);
-  
 
-  // instance data members
+
+  // private instance data
 
   private String _assayProtocol;
   private Date _assayProtocolLastModifiedDate;
@@ -45,32 +49,21 @@ public abstract class Screening extends ScreeningRoomActivity
   private Integer _numberOfReplicates;
   private BigDecimal _estimatedFinalScreenConcentrationInMoles;
 
-  
-  // public constructors and methods
 
-  public Screening(Screen screen,
-                   ScreeningRoomUser performedBy,
-                   Date dateCreated,
-                   Date dateOfActivity) throws DuplicateEntityException
-  {
-    super(screen, performedBy, dateCreated, dateOfActivity);
-  }
+  // public instance methods
 
   /**
    * Get the assay protocol.
-   * 
    * @return the assay protocol
-   * @hibernate.property
-   *   type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getAssayProtocol()
   {
     return _assayProtocol;
   }
-  
+
   /**
    * Set the assay protocol.
-   * 
    * @param assayProtocol the new assay protocol
    */
   public void setAssayProtocol(String assayProtocol)
@@ -81,7 +74,6 @@ public abstract class Screening extends ScreeningRoomActivity
   /**
    * Get the date the assay protocol was last modified.
    * @return the date the assay protocol was last modified
-   * @hibernate.property
    */
   public Date getAssayProtocolLastModifiedDate()
   {
@@ -89,7 +81,7 @@ public abstract class Screening extends ScreeningRoomActivity
   }
 
   /**
-   * Set the date the assay protocol was last modified
+   * Set the date the assay protocol was last modified.
    * @param assayProtocolLastModifiedDate the new date the assay protocol was last modified
    */
   public void setAssayProtocolLastModifiedDate(Date assayProtocolLastModifiedDate)
@@ -98,11 +90,10 @@ public abstract class Screening extends ScreeningRoomActivity
   }
 
   /**
-   * Get the assay protocol type
+   * Get the assay protocol type.
    * @return the assay protocol type
-   * @hibernate.property
-   *   type="edu.harvard.med.screensaver.model.screens.AssayProtocolType$UserType"
    */
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.AssayProtocolType$UserType")
   public AssayProtocolType getAssayProtocolType()
   {
     return _assayProtocolType;
@@ -119,9 +110,7 @@ public abstract class Screening extends ScreeningRoomActivity
 
   /**
    * Get the number of replicates.
-   *
    * @return the number of replicates
-   * @hibernate.property
    */
   public Integer getNumberOfReplicates()
   {
@@ -130,7 +119,6 @@ public abstract class Screening extends ScreeningRoomActivity
 
   /**
    * Set the number of replicates.
-   *
    * @param numberOfReplicates the new number of replicates
    */
   public void setNumberOfReplicates(Integer numberOfReplicates)
@@ -141,8 +129,8 @@ public abstract class Screening extends ScreeningRoomActivity
   /**
    * Get the estimated final screen concentration, in Moles.
    * @return the estimated final screen concentration, in Moles
-   * @hibernate.property type="big_decimal"
    */
+  @org.hibernate.annotations.Type(type="big_decimal")
   public BigDecimal getEstimatedFinalScreenConcentrationInMoles()
   {
     return _estimatedFinalScreenConcentrationInMoles;
@@ -165,13 +153,28 @@ public abstract class Screening extends ScreeningRoomActivity
   }
 
 
-  // private methods
+  // protected constructors
 
   /**
-   * @motivation for Hibernate and subclasses
+   * Construct an initialized <code>Screening</code>.
+   * @param screen the screen
+   * @param performedBy the user that performed the screening
+   * @param dateCreated the date created
+   * @param dateOfActivity the date the screening took place
    */
-  protected Screening()
+  protected Screening(
+    Screen screen,
+    ScreeningRoomUser performedBy,
+    Date dateCreated,
+    Date dateOfActivity)
   {
+    super(screen, performedBy, dateCreated, dateOfActivity);
   }
+
+  /**
+   * Construct an uninitialized <code>Screening</code>.
+   * @motivation for hibernate and proxy/concrete subclass constructors
+   */
+  protected Screening() {}
 }
 

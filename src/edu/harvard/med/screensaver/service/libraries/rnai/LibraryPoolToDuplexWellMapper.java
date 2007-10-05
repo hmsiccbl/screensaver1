@@ -15,12 +15,12 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
+import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.screens.LabCherryPick;
-import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
-import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 
 import org.apache.log4j.Logger;
 
@@ -67,7 +67,7 @@ public class LibraryPoolToDuplexWellMapper
       Well poolWell = screenerCherryPick.getScreenedWell();
       Set<Well> duplexWells = mapPoolWellToDuplexWells(poolWell);
       for (Well duplexWell : duplexWells) {
-        labCherryPicks.add(new LabCherryPick(screenerCherryPick, duplexWell));
+        labCherryPicks.add(cherryPickRequest.createLabCherryPick(screenerCherryPick, duplexWell));
       }
     }
     return labCherryPicks;
@@ -146,6 +146,5 @@ public class LibraryPoolToDuplexWellMapper
     }
     return poolLibraryName;
   }
-
 }
 

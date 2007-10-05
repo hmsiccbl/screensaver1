@@ -9,6 +9,13 @@
 
 package edu.harvard.med.screensaver.db.accesspolicy;
 
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
+import edu.harvard.med.screensaver.model.cherrypicks.CompoundCherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
+import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation;
+import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.derivatives.Derivative;
 import edu.harvard.med.screensaver.model.derivatives.DerivativeScreenResult;
 import edu.harvard.med.screensaver.model.libraries.Compound;
@@ -29,20 +36,13 @@ import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
-import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
-import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
-import edu.harvard.med.screensaver.model.screens.CompoundCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
-import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
-import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
-import edu.harvard.med.screensaver.model.screens.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;

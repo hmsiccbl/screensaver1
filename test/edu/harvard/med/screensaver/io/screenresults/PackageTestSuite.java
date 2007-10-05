@@ -16,19 +16,20 @@ import junit.framework.TestSuite;
 
 public class PackageTestSuite extends TestSuite
 {
-
-  public static void main(String[] args) {
+  public static void main(String[] args)
+  {
     junit.textui.TestRunner.run(suite());
   }
 
-  public static Test suite() {
+  public static Test suite()
+  {
     return new PackageTestSuite();
   }
 
-  public PackageTestSuite() {
+  public PackageTestSuite()
+  {
     addTestSuite(ScreenResultParserTest.class);
     addTestSuite(ScreenResultExporterTest.class);
     addTestSuite(ScreenResultPersistenceTest.class);
   }
-  
 }

@@ -159,9 +159,7 @@ public class ScreenResultImporter
   {
     int screenNumber = Integer.parseInt(app.getCommandLineOptionValue(SCREEN_OPTION[SHORT_OPTION]));
     GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
-    Screen screen = dao.findEntityByProperty(Screen.class,
-                                              "hbnScreenNumber",
-                                              screenNumber);
+    Screen screen = dao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
     if (screen == null) {
       log.error("screen " + screenNumber + " does not exist");
       System.exit(1);

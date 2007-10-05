@@ -71,7 +71,7 @@ public class ScreenFinder extends AbstractBackingBean
   {
     if (_screenNumber != null) {
       Screen screen = _dao.findEntityByProperty(Screen.class,
-                                                "hbnScreenNumber",
+                                                "screenNumber",
                                                 _screenNumber);
       if (screen != null) {
         return _screenViewer.viewScreen(screen);

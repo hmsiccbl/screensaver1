@@ -2,50 +2,65 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.model.users;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.Activity;
-import edu.harvard.med.screensaver.model.CollectionElementName;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.DerivedEntityProperty;
-import edu.harvard.med.screensaver.model.ToManyRelationship;
-import edu.harvard.med.screensaver.util.CryptoUtils;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Transient;
+import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
+
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.util.CryptoUtils;
 
 
 /**
  * A Hibernate entity bean representing a Screensaver user. A Screensaver user
- * may be an {@link AdministratorUser} and/or a {@link ScreeningRoomUser}. 
+ * may be an {@link AdministratorUser} and/or a {@link ScreeningRoomUser}.
  * Also acts as JAAS {@link java.security.Principal}.
  * <p>
  * This parent "user" class supports multiple forms of login IDs. The
  * <code>loginID</code> property is a Screensaver-managed login ID, whereas
  * the <code>eCommonsID</code> and <code>harvardID</code> properties are
  * managed at higher organizational levels, and the passwords for these latter
- * login IDs are <i<not</i> stored by Screensaver (authentication via these
+ * login IDs are <i>not</i> stored by Screensaver (authentication via these
  * IDs will require use of a network authentication service).
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- * @hibernate.class lazy="false"
  */
+@Entity
+@Inheritance(strategy=InheritanceType.JOINED)
+@org.hibernate.annotations.Proxy
 abstract public class ScreensaverUser extends AbstractEntity
 {
-  
+
   // static fields
 
   private static final Logger log = Logger.getLogger(ScreensaverUser.class);
@@ -56,6 +71,8 @@ abstract public class ScreensaverUser extends AbstractEntity
 
   private Integer _screensaverUserId;
   private Integer _version;
+  private transient HashMap<String,Boolean> _rolesMap;
+  private Set<Activity> _activitiesPerformed = new HashSet<Activity>();
   private Date _dateCreated;
   private String _firstName;
   private String _lastName;
@@ -63,21 +80,17 @@ abstract public class ScreensaverUser extends AbstractEntity
   private String _phone;
   private String _mailingAddress;
   private String _comments;
-  private Set<ScreensaverUserRole> _roles = new HashSet<ScreensaverUserRole>();
+  private Set<ScreensaverUserRole> _roles = new HashSet<ScreensaverUserRole>(); //ValidatingScreensaverUserRoleSet();
   private String _loginId;
   private String _digestedPassword;
   private String _eCommonsId;
   private String _harvardId;
-  private Set<Activity> _activitiesPerformed = new HashSet<Activity>();
-  
-  private transient HashMap<String,Boolean> _rolesMap;
 
 
   // public constructors
 
   /**
-   * Constructs an initialized <code>ScreensaverUser</code> object.
-   *
+   * Construct an initialized <code>ScreensaverUser</code>.
    * @param dateCreated the date created
    * @param firstName the first name
    * @param lastName the last name
@@ -98,8 +111,7 @@ abstract public class ScreensaverUser extends AbstractEntity
   }
 
   /**
-   * Constructs an initialized <code>ScreensaverUser</code> object.
-   *
+   * Construct an initialized <code>ScreensaverUser</code>.
    * @param dateCreated the date created
    * @param firstName the first name
    * @param lastName the last name
@@ -127,8 +139,7 @@ abstract public class ScreensaverUser extends AbstractEntity
   }
 
   /**
-   * Constructs an initialized <code>ScreensaverUser</code> object.
-   *
+   * Construct an initialized <code>ScreensaverUser</code>.
    * @param dateCreated the date created
    * @param firstName the first name
    * @param lastName the last name
@@ -155,9 +166,10 @@ abstract public class ScreensaverUser extends AbstractEntity
   }
 
 
-  // public methods
+  // public instance methods
 
   @Override
+  @Transient
   public Integer getEntityId()
   {
     return getScreensaverUserId();
@@ -165,240 +177,96 @@ abstract public class ScreensaverUser extends AbstractEntity
 
   /**
    * Get the id for the Screensaver user.
-   *
    * @return the id for the Screensaver user
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="screensaver_user_id_seq"
    */
+  @Id
+  @org.hibernate.annotations.GenericGenerator(
+    name="screensaver_user_id_seq",
+    strategy="sequence",
+    parameters = { @Parameter(name="sequence", value="screensaver_user_id_seq") }
+  )
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="screensaver_user_id_seq")
   public Integer getScreensaverUserId()
   {
     return _screensaverUserId;
   }
 
   /**
-   * Get the date created.
-   *
-   * @return the date created
-   * @hibernate.property
-   *   not-null="true"
-   */
-  public Date getDateCreated()
-  {
-    return _dateCreated;
-  }
-
-  /**
-   * Set the date created.
-   *
-   * @param dateCreated the new date created
-   */
-  public void setDateCreated(Date dateCreated)
-  {
-    _dateCreated = truncateDate(dateCreated);
-  }
-
-  /**
-   * Get the first name.
-   *
-   * @return the first name
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
-   */
-  public String getFirstName()
-  {
-    return _firstName;
-  }
-
-  /**
-   * Set the first name.
-   *
-   * @param firstName the new first name
-   */
-  public void setFirstName(String firstName)
-  {
-    _firstName = firstName;
-  }
-
-  /**
-   * Get the last name.
-   *
-   * @return the last name
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
-   */
-  public String getLastName()
-  {
-    return _lastName;
-  }
-
-  /**
-   * Set the last name.
-   *
-   * @param lastName the new last name
-   */
-  public void setLastName(String lastName)
-  {
-    _lastName = lastName;
-  }
-  
-  /**
-   * Get the full name ("last, first').
-   * @return the full name
-   */
-  @DerivedEntityProperty
-  public String getFullNameLastFirst()
-  {
-    return getFullName(true);
-  }
-  
-  /**
-   * Get the full name ("first, last").
-   * @return the full name
-   */
-  @DerivedEntityProperty
-  public String getFullNameFirstLast()
-  {
-    return getFullName(false);
-  }
-
-  /**
-   * Get the full name.
-   * @param lastFirst true if desired format is "Last, First", false if desiried format is "First Last"
-   * @return the full name
-   */
-  @DerivedEntityProperty
-  public String getFullName(boolean lastFirst)
-  {
-    if (lastFirst) {
-      return _lastName + ", " + _firstName;
-    }
-    else {
-      return _firstName + " " + _lastName;
-    }
-  }
-
-  /**
-   * Get the email.
-   *
-   * @return the email
-   * @hibernate.property
-   *   type="text"
-   */
-  public String getEmail()
-  {
-    return _email;
-  }
-
-  /**
-   * Set the email.
-   *
-   * @param email the new email
-   */
-  public void setEmail(String email)
-  {
-    _email = email;
-  }
-  
-  /**
-   * Get the phone.
-   *
-   * @return the phone
-   * @hibernate.property
-   *   type="text"
-   */
-  public String getPhone()
-  {
-    return _phone;
-  }
-
-  /**
-   * Set the phone.
-   *
-   * @param phone the new phone
-   */
-  public void setPhone(String phone)
-  {
-    _phone = phone;
-  }
-
-  /**
-   * Get the mailing address.
-   *
-   * @return the mailing address
-   * @hibernate.property
-   *   type="text"
-   */
-  public String getMailingAddress()
-  {
-    return _mailingAddress;
-  }
-
-  /**
-   * Set the mailing address.
-   *
-   * @param mailingAddress the new mailing address
-   */
-  public void setMailingAddress(String mailingAddress)
-  {
-    _mailingAddress = mailingAddress;
-  }
-
-  /**
-   * Get the comments.
-   *
-   * @return the comments
-   * @hibernate.property
-   *   type="text"
-   */
-  public String getComments()
-  {
-    return _comments;
-  }
-
-  /**
-   * Set the comments.
-   *
-   * @param comments the new comments
-   */
-  public void setComments(String comments)
-  {
-    _comments = comments;
-  }
-  
-  /**
    * Get the set of user roles that this user belongs to.
-   * 
-   * @return the set of user roles that this user belongs to
    *
-   * @hibernate.set
-   *   order-by="screensaver_user_role"
-   *   table="screensaver_user_role_type"
-   *   cascade="delete"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="screensaver_user_id"
-   *   foreign-key="fk_screensaver_user_role_type_to_screensaver_user"
-   * @hibernate.collection-element
-   *   type="edu.harvard.med.screensaver.model.users.ScreensaverUserRole$UserType"
-   *   column="screensaver_user_role"
-   *   not-null="true"
+   * @return the set of user roles that this user belongs to
    */
+  @Column(name = "screensaverUserRole", nullable = false)
+  @JoinTable(name = "screensaverUserRoleType", joinColumns = @JoinColumn(name = "screensaverUserId"))
+  @org.hibernate.annotations.CollectionOfElements
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.users.ScreensaverUserRole$UserType")
+  @org.hibernate.annotations.ForeignKey(name = "fk_screensaver_user_role_type_to_screensaver_user")
+  @OrderBy("screensaverUserRole")
   public Set<ScreensaverUserRole> getScreensaverUserRoles()
   {
-//    // we cannot prevent client code from adding an illegal role to this
-//    // collection after returning, but this validation will 1) prevent
-//    // subsequent access to the illegal roles via this method and 2) prevent
-//    // illegal administrative roles from being persisted, since Hibernate will
-//    // call this method before flushing
-//    validateRoles();
+    // TODO: reinstate this logic, but not this way, since it causes Hibernate
+    // to believe the entity has been modified, and is thus updated at flush
+    // time; this is turn causes erroneous concurrent mod exceptions to occur
+    // throughout the application.
+    // if (! (_roles instanceof ValidatingScreensaverUserRoleSet)) {
+    // _roles = new ValidatingScreensaverUserRoleSet(_roles);
+    // }
     return _roles;
   }
-  
+
   /**
+   * Add a role to this user (i.e., place the user into a new role).
+   * @param role the role to add
+   * @return true iff the user was not already added to this role
+   */
+  public boolean addScreensaverUserRole(ScreensaverUserRole role)
+  {
+    boolean result = _roles.add(role);
+    validateRoles();
+    return result;
+  }
+
+  /**
+   * Remove this user from a role.
+   * @param role the role to remove this user from
+   * @return true iff the user previously belonged to the role
+   */
+  public boolean removeScreensaverUserRole(ScreensaverUserRole role)
+  {
+    return _roles.remove(role);
+  }
+
+  /**
+   * Remove this user from all roles.
+   * @param well the role to remove this user from
+   */
+  public void removeScreensaverUserRoles()
+  {
+    _roles.clear();
+  }
+
+  /**
+   * Returns true whenever the user is in the specified role
+   * @param role the role to check whether the user is in
+   * @return true whenever the user is in the specified role
+   */
+  @Transient
+  public boolean isUserInRole(ScreensaverUserRole role)
+  {
+    if (role == null || ! validateRole(role)) {
+      return false;
+    }
+    return _roles.contains(role);
+  }
+
+  /**
+   * Get a mapping from the names of the roles to boolean values indicating whether or not the
+   * user is in the role. For use in with JSF EL expressions.
+   * @return a mapping from the names of the roles to boolean values indicating whether or not the
+   * user is in the role.
    * @motivation for JSF EL expressions
    */
+  @Transient
   public Map<String,Boolean> getIsUserInRoleOfNameMap()
   {
     if (_rolesMap == null) {
@@ -411,54 +279,203 @@ abstract public class ScreensaverUser extends AbstractEntity
   }
 
   /**
-   * Add a role to this user (i.e., place the user into a new role).
-   *
-   * @param role the role to add
-   * @return true iff the user was not already added to this role
+   * Get the set of activities performed by this user.
+   * @return the set of activities performed by this user
+   * @return the activities performed
    */
-  public boolean addScreensaverUserRole(ScreensaverUserRole role)
+  @OneToMany(
+    mappedBy="performedBy",
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+    fetch=FetchType.LAZY
+  )
+  @OrderBy("dateOfActivity")
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
+  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="activityPerformed")
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
+  public Set<Activity> getActivitiesPerformed()
   {
-    boolean result = _roles.add(role);
-    validateRoles(); // we call validateRoles() instead of just validateRole(role), to throw exception 
-    return result;
+    return _activitiesPerformed;
   }
-  
+
   /**
-   * Remove this user from a role.
-   * @param role the role to remove this user from
-   * @return     true iff the user previously belonged to the role
+   * Get the date created.
+   * @return the date created
    */
-  public boolean removeScreensaverUserRole(ScreensaverUserRole role)
+  @Column(nullable=false)
+  public Date getDateCreated()
   {
-    return _roles.remove(role);
+    return _dateCreated;
   }
-  
+
   /**
-   * Remove this user from all roles.
-   * @param well the role to remove this user from
+   * Set the date created.
+   * @param dateCreated the new date created
    */
-  public void removeScreensaverUserRoles()
+  public void setDateCreated(Date dateCreated)
   {
-    for (ScreensaverUserRole role : new HashSet<ScreensaverUserRole>(getScreensaverUserRoles())) {
-      removeScreensaverUserRole(role);
+    _dateCreated = truncateDate(dateCreated);
+  }
+
+  /**
+   * Get the first name.
+   * @return the first name
+   */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(type="text")
+  public String getFirstName()
+  {
+    return _firstName;
+  }
+
+  /**
+   * Set the first name.
+   * @param firstName the new first name
+   */
+  public void setFirstName(String firstName)
+  {
+    _firstName = firstName;
+  }
+
+  /**
+   * Get the last name.
+   * @return the last name
+   */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(type="text")
+  public String getLastName()
+  {
+    return _lastName;
+  }
+
+  /**
+   * Set the last name.
+   * @param lastName the new last name
+   */
+  public void setLastName(String lastName)
+  {
+    _lastName = lastName;
+  }
+
+  /**
+   * Get the full name ("last, first').
+   * @return the full name
+   */
+  @Transient
+  public String getFullNameLastFirst()
+  {
+    return getFullName(true);
+  }
+
+  /**
+   * Get the full name ("first, last").
+   * @return the full name
+   */
+  @Transient
+  public String getFullNameFirstLast()
+  {
+    return getFullName(false);
+  }
+
+  /**
+   * Get the full name.
+   * @param lastFirst true if desired format is "Last, First", false if desiried format is "First Last"
+   * @return the full name
+   */
+  @Transient
+  public String getFullName(boolean lastFirst)
+  {
+    if (lastFirst) {
+      return _lastName + ", " + _firstName;
+    }
+    else {
+      return _firstName + " " + _lastName;
     }
   }
-  
-  @DerivedEntityProperty
-  public boolean isUserInRole(ScreensaverUserRole role) 
+
+  /**
+   * Get the email.
+   * @return the email
+   */
+  @org.hibernate.annotations.Type(type="text")
+  public String getEmail()
   {
-    if (role == null || !validateRole(role)) {
-      return false;
-    }
-    return _roles.contains(role);
+    return _email;
+  }
+
+  /**
+   * Set the email.
+   * @param email the new email
+   */
+  public void setEmail(String email)
+  {
+    _email = email;
+  }
+
+  /**
+   * Get the phone.
+   * @return the phone
+   */
+  @org.hibernate.annotations.Type(type="text")
+  public String getPhone()
+  {
+    return _phone;
+  }
+
+  /**
+   * Set the phone.
+   * @param phone the new phone
+   */
+  public void setPhone(String phone)
+  {
+    _phone = phone;
+  }
+
+  /**
+   * Get the mailing address.
+   * @return the mailing address
+   */
+  @org.hibernate.annotations.Type(type="text")
+  public String getMailingAddress()
+  {
+    return _mailingAddress;
+  }
+
+  /**
+   * Set the mailing address.
+   * @param mailingAddress the new mailing address
+   */
+  public void setMailingAddress(String mailingAddress)
+  {
+    _mailingAddress = mailingAddress;
+  }
+
+  /**
+   * Get the comments.
+   * @return the comments
+   */
+  @org.hibernate.annotations.Type(type="text")
+  public String getComments()
+  {
+    return _comments;
+  }
+
+  /**
+   * Set the comments.
+   * @param comments the new comments
+   */
+  public void setComments(String comments)
+  {
+    _comments = comments;
   }
 
   /**
    * Get the user's Screensaver-managed login ID.
-   * 
    * @return the Screensaver login ID
-   * @hibernate.property type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getLoginId()
   {
     return _loginId;
@@ -466,7 +483,6 @@ abstract public class ScreensaverUser extends AbstractEntity
 
   /**
    * Set the user's Screensaver-managed login ID.
-   *
    * @param loginID the new Screensaver login ID
    */
   public void setLoginId(String loginId)
@@ -477,9 +493,8 @@ abstract public class ScreensaverUser extends AbstractEntity
   /**
    * Get the digested (hashed) password.
    * @return the digested (hashed) password
-   * 
-   * @hibernate.property type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getDigestedPassword()
   {
     return _digestedPassword;
@@ -487,18 +502,17 @@ abstract public class ScreensaverUser extends AbstractEntity
 
   /**
    * Set the digested (hashed) version of the password associated with the user's login ID.
-   * @param screensaverDigestedPassword
+   * @param digestedPassword
    */
-  public void setDigestedPassword(String screensaverDigestedPassword)
+  public void setDigestedPassword(String digestedPassword)
   {
-    _digestedPassword = screensaverDigestedPassword;
+    _digestedPassword = digestedPassword;
   }
 
   /**
    * Set the password associated with the user's login ID, specified as a
    * plaintext password, but which will be digested (hashed) before being
    * stored, for security purposes.
-   * 
    * @param screensaverPassword the plaintext password
    */
   public void updateScreensaverPassword(String screensaverPassword)
@@ -514,11 +528,9 @@ abstract public class ScreensaverUser extends AbstractEntity
 
   /**
    * Get the eCommons ID.
-   *
    * @return the eCommons ID
-   * @hibernate.property
-   *   type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getECommonsId()
   {
     return _eCommonsId;
@@ -526,7 +538,6 @@ abstract public class ScreensaverUser extends AbstractEntity
 
   /**
    * Set the eCommons ID.
-   *
    * @param eCommonsId the new eCommons ID
    */
   public void setECommonsId(String eCommonsId)
@@ -539,11 +550,9 @@ abstract public class ScreensaverUser extends AbstractEntity
 
   /**
    * Get the harvard id.
-   *
    * @return the harvard id
-   * @hibernate.property
-   *   type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getHarvardId()
   {
     return _harvardId;
@@ -551,7 +560,6 @@ abstract public class ScreensaverUser extends AbstractEntity
 
   /**
    * Set the harvard id.
-   *
    * @param harvardId the new harvard id
    */
   public void setHarvardId(String harvardId)
@@ -559,138 +567,123 @@ abstract public class ScreensaverUser extends AbstractEntity
     _harvardId = harvardId;
   }
 
-  /**
-   * Get an unmodifiable copy of the set of activities performed by this user.
-   *
-   * @return the activities performed
-   */
-  @ToManyRelationship(inverseProperty="performedBy")
-  @CollectionElementName("activityPerformed")
-  public Set<Activity> getActivitiesPerformed()
-  {
-    return Collections.unmodifiableSet(_activitiesPerformed);
-  }
+
+  // protected constructor and instance method
 
   /**
-   * Add an activity that was performed by this user.
-   *
-   * @param activityPerformed the new activity that was performed by this user
-   * @return true iff the user did not already perform the activity
-   */
-  public boolean addActivityPerformed(Activity activityPerformed)
-  {
-    if (getHbnActivitiesPerformed().add(activityPerformed)) {
-      activityPerformed.setPerformedBy(this);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Get the activities performed.
-   *
-   * @return the activities performed
-   * @hibernate.set
-   *   cascade="none"
-   *   inverse="true"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="performed_by_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.Activity"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   * this method is public only because the bi-directional relationship
-   * is cross-package.
-   */
-  public Set<Activity> getHbnActivitiesPerformed()
-  {
-    return _activitiesPerformed;
-  }
-
-  // package methods
-
-  @Override
-  protected Object getBusinessKey()
-  {
-    // TODO: make this into a real biz key inner class
-    return getFirstName() + " " + getLastName() + " " + getDateCreated();
-  }
-
-  
-  // protected methods
-
-  /**
-   * Construct an uninitialized <code>ScreeningRoomUser</code> object.
-   *
-   * @motivation for hibernate
+   * Construct an uninitialized <code>ScreeningRoomUser</code>.
+   * @motivation for hibernate and proxy/concrete subclass constructors
    */
   protected ScreensaverUser() {}
 
-  abstract protected boolean validateRole(ScreensaverUserRole role); 
+  /**
+   * Validate the specified role for this user. Throw a {@link DataModelViolationException}
+   * when it is illegal for this type of user to have this role.
+   * @throws DataModelViolationException when it is illegal for this type of user to have this role
+   */
+  abstract protected boolean validateRole(ScreensaverUserRole role);
 
-  // private methods
+
+  // private instance methods
 
   /**
    * Set the id for the Screensaver user.
-   *
    * @param screeningRoomUserId the new id for the Screensaver user
    * @motivation for hibernate
    */
-  private void setScreensaverUserId(Integer screensaverUserId) 
+  private void setScreensaverUserId(Integer screensaverUserId)
   {
     _screensaverUserId = screensaverUserId;
   }
-  
+
   /**
    * Get the version for the Screensaver user.
-   *
    * @return the version for the Screensaver user
    * @motivation for hibernate
-   * @hibernate.version
    */
-  private Integer getVersion() {
+  @Version
+  @Column(nullable=false)
+  private Integer getVersion()
+  {
     return _version;
   }
 
   /**
    * Set the version for the Screensaver user.
-   *
    * @param version the new version for the Screensaver user
    * @motivation for hibernate
    */
-  private void setVersion(Integer version) {
+  private void setVersion(Integer version)
+  {
     _version = version;
   }
 
   /**
    * Set the screensaver user roles.
-   *
    * @param roles the new screensaver user roles
    * @motivation for hibernate
    */
   private void setScreensaverUserRoles(Set<ScreensaverUserRole> roles)
   {
     _roles = roles;
-  }  
+  }
 
   /**
    * Set the activities performed by this user.
-   *
    * @param activitiesPerformed the screening room activities performed by this user
    * @motivation for hibernate
    */
-  private void setHbnActivitiesPerformed(Set<Activity> activitiesPerformed)
+  private void setActivitiesPerformed(Set<Activity> activitiesPerformed)
   {
     _activitiesPerformed = activitiesPerformed;
   }
-  
-  private void validateRoles() 
+
+  /**
+   * Validate the set of roles that this user has. Throw a {@link DataModelViolationException}
+   * when one or more of the roles is not valid.
+   * @throws DataModelViolationException when one or more of the roles is not valid
+   */
+  private void validateRoles()
   {
     for (ScreensaverUserRole role : _roles) {
-      if (!validateRole(role)) {
-        throw new DataModelViolationException("user " + this + 
-                                              " has been granted illegal role: " + role);      
+      if (! validateRole(role)) {
+        throw new DataModelViolationException(
+          "user " + this + " has been granted illegal role: " + role);
       }
-    }  
+    }
   }
+
+  /**
+   * A set of screensaver user roles that validates roles every time a role is added. Makes
+   * sure administrative roles are only assigned to {@link AdministratorUser AdministratorUsers},
+   * and screener roles are only assigned to {@link ScreensaverUser ScreensaverUsers}.
+   * <p>
+   * Implementation notes:
+   * <p>
+   * Andrew (@) makes a good point that this might gum up the works when
+   * persisting - it may possibly cause hibernate to consider the role set dirty when it
+   * actually is clean, forcing database save ops. Which could be pretty painful, since various
+   * operations load all the users into the session. We should watch out for this and consider
+   * reworking.
+   * <p>
+   * I was considering using AOP to implement a whole validation layer. This would give us the
+   * ability to replace this <code>ValidatingScreensaverUserRoleSet</code> approach, as well as
+   * removing various hacks and special in the test suite for working around data model
+   * integrity (in situations where something else entirely is being tested).
+   */
+  private class ValidatingScreensaverUserRoleSet extends HashSet<ScreensaverUserRole>
+  {
+    private static final long serialVersionUID = 1L;
+    public ValidatingScreensaverUserRoleSet() {}
+    public ValidatingScreensaverUserRoleSet(Set<ScreensaverUserRole> roles)
+    {
+      addAll(roles);
+    }
+    public boolean add(ScreensaverUserRole role)
+    {
+      boolean isAdded = super.add(role);
+      validateRoles();
+      return isAdded;
+    }
+  };
 }

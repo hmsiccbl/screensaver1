@@ -498,18 +498,17 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     Sheet dataHeadersSheet = initializeDataHeadersSheet(workbook);
     ParsedScreenInfo parsedScreenInfo = parseScreenInfo(workbook, screen);
     
-    dataHeadersParseResult.setScreenResult(new ScreenResult(screen, parsedScreenInfo.getDateCreated()));
+    dataHeadersParseResult.setScreenResult(screen.createScreenResult(parsedScreenInfo.getDateCreated()));
     int dataHeaderCount = findDataHeaderColumnCount(dataHeadersSheet);
     for (int iDataHeader = 0; iDataHeader < dataHeaderCount; ++iDataHeader) {
       recordDataHeaderColumn(iDataHeader);
-      ResultValueType rvt = 
-        new ResultValueType(dataHeadersParseResult.getScreenResult(),
-                            dataHeadersCell(DataHeaderRow.NAME, iDataHeader, true).getString(),
-                            dataHeadersCell(DataHeaderRow.REPLICATE, iDataHeader).getInteger(),
-                            _rawOrDerivedParser.parse(dataHeadersCell(DataHeaderRow.RAW_OR_DERIVED, iDataHeader)),
-                            _booleanParser.parse(dataHeadersCell(DataHeaderRow.IS_ASSAY_ACTIVITY_INDICATOR, iDataHeader)),
-                            _primaryOrFollowUpParser.parse(dataHeadersCell(DataHeaderRow.PRIMARY_OR_FOLLOWUP, iDataHeader)),
-                            dataHeadersCell(DataHeaderRow.ASSAY_PHENOTYPE, iDataHeader).getString());
+      ResultValueType rvt = dataHeadersParseResult.getScreenResult().createResultValueType(
+        dataHeadersCell(DataHeaderRow.NAME, iDataHeader, true).getString(),
+        dataHeadersCell(DataHeaderRow.REPLICATE, iDataHeader).getInteger(),
+        _rawOrDerivedParser.parse(dataHeadersCell(DataHeaderRow.RAW_OR_DERIVED, iDataHeader)),
+        _booleanParser.parse(dataHeadersCell(DataHeaderRow.IS_ASSAY_ACTIVITY_INDICATOR, iDataHeader)),
+        _primaryOrFollowUpParser.parse(dataHeadersCell(DataHeaderRow.PRIMARY_OR_FOLLOWUP, iDataHeader)),
+        dataHeadersCell(DataHeaderRow.ASSAY_PHENOTYPE, iDataHeader).getString());
       rvt.setDescription(dataHeadersCell(DataHeaderRow.DESCRIPTION, iDataHeader).getString());
       rvt.setTimePoint(dataHeadersCell(DataHeaderRow.TIME_POINT, iDataHeader).getString());
       if (rvt.isDerived()) {

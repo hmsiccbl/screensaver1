@@ -15,25 +15,15 @@ import org.apache.log4j.Logger;
 
 public class ResultValueTest extends TestCase
 {
-  // static members
-
   private static Logger log = Logger.getLogger(ResultValueTest.class);
-
-
-  // instance data members
-
-  // public constructors and methods
   
-  public void testResultValueNumercPrecision()
+  public void testResultValueNumericPrecision()
   {
-    ResultValue rv = new ResultValue(5.0123, 3);
+    ResultValue rv = new ResultValue(AssayWellType.EXPERIMENTAL, 5.0123, 3, true, false);
     assertEquals("default decimal precision formatted string", "5.012", rv.getValue());
     assertEquals("default decimal precision formatted string", "5.0123", rv.formatNumericValue(4));
     assertEquals("default decimal precision formatted string", "5", rv.formatNumericValue(0));
     assertEquals("default decimal precision formatted string", "5.0123000000", rv.formatNumericValue(10));
   }
-
-  // private methods
-
 }
 

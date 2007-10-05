@@ -15,7 +15,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
 import org.apache.log4j.Logger;
 
-public class ChecklistItemTypeTest extends AbstractEntityInstanceTest
+public class ChecklistItemTypeTest extends AbstractEntityInstanceTest<ChecklistItemType>
 {
   // static members
 

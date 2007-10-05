@@ -35,12 +35,12 @@ public class UniqueDataHeaderNamesTest extends AbstractSpringTest
     expectedUniqueNames.add("Assay Indicator");
 
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
-    ScreenResult screenResult = new ScreenResult(screen, new Date());
-    new ResultValueType(screenResult, "Luminescence");
-    new ResultValueType(screenResult, "Luminescence");
-    new ResultValueType(screenResult, "FI");
-    new ResultValueType(screenResult, "FI");
-    new ResultValueType(screenResult, "Assay Indicator");
+    ScreenResult screenResult = screen.createScreenResult(new Date());
+    screenResult.createResultValueType("Luminescence");
+    screenResult.createResultValueType("Luminescence");
+    screenResult.createResultValueType("FI");
+    screenResult.createResultValueType("FI");
+    screenResult.createResultValueType("Assay Indicator");
     new Library("library 1", "lib1", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 1);
 
     UniqueDataHeaderNames uniqueDataHeaderNames = new UniqueDataHeaderNames(screenResult);

@@ -169,8 +169,8 @@ public class ReagentFinder extends AbstractBackingBean
             well = _dao.findEntityById(Well.class,
                                        reagentWells.get(0).getWellKey().toString(),
                                        true,
-                                       "hbnSilencingReagents.gene",
-                                       "hbnCompounds");
+                                       "silencingReagents.gene",
+                                       "compounds");
             if (well != null) {
               foundWells.add(well);
             }

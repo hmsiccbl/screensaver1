@@ -11,20 +11,30 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.SecondaryTable;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
+
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.DerivedEntityProperty;
-import edu.harvard.med.screensaver.model.EntityIdProperty;
+import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 
 
 /**
@@ -32,9 +42,13 @@ import edu.harvard.med.screensaver.model.EntityIdProperty;
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- * @hibernate.class lazy="false"
  */
-public class Well extends AbstractEntity implements Comparable
+@Entity
+@Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "plateNumber", "wellName" }) })
+@SecondaryTable(name="wellMolfile")
+@org.hibernate.annotations.Proxy
+@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Library.class)
+public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
 {
 
   // static fields
@@ -74,42 +88,14 @@ public class Well extends AbstractEntity implements Comparable
   private String _vendorIdentifier;
   private WellType _wellType = WellType.EXPERIMENTAL;
   private String _smiles;
-  // TODO: this is always either a 0 or 1-element set, so consider changing to a to-one relationship with a proxyable entity; the key is to maintain lazy loading of the molfile data
-  private Set<String> _molfile = new HashSet<String>();
+  private String _molfile;
   private String _genbankAccessionNumber;
 
   private transient WellKey _wellKey;
   private transient ReagentVendorIdentifier _reagentVendorIdentifier;
 
 
-  // public constructors and instance methods
-
-  /**
-   * Constructs an initialized <code>Well</code> object.
-   *
-   * @param parentLibrary
-   * @param wellKey
-   * @param wellType
-   */
-  public Well(Library parentLibrary, WellKey wellKey, WellType wellType) {
-    _wellKey = wellKey;
-    _wellType = wellType;
-    // this call must occur after assignments of wellName and plateNumber (to
-    // ensure hashCode() works)
-    setLibrary(parentLibrary);
-  }
-
-  /**
-   * Constructs an initialized <code>Well</code> object.
-   *
-   * @param parentLibrary
-   * @param plateNumber
-   * @param wellName
-   */
-  public Well(Library parentLibrary, Integer plateNumber, String wellName)
-  {
-    this(parentLibrary, new WellKey(plateNumber, wellName), WellType.EXPERIMENTAL);
-  }
+  // public instance methods
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -118,134 +104,108 @@ public class Well extends AbstractEntity implements Comparable
   }
 
   @Override
+  @Transient
   public String getEntityId()
   {
-    return getBusinessKey().toString();
+    return getWellKey().toString();
+  }
+
+  public int compareTo(Well o)
+  {
+    assert o instanceof Well : "input to compareTo() must be a Well";
+    return getWellKey().compareTo(((Well) o).getWellKey());
   }
 
   /**
    * Get the well id for the well.
-   *
    * @return the well id for the well
-   * @hibernate.id
-   *   generator-class="assigned"
    */
+  @Id
+  @org.hibernate.annotations.Type(type="text")
   public String getWellId()
   {
-    return getBusinessKey().toString();
+    return getWellKey().toString();
   }
 
   /**
    * Get the library the well is in.
-   *
    * @return the library the well is in.
    */
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinColumn(name="libraryId", nullable=false, updatable=false)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.ForeignKey(name="fk_well_to_library")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   public Library getLibrary()
   {
-    return getHbnLibrary();
+    return _library;
   }
 
   /**
-   * Set the library the well is in. Throw a NullPointerException if the library
-   * is null.
-   *
-   * @param library the new library for the well
-   * @throws NullPointerException when the library is null
+   * Get the set of compounds.
+   * @return the set of compounds
    */
-  public void setLibrary(Library library)
-  {
-    assert _wellKey != null : "properties forming business key have not been defined";
-    if (_library != null) {
-      _library.getHbnWells().remove(this);
-    }
-    setHbnLibrary(library);
-    library.getHbnWells().add(this);
-  }
-
-  /**
-   * Get an unmodifiable copy of the set of compounds.
-   *
-   * @return an unmodifiable copy of the set of compounds
-   */
+  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinTable(
+    name="wellCompoundLink",
+    joinColumns=@JoinColumn(name="wellId"),
+    inverseJoinColumns=@JoinColumn(name="compoundId")
+  )
+  @org.hibernate.annotations.ForeignKey(name="fk_well_compound_link_to_well")
+  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
+  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
   public Set<Compound> getCompounds()
   {
-    return Collections.unmodifiableSet(getHbnCompounds());
+    return _compounds;
   }
 
   /**
    * Get the set of compounds, ordered by length of SMILES string, from longest to shortest.
    * @return the set of compounds, ordered by length of SMILES string, from longest to shortest
    */
-  @DerivedEntityProperty
+  @Transient
   public SortedSet<Compound> getOrderedCompounds()
   {
-    SortedSet<Compound> orderedCompounds = new TreeSet<Compound>(new Comparator<Compound>() {
-      public int compare(Compound compound1, Compound compound2)
-      {
-        int lengthCompare =
-          compound2.getSmiles().length() - compound1.getSmiles().length();
-        if (lengthCompare == 0) {
-          return compound1.getSmiles().compareTo(compound2.getSmiles());
-        }
-        return lengthCompare;
-      }
-    });
-    orderedCompounds.addAll(getHbnCompounds());
+    SortedSet<Compound> orderedCompounds = new TreeSet<Compound>();
+    orderedCompounds.addAll(_compounds);
     return orderedCompounds;
   }
 
   /**
    * Get the primary compound: the compound that is most likely the one being tested for
-   * bioactivity. Normally, we expect a single potentially bioactive
-   * compound, plus salts and other solvents, in a compound well. (But be careful, because
-   * sometimes the experimental compound is also a salt!) As an approximation, take the
-   * compound with the longest smiles.
+   * bioactivity. {@link Compound Compounds} are comparable on just such a quality.
    * @return the primary compound
    */
-  @DerivedEntityProperty
+  @Transient
   public Compound getPrimaryCompound()
   {
-    Compound compoundWithLongestSmiles = null;
-    for (Compound compound : getHbnCompounds()) {
-      if (
-        compoundWithLongestSmiles == null ||
-        compound.getSmiles().length() > compoundWithLongestSmiles.getSmiles().length()) {
-        compoundWithLongestSmiles = compound;
-      }
+    if (_compounds.isEmpty()) {
+      return null;
     }
-    return compoundWithLongestSmiles;
+    return getOrderedCompounds().first();
   }
 
   /**
    * Add the compound.
-   *
    * @param compound the compound to add
    * @return true iff the compound was not already in the well
    */
   public boolean addCompound(Compound compound)
   {
-    assert !(getHbnCompounds().contains(compound) ^ compound.getHbnWells()
-      .contains(this)) : "asymmetric compound/well association encountered";
-    if (getHbnCompounds().add(compound)) {
-      return compound.getHbnWells().add(this);
-    }
-    return false;
+    compound.getWells().add(this);
+    return _compounds.add(compound);
   }
 
   /**
    * Remove the compound.
-   *
    * @param compound the compound to remove
    * @return true iff the compound was previously in the well
    */
   public boolean removeCompound(Compound compound)
   {
-    assert !(getHbnCompounds().contains(compound) ^ compound.getHbnWells()
-      .contains(this)) : "asymmetric compound/well association encountered";
-    if (getHbnCompounds().remove(compound)) {
-      return compound.getHbnWells().remove(this);
-    }
-    return false;
+    compound.getWells().remove(this);
+    return _compounds.remove(compound);
   }
 
   /**
@@ -253,27 +213,35 @@ public class Well extends AbstractEntity implements Comparable
    */
   public void removeCompounds()
   {
-    HashSet<Compound> compoundsCopy = new HashSet<Compound>(getHbnCompounds());
-    for (Compound compound : compoundsCopy) {
-      removeCompound(compound);
+    for (Compound compound : _compounds) {
+      compound.getWells().remove(this);
     }
+    _compounds.clear();
   }
 
   /**
-   * Get an unmodifiable copy of the set of silencing reagents.
-   *
-   * @return an unmodifiable copy of the set of silencing reagents
+   * Get the set of silencing reagents.
+   * @return the set of silencing reagents
    */
+  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinTable(
+    name="wellSilencingReagentLink",
+    joinColumns=@JoinColumn(name="wellId"),
+    inverseJoinColumns=@JoinColumn(name="silencingReagentId")
+  )
+  @org.hibernate.annotations.ForeignKey(name="fk_well_silencing_reagent_link_to_well")
+  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
+  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
   public Set<SilencingReagent> getSilencingReagents()
   {
-    return Collections.unmodifiableSet(getHbnSilencingReagents());
+    return _silencingReagents;
   }
 
   /**
    * Get the set of genes that have silencing reagents contained in this well.
    * @return the set of genes that have silencing reagents contained in this well
    */
-  @DerivedEntityProperty
+  @Transient
   public Set<Gene> getGenes()
   {
     Set<Gene> genes = new HashSet<Gene>();
@@ -287,7 +255,7 @@ public class Well extends AbstractEntity implements Comparable
    * Get the gene that has silencing reagents contained in this well.
    * @return the gene that have silencing reagents contained in this well
    */
-  @DerivedEntityProperty
+  @Transient
   public Gene getGene()
   {
     Set<Gene> genes = getGenes();
@@ -302,37 +270,24 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Add the silencing reagent.
-   *
    * @param silencingReagent the silencing reagent to add
    * @return true iff the silencing reagent was not already in the well
    */
   public boolean addSilencingReagent(SilencingReagent silencingReagent)
   {
-    assert !(getHbnSilencingReagents().contains(silencingReagent) ^
-      silencingReagent.getHbnWells().contains(this)) :
-        "asymmetric compound/well association encountered";
-    if (getHbnSilencingReagents().add(silencingReagent)) {
-      return silencingReagent.getHbnWells().add(this);
-    }
-    return false;
+    silencingReagent.getWells().add(this);
+    return _silencingReagents.add(silencingReagent);
   }
 
   /**
    * Remove the silencing reagent.
-   *
    * @param silencingReagent the silencing reagent to remove
    * @return true iff the compound was previously in the well
    */
   public boolean removeSilencingReagent(SilencingReagent silencingReagent)
   {
-    assert ! (getHbnSilencingReagents().contains(silencingReagent) ^
-      silencingReagent.getHbnWells().contains(this)) :
-        "asymmetric compound/well association encountered";
-    if (getHbnSilencingReagents().remove(silencingReagent)) {
-      silencingReagent.getGene().getHbnSilencingReagents().remove(silencingReagent);
-      return silencingReagent.getHbnWells().remove(this);
-    }
-    return false;
+    silencingReagent.getWells().add(this);
+    return _silencingReagents.remove(silencingReagent);
   }
 
   /**
@@ -340,68 +295,40 @@ public class Well extends AbstractEntity implements Comparable
    */
   public void removeSilencingReagents()
   {
-    HashSet<SilencingReagent> silencingReagentsCopy =
-      new HashSet<SilencingReagent>(getHbnSilencingReagents());
-    for (SilencingReagent silencingReagent : silencingReagentsCopy) {
-      removeSilencingReagent(silencingReagent);
+    for (SilencingReagent silencingReagent : _silencingReagents) {
+      silencingReagent.getWells().remove(this);
+    _silencingReagents.clear();
   }
   }
 
   /**
    * Get the plate number for the well.
-   *
    * @return the plate number for the well
-   * @hibernate.property not-null="true"
    */
-  @EntityIdProperty
+  @org.hibernate.annotations.Immutable
+  @Column(nullable=false)
   public Integer getPlateNumber()
   {
     return _wellKey.getPlateNumber();
   }
 
   /**
-   * Set the plate number for the well.
-   *
-   * @param plateNumber the new plate number for the well
-   */
-  private void setPlateNumber(Integer plateNumber)
-  {
-    if (_wellKey == null) {
-      _wellKey = new WellKey(plateNumber, 0, 0);
-    }
-    else {
-      _wellKey.setPlateNumber(plateNumber);
-    }
-  }
-
-  /**
    * Get the well name for the well.
-   *
    * @return the well name for the well
-   * @hibernate.property type="text" not-null="true"
    */
-  @EntityIdProperty
+  @org.hibernate.annotations.Immutable
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(type="text")
   public String getWellName()
   {
     return _wellKey.getWellName();
   }
 
   /**
-   * Set the well name for the well.
-   *
-   * @param wellName the new well name for the well
+   * Get the well key.
+   * @return the well key
    */
-  private void setWellName(String wellName)
-  {
-    if (_wellKey == null) {
-      _wellKey = new WellKey(0, wellName);
-    }
-    else {
-      _wellKey.setWellName(wellName);
-    }
-  }
-
-  @DerivedEntityProperty
+  @Transient
   public WellKey getWellKey()
   {
     return _wellKey;
@@ -409,10 +336,9 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Get the ICCB number for the well.
-   *
    * @return the ICCB number for the well
-   * @hibernate.property type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getIccbNumber()
   {
     return _iccbNumber;
@@ -420,7 +346,6 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Set the ICCB number for the well.
-   *
    * @param iccbNumber The new ICCB number for the well
    */
   public void setIccbNumber(String iccbNumber)
@@ -430,16 +355,20 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Get the vendor identifier for the well.
-   *
    * @return the vendor identifier for the well
-   * @hibernate.property type="text" not-null="false"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getVendorIdentifier()
   {
     return _vendorIdentifier;
   }
 
-  @DerivedEntityProperty
+  /**
+   * Get the full vendor identifier, which consists of the vendor name from the library,
+   * when available, followed by the vendor identifier for the well
+   * @return the full vendor identifier
+   */
+  @Transient
   public ReagentVendorIdentifier getReagentVendorIdentifier()
   {
     if (_reagentVendorIdentifier == null) {
@@ -449,7 +378,7 @@ public class Well extends AbstractEntity implements Comparable
     return _reagentVendorIdentifier;
   }
 
-  @DerivedEntityProperty
+  @Transient
   public String getFullVendorIdentifier()
   {
     String vendor = _library.getVendor();
@@ -464,7 +393,6 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Set the vendor identifier for the well.
-   *
    * @param vendorIdentifier the new vendor identifier for the well
    */
   public void setVendorIdentifier(String vendorIdentifier)
@@ -474,11 +402,12 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Get the well's type.
-   *
    * @return the well's type
-   * @hibernate.property type="edu.harvard.med.screensaver.model.libraries.WellType$UserType"
-   *                     not-null="true"
    */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(
+    type="edu.harvard.med.screensaver.model.libraries.WellType$UserType"
+  )
   public WellType getWellType()
   {
     return _wellType;
@@ -486,7 +415,6 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Set the well's type.
-   *
    * @param wellType the new type of the well
    */
   public void setWellType(WellType wellType)
@@ -496,10 +424,9 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Get the SMILES for the well.
-   *
    * @return the SMILES for the well
-   * @hibernate.property type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getSmiles()
   {
     return _smiles;
@@ -507,7 +434,6 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Set the SMILES for the well.
-   *
    * @param smiles The new SMILES for the well
    */
   public void setSmiles(String smiles)
@@ -517,55 +443,35 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Get the molfile for the well.
-   *
    * @return the molfile for the well
    */
+  @Column(name="molfile", table="wellMolfile")
+  @org.hibernate.annotations.Type(type="text")
+  @org.hibernate.annotations.ForeignKey(name="fk_well_molfile_to_well") // this doesnt work
+  // lazy loading isnt working here. this could cause performance problems. things i tried are
+  // below. the @Basic should work, in combination with the @Proxy on the class:
+  //@Basic(fetch=FetchType.LAZY)
+  //@org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  //@org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.EXTRA)
   public String getMolfile()
-  {
-    if (_molfile.isEmpty()) {
-      return null;
-    }
-    return _molfile.iterator().next();
-  }
-
-  /**
-   * Set the molfile for the well.
-   *
-   * @param molfile The new molfile for the well
-   */
-  public void setMolfile(String molfile)
-  {
-    _molfile.clear();
-    if (molfile != null) {
-      _molfile.add(molfile);
-    }
-  }
-
-  /**
-   * @motivation Although molfile is just a simple property, we force it to be
-   *             in a separate table in order to avoid loading its potentially
-   *             large value and consuming memory unless it is explicitly
-   *             requested by the application.
-   * @hibernate.set class="java.lang.String" lazy="true" table="well_molfile"
-   * @hibernate.collection-key column="well_id"
-   * @hibernate.collection-element column="molfile" type="text"
-   */
-  private Set<String> getHbnMolfile()
   {
     return _molfile;
   }
 
-  private void setHbnMolfile(Set<String> molfile)
+  /**
+   * Set the molfile for the well.
+   * @param molfile The new molfile for the well
+   */
+  public void setMolfile(String molfile)
   {
     _molfile = molfile;
   }
 
   /**
    * Get the GenBank Accession number.
-   *
    * @return the GenBank Accession number
-   * @hibernate.property type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getGenbankAccessionNumber()
   {
     return _genbankAccessionNumber;
@@ -573,7 +479,6 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Set the GenBank Accession number.
-   *
    * @param genbankAccessionNumber the GenBank Accession number
    */
   public void setGenbankAccessionNumber(String genbankAccessionNumber)
@@ -581,24 +486,21 @@ public class Well extends AbstractEntity implements Comparable
     _genbankAccessionNumber = genbankAccessionNumber;
   }
 
-
-  // public hibernate methods for cross-package relationships
-
   /**
    * Get the <i>zero-based</i> row index of this well.
    * @return the <i>zero-based</i> row index of this well
    */
-  @DerivedEntityProperty
+  @Transient
   public int getRow()
   {
     return _wellKey.getRow();
   }
 
-  @DerivedEntityProperty
   /**
    * Get the row letter of this well.
    * @return the row letter of this well
    */
+  @Transient
   public char getRowLetter()
   {
     return (char) (_wellKey.getRow() + MIN_WELL_ROW);
@@ -608,13 +510,17 @@ public class Well extends AbstractEntity implements Comparable
    * Get the <i>zero-based</i> column index of this well.
    * @return the <i>zero-based</i> column index of this well
    */
-  @DerivedEntityProperty
+  @Transient
   public int getColumn()
   {
     return _wellKey.getColumn();
   }
 
-  @DerivedEntityProperty
+  /**
+   * Return true iff this well is on the edge of the 384-well plate.
+   * @return true iff this well is on the edge of the 384-well plate
+   */
+  @Transient
   public boolean isEdgeWell()
   {
     // TODO: use plate size/layout to determine this dynamically
@@ -623,92 +529,48 @@ public class Well extends AbstractEntity implements Comparable
   }
 
 
-  // protected getters and setters
-
-  protected Object getBusinessKey()
-  {
-    return _wellKey;
-  }
-
-
-  // package getters and setters
+  // package constructors
 
   /**
-   * Set the library the well is in. Throw a NullPointerException when the library
-   * is null.
-   *
-   * @param library the new library for the well
-   * @throws NullPointerException when the library is null
-   * @motivation for hibernate
+   * Construct an initialized <code>Well</code> object.
+   * @param library
+   * @param wellKey
+   * @param wellType
+   * @motivation for use of {@link Library#createWell(WellKey, WellType)} only
    */
-  void setHbnLibrary(Library library)
+  Well(Library library, WellKey wellKey, WellType wellType)
   {
-    if (library == null) {
-      throw new NullPointerException();
-    }
     _library = library;
+    _wellKey = wellKey;
+    _wellType = wellType;
   }
 
   /**
-   * Get the modifiable set of compounds contained in the well. If the caller
-   * modifies the returned collection, it must ensure that the bi-directional
-   * relationship is maintained by updating the related {@link Compound}
-   * bean(s).
-   *
-   * @return the set of compounds contained in the well
-   * @motivation for Hibernate and for associated {@link Compound} bean (so that
-   *             it can maintain the bi-directional association between
-   *             {@link Compound} and {@link Well}).
-   * @hibernate.set
-   *   table="well_compound_link"
-   *   cascade="save-update"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="well_id"
-   * @hibernate.collection-many-to-many
-   *   column="compound_id"
-   *   class="edu.harvard.med.screensaver.model.libraries.Compound"
-   *   foreign-key="fk_well_compound_link_to_well"
+   * Construct an initialized <code>Well</code> object.
+   * @param library
+   * @param plateNumber
+   * @param wellName
+   * @motivation for use of {@link Library#createWell(Integer,String)} only
    */
-  Set<Compound> getHbnCompounds()
+  Well(Library library, Integer plateNumber, String wellName)
   {
-    return _compounds;
+    this(library, new WellKey(plateNumber, wellName), WellType.EMPTY);
   }
 
+
+  // protected constructor
+
   /**
-   * Get the silencing reagents.
-   *
-   * @return the silencing reagents
-   * @hibernate.set
-   *   table="well_silencing_reagent_link"
-   *   cascade="save-update"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="well_id"
-   * @hibernate.collection-many-to-many
-   *   column="silencing_reagent_id"
-   *   class="edu.harvard.med.screensaver.model.libraries.SilencingReagent"
-   *   foreign-key="fk_well_silencing_reagent_link_to_well"
-   * @motivation for hibernate and maintenance of bi-directional relationships
+   * Construct an uninitialized <code>Well</code> object.
+   * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  Set<SilencingReagent> getHbnSilencingReagents()
-  {
-    return _silencingReagents;
-  }
+  protected Well() {}
 
 
   // private methods
 
   /**
-   * Constructs an uninitialized Well object.
-   *
-   * @motivation for hibernate
-   */
-  private Well() {}
-
-  /**
    * Set the well id for the well.
-   *
    * @param wellId the new well id for the well
    * @motivation for hibernate
    */
@@ -719,11 +581,11 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Get the version of the well.
-   *
    * @return the version of the well
    * @motivation for hibernate
-   * @hibernate.version
    */
+  @Version
+  @Column(nullable=false)
   private Integer getVersion()
   {
     return _version;
@@ -731,7 +593,6 @@ public class Well extends AbstractEntity implements Comparable
 
   /**
    * Set the version of the well.
-   *
    * @param version the new version of the well
    * @motivation for hibernate
    */
@@ -741,47 +602,62 @@ public class Well extends AbstractEntity implements Comparable
   }
 
   /**
-   * Get the library the well is in.
-   *
-   * @return the library the well is in
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.libraries.Library"
-   *   column="library_id"
-   *   not-null="true"
-   *   foreign-key="fk_well_to_library"
-   *   cascade="save-update"
-   *   lazy="proxy"
+   * Set the library the well is in.
+   * @param library the new library for the well
+   * @motivation for hibernate
    */
-  private Library getHbnLibrary()
+  private void setLibrary(Library library)
   {
-    return _library;
+    _library = library;
   }
 
   /**
-   * Set the set of compounds contained in the well.
-   *
-   * @param compounds the new set of compounds contained in the well
+   * Set the set of compounds
+   * @param compounds the new set of compounds
    * @motivation for hibernate
    */
-  private void setHbnCompounds(Set<Compound> compounds)
+  private void setCompounds(Set<Compound> compounds)
   {
     _compounds = compounds;
   }
 
   /**
-   * Set the silencing reagents.
-   *
-   * @param silencingReagents the new silencing reagents
+   * Set the set of silencing reagents
+   * @param silencingReagents the new set of silencing reagents
    * @motivation for hibernate
    */
-  private void setHbnSilencingReagents(Set<SilencingReagent> silencingReagents)
+  private void setSilencingReagents(Set<SilencingReagent> silencingReagents)
   {
     _silencingReagents = silencingReagents;
   }
 
-  public int compareTo(Object o)
+  /**
+   * Set the plate number for the well.
+   * @param plateNumber the new plate number for the well
+   * @motivation for hibernate
+   */
+  private void setPlateNumber(Integer plateNumber)
   {
-    assert o instanceof Well : "input to compareTo() must be a Well";
-    return getWellKey().compareTo(((Well) o).getWellKey());
+    if (_wellKey == null) {
+      _wellKey = new WellKey(plateNumber, 0, 0);
+    }
+    else {
+      _wellKey.setPlateNumber(plateNumber);
+    }
+  }
+
+  /**
+   * Set the well name for the well.
+   * @param wellName the new well name for the well
+   * @motivation for hibernate
+   */
+  private void setWellName(String wellName)
+  {
+    if (_wellKey == null) {
+      _wellKey = new WellKey(0, wellName);
+    }
+    else {
+      _wellKey.setWellName(wellName);
+    }
   }
 }

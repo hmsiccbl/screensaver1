@@ -60,7 +60,11 @@ public class UsersDAO extends AbstractDAO
     // layer to do sorting, as this keeps sorting order policy in
     // ScreensaverUserComparator, and also keeps our query simpler. Also, the
     // SortedSet return type makes return value more explicit
-    String hql = "select distinct lh from ScreeningRoomUser lh left outer join lh.hbnLabHead where lh.hbnLabHead is null";
+    String hql =
+      "select distinct lh from ScreeningRoomUser " +
+      "lh left outer join lh.labHead " +
+      "left outer join fetch lh.labAffiliation " +
+      "where lh.labHead is null";
     SortedSet labHeads = new TreeSet<ScreeningRoomUser>(ScreensaverUserComparator.getInstance());
     labHeads.addAll((List<ScreeningRoomUser>) getHibernateTemplate().find(hql));
     return labHeads;

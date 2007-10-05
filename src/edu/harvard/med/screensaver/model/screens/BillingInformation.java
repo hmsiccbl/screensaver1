@@ -2,35 +2,48 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Transient;
+import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.ToOneRelationship;
 
 
 /**
  * A Hibernate entity bean representing a billing information.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.class lazy="false"
  */
+@Entity
+@org.hibernate.annotations.Proxy
+@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
 public class BillingInformation extends AbstractEntity
 {
-  
+
   // static fields
 
   private static final Logger log = Logger.getLogger(BillingInformation.class);
@@ -44,7 +57,7 @@ public class BillingInformation extends AbstractEntity
   private Screen _screen;
   private Set<BillingItem> _billingItems = new HashSet<BillingItem>();
   private BillingInfoToBeRequested _billingInfoToBeRequested;
-  private boolean _billingForSuppliesOnly;
+  private boolean _isBillingForSuppliesOnly;
   private Date _billingInfoReturnDate;
   private String _amountToBeChargedForScreen;
   private String _facilitiesAndAdministrationCharge;
@@ -60,11 +73,11 @@ public class BillingInformation extends AbstractEntity
   // public constructor
 
   /**
-   * Constructs an initialized <code>BillingInformation</code> object.
-   *
+   * Construct an initialized <code>BillingInformation</code>.
    * @param screen the screen
-   * @param billingInfoToBeRequested is fee to be charged for screening
+   * @param billingInfoToBeRequested is billing info to be requested
    */
+  // TODO make package visible
   public BillingInformation(Screen screen, BillingInfoToBeRequested billingInfoToBeRequested)
   {
     if (screen == null) {
@@ -72,7 +85,6 @@ public class BillingInformation extends AbstractEntity
     }
     _screen = screen;
     _billingInfoToBeRequested = billingInfoToBeRequested;
-    _screen.setBillingInformation(this);
   }
 
 
@@ -83,8 +95,9 @@ public class BillingInformation extends AbstractEntity
   {
     return visitor.visit(this);
   }
-  
+
   @Override
+  @Transient
   public Integer getEntityId()
   {
     return getBillingInformationId();
@@ -92,11 +105,17 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Get the id for the billing information.
-   *
    * @return the id for the billing information
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="billing_information_id_seq"
    */
+  @Id
+  @org.hibernate.annotations.GenericGenerator(
+    name="billing_information_id_seq",
+    strategy="sequence",
+    parameters = {
+      @org.hibernate.annotations.Parameter(name="sequence", value="billing_information_id_seq")
+    }
+  )
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="billing_information_id_seq")
   public Integer getBillingInformationId()
   {
     return _billingInformationId;
@@ -104,16 +123,18 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Get the screen.
-   *
    * @return the screen
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.Screen"
-   *   column="screen_id"
-   *   not-null="true"
-   *   foreign-key="fk_billing_information_to_screen"
-   *   cascade="save-update"
    */
-  @ToOneRelationship(nullable=false)
+  @OneToOne(
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE },
+    optional=false
+  )
+  @JoinColumn(name="screenId", nullable=false, updatable=false)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.ForeignKey(name="fk_billing_information_to_screen")
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE }
+  )
   public Screen getScreen()
   {
     return _screen;
@@ -121,46 +142,50 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Get an unmodifiable copy of the set of billing items.
-   *
    * @return the billing items
    */
+  @OneToMany(
+    mappedBy="billingInformation",
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+    fetch=FetchType.LAZY
+  )
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
   public Set<BillingItem> getBillingItems()
   {
-    return Collections.unmodifiableSet(_billingItems);
+    return _billingItems;
   }
 
   /**
-   * Add the billing item.
-   *
-   * @param billingItem the billing item to add
-   * @return true iff the billing information did not already have the billing item
+   * Create and return a new billing item for this billing information.
+   * @param itemToBeCharged the item to be charged
+   * @param amount the amount
+   * @param dateFaxed the date faxed
+   * @return the new billing item for this billing information
    */
-  public boolean addBillingItem(BillingItem billingItem)
+  public BillingItem createBillingItem(String itemToBeCharged, String amount, Date dateFaxed)
   {
-    if (getHbnBillingItems().add(billingItem)) {
-      billingItem.setHbnBillingInformation(this);
-      return true;
-    }
-    return false;
+    BillingItem billingItem = new BillingItem(this, itemToBeCharged, amount, dateFaxed);
+    _billingItems.add(billingItem);
+    return billingItem;
   }
 
   /**
-   * Get the is fee to be charged for screening.
-   *
-   * @return the is fee to be charged for screening
-   * @hibernate.property
-   *   type="edu.harvard.med.screensaver.model.screens.BillingInfoToBeRequested$UserType"
-   *   not-null="true"
+   * Get the billing info to be requested.
+   * @return the billing info to be requested
    */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.BillingInfoToBeRequested$UserType")
   public BillingInfoToBeRequested getBillingInfoToBeRequested()
   {
     return _billingInfoToBeRequested;
   }
 
   /**
-   * Set the is fee to be charged for screening.
-   *
-   * @param billingInfoToBeRequested the new is fee to be charged for screening
+   * Set the billing info to be requested.
+   * @param billingInfoToBeRequested the new billing info to be requested
    */
   public void setBillingInfoToBeRequested(BillingInfoToBeRequested billingInfoToBeRequested)
   {
@@ -170,19 +195,27 @@ public class BillingInformation extends AbstractEntity
   /**
    * Get the billing for supplies only.
    * @return the billing for supplies only
-   * @hibernate.property
    */
-  public boolean getBillingForSuppliesOnly()
+  @Column(nullable=false, name="isBillingForSuppliesOnly")
+  public boolean isBillingForSuppliesOnly()
   {
-    return _billingForSuppliesOnly;
+    return _isBillingForSuppliesOnly;
   }
-  
+
+  /**
+   * Set the billing for supplies only.
+   * @param isBillingForSuppliesOnly the new billing for supplies only
+   */
+  public void setBillingForSuppliesOnly(boolean isBillingForSuppliesOnly)
+  {
+    _isBillingForSuppliesOnly = isBillingForSuppliesOnly;
+  }
+
   /**
    * Get the billing info return date.
    * @return the billing info return date
-   * @hibernate.property
    */
-  public Date getBillingInfoReturnDate() 
+  public Date getBillingInfoReturnDate()
   {
     return _billingInfoReturnDate;
   }
@@ -197,21 +230,10 @@ public class BillingInformation extends AbstractEntity
   }
 
   /**
-   * Set the billing for supplies only.
-   * @param billingForSuppliesOnly the new billing for supplies only
-   */
-  public void setBillingForSuppliesOnly(boolean billingForSuppliesOnly)
-  {
-    _billingForSuppliesOnly = billingForSuppliesOnly;
-  }
-  
-  /**
    * Get the amount to be charged for screen.
-   *
    * @return the amount to be charged for screen
-   * @hibernate.property
-   *   type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getAmountToBeChargedForScreen()
   {
     return _amountToBeChargedForScreen;
@@ -219,7 +241,6 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Set the amount to be charged for screen.
-   *
    * @param amountToBeChargedForScreen the new amount to be charged for screen
    */
   public void setAmountToBeChargedForScreen(String amountToBeChargedForScreen)
@@ -230,9 +251,8 @@ public class BillingInformation extends AbstractEntity
   /**
    * Get the facilities and administration charge.
    * @return the facilities and administration charge
-   * @hibernate.property
-   *   type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getFacilitiesAndAdministrationCharge()
   {
     return _facilitiesAndAdministrationCharge;
@@ -249,9 +269,7 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Get the fee form requested date.
-   *
    * @return the fee form requested date
-   * @hibernate.property
    */
   public Date getFeeFormRequestedDate()
   {
@@ -260,7 +278,6 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Set the fee form requested date.
-   *
    * @param feeFormRequestedDate the new fee form requested date
    */
   public void setFeeFormRequestedDate(Date feeFormRequestedDate)
@@ -270,11 +287,9 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Get the fee form requested initials.
-   *
    * @return the fee form requested initials
-   * @hibernate.property
-   *   type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getFeeFormRequestedInitials()
   {
     return _feeFormRequestedInitials;
@@ -282,7 +297,6 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Set the fee form requested initials.
-   *
    * @param feeFormRequestedInitials the new fee form requested initials
    */
   public void setFeeFormRequestedInitials(String feeFormRequestedInitials)
@@ -292,10 +306,9 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Get the is fee form on file.
-   *
    * @return the is fee form on file
-   * @hibernate.property
    */
+  @Column(nullable=false)
   public boolean getIsFeeFormOnFile()
   {
     return _isFeeFormOnFile;
@@ -303,7 +316,6 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Set the is fee form on file.
-   *
    * @param isFeeFormOnFile the new is fee form on file
    */
   public void setIsFeeFormOnFile(boolean isFeeFormOnFile)
@@ -313,9 +325,7 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Get the date completed 5-10K compounds.
-   *
    * @return the date completed 5-10K compounds
-   * @hibernate.property
    */
   public Date getDateCompleted5KCompounds()
   {
@@ -324,7 +334,6 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Set the date completed 5-10K compounds.
-   *
    * @param dateCompleted5KCompounds the new date completed 5-10K compounds
    */
   public void setDateCompleted5KCompounds(Date dateCompleted5KCompounds)
@@ -334,9 +343,7 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Get the date faxed to billing department.
-   *
    * @return the date faxed to billing department
-   * @hibernate.property
    */
   public Date getDateFaxedToBillingDepartment()
   {
@@ -345,7 +352,6 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Set the date faxed to billing department.
-   *
    * @param dateFaxedToBillingDepartment the new date faxed to billing department
    */
   public void setDateFaxedToBillingDepartment(Date dateFaxedToBillingDepartment)
@@ -355,9 +361,7 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Get the date charged.
-   *
    * @return the date charged
-   * @hibernate.property
    */
   public Date getDateCharged()
   {
@@ -366,7 +370,6 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Set the date charged.
-   *
    * @param dateCharged the new date charged
    */
   public void setDateCharged(Date dateCharged)
@@ -376,11 +379,9 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Get the comments.
-   *
    * @return the comments
-   * @hibernate.property
-   *   type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getComments()
   {
     return _comments;
@@ -388,7 +389,6 @@ public class BillingInformation extends AbstractEntity
 
   /**
    * Set the comments.
-   *
    * @param comments the new comments
    */
   public void setComments(String comments)
@@ -397,22 +397,53 @@ public class BillingInformation extends AbstractEntity
   }
 
 
-  // protected methods
+  // protected constructor
 
-  @Override
-  protected Object getBusinessKey()
+  /**
+   * Construct an uninitialized <code>BillingInformation</code>.
+   * @motivation for hibernate and proxy/concrete subclass constructors
+   */
+  protected BillingInformation() {}
+
+
+  // private constructor and instance methods
+
+  /**
+   * Set the id for the billing information.
+   * @param billingInformationId the new id for the billing information
+   * @motivation for hibernate
+   */
+  private void setBillingInformationId(Integer billingInformationId)
   {
-    return _screen;
+    _billingInformationId = billingInformationId;
   }
 
+  /**
+   * Get the version for the billing information.
+   * @return the version for the billing information
+   * @motivation for hibernate
+   */
+  @Column(nullable=false)
+  @Version
+  private Integer getVersion()
+  {
+    return _version;
+  }
 
-  // package methods
+  /**
+   * Set the version for the billing information.
+   * @param version the new version for the billing information
+   * @motivation for hibernate
+   */
+  private void setVersion(Integer version)
+  {
+    _version = version;
+  }
 
   /**
    * Set the screen.
-   *
    * @param screen the new screen
-   * @motivation for hibernate and maintenance of bi-directional relationships
+   * @motivation for hibernate
    */
   private void setScreen(Screen screen)
   {
@@ -420,75 +451,11 @@ public class BillingInformation extends AbstractEntity
   }
 
   /**
-   * Get the billing items.
-   *
-   * @return the billing items
-   * @hibernate.set
-   *   cascade="save-update"
-   *   inverse="true"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="billing_information_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.BillingItem"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  Set<BillingItem> getHbnBillingItems()
-  {
-    return _billingItems;
-  }
-
-
-  // private constructor
-
-  /**
-   * Construct an uninitialized <code>BillingInformation</code> object.
-   *
+   * Set the set of billing items.
+   * @param billingItems the new set of billing items
    * @motivation for hibernate
    */
-  private BillingInformation() {}
-
-
-  // private methods
-
-  /**
-   * Set the id for the billing information.
-   *
-   * @param billingInformationId the new id for the billing information
-   * @motivation for hibernate
-   */
-  private void setBillingInformationId(Integer billingInformationId) {
-    _billingInformationId = billingInformationId;
-  }
-
-  /**
-   * Get the version for the billing information.
-   *
-   * @return the version for the billing information
-   * @motivation for hibernate
-   * @hibernate.version
-   */
-  private Integer getVersion() {
-    return _version;
-  }
-
-  /**
-   * Set the version for the billing information.
-   *
-   * @param version the new version for the billing information
-   * @motivation for hibernate
-   */
-  private void setVersion(Integer version) {
-    _version = version;
-  }
-
-  /**
-   * Set the billing items.
-   *
-   * @param billingItems the new billing items
-   * @motivation for hibernate
-   */
-  private void setHbnBillingItems(Set<BillingItem> billingItems)
+  private void setBillingItems(Set<BillingItem> billingItems)
   {
     _billingItems = billingItems;
   }

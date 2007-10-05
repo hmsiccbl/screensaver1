@@ -15,7 +15,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
 import org.apache.log4j.Logger;
 
-public class DerivativeScreenResultTest extends AbstractEntityInstanceTest
+public class DerivativeScreenResultTest extends AbstractEntityInstanceTest<DerivativeScreenResult>
 {
   // static members
 

@@ -9,12 +9,12 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
-
-import org.apache.log4j.Logger;
 
 /**
  *

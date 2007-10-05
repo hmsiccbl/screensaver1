@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -85,7 +85,7 @@ class RNAiCherryPickScreeningSynchronizer extends ScreeningSynchronizer
     for (RNAiCherryPickScreening rnaiCherryPickScreening :
       _dao.findAllEntitiesOfType(RNAiCherryPickScreening.class)) {
       rnaiCherryPickScreening.getScreen().getScreeningRoomActivities().remove(rnaiCherryPickScreening);
-      rnaiCherryPickScreening.getPerformedBy().getHbnActivitiesPerformed().remove(rnaiCherryPickScreening);
+      rnaiCherryPickScreening.getPerformedBy().getActivitiesPerformed().remove(rnaiCherryPickScreening);
     }
   }
 
@@ -119,7 +119,7 @@ class RNAiCherryPickScreeningSynchronizer extends ScreeningSynchronizer
   }
 
   /**
-   * Create a new {@link RNAiCherryPickScreening} object for the given result set.
+   * Create a new {@link RnaiCherryPickScreening} object for the given result set.
    * The returned <code>RNAiCherryPickScreening</code> has exactly the following properties
    * initialized:
    * <ul>
@@ -153,8 +153,7 @@ class RNAiCherryPickScreeningSynchronizer extends ScreeningSynchronizer
     ScreeningRoomUser performedBy = getPerformedBy(resultSet);
     RNAiCherryPickRequest cherryPickRequest =
       getRNAiCherryPickRequestByCherryPickRequestNumber(cherryPickRequestNumber);
-    return new RNAiCherryPickScreening(
-      screen,
+    return screen.createRNAiCherryPickScreening(
       performedBy,
       dateCreated,
       dateOfActivity,

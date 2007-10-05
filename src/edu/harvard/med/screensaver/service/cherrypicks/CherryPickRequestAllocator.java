@@ -22,13 +22,13 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
-import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
-import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransferStatus;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
-import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
@@ -86,6 +86,7 @@ public class CherryPickRequestAllocator
   {
     // TODO: handle concurrency; perform appropriate locking to prevent race conditions (overdrawing well) among multiple allocate() calls
     final Set<LabCherryPick> unfulfillableLabCherryPicks = new HashSet<LabCherryPick>();
+
     CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
     validateAllocationBusinessRules(cherryPickRequest);
     for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
@@ -205,7 +206,7 @@ public class CherryPickRequestAllocator
     // note: we reload sourceWell, since lack of 'update' cascade for
     // labCherryPick.sourceWell will prevent sourceWell (or further transitive
     // relationships, such as libraries.copies) from being reattached in calling code
-    Well sourceWell = _dao.reloadEntity(labCherryPick.getSourceWell(), true, "hbnLibrary.hbnCopies.hbnCopyInfos");
+    Well sourceWell = _dao.reloadEntity(labCherryPick.getSourceWell(), true, "library.copies.copyInfos");
     Copy copy = selectCopy(sourceWell,
                            labCherryPick.getCherryPickRequest().getMicroliterTransferVolumePerWellApproved());
     if (copy == null) {

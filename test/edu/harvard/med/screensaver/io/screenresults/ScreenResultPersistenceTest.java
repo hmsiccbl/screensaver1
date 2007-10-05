@@ -14,6 +14,7 @@ import java.io.File;
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.io.workbook2.ParseError;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
@@ -34,6 +35,7 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
   public static final File TEST_INPUT_FILE_DIR = new File("test/edu/harvard/med/screensaver/io/screenresults");
   
   protected GenericEntityDAO genericEntityDao;
+  protected LibrariesDAO librariesDao;
   protected SchemaUtil schemaUtil;
   protected ScreenResultParser screenResultParser;
 
@@ -41,7 +43,6 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
   {
     super.onSetUp();
     schemaUtil.truncateTablesOrCreateSchema();
-
   }
 
   /**
@@ -59,6 +60,7 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
           LibraryType.COMMERCIAL,
           1,
           3);
+        librariesDao.loadOrCreateWellsForLibrary(library);
         genericEntityDao.persistEntity(library);
         genericEntityDao.flush();
         
@@ -72,21 +74,19 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
       }
     });
     
-    genericEntityDao.doInTransaction(new DAOTransaction() {
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
       public void runTransaction() {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 115);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 115);
         ScreenResult screenResult = screen.getScreenResult();
         assertNotNull(screenResult);
         ResultValueType rvt0 = screenResult.getResultValueTypesList().get(0);
-        ResultValue rv = rvt0.getResultValues().get(new WellKey(1,0,0));
+        ResultValue rv = rvt0.getWellKeyToResultValueMap().get(new WellKey(1,0,0));
         assertEquals("1071894", rv.getValue());
         // this tests how Hibernate will make use of WellKey, initializing with a concatenated key string
-        rv = rvt0.getResultValues().get(new WellKey("00001:A01"));
+        rv = rvt0.getWellKeyToResultValueMap().get(new WellKey("00001:A01"));
         assertEquals("1071894", rv.getValue());
       }
     });
-    
   }
-  
-  
 }

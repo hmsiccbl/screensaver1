@@ -425,8 +425,7 @@ public class DataRowParser
     SilencingReagent silencingReagent =
       _parser.getLibrariesDAO().findSilencingReagent(gene, silencingReagentType, sequence);
     if (silencingReagent == null) {
-      silencingReagent = new SilencingReagent(
-        gene,
+      silencingReagent = gene.createSilencingReagent(
         silencingReagentType,
         sequence,
         isPoolOfUnknownSequences);

@@ -17,7 +17,7 @@ public class PackageTestSuite extends TestSuite
 
   public static void main(String[] args)
   {
-    junit.textui.TestRunner.run(suite());
+    junit.textui.TestRunner.run(PackageTestSuite.class);
   }
 
   public static Test suite()

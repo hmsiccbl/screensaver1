@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -11,23 +11,36 @@ package edu.harvard.med.screensaver.model.users;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
+import javax.persistence.Version;
+
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.ToOneRelationship;
 
 
 /**
  * A Hibernate entity bean representing a checklist item.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.class lazy="false"
  */
+@Entity
+@org.hibernate.annotations.Proxy
+@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ScreeningRoomUser.class)
 public class ChecklistItem extends AbstractEntity
 {
-  
+
   // static fields
 
   private static final Logger log = Logger.getLogger(ChecklistItem.class);
@@ -46,78 +59,16 @@ public class ChecklistItem extends AbstractEntity
   private String _deactivationInitials;
 
 
-  // public constructor
-
-  /**
-   * Constructs an initialized <code>ChecklistItem</code> object.
-   *
-   * @param checklistItemType the checklist item type
-   * @param screeningRoomUser the screening room user
-   */
-  public ChecklistItem(
-    ChecklistItemType checklistItemType,
-    ScreeningRoomUser screeningRoomUser)
-  {
-    if (checklistItemType == null || screeningRoomUser == null) {
-      throw new NullPointerException();
-    }
-    _checklistItemType = checklistItemType;
-    _screeningRoomUser = screeningRoomUser;
-    _screeningRoomUser.getChecklistItems().add(this);
-  }
-
-  /**
-   * Constructs an initialized <code>ChecklistItem</code> object.
-   *
-   * @param checklistItemType the checklist item type
-   * @param screeningRoomUser the screening room user
-   * @param activationDate the activation date
-   * @param activationInitials the activation initials
-   */
-  public ChecklistItem(
-    ChecklistItemType checklistItemType,
-    ScreeningRoomUser screeningRoomUser,
-    Date activationDate,
-    String activationInitials)
-  {
-    this(checklistItemType, screeningRoomUser);
-    _activationDate = truncateDate(activationDate);
-    _activationInitials = activationInitials;
-  }
-
-  /**
-   * Constructs an initialized <code>ChecklistItem</code> object.
-   *
-   * @param checklistItemType the checklist item type
-   * @param screeningRoomUser the screening room user
-   * @param activationDate the activation date
-   * @param activationInitials the activation initials
-   * @param deactivationDate the deactivation date
-   * @param deactivationInitials the deactivation initials
-   */
-  public ChecklistItem(
-    ChecklistItemType checklistItemType,
-    ScreeningRoomUser screeningRoomUser,
-    Date activationDate,
-    String activationInitials,
-    Date deactivationDate,
-    String deactivationInitials)
-  {
-    this(checklistItemType, screeningRoomUser, activationDate, activationInitials);
-    _deactivationDate = truncateDate(deactivationDate);
-    _deactivationInitials = deactivationInitials;
-  }
-
-
-  // public methods
+  // public instance methods
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
   }
-  
+
   @Override
+  @Transient
   public Integer getEntityId()
   {
     return getChecklistItemId();
@@ -125,11 +76,15 @@ public class ChecklistItem extends AbstractEntity
 
   /**
    * Get the id for the checklist item.
-   *
    * @return the id for the checklist item
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="checklist_item_id_seq"
    */
+  @Id
+  @org.hibernate.annotations.GenericGenerator(
+    name="checklist_item_id_seq",
+    strategy="sequence",
+    parameters = { @Parameter(name="sequence", value="checklist_item_id_seq") }
+  )
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="checklist_item_id_seq")
   public Integer getChecklistItemId()
   {
     return _checklistItemId;
@@ -137,60 +92,37 @@ public class ChecklistItem extends AbstractEntity
 
   /**
    * Get the checklist item type.
-   *
    * @return the checklist item type
    */
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinColumn(name="checklistItemTypeId", nullable=false, updatable=false)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.ForeignKey(name="fk_checklist_item_to_checklist_item_type")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional=true)
   public ChecklistItemType getChecklistItemType()
   {
     return _checklistItemType;
   }
 
   /**
-   * Set the checklist item type.
-   *
-   * @param checklistItemType the new checklist item type
-   */
-  public void setChecklistItemType(ChecklistItemType checklistItemType)
-  {
-    if (checklistItemType == null) {
-      throw new NullPointerException();
-    }
-    _screeningRoomUser.getChecklistItems().remove(this);
-    _checklistItemType = checklistItemType;
-    _screeningRoomUser.getChecklistItems().add(this);
-  }
-
-  /**
    * Get the screening room user.
-   *
    * @return the screening room user
    */
-  @ToOneRelationship(nullable=false)
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinColumn(name="screeningRoomUserId", nullable=false, updatable=false)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.ForeignKey(name="fk_checklist_item_to_screening_room_user")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public ScreeningRoomUser getScreeningRoomUser()
   {
     return _screeningRoomUser;
   }
 
   /**
-   * Set the screening room user.
-   *
-   * @param screeningRoomUser the new screening room user
-   */
-  public void setScreeningRoomUser(ScreeningRoomUser screeningRoomUser)
-  {
-    if (screeningRoomUser == null) {
-      throw new NullPointerException();
-    }
-    _screeningRoomUser.getChecklistItems().remove(this);
-    _screeningRoomUser = screeningRoomUser;
-    _screeningRoomUser.getChecklistItems().add(this);
-  }
-
-  /**
    * Get the activation date.
-   *
    * @return the activation date
-   * @hibernate.property
    */
   public Date getActivationDate()
   {
@@ -199,7 +131,6 @@ public class ChecklistItem extends AbstractEntity
 
   /**
    * Set the activation date.
-   *
    * @param activationDate the new activation date
    */
   public void setActivationDate(Date activationDate)
@@ -209,11 +140,9 @@ public class ChecklistItem extends AbstractEntity
 
   /**
    * Get the activation initials.
-   *
    * @return the activation initials
-   * @hibernate.property
-   *   type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getActivationInitials()
   {
     return _activationInitials;
@@ -221,7 +150,6 @@ public class ChecklistItem extends AbstractEntity
 
   /**
    * Set the activation initials.
-   *
    * @param activationInitials the new activation initials
    */
   public void setActivationInitials(String activationInitials)
@@ -231,9 +159,7 @@ public class ChecklistItem extends AbstractEntity
 
   /**
    * Get the deactivation date.
-   *
    * @return the deactivation date
-   * @hibernate.property
    */
   public Date getDeactivationDate()
   {
@@ -242,7 +168,6 @@ public class ChecklistItem extends AbstractEntity
 
   /**
    * Set the deactivation date.
-   *
    * @param deactivationDate the new deactivation date
    */
   public void setDeactivationDate(Date deactivationDate)
@@ -252,11 +177,9 @@ public class ChecklistItem extends AbstractEntity
 
   /**
    * Get the deactivation initials.
-   *
    * @return the deactivation initials
-   * @hibernate.property
-   *   type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getDeactivationInitials()
   {
     return _deactivationInitials;
@@ -264,7 +187,6 @@ public class ChecklistItem extends AbstractEntity
 
   /**
    * Set the deactivation initials.
-   *
    * @param deactivationInitials the new deactivation initials
    */
   public void setDeactivationInitials(String deactivationInitials)
@@ -273,114 +195,51 @@ public class ChecklistItem extends AbstractEntity
   }
 
 
-  // protected methods
+  // package constructor
 
   /**
-   * A business key class for the well.
+   * Construct an initialized <code>ChecklistItem</code>.
+   * <p>
+   * Intended only for use by {@link
+   * ScreeningRoomUser#createChecklistItem(ChecklistItemType, Date, String, Date, String)}.
+   * @param checklistItemType the checklist item type
+   * @param screeningRoomUser the screening room user
+   * @param activationDate the activation date
+   * @param activationInitials the activation initials
+   * @param deactivationDate the deactivation date
+   * @param deactivationInitials the deactivation initials
    */
-  private class BusinessKey
+  ChecklistItem(
+    ChecklistItemType checklistItemType,
+    ScreeningRoomUser screeningRoomUser,
+    Date activationDate,
+    String activationInitials,
+    Date deactivationDate,
+    String deactivationInitials)
   {
-    
-    /**
-     * Get the checklist item type.
-     *
-     * @return the checklist item type
-     */
-    public ChecklistItemType getChecklistItemType()
-    {
-      return _checklistItemType;
-    }
-    
-    /**
-     * Get the screening room user.
-     *
-     * @return the screening room user
-     */
-    public ScreeningRoomUser getScreeningRoomUser()
-    {
-      return _screeningRoomUser;
-    }
-
-    @Override
-    public boolean equals(Object object)
-    {
-      if (! (object instanceof BusinessKey)) {
-        return false;
-      }
-      BusinessKey that = (BusinessKey) object;
-      return
-        getChecklistItemType().equals(that.getChecklistItemType()) &&
-        getScreeningRoomUser().equals(that.getScreeningRoomUser());
-    }
-
-    @Override
-    public int hashCode()
-    {
-      return
-        getChecklistItemType().hashCode() +
-        getScreeningRoomUser().hashCode();
-    }
-
-    @Override
-    public String toString()
-    {
-      return getChecklistItemType() + ":" + getScreeningRoomUser();
-    }
-  }
-
-  @Override
-  protected Object getBusinessKey()
-  {
-    return new BusinessKey();
-  }
-
-
-  // package methods
-
-  /**
-   * Set the checklist item type.
-   * Throw a NullPointerException when the checklist item type is null.
-   *
-   * @param checklistItemType the new checklist item type
-   * @throws NullPointerException when the checklist item type is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  void setHbnChecklistItemType(ChecklistItemType checklistItemType)
-  {
-    if (checklistItemType == null) {
+    if (checklistItemType == null || screeningRoomUser == null) {
       throw new NullPointerException();
     }
     _checklistItemType = checklistItemType;
-  }
-
-  /**
-   * Set the screening room user.
-   * Throw a NullPointerException when the screening room user is null.
-   *
-   * @param screeningRoomUser the new screening room user
-   * @throws NullPointerException when the screening room user is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  void setHbnScreeningRoomUser(ScreeningRoomUser screeningRoomUser)
-  {
-    if (screeningRoomUser == null) {
-      throw new NullPointerException();
-    }
     _screeningRoomUser = screeningRoomUser;
+    _activationDate = truncateDate(activationDate);
+    _activationInitials = activationInitials;
+    _deactivationDate = truncateDate(deactivationDate);
+    _deactivationInitials = deactivationInitials;
   }
 
 
-  // private constructor
+  // protected constructor
 
   /**
    * Construct an uninitialized <code>ChecklistItem</code> object.
    *
-   * @motivation for hibernate
+   * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  private ChecklistItem() {}
+  protected ChecklistItem() {}
 
 
-  // private methods
+  // private constructor and instance methods
 
   /**
    * Set the id for the checklist item.
@@ -395,11 +254,11 @@ public class ChecklistItem extends AbstractEntity
 
   /**
    * Get the version for the checklist item.
-   *
    * @return the version for the checklist item
    * @motivation for hibernate
-   * @hibernate.version
    */
+  @Version
+  @Column(nullable=false)
   private Integer getVersion()
   {
     return _version;
@@ -407,7 +266,6 @@ public class ChecklistItem extends AbstractEntity
 
   /**
    * Set the version for the checklist item.
-   *
    * @param version the new version for the checklist item
    * @motivation for hibernate
    */
@@ -417,37 +275,22 @@ public class ChecklistItem extends AbstractEntity
   }
 
   /**
-   * Get the checklist item type.
-   *
-   * @return the checklist item type
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.users.ChecklistItemType"
-   *   column="checklist_item_type_id"
-   *   not-null="true"
-   *   foreign-key="fk_checklist_item_to_checklist_item_type"
-   *   cascade="save-update"
+   * Set the checklist item type.
+   * @param checklistItemType the new checklist item type
    * @motivation for hibernate
    */
-  @ToOneRelationship(unidirectional=true)
-  private ChecklistItemType getHbnChecklistItemType()
+  private void setChecklistItemType(ChecklistItemType checklistItemType)
   {
-    return _checklistItemType;
+    _checklistItemType = checklistItemType;
   }
 
   /**
-   * Get the screening room user.
-   *
-   * @return the screening room user
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser"
-   *   column="screensaver_user_id"
-   *   not-null="true"
-   *   foreign-key="fk_checklist_item_to_screening_room_user"
-   *   cascade="save-update"
+   * Set the screening room user.
+   * @param screeningRoomUser the new screening room user
    * @motivation for hibernate
    */
-  private ScreeningRoomUser getHbnScreeningRoomUser()
+  private void setScreeningRoomUser(ScreeningRoomUser screeningRoomUser)
   {
-    return _screeningRoomUser;
+    _screeningRoomUser = screeningRoomUser;
   }
 }

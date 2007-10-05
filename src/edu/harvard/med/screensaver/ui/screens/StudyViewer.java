@@ -102,9 +102,10 @@ public class StudyViewer extends AbstractBackingBean
         {
           Study study = _dao.reloadEntity(studyIn,
                                           true,
-                                          "hbnLabHead.hbnLabMembers",
-                                          "hbnLeadScreener");
-          _dao.needReadOnly(study, "hbnCollaborators.hbnLabAffiliation");
+                                          "labHead.labAffiliation",
+                                          "labHead.labMembers",
+                                          "leadScreener");
+          _dao.needReadOnly(study, "collaborators.labAffiliation");
           _dao.needReadOnly(study, "publications");
           _dao.needReadOnly(study, "annotationTypes");
           setStudy(study);

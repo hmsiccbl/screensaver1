@@ -15,7 +15,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
 import org.apache.log4j.Logger;
 
-public class WellVolumeCorrectionActivityTest extends AbstractEntityInstanceTest
+public class WellVolumeCorrectionActivityTest extends AbstractEntityInstanceTest<WellVolumeCorrectionActivity>
 {
   // static members
 

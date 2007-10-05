@@ -238,8 +238,8 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume,We
                                                     "copy",
                                                     "labCherryPick.wellVolumeAdjustments",
                                                     "labCherryPick.cherryPickRequest",
-                                                    "labCherryPick.assayPlate.hbnCherryPickLiquidTransfer",
-                                                    "wellVolumeCorrectionActivity.hbnPerformedBy");
+                                                    "labCherryPick.assayPlate.cherryPickLiquidTransfer",
+                                                    "wellVolumeCorrectionActivity.performedBy");
       wvas.add(wva2);
     }
     getRowDetail().setContents(wvas);
@@ -278,15 +278,14 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume,We
   @Override
   public void doSave()
   {
-    ScreensaverUser screensaverUser = getCurrentScreensaverUser().getScreensaverUser();
+    final ScreensaverUser screensaverUser = getCurrentScreensaverUser().getScreensaverUser();
     if (!(screensaverUser instanceof AdministratorUser) || !((AdministratorUser) screensaverUser).isUserInRole(ScreensaverUserRole.LIBRARIES_ADMIN)) {
       throw new BusinessRuleViolationException("only libraries administrators can edit well volumes");
     }
-    final AdministratorUser administratorUser = (AdministratorUser) screensaverUser;
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         if (_newRemainingVolumes.size() > 0) {
-          _dao.reattachEntity(administratorUser);
+          AdministratorUser administratorUser = (AdministratorUser) _dao.reloadEntity(screensaverUser);
           WellVolumeCorrectionActivity wellVolumeCorrectionActivity =
             new WellVolumeCorrectionActivity(administratorUser, new Date());
           wellVolumeCorrectionActivity.setComments(getWellVolumeAdjustmentActivityComments());
@@ -296,12 +295,11 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume,We
             WellCopyVolume wellCopyVolume = entry.getKey();
             BigDecimal newRemainingVolume = entry.getValue();
             WellVolumeAdjustment wellVolumeAdjustment =
-              new WellVolumeAdjustment(wellCopyVolume.getCopy(),
-                                       wellCopyVolume.getWell(),
-                                       newRemainingVolume.subtract(wellCopyVolume.getRemainingMicroliterVolume()),
-                                       wellVolumeCorrectionActivity);
+              wellVolumeCorrectionActivity.createWellVolumeAdjustment(
+                  wellCopyVolume.getCopy(),
+                  wellCopyVolume.getWell(),
+                  newRemainingVolume.subtract(wellCopyVolume.getRemainingMicroliterVolume()));
             wellCopyVolume.addWellVolumeAdjustment(wellVolumeAdjustment);
-            wellVolumeCorrectionActivity.getWellVolumeAdjustments().add(wellVolumeAdjustment);
           }
           _dao.persistEntity(wellVolumeCorrectionActivity);
         }

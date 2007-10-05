@@ -196,7 +196,7 @@ public class BulkScreenResultImporter
           {
             public void runTransaction() 
             {
-              final Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+              final Screen screen = _dao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
               if (screen == null) {
                 throw new DAOTransactionRollbackException("no such screen " + screenNumber);
               }
@@ -213,7 +213,7 @@ public class BulkScreenResultImporter
         {
           public void runTransaction() 
           {
-            final Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+            final Screen screen = _dao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
             if (screen == null) {
               throw new DAOTransactionRollbackException("no such screen " + screenNumber);
             }

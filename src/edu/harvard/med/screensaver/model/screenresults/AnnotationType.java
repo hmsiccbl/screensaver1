@@ -10,37 +10,50 @@
 package edu.harvard.med.screensaver.model.screenresults;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Transient;
+import javax.persistence.Version;
+
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.ImmutableProperty;
-import edu.harvard.med.screensaver.model.ToManyRelationship;
-import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 
-import org.apache.log4j.Logger;
-
 /**
  * Annotation type on a library member (e.g. a compound or silencing reagent).
  *
- * @hibernate.class
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
+@Entity
+@org.hibernate.annotations.Proxy
+@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
 public class AnnotationType extends AbstractEntity implements MetaDataType, Comparable<AnnotationType>
 {
-  // static members
+
+  // private static data
 
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(AnnotationType.class);
 
 
-  // instance data members
+  // private instance data
 
   private Integer _annotationTypeId;
   private Integer _version;
@@ -54,10 +67,16 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
 
   // constructors
 
-  protected AnnotationType()
-  {
-  }
-
+  /**
+   * Construct an initialized <code>AnnotationType</code>. Intended only for use by {@link
+   * Screen#createAnnotationType(String, String, boolean)}.
+   * @param study the study
+   * @param name the name of the annotation type
+   * @param description the description for the annotation type
+   * @param ordinal the ordinal position of this <code>AnnotationType</code> within its
+   * parent {@link Screen}.
+   * @param isNumeric true iff this annotation type contains numeric result values
+   */
   public AnnotationType(Screen study,
                         String name,
                         String description,
@@ -73,20 +92,7 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
   }
 
 
-  // Comparable interface methods
-
-  /**
-   * Defines natural ordering of <code>AnnotationType</code> objects, based
-   * upon their ordinal field value. Note that natural ordering is only defined
-   * between <code>AnnotationType</code> objects that share the same parent
-   * {@link Screen}.
-   */
-  public int compareTo(AnnotationType that) {
-    return getOrdinal().compareTo(that.getOrdinal());
-  }
-
-
-  // public methods
+  // public instance methods
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -95,18 +101,42 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
   }
 
   @Override
+  @Transient
   public Serializable getEntityId()
   {
     return getAnnotationTypeId();
   }
 
   /**
-   * Get the id for the annotation.
-   *
-   * @return the id for the annotation type
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="annotation_type_id_seq"
+   * Defines natural ordering of <code>AnnotationType</code> objects, based
+   * upon their ordinal field value. Note that natural ordering is only defined
+   * between <code>AnnotationType</code> objects that share the same parent
+   * {@link Screen}.
    */
+  public int compareTo(AnnotationType that)
+  {
+    return getOrdinal().compareTo(that.getOrdinal());
+  }
+
+  @Override
+  public String toString()
+  {
+    return _study.getScreenNumber() + ":" + _name;
+  }
+
+  /**
+   * Get the id for the annotation.
+   * @return the id for the annotation type
+   */
+  @Id
+  @org.hibernate.annotations.GenericGenerator(
+    name="annotation_type_id_seq",
+    strategy="sequence",
+    parameters = {
+      @org.hibernate.annotations.Parameter(name="sequence", value="annotation_type_id_seq")
+    }
+  )
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="annotation_type_id_seq")
   public Integer getAnnotationTypeId()
   {
     return _annotationTypeId;
@@ -114,90 +144,53 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
 
   /**
    * Get the study.
-   *
-   * @return the screen
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.Screen"
-   *   column="study_id"
-   *   not-null="true"
-   *   foreign-key="fk_annotation_type_to_screen"
-   *   cascade="save-update"
+   * @return the study
    */
-  @ToOneRelationship(nullable=false, inverseProperty="annotationTypes")
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinColumn(name="studyId", nullable=false, updatable=false)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.ForeignKey(name="fk_annotation_type_to_screen")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public Screen getStudy()
   {
     return _study;
   }
 
   /**
-   * @hibernate.property
+   * Get the set of annotation values for this annotation type
+   * @return the set of annotation values for this annotation type
    */
-  public String getName()
+  @OneToMany(
+    mappedBy="annotationType",
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+    fetch=FetchType.LAZY
+  )
+  @OrderBy("reagentVendorIdentifier")
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
+  public Set<AnnotationValue> getAnnotationValues()
   {
-    return _name;
-  }
-
-  public void setName(String name)
-  {
-    _name = name;
+    return _values;
   }
 
   /**
-   * @hibernate.property type="text"
+   * Create and return an annotation value for the annotation type.
+   * @param reagentVendorIdentifier the reagent vendor identifier
+   * @param value the value
+   * @param isNumeric true iff the annotation value is numeric
+   * @return the new annotation value
    */
-  public String getDescription()
+  public AnnotationValue createAnnotationValue(
+    ReagentVendorIdentifier reagentVendorIdentifier,
+    String value)
   {
-    return _description;
-  }
-
-  public void setDescription(String description)
-  {
-    _description = description;
-  }
-
-  /**
-   * Get the ordinal position of this <code>AnnotationType</code> within its
-   * parent {@link Screen}.
-   *
-   * @return an <code>Integer</code>
-   * @hibernate.property type="integer" column="ordinal"
-   */
-  public Integer getOrdinal()
-  {
-    return _ordinal;
-  }
-
-  /**
-   * Set the ordinal position of this <code>AnnotationType</code> within its
-   * parent {@link Screen}.
-   *
-   * @param ordinal the ordinal position of this <code>AnnotationType</code>
-   *          within its parent {@link ScreenResult}
-   * @motivation for Hibernate
-   */
-  @ImmutableProperty
-  private void setOrdinal(Integer ordinal)
-  {
-    _ordinal = ordinal;
-  }
-
-  /**
-   * @hibernate.property not-null="true"
-   * @return
-   */
-  public boolean isNumeric()
-  {
-    return _isNumeric;
-  }
-
-  public AnnotationValue addAnnotationValue(ReagentVendorIdentifier reagentVendorIdentifier,
-                                            String textValue,
-                                            boolean isNumeric)
-  {
-    AnnotationValue annotationValue = new AnnotationValue(this,
-                                                          reagentVendorIdentifier,
-                                                          textValue,
-                                                          isNumeric && textValue != null ?  new Double(textValue) : null);
+    AnnotationValue annotationValue = new AnnotationValue(
+      this,
+      reagentVendorIdentifier,
+      value,
+      _isNumeric && value != null ? new Double(value) : null);
     boolean result = _values.add(annotationValue);
     if (result) {
       return annotationValue;
@@ -206,69 +199,136 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
   }
 
   /**
-   * Get the set of annotation values for this annotation type
-   *
-   * @return the set of annotation values for this annotation type
-   * @hibernate.set lazy="true"
-   *                cascade="all-delete-orphan"
-   *                inverse="true"
-   * @hibernate.collection-key column="annotation_type_id"
-   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.AnnotationValue"
+   * Create and return an <b><i>Data Transfer Object</i></b> annotation value for the
+   * annotation type. This is an optimization for the purposes of {@link AnnotationsDAO}
+   * methods, which circumvent the normal method for loading a relationship property,
+   * using SQL instead. This allows us to retrieve a subset of the annotation values for an
+   * annotation type without loading the whole set of them. Annotation values loaded this
+   * way will not be persisted by any cascade from the parent annotation type.
+   * @param reagentVendorIdentifier the reagent vendor identifier
+   * @param value the value
+   * @param numericValue the numerical value
+   * @return the new annotation value
    */
-  @ToManyRelationship
-  public Set<AnnotationValue> getAnnotationValues()
+  public AnnotationValue createAnnotationValueDTO(
+    ReagentVendorIdentifier reagentVendorIdentifier,
+    String value)
   {
-    return _values;
-  }
-
-  @Override
-  public int hashCode()
-  {
-    return getBusinessKey().hashCode();
-  }
-
-  public String toString()
-  {
-    return _study.getScreenNumber() + ":" + _name;
-  }
-
-
-  // private methods
-
-  private void setAnnotationValues(Set<AnnotationValue> values)
-  {
-    _values = values;
+    return new AnnotationValue(
+      this,
+      reagentVendorIdentifier,
+      value,
+      _isNumeric && value != null ? new Double(value) : null);
   }
 
   /**
+   * Get the name of the annotation type.
+   * @return the name of the annotation type
+   */
+  @org.hibernate.annotations.Type(type="text")
+  public String getName()
+  {
+    return _name;
+  }
+
+  /**
+   * Set the name of the annotation type.
+   * @param name the new name of the annotation type
+   */
+  public void setName(String name)
+  {
+    _name = name;
+  }
+
+  /**
+   * Get the description
+   * @return the description
+   */
+  @org.hibernate.annotations.Type(type="text")
+  public String getDescription()
+  {
+    return _description;
+  }
+
+  /**
+   * Set the description
+   * @param description the new description
+   */
+  public void setDescription(String description)
+  {
+    _description = description;
+  }
+
+  /**
+   * Get the 0-based ordinal position of this <code>AnnotationType</code> within its
+   * parent {@link Screen}.
+   * @return the 0-based ordinal position
+   */
+  @Column(nullable=false, updatable=false)
+  @org.hibernate.annotations.Immutable
+  public Integer getOrdinal()
+  {
+    return _ordinal;
+  }
+
+  /**
+   * Return true iff this annotation type contains numeric result values.
+   * @return true iff this annotation type contains numeric result values
+   */
+  @Column(nullable=false, updatable=false, name="isNumeric")
+  @org.hibernate.annotations.Immutable
+  public boolean isNumeric()
+  {
+    return _isNumeric;
+  }
+
+
+  // protected constructor
+
+  /**
+   * Construct an uninitialized <code>AnnotationType</code>.
+   * @motivation for hibernate and proxy/concrete subclass constructors
+   */
+  protected AnnotationType() {}
+
+
+  // private instance methods
+
+  /**
    * Set the id for the annotation type.
-   *
    * @param annotationTypeId the new id for the annotation type
    * @motivation for hibernate
    */
-  private void setAnnotationTypeId(Integer annotationTypeId) {
+  private void setAnnotationTypeId(Integer annotationTypeId)
+  {
     _annotationTypeId = annotationTypeId;
   }
 
   /**
-   * Get the version for the annotation.
-   *
-   * @return the version for the annotation
+   * Get the version for the annotation type.
+   * @return the version for the annotation type
    * @motivation for hibernate
-   * @hibernate.version
    */
-  private Integer getVersion() {
+  @Column(nullable=false)
+  @Version
+  private Integer getVersion()
+  {
     return _version;
   }
 
   /**
+   * Set the version for the annotation type.
+   * @param version the new version for the annotation type
    * @motivation for hibernate
    */
-  private void setVersion(Integer version) {
+  private void setVersion(Integer version)
+  {
     _version = version;
   }
 
   /**
+   * Set the study.
+   * @param study the new study
    * @motivation for hibernate
    */
   private void setStudy(Screen study)
@@ -276,14 +336,33 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
     _study = study;
   }
 
+  /**
+   * Set the annotation values.
+   * @param values the new set of annotation values
+   */
+  private void setAnnotationValues(Set<AnnotationValue> values)
+  {
+    _values = values;
+  }
+
+  /**
+   * Set the ordinal position of this <code>AnnotationType</code> within its
+   * parent {@link Screen}.
+   * @param ordinal the ordinal position of this <code>AnnotationType</code>
+   *          within its parent {@link ScreenResult}
+   * @motivation for Hibernate
+   */
+  private void setOrdinal(Integer ordinal)
+  {
+    _ordinal = ordinal;
+  }
+
+  /**
+   * Set the numericalness of this result value type.
+   * @param isNumeric the new numericalness of this result value type
+   */
   private void setNumeric(boolean isNumeric)
   {
     _isNumeric = isNumeric;
-  }
-
-  @Override
-  protected Object getBusinessKey()
-  {
-    return _study + ":" + _name;
   }
 }

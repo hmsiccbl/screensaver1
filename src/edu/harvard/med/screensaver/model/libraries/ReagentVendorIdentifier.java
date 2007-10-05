@@ -9,7 +9,10 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import org.apache.log4j.Logger;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Transient;
+
 
 /**
  * Not yet part of the data model, but needed by UI code. (We really need a
@@ -18,6 +21,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
+@Embeddable
 public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifier>
 {
   // instance data members
@@ -40,8 +44,9 @@ public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifi
 
   /**
    * @return vendor the library vendor (from {@link Library#getVendor}).
-   * @hibernate.property
    */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(type="text")
   public String getVendorName()
   {
     return _vendorName;
@@ -49,8 +54,9 @@ public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifi
 
   /**
    * @return vendorId the vendor ID (from {@link Well#getVendorIdentifier()})
-   * @hibernate.property
    */
+  @Column
+  @org.hibernate.annotations.Type(type="text")
   public String getVendorIdentifier()
   {
     return _vendorIdentifier;
@@ -78,6 +84,7 @@ public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifi
     return _asString;
   }
 
+  @Transient
   public String getId()
   {
     if (_id == null) {

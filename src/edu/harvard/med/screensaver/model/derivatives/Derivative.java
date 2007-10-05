@@ -2,33 +2,47 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.model.derivatives;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Transient;
+import javax.persistence.Version;
+
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 
-import org.apache.log4j.Logger;
-
 
 /**
  * A Hibernate entity bean representing a derivative.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.class lazy="false"
  */
+@Entity
+@org.hibernate.annotations.Proxy
 public class Derivative extends AbstractEntity
 {
-  
+
   // static fields
 
   private static final Logger log = Logger.getLogger(Derivative.class);
@@ -49,29 +63,27 @@ public class Derivative extends AbstractEntity
   // public constructor
 
   /**
-   * Constructs an initialized <code>Derivative</code> object.
-   *
+   * Construct an initialized <code>Derivative</code>.
    * @param name the name
    * @param smiles the SMILES string
    */
-  public Derivative(
-    String name,
-    String smiles)
+  public Derivative(String name, String smiles)
   {
     _name = name;
     _smiles = smiles;
   }
 
 
-  // public methods
+  // public instance methods
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
   }
-  
+
   @Override
+  @Transient
   public Integer getEntityId()
   {
     return getDerivativeId();
@@ -79,49 +91,60 @@ public class Derivative extends AbstractEntity
 
   /**
    * Get the id for the derivative.
-   *
    * @return the id for the derivative
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="derivative_id_seq"
    */
+  @Id
+  @org.hibernate.annotations.GenericGenerator(
+    name="derivative_id_seq",
+    strategy="sequence",
+    parameters = { @org.hibernate.annotations.Parameter(name="sequence", value="derivative_id_seq") }
+  )
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="derivative_id_seq")
   public Integer getDerivativeId()
   {
     return _derivativeId;
   }
 
   /**
-   * Get an unmodifiable copy of the set of derivative screen results.
-   *
+   * Get the set of derivative screen results.
    * @return the derivative screen results
    */
+  @OneToMany(
+    mappedBy="derivative",
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+    fetch=FetchType.LAZY
+  )
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
   public Set<DerivativeScreenResult> getDerivativeScreenResults()
   {
-    return Collections.unmodifiableSet(_derivativeScreenResults);
+    return _derivativeScreenResults;
   }
 
   /**
-   * Add the derivative screen result.
-   *
-   * @param derivativeScreenResult the derivative screen result to add
-   * @return true iff the derivative did not already have the derivative screen result
+   * Create and return a new derivative screen result for the derivative.
+   * @param activityLevel the activity level
+   * @param activityType the activity type
+   * @return the new derivative screen result
    */
-  public boolean addDerivativeScreenResult(DerivativeScreenResult derivativeScreenResult)
+  public DerivativeScreenResult createDerivativeScreenResult(String activityLevel, String activityType)
   {
-    if (getHbnDerivativeScreenResults().add(derivativeScreenResult)) {
-      derivativeScreenResult.setHbnDerivative(this);
-      return true;
-    }
-    return false;
+    DerivativeScreenResult derivativeScreenResult = new DerivativeScreenResult(
+      this,
+      activityLevel,
+      activityType);
+    _derivativeScreenResults.add(derivativeScreenResult);
+    return derivativeScreenResult;
   }
 
   /**
    * Get the name.
-   *
    * @return the name
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
    */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(type="text")
   public String getName()
   {
     return _name;
@@ -129,7 +152,6 @@ public class Derivative extends AbstractEntity
 
   /**
    * Set the name.
-   *
    * @param name the new name
    */
   public void setName(String name)
@@ -139,21 +161,17 @@ public class Derivative extends AbstractEntity
 
   /**
    * Get the synonyms.
-   *
    * @return the synonyms
-   * @hibernate.set
-   *   order-by="synonym"
-   *   table="derivative_synonym"
-   *   cascade="delete"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="derivative_id"
-   *   foreign-key="fk_derivative_synonym_to_derivative"
-   * @hibernate.collection-element
-   *   type="text"
-   *   column="synonym"
-   *   not-null="true"
    */
+  @org.hibernate.annotations.CollectionOfElements
+  @Column(name="synonym", nullable=false)
+  @JoinTable(
+    name="derivativeSynonym",
+    joinColumns=@JoinColumn(name="derivativeId")
+  )
+  @org.hibernate.annotations.Type(type="text")
+  @org.hibernate.annotations.ForeignKey(name="fk_derivative_synonym_to_derivative")
+  @OrderBy("synonym")
   public Set<String> getSynonyms()
   {
     return _synonyms;
@@ -161,7 +179,6 @@ public class Derivative extends AbstractEntity
 
   /**
    * Add the synonym.
-   *
    * @param synonym the synonym to add
    * @return true iff the derivative did not already have the synonym
    */
@@ -172,7 +189,6 @@ public class Derivative extends AbstractEntity
 
   /**
    * Remove the synonym.
-   *
    * @param synonym the synonym to remove
    * @return true iff the derivative previously had the synonym
    */
@@ -183,13 +199,10 @@ public class Derivative extends AbstractEntity
 
   /**
    * Get the SMILES string.
-   *
    * @return the SMILES string
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
-   *   unique="true"
    */
+  @Column(nullable=false, unique=true)
+  @org.hibernate.annotations.Type(type="text")
   public String getSmiles()
   {
     return _smiles;
@@ -197,7 +210,6 @@ public class Derivative extends AbstractEntity
 
   /**
    * Set the SMILES string.
-   *
    * @param smiles the new SMILES string
    */
   public void setSmiles(String smiles)
@@ -207,11 +219,9 @@ public class Derivative extends AbstractEntity
 
   /**
    * Get the SD file.
-   *
    * @return the SD file
-   * @hibernate.property
-   *   type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getSdfile()
   {
     return _sdfile;
@@ -219,7 +229,6 @@ public class Derivative extends AbstractEntity
 
   /**
    * Set the SD file.
-   *
    * @param sdfile the new SD file
    */
   public void setSdfile(String sdfile)
@@ -228,47 +237,13 @@ public class Derivative extends AbstractEntity
   }
 
 
-  // protected methods
-
-  @Override
-  protected Object getBusinessKey()
-  {
-    return getSmiles();
-  }
-
-
-  // package methods
+  // private constructor and instance methods
 
   /**
-   * Get the derivative screen results.
-   *
-   * @return the derivative screen results
-   * @hibernate.set
-   *   cascade="save-update"
-   *   inverse="true"
-   * @hibernate.collection-key
-   *   column="derivative_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.derivatives.DerivativeScreenResult"
-   * @motivation for hibernate and maintenance of bi-directional relationships
+   * Construct an uninitialized <code>Derivative</code>.
+   * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  Set<DerivativeScreenResult> getHbnDerivativeScreenResults()
-  {
-    return _derivativeScreenResults;
-  }
-
-
-  // private constructor
-
-  /**
-   * Construct an uninitialized <code>Derivative</code> object.
-   *
-   * @motivation for hibernate
-   */
-  private Derivative() {}
-
-
-  // private methods
+  protected Derivative() {}
 
   /**
    * Set the id for the derivative.
@@ -276,45 +251,45 @@ public class Derivative extends AbstractEntity
    * @param derivativeId the new id for the derivative
    * @motivation for hibernate
    */
-  private void setDerivativeId(Integer derivativeId) {
+  private void setDerivativeId(Integer derivativeId)
+  {
     _derivativeId = derivativeId;
   }
 
   /**
    * Get the version for the derivative.
-   *
    * @return the version for the derivative
    * @motivation for hibernate
-   * @hibernate.version
    */
-  private Integer getVersion() {
+  @Column(nullable=false)
+  @Version
+  private Integer getVersion()
+  {
     return _version;
   }
 
   /**
    * Set the version for the derivative.
-   *
    * @param version the new version for the derivative
    * @motivation for hibernate
    */
-  private void setVersion(Integer version) {
+  private void setVersion(Integer version)
+  {
     _version = version;
   }
 
   /**
    * Set the derivative screen results.
-   *
    * @param derivativeScreenResults the new derivative screen results
    * @motivation for hibernate
    */
-  private void setHbnDerivativeScreenResults(Set<DerivativeScreenResult> derivativeScreenResults)
+  private void setDerivativeScreenResults(Set<DerivativeScreenResult> derivativeScreenResults)
   {
     _derivativeScreenResults = derivativeScreenResults;
   }
 
   /**
    * Set the synonyms.
-   *
    * @param synonyms the new synonyms
    * @motivation for hibernate
    */

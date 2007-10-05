@@ -18,6 +18,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
+import edu.harvard.med.screensaver.model.annotations.ManyToOne;
+import edu.harvard.med.screensaver.model.annotations.ManyToMany;
+import edu.harvard.med.screensaver.model.annotations.OneToOne;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
@@ -82,15 +85,28 @@ public class RelatedProperty
     }
     
     // TODO: if unidirectional from this side, no need to calculate related property info, below.
-    
-    ToOneRelationship toOneRelationship = _propertyDescriptor.getReadMethod().getAnnotation(ToOneRelationship.class);
-    ToManyRelationship toManyRelationship = _propertyDescriptor.getReadMethod().getAnnotation(ToManyRelationship.class);
-    if (toOneRelationship != null && toOneRelationship.inverseProperty().length() > 0) {
-      _relatedPropertyName = toOneRelationship.inverseProperty();
+
+    // TODO: see which annotation checks below are really necessary
+
+    javax.persistence.OneToMany jpaOneToMany =
+      _propertyDescriptor.getReadMethod().getAnnotation(javax.persistence.OneToMany.class);
+    OneToOne oneToOne = _propertyDescriptor.getReadMethod().getAnnotation(OneToOne.class);
+    ManyToOne manyToOne = _propertyDescriptor.getReadMethod().getAnnotation(ManyToOne.class);
+    ManyToMany manyToMany = _propertyDescriptor.getReadMethod().getAnnotation(ManyToMany.class);
+    if (jpaOneToMany != null && jpaOneToMany.mappedBy().length() > 0) {
+      _relatedPropertyName = jpaOneToMany.mappedBy();
       _relatedPropertyDescriptor = findRelatedPropertyDescriptor(_relatedBeanInfo, _relatedPropertyName);
     }
-    else if (toManyRelationship != null && toManyRelationship.inverseProperty().length() > 0) {
-      _relatedPropertyName = toManyRelationship.inverseProperty();
+    else if (oneToOne != null && oneToOne.inverseProperty().length() > 0) {
+      _relatedPropertyName = oneToOne.inverseProperty();
+      _relatedPropertyDescriptor = findRelatedPropertyDescriptor(_relatedBeanInfo, _relatedPropertyName);
+    }
+    else if (manyToOne != null && manyToOne.inverseProperty().length() > 0) {
+      _relatedPropertyName = manyToOne.inverseProperty();
+      _relatedPropertyDescriptor = findRelatedPropertyDescriptor(_relatedBeanInfo, _relatedPropertyName);
+    }
+    else if (manyToMany != null && manyToMany.inverseProperty().length() > 0) {
+      _relatedPropertyName = manyToMany.inverseProperty();
       _relatedPropertyDescriptor = findRelatedPropertyDescriptor(_relatedBeanInfo, _relatedPropertyName);
     }
     else {
@@ -103,8 +119,8 @@ public class RelatedProperty
     }
 
     if (_relatedPropertyDescriptor != null) {
-      ToManyRelationship relatedToManyRelationship = _relatedPropertyDescriptor.getReadMethod().getAnnotation(ToManyRelationship.class);
-      if (relatedToManyRelationship != null ||
+      ManyToMany relatedManyToMany = _relatedPropertyDescriptor.getReadMethod().getAnnotation(ManyToMany.class);
+      if (relatedManyToMany != null ||
         Collection.class.isAssignableFrom(_relatedPropertyDescriptor.getReadMethod().getReturnType())) {
         _relatedSideIsToMany = true;
       }
@@ -121,13 +137,13 @@ public class RelatedProperty
     return _relatedPropertyDescriptor;
   }
     
-  public boolean hasForeignKeyConstraint()
+  public boolean relatedPropertyIsImmutable()
   {
-    if (!exists()) {
+    if (! exists()) {
       return false;
     }
-    ToOneRelationship toOneRelationship = _relatedPropertyDescriptor.getReadMethod().getAnnotation(ToOneRelationship.class);
-    return toOneRelationship != null && !toOneRelationship.nullable();
+    org.hibernate.annotations.Immutable immutable = _relatedPropertyDescriptor.getReadMethod().getAnnotation(org.hibernate.annotations.Immutable.class);
+    return immutable != null;
   }
 
   public String getExpectedName()

@@ -12,12 +12,10 @@ package edu.harvard.med.screensaver.ui.namevaluetable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.faces.model.ListDataModel;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
-
-import org.apache.log4j.Logger;
 
 /**
  * A NameValueTable for the well details portion of the Well Viewer.

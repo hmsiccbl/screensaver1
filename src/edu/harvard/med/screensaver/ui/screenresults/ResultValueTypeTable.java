@@ -62,10 +62,10 @@ public class ResultValueTypeTable extends MetaDataTable<ResultValueType>
        @Override
        public String formatValue(ResultValueType rvt)
        {
-         if (rvt.getPositivesPercentage() == null) {
+         if (rvt.getPositivesRatio() == null) {
            return "";
          }
-         return NumberFormat.getPercentInstance().format(rvt.getPositivesPercentage());
+         return NumberFormat.getPercentInstance().format(rvt.getPositivesRatio());
        }
      }
     );

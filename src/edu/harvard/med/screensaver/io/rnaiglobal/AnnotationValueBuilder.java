@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.io.rnaiglobal;
 
 import jxl.Cell;
-
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 
 interface AnnotationValueBuilder

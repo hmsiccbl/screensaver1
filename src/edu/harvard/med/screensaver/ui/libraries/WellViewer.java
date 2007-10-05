@@ -86,12 +86,12 @@ public class WellViewer extends ReagentViewer
           Well well = _dao.findEntityById(Well.class,
                                           wellKey.toString(),
                                           true,
-                                          "hbnLibrary",
-                                          "hbnSilencingReagents.gene.genbankAccessionNumbers",
-                                          "hbnCompounds.compoundNames",
-                                          "hbnCompounds.pubchemCids",
-                                          "hbnCompounds.nscNumbers",
-                                          "hbnCompounds.casNumbers");
+                                          "library",
+                                          "silencingReagents.gene.genbankAccessionNumbers",
+                                          "compounds.compoundNames",
+                                          "compounds.pubchemCids",
+                                          "compounds.nscNumbers",
+                                          "compounds.casNumbers");
           if (well == null) {
             throw new IllegalArgumentException("no such well");
           }

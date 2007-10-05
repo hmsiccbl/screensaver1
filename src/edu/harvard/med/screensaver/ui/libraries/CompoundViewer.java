@@ -113,7 +113,7 @@ public class CompoundViewer extends AbstractBackingBean
                             "pubchemCids",
                             "casNumbers",
                             "nscNumbers",
-                            "hbnWells.hbnLibrary");
+                            "wells.library");
           setCompound(compound);
           setCompoundNameValueTable(new CompoundNameValueTable(compound, CompoundViewer.this));
         }

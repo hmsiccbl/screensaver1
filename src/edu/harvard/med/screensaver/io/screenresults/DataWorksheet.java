@@ -70,7 +70,7 @@ public class DataWorksheet implements ScreenResultWorkbookSpecification
         StringBuilder excludeBuf = new StringBuilder();
         HSSFRow row = HSSFCellUtil.getRow(rowIndex, sheet);
         for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-          ResultValue rv = rvt.getResultValues().get(wellKey);
+          ResultValue rv = rvt.getWellKeyToResultValueMap().get(wellKey);
           if (rv != null) {
             assayWellType = rv.getAssayWellType(); // overwrites, but should be same for all resultValues of a well
             addExclude(excludeBuf, row, rvt, rv);

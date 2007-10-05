@@ -103,7 +103,7 @@ public class GeneViewer extends AbstractBackingBean
           Gene gene = _dao.reloadEntity(geneIn, false);
           _dao.needReadOnly(gene,
                             "genbankAccessionNumbers",
-                            "hbnSilencingReagents.hbnWells.hbnLibrary");
+                            "silencingReagents.wells.library");
           setGene(gene);
           setGeneNameValueTable(new GeneNameValueTable(gene, GeneViewer.this));
         }

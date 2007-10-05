@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.faces.application.Application;
 import javax.faces.component.UIColumn;
@@ -30,8 +29,6 @@ import javax.faces.context.FacesContext;
 import javax.faces.el.ValueBinding;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletResponse;
-
-import edu.harvard.med.screensaver.model.VocabularyTerm;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;

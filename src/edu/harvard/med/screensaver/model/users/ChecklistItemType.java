@@ -2,14 +2,23 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.model.users;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+import javax.persistence.Version;
+
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
@@ -17,21 +26,22 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 
 /**
  * A Hibernate entity bean representing a checklist item type.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.class lazy="false"
  */
+@Entity
+@org.hibernate.annotations.Proxy
 public class ChecklistItemType extends AbstractEntity
 {
-  
-  // static fields
+
+  // private static fields
 
   private static final Logger log = Logger.getLogger(ChecklistItemType.class);
   private static final long serialVersionUID = 0L;
 
 
-  // instance fields
+  // private instance fields
 
   private Integer _checklistItemTypeId;
   private Integer _version;
@@ -43,8 +53,7 @@ public class ChecklistItemType extends AbstractEntity
   // public constructor
 
   /**
-   * Constructs an initialized <code>ChecklistItemType</code> object.
-   *
+   * Construct an initialized <code>ChecklistItemType</code>.
    * @param orderStatistic the order statistic
    * @param itemName the item name
    * @param hasDeactivation the has deactivation
@@ -67,8 +76,9 @@ public class ChecklistItemType extends AbstractEntity
   {
     return visitor.visit(this);
   }
-  
+
   @Override
+  @Transient
   public Integer getEntityId()
   {
     return getChecklistItemTypeId();
@@ -76,11 +86,15 @@ public class ChecklistItemType extends AbstractEntity
 
   /**
    * Get the id for the checklist item type.
-   *
    * @return the id for the checklist item type
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="checklist_item_type_id_seq"
    */
+  @Id
+  @org.hibernate.annotations.GenericGenerator(
+    name="checklist_item_type_id_seq",
+    strategy="sequence",
+    parameters = { @Parameter(name="sequence", value="checklist_item_type_id_seq") }
+  )
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="checklist_item_type_id_seq")
   public Integer getChecklistItemTypeId()
   {
     return _checklistItemTypeId;
@@ -88,98 +102,52 @@ public class ChecklistItemType extends AbstractEntity
 
   /**
    * Get the order statistic.
-   *
    * @return the order statistic
-   * @hibernate.property
-   *   not-null="true"
-   *   unique="true"
    */
+  @Column(nullable=false, unique=true)
+  @org.hibernate.annotations.Immutable
   public Integer getOrderStatistic()
   {
     return _orderStatistic;
   }
 
   /**
-   * Set the order statistic.
-   *
-   * @param orderStatistic the new order statistic
-   */
-  public void setOrderStatistic(Integer orderStatistic)
-  {
-    _orderStatistic = orderStatistic;
-  }
-
-  /**
    * Get the item name.
-   *
    * @return the item name
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
-   *   unique="true"
    */
+  @Column(nullable=false, unique=true)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.Type(type="text")
   public String getItemName()
   {
     return _itemName;
   }
 
   /**
-   * Set the item name.
-   *
-   * @param itemName the new item name
-   */
-  public void setItemName(String itemName)
-  {
-    _itemName = itemName;
-  }
-
-  /**
    * Get the has deactivation.
-   *
    * @return the has deactivation
-   * @hibernate.property
-   *   not-null="true"
    */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Immutable
   public boolean getHasDeactivation()
   {
     return _hasDeactivation;
   }
 
-  /**
-   * Set the has deactivation.
-   *
-   * @param hasDeactivation the new has deactivation
-   */
-  public void setHasDeactivation(boolean hasDeactivation)
-  {
-    _hasDeactivation = hasDeactivation;
-  }
 
-
-  // protected methods
-
-  @Override
-  protected Object getBusinessKey()
-  {
-    return getOrderStatistic();
-  }
-
-
-  // private constructor
+  // protected constructor
 
   /**
-   * Construct an uninitialized <code>ChecklistItemType</code> object.
-   *
-   * @motivation for hibernate
+   * Construct an uninitialized <code>ChecklistItemType</code>.
+   * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  private ChecklistItemType() {}
+  protected ChecklistItemType() {}
 
 
-  // private methods
+  // private constructor and instance methods
 
   /**
    * Set the id for the checklist item type.
-   *
    * @param checklistItemTypeId the new id for the checklist item type
    * @motivation for hibernate
    */
@@ -190,11 +158,11 @@ public class ChecklistItemType extends AbstractEntity
 
   /**
    * Get the version for the checklist item type.
-   *
    * @return the version for the checklist item type
    * @motivation for hibernate
-   * @hibernate.version
    */
+  @Version
+  @Column(nullable=false)
   private Integer getVersion()
   {
     return _version;
@@ -202,12 +170,41 @@ public class ChecklistItemType extends AbstractEntity
 
   /**
    * Set the version for the checklist item type.
-   *
    * @param version the new version for the checklist item type
    * @motivation for hibernate
    */
   private void setVersion(Integer version)
   {
     _version = version;
+  }
+
+  /**
+   * Set the order statistic.
+   * @param orderStatistic the new order statistic
+   * @motivation for hibernate
+   */
+  private void setOrderStatistic(Integer orderStatistic)
+  {
+    _orderStatistic = orderStatistic;
+  }
+
+  /**
+   * Set the item name.
+   * @param itemName the new item name
+   * @motivation for hibernate
+   */
+  private void setItemName(String itemName)
+  {
+    _itemName = itemName;
+  }
+
+  /**
+   * Set the has deactivation.
+   * @param hasDeactivation the new has deactivation
+   * @motivation for hibernate
+   */
+  private void setHasDeactivation(boolean hasDeactivation)
+  {
+    _hasDeactivation = hasDeactivation;
   }
 }

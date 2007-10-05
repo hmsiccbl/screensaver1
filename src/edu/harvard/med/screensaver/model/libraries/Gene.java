@@ -2,36 +2,46 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.DerivedEntityProperty;
-import edu.harvard.med.screensaver.model.EntityIdProperty;
-import edu.harvard.med.screensaver.model.ToManyRelationship;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Transient;
+import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 
 
 /**
  * A Hibernate entity bean representing a gene.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.class lazy="false"
  */
-public class Gene extends AbstractEntity
+@Entity
+@org.hibernate.annotations.Proxy
+public class Gene extends SemanticIDAbstractEntity
 {
-  
+
   // static fields
 
   private static final Logger log = Logger.getLogger(Gene.class);
@@ -40,6 +50,7 @@ public class Gene extends AbstractEntity
 
   // instance fields
 
+  private Integer _geneId;
   private Integer _version;
   private Set<SilencingReagent> _silencingReagents = new HashSet<SilencingReagent>();
   private String _geneName;
@@ -51,12 +62,10 @@ public class Gene extends AbstractEntity
   private String _speciesName;
 
 
-  // public constructor
+  // public constructors
 
-  // public constructor
-  
   /**
-   * Constructs an initialized <code>Gene</code> object.
+   * Construct a <code>Gene</code>.
    *
    * @param geneName the gene name
    * @param entrezgeneId the EntrezGene ID
@@ -74,9 +83,8 @@ public class Gene extends AbstractEntity
     _genbankAccessionNumbers.add(genbankAccessionNumber);
   }
 
-
   /**
-   * Constructs an initialized <code>Gene</code> object.
+   * Construct a <code>Gene</code>.
    *
    * @param geneName the gene name
    * @param entrezgeneId the EntrezGene ID
@@ -89,6 +97,7 @@ public class Gene extends AbstractEntity
     String entrezgeneSymbol,
     String speciesName)
   {
+    _geneId = entrezgeneId;
     _geneName = geneName;
     _entrezgeneId = entrezgeneId;
     _entrezgeneSymbol = entrezgeneSymbol;
@@ -96,69 +105,105 @@ public class Gene extends AbstractEntity
   }
 
 
-  // public methods
+  // public instance methods
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
   }
-  
+
   @Override
-  @EntityIdProperty
+  @Transient
   public Integer getEntityId()
   {
-    return getBusinessKey();
+    return getGeneId();
   }
 
   /**
    * Get the id for the gene.
-   *
    * @return the id for the gene
-   * @hibernate.id
-   *   generator-class="assigned"
    */
-  @EntityIdProperty
+  @Id
   public Integer getGeneId()
   {
-    return getBusinessKey();
+    return _geneId;
   }
 
   /**
-   * Get an unmodifiable copy of the set of silencing reagents.
-   *
-   * @return the silencing reagents
+   * Get the set of silencing reagents.
+   * @return the set of silencing reagents
    */
+  @OneToMany(
+    mappedBy="gene",
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+    fetch=FetchType.LAZY
+  )
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
   public Set<SilencingReagent> getSilencingReagents()
   {
-    return Collections.unmodifiableSet(_silencingReagents);
+    return _silencingReagents;
   }
 
+  /**
+   * Create a new silencing reagent for the gene.
+   * @param silencingReagentType the silencing reagent type
+   * @param sequence the sequence
+   * @return the new silencing reagent
+   */
+  public SilencingReagent createSilencingReagent(
+    SilencingReagentType silencingReagentType,
+    String sequence)
+  {
+    return createSilencingReagent(silencingReagentType, sequence, false);
+  }
+
+  /**
+   * Create a new silencing reagent for the gene.
+   * @param silencingReagentType the silencing reagent type
+   * @param sequence the sequence
+   * @param isPoolOfUnknownSequences
+   * @return the new silencing reagent
+   */
+  public SilencingReagent createSilencingReagent(
+    SilencingReagentType silencingReagentType,
+    String sequence,
+    boolean isPoolOfUnknownSequences)
+  {
+    SilencingReagent silencingReagent = new SilencingReagent(
+      this,
+      silencingReagentType,
+      sequence,
+      isPoolOfUnknownSequences);
+    if (! _silencingReagents.add(silencingReagent)) {
+      throw new DuplicateEntityException(this, silencingReagent);
+    }
+    return silencingReagent;
+  }
 
   /**
    * Get the set of wells that contain silencing reagents for this gene.
    * @return the set of wells that contain silencing reagents for this gene
    */
-  @DerivedEntityProperty
+  @Transient
   public Set<Well> getWells()
   {
     Set<Well> wells = new HashSet<Well>();
     for (SilencingReagent silencingReagent : getSilencingReagents()) {
-      for (Well well : silencingReagent.getWells()) {
-        wells.add(well);
-      }
+      wells.addAll(silencingReagent.getWells());
     }
     return wells;
   }
-  
+
   /**
    * Get the gene name.
-   *
    * @return the gene name
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
    */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(type="text")
   public String getGeneName()
   {
     return _geneName;
@@ -166,7 +211,6 @@ public class Gene extends AbstractEntity
 
   /**
    * Set the gene name.
-   *
    * @param geneName the new gene name
    */
   public void setGeneName(String geneName)
@@ -176,13 +220,10 @@ public class Gene extends AbstractEntity
 
   /**
    * Get the EntrezGene ID.
-   *
    * @return the EntrezGene ID
-   * @hibernate.property
-   *   not-null="true"
-   *   unique="true"
    */
-  @EntityIdProperty
+  @org.hibernate.annotations.Immutable
+  @Column(nullable=false, unique=true)
   public Integer getEntrezgeneId()
   {
     return _entrezgeneId;
@@ -190,12 +231,10 @@ public class Gene extends AbstractEntity
 
   /**
    * Get the EntrezGene symbol.
-   *
    * @return the EntrezGene symbol
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
    */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(type="text")
   public String getEntrezgeneSymbol()
   {
     return _entrezgeneSymbol;
@@ -203,7 +242,6 @@ public class Gene extends AbstractEntity
 
   /**
    * Set the EntrezGene symbol.
-   *
    * @param entrezgeneSymbol the new EntrezGene symbol
    */
   public void setEntrezgeneSymbol(String entrezgeneSymbol)
@@ -213,21 +251,16 @@ public class Gene extends AbstractEntity
 
   /**
    * Get the old EntrezGene IDs.
-   *
    * @return the old EntrezGene IDs
-   * @hibernate.set
-   *   order-by="old_entrezgene_id"
-   *   table="gene_old_entrezgene_id"
-   *   cascade="delete"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="gene_id"
-   *   foreign-key="fk_gene_old_entrezgene_id_to_gene"
-   * @hibernate.collection-element
-   *   type="int"
-   *   column="old_entrezgene_id"
-   *   not-null="true"
    */
+  @org.hibernate.annotations.CollectionOfElements
+  @Column(name="oldEntrezgeneId", nullable=false)
+  @JoinTable(
+    name="geneOldEntrezgeneId",
+    joinColumns=@JoinColumn(name="geneId")
+  )
+  @org.hibernate.annotations.ForeignKey(name="fk_gene_old_entrezgene_id_to_gene")
+  @OrderBy("oldEntrezgeneId") // TODO: test this (somehow)
   public Set<Integer> getOldEntrezgeneIds()
   {
     return _oldEntrezgeneIds;
@@ -235,7 +268,6 @@ public class Gene extends AbstractEntity
 
   /**
    * Add the old EntrezGene ID.
-   *
    * @param oldEntrezgeneId the old EntrezGene ID to add
    * @return true iff the gene did not already have the old EntrezGene ID
    */
@@ -246,7 +278,6 @@ public class Gene extends AbstractEntity
 
   /**
    * Remove the old EntrezGene ID.
-   *
    * @param oldEntrezgeneId the old EntrezGene ID to remove
    * @return true iff the gene previously had the old EntrezGene ID
    */
@@ -257,21 +288,17 @@ public class Gene extends AbstractEntity
 
   /**
    * Get the old EntrezGene symbols.
-   *
    * @return the old EntrezGene symbols
-   * @hibernate.set
-   *   order-by="old_entrezgene_symbol"
-   *   table="gene_old_entrezgene_symbol"
-   *   cascade="delete"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="gene_id"
-   *   foreign-key="fk_gene_old_entrezgene_symbol_to_gene"
-   * @hibernate.collection-element
-   *   type="text"
-   *   column="old_entrezgene_symbol"
-   *   not-null="true"
    */
+  @org.hibernate.annotations.CollectionOfElements
+  @Column(name="oldEntrezgeneSymbol", nullable=false)
+  @JoinTable(
+    name="geneOldEntrezgeneSymbol",
+    joinColumns=@JoinColumn(name="geneId")
+  )
+  @org.hibernate.annotations.Type(type="text")
+  @org.hibernate.annotations.ForeignKey(name="fk_gene_old_entrezgene_symbol_to_gene")
+  @OrderBy("oldEntrezgeneSymbol") // TODO: test this (somehow)
   public Set<String> getOldEntrezgeneSymbols()
   {
     return _oldEntrezgeneSymbols;
@@ -279,7 +306,6 @@ public class Gene extends AbstractEntity
 
   /**
    * Add the old EntrezGene symbol.
-   *
    * @param oldEntrezgeneSymbol the old EntrezGene symbol to add
    * @return true iff the gene did not already have the old EntrezGene symbol
    */
@@ -290,7 +316,6 @@ public class Gene extends AbstractEntity
 
   /**
    * Remove the old EntrezGene symbol.
-   *
    * @param oldEntrezgeneSymbol the old EntrezGene symbol to remove
    * @return true iff the gene previously had the old EntrezGene symbol
    */
@@ -301,21 +326,18 @@ public class Gene extends AbstractEntity
 
   /**
    * Get the GenBank accession numbers.
-   *
    * @return the GenBank accession numbers
-   * @hibernate.set
-   *   order-by="genbank_accession_number"
-   *   table="gene_genbank_accession_number"
-   *   cascade="delete"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="gene_id"
-   * @hibernate.collection-element
-   *   type="text"
-   *   column="genbank_accession_number"
-   *   not-null="true"
    */
-  @ToManyRelationship(minCardinality=1)
+  @Column(name="genbankAccessionNumber", nullable=false)
+  @JoinTable(
+    name="geneGenbankAccessionNumber",
+    joinColumns=@JoinColumn(name="geneId")
+  )
+  @OrderBy("genbankAccessionNumber")
+  @org.hibernate.annotations.CollectionOfElements
+  @org.hibernate.annotations.Type(type="text")
+  @org.hibernate.annotations.ForeignKey(name="fk_gene_genbank_accession_number_to_gene")
+  @edu.harvard.med.screensaver.model.annotations.CollectionOfElements(initialCardinality=1)
   public Set<String> getGenbankAccessionNumbers()
   {
     return _genbankAccessionNumbers;
@@ -323,7 +345,6 @@ public class Gene extends AbstractEntity
 
   /**
    * Add the GenBank accession number.
-   *
    * @param genbankAccessionNumber the GenBank accession number to add
    * @return true iff the gene did not already have the GenBank accession number
    */
@@ -334,7 +355,6 @@ public class Gene extends AbstractEntity
 
   /**
    * Remove the GenBank accession number.
-   *
    * @param genbankAccessionNumber the GenBank accession number to remove
    * @return true iff the gene previously had the GenBank accession number
    */
@@ -345,12 +365,10 @@ public class Gene extends AbstractEntity
 
   /**
    * Get the species name.
-   *
    * @return the species name
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
    */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(type="text")
   public String getSpeciesName()
   {
     return _speciesName;
@@ -358,7 +376,6 @@ public class Gene extends AbstractEntity
 
   /**
    * Set the species name.
-   *
    * @param speciesName the new species name
    */
   public void setSpeciesName(String speciesName)
@@ -367,76 +384,34 @@ public class Gene extends AbstractEntity
   }
 
 
-  // protected methods
-
-  @Override
-  protected Integer getBusinessKey()
-  {
-    return getEntrezgeneId();
-  }
-
-
-  // package methods
+  // protected constructor
 
   /**
-   * Get the silencing reagents.
-   *
-   * @return the silencing reagents
-   * @hibernate.set
-   *   cascade="save-update"
-   *   inverse="true"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="gene_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.libraries.SilencingReagent"
-   * @motivation for hibernate and maintenance of bi-directional relationships
+   * Construct an uninitialized <code>Gene</code>.
+   * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  Set<SilencingReagent> getHbnSilencingReagents()
-  {
-    return _silencingReagents;
-  }
+  protected Gene() {}
 
 
-  // private constructor
-
-  /**
-   * Construct an uninitialized <code>Gene</code> object.
-   *
-   * @motivation for hibernate
-   */
-  private Gene() {}
-
-
-  // private methods
+  // private constructor and instance methods
 
   /**
    * Set the id for the gene.
-   *
    * @param geneId the new id for the gene
    * @motivation for hibernate
    */
   private void setGeneId(Integer geneId)
   {
+    _geneId = geneId;
   }
 
   /**
-   * Set the EntrezGene ID.
-   *
-   * @param entrezgeneId the new EntrezGene ID
-   */
-  private void setEntrezgeneId(Integer entrezgeneId)
-  {
-    _entrezgeneId = entrezgeneId;
-  }  
-  
-  /**
    * Get the version for the gene.
-   *
    * @return the version for the gene
    * @motivation for hibernate
-   * @hibernate.version
    */
+  @Version
+  @Column(nullable=false)
   private Integer getVersion()
   {
     return _version;
@@ -444,7 +419,6 @@ public class Gene extends AbstractEntity
 
   /**
    * Set the version for the gene.
-   *
    * @param version the new version for the gene
    * @motivation for hibernate
    */
@@ -454,19 +428,27 @@ public class Gene extends AbstractEntity
   }
 
   /**
-   * Set the silencing reagents.
-   *
-   * @param silencingReagents the new silencing reagents
+   * Set the set of silencing reagents.
+   * @param silencingReagents the new set of silencing reagents
    * @motivation for hibernate
    */
-  private void setHbnSilencingReagents(Set<SilencingReagent> silencingReagents)
+  private void setSilencingReagents(Set<SilencingReagent> silencingReagents)
   {
     _silencingReagents = silencingReagents;
   }
 
   /**
+   * Set the EntrezGene ID.
+   * @param entrezgeneId the new EntrezGene ID
+   * @motivation for hibernate
+   */
+  private void setEntrezgeneId(Integer entrezgeneId)
+  {
+    _entrezgeneId = entrezgeneId;
+  }
+
+  /**
    * Set the old EntrezGene IDs.
-   *
    * @param oldEntrezgeneIds the new old EntrezGene IDs
    * @motivation for hibernate
    */
@@ -477,7 +459,6 @@ public class Gene extends AbstractEntity
 
   /**
    * Set the old EntrezGene symbols.
-   *
    * @param oldEntrezgeneSymbols the new old EntrezGene symbols
    * @motivation for hibernate
    */
@@ -488,7 +469,6 @@ public class Gene extends AbstractEntity
 
   /**
    * Set the GenBank accession numbers.
-   *
    * @param genbankAccessionNumbers the new GenBank accession numbers
    * @motivation for hibernate
    */

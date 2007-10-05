@@ -15,7 +15,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
 import org.apache.log4j.Logger;
 
-public class LabAffiliationTest extends AbstractEntityInstanceTest
+public class LabAffiliationTest extends AbstractEntityInstanceTest<LabAffiliation>
 {
   // static members
 

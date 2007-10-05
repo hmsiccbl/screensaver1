@@ -14,7 +14,6 @@ import junit.framework.TestSuite;
 
 public class ProjectTestSuite extends TestSuite
 {
-
   public static void main(String[] args)
   {
     junit.textui.TestRunner.run(suite());
@@ -28,12 +27,11 @@ public class ProjectTestSuite extends TestSuite
   public ProjectTestSuite()
   {
     addTest(edu.harvard.med.screensaver.analysis.heatmaps.PackageTestSuite.suite());
-    addTest(edu.harvard.med.screensaver.model.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.db.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.io.PackageTestSuite.suite());
+    addTest(edu.harvard.med.screensaver.model.PackageTestSuite.suite());
+    addTest(edu.harvard.med.screensaver.service.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.ui.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.util.PackageTestSuite.suite());
-    addTest(edu.harvard.med.screensaver.service.PackageTestSuite.suite());
   }
-
 }

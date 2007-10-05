@@ -307,8 +307,8 @@ public class UserSynchronizer
       ChecklistItemType checklistItemType =
         getChecklistItemTypeForScreenDBChecklistItemName(screendbChecklistItemName);
       
-      new ChecklistItem(
-        checklistItemType, user, activationDate, activationInitials, deactivationDate, deactivationInitials);
+      user.createChecklistItem(
+        checklistItemType, activationDate, activationInitials, deactivationDate, deactivationInitials);
       screendbChecklistItemTypeNamesFound.add(screendbChecklistItemName);
     }
     
@@ -353,7 +353,7 @@ public class UserSynchronizer
       throw new ScreenDBSynchronizationException(
         "couldn't find Screensaver checklist item type for \"" + checklistItemTypeName + "\"");
     }
-    new ChecklistItem(checklistItemType, user);
+    user.createChecklistItem(checklistItemType);
   }
   
   private void connectUsersToLabHeads()

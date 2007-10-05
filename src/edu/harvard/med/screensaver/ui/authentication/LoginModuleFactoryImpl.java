@@ -80,5 +80,4 @@ public class LoginModuleFactoryImpl implements LoginModuleFactory, ApplicationCo
   {
     return (LoginModule) _appCtx.getBean("screensaverLoginModule");
   }
-
 }

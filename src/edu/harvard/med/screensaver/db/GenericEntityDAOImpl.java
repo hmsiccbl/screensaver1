@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -77,17 +77,17 @@ import org.springframework.orm.hibernate3.HibernateCallback;
  * Hibernate session as managed (read-write) entities, changes to them <i>will</i>
  * be persisted! So the best practice is for the client code to never modify
  * entities loaded as read-only.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDAO 
+public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDAO
 {
   // static members
 
   private static Logger log = Logger.getLogger(GenericEntityDAOImpl.class);
   private static final Logger entityInflatorLog = Logger.getLogger(GenericEntityDAOImpl.class.getName() + ".EntityInflator");
-  
+
   public static String makeQueryIdList(List<? extends AbstractEntity> entities)
   {
     List<Object> ids = new ArrayList<Object>(entities.size());
@@ -99,7 +99,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
 
 
   // instance data members
-  
+
   // public methods
 
   /**
@@ -108,7 +108,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   public GenericEntityDAOImpl()
   {
   }
-  
+
   /**
    * @deprecated Use this method prevents compile-time checking of constructor
    *             signature. Instantiate the entity via its constructor and use
@@ -127,7 +127,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   /**
    * Make the specified entity persistent. The entity's ID property will be set
    * upon return.
-   * 
+   *
    * @param entity
    */
   public void persistEntity(AbstractEntity entity)
@@ -137,36 +137,44 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
 
   /**
    * Reattach the entity to the current Hibernate session, allowing
-   * modifications that have been made or that will be made to the entity to be
-   * persisted. In particular, this will cause the entity (and any related
-   * entities that are reachable via "update" cascades) to be version checked
-   * against the database and causing a ConcurrencyFailureException to be thrown
-   * if concurrent modification of this or its related entities is detected.
+   * modifications that have been made to it while detached, or that will be
+   * made to the reattached entity, to be persisted. Note that this will cause
+   * the entity (and any related entities that are reachable via "update"
+   * cascades) to be version checked against the database, possibly causing a
+   * ConcurrencyFailureException to be thrown if concurrent modification of this
+   * or its related entities is detected.
    * <p>
-   * Internally, Hibernate will issue SQL calls to increment the version field
-   * of each entity. This can be expensive for large entity networks.
+   * Internally, version checking is effected by Hibernate by issuing SQL update
+   * statements to increment the version field of each entity at time of this
+   * method call. This can be expensive for large entity networks with "update"
+   * cascades enabled.
    * </p>
+   *
+   * @param entity the entity to be reattached
+   * @return the same entity instance passed in
    */
   public <E extends AbstractEntity> E reattachEntity(E entity)
   {
     getHibernateTemplate().update(entity);
     return entity;
   }
-  
+
   /**
-   * Reattach a <i>new instance</i> of a previously persistent, but detached
-   * entity to the current Hibernate session, allowing its previously
-   * uninitialized lazy relationships to be navigated (without throwing
-   * LazyInitializationExceptions). If the entity already exists in the session,
-   * the entity will <i>not</i> be reloaded from the database. The specified
-   * entity instance is unchanged, and its uninitialized relationships cannot be
-   * navigated.
+   * For a given detached entity, return a <i>new, Hibernate-managed instance</i>.
+   * If called within a transaction, all lazy relationships on the returned
+   * entity can be safely navigated (i.e., w/o throwing
+   * LazyInitializationExceptions). Note that if the entity already exists in
+   * the session, the entity will <i>not</i> actually be reloaded from the
+   * database; instead the returned instance will be the one already cached with
+   * the session. The passed-in entity instance will be unchanged, and its
+   * uninitialized relationships cannot be navigated.
    * <p>
-   * Relationships that were initialized in the specified entity
+   * Any relationships that may have been initialized in the passed-in entity
    * (network) will <i>not</i> be pre-initialized in the new instance of the
-   * returned entity.
+   * returned entity, so consider the potential performance impact of navigating
+   * through previously initialized lazy relationships.
    * </p>
-   * 
+   *
    * @param entity the entity to be reloaded
    * @return a new Hibernate-managed instance of the specified entity
    */
@@ -176,24 +184,27 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     // TODO: throw exception if entity already exists in the session
     return reloadEntity(entity, false);
   }
-  
+
   /**
-   * Reattach a <i>new instance</i> of a previously persistent, but detached
-   * entity to the current Hibernate session, allowing its previously
-   * uninitialized lazy relationships to be navigated (without throwing
-   * LazyInitializationExceptions). If the entity already exists in the session,
-   * the entity will <i>not</i> be reloaded from the database. The specified
-   * entity instance is unchanged, and its uninitialized relationships cannot be
-   * navigated.
+   * For a given detached entity, return a <i>new, Hibernate-managed instance</i>.
+   * If called within a transaction, all lazy relationships on the returned
+   * entity can be safely navigated (i.e., w/o throwing
+   * LazyInitializationExceptions). Note that if the entity already exists in
+   * the session, the entity will <i>not</i> actually be reloaded from the
+   * database; instead the returned instance will be the one already cached with
+   * the session. The passed-in entity instance will be unchanged, and its
+   * uninitialized relationships cannot be navigated.
    * <p>
-   * Relationships that were initialized in the specified entity
+   * Any relationships that may have been initialized in the passed-in entity
    * (network) will <i>not</i> be pre-initialized in the new instance of the
-   * returned entity.
+   * returned entity, so consider the potential performance impact of navigating
+   * through previously initialized lazy relationships, except for those
+   * requested via the <code>relationships</code> argument.
    * </p>
-   * 
+   *
    * @param <E>
    * @param entity the entity to be reloaded
-   * @param readOnly see class-level documentation of {@link GenericEntityDAO} 
+   * @param readOnly see class-level documentation of {@link GenericEntityDAO}
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
@@ -205,16 +216,16 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     // TODO: throw exception if entity already exists in the session
     if (entity != null) {
       log.debug("reloading entity " + entity);
-      return (E) findEntityById(getEntityClass(entity), entity.getEntityId(), readOnly, relationships);
+      return (E) findEntityById(entity.getEntityClass(), entity.getEntityId(), readOnly, relationships);
     }
     return null;
   }
-  
+
   /**
    * Loads the specified relationships of a given entity, allowing these
    * relationships to be navigated after the entity is detached from the
    * Hibernate session.
-   * 
+   *
    * @param entity the root entity
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
@@ -228,13 +239,13 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     }
     inflate(entity, false, relationships);
   }
-  
+
   /**
    * Loads the specified relationships of a given entity, allowing these
    * relationships to be navigated after the entity is detached from the
    * Hibernate session. See class-level documentation of
    * {@link GenericEntityDAO} for issues related to loading read-only entities.
-   * 
+   *
    * @param entity the root entity
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
@@ -248,16 +259,16 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     }
     inflate(entity, true, relationships);
   }
-  
+
   /**
    * Returns the size of a to-many relationship collection, and does so
    * efficiently, without loading the entities in the relationship.
-   * 
+   *
    * @param persistentCollection
    */
   public int relationshipSize(final Object persistentCollection)
   {
-    Number size = (Number) getHibernateTemplate().execute(new HibernateCallback() 
+    Number size = (Number) getHibernateTemplate().execute(new HibernateCallback()
     {
       public Object doInHibernate(Session session) throws HibernateException, SQLException
       {
@@ -266,7 +277,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     });
     return size.intValue();
   }
-  
+
   /**
    * Returns the size of a to-many relationship collection, and does so
    * efficiently, without loading the entities in the relationship.
@@ -276,7 +287,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    */
   public int relationshipSize(final AbstractEntity entity, final String relationship)
   {
-    Number size = (Number) getHibernateTemplate().execute(new HibernateCallback() 
+    Number size = (Number) getHibernateTemplate().execute(new HibernateCallback()
     {
       public Object doInHibernate(Session session) throws HibernateException, SQLException
       {
@@ -296,7 +307,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     final String relationshipProperty,
     final String relationshipPropertyValue)
   {
-    Number size = (Number) getHibernateTemplate().execute(new HibernateCallback() 
+    Number size = (Number) getHibernateTemplate().execute(new HibernateCallback()
     {
       public Object doInHibernate(Session session) throws HibernateException, SQLException
       {
@@ -313,15 +324,15 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     });
     return size.intValue();
   }
-  
+
   public void deleteEntity(AbstractEntity entity)
   {
     getHibernateTemplate().delete(entity);
   }
-  
+
   /**
    * Retrieve and return a list of entities of the specified type.
-   * 
+   *
    * @param <E> The type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
    * @return a list of the entities of the specified type
@@ -349,7 +360,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
 
   /**
    * Retrieve and return an entity by its identifier (primary key).
-   * 
+   *
    * @param <E> the type of the entity to retrieve
    * @param id the identifier of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
@@ -381,8 +392,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   /**
    * Retrieve and return the entity that has specific values for the specified
    * properties. Return <code>null</code> if no entity has that value for that
-   * set of properties. 
-   * 
+   * set of properties.
+   *
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
    * @param name2Value a <code>Map</code> containing entries for each
@@ -390,7 +401,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * @return the entity that has the specified values for the specified
    *         set of properties
    */
-  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, 
+  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass,
                                                                      Map<String,Object> name2Value)
   {
     return findEntitiesByProperties(entityClass, name2Value, false);
@@ -413,8 +424,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   {
     String entityName = entityClass.getSimpleName();
     final StringBuffer hql = new StringBuffer();
-    
-    List<String> relationships = expandRelationships(relationshipsIn); 
+
+    List<String> relationships = expandRelationships(relationshipsIn);
     Map<String,String> path2Alias = makeAliases(relationships);
     String entityAlias = "x";
     hql.append("select distinct x from ").append(entityName).append(' ').append(entityAlias);
@@ -437,8 +448,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
       String asAlias = path2Alias.get(relationship);
       hql.append(" left join fetch ").append(fromAlias).append(".").append(association).append(' ').append(asAlias);
     }
-    
-    boolean first = true;    
+
+    boolean first = true;
     if (name2Value == null) {
       name2Value = Collections.EMPTY_MAP;
     }
@@ -455,14 +466,14 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
       hql.append("x.").append(propertyName).append(" = ?");
       values[i++]= name2Value.get(propertyName);
     }
-    
+
     if (log.isDebugEnabled()) {
       log.debug(hql.toString());
     }
-    
-    List<E> result = (List<E>) getHibernateTemplate().execute(new HibernateCallback() 
+
+    List<E> result = (List<E>) getHibernateTemplate().execute(new HibernateCallback()
     {
-      public Object doInHibernate(Session session) throws HibernateException, SQLException 
+      public Object doInHibernate(Session session) throws HibernateException, SQLException
       {
         Query query = session.createQuery(hql.toString());
         query.setReadOnly(readOnly);
@@ -479,11 +490,11 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     }
     return result;
   }
-  
+
   /**
    * Retrieve and return a list of entities that have specific values for the
    * specified properties.
-   * 
+   *
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
    * @return a list of entities that have the specified value for the specified
@@ -493,7 +504,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * @exception InvalidArgumentException when there is more
    *    than one entity with the specified value for the property
    */
-  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, 
+  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass,
                                                              Map<String,Object> name2Value)
   {
     return findEntityByProperties(entityClass,
@@ -529,20 +540,20 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     }
     return entities.get(0);
   }
-  
+
   /**
    * Retrieve and return the entities that have a specific value for the
    * specified property. Return empty list if no entity has that value for that
    * property.
-   * 
+   *
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
    * @param propertyName the name of the property to query against
    * @param propertyValue the value of the property to query for
    * @return the entity that has the specified value for the specified property
    */
-  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass, 
-                                                                   String propertyName, 
+  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass,
+                                                                   String propertyName,
                                                                    Object propertyValue)
   {
     return findEntitiesByProperty(entityClass, propertyName, propertyValue, false);
@@ -572,11 +583,11 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * property. Return <code>null</code> if no entity has that value for that
    * property. Throw an <code>InvalidArgumentException</code> if there is more
    * than one entity with the specified value.
-   * 
+   *
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
    * @param propertyName the name of the property to query against
-   * @param propertyValue the value of the property to query for 
+   * @param propertyValue the value of the property to query for
    * @return the entity that has the specified value for the specified property
    * @exception InvalidArgumentException when there is more
    *    than one entity with the specified value for the property
@@ -590,7 +601,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
                                 propertyValue,
                                 false);
   }
-                                                           
+
   /**
    * See @{@link #findEntityByProperty(Class, String, Object)}.
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
@@ -619,7 +630,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     }
     return entities.get(0);
   }
-  
+
 //  @SuppressWarnings("unchecked")
 //  public <E extends AbstractEntity> List<E> findEntitiesByPropertyPattern(
 //    Class<E> entityClass,
@@ -631,7 +642,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
 //    propertyPattern = propertyPattern.replaceAll( "\\*", "%" );
 //    return (List<E>) getHibernateTemplate().find(hql, propertyPattern);
 //  }
-  
+
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> List<E> findEntitiesByHql(
     Class<E> entityClass,
@@ -640,8 +651,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   {
     return (List<E>) getHibernateTemplate().find(hql, hqlParameters);
   }
-  
- 
+
+
   // private instance methods
 
   /**
@@ -671,7 +682,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
 
   /**
    * Return an array of types that correspond to the array of arguments.
-   *  
+   *
    * @param arguments the arguments to get the types for
    * @return an array of types that correspond to the array of arguments
    */
@@ -679,7 +690,13 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   {
     Class [] argumentTypes = new Class [arguments.length];
     for (int i = 0; i < arguments.length; i++) {
-      Class argumentType = arguments[i].getClass();
+      Class argumentType;
+      if (arguments[i] instanceof AbstractEntity) {
+        argumentType = ((AbstractEntity) arguments[i]).getEntityClass();
+      }
+      else {
+        argumentType = arguments[i].getClass();
+      }
       if (argumentType.equals(Boolean.class)) {
         argumentType = Boolean.TYPE;
       }
@@ -687,10 +704,10 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     }
     return argumentTypes;
   }
-  
+
   /**
    * Construct and return a new entity object.
-   * 
+   *
    * @param <E> the entity type
    * @param constructor the constructor to invoke
    * @param constructorArguments the (possibly empty) list of arguments to
@@ -728,13 +745,13 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
       if (!verifyEntityRelationshipExists(session, entityClass, relationship)) {
         return false;
       }
-      
+
       org.hibernate.type.Type nextType = metadata.getPropertyType(relationship);
       if (nextType.isCollectionType()) {
         nextType = ((CollectionType) nextType).getElementType((SessionFactoryImplementor) session.getSessionFactory());
       }
       Class nextEntityClass = nextType.getReturnedClass();
-      return verifyEntityRelationshipExists(session, 
+      return verifyEntityRelationshipExists(session,
                                             nextEntityClass,
                                             nextRelationship);
     }
@@ -747,7 +764,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
       return true;
     }
   }
-  
+
   @SuppressWarnings("unchecked")
   private <T> void inflate(final AbstractEntity entity,
                            boolean readOnly,
@@ -758,7 +775,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
       entityInflatorLog.debug("inflating " + entity + " for relationships: " + relationships);
       start = System.currentTimeMillis();
     }
-    findEntityById(getEntityClass(entity), entity.getEntityId(), readOnly, relationships);
+    findEntityById(entity.getEntityClass(), entity.getEntityId(), readOnly, relationships);
     if (entityInflatorLog.isDebugEnabled()) {
       entityInflatorLog.debug("inflating " + entity + " took " + (System.currentTimeMillis() - start) / 1000.0 + " seconds");
     }
@@ -767,7 +784,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   private Map<String,String> makeAliases(List<String> relationships)
   {
     int nextAlias = 1;
-    Map<String,String> path2Alias = new HashMap<String,String>(); 
+    Map<String,String> path2Alias = new HashMap<String,String>();
     for (String relationship : relationships) {
       if (!path2Alias.containsKey(relationship)) {
         path2Alias.put(relationship, "x" + nextAlias++);
@@ -798,15 +815,5 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     }
      return new ArrayList<String>(expandedRelationships);
   }
-
-  private Class getEntityClass(AbstractEntity entity)
-  {
-    Class c = entity.getClass();
-    if (c.getName().contains("$$EnhancerByCGLIB")) {
-      return c.getSuperclass();
-    }
-    return c;
-  }
-   
 }
 

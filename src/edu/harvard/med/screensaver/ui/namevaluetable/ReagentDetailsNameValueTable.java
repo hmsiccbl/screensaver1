@@ -14,11 +14,10 @@ import java.util.List;
 
 import javax.faces.model.ListDataModel;
 
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
-import edu.harvard.med.screensaver.ui.util.HtmlUtils;
-
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.ui.util.HtmlUtils;
 
 /**
  * A NameValueTable for the well details portion of the Reagent Viewer.

@@ -2,68 +2,73 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.model.users;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.CollectionElementName;
-import edu.harvard.med.screensaver.model.DerivedEntityProperty;
-import edu.harvard.med.screensaver.model.ToManyRelationship;
-import edu.harvard.med.screensaver.model.ToOneRelationship;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
-import edu.harvard.med.screensaver.model.screens.Screen;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.screens.Screen;
 
 
 /**
  * A Hibernate entity bean representing a screening room user.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.joined-subclass table="screening_room_user" lazy="false"
- * @hibernate.joined-subclass-key column="screensaver_user_id"
  */
+@Entity
+@PrimaryKeyJoinColumn(name="screensaverUserId")
+@org.hibernate.annotations.ForeignKey(name="fk_screening_room_user_to_screensaver_user")
+@org.hibernate.annotations.Proxy(lazy=false)
 public class ScreeningRoomUser extends ScreensaverUser
 {
-  
-  // static fields
+
+  // private static data
 
   private static final Logger log = Logger.getLogger(ScreeningRoomUser.class);
   private static final long serialVersionUID = 0L;
 
 
-  // instance fields
+  // private instance data
 
-  private ScreeningRoomUserClassification _userClassification;
-  private Set<ChecklistItem> _checklistItems = new HashSet<ChecklistItem>();
-  private Set<Screen> _screensLed = new HashSet<Screen>();
-  private Set<Screen> _screensHeaded = new HashSet<Screen>();
-  private Set<Screen> _screensCollaborated = new HashSet<Screen>();
-  private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
   private ScreeningRoomUser _labHead;
   private Set<ScreeningRoomUser> _labMembers = new HashSet<ScreeningRoomUser>();
   private LabAffiliation _labAffiliation;
+  private Set<ChecklistItem> _checklistItems = new HashSet<ChecklistItem>();
+  private Set<Screen> _screensHeaded = new HashSet<Screen>();
+  private Set<Screen> _screensLed = new HashSet<Screen>();
+  private Set<Screen> _screensCollaborated = new HashSet<Screen>();
+  private ScreeningRoomUserClassification _userClassification;
   private boolean _isNonScreeningUser;
   private String _comsCrhbaPermitNumber;
   private String _comsCrhbaPermitPrincipalInvestigator;
-  private String _labName; // optimization
 
 
-  // public constructors
+  // public constructor
 
   /**
-   * Constructs an initialized <code>ScreeningRoomUser</code> object.
-   *
+   * Construct an initialized <code>ScreeningRoomUser</code>.
    * @param dateCreated the date created
    * @param firstName the first name
    * @param lastName the last name
@@ -102,199 +107,108 @@ public class ScreeningRoomUser extends ScreensaverUser
     setNonScreeningUser(isNonScreeningUser);
   }
 
-  
-  // public methods
 
+  // public instance methods
+
+  @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
   }
 
   /**
-   * Get an unmodifiable copy of the set of checklist items.
-   *
-   * @return the checklist items
-   * @hibernate.set
-   *   cascade="all-delete-orphan"
-   *   inverse="true"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="screensaver_user_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.users.ChecklistItem"
-   */
-  public Set<ChecklistItem> getChecklistItems()
-  {
-    return _checklistItems;
-  }
-
-  /**
-   * Get an unmodifiable copy of the set of screens for which this user was the lead screener.
-   *
-   * @return the screens for which this user was the lead screener
-   */
-  @ToManyRelationship(inverseProperty="leadScreener")
-  @CollectionElementName("screenLed")
-  public Set<Screen> getScreensLed()
-  {
-    return Collections.unmodifiableSet(_screensLed);
-  }
-
-  /**
-   * Add the screens for which this user was the lead screene.
-   *
-   * @param screenLed the screens for which this user was the lead screene to add
-   * @return true iff the screening room user did not already have the screens for which this user was the lead screene
-   */
-  public boolean addScreenLed(Screen screenLed)
-  {
-    if (getHbnScreensLed().add(screenLed)) {
-      screenLed.setHbnLeadScreener(this);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Get an unmodifiable copy of the set of screens for which this user was the lab head.
-   *
-   * @return the screens for which this user was the lab head
-   */
-  @ToManyRelationship(inverseProperty="labHead")
-  @CollectionElementName("screenHeaded")
-  public Set<Screen> getScreensHeaded()
-  {
-    return Collections.unmodifiableSet(_screensHeaded);
-  }
-
-  /**
-   * Add the screens for which this user was the lab hea.
-   *
-   * @param screenHeaded the screens for which this user was the lab hea to add
-   * @return true iff the screening room user did not already have the screens for which this user was the lab hea
-   */
-  public boolean addScreenHeaded(Screen screenHeaded)
-  {
-    if (getHbnScreensHeaded().add(screenHeaded)) {
-      screenHeaded.setHbnLabHead(this);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Get an unmodifiable copy of the set of screens for which this user was a collaborator.
-   *
-   * @return the screens for which this user was a collaborator
-   */
-  @ToManyRelationship(inverseProperty="collaborators")
-  @CollectionElementName("screenCollaborated")
-  public Set<Screen> getScreensCollaborated()
-  {
-    return Collections.unmodifiableSet(_screensCollaborated);
-  }
-
-  /**
-   * Add the screens for which this user was a collaborator.
-   *
-   * @param screenCollaborated the screens for which this user was a collaborato to add
-   * @return true iff the screening room user did not already have the screens for which this user was a collaborato
-   */
-  public boolean addScreenCollaborated(Screen screenCollaborated)
-  {
-    if (getHbnScreensCollaborated().add(screenCollaborated)) {
-      return screenCollaborated.getHbnCollaborators().add(this);
-    }
-    return false;
-  }
-
-  /**
-   * Remove the screens for which this user was a collaborator.
-   *
-   * @param screenCollaborated the screens from which this user is no longer a collaborator
-   * @return true iff the screening room user previously was a collaborator on the screen
-   */
-  public boolean removeScreenCollaborated(Screen screenCollaborated)
-  {
-    if (getHbnScreensCollaborated().remove(screenCollaborated)) {
-      return screenCollaborated.getHbnCollaborators().remove(this);
-    }
-    return false;
-  }
-
-  /**
-   * Get an unmodifiable copy of the set of cherry pick requests.
-   *
-   * @return the cherry pick requests
-   */
-  @ToManyRelationship(inverseProperty="requestedBy")
-  public Set<CherryPickRequest> getCherryPickRequests()
-  {
-    return Collections.unmodifiableSet(_cherryPickRequests);
-  }
-
-  /**
    * Get the ScreeningRoomUser that is the head of this user's lab. If this user
    * is the lab head, return this user.
-   *
    * @return the lab head; null if this user is the head of her own lab.
    */
-  @ToOneRelationship(inverseProperty="labMembers")
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinColumn(name="labHeadId", nullable=true)
+  @org.hibernate.annotations.ForeignKey(name="fk_screening_room_user_to_lab_head")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.NO_PROXY)
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE
+  })
+  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="labMembers")
   public ScreeningRoomUser getLabHead()
   {
-    if (isLabHead()) {
-      return this;
-    }
     return _labHead;
   }
-  
+
   /**
    * Set the lab head.
-   *
    * @param labHead the new lab head
    */
   public void setLabHead(ScreeningRoomUser labHead)
   {
+    // hibernate callers do not need maintenance of bi-directional integrity. they also crash
+    // when you call getLabMembers from within setLabHead
+    if (isHibernateCaller()) {
+      _labHead = labHead;
+      return;
+    }
+    if (labHead != null && labHead.equals(_labHead)) {
+      return;
+    }
     if (_labHead != null) {
-      _labHead.getHbnLabMembers().remove(this);
+      _labHead.getLabMembers().remove(this);
     }
     _labHead = labHead;
     if (_labHead != null) {
-      _labHead.getHbnLabMembers().add(this);
+      _labHead.getLabMembers().add(this);
     }
   }
 
-  // note: cannot name this method "isLabHead", as this is ambiguous with "getLabHead", 
-  // w.r.t. to JavaBean property names (causing a unit test to fail)
-  @DerivedEntityProperty
+  /**
+   * Return true iff this user is the head of a lab. Users are considered lab heads whenever
+   * they do not themselves have any lab head.
+   * @return true iff this user is the head of a lab
+   * @motivation cannot name this method isLabHead or java.beans.BeanInfo classes get confused
+   * about the appropriate type and getter method for property labHead, screwing up our model
+   * unit tests
+   */
+  @Transient
   public boolean isHeadOfLab()
   {
-    return getLabHead() == null;
+    return _labHead == null;
   }
 
   /**
-   * Get an unmodifiable copy of the set of lab members. If this
-   * ScreeningRoomUser is also the lab head, the result will <i>not</i> contain
-   * this ScreeningRoomUser (i.e., the lab head is not considered a lab member).
-   * 
-   * @return the lab members
+   * Get the set of lab members. If this ScreeningRoomUser is also the lab head, the result
+   * will <i>not</i> contain this ScreeningRoomUser (i.e., the lab head is not considered a
+   * lab member).
+   * <p>
+   * Note there is no corresponding <code>removeLabMember(ScreeningRoomUser)</code> here. This
+   * is intentional, as opposed to other places in the code where the absence of such a remove
+   * method is just sloppy. <code>b.setLabHead(a)</code> should really be called instead of
+   * <code>a.removeLabMember(b)</code>, so we can appropriately set the new lab head for
+   * <code>b</code>. It probably makes sense to not remove a lab member unless and until that
+   * screener is a member of another lab. But adding a <code>previousLabMembers</code> property
+   * is probably overkill :)
+   *
+   * @return the set of lab members
    */
-  @ToManyRelationship(inverseProperty="labHead")
+  @OneToMany(
+    mappedBy="labHead",
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE },
+    fetch=FetchType.LAZY
+  )
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE
+  })
   public Set<ScreeningRoomUser> getLabMembers()
   {
-    return Collections.unmodifiableSet(_labMembers);
+    return _labMembers;
   }
 
   /**
    * Add the lab member.
-   *
    * @param labMember the lab member to add
    * @return true iff the screening room user did not already have the lab member
    */
   public boolean addLabMember(ScreeningRoomUser labMember)
   {
-    if (getHbnLabMembers().add(labMember)) {
-      labMember.setHbnLabHead(this);
+    if (getLabMembers().add(labMember)) {
+      labMember.setLabHead(this);
       return true;
     }
     return false;
@@ -303,86 +217,230 @@ public class ScreeningRoomUser extends ScreensaverUser
   /**
    * Get the lab affiliation. The lab affiliation should always be present, whether this user
    * is a lab head or a lab member.
-   *
    * @return the lab affiliation
    */
-  @ToOneRelationship(nullable=true)
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinColumn(name="labAffiliationId", nullable=true)
+  @org.hibernate.annotations.ForeignKey(name="fk_screening_room_user_to_lab_affiliation")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE
+  })
+  @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional=true)
   public LabAffiliation getLabAffiliation()
   {
     return _labAffiliation;
   }
 
   /**
-   * Set the lab affiliation.
-   *
+   * Set the lab affiliation. Update the lab name.
    * @param labAffiliation the new lab affiliation
    */
   public void setLabAffiliation(LabAffiliation labAffiliation)
   {
-    if (labAffiliation == _labAffiliation) {
-      return;
-    }
-    if (_labAffiliation != null) {
-      _labAffiliation.getHbnScreeningRoomUsers().remove(this);
-      _labName = null;
-    }
     _labAffiliation = labAffiliation;
-    if (_labAffiliation != null) {
-      _labAffiliation.getHbnScreeningRoomUsers().add(this);
-      _labName = makeLabName();
+  }
+
+  /**
+   * Get the name of the lab affiliation.
+   * @return the lab affiliation name
+   */
+  @Transient
+  public String getLabAffiliationName()
+  {
+    LabAffiliation labAffiliation;
+    if (isHeadOfLab()) {
+      labAffiliation = getLabAffiliation();
     }
+    else {
+      labAffiliation = getLabHead().getLabAffiliation();
+    }
+    if (labAffiliation == null) {
+      return "";
+    }
+    return labAffiliation.getAffiliationName();
   }
 
   /**
-   * Set the date created, updating this entity's membership in any related entity sets
-   * that it already is a member of.
-   * 
-   * @param dateCreated the new date created
+   * Get the set of checklist items.
+   * @return the checklist items
    */
-  @Override
-  public void setDateCreated(Date dateCreated)
+  @OneToMany(
+    mappedBy="screeningRoomUser",
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+    fetch=FetchType.LAZY
+  )
+  @OrderBy("checklistItemType") // TODO: would like this to be checklistItemType.orderStatistic
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
+  public Set<ChecklistItem> getChecklistItems()
   {
-    preModifyBusinessKey();
-    super.setDateCreated(dateCreated);
-    postModifyBusinessKey();
+    return _checklistItems;
   }
 
   /**
-   * Set the first name, updating this entity's membership in any related entity sets
-   * that it already is a member of.
-   * 
-   * @param firstName the new first name
+   * Create a new checklist item for the user.
+   * @param checklistItemType the checklist item type
+   * @return the new checklist item for the user
    */
-  @Override
-  public void setFirstName(String firstName)
+  public ChecklistItem createChecklistItem(ChecklistItemType checklistItemType)
   {
-    preModifyBusinessKey();
-    super.setFirstName(firstName);
-    postModifyBusinessKey();
+    return createChecklistItem(checklistItemType, null, null, null, null);
   }
 
   /**
-   * Set the last name, updating this entity's membership in any related entity sets
-   * that it already is a member of.
-   * 
-   * @param lastName the new last name
+   * Create a new checklist item for the user.
+   * @param checklistItemType the checklist item type
+   * @param activationDate the activation date
+   * @param activationInitials the activation initials
+   * @return the new checklist item for the user
    */
-  @Override
-  public void setLastName(String lastName)
+  public ChecklistItem createChecklistItem(
+    ChecklistItemType checklistItemType,
+    Date activationDate,
+    String activationInitials)
   {
-    preModifyBusinessKey();
-    super.setLastName(lastName);
-    postModifyBusinessKey(); 
+    return createChecklistItem(checklistItemType, activationDate, activationInitials, null, null);
+  }
+
+  /**
+   * Create a new checklist item for the user.
+   * @param checklistItemType the checklist item type
+   * @param activationDate the activation date
+   * @param activationInitials the activation initials
+   * @param deactivationDate the deactivation date
+   * @param deactivationInitials the deactivation initials
+   * @return the new checklist item for the user
+   */
+  public ChecklistItem createChecklistItem(
+    ChecklistItemType checklistItemType,
+    Date activationDate,
+    String activationInitials,
+    Date deactivationDate,
+    String deactivationInitials)
+  {
+    ChecklistItem checklistItem = new ChecklistItem(
+      checklistItemType,
+      this,
+      activationDate,
+      activationInitials,
+      deactivationDate,
+      deactivationInitials);
+    _checklistItems.add(checklistItem);
+    return checklistItem;
+  }
+
+  /**
+   * Get the set of screens for which this user was the lab head.
+   * @return the set of screens for which this user was the lab head
+   */
+  @OneToMany(
+    mappedBy="labHead",
+    fetch=FetchType.LAZY
+  )
+  @OrderBy("screenNumber")
+  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="screenHeaded")
+  public Set<Screen> getScreensHeaded()
+  {
+    return _screensHeaded;
+  }
+
+  /**
+   * Add the screens for which this user was the lab head.
+   * @param screenHeaded the screens for which this user was the lab hea to add
+   * @return true iff the screening room user did not already have the screens for which this user was the lab hea
+   */
+  public boolean addScreenHeaded(Screen screenHeaded)
+  {
+    if (_screensHeaded.add(screenHeaded)) {
+      screenHeaded.setLabHead(this);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Get the set of screens for which this user is the lead screener.
+   * @return the set of screens for which this user is the lead screener
+   */
+  @OneToMany(
+    mappedBy="leadScreener",
+    fetch=FetchType.LAZY
+  )
+  @OrderBy("screenNumber")
+  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="screenLed")
+  public Set<Screen> getScreensLed()
+  {
+    return _screensLed;
+  }
+
+  /**
+   * Add the screen for which this user was the lead screener.
+   * @param screenLed the screen for which this user was the lead screener
+   * @return true iff the screening room user was not already lead screener for this screen
+   */
+  public boolean addScreenLed(Screen screenLed)
+  {
+    if (_screensLed.add(screenLed)) {
+      screenLed.setLeadScreener(this);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Get the set of screens for which this user was a collaborator.
+   * @return the set of screens for which this user was a collaborator
+   */
+  @ManyToMany(
+    mappedBy="collaborators",
+    targetEntity=Screen.class
+  )
+  @org.hibernate.annotations.ForeignKey(name="fk_collaborator_link_to_screening_room_user")
+  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
+  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
+  @edu.harvard.med.screensaver.model.annotations.ManyToMany(singularPropertyName="screenCollaborated")
+  public Set<Screen> getScreensCollaborated()
+  {
+    return _screensCollaborated;
+  }
+
+  /**
+   * Add the screens for which this user was a collaborator.
+   * @param screenCollaborated the screens for which this user was a collaborato to add
+   * @return true iff the screening room user did not already have the screens for which this user was a collaborato
+   */
+  public boolean addScreenCollaborated(Screen screenCollaborated)
+  {
+    if (_screensCollaborated.add(screenCollaborated)) {
+      return screenCollaborated.getCollaborators().add(this);
+    }
+    return false;
+  }
+
+  /**
+   * Remove the screens for which this user was a collaborator.
+   * @param screenCollaborated the screens from which this user is no longer a collaborator
+   * @return true iff the screening room user previously was a collaborator on the screen
+   */
+  public boolean removeScreenCollaborated(Screen screenCollaborated)
+  {
+    if (_screensCollaborated.remove(screenCollaborated)) {
+      return screenCollaborated.getCollaborators().remove(this);
+    }
+    return false;
   }
 
   /**
    * Get the user classification.
-   *
    * @return the user classification
-   * @hibernate.property
-   *   type="edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification$UserType"
-   *   not-null="true"
    */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(
+    type="edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification$UserType"
+  )
   public ScreeningRoomUserClassification getUserClassification()
   {
     return _userClassification;
@@ -390,28 +448,26 @@ public class ScreeningRoomUser extends ScreensaverUser
 
   /**
    * Set the user classification.
-   *
    * @param userClassification the new user classification
    */
   public void setUserClassification(ScreeningRoomUserClassification userClassification)
   {
+    assert userClassification != null : "user classification must be non-null";
     _userClassification = userClassification;
   }
 
   /**
    * Get non-screening flag, indicating whether this user performs screening.
-   * 
    * @return a flag indicating whether this user performs screening
-   * @hibernate.property not-null="true"
    */
-  public boolean getNonScreeningUser()
+  @Column(nullable=false, name="isNonScreeningUser")
+  public boolean isNonScreeningUser()
   {
     return _isNonScreeningUser;
   }
 
   /**
    * Set the non-screening flag.
-   *
    * @param isNonScreeningUser a flag indicating whether this user performs screening.
    */
   public void setNonScreeningUser(boolean isNonScreeningUser)
@@ -421,10 +477,9 @@ public class ScreeningRoomUser extends ScreensaverUser
 
   /**
    * Get the COMS-CRHBA permit number.
-   * 
    * @return the COMS-CRHBA permit number
-   * @hibernate.property type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getComsCrhbaPermitNumber()
   {
     return _comsCrhbaPermitNumber;
@@ -441,10 +496,9 @@ public class ScreeningRoomUser extends ScreensaverUser
 
   /**
    * Get the COMS-CRHBA permit principal investigator.
-   * 
    * @return the COMS-CRHBA permit principal investigator
-   * @hibernate.property type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getComsCrhbaPermitPrincipalInvestigator()
   {
     return _comsCrhbaPermitPrincipalInvestigator;
@@ -459,170 +513,83 @@ public class ScreeningRoomUser extends ScreensaverUser
     _comsCrhbaPermitPrincipalInvestigator = comsCrhbaPermitPrincipalInvestigator;
   }
 
+  /**
+   * Get the lab name. This is a combination of the name of the lab head, last and first, and
+   * the lab affiliation name.
+   * @return the lab name
+   */
+  @Transient
+  public String getLabName()
+  {
+    if (isHeadOfLab()) {
+      StringBuilder labName = new StringBuilder(getFullNameLastFirst());
+      String labAffiliation = getLabAffiliationName();
+      if (labAffiliation.length() > 0) {
+        labName.append(" - ").append(labAffiliation);
+      }
+      return labName.toString();
+    }
+    else {
+      return getLabHead().getLabName();
+    }
+  }
 
   /**
    * Get whether this user is an RNAi screener.
-   *
    * @return <code>true</code> iff this user is an RNAi screener.
    */
-  @DerivedEntityProperty
+  @Transient
   public boolean isRnaiUser()
   {
     return getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
   }
-  
+
   /**
    * Get whether this user is a small compound screener.
-   *
    * @return <code>true</code> iff this user is a small compound screener.
    */
-  @DerivedEntityProperty
+  @Transient
   public boolean isCompoundUser()
   {
     return getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
   }
 
-  @DerivedEntityProperty(isPersistent=true)
-  public String getLabName() 
+
+  // protected instance methods
+
+  @Override
+  protected boolean validateRole(ScreensaverUserRole role)
   {
-    if (isLabHead()) {
-      return getHbnLabName();
+    if (log.isDebugEnabled()) {
+      log.debug("validateRole " + this + " " + role);
     }
-    return getLabHead().getLabName();
+    return ! role.isAdministrative();
   }
 
-  @DerivedEntityProperty
-  public boolean isLabHead()
-  {
-    return _labHead == null;
-  }
 
-  @DerivedEntityProperty
-  public String getLabAffiliationName()
-  {
-    LabAffiliation labAffiliation = getLabHead().getLabAffiliation();
-    if (labAffiliation != null) {
-      String labAffiliationName = labAffiliation.getAffiliationName();
-      if (labAffiliationName != null && labAffiliationName.length() > 0) {
-        return labAffiliationName;
-      }
-    }    
-    return "";
-  }
- 
-  
-  // protected methods
+  // protected constructor
 
   /**
-   * Get the screens for which this user was the lead screener.
-   *
-   * @return the screens for which this user was the lead screener
-   * @hibernate.set
-   *   cascade="none"
-   *   inverse="true"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="lead_screener_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.Screen"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   * this method is public only because the bi-directional relationship
-   * is cross-package.
+   * Construct an uninitialized <code>ScreeningRoomUser</code>.
+   * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  public Set<Screen> getHbnScreensLed()
-  {
-    return _screensLed;
-  }
+  protected ScreeningRoomUser() {}
+
+
+  // private constructor and instance methods
 
   /**
-   * Get the screens for which this user was the lab head.
-   *
-   * @return the screens for which this user was the lab head
-   * @hibernate.set
-   *   cascade="none"
-   *   inverse="true"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="lab_head_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.Screen"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   * this method is public only because the bi-directional relationship
-   * is cross-package.
-   */
-  public Set<Screen> getHbnScreensHeaded()
-  {
-    return _screensHeaded;
-  }
-
-  /**
-   * Get the screens for which this user was a collaborator.
-   *
-   * @return the screens for which this user was a collaborator
-   * @hibernate.set
-   *   inverse="true"
-   *   table="collaborator_link"
-   *   cascade="none"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="collaborator_id"
-   * @hibernate.collection-many-to-many
-   *   column="screen_id"
-   *   class="edu.harvard.med.screensaver.model.screens.Screen"
-   *   foreign-key="fk_collaborator_link_to_screening_room_user"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   * this method is public only because the bi-directional relationship
-   * is cross-package.
-   */
-  public Set<Screen> getHbnScreensCollaborated()
-  {
-    return _screensCollaborated;
-  }
-
-  /**
-   * Get the cherry pick requests made by this user.
-   *
-   * @return the cherry pick requests made by this user
-   * @hibernate.set
-   *   cascade="none"
-   *   inverse="true"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="requested_by_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.CherryPickRequest"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   * public access since relationship is cross-package
-   */
-  public Set<CherryPickRequest> getHbnCherryPickRequests()
-  {
-    return _cherryPickRequests;
-  }
-  
-  
-  // protected methods
-
-  protected boolean validateRole(ScreensaverUserRole role) 
-  {
-    return !role.isAdministrative();
-  }
-  
-  
-  // private constructor
-
-  /**
-   * Construct an uninitialized <code>ScreeningRoomUser</code> object.
-   *
+   * Set the lab members.
+   * @param labMembers the new lab members
    * @motivation for hibernate
    */
-  private ScreeningRoomUser() {}
-
-
-  // private methods
+  private void setLabMembers(Set<ScreeningRoomUser> labMembers)
+  {
+    _labMembers = labMembers;
+  }
 
   /**
    * Set the checklist items.
-   *
    * @param checklistItems the new checklist items
    * @motivation for hibernate
    */
@@ -632,181 +599,32 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Set the screens for which this user was the lead screener.
-   *
-   * @param screensLed the new screens for which this user was the lead screener
-   * @motivation for hibernate
-   */
-  private void setHbnScreensLed(Set<Screen> screensLed)
-  {
-    _screensLed = screensLed;
-  }
-
-  /**
    * Set the screens for which this user was the lab head.
-   *
    * @param screensHeaded the new screens for which this user was the lab head
    * @motivation for hibernate
    */
-  private void setHbnScreensHeaded(Set<Screen> screensHeaded)
+  private void setScreensHeaded(Set<Screen> screensHeaded)
   {
     _screensHeaded = screensHeaded;
   }
 
   /**
+   * Set the screens for which this user was the lead screener.
+   * @param screensLed the new screens for which this user was the lead screener
+   * @motivation for hibernate
+   */
+  private void setScreensLed(Set<Screen> screensLed)
+  {
+    _screensLed = screensLed;
+  }
+
+  /**
    * Set the screens for which this user was a collaborator.
-   *
    * @param screensCollaborated the new screens for which this user was a collaborator
    * @motivation for hibernate
    */
-  private void setHbnScreensCollaborated(Set<Screen> screensCollaborated)
+  private void setScreensCollaborated(Set<Screen> screensCollaborated)
   {
     _screensCollaborated = screensCollaborated;
-  }
-
-  /**
-   * Set the cherry pick requests made by this user.
-   *
-   * @param cherryPickRequests the cherry pick requests made by this user
-   * @motivation for hibernate
-   */
-  private void setHbnCherryPickRequests(Set<CherryPickRequest> cherryPickRequests)
-  {
-    _cherryPickRequests = cherryPickRequests;
-  }
-
-  /**
-   * Get the lab head.
-   *
-   * @return the lab head
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser"
-   *   column="lab_head_id"
-   *   foreign-key="fk_screening_room_user_to_lab_head"
-   *   cascade="save-update"
-   *   lazy="no-proxy"
-   * @motivation for hibernate
-   */
-  private ScreeningRoomUser getHbnLabHead()
-  {
-    return _labHead;
-  }
-
-  /**
-   * Set the lab head.
-   *
-   * @param labHead the new lab head
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  private void setHbnLabHead(ScreeningRoomUser labHead)
-  {
-    _labHead = labHead;
-  }
-
-  /**
-   * @hibernate.property type="text" column="lab_name"
-   * @return
-   */
-  private String getHbnLabName() 
-  {
-    return _labName;
-  }
-
-  private void setHbnLabName(String labName)
-  {
-    _labName = labName;
-  }
-
-    /**
-   * Get the lab members.
-   *
-   * @return the lab members
-   * @hibernate.set
-   *   inverse="true" 
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="lab_head_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   * @motivation in order to avoid what I believe is a Hibernate bug, I
-   *   have removed the cascade="save-update" from the hibernate.set
-   *   annotation. this means that lab members will not automatically
-   *   get saved or updated when you save or update the lab head! (to
-   *   reproduce the bug, but the cascade back in, and run the
-   *   {@link edu.harvard.med.screensaver.db.screendb.ScreenDBDataImporter}.
-   *   (NOTE: if/when you fix this, make sure to remove the 2 hacks in
-   *   EntityBeansPersistenceTest!)
-   */
-  private Set<ScreeningRoomUser> getHbnLabMembers()
-  {
-    return _labMembers;
-  }
-
-  /**
-   * Set the lab members.
-   *
-   * @param labMembers the new lab members
-   * @motivation for hibernate
-   */
-  private void setHbnLabMembers(Set<ScreeningRoomUser> labMembers)
-  {
-    _labMembers = labMembers;
-  }
-  
-  /**
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.users.LabAffiliation"
-   *   column="lab_affiliation_id"
-   *   foreign-key="fk_screening_room_user_to_lab_affiliation"
-   *   cascade="save-update"
-   *   lazy="proxy"
-   */
-  private LabAffiliation getHbnLabAffiliation()
-  {
-    return _labAffiliation;
-  }
-
-  private void setHbnLabAffiliation(LabAffiliation labAffiliation)
-  {
-    _labAffiliation = labAffiliation;
-  }
-
-
-  private void preModifyBusinessKey() {
-    if (_screensCollaborated != null) {
-      for (Screen screenCollaborated : _screensCollaborated) {
-        screenCollaborated.getHbnCollaborators().remove(this);
-      }
-    }
-    if (_labHead != null) {
-      _labHead.getHbnLabMembers().remove(this);
-    }
-  }
-
-
-  private void postModifyBusinessKey() {
-    if (_screensCollaborated != null) {
-      for (Screen screenCollaborated : _screensCollaborated) {
-        screenCollaborated.getHbnCollaborators().add(this);
-      }
-    }
-    if (_labHead != null) {
-      _labHead.getHbnLabMembers().add(this);
-    }
-  }
-  
-  private String makeLabName()
-  {
-    if (!isLabHead()) {
-      // only the lab head will have a derived lab name property
-      return null; 
-    }
-    StringBuilder labName = new StringBuilder(getLabHead().getFullNameLastFirst());
-    String labAffiliation = getLabAffiliationName();
-    if (labAffiliation.length() > 0) {
-      labName.append(" - ").append(labAffiliation);
-    }
-    return labName.toString();
   }
 }

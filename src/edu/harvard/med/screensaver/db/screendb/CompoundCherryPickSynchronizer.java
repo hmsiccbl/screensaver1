@@ -24,6 +24,13 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.CompoundCherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
+import edu.harvard.med.screensaver.model.cherrypicks.LegacyCherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -31,14 +38,7 @@ import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
-import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
-import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
-import edu.harvard.med.screensaver.model.screens.CompoundCherryPickRequest;
-import edu.harvard.med.screensaver.model.screens.LabCherryPick;
-import edu.harvard.med.screensaver.model.screens.LegacyCherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 public class CompoundCherryPickSynchronizer
@@ -189,8 +189,8 @@ public class CompoundCherryPickSynchronizer
       dateRequested = resultSet.getDate("date_of_visit");
     }
     Integer visitId = resultSet.getInt("id");
-    CompoundCherryPickRequest request =
-      new CompoundCherryPickRequest(screen, requestedBy, dateRequested, visitId);
+    CompoundCherryPickRequest request = (CompoundCherryPickRequest)
+      screen.createCherryPickRequest(requestedBy, dateRequested, visitId);
     request.setMicroliterTransferVolumePerWellRequested(volumeTransferred);
     request.setMicroliterTransferVolumePerWellApproved(volumeTransferred);
     request.setComments(resultSet.getString("comments"));
@@ -203,7 +203,7 @@ public class CompoundCherryPickSynchronizer
     CompoundCherryPickRequest request)
   throws SQLException
   {
-    CherryPickLiquidTransfer liquidTransfer = new CherryPickLiquidTransfer(
+    CherryPickLiquidTransfer liquidTransfer = request.getScreen().createCherryPickLiquidTransfer(
       _userSynchronizer.getScreeningRoomUserForScreenDBUserId(resultSet.getInt("performed_by")),
       resultSet.getDate("date_created"),
       resultSet.getDate("date_of_visit"), // date_of_visit => CPLiquidTransfer.dateOfActivity
@@ -220,7 +220,7 @@ public class CompoundCherryPickSynchronizer
   {
     String filename = getCherryPickFilename(visitId);
     // TODO: is EPPENDORF the correct plate type here?
-    LegacyCherryPickAssayPlate assayPlate = new LegacyCherryPickAssayPlate(request, 1, 0, PlateType.EPPENDORF, filename);
+    LegacyCherryPickAssayPlate assayPlate = request.createLegacyCherryPickAssayPlate(1, 0, PlateType.EPPENDORF, filename);
     assayPlate.setCherryPickLiquidTransfer(liquidTransfer);
     return assayPlate;
   }
@@ -269,8 +269,8 @@ public class CompoundCherryPickSynchronizer
         continue;
       }
       
-      ScreenerCherryPick screenerCherryPick = new ScreenerCherryPick(request, sourceWell);
-      LabCherryPick labCherryPick = new LabCherryPick(screenerCherryPick, sourceWell);
+      ScreenerCherryPick screenerCherryPick = request.createScreenerCherryPick(sourceWell);
+      LabCherryPick labCherryPick = request.createLabCherryPick(screenerCherryPick, sourceWell);
 
       labCherryPick.setAllocated(getSourceCopy(sourceWell.getLibrary(), copyName));
 
@@ -292,7 +292,7 @@ public class CompoundCherryPickSynchronizer
     String copyId = sourceLibrary.getShortName() + ":" + copyName;
     Copy sourceCopy = _dao.findEntityById(Copy.class, copyId);
     if (sourceCopy == null) {
-      sourceCopy = new Copy(sourceLibrary, CopyUsageType.FOR_CHERRY_PICK_SCREENING, copyName);
+      sourceCopy = sourceLibrary.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, copyName);
       _dao.persistEntity(sourceCopy);
     }
     return sourceCopy;

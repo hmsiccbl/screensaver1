@@ -22,14 +22,18 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
+import org.apache.log4j.Logger;
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.DataAccessException;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
 import edu.harvard.med.screensaver.model.screens.Publication;
@@ -44,10 +48,6 @@ import edu.harvard.med.screensaver.ui.WebDataAccessPolicy;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
-
-import org.apache.log4j.Logger;
-import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.dao.DataAccessException;
 
 public class ScreenDetailViewer extends StudyDetailViewer
 {
@@ -330,7 +330,7 @@ public class ScreenDetailViewer extends StudyDetailViewer
         public void runTransaction()
         {
           _dao.reattachEntity(getScreen()); // checks if up-to-date
-          _dao.need(getScreen(), "hbnLabHead.hbnLabMembers");
+          _dao.need(getScreen(), "labHead.labMembers");
         }
       });
       return REDISPLAY_PAGE_ACTION_RESULT;
@@ -400,7 +400,7 @@ public class ScreenDetailViewer extends StudyDetailViewer
   {
     if (_newStatusValue != null) {
       try {
-        new StatusItem(getScreen(),
+        getScreen().createStatusItem(
                        new Date(),
                        _newStatusValue);
       }
@@ -423,7 +423,7 @@ public class ScreenDetailViewer extends StudyDetailViewer
   public String addPublication()
   {
     try {
-      new Publication(getScreen(), "<new>", "", "", "");
+      getScreen().createPublication("<new>", "", "", "");
     }
     catch (DuplicateEntityException e) {
       showMessage("screens.duplicateEntity", "publication");
@@ -442,7 +442,7 @@ public class ScreenDetailViewer extends StudyDetailViewer
   public String addLetterOfSupport()
   {
     try {
-      new LetterOfSupport(getScreen(), new Date(), "");
+      getScreen().createLetterOfSupport(new Date(), "");
     }
     catch (DuplicateEntityException e) {
       showMessage("screens.duplicateEntity", "letter of support");
@@ -461,7 +461,7 @@ public class ScreenDetailViewer extends StudyDetailViewer
   public String addAttachedFile()
   {
     try {
-      new AttachedFile(getScreen(), "<new>", "");
+      getScreen().createAttachedFile("<new>", "");
     }
     catch (DuplicateEntityException e) {
       showMessage("screens.duplicateEntity", "attached file");

@@ -62,16 +62,16 @@ public class ScreenResultPrinter
       printer.println("\tisFollowupData=" + rvt.isFollowUpData());
       printer.println("\tcomments="+rvt.getComments());
 
-      int nResultValues = rvt.getResultValues().size();
+      int nResultValues = rvt.getWellKeyToResultValueMap().size();
       printer.println("\tResult Values: (" + nResultValues + ")");
       int n = 0;
       boolean ellipsesOnce = false;
       
-      for (WellKey wellKey : new TreeSet<WellKey>(rvt.getResultValues().keySet())) {
+      for (WellKey wellKey : new TreeSet<WellKey>(rvt.getWellKeyToResultValueMap().keySet())) {
         if (maxResultValuesToPrint != null) {
           if (n < maxResultValuesToPrint / 2 || n >= nResultValues - maxResultValuesToPrint / 2) {
             printer.println("\t\t" + wellKey + 
-                            "\t" + rvt.getResultValues().get(wellKey).getValue());
+                            "\t" + rvt.getWellKeyToResultValueMap().get(wellKey).getValue());
           } 
           else if (!ellipsesOnce) {
             printer.println("\t\t...");

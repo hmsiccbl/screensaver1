@@ -9,6 +9,9 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import org.apache.log4j.Logger;
+import org.springframework.dao.DataAccessException;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
@@ -19,9 +22,6 @@ import edu.harvard.med.screensaver.ui.screenresults.AnnotationViewer;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
 import edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapViewer;
-
-import org.apache.log4j.Logger;
-import org.springframework.dao.DataAccessException;
 
 public class ScreenViewer extends StudyViewer
 {
@@ -108,19 +108,20 @@ public class ScreenViewer extends StudyViewer
         {
           Screen screen = _dao.reloadEntity(screenIn,
                                             true,
-                                            "hbnLabHead.hbnLabMembers",
-                                            "hbnLeadScreener",
+                                            "labHead.labAffiliation",
+                                            "labHead.labMembers",
+                                            "leadScreener",
                                             "billingInformation");
-          _dao.needReadOnly(screen, "hbnCollaborators.hbnLabAffiliation");
-          _dao.needReadOnly(screen, "screeningRoomActivities");
+          _dao.needReadOnly(screen, "collaborators.labAffiliation");
+          _dao.needReadOnly(screen, "screeningRoomActivities.performedBy");
           _dao.needReadOnly(screen, "abaseTestsets", "attachedFiles", "fundingSupports", "keywords", "lettersOfSupport", "publications");
           _dao.needReadOnly(screen, "statusItems");
           _dao.needReadOnly(screen, "cherryPickRequests");
           _dao.needReadOnly(screen, "annotationTypes.annotationValues");
           _dao.needReadOnly(screen.getScreenResult(), "plateNumbers");
           _dao.needReadOnly(screen.getScreenResult(),
-                            "hbnResultValueTypes.hbnDerivedTypes",
-                            "hbnResultValueTypes.hbnTypesDerivedFrom");
+                            "resultValueTypes.derivedTypes",
+                            "resultValueTypes.typesDerivedFrom");
 
           setScreen(screen);
         }
@@ -146,6 +147,5 @@ public class ScreenViewer extends StudyViewer
   private void resetView()
   {
   }
-
 }
 

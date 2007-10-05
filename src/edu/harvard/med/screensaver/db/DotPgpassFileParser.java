@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-//
+// 
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -28,12 +28,7 @@ import org.apache.log4j.Logger;
 public class DotPgpassFileParser
 {
   private static Logger log = Logger.getLogger(DotPgpassFileParser.class);
-
-  private String _hostname;
-  private String _port;
-  private String _database;
-  private String _user;
-
+  
   synchronized public String getPasswordFromDotPgpassFile(
     String hostname,
     String port,
@@ -41,10 +36,6 @@ public class DotPgpassFileParser
     String user)
   {
     File pgpassFile = new File(System.getProperty("user.home"), ".pgpass");
-    if (!pgpassFile.canRead()) {
-      log.warn("cannot read user's .pgpass file at " + pgpassFile);
-      return null;
-    }
     Pattern pattern = Pattern.compile("(\\S+?):(\\S+?):(\\S+?):(\\S+?):(\\S+)");
     try {
       FileInputStream pgpassInputStream = new FileInputStream(pgpassFile);
@@ -59,7 +50,7 @@ public class DotPgpassFileParser
           String databaseMatch = matcher.group(3);
           String userMatch     = matcher.group(4);
           String passwordMatch = matcher.group(5);
-
+          
           if (
             (hostnameMatch.equals("*") || hostnameMatch.equals(hostname)) &&
             (portMatch    .equals("*") || portMatch    .equals(port    )) &&
@@ -72,8 +63,9 @@ public class DotPgpassFileParser
       }
     }
     catch (IOException e) {
-      log.warn("unable to read and parse the user's .pgpass file " + pgpassFile, e);
+      log.error("unable to read and parse the .pgpass file", e);
     }
+    log.error("unable to find a matching entry in .pgpass file for user " + user);
     return null;
   }
 }

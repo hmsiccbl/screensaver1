@@ -42,22 +42,22 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.cherrypicks.CherryPickRequestExporter;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.InvalidCherryPickWellException;
+import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
+import edu.harvard.med.screensaver.model.cherrypicks.LegacyCherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.io.workbook2.Workbook2Utils;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
-import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransfer;
-import edu.harvard.med.screensaver.model.screens.CherryPickLiquidTransferStatus;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
-import edu.harvard.med.screensaver.model.screens.InvalidCherryPickWellException;
-import edu.harvard.med.screensaver.model.screens.LabCherryPick;
-import edu.harvard.med.screensaver.model.screens.LegacyCherryPickAssayPlate;
-import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -174,7 +174,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       {
         return lcp.isPlated() ? "plated" :
           lcp.isFailed() ? "failed" :
-            lcp.isCanceled() ? "canceled" :
+            lcp.isCancelled() ? "canceled" :
               lcp.isMapped() ? "mapped" :
                 lcp.isAllocated() ? "reserved" : "unfulfilled";
       }
@@ -187,7 +187,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           {
             return lcp.isPlated() ? 5 :
               lcp.isFailed() ? 4 :
-                lcp.isCanceled() ? 3 :
+                lcp.isCancelled() ? 3 :
                   lcp.isMapped() ? 2 :
                     lcp.isAllocated() ? 1 : 0;
           }
@@ -488,25 +488,25 @@ public class CherryPickRequestViewer extends AbstractBackingBean
         {
           CherryPickRequest cherryPickRequest = _dao.reloadEntity(cherryPickRequestIn,
                                                                   true,
-                                                                  "hbnRequestedBy",
-                                                                  "screen.hbnLabHead",
-                                                                  "screen.hbnLeadScreener",
-                                                                  "screen.hbnCollaborators");
+                                                                  "requestedBy",
+                                                                  "screen.labHead",
+                                                                  "screen.leadScreener",
+                                                                  "screen.collaborators");
           if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
             throw new UnsupportedOperationException("Sorry, but viewing compound cherry pick requests is not yet implemented.");
           }
 
           _dao.needReadOnly(cherryPickRequest,
-                            "cherryPickAssayPlates.hbnCherryPickLiquidTransfer",
+                            "cherryPickAssayPlates.cherryPickLiquidTransfer.performedBy",
                             "cherryPickAssayPlates.labCherryPicks.sourceWell");
           if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI)) {
             _dao.needReadOnly(cherryPickRequest,
-                              "labCherryPicks.sourceWell.hbnSilencingReagents.gene.genbankAccessionNumbers");
+                              "labCherryPicks.sourceWell.silencingReagents.gene.genbankAccessionNumbers");
             _dao.needReadOnly(cherryPickRequest,
-                              "screenerCherryPicks.screenedWell.hbnSilencingReagents.gene.genbankAccessionNumbers",
-                              "screenerCherryPicks.RNAiKnockdownConfirmation");
+                              "screenerCherryPicks.screenedWell.silencingReagents.gene.genbankAccessionNumbers",
+                              "screenerCherryPicks.rnaiKnockdownConfirmation");
             _dao.needReadOnly(cherryPickRequest,
-                              "screenerCherryPicks.labCherryPicks.wellVolumeAdjustments");
+                              "screenerCherryPicks.labCherryPicks.wellVolumeAdjustments.copy");
           }
 //          else if (cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
 //            // TODO: inflate, as needed
@@ -883,7 +883,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
                                                                   "labCherryPicks.sourceWell");
           _dao.need(cherryPickRequest,
                     "screenerCherryPicks.screenedWell",
-                    "screenerCherryPicks.RNAiKnockdownConfirmation");
+                    "screenerCherryPicks.rnaiKnockdownConfirmation");
           if (cherryPickRequest.isAllocated()) {
             throw new BusinessRuleViolationException("cherry picks cannot be deleted once a cherry pick request has been allocated");
           }
@@ -1097,8 +1097,10 @@ public class CherryPickRequestViewer extends AbstractBackingBean
             // TODO: protect against race condition (should enforce at schema level)
             CherryPickAssayPlate newAssayPlate = (CherryPickAssayPlate) assayPlate.clone();
             for (LabCherryPick labCherryPick : assayPlate.getLabCherryPicks()) {
-              LabCherryPick newLabCherryPick = new LabCherryPick(labCherryPick.getScreenerCherryPick(),
-                                                                 labCherryPick.getSourceWell());
+              LabCherryPick newLabCherryPick =
+                labCherryPick.getScreenerCherryPick().getCherryPickRequest().createLabCherryPick(
+                    labCherryPick.getScreenerCherryPick(),
+                    labCherryPick.getSourceWell());
               _dao.persistEntity(newLabCherryPick);
               if (!_cherryPickRequestAllocator.allocate(newLabCherryPick)) {
                 someCherryPicksUnfulfillable = true;
@@ -1163,7 +1165,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           newCherryPickRequest.setDateVolumeApproved(cherryPickRequest.getDateVolumeApproved());
           newCherryPickRequest.setDateRequested(new Date());
           newCherryPickRequest.setRandomizedAssayPlateLayout(cherryPickRequest.isRandomizedAssayPlateLayout());
-          newCherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(new HashSet<Integer>(cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate()));
+          newCherryPickRequest.addRequestedEmptyColumnsOnAssayPlate(cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate());
           newCherryPickRequest.setRequestedBy(cherryPickRequest.getRequestedBy());
           // note: we can only instantiate one new ScreenerCherryPick per *set*
           // of LabCherryPicks from the same screenedWell, otherwise we'll
@@ -1171,12 +1173,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           for (ScreenerCherryPick screenerCherryPick : cherryPickRequest.getScreenerCherryPicks()) {
             ScreenerCherryPick newScreenerCherryPick = null;
             for (LabCherryPick labCherryPick : screenerCherryPick.getLabCherryPicks()) {
-              if (!labCherryPick.isAllocated() && !labCherryPick.isCanceled()) {
+              if (!labCherryPick.isAllocated() && !labCherryPick.isCancelled()) {
                 if (newScreenerCherryPick == null) {
-                  newScreenerCherryPick = new ScreenerCherryPick(newCherryPickRequest,
-                                                                 labCherryPick.getScreenerCherryPick().getScreenedWell());
+                  newScreenerCherryPick = newCherryPickRequest.createScreenerCherryPick(labCherryPick.getScreenerCherryPick().getScreenedWell());
                 }
-                new LabCherryPick(newScreenerCherryPick, labCherryPick.getSourceWell());
+                newCherryPickRequest.createLabCherryPick(newScreenerCherryPick, labCherryPick.getSourceWell());
               }
             }
           }
@@ -1248,7 +1249,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           _dao.reattachEntity(_cherryPickRequest);
           _cherryPickRequest.setRequestedBy(_requestedBy.getSelection());
           _cherryPickRequest.setVolumeApprovedBy(_volumeApprovedBy.getSelection());
-          _cherryPickRequest.setRequestedEmptyColumnsOnAssayPlate(new HashSet<Integer>(_emptyColumnsOnAssayPlate.getSelections()));
+          _cherryPickRequest.clearRequestedEmptyColumnsOnAssayPlate();
+          _cherryPickRequest.addRequestedEmptyColumnsOnAssayPlate(_emptyColumnsOnAssayPlate.getSelections());
         }
       });
     }
@@ -1299,7 +1301,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     for (Iterator iter = selectedAssayPlates.iterator(); iter.hasNext();) {
       CherryPickAssayPlate assayPlate = (CherryPickAssayPlate) iter.next();
       if (validationType.equals(VALIDATE_SELECTED_PLATES_FOR_DEALLOCATION)) {
-        if (assayPlate.isFailed() || assayPlate.isPlated() || assayPlate.isCanceled()) {
+        if (assayPlate.isFailed() || assayPlate.isPlated() || assayPlate.isCancelled()) {
           showMessageForComponent("cherryPicks.deallocateActiveMappedPlatesOnly",
                                   "assayPlatesTable",
                                   assayPlate.getName());
@@ -1326,7 +1328,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
                                   assayPlate.getName());
           adjustSelection = true;
         }
-        else if (assayPlate.isPlated() || assayPlate.isFailed() || assayPlate.isCanceled()) {
+        else if (assayPlate.isPlated() || assayPlate.isFailed() || assayPlate.isCancelled()) {
           iter.remove();
           showMessageForComponent("cherryPicks.assayPlateAlreadyPlatedFailedCanceled",
                                   "assayPlatesTable",
@@ -1369,15 +1371,15 @@ public class CherryPickRequestViewer extends AbstractBackingBean
                                             wellKey.toString(),
                                             true,
                                             // needed by libraryPoolToDuplexWellMapper, below
-                                            "hbnSilencingReagents.hbnWells.hbnSilencingReagents.gene",
-                                            "hbnSilencingReagents.gene");
+                                            "silencingReagents.wells.silencingReagents.gene",
+                                            "silencingReagents.gene");
             if (well == null) {
               throw new InvalidCherryPickWellException(wellKey, "no such well");
             }
             else {
-              ScreenerCherryPick screenerCherryPick = new ScreenerCherryPick(cherryPickRequest, well);
+              ScreenerCherryPick screenerCherryPick = cherryPickRequest.createScreenerCherryPick(well);
               if (!arePoolWells) {
-                new LabCherryPick(screenerCherryPick, well);
+                cherryPickRequest.createLabCherryPick(screenerCherryPick, well);
               }
             }
           }
@@ -1385,8 +1387,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           if (arePoolWells) {
             _libraryPoolToDuplexWellMapper.createDuplexLabCherryPicksforPoolScreenerCherryPicks((RNAiCherryPickRequest) cherryPickRequest);
           }
-
-
         }
       });
 

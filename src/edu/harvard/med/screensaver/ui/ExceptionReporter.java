@@ -89,5 +89,4 @@ public class ExceptionReporter extends AbstractBackingBean
       return stackTrace;
     }
   }
-
 }

@@ -136,4 +136,3 @@ extends PropertyPlaceholderConfigurer
         _properties.getProperty("SCREENSAVER_PGSQL_USER")));
   }
 }
-

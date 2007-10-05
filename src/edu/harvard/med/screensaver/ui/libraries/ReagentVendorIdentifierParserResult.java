@@ -14,12 +14,10 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
-import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.util.Pair;
-
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+import edu.harvard.med.screensaver.util.Pair;
 
 public class ReagentVendorIdentifierParserResult
 {

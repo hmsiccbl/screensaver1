@@ -11,8 +11,8 @@ package edu.harvard.med.screensaver.service.cherrypicks;
 
 import java.util.Comparator;
 
+import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 
 public class PlateMappingCherryPickComparator implements Comparator<LabCherryPick>
 {

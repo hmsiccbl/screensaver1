@@ -24,13 +24,19 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+import org.hibernate.LazyInitializationException;
+
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
+import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -50,13 +56,8 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
-import edu.harvard.med.screensaver.model.screens.LabCherryPick;
-import edu.harvard.med.screensaver.model.screens.Publication;
-import edu.harvard.med.screensaver.model.screens.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
@@ -64,9 +65,6 @@ import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocato
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.Pair;
-
-import org.apache.log4j.Logger;
-import org.hibernate.LazyInitializationException;
 
 
 /**
@@ -124,8 +122,9 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         public void runTransaction()
         {
-          Compound compound = genericEntityDao.defineEntity(Compound.class, "compound P");
+          Compound compound = new Compound("compound P", "inchi");
           compound.setChembankId("P");
+          genericEntityDao.persistEntity(compound);
         }
       });
 
@@ -173,12 +172,11 @@ public class ComplexDAOTest extends AbstractSpringTest
             LibraryType.KNOWN_BIOACTIVES,
             1,
             2);
-          Compound compound = genericEntityDao.defineEntity(
-            Compound.class,
-            "compound P");
+          Compound compound = new Compound("compound P", "inchi");
           compound.setChembankId("P");
-          Well well = new Well(library, 27, "A01");
+          Well well = library.createWell(27, "A01");
           well.addCompound(compound);
+          genericEntityDao.persistEntity(library);
         }
       });
 
@@ -224,8 +222,8 @@ public class ComplexDAOTest extends AbstractSpringTest
             LibraryType.KNOWN_BIOACTIVES,
             1,
             2);
+          library.createWell(27, "A01");
           genericEntityDao.persistEntity(library);
-          genericEntityDao.defineEntity(Well.class, library, 27, "A01");
         }
       });
 
@@ -235,7 +233,7 @@ public class ComplexDAOTest extends AbstractSpringTest
         {
           Library library = genericEntityDao.findEntityByProperty(Library.class, "libraryName", "library Q");
           Well well = library.getWells().iterator().next();
-          Compound compound = genericEntityDao.defineEntity(Compound.class, "compound P");
+          Compound compound = new Compound("compound P", "inchi");
           compound.setChembankId("P");
           well.addCompound(compound);
         }
@@ -247,7 +245,7 @@ public class ComplexDAOTest extends AbstractSpringTest
         {
           Library library = genericEntityDao.findEntityByProperty(Library.class, "libraryName", "library Q");
           Well well = library.getWells().iterator().next();
-          assertTrue(well.getCompounds().contains(new Compound("compound P")));
+          assertTrue(well.getCompounds().contains(new Compound("compound P", "inchi P")));
         }
       });
   }
@@ -259,16 +257,17 @@ public class ComplexDAOTest extends AbstractSpringTest
         {
           public void runTransaction()
           {
-            Library library = genericEntityDao.defineEntity(
-              Library.class,
+            Library library = new Library(
               "library Q",
               "Q",
+              ScreenType.SMALL_MOLECULE,
               LibraryType.KNOWN_BIOACTIVES,
               1,
               2);
-            genericEntityDao.defineEntity(Well.class, library, 27, "A01");
-            genericEntityDao.defineEntity(Well.class, library, 27, "A02");
-            genericEntityDao.defineEntity(Well.class, library, 27, "A03");
+            library.createWell(27, "A01");
+            library.createWell(27, "A02");
+            library.createWell(27, "A03");
+            genericEntityDao.persistEntity(library);
             throw new RuntimeException("fooled ya!");
           }
         });
@@ -293,14 +292,15 @@ public class ComplexDAOTest extends AbstractSpringTest
               LibraryType.KNOWN_BIOACTIVES,
               1,
               2);
+            library.createWell(27, "A01");
+            library.createWell(27, "A02");
+            library.createWell(27, "A03");
             genericEntityDao.persistEntity(library);
-            genericEntityDao.defineEntity(Well.class, library, 27, "A01");
-            genericEntityDao.defineEntity(Well.class, library, 27, "A02");
-            genericEntityDao.defineEntity(Well.class, library, 27, "A03");
           }
         });
     }
     catch (Exception e) {
+      e.printStackTrace();
       fail("unexpected exception e");
     }
 
@@ -334,8 +334,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           ScreenResult screenResult = ScreenResultParserTest.makeScreenResult(new Date());
           ResultValueType[] rvt = new ResultValueType[replicates];
           for (int i = 0; i < replicates; i++) {
-            rvt[i] = new ResultValueType(
-              screenResult,
+            rvt[i] = screenResult.createResultValueType(
               "rvt" + i,
               i + 1,
               false,
@@ -354,12 +353,9 @@ public class ComplexDAOTest extends AbstractSpringTest
             LibraryType.COMMERCIAL,
             1,
             1);
-          genericEntityDao.persistEntity(library);
           Well[] wells = new Well[3];
           for (int iWell = 0; iWell < wells.length; ++iWell) {
-            wells[iWell] = genericEntityDao.defineEntity(
-              Well.class,
-              library,
+            wells[iWell] = library.createWell(
               ( iWell / 2 ) + 1,
               String.format("%c%02d",
                             Well.MIN_WELL_ROW + ((iWell / Well.PLATE_ROWS) + 1),
@@ -371,6 +367,7 @@ public class ComplexDAOTest extends AbstractSpringTest
                                                iWell % 2 == 1);
             }
           }
+          genericEntityDao.persistEntity(library);
 
           // test the calculation of replicateCount from child ResultValueTypes,
           // before setReplicate() is called by anyone
@@ -381,7 +378,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           expectedPlateNumbers.add(2);
           assertEquals(expectedPlateNumbers, screenResult.getPlateNumbers());
 
-          genericEntityDao.persistEntity(screenResult);
+          genericEntityDao.persistEntity(screenResult.getScreen());
         }
 
       });
@@ -422,7 +419,7 @@ public class ComplexDAOTest extends AbstractSpringTest
               "human",
               rvt.getAssayPhenotype());
 
-            Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
+            Map<WellKey,ResultValue> resultValues = rvt.getWellKeyToResultValueMap();
             for (WellKey wellKey : resultValues.keySet()) {
               assertTrue(wellKeys.contains(wellKey));
               // note that our naming scheme is testing the ordering of the
@@ -450,8 +447,7 @@ public class ComplexDAOTest extends AbstractSpringTest
           ScreenResult screenResult = ScreenResultParserTest.makeScreenResult(new Date());
 
           for (int i = 0; i < replicates; i++) {
-            ResultValueType rvt = new ResultValueType(
-              screenResult,
+            ResultValueType rvt = screenResult.createResultValueType(
               "rvt" + i,
               1,
               false,
@@ -463,8 +459,7 @@ public class ComplexDAOTest extends AbstractSpringTest
               derivedRvtSet2.add(rvt);
             }
           }
-          ResultValueType derivedRvt1 = new ResultValueType(
-            screenResult,
+          ResultValueType derivedRvt1 = screenResult.createResultValueType(
             "derivedRvt1",
             1,
             false,
@@ -475,8 +470,7 @@ public class ComplexDAOTest extends AbstractSpringTest
             derivedRvt1.addTypeDerivedFrom(resultValueType);
           }
 
-          ResultValueType derivedRvt2 = new ResultValueType(
-            screenResult,
+          ResultValueType derivedRvt2 = screenResult.createResultValueType(
             "derivedRvt2",
             1,
             false,
@@ -487,7 +481,7 @@ public class ComplexDAOTest extends AbstractSpringTest
             derivedRvt2.addTypeDerivedFrom(resultValueType);
           }
 
-          genericEntityDao.persistEntity(screenResult);
+          genericEntityDao.persistEntity(screenResult.getScreen());
       }
     });
 
@@ -519,78 +513,84 @@ public class ComplexDAOTest extends AbstractSpringTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        ScreeningRoomUser user1 = genericEntityDao.defineEntity(ScreeningRoomUser.class,
-                                                   new Date(),
-                                                   "first1",
-                                                   "last1",
-                                                   "email1@hms.harvard.edu",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   ScreeningRoomUserClassification.ICCB_FELLOW,
-                                                   false);
-        ScreeningRoomUser user2 = genericEntityDao.defineEntity(ScreeningRoomUser.class,
-                                                   new Date(),
-                                                   "first2",
-                                                   "last2",
-                                                   "email2@hms.harvard.edu",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   ScreeningRoomUserClassification.ICCB_FELLOW,
-                                                   false);
-        ScreeningRoomUser user3 = genericEntityDao.defineEntity(ScreeningRoomUser.class,
-                                                   new Date(),
-                                                   "first3",
-                                                   "last3",
-                                                   "email3@hms.harvard.edu",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   ScreeningRoomUserClassification.ICCB_FELLOW,
-                                                   false);
-        ScreeningRoomUser user4 = genericEntityDao.defineEntity(ScreeningRoomUser.class,
-                                                   new Date(),
-                                                   "first4",
-                                                   "last4",
-                                                   "email4@hms.harvard.edu",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   ScreeningRoomUserClassification.ICCB_FELLOW,
-                                                   false);
-        ScreeningRoomUser user5 = genericEntityDao.defineEntity(ScreeningRoomUser.class,
-                                                   new Date(),
-                                                   "first5",
-                                                   "last5",
-                                                   "email5@hms.harvard.edu",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   ScreeningRoomUserClassification.ICCB_FELLOW,
-                                                   false);
-        ScreeningRoomUser user6 = genericEntityDao.defineEntity(ScreeningRoomUser.class,
-                                                   new Date(),
-                                                   "first6",
-                                                   "last6",
-                                                   "email6@hms.harvard.edu",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   ScreeningRoomUserClassification.ICCB_FELLOW,
-                                                   false);
+        ScreeningRoomUser user1 = new ScreeningRoomUser (
+          new Date(),
+          "first1",
+          "last1",
+          "email1@hms.harvard.edu",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ScreeningRoomUserClassification.ICCB_FELLOW,
+          false);
+        genericEntityDao.persistEntity(user1);
+        ScreeningRoomUser user2 = new ScreeningRoomUser (
+          new Date(),
+          "first2",
+          "last2",
+          "email2@hms.harvard.edu",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ScreeningRoomUserClassification.ICCB_FELLOW,
+          false);
+        genericEntityDao.persistEntity(user2);
+        ScreeningRoomUser user3 = new ScreeningRoomUser (
+          new Date(),
+          "first3",
+          "last3",
+          "email3@hms.harvard.edu",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ScreeningRoomUserClassification.ICCB_FELLOW,
+          false);
+        genericEntityDao.persistEntity(user3);
+        ScreeningRoomUser user4 = new ScreeningRoomUser (
+          new Date(),
+          "first4",
+          "last4",
+          "email4@hms.harvard.edu",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ScreeningRoomUserClassification.ICCB_FELLOW,
+          false);
+        genericEntityDao.persistEntity(user4);
+        ScreeningRoomUser user5 = new ScreeningRoomUser (
+          new Date(),
+          "first5",
+          "last5",
+          "email5@hms.harvard.edu",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ScreeningRoomUserClassification.ICCB_FELLOW,
+          false);
+        genericEntityDao.persistEntity(user5);
+        ScreeningRoomUser user6 = new ScreeningRoomUser (
+          new Date(),
+          "first6",
+          "last6",
+          "email6@hms.harvard.edu",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ScreeningRoomUserClassification.ICCB_FELLOW,
+          false);
+        genericEntityDao.persistEntity(user6);
         user2.setLabHead(user1);
         user3.setLabHead(user1);
         user5.setLabHead(user4);
@@ -616,7 +616,7 @@ public class ComplexDAOTest extends AbstractSpringTest
       public void runTransaction()
       {
         Screen screen1 = MakeDummyEntities.makeDummyScreen(1);
-        new ScreenResult(screen1, new Date());
+        screen1.createScreenResult(new Date());
         genericEntityDao.persistEntity(screen1);
       }
     });
@@ -625,7 +625,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
         assertNotNull("screen1 has screen result initially", screen1.getScreenResult());
         screenResultIds[0] = screen1.getScreenResult().getEntityId();
         screenResultsDao.deleteScreenResult(screen1.getScreenResult());
@@ -637,7 +637,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
         assertNull("screen1 has no screen result after delete and commit", screen1.getScreenResult());
 
         ScreenResult screenResult1 = genericEntityDao.findEntityById(ScreenResult.class, screenResultIds[0]);
@@ -654,7 +654,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
         assertEquals("screen has 1 cherry pick request before deleting cherry pick request",
                      1,
                      screen.getCherryPickRequests().size());
@@ -673,7 +673,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
         assertEquals("screen has no cherry pick requests", 0, screen.getCherryPickRequests().size());
         assertNull("cherry pick request deleted",
                    genericEntityDao.findEntityById(CherryPickRequest.class, cherryPickRequest.getEntityId()));
@@ -710,8 +710,8 @@ public class ComplexDAOTest extends AbstractSpringTest
 
         Screen screen = MakeDummyEntities.makeDummyScreen(screenNumber, ScreenType.RNAI);
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
-        new LabCherryPick(new ScreenerCherryPick(cherryPickRequest, poolWell1), pool1DuplexWells.iterator().next());
-        new LabCherryPick(new ScreenerCherryPick(cherryPickRequest, poolWell2), pool2DuplexWells.iterator().next());
+        cherryPickRequest.createLabCherryPick(cherryPickRequest.createScreenerCherryPick(poolWell1), pool1DuplexWells.iterator().next());
+        cherryPickRequest.createLabCherryPick(cherryPickRequest.createScreenerCherryPick(poolWell2), pool2DuplexWells.iterator().next());
         genericEntityDao.persistEntity(screen);
         result[0] = cherryPickRequest;
       }
@@ -728,7 +728,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
         assertEquals("screener cherry picks exist before delete",
                      2,
@@ -746,7 +746,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
         assertEquals("screener cherry picks deleted from cherry pick request", 0, cherryPickRequest.getScreenerCherryPicks().size());
         assertEquals("screener cherry picks deleted from well1", 0, cherryPickRequestDao.findScreenerCherryPicksForWell(librariesDao.findWell(new WellKey(1, "A01"))).size());
@@ -764,7 +764,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
         assertEquals("lab cherry picks exist before delete",
                      2,
@@ -782,7 +782,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
         assertEquals("lab cherry picks deleted from cherry pick request", 0, cherryPickRequest.getLabCherryPicks().size());
         assertEquals("lab cherry picks deleted from well1", 0, cherryPickRequestDao.findLabCherryPicksForWell(librariesDao.findWell(new WellKey(3, "A01"))).size());
@@ -808,8 +808,8 @@ public class ComplexDAOTest extends AbstractSpringTest
       public void runTransaction()
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
-        ScreenResult screenResult = new ScreenResult(screen, new Date());
-        ResultValueType rvt = new ResultValueType(screenResult, "Raw Value");
+        ScreenResult screenResult = screen.createScreenResult(new Date());
+        ResultValueType rvt = screenResult.createResultValueType("Raw Value");
         rvt.setPositiveIndicator(true);
         rvt.setPositiveIndicatorType(PositiveIndicatorType.NUMERICAL);
         rvt.setPositiveIndicatorCutoff(indicatorCutoff);
@@ -824,7 +824,7 @@ public class ComplexDAOTest extends AbstractSpringTest
         for (int i = 1; i <= 10; ++i) {
           int plateNumber = i;
           expectedPlateNumbers.add(i);
-          Well well = new Well(library, plateNumber, "A01");
+          Well well = library.createWell(plateNumber, "A01");
           expectedWells.add(well);
           AssayWellType assayWellType = i % 2 == 0 ? AssayWellType.EXPERIMENTAL : AssayWellType.ASSAY_POSITIVE_CONTROL;
           boolean exclude = i % 4 == 0;
@@ -844,7 +844,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
         assertEquals("plate numbers", expectedPlateNumbers, screen.getScreenResult().getPlateNumbers());
         assertEquals("wells", expectedWells, screen.getScreenResult().getWells());
         assertEquals("experimental well count", expectedExperimentalWellCount[0], screen.getScreenResult().getExperimentalWellCount());
@@ -855,9 +855,9 @@ public class ComplexDAOTest extends AbstractSpringTest
   public void testFindSortedResultValueTableByRange()
   {
     final Screen screen = MakeDummyEntities.makeDummyScreen(1);
-    ScreenResult screenResult = new ScreenResult(screen, new Date());
-    ResultValueType rvt1 = new ResultValueType(screenResult, "Raw Value");
-    ResultValueType rvt2 = new ResultValueType(screenResult, "Derived Value");
+    ScreenResult screenResult = screen.createScreenResult(new Date());
+    ResultValueType rvt1 = screenResult.createResultValueType("Raw Value");
+    ResultValueType rvt2 = screenResult.createResultValueType("Derived Value");
     rvt2.setPositiveIndicator(true);
     rvt2.setPositiveIndicatorType(PositiveIndicatorType.PARTITION);
     rvt2.setDerived(true);
@@ -873,7 +873,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     for (int iPlate = library.getStartPlate(); iPlate <= library.getEndPlate(); ++iPlate) {
       int plateNumber = iPlate;
       for (int iWell = 1; iWell <= 10; ++iWell) {
-        Well well = new Well(library, plateNumber, "A" + iWell);
+        Well well = library.createWell(plateNumber, "A" + iWell);
         AssayWellType assayWellType = iPlate == 10 ? AssayWellType.LIBRARY_CONTROL : AssayWellType.EXPERIMENTAL;
         rvt1.addResultValue(well, assayWellType, (double) iWell, 0, false);
         rvt2.addResultValue(well, assayWellType, iWell % 2 == 0 ? "S" : "W", false);
@@ -995,9 +995,9 @@ public class ComplexDAOTest extends AbstractSpringTest
   public void testFindResultValuesByPlate()
   {
     final Screen screen = MakeDummyEntities.makeDummyScreen(1);
-    ScreenResult screenResult = new ScreenResult(screen, new Date());
-    ResultValueType rvt1 = new ResultValueType(screenResult, "Raw Value");
-    ResultValueType rvt2 = new ResultValueType(screenResult, "Derived Value");
+    ScreenResult screenResult = screen.createScreenResult(new Date());
+    ResultValueType rvt1 = screenResult.createResultValueType("Raw Value");
+    ResultValueType rvt2 = screenResult.createResultValueType("Derived Value");
     Library library = new Library(
       "library 1",
       "lib1",
@@ -1008,7 +1008,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     for (int iPlate = 1; iPlate <= 3; ++iPlate) {
       int plateNumber = iPlate;
       for (int iWell = 0; iWell < 10; ++iWell) {
-        Well well = new Well(library, plateNumber, "A" + (iWell + 1));
+        Well well = library.createWell(plateNumber, "A" + (iWell + 1));
         rvt1.addResultValue(well, (double) iWell, 3);
         rvt2.addResultValue(well, iWell + 10.0, 3);
       }
@@ -1038,17 +1038,15 @@ public class ComplexDAOTest extends AbstractSpringTest
   public void testFindSortedAnnotationValueTableByRange()
   {
     final Screen screen = MakeDummyEntities.makeDummyScreen(1);
-    AnnotationType at1 = new AnnotationType(screen, "annot1", "desc1", 0, false);
-    AnnotationType at2 = new AnnotationType(screen, "annot2", "desc2", 1, true);
+    AnnotationType at1 = screen.createAnnotationType("annot1", "desc1", false);
+    AnnotationType at2 = screen.createAnnotationType("annot2", "desc2", true);
     for (int i = 0; i < 20; ++i) {
       ReagentVendorIdentifier reagentVendorId = new ReagentVendorIdentifier("vendor",
                                                                             String.format("vendorId%02d", i));
-      at1.addAnnotationValue(reagentVendorId,
-                             String.format("value%02d", i),
-                             false);
-      at2.addAnnotationValue(reagentVendorId,
-                             Integer.toString(i),
-                             true);
+      at1.createAnnotationValue(reagentVendorId,
+                             String.format("value%02d", i));
+      at2.createAnnotationValue(reagentVendorId,
+                             Integer.toString(i));
     }
     genericEntityDao.persistEntity(screen);
 
@@ -1170,35 +1168,39 @@ public class ComplexDAOTest extends AbstractSpringTest
   public void testFindAnnotationValuesAndAnnotationsTypes()
   {
     final Screen screen = MakeDummyEntities.makeDummyScreen(1);
-    AnnotationType at1 = new AnnotationType(screen, "annot1", "desc1", 0, false);
-    AnnotationType at2 = new AnnotationType(screen, "annot2", "desc2", 1, true);
-    AnnotationType at3 = new AnnotationType(screen, "annot3", "desc3", 2, true);
+    final AnnotationType at1 = screen.createAnnotationType("annot1", "desc1", false);
+    final AnnotationType at2 = screen.createAnnotationType("annot2", "desc2", true);
+    final AnnotationType at3 = screen.createAnnotationType("annot3", "desc3", true);
     for (int i = 0; i < 20; ++i) {
       ReagentVendorIdentifier reagentVendorId = new ReagentVendorIdentifier("vendor",
                                                                             String.format("vendorId%02d", i));
-      at1.addAnnotationValue(reagentVendorId,
-                             String.format("value%02d", i),
-                             false);
-      at2.addAnnotationValue(reagentVendorId,
-                             Integer.toString(i),
-                             true);
+      at1.createAnnotationValue(reagentVendorId,
+                                String.format("value%02d", i));
+      at2.createAnnotationValue(reagentVendorId,
+                                Integer.toString(i));
     }
     genericEntityDao.persistEntity(screen);
 
-    assertEquals("all annotation types",
-                 new HashSet<AnnotationType>(Arrays.asList(at1, at2, at3)),
-                 new HashSet<AnnotationType>(annotationsDao.findAllAnnotationTypes()));
+    // this transaction may seem unnecessary, but if any of the assertions fail, they lead
+    // to calling toString() on the annotationsDao method result, which causes LazyInitE
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        assertEquals("all annotation types",
+          new TreeSet<AnnotationType>(Arrays.asList(at1, at2, at3)),
+          new TreeSet<AnnotationType>(annotationsDao.findAllAnnotationTypes()));
+        assertEquals("reagent's annotation types",
+          new TreeSet<AnnotationType>(Arrays.asList(at1, at2)),
+          new TreeSet<AnnotationType>(annotationsDao.findAllAnnotationTypesForReagent(new ReagentVendorIdentifier("vendor", "vendorId02"))));
 
-    assertEquals("reagent's annotation types",
-                 new HashSet<AnnotationType>(Arrays.asList(at1, at2)),
-                 new HashSet<AnnotationType>(annotationsDao.findAllAnnotationTypesForReagent(new ReagentVendorIdentifier("vendor", "vendorId02"))));
-
-    List<AnnotationValue> annotationValues = annotationsDao.findAnnotationValuesForReagent(new ReagentVendorIdentifier("vendor", "vendorId02"));
-    assertEquals("annotation values count", 2, annotationValues.size());
-    // TODO: the ordering of these asserts relies upon the database maintaining the same physical ordering as above insertions
-    assertEquals("value02", annotationValues.get(0).getFormattedValue());
-    assertEquals("2", annotationValues.get(1).getFormattedValue());
-
+        List<AnnotationValue> annotationValues = annotationsDao.findAnnotationValuesForReagent(new ReagentVendorIdentifier("vendor", "vendorId02"));
+        assertEquals("annotation values count", 2, annotationValues.size());
+        // TODO: the ordering of these asserts relies upon the database maintaining the same physical ordering as above insertions
+        assertEquals("value02", annotationValues.get(0).getFormattedValue());
+        assertEquals("2", annotationValues.get(1).getFormattedValue());
+      }
+    });
   }
 
   public void testEntityInflation()
@@ -1222,7 +1224,7 @@ public class ComplexDAOTest extends AbstractSpringTest
         screen.getLabHead().addLabMember(labMember);
         screen.addKeyword("keyword1");
         screen.addKeyword("keyword2");
-        genericEntityDao.persistEntity(labMember); // required due to Hibernate bug; see ScreeningRoomUser.getHbnLabMembers()
+        genericEntityDao.persistEntity(labMember); // required due to Hibernate bug; see ScreeningRoomUser.getLabMembers()
         genericEntityDao.persistEntity(screen);
       }
     });
@@ -1232,11 +1234,10 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
         genericEntityDao.need(screen,
                               "keywords",
-                              //"hbnLabHead", // intermediate relationships should be inferred
-                              "hbnLabHead.hbnLabMembers");
+                              "labHead.labMembers");
         screenOut[0] = screen;
       }
     });
@@ -1268,11 +1269,11 @@ public class ComplexDAOTest extends AbstractSpringTest
                                   LibraryType.COMMERCIAL,
                                   1,
                                   1);
-    new Well(library, 1, "A01");
+    library.createWell(1, "A01");
     genericEntityDao.persistEntity(library);
     try {
-      // oops...should've been "hbnWells"!
-      genericEntityDao.need(library, "wells");
+        // oops...should've been "wells"!
+      genericEntityDao.need(library, "hbnWells");
       fail("invalid relationship name was not detected!");
     }
     catch (Exception e) {}
@@ -1286,8 +1287,8 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
         try {
-          new Publication(screen, "1", "2007", "authro1", "Title1");
-          new Publication(screen, "2", "2007", "author2", "Title2");
+          screen.createPublication("1", "2007", "authro1", "Title1");
+          screen.createPublication("2", "2007", "author2", "Title2");
         }
         catch (DuplicateEntityException e) {
           e.printStackTrace();
@@ -1327,9 +1328,9 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 1);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
         assertEquals("keywords size", 2, genericEntityDao.relationshipSize(screen, "publications"));
-        assertEquals("collaborators size", 2, genericEntityDao.relationshipSize(screen.getHbnCollaborators()));
+        assertEquals("collaborators size", 2, genericEntityDao.relationshipSize(screen.getCollaborators()));
       }
     });
   }
@@ -1342,8 +1343,9 @@ public class ComplexDAOTest extends AbstractSpringTest
     CherryPickRequest cherryPickRequest2 = screen.createCherryPickRequest();
     Iterator<ScreenerCherryPick> scpIter = cherryPickRequest1.getScreenerCherryPicks().iterator();
     ScreenerCherryPick duplicateScreenerCherryPick1 = scpIter.next();
-    new LabCherryPick(new ScreenerCherryPick(cherryPickRequest2, duplicateScreenerCherryPick1.getScreenedWell()),
-                      duplicateScreenerCherryPick1.getLabCherryPicks().iterator().next().getSourceWell());
+    cherryPickRequest2.createLabCherryPick(
+      cherryPickRequest2.createScreenerCherryPick(duplicateScreenerCherryPick1.getScreenedWell()),
+      duplicateScreenerCherryPick1.getLabCherryPicks().iterator().next().getSourceWell());
     genericEntityDao.persistEntity(screen);
     Map<WellKey,Number> duplicateCherryPickWells = cherryPickRequestDao.findDuplicateCherryPicksForScreen(screen);
     assertEquals("duplicate cherry picks count", 1, duplicateCherryPickWells.size());
@@ -1353,8 +1355,9 @@ public class ComplexDAOTest extends AbstractSpringTest
 
     CherryPickRequest cherryPickRequest3 = screen.createCherryPickRequest();
     ScreenerCherryPick duplicateScreenerCherryPick2 = scpIter.next();
-    new LabCherryPick(new ScreenerCherryPick(cherryPickRequest3, duplicateScreenerCherryPick2.getScreenedWell()),
-                      duplicateScreenerCherryPick2.getLabCherryPicks().iterator().next().getSourceWell());
+    cherryPickRequest3.createLabCherryPick(
+      cherryPickRequest3.createScreenerCherryPick(duplicateScreenerCherryPick2.getScreenedWell()),
+      duplicateScreenerCherryPick2.getLabCherryPicks().iterator().next().getSourceWell());
     genericEntityDao.persistEntity(screen);
     duplicateCherryPickWells = cherryPickRequestDao.findDuplicateCherryPicksForScreen(screen);
     assertEquals("duplicate cherry picks count", 2, duplicateCherryPickWells.size());
@@ -1369,20 +1372,20 @@ public class ComplexDAOTest extends AbstractSpringTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, 384);
-        Copy copyC = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
-        new CopyInfo(copyC, 1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
-        new CopyInfo(copyC, 2, "loc1", PlateType.EPPENDORF, new BigDecimal("100.00")); // should be ignored
-        Copy copyD = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
-        new CopyInfo(copyD, 1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
-        new CopyInfo(copyD, 2, "loc1", PlateType.EPPENDORF, new BigDecimal("100.00")); // should be ignored
-        Copy copyE = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "E");
-        new CopyInfo(copyE, 1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
-        new CopyInfo(copyE, 2, "loc1", PlateType.EPPENDORF, new BigDecimal("100.00")); // should be ignored
-        Copy copyF = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "F");
-        new CopyInfo(copyF, 1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
-        new CopyInfo(copyF, 2, "loc1", PlateType.EPPENDORF, new BigDecimal("100.00")); // should be ignored
-        Copy copyG = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "G");
-        new CopyInfo(copyG, 1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00")).setDateRetired(new Date());
+        Copy copyC = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
+        copyC.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
+        copyC.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new BigDecimal("100.00")); // should be ignored
+        Copy copyD = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
+        copyD.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
+        copyD.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new BigDecimal("100.00")); // should be ignored
+        Copy copyE = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "E");
+        copyE.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
+        copyE.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new BigDecimal("100.00")); // should be ignored
+        Copy copyF = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "F");
+        copyF.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
+        copyF.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new BigDecimal("100.00")); // should be ignored
+        Copy copyG = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "G");
+        copyG.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00")).setDateRetired(new Date());
 
         genericEntityDao.persistEntity(library);
 
@@ -1393,17 +1396,17 @@ public class ComplexDAOTest extends AbstractSpringTest
         Well wellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
         Well wellB02 = genericEntityDao.findEntityById(Well.class, "00001:B02");
         /*Well wellC03 =*/ genericEntityDao.findEntityById(Well.class, "00001:C03");
-        wellVolumeAdjustments.add(new WellVolumeAdjustment(copyD, wellA01, new BigDecimal("-1.00"), wellVolumeCorrectionActivity));
-        wellVolumeAdjustments.add(new WellVolumeAdjustment(copyF, wellA01, new BigDecimal("-1.00"), wellVolumeCorrectionActivity));
-        wellVolumeAdjustments.add(new WellVolumeAdjustment(copyD, wellB02, new BigDecimal("-1.00"), wellVolumeCorrectionActivity));
-        wellVolumeAdjustments.add(new WellVolumeAdjustment(copyF, wellB02, new BigDecimal("-1.00"), wellVolumeCorrectionActivity));
+        wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copyD, wellA01, new BigDecimal("-1.00")));
+        wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copyF, wellA01, new BigDecimal("-1.00")));
+        wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copyD, wellB02, new BigDecimal("-1.00")));
+        wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copyF, wellB02, new BigDecimal("-1.00")));
         genericEntityDao.persistEntity(wellVolumeCorrectionActivity);
 
         RNAiCherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, 2);
-        ScreenerCherryPick dummyScreenerCherryPick = new ScreenerCherryPick(cherryPickRequest, wellA01);
-        LabCherryPick labCherryPick1 = new LabCherryPick(dummyScreenerCherryPick, wellA01);
+        ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(wellA01);
+        LabCherryPick labCherryPick1 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, wellA01);
         labCherryPick1.setAllocated(copyE);
-        LabCherryPick labCherryPick2 = new LabCherryPick(dummyScreenerCherryPick, wellB02);
+        LabCherryPick labCherryPick2 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, wellB02);
         labCherryPick2.setAllocated(copyF);
         genericEntityDao.persistEntity(cherryPickRequest.getScreen());
       }
@@ -1499,22 +1502,21 @@ public class ComplexDAOTest extends AbstractSpringTest
     Copy copyC = genericEntityDao.findEntityById(Copy.class, "library:C");
     Copy copyD = genericEntityDao.findEntityById(Copy.class, "library:D");
     Well plate1WellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
-    Well plate2WellB02 = genericEntityDao.findEntityById(Well.class, "00002:B02");
+    //Well plate2WellB02 =
+    genericEntityDao.findEntityById(Well.class, "00002:B02");
 
-    Screen screen = MakeDummyEntities.makeDummyScreen(1);
+    Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
 
     {
-      CherryPickRequest cherryPickRequest = new RNAiCherryPickRequest(screen,
-                                                                      screen.getLeadScreener(),
-                                                                      new Date());
+      CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
       cherryPickRequest.setMicroliterTransferVolumePerWellApproved(new BigDecimal("1.0"));
-      ScreenerCherryPick dummyScreenCherryPick = new ScreenerCherryPick(cherryPickRequest, plate1WellA01);
-      Well sourceWell1 = librariesDao.findWell(new WellKey(1, "P23"));
-      Well sourceWell2 = librariesDao.findWell(new WellKey(2, "P23"));
-      Well sourceWell3 = librariesDao.findWell(new WellKey(2, "P24"));
-      new LabCherryPick(dummyScreenCherryPick, sourceWell1);
-      new LabCherryPick(dummyScreenCherryPick, sourceWell2);
-      new LabCherryPick(dummyScreenCherryPick, sourceWell3);
+      ScreenerCherryPick dummyScreenCherryPick = cherryPickRequest.createScreenerCherryPick(plate1WellA01);
+      Well sourceWell1 = librariesDao.findWell(new WellKey(1, "P23"), true);
+      Well sourceWell2 = librariesDao.findWell(new WellKey(2, "P23"), true);
+      Well sourceWell3 = librariesDao.findWell(new WellKey(2, "P24"), true);
+      cherryPickRequest.createLabCherryPick(dummyScreenCherryPick, sourceWell1);
+      cherryPickRequest.createLabCherryPick(dummyScreenCherryPick, sourceWell2);
+      cherryPickRequest.createLabCherryPick(dummyScreenCherryPick, sourceWell3);
       genericEntityDao.persistEntity(cherryPickRequest);
 
       Collection<WellCopyVolume> wellCopyVolumes = librariesDao.findWellCopyVolumes(cherryPickRequest, false);
@@ -1534,18 +1536,18 @@ public class ComplexDAOTest extends AbstractSpringTest
       }
     }
 
+    screen = genericEntityDao.reloadEntity(screen, false, "cherryPickRequests");
+
     {
-      CherryPickRequest cherryPickRequest = new RNAiCherryPickRequest(screen,
-                                                                      screen.getLeadScreener(),
-                                                                      new Date());
+      CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
       cherryPickRequest.setMicroliterTransferVolumePerWellApproved(new BigDecimal("1.0"));
-      ScreenerCherryPick dummyScreenCherryPick = new ScreenerCherryPick(cherryPickRequest, plate1WellA01);
-      Well sourceWell1 = librariesDao.findWell(new WellKey(1, "P23"));
-      Well sourceWell2 = librariesDao.findWell(new WellKey(2, "P23"));
-      Well sourceWell3 = librariesDao.findWell(new WellKey(2, "P24"));
-      new LabCherryPick(dummyScreenCherryPick, sourceWell1);
-      new LabCherryPick(dummyScreenCherryPick, sourceWell2);
-      new LabCherryPick(dummyScreenCherryPick, sourceWell3).setAllocated(copyC);
+      ScreenerCherryPick dummyScreenCherryPick = cherryPickRequest.createScreenerCherryPick(plate1WellA01);
+      Well sourceWell1 = librariesDao.findWell(new WellKey(1, "P23"), true);
+      Well sourceWell2 = librariesDao.findWell(new WellKey(2, "P23"), true);
+      Well sourceWell3 = librariesDao.findWell(new WellKey(2, "P24"), true);
+      cherryPickRequest.createLabCherryPick(dummyScreenCherryPick, sourceWell1);
+      cherryPickRequest.createLabCherryPick(dummyScreenCherryPick, sourceWell2);
+      cherryPickRequest.createLabCherryPick(dummyScreenCherryPick, sourceWell3).setAllocated(copyC);
       genericEntityDao.persistEntity(cherryPickRequest);
 
       Collection<WellCopyVolume> wellCopyVolumes = librariesDao.findWellCopyVolumes(cherryPickRequest, true);
@@ -1572,26 +1574,24 @@ public class ComplexDAOTest extends AbstractSpringTest
       genericEntityDao.doInTransaction(new DAOTransaction() {
         public void runTransaction() {
           Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, 384);
-          Copy copyC = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
-          Copy copyD = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
-          new CopyInfo(copyC, 1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
-          new CopyInfo(copyC, 2, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
-          new CopyInfo(copyD, 1, "loc1", PlateType.EPPENDORF, new BigDecimal("20.00"));
-          new CopyInfo(copyD, 2, "loc1", PlateType.EPPENDORF, new BigDecimal("20.00"));
+          Copy copyC = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
+          Copy copyD = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
+          copyC.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
+          copyC.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
+          copyD.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("20.00"));
+          copyD.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new BigDecimal("20.00"));
           genericEntityDao.persistEntity(library);
 
           Well plate1WellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
           Well plate2WellB02 = genericEntityDao.findEntityById(Well.class, "00002:B02");
           RNAiCherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, 1);
-          ScreenerCherryPick dummyScreenerCherryPick = new ScreenerCherryPick(cherryPickRequest, plate1WellA01);
-          LabCherryPick labCherryPick1 = new LabCherryPick(dummyScreenerCherryPick, plate1WellA01);
+          ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(plate1WellA01);
+          LabCherryPick labCherryPick1 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, plate1WellA01);
           labCherryPick1.setAllocated(copyC);
-          LabCherryPick labCherryPick2 = new LabCherryPick(dummyScreenerCherryPick, plate2WellB02);
+          LabCherryPick labCherryPick2 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, plate2WellB02);
           labCherryPick2.setAllocated(copyD);
           genericEntityDao.persistEntity(cherryPickRequest.getScreen());
         }
       });
     }
-
-
 }

@@ -15,8 +15,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -26,14 +27,10 @@ import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
-import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.StudySearchResults;
-
-import org.apache.log4j.Logger;
-import org.aspectj.weaver.ltw.LTWeaver;
 
 
 public class Menu extends AbstractBackingBean
@@ -167,8 +164,8 @@ public class Menu extends AbstractBackingBean
       {
         List<? extends Study> studies = _dao.findAllEntitiesOfType(Screen.class /* TODO: change to Study.class*/,
                                                                    true,
-                                                                   "hbnLabHead",
-                                                                   "hbnLeadScreener");
+                                                                   "labHead",
+                                                                   "leadScreener");
         for (Iterator<? extends Study> iter = studies.iterator(); iter.hasNext();) {
           Study study = iter.next();
           if (study.isRestricted()) {
@@ -194,8 +191,8 @@ public class Menu extends AbstractBackingBean
         List<Screen> screens = _dao.findAllEntitiesOfType(Screen.class,
                                                           true,
                                                           "screenResult",
-                                                          "hbnLabHead",
-                                                          "hbnLeadScreener",
+                                                          "labHead",
+                                                          "leadScreener",
                                                           "billingInformation",
                                                           "statusItems");
         for (Iterator<Screen> iter = screens.iterator(); iter.hasNext();) {

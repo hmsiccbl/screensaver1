@@ -15,7 +15,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
 import org.apache.log4j.Logger;
 
-public class RNAiCherryPickScreeningTest extends AbstractEntityInstanceTest
+public class RNAiCherryPickScreeningTest extends AbstractEntityInstanceTest<RNAiCherryPickScreening>
 {
   // static members
 

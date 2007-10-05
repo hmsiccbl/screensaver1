@@ -2,14 +2,13 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.model.screenresults;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,11 +17,24 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
+import javax.persistence.Transient;
+import javax.persistence.Version;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.DerivedEntityProperty;
-import edu.harvard.med.screensaver.model.ToManyRelationship;
-import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
@@ -41,28 +53,30 @@ import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
  * headings are represented by {@link ResultValueType}s and the rows are
  * identified by stock plate {@link Well}s, and each row contains a
  * {@link ResultValue} for each {@link ResultValueType} "column".
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- * @hibernate.class lazy="false"
  */
+@Entity
+@org.hibernate.annotations.Proxy
+@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
 public class ScreenResult extends AbstractEntity
 {
 
-  private static final long serialVersionUID = 41904893172411174L;
-  
+  private static final long serialVersionUID = 0;
 
-  // persistent instance data
-  
-  private Integer                    _screenResultId;
-  private Integer                    _version;
-  private Screen                     _screen;
-  private Date                       _dateCreated;
-  private Date                       _dateLastImported;
-  private boolean                    _isShareable;
-  private Integer                    _replicateCount;
+
+  // private instance data
+
+  private Integer _screenResultId;
+  private Integer _version;
+  private Screen _screen;
+  private SortedSet<Well> _wells = new TreeSet<Well>();
+  private Date _dateCreated;
+  private Date _dateLastImported;
+  private boolean _isShareable;
+  private Integer _replicateCount;
   private SortedSet<ResultValueType> _resultValueTypes = new TreeSet<ResultValueType>();
-  private SortedSet<Well>            _wells = new TreeSet<Well>();
   /**
    * @motivation optimization, to avoid loading inspecting all ResultValues when
    *             determining the set of plate numbers associated with this
@@ -71,94 +85,94 @@ public class ScreenResult extends AbstractEntity
    *             number is therefore stored along with each Well, but we have no
    *             normalized Plate table.
    */
-  private SortedSet<Integer>         _plateNumbers = new TreeSet<Integer>();
+  private SortedSet<Integer> _plateNumbers = new TreeSet<Integer>();
+  private int _experimentalWellCount;
 
   private transient UniqueDataHeaderNames _uniqueDataHeaderNames;
 
 
-  private int _experimentalWellCount;
+  // public constructor
 
-
-
-  
-  // public constructors and instance methods
-  
   /**
-   * Constructs an initialized ScreenResult object.
-   * @param screen
-   * @param dateCreated
-   * @param isShareable
+   * Construct an initialized <code>ScreenResult</code>. Intended only for use by {@link
+   * Screen#createScreenResult(Date)} and {@link Screen#createScreenResult(Date, boolean, Integer)}.
+   * @param screen the screen
+   * @param dateCreated the date the screen result's data was initially created
+   * @param isShareable whether this screen result can be viewed by all users of the system
    * @param replicateCount
    */
-  public ScreenResult(
-    Screen screen,
-    Date dateCreated,
-    boolean isShareable,
-    Integer replicateCount)
+  public ScreenResult(Screen screen, Date dateCreated, boolean isShareable, Integer replicateCount)
   {
-    this(screen, dateCreated);
+    setScreen(screen);
+    setDateCreated(dateCreated);
+    setDateLastImported(new Date());
     setShareable(isShareable);
     setReplicateCount(replicateCount);
   }
 
-  /**
-   * Constructs an initialized ScreenResult object.
-   * 
-   * @param screen
-   * @param dateCreated
-   */
-  public ScreenResult(Screen screen, Date dateCreated)
-  {
-    setDateCreated(dateCreated); // must occur before _screen.setHbnScreenResult(), as dateCreated is part of our business key
-    setDateLastImported(new Date());
-    setScreen(screen);
-    _screen.setScreenResult(this);
-  }
-  
+
+  // public instance methods
+
+  @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
   }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
-   */
+  @Override
+  @Transient
   public Integer getEntityId()
   {
     return getScreenResultId();
   }
-  
+
   /**
-   * Get a unique identifier for the <code>ScreenResult</code>.
-   * 
-   * @return an Integer representing a unique identifier for the
-   *         <code>ScreenResult</code>
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="screen_result_id_seq"
+   * Get the id for the screen result.
+   * @return the id for the screen result
    */
+  @Id
+  @org.hibernate.annotations.GenericGenerator(
+    name="screen_result_id_seq",
+    strategy="sequence",
+    parameters = {
+      @org.hibernate.annotations.Parameter(name="sequence", value="screen_result_id_seq")
+    }
+  )
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="screen_result_id_seq")
   public Integer getScreenResultId()
   {
     return _screenResultId;
   }
 
   /**
-   * Get the date that this <code>ScreenResult</code>'s data was initially
-   * created.
-   * 
-   * @return returns a {@link java.util.Date} representing the date this
-   *         <code>ScreenResult</code> was initially created
-   * @hibernate.property type="date" not-null="true"
+   * Get the screen.
+   * @return the screen
    */
+  @OneToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinColumn(name="screenId", nullable=false, updatable=false, unique=true)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.ForeignKey(name="fk_screen_result_to_screen")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  public Screen getScreen()
+  {
+    return _screen;
+  }
+
+  /**
+   * Get the date that this <code>ScreenResult</code>'s data was initially created.
+   * @return the date that this <code>ScreenResult</code>'s data was initially created
+   */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(type="date")
   public Date getDateCreated()
   {
     return _dateCreated;
   }
-  
+
   /**
-   * Set the date this <code>ScreenResult</code> was initially created.
-   * 
-   * @param dateCreated the date this <code>ScreenResult</code> was initially
-   *          created.
+   * Set the date that this <code>ScreenResult</code>'s data was initially created.
+   * @param dateCreated the new date that this <code>ScreenResult</code>'s data was initially
+   * created
    */
   public void setDateCreated(Date dateCreated)
   {
@@ -166,24 +180,20 @@ public class ScreenResult extends AbstractEntity
   }
 
   /**
-   * Get the date this <code>ScreenResult</code> was last imported into
-   * Screensaver.
-   * 
-   * @return returns a {@link java.util.Date} representing the date this
-   *         <code>ScreenResult</code> was last imported into Screensaver.
-   * @hibernate.property type="date" not-null="true"
+   * Get the date this <code>ScreenResult</code> was last imported into Screensaver.
+   * @return the date this <code>ScreenResult</code> was last imported into Screensaver
    */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(type="date")
   public Date getDateLastImported()
   {
     return _dateLastImported;
   }
-  
+
   /**
-   * Set the date this <code>ScreenResult</code> was last imported into
-   * Screensaver.
-   * 
-   * @param dateImported the date this <code>ScreenResult</code> was last
-   *          imported into Screensaver.
+   * Set the date this <code>ScreenResult</code> was last imported into Screensaver.
+   * @param dateImported the new date this <code>ScreenResult</code> was last imported into
+   * Screensaver
    */
   public void setDateLastImported(Date dateImported)
   {
@@ -191,29 +201,22 @@ public class ScreenResult extends AbstractEntity
   }
 
   /**
-   * Get whether this <code>ScreenResult</code> can be viewed by all users of
-   * the system; that is,
-   * {@link edu.harvard.med.screensaver.model.users.ScreeningRoomUser}s other
-   * than those associated with the
-   * {@link edu.harvard.med.screensaver.screens.Screen}.
-   * 
-   * @return <code>true</code> iff this <code>ScreenResult</code> is
-   *         shareable among all users
-   * @hibernate.property column="is_shareable" not-null="true"
+   * Get whether this screen result can be viewed by all users of
+   * the system; that is, {@link edu.harvard.med.screensaver.model.users.ScreeningRoomUser
+   * ScreeningRoomUsers} other than those associated with the {@link Screen}.
+   * @return true iff this <code>ScreenResult</code> is shareable among all users
    */
+  @Column(nullable=false, name="isShareable")
   public boolean isShareable()
   {
     return _isShareable;
   }
 
   /**
-   * Set the shareability of this <code>ScreenResult</code>.
-   * 
-   * @param isShareable whether this <code>ScreenResult</code> can be viewed
-   *          by all users of the system; that is,
-   *          {@link edu.harvard.med.screensaver.model.users.ScreeningRoomUser}s
-   *          other than those associated with the
-   *          {@link edu.harvard.med.screensaver.screens.Screen}
+   * Set whether this <code>ScreenResult</code> can be viewed by all users of
+   * the system; that is, {@link edu.harvard.med.screensaver.model.users.ScreeningRoomUser
+   * ScreeningRoomUsers} other than those associated with the {@link Screen}.
+   * @param isShareable true iff this <code>ScreenResult</code> is shareable among all users
    */
   public void setShareable(boolean isShareable)
   {
@@ -221,18 +224,72 @@ public class ScreenResult extends AbstractEntity
   }
 
   /**
-   * Get a ordered set of all {@link ResultValueType}s for this
-   * <code>ScreenResult</code>.
-   * 
-   * @return an unmodifiable {@link java.util.SortedSet} of all
-   *         {@link ResultValueType}s for this <code>ScreenResult</code>.
+   * Get the ordered set of all {@link ResultValueType ResultValueTypes} for this screen result.
+   * @return the ordered set of all {@link ResultValueType ResultValueTypes} for this screen
+   * result.
    */
+  @OneToMany(
+    mappedBy="screenResult",
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+    fetch=FetchType.LAZY
+  )
+  @OrderBy("ordinal")
+  @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
   public SortedSet<ResultValueType> getResultValueTypes()
   {
-    return Collections.unmodifiableSortedSet(_resultValueTypes);
+    return _resultValueTypes;
   }
-  
-  @DerivedEntityProperty
+
+  /**
+   * Create and return a new result value type for the screen result.
+   * @param name the name of this result value type
+   * @return the new result value type
+   */
+  public ResultValueType createResultValueType(String name)
+  {
+    return createResultValueType(name, null, false, false, false, null);
+  }
+
+  /**
+   * Create and return a new result value type for the screen result.
+   * @param name the name of this result value type
+   * @param replicateOrdinal the replicate ordinal
+   * @param isDerived true iff the result value type is derived from other result value types
+   * @param isPositiveIndicator true iff the result value type is an positive indicator
+   * @param isFollowupData true iff the result value type contains follow up data
+   * @param assayPhenotype the assay phenotype
+   * @return the new result value type
+   */
+  public ResultValueType createResultValueType(
+    String name,
+    Integer replicateOrdinal,
+    boolean isDerived,
+    boolean isPositiveIndicator,
+    boolean isFollowupData,
+    String assayPhenotype)
+  {
+    ResultValueType resultValueType = new ResultValueType(
+      this,
+      name,
+      replicateOrdinal,
+      isDerived,
+      isPositiveIndicator,
+      isFollowupData,
+      assayPhenotype);
+    _resultValueTypes.add(resultValueType);
+    return resultValueType;
+  }
+
+  /**
+   * Get the unique data header names
+   * @return the unique data header names
+   * @see UniqueDataHeaderNames
+   */
+  @Transient
   public UniqueDataHeaderNames getUniqueDataHeaderNames()
   {
     if (_uniqueDataHeaderNames == null) {
@@ -240,43 +297,26 @@ public class ScreenResult extends AbstractEntity
     }
     return _uniqueDataHeaderNames;
   }
-  
+
   /**
-   * Add the result value type to the screen result.
-   * @param resultValueType The result value type to add
-   * @return true iff the result value type was not already in the screen result
-   */
-  public boolean addResultValueType(ResultValueType resultValueType)
-  {
-    assert !(_resultValueTypes.contains(resultValueType) ^ resultValueType.getScreenResult().equals(this)) :
-      "asymmetric screen result/result value type encountered";
-    if (_resultValueTypes.add(resultValueType)) {
-      resultValueType.setHbnScreenResult(this);
-      return true;
-    }
-    return false;
-  }
-  
-  /**
-   * Get the number of replicates (assay plates) associated with this
-   * <code>ScreenResult</code>. If replicate count was not explicitly
-   * specified at instantiation time, calculates the replicate count by finding
-   * the maximum replicate ordinal value from the ScreenResult's
+   * Get the number of replicates (assay plates) associated with this screen result. If the
+   * replicate count was not explicitly specified at instantiation time, calculate the replicate
+   * count by finding the maximum replicate ordinal value from the screen result's
    * ResultValueTypes; if none of the ResultValueTypes have their replicate
    * ordinal values defined, replicate count is 1.
-   * 
+   *
    * @return the number of replicates (assay plates) associated with this
    *         <code>ScreenResult</code>
-   * @hibernate.property type="integer" not-null="true"
    */
+  @Column(nullable=false)
   public Integer getReplicateCount()
   {
     if (_replicateCount == null) {
       if (getResultValueTypes().size() == 0) {
         _replicateCount = 0;
-      } 
+      }
       else {
-        ResultValueType maxOrdinalRvt = 
+        ResultValueType maxOrdinalRvt =
           Collections.max(getResultValueTypes(),
             new Comparator<ResultValueType>()
             {
@@ -303,13 +343,11 @@ public class ScreenResult extends AbstractEntity
     }
     return _replicateCount;
   }
-  
+
   /**
-   * Set the number of replicates (assay plates) associated with this
-   * <code>ScreenResult</code>.
-   * 
-   * @param replicateCount the number of replicates (assay plates) associated
-   *          with this <code>ScreenResult</code>
+   * Set the number of replicates (assay plates) associated with this screen result.
+   * @param replicateCount the new number of replicates (assay plates) associated with this
+   * screen result
    */
   public void setReplicateCount(Integer replicateCount)
   {
@@ -317,41 +355,68 @@ public class ScreenResult extends AbstractEntity
   }
 
   /**
-   * Get the set of plate numbers associated with this ScreenResult (via ResultValue Wells).
-   * @hibernate.set table="screen_result_plate_numbers" lazy="true" sort="natural"
-   * @hibernate.collection-key column="screen_result_id"
-   * @hibernate.collection-element type="integer" column="plate_number"
-   * @return
+   * Get the set of plate numbers associated with this screen result (via ResultValue Wells).
+   * @return the set of plate numbers associated with this screen result
    */
-  @DerivedEntityProperty(isPersistent=true)
+  @org.hibernate.annotations.CollectionOfElements
+  @Column(name="plateNumber", nullable=false)
+  @JoinTable(
+    name="screenResultPlateNumber",
+    joinColumns=@JoinColumn(name="screenResultId")
+  )
+  @OrderBy("plateNumber")
+  @org.hibernate.annotations.ForeignKey(name="fk_screen_result_plate_number_to_screen_result")
+  @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
   public SortedSet<Integer> getPlateNumbers()
   {
     return _plateNumbers;
   }
-  
+
   /**
+   * Get the number of plate numbers associated with this screen result.
+   * @return the number of plate numbers associated with this screen result
    * @motivation JSF EL 1.1 does not provide a size/length operator for collections.
    */
-  @DerivedEntityProperty
+  @Transient
   public int getPlateNumberCount()
   {
     return _plateNumbers.size();
   }
-  
-  // TODO: get rid of this method (figure out how to bypass its requirement in unit tests)
+
   /**
-   * Add a plate number that is associated with this ScreenResult.
-   * 
-   * @param plateNumber
-   * @return
+   * Get the set of wells associated with this screen result. <i>Do not modify
+   * the returned collection.</i> To add a well, call {@link #addWell}.
+   * @return the set of wells associated with this screen result
    */
-  public boolean addPlateNumber(Integer plateNumber)
+  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinTable(
+    name="screenResultWellLink",
+    joinColumns=@JoinColumn(name="screenResultId"),
+    inverseJoinColumns=@JoinColumn(name="wellId")
+  )
+  @org.hibernate.annotations.ForeignKey(name="fk_screen_result_well_link_to_screen_result")
+  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
+  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
+  @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
+  public SortedSet<Well> getWells()
   {
-    return _plateNumbers.add(plateNumber);
+    return _wells;
   }
+
+  /**
+   * Get the number of wells associated with this screen result.
+   * @return the number of wells associated with this screen result
+   * @motivation JSF EL 1.1 does not provide a size/length operator for collections.
+   */
+  @Transient
+  public int getWellCount()
+  {
+    return _wells.size();
+  }
+
   /**
    * Add a well that is associated with this ScreenResult.
-   * 
    * @param well the well to add
    * @return true iff the well was added successfully
    */
@@ -360,40 +425,14 @@ public class ScreenResult extends AbstractEntity
     _plateNumbers.add(well.getPlateNumber());
     return _wells.add(well);
   }
-  
+
   /**
-   * Get the set of wells associated with this ScreenResult. <i>Do not modify
-   * the returned collection.</i> To add a well, call {@link #addWell}.
-   * 
-   * @return the set of wells associated with this ScreenResult
-   * @hibernate.set table="screen_result_well_link" lazy="true"
-   *                cascade="save-update" sort="natural"
-   * @hibernate.collection-key column="screen_result_id"
-   * @hibernate.collection-many-to-many class="edu.harvard.med.screensaver.model.libraries.Well"
-   *                                    column="well_id"
-   */
-  @ToManyRelationship(unidirectional=true)
-  public SortedSet<Well> getWells()
-  {
-    return _wells;
-  }
-  
-  /**
-   * @motivation JSF EL 1.1 does not provide a size/length operator for collections.
-   */
-  @DerivedEntityProperty
-  public int getWellCount()
-  {
-    return _wells.size();
-  }
-  
-  /**
-   * Get the number of experimental wells that have data in this Screen Result
+   * Get the number of experimental wells that have data in this screen result.
+   * @return the number of experimental wells that have data in this screen result
    * @motivation optimization
-   * @return the number of experimental wells that have data in this Screen Result
-   * @hibernate.property type="integer" not-null="true"
    */
-  @DerivedEntityProperty(isPersistent=true)
+  @Column(nullable=false)
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
   public int getExperimentalWellCount()
   {
     return _experimentalWellCount;
@@ -401,21 +440,20 @@ public class ScreenResult extends AbstractEntity
 
   /**
    * Return a list of ResultValueTypes
-   * 
-   * @motivation random access to ResultValueTypes by ordinal
    * @return an ordered list of ResultValueTypes
+   * @motivation random access to ResultValueTypes by ordinal
    */
-  @DerivedEntityProperty
+  @Transient
   public List<ResultValueType> getResultValueTypesList()
   {
     return new ArrayList<ResultValueType>(_resultValueTypes);
   }
-  
+
   /**
    * Return the subset of ResultValueTypes that contain numeric ResultValue data.
    * @return the subset of ResultValueTypes that contain numeric ResultValue data
    */
-  @DerivedEntityProperty
+  @Transient
   public List<ResultValueType> getNumericResultValueTypes()
   {
     List<ResultValueType> numericResultValueTypes = new ArrayList<ResultValueType>();
@@ -427,76 +465,34 @@ public class ScreenResult extends AbstractEntity
     return numericResultValueTypes;
   }
 
+
+  // package instance method
+
   /**
-   * Get the screen.
-   *
-   * @return the screen
-   * TODO: When moving to Hibernate annotations, add unique="true" for this many-to-one. XDoclet generates the unique constraint twice causing an error!  
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.screens.Screen"
-   *   column="screen_id"
-   *   not-null="true"
-   *   foreign-key="fk_screen_result_to_screen"
-   *   cascade="save-update"
-   * @motivation for hibernate
+   * Increment the number of experimental wells that have data in this screen result.
+   * Intended only for use by {@link ResultValueType#addResultValue(ResultValue, Well)}.
+   * @see #getExperimentalWellCount()
    */
-  @ToOneRelationship(nullable=false)
-  public Screen getScreen()
-  {
-    return _screen;
-  }
-
- 
-  // protected getters and setters
-  
-  /* (non-Javadoc)
-   * @see edu.harvard.med.screensaver.model.AbstractEntity#getBusinessKey()
-   */
-  protected Object getBusinessKey()
-  {
-    // note: we accommodate null _screen value, allowing ScreenResult objects to
-    // exist without a parent Screen; this is for pragmatic reasons: our unit
-    // tests are simpler, ICBG reporter, etc.
-    int screenNumber = _screen == null ? -1 : _screen.getScreenNumber();
-    return screenNumber + ":" + DateFormat.getDateInstance().format(getDateCreated());
-  }
-  
-
-  // package instance methods
-  
-  /**
-   * Get a sorted set of all {@link ResultValueType}s for this
-   * <code>ScreenResult</code>.
-   * 
-   * @motivation for Hibernate
-   * @return an {@link java.util.SortedSet} of all {@link ResultValueType}s for
-   *         this <code>ScreenResult</code>
-   * @hibernate.set cascade="all" lazy="true" inverse="true" sort="natural" 
-   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screenresults.ResultValueType"
-   * @hibernate.collection-key column="screen_result_id"
-   */
-  SortedSet<ResultValueType> getHbnResultValueTypes() {
-    return _resultValueTypes;
-  }
-
   void incrementExperimentalWellCount()
   {
-    ++_experimentalWellCount;
+    _experimentalWellCount ++;
   }
-  
 
-  // private getters and setters
-  
+
+  // protected constructor
+
   /**
-   * Constructs an uninitialized <code>ScreenResult</code> object.
-   * @motivation for Hibernate loading
+   * Construct an uninitialized <code>ScreenResult</code>.
+   * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  private ScreenResult() {}
+  protected ScreenResult() {}
+
+
+  // private instance methods
 
   /**
-   * Set the unique identifier for the <code>ScreenResult</code>.
-   * 
-   * @param screenResultId a unique identifier for the <code>ScreenResult</code>
+   * Set the id for the screen result.
+   * @param screenResultId the id for the screen result
    */
   private void setScreenResultId(Integer screenResultId)
   {
@@ -504,33 +500,31 @@ public class ScreenResult extends AbstractEntity
   }
 
   /**
-   * Get the version number of the compound.
-   * 
-   * @return the version number of the <code>ScreenResult</code>
+   * Get the version number of the screen result.
+   * @return the version number of the screen result
    * @motivation for hibernate
-   * @hibernate.version
    */
-  private Integer getVersion() {
+  @Column(nullable=false)
+  @Version
+  private Integer getVersion()
+  {
     return _version;
   }
 
   /**
-   * Set the version number of the <code>ScreenResult</code>
-   * 
-   * @param version the new version number for the <code>ScreenResult</code>
+   * Set the version number of the screen result.
+   * @param version the new version number of the screen result
    * @motivation for hibernate
    */
-  private void setVersion(Integer version) {
+  private void setVersion(Integer version)
+  {
     _version = version;
   }
-  
+
   /**
    * Set the screen.
-   *
    * @param screen the new screen
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   * this method is public only because the bi-directional relationship
-   * is cross-package.
+   * @motivation for hibernate
    */
   private void setScreen(Screen screen)
   {
@@ -538,33 +532,28 @@ public class ScreenResult extends AbstractEntity
   }
 
   /**
-   * Set the sorted set of {@link ResultValueType}s that comprise this
-   * <code>ScreenResult</code>.
-   * 
-   * @param resultValueTypes the {@link java.util.SortedSet} of
-   *          {@link ResultValueType}s that comprise this
-   *          <code>ScreenResult</code>.
+   * Set the ordered set of all {@link ResultValueType ResultValueTypes} for this screen result.
+   * @param resultValueTypes the new ordered set of all {@link ResultValueType ResultValueTypes}
+   * for this screen result.
    * @motivation for hibernate
    */
-  private void setHbnResultValueTypes(SortedSet<ResultValueType> resultValueTypes) {
+  private void setResultValueTypes(SortedSet<ResultValueType> resultValueTypes)
+  {
     _resultValueTypes = resultValueTypes;
   }
 
   /**
-   * Set the set of plate numbers associated with this ScreenResult (via
-   * ResultValue Wells).
-   * 
-   * @param plateNumbers the set of plate numbers
+   * Set the set of plate numbers associated with this screen result (via ResultValue Wells).
+   * @param plateNumbers the new set of plate numbers
    * @motivation for Hibernate
    */
   private void setPlateNumbers(SortedSet<Integer> plateNumbers)
   {
     _plateNumbers = plateNumbers;
   }
-  
+
   /**
    * Set the set of wells associated with this ScreenResult.
-   * 
    * @param well the set of wells
    * @motivation for Hibernate
    */
@@ -572,7 +561,7 @@ public class ScreenResult extends AbstractEntity
   {
     _wells = wells;
   }
-  
+
   /**
    * @motivation for Hibernate
    * @param experimentalWellCount

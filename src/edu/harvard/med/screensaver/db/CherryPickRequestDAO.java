@@ -19,12 +19,12 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.db.screendb.ScreenDBSynchronizer;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
+import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
-import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreenerCherryPick;
 
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
@@ -105,7 +105,6 @@ public class CherryPickRequestDAO extends AbstractDAO
     }
 
     // dissociate from related entities
-    cherryPickRequest.getRequestedBy().getHbnCherryPickRequests().remove(cherryPickRequest);
     cherryPickRequest.getScreen().getCherryPickRequests().remove(cherryPickRequest);    
     getHibernateTemplate().delete(cherryPickRequest);
   }
@@ -155,11 +154,12 @@ public class CherryPickRequestDAO extends AbstractDAO
     return (Map<WellKey,Number>) getHibernateTemplate().execute(new HibernateCallback() {
       public Object doInHibernate(Session session) throws HibernateException, SQLException
       {
-        Query query = session.createQuery("select sw.wellId, count(*) " +
-                            "from Screen s left join s.cherryPickRequests cpr left join cpr.screenerCherryPicks scp join scp.screenedWell sw " +
-                            "where s.hbnScreenNumber = :screenNumber " +
-                            "group by sw.wellId " +
-                            "having count(*) > 1");
+        Query query = session.createQuery(
+          "select sw.wellId, count(*) " +
+          "from Screen s left join s.cherryPickRequests cpr left join cpr.screenerCherryPicks scp join scp.screenedWell sw " +
+          "where s.screenNumber = :screenNumber " +
+          "group by sw.wellId " +
+          "having count(*) > 1");
         query.setReadOnly(true);
         query.setParameter("screenNumber", screen.getScreenNumber());
         Map<WellKey,Number> result = new HashMap<WellKey,Number>();
@@ -171,8 +171,5 @@ public class CherryPickRequestDAO extends AbstractDAO
       }
     });
   }
-  
-  // private methods
-
 }
 

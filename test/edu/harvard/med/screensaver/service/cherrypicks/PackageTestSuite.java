@@ -14,7 +14,6 @@ import junit.framework.TestSuite;
 
 public class PackageTestSuite extends TestSuite
 {
-
   public static void main(String[] args)
   {
     junit.textui.TestRunner.run(suite());
@@ -31,5 +30,4 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapperTest.class);
     addTestSuite(edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilderTest.class);
   }
-
 }

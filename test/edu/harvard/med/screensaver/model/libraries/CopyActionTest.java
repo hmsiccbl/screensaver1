@@ -15,7 +15,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
 import org.apache.log4j.Logger;
 
-public class CopyActionTest extends AbstractEntityInstanceTest
+public class CopyActionTest extends AbstractEntityInstanceTest<CopyAction>
 {
   // static members
 

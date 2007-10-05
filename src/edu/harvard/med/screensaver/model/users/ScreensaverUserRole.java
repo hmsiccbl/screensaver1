@@ -24,7 +24,6 @@ import org.apache.log4j.Logger;
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- * @hibernate.class lazy="false"
  */
 public enum ScreensaverUserRole implements VocabularyTerm, Principal
 {
@@ -104,9 +103,6 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
     return _comment;
   }
 
-  /* (non-Javadoc)
-   * @see java.lang.Object#toString()
-   */
   @Override
   public String toString()
   {
@@ -123,9 +119,8 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
     return getValue();
   }
 
-
-  public boolean isAdministrative() {
+  public boolean isAdministrative()
+  {
     return _isAdministrative;
   }
-
 }

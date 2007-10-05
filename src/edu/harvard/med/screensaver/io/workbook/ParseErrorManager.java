@@ -21,8 +21,6 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
-import com.sun.rowset.internal.Row;
-
 /**
  * Maintains a list of error messages.
  * 

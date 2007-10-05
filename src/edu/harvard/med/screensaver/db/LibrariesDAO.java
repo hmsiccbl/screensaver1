@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -24,7 +25,6 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 
@@ -41,6 +41,16 @@ public interface LibrariesDAO
    * @return the well, null if there is no well
    */
   public Well findWell(WellKey wellKey);
+
+  /**
+   * Find and return the well.
+   * 
+   * @param wellKey the wellKey
+   * @param loadContents if true, then load all the compounds, silencing reagents and genes
+   * associated with the well
+   * @return the well, null if there is no well
+   */
+  public Well findWell(WellKey wellKey, boolean loadContents);
 
   /**
    * Find and return the wells containing the reagent of a given a vendor and

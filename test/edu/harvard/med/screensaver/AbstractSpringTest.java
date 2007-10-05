@@ -30,7 +30,7 @@ extends AbstractDependencyInjectionSpringContextTests
    * Spring configuration will be loaded from the configuration file(s)
    * specified in this constant.
    */
-  private static final String[] SPRING_CONFIG_FILES = new String[] {
+  private static final String[] SPRING_CONFIG_FILES = new String [] {
     "spring-context-test.xml",
   };
 
@@ -52,9 +52,6 @@ extends AbstractDependencyInjectionSpringContextTests
     setPopulateProtectedVariables(true);
   }
 
-  /* (non-Javadoc)
-   * @see org.springframework.test.AbstractDependencyInjectionSpringContextTests#getConfigLocations()
-   */
   @Override
   protected String[] getConfigLocations() {
     return SPRING_CONFIG_FILES;

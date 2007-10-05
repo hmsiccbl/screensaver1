@@ -167,13 +167,6 @@
   
   <!-- uptodate properties (depends on "file sets" section) -->
 
-  <uptodate property="hbm_xml.uptodate" targetfile="${hibernate.cfg.xml}" >
-    <srcfiles refid="model.src.fileset"/>
-    <srcfiles refid="test.model.src.fileset"/>
-    <srcfiles dir="resources" includes="**/hibernate-properties-*.xml"/>
-    <srcfiles dir="resources" includes="**/*.replace.properties"/>
-  </uptodate>
-
   <uptodate property="distro.uptodate" targetfile="${distro.file.tgz}">
     <srcfiles refid="deploy.lib.fileset"/>
     <srcfiles dir="src"/>
@@ -207,6 +200,11 @@
   <path id="distro.project.classpath">
     <path refid="build.library.path"/>
     <pathelement path="${distro.build.dir}/classes"/>
+  </path>
+  
+  <path id="hibernatetools.classpath">
+    <path refid="build.library.path"/>
+    <pathelement path=".eclipse.classes"/>
   </path>
 
 
@@ -359,85 +357,21 @@
     </copy>	
   </target>
 
-  <target 
-    name="hbm_xml"
-    unless="hbm_xml.uptodate"
-  >
-    <description>
-      Generate hibernate.cfg.xml and .hbm.xml files
-    </description>
-    <taskdef
-      name="hibernatedoclet"
-      classname="xdoclet.modules.hibernate.HibernateDocletTask"
-      classpathref="build.library.path"
-    />
-    <!-- note: mergedir *must* be same as destdir, due XDoclet bug -->
-    <hibernatedoclet
-      destdir="resources"
-      mergedir="resources"
-      excludedtags="@version,@author,@todo"
-      force="true"
-      verbose="${verbose}"
-    >
-      <fileset refid="model.src.fileset"/>
-      <!--fileset refid="test.model.src.fileset"/-->
-      <hibernatecfg
-        version="3.0" 
-        showsql="false"
-        
-        driver="org.postgresql.Driver"
-        jdbcurl="jdbc:postgresql://localhost/${app.name}"
-        username="${app.name}"
-        password="${app.name}"
-        dialect="org.hibernate.dialect.PostgreSQLDialect"
-      >
-        <otherProperty name="generate_statistics" value="${debug}"/>
-      </hibernatecfg>
-      <!-- TODO: make 'hibernate.cfg.xml' property match this destinationFile attribute value -->
-      <hibernate version="3.0" destinationFile="{0}.hbm.xml"/>
-    </hibernatedoclet>
-    <!-- HACK: we need to create custom db table indexes.  This following 'replace' statement does this.  
-         Uses's Hibernate's <database-object> mechanism for defining custom create/drop SQL statements 
-         (http://www.hibernate.org/hib_docs/v3/reference/en/html/mapping.html#mapping-database-object), 
-         which is not supported by XDoclet, forcing us to do the dirty work of merging this definition 
-         into our hibernate-properties-*.xml file(s). -->
-    <replace 
-      file="resources/edu/harvard/med/screensaver/model/screenresults/ResultValueType.hbm.xml" 
-      propertyFile="resources/edu/harvard/med/screensaver/model/screenresults/ResultValueType.replace.properties">
-      <replacefilter 
-        token="&lt;/class&gt;" 
-        property="ResultValueType.indexes"/>
-    </replace>
-  	
-  	<!-- an index for well_molfile -->
-    <replace 
-      file="resources/edu/harvard/med/screensaver/model/libraries/Well.hbm.xml" 
-      propertyFile="resources/edu/harvard/med/screensaver/model/libraries/Well.replace.properties">
-      <replacefilter 
-        token="&lt;/class&gt;" 
-        property="Well.indexes"/>
-    </replace>
-    
-  </target>
-
-
+ 
   <!-- generate ddl -->
 
-  <target 
-    name="ddl" 
-    depends="hbm_xml,distro"
-  >
+  <target name="ddl">
     <description>
       Generate the DDL from the beans classes and associated hbm.xml files
     </description>
     <taskdef
       name="hibernatetool" 
       classname="org.hibernate.tool.ant.HibernateToolTask" 
-      classpathref="distro.project.classpath"
+      classpathref="hibernatetools.classpath"
     />
     <hibernatetool destdir="resources/sql">
-      <configuration
-        configurationfile="resources/hibernate.cfg.xml"
+      <annotationconfiguration
+        configurationfile="${hibernate.cfg.xml}"
         namingstrategy="org.hibernate.cfg.ImprovedNamingStrategy"
       />
       <hbm2ddl
@@ -552,12 +486,7 @@
     </junit>
   </target>
 
-
-  <!-- TODO: should call hbm_xml with a destination dir parameter, to allow generated hibernate files to be custom-built into ${build.dir}, since they can differ depending upon Ant cmd-line options (e.g., -Dtest=true) -->
-  <target
-    name="build"
-    depends="hbm_xml"
-  >
+  <target name="build">
     <description>A "subroutine" target that performs the common build operations 
       for either a WAR or non-web build.  Builds into the directory specified by
       the 'build.dir' property.  This target directory will contain 'classes/', 
@@ -649,7 +578,6 @@
     description="Clean out generated files related to persistence (Hibernate files, sql schema)."
   >
     <delete includeemptydirs="true">
-      <fileset file="${hibernate.cfg.xml}"/>
       <fileset dir="resources" includes="**/*.hbm.xml" />
       <fileset dir="resources/sql" includes="create_schema.sql" />
       <fileset dir="resources/sql" includes="drop_schema.sql" />
@@ -704,6 +632,8 @@
     6. go to the targets tab
     7. for each of "After a Clean", "Manual Build", and "Auto Build", select the following rule as the target.
        note you will probably have to deselect the default target.
+    8. click the "Refresh" tab, check the "Refresh resources upon completion" box, check the "Specific
+       resources" radio button, click "Specify resources...", and select the .eclipse.classes dir
     
     it is probably not necessary to do step 7 for "Auto Build", but seems to be necessary for "After a Clean" and
     "Manual Build".

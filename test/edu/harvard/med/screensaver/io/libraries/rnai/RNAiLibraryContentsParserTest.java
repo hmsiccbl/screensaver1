@@ -20,8 +20,8 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.io.workbook.ParseError;
@@ -363,7 +363,17 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
    * <li> new well, duplicate sr/gene
    * <li> new well/sr, duplicate gene
    * </ol>
-  */
+   * 
+   * TODO: semantics of loading new silencing reagents into a well with existing
+   * silencing reagents has changed. now, the old silencing reagent is removed
+   * from the well. (see DataRowParser.parseDataRowContent.) does this make
+   * sense? yes, since it is not a natural situation to expect <i>some</i> of
+   * the contents of the well to be loaded from one library file, and <i>some</i>
+   * from a different file. as a consequence, this test should be rewritten, but
+   * probably requires some thought, since the initial purpose of this test is
+   * to make sure duplicate entities dont get created (as the name of the test
+   * implies).
+   */
   public void testUseOfExistingEntities()
   {
     genericEntityDao.doInTransaction(new DAOTransaction()
@@ -377,6 +387,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
           LibraryType.SIRNA,
           50001,
           50001);
+        librariesDao.loadOrCreateWellsForLibrary(library);
         genericEntityDao.persistEntity(library);
   
         // parse the first spreadsheet
@@ -396,7 +407,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
   
         // persist the new well/sr/genes, so the next
         genericEntityDao.persistEntity(library);
-  
+        
         // parse the second spreadsheet
         filename = "existing entities 2.xls";
         file = new File(TEST_INPUT_FILE_DIR, filename);
@@ -416,7 +427,6 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
         Well a05 = null, a07 = null, a09 = null, a11 = null, a13 = null, a15 = null, a17 = null;
         for (Well well: library.getWells()) {
           String wellName = well.getWellName();
-          log.info("well name " + wellName);
           if (wellName.equals("A05"))      { a05 = well; }
           else if (wellName.equals("A07")) { a07 = well; }
           else if (wellName.equals("A09")) { a09 = well; }

@@ -16,7 +16,6 @@ import junit.framework.TestSuite;
 
 public class PackageTestSuite extends TestSuite
 {
-
   public static void main(String[] args)
   {
     junit.textui.TestRunner.run(suite());
@@ -30,6 +29,7 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     addTestSuite(PlateWellListParserTest.class);
+    addTestSuite(WellsDataExporterTest.class);
     addTest(edu.harvard.med.screensaver.io.libraries.rnai.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.io.libraries.compound.PackageTestSuite.suite());
   }

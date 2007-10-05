@@ -10,15 +10,23 @@
 package edu.harvard.med.screensaver.model.screenresults;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
+
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
+import javax.persistence.Version;
+
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.DerivedEntityProperty;
-import edu.harvard.med.screensaver.model.ToOneRelationship;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
-
-import org.apache.log4j.Logger;
 
 /**
  * Annotation value on a particular library member (e.g. a compound or silencing
@@ -29,19 +37,22 @@ import org.apache.log4j.Logger;
  * general, all wells that share the same annotation will also share the same
  * vendor identifier (though this is not enforced by the model).
  *
- * @hibernate.class
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
+@Entity
+@org.hibernate.annotations.Proxy
+@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=AnnotationType.class)
 public class AnnotationValue extends AbstractEntity
 {
-  // static members
+
+  // private static data
 
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(AnnotationType.class);
 
 
-  // instance data members
+  // private instance data
 
   private Integer _annotationValueId;
   private Integer _version;
@@ -51,16 +62,123 @@ public class AnnotationValue extends AbstractEntity
   private Double _numericValue;
 
 
-  // constructors
+  // private instance methods
 
-  private AnnotationValue()
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
+    return visitor.visit(this);
   }
 
-  public AnnotationValue(AnnotationType annotationType,
-                         ReagentVendorIdentifier reagentVendorIdentifier,
-                         String value,
-                         Double numericValue)
+  @Override
+  @Transient
+  public Serializable getEntityId()
+  {
+    return getAnnotationValueId();
+  }
+
+  /**
+   * Get the id for the annotation value.
+   * @return the id for the annotation value
+   */
+  @Id
+  @org.hibernate.annotations.GenericGenerator(
+    name="annotation_value_id_seq",
+    strategy="sequence",
+    parameters = {
+      @org.hibernate.annotations.Parameter(name="sequence", value="annotation_value_id_seq")
+    }
+  )
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="annotation_value_id_seq")
+  public Integer getAnnotationValueId()
+  {
+    return _annotationValueId;
+  }
+
+  /**
+   * Get the annotation type.
+   * @return the annotation type
+  */
+  @ManyToOne
+  @JoinColumn(name="annotationTypeId", nullable=false, updatable=false)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.ForeignKey(name="fk_annotation_value_to_annotation_type")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.NO_PROXY)
+  public AnnotationType getAnnotationType()
+  {
+    return _annotationType;
+  }
+
+  /**
+   * Get the reagent vendor identifier.
+   * @return the reagent vendor identifier
+   */
+  @Column(nullable=false)
+  @Embedded
+  public ReagentVendorIdentifier getReagentVendorIdentifier()
+  {
+    return _reagentVendorIdentifier;
+  }
+
+  /**
+   * Set the reagent vendor identifier.
+   * @param reagentVendorIdentifier the new reagent vendor identifier
+   */
+  public void setReagentVendorIdentifier(ReagentVendorIdentifier reagentVendorIdentifier)
+  {
+    _reagentVendorIdentifier = reagentVendorIdentifier;
+  }
+
+  /**
+   * Get the value.
+   * @return the value
+   */
+  @Column(updatable=false)
+  @org.hibernate.annotations.Type(type="text")
+  @org.hibernate.annotations.Immutable
+  public String getValue()
+  {
+    return _value;
+  }
+
+  /**
+   * Get the numerical value.
+   * @return the numerical value
+   * @motivation for sorting via SQL
+   */
+  @Column(updatable=false)
+  @org.hibernate.annotations.Immutable
+  public Double getNumericValue()
+  {
+    return _numericValue;
+  }
+
+  /**
+   * Get the formatted value.
+   * @return the formatted value
+   */
+  @Transient
+  public String getFormattedValue()
+  {
+    return _value;
+  }
+
+
+  // protected constructor
+
+  /**
+   * Construct an initialized <code>AnnotationValue</code>. Intended only for use by
+   * {@link AnnotationType#createAnnotationValue(ReagentVendorIdentifier, String, boolean)}.
+   * @param annotationType the annotation type
+   * @param reagentVendorIdentifier the reagent vendor identifier
+   * @param value the value
+   * @param numericValue the numerical value
+   */
+  AnnotationValue(
+    AnnotationType annotationType,
+    ReagentVendorIdentifier reagentVendorIdentifier,
+    String value,
+    Double numericValue)
   {
     if (annotationType.isNumeric() && value != null && numericValue == null) {
       throw new IllegalArgumentException("'numericValue' must be specified (in addition to 'value') for numeric annotation types");
@@ -72,142 +190,52 @@ public class AnnotationValue extends AbstractEntity
   }
 
 
-  // public methods
-
-  @Override
-  public Object acceptVisitor(AbstractEntityVisitor visitor)
-  {
-    return visitor.visit(this);
-  }
-
-  @Override
-  public Serializable getEntityId()
-  {
-    return getAnnotationValueId();
-  }
+  // protected constructor
 
   /**
-   * Get the id for the annotation value.
-   *
-   * @return the id for the annotation value
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="annotation_value_id_seq"
+   * Construct an uninitialized <code>AnnotationValue</code>.
+   * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  public Integer getAnnotationValueId()
-  {
-    return _annotationValueId;
-  }
-
-  /**
-  * @hibernate.many-to-one
-  *   class="edu.harvard.med.screensaver.model.screenresults.AnnotationType"
-  *   column="annotation_type_id"
-  *   not-null="true"
-  *   foreign-key="fk_annotation_value_to_annotation_type"
-  *   cascade="none"
-  */
-  @ToOneRelationship
-  public AnnotationType getAnnotationType()
-  {
-    return _annotationType;
-  }
-
-  /**
-   * @hibernate.component not-null="true"
-   */
-  public ReagentVendorIdentifier getReagentVendorIdentifier()
-  {
-    return _reagentVendorIdentifier;
-  }
-
-  public void setReagentVendorIdentifier(ReagentVendorIdentifier reagentVendorIdentifier)
-  {
-    _reagentVendorIdentifier = reagentVendorIdentifier;
-  }
-
-  /**
-   * @hibernate.property type="text"
-   */
-  public String getValue()
-  {
-    return _value;
-  }
-
-  /**
-   * @hibernate.property
-   * @motivation for sorting via SQL
-   */
-  public Double getNumericValue()
-  {
-    return _numericValue;
-  }
-
-  @DerivedEntityProperty
-  public String getFormattedValue()
-  {
-    return _value;
-  }
+  protected AnnotationValue() {}
 
 
-//  /**
-//   * Add a well that is annotated by this annotation value
-//   *
-//   * @param well the well to add
-//   * @return true iff the well was added successfully
-//   */
-//  public boolean addWell(Well well)
-//  {
-//    return _wells.add(well);
-//  }
-//
-//  /**
-//   * Get the set of wells associated with this Annotation.
-//   *
-//   * @return the set of wells associated with this Annotation
-//   * @hibernate.set table="annotation_value_well_link" lazy="true"
-//   *                cascade="save-update" sort="natural"
-//   * @hibernate.collection-key column="annotation_value_id"
-//   * @hibernate.collection-many-to-many class="edu.harvard.med.screensaver.model.libraries.Well"
-//   *                                    column="well_id"
-//   */
-//  @ToManyRelationship(unidirectional=true)
-//  public SortedSet<Well> getWells()
-//  {
-//    return _wells;
-//  }
-
-
-  // private methods
+  // private constructor and instance methods
 
   /**
    * Set the id for the annotation value.
-   *
    * @param annotationValueId the new id for the annotation value
    * @motivation for hibernate
    */
-  private void setAnnotationValueId(Integer annotationValueId) {
+  private void setAnnotationValueId(Integer annotationValueId)
+  {
     _annotationValueId = annotationValueId;
   }
 
   /**
    * Get the version for the annotation value.
-   *
    * @return the version for the annotation value
    * @motivation for hibernate
-   * @hibernate.version
    */
-  private Integer getVersion() {
+  @Column(nullable=false)
+  @Version
+  private Integer getVersion()
+  {
     return _version;
   }
 
   /**
+   * Set the version for the annotation value.
+   * @param version the new version for the annotation value
    * @motivation for hibernate
    */
-  private void setVersion(Integer version) {
+  private void setVersion(Integer version)
+  {
     _version = version;
   }
 
   /**
+   * Set the annotation type.
+   * @param annotationType the new annotation type
    * @motivation for hibernate
    */
   private void setAnnotationType(AnnotationType annotationType)
@@ -215,19 +243,22 @@ public class AnnotationValue extends AbstractEntity
     _annotationType = annotationType;
   }
 
+  /**
+   * Set the value.
+   * @param value the new value
+   * @motivation for hibernate
+   */
   private void setValue(String value)
   {
     _value = value;
   }
 
-  private void setNumericValue(Double value)
+  /**
+   * Set the numerical Value
+   * @param numericValue the new numerical value
+   */
+  private void setNumericValue(Double numericValue)
   {
-    _numericValue = value;
-  }
-
-  @Override
-  protected Object getBusinessKey()
-  {
-    return _annotationType + ":" + _reagentVendorIdentifier;
+    _numericValue = numericValue;
   }
 }

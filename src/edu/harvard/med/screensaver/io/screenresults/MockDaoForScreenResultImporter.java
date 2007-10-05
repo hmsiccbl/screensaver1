@@ -24,7 +24,9 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -38,7 +40,6 @@ import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
@@ -78,8 +79,24 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
 
   public Well findWell(WellKey wellKey)
   {
-    return new Well(_library, wellKey, WellType.EXPERIMENTAL);
+    try {
+      return _library.createWell(wellKey, WellType.EXPERIMENTAL);
+    }
+    catch (DuplicateEntityException e) {
+      for (Well well : _library.getWells()) {
+        if (well.getWellKey().equals(wellKey)) {
+          return well;
+        }
+      }
+      return null;
+    }
   }
+
+  public Well findWell(WellKey wellKey, boolean loadContents)
+  {
+    return findWell(wellKey);
+  }
+
 
   public List<Well> findReagentWellsByVendorId(ReagentVendorIdentifier reagentVendorIdentifier)
   {
@@ -171,7 +188,7 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   @SuppressWarnings("unchecked")
   public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass, String propertyName, Object propertyValue)
   {
-    if (entityClass.equals(Screen.class) && propertyName.equals("hbnScreenNumber")) {
+    if (entityClass.equals(Screen.class) && propertyName.equals("screenNumber")) {
       return (E) MakeDummyEntities.makeDummyScreen(((Integer) propertyValue));
     }
     return null;

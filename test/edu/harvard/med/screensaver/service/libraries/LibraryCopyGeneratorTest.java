@@ -85,7 +85,7 @@ public class LibraryCopyGeneratorTest extends AbstractSpringPersistenceTest
       }
     }
     
-    Library library = genericEntityDao.findEntityByProperty(Library.class, "libraryName", "library", true, "hbnCopies.hbnCopyInfos");
+    Library library = genericEntityDao.findEntityByProperty(Library.class, "libraryName", "library", true, "copies.copyInfos");
     Set<Copy> libraryCopies = library.getCopies();
     assertEquals("persisted library copies count", copyNames.size(), libraryCopies.size());
     

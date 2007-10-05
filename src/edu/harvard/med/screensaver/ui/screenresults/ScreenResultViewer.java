@@ -1,11 +1,11 @@
-//$HeadURL$
-//$Id$
-
-//Copyright 2006 by the President and Fellows of Harvard College.
-
-//Screensaver is an open-source project developed by the ICCB-L and NSRB labs
-//at Harvard Medical School. This software is distributed under the terms of
-//the GNU General Public License.
+// $HeadURL$
+// $Id$
+//
+// Copyright 2006 by the President and Fellows of Harvard College.
+// 
+// Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+// at Harvard Medical School. This software is distributed under the terms of
+// the GNU General Public License.
 
 package edu.harvard.med.screensaver.ui.screenresults;
 
@@ -232,7 +232,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
         {
           ScreenResult screenResult = _dao.reloadEntity(_screenResult,
                                                         true,
-          "hbnResultValueTypes");
+          "resultValueTypes");
           // note: we eager fetch the resultValues for each ResultValueType
           // individually, since fetching all with a single needReadOnly() call
           // would generate an SQL result cross-product for all RVTs+RVs that
@@ -243,7 +243,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
             // only includes the result_value_type_result_values table, whereas
             // the needReadOnly() call's SQL statement joins to the
             // result_value_type table as well, which is slower
-            rvt.getResultValues().keySet().iterator();
+            rvt.getWellKeyToResultValueMap().keySet().iterator();
             //_dao.needReadOnly(rvt, "resultValues");
           }
           File exportedWorkbookFile = null;
@@ -444,10 +444,10 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
       }
     };
   }
+
   private void resetView()
   {
     _dataFilter = null;
     _showPositivesOnlyForDataHeader = null;
   }
-
 }

@@ -22,9 +22,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
-import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
-import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
@@ -134,7 +132,7 @@ abstract class ScreeningSynchronizer
         continue;
       }
       
-      new PlatesUsed(screening, startPlate, endPlate, copy);
+      screening.createPlatesUsed(startPlate, endPlate, copy);
     }
     statement.close();
   }
@@ -153,7 +151,7 @@ abstract class ScreeningSynchronizer
       // (LibraryScreening or RNAiCherryPickScreening)
       Screening screening = _screenDBVisitIdToScreeningMap.get(visitId);
       if (screening != null) {
-        new EquipmentUsed(screening, equipment, protocol, description);
+        screening.createEquipmentUsed(equipment, protocol, description);
       }
     }
     statement.close();

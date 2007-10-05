@@ -111,8 +111,8 @@ public class ScreenResultExporterTest extends AbstractSpringTest
       ResultValueType expectedRvt = (ResultValueType) expectedIter.next();
       ResultValueType actualRvt = (ResultValueType) actualIter.next();
       assertTrue(expectedRvt.isEquivalent(actualRvt));
-      Map<WellKey,ResultValue> expectedResultValues = new HashMap<WellKey,ResultValue>(expectedRvt.getResultValues());
-      Map<WellKey,ResultValue> actualResultValues = new HashMap<WellKey,ResultValue>(actualRvt.getResultValues());
+      Map<WellKey,ResultValue> expectedResultValues = new HashMap<WellKey,ResultValue>(expectedRvt.getWellKeyToResultValueMap());
+      Map<WellKey,ResultValue> actualResultValues = new HashMap<WellKey,ResultValue>(actualRvt.getWellKeyToResultValueMap());
       for (WellKey wellKey : expectedResultValues.keySet()) {
         ResultValue expectedRv = (ResultValue) expectedResultValues.get(wellKey);
         ResultValue actualRv = (ResultValue) actualResultValues.get(wellKey);

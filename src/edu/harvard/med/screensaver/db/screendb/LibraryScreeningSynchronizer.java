@@ -81,7 +81,7 @@ class LibraryScreeningSynchronizer extends ScreeningSynchronizer
   private void deleteOldLibraryScreenings() {
     for (LibraryScreening libraryScreening : _dao.findAllEntitiesOfType(LibraryScreening.class)) {
       libraryScreening.getScreen().getScreeningRoomActivities().remove(libraryScreening);
-      libraryScreening.getPerformedBy().getHbnActivitiesPerformed().remove(libraryScreening);
+      libraryScreening.getPerformedBy().getActivitiesPerformed().remove(libraryScreening);
     }
   }
 
@@ -98,7 +98,7 @@ class LibraryScreeningSynchronizer extends ScreeningSynchronizer
       screening.setAssayProtocolLastModifiedDate(resultSet.getDate("assay_date"));
       screening.setNumberOfReplicates(resultSet.getInt("no_replicate_screen"));
       screening.setAbaseTestsetId(resultSet.getString("abase_testset_id"));
-      screening.setIsSpecial(getIsSpecial(resultSet));
+      screening.setSpecial(getIsSpecial(resultSet));
       synchronizeVolumeTransferredPerWell(resultSet, screening);
       synchronizeEstimatedFinalScreenConcentration(resultSet, screening);
       synchronizeAssayProtocolType(resultSet, screening);
@@ -133,7 +133,7 @@ class LibraryScreeningSynchronizer extends ScreeningSynchronizer
     Date dateOfActivity = resultSet.getDate("date_of_visit");
     Screen screen = _screenSynchronizer.getScreenForScreenNumber(screenNumber);
     ScreeningRoomUser performedBy = getPerformedBy(resultSet);
-    return new LibraryScreening(screen, performedBy, dateCreated, dateOfActivity);
+    return screen.createLibraryScreening(performedBy, dateCreated, dateOfActivity);
   }
 }
 

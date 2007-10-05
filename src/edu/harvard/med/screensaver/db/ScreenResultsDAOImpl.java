@@ -90,7 +90,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     Map<WellKey,List<ResultValue>> result = new HashMap<WellKey,List<ResultValue>>(hqlResult.size());
     for (Iterator iter = hqlResult.iterator(); iter.hasNext();) {
       Object[] row = (Object[]) iter.next();
-      WellKey wellKey = (WellKey) row[0];
+      WellKey wellKey = new WellKey((String) row[0]);
       List<ResultValue> rvsForRvt = result.get(wellKey);
       if (rvsForRvt == null) {
         rvsForRvt = new ArrayList<ResultValue>(rvts.size());
@@ -173,7 +173,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
   public void deleteScreenResult(ScreenResult screenResult)
   {
     // disassociate ScreenResult from Screen
-    screenResult.getScreen().setScreenResult(null);
+    screenResult.getScreen().clearScreenResult();
 
     getHibernateTemplate().delete(screenResult);
     log.debug("deleted " + screenResult);
@@ -299,11 +299,11 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     String rvtIdsList = StringUtils.makeListString(StringUtils.wrapStrings(rvtIds, "'", "'"), ",");
 
     StringBuilder sql = new StringBuilder();
-    sql.append("select rv.result_value_type_id, rv.key, rv.assay_well_type, rv.value, rv.numeric_value, rv.numeric_decimal_precision, rv.exclude, rv.positive ").
+    sql.append("select rv.result_value_type, rv.well_id, rv.assay_well_type, rv.value, rv.numeric_value, rv.numeric_decimal_precision, rv.is_exclude, rv.is_positive ").
     append("from result_value_type_result_values rv ").
-    append("where (rv.result_value_type_id in (").append(rvtIdsList).
-    append(")) and (rv.key in (").append(wellKeysList).append("))");
-
+    append("where (rv.result_value_type in (").append(rvtIdsList).
+    append(")) and (rv.well_id in (").append(wellKeysList).append("))");
+    
     Map<WellKey,List<ResultValue>> result = new HashMap<WellKey,List<ResultValue>>();
     Query query = session.createSQLQuery(sql.toString());
     for (Iterator iter = query.list().iterator(); iter.hasNext();) {
@@ -326,17 +326,19 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
 
       ResultValue rv;
       if (numValue != null) {
-        rv = new ResultValue(assayWellType,
-                             numValue,
-                             numPrecision,
-                             exclude,
-                             positive);
+        rv = new ResultValue(
+          assayWellType,
+          numValue,
+          numPrecision,
+          exclude,
+          positive);
       }
       else {
-        rv = new ResultValue(assayWellType,
-                             textValue,
-                             exclude,
-                             positive);
+        rv = new ResultValue(
+          assayWellType,
+          textValue,
+          exclude,
+          positive);
       }
       resultValues.set(rvtId2Pos.get(rvtId), rv);
     }

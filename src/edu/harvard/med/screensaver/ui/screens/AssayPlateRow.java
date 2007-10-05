@@ -12,7 +12,7 @@ package edu.harvard.med.screensaver.ui.screens;
 import java.util.HashMap;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 
 public class AssayPlateRow
 {
@@ -64,7 +64,7 @@ public class AssayPlateRow
     _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[2], 
                   _assayPlate.getName());
     _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[3], _assayPlate.getStatusLabel());
-    if (!_assayPlate.isFailed() && !_assayPlate.isPlated() && !_assayPlate.isCanceled()) {
+    if (!_assayPlate.isFailed() && !_assayPlate.isPlated() && !_assayPlate.isCancelled()) {
       _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[4], "");
       _columnName2Value.put(ASSAY_PLATES_TABLE_COLUMNS[5], "");
     }

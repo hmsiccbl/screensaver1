@@ -80,7 +80,7 @@ public class LibraryCopyGenerator
     for (String copyName : copyNames) {
       Copy copy = library.getCopy(copyName);
       if (copy == null) {
-        copy = new Copy(library, CopyUsageType.FOR_CHERRY_PICK_SCREENING, copyName);
+        copy = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, copyName);
         log.info("created " + copy + " for library " + library.getLibraryName());
       }
       CopyInfo copyInfo = createPlateCopy(copy, plateNumber, volume, plateType, datePlated);
@@ -103,7 +103,7 @@ public class LibraryCopyGenerator
   {
     CopyInfo copyInfo = copy.getCopyInfo(plateNumber);
     if (copyInfo == null) {
-      copyInfo = new CopyInfo(copy, plateNumber, "<unknown>", plateType, volume);
+      copyInfo = copy.createCopyInfo(plateNumber, "<unknown>", plateType, volume);
       copyInfo.setDatePlated(datePlated);
       log.info("created " + copyInfo + " for " + copy);
       return copyInfo;

@@ -9,18 +9,13 @@
 
 package edu.harvard.med.screensaver.ui.namevaluetable;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.model.libraries.Compound;
-import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
-
-import org.apache.log4j.Logger;
 
 /**
  * A NameValueTable for the Well Viewer.

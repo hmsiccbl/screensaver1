@@ -36,13 +36,13 @@ public class HeatMapCellTest extends AbstractSpringTest
   public void testHeatMapCell()
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
-    ScreenResult screenResult = new ScreenResult(screen, new Date());
-    ResultValueType rvt = new ResultValueType(screenResult, "rvt1");
+    ScreenResult screenResult = screen.createScreenResult(new Date());
+    ResultValueType rvt = screenResult.createResultValueType("rvt1");
     Library library = new Library("library 1", "lib1", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 1);
-    Well well = new Well(library, 1, "A01" );
+    Well well = library.createWell(1, "A01" );
     rvt.addResultValue(well, "1.0");
     
-    HeatMapCell cell = new HeatMapCell(rvt.getResultValues().get(well.getWellKey()),
+    HeatMapCell cell = new HeatMapCell(rvt.getWellKeyToResultValueMap().get(well.getWellKey()),
                                        well.getWellKey(),
                                        1.0,
                                        new Color(128, 0, 196),

@@ -146,9 +146,9 @@ public class WellFinder extends AbstractBackingBean
           Well well = _dao.findEntityById(Well.class,
                                           wellKey.toString(),
                                           true,
-                                          "hbnLibrary",
-                                          "hbnSilencingReagents.gene",
-                                          "hbnCompounds");
+                                          "library",
+                                          "silencingReagents.gene",
+                                          "compounds");
           if (well == null) {
             showMessage("libraries.noSuchWell", wellKey.getPlateNumber(), wellKey.getWellName());
           }

@@ -11,11 +11,13 @@ package edu.harvard.med.screensaver.model.screenresults;
 
 import java.beans.IntrospectionException;
 import java.io.File;
+import java.util.HashSet;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -25,7 +27,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 import org.apache.log4j.Logger;
 
-public class ResultValueTypeTest extends AbstractEntityInstanceTest
+public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueType>
 {
   // static members
 
@@ -69,8 +71,7 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest
         screenResultParser.parse(screen, workbookFile);
         log.debug(screenResultParser.getErrors());
         assertFalse("screen result had no errors", screenResultParser.getHasErrors());
-        genericEntityDao.persistEntity(screen);
-        
+        persistEntity(screen, new HashSet<AbstractEntity>());
       }
     });
     
@@ -78,10 +79,10 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 115); 
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 115); 
         assertEquals("result values count", 
                      28,
-                     screen.getScreenResult().getResultValueTypesList().get(0).getResultValues().size());
+                     screen.getScreenResult().getResultValueTypesList().get(0).getWellKeyToResultValueMap().size());
       }
     });
   }

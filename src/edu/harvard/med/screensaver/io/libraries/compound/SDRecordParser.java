@@ -273,9 +273,8 @@ class SDRecordParser
    */
   private Compound createCompoundFromSmiles(String smiles)
   {
-    Compound compound = new Compound(smiles);
     String inchi = _openBabelClient.convertSmilesToInchi(smiles);
-    compound.setInchi(inchi);
+    Compound compound = new Compound(smiles, inchi);
     for (String pubchemCid : _pubchemCidListProvider.getPubchemCidListForInchi(inchi)) {
       compound.addPubchemCid(pubchemCid);
     }

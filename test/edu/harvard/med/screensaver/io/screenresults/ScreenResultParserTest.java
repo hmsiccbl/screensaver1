@@ -51,7 +51,6 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
-import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -191,12 +190,12 @@ public class ScreenResultParserTest extends AbstractSpringTest
     jxl.Workbook wb = jxl.Workbook.getWorkbook(xlsInStream);
     Sheet sheet = wb.getSheet(0);
     try {
-      jxl.Cell cell = sheet.getCell(0, 2);
+      sheet.getCell(0, 2);
       fail("expected ArrayIndexOutOfBoundsException");
     }
     catch (ArrayIndexOutOfBoundsException e) {}
     try {
-      jxl.Cell cell = sheet.getCell(10, 0);
+      sheet.getCell(10, 0);
       fail("expected ArrayIndexOutOfBoundsException");
     }
     catch (ArrayIndexOutOfBoundsException e) {}
@@ -373,10 +372,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
     try {
-      new LibraryScreening(screen,
-                           screen.getLeadScreener(),
-                           DateUtil.makeDate(2007, 1, 1),
-                           DateUtil.makeDate(2007, 2, 2));
+      screen.createLibraryScreening(
+        screen.getLeadScreener(),
+        DateUtil.makeDate(2007, 1, 1),
+        DateUtil.makeDate(2007, 2, 2));
     }
     catch (DuplicateEntityException e) {
       e.printStackTrace();
@@ -418,7 +417,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
     ResultValueType rvt;
     
-    rvt = new ResultValueType(expectedScreenResult, "Luminescence");
+    rvt = expectedScreenResult.createResultValueType("Luminescence");
     rvt.setDescription("Desc1");
     rvt.setReplicateOrdinal(1);
     rvt.setTimePoint("0:10");
@@ -429,7 +428,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setNumeric(true);
     expectedResultValueTypes.put(0, rvt);
 
-    rvt = new ResultValueType(expectedScreenResult, "Luminescence");
+    rvt = expectedScreenResult.createResultValueType("Luminescence");
     rvt.setDescription("Desc2");
     rvt.setReplicateOrdinal(2);
     rvt.setTimePoint("0:10");
@@ -441,7 +440,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setNumeric(true);
     expectedResultValueTypes.put(1, rvt);
 
-    rvt = new ResultValueType(expectedScreenResult, "FI");
+    rvt = expectedScreenResult.createResultValueType("FI");
     rvt.setDescription("Fold Induction");
     rvt.setReplicateOrdinal(1);
     rvt.setDerived(true);
@@ -451,7 +450,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setNumeric(true);
     expectedResultValueTypes.put(2, rvt);
 
-    rvt = new ResultValueType(expectedScreenResult, "FI");
+    rvt = expectedScreenResult.createResultValueType("FI");
     rvt.setDescription("Fold Induction");
     rvt.setReplicateOrdinal(2);
     rvt.setDerived(true);
@@ -462,7 +461,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setNumeric(true);
     expectedResultValueTypes.put(3, rvt);
 
-    rvt = new ResultValueType(expectedScreenResult, "AssayIndicator1");
+    rvt = expectedScreenResult.createResultValueType("AssayIndicator1");
     rvt.setDerived(true);
     rvt.setHowDerived("Average");
     rvt.addTypeDerivedFrom(expectedResultValueTypes.get(2));
@@ -475,7 +474,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setNumeric(true);
     expectedResultValueTypes.put(4, rvt);
 
-    rvt = new ResultValueType(expectedScreenResult, "AssayIndicator2");
+    rvt = expectedScreenResult.createResultValueType("AssayIndicator2");
     rvt.setDerived(true);
     rvt.setHowDerived("W<=1.6, M<=1.7, S<=1.8");
     rvt.addTypeDerivedFrom(expectedResultValueTypes.get(4));
@@ -485,7 +484,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setNumeric(false);
     expectedResultValueTypes.put(5, rvt);
 
-    rvt = new ResultValueType(expectedScreenResult, "AssayIndicator3");
+    rvt = expectedScreenResult.createResultValueType("AssayIndicator3");
     rvt.setDerived(true);
     rvt.setHowDerived("AssayIndicator2 is S");
     rvt.addTypeDerivedFrom(expectedResultValueTypes.get(5));
@@ -537,12 +536,14 @@ public class ScreenResultParserTest extends AbstractSpringTest
       if (expectedRvt != null) {
         setDefaultValues(expectedRvt);
         setDefaultValues(actualRvt);
+        log.info("expectedRvt = " + expectedRvt.getName());
+        log.info("actualRvt = " + actualRvt.getName());
         assertTrue("ResultValueType " + iRvt, expectedRvt.isEquivalent(actualRvt));
 
         // compare result values
-        assertEquals(960, actualRvt.getResultValues().size());
+        assertEquals(960, actualRvt.getWellKeyToResultValueMap().size());
         int iWell = 0;
-        Map<WellKey,ResultValue> resultValues = actualRvt.getResultValues();
+        Map<WellKey,ResultValue> resultValues = actualRvt.getWellKeyToResultValueMap();
         for (WellKey wellKey : new TreeSet<WellKey>(resultValues.keySet())) {
           ResultValue rv = resultValues.get(wellKey);
           assertEquals("rvt " + iRvt + " well #" + iWell + " plate name",
@@ -593,7 +594,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     int resultValues = 10;
     assertEquals("result value count", 
                  resultValues,
-                 screenResult.getResultValueTypesList().get(0).getResultValues().size());
+                 screenResult.getResultValueTypesList().get(0).getWellKeyToResultValueMap().size());
     int nonExcludedResultValues = resultValues - 1;
     List<Integer> expectedHitCount = Arrays.asList(4, 6, 3);
     List<Double> expectedHitRatio = Arrays.asList(expectedHitCount.get(0) / (double) nonExcludedResultValues, 
@@ -606,7 +607,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
         assertEquals("hit count", expectedHitCount.get(iPositiveIndicatorRvt), rvt.getPositivesCount());
         assertEquals("hit ratio", 
                      expectedHitRatio.get(iPositiveIndicatorRvt).doubleValue(), 
-                     rvt.getPositivesPercentage().doubleValue(), 
+                     rvt.getPositivesRatio().doubleValue(), 
                      0.01);
         ++iPositiveIndicatorRvt;
       }
@@ -637,7 +638,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     for (int i = 0; i < 30 - 1; ++i) {
       ResultValueType rvt = resultValueTypes.get(i);
       assertEquals("is derived from next", resultValueTypes.get(i+1), rvt.getDerivedTypes().first());
-      Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
+      Map<WellKey,ResultValue> resultValues = rvt.getWellKeyToResultValueMap();
       assertEquals(rvt.getName() + " result value 0", 1000.0 + i, resultValues.get(new WellKey(1, "A01")).getNumericValue());
       assertEquals(rvt.getName() + " result value 1", 2000.0 + i, resultValues.get(new WellKey(1, "A02")).getNumericValue());
       assertEquals(rvt.getName() + " result value 2", 3000.0 + i, resultValues.get(new WellKey(1, "A03")).getNumericValue());
@@ -673,7 +674,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public static ScreenResult makeScreenResult(Date date)
   {
     Screen screen = makeScreen(date);
-    ScreenResult screenResult = new ScreenResult(screen, date);
+    ScreenResult screenResult = screen.createScreenResult(date);
     return screenResult;
   }
 

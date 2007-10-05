@@ -90,8 +90,8 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
       public void runTransaction()
       {
         final Screen screen = MakeDummyEntities.makeDummyScreen(1); 
-        ScreenResult screenResult = new ScreenResult(screen, new Date());
-        ResultValueType rvt = new ResultValueType(screenResult, "rvt");
+        ScreenResult screenResult = screen.createScreenResult(new Date());
+        ResultValueType rvt = screenResult.createResultValueType("rvt");
         Library library = new Library(
           "library 1",
           "lib1",
@@ -102,7 +102,7 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
         for (int iPlate = 1; iPlate <= plates; ++iPlate) {
           int plateNumber = iPlate;
           for (int iWell = 1; iWell <= Well.MAX_WELL_COLUMN; ++iWell) {
-            Well well = new Well(library, plateNumber, "A" + iWell);
+            Well well = library.createWell(plateNumber, "A" + iWell);
             String value = Integer.toString(plateNumber * Well.MAX_WELL_COLUMN + iWell);
             rvt.addResultValue(well, value);
           }
@@ -183,7 +183,7 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
       public void runTransaction()
       {
         genericEntityDao.persistEntity(rvt); // reattach to Hibernate sesssion
-        Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
+        Map<WellKey,ResultValue> resultValues = rvt.getWellKeyToResultValueMap();
         for (Map.Entry<WellKey,ResultValue> entry: resultValues.entrySet()) {
           entry.getValue().getValue();
         }
@@ -199,7 +199,7 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
       public void runTransaction()
       {
         genericEntityDao.persistEntity(rvt); // reattach to Hibernate sesssion
-        Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
+        Map<WellKey,ResultValue> resultValues = rvt.getWellKeyToResultValueMap();
         Map<WellKey,List<ResultValue>> table = new HashMap<WellKey,List<ResultValue>>();
         List<ResultValue> values = new ArrayList<ResultValue>(1);
         for (Map.Entry<WellKey,ResultValue> entry: resultValues.entrySet()) {

@@ -229,14 +229,14 @@ public class EntityReplicator
   private void virginize(AbstractEntity entity)
   {
     Pair<Class<? extends AbstractEntity>,Integer> entityVirginizedKey =
-      new Pair<Class<? extends AbstractEntity>,Integer>(entity.getClass(), entity.hashCode());
+      new Pair<Class<? extends AbstractEntity>,Integer>(entity.getEntityClass(), entity.hashCode());
     if (virginized.contains(entityVirginizedKey)) {
       return;
     }
     virginized.add(entityVirginizedKey);
     log.info("virginizing " + entity);
 
-    Class<? extends AbstractEntity> entityClass = entity.getClass();
+    Class<? extends AbstractEntity> entityClass = entity.getEntityClass();
     ClassMetadata classMetadata = _sessionFactory.getClassMetadata(entityClass);
 
     classMetadata.setIdentifier(entity, null, EntityMode.POJO); // make into a transient entity, so it can persisted in new session

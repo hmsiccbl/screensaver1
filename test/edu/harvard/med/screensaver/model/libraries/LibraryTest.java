@@ -15,7 +15,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
 import org.apache.log4j.Logger;
 
-public class LibraryTest extends AbstractEntityInstanceTest
+public class LibraryTest extends AbstractEntityInstanceTest<Library>
 {
   // static members
 

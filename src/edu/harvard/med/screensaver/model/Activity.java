@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -12,25 +12,42 @@ package edu.harvard.med.screensaver.model;
 import java.util.Calendar;
 import java.util.Date;
 
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
+import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
+
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 
 /**
  * A Hibernate entity bean representing an activity.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- * @hibernate.class lazy="true"
  */
+@Entity
+@Inheritance(strategy=InheritanceType.JOINED)
+@org.hibernate.annotations.Proxy
 public abstract class Activity extends AbstractEntity implements Comparable
 {
-  
+
   // static fields
 
   private static final Logger log = Logger.getLogger(Activity.class);
   private static final long serialVersionUID = 0L;
+
 
   // instance fields
 
@@ -41,63 +58,18 @@ public abstract class Activity extends AbstractEntity implements Comparable
   private Date _dateOfActivity;
   private String _comments;
 
-  
-  // public constructor
 
-  /**
-   * Constructs an initialized <code>Activity</code> object.
-   *
-   * @param performedBy the user that performed the activity
-   * @param dateCreated the date created
-   * @param dateOfActivity the date the activity took place
-   */
-  public Activity(
-    ScreensaverUser performedBy,
-    Date dateCreated,
-    Date dateOfActivity) throws DuplicateEntityException
+  // public instance methods
+
+  @Transient
+  public int compareTo(Object o)
   {
-    this(performedBy, dateCreated, dateOfActivity, true);
+    Activity other = (Activity) o;
+    return getDateOfActivity().compareTo(other.getDateOfActivity());
   }
-
-  /**
-   * Constructs an initialized <code>Activity</code> object.
-   *
-   * @param performedBy the user that performed the activity
-   * @param dateCreated the date created
-   * @param dateOfActivity the date the activity took place
-   * @param addToPerformedByActivitiesPerformed true whenever we should add the
-   * activity to the acitivitiesPerformed of the performedBy. This should always
-   * happen, so you shouldn't just call this constructor with a false value here
-   * - if you do so you need to add it yourself. The motivation for this is to
-   * make a (hopefully temporary) hack in ScreeningRoomActivity work. The current
-   * Activity business key does not work for that class due to crazy organizations
-   * in the data the ScreenDBSynchronizer is loading from ScreenDB. So SRA has a
-   * temporary biz key to help mitigate this, and hopefully we will be fixing
-   * all this biz key stuff soon enough.
-   */
-  public Activity(
-    ScreensaverUser performedBy,
-    Date dateCreated,
-    Date dateOfActivity,
-    boolean addToPerformedByActivitiesPerformed) throws DuplicateEntityException
-  {
-    if (performedBy == null) {
-      throw new NullPointerException();
-    }
-    _performedBy = performedBy;
-    setDateCreated(dateCreated);
-    setDateOfActivity(dateOfActivity);
-    if (addToPerformedByActivitiesPerformed) {
-      if (!_performedBy.getHbnActivitiesPerformed().add(this)) {
-        throw new DuplicateEntityException(_performedBy, this);
-      }
-    }
-  }
-
-
-  // public methods
 
   @Override
+  @Transient
   public Integer getEntityId()
   {
     return getActivityId();
@@ -105,53 +77,45 @@ public abstract class Activity extends AbstractEntity implements Comparable
 
   /**
    * Get the id for the activity.
-   *
    * @return the id for the activity
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="activity_id_seq"
    */
+  @Id
+  @org.hibernate.annotations.GenericGenerator(
+    name="activity_id_seq",
+    strategy="sequence",
+    parameters = { @Parameter(name="sequence", value="activity_id_seq") }
+  )
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="activity_id_seq")
   public Integer getActivityId()
   {
     return _activityId;
   }
-  
-  @ImmutableProperty
+
+  @Transient
   abstract public String getActivityTypeName();
 
   /**
    * Get the user that performed the activity.
-   *
    * @return the user that performed the activity
    */
-  @ToOneRelationship(nullable=false, inverseProperty="activitiesPerformed")
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinColumn(name="performedById", nullable=false, updatable=false)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.ForeignKey(name="fk_activity_to_screensaver_user")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="activitiesPerformed")
   public ScreensaverUser getPerformedBy()
   {
     return _performedBy;
   }
 
   /**
-   * Set the user that performed the activity.
-   *
-   * @param performedBy the new user that performed the activity
-   */
-  public void setPerformedBy(ScreensaverUser performedBy)
-  {
-    if (performedBy == null) {
-      throw new NullPointerException();
-    }
-    _performedBy.getHbnActivitiesPerformed().remove(this);
-    _performedBy = performedBy;
-    _performedBy.getHbnActivitiesPerformed().add(this);
-  }
-
-  /**
    * Get the date the activity entity was created.
-   *
    * @return the date the activity entity was created
-   * @hibernate.property
-   *   not-null="true" type="timestamp"
    */
-  @ImmutableProperty
+  @Column(nullable=false, updatable=false)
+  @org.hibernate.annotations.Immutable
   public Date getDateCreated()
   {
     return _dateCreated;
@@ -159,12 +123,10 @@ public abstract class Activity extends AbstractEntity implements Comparable
 
   /**
    * Get the date the activity was performed.
-   *
    * @return the date the activity was performed
-   * @hibernate.property
-   *   not-null="true"
    */
-  @ImmutableProperty
+  @Column(nullable=false, updatable=false)
+  @org.hibernate.annotations.Immutable
   public Date getDateOfActivity()
   {
     return _dateOfActivity;
@@ -172,11 +134,9 @@ public abstract class Activity extends AbstractEntity implements Comparable
 
   /**
    * Get the comments.
-   *
    * @return the comments
-   * @hibernate.property
-   *   type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getComments()
   {
     return _comments;
@@ -184,7 +144,6 @@ public abstract class Activity extends AbstractEntity implements Comparable
 
   /**
    * Set the comments.
-   *
    * @param comments the new comments
    */
   public void setComments(String comments)
@@ -192,72 +151,78 @@ public abstract class Activity extends AbstractEntity implements Comparable
     _comments = comments;
   }
 
-  @Override
-  protected Object getBusinessKey()
+
+  // protected constructors
+
+  /**
+   * Construct an initialized <code>Activity</code>.
+   * @param performedBy the user that performed the activity
+   * @param dateCreated the date created
+   * @param dateOfActivity the date the activity took place
+   */
+  protected Activity(ScreensaverUser performedBy, Date dateCreated, Date dateOfActivity)
   {
-    return _dateCreated;
+    if (performedBy == null) {
+      throw new NullPointerException();
+    }
+    _performedBy = performedBy;
+    setDateCreated(dateCreated);
+    setDateOfActivity(dateOfActivity);
   }
 
-  public int compareTo(Object o)
-  {
-    Activity other = (Activity) o;
-    return getDateOfActivity().compareTo(other.getDateOfActivity());
-  }
-  
-  // protected constructor
-  
   /**
-   * Construct an uninitialized <code>Activity</code> object.
-   *
-   * @motivation for hibernate and CGLIB2 proxy
+   * Construct an uninitialized <code>Activity</code>.
+   * @motivation for hibernate and proxy and concrete subclasses constructors
    */
   protected Activity() {}
 
 
-  // private methods
+  // private instance methods
 
   /**
    * Set the id for the activity.
-   *
    * @param screeninRoomActivityId the new id for the activity
    * @motivation for hibernate
    */
-  private void setActivityId(Integer screeninRoomActivityId) {
+  private void setActivityId(Integer screeninRoomActivityId)
+  {
     _activityId = screeninRoomActivityId;
   }
-  
+
   /**
-   * Get the user that performed the activity.
-   *
-   * @return the user that performed the activity
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.users.ScreensaverUser"
-   *   column="performed_by_id"
-   *   not-null="true"
-   *   foreign-key="fk_activity_to_performed_by"
-   *   cascade="save-update"
+   * Get the version for the activity.
+   * @return the version for the activity
    * @motivation for hibernate
    */
-  private ScreensaverUser getHbnPerformedBy()
+  @Column(nullable=false)
+  @Version
+  private Integer getVersion()
   {
-    return _performedBy;
+    return _version;
+  }
+
+  /**
+   * Set the version for the activity.
+   * @param version the new version for the
+   * @motivation for hibernate
+   */
+  private void setVersion(Integer version)
+  {
+    _version = version;
   }
 
   /**
    * Set the user that performed the activity.
-   *
    * @param performedBy the new user that performed the activity
    * @motivation for hibernate
    */
-  private void setHbnPerformedBy(ScreensaverUser performedBy)
+  private void setPerformedBy(ScreensaverUser performedBy)
   {
     _performedBy = performedBy;
   }
 
-
   /**
    * Set the date the activity entity was created.
-   *
    * @param dateCreated the new date the activity entity was created
    * @motivation for hibernate
    */
@@ -266,35 +231,12 @@ public abstract class Activity extends AbstractEntity implements Comparable
     _dateCreated = truncateDate(dateCreated, Calendar.SECOND);
   }
 
-
   /**
    * Set the date the activity was performed.
-   *
    * @param dateCreated the new date the activity was performed.
    */
   private void setDateOfActivity(Date dateOfActivity)
   {
     _dateOfActivity = truncateDate(dateOfActivity);
-  }
-
-  /**
-   * Get the version for the activity.
-   *
-   * @return the version for the activity
-   * @motivation for hibernate
-   * @hibernate.version
-   */
-  private Integer getVersion() {
-    return _version;
-  }
-
-  /**
-   * Set the version for the activity.
-   *
-   * @param version the new version for the 
-   * @motivation for hibernate
-   */
-  private void setVersion(Integer version) {
-    _version = version;
   }
 }

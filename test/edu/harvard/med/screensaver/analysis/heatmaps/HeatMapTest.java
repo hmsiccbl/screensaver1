@@ -58,7 +58,7 @@ public class HeatMapTest extends AbstractSpringTest
   {
     assertFalse(_parser.getHasErrors());
     HeatMap heatMap = new HeatMap(1,
-                                  _screenResult.getResultValueTypes().first().getResultValues(),
+                                  _screenResult.getResultValueTypes().first().getWellKeyToResultValueMap(),
                                   new NoOpFilter(),
                                   new IdentityFunction(),
                                   new MultiGradientColorFunction(Color.BLACK,
@@ -80,7 +80,7 @@ public class HeatMapTest extends AbstractSpringTest
   public void testZScoreHeatMap()
   {
     HeatMap heatMap = new HeatMap(1,
-                                  _screenResult.getResultValueTypes().first().getResultValues(),
+                                  _screenResult.getResultValueTypes().first().getWellKeyToResultValueMap(),
                                   new NoOpFilter(),
                                   new ZScoreFunction(),
                                   new MultiGradientColorFunction(Color.BLACK,
@@ -100,7 +100,7 @@ public class HeatMapTest extends AbstractSpringTest
   public void testFilters()
   {
     HeatMap heatMap = new HeatMap(1,
-                                  _screenResult.getResultValueTypes().first().getResultValues(),
+                                  _screenResult.getResultValueTypes().first().getWellKeyToResultValueMap(),
                                   new ChainedFilter<Pair<WellKey,ResultValue>>(new ExcludedWellsFilter(), 
                                     new ChainedFilter<Pair<WellKey,ResultValue>>(new ControlWellsFilter())),
                                   new IdentityFunction(),
@@ -114,7 +114,7 @@ public class HeatMapTest extends AbstractSpringTest
   public void testMakeHtmlHeatMap() throws IOException
   {
     HeatMap heatMap = new HeatMap(1,
-                                  _screenResult.getResultValueTypes().first().getResultValues(),
+                                  _screenResult.getResultValueTypes().first().getWellKeyToResultValueMap(),
                                   new ChainedFilter<Pair<WellKey,ResultValue>>(new ExcludedWellsFilter(),
                                                                  new ChainedFilter<Pair<WellKey,ResultValue>>(new ControlWellsFilter())),
                                   new ZScoreFunction(),

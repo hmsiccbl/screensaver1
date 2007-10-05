@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -11,35 +11,56 @@ package edu.harvard.med.screensaver.model.libraries;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.DerivedEntityProperty;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
+
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 
 
 /**
  * A Hibernate entity bean representing a copy info.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.class lazy="false"
  */
+@Entity
+@Table(
+  uniqueConstraints={ @UniqueConstraint(columnNames={ "copyId", "plateNumber" }) }
+)
+@org.hibernate.annotations.Proxy
+@ContainedEntity(containingEntityClass=Copy.class)
 public class CopyInfo extends AbstractEntity
 {
-  
+
   // static fields
 
   private static final Logger log = Logger.getLogger(CopyInfo.class);
   private static final long serialVersionUID = 0L;
 
-  
-  // instance fields
+
+  // private instance fields
 
   private Integer _copyInfoId;
   private Integer _version;
@@ -48,27 +69,240 @@ public class CopyInfo extends AbstractEntity
   private Integer _plateNumber;
   private String _location;
   private PlateType _plateType;
-  /**
-   * The default initial volume (microliters) for a well on this copy plate.
-   */
+  /** The default initial volume (microliters) for a well on this copy plate. */
   private BigDecimal _microliterWellVolume;
   private String _comments;
   private Date _datePlated;
   private Date _dateRetired;
 
 
-  // public constructor
+  // public instance methods
+
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
+
+  @Override
+  @Transient
+  public Integer getEntityId()
+  {
+    return getCopyInfoId();
+  }
 
   /**
-   * Constructs an initialized <code>CopyInfo</code> object.
-   *
+   * Get the id for the copy info.
+   * @return the id for the copy info
+   */
+  @Id
+  @org.hibernate.annotations.GenericGenerator(
+    name="copy_info_id_seq",
+    strategy="sequence",
+    parameters = { @Parameter(name="sequence", value="copy_info_id_seq") }
+  )
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="copy_info_id_seq")
+  public Integer getCopyInfoId()
+  {
+    return _copyInfoId;
+  }
+
+  /**
+   * Get the copy.
+   * @return the copy
+   */
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE })
+  @JoinColumn(name="copyId", nullable=false, updatable=false)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.ForeignKey(name="fk_copy_info_to_copy")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
+  public Copy getCopy()
+  {
+    return _copy;
+  }
+
+  /**
+   * Get the set of copy actions.
+   * @return the copy actions
+   */
+  @OneToMany(
+    mappedBy="copyInfo",
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+    fetch=FetchType.LAZY
+  )
+  @OrderBy("date")
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
+  public Set<CopyAction> getCopyActions()
+  {
+    return _copyActions;
+  }
+
+  /**
+   * Create and return a new copy action for the copy info
+   * @param copyInfo the copy info
+   * @param description the description
+   * @param date the date
+   * @return the newly created copy action for the copy info
+   */
+  public CopyAction createCopyAction(String description, Date date)
+  {
+    CopyAction copyAction = new CopyAction(this, description, date);
+    // no need to check for duplicate entities here since copy actions are not SemanticID
+    _copyActions.add(copyAction);
+    return copyAction;
+  }
+
+  /**
+   * Get the plate number.
+   * @return the plate number
+   */
+  @org.hibernate.annotations.Immutable
+  @Column(nullable=false)
+  public Integer getPlateNumber()
+  {
+    return _plateNumber;
+  }
+
+  /**
+   * Get the location.
+   * @return the location
+   */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(type="text")
+  public String getLocation()
+  {
+    return _location;
+  }
+
+  /**
+   * Set the location.
+   * @param location the new location
+   */
+  public void setLocation(String location)
+  {
+    _location = location;
+  }
+
+  /**
+   * Get the plate type.
+   * @return the plate type
+   */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(
+    type="edu.harvard.med.screensaver.model.libraries.PlateType$UserType"
+  )
+  public PlateType getPlateType()
+  {
+    return _plateType;
+  }
+
+  /**
+   * Set the plate type.
+   * @param plateType the new plate type
+   */
+  public void setPlateType(PlateType plateType)
+  {
+    _plateType = plateType;
+  }
+
+  /**
+   * Get the default volume (microliters) for wells on this copy plate.
+   * @return the volume
+   */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.Type(type="big_decimal")
+  public BigDecimal getMicroliterWellVolume()
+  {
+    return _microliterWellVolume;
+  }
+
+  /**
+   * Get the comments.
+   * @return the comments
+   */
+  @org.hibernate.annotations.Type(type="text")
+  public String getComments()
+  {
+    return _comments;
+  }
+
+  /**
+   * Set the comments.
+   * @param comments the new comments
+   */
+  public void setComments(String comments)
+  {
+    _comments = comments;
+  }
+
+  /**
+   * Get the date plated.
+   * @return the date plated
+   */
+  public Date getDatePlated()
+  {
+    return _datePlated;
+  }
+
+  /**
+   * Set the date plated.
+   * @param datePlated the new date plated
+   */
+  public void setDatePlated(Date datePlated)
+  {
+    _datePlated = truncateDate(datePlated);
+  }
+
+  /**
+   * Get the date retired.
+   * @return the date retired
+   */
+  public Date getDateRetired()
+  {
+    return _dateRetired;
+  }
+
+  /**
+   * Set the date retired.
+   * @param dateRetired the new date retired
+   */
+  public void setDateRetired(Date dateRetired)
+  {
+    _dateRetired = truncateDate(dateRetired);
+  }
+
+  /**
+   * Return true iff this library has been retired.
+   * @return true iff this library has been retired
+   */
+  @Transient
+  public boolean isRetired()
+  {
+    return _dateRetired != null;
+  }
+
+
+  // package constructor
+
+  /**
+   * Construct an initialized <code>CopyInfo</code>. Intended only for use by {@link
+   * Copy#createCopyInfo(Integer, String, PlateType, BigDecimal)}.
    * @param copy the copy
    * @param plateNumber the plate number
    * @param location the location
    * @param plateType the plate type
    * @param volume the volume
+   * @motivation intended only for use by {@link Copy@createCopyInfo}
    */
-  public CopyInfo(
+  CopyInfo(
     Copy copy,
     Integer plateNumber,
     String location,
@@ -80,432 +314,85 @@ public class CopyInfo extends AbstractEntity
     _location = location;
     _plateType = plateType;
     setMicroliterWellVolume(volume);
-    _copy.getHbnCopyInfos().add(this);
   }
 
 
-  // public methods
-
-  @Override
-  public Object acceptVisitor(AbstractEntityVisitor visitor)
-  {
-    return visitor.visit(this);
-  }
-  
-  @Override
-  public Integer getEntityId()
-  {
-    return getCopyInfoId();
-  }
+  // protected constructor
 
   /**
-   * Get the id for the copy info.
-   *
-   * @return the id for the copy info
-   * @hibernate.id generator-class="sequence"
-   * @hibernate.generator-param name="sequence" value="copy_info_id_seq"
+   * Construct an uninitialized <code>CopyInfo</code>.
+   * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  public Integer getCopyInfoId()
-  {
-    return _copyInfoId;
-  }
-
-  /**
-   * Get the copy.
-   *
-   * @return the copy
-   */
-  public Copy getCopy()
-  {
-    return _copy;
-  }
-
-  /**
-   * Set the copy.
-   *
-   * @param copy the new copy
-   */
-  public void setCopy(Copy copy)
-  {
-    _copy.getHbnCopyInfos().remove(this);
-    _copy = copy;
-    copy.getHbnCopyInfos().add(this);
-  }
-
-  /**
-   * Get an unmodifiable copy of the set of copy actions.
-   *
-   * @return the copy actions
-   */
-  public Set<CopyAction> getCopyActions()
-  {
-    return Collections.unmodifiableSet(_copyActions);
-  }
-
-  /**
-   * Add the copy action.
-   *
-   * @param copyAction the copy action to add
-   * @return true iff the copy info did not already have the copy action
-   */
-  public boolean addCopyAction(CopyAction copyAction)
-  {
-    if (getHbnCopyActions().add(copyAction)) {
-      copyAction.setHbnCopyInfo(this);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Get the plate number.
-   *
-   * @return the plate number
-   */
-  public Integer getPlateNumber()
-  {
-    return _plateNumber;
-  }
-
-  /**
-   * Set the plate number.
-   *
-   * @param plateNumber the new plate number
-   */
-  public void setPlateNumber(Integer plateNumber)
-  {
-    _copy.getHbnCopyInfos().remove(this);
-    _plateNumber = plateNumber;
-    _copy.getHbnCopyInfos().add(this);
-  }
-
-  /**
-   * Get the location.
-   *
-   * @return the location
-   * @hibernate.property
-   *   type="text"
-   *   not-null="true"
-   */
-  public String getLocation()
-  {
-    return _location;
-  }
-
-  /**
-   * Set the location.
-   *
-   * @param location the new location
-   */
-  public void setLocation(String location)
-  {
-    _location = location;
-  }
-
-  /**
-   * Get the plate type.
-   *
-   * @return the plate type
-   * @hibernate.property
-   *   type="edu.harvard.med.screensaver.model.libraries.PlateType$UserType"
-   *   not-null="true"
-   */
-  public PlateType getPlateType()
-  {
-    return _plateType;
-  }
-
-  /**
-   * Set the plate type.
-   *
-   * @param plateType the new plate type
-   */
-  public void setPlateType(PlateType plateType)
-  {
-    _plateType = plateType;
-  }
-
-  /**
-   * Get the default volume (microliters) for wells on this copy plate.  
-   * 
-   * @return the volume
-   * @hibernate.property type="big_decimal" not-null="true"
-   */
-  public BigDecimal getMicroliterWellVolume()
-  {
-    return _microliterWellVolume;
-  }
-  
-  /**
-   * Get the comments.
-   *
-   * @return the comments
-   * @hibernate.property
-   *   type="text"
-   */
-  public String getComments()
-  {
-    return _comments;
-  }
-
-  /**
-   * Set the comments.
-   *
-   * @param comments the new comments
-   */
-  public void setComments(String comments)
-  {
-    _comments = comments;
-  }
-
-  /**
-   * Get the date plated.
-   *
-   * @return the date plated
-   * @hibernate.property
-   */
-  public Date getDatePlated()
-  {
-    return _datePlated;
-  }
-
-  /**
-   * Set the date plated.
-   *
-   * @param datePlated the new date plated
-   */
-  public void setDatePlated(Date datePlated)
-  {
-    _datePlated = truncateDate(datePlated);
-  }
-
-  /**
-   * Get the date retired.
-   *
-   * @return the date retired
-   * @hibernate.property
-   */
-  public Date getDateRetired()
-  {
-    return _dateRetired;
-  }
-
-  /**
-   * Set the date retired.
-   *
-   * @param dateRetired the new date retired
-   */
-  public void setDateRetired(Date dateRetired)
-  {
-    _dateRetired = truncateDate(dateRetired);
-  }
-
-  @DerivedEntityProperty
-  public boolean isRetired()
-  {
-    return _dateRetired != null;
-  }
-
-  // protected methods
-
-  /**
-   * A business key class for the well.
-   */
-  private class BusinessKey
-  {
-    
-    /**
-     * Get the copy.
-     *
-     * @return the copy
-     */
-    public Copy getCopy()
-    {
-      return _copy;
-    }
-    
-    /**
-     * Get the plate number.
-     *
-     * @return the plate number
-     */
-    public Integer getPlateNumber()
-    {
-      return _plateNumber;
-    }
-
-    @Override
-    public boolean equals(Object object)
-    {
-      if (! (object instanceof BusinessKey)) {
-        return false;
-      }
-      BusinessKey that = (BusinessKey) object;
-      return
-        getCopy().equals(that.getCopy()) &&
-        getPlateNumber().equals(that.getPlateNumber());
-    }
-
-    @Override
-    public int hashCode()
-    {
-      return
-        getCopy().hashCode() +
-        getPlateNumber().hashCode();
-    }
-
-    @Override
-    public String toString()
-    {
-      return getCopy() + ":" + getPlateNumber();
-    }
-  }
-
-  @Override
-  protected Object getBusinessKey()
-  {
-    return new BusinessKey();
-  }
+  protected CopyInfo() {}
 
 
-  // package methods
-
-  /**
-   * Set the copy.
-   * Throw a NullPointerException when the copy is null.
-   *
-   * @param copy the new copy
-   * @throws NullPointerException when the copy is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  void setHbnCopy(Copy copy)
-  {
-    if (copy == null) {
-      throw new NullPointerException();
-    }
-    _copy = copy;
-  }
-
-  /**
-   * Get the copy actions.
-   *
-   * @return the copy actions
-   * @hibernate.set
-   *   cascade="save-update"
-   *   inverse="true"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="copy_info_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.libraries.CopyAction"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  Set<CopyAction> getHbnCopyActions()
-  {
-    return _copyActions;
-  }
-
-
-  // private constructor
-
-  /**
-   * Construct an uninitialized <code>CopyInfo</code> object.
-   *
-   * @motivation for hibernate
-   */
-  private CopyInfo() {}
-
-
-  // private methods
+  // private constructors and instance methods
 
   /**
    * Set the id for the copy info.
-   *
    * @param copyInfoId the new id for the copy info
    * @motivation for hibernate
    */
-  private void setCopyInfoId(Integer copyInfoId) {
+  private void setCopyInfoId(Integer copyInfoId)
+  {
     _copyInfoId = copyInfoId;
   }
 
   /**
    * Get the version for the copy info.
-   *
    * @return the version for the copy info
    * @motivation for hibernate
-   * @hibernate.version
    */
+  @Version
+  @Column(nullable=false)
   private Integer getVersion() {
     return _version;
   }
 
   /**
    * Set the version for the copy info.
-   *
    * @param version the new version for the copy info
    * @motivation for hibernate
    */
-  private void setVersion(Integer version) {
+  private void setVersion(Integer version)
+  {
     _version = version;
   }
 
   /**
-   * Get the copy.
-   *
-   * @return the copy
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.libraries.Copy"
-   *   column="copy_id"
-   *   not-null="true"
-   *   foreign-key="fk_copy_info_to_copy"
-   *   cascade="save-update"
+   * Set the copy.
+   * @param copy the new copy
    * @motivation for hibernate
    */
-  private Copy getHbnCopy()
+  private void setCopy(Copy copy)
   {
-    return _copy;
+    _copy = copy;
   }
 
   /**
    * Set the copy actions.
-   *
    * @param copyActions the new copy actions
    * @motivation for hibernate
    */
-  private void setHbnCopyActions(Set<CopyAction> copyActions)
+  private void setCopyActions(Set<CopyAction> copyActions)
   {
     _copyActions = copyActions;
-  }
-  
-  /**
-   * Get the plate number.
-   *
-   * @return the plate number
-   * @hibernate.property
-   *   column="plate_number"
-   *   not-null="true"
-   * @motivation for hibernate
-   */
-  private Integer getHbnPlateNumber()
-  {
-    return _plateNumber;
   }
 
   /**
    * Set the plate number.
-   *
    * @param plateNumber the new plate number
    * @motivation for hibernate
    */
-  private void setHbnPlateNumber(Integer plateNumber)
+  private void setPlateNumber(Integer plateNumber)
   {
     _plateNumber = plateNumber;
   }
 
   /**
    * Set the volume.
-   *
    * @param volume the new volume
+   * @motivation for hibernate and package constructor
    */
   private void setMicroliterWellVolume(BigDecimal volume)
   {

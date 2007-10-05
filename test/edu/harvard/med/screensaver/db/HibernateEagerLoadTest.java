@@ -102,10 +102,10 @@ public class HibernateEagerLoadTest extends AbstractSpringTest
           LibraryType.NATURAL_PRODUCTS,
           1,
           50);
-        Well well1 = new Well(library, new WellKey(PLATE_NUMBER, WELL_NAME), WellType.EXPERIMENTAL);
+        Well well1 = library.createWell(new WellKey(PLATE_NUMBER, WELL_NAME), WellType.EXPERIMENTAL);
         Gene gene1 = new Gene(GENE_NAME, GENE_ID, GENE_SYMBOL, "Human");
         gene1.addGenbankAccessionNumber(GENBANK_ACC_NO);
-        SilencingReagent siReagent1 = new SilencingReagent(gene1, SilencingReagentType.SIRNA, SIRNA_SEQ);
+        SilencingReagent siReagent1 = gene1.createSilencingReagent(SilencingReagentType.SIRNA, SIRNA_SEQ);
         well1.addSilencingReagent(siReagent1);
         genericEntityDao.persistEntity(library);
       }

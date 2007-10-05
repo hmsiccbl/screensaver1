@@ -15,10 +15,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.libraries.Compound;
-import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -31,8 +32,6 @@ import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -80,8 +79,7 @@ public class SimpleDAOTest extends AbstractSpringTest
   
   public void testPersistEntity()
   {
-    Compound compound = new Compound("smiles");
-    compound.setSalt(true);
+    Compound compound = new Compound("smiles", "inchi", true);
     genericEntityDao.persistEntity(compound);
     List<Compound> compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
     assertEquals("one compound in the machine", compounds.size(), 1);
@@ -94,7 +92,7 @@ public class SimpleDAOTest extends AbstractSpringTest
     List<Compound> compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
     assertEquals("no compounds in an empty database", 0, compounds.size());
     
-    genericEntityDao.persistEntity(new Compound("smiles"));
+    genericEntityDao.persistEntity(new Compound("smiles", "inchi"));
     compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
     assertEquals("one compound in the machine", compounds.size(), 1);
     assertEquals("smiles match", "smiles", compounds.get(0).getSmiles());
@@ -102,7 +100,7 @@ public class SimpleDAOTest extends AbstractSpringTest
   
   public void testFindEntityById()
   {
-    Compound compound = new Compound("smilesZ");
+    Compound compound = new Compound("smilesZ", "inchiZ");
     genericEntityDao.persistEntity(compound);
     Serializable id = compound.getCompoundId();
 
@@ -117,40 +115,47 @@ public class SimpleDAOTest extends AbstractSpringTest
   {
     final ResultValueType[] rvts = new ResultValueType[4];
     genericEntityDao.doInTransaction(new DAOTransaction()
-                        {
+    {
       public void runTransaction()
       {
         ScreenResult screenResult = ScreenResultParserTest.makeScreenResult(new Date());
-        rvts[0] = genericEntityDao.defineEntity(ResultValueType.class, screenResult, "rvt0");
+        rvts[0] = screenResult.createResultValueType("rvt0");
         rvts[0].setDerived(true);
         rvts[0].setAssayPhenotype("Mouse");
-        rvts[1] = genericEntityDao.defineEntity(ResultValueType.class, screenResult, "rvt1");
+        rvts[1] = screenResult.createResultValueType("rvt1");
         rvts[1].setDerived(false);
         rvts[1].setAssayPhenotype("Mouse");
-        rvts[2] = genericEntityDao.defineEntity(ResultValueType.class, screenResult, "rvt2");
+        rvts[2] = screenResult.createResultValueType("rvt2");
         rvts[2].setDerived(true);
         rvts[2].setAssayPhenotype("Mouse");
-        rvts[3] = genericEntityDao.defineEntity(ResultValueType.class, screenResult, "rvt3");
+        rvts[3] = screenResult.createResultValueType("rvt3");
         rvts[3].setDerived(true);
         rvts[3].setAssayPhenotype("Human");
+        genericEntityDao.persistEntity(screenResult.getScreen());
+        genericEntityDao.persistEntity(rvts[0]);
       }
-                        });
+    });
     
     genericEntityDao.doInTransaction(new DAOTransaction()
-                        {
+    {
       public void runTransaction()
       {
         Map<String,Object> queryProperties = new HashMap<String,Object>();
         queryProperties.put("derived", true);
         queryProperties.put("assayPhenotype", "Mouse");
-        List<ResultValueType> entities = genericEntityDao.findEntitiesByProperties(ResultValueType.class,
-                                                                      queryProperties);
-        assertTrue(entities.contains(rvts[0]));
-        assertTrue(entities.contains(rvts[2]));
-        assertFalse(entities.contains(rvts[1]));
-        assertFalse(entities.contains(rvts[3]));
+        List<ResultValueType> entities = genericEntityDao.findEntitiesByProperties(
+          ResultValueType.class,
+          queryProperties);
+        assertEquals(2, entities.size());
+        for (ResultValueType resultValueType : entities) {
+          assertTrue(
+            resultValueType.getName().equals("rvt0") ||
+            resultValueType.getName().equals("rvt2"));
+          assertEquals(true, resultValueType.isDerived());
+          assertEquals("Mouse", resultValueType.getAssayPhenotype());
+        }
       }
-                        });
+    });
   }
   
   public void testFindEntityByProperties()
@@ -160,13 +165,14 @@ public class SimpleDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        expectedLibrary[0] = genericEntityDao.defineEntity(Library.class,
+        expectedLibrary[0] = new Library(
           "ln1",
           "sn1",
           ScreenType.SMALL_MOLECULE,
           LibraryType.NATURAL_PRODUCTS,
           1,
           50);
+        genericEntityDao.persistEntity(expectedLibrary[0]);
       }
     });
     genericEntityDao.doInTransaction(new DAOTransaction()
@@ -177,14 +183,15 @@ public class SimpleDAOTest extends AbstractSpringTest
         props.put("startPlate", 1);
         props.put("endPlate", 50);
         Library actualLibrary = genericEntityDao.findEntityByProperties(Library.class, props);
-        assertEquals(expectedLibrary[0], actualLibrary);
+        assertTrue(expectedLibrary[0].isEquivalent(actualLibrary));
       }
     });
   }
 
   public void testFindEntitiesByProperty1()
   {
-    Compound compound = genericEntityDao.defineEntity(Compound.class, "spaz");
+    Compound compound = new Compound("spaz", "inchi");
+    genericEntityDao.persistEntity(compound);
     
     List<Compound> compounds = genericEntityDao.findEntitiesByProperty(Compound.class, "smiles", "spaz");
     assertEquals(1, compounds.size());
@@ -209,7 +216,8 @@ public class SimpleDAOTest extends AbstractSpringTest
 
   public void testFindEntitybyProperty()
   {
-    Compound compound = genericEntityDao.defineEntity(Compound.class, "spaz");
+    Compound compound = new Compound("spaz", "inchi");
+    genericEntityDao.persistEntity(compound);
     
     Compound compound2 = genericEntityDao.findEntityByProperty(Compound.class, "smiles", "spaz");
     assertEquals(compound, compound2);
@@ -247,24 +255,24 @@ public class SimpleDAOTest extends AbstractSpringTest
           LibraryType.NATURAL_PRODUCTS,
           1,
           50);
-        Well well1 = new Well(expectedLibrary[0], new WellKey(1, "A01"), WellType.EXPERIMENTAL);
+        Well well1 = expectedLibrary[0].createWell(new WellKey(1, "A01"), WellType.EXPERIMENTAL);
         Gene gene1 = new Gene("ANT1", 1, "ENTREZ-ANT1", "Human");
         gene1.addGenbankAccessionNumber("GBAN1");
-        SilencingReagent siReagent1 = new SilencingReagent(gene1, SilencingReagentType.SIRNA, "AAAA");
+        SilencingReagent siReagent1 = gene1.createSilencingReagent(SilencingReagentType.SIRNA, "AAAA");
         well1.addSilencingReagent(siReagent1);
         Gene gene2 = new Gene("ANT2", 2, "ENTREZ-ANT2", "Human");
         gene2.addGenbankAccessionNumber("GBAN2");
-        SilencingReagent siReagent2 = new SilencingReagent(gene2, SilencingReagentType.SIRNA, "CCCC");
-        Well well2 = new Well(expectedLibrary[0], new WellKey(2, "A01"), WellType.EXPERIMENTAL);
+        SilencingReagent siReagent2 = gene2.createSilencingReagent(SilencingReagentType.SIRNA, "CCCC");
+        Well well2 = expectedLibrary[0].createWell(new WellKey(2, "A01"), WellType.EXPERIMENTAL);
         well2.addSilencingReagent(siReagent2);
         Gene gene3 = new Gene("ANT3", 3, "ENTREZ-ANT3", "Human");
         gene3.addGenbankAccessionNumber("GBAN3");
-        SilencingReagent siReagent3 = new SilencingReagent(gene3, SilencingReagentType.SIRNA, "TTTT");
-        Well well3 = new Well(expectedLibrary[0], new WellKey(3, "A01"), WellType.EXPERIMENTAL);
+        SilencingReagent siReagent3 = gene3.createSilencingReagent(SilencingReagentType.SIRNA, "TTTT");
+        Well well3 = expectedLibrary[0].createWell(new WellKey(3, "A01"), WellType.EXPERIMENTAL);
         well3.addSilencingReagent(siReagent3);
-        new Copy(expectedLibrary[0], CopyUsageType.FOR_LIBRARY_SCREENING, "copy1"); 
-        new Copy(expectedLibrary[0], CopyUsageType.FOR_LIBRARY_SCREENING, "copy2"); 
-        new Copy(expectedLibrary[0], CopyUsageType.FOR_LIBRARY_SCREENING, "copy3"); 
+        expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy1"); 
+        expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy2"); 
+        expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy3"); 
         genericEntityDao.persistEntity(expectedLibrary[0]);
       }
     });
@@ -278,11 +286,11 @@ public class SimpleDAOTest extends AbstractSpringTest
                                                                  "startPlate", 
                                                                  1, 
                                                                  false, 
-                                                                 //"hbnWells", // implicit
-                                                                 //"hbnWells.hbnSilencingReagents", // implicit
-                                                                 "hbnWells.hbnSilencingReagents.gene", // implicit
-                                                                 "hbnWells.hbnSilencingReagents.gene.genbankAccessionNumbers");
-        assertEquals(expectedLibrary[0], actualLibrary[0]);
+                                                                 //"wells", // implicit
+                                                                 //"hbnWells.silencingReagents", // implicit
+                                                                 "wells.silencingReagents.gene", // implicit
+                                                                 "wells.silencingReagents.gene.genbankAccessionNumbers");
+        assertTrue(expectedLibrary[0].isEquivalent(actualLibrary[0]));
       }
     });
     try {

@@ -2,26 +2,37 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.util.Collections;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.EntityIdProperty;
-import edu.harvard.med.screensaver.model.ImmutableProperty;
-import edu.harvard.med.screensaver.model.ToOneRelationship;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Transient;
+import javax.persistence.Version;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
+import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 
 
 /**
@@ -29,59 +40,42 @@ import org.apache.log4j.Logger;
  * representing a copy of a library's contents. The lab works from library
  * copies, rather than directly from master library plates, in order to reduce
  * freeze/thaw cycles, minimize the impact of loss due to a physical loss, etc.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.class lazy="false"
  */
-public class Copy extends AbstractEntity
+@Entity
+@org.hibernate.annotations.Proxy
+@ContainedEntity(containingEntityClass=Library.class)
+public class Copy extends SemanticIDAbstractEntity
 {
-  
+
   // static fields
 
   private static final Logger log = Logger.getLogger(Copy.class);
   private static final long serialVersionUID = 0L;
-  
+
 
   // instance fields
 
+  private String _copyId;
   private Integer _version;
   private Library _library;
   private Set<CopyInfo> _copyInfos = new HashSet<CopyInfo>();
   private String _name;
   private CopyUsageType _usageType;
-//  private Set<LabCherryPick> _labCherryPicks = new HashSet<LabCherryPick>();
-  
-
-  // public constructor
-
-  /**
-   * Constructs an initialized <code>Copy</code> object.
-   *
-   * @param library the library
-   * @param name the name
-   */
-  public Copy(
-    Library library,
-    CopyUsageType usageType,
-    String name)
-  {
-    _library = library;
-    _name = name;
-    _usageType = usageType;
-    _library.getHbnCopies().add(this);
-  }
 
 
-  // public methods
+  // public instance methods
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
   }
-  
+
   @Override
+  @Transient
   public String getEntityId()
   {
     return getCopyId();
@@ -89,287 +83,190 @@ public class Copy extends AbstractEntity
 
   /**
    * Get the id for the copy.
-   *
    * @return the id for the copy
-   * @hibernate.id generator-class="assigned"
    */
+  @Id
+  @org.hibernate.annotations.Type(type="text")
   public String getCopyId()
   {
-    return getBusinessKey().toString();
+    return _copyId;
   }
 
   /**
    * Get the library.
-   *
    * @return the library
    */
-  @ToOneRelationship(nullable=false, inverseProperty="copies")
-  @EntityIdProperty
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE })
+  @JoinColumn(name="libraryId", nullable=false, updatable=false)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.ForeignKey(name="fk_copy_to_library")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
+  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="copies")
   public Library getLibrary()
   {
     return _library;
   }
 
   /**
-   * Get this copy's usage type.
-   * @return the copy's usage type.
-   * @hibernate.property type="edu.harvard.med.screensaver.model.libraries.CopyUsageType$UserType"
+   * Get the set of copy infos.
+   * @return the set of copy infos
    */
-  @ImmutableProperty
-  public CopyUsageType getUsageType()
+  @OneToMany(
+    mappedBy="copy",
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+    fetch=FetchType.LAZY
+  )
+  @OrderBy("copyInfoId")
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
+  public Set<CopyInfo> getCopyInfos()
   {
-    return _usageType;
+    return _copyInfos;
   }
 
   /**
-   * Get an unmodifiable copy of the set of copy infos.
-   *
-   * @return the copy infos
+   * Get the copy info with the given plate number
+   * @param plateNumber the plate number to get the copy info for
+   * @return the copy info with the given plate number
    */
-  public Set<CopyInfo> getCopyInfos()
-  {
-    return Collections.unmodifiableSet(_copyInfos);
-  }
-
+  @Transient
   public CopyInfo getCopyInfo(final Integer plateNumber)
   {
-    return (CopyInfo) CollectionUtils.find(_copyInfos, new Predicate() 
+    // TODO: use a map instead of a set for Copy=>CopyInfo
+    return (CopyInfo) CollectionUtils.find(_copyInfos, new Predicate()
     {
       public boolean evaluate(Object e) { return ((CopyInfo) e).getPlateNumber().equals(plateNumber); };
     });
-//    return CollectionUtils.indexCollection(_copyInfos,
-//                                           new Transformer() 
-//    {
-//      public Object transform(Object e)
-//      {
-//        return ((CopyInfo) e).getPlateNumber();
-//      }
-//    },
-//    Integer.class,
-//    CopyInfo.class).get(plate);
   }
 
   /**
-   * Add the copy info.
-   *
-   * @param copyInfo the copy info to add
-   * @return true iff the copy did not already have the copy info
+   * Create a new copy info for the copy.
+   * @param plateNumber the plate number
+   * @param location the location
+   * @param plateType the plate type
+   * @param volume the volume
+   * @return the new copy info for the copy
    */
-  public boolean addCopyInfo(CopyInfo copyInfo)
+  public CopyInfo createCopyInfo(
+    Integer plateNumber,
+    String location,
+    PlateType plateType,
+    BigDecimal volume)
   {
-    if (getHbnCopyInfos().add(copyInfo)) {
-      copyInfo.setHbnCopy(this);
-      return true;
+    CopyInfo copyInfo = new CopyInfo(this, plateNumber, location, plateType, volume);
+    if (! _copyInfos.add(copyInfo)) {
+      throw new DuplicateEntityException(this, copyInfo);
     }
-    return false;
+    return copyInfo;
   }
 
   /**
    * Get the name.
-   *
    * @return the name
    */
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(type="text")
+  @org.hibernate.annotations.Immutable
   public String getName()
   {
     return _name;
   }
 
   /**
-   * Set the name.
-   *
-   * @param name the new name
+   * Get this copy's usage type.
+   * @return the copy's usage type.
    */
-  public void setName(String name)
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(
+    type="edu.harvard.med.screensaver.model.libraries.CopyUsageType$UserType"
+  )
+  @org.hibernate.annotations.Immutable
+  public CopyUsageType getUsageType()
   {
-    _library.getHbnCopies().remove(this);
-    _name = name;
-    _library.getHbnCopies().add(this);
+    return _usageType;
   }
-
-//  // HACK: This property is marked as derived for unit testing purposes
-//  // only! It is in fact a real hibernate relationship, though it is unique in that it can only be
-//  // modified from the other side (via CherryPick.setAllocated()). Our unit tests do
-//  // not yet handle this case.
-//  /**
-//   * Get an unmodifiable copy of the set of cherry picks.
-//   *
-//   * @return the cherry picks
-//   */
-//  @ToManyRelationship(inverseProperty="sourceCopy")
-//  @DerivedEntityProperty
-//  public Set<LabCherryPick> getLabCherryPicks()
-//  {
-//    return Collections.unmodifiableSet(_labCherryPicks);
-//  }
-
-  
-  // protected methods
 
   /**
-   * A business key class for the copy.
+   * Construct an initialized <code>Copy</code>.
+   * @param library the library
+   * @param usageType the copy usage type
+   * @param name the name
+   * @motivation intended for use by {@link Library#createCopy} only.
    */
-  private class BusinessKey
+  Copy(Library library, CopyUsageType usageType, String name)
   {
-    
-    /**
-     * Get the library.
-     *
-     * @return the library
-     */
-    public Library getLibrary()
-    {
-      return _library;
-    }
-    
-    /**
-     * Get the name.
-     *
-     * @return the name
-     */
-    public String getName()
-    {
-      return _name;
-    }
-
-    @Override
-    public boolean equals(Object object)
-    {
-      if (! (object instanceof BusinessKey)) {
-        return false;
-      }
-      BusinessKey that = (BusinessKey) object;
-      return
-        this.getLibrary().equals(that.getLibrary()) &&
-        this.getName().equals(that.getName());
-    }
-
-    @Override
-    public int hashCode()
-    {
-      return
-        this.getLibrary().hashCode() +
-        this.getName().hashCode();
-    }
-
-    @Override
-    public String toString()
-    {
-      return this.getLibrary().getShortName() + ":" + this.getName();
-    }
-  }
-
-  @Override
-  protected Object getBusinessKey()
-  {
-    return new BusinessKey();
-  }
-
-
-  // package methods
-
-  /**
-   * Set the library.
-   * Throw a NullPointerException when the library is null.
-   *
-   * @param library the new library
-   * @throws NullPointerException when the library is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  void setHbnLibrary(Library library)
-  {
-    if (library == null) {
-      throw new NullPointerException();
-    }
+    _copyId = library.getShortName() + ":" + name;
     _library = library;
-  }
-
-  /**
-   * Get the copy infos.
-   *
-   * @return the copy infos
-   * @hibernate.set
-   *   cascade="save-update"
-   *   inverse="true"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="copy_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.libraries.CopyInfo"
-   * @motivation for hibernate and maintenance of bi-directional relationships
-   */
-  Set<CopyInfo> getHbnCopyInfos()
-  {
-    return _copyInfos;
+    _name = name;
+    _usageType = usageType;
   }
 
 
-  // private constructor
+  // protected constructor
 
   /**
-   * Construct an uninitialized <code>Copy</code> object.
-   *
-   * @motivation for hibernate
+   * Construct an uninitialized <code>Copy</code>.
+   * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  private Copy() {}
+  protected Copy() {}
 
 
-  // private methods
+  // private instance methods
 
   /**
    * Set the id for the copy.
-   *
    * @param copyId the new id for the copy
    * @motivation for hibernate
    */
   private void setCopyId(String copyId)
   {
+    _copyId = copyId;
   }
 
   /**
    * Get the version for the copy.
-   *
    * @return the version for the copy
    * @motivation for hibernate
-   * @hibernate.version
    */
-  private Integer getVersion() {
+  @Version
+  @Column(nullable=false)
+  private Integer getVersion()
+  {
     return _version;
   }
 
   /**
    * Set the version for the copy.
-   *
    * @param version the new version for the copy
    * @motivation for hibernate
    */
-  private void setVersion(Integer version) {
+  private void setVersion(Integer version)
+  {
     _version = version;
   }
 
   /**
-   * Get the library.
-   *
-   * @return the library
-   * @hibernate.many-to-one
-   *   class="edu.harvard.med.screensaver.model.libraries.Library"
-   *   column="library_id"
-   *   not-null="true"
-   *   foreign-key="fk_copy_to_library"
-   *   cascade="save-update"
+   * Set the library the well is in.
+   * @param library the new library for the well
    * @motivation for hibernate
    */
-  private Library getHbnLibrary()
+  private void setLibrary(Library library)
   {
-    return _library;
+    _library = library;
   }
 
   /**
    * Set the copy infos.
-   *
    * @param copyInfos the new copy infos
    * @motivation for hibernate
    */
-  private void setHbnCopyInfos(Set<CopyInfo> copyInfos)
+  private void setCopyInfos(Set<CopyInfo> copyInfos)
   {
     _copyInfos = copyInfos;
   }
@@ -384,55 +281,12 @@ public class Copy extends AbstractEntity
   }
 
   /**
-   * Get the name.
-   *
-   * @return the name
-   * @hibernate.property
-   *   column="name"
-   *   type="text"
-   *   not-null="true"
-   * @motivation for hibernate
-   */
-  private String getHbnName()
-  {
-    return _name;
-  }
-
-  /**
    * Set the name.
-   *
    * @param name the new name
    * @motivation for hibernate
    */
-  private void setHbnName(String name)
+  private void setName(String name)
   {
     _name = name;
   }
-  
-
-//  /**
-//   * Get the cherry picks.
-//   * 
-//   * @return the cherry picks
-//   * @hibernate.set cascade="none" inverse="true" lazy="true"
-//   * @hibernate.collection-key column="copy_id"
-//   * @hibernate.collection-one-to-many class="edu.harvard.med.screensaver.model.screens.LabCherryPick"
-//   * @motivation for hibernate and maintenance of bi-directional relationships
-//   * public access for cross-package relationship
-//   */
-//  public Set<LabCherryPick> getHbnLabCherryPicks()
-//  {
-//    return _labCherryPicks;
-//  }
-//
-//  /**
-//   * Set the cherry picks.
-//   *
-//   * @param labCherryPicks the new cherry picks
-//   * @motivation for hibernate
-//   */
-//  private void setHbnLabCherryPicks(Set<LabCherryPick> labCherryPicks)
-//  {
-//    _labCherryPicks = labCherryPicks;
-//  }
 }

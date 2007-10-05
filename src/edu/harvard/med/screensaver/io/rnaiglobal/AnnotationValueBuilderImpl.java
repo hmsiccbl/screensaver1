@@ -31,9 +31,8 @@ class AnnotationValueBuilderImpl implements AnnotationValueBuilder
     String value = transformValue(row[_sourceColumnIndex].getContents());
     ReagentVendorIdentifier reagentVendorIdentifier = new ReagentVendorIdentifier(DHARMACON_VENDOR_NAME,
                                                                                   row[0].getContents());
-    _annotationType.addAnnotationValue(reagentVendorIdentifier,
-                                       value,
-                                       _annotationType.isNumeric());
+    _annotationType.createAnnotationValue(reagentVendorIdentifier,
+                                          value);
   }
 
   public AnnotationType getAnnotationType()

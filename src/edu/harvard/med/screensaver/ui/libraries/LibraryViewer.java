@@ -160,7 +160,7 @@ public class LibraryViewer extends AbstractBackingBean
         Library library = _dao.reloadEntity(libraryIn, true);
         setLibrary(library);
         setLibrarySize(
-          _dao.relationshipSize(library, "hbnWells", "wellType", "experimental"));
+          _dao.relationshipSize(library, "wells", "wellType", "experimental"));
         setLibraryNameValueTable(new LibraryNameValueTable(library, getLibrarySize()));
       }
     });
@@ -176,8 +176,8 @@ public class LibraryViewer extends AbstractBackingBean
       {
         Library library = _dao.reloadEntity(_library, true);
         _dao.needReadOnly(library,
-                          "hbnWells.hbnSilencingReagents.gene.genbankAccessionNumbers",
-                          "hbnWells.hbnCompounds");
+                          "wells.silencingReagents.gene.genbankAccessionNumbers",
+                          "wells.compounds");
         _wellsBrowser.setContents(new ArrayList<Well>(library.getWells()));
       }
     });

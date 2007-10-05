@@ -31,6 +31,7 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
+
 public class AnnotationsDAO extends AbstractDAO
 {
   // static members
@@ -60,7 +61,8 @@ public class AnnotationsDAO extends AbstractDAO
   public List<AnnotationType> findAllAnnotationTypesForReagent(ReagentVendorIdentifier rvi)
   {
     return getHibernateTemplate().find("select at from AnnotationValue av join av.annotationType at " +
-                                       "where av.reagentVendorIdentifier=(?,?)",
+                                       "where av.reagentVendorIdentifier.vendorName=? " +
+                                       "and av.reagentVendorIdentifier.vendorIdentifier=?",
                                        new Object[] { rvi.getVendorName(), rvi.getVendorIdentifier() } );
   }
 
@@ -84,8 +86,9 @@ public class AnnotationsDAO extends AbstractDAO
   {
     // note: we eager fetch the related AnnotationTypes, as a courtesy to the calling code (it's reasonable to expect the calling code will need the AnnotationType)
     return getHibernateTemplate().find("from AnnotationValue av left join fetch av.annotationType " +
-                                       "where av.reagentVendorIdentifier=(?,?)",
-                                       new Object[] { rvi.getVendorName(), rvi.getVendorIdentifier() } );
+      "where av.reagentVendorIdentifier.vendorName=? " +
+      "and av.reagentVendorIdentifier.vendorIdentifier=?",
+      new Object[] { rvi.getVendorName(), rvi.getVendorIdentifier() } );
     // this simpler version doesn't work, for some reason
     // return getHibernateTemplate().find("from AnnotationValue av where av.reagentVendorIdentifier=?", rvi);
   }
@@ -245,7 +248,7 @@ public class AnnotationsDAO extends AbstractDAO
     }
 
     StringBuilder sql = new StringBuilder();
-    sql.append("select av.annotation_type_id, av.vendor_name, av.vendor_identifier, av.value, av.numeric_value ").
+    sql.append("select av.annotation_type_id, av.vendor_name, av.vendor_identifier, av.value ").
     append("from annotation_value av ").
     append("where (av.annotation_type_id in (:atIds)) ").
     append("and (av.vendor_name || ':' || av.vendor_identifier in (:rviIds))");
@@ -266,10 +269,9 @@ public class AnnotationsDAO extends AbstractDAO
         result.put(reagentVendorId, annotationValues);
       }
       String textValue = (String) row[field++];
-      Double numValue = (Double) row[field++];
 
       AnnotationType at = annotationTypes.get(atId2Pos.get(atId));
-      AnnotationValue annotationValue = new AnnotationValue(at, reagentVendorId, textValue, numValue);
+      AnnotationValue annotationValue = at.createAnnotationValueDTO(reagentVendorId, textValue);
       annotationValues.set(atId2Pos.get(atId), annotationValue);
     }
     return result;

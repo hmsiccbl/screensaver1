@@ -21,11 +21,11 @@ import java.util.TreeSet;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
-import edu.harvard.med.screensaver.model.screens.CherryPickAssayPlate;
-import edu.harvard.med.screensaver.model.screens.CherryPickRequest;
-import edu.harvard.med.screensaver.model.screens.LabCherryPick;
 import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
@@ -84,10 +84,10 @@ public class CherryPickRequestPlateMapper
     
     List<LabCherryPick> labCherryPicksAssignedToCurrentPlate = new ArrayList<LabCherryPick>();
     while (toBeMapped.size() > 0) {
-      plate = new CherryPickAssayPlate(cherryPickRequest, 
-                                       plateIndex++, 
-                                       0, 
-                                       cherryPickRequest.getAssayPlateType());
+      plate = cherryPickRequest.createCherryPickAssayPlate(
+        plateIndex++, 
+        0, 
+        cherryPickRequest.getAssayPlateType());
 
       labCherryPicksAssignedToCurrentPlate.clear();
       do {

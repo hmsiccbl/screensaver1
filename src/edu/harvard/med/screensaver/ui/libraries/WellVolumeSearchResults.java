@@ -158,8 +158,8 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume,WellVolume
                                                     "copy",
                                                     "labCherryPick.wellVolumeAdjustments",
                                                     "labCherryPick.cherryPickRequest",
-                                                    "labCherryPick.assayPlate.hbnCherryPickLiquidTransfer",
-                                                    "wellVolumeCorrectionActivity.hbnPerformedBy");
+                                                    "labCherryPick.assayPlate.cherryPickLiquidTransfer",
+                                                    "wellVolumeCorrectionActivity.performedBy");
       wvas.add(wva2);
     }
     getRowDetail().setContents(wvas);

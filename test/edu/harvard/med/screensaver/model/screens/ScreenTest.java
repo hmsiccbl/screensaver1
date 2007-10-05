@@ -15,13 +15,15 @@ import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
 
-import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.util.DateUtil;
-
 import org.apache.log4j.Logger;
 
-public class ScreenTest extends AbstractEntityInstanceTest
+import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.util.DateUtil;
+
+public class ScreenTest extends AbstractEntityInstanceTest<Screen>
 {
   // static members
 
@@ -42,35 +44,22 @@ public class ScreenTest extends AbstractEntityInstanceTest
   public void testGetScreeningRoomActivities() throws Exception
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(1);
-    LibraryScreening screening1 = new LibraryScreening(screen,
-                                                       screen.getLeadScreener(),
-                                                       DateUtil.makeDate(2007,
-                                                         1,
-                                                         1),
-                                                       DateUtil.makeDate(2007,
-                                                         3,
-                                                         7));
-    LibraryScreening screening2 = new LibraryScreening(screen,
-                                                       screen.getLeadScreener(),
-                                                       DateUtil.makeDate(2007,
-                                                         1,
-                                                         1),
-                                                       DateUtil.makeDate(2007,
-                                                                         3,
-                                                                         8));
-    CherryPickRequest cpr = new CompoundCherryPickRequest(screen,
-                                                          screen.getLeadScreener(),
-                                                          DateUtil.makeDate(2007,
-                                                                            3,
-                                                                            9));
-    CherryPickLiquidTransfer cplt = new CherryPickLiquidTransfer(MakeDummyEntities.makeDummyUser(1,
-                                                                                                              "Lab",
-                                                                                                              "Guy"),
-                                                                 DateUtil.makeDate(2007,
-                                                                   1,
-                                                                   1),
-                                                                 new Date(),
-                                                                 cpr);
+    LibraryScreening screening1 = screen.createLibraryScreening(
+      screen.getLeadScreener(),
+      DateUtil.makeDate(2007, 1, 1),
+      DateUtil.makeDate(2007, 3, 7));
+    LibraryScreening screening2 = screen.createLibraryScreening(
+      screen.getLeadScreener(),
+      DateUtil.makeDate(2007, 1, 1),
+      DateUtil.makeDate(2007, 3, 8));
+    CherryPickRequest cpr = screen.createCherryPickRequest(
+      screen.getLeadScreener(),
+      DateUtil.makeDate(2007, 3, 9));
+    CherryPickLiquidTransfer cplt = screen.createCherryPickLiquidTransfer(
+      MakeDummyEntities.makeDummyUser(1, "Lab", "Guy"),
+      DateUtil.makeDate(2007, 1, 1),
+      new Date(),
+      cpr);
 
     Set<LibraryScreening> libraryScreenings =
       screen.getScreeningRoomActivitiesOfType(LibraryScreening.class);

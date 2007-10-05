@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -13,12 +13,17 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Transient;
+
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.DuplicateEntityException;
-import edu.harvard.med.screensaver.model.ImmutableProperty;
-import edu.harvard.med.screensaver.model.ToManyRelationship;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 
@@ -27,51 +32,33 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
  * that is performed against <i>full copies</i> of the plates of one or more
  * libraries. (Consider that a screening could also be performed against a
  * selected subset of the wells from a library, as is the case with
- * {@link RNAiCherryPickScreening}.
- * 
+ * {@link RnaiCherryPickScreening}.
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @hibernate.joined-subclass table="library_screening" lazy="true"
- * @hibernate.joined-subclass-key column="activity_id"
  */
+@Entity
+@PrimaryKeyJoinColumn(name="activityId")
+@org.hibernate.annotations.ForeignKey(name="fk_library_screening_to_activity")
+@org.hibernate.annotations.Proxy
+@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
 public class LibraryScreening extends Screening
 {
-  
-  // static fields
+
+  // private static data
 
   private static final long serialVersionUID = 0L;
   private static final Logger log = Logger.getLogger(LibraryScreening.class);
 
 
-  // instance fields
+  // private instance data
 
   private Set<PlatesUsed> _platesUsed = new HashSet<PlatesUsed>();
   private String _abaseTestsetId;
   private boolean _isSpecial;
 
 
-  // public constructor
-
-  /**
-   * Constructs an initialized <code>LibraryScreening</code> object.
-   *
-   * @param screen the screen
-   * @param performedBy the user that performed the library assay
-   * @param dateCreated the date created
-   * @param assayProtocolType the assay protocol type
-   * @throws DuplicateEntityException 
-   */
-  public LibraryScreening(
-    Screen screen,
-    ScreeningRoomUser performedBy,
-    Date dateCreated,
-    Date dateOfActivity) throws DuplicateEntityException
-  {
-    super(screen, performedBy, dateCreated, dateOfActivity);
-  }
-
-
-  // public methods
+  // public instance methods
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -80,7 +67,7 @@ public class LibraryScreening extends Screening
   }
 
   @Override
-  @ImmutableProperty
+  @Transient
   public String getActivityTypeName()
   {
     return "Library Screening";
@@ -88,28 +75,42 @@ public class LibraryScreening extends Screening
 
   /**
    * Get the plates used.
-   *
    * @return the plates used
-   * @hibernate.set
-   *   cascade="all-delete-orphan"
-   *   inverse="true"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="library_screening_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.screens.PlatesUsed"
    */
-  @ToManyRelationship(inverseProperty="libraryScreening")
+  @OneToMany(
+    mappedBy="libraryScreening",
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+    fetch=FetchType.LAZY
+  )
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
+  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="platesUsed")
   public Set<PlatesUsed> getPlatesUsed()
   {
     return _platesUsed;
   }
 
   /**
+   * Create and return a new plates used for the library screening.
+   * @param startPlate the start plate
+   * @param endPlate the end plate
+   * @param copy the copy
+   * @return a new plates used for the library screening
+   */
+  public PlatesUsed createPlatesUsed(Integer startPlate, Integer endPlate, String copy)
+  {
+    PlatesUsed platesUsed = new PlatesUsed(this, startPlate, endPlate, copy);
+    _platesUsed.add(platesUsed);
+    return platesUsed;
+  }
+
+  /**
    * Get the abase testset id
    * @return the abase testset id
-   * @hibernate.property type="text"
    */
+  @org.hibernate.annotations.Type(type="text")
   public String getAbaseTestsetId()
   {
     return _abaseTestsetId;
@@ -127,9 +128,9 @@ public class LibraryScreening extends Screening
   /**
    * Get the is special boolean flag.
    * @return the is special boolean flag
-   * @hibernate.property not-null="true"
    */
-  public boolean getIsSpecial()
+  @Column(name="isSpecial", nullable=false)
+  public boolean isSpecial()
   {
     return _isSpecial;
   }
@@ -138,27 +139,45 @@ public class LibraryScreening extends Screening
    * Set the is special boolean flag.
    * @param isSpecial the new value for the is special boolean flag
    */
-  public void setIsSpecial(boolean isSpecial)
+  public void setSpecial(boolean isSpecial)
   {
     _isSpecial = isSpecial;
   }
 
-  
-  // protected methods
-  
+
+  // package constructor
+
+  /**
+   * Construct an initialized <code>LibraryScreening</code>. Intended only for use by {@link
+   * Screen#createLibraryScreening(ScreeningRoomUser, Date, Date)}.
+   * @param screen the screen
+   * @param performedBy the user that performed the library assay
+   * @param dateCreated the date created
+   * @param assayProtocolType the assay protocol type
+   */
+  LibraryScreening(
+    Screen screen,
+    ScreeningRoomUser performedBy,
+    Date dateCreated,
+    Date dateOfActivity)
+  {
+    super(screen, performedBy, dateCreated, dateOfActivity);
+  }
+
+
+  // protected constructor
+
   /**
    * Construct an uninitialized <code>LibraryScreening</code> object.
-   *
-   * @motivation for hibernate
+   * @motivation for hibernate and proxy/concrete subclass constructors
    */
   protected LibraryScreening() {}
 
 
-  // private methods
+  // private instance methods
 
   /**
    * Set the plates used.
-   *
    * @param platesUsed the new plates used
    * @motivation for hibernate
    */

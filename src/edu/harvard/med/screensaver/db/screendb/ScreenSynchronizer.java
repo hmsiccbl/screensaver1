@@ -31,6 +31,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
+import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -125,9 +126,10 @@ public class ScreenSynchronizer
       String publishableProtocol = resultSet.getString("protocol");
       String publishableProtocolComments = resultSet.getString("protocol_comments");
 
-      Screen screen = _dao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
+      Screen screen = _dao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
       if (screen == null) {
         screen = new Screen(leadScreener, labHead, screenNumber, dateCreated, screenType,
+          StudyType.IN_VITRO,
           screenTitle, dataMeetingScheduled, dataMeetingComplete, summary, comments, abaseStudyId,
           abaseProtocolId);
       }
@@ -267,7 +269,7 @@ public class ScreenSynchronizer
       Date statusDate = resultSet.getDate("status_date");
       StatusValue statusValue = getStatusValue(resultSet);
       try {
-        new StatusItem(screen, statusDate, statusValue);
+        screen.createStatusItem(statusDate, statusValue);
       }
       catch (DuplicateEntityException e) {
         throw new ScreenDBSynchronizationException(
@@ -316,13 +318,7 @@ public class ScreenSynchronizer
       Date testsetDate = resultSet.getDate("abase_date");
       String testsetName = resultSet.getString("testset_name");
       String comments = resultSet.getString("comments");
-      try {
-        new AbaseTestset(screen, testsetDate, testsetName, comments);
-      }
-      catch (DuplicateEntityException e) {
-        throw new ScreenDBSynchronizationException(
-          "duplicate abase testset for screen number " + screenNumber, e);
-      }
+      screen.createAbaseTestset(testsetDate, testsetName, comments);
     }
     statement.close();
   }
@@ -346,8 +342,7 @@ public class ScreenSynchronizer
         throw new ScreenDBSynchronizationException("unable to get publication info from pubmed");
       }
       try {
-        new Publication(
-          screen,
+        screen.createPublication(
           pubmedId,
           publicationInfo.getYearPublished(),
           publicationInfo.getAuthors(),

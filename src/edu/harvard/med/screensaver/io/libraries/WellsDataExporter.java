@@ -130,18 +130,17 @@ public class WellsDataExporter implements DataExporter<Well>
         if (well.getLibrary().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
           inflatedWells.add(_dao.reloadEntity(well,
                                               true,
-                                              "hbnMolfile",
-                                              "hbnCompounds.compoundNames",
-                                              "hbnCompounds.casNumbers",
-                                              "hbnCompounds.nscNumbers",
-                                              "hbnCompounds.pubchemCids"));
+                                              "compounds.compoundNames",
+                                              "compounds.casNumbers",
+                                              "compounds.nscNumbers",
+                                              "compounds.pubchemCids"));
         }
         else if (well.getLibrary().getScreenType().equals(ScreenType.RNAI)) {
           inflatedWells.add(_dao.reloadEntity(well,
                                               true,
-                                              "hbnSilencingReagents.gene.genbankAccessionNumbers",
-                                              "hbnSilencingReagents.gene.oldEntrezgeneIds",
-                                              "hbnSilencingReagents.gene.oldEntrezgeneSymbols"));
+                                              "silencingReagents.gene.genbankAccessionNumbers",
+                                              "silencingReagents.gene.oldEntrezgeneIds",
+                                              "silencingReagents.gene.oldEntrezgeneSymbols"));
         }
       }
     }
@@ -150,18 +149,17 @@ public class WellsDataExporter implements DataExporter<Well>
         if (library.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
           _dao.reloadEntity(library,
                             true,
-                            "hbnWells.hbnMolfile",
-                            "hbnWells.hbnCompounds.compoundNames",
-                            "hbnWells.hbnCompounds.casNumbers",
-                            "hbnWells.hbnCompounds.nscNumbers",
-                            "hbnWells.hbnCompounds.pubchemCids");
+                            "wells.compounds.compoundNames",
+                            "wells.compounds.casNumbers",
+                            "wells.compounds.nscNumbers",
+                            "wells.compounds.pubchemCids");
         }
         else if (library.getScreenType().equals(ScreenType.RNAI)) {
           _dao.reloadEntity(library,
                             true,
-                            "hbnWells.hbnSilencingReagents.gene.genbankAccessionNumbers",
-                            "hbnWells.hbnSilencingReagents.gene.oldEntrezgeneIds",
-                            "hbnWells.hbnSilencingReagents.gene.oldEntrezgeneSymbols");
+                            "wells.silencingReagents.gene.genbankAccessionNumbers",
+                            "wells.silencingReagents.gene.oldEntrezgeneIds",
+                            "wells.silencingReagents.gene.oldEntrezgeneSymbols");
         }
       }
       for (Well well : wells) {

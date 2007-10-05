@@ -14,13 +14,12 @@ import java.util.List;
 
 import javax.faces.model.ListDataModel;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
 import edu.harvard.med.screensaver.ui.libraries.ReagentViewer;
-import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.util.HtmlUtils;
-
-import org.apache.log4j.Logger;
 
 /**
  * A NameValueTable for the Gene Viewer.

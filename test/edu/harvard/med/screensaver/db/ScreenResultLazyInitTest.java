@@ -61,9 +61,9 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
       public void runTransaction()
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(107);
-        ScreenResult screenResult = new ScreenResult(screen, new Date());
-        new ResultValueType(screenResult, "Luminescence");
-        new ResultValueType(screenResult, "FI");
+        ScreenResult screenResult = screen.createScreenResult(new Date());
+        screenResult.createResultValueType("Luminescence");
+        screenResult.createResultValueType("FI");
         genericEntityDao.persistEntity(screen);
       }
     });
@@ -73,7 +73,7 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
       {
         Session session = hibernateTemplate.getSessionFactory().getCurrentSession();
         assertEquals("session initially empty", 0, session.getStatistics().getEntityCount());
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 107);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 107);
         assertNotNull("screen in session", screen);
         for (Object key : session.getStatistics().getEntityKeys()) {
           EntityKey entityKey = (EntityKey) key;
@@ -90,8 +90,8 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
       public void runTransaction()
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(107);
-        ScreenResult screenResult = new ScreenResult(screen, new Date());
-        ResultValueType rvt = new ResultValueType(screenResult, "Luminescence");
+        ScreenResult screenResult = screen.createScreenResult(new Date());
+        ResultValueType rvt = screenResult.createResultValueType("Luminescence");
         Library library = new Library(
           "library 1",
           "lib1",
@@ -100,7 +100,7 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
           1,
           1);
         for (int i = 1; i < 10; ++i) {
-          Well well = new Well(library, i, "A01");
+          Well well = library.createWell(i, "A01");
           genericEntityDao.persistEntity(well);
           rvt.addResultValue(well, Integer.toString(i));
         }
@@ -113,7 +113,7 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
       {
         Session session = hibernateTemplate.getSessionFactory().getCurrentSession();
         assertEquals("session initially empty", 0, session.getStatistics().getEntityCount());
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", 107);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 107);
         List<ResultValueType> rvts = screen.getScreenResult().getResultValueTypesList();
         ResultValueType rvt = rvts.get(0);
         
@@ -125,7 +125,7 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
         }
         
         Set<Well> wells = rvt.getScreenResult().getWells();
-        Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
+        Map<WellKey,ResultValue> resultValues = rvt.getWellKeyToResultValueMap();
         log.debug("resultValue count=" + resultValues.size());
         Iterator iter = wells.iterator();
         int n = session.getStatistics().getEntityKeys().size();

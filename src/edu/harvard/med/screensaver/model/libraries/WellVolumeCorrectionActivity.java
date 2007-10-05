@@ -2,23 +2,30 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.ToManyRelationship;
-import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.PrimaryKeyJoinColumn;
 
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 /**
  * Tracks the activity of correcting the "known" volume of a set of wells on a
@@ -27,33 +34,42 @@ import org.apache.log4j.Logger;
  * {@link WellVolumeAdjustment WellVolumeAdjustments}. Any difference, of
  * course, will always be due to inaccuracies or errors in lab operations,
  * rather than Screensaver's fault! :)
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- * @hibernate.joined-subclass table="well_volume_correction_activity"
- *                            lazy="true"
- * @hibernate.joined-subclass-key column="activity_id"
  */
+@Entity
+@PrimaryKeyJoinColumn(name="activityId")
+@org.hibernate.annotations.ForeignKey(name="fk_well_volume_correction_activity_to_activity")
+@org.hibernate.annotations.Proxy
 public class WellVolumeCorrectionActivity extends AdministrativeActivity
 {
-  // static members
+
+  // private static data
 
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(WellVolumeCorrectionActivity.class);
 
-  
-  // instance data members
+
+  // private instance datum
 
   private Set<WellVolumeAdjustment> _wellVolumeAdjustments = new HashSet<WellVolumeAdjustment>();
 
 
-  // public constructors and methods
+  // public constructor
 
-  public WellVolumeCorrectionActivity(AdministratorUser performedBy,
-                                      Date datePerformed)
+  /**
+   * Construct an initialized <code>WellVolumeCorrectionActivity</code>.
+   * @param performedBy the user that performed the activity
+   * @param dateOfActivity the date the activity took place
+   */
+  public WellVolumeCorrectionActivity(AdministratorUser performedBy, Date datePerformed)
   {
     super(performedBy, datePerformed);
   }
+
+
+  // public instance methods
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -62,32 +78,65 @@ public class WellVolumeCorrectionActivity extends AdministrativeActivity
   }
 
   /**
-   * @hibernate.set
-   *   cascade="all-delete-orphan"
-   *   inverse="false"
-   *   lazy="true"
-   * @hibernate.collection-key
-   *   column="well_volume_correction_activity_id"
-   * @hibernate.collection-one-to-many
-   *   class="edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment"
-   * @motivation for hibernate and maintenance of bi-directional relationships
+   * Get the set of well volume adjustments.
+   * @return the set of well volume adjustments
    */
-  @ToManyRelationship(inverseProperty="wellVolumeAdjustments")
+  @OneToMany(
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+    fetch=FetchType.LAZY
+  )
+  @JoinColumn(name="wellVolumeCorrectionActivityId")
+  @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_well_volume_correction_activity")
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE,
+    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
+  })
   public Set<WellVolumeAdjustment> getWellVolumeAdjustments()
   {
     return _wellVolumeAdjustments;
   }
 
   /**
-   * @motivation for Hibernate and CGLIB2 
+   * Create and return a new well volume adjustment for the well volume correction activity.
+   * @param copy the copy
+   * @param well the well
+   * @param microliterVolume the volume in microliters
+   * @return true the new well volume adjustment
    */
-  protected WellVolumeCorrectionActivity()
+  public WellVolumeAdjustment createWellVolumeAdjustment(
+      Copy copy,
+      Well well,
+      BigDecimal microliterVolume)
   {
+    WellVolumeAdjustment wellVolumeAdjustment = new WellVolumeAdjustment(
+      copy,
+      well,
+      microliterVolume,
+      this);
+    _wellVolumeAdjustments.add(wellVolumeAdjustment);
+    return wellVolumeAdjustment;
   }
 
+
+  // protected constructor
+
+  /**
+   * Construct an uninitialized <code>WellVolumeCorrectionActivity</code>.
+   * @motivation for hibernate and proxy/concrete subclass constructors
+   */
+  protected WellVolumeCorrectionActivity() {}
+
+
+  // private constructor and instance method
+
+  /**
+   * Set the set of well volume adjustments.
+   * @param wellVolumeAdjustments the new set of well volume adjustments
+   * @motivation for hibernate
+   */
   private void setWellVolumeAdjustments(Set<WellVolumeAdjustment> wellVolumeAdjustments)
   {
     _wellVolumeAdjustments = wellVolumeAdjustments;
   }
-
 }

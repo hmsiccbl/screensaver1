@@ -18,7 +18,7 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 
 import org.apache.log4j.Logger;
 
-public class ScreeningRoomUserTest extends AbstractEntityInstanceTest
+public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningRoomUser>
 {
   // static members
 
@@ -48,7 +48,7 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest
       {
         ScreeningRoomUser labMember = new ScreeningRoomUser(new Date(), "Lab", "Member", "lab_member@hms.harvard.edu", "", "","", "", "", ScreeningRoomUserClassification.ICCBL_NSRB_STAFF, false);
         genericEntityDao.persistEntity(labMember);
-        assertNull("lab member without lab head", labMember.getLabName());
+        assertNotNull("lab member without lab head", labMember.getLabName());
 
         ScreeningRoomUser labHead = new ScreeningRoomUser(new Date(), "Lab", "Head", "lab_head@hms.harvard.edu", "", "","", "", "", ScreeningRoomUserClassification.ICCBL_NSRB_STAFF, false);
         labHead.setLabAffiliation(new LabAffiliation("LabAffiliation", AffiliationCategory.HMS));
@@ -83,16 +83,6 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest
     assertEquals(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER, user2.getScreensaverUserRoles().iterator().next());
 
     try {
-      ScreeningRoomUser user3 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
-      user3.getScreensaverUserRoles().add(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
-      user3.getScreensaverUserRoles(); // expected to throw excepted 
-      fail("expected DataModelViolationException when getting administrative role to screening room user");
-    }
-    catch (Exception e) {
-      assertTrue(e instanceof DataModelViolationException);
-    }
-    
-    try {
       genericEntityDao.doInTransaction(new DAOTransaction() {
         public void runTransaction() 
         {
@@ -117,9 +107,8 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest
       fail("expected DataModelViolationException during flush after adding administrative role to screening room user");
     }
     catch (Exception e) {
-      assertTrue(e.getCause().getCause().getCause() instanceof DataModelViolationException);
+      assertTrue(e instanceof DataModelViolationException);
     }
-    
   }
 }
 
