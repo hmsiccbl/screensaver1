@@ -186,6 +186,7 @@ public abstract class AbstractEntity implements Serializable
    * @return the concrete Class of this AbstractEntity, with the caveat that is
    *         not a proxy subclass
    */
+  @SuppressWarnings("unchecked")
   @Transient
   final public Class<? extends AbstractEntity> getEntityClass()
   {
