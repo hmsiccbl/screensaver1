@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.model;
 
+import org.apache.log4j.Logger;
+
 
 /**
  * An {@link AbstractEntity} with a semantic ID.
@@ -28,6 +30,8 @@ package edu.harvard.med.screensaver.model;
  */
 public abstract class SemanticIDAbstractEntity extends AbstractEntity
 {
+  private static Logger log = Logger.getLogger(SemanticIDAbstractEntity.class);
+
   public boolean equals(Object object)
   {
     if (object != null) {
