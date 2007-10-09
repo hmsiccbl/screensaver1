@@ -794,7 +794,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
       }
     }
 
-    genericEntityDao.persistEntity(entity);
+    genericEntityDao.saveOrUpdateEntity(entity);
   }
 
   private void doTestBidirectionalityOfOneSideOfRelationship(AbstractEntity bean,
@@ -1309,8 +1309,8 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
           screenerCherryPick,
           well);
         if (persistEntities) {
-          genericEntityDao.persistEntity(well);
-          genericEntityDao.persistEntity(labCherryPick);
+          genericEntityDao.saveOrUpdateEntity(well);
+          genericEntityDao.saveOrUpdateEntity(labCherryPick);
         }
         return labCherryPick;
       }
@@ -1401,7 +1401,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
           // TODO: work out the type-safety crap below
           NE newEntity = (NE) factoryMethod.invoke(parentBean, arguments);
           if (persistEntities) {
-            genericEntityDao.persistEntity(newEntity);
+            genericEntityDao.saveOrUpdateEntity(newEntity);
           }
           return newEntity;
         }
@@ -1420,7 +1420,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
       // TODO: work out the type-safety crap below
       NE newEntity = (NE) constructor.newInstance(arguments);
       if (persistEntities) {
-        genericEntityDao.persistEntity(newEntity);
+        genericEntityDao.saveOrUpdateEntity(newEntity);
       }
       return newEntity;
     }

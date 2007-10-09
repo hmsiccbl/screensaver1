@@ -80,7 +80,7 @@ public class SimpleDAOTest extends AbstractSpringTest
   public void testPersistEntity()
   {
     Compound compound = new Compound("smiles", "inchi", true);
-    genericEntityDao.persistEntity(compound);
+    genericEntityDao.saveOrUpdateEntity(compound);
     List<Compound> compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
     assertEquals("one compound in the machine", compounds.size(), 1);
     assertEquals("names match", compounds.get(0).getSmiles(), "smiles");
@@ -92,7 +92,7 @@ public class SimpleDAOTest extends AbstractSpringTest
     List<Compound> compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
     assertEquals("no compounds in an empty database", 0, compounds.size());
     
-    genericEntityDao.persistEntity(new Compound("smiles", "inchi"));
+    genericEntityDao.saveOrUpdateEntity(new Compound("smiles", "inchi"));
     compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
     assertEquals("one compound in the machine", compounds.size(), 1);
     assertEquals("smiles match", "smiles", compounds.get(0).getSmiles());
@@ -101,7 +101,7 @@ public class SimpleDAOTest extends AbstractSpringTest
   public void testFindEntityById()
   {
     Compound compound = new Compound("smilesZ", "inchiZ");
-    genericEntityDao.persistEntity(compound);
+    genericEntityDao.saveOrUpdateEntity(compound);
     Serializable id = compound.getCompoundId();
 
     Compound compound2 = genericEntityDao.findEntityById(Compound.class, id);
@@ -131,8 +131,8 @@ public class SimpleDAOTest extends AbstractSpringTest
         rvts[3] = screenResult.createResultValueType("rvt3");
         rvts[3].setDerived(true);
         rvts[3].setAssayPhenotype("Human");
-        genericEntityDao.persistEntity(screenResult.getScreen());
-        genericEntityDao.persistEntity(rvts[0]);
+        genericEntityDao.saveOrUpdateEntity(screenResult.getScreen());
+        genericEntityDao.saveOrUpdateEntity(rvts[0]);
       }
     });
     
@@ -172,7 +172,7 @@ public class SimpleDAOTest extends AbstractSpringTest
           LibraryType.NATURAL_PRODUCTS,
           1,
           50);
-        genericEntityDao.persistEntity(expectedLibrary[0]);
+        genericEntityDao.saveOrUpdateEntity(expectedLibrary[0]);
       }
     });
     genericEntityDao.doInTransaction(new DAOTransaction()
@@ -191,7 +191,7 @@ public class SimpleDAOTest extends AbstractSpringTest
   public void testFindEntitiesByProperty1()
   {
     Compound compound = new Compound("spaz", "inchi");
-    genericEntityDao.persistEntity(compound);
+    genericEntityDao.saveOrUpdateEntity(compound);
     
     List<Compound> compounds = genericEntityDao.findEntitiesByProperty(Compound.class, "smiles", "spaz");
     assertEquals(1, compounds.size());
@@ -217,7 +217,7 @@ public class SimpleDAOTest extends AbstractSpringTest
   public void testFindEntitybyProperty()
   {
     Compound compound = new Compound("spaz", "inchi");
-    genericEntityDao.persistEntity(compound);
+    genericEntityDao.saveOrUpdateEntity(compound);
     
     Compound compound2 = genericEntityDao.findEntityByProperty(Compound.class, "smiles", "spaz");
     assertEquals(compound, compound2);
@@ -273,7 +273,7 @@ public class SimpleDAOTest extends AbstractSpringTest
         expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy1"); 
         expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy2"); 
         expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy3"); 
-        genericEntityDao.persistEntity(expectedLibrary[0]);
+        genericEntityDao.saveOrUpdateEntity(expectedLibrary[0]);
       }
     });
 

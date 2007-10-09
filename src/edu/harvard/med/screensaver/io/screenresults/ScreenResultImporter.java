@@ -136,7 +136,7 @@ public class ScreenResultImporter
           else {
             new ScreenResultPrinter(screenResult).print();
           }
-          dao.persistEntity(screenResult);
+          dao.saveOrUpdateEntity(screenResult);
           log.info("Done parsing input file.");
         }
       });

@@ -218,13 +218,13 @@ public class ScreenDBSynchronizer
         screenSynchronizer.synchronizeScreens();
         log.info("done synchronizing screens.");
         log.info("synchronizing library screenings..");
-        libraryScreeningSynchronizer.synchronizeLibraryScreenings();
+        //libraryScreeningSynchronizer.synchronizeLibraryScreenings();
         log.info("done synchronizing library screenings.");
         log.info("synchronizing compound cherry picks..");
         compoundCherryPickSynchronizer.synchronizeCompoundCherryPicks();
         log.info("done synchronizing compound cherry picks.");
         log.info("synchronizing rnai cherry pick screenings..");
-        rnaiCherryPickScreeningSynchronizer.synchronizeRnaiCherryPickScreenings();
+        //rnaiCherryPickScreeningSynchronizer.synchronizeRnaiCherryPickScreenings();
         log.info("done synchronizing rnai cherry pick screenings.");
       }
     });

@@ -173,8 +173,8 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
     rnaiScreen.addCollaborator(compoundRnaiUser);
     compoundScreen.addCollaborator(compoundRnaiUser);
     
-    genericEntityDao.persistEntity(rnaiScreen);
-    genericEntityDao.persistEntity(compoundScreen);
+    genericEntityDao.saveOrUpdateEntity(rnaiScreen);
+    genericEntityDao.saveOrUpdateEntity(compoundScreen);
 
     List<Screen> screens = genericEntityDao.findAllEntitiesOfType(Screen.class);
     assertEquals("screens count", 2, screens.size());
@@ -232,7 +232,7 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
           1,
           3);
         librariesDao.loadOrCreateWellsForLibrary(library);
-        genericEntityDao.persistEntity(library);
+        genericEntityDao.saveOrUpdateEntity(library);
         genericEntityDao.flush();
 
         ScreensaverUserRole role = screenType.equals(ScreenType.SMALL_MOLECULE) ? ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER : ScreensaverUserRole.RNAI_SCREENING_ROOM_USER;
@@ -274,9 +274,9 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
         screen117.createScreenResult(new Date());
         screen117.setLeadScreener(users[6]);
         
-        genericEntityDao.persistEntity(screen115);
-        genericEntityDao.persistEntity(screen116);
-        genericEntityDao.persistEntity(screen117);
+        genericEntityDao.saveOrUpdateEntity(screen115);
+        genericEntityDao.saveOrUpdateEntity(screen116);
+        genericEntityDao.saveOrUpdateEntity(screen117);
         
       }
     } );
@@ -362,7 +362,7 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
           1,
           3);
         librariesDao.loadOrCreateWellsForLibrary(library);
-        genericEntityDao.persistEntity(library);
+        genericEntityDao.saveOrUpdateEntity(library);
         genericEntityDao.flush();
 
         users[0] = makeUserWithRoles(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER); // lead screener for screen 115
@@ -381,7 +381,7 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
         screen.setLeadScreener(users[0]);
         screen.addCollaborator(users[1]);
         screen.createCherryPickRequest();
-        genericEntityDao.persistEntity(screen);
+        genericEntityDao.saveOrUpdateEntity(screen);
       }
     });
     
@@ -443,7 +443,7 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
     for (ScreensaverUserRole role : roles) {
       user.addScreensaverUserRole(role);
     }
-    genericEntityDao.persistEntity(user);
+    genericEntityDao.saveOrUpdateEntity(user);
     return user;
   }
   

@@ -330,7 +330,7 @@ public class DataRowParser
         entrezgeneSymbol,
         genbankAccessionNumber,
         geneInfo.getSpeciesName());
-      _parser.getDAO().persistEntity(gene);
+      _parser.getDAO().saveOrUpdateEntity(gene);
     }
     addOldEntrezgeneIds(gene);
     return gene;
@@ -429,7 +429,7 @@ public class DataRowParser
         silencingReagentType,
         sequence,
         isPoolOfUnknownSequences);
-      _parser.getDAO().persistEntity(silencingReagent);
+      _parser.getDAO().saveOrUpdateEntity(silencingReagent);
     }
     return silencingReagent;
   }

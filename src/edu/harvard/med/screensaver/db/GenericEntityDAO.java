@@ -45,19 +45,31 @@ public interface GenericEntityDAO
   /**
    * @deprecated Use this method prevents compile-time checking of constructor
    *             signature. Instantiate the entity via its constructor and use
-   *             {@link #persistEntity(AbstractEntity)} instead.
+   *             {@link #saveOrUpdateEntity(AbstractEntity)} instead.
    */
   public <E extends AbstractEntity> E defineEntity(Class<E> entityClass,
                                                    Object... constructorArguments);
 
   /**
    * Make the specified entity persistent. The entity's ID property will be set
-   * upon return.
+   * upon return. This method calls the underlying Hibernate Session.saveOrUpdate, which
+   * does not have JPA semantics. We have encountered situations in which the save-or-update
+   * cascades were not followed when this method was called, but only after the session
+   * was flushed. If this seems like a problem to you, try {@link #persistEntity(AbstractEntity)}
+   * instead.
+   *
+   * @param entity
+   */
+  public void saveOrUpdateEntity(AbstractEntity entity);
+
+  /**
+   * Make the specified entity persistent. The entity's ID property will be set
+   * upon return. This is the one with JPA semantics: save-update cascades will be followed
+   * at the time this method is called.
    *
    * @param entity
    */
   public void persistEntity(AbstractEntity entity);
-
 
   /**
    * Reattach the entity to the current Hibernate session, allowing

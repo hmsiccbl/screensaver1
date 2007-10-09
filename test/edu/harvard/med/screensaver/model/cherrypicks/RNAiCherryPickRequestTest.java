@@ -50,8 +50,8 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCh
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
         cherryPickRequest.addRequestedEmptyColumnsOnAssayPlate(requestedEmptyColumns);
-        genericEntityDao.persistEntity(cherryPickRequest); // why do we need this, if we're also persisting the screen?!
-        genericEntityDao.persistEntity(screen);
+        genericEntityDao.saveOrUpdateEntity(cherryPickRequest); // why do we need this, if we're also persisting the screen?!
+        genericEntityDao.saveOrUpdateEntity(screen);
       }
     });
     
@@ -78,7 +78,7 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCh
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
         RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
-        genericEntityDao.persistEntity(CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, 384));
+        genericEntityDao.saveOrUpdateEntity(CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, 384));
 
         for (int plateOrdinal = 0; plateOrdinal < 6; ++plateOrdinal) {
           for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
@@ -89,8 +89,8 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCh
             }
           }
         }
-        genericEntityDao.persistEntity(cherryPickRequest); // avoid hib errors on flush
-        genericEntityDao.persistEntity(screen); // avoid hib errors on flush
+        genericEntityDao.saveOrUpdateEntity(cherryPickRequest); // avoid hib errors on flush
+        genericEntityDao.saveOrUpdateEntity(screen); // avoid hib errors on flush
 
         assertEquals("cherry pick allowance used", 384 * 6, cherryPickRequest.getCherryPickAllowanceUsed());
       }
@@ -112,13 +112,13 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCh
         {
           Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
           RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
-          genericEntityDao.persistEntity(CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, 384));
+          genericEntityDao.saveOrUpdateEntity(CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, 384));
           WellKey wellKey = new WellKey(50001, 0, 0);
           Well well = librariesDao.findWell(wellKey);
           cherryPickRequest.createScreenerCherryPick(well);
           cherryPickRequest.createScreenerCherryPick(well);
 
-          genericEntityDao.persistEntity(cherryPickRequest);
+          genericEntityDao.saveOrUpdateEntity(cherryPickRequest);
         }
       });
     }

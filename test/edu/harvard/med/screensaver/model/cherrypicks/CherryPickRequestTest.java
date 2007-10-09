@@ -88,15 +88,15 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest<CherryPick
       {
         Library library = new Library("name", "short", ScreenType.SMALL_MOLECULE, LibraryType.DOS,
           5, 5);
-        genericEntityDao.persistEntity(library);
+        genericEntityDao.saveOrUpdateEntity(library);
         librariesDao.loadOrCreateWellsForLibrary(library);
         Well well = library.getWells().iterator().next();
         ScreeningRoomUser user = new ScreeningRoomUser(
           new Date(), "joe", "user",  "email", "phone", "addr", "comments", "ecommons",
           "harvardId", ScreeningRoomUserClassification.GRADUATE_STUDENT, false);
-        genericEntityDao.persistEntity(user);
+        genericEntityDao.saveOrUpdateEntity(user);
         Screen screen = new Screen(user, user, screenNumber, new Date(), ScreenType.SMALL_MOLECULE, "title");
-        genericEntityDao.persistEntity(screen);
+        genericEntityDao.saveOrUpdateEntity(screen);
         
         CompoundCherryPickRequest request = (CompoundCherryPickRequest)
           screen.createCherryPickRequest(user, new Date(), cherryPickRequestNumber);
@@ -110,7 +110,7 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest<CherryPick
           screen.createCherryPickLiquidTransfer(user, new Date(), new Date(), request);
         transfer.addCherryPickAssayPlate(plate);
 
-        genericEntityDao.persistEntity(request);
+        genericEntityDao.saveOrUpdateEntity(request);
       }
     });
     
@@ -148,7 +148,7 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest<CherryPick
       screen.getLeadScreener(), 
       new Date(),
       4000);
-    genericEntityDao.persistEntity(cherryPickRequest);
+    genericEntityDao.saveOrUpdateEntity(cherryPickRequest);
     
     CherryPickRequest cherryPickRequest2 = genericEntityDao.findEntityById(CherryPickRequest.class, cherryPickRequest.getEntityId());
     assertEquals("cherryPickRequestNumber", new Integer(4000), cherryPickRequest2.getCherryPickRequestNumber());
@@ -163,7 +163,7 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest<CherryPick
       new Date(),
       4000);
     CherryPickRequest cherryPickRequest2 = screen.createCherryPickRequest();
-    genericEntityDao.persistEntity(screen);
+    genericEntityDao.saveOrUpdateEntity(screen);
 
     CherryPickRequest foundCherryPickRequest1 = 
       cherryPickRequestDao.findCherryPickRequestByNumber(4000);

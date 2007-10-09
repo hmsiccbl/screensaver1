@@ -73,6 +73,6 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
     }
     assertEquals("workbook has no errors", 0, errors.size());
     //ParseError error;
-    genericEntityDao.persistEntity(library);
+    genericEntityDao.saveOrUpdateEntity(library);
   }
 }

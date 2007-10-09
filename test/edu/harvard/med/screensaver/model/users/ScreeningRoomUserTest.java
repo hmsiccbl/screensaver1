@@ -47,13 +47,13 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
       public void runTransaction() 
       {
         ScreeningRoomUser labMember = new ScreeningRoomUser(new Date(), "Lab", "Member", "lab_member@hms.harvard.edu", "", "","", "", "", ScreeningRoomUserClassification.ICCBL_NSRB_STAFF, false);
-        genericEntityDao.persistEntity(labMember);
+        genericEntityDao.saveOrUpdateEntity(labMember);
         assertNotNull("lab member without lab head", labMember.getLabName());
 
         ScreeningRoomUser labHead = new ScreeningRoomUser(new Date(), "Lab", "Head", "lab_head@hms.harvard.edu", "", "","", "", "", ScreeningRoomUserClassification.ICCBL_NSRB_STAFF, false);
         labHead.setLabAffiliation(new LabAffiliation("LabAffiliation", AffiliationCategory.HMS));
         labMember.setLabHead(labHead);
-        genericEntityDao.persistEntity(labHead);
+        genericEntityDao.saveOrUpdateEntity(labHead);
       }
     });
     
@@ -76,7 +76,7 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
                                                          ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
                                                          false);
     user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
-    genericEntityDao.persistEntity(user);
+    genericEntityDao.saveOrUpdateEntity(user);
     
     ScreeningRoomUser user2 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
     assertEquals(1, user2.getScreensaverUserRoles().size());

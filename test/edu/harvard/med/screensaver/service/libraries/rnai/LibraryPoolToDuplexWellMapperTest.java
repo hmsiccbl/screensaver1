@@ -146,10 +146,10 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
         duplexWell2_2_3.addSilencingReagent(silencingReagent3_3);
         duplexWell2_2_4.addSilencingReagent(silencingReagent3_4);
         
-        genericEntityDao.persistEntity(poolLibrary1);
-        genericEntityDao.persistEntity(duplexLibrary1);
-        genericEntityDao.persistEntity(poolLibrary2);
-        genericEntityDao.persistEntity(duplexLibrary2);
+        genericEntityDao.saveOrUpdateEntity(poolLibrary1);
+        genericEntityDao.saveOrUpdateEntity(duplexLibrary1);
+        genericEntityDao.saveOrUpdateEntity(poolLibrary2);
+        genericEntityDao.saveOrUpdateEntity(duplexLibrary2);
       }
     });
     
@@ -170,7 +170,7 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           expectedDuplexCherryPickWellKeys.add(new WellKey(5, "D04"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
-          genericEntityDao.persistEntity(screen); // avoid hib errors on flush
+          genericEntityDao.saveOrUpdateEntity(screen); // avoid hib errors on flush
         }
         
         // cherry pick pool whose gene is in both library 1 and 2, and cherry picked from both libraries
@@ -191,7 +191,7 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           expectedDuplexCherryPickWellKeys.add(new WellKey(10, "D04"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
-          genericEntityDao.persistEntity(screen); // avoid hib errors on flush
+          genericEntityDao.saveOrUpdateEntity(screen); // avoid hib errors on flush
         }
         
         // cherry pick pool whose gene is only in library1
@@ -207,7 +207,7 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           expectedDuplexCherryPickWellKeys.add(new WellKey(5, "D05"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
-          genericEntityDao.persistEntity(screen); // avoid hib errors on flush
+          genericEntityDao.saveOrUpdateEntity(screen); // avoid hib errors on flush
         }
         
         // cherry pick pool whose gene is only in library2
@@ -223,7 +223,7 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           expectedDuplexCherryPickWellKeys.add(new WellKey(10, "D05"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
-          genericEntityDao.persistEntity(screen); // avoid hib errors on flush
+          genericEntityDao.saveOrUpdateEntity(screen); // avoid hib errors on flush
         }
         
         // test reverse lookup, from duplex to pool

@@ -137,7 +137,7 @@ public class NaturalProductsLibraryContentsImporter extends AbstractBackingBean
               library,
               new File(_uploadedFile.getName()),
               _uploadedFile.getInputStream());
-            _dao.persistEntity(library);
+            _dao.saveOrUpdateEntity(library);
           }
           catch (IOException e) {
             throw new DAOTransactionRollbackException("could not access uploaded file", e);

@@ -97,7 +97,7 @@ public class LibrarySynchronizer
             }
             library.setDescription(resultSet.getString("description"));
             library.setVendor(vendor);
-            _dao.persistEntity(library);
+            _dao.saveOrUpdateEntity(library);
           }
         }
         catch (SQLException e) {

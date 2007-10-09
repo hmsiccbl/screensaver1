@@ -40,7 +40,7 @@ public class WellsDataExporterTest extends AbstractSpringPersistenceTest
         LibraryType.COMMERCIAL,
         1,
         1);
-      genericEntityDao.persistEntity(library);
+      genericEntityDao.saveOrUpdateEntity(library);
       librariesDao.loadOrCreateWellsForLibrary(library);
       wellSet = library.getWells();
     }

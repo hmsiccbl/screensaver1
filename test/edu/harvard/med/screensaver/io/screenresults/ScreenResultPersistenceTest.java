@@ -61,7 +61,7 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
           1,
           3);
         librariesDao.loadOrCreateWellsForLibrary(library);
-        genericEntityDao.persistEntity(library);
+        genericEntityDao.saveOrUpdateEntity(library);
         genericEntityDao.flush();
         
         screenResultParser.parse(screen, 
@@ -70,7 +70,7 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
           System.out.println("error: " + error);
         }
         assertFalse(screenResultParser.getHasErrors());
-        genericEntityDao.persistEntity(screen);
+        genericEntityDao.saveOrUpdateEntity(screen);
       }
     });
     

@@ -59,7 +59,7 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueT
   {
     schemaUtil.truncateTablesOrCreateSchema();
     Library library = new Library("name", "short", ScreenType.SMALL_MOLECULE, LibraryType.DOS, 1, 3);
-    genericEntityDao.persistEntity(library);
+    genericEntityDao.saveOrUpdateEntity(library);
     librariesDao.loadOrCreateWellsForLibrary(library);
 
     genericEntityDao.doInTransaction(new DAOTransaction() 

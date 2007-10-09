@@ -94,7 +94,7 @@ public class BulkRNAiLibraryLoader
               log.error(error.toString());
             }
           }
-          _dao.persistEntity(library);
+          _dao.saveOrUpdateEntity(library);
           log.info("finished processing RNAi File: " + rnaiFile.getName());
         }
       });

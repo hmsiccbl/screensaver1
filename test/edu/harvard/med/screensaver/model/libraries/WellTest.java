@@ -43,7 +43,7 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
           LibraryType.COMMERCIAL,
           1,
           1);
-        genericEntityDao.persistEntity(library);
+        genericEntityDao.saveOrUpdateEntity(library);
         librariesDao.loadOrCreateWellsForLibrary(library);
         for (Well well : library.getWells()) {
           well.setMolfile("molfile");

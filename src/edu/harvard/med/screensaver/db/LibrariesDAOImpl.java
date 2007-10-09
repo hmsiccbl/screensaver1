@@ -174,7 +174,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         }
       }
     }
-    _dao.persistEntity(library);
+    _dao.saveOrUpdateEntity(library);
     log.info("created wells for library " + library.getLibraryName());
   }
 

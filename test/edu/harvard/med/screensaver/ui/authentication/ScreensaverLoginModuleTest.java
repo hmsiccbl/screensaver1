@@ -149,7 +149,7 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     _validUser.updateScreensaverPassword(new String(TEST_VALID_SCREENSAVER_PASSWORD));
     _validUser.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
     _validUser.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
-    genericEntityDao.persistEntity(_validUser);
+    genericEntityDao.saveOrUpdateEntity(_validUser);
   }
   
   

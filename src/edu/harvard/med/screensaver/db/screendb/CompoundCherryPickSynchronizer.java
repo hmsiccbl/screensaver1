@@ -21,8 +21,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
@@ -38,6 +38,7 @@ import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
+import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
@@ -149,7 +150,7 @@ public class CompoundCherryPickSynchronizer
 
         createCherryPicks(visitId, request, assayPlate);
       }
-      _dao.persistEntity(request);
+      _dao.saveOrUpdateEntity(request);
     }
     statement.close();
   }
@@ -271,6 +272,7 @@ public class CompoundCherryPickSynchronizer
           "couldn't find well with plate number " + sourcePlateNumber + " and well name " + sourceWellName);
         continue;
       }
+      sourceWell.setWellType(WellType.EXPERIMENTAL);
       
       ScreenerCherryPick screenerCherryPick = request.createScreenerCherryPick(sourceWell);
       LabCherryPick labCherryPick = request.createLabCherryPick(screenerCherryPick, sourceWell);
@@ -296,7 +298,7 @@ public class CompoundCherryPickSynchronizer
     Copy sourceCopy = _dao.findEntityById(Copy.class, copyId);
     if (sourceCopy == null) {
       sourceCopy = sourceLibrary.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, copyName);
-      _dao.persistEntity(sourceCopy);
+      _dao.saveOrUpdateEntity(sourceCopy);
     }
     return sourceCopy;
   }

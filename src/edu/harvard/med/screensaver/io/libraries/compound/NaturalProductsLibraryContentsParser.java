@@ -158,7 +158,7 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
         well.setVendorIdentifier(vendorIdentifier);
         well.setIccbNumber(iccbNumber);
         well.setWellType(WellType.EXPERIMENTAL);
-        _dao.persistEntity(well);
+        _dao.saveOrUpdateEntity(well);
       }
       catch (NaturalProductsLibraryContentsException e) {
       }

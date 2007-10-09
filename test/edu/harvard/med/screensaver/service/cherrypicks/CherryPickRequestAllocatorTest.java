@@ -70,7 +70,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         // plate independently
         
         Library library = makeRNAiDuplexLibrary("library1", 1, 6, 1);
-        genericEntityDao.persistEntity(library);
+        genericEntityDao.saveOrUpdateEntity(library);
 
         Copy copy1 = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
         copy1.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal(12).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
@@ -111,7 +111,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         LabCherryPick cherryPick4 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(4, "A01")));
         LabCherryPick cherryPick5 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(5, "A01")));
         LabCherryPick cherryPick6 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(6, "A01")));
-        genericEntityDao.persistEntity(cherryPickRequest.getScreen());
+        genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
 
         Set<LabCherryPick> unfulfillableCherryPicks = cherryPickRequestAllocator.allocate(cherryPickRequest);
 
@@ -135,7 +135,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         Library library = makeRNAiDuplexLibrary("library", 1, 1, 384);
-        genericEntityDao.persistEntity(library);
+        genericEntityDao.saveOrUpdateEntity(library);
 
         Copy copy1 = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
         copy1.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
@@ -198,7 +198,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         copy1.createCopyInfo(1, "loc1", PlateType.EPPENDORF, requestVolume.add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
         Copy copy2 = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
         copy2.createCopyInfo(1, "loc1", PlateType.EPPENDORF, requestVolume.add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        genericEntityDao.persistEntity(library);
+        genericEntityDao.saveOrUpdateEntity(library);
 
         WellVolumeCorrectionActivity wellVolumeCorrectionActivity = 
           new WellVolumeCorrectionActivity(new AdministratorUser("Joe", "Admin", "joe_admin@hms.harvard.edu", "", "", "", "", ""), 
@@ -212,7 +212,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copy1, wellB02, new BigDecimal("0.00")));
         wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copy2, wellB02, new BigDecimal("-1.00")));
         wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copy2, wellC03, requestVolume));
-        genericEntityDao.persistEntity(wellVolumeCorrectionActivity);
+        genericEntityDao.saveOrUpdateEntity(wellVolumeCorrectionActivity);
       }
     });
 
@@ -248,7 +248,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         Library library = makeRNAiDuplexLibrary("library", 1, 1, 384);
         Copy copy = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
         copy.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal(requestVolume).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        genericEntityDao.persistEntity(library);
+        genericEntityDao.saveOrUpdateEntity(library);
       }
     });
     
@@ -382,7 +382,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
             expectedUnfulfillableCherryPicks.add(labCherryPick);
           }
         }
-        genericEntityDao.persistEntity(cherryPickRequest.getScreen());
+        genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
         Set<LabCherryPick> unfulfillableCherryPicks = cherryPickRequestAllocator.allocate(cherryPickRequest);
         assertEquals("unfulfillable cherry picks for requested " + Arrays.asList(cherryPickWellNames),
                      expectedUnfulfillableCherryPicks,

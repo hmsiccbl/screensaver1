@@ -64,7 +64,7 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
         ScreenResult screenResult = screen.createScreenResult(new Date());
         screenResult.createResultValueType("Luminescence");
         screenResult.createResultValueType("FI");
-        genericEntityDao.persistEntity(screen);
+        genericEntityDao.saveOrUpdateEntity(screen);
       }
     });
 
@@ -101,10 +101,10 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
           1);
         for (int i = 1; i < 10; ++i) {
           Well well = library.createWell(i, "A01");
-          genericEntityDao.persistEntity(well);
+          genericEntityDao.saveOrUpdateEntity(well);
           rvt.addResultValue(well, Integer.toString(i));
         }
-        genericEntityDao.persistEntity(screen);
+        genericEntityDao.saveOrUpdateEntity(screen);
       }
     });
 

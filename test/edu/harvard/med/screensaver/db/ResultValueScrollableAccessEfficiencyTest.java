@@ -107,7 +107,7 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
             rvt.addResultValue(well, value);
           }
         }
-        genericEntityDao.persistEntity(screen);
+        genericEntityDao.saveOrUpdateEntity(screen);
       }
     });
 
@@ -182,7 +182,7 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
     {
       public void runTransaction()
       {
-        genericEntityDao.persistEntity(rvt); // reattach to Hibernate sesssion
+        genericEntityDao.saveOrUpdateEntity(rvt); // reattach to Hibernate sesssion
         Map<WellKey,ResultValue> resultValues = rvt.getWellKeyToResultValueMap();
         for (Map.Entry<WellKey,ResultValue> entry: resultValues.entrySet()) {
           entry.getValue().getValue();
@@ -198,7 +198,7 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
     {
       public void runTransaction()
       {
-        genericEntityDao.persistEntity(rvt); // reattach to Hibernate sesssion
+        genericEntityDao.saveOrUpdateEntity(rvt); // reattach to Hibernate sesssion
         Map<WellKey,ResultValue> resultValues = rvt.getWellKeyToResultValueMap();
         Map<WellKey,List<ResultValue>> table = new HashMap<WellKey,List<ResultValue>>();
         List<ResultValue> values = new ArrayList<ResultValue>(1);

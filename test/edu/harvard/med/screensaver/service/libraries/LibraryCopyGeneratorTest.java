@@ -53,7 +53,7 @@ public class LibraryCopyGeneratorTest extends AbstractSpringPersistenceTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         _library = new Library("library", "lib", ScreenType.RNAI, LibraryType.COMMERCIAL, 2, 5);
-        genericEntityDao.persistEntity(_library);
+        genericEntityDao.saveOrUpdateEntity(_library);
       }
     });
   }

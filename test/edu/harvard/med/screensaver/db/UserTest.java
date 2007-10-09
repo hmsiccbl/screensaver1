@@ -68,7 +68,7 @@ public class UserTest extends AbstractSpringTest
         ScreensaverUser user = new ScreeningRoomUser(new Date(), "First", "Last", "first_last@hms.harvard.edu", "", "", "", "", "", ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR, false);
         user.setLoginId("myLoginId");
         user.updateScreensaverPassword("myPassword");
-        genericEntityDao.persistEntity(user);
+        genericEntityDao.saveOrUpdateEntity(user);
       }
     });
     
@@ -94,10 +94,10 @@ public class UserTest extends AbstractSpringTest
       {
         ScreensaverUser user1 = new ScreeningRoomUser(new Date(), "First1", "Last1", userEmail1, "", "", "", "", "", ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR, false);
         user1.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
-        genericEntityDao.persistEntity(user1);
+        genericEntityDao.saveOrUpdateEntity(user1);
         ScreensaverUser user2 = new ScreeningRoomUser(new Date(), "First2", "Last2", userEmail2, "", "", "", "", "", ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR, false);
         user2.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
-        genericEntityDao.persistEntity(user2);
+        genericEntityDao.saveOrUpdateEntity(user2);
       }
     });
     

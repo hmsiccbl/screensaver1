@@ -247,7 +247,7 @@ class SDRecordParser
     if (compound == null) {
       compound = createCompoundFromSmiles(smiles);
       _parser.cacheCompound(compound);
-      _parser.getDAO().persistEntity(compound);
+      _parser.getDAO().saveOrUpdateEntity(compound);
     }
     if (isPrimaryCompound) {
       String compoundName = _sdRecordData.getCompoundName();

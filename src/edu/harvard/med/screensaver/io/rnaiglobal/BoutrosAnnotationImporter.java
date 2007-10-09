@@ -140,10 +140,10 @@ public class BoutrosAnnotationImporter
                                                                 null,
                                                                 dao);
           rnaiGlobalMember.setComments("RNAi Global group account");
-          dao.persistEntity(rnaiGlobalMember);
+          dao.saveOrUpdateEntity(rnaiGlobalMember);
 
           importAnnotationData(screen, file, dao);
-          dao.persistEntity(screen);
+          dao.saveOrUpdateEntity(screen);
         }
         catch (Exception e) {
           throw new DAOTransactionRollbackException(e);

@@ -301,7 +301,7 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume,We
                   newRemainingVolume.subtract(wellCopyVolume.getRemainingMicroliterVolume()));
             wellCopyVolume.addWellVolumeAdjustment(wellVolumeAdjustment);
           }
-          _dao.persistEntity(wellVolumeCorrectionActivity);
+          _dao.saveOrUpdateEntity(wellVolumeCorrectionActivity);
         }
       }
     });

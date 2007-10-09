@@ -104,7 +104,7 @@ class LibraryScreeningSynchronizer extends ScreeningSynchronizer
       synchronizeAssayProtocolType(resultSet, screening);
       
       _screenDBVisitIdToScreeningMap.put(resultSet.getInt("id"), screening);
-      _dao.persistEntity(screening);
+      _dao.saveOrUpdateEntity(screening);
     }
     statement.close();
   }

@@ -97,7 +97,7 @@ public class CompoundPubchemCidListUpgrader
             else {
               compound.setPubchemCidListUpgraderFailed(true);
             }
-            _dao.persistEntity(compound);
+            _dao.saveOrUpdateEntity(compound);
             incrementNumCompoundsUpgraded();
             i ++;
           }

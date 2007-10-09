@@ -211,6 +211,10 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   {
   }
 
+  public void saveOrUpdateEntity(AbstractEntity entity)
+  {
+  }
+
   public void persistEntity(AbstractEntity entity)
   {
   }

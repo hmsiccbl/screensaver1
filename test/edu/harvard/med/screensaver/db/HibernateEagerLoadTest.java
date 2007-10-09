@@ -107,7 +107,7 @@ public class HibernateEagerLoadTest extends AbstractSpringTest
         gene1.addGenbankAccessionNumber(GENBANK_ACC_NO);
         SilencingReagent siReagent1 = gene1.createSilencingReagent(SilencingReagentType.SIRNA, SIRNA_SEQ);
         well1.addSilencingReagent(siReagent1);
-        genericEntityDao.persistEntity(library);
+        genericEntityDao.saveOrUpdateEntity(library);
       }
     });
 

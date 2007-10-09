@@ -157,7 +157,7 @@ public class ScreenSynchronizer
 
       synchronizeKeywords(keywords, screen);
       synchronizeFundingSupports(fundingSupportString, screen);
-      _dao.persistEntity(screen);
+      _dao.saveOrUpdateEntity(screen);
       synchronizeBillingInformation(resultSet, screen);
       _screenNumberToScreenMap.put(screenNumber, screen);
     }

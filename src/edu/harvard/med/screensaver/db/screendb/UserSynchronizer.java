@@ -230,7 +230,7 @@ public class UserSynchronizer
       labAffiliation = new LabAffiliation(
         affiliationName,
         affiliationCategory);
-      _dao.persistEntity(labAffiliation);
+      _dao.saveOrUpdateEntity(labAffiliation);
     }
     return labAffiliation;
   }
@@ -374,7 +374,7 @@ public class UserSynchronizer
   private void persistScreeningRoomUsers()
   {
     for (ScreeningRoomUser user : _screenDBUserIdToScreeningRoomUserMap.values()) {
-      _dao.persistEntity(user);
+      _dao.saveOrUpdateEntity(user);
     }
   }
 }

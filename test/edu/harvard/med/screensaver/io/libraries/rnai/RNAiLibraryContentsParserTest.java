@@ -388,7 +388,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
           50001,
           50001);
         librariesDao.loadOrCreateWellsForLibrary(library);
-        genericEntityDao.persistEntity(library);
+        genericEntityDao.saveOrUpdateEntity(library);
   
         // parse the first spreadsheet
         String filename = "existing entities 1.xls";
@@ -406,7 +406,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
         assertEquals("library has all wells", 384, library.getWells().size());
   
         // persist the new well/sr/genes, so the next
-        genericEntityDao.persistEntity(library);
+        genericEntityDao.saveOrUpdateEntity(library);
         
         // parse the second spreadsheet
         filename = "existing entities 2.xls";
@@ -507,7 +507,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
         List<ParseError> errors = rnaiLibraryContentsParser.getErrors();
         assertEquals("workbook has no errors", 0, errors.size());
 
-        genericEntityDao.persistEntity(library);
+        genericEntityDao.saveOrUpdateEntity(library);
         
         // this library has 779 wells according to
         // http://iccb.med.harvard.edu/screening/RNAi%20Libraries/index.htm

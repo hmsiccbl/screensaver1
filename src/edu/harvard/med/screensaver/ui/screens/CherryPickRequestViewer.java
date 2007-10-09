@@ -1101,7 +1101,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
                 labCherryPick.getScreenerCherryPick().getCherryPickRequest().createLabCherryPick(
                     labCherryPick.getScreenerCherryPick(),
                     labCherryPick.getSourceWell());
-              _dao.persistEntity(newLabCherryPick);
+              _dao.saveOrUpdateEntity(newLabCherryPick);
               if (!_cherryPickRequestAllocator.allocate(newLabCherryPick)) {
                 someCherryPicksUnfulfillable = true;
               } else {
@@ -1181,7 +1181,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
               }
             }
           }
-          _dao.persistEntity(newCherryPickRequest);
+          _dao.saveOrUpdateEntity(newCherryPickRequest);
           result[0] = newCherryPickRequest;
         }
       });
@@ -1434,7 +1434,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           }
           assayPlate.setCherryPickLiquidTransfer(liquidTransfer);
         }
-        _dao.persistEntity(liquidTransfer); // necessary?
+        _dao.saveOrUpdateEntity(liquidTransfer); // necessary?
       }
     });
   }
