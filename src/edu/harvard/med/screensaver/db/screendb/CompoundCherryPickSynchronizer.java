@@ -107,6 +107,9 @@ public class CompoundCherryPickSynchronizer
       if (library != null) {
         librariesToLoadOrCreateWellsFor.add(library);
       }
+      else {
+        log.error("Library with plate " + sourcePlateNumber + " not found");
+      }
     }
     for (Library library : librariesToLoadOrCreateWellsFor) {
       _librariesDao.loadOrCreateWellsForLibrary(library);
