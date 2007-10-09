@@ -102,7 +102,7 @@ public class LibrarySynchronizer
         }
         catch (SQLException e) {
           _synchronizationException = new ScreenDBSynchronizationException(
-            "SQL exception synchronizing users: " + e.getMessage(),
+            "SQL exception synchronizing libraries: " + e.getMessage(),
             e);
         }
       }
