@@ -414,20 +414,6 @@
      verbose="${verbose}" 
     >
     	<tag name="motivation" description="Motivation"/>
-    	<tag name="hibernate.property" enabled="false"/>
-      <tag name="hibernate.class" enabled="false"/>
-      <tag name="hibernate.id" enabled="false"/>
-      <tag name="hibernate.generator-param" enabled="false"/>
-      <tag name="hibernate.many-to-one" enabled="false"/>
-      <tag name="hibernate.one1-to-one" enabled="false"/>
-      <tag name="hibernate.set" enabled="false"/>
-      <tag name="hibernate.collection-key" enabled="false"/>
-      <tag name="hibernate.collection-element" enabled="false"/>
-      <tag name="hibernate.collection-one-to-many" enabled="false"/>
-      <tag name="hibernate.collection-many-to-many" enabled="false"/>
-      <tag name="hibernate.subclass" enabled="false"/>
-      <tag name="hibernate.joined-subclass" enabled="false"/>
-      <tag name="hibernate.joined-subclass-key" enabled="false"/>
     </javadoc>
   </target>
 
