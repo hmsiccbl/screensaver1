@@ -28,7 +28,7 @@
 							<t:outputLabel for="wellVolumeAdjustmentActivityComments"
 								value="Comments for well volume adjustment(s):"
 								styleClass="label"
-								title="Comments to associated with the well volume adjustment(s)" />
+								title="Comments associated with the well volume adjustment(s)" />
 							<t:inputTextarea id="wellVolumeAdjustmentActivityComments"
 								rows="3" cols="80"
 								value="#{searchResults.wellVolumeAdjustmentActivityComments}"
