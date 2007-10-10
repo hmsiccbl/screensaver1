@@ -43,12 +43,12 @@ import org.hibernate.usertype.UserType;
  * </pre>
  *
  * Second, every entity property that has type <code>term.VTS</code> must be
- * Xdoclet-annotated with the <code>UserType</code>. For example:
+ * Hibernate-annotated with the <code>UserType</code>. For example:
  * 
  * <pre>
- *   @hibernate.property
+ *   @org.hibernate.annotations.Type(
  *     type="term.VTS$UserType"
- *     ...
+ *   )
  * </pre>
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
