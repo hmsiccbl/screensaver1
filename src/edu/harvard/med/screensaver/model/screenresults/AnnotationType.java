@@ -36,7 +36,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 
 /**
- * Annotation type on a library member (e.g. a compound or silencing reagent).
+ * Annotation type on a library member (e.g., a compound or silencing reagent).
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
