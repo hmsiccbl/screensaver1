@@ -28,7 +28,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
@@ -57,6 +59,11 @@ import edu.harvard.med.screensaver.util.CryptoUtils;
  */
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
+@Table(uniqueConstraints={ @UniqueConstraint(columnNames={
+  "firstName",
+  "lastName",
+  "dateCreated"
+}) })
 @org.hibernate.annotations.Proxy
 abstract public class ScreensaverUser extends AbstractEntity
 {
@@ -475,6 +482,7 @@ abstract public class ScreensaverUser extends AbstractEntity
    * Get the user's Screensaver-managed login ID.
    * @return the Screensaver login ID
    */
+  @Column(unique=true)
   @org.hibernate.annotations.Type(type="text")
   public String getLoginId()
   {
@@ -530,6 +538,8 @@ abstract public class ScreensaverUser extends AbstractEntity
    * Get the eCommons ID.
    * @return the eCommons ID
    */
+  // TODO: make this unique when duplicates are taken care of in the database
+  //@Column(unique=true)
   @org.hibernate.annotations.Type(type="text")
   public String getECommonsId()
   {
