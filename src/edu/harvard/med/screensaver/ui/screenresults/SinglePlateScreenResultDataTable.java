@@ -10,13 +10,13 @@
 package edu.harvard.med.screensaver.ui.screenresults;
 
 import java.util.Arrays;
-import java.util.List;
 
 import javax.faces.model.DataModel;
 
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
+import edu.harvard.med.screensaver.ui.table.DataTableRowsPerPageUISelectOneBean;
 
 import org.apache.log4j.Logger;
 
@@ -64,9 +64,10 @@ public class SinglePlateScreenResultDataTable extends ScreenResultDataTable
 
   // abstract method implementations
 
-  protected List<Integer> getRowsPerPageSelections()
+  @Override
+  protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector()
   {
-    return Arrays.asList(16, 24, 48, 96, 384);
+    return new DataTableRowsPerPageUISelectOneBean(Arrays.asList(16, 24, 48, 96, 384));
   }
 
   @Override

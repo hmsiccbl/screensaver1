@@ -46,5 +46,4 @@ log4j.logger.userActivity=info, userActivityLog
 #log4j.logger.edu.harvard.med.screensaver.db.GenericEntityDAOImpl.EntityInflator=debug
 
 log4j.logger.edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter=debug
-
-
+log4j.logger.org.hibernate.SQL=debug

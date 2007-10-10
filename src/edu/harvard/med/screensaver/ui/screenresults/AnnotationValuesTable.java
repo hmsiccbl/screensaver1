@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui.screenresults;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -25,11 +26,12 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.ui.libraries.ReagentViewer;
 import edu.harvard.med.screensaver.ui.table.DataTable;
+import edu.harvard.med.screensaver.ui.table.DataTableRowsPerPageUISelectOneBean;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
 import org.apache.log4j.Logger;
 
-public class AnnotationValuesTable extends DataTable
+public class AnnotationValuesTable extends DataTable<Map<String,Object>>
 {
 
   // static members
@@ -46,7 +48,7 @@ public class AnnotationValuesTable extends DataTable
   private LibrariesDAO _librariesDao;
   private ReagentViewer _reagentViewer;
 
-  private List<AnnotationType> _annotationTypes;
+  private List<AnnotationType> _annotationTypes = Collections.emptyList();
 
 
   // constructors
@@ -70,7 +72,7 @@ public class AnnotationValuesTable extends DataTable
   }
 
 
-  // public methods
+  // abstract & template method implementations
 
   @Override
   protected List<TableColumn<Map<String,Object>>> buildColumns()
@@ -120,6 +122,9 @@ public class AnnotationValuesTable extends DataTable
       });
     }
 
+    // we make this call here, rather than in buildRowsPerPageSelector(), to avoid infinite recursion
+    getRowsPerPageSelector().setAllRowsValue(totalRows[0]);
+
     return new AnnotationValuesDataModel(_annotationTypes,
                                          getRowsPerPageSelector().getSelection(),
                                          totalRows[0],
@@ -129,13 +134,13 @@ public class AnnotationValuesTable extends DataTable
   }
 
   @Override
-  protected List<Integer> getRowsPerPageSelections()
+  protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector()
   {
-    return Arrays.asList(10, 20, 50, 100);
+    return new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100));
   }
 
 
-  // instance data members
+  // public methods
 
   public void setAnnotationTypes(List<AnnotationType> annotationTypes)
   {

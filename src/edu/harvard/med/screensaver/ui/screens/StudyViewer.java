@@ -34,7 +34,6 @@ public class StudyViewer extends AbstractBackingBean
   private AnnotationViewer _annotationViewer;
 
   private Study _study;
-  private boolean _showNavigationBar;
 
   // constructors
 
@@ -67,19 +66,6 @@ public class StudyViewer extends AbstractBackingBean
   public Study getStudy()
   {
     return _study;
-  }
-
-  /**
-   * @motivation for JSF saveState component
-   */
-  public void setShowNavigationBar(boolean showNavigationBar)
-  {
-    _showNavigationBar = showNavigationBar;
-  }
-
-  public boolean isShowNavigationBar()
-  {
-    return _showNavigationBar;
   }
 
 

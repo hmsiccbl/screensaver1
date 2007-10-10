@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.table;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -90,6 +91,15 @@ public class TableSortManager<E> extends Observable implements Observer
     if (comparators.size() > 0) {
       _comparators.put(compoundSortColumns.get(0), comparators);
     }
+  }
+
+  public void addCompoundSortColumns(Integer[] compoundSortIndexes)
+  {
+    List<TableColumn<E>> compoundSortColumns = new ArrayList<TableColumn<E>>();
+    for (Integer colIndex : compoundSortIndexes) {
+      compoundSortColumns.add(getColumns().get(colIndex));
+    }
+    addCompoundSortColumns(compoundSortColumns);
   }
 
   public int getSortColumnIndex()

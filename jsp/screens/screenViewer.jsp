@@ -5,17 +5,9 @@
 
 <f:subview id="screenViewer">
 
-	<t:saveState value="#{screenViewer.showNavigationBar}" />
-
-	<t:aliasBean alias="#{navigator}" value="#{screensBrowser}">
-		<h:form id="navPanelForm">
-			<%@include file="../searchResultsNavPanel.jspf"%>
-		</h:form>
-	</t:aliasBean>
-
-	<t:panelGrid columns="1" width="100%">
+	<t:panelGrid columns="1" width="100%"
+		rendered="#{!empty screenViewer.screen}">
 		<%@include file="screenDetailViewer.jspf"%>
-		<%@include file="../studies/annotationViewer.jspf"%>
 		<%@include file="screenresults/screenResultViewer.jspf"%>
 	</t:panelGrid>
 

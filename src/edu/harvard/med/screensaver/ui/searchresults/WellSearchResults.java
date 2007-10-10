@@ -33,7 +33,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class WellSearchResults extends SearchResults<Well,Object>
+public class WellSearchResults extends EntitySearchResults<Well>
 {
 
   // private static final fields
@@ -47,7 +47,6 @@ public class WellSearchResults extends SearchResults<Well,Object>
   private WellViewer _wellViewer;
   private CompoundViewer _compoundViewer;
   private GeneViewer _geneViewer;
-  private List<DataExporter<Well>> _dataExporters;
 
   private List<TableColumn<Well>> _columns;
 
@@ -70,11 +69,11 @@ public class WellSearchResults extends SearchResults<Well,Object>
                            GeneViewer geneViewer,
                            List<DataExporter<Well>> dataExporters)
   {
+    super(dataExporters);
     _libraryViewer = libraryViewer;
     _wellViewer = wellViewer;
     _compoundViewer = compoundViewer;
     _geneViewer = geneViewer;
-    _dataExporters = dataExporters;
   }
 
 
@@ -120,7 +119,7 @@ public class WellSearchResults extends SearchResults<Well,Object>
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(Well well) { return _wellViewer.viewWell(well, true); }
+        public Object cellAction(Well well) { return viewCurrentEntity(); }
       });
       _columns.add(new TableColumn<Well>("Well Type", "The type of well, e.g., 'Experimental', 'Control', 'Empty', etc.") {
         @Override
@@ -146,16 +145,16 @@ public class WellSearchResults extends SearchResults<Well,Object>
         }
 
         @Override
-        public boolean isCommandLink() { return getContentsCount(getEntity()) == 1; }
+        public boolean isCommandLink() { return getContentsCount(getRowData()) == 1; }
 
         @Override
-        public boolean isCommandLinkList() { return getContentsCount(getEntity()) > 1; }
+        public boolean isCommandLinkList() { return getContentsCount(getRowData()) > 1; }
 
         @Override
         public Object cellAction(Well well)
         {
           if (getGeneCount(well) == 1) {
-            return _geneViewer.viewGene(well.getGene(), well, true);
+            return _geneViewer.viewGene(well.getGene(), well);
           }
           if (getCompoundCount(well) > 0) {
             // commandValue is really a smiles, not a compoundId
@@ -167,7 +166,7 @@ public class WellSearchResults extends SearchResults<Well,Object>
                 break;
               }
             }
-            return _compoundViewer.viewCompound(compound, well, true);
+            return _compoundViewer.viewCompound(compound, well);
           }
           return REDISPLAY_PAGE_ACTION_RESULT;
         }
@@ -177,29 +176,9 @@ public class WellSearchResults extends SearchResults<Well,Object>
   }
 
   @Override
-  public List<DataExporter<Well>> getDataExporters()
-  {
-    return _dataExporters;
-  }
-
-  @Override
-  public String showSummaryView()
-  {
-    // NOTE: if there were more ways to get to a well search results, then this method would
-    // need to be more intelligent
-    return VIEW_WELL_SEARCH_RESULTS;
-  }
-
-  @Override
   protected void setEntityToView(Well well)
   {
-    // TODO: we should really only call the view*() method for the mode we're in; otherwise we're doing extra db work
-    _wellViewer.viewWell(well, true);
-    // we need to call these view methods even, if the gene/compound is null, so
-    // that the view can at least be updated to reflect the emptiness of the
-    // well
-    _geneViewer.viewGene(well.getGene(), well, true);
-    _compoundViewer.viewCompound(well.getPrimaryCompound(), well, true);
+    _wellViewer.viewWell(well);
   }
 
 

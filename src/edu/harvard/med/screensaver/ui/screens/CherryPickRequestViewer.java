@@ -538,26 +538,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return _isPanelCollapsedMap;
   }
 
-  public HtmlDataScroller getScreenerCherryPicksTableDataScroller1()
-  {
-    return _screenerCherryPicksTableDataScroller1;
-  }
-
-  public void setScreenerCherryPicksTableDataScroller1(HtmlDataScroller screenerCherryPicksTableDataScroller1)
-  {
-    this._screenerCherryPicksTableDataScroller1 = screenerCherryPicksTableDataScroller1;
-  }
-
-  public HtmlDataScroller getScreenerCherryPicksTableDataScroller2()
-  {
-    return _screenerCherryPicksTableDataScroller2;
-  }
-
-  public void setScreenerCherryPicksTableDataScroller2(HtmlDataScroller screenerCherryPicksTableDataScroller2)
-  {
-    this._screenerCherryPicksTableDataScroller2 = screenerCherryPicksTableDataScroller2;
-  }
-
   public DataTableRowsPerPageUISelectOneBean getLabCherryPicksPerPage()
   {
     return _labCherryPicksPerPage;
@@ -1100,7 +1080,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
               LabCherryPick newLabCherryPick =
                 labCherryPick.getScreenerCherryPick().getCherryPickRequest().createLabCherryPick(
                     labCherryPick.getScreenerCherryPick(),
-                    labCherryPick.getSourceWell());
+                                                                 labCherryPick.getSourceWell());
               _dao.saveOrUpdateEntity(newLabCherryPick);
               if (!_cherryPickRequestAllocator.allocate(newLabCherryPick)) {
                 someCherryPicksUnfulfillable = true;
@@ -1387,6 +1367,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           if (arePoolWells) {
             _libraryPoolToDuplexWellMapper.createDuplexLabCherryPicksforPoolScreenerCherryPicks((RNAiCherryPickRequest) cherryPickRequest);
           }
+
+
         }
       });
 

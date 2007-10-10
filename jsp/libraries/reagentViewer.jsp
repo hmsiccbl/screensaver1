@@ -5,16 +5,6 @@
 
 <f:subview id="reagentViewer">
 
-	<t:saveState value="#{reagentViewer.showNavigationBar}" />
-
-	<t:panelGroup rendered="#{reagentViewer.showNavigationBar}">
-		<t:aliasBean alias="#{navigator}" value="#{reagentsBrowser}">
-			<h:form id="navPanelForm">
-				<%@ include file="../searchResultsNavPanel.jspf"%>
-			</h:form>
-		</t:aliasBean>
-	</t:panelGroup>
-
 	<t:aliasBean alias="#{nameValueTable}"
 		value="#{reagentViewer.nameValueTable}">
 		<%@ include file="../nameValueTable.jspf"%>
@@ -34,7 +24,8 @@
 		<%@ include file="structureImageNotice.jspf"%>
 	</t:panelGroup>
 
-	<t:div style="margin-top: 15px; margin-left: 20px;" rendered="#{reagentViewer.annotationNameValueTable.numRows > 0}">
+	<t:div style="margin-top: 15px; margin-left: 20px;"
+		rendered="#{reagentViewer.annotationNameValueTable.numRows > 0}">
 		<t:outputText styleClass="subsectionHeader" value="Annotations" />
 		<t:aliasBean alias="#{nameValueTable}"
 			value="#{reagentViewer.annotationNameValueTable}">

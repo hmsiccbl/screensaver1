@@ -26,7 +26,6 @@ public class GeneViewer extends AbstractBackingBean
 
   private Gene _gene;
   private GeneNameValueTable _geneNameValueTable;
-  private boolean _showNavigationBar;
   private Well _parentWellOfInterest;
 
 
@@ -68,19 +67,6 @@ public class GeneViewer extends AbstractBackingBean
   }
 
   /**
-   * @motivation for JSF saveState component
-   */
-  public void setShowNavigationBar(boolean showNavigationBar)
-  {
-    _showNavigationBar = showNavigationBar;
-  }
-
-  public boolean isShowNavigationBar()
-  {
-    return _showNavigationBar;
-  }
-
-  /**
    * Get the parent Well of interest, for which this compound is being viewed (a
    * compound can be in multiple wells, but the UI may want to be explicit about
    * which Well "led" to this viewer").
@@ -103,8 +89,8 @@ public class GeneViewer extends AbstractBackingBean
           Gene gene = _dao.reloadEntity(geneIn, false);
           _dao.needReadOnly(gene,
                             "genbankAccessionNumbers",
-                            "silencingReagents.wells.library");
-          setGene(gene);
+                             "silencingReagents.wells.library");
+         setGene(gene);
           setGeneNameValueTable(new GeneNameValueTable(gene, GeneViewer.this));
         }
         else {
@@ -117,10 +103,9 @@ public class GeneViewer extends AbstractBackingBean
   }
 
   @UIControllerMethod
-  public String viewGene(Gene gene, Well forWell, boolean showNavigationBar)
+  public String viewGene(Gene gene, Well forWell)
   {
     _parentWellOfInterest = forWell;
-    _showNavigationBar = showNavigationBar;
     return viewGene(gene);
   }
 

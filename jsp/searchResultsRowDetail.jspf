@@ -6,11 +6,11 @@
 <f:subview id="searchResultsRowDetail">
 
 	<t:dataTable id="detailTable"
-		value="#{searchResults.rowDetail.dataModel}" var="row" styleClass="standardTable"
+		value="#{rowDetail.dataModel}" var="row" styleClass="standardTable"
 		headerClass="tableHeader" rowClasses="row1,row2"
-		sortColumn="#{searchResults.rowDetail.sortManager.sortColumnName}"
-		sortAscending="#{searchResults.rowDetail.sortManager.sortAscending}" width="100%">
-		<t:columns value="#{searchResults.rowDetail.sortManager.columnModel}" var="column"
+		sortColumn="#{rowDetail.sortManager.sortColumnName}"
+		sortAscending="#{rowDetail.sortManager.sortAscending}" width="100%">
+		<t:columns value="#{rowDetail.sortManager.columnModel}" var="column"
 			styleClass="column">
 
 			<f:facet name="header">
@@ -28,20 +28,20 @@
 				</t:commandSortHeader>
 			</f:facet>
 
-			<t:outputText value="#{searchResults.rowDetail.cellValue}"
+			<t:outputText value="#{rowDetail.cellValue}"
 				rendered="#{! (column.isCommandLink || column.isCommandLinkList)}" />
-			<t:commandLink action="#{searchResults.rowDetail.cellAction}"
-				value="#{searchResults.rowDetail.cellValue}" rendered="#{column.isCommandLink}">
+			<t:commandLink action="#{rowDetail.cellAction}"
+				value="#{rowDetail.cellValue}" rendered="#{column.isCommandLink}">
 				<f:param name="commandValue"
-					value="#{searchResults.rowDetail.escapeBackslashes[searchResults.rowDetail.cellValue]}" />
+					value="#{rowDetail.escapeBackslashes[rowDetail.cellValue]}" />
 			</t:commandLink>
 			<t:dataList id="commandLinkList" var="commandValue"
-				value="#{searchResults.rowDetail.cellValue}" layout="simple"
+				value="#{rowDetail.cellValue}" layout="simple"
 				rendered="#{column.isCommandLinkList}" rowIndexVar="rowIndex"
 				rowCountVar="rowCount">
-				<t:commandLink action="#{searchResults.rowDetail.cellAction}" value="#{commandValue}">
+				<t:commandLink action="#{rowDetail.cellAction}" value="#{commandValue}">
 					<f:param name="commandValue"
-						value="#{searchResults.rowDetail.escapeBackslashes[commandValue]}" />
+						value="#{rowDetail.escapeBackslashes[commandValue]}" />
 				</t:commandLink>
 				<t:outputText value=";" rendered="#{rowIndex < rowCount - 1}" />
 			</t:dataList>

@@ -162,7 +162,7 @@ public class WellFinder extends AbstractBackingBean
         }
         // show in well viewer, iff the user entered exactly 1 well (counting erroneous wells)
         else if (parseResult.getParsedWellKeys().size() == 1 && parseResult.getErrors().size() == 0) {
-          result[0] = _wellViewer.viewWell(parseResult.getParsedWellKeys().first(), false);
+          result[0] = _wellViewer.viewWell(parseResult.getParsedWellKeys().first());
         }
         else {
           _wellsBrowser.setContents(foundWells);

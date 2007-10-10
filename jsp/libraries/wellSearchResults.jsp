@@ -9,6 +9,11 @@
 			<%@include file="../searchResults.jspf"%>
 		</t:aliasBean>
 	</h:form>
+
+	<t:panelGroup rendered="#{wellsBrowser.entityView}">
+		<%@ include file="wellViewer.jsp"%>
+	</t:panelGroup>
+
 </f:subview>
 
 

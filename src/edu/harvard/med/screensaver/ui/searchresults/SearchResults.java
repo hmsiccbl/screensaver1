@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.searchresults;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,49 +16,42 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 
-import javax.faces.component.UIData;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.table.DataTable;
 import edu.harvard.med.screensaver.ui.table.DataTableRowsPerPageUISelectOneBean;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 import edu.harvard.med.screensaver.ui.table.TableSortManager;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
-import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 
 
 /**
- * Manages sorting and paging of a search result. Supports two modes of
- * operation: "summary" and "detail" modes, corresponding to UI browsers and UI
- * viewers, respectively. A browser display a sortable, paged list of the search
- * results, while a viewer shows detail for a selected search result item.
- * Maintains the current page for summary mode and the current entity for detail
- * mode, allowing each of these to be scrolled independently. The current sort
- * column and sort order, however, are shared between the two modes.
+ * Backing bean for search result pages. Provides:
+ * <ul>
+ * <li>Sorting and paging of a search result.</li>
+ * <li>Compound sort orders over multiple columns (primary, secondary,
+ * tertiary, etc. sort orders).</li>
+ * <li>Editable data fields.</li>
+ * </ul>
  *
+ * @param E the type of each row's data object
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-abstract public class SearchResults<E,D> extends AbstractBackingBean
+abstract public class SearchResults<E> extends AbstractBackingBean
 {
 
   // public static final data
 
   private static final Logger log = Logger.getLogger(SearchResults.class);
 
-  private static final List<Integer> PAGE_SIZE_SELECTIONS =
-    Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE);
-  private static final Integer DEFAULT_PAGESIZE = PAGE_SIZE_SELECTIONS.get(1);
+  public static List<Integer> DEFAULT_ROWS_PER_PAGE_SELECTIONS = Arrays.asList(10, 20, 50, 100,
+                                                                               DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE);
 
   /**
    * Workaround for JSF suckiness. Two things: first, I need to use the returning a Map trick to
@@ -84,22 +75,14 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
 
   // private instance data
 
+
+  private Map<String,Boolean> _capabilities = new HashMap<String,Boolean>();
   private String _description;
   private Collection<E> _unsortedResults;
-  private List<E> _currentSort;
-  private Pair<TableColumn<E>,SortDirection> _currentSortType;
-  private int _resultsSize;
-  private int _currentPageIndex = 0;
-  private int _currentEntityIndex = 0;
-  private DataTableRowsPerPageUISelectOneBean _rowsPerPage;
-  private UIData _dataTable;
-  private DataModel _dataModel;
-  private TableSortManager<E> _sortManager;
-  private UISelectOneBean<DataExporter<E>> _dataExporterSelector;
+  private DataTable<E> _dataTable;
+  private List<E> _sortedData;
   private boolean _editMode;
   private boolean _hasEditableColumns;
-  private SearchResults<D,?> _rowDetail;
-  private boolean _isRowDetailVisible;
 
 
   // public constructor
@@ -109,6 +92,38 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
    */
   protected SearchResults()
   {
+  }
+
+  protected SearchResults(String[] capabilities)
+  {
+    if (capabilities != null) {
+      for (String capability : capabilities) {
+        _capabilities.put(capability, true);
+      }
+    }
+  }
+
+  // abstract methods
+
+  /**
+   * Create and return a list of the column header values.
+   *
+   * @return a list of the column headers
+   */
+  abstract protected List<TableColumn<E>> getColumns();
+
+
+  // public methods
+
+  /**
+   * @motivation to allow JSF pages to know what subclass methods are available;
+   *             this is a hack that is the JSF-equivalent of using the Java
+   *             'instanceof' operator before downcasting an object to get at
+   *             its subclass methods
+   */
+  public Map<String,Boolean> getCapabilities()
+  {
+    return _capabilities;
   }
 
   public void setContents(Collection<E> unsortedResults)
@@ -126,15 +141,29 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
   {
     _unsortedResults = unsortedResults;
     _description = description;
-    _resultsSize = unsortedResults.size();
-    _currentEntityIndex = 0;
-    _currentPageIndex = 0;
-    _rowsPerPage = new DataTableRowsPerPageUISelectOneBean(PAGE_SIZE_SELECTIONS,
-                                                           DEFAULT_PAGESIZE);
-    _rowsPerPage.setAllRowsValue(_resultsSize);
-    _currentSortType = null; // force re-initialization
-    _sortManager = null; // force re-initialization; necessary in case column set has changed, as returned by getColumns()
-    doSort();
+    _dataTable = new DataTable<E>()
+    {
+      @Override
+      protected List<TableColumn<E>> buildColumns()
+      {
+        return getColumns();
+      }
+
+      @Override
+      protected DataModel buildDataModel()
+      {
+        return SearchResults.this.buildDataModel();
+      }
+
+      @Override
+      protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector()
+      {
+        return SearchResults.this.buildRowsPerPageSelector();
+      }
+    };
+
+    initializeCompoundSorts();
+    initializeHasEditableColumns(getSortManager().getColumns());
   }
 
   /**
@@ -147,21 +176,17 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
     // TODO: implement
   }
 
+  public DataTable<E> getDataTable()
+  {
+    return _dataTable;
+  }
+
+
   // public getters and setters - used by searchResults.jspf
 
   public TableSortManager<E> getSortManager()
   {
-    if (_sortManager == null) {
-      List<TableColumn<E>> columns = getColumns();
-      if (columns == null) {
-        columns = new ArrayList<TableColumn<E>>();
-      }
-      initializeTableSortManager(columns);
-      initializeCompoundSortColumns(columns);
-      initializeHasEditableColumns(columns);
-    }
-
-    return _sortManager;
+    return _dataTable.getSortManager();
   }
 
   protected List<Integer[]> getCompoundSorts()
@@ -179,144 +204,8 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
     return _description;
   }
 
-  /**
-   * Get the data table.
-   * @return the data table; might be null if <t:dataTable> doesn't define a binding attribute, so watch out!
-   */
-  public UIData getDataTable()
-  {
-    return _dataTable;
-  }
-
-  /**
-   * Set the data table.
-   * @param dataTable the new data table
-   */
-  public void setDataTable(UIData dataTable)
-  {
-    _dataTable = dataTable;
-  }
-
-  /**
-   * Get the data model.
-   * @return the data model
-   */
-  public DataModel getDataModel()
-  {
-    if (_dataModel == null) {
-      doSort();
-    }
-    return _dataModel;
-  }
-
-  /**
-   * Set the data model.
-   * @param dataModel the new data model
-   */
-  public void setDataModel(DataModel dataModel)
-  {
-    _dataModel = dataModel;
-  }
-
-  /**
-   * Get the (1-based) index of the first item displayed on the current page.
-   * @return the (1-based) index of the first item displayed on the current page
-   */
-  public int getFirstIndex()
-  {
-    if (_resultsSize == 0) {    // special case if results are empty
-      return 0;
-    }
-    return (_currentPageIndex * _rowsPerPage.getSelection()) + 1;
-  }
-
-  /**
-   * Get the (1-based) index of the last item displayed on the current page.
-   * @return the (1-based) index of the last item displayed on the current page
-   */
-  public int getLastIndex()
-  {
-    int lastIndex = (_currentPageIndex + 1) * _rowsPerPage.getSelection();
-    if (lastIndex > _resultsSize) {
-      lastIndex = _resultsSize;
-    }
-    return lastIndex;
-  }
-
-  /**
-   * Get the (1-based) index of the current item displayed on the current page.
-   * @return the (1-based) index of the current item displayed on the current page
-   */
-  public int getCurrentIndex()
-  {
-    if (_resultsSize == 0) {    // special case if results are empty
-      return 0;
-    }
-    return _currentEntityIndex + 1;
-  }
-
-  /**
-   * Get the data object associated with the current row.
-   * @return the data object associated with the current row
-   */
-  public E getCurrentRowDataObject()
-  {
-    if (_resultsSize == 0) {
-      return null;
-    }
-    return getCurrentSort().get(getCurrentIndex() - 1);
-  }
-
-  protected void makeRowDetail(E entity)
-  {
-  }
-
-  public SearchResults<D,?> getRowDetail()
-  {
-    return _rowDetail;
-  }
-
-  public void setRowDetail(SearchResults<D,?> rowDetail)
-  {
-    _rowDetail = rowDetail;
-  }
-
-  /**
-   * Get the total size of the search results.
-   * @return the total size of the search results
-   */
-  public int getResultsSize()
-  {
-    return _resultsSize;
-  }
-
-  /**
-   * Get the number of items currently being displayed on a page.
-   * @return the number of items currently being displayed on a page
-   */
-  public DataTableRowsPerPageUISelectOneBean getRowsPerPageSelector()
-  {
-    return _rowsPerPage;
-  }
-
 
   // public action command methods & action listeners
-
-  /**
-   * Resort the results according to the current column, as selected by the user
-   * in a drop-down list (in the UI), and redisplay the page. Sort direction is
-   * determined by last call to
-   * {@link TableSortManager#setSortDirection(SortDirection)}.
-   *
-   * @return the navigation rule to redisplay the current page
-   */
-  public Object sortOnSelectedColumn()
-  {
-    Object currentEntity = _currentSort.get(_currentEntityIndex);
-    doSort();
-    _currentEntityIndex = _currentSort.indexOf(currentEntity);
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
 
   /**
    * Get the value to be displayed for the current cell.
@@ -324,155 +213,15 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
    */
   public Object getCellValue()
   {
-    return getCurrentColumn().getCellValue(getEntity());
+    return getCurrentColumn().getCellValue(getRowData());
   }
 
   public void setCellValue(Object value)
   {
     if (log.isDebugEnabled()) {
-      log.debug("setting value on " + getEntity() + " from column " + getCurrentColumn().getName() + ": " + value);
+      log.debug("setting value on " + getRowData() + " from column " + getCurrentColumn().getName() + ": " + value);
     }
-    getCurrentColumn().setCellValue(getEntity(), value);
-  }
-
-  /**
-   * Perform the action for clicking on the current cell. Return the navigation rule to go
-   * along with the action for clicking on the current cell. This method is only called when
-   * {@link TableColumn#getIsCommandLink()} is true for the current column.
-   *
-   * @return the navigation rule to go along with the action for clicking on the current cell
-   */
-  @SuppressWarnings("unchecked")
-  public Object cellAction()
-  {
-    // update the current entity, based upon the row that the user just interacted with
-    if (getDataTable() != null) {
-      _currentEntityIndex = getDataTable().getRowIndex();
-    }
-
-    return getCurrentColumn().cellAction(getEntity());
-  }
-
-  @SuppressWarnings("unchecked")
-  public String showRowDetail()
-  {
-    if (getDataModel().isRowAvailable()) {
-      E entity = getEntity();
-      makeRowDetail(entity);
-      _isRowDetailVisible = true;
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  public String hideRowDetail()
-  {
-    _isRowDetailVisible = false;
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  public boolean isRowDetailVisible()
-  {
-    return _isRowDetailVisible;
-  }
-
-  /**
-   * Reset the state of the search results to display the first page.
-   *
-   * @return the navigation rule to redisplay the search results
-   */
-  @UIControllerMethod
-  public String firstPage()
-  {
-    if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
-      _currentPageIndex = 0;
-    }
-    else {
-      _currentEntityIndex = 0;
-    }
-    return gotoCurrentIndex();
-  }
-
-  /**
-   * Reset the state of the search results to display the previous page.
-   *
-   * @return the navigation rule to redisplay the search results
-   */
-  @UIControllerMethod
-  public String prevPage()
-  {
-    if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
-      _currentPageIndex = Math.max(0,
-                                   _currentPageIndex - 1);
-    }
-    else {
-      _currentEntityIndex = Math.max(0,
-                                     _currentEntityIndex - 1);
-    }
-    return gotoCurrentIndex();
-  }
-
-  /**
-   * Reset the state of the search results to display the next page.
-   *
-   * @return the navigation rule to redisplay the search results
-   */
-  @UIControllerMethod
-  public String nextPage()
-  {
-    if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
-      _currentPageIndex = Math.min(_currentPageIndex + 1,
-                                   Math.max(0, _resultsSize - 1) / _rowsPerPage.getSelection());
-    }
-    else {
-      _currentEntityIndex = Math.min(_currentEntityIndex + 1,
-                                     _resultsSize - 1);
-    }
-
-    return gotoCurrentIndex();
-  }
-
-  /**
-   * Reset the state of the search results to display the last page.
-   *
-   * @return the navigation rule to redisplay the search results
-   */
-  @UIControllerMethod
-  public String lastPage()
-  {
-    if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
-      _currentPageIndex = Math.max(0, _resultsSize - 1) / _rowsPerPage.getSelection();
-    }
-    else {
-      _currentEntityIndex = _resultsSize - 1;
-    }
-    return gotoCurrentIndex();
-  }
-
-  /**
-   * Get the current view mode.
-   * @return the current view mode as a {@link SearchResultsViewMode} object
-   */
-  public SearchResultsViewMode getViewMode()
-  {
-    // HACK: is there a better way of determining the context in which this controller is being used???
-    if (
-      getFacesContext().getViewRoot().getViewId().contains("Browser") ||
-      getFacesContext().getViewRoot().getViewId().contains("SearchResults")
-    ) {
-      return SearchResultsViewMode.SUMMARY;
-    }
-    return SearchResultsViewMode.DETAIL;
-  }
-
-  /**
-   * Returns whether the current view mode is a "summary" view.
-   *
-   * @return <code>true</code> iff the view mode is
-   *         SearchResultsViewMode.SUMMARY, else <code>false</code>
-   */
-  public boolean isSummaryView()
-  {
-    return getViewMode().equals(SearchResultsViewMode.SUMMARY);
+    getCurrentColumn().setCellValue(getRowData(), value);
   }
 
   public boolean isEditMode()
@@ -485,19 +234,6 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
     return _hasEditableColumns;
   }
 
-  /**
-   * Update the number of items displayed per page, based on the user selecting
-   * a new value in the selection input for items per page.
-   *
-   * @return the navigation rule to redisplay the search results
-   */
-  public String updateRowsPerPage()
-  {
-    if (getDataTable() != null) { getDataTable().setFirst(0); }
-    _currentPageIndex = 0;
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
   @UIControllerMethod
   /*final (CGLIB2 restriction)*/ public String edit()
   {
@@ -505,6 +241,9 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
     doEdit();
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
+
+
+  // protected instance methods
 
   protected void doEdit() {}
 
@@ -527,70 +266,10 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
 
   protected void doCancel() {}
 
-  public UISelectOneBean<DataExporter<E>> getDataExporterSelector()
-  {
-    if (_dataExporterSelector == null) {
-      _dataExporterSelector = new UISelectOneBean<DataExporter<E>>(getDataExporters()) {
-        @Override
-        protected String getLabel(DataExporter<E> dataExporter)
-        {
-          return dataExporter.getFormatName();
-        }
-      };
-    }
-    return _dataExporterSelector;
-  }
-
-  @SuppressWarnings("unchecked")
-  @UIControllerMethod
-  /*final (CGLIB2 restriction)*/ public String downloadSearchResults()
-  {
-    try {
-      DataExporter dataExporter = getDataExporterSelector().getSelection();
-      InputStream inputStream = dataExporter.export(_currentSort);
-      JSFUtils.handleUserDownloadRequest(getFacesContext(),
-                                         inputStream,
-                                         dataExporter.getFileName(),
-                                         dataExporter.getMimeType());
-    }
-    catch (IOException e) {
-      reportApplicationError(e.toString());
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
   public Map<String,String> getEscapeBackslashes()
   {
     return _backslashEscaper;
   }
-
-
-  // abstract public and private methods
-
-  /**
-   * Return the string action to show the summary view
-   * @return the summary view page
-   */
-  @UIControllerMethod
-  abstract public String showSummaryView();
-
-  /**
-   * Create and return a list of the column header values.
-   *
-   * @return a list of the column headers
-   */
-  abstract protected List<TableColumn<E>> getColumns();
-
-  /**
-   * Set the entity to be displayed in detail mode.
-   * @param entity the entity to be displayed in detail mode
-   */
-  abstract protected void setEntityToView(E entity);
-
-  abstract protected List<DataExporter<E>> getDataExporters();
-
-
-  // protected instance methods
 
   final protected TableColumn<E> getCurrentColumn()
   {
@@ -602,29 +281,51 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
    * @return the entity in the current cell
    */
   @SuppressWarnings("unchecked")
-  final protected E getEntity()
+  final protected E getRowData()
   {
-    return (E) getDataModel().getRowData();
+    return (E) _dataTable.getDataModel().getRowData();
   }
 
   final protected List<E> getCurrentSort()
   {
-    doSort();
-    return _currentSort;
+    buildDataModel();
+    return _sortedData;
+  }
+
+  protected DataModel buildDataModel()
+  {
+    _sortedData = new ArrayList<E>(_unsortedResults);
+    Collections.sort(_sortedData, getSortManager().getSortColumnComparator());
+    DataModel dataModel = new ListDataModel(_sortedData);
+    return dataModel;
+  }
+
+  /**
+   * Subclass should override if it needs to specify a custom
+   * DataTableRowsPerPageUISelectOneBean
+   *
+   * @return a DataTableRowsPerPageUISelectOneBean or null if the default
+   *         DataTableRowsPerPageUISelectOneBean, as built by DataTable, is
+   *         acceptable.
+   */
+  protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector()
+  {
+    DataTableRowsPerPageUISelectOneBean rowsPerPageSelector =
+      new DataTableRowsPerPageUISelectOneBean(DEFAULT_ROWS_PER_PAGE_SELECTIONS,
+                                              DEFAULT_ROWS_PER_PAGE_SELECTIONS.get(1));
+    rowsPerPageSelector.setAllRowsValue(getDataTable().getDataModel().getRowCount());
+    return rowsPerPageSelector;
   }
 
 
   // private instance methods
 
-  private void initializeTableSortManager(List<TableColumn<E>> columns)
+
+  private void initializeCompoundSorts()
   {
-    _sortManager = new TableSortManager<E>(columns);
-    _sortManager.addObserver(new Observer() {
-      public void update(Observable o, Object obj)
-      {
-        doSort();
-      }
-    });
+    for (Integer[] compoundSortIndexes : getCompoundSorts()) {
+      getSortManager().addCompoundSortColumns(compoundSortIndexes);
+    }
   }
 
   private void initializeHasEditableColumns(List<TableColumn<E>> columns)
@@ -637,61 +338,8 @@ abstract public class SearchResults<E,D> extends AbstractBackingBean
     }
   }
 
-  private void initializeCompoundSortColumns(List<TableColumn<E>> columns)
+  protected void setEditMode(boolean isEditMode)
   {
-    List<Integer[]> compoundSorts = getCompoundSorts();
-    for (Integer[] compoundSort : compoundSorts) {
-      List<TableColumn<E>> compoundSortColumns = new ArrayList<TableColumn<E>>();
-      for (Integer colIndex : compoundSort) {
-        compoundSortColumns.add(columns.get(colIndex));
-      }
-      _sortManager.addCompoundSortColumns(compoundSortColumns);
-    }
-  }
-
-  /**
-   * Update the search browser's data table, or the search viewer's current
-   * entity, depending upon the current SearchResultsViewMode.
-   */
-  private String gotoCurrentIndex()
-  {
-    hideRowDetail();
-    if (getViewMode().equals(SearchResultsViewMode.SUMMARY)) {
-      // update the search results summary table
-      if (getDataTable() != null) {
-        getDataTable().setFirst(_currentPageIndex * _rowsPerPage.getSelection());
-      }
-    }
-    else {
-      // update the entity viewer
-      if (_resultsSize > 0) {
-        setEntityToView(_currentSort.get(_currentEntityIndex));
-      }
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  /**
-   * Internal method for performing and caching sorted results, by both sort
-   * column and direction.
-   */
-  private void doSort()
-  {
-    hideRowDetail();
-    // TODO: reinstate cached sort orders by column & direction
-    Pair<TableColumn<E>,SortDirection> newSortType =
-      new Pair<TableColumn<E>,SortDirection>(getSortManager().getSortColumn(), getSortManager().getSortDirection());
-    if (!newSortType.equals(_currentSortType)) {
-      _currentSort = new ArrayList<E>(_unsortedResults);
-      Collections.sort(_currentSort, getSortManager().getSortColumnComparator());
-      _dataModel = new ListDataModel(_currentSort);
-      _currentSortType = newSortType;
-    }
-  }
-
-  private void setEditMode(boolean isEditMode)
-  {
-    hideRowDetail();
     _editMode = isEditMode;
     getSortManager().getColumnModel().updateVisibleColumns();
   }

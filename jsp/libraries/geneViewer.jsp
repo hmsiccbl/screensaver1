@@ -5,16 +5,6 @@
 
 <f:subview id="geneViewer">
 
-	<t:saveState value="#{geneViewer.showNavigationBar}" />
-
-	<t:panelGroup rendered="#{geneViewer.showNavigationBar}">
-		<t:aliasBean alias="#{navigator}" value="#{wellsBrowser}">
-			<h:form id="navPanelForm">
-				<%@ include file="../searchResultsNavPanel.jspf"%>
-			</h:form>
-		</t:aliasBean>
-	</t:panelGroup>
-
 	<t:panelGrid rendered="#{! empty geneViewer.gene}" columns="1">
 		<t:aliasBean alias="#{nameValueTable}" value="#{geneViewer.geneNameValueTable}">
 			<%@ include file="../nameValueTable.jspf" %>

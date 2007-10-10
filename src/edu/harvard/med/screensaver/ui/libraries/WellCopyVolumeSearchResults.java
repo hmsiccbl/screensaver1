@@ -20,7 +20,6 @@ import java.util.Map;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
@@ -28,15 +27,15 @@ import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.SearchResultsWithRowDetail;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
 import org.apache.commons.collections.MultiMap;
 import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.log4j.Logger;
 
-public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume,WellVolumeAdjustment>
+public class WellCopyVolumeSearchResults extends SearchResultsWithRowDetail<WellCopyVolume,SearchResults<WellVolumeAdjustment>>
 {
   // static members
 
@@ -183,7 +182,7 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume,We
         public boolean isVisible() { return !isEditMode(); }
 
         @Override
-        public boolean isCommandLink() { return getEntity().getWellVolumeAdjustments().size() > 0; }
+        public boolean isCommandLink() { return getRowData().getWellVolumeAdjustments().size() > 0; }
 
         @Override
         public Object cellAction(WellCopyVolume entity)
@@ -245,19 +244,6 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume,We
     getRowDetail().setContents(wvas);
   }
 
-  @Override
-  @UIControllerMethod
-  public String showSummaryView()
-  {
-    return VIEW_WELL_VOLUME_SEARCH_RESULTS;
-  }
-
-  @Override
-  protected void setEntityToView(WellCopyVolume wellCopyVolume)
-  {
-    _wellViewer.viewWell(wellCopyVolume.getWell());
-  }
-
   public String getWellVolumeAdjustmentActivityComments()
   {
     return _wellVolumeAdjustmentActivityComments;
@@ -297,7 +283,7 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume,We
             WellVolumeAdjustment wellVolumeAdjustment =
               wellVolumeCorrectionActivity.createWellVolumeAdjustment(
                   wellCopyVolume.getCopy(),
-                  wellCopyVolume.getWell(),
+                                       wellCopyVolume.getWell(),
                   newRemainingVolume.subtract(wellCopyVolume.getRemainingMicroliterVolume()));
             wellCopyVolume.addWellVolumeAdjustment(wellVolumeAdjustment);
           }
@@ -311,12 +297,6 @@ public class WellCopyVolumeSearchResults extends SearchResults<WellCopyVolume,We
     else {
       showMessage("libraries.updatedNoWellVolumes");
     }
-  }
-
-  @Override
-  protected List<DataExporter<WellCopyVolume>> getDataExporters()
-  {
-    return new ArrayList<DataExporter<WellCopyVolume>>();
   }
 
 

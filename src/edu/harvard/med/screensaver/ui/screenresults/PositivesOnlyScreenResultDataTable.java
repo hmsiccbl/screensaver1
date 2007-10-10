@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.ui.screenresults;
 
 import java.util.Arrays;
-import java.util.List;
 
 import javax.faces.model.DataModel;
 
@@ -65,11 +64,15 @@ public class PositivesOnlyScreenResultDataTable extends ScreenResultDataTable
   }
 
 
-  // abstract method implementations
+  // abstract & template method implementations
 
-  protected List<Integer> getRowsPerPageSelections()
+  @Override
+  protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector()
   {
-    return Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE);
+    DataTableRowsPerPageUISelectOneBean rowsPerPageSelector =
+      new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE));
+    rowsPerPageSelector.setAllRowsValue(getDataModel().getRowCount());
+    return rowsPerPageSelector;
   }
 
   @Override

@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui.screenresults;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,7 @@ import org.apache.log4j.Logger;
 
 /**
  * Backing bean for a "meta data" table, which displays information for a set of
- * data types (e.g. {@link ResultValueType} or {@link AnnotationType}, one data
+ * data types (e.g. {@link ResultValueType} or {@link AnnotationType}), one data
  * type per column, one row per data type attribute. Manages a "select many"
  * component that allows the user to select the subset of data types that are to
  * be viewed.
@@ -53,9 +54,10 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
   private static final DataModel EMPTY_METADATA_MODEL = new ListDataModel(new ArrayList<MetaDataTableRow<?>>());
 
 
+
   // instance data members
 
-  private List<T> _metaDataTypes;
+  private List<T> _metaDataTypes = Collections.emptyList();
   private UISelectMany _selectManyUIComponent;
   private UISelectManyBean<T> _selections;
   private DataModel _columnModel;
@@ -211,7 +213,7 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
 
   private void reset()
   {
-    _metaDataTypes = null;
+    _metaDataTypes = Collections.emptyList();
     _selections = null;
     _columnModel = null;
     _dataModel = null;

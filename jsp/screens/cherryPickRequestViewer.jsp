@@ -354,7 +354,7 @@ TODO:
 
 				<t:panelGrid columns="4">
 					<t:dataScroller id="screenerCherryPicksDataScroller"
-						for="screenerCherryPicksTable" binding="#{cherryPickRequestViewer.screenerCherryPicksTableDataScroller1}"
+						for="screenerCherryPicksTable"
 						firstRowIndexVar="fromRow"
 						lastRowIndexVar="toRow" rowsCountVar="rowCount" paginator="true"
 						paginatorMaxPages="10" fastStep="10"
@@ -387,7 +387,7 @@ TODO:
 						</f:facet>
 					</t:dataScroller>
 					<t:dataScroller id="screenerCherryPicksDataScroller2"
-						for="screenerCherryPicksTable" binding="#{cherryPickRequestViewer.screenerCherryPicksTableDataScroller2}"
+						for="screenerCherryPicksTable"
 						firstRowIndexVar="fromRow"
 						lastRowIndexVar="toRow" rowsCountVar="rowCount"
 						pageCountVar="pages">

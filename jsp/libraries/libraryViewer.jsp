@@ -5,19 +5,9 @@
 
 <f:subview id="libraryViewer">
 
-	<t:saveState value="#{libraryViewer.showNavigationBar}" />
-
-	<t:panelGroup rendered="#{libraryViewer.showNavigationBar}">
-		<t:aliasBean alias="#{navigator}" value="#{librariesBrowser}">
-			<h:form id="navPanelForm">
-				<%@ include file="../searchResultsNavPanel.jspf"%>
-			</h:form>
-		</t:aliasBean>
-	</t:panelGroup>
-
 	<t:aliasBean alias="#{nameValueTable}" value="#{libraryViewer.libraryNameValueTable}" >
-    <%@ include file="../nameValueTable.jspf"  %>
-  </t:aliasBean>
+		<%@ include file="../nameValueTable.jspf"%>
+	</t:aliasBean>
 
   <t:panelGroup>
     <h:form id="libraryContentsForm">

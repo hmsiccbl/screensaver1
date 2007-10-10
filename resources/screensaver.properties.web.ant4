@@ -1,6 +1,6 @@
 # screensaver.properties.ant4
-# contains properties used at both build-time and run-time 
-# for running the Screensaver1 web application on 'androsta' 
+# contains properties used at both build-time and run-time
+# for running the Screensaver1 web application on 'androsta'
 # (ant4's development host)
 
 
@@ -24,6 +24,6 @@ babel.executable.path=/usr/local/openbabel/bin/babel
 
 # database connection
 SCREENSAVER_PGSQL_SERVER=localhost
-SCREENSAVER_PGSQL_DB=devscreensaver1
+SCREENSAVER_PGSQL_DB=devscreensaver1-upgrade
 SCREENSAVER_PGSQL_USER=devscreensaver1
 SCREENSAVER_PGSQL_PASSWORD=

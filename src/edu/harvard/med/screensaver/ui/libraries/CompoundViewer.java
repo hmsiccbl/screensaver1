@@ -33,7 +33,6 @@ public class CompoundViewer extends AbstractBackingBean
 
   private Compound _compound;
   private CompoundNameValueTable _compoundNameValueTable;
-  private boolean _showNavigationBar;
   private Well _parentWellOfInterest;
 
 
@@ -53,19 +52,6 @@ public class CompoundViewer extends AbstractBackingBean
 
 
   // public instance methods
-
-  /**
-   * @motivation for JSF saveState component
-   */
-  public void setShowNavigationBar(boolean showNavigationBar)
-  {
-    _showNavigationBar = showNavigationBar;
-  }
-
-  public boolean isShowNavigationBar()
-  {
-    return _showNavigationBar;
-  }
 
   /**
    * Get the parent Well of interest, for which this compound is being viewed (a
@@ -127,10 +113,9 @@ public class CompoundViewer extends AbstractBackingBean
   }
 
   @UIControllerMethod
-  public String viewCompound(Compound compound, Well forWell, boolean showNavigationBar)
+  public String viewCompound(Compound compound, Well forWell)
   {
     _parentWellOfInterest = forWell;
-    _showNavigationBar = showNavigationBar;
     return viewCompound(compound);
   }
 

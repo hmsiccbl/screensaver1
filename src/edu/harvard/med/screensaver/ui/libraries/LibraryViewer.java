@@ -49,7 +49,6 @@ public class LibraryViewer extends AbstractBackingBean
   private CompoundLibraryContentsImporter _compoundLibraryContentsImporter;
   private RNAiLibraryContentsImporter _rnaiLibraryContentsImporter;
   private NaturalProductsLibraryContentsImporter _naturalProductsLibraryContentsImporter;
-  private boolean _showNavigationBar;
 
 
   // constructors
@@ -123,19 +122,6 @@ public class LibraryViewer extends AbstractBackingBean
     _libraryNameValueTable = libraryNameValueTable;
   }
 
-  /**
-   * @motivation for JSF saveState component
-   */
-  public void setShowNavigationBar(boolean showNavigationBar)
-  {
-    _showNavigationBar = showNavigationBar;
-  }
-
-  public boolean isShowNavigationBar()
-  {
-    return _showNavigationBar;
-  }
-
   @UIControllerMethod
   public String viewLibrary()
   {
@@ -164,7 +150,6 @@ public class LibraryViewer extends AbstractBackingBean
         setLibraryNameValueTable(new LibraryNameValueTable(library, getLibrarySize()));
       }
     });
-    _showNavigationBar = showNavigationBar;
     return VIEW_LIBRARY;
   }
 

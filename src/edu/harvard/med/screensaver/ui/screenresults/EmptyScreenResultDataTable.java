@@ -14,6 +14,8 @@ import java.util.List;
 
 import javax.faces.model.DataModel;
 
+import edu.harvard.med.screensaver.ui.table.DataTableRowsPerPageUISelectOneBean;
+
 import org.apache.log4j.Logger;
 
 public class EmptyScreenResultDataTable extends ScreenResultDataTable
@@ -36,6 +38,12 @@ public class EmptyScreenResultDataTable extends ScreenResultDataTable
   protected DataModel buildDataModel()
   {
     return new EmptyScreenResultDataModel();
+  }
+
+  @Override
+  protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector()
+  {
+    return new DataTableRowsPerPageUISelectOneBean(Arrays.asList(0));
   }
 
 

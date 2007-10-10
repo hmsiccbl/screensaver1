@@ -10,105 +10,116 @@
 			styleClass="sectionHeader"
 			rendered="#{! empty searchResults.description}" />
 
-		<t:aliasBean alias="#{navigator}" value="#{searchResults}">
-			<%@ include file="searchResultsNavPanel.jspf"%>
+		<t:buffer into="#{dataTableBuffer}">
+			<t:dataTable id="searchResultsTable"
+				binding="#{searchResults.dataTable.dataTableUIComponent}"
+				value="#{searchResults.dataTable.dataModel}" var="row"
+				rows="#{searchResults.dataTable.rowsPerPage}"
+				styleClass="standardTable"
+				headerClass="tableHeader" rowClasses="row1,row2"
+				sortColumn="#{searchResults.dataTable.sortManager.sortColumnName}"
+				sortAscending="#{searchResults.dataTable.sortManager.sortAscending}"
+				width="100%">
+
+				<t:columns id="dataColumns"
+					value="#{searchResults.dataTable.sortManager.columnModel}"
+					var="column"
+					styleClass="#{column.numeric ? \"numericColumn\" : \"column\"}">
+					<f:facet name="header">
+						<t:commandSortHeader columnName="#{column.name}" arrow="false"
+							immediate="false" title="#{column.description}">
+							<f:facet name="ascending">
+								<t:graphicImage value="/images/ascending-arrow.gif"
+									rendered="true" border="0" />
+							</f:facet>
+							<f:facet name="descending">
+								<t:graphicImage value="/images/descending-arrow.gif"
+									rendered="true" border="0" />
+							</f:facet>
+							<t:outputText value="#{column.name}" />
+						</t:commandSortHeader>
+					</f:facet>
+					<t:outputText value="#{searchResults.cellValue}"
+						rendered="#{! (column.isCommandLink || column.isCommandLinkList || (column.editable && searchResults.editMode))}" />
+					<t:inputText value="#{searchResults.cellValue}"
+						rendered="#{column.editable && searchResults.editMode}"
+						immediate="true" />
+					<t:commandLink action="#{searchResults.dataTable.cellAction}"
+						value="#{searchResults.cellValue}"
+						rendered="#{column.isCommandLink && (!column.editable || !searchResults.editMode)}">
+						<f:param name="commandValue"
+							value="#{searchResults.escapeBackslashes[searchResults.cellValue]}" />
+					</t:commandLink>
+					<t:dataList id="commandLinkList" var="commandValue"
+						value="#{searchResults.cellValue}" layout="simple"
+						rendered="#{column.isCommandLinkList && (!column.editable || !searchResults.editMode)}"
+						rowIndexVar="rowIndex" rowCountVar="rowCount">
+						<t:commandLink action="#{searchResults.dataTable.cellAction}"
+							value="#{commandValue}">
+							<f:param name="commandValue"
+								value="#{searchResults.escapeBackslashes[commandValue]}" />
+						</t:commandLink>
+						<t:outputText value=";" rendered="#{rowIndex < rowCount - 1}" />
+					</t:dataList>
+				</t:columns>
+			</t:dataTable>
+
+			<t:panelGrid
+				rendered="#{searchResults.capabilities[\"viewRowDetail\"] && searchResults.rowDetailVisible && !searchResults.editMode}"
+				columns="1">
+				<t:outputText value="Row Detail:" styleClass="subsection" />
+				<t:aliasBean alias="#{rowDetail}"
+					value="#{searchResults.capabilities[\"viewRowDetail\"] ? searchResults.rowDetail : null}">
+					<t:outputText value="Coming soon!" />
+				</t:aliasBean>
+				<t:commandButton image="/images/delete.png"
+					action="#{searchResults.hideRowDetail}" />
+			</t:panelGrid>
+
+			<t:outputText value="#{searchResultsFooter}" escape="false" />
+
+			<t:panelGroup id="commandPanel">
+
+				<t:panelGroup rendered="#{searchResults.editable}">
+					<t:commandButton id="editCommand" value="Edit"
+						action="#{searchResults.edit}"
+						rendered="#{searchResults.hasEditableColumns && !searchResults.editMode}" />
+					<t:commandButton id="saveCommand" value="Save"
+						action="#{searchResults.save}"
+						rendered="#{searchResults.hasEditableColumns && searchResults.editMode}" />
+					<t:commandButton id="cancelCommand" value="Cancel" immediate="true"
+						action="#{searchResults.cancel}"
+						rendered="#{searchResults.hasEditableColumns && searchResults.editMode}" />
+				</t:panelGroup>
+
+				<t:panelGrid
+					style="margin: 0px; border: 1px solid grey; padding: 1px;"
+					border="0" cellpadding="0" cellspacing="0" columns="1" width="100%"
+					rendered="#{searchResults.capabilities[\"exportData\"] && searchResults.dataExporterSelector.size > 0}"
+					title="Download search results to Excel spreadsheet or SD File">
+					<t:panelGroup style="float: right">
+						<t:outputText value="download search results to: " />
+						<t:selectOneMenu id="downloadFormat"
+							value="#{searchResults.dataExporterSelector.value}">
+							<f:selectItems
+								value="#{searchResults.dataExporterSelector.selectItems}" />
+						</t:selectOneMenu>
+						<t:commandButton id="downloadSearchResultsCommandButton"
+							value="Download" action="#{searchResults.downloadSearchResults}" />
+					</t:panelGroup>
+				</t:panelGrid>
+
+			</t:panelGroup>
+		</t:buffer>
+
+		<t:aliasBean alias="#{dataTable}" value="#{searchResults.dataTable}">
+			<%@ include file="dataTableNavigator.jspf"%>
 		</t:aliasBean>
 
 		<t:outputText value="#{searchResultsHeader}" escape="false" />
 
-		<t:dataTable id="searchResultsTable"
-			binding="#{searchResults.dataTable}"
-			value="#{searchResults.dataModel}" var="row"
-			rows="#{searchResults.rowsPerPageSelector.selection}"
-			varDetailToggler="detailToggler" styleClass="standardTable"
-			headerClass="tableHeader" rowClasses="row1,row2"
-			sortColumn="#{searchResults.sortManager.sortColumnName}"
-			sortAscending="#{searchResults.sortManager.sortAscending}"
-			width="100%">
+		<t:outputText value="#{dataTableBuffer}" escape="false"
+			rendered="#{!searchResults.capabilities[\"viewEntity\"] || !searchResults.entityView}" />
 
-			<t:columns id="dataColumns"
-				value="#{searchResults.sortManager.columnModel}" var="column"
-				styleClass="#{column.numeric ? \"numericColumn\" : \"column\"}">
-				<f:facet name="header">
-					<t:commandSortHeader columnName="#{column.name}" arrow="false"
-						immediate="false" title="#{column.description}">
-						<f:facet name="ascending">
-							<t:graphicImage value="/images/ascending-arrow.gif"
-								rendered="true" border="0" />
-						</f:facet>
-						<f:facet name="descending">
-							<t:graphicImage value="/images/descending-arrow.gif"
-								rendered="true" border="0" />
-						</f:facet>
-						<t:outputText value="#{column.name}" />
-					</t:commandSortHeader>
-				</f:facet>
-				<t:outputText value="#{searchResults.cellValue}"
-					rendered="#{! (column.isCommandLink || column.isCommandLinkList || (column.editable && searchResults.editMode))}" />
-				<t:inputText value="#{searchResults.cellValue}"
-					rendered="#{column.editable && searchResults.editMode}"
-					immediate="true" />
-				<t:commandLink action="#{searchResults.cellAction}"
-					value="#{searchResults.cellValue}"
-					rendered="#{column.isCommandLink && (!column.editable || !searchResults.editMode)}">
-					<f:param name="commandValue"
-						value="#{searchResults.escapeBackslashes[searchResults.cellValue]}" />
-				</t:commandLink>
-				<t:dataList id="commandLinkList" var="commandValue"
-					value="#{searchResults.cellValue}" layout="simple"
-					rendered="#{column.isCommandLinkList && (!column.editable || !searchResults.editMode)}"
-					rowIndexVar="rowIndex" rowCountVar="rowCount">
-					<t:commandLink action="#{searchResults.cellAction}"
-						value="#{commandValue}">
-						<f:param name="commandValue"
-							value="#{searchResults.escapeBackslashes[commandValue]}" />
-					</t:commandLink>
-					<t:outputText value=";" rendered="#{rowIndex < rowCount - 1}" />
-				</t:dataList>
-			</t:columns>
-		</t:dataTable>
-
-		<t:panelGrid
-			rendered="#{searchResults.rowDetailVisible && !searchResults.editMode}"
-			columns="1">
-			<t:outputText value="Row Detail:" styleClass="label"/>
-			<%@include file="searchResultsRowDetail.jspf"%>
-			<t:commandButton image="/images/delete.png" action="#{searchResults.hideRowDetail}"/>
-		</t:panelGrid>
-
-		<t:outputText value="#{searchResultsFooter}" escape="false" />
-
-		<t:panelGroup id="commandPanel">
-
-			<t:panelGroup rendered="#{searchResults.editable}">
-				<t:commandButton id="editCommand" value="Edit"
-					action="#{searchResults.edit}"
-					rendered="#{searchResults.hasEditableColumns && !searchResults.editMode}" />
-				<t:commandButton id="saveCommand" value="Save"
-					action="#{searchResults.save}"
-					rendered="#{searchResults.hasEditableColumns && searchResults.editMode}" />
-				<t:commandButton id="cancelCommand" value="Cancel" immediate="true"
-					action="#{searchResults.cancel}"
-					rendered="#{searchResults.hasEditableColumns && searchResults.editMode}" />
-			</t:panelGroup>
-
-			<t:panelGrid
-				style="margin: 0px; border: 1px solid grey; padding: 1px;"
-				border="0" cellpadding="0" cellspacing="0" columns="1" width="100%"
-				rendered="#{searchResults.dataExporterSelector.size > 0}"
-				title="Download search results to Excel spreadsheet or SD File">
-				<t:panelGroup style="float: right">
-					<t:outputText value="download search results to: " />
-					<t:selectOneMenu id="downloadFormat"
-						value="#{searchResults.dataExporterSelector.value}">
-						<f:selectItems
-							value="#{searchResults.dataExporterSelector.selectItems}" />
-					</t:selectOneMenu>
-					<t:commandButton id="downloadSearchResultsCommandButton"
-						value="Download" action="#{searchResults.downloadSearchResults}" />
-				</t:panelGroup>
-			</t:panelGrid>
-
-		</t:panelGroup>
 	</t:panelGrid>
 </f:subview>

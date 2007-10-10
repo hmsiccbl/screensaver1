@@ -16,8 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -33,6 +31,8 @@ import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.NameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.ReagentNameValueTable;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+
+import org.apache.log4j.Logger;
 
 public class ReagentViewer extends AbstractBackingBean
 {
@@ -51,7 +51,6 @@ public class ReagentViewer extends AbstractBackingBean
   private Well _well;
   private NameValueTable _nameValueTable;
   private NameValueTable _annotationNameValueTable;
-  private boolean _showNavigationBar;
 
 
   // constructors
@@ -116,46 +115,26 @@ public class ReagentViewer extends AbstractBackingBean
     _annotationNameValueTable = annotationNameValueTable;
   }
 
-  /**
-   * @motivation for JSF saveState component
-   */
-  public void setShowNavigationBar(boolean showNavigationBar)
-  {
-    _showNavigationBar = showNavigationBar;
-  }
-
-  public boolean isShowNavigationBar()
-  {
-    return _showNavigationBar;
-  }
-
   @UIControllerMethod
   public String viewReagent()
   {
     WellKey wellKey = new WellKey((String) getRequestParameter("wellId"));
-    return viewReagent(wellKey, false);
+    return viewReagent(wellKey);
   }
 
   @UIControllerMethod
   public String viewReagent(Well well)
   {
-    return viewReagent(well, false);
-  }
-
-  @UIControllerMethod
-  public String viewReagent(Well well, boolean showNavigationBar)
-  {
     if (well == null) {
       reportApplicationError("attempted to view an unknown well (not in database)");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    return viewReagent(well.getWellKey(), showNavigationBar);
+    return viewReagent(well.getWellKey());
   }
 
   @UIControllerMethod
-  public String viewReagent(final WellKey wellKey, boolean showNavigationBar)
+  public String viewReagent(final WellKey wellKey)
   {
-    _showNavigationBar = showNavigationBar;
     try {
       _dao.doInTransaction(new DAOTransaction() {
 
@@ -198,7 +177,7 @@ public class ReagentViewer extends AbstractBackingBean
         break;
       }
     }
-    return _geneViewer.viewGene(gene, _well, _showNavigationBar);
+    return _geneViewer.viewGene(gene, _well);
   }
 
   public String viewCompound()
@@ -211,7 +190,7 @@ public class ReagentViewer extends AbstractBackingBean
         break;
       }
     }
-    return _compoundViewer.viewCompound(compound, _well, _showNavigationBar);
+    return _compoundViewer.viewCompound(compound, _well);
   }
 
   @UIControllerMethod

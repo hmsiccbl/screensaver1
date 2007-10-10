@@ -13,15 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer;
-import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.SearchResultsWithRowDetail;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
 import org.apache.log4j.Logger;
 
-public class WellVolumeSearchResults extends SearchResults<WellVolume,WellVolumeAdjustment>
+public class WellVolumeSearchResults extends SearchResultsWithRowDetail<WellVolume,WellVolumeAdjustmentSearchResults>
 {
   // static members
 
@@ -129,7 +128,7 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume,WellVolume
         public Object getCellValue(WellVolume wellVolume) { return wellVolume.getWellVolumeAdjustments().size(); }
 
         @Override
-        public boolean isCommandLink() { return getEntity().getWellVolumeAdjustments().size() > 0; }
+        public boolean isCommandLink() { return getRowData().getWellVolumeAdjustments().size() > 0; }
 
         @Override
         public Object cellAction(WellVolume wellVolume)
@@ -163,24 +162,7 @@ public class WellVolumeSearchResults extends SearchResults<WellVolume,WellVolume
       wvas.add(wva2);
     }
     getRowDetail().setContents(wvas);
-  }
 
-  @Override
-  public String showSummaryView()
-  {
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @Override
-  protected void setEntityToView(WellVolume wellCopyVolume)
-  {
-    _wellViewer.viewWell(wellCopyVolume.getWell());
-  }
-
-  @Override
-  protected List<DataExporter<WellVolume>> getDataExporters()
-  {
-    return new ArrayList<DataExporter<WellVolume>>();
   }
 
 

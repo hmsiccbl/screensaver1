@@ -9,6 +9,10 @@
 			<%@include file="../searchResults.jspf"%>
 		</t:aliasBean>
 	</h:form>
+
+	<t:panelGroup rendered="#{librariesBrowser.entityView}">
+		<%@ include file="libraryViewer.jsp"%>
+	</t:panelGroup>
 </f:subview>
 
 

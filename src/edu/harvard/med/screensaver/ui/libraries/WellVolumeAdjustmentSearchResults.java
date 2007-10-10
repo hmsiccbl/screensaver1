@@ -12,14 +12,13 @@ package edu.harvard.med.screensaver.ui.libraries;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
-public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeAdjustment,Object>
+public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeAdjustment>
 {
   private CherryPickRequestViewer _cherryPickRequestViewer;
 
@@ -89,13 +88,4 @@ public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeA
     });
     return columns;
   }
-
-  @Override
-  protected List<DataExporter<WellVolumeAdjustment>> getDataExporters() { return null; }
-
-  @Override
-  protected void setEntityToView(WellVolumeAdjustment entity) {}
-
-  @Override
-  public String showSummaryView() { return null; }
 }

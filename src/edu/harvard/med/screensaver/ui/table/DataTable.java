@@ -9,8 +9,8 @@
 
 package edu.harvard.med.screensaver.ui.table;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -20,7 +20,6 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.screenresults.ScreenResultDataModel;
 
 import org.apache.log4j.Logger;
 
@@ -35,10 +34,12 @@ import org.apache.log4j.Logger;
  * <li>reports whether the "current" column is numeric {@link #isNumericColumn()}</li>
  * </ul>
  *
+ * @param E the type of the data object associated with each row
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public abstract class DataTable extends AbstractBackingBean implements Observer
+public abstract class DataTable<E> extends AbstractBackingBean implements Observer
 {
   // static members
 
@@ -49,17 +50,19 @@ public abstract class DataTable extends AbstractBackingBean implements Observer
 
   private DataModel _dataModel;
   private UIData _dataTableUIComponent;
-  private TableSortManager<Map<String,Object>> _sortManager;
+  private TableSortManager<E> _sortManager;
   private UIInput _rowsPerPageUIComponent;
   private DataTableRowsPerPageUISelectOneBean _rowsPerPageSelector;
+  private List<Observer> _observers = new ArrayList<Observer>();
 
-  // abstract methods
 
-  abstract protected List<TableColumn<Map<String,Object>>> buildColumns();
+  // abstract & template methods
+
+  abstract protected List<TableColumn<E>> buildColumns();
 
   abstract protected DataModel buildDataModel();
 
-  abstract protected List<Integer> getRowsPerPageSelections();
+  abstract protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector();
 
 
   // public constructors and methods
@@ -74,6 +77,19 @@ public abstract class DataTable extends AbstractBackingBean implements Observer
     _dataTableUIComponent = dataTableUIComponent;
   }
 
+  /**
+   * @motivation MyFaces dataScroller component's 'for' attribute needs the
+   *             (absolute) clientId of the dataTable component, if the
+   *             dataScroller is in a different (or nested) subView.
+   */
+  public String getClientId()
+  {
+    if (_dataTableUIComponent != null) {
+      return _dataTableUIComponent.getClientId(getFacesContext());
+    }
+    return null;
+  }
+
   public DataModel getDataModel()
   {
     if (_dataModel == null) {
@@ -82,11 +98,11 @@ public abstract class DataTable extends AbstractBackingBean implements Observer
     return _dataModel;
   }
 
-  public TableSortManager<Map<String,Object>> getSortManager()
+  public TableSortManager<E> getSortManager()
   {
     if (_sortManager == null) {
-      List<TableColumn<Map<String,Object>>> columns = buildColumns();
-      _sortManager = new TableSortManager<Map<String,Object>>(columns);
+      List<TableColumn<E>> columns = buildColumns();
+      _sortManager = new TableSortManager<E>(columns);
       _sortManager.addObserver(this);
     }
     return _sortManager;
@@ -105,24 +121,48 @@ public abstract class DataTable extends AbstractBackingBean implements Observer
   @SuppressWarnings("unchecked")
   public String cellAction()
   {
-    return (String) getSortManager().getCurrentColumn().cellAction((Map<String,Object>) getDataModel().getRowData());
+    return (String) getSortManager().getCurrentColumn().cellAction((E) getDataModel().getRowData());
+  }
+
+  public int getRowsPerPage()
+  {
+    return getRowsPerPageSelector().getSelection();
   }
 
   public DataTableRowsPerPageUISelectOneBean getRowsPerPageSelector()
   {
     if (_rowsPerPageSelector == null) {
-      _rowsPerPageSelector = new DataTableRowsPerPageUISelectOneBean(getRowsPerPageSelections());
-      _rowsPerPageSelector.setAllRowsValue(getRawDataSize()); // only has an effect in case where getRowsPerPageSelections() contains SHOW_ALL_VALUE
+      _rowsPerPageSelector = buildRowsPerPageSelector();
     }
     return _rowsPerPageSelector;
   }
 
-  public void rowNumberListener(ValueChangeEvent event)
+  public void pageNumberListener(ValueChangeEvent event)
   {
     if (event.getNewValue() != null && event.getNewValue().toString().trim().length() > 0) {
-      log.debug("row number changed to " + event.getNewValue());
-      gotoDataTableRowIndex(Integer.parseInt(event.getNewValue().toString()) - 1);
+      log.debug("page number changed to " + event.getNewValue());
+      gotoPageIndex(Integer.parseInt(event.getNewValue().toString()) - 1);
+//      _rowsPerPageUIComponent.setSubmittedValue(null); // clear
+//      _rowsPerPageUIComponent.setValue(null); // clear
       getFacesContext().renderResponse();
+    }
+  }
+
+  public void gotoPageIndex(int pageIndex)
+  {
+    gotoRowIndex(pageIndex * getRowsPerPage());
+  }
+
+  public void gotoRowIndex(int rowIndex)
+  {
+    if (_dataTableUIComponent != null) {
+      // ensure value is within valid range, and in particular that we never show
+      // less than the table's configured row count (unless it's more than the
+      // total number of rows)
+      rowIndex = Math.max(0,
+                          Math.min(rowIndex,
+                                   getRowCount() - getDataTableUIComponent().getRows()));
+      _dataTableUIComponent.setFirst(rowIndex);
     }
   }
 
@@ -131,7 +171,7 @@ public abstract class DataTable extends AbstractBackingBean implements Observer
     return getSortManager().getCurrentColumn().isNumeric();
   }
 
-  public int getRawDataSize()
+  public int getRowCount()
   {
     return getDataModel().getRowCount();
   }
@@ -140,22 +180,34 @@ public abstract class DataTable extends AbstractBackingBean implements Observer
   {
     log.debug("rowsPerPage changed to " + event.getNewValue());
     getRowsPerPageSelector().setValue((String) event.getNewValue());
-    if (getDataModel() instanceof ScreenResultDataModel) {
+    if (!isMultiPaged()) {
+      gotoRowIndex(0);
+    }
+    if (getDataModel() instanceof VirtualPagingDataModel) {
       ((VirtualPagingDataModel<?,?>) getDataModel()).setRowsToFetch(getRowsPerPageSelector().getSelection());
     }
     getFacesContext().renderResponse();
   }
 
+  public boolean isMultiPaged()
+  {
+    return getRowCount() > getRowsPerPage();
+  }
+
   @SuppressWarnings("unchecked")
   public void update(Observable o, Object obj)
   {
-    // sort column changed
     resort();
+    for (Observer observer : _observers) {
+      observer.update(o, obj);
+    }
   }
 
   public void resort()
   {
-    // TODO: full rebuild is only strictly needed by FullScreenResultDataModel, other ScreenResultDataModel classes could have a callback method called to avoid database calls (as they could do their own in-memory sorting)
+    // TODO: full rebuild is only strictly needed by VirtualPagingDataModel,
+    // other DataModel classes could have a callback method called to avoid
+    // database calls (as they could do their own in-memory sorting)
     rebuildRows();
   }
 
@@ -167,7 +219,8 @@ public abstract class DataTable extends AbstractBackingBean implements Observer
 
   public void rebuildRows()
   {
-    _dataModel = null; // force rebuild, but lazily
+    _dataModel = null; // force rebuild
+    getRowsPerPageSelector().setAllRowsValue(getDataModel().getRowCount());
     if (_dataTableUIComponent != null) {
       _dataTableUIComponent.setFirst(0);
     }
@@ -185,16 +238,8 @@ public abstract class DataTable extends AbstractBackingBean implements Observer
     _sortManager = null;
   }
 
-
-  private void gotoDataTableRowIndex(int rowIndex)
+  public void addObserver(Observer observer)
   {
-    log.debug("goto data table row index " + rowIndex);
-    // ensure value is within valid range, and in particular that we never show
-    // less than the table's configured row count (unless it's more than the
-    // total number of rows)
-    rowIndex = Math.max(0,
-                        Math.min(rowIndex,
-                                 getRawDataSize() - getDataTableUIComponent().getRows()));
-    getDataTableUIComponent().setFirst(rowIndex);
+    _observers.add(observer);
   }
 }

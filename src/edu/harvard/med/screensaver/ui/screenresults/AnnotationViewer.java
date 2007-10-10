@@ -16,15 +16,14 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -47,7 +46,6 @@ public class AnnotationViewer extends AbstractBackingBean implements Observer
   // instance data members
 
   private GenericEntityDAO _dao;
-  //private ScreenAnnotationExporter _screenAnnotationExporter;
 
   private Study _study;
   private AnnotationTypesTable _annotationTypesTable;
@@ -73,6 +71,7 @@ public class AnnotationViewer extends AbstractBackingBean implements Observer
     _annotationTypesTable = annotationTypesTable;
     _annotationValuesTable = annotationValuesTable;
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
+    // HACK: the "annotationTypes" panel must be expanded initially, if all metadata type selections are to be selected on initialization (MetaDataTable.initialize())
     _isPanelCollapsedMap.put("annotationTypes", false);
     _isPanelCollapsedMap.put("annotationValues", true);
   }
@@ -122,64 +121,6 @@ public class AnnotationViewer extends AbstractBackingBean implements Observer
 
 
   // JSF application methods
-
-  @UIControllerMethod
-  public String download()
-  {
-//    try {
-//      _dao.doInTransaction(new DAOTransaction()
-//      {
-//        public void runTransaction()
-//        {
-//          ScreenResult screenResult = _dao.reloadEntity(_screen,
-//                                                        true,
-//                                                        "annotationTypes");
-//          // note: we eager fetch the annotation values for each annotation type
-//          // individually, since fetching all with a single needReadOnly() call
-//          // would generate an SQL result cross-product for all types+values that
-//          // would include a considerable amount of redundant data
-//          // for the (denormalized) RVT fields
-//          for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-//            // note: requesting the iterator generates an SQL statement that
-//            // only includes the result_value_type_result_values table, whereas
-//            // the needReadOnly() call's SQL statement joins to the
-//            // result_value_type table as well, which is slower
-//            rvt.getResultValues().keySet().iterator();
-//            //_dao.needReadOnly(rvt, "resultValues");
-//          }
-//          File exportedWorkbookFile = null;
-//          FileOutputStream out = null;
-//          try {
-//            if (screenResult != null) {
-//              HSSFWorkbook workbook = _screenResultExporter.build(screenResult);
-//              exportedWorkbookFile = File.createTempFile("screenResult" + screenResult.getScreen().getScreenNumber() + ".",
-//              ".xls");
-//              out = new FileOutputStream(exportedWorkbookFile);
-//              workbook.write(out);
-//              out.close();
-//              JSFUtils.handleUserFileDownloadRequest(getFacesContext(),
-//                                                     exportedWorkbookFile,
-//                                                     Workbook.MIME_TYPE);
-//            }
-//          }
-//          catch (IOException e)
-//          {
-//            reportApplicationError(e);
-//          }
-//          finally {
-//            IOUtils.closeQuietly(out);
-//            if (exportedWorkbookFile != null && exportedWorkbookFile.exists()) {
-//              exportedWorkbookFile.delete();
-//            }
-//          }
-//        }
-//      });
-//    }
-//    catch (DataAccessException e) {
-//      showMessage("databaseOperationFailed", e.getMessage());
-//    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
 
 
   // protected methods

@@ -12,7 +12,6 @@ package edu.harvard.med.screensaver.ui.searchresults;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
@@ -26,7 +25,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class LibrarySearchResults extends SearchResults<Library,Object>
+public class LibrarySearchResults extends EntitySearchResults<Library>
 {
 
   // private static final fields
@@ -58,20 +57,6 @@ public class LibrarySearchResults extends SearchResults<Library,Object>
 
   // implementations of the SearchResults abstract methods
 
-  @Override
-  protected List<DataExporter<Library>> getDataExporters()
-  {
-    return new ArrayList<DataExporter<Library>>();
-  }
-
-  @Override
-  public String showSummaryView()
-  {
-    // NOTE: if there were more ways to get to a library search results, then this method would
-    // need to be more intelligent
-    return BROWSE_LIBRARIES;
-  }
-
   protected List<TableColumn<Library>> getColumns()
   {
     if (_columns == null) {
@@ -84,7 +69,7 @@ public class LibrarySearchResults extends SearchResults<Library,Object>
         public boolean isCommandLink() { return true; }
 
         @Override
-        public Object cellAction(Library library) { return _libraryViewer.viewLibrary(library, true); }
+        public Object cellAction(Library library) { return viewCurrentEntity(); }
       });
       _columns.add(new TableColumn<Library>("Library Name", "The full name of the library") {
         @Override
@@ -111,17 +96,17 @@ public class LibrarySearchResults extends SearchResults<Library,Object>
   }
 
   @Override
+  protected void setEntityToView(Library library)
+  {
+    _libraryViewer.viewLibrary(library, true);
+  }
+
+  @Override
   protected List<Integer[]> getCompoundSorts()
   {
     List<Integer[]> compoundSorts = super.getCompoundSorts();
     compoundSorts.add(new Integer[] {2, 3, 0});
     compoundSorts.add(new Integer[] {3, 0});
     return compoundSorts;
-  }
-
-  @Override
-  protected void setEntityToView(Library library)
-  {
-    _libraryViewer.viewLibrary(library, true);
   }
 }

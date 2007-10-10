@@ -14,7 +14,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.SortedSet;
 
-import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
@@ -31,7 +30,7 @@ import edu.harvard.med.screensaver.util.NullSafeComparator;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class ScreenSearchResults extends SearchResults<Screen,Object>
+public class ScreenSearchResults extends EntitySearchResults<Screen>
 {
 
   // private static final fields
@@ -70,7 +69,7 @@ public class ScreenSearchResults extends SearchResults<Screen,Object>
         public Object getCellValue(Screen screen) { return screen.getScreenNumber(); }
 
         @Override
-        public Object cellAction(Screen screen) { return _screenViewer.viewScreen(screen); }
+        public Object cellAction(Screen screen) { return viewCurrentEntity(); }
 
         @Override
         public boolean isCommandLink() { return true; }
@@ -223,26 +222,15 @@ public class ScreenSearchResults extends SearchResults<Screen,Object>
     return compoundSorts;
   }
 
-  private boolean showStatusFields()
-  {
-    return isUserInRole(ScreensaverUserRole.SCREENS_ADMIN) ||
-      isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
-  }
-  @Override
-  protected List<DataExporter<Screen>> getDataExporters()
-  {
-    return new ArrayList<DataExporter<Screen>>();
-  }
-
-  @Override
-  public String showSummaryView()
-  {
-    return BROWSE_SCREENS;
-  }
-
   @Override
   protected void setEntityToView(Screen screen)
   {
     _screenViewer.viewScreen(screen);
+  }
+
+  private boolean showStatusFields()
+  {
+    return isUserInRole(ScreensaverUserRole.SCREENS_ADMIN) ||
+      isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
   }
 }

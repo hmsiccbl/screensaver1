@@ -211,8 +211,8 @@
 							<t:panelGroup id="annotationValuesTableCommandPanel"
 								styleClass="commandPanel">
 
-								<t:inputText id="rowNumber"
-									valueChangeListener="#{annotationViewer.annotationValuesTable.rowNumberListener}"
+								<t:inputText id="pageNumber"
+									valueChangeListener="#{annotationViewer.annotationValuesTable.pageNumberListener}"
 									size="6" styleClass="inputText">
 								</t:inputText>
 								<%-- note: no 'action' attribute necessary, as 'rowNumber' inputText component, above, invokes update logic via valueChangeListener --%>

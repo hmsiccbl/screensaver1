@@ -124,8 +124,7 @@ public class CompoundNameValueTable extends NameValueTable
       String name = getName(index);
       if (name.equals(SMILES)) {
         return _compoundViewer.viewCompound(_compound,
-                                            isEmbedded() ? _parentViewer.getWell() : null,
-                                            isEmbedded() ? _parentViewer.isShowNavigationBar() : null);
+                                            isEmbedded() ? _parentViewer.getWell() : null);
       }
     }
     // other fields do not have actions

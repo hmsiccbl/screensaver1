@@ -41,7 +41,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public abstract class ScreenResultDataTable extends DataTable
+public abstract class ScreenResultDataTable extends DataTable<Map<String,Object>>
 {
   // static members
 
@@ -86,7 +86,7 @@ public abstract class ScreenResultDataTable extends DataTable
   {
     _resultValueTypes = resultValueTypes;
     rebuildColumnsAndRows();
-    getRowsPerPageSelector().setAllRowsValue(getRawDataSize()); // only has an effect in case where getRowsPerPageSelections() contains SHOW_ALL_VALUE
+    getRowsPerPageSelector().setAllRowsValue(getRowCount()); // only has an effect in case where getRowsPerPageSelections() contains SHOW_ALL_VALUE
     if (getRowsPerPageUIComponent() != null) {
       getRowsPerPageUIComponent().setValue(getRowsPerPageSelector().getValue());
     }

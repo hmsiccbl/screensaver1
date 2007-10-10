@@ -38,7 +38,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class ReagentSearchResults extends SearchResults<Well,Object>
+public class ReagentSearchResults extends EntitySearchResults<Well>
 {
 
   // private static final fields
@@ -52,7 +52,6 @@ public class ReagentSearchResults extends SearchResults<Well,Object>
   private CompoundViewer _compoundViewer;
   private GeneViewer _geneViewer;
   private AnnotationsDAO _annotationsDao;
-  private List<DataExporter<Well>> _dataExporters;
 
   private List<TableColumn<Well>> _columns;
   private List<AnnotationType> _annotationTypes;
@@ -77,11 +76,11 @@ public class ReagentSearchResults extends SearchResults<Well,Object>
                               AnnotationsDAO annotationsDao,
                               List<DataExporter<Well>> dataExporters)
   {
+    super(dataExporters);
     _reagentViewer = reagentViewer;
     _compoundViewer = compoundViewer;
     _geneViewer = geneViewer;
     _annotationsDao = annotationsDao;
-    _dataExporters = dataExporters;
   }
 
   public void setContents(Collection<Well> unsortedResults,
@@ -115,7 +114,7 @@ public class ReagentSearchResults extends SearchResults<Well,Object>
       @Override
       public Object cellAction(Well well)
       {
-        return _reagentViewer.viewReagent(well, true);
+        return viewCurrentEntity();
       }
     });
     _columns.add(new TableColumn<Well>("Contents", "The gene name for the silencing reagent, or SMILES for the compound reagent") {
@@ -138,16 +137,16 @@ public class ReagentSearchResults extends SearchResults<Well,Object>
       }
 
       @Override
-      public boolean isCommandLink() { return getContentsCount(getEntity()) == 1; }
+      public boolean isCommandLink() { return getContentsCount(getRowData()) == 1; }
 
       @Override
-      public boolean isCommandLinkList() { return getContentsCount(getEntity()) > 1; }
+      public boolean isCommandLinkList() { return getContentsCount(getRowData()) > 1; }
 
       @Override
       public Object cellAction(Well well)
       {
         if (getGeneCount(well) == 1) {
-          return _geneViewer.viewGene(well.getGene(), well, true);
+          return _geneViewer.viewGene(well.getGene(), well);
         }
         if (getCompoundCount(well) > 0) {
           // commandValue is really a smiles, not a compoundId
@@ -159,7 +158,7 @@ public class ReagentSearchResults extends SearchResults<Well,Object>
               break;
             }
           }
-          return _compoundViewer.viewCompound(compound, well, true);
+          return _compoundViewer.viewCompound(compound, well);
         }
         return REDISPLAY_PAGE_ACTION_RESULT;
       }
@@ -201,27 +200,9 @@ public class ReagentSearchResults extends SearchResults<Well,Object>
   }
 
   @Override
-  public List<DataExporter<Well>> getDataExporters()
-  {
-    return _dataExporters;
-  }
-
-  @Override
-  public String showSummaryView()
-  {
-    return VIEW_REAGENT_SEARCH_RESULTS;
-  }
-
-  @Override
   protected void setEntityToView(Well well)
   {
-    // TODO: we should really only call the view*() method for the mode we're in; otherwise we're doing extra db work
-    _reagentViewer.viewReagent(well, true);
-    // we need to call these view methods even, if the gene/compound is null, so
-    // that the view can at least be updated to reflect the emptiness of the
-    // well
-    _geneViewer.viewGene(well.getGene(), well, true);
-    _compoundViewer.viewCompound(well.getPrimaryCompound(), well, true);
+    _reagentViewer.viewReagent(well);
   }
 
 

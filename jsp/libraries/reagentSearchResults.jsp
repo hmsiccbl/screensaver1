@@ -9,6 +9,11 @@
 			<%@include file="../searchResults.jspf"%>
 		</t:aliasBean>
 	</h:form>
+
+	<t:panelGroup rendered="#{reagentsBrowser.entityView}">
+		<%@ include file="reagentViewer.jsp"%>
+	</t:panelGroup>
+
 </f:subview>
 
 

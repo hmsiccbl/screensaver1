@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -28,7 +27,7 @@ import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class StudySearchResults extends SearchResults<Study,Object>
+public class StudySearchResults extends EntitySearchResults<Study>
 {
 
   // private static final fields
@@ -67,7 +66,7 @@ public class StudySearchResults extends SearchResults<Study,Object>
         public Object getCellValue(Study study) { return study.getStudyNumber(); }
 
         @Override
-        public Object cellAction(Study study) { return _studyViewer.viewStudy(study); }
+        public Object cellAction(Study study) { return viewCurrentEntity(); }
 
         @Override
         public boolean isCommandLink() { return true; }
@@ -131,18 +130,6 @@ public class StudySearchResults extends SearchResults<Study,Object>
   {
     return isUserInRole(ScreensaverUserRole.SCREENS_ADMIN/*TODO: need STUDY_ADMIN, perhaps*/) ||
       isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
-  }
-
-  @Override
-  protected List<DataExporter<Study>> getDataExporters()
-  {
-    return new ArrayList<DataExporter<Study>>();
-  }
-
-  @Override
-  public String showSummaryView()
-  {
-    return BROWSE_STUDIES;
   }
 
   @Override

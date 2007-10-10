@@ -56,29 +56,22 @@ public class WellViewer extends ReagentViewer
   public String viewWell()
   {
     WellKey wellKey = new WellKey((String) getRequestParameter("wellId"));
-    return viewWell(wellKey, false);
+    return viewWell(wellKey);
   }
 
   @UIControllerMethod
   public String viewWell(Well well)
   {
-    return viewWell(well, false);
-  }
-
-  @UIControllerMethod
-  public String viewWell(Well well, boolean showNavigationBar)
-  {
     if (well == null) {
       reportApplicationError("attempted to view an unknown well (not in database)");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    return viewWell(well.getWellKey(), showNavigationBar);
+    return viewWell(well.getWellKey());
   }
 
   @UIControllerMethod
-  public String viewWell(final WellKey wellKey, boolean showNavigationBar)
+  public String viewWell(final WellKey wellKey)
   {
-    setShowNavigationBar(showNavigationBar);
     try {
       _dao.doInTransaction(new DAOTransaction() {
         public void runTransaction()
