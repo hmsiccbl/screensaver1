@@ -19,7 +19,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
@@ -45,6 +47,12 @@ import edu.harvard.med.screensaver.model.Activity;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
+@Table(uniqueConstraints={ @UniqueConstraint(columnNames={
+  "copyId",
+  "wellId",
+  "labCherryPickId",
+  "wellVolumeCorrectionActivityId"
+}) })
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(
   containingEntityClass=LabCherryPick.class,

@@ -46,9 +46,7 @@ import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 @Entity
-@Table(
-  uniqueConstraints={ @UniqueConstraint(columnNames={ "copyId", "plateNumber" }) }
-)
+@Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "copyId", "plateNumber" }) })
 @org.hibernate.annotations.Proxy
 @ContainedEntity(containingEntityClass=Copy.class)
 public class CopyInfo extends AbstractEntity

@@ -19,7 +19,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
@@ -36,6 +38,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 @Entity
+@Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "screeningRoomUserId", "checklistItemTypeId" }) })
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ScreeningRoomUser.class)
 public class ChecklistItem extends AbstractEntity

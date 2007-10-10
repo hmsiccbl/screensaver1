@@ -46,9 +46,7 @@ import edu.harvard.med.screensaver.model.screens.IsHitConfirmedViaExperimentatio
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 @Entity
-@Table(
-  uniqueConstraints={ @UniqueConstraint(columnNames={ "cherryPickRequestId", "screenedWellId" }) }
-)
+@Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "cherryPickRequestId", "screenedWellId" }) })
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=CherryPickRequest.class)
 public class ScreenerCherryPick extends AbstractEntity

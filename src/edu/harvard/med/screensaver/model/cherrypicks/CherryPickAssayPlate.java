@@ -28,7 +28,9 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
@@ -53,6 +55,11 @@ import edu.harvard.med.screensaver.model.libraries.PlateType;
   discriminatorType=DiscriminatorType.STRING
 )
 @DiscriminatorValue("CherryPickAssayPlate")
+@Table(uniqueConstraints={ @UniqueConstraint(columnNames={
+  "cherryPickRequestId",
+  "plateOrdinal",
+  "attemptOrdinal"
+}) })
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=CherryPickRequest.class)
 public class CherryPickAssayPlate extends AbstractEntity implements Comparable<CherryPickAssayPlate>

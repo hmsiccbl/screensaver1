@@ -24,7 +24,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
@@ -42,6 +44,7 @@ import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
+@Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "studyId", "name" }) })
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
 public class AnnotationType extends AbstractEntity implements MetaDataType, Comparable<AnnotationType>

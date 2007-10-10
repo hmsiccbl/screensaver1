@@ -22,7 +22,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -45,6 +47,7 @@ import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 @Entity
+@Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "libraryId", "name" }) })
 @org.hibernate.annotations.Proxy
 @ContainedEntity(containingEntityClass=Library.class)
 public class Copy extends SemanticIDAbstractEntity
