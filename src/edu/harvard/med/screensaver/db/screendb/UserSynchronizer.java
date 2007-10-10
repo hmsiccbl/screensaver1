@@ -166,6 +166,9 @@ public class UserSynchronizer
     String mailingAddress = resultSet.getString("lab_location");
     String comments = resultSet.getString("comments");
     String ecommonsId = getEcommonsId(resultSet);
+    if ("".equals(ecommonsId)) {
+      ecommonsId = null;
+    }
     String harvardId = resultSet.getString("harvard_id");
     String affiliationName = resultSet.getString("lab_affiliation");
     ScreeningRoomUserClassification classification = getClassification(resultSet);
