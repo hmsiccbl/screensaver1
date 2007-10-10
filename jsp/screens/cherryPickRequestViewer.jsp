@@ -24,10 +24,10 @@ TODO:
 			<f:facet name="header">
 				<t:div styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
-						<h:graphicImage
+						<t:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
-						<h:outputText value="#{title}" styleClass="sectionHeader" />
+						<t:outputText value="#{title}" styleClass="sectionHeader" />
 					</t:headerLink>
 				</t:div>
 			</f:facet>
@@ -38,13 +38,13 @@ TODO:
 
 				<t:outputText value="Screen&nbsp;ID" escape="false"
 					visibleOnUserRole="developer"
-          title="The database ID for the screen. This is an implementation-level detail displayed only for development purposes" />
+					title="The database ID for the screen. This is an implementation-level detail displayed only for development purposes" />
 				<t:outputText id="screenId"
 					value="#{cherryPickRequestViewer.cherryPickRequest.screen.screenId}"
 					styleClass="dataText" visibleOnUserRole="developer" />
 
 				<t:outputText value="Screen&nbsp;Number" escape="false"
-          title="The number used to uniquely identify the screen" />
+					title="The number used to uniquely identify the screen" />
 				<t:commandLink id="screenCommand"
 					action="#{cherryPickRequestViewer.viewScreen}">
 					<t:outputText id="screenNumber"
@@ -52,12 +52,14 @@ TODO:
 						styleClass="dataText" />
 				</t:commandLink>
 
-				<t:outputText value="Title" escape="false" title="The title of the screen" />
+				<t:outputText value="Title" escape="false"
+					title="The title of the screen" />
 				<t:outputText id="title"
 					value="#{cherryPickRequestViewer.cherryPickRequest.screen.title}"
 					styleClass="dataText" />
 
-				<t:outputText value="Screen&nbsp;Type" escape="false" title="'Small Molecule' or 'RNAi'" />
+				<t:outputText value="Screen&nbsp;Type" escape="false"
+					title="'Small Molecule' or 'RNAi'" />
 				<t:outputText id="screenType"
 					value="#{cherryPickRequestViewer.cherryPickRequest.screen.screenType}"
 					converter="ScreenTypeConverter" styleClass="dataText" />
@@ -66,14 +68,15 @@ TODO:
 
 		<t:collapsiblePanel id="cherryPickRequestDetailsPanel"
 			value="#{cherryPickRequestViewer.isPanelCollapsedMap['cherryPickRequestDetails']}"
-			title="Cherry Pick Request Details" var="isCollapsed" titleVar="title">
+			title="Cherry Pick Request Details" var="isCollapsed"
+			titleVar="title">
 			<f:facet name="header">
 				<t:div styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
-						<h:graphicImage
+						<t:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
-						<h:outputText value="#{title}" styleClass="sectionHeader" />
+						<t:outputText value="#{title}" styleClass="sectionHeader" />
 					</t:headerLink>
 				</t:div>
 			</f:facet>
@@ -98,28 +101,31 @@ TODO:
 						action="#{cherryPickRequestViewer.save}" styleClass="command"
 						rendered="#{cherryPickRequestViewer.editMode}"
 						title="Save your changes and leave edit mode" />
-					<h:commandButton id="cancelEditCommand" value="Cancel"
+					<t:commandButton id="cancelEditCommand" value="Cancel"
 						rendered="#{cherryPickRequestViewer.editMode}"
 						action="#{cherryPickRequestViewer.cancelEdit}" immediate="true"
-						styleClass="command" title="Discard your changes and leave edit mode" />
+						styleClass="command"
+						title="Discard your changes and leave edit mode" />
 					<t:commandButton id="downloadCherryPickRequestCommand"
 						value="Download"
 						action="#{cherryPickRequestViewer.downloadCherryPickRequest}"
 						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks}"
-						styleClass="command" title="Download the cherry pick request to a file"/>
+						styleClass="command"
+						title="Download the cherry pick request to a file" />
 				</t:panelGroup>
 
 				<t:panelGrid id="cherryPickRequestInfoTable" columns="2"
 					styleClass="standardTable" rowClasses="row1,row2"
 					columnClasses="keyColumn,column">
 
-					<t:outputText value="Cherry Pick Request #" title="The cherry pick request number" />
+					<t:outputText value="Cherry Pick Request #"
+						title="The cherry pick request number" />
 					<t:outputText id="cherryPickRequestEntityNumber"
 						value="#{cherryPickRequestViewer.cherryPickRequest.cherryPickRequestNumber}"
 						styleClass="dataText" />
 
 					<t:outputText value="Date Requested"
-					  title="The date the cherry pick request was made by the screener" />
+						title="The date the cherry pick request was made by the screener" />
 					<t:inputDate id="dateRequestedEditable"
 						value="#{cherryPickRequestViewer.cherryPickRequest.dateRequested}"
 						popupCalendar="true"
@@ -131,8 +137,8 @@ TODO:
 						styleClass="dataText" />
 
 					<t:outputText value="Requested&nbsp;By" escape="false"
-					  title="The screener that made the request" />
-					<h:panelGroup rendered="#{!cherryPickRequestViewer.editMode}">
+						title="The screener that made the request" />
+					<t:panelGroup rendered="#{!cherryPickRequestViewer.editMode}">
 						<t:commandLink id="requestedBy"
 							value="#{cherryPickRequestViewer.cherryPickRequest.requestedBy.fullNameLastFirst}"
 							action="#{cherryPickRequestViewer.viewLeadScreener}"
@@ -145,7 +151,7 @@ TODO:
 								styleClass="dataText" />
 						</h:outputLink>
 						<t:outputText value=")" styleClass="dataText" />
-					</h:panelGroup>
+					</t:panelGroup>
 					<t:selectOneMenu id="requestedByEditable"
 						value="#{cherryPickRequestViewer.requestedBy.value}"
 						rendered="#{cherryPickRequestViewer.editMode}"
@@ -155,7 +161,8 @@ TODO:
 					</t:selectOneMenu>
 
 					<t:outputText value="Requested&nbsp;Volume&nbsp;(&#181;L)"
-						escape="false" title="The volume per well that the screener requested" />
+						escape="false"
+						title="The volume per well that the screener requested" />
 					<t:inputText id="requestedVolume"
 						value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellRequested}"
 						displayValueOnly="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.allocated}"
@@ -163,7 +170,8 @@ TODO:
 						displayValueOnlyStyleClass="dataText" />
 
 					<t:outputText value="Approved&nbsp;Volume&nbsp;(&#181;L)"
-						escape="false" title="The volume per well approved by the screening room" />
+						escape="false"
+						title="The volume per well approved by the screening room" />
 					<t:outputText
 						value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellApproved}"
 						rendered="#{(!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.allocated) && empty cherryPickRequestViewer.cherryPickRequest.volumeApprovedBy}"
@@ -195,13 +203,14 @@ TODO:
 							<t:outputText value="Date Approved" styleClass="label"
 								title="The date the cherry pick volume was approved" />
 							<t:inputDate id="dateVolumeApprovedEditable"
-							value="#{cherryPickRequestViewer.cherryPickRequest.dateVolumeApproved}"
-							popupCalendar="true" styleClass="inputText" />
+								value="#{cherryPickRequestViewer.cherryPickRequest.dateVolumeApproved}"
+								popupCalendar="true" styleClass="inputText" />
 						</t:div>
 					</t:panelGroup>
 
 					<t:outputText value="Cherry&nbsp;Pick&nbsp;Plate&nbsp;Type"
-						escape="false" title="The plate type, e.g., 'Eppendorf', 'Genetix', etc." />
+						escape="false"
+						title="The plate type, e.g., 'Eppendorf', 'Genetix', etc." />
 					<t:outputText
 						value="#{cherryPickRequestViewer.cherryPickRequest.assayPlateType}"
 						styleClass="dataText" />
@@ -214,8 +223,10 @@ TODO:
 						displayValueOnly="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.mapped}"
 						styleClass="command" displayValueOnlyStyleClass="dataText" />
 
-					<t:outputText value="Screener-requested&nbsp;empty columns&nbsp;on&nbsp;plate"
-						escape="false" title="The columns the screener requested to leave empty" />
+					<t:outputText
+						value="Screener-requested&nbsp;empty columns&nbsp;on&nbsp;plate"
+						escape="false"
+						title="The columns the screener requested to leave empty" />
 					<t:outputText
 						value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlateAsString}"
 						rendered="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.mapped}"
@@ -229,7 +240,8 @@ TODO:
 							value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlate.selectItems}" />
 					</t:selectManyListbox>
 
-					<t:outputText value="Comments" escape="false" title="Comments made by screening room staff" />
+					<t:outputText value="Comments" escape="false"
+						title="Comments made by screening room staff" />
 					<t:inputTextarea id="cherryPickRequestComments"
 						value="#{cherryPickRequestViewer.cherryPickRequest.comments}"
 						rows="10" cols="80"
@@ -238,18 +250,18 @@ TODO:
 
 					<t:outputText value="Screener&nbsp;cherry&nbsp;picks"
 						escape="false" title="The number of screener cherry picks" />
-					<t:outputText id="screenCherryPickCount"
+					<t:outputText id="screenerCherryPickCount"
 						value="#{cherryPickRequestViewer.screenerCherryPickCount}"
 						styleClass="dataText" />
 
 					<t:outputText value="Lab&nbsp;cherry&nbsp;picks" escape="false"
-					  title="The number of lab cherry picks" />
+						title="The number of lab cherry picks" />
 					<t:outputText id="labCherryPickCount"
 						value="#{cherryPickRequestViewer.labCherryPickCount}"
 						styleClass="dataText" />
 
 					<t:outputText value="Cherry&nbsp;Pick&nbsp;Plates" escape="false"
-					  title="The number of cherry pick plates" />
+						title="The number of cherry pick plates" />
 					<t:outputText id="assayPlatesCount"
 						value="#{cherryPickRequestViewer.assayPlatesDataModel.rowCount}"
 						styleClass="dataText" />
@@ -260,24 +272,27 @@ TODO:
 			</t:panelGrid>
 		</t:collapsiblePanel>
 
+	</h:form>
+
+	<h:form id="screenCherryPicksPanelForm">
+
 		<t:collapsiblePanel id="screenerCherryPicksPanel"
 			value="#{cherryPickRequestViewer.isPanelCollapsedMap['screenerCherryPicks']}"
 			title="Screener Cherry Picks" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
 				<t:div styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
-						<h:graphicImage
+						<t:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
-						<h:outputText value="#{title}" styleClass="sectionHeader" />
+						<t:outputText value="#{title}" styleClass="sectionHeader" />
 					</t:headerLink>
 				</t:div>
 			</f:facet>
 
 			<t:outputText value="Cherry picks have not yet been specified."
 				styleClass="label"
-				rendered="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks && !cherryPickRequestViewer.editable}"
-			/>
+				rendered="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks && !cherryPickRequestViewer.editable}" />
 
 			<t:panelGrid id="addCherryPicksAndHelpPanels" columns="2"
 				columnClasses="column"
@@ -325,14 +340,15 @@ TODO:
 				<%-- Render table into a buffer, allowing dataScrollers to be positioned above table. See http://wiki.apache.org/myfaces/Buffer. --%>
 				<t:buffer into="#{screenerCherryPicksTableRenderBuffer}">
 					<t:dataTable id="screenerCherryPicksTable" var="cherryPickRow"
-						value="#{cherryPickRequestViewer.screenerCherryPicksDataModel}"
+						binding="#{cherryPickRequestViewer.screenerCherryPicksDataTable.dataTableUIComponent}"
+						value="#{cherryPickRequestViewer.screenerCherryPicksDataTable.dataModel}"
 						styleClass="standardTable" columnClasses="column"
-						rows="#{cherryPickRequestViewer.screenerCherryPicksPerPage.selection}"
+						rows="#{cherryPickRequestViewer.screenerCherryPicksDataTable.rowsPerPageSelector.selection}"
 						rowClasses="row1,row2" headerClass="tableHeader"
-						sortColumn="#{cherryPickRequestViewer.screenerCherryPicksSortManager.sortColumnName}"
-						sortAscending="#{cherryPickRequestViewer.screenerCherryPicksSortManager.sortAscending}">
+						sortColumn="#{cherryPickRequestViewer.screenerCherryPicksDataTable.sortManager.sortColumnName}"
+						sortAscending="#{cherryPickRequestViewer.screenerCherryPicksDataTable.sortManager.sortAscending}">
 						<t:columns
-							value="#{cherryPickRequestViewer.screenerCherryPicksSortManager.columnModel}"
+							value="#{cherryPickRequestViewer.screenerCherryPicksDataTable.sortManager.columnModel}"
 							var="column" styleClass="column">
 							<f:facet name="header">
 								<t:commandSortHeader columnName="#{column.name}" arrow="false">
@@ -344,79 +360,32 @@ TODO:
 										<t:graphicImage value="/images/descending-arrow.gif"
 											rendered="true" border="0" />
 									</f:facet>
-									<h:outputText value="#{column.name}" />
+									<t:outputText value="#{column.name}" />
 								</t:commandSortHeader>
 							</f:facet>
-							<t:outputText value="#{cherryPickRequestViewer.screenerCherryPicksCellValue}" />
+							<t:outputText
+								value="#{cherryPickRequestViewer.screenerCherryPicksDataTable.cellValue}" />
 						</t:columns>
 					</t:dataTable>
 				</t:buffer>
 
-				<t:panelGrid columns="4">
-					<t:dataScroller id="screenerCherryPicksDataScroller"
-						for="screenerCherryPicksTable"
-						firstRowIndexVar="fromRow"
-						lastRowIndexVar="toRow" rowsCountVar="rowCount" paginator="true"
-						paginatorMaxPages="10" fastStep="10"
-						renderFacetsIfSinglePage="false" styleClass="scroller"
-						pageCountVar="pages"
-						paginatorActiveColumnClass="scroller_activePage">
-						<f:facet name="first">
-							<t:graphicImage url="/images/arrow-first.png" border="0"
-								title="First page" />
-						</f:facet>
-						<f:facet name="last">
-							<t:graphicImage url="/images/arrow-last.png" border="0"
-								title="Last page" />
-						</f:facet>
-						<f:facet name="previous">
-							<t:graphicImage url="/images/arrow-previous.png" border="0"
-								title="Previous page" />
-						</f:facet>
-						<f:facet name="next">
-							<t:graphicImage url="/images/arrow-next.png" border="0"
-								title="Next page" />
-						</f:facet>
-						<f:facet name="fastforward">
-							<t:graphicImage url="/images/arrow-fastforward.png" border="0"
-								title="Forward 10 pages" />
-						</f:facet>
-						<f:facet name="fastrewind">
-							<t:graphicImage url="/images/arrow-fastrewind.png" border="0"
-								title="Back 10 pages" />
-						</f:facet>
-					</t:dataScroller>
-					<t:dataScroller id="screenerCherryPicksDataScroller2"
-						for="screenerCherryPicksTable"
-						firstRowIndexVar="fromRow"
-						lastRowIndexVar="toRow" rowsCountVar="rowCount"
-						pageCountVar="pages">
-						<t:outputText value="#{fromRow}..#{toRow < 0 ? rowCount : toRow} of #{rowCount}"
-							styleClass="label" />
-					</t:dataScroller>
-
-					<t:selectOneMenu id="screenerCherryPicksPerPage"
-						value="#{cherryPickRequestViewer.screenerCherryPicksPerPage.value}"
-						onchange="document.getElementById('updateScreenerCherryPicksPerPage').click();"
-						styleClass="data"
-						title="Number of screener cherry picks to display per page" >
-						<f:selectItems
-							value="#{cherryPickRequestViewer.screenerCherryPicksPerPage.selectItems}" />
-					</t:selectOneMenu>
-					<t:outputText value=" per page" styleClass="label" />
-					<t:commandButton id="updateScreenerCherryPicksPerPage"
-						forceId="true" value="update screener cherry picks per page"
-						style="display: none" />
-
-				</t:panelGrid>
+				<t:aliasBean alias="#{dataTable}"
+					value="#{cherryPickRequestViewer.screenerCherryPicksDataTable}">
+					<%@ include file="../dataTableNavigator.jspf"%>
+				</t:aliasBean>
 
 				<t:div>
-					<t:outputText value="#{screenerCherryPicksTableRenderBuffer}" escape="false" />
+					<t:outputText value="#{screenerCherryPicksTableRenderBuffer}"
+						escape="false" />
 				</t:div>
 
 			</t:panelGrid>
 
 		</t:collapsiblePanel>
+
+	</h:form>
+
+	<h:form id="labCherryPicksPanelForm">
 
 		<t:collapsiblePanel id="labCherryPicksPanel"
 			value="#{cherryPickRequestViewer.isPanelCollapsedMap['labCherryPicks']}"
@@ -424,10 +393,10 @@ TODO:
 			<f:facet name="header">
 				<t:div styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
-						<h:graphicImage
+						<t:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
-						<h:outputText value="#{title}" styleClass="sectionHeader" />
+						<t:outputText value="#{title}" styleClass="sectionHeader" />
 					</t:headerLink>
 				</t:div>
 			</f:facet>
@@ -447,7 +416,8 @@ TODO:
 						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks}"
 						styleClass="command"
 						title="View the  available #{cherryPickRequestViewer.liquidTerm} volumes for the cherry picks on the cherry pick copy plates" />
-					<t:commandButton id="viewCherryPickRequestWellVolumesForUnfulfilled"
+					<t:commandButton
+						id="viewCherryPickRequestWellVolumesForUnfulfilled"
 						value="View Unfulfilled Well Volumes"
 						action="#{cherryPickRequestViewer.viewCherryPickRequestWellVolumesForUnfulfilled}"
 						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks}"
@@ -477,33 +447,32 @@ TODO:
 						styleClass="command"
 						title="Create a new cherry pick request consisting of unfulfilled cherry picks" />
 					<t:outputLabel for="showFailedLabCherryPicks" value="Show failed:"
-						styleClass="label"
-						title="Show or hide failed lab cherry picks" />
+						styleClass="label" title="Show or hide failed lab cherry picks" />
 					<t:selectBooleanCheckbox id="showFailedLabCherryPicks"
 						value="#{cherryPickRequestViewer.showFailedLabCherryPicks}"
 						valueChangeListener="#{cherryPickRequestViewer.toggleShowFailedLabCherryPicks}"
 						onchange="javascript:document.getElementById('toggleShowFailedLabCherryPicksCommand').click()"
-						immediate="true"
-						styleClass="command"
+						immediate="true" styleClass="command"
 						title="Show or hide failed lab cherry picks" />
 					<t:commandButton id="toggleShowFailedLabCherryPicksCommand"
-						immediate="true"
-						forceId="true" style="display:none" />
+						immediate="true" forceId="true" style="display:none" />
 
 				</t:panelGroup>
 
 				<%-- Render table into a buffer, allowing dataScrollers to be positioned above table. See http://wiki.apache.org/myfaces/Buffer. --%>
 				<t:buffer into="#{labCherryPicksTableRenderBuffer}">
-					<t:dataTable id="labCherryPicksTable" var="row"
-						value="#{cherryPickRequestViewer.labCherryPicksDataModel}"
+					<t:dataTable id="labCherryPicksTable"
+						binding="#{cherryPickRequestViewer.labCherryPicksDataTable.dataTableUIComponent}"
+						var="row"
+						value="#{cherryPickRequestViewer.labCherryPicksDataTable.dataModel}"
 						styleClass="standardTable" columnClasses="column"
-						rows="#{cherryPickRequestViewer.labCherryPicksPerPage.selection}"
+						rows="#{cherryPickRequestViewer.labCherryPicksDataTable.rowsPerPageSelector.selection}"
 						rowClasses="row1,row2" headerClass="tableHeader"
-						sortColumn="#{cherryPickRequestViewer.labCherryPicksSortManager.sortColumnName}"
-						sortAscending="#{cherryPickRequestViewer.labCherryPicksSortManager.sortAscending}"
+						sortColumn="#{cherryPickRequestViewer.labCherryPicksDataTable.sortManager.sortColumnName}"
+						sortAscending="#{cherryPickRequestViewer.labCherryPicksDataTable.sortManager.sortAscending}"
 						rendered="#{!empty cherryPickRequestViewer.cherryPickRequest.labCherryPicks}">
 						<t:columns
-							value="#{cherryPickRequestViewer.labCherryPicksSortManager.columnModel}"
+							value="#{cherryPickRequestViewer.labCherryPicksDataTable.sortManager.columnModel}"
 							var="column" styleClass="column">
 							<f:facet name="header">
 								<t:commandSortHeader columnName="#{column.name}" arrow="false">
@@ -518,67 +487,16 @@ TODO:
 									<t:outputText value="#{column.name}" />
 								</t:commandSortHeader>
 							</f:facet>
-							<t:outputText value="#{cherryPickRequestViewer.labCherryPicksCellValue}" />
+							<t:outputText
+								value="#{cherryPickRequestViewer.labCherryPicksDataTable.cellValue}" />
 						</t:columns>
 					</t:dataTable>
 				</t:buffer>
 
-				<t:panelGrid columns="4">
-					<t:dataScroller id="labCherryPicksDataScroller"
-						for="labCherryPicksTable" firstRowIndexVar="fromRow"
-						lastRowIndexVar="toRow" rowsCountVar="rowCount" paginator="true"
-						paginatorMaxPages="10" fastStep="10" pageCountVar="pages"
-						renderFacetsIfSinglePage="false" styleClass="scroller"
-						paginatorActiveColumnClass="scroller_activePage">
-						<f:facet name="first">
-							<t:graphicImage url="/images/arrow-first.png" border="0"
-								title="First page" />
-						</f:facet>
-						<f:facet name="last">
-							<t:graphicImage url="/images/arrow-last.png" border="0"
-								title="Last page" />
-						</f:facet>
-						<f:facet name="previous">
-							<t:graphicImage url="/images/arrow-previous.png" border="0"
-								title="Previous page" />
-						</f:facet>
-						<f:facet name="next">
-							<t:graphicImage url="/images/arrow-next.png" border="0"
-								title="Next page" />
-						</f:facet>
-						<f:facet name="fastforward">
-							<t:graphicImage url="/images/arrow-fastforward.png" border="0"
-								title="Forward 10 pages" />
-						</f:facet>
-						<f:facet name="fastrewind">
-							<t:graphicImage url="/images/arrow-fastrewind.png" border="0"
-								title="Back 10 pages" />
-						</f:facet>
-					</t:dataScroller>
-					<t:dataScroller id="labCherryPicksDataScroller2"
-						for="labCherryPicksTable" firstRowIndexVar="fromRow"
-						lastRowIndexVar="toRow" rowsCountVar="rowCount"
-						pageCountVar="pages">
-						<t:outputText value="#{fromRow}..#{toRow < 0 ? rowCount : toRow} of #{rowCount}"
-							styleClass="label" />
-					</t:dataScroller>
-
-					<t:panelGroup
-						rendered="#{!empty cherryPickRequestViewer.cherryPickRequest.labCherryPicks}">
-						<t:selectOneMenu id="labCherryPicksPerPage"
-							value="#{cherryPickRequestViewer.labCherryPicksPerPage.value}"
-							onchange="document.getElementById('updateLabCherryPicksPerPage').click();"
-							styleClass="data"
-							title="Number of lab cherry picks to display per page" >
-							<f:selectItems
-								value="#{cherryPickRequestViewer.labCherryPicksPerPage.selectItems}" />
-						</t:selectOneMenu>
-						<t:outputText value=" per page" styleClass="label" />
-						<t:commandButton id="updateLabCherryPicksPerPage" forceId="true"
-							value="update lab cherry picks per page" style="display: none" />
-					</t:panelGroup>
-
-				</t:panelGrid>
+				<t:aliasBean alias="#{dataTable}"
+					value="#{cherryPickRequestViewer.labCherryPicksDataTable}">
+					<%@ include file="../dataTableNavigator.jspf"%>
+				</t:aliasBean>
 
 				<t:div>
 					<t:outputText value="#{labCherryPicksTableRenderBuffer}"
@@ -595,7 +513,7 @@ TODO:
 			<f:facet name="header">
 				<t:div styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
-						<h:graphicImage
+						<t:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
 						<t:outputText value="#{title}" styleClass="sectionHeader" />
@@ -675,14 +593,16 @@ TODO:
 								value="#{cherryPickRequestViewer.liquidTransferPerformedBy.selectItems}" />
 						</t:selectOneMenu>
 						<t:outputLabel for="dateOfLiquidTransfer" value="Date:"
-							styleClass="label" title="The date the #{cherryPickRequestViewer.liquidTerm} transfer took place" />
+							styleClass="label"
+							title="The date the #{cherryPickRequestViewer.liquidTerm} transfer took place" />
 						<t:inputDate id="dateOfLiquidTransfer"
 							value="#{cherryPickRequestViewer.dateOfLiquidTransfer}"
 							popupCalendar="true"
 							rendered="#{cherryPickRequestViewer.editable}"
 							styleClass="inputText" />
-						<t:outputLabel for="liquidTransferComments" value="Comments:" styleClass="label"
-						  title="Screening room staff comments for the #{cherryPickRequestViewer.liquidTerm} transfer" />
+						<t:outputLabel for="liquidTransferComments" value="Comments:"
+							styleClass="label"
+							title="Screening room staff comments for the #{cherryPickRequestViewer.liquidTerm} transfer" />
 						<t:inputText id="liquidTransferComments"
 							value="#{cherryPickRequestViewer.liquidTransferComments}"
 							rendered="#{cherryPickRequestViewer.editable}"

@@ -54,30 +54,30 @@
 			<t:inputText id="pageNumber"
 				valueChangeListener="#{dataTable.pageNumberListener}" size="6"
 				styleClass="inputText" />
-			<t:commandButton id="updatePageNumberButton" forceId="true"
+			<t:commandButton id="updatePageNumberButton"
 				value="Find Page" styleClass="command" />
 		</t:panelGroup>
 
 		<t:panelGrid columns="2" title="The sort column and direction">
 			<t:outputLabel for="sortOrderMenu" value="Sort by" styleClass="label" />
 			<t:panelGroup>
-				<t:selectOneMenu id="sortOrderMenu"
+				<t:selectOneMenu id="sortColumnMenu"
 					value="#{dataTable.sortManager.sortColumnSelector.value}"
-					onchange="document.getElementById('updateSortOrderButton').click();"
+					onchange="javascript:this.nextSibling.nextSibling.click();"
 					styleClass="command">
 					<f:selectItems
 						value="#{dataTable.sortManager.sortColumnSelector.selectItems}" />
 				</t:selectOneMenu>
 				<t:selectOneMenu id="sortDirection"
 					value="#{dataTable.sortManager.sortDirectionSelector.value}"
-					onchange="document.getElementById('updateSortOrderButton').click();"
+					onchange="javascript:this.nextSibling.click();"
 					styleClass="command">
 					<f:selectItems
 						value="#{dataTable.sortManager.sortDirectionSelector.selectItems}" />
 				</t:selectOneMenu>
+				<t:commandButton id="updateSortButton"
+					styleClass="hiddenCommand" />
 			</t:panelGroup>
-			<t:commandButton id="updateSortOrderButton" forceId="true"
-				styleClass="hiddenCommand" />
 		</t:panelGrid>
 
 		<t:panelGroup id="rowsPerPagePanel" style="float:right"
@@ -86,12 +86,12 @@
 				value="#{dataTable.rowsPerPageSelector.value}"
 				binding="#{dataTable.rowsPerPageUIComponent}"
 				valueChangeListener="#{dataTable.rowsPerPageListener}"
-				onchange="document.getElementById('updateRowsPerPageButton').click();"
+				onchange="javascript:this.nextSibling.nextSibling.click();"
 				styleClass="data" title="Number of rows to display per page">
 				<f:selectItems value="#{dataTable.rowsPerPageSelector.selectItems}" />
 			</t:selectOneMenu>
 			<t:outputText value=" per page" styleClass="label" />
-			<t:commandButton id="updateRowsPerPageButton" forceId="true"
+			<t:commandButton id="updateRowsPerPageButton"
 				value="Go" styleClass="hiddenCommand" />
 		</t:panelGroup>
 

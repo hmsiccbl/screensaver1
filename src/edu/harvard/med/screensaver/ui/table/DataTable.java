@@ -60,6 +60,16 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
 
   abstract protected List<TableColumn<E>> buildColumns();
 
+  /**
+   * Template method that must build a DataModel for the data table. Data must
+   * be sorted. Method implementation will probably want to make use of
+   * {@link SortManager#getSortColumnComparator getSortManager().getSortColumnComparator()}.
+   * This method will be called whenever
+   * {@link DataTable#rebuildRows() is called}, which in turn is called
+   * whenever the sort column or direction is changed.
+   *
+   * @return sorted DataModel
+   */
   abstract protected DataModel buildDataModel();
 
   abstract protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector();
@@ -118,10 +128,36 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
     _rowsPerPageUIComponent = rowsPerPageUIComponent;
   }
 
+  /**
+   * Convenience method that invokes the JSF action for the "current" row and
+   * column (as set by JSF during the invoke application phase). Equivalent to
+   * <code>getSortManager().getCurrentColumn().cellAction((E) getDataModel().getRowData())</code>.
+   */
   @SuppressWarnings("unchecked")
   public String cellAction()
   {
     return (String) getSortManager().getCurrentColumn().cellAction((E) getDataModel().getRowData());
+  }
+
+  /**
+   * Convenience method that returns the value of the "current" row and column
+   * (as set by JSF during the render phase, when rendering each table cell).
+   * Equivalent to
+   * <code>getSortManager().getCurrentColumn().getCellValue(getDataModel().getRowData())</code>.
+   */
+  public Object getCellValue()
+  {
+    return getSortManager().getCurrentColumn().getCellValue(getRowData());
+  }
+
+  /**
+   * Get the data object associated with the "current" row (i.e., as set by JSF
+   * at render time).
+   */
+  @SuppressWarnings("unchecked")
+  final protected E getRowData()
+  {
+    return (E) getDataModel().getRowData();
   }
 
   public int getRowsPerPage()

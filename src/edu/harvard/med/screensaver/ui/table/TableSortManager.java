@@ -102,6 +102,13 @@ public class TableSortManager<E> extends Observable implements Observer
     addCompoundSortColumns(compoundSortColumns);
   }
 
+  public void addAllCompoundSorts(List<List<TableColumn<E>>> allCompoundSorts)
+  {
+    for (List<TableColumn<E>> compoundSort : allCompoundSorts) {
+      addCompoundSortColumns(compoundSort);
+    }
+  }
+
   public int getSortColumnIndex()
   {
     return getSortColumnSelector().getSelectionIndex();
