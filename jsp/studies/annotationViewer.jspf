@@ -169,69 +169,9 @@
 							</t:dataTable>
 						</t:buffer>
 
-						<t:panelGrid columns="3">
-							<t:dataScroller id="annotationValuesTableScroller"
-								for="annotationValuesTable" firstRowIndexVar="fromRow"
-								lastRowIndexVar="toRow" rowsCountVar="rowCount" paginator="true"
-								paginatorMaxPages="10" fastStep="10"
-								renderFacetsIfSinglePage="false" styleClass="scroller"
-								paginatorActiveColumnClass="scroller_activePage">
-								<f:facet name="first">
-									<t:graphicImage url="/images/arrow-first.png" border="0"
-										title="First page" />
-								</f:facet>
-								<f:facet name="last">
-									<t:graphicImage url="/images/arrow-last.png" border="0"
-										title="Last page" />
-								</f:facet>
-								<f:facet name="previous">
-									<t:graphicImage url="/images/arrow-previous.png" border="0"
-										title="Previous page" />
-								</f:facet>
-								<f:facet name="next">
-									<t:graphicImage url="/images/arrow-next.png" border="0"
-										title="Next page" />
-								</f:facet>
-								<f:facet name="fastforward">
-									<t:graphicImage url="/images/arrow-fastforward.png" border="0"
-										title="Forward 10 pages" />
-								</f:facet>
-								<f:facet name="fastrewind">
-									<t:graphicImage url="/images/arrow-fastrewind.png" border="0"
-										title="Back 10 pages" />
-								</f:facet>
-							</t:dataScroller>
-							<t:dataScroller id="annotationValuesTableScroller2"
-								for="annotationValuesTable" firstRowIndexVar="fromRow"
-								lastRowIndexVar="toRow" rowsCountVar="rowCount">
-								<t:outputText value="#{fromRow}..#{toRow} of #{rowCount}"
-									styleClass="label" />
-							</t:dataScroller>
-
-							<t:panelGroup id="annotationValuesTableCommandPanel"
-								styleClass="commandPanel">
-
-								<t:inputText id="pageNumber"
-									valueChangeListener="#{annotationViewer.annotationValuesTable.pageNumberListener}"
-									size="6" styleClass="inputText">
-								</t:inputText>
-								<%-- note: no 'action' attribute necessary, as 'rowNumber' inputText component, above, invokes update logic via valueChangeListener --%>
-								<t:commandButton id="updateAnnotationValuesPositionButton2"
-									value="Go" styleClass="command" />
-
-								<t:selectOneMenu id="annotationValuesTableRowsPerPageList"
-									value="#{annotationViewer.annotationValuesTable.rowsPerPageSelector.value}"
-									binding="#{annotationViewer.annotationValuesTable.rowsPerPageUIComponent}"
-									valueChangeListener="#{annotationViewer.annotationValuesTable.rowsPerPageListener}"
-									onchange="document.getElementById('updateAnnotationValuesButton').click();"
-									styleClass="data" title="Number of rows to display per page">
-									<f:selectItems
-										value="#{annotationViewer.annotationValuesTable.rowsPerPageSelector.selectItems}" />
-								</t:selectOneMenu>
-								<t:outputText value=" per page" styleClass="label" />
-							</t:panelGroup>
-
-						</t:panelGrid>
+						<t:aliasBean alias="#{dataTable}" value="#{annotationViewer.annotationValuesTable}">
+							<%@ include file="../dataTableNavigator.jspf"%>
+						</t:aliasBean>
 
 						<t:outputText escape="false"
 							value="#{annotationValuesTableBuffer}" />
