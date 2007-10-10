@@ -137,7 +137,7 @@ public class CompoundCherryPickSynchronizer
 
         // TODO: null volumeTransferreds tend to break the *CherryPick
         // classes. there are a slew of compound cherry picks in
-        // ScreenDBwith null volumes, ranging in visit dates from
+        // ScreenDB with null volumes, ranging in visit dates from
         // 2001-12 to 2004-05. im not really hip to trying to fix
         // those data issues - probably completely impossible. in the
         // cases that i looked at, there are a lot of null fields and
@@ -272,7 +272,15 @@ public class CompoundCherryPickSynchronizer
           "couldn't find well with plate number " + sourcePlateNumber + " and well name " + sourceWellName);
         continue;
       }
-      sourceWell.setWellType(WellType.EXPERIMENTAL);
+      
+      // this will produce errors when running against a newly initialized Screensaver database (ie without
+      // loaded libraries), or with a Screensaver database that is not terribly recent. see class javadocs
+      // for ScreenDBSynchronizer for details.
+      if (! sourceWell.getWellType().equals(WellType.EXPERIMENTAL)) {
+        log.error(
+          "ScreenDB cherry pick for visit id " + visitId + " is against a non-experimental well: " + sourceWell + ". " +
+          "One possible reason for this is that the library has not been loaded into Screensaver yet.");
+      }
       
       ScreenerCherryPick screenerCherryPick = request.createScreenerCherryPick(sourceWell);
       LabCherryPick labCherryPick = request.createLabCherryPick(screenerCherryPick, sourceWell);
