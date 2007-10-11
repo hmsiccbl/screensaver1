@@ -104,7 +104,6 @@ public class Screen extends Study
   // iccb screen
 
   private Set<StatusItem> _statusItems = new HashSet<StatusItem>();
-  private int _allTimeScreeningRoomActivityCount = 0;
   private Set<ScreeningRoomActivity> _screeningRoomActivities = new HashSet<ScreeningRoomActivity>();
   private Date _dataMeetingScheduled;
   private Date _dataMeetingComplete;
@@ -117,7 +116,6 @@ public class Screen extends Study
   private Set<LetterOfSupport> _lettersOfSupport = new HashSet<LetterOfSupport>();
   private Date _publishableProtocolDateEntered;
   private String _publishableProtocolEnteredBy;private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
-  private int _allTimeCherryPickRequestCount = 0;
 
 
   // public constructors
@@ -451,6 +449,7 @@ public class Screen extends Study
     cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
   )
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
     org.hibernate.annotations.CascadeType.DELETE,
@@ -891,6 +890,7 @@ public class Screen extends Study
     cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
   )
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
     org.hibernate.annotations.CascadeType.DELETE,
